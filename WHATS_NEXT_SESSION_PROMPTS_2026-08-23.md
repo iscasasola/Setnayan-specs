@@ -33,7 +33,7 @@ not have to answer anything mid-session.**
 | ~~W4-ADMIN · The admin console, one shape~~ | ✅ **DONE** 08-24 · 4 PRs (#4785 · #4787 · #4788 · #4789) · the header-row bill **54 → 0** | Opus 5 | high | 4 |
 | ~~W4-A · The four screens a couple lives in~~ | ✅ **DONE** 2026-08-24 · 4 PRs (#4771 · #4780 · #4782 · #4791), SERVED not merely merged** — #4791's merge commit is an ancestor of the build production is running. 🔑 **It reported itself DONE at 3 PRs when it was two-thirds finished; its OWN adversarial audit caught that, CI and review did not.** Root cause, recorded as the headline rather than buried: it swept for one SPELLING of a colour, found every instance of that spelling, and called the colour delta closed — while those screens also paint in raw hex and inline CSS vars. ⏭ Three things stay open and are NOT debt: the guest roster's selection column (owner decision) · budget's total/grouping/collapse (a redesign, for whoever owns the six-state port) · and two unclaimed surfaces. | Opus 5 | medium | 4 |
 | ~~W4-WORDS · The words follow the occasion~~ | ✅ **DONE** 08-24 · 1 PR [#4793](https://github.com/iscasasola/setnayan-platform/pull/4793), **SERVED and verified in prod by the object** (funeral vocab row · `register:'solemn'` profile · 7 scoped tiles · the quiet onboarding intro). 🔑 **Step 1 (threading) was ALREADY SHIPPED as S13** — the brief's "69 guest-read instances" was stale; a real comment-stripper found ONE rendered remainder, already on the S13 bill deliberately. The whole session became the wake. Six coverage guards fired on the new type (the sixth — role sets — only in CI, because it lives in the db suite); each answered as a decision. | Fable 5 | high | 4 |
-| **W5-A · A supplier's record survives a delete** | ▶ **NOT STARTED** — the most careful one | Opus 5 | **max** | 5 |
+| ~~W5-A · A supplier's record survives a delete~~ | ✅ **DONE 08-24 · 3 PRs** ([#4796](https://github.com/iscasasola/setnayan-platform/pull/4796) · [#4800](https://github.com/iscasasola/setnayan-platform/pull/4800) · [#4802](https://github.com/iscasasola/setnayan-platform/pull/4802)). 🔑 **THE SIX SLICES PRESERVED THE ROWS AND EVERY PUBLISHED NUMBER STILL WENT TO ZERO** — review row 1→1 and booking preserved, but `trusted_review_count` **1→0**, `public_completed_count` **1→0**: all three matviews filtered on `EXISTS(events)` and `NULL = NULL` is never true. The dated Track Record list showed the job while the count above it said the supplier had never worked. Also: the review's receipt was stripped **in the same statement as its rescue** (an FK's `SET NULL` is an UPDATE, and an UPDATE fires your triggers), and **a couple with one private working note could not delete their event at all** (`23503`). ⚠ **The FK count in every brief is stale — measured 144 CASCADE / 19 SET NULL, not 152/10 or 145/19.** 🔴 Nine tables still CASCADE and are the OWNER's, headed by `vendor_recommendations` (**public**). ⚖ The declared Samahan collision on `user-fk-behaviour.generated.txt` **did not materialise** — that file records *user*-deletion FK behaviour and W5-A is *event* deletion; it is byte-unchanged. | Opus 5 | **max** | 5 |
 | ~~W5-B · The surfaces nobody drew~~ | ✅ **DONE (re-scoped small)** 08-24 · 2 PRs [#4798](https://github.com/iscasasola/setnayan-platform/pull/4798) + [#4797](https://github.com/iscasasola/setnayan-platform/pull/4797), auto-merge armed — verify with `gh pr view`. 🔑 **THE SURFACES WERE NEARLY ALL DRAWN**: /explore ships in the terracotta system · 8/10 Papic routes wear the DoorShell · the tour mechanism SHIPS (modal carousel, 7 mounted) · the onboarding content landed 08-20/21. The honest delta: `customer_vendors_v1` was defined and mounted NOWHERE since 2026-05-31 (copy rewritten for the Marketplace takeover + remounted, takeover branch only) and the VENDOR had no welcome tour at all (5 slides added, gated on the layout's batched select). ⏭ Flagged, not built: the /tour marketing tree's ~290-hex palette port (its own design unit, deliberately deferred 08-13) · /vendors styling (tier matrix = owner). Full row: DECISION_LOG 2026-08-24 🧭. | Fable 5 | medium | 5 |
 | **W5-C · Who is in my event?** | ▶ **NOT STARTED** | Opus 5 | medium | 5 |
 | 🔴 **OWNER DECISION · the guest table's selection column** | ▶ **NOT A BUILD — HIS CALL.** The Roster archetype forbids a selection column and the desktop guest table has one. It was deliberately NOT removed: a faithful "the avatar IS the checkbox" port loses what a real checkbox gives free — announced state, Space to toggle, the mixed state on select-all, forced-colors rendering — drops the target to 36px against this repo's own 44px minimum, and silently reassigns a click that today opens the guest. ⚠ **And the audit's premise that "mobile already does it the approved way" is FALSE** — mobile SWAPS a checkbox into the avatar's slot in select mode; it never makes the avatar the control. **The archetype's rule is implemented nowhere in this product.** A design decision with an accessibility cost, not debt. | — | — | — |
@@ -1797,7 +1797,54 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 
 ## WAVE 5 — two to three at once
 
-### W5-A · A supplier's record survives a delete · **Opus 5 · max**
+### ✅ W5-A · A supplier's record survives a delete — **DONE 2026-08-24. DO NOT RUN THIS SECTION.**
+
+> **3 PRs:** [#4796](https://github.com/iscasasola/setnayan-platform/pull/4796) (the receipt) ·
+> [#4800](https://github.com/iscasasola/setnayan-platform/pull/4800) (the published numbers) ·
+> [#4802](https://github.com/iscasasola/setnayan-platform/pull/4802) (the delete that could not happen).
+> ⚠ **Verify before trusting this line** — this file has been wrong about a PR's state four times:
+> `gh pr view 4796 4800 4802 -R iscasasola/setnayan-platform --json number,state,mergedAt`.
+> Full row: `DECISION_LOG.md` 2026-08-24 🧾. Corrected header:
+> [`VENDOR_DATA_SURVIVES_DELETION_2026-08-21.md`](VENDOR_DATA_SURVIVES_DELETION_2026-08-21.md).
+>
+> 🚨 **THE FINDING: SLICES 1–6 WERE REAL AND THE GUARANTEE WAS NOT BEING DELIVERED.** Measured
+> against the LIVE database by rolled-back transaction — one arm's-length marketplace booking,
+> one review, delete the event: review row **1→1** ✅ · booking preserved ✅ · dated Track Record
+> list **1→1** ✅ · `trusted_review_count` **1→0** 🚨 · `public_completed_count` **1→0** 🚨 ·
+> `full_completed_count` **1→0** 🚨. **The fourth costume of "stored does not mean survives", and
+> the worst: not VANISHED, not ANONYMOUS, not a BROKEN URL — CONTRADICTED.**
+>
+> 🔑 **AN FK'S `ON DELETE SET NULL` IS AN UPDATE, AND AN UPDATE FIRES YOUR TRIGGERS.** That is how
+> the review's receipt (`booked_through_setnayan`) went **TRUE → FALSE at the delete**, in the same
+> statement that rescued the row. The classification doc **prescribed that exact guard and it was
+> never built**, and slice 1's own test went green because it asserted the ROW survived and never
+> read the receipt back. **A review that says it was NOT a real booking is a claim, not an absence.**
+>
+> ⛔ **THE OBVIOUS FIX FOR THE `23503` IS THE ONE THAT MUST NOT BE MADE.** Mirroring slice 4's
+> `ON UPDATE CASCADE` would carry the couple's private working note into orphanhood, stop it matching
+> the deleted event, and **preserve** 4,000 characters of their candid assessment of the very
+> supplier it is attached to. Notes are deleted a moment EARLIER instead.
+>
+> 🪤 **AND THE FIX ALMOST SHIPPED ITS OWN TRAP, caught by its own test:** prod carries
+> `ALTER DEFAULT PRIVILEGES … GRANT **ALL** ON TABLES TO anon, authenticated`, and a matview has no
+> `CREATE OR REPLACE` — so a rebuilt relation is **born with `anon = arwdDxtm`**. Without an explicit
+> REVOKE the rebuild would have given the public internet **WRITE** on the headline rating and
+> published the service-role-only count. **Same trap as "recreating a policy discards its TO clause",
+> one level down.**
+>
+> ⚠ **CORRECTIONS TO THE BRIEFS:** the FK count is **144 CASCADE / 19 SET NULL** (not 152/10, not
+> 145/19) · `vendor_activity_stats` is **NOT** wholly derived from cascading tables — two of its four
+> inputs already survive; only the **response statistics** vanish, because `chat_threads` cascades
+> whole, and that is an owner question.
+>
+> 🔴 **STILL OPEN AND STILL THE OWNER'S — nine tables, all measured still `ON DELETE CASCADE`:**
+> `vendor_recommendations` (⚠ **public**, `USING (true)` — the SECOND public supplier endorsement a
+> delete silently removes) · `chat_threads` · `vendor_client_notes` · `booking_handovers` ·
+> `event_vendor_policy_acknowledgements` · `event_vendor_payment_plan` · `vendor_review_appeals` ·
+> `user_reports` · `vendor_guest_deliveries`.
+
+<details><summary>The original prompt, kept for history</summary>
+
 
 ```
 You are the ONLY migration writer in this wave. This is the most careful piece of work in the plan.
@@ -1847,6 +1894,8 @@ superuser and will not catch a permissions failure.
 
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
+
+</details>
 
 ### W5-B · The surfaces nobody drew · **Fable (re-scope) → Opus 5 (build) · medium**
 

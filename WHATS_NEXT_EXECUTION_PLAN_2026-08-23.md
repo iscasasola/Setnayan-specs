@@ -173,7 +173,7 @@ table plus `chat_threads` reads, against the event-type tables.
 
 | session | carries | migration |
 |---|---|---|
-| **W5-A · Vendor data survives a delete** (measure first) | DEL-2 — reviews, money and quotes already land; the rest of the 153-FK classification is **mapped-but-unverified** and `vendor_activity_stats` still recomputes downward | **YES**, sole migration writer |
+| ~~W5-A · Vendor data survives a delete~~ ✅ **DONE 08-24, 3 PRs (#4796 · #4800 · #4802)** | **Measured, and the briefs were wrong twice.** FKs are **144 CASCADE / 19 SET NULL**, not 153 and not 152/10. `vendor_activity_stats` does **NOT** recompute wholly downward — two of its four inputs already survive; only the **response statistics** vanish (`chat_threads` cascades whole), which is an OWNER question. What was actually broken: all three public matviews filtered on `EXISTS(events)`, so **every published number still went to 0** while the rows survived; the review's receipt was stripped by the FK's own `SET NULL` (an UPDATE fires triggers); and one private working note **refused the delete outright** (`23503`). 🔴 Nine tables still CASCADE and are the owner's, headed by the **public** `vendor_recommendations`. | — |
 | ✅ **W5-B · Undrawn surfaces — DONE 2026-08-24 (re-scoped small: nearly all already drawn; delta = two tour handles, PRs #4798/#4797)** | S7 — explore, tour, papic, onboarding all measured drawn/shipped; /tour palette port flagged as its own future unit | no |
 | **W5-C · Small sweeps** | S11 roster half + the coordinator "Edit this site" dead end + WL-b (a host sees WHO holds a camera, not "Phone joined") | maybe |
 
@@ -235,7 +235,7 @@ by how many files it touches.**
 | W3-C · A wake | **Opus 5** high for the schema and wiring · **Fable** for the words | high | The tone is the product here. A wake reading "celebrate" is the whole defect. |
 | W4-A / W4-B · design ports | **Opus 5 medium** for the first screen (it sets the pattern) · **Sonnet 5 medium** for the repeats | medium | The archetypes are binding; a delta is a defect in the port, not a design decision. |
 | ✅ W4-C · Grant hardening — DONE 2026-08-24 | **Opus 5** | **xhigh** | Grants and RLS fail silently at runtime and are green in every test. |
-| W5-A · Vendor data survives a delete | **Opus 5** | **max** | 152 of 162 FKs cascade, the classification's own adversarial check died at 31 of 71 agents, and being wrong destroys a supplier's record permanently. |
+| ~~W5-A · Vendor data survives a delete~~ ✅ DONE 08-24 | **Opus 5** | **max** | ⚠ The "152 of 162" here was stale: **measured 144 CASCADE / 19 SET NULL**. Being wrong destroys a supplier's record permanently, so every claim was re-measured against the live DB by rolled-back transaction before anything was written. |
 | ✅ W5-B · Undrawn surfaces — DONE 2026-08-24 | **Fable** re-scoped and built (delta was small) | medium | Nearly all of it was already drawn. |
 | W5-C · Small sweeps | **Opus 5** | medium | |
 | W6 · grab-bag | **Fable** to verify · **Sonnet 5** medium to fix | medium | Most of it is expected to be already done. |

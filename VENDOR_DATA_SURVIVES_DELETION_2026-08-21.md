@@ -4,6 +4,99 @@
 > for the vendor stays, including the reviews, statistics, etc that the vendor needs
 > for their website."*
 
+> ## 🚨 SLICES 1–6 PRESERVED THE ROWS AND EVERY PUBLISHED NUMBER STILL WENT TO ZERO
+> ### — re-measured in PRODUCTION 2026-08-24 (W5-A). Read this before any remaining slice.
+>
+> The six slices below are real and are not undone. But the guarantee they were
+> built for was **not being delivered**, and nothing in CI or in this document
+> said so. Measured by rolled-back transaction against the live database, seeding
+> one arm's-length marketplace booking with one review and deleting the event:
+>
+> | | before → after |
+> |---|---|
+> | review row | 1 → 1 ✅ slice 1 |
+> | booking row | survives ✅ slice 2 |
+> | dated Track Record list | 1 → 1 ✅ |
+> | `trusted_review_count` — **THE public star rating** | **1 → 0** 🚨 |
+> | `public_completed_count` — the experience-tier badge | **1 → 0** 🚨 |
+> | `full_completed_count` | **1 → 0** 🚨 |
+>
+> 🔑 **THE FOURTH COSTUME OF "STORED DOES NOT MEAN SURVIVES", AND THE WORST SO
+> FAR.** Slice 2: the row **VANISHES**. Slice 3: it goes **ANONYMOUS**. Slice 5:
+> it builds a **BROKEN URL**. Here it is **CONTRADICTED** — the dated Track
+> Record list shows the job while the count directly above it says the supplier
+> has never worked. All three matviews carry `EXISTS (… FROM events …)`, and
+> `NULL = NULL` is never true, so the preserved row is filtered out of the very
+> number it was preserved for.
+>
+> 🔑 **AND THE REVIEW'S RECEIPT WAS STRIPPED IN THE SAME STATEMENT AS ITS
+> RESCUE.** `booked_through_setnayan` went **TRUE → FALSE at the delete** —
+> because **an FK's `ON DELETE SET NULL` is an UPDATE, and an UPDATE fires your
+> triggers.** `stamp_review_provenance` is `BEFORE INSERT OR UPDATE`, so nulling
+> `event_id` re-derived provenance from an event that no longer exists. This
+> document **prescribed that exact guard** (see `vendor_reviews.
+> booked_through_setnayan / via_vendor_import` below) and it was never built.
+> ⚠ So the row survived and the record did not — and a review that says it was
+> NOT a real booking is a **claim**, not an absence. Worse than the cascade.
+>
+> 🚨 **A COUPLE WITH ONE PRIVATE WORKING NOTE COULD NOT DELETE THEIR EVENT AT
+> ALL.** Reproduced in prod: `23503`, `event_vendor_working_notes_vendor_event_fk`.
+> It is the **slice-4 trap still open on the table slice 2 itself touches** — a
+> composite FK spanning `event_id` with `ON UPDATE NO ACTION`, met by a preserve
+> that UPDATEs `event_id`. Measured across the whole schema: **six** composite FKs
+> exist in `public`; this is the **only** one that both spans a column a preserve
+> trigger nulls and still says NO ACTION.
+> ⛔ **The obvious fix — mirror slice 4's `ON UPDATE CASCADE` — is the one fix
+> that must not be made.** The note would follow the booking into orphanhood,
+> stop matching the deleted event, and **SURVIVE**: 4,000 characters of the
+> couple's candid assessment of a supplier, attached to that supplier's preserved
+> record. The notes are deleted a moment EARLIER instead.
+>
+> ⚖ **THE LAUNDERING DIRECTION WAS CLOSED AT THE SAME TIME.** Relaxing the events
+> predicate alone would let the self-dealing `NOT EXISTS` guards — which read the
+> **cascading** `event_members` and `comp_grants` — pass vacuously for an orphan
+> and publish self-dealt work forever. Reviews now get the shape slice 2 already
+> used for bookings: a self-dealt review is **destroyed at deletion time**
+> (exactly what the cascade does to it today), so *orphan ⇒ arm's-length* holds
+> by construction and **no stamp column was added**.
+>
+> 🪤 **A TRAP THE FIX ITSELF ALMOST SHIPPED, caught by its own test.** Prod carries
+> `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT **ALL** ON TABLES TO anon,
+> authenticated`. A matview has no `CREATE OR REPLACE`, so it must be dropped and
+> rebuilt — and a rebuilt relation is **born with `anon = arwdDxtm`**. Recreating
+> without an explicit `REVOKE` would have upgraded the public internet from read
+> to **WRITE** on the headline rating, and published the supplier-only count.
+> **Same trap as "recreating a policy discards its `TO` clause", one level down:
+> the DROP takes the grant and the DEFAULT PRIVILEGE writes back a WIDER one.**
+>
+> ⚠ **CORRECTING THIS DOCUMENT ON `vendor_activity_stats`.** It is framed below as
+> wholly derived from cascading tables. Measured: **two of its four inputs already
+> survive** — `finalized_booking_count` reads `event_vendors` by
+> `marketplace_vendor_id` (slice 2 preserved it, 1 → 1) and the review inputs
+> read `vendor_reviews` by `vendor_profile_id` (slice 1, 1 → 1). What genuinely
+> still vanishes is the **response statistics**, because `chat_threads` cascades
+> whole: threads 1 → 0, replied 1 → 0. **That is an OWNER question, not an
+> engineering one** — see the open list at the end of this block.
+>
+> ⚠ **AND THE FK COUNT IN THIS DOCUMENT IS STALE AGAIN.** It says 152/10, then
+> 153/11. Measured 2026-08-24: **144 CASCADE · 19 SET NULL.** Run the count
+> yourself; do not quote any number in this file.
+>
+> **Shipped:** PR [#4796](https://github.com/iscasasola/setnayan-platform/pull/4796)
+> (the receipt) · PR [#4800](https://github.com/iscasasola/setnayan-platform/pull/4800) (the published numbers) · PR [#4802](https://github.com/iscasasola/setnayan-platform/pull/4802) (the delete that
+> could not happen). Full db suite 1547/1547; every guard mutation-checked by
+> occurrence count; each migration dry-run against prod in a rolled-back
+> transaction first.
+>
+> 🔴 **STILL OPEN AND STILL THE OWNER'S — nine tables, all measured 2026-08-24 as
+> still `ON DELETE CASCADE`:** `vendor_recommendations` (⚠ **public**, `USING
+> (true)` — the SECOND public supplier endorsement a delete silently removes,
+> structurally identical to `vendor_reviews`, which the owner named FIRST) ·
+> `chat_threads` (the response statistics above) · `vendor_client_notes` ·
+> `booking_handovers` · `event_vendor_policy_acknowledgements` ·
+> `event_vendor_payment_plan` · `vendor_review_appeals` · `user_reports` ·
+> `vendor_guest_deliveries`.
+
 > ## ✅ SLICE 1 IS BUILT — `vendor_reviews` (PR #4665, 2026-08-21)
 >
 > **Do NOT rebuild it.** A review now survives its event: `event_id` is nullable
