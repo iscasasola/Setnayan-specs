@@ -86,7 +86,12 @@ not have to answer anything mid-session.**
 > ⚠ **AND THIS TABLE IS A SUMMARY AND SUMMARIES GO STALE FIRST.** It disagreed with the section
 > markers below for several hours on 2026-08-24 — the same read-from-the-middle failure this file
 > has already produced twice. **A session's own section is the authority; if this table disagrees
-> with it, THE SECTION WINS.** 14 done · 7 open.
+> with it, THE SECTION WINS.**
+> 🔢 **DO NOT QUOTE A COUNT FROM THIS LINE — RECOUNT IT.** It said "14 done · 7 open" on 2026-08-25
+> when the real figures were **19 sessions done, 1 running, 2 not started** (plus unclaimed rows and
+> one owner decision, which are not sessions and should never be counted as though they were).
+> **A tally is the fastest-rotting thing in any register**, and this one has now been stale twice.
+> Count the rows above; do not read a number somebody wrote.
 
 ---
 
