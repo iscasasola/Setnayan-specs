@@ -55,6 +55,23 @@ not have to answer anything mid-session.**
 > 🔑 **OWNERSHIP IS DECIDED BY THE FILES A COMMIT TOUCHES, NEVER BY ITS TITLE.** Same class as
 > reading a PR title as evidence a session had started, which I also did today.
 >
+> 🔀 **SAMAHAN RUNS AS A SEPARATE STREAM AND SHOULD STAY SEPARATE — BUT IT SHARES THREE FILES WITH
+> SCHEDULED WORK, AND ONE OF THEM IS ANOTHER SESSION'S ENTIRE DELIVERABLE (measured 2026-08-24).**
+> Its own territory is `app/dashboard/(account)/samahan` and its own migrations — **no scheduled
+> session owns either**, so the feature work genuinely does not collide and combining the streams
+> would buy nothing but a shared queue.
+> ⚠ **THE COLLISION IS IN THE GENERATED FILES, WHICH IS WHERE IT WOULD BE INVISIBLE:**
+> · `apps/web/tests/db/user-fk-behaviour.generated.txt` — what happens to every user-referencing
+>   column when an account is deleted; **62 cascade entries.** 🔴 **This is W5-A's ENTIRE SUBJECT.**
+>   Samahan has regenerated it twice. **Do NOT run W5-A while a Samahan migration is in flight** —
+>   whoever regenerates last wins, and the loser's change vanishes with a clean merge.
+> · `supabase/security/exposure-surface.baseline.txt` — 6,230 lines, every capability held by
+>   `anon`/`authenticated`. W4-C moved it; **W8 will too.**
+> · `lib/erasure/coverage.ts` — the erasure classification W2-B extended.
+> ⇒ **THE RULE, NOT A MERGE:** a stream outside the waves is fine as long as it declares which
+> GENERATED files it regenerates. **Territory checks look at feature folders and miss exactly these
+> — a generated file has no owner, so nobody thinks to claim it.**
+>
 > 🔑 **THREE STATES, NOT TWO — "OPEN" WAS AMBIGUOUS AND MISLED THE OWNER (2026-08-24).** He asked
 > why a session was "open" when one was plainly running it, and he was right: the word conflated
 > *nobody has this* with *somebody has this and has not finished*. **✅ DONE · 🏃 RUNNING · ▶ NOT
