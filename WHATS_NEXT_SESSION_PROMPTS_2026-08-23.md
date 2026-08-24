@@ -1266,8 +1266,9 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 ```
 ✅ W2-C1's SWEEP HAS MERGED (PR #4738, 2026-08-23) — you are clear. Same territory:
 app/admin/** exclusively.
-📏 RE-MEASURED 2026-08-24: gold-as-text in `app/admin` is now **150 occurrences across 67 files by
-raw grep**, down from 207 across 82. The remainder is the legitimate kind — icons and comments,
+📏 RE-MEASURED 2026-08-24: the admin console is **108 route pages**, not the ~95 the brief says —
+it grew. And gold-as-text is now **150 occurrences across 67 files by raw grep**, down from 207
+across 82. The remainder is the legitimate kind — icons and comments,
 which the guard's own regex excludes. ⛔ DO NOT "FINISH" THE SWEEP by driving the raw number to
 zero: you would be recolouring icons that pass contrast at the 3:1 non-text bar. The guard is the
 authority on what still counts.
@@ -1945,9 +1946,15 @@ event type with its own voice). Both are the per-event-type vocabulary. Run apar
 have rebuilt what the first threaded.
 
 DO THEM IN THIS ORDER — it is the whole reason they are one session:
-1. THREAD THE EXISTING TYPES FIRST. 🔑 IT IS THREADING, NOT BUILDING: the words provider is ALREADY
+1. THREAD THE EXISTING TYPES FIRST — all 16, confirmed live in `event_type_vocab`.
+   🔑 IT IS THREADING, NOT BUILDING: the words provider is ALREADY
    MOUNTED in the guest tree (`app/[slug]/_components/event-words-provider.tsx`, proven by
-   countdown.tsx consuming it) and the per-type terminology is already seeded. 69 guest-read
+   countdown.tsx consuming it) and the per-type terminology is already seeded.
+   ⚠ THE COUNT DEPENDS ENTIRELY ON METHOD AND THE BRIEF'S 69 IS NEITHER OBVIOUS NUMBER. Measured
+   2026-08-24 in `app/[slug]`, tests excluded: **324 raw lines · 49 once comment lines are removed
+   · 73 files.** This codebase is heavily commented, so a raw grep overstates by ~6x. STATE YOUR
+   METHOD AND DRIVE THE GUEST-READ NUMBER, never the raw one — the same trap as the admin gold,
+   where 106 and 207 were both real and only one was the target. 69 guest-read
    instances still say "the couple" at people whose event has no couple in it.
    🔒 WEDDINGS MUST READ BYTE-IDENTICALLY AFTERWARDS. Assert it — do not assume it. That assertion
    is the deliverable that makes step 2 safe.
@@ -1958,9 +1965,21 @@ DO THEM IN THIS ORDER — it is the whole reason they are one session:
    anything. A wake screen reading "Let's get this celebration started!" is not a copy bug, it is
    the entire defect.
 
-WHERE IT LANDS: lib/event-type-profile.ts · lib/event-words.ts · lib/checklist-event-type-defs.ts ·
-app/[slug]/_components/event-words-provider.tsx and the guest-tree strings that still hardcode
-couple wording · a migration for the new type.
+WHERE IT LANDS — ⚠ RE-MEASURED 2026-08-24 AND THE BRIEF WAS WRONG ABOUT TWO OF THESE:
+  · `lib/event-type-profile.ts` ✅ exists.
+  · `lib/checklist-event-type-defs.ts` ✅ exists.
+  · 🛑 **`lib/event-words.ts` DOES NOT EXIST.** Do not go looking for it and do not create it.
+    **THE VOCABULARY LIVES IN THE DATABASE** — `event_type_vocab`, read live: **16 rows, all
+    enabled** (wedding · debut · gender_reveal · birthday · celebration · travel · corporate ·
+    tournament · christening · anniversary · graduation · reunion · gala_night · simple_event ·
+    date · hangout). The brief's "16 event types" is exactly right; its file was not.
+  · `app/[slug]/_components/event-words-provider.tsx` ✅ exists and takes RESOLVED words as a prop —
+    the server does the resolving, so your threading work is upstream of it.
+  · ⚖ **THE "MIGRATION" MAY BE A DATA INSERT, NOT SCHEMA.** `event_type_vocab` already carries
+    `label_en · emoji · description · sort_order · enabled · onboarding_href · hero_photo_url`, and
+    the provider's own docblock says an admin can add a type AT RUNTIME because the table is
+    dynamic. **Check whether the wake needs any schema change at all before allocating one.** If it
+    does not, say so — the session may be M rather than L, and it may not be a migration writer.
 
 THINGS THIS PRODUCT HAS ALREADY LEARNED, and they apply directly:
 - The onboarding flow ASKS WHAT IT ALREADY KNOWS. Do not add a screen that re-asks something the
