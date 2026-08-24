@@ -2031,8 +2031,8 @@ DO THEM IN THIS ORDER — it is the whole reason they are one session:
    2026-08-24 in `app/[slug]`, tests excluded: **324 raw lines · 49 once comment lines are removed
    · 73 files.** This codebase is heavily commented, so a raw grep overstates by ~6x. STATE YOUR
    METHOD AND DRIVE THE GUEST-READ NUMBER, never the raw one — the same trap as the admin gold,
-   where 106 and 207 were both real and only one was the target. 69 guest-read
-   instances still say "the couple" at people whose event has no couple in it.
+   where 106 and 207 were both real and only one was the target. Whatever the number turns out to
+   be, the defect is the same: people whose event has no couple in it are being called "the couple".
    🔒 WEDDINGS MUST READ BYTE-IDENTICALLY AFTERWARDS. Assert it — do not assume it. That assertion
    is the deliverable that makes step 2 safe.
 2. THEN ADD THE WAKE, on the seam step 1 just proved. A family arranging a funeral gets an event
@@ -2068,7 +2068,14 @@ THINGS THIS PRODUCT HAS ALREADY LEARNED, and they apply directly:
   and removal disarms the "you already have one of these" walk-back.
 - There is a settled checklist for adding an event type in the corpus. Follow it; do not derive one.
 
-MIGRATION: yes, event-type tables only. You are the ONLY migration writer in your wave.
+MIGRATION: ⚠ **DECIDE THIS, DO NOT ASSUME IT — and the answer above says it may be NO.**
+`event_type_vocab` already carries every column a new type needs and the provider's docblock says an
+admin can add one AT RUNTIME. **So check first.** If the wake needs only a row, say so and do not
+allocate a migration; if it genuinely needs schema, you are the only migration writer in your wave
+and it touches event-type tables only.
+🛑 The earlier line here said "MIGRATION: yes" flatly and contradicted the paragraph above it. That
+was the fourth internal contradiction found in this file today — **when two parts of one prompt
+disagree, the one with the measurement behind it wins.**
 2 PRs: the threading, then the wake.
 
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
