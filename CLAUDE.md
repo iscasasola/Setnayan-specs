@@ -69,6 +69,45 @@ committed docs on purpose.
 already ship, and produce errors.** The fix is this block. Keep it CURRENT — one active work
 stream, deleted or replaced when it finishes. If you finish a stream, update this block.
 
+> ### ✅ DONE 2026-08-24 — W4-WORDS: THE FUNERAL, THE FIRST SOLEMN EVENT TYPE — do NOT rebuild it
+> **1 PR, merged and SERVED:** [#4793](https://github.com/iscasasola/setnayan-platform/pull/4793)
+> (`/api/health` → `2eb7b2d`), migration `20271163083797` **verified applied in prod BY THE
+> OBJECT**: the `funeral` vocab row (🕊️, enabled) · `register:'solemn'` in the profile's
+> terminology JSONB · the quiet onboarding intro · exactly seven scoped marketplace tiles. Full
+> row: `DECISION_LOG.md` 2026-08-24 🕊️.
+> 🔑 **HALF THE BRIEF WAS ALREADY SHIPPED.** Step 1 ("thread the 16 types, 69 guest-read
+> instances still say the couple") was STALE — S13 had already threaded the guest tree and
+> holds it with an exact-bill guard. A REAL comment-stripper (state machine, not line
+> prefixes — a prefix filter's survivors are mostly block-comment continuation lines) found
+> ONE rendered remainder, already on the S13 bill as deliberately unreachable.
+> 🔑 **THE TONE SWITCH IS DATA, NOT SCHEMA** — the terminology JSONB carries
+> `register`/`occasion_noun`; `EventWords` gained `occasion`+`solemn`; a hardcoded
+> `FUNERAL_PROFILE` keeps a wake solemn on a DB read error. **What solemn does:** no countdown
+> (widget + BOTH server mounts) · never enters the `save_the_date` OR the joyful auto-composed
+> `editorial` phase (previews included) · no marketing upsells · RSVP reads "Will be there /
+> Unable to come" · pabuya reads "A gift of sympathy" (abuloy — owner 2026-08-17: a wake MAY
+> accept money, gentler than "digital money dance") · its own short-runway checklist,
+> service-day run-of-show, helper roles (no "Maid of honor" at a wake) and a solemn sample
+> story. **Every celebratory type is pinned byte-identical** — the frozen literals in
+> `the-wake-never-celebrates.test.ts` are never edited to match a change.
+> ⚠ **The solemn no-STD gate is keyed on the REGISTER, deliberately NOT on
+> `surfaceEnabled('save_the_date')`** — the general wedding-parts-stay-home build is S15's
+> scope and the funeral must not ride along with it. Do not "simplify" the gate onto the flag.
+> 🪤 **SIX coverage guards fired on the new type — the design working.** Five in the unit
+> suite; the SIXTH (host role sets) fired ONLY IN CI because it lives in `test:db` and the
+> session had run just its own two db files. **Run the whole db suite for an event-type
+> change.** Papic is OFFERED at wakes per the standing 2026-08-01 "offer Papic everywhere"
+> ruling — one line in `PAPIC_ACCESS_PHASE_1_TYPES` to reverse. **Baptism deliberately NOT
+> added** (same 2026-08-17 ruling: christening covers it — do not add it as a new type).
+> 🪤 **A trap fixed in passing:** the admin profile editor REBUILT the terminology blob from
+> its six form fields, so any admin save silently stripped keys the form doesn't know
+> (`register` included). It now merges over the stored blob — keep that merge when adding
+> terminology keys.
+> ⏭ **OPEN OWNER DECISIONS, flagged not decided:** the funeral's AI-planner tier (today the
+> explicit ₱499 standard default — whether the planner should offer itself at a funeral at all
+> is his) · whether wakes stay in the Papic offer · a funeral-home taxonomy leaf (none exists;
+> the checklist def's anchor is null because of it).
+
 > ### ✅ DONE 2026-08-24 — W4-A: THE FOUR SCREENS A COUPLE LIVES IN — do NOT rebuild any of it
 > **FOUR PRs, all merged and LIVE:** [#4771](https://github.com/iscasasola/setnayan-platform/pull/4771) ·
 > [#4780](https://github.com/iscasasola/setnayan-platform/pull/4780) ·

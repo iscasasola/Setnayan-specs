@@ -1866,7 +1866,8 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 ### W5-C · Who is in my event? · **Opus 5 · medium**
 
 ```
-🔒 Needs W4-A merged — same tree.
+🔓 GATE SATISFIED — W4-A merged all four of its PRs on 2026-08-24 and production is serving them,
+so the tree you share with it is free. (Re-confirm with `gh pr list --state open`; this file rots.)
 Three small things, all verified still true on 2026-08-23.
 
 1. ONE SCREEN THAT ANSWERS "WHO IS IN MY EVENT". Today the answer is spread across five separate
@@ -1890,7 +1891,11 @@ already generates before assuming anything must be built, and check whether the 
 auto-draft (which already writes a whole day up from the schedule and the photos) is the mechanism
 to extend rather than a second one to invent.
 
-🔑 A GRANTED CAPABILITY NOTHING CALLS IS A GATE WITH NO HANDLE — this repo has found five. Before
+🔑 A GRANTED CAPABILITY NOTHING CALLS IS A GATE WITH NO HANDLE — this repo has found five.
+⚠ AND A SIXTH SHAPE WAS FOUND ON 2026-08-24 THAT IS NOT THIS ONE, so do not mis-diagnose by
+pattern-matching: `moderator_area_level` is CALLED in nine files and simply not consulted on the one
+door guarding money. **A mechanism used correctly elsewhere and skipped in one place looks nothing
+like an uncalled function — and the fix is to copy a working call site, not to build one.** Before
 building any of the three, grep for a WRITER, not just a column or a function: the mechanism may
 already exist with nothing calling it, in which case your job is the handle, not the gate.
 
