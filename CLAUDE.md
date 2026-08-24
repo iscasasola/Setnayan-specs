@@ -69,6 +69,33 @@ committed docs on purpose.
 already ship, and produce errors.** The fix is this block. Keep it CURRENT — one active work
 stream, deleted or replaced when it finishes. If you finish a stream, update this block.
 
+> ### ✅ DONE 2026-08-24 — W4-A: THE FOUR SCREENS A COUPLE LIVES IN — do NOT rebuild any of it
+> **3 PRs, all merged:** [#4771](https://github.com/iscasasola/setnayan-platform/pull/4771) ·
+> [#4780](https://github.com/iscasasola/setnayan-platform/pull/4780) ·
+> [#4782](https://github.com/iscasasola/setnayan-platform/pull/4782). Full row: `DECISION_LOG.md` 2026-08-24.
+> 🔑 **MEASURED FIRST, AND STRUCTURE ALREADY MATCHED ON ALL FOUR — nothing was redrawn.** Guests
+> matches the Roster archetype since its 2026-08-22 rework; the vendors LIST is claimed by NO
+> archetype (only `vendors/[vendor]` → Detail) and stays under its own locked 2026-05-31 spec;
+> budget already speaks the Ledger register; **alaala is the memory-arc PILLAR page (owner
+> 2026-06-15), not the gallery — the Gallery archetype's dashboard subject is `galleries/`,
+> untouched and unclaimed by any wave.** The REAL delta was colour/typography register: 46
+> gold-as-text sites → `terracotta-700`, one `-700-700` typo class that styled nothing, a gold
+> ERROR message → `danger-700`, stock-amber density badges → the gold ladder.
+> 🔤 **THE VENDORS SEARCH OVERLAY'S SERIF HAD NEVER RENDERED** — `var(--font-serif,'Cormorant
+> Garamond',serif)` names a variable that exists nowhere and a family next/font never registers
+> (it hashes names), so every serif title computed the PHONE'S DEFAULT SERIF. Repointed at
+> `--font-editorial-display`. *Rejected-not-thrown, CSS edition — add "undefined CSS var" to that family.*
+> 📏 **THE INHERITED AP-2 TALLY IS ANSWERED: THE APP IS NOT FALLING BACK.** Derived from shipped
+> source (dashboards sit behind a login): body `font-sans` → `:root` → Hanken Grotesk, and
+> `.app-surface` re-pins the whole dashboard tree; 823 font-utility uses all resolve to
+> Hanken/Space Mono; the only system stacks are 3 print-only pages. **No build opened; the
+> shared-chrome typeface question (ONE_SHELL_PLAN §5.3) stays an OPEN OWNER DECISION.**
+> 🛡 Guard: `app/dashboard/[eventId]/gold-is-not-text.test.ts` — comments stripped, prefix-trap
+> lookahead, per-file bill checked BOTH directions (PRs 2/3 shrank it, live-proving direction 2),
+> mutation-tested by printed count ×4. ⚠ A first typecheck printed a FALSE GREEN through a pipe
+> (`tsc: command not found` masked by `tail`) — always print the exit code explicitly.
+> ⏭ Reported, not churned: ~15 `bg-white/NN` alpha fills are visually inert on the #FFFFFF ground — debt, not defect.
+
 > ### ✅ DONE 2026-08-24 — W3-B: A SUPPLIER'S CARD EARNS ITS KEEP
 > **5 PRs — the fifth is an owner ruling he made mid-session, closing the item the other four left open.**
 > ** Do NOT rebuild any of it.** Row: `DECISION_LOG.md` 2026-08-24.
