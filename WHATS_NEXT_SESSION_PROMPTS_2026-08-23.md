@@ -456,7 +456,7 @@ owner ruling** and carries the weight of one. The shape he approved:
 presence… only the graph shows relationships, and the graph never talks"* — and that lock **names an
 event guest list as container membership, the explicitly permitted case**, not graph traversal.
 
-### ⭑ W8 · Guests can see who else is coming · **Opus 5 · high** — its own wave, ALONE
+### ⭑ W8 · The coordinator can see the guest list · **Opus 5 · medium** — runs alongside W5-E
 
 **Why its own wave rather than folded into a session:** it needs the guest tree (`app/[slug]/**`),
 the host's guest screen, **and a migration touching `events` and the RLS on `guests`**. Every wave
