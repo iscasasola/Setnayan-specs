@@ -44,6 +44,7 @@ not have to answer anything mid-session.**
 | ⭑**UNCLAIMED · the dashboard `galleries/` surface** | ▶ **NOT STARTED — NO WAVE OWNS IT.** Surfaced by W4-A: `alaala` is the owner-directed memory-arc pillar page (2026-06-15), NOT the gallery. The Gallery archetype's dashboard subject is `galleries/`, a different surface nobody has claimed. Also unclaimed: the couple's vendors LIST route answers to no archetype by route and stays under its own locked spec. | — | — | — |
 | **SAMAHAN · the group, its stories and its chat** | 🏃 **RUNNING · integrated into this plan 2026-08-24.** 6 PRs merged (#4781 #4783 #4784 #4786 #4790), #4795 open. Owns `(account)/samahan` + `lib/communities` + its own migrations — no wave session owns those. 🔴 **Regenerates the FK-behaviour file and the exposure baseline: MUST NOT run at the same time as W5-A.** | — | — | alongside |
 | ~~W5-D · The board tells the truth~~ | ✅ **DONE 2026-08-24 · 3 PRs (#4804 · #4805 · #4806).** All three phone findings are live: a celebrated card is **kept, not graded**, the score prints once, and the shelf stopped listing celebrations that already exist. 🔑 **#4806 did the thing worth more than the fixes — a guard that COMPARES TWO SURFACES**, the check whose absence let two of the three exist. | — | — | 5 |
+| ⭑**W5-E · Two surfaces nobody claimed** | ▶ **NOT STARTED — created 2026-08-25 from the unclaimed rows.** The dashboard `galleries/` surface (the Gallery archetype's real subject, skipped because it was assumed to be `alaala`) and the budget screen's archetype gap. Runs alongside W8. | Opus 5 | medium | 5 |
 | **W6 · The grab-bag, verified first** | ▶ **NOT STARTED** — carries the orphans from waves 0–3 | Fable → Sonnet 5 | medium | 6 · alone |
 | **W8 · ~~Guests can see who else is coming~~ → THE COORDINATOR CAN SEE THE GUEST LIST** | ▶ **NOT STARTED · RE-SCOPED 08-24 — the owner REVERSED his earlier yes.** *"no. only the owner of the event and coordinator (by request)."* ⛔ Nothing is published to guests. The accepted-only rule, the K-floor and the per-event switch **all fall away — do not build them.** It is now an ACCESS GRANT: the host already sees the list; a coordinator sees it ON REQUEST. Much smaller, and no longer a privacy disclosure. | Opus 5 | medium | 8 · alone |
 
@@ -2088,6 +2089,51 @@ that three separate times in two days.
 ⚠ And ~70 changes shipped in two days, all tested, with these sitting on the first screen. **No
 test asks whether a screen contradicts the screen beside it.** If you can express any of these as
 a guard that compares two surfaces rather than checking one, that is worth more than the fix.
+
+2 PRs. No migration.
+
+RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
+```
+
+### ⭑ W5-E · Two surfaces nobody claimed · **Opus 5 · medium** — runs alongside W8
+
+*Created 2026-08-25 from the unclaimed rows. Both were surfaced by other sessions working nearby
+and fell outside every brief — which is exactly why they survived.*
+
+```
+Two surfaces that no wave ever owned. Neither is a rescue; both are small and both were found by
+somebody working on something else.
+
+1. THE DASHBOARD `galleries/` SURFACE HAS NO OWNER AND NO PORT.
+   🔑 READ THIS BEFORE YOU OPEN ANYTHING: `alaala` is NOT the gallery. It is the owner-directed
+   MEMORY-ARC pillar page (his direction, 2026-06-15) and it has already been ported. **The Gallery
+   archetype's dashboard subject is `galleries/` — a different surface**, and every design wave
+   skipped it because the two were assumed to be one thing.
+   ⇒ Measure first: does `galleries/` exist, what does it render, and does the Gallery archetype
+   actually describe it? **If the archetype does not fit that surface, say so and stop** — the 19
+   archetypes are BINDING and a forced fit is worse than an unported screen.
+
+2. THE BUDGET SCREEN DOES NOT BEHAVE LIKE ITS ARCHETYPE.
+   Found by W4-A and deliberately not taken, because individually these are small and together they
+   are a redesign: the running total **scrolls away** where the Ledger archetype PINS it · rows are
+   **not grouped by category** · supplier cards **never collapse** · and its three biggest numbers
+   render in the BODY face while their own labels are already mono, so **"Paid" appears twice on one
+   screen in two different typefaces.**
+   ⚠ The typeface mismatch is the cheapest and most visible — do that one first, on its own.
+   ⚖ The pinning and grouping change how the screen is USED, not how it looks. If either turns out
+   to need a layout the archetype does not draw, that is an owner call, not yours.
+
+⛔ NOT YOURS — the 98 loading screens still drawing the retired page title. They belong to the
+2026-08-21 header retirement and they are broad enough to collide with everything; W6 takes them
+while running alone.
+
+TERRITORY: `app/dashboard/[eventId]/galleries/**` and `app/dashboard/[eventId]/budget/**`.
+⚠ **W8 IS RUNNING ALONGSIDE YOU** and owns the guest-list surface and the access-request path in the
+same tree. **Do not touch either.** Confirm with `gh pr list --state open` before you push.
+
+🔑 AND THE RULE THAT PRODUCED BOTH OF THESE: they were invisible because every session had a scope
+and none of them included these. **When you finish, say plainly what you noticed nearby and did not
+take** — that sentence is how the next unclaimed surface gets found.
 
 2 PRs. No migration.
 
