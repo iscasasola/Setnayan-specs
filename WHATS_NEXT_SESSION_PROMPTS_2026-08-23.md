@@ -30,7 +30,7 @@ not have to answer anything mid-session.**
 | W3-C · A wake is not a celebration | Opus 5 (+ Fable for the words) | high | 3 |
 | W4-A · The four screens a couple lives in | Opus 5 → Sonnet 5 | medium | 4 |
 | W4-B · Sixty-three supplier screens | Opus 5 → Sonnet 5 | medium | 4 |
-| W4-C · Shut the doors nobody uses | Opus 5 | **xhigh** | 4 |
+| ✅ W4-C · Shut the doors nobody uses — DONE 2026-08-24 | Opus 5 | **xhigh** | 4 |
 | W5-A · A supplier's record survives a delete | Opus 5 | **max** | 5 |
 | W5-B · The surfaces nobody drew | Fable → Opus 5 | medium | 5 |
 | W5-C · Who is in my event? | Opus 5 | medium | 5 |
@@ -465,7 +465,7 @@ already ships.
 |---|---|
 | W3-A: ~30 files, and the couple's supplier page has **45** unbound reads | **19** unbound reads across **14** files; that page has **3**, and **12** already bind their error. Most of it was fixed already. |
 | W5-A: **152** foreign keys cascade, **10** survive | **145** cascade, **19** survive. Nine more already survive than the brief claims. |
-| W4-C: **~290** anonymous read grants | **235**, across 384 public tables. Batches have landed. |
+| W4-C: **~290** anonymous read grants | **235**, across 384 public tables. Batches have landed. ✅ **W4-C ran 2026-08-24: 230 at its start, 203 after — the rest is deliberate, see its DONE banner.** |
 | W2-C1: **106** gold-as-text occurrences | 106 by the guard's regex, **207** by a plain grep. Both real, different methods — say which you used. |
 | W1-C: the compliance pack still claims Philippine hosting and a 90-day retention rule | The **adopted** manual already carries the corrected retention row and no PH-hosting claim was found in it. The remaining "90 days" is about marketing samples — a different, correct rule. |
 | C1: the per-guest QR download "refuses anyone without a full account" | It requires the event to own a **paid ₱1,499 SKU** — it is the BRANDED variant. Opening it to every guest gives away a sold product. |
@@ -1555,7 +1555,36 @@ their business — treat the port as a trust surface, not a repaint.
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
 
-### W4-C · Shut the doors nobody uses · **Opus 5 · xhigh**
+### ✅ W4-C · Shut the doors nobody uses — **DONE 2026-08-24. DO NOT RUN THIS SECTION.**
+
+> **3 PRs, all merged:** [#4768](https://github.com/iscasasola/setnayan-platform/pull/4768) (batch 6 · 12 tables) ·
+> [#4778](https://github.com/iscasasola/setnayan-platform/pull/4778) (batch 7 · 15 tables) ·
+> [#4770](https://github.com/iscasasola/setnayan-platform/pull/4770) (the two elevated-rights views, checked and pinned).
+> ⚠ **Verify before trusting this line:** `gh pr view 4768 4770 4778 -R iscasasola/setnayan-platform --json number,state,mergedAt`.
+>
+> ✅ **Both migrations verified applied in prod BY THE OBJECT** (`has_table_privilege` false on all 27),
+> and the whole surface measured **230 → 203** anon-granted tables — a positive delta, not an empty read.
+> **102 tables closed across seven batches now.**
+>
+> ⚖ **THE ~203 REMAINING GRANTS ARE LEFT DELIBERATELY, NOT UNFINISHED:** 96 tables carry a real
+> anon-reaching policy (those grants ARE the product — the public marketplace, catalogs, the guest
+> surface), and the other ~107 are reached through shared `lib/` helpers, public trees or API routes
+> on the caller's own session, where a wrong revoke turns today's RLS-empty read into a runtime
+> permission ERROR on a live page. Each needs per-file injected-client analysis; do not batch them.
+>
+> ⚖ **BOTH FLAGGED VIEWS PASSED THE CHECK.** `events_host`: authenticated-only, its WHERE is the
+> whole gate (behaviourally pinned — a signed-in stranger reads ZERO rows), and it redacts exactly
+> one column, the encrypted photo-delivery OAuth token, now pinned against a `SELECT *` rebuild.
+> `vendor_completed_events`: public on purpose; its self-dealing and shortlisted-is-not-a-booking
+> exclusions now have behavioural pins. **The inventory is the invariant** — a future definer view
+> readable by an app principal goes red in `elevated-views-checked.db.test.ts` until registered.
+>
+> 🔑 **THE LESSON THAT PAID:** a `from('name')` grep reported one table as queried by NOTHING; it is
+> queried through an exported table-name CONSTANT. Grep the REF. And an auth-guard grep cried wolf
+> exactly the way batch 4's did (missed `requireHostMembershipOrThrow`) — the file was right, the
+> check was too narrow. Full row: `DECISION_LOG.md` 2026-08-24.
+
+<details><summary>The original prompt, kept for its reasoning</summary>
 
 ```
 You are the ONLY migration writer in this wave.
@@ -1595,6 +1624,8 @@ RULES THAT MAKE THIS SURVIVABLE:
 
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
+
+</details>
 
 ---
 

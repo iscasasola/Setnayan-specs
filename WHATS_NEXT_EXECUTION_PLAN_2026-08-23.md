@@ -166,7 +166,7 @@ table plus `chat_threads` reads, against the event-type tables.
 |---|---|---|
 | **W4-A · Couple's four daily screens** (measure first) | S5 — guests · vendors · budget · alaala wear the approved design | no |
 | **W4-B · Supplier design port** | S6 — all 63 supplier screens | no |
-| **W4-C · Grant hardening** | S9-res S9-next WL-d — ~290 unused anon read grants and 2 elevated-rights views closed in small batches | **YES**, sole migration writer this wave |
+| ✅ **W4-C · Grant hardening — DONE 2026-08-24** | 3 PRs merged ([#4768](https://github.com/iscasasola/setnayan-platform/pull/4768) · [#4778](https://github.com/iscasasola/setnayan-platform/pull/4778) · [#4770](https://github.com/iscasasola/setnayan-platform/pull/4770)): 27 more grants revoked (230 → 203 measured in prod by the object; 102 closed across 7 batches), both elevated-rights views checked, pinned by a new guard. The ~203 remaining grants are DELIBERATE (real anon policies, or caller-session paths needing per-file analysis) — see the DONE banner in the session-prompts file. | was sole migration writer |
 
 ### WAVE 5 — two to three concurrent
 
@@ -233,7 +233,7 @@ by how many files it touches.**
 | ✅ W3-B · Vendor card features — DONE | **Opus 5** | high | Two aggregates published to strangers; both floors enforced in SQL, twice each. The "new table" the brief called for was not needed. |
 | W3-C · A wake | **Opus 5** high for the schema and wiring · **Fable** for the words | high | The tone is the product here. A wake reading "celebrate" is the whole defect. |
 | W4-A / W4-B · design ports | **Opus 5 medium** for the first screen (it sets the pattern) · **Sonnet 5 medium** for the repeats | medium | The archetypes are binding; a delta is a defect in the port, not a design decision. |
-| W4-C · Grant hardening | **Opus 5** | **xhigh** | Grants and RLS fail silently at runtime and are green in every test. |
+| ✅ W4-C · Grant hardening — DONE 2026-08-24 | **Opus 5** | **xhigh** | Grants and RLS fail silently at runtime and are green in every test. |
 | W5-A · Vendor data survives a delete | **Opus 5** | **max** | 152 of 162 FKs cascade, the classification's own adversarial check died at 31 of 71 agents, and being wrong destroys a supplier's record permanently. |
 | W5-B · Undrawn surfaces | **Fable** to re-scope · **Opus 5** medium to build | medium | Its scope genuinely moved last week. |
 | W5-C · Small sweeps | **Opus 5** | medium | |
