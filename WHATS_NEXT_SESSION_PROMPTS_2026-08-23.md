@@ -30,7 +30,7 @@ not have to answer anything mid-session.**
 | ~~W3-C · A wake is not a celebration~~ | 🛑 **SUPERSEDED** — merged into W4-WORDS | — | — | — |
 | ~~W4-B · Sixty-three supplier screens~~ | ✅ **DONE** 08-24 · 6 PRs (#4772–#4779) | — | — | 4 |
 | ~~W4-C · Shut the doors nobody uses~~ | ✅ **DONE** 08-24 · 27 more grants closed, 2 views pinned | Opus 5 | xhigh | 4 |
-| **W2-C2 · Ninety-five admin routes, one shape** | ⏭ **OPEN** — ⚠ it is **108** routes now, not 95 | Opus 5 | high | 4 |
+| **W4-ADMIN · The admin console, one shape** *(was W4-ADMIN)* | ⏭ **OPEN** — ⚠ **108** routes now, not the 95 in its title | Opus 5 | high | 4 |
 | **W4-A · The four screens a couple lives in** | ⏭ **OPEN** — measure first, eroded twice over | Opus 5 → Sonnet 5 | medium | 4 |
 | **W4-WORDS · The words follow the occasion** | ⏭ **OPEN** — ⚠ its scope changed: the vocabulary is a DB table, not a lib file | Opus 5 (+ Fable for the words) | high | 4 |
 | **W5-A · A supplier's record survives a delete** | ⏭ **OPEN** — the most careful one | Opus 5 | **max** | 5 |
@@ -232,7 +232,7 @@ event-words provider).
 | **1** | **W1-A** finished event + launcher + dashboard polish · **W1-B** Pabati + buy pages + story-editing goes free · **W1-C** paperwork | W1-B |
 | **2** | **W2-A** guest activation + the cookie banner + honest reads in the hub · **W2-B** the two deletion jobs · **W2-C1** the admin gold | — |
 | **3** | ~~**W3-A** honest reads in the couple tree~~ **✅ DONE** · ~~**W3-B** supplier cards~~ **✅ DONE** · ~~**W3-D** the guest page's design set~~ **✅ DONE 2026-08-24 — 5 PRs, #4754 · #4755 · #4757 · #4758 · #4759** | ✅ **WAVE 3 IS COMPLETE.** W3-C was superseded into W4-WORDS. |
-| **4** | **W4-WORDS** ⭑NEW the words follow the occasion · **W4-B** supplier screens · **W2-C2** admin archetype | W4-WORDS |
+| **4** | **W4-WORDS** ⭑NEW the words follow the occasion · **W4-B** supplier screens · **W4-ADMIN** the admin console | W4-WORDS |
 | **5** | **W4-A** the couple's four daily screens · **W5-C** who is in my event + drafted invitation words · **W4-C** grant hardening | W4-C |
 | **6** | **W5-A** a supplier's record survives a delete · **W5-B** the undrawn surfaces | W5-A |
 | **7** | **W6** the grab-bag, ALONE | per finding |
@@ -1294,7 +1294,8 @@ One PR. Report the occurrence count before and after; "106 → 0" is the deliver
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
 
-### W2-C2 · Ninety-five admin routes, one shape · **Opus 5 · high**
+### W4-ADMIN · The admin console, one shape · **Opus 5 · high** — wave 4
+*(was **W4-ADMIN**. Renamed 2026-08-24: a wave-4 session whose name began "W2" read as wave 2 and misled the owner. **A name that contradicts its position is a trap, not a label.**)*
 
 ```
 ✅ W2-C1's SWEEP HAS MERGED (PR #4738, 2026-08-23) — you are clear. Same territory:
