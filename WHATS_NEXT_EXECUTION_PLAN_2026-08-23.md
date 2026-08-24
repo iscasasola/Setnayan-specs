@@ -165,7 +165,7 @@ table plus `chat_threads` reads, against the event-type tables.
 | session | carries | migration |
 |---|---|---|
 | **W4-A · Couple's four daily screens** (measure first) | S5 — guests · vendors · budget · alaala wear the approved design | no |
-| **W4-B · Supplier design port** | S6 — all 63 supplier screens | no |
+| ✅ **W4-B · Supplier design port — DONE 2026-08-24** | S6 — shipped in 6 PRs (#4772–#4779, all merged): one tree kit, both hand-rolled recipes at ZERO behind a generated-baseline guard, 152 gold-as-text sites to AA, empties/pills/notices converged. Row: `DECISION_LOG.md` 2026-08-24. | no |
 | ✅ **W4-C · Grant hardening — DONE 2026-08-24** | 3 PRs merged ([#4768](https://github.com/iscasasola/setnayan-platform/pull/4768) · [#4778](https://github.com/iscasasola/setnayan-platform/pull/4778) · [#4770](https://github.com/iscasasola/setnayan-platform/pull/4770)): 27 more grants revoked (230 → 203 measured in prod by the object; 102 closed across 7 batches), both elevated-rights views checked, pinned by a new guard. The ~203 remaining grants are DELIBERATE (real anon policies, or caller-session paths needing per-file analysis) — see the DONE banner in the session-prompts file. | was sole migration writer |
 
 ### WAVE 5 — two to three concurrent

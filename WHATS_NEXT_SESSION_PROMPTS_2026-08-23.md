@@ -29,7 +29,7 @@ not have to answer anything mid-session.**
 | ✅ W3-B · A supplier's card earns its keep — **DONE 2026-08-24, 4 PRs** | Opus 5 | high | 4 |
 | W3-C · A wake is not a celebration | Opus 5 (+ Fable for the words) | high | 3 |
 | W4-A · The four screens a couple lives in | Opus 5 → Sonnet 5 | medium | 4 |
-| W4-B · Sixty-three supplier screens | Opus 5 → Sonnet 5 | medium | 4 |
+| ✅ W4-B · Sixty-three supplier screens — DONE 2026-08-24 (6 PRs #4772–#4779, all merged) | — | — | — |
 | ✅ W4-C · Shut the doors nobody uses — DONE 2026-08-24 | Opus 5 | **xhigh** | 4 |
 | W5-A · A supplier's record survives a delete | Opus 5 | **max** | 5 |
 | W5-B · The surfaces nobody drew | Fable → Opus 5 | medium | 5 |
@@ -1530,7 +1530,11 @@ is the GOLD; the action colour lives in the slot named `mulberry`. Check contras
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
 
-### W4-B · Sixty-three supplier screens · **Opus 5 (the kit) → Sonnet 5 (the sweep) · medium**
+### ✅ W4-B · Sixty-three supplier screens — DONE 2026-08-24. Do NOT run this prompt again.
+> Shipped as 6 merged PRs (#4772 kit+guard · #4773 inputs · #4774 cards · #4775 gold-as-text ·
+> #4777 empties/pills · #4779 notices + ShopStat deleted unshipped). The convergence guard
+> `kit-convergence.test.ts` now holds an EMPTY baseline — the tree hand-rolls neither recipe.
+> Full row: `DECISION_LOG.md` 2026-08-24. The original prompt is kept below as history only.
 
 ```
 🔓 W3-B is DONE (2026-08-24). Its four PRs are #4741 · #4742 · #4744 · #4745 — confirm they are
