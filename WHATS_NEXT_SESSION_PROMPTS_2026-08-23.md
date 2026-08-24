@@ -1727,7 +1727,24 @@ TOUCHING IT, and report the closures as results.
    photographer cannot see their own shots after the day; the band-as-emcee package does not reach
    the coordinator's message box.
 4. Anything queued for you by W2-B's privacy verification.
-4b. 🔴 BUILD THE ANALYTICS OPT-OUT WE ADVERTISE. The live `/privacy` page tells people analytics
+4c. 🧹 THE ORPHANS FROM WAVES 0–3 — audited 2026-08-24, and MOST OF THE LIST TURNED OUT DONE.
+   Measured on main: the After-stage stub and its fictional "7-day review window" are GONE · the
+   guest can name a plus-one · the seat page now binds its errors (0 → 11) · the "pending" chip was
+   reworded with its reasoning in a comment. **Do not rebuild any of those.** What genuinely
+   survived:
+   · **C7 / C8 — the two false camera refusals.** `app/papic/decorate/page.tsx` still says "the host
+     hasn't turned on guest cameras" and the gate it reads is TRUE on every prod event. Re-opened
+     for DIAGNOSIS, never diagnosed. Reproduce each against a prod event whose pool applies before
+     touching either; the two surfaces fail for different reasons.
+   · **PR #4535 was CLOSED, not merged**, and nobody ever assessed what it genuinely carried that
+     main lacks. 507 files, so most was noise — but "most" is not "all". One pass to name anything
+     real, or record that there was nothing.
+   · **Blur "part 1" implies a part 2** (PR #4760's own title) and no wave carries it. Find out what
+     is left and either schedule it or close it.
+   · **13 unbound reads remain in server actions** — deliberately out of W3-A's guard, which walks
+     render paths only. The residual question nobody has answered: can an action's failed read
+     still surface as a false empty state downstream? Answer it; do not assume either way.
+4b. ✅ THE PRIVACY SENTENCE IS OFF THE PAGE — PR #4776, 2026-08-24. **BUILD THE CONTROL.** The live `/privacy` page tells people analytics
    tracking has an "opt-out available in your profile" — and there is NO such control: no setting,
    no column storing the choice, nothing that could read one. Owner ruled 2026-08-24: the sentence
    comes off the page now (done ahead of you) and the real control is built HERE.
