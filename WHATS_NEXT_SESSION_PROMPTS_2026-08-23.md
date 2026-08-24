@@ -1170,7 +1170,25 @@ before reporting an affordance absent.
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
 
-### W2-B · Delete what we said we would delete · **Opus 5 · xhigh**
+### ✅ W2-B · Delete what we said we would delete — **DONE 2026-08-24. DO NOT RE-RUN.**
+
+> **Both sweeps ship and are verified applied in prod by the object** — face data deleted 3 months
+> after the event ENDS, a supplier's raw identity uploads 90 days after the approve/reject decision
+> (PR [#4735](https://github.com/iscasasola/setnayan-platform/pull/4735)). The `/privacy` notice and
+> the data-subject register were corrected in the same change.
+>
+> **The read-only half is done too:** all 13 pack findings are dispatched in
+> [`NPC_Pack_Findings_VERIFIED_2026-08-24.md`](NPC_Pack_Findings_VERIFIED_2026-08-24.md) —
+> 9 confirmed · 2 refuted · 1 an owner decision · 1 withheld. 🚨 **The loudest result was not the
+> retention gap: the pack OVER-declares — it names 4 processors we don't use and omits 3 we do,
+> including a German grammar service that receives couples' event stories.**
+>
+> ⏭ **Follow-on that also shipped:** owner face-blur rulings 2/3/4 (PRs
+> [#4747](https://github.com/iscasasola/setnayan-platform/pull/4747) ·
+> [#4749](https://github.com/iscasasola/setnayan-platform/pull/4749)). **Ruling 1 — blur on the
+> public event page + shared pool — is SCOPED, NOT BUILT** (`DECISION_LOG.md` 2026-08-24).
+>
+> **The brief below is kept as history. Read the verified doc before acting on any of it.**
 
 ```
 Two retention promises are written, signed off by the owner as DPO, and NOTHING RUNS THEM. Read

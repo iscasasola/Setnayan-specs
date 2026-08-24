@@ -141,7 +141,7 @@ intersection check that proves it.
 | session | carries | what a person gets | territory | migration |
 |---|---|---|---|---|
 | **W2-A · Guest activation** | C1–C6, C9 + S3-hub | a guest can keep their QR and copy the address · the "check your email" screen has a way in · they are told they are on the list · they are pointed at the reply card · they can no longer erase contact details the couple typed · they can name their +1 · seat and find-my-table stop rendering a failed read as "nothing here" | `[slug]/_components/*` · `[slug]/actions.ts` · `[slug]/seat` · `find-my-table` · `api/website/qr/guest/*` · `join/*/check-email` · `papic/{me,guest,decorate}` | no |
-| **W2-B · Privacy deletion jobs** | NPC-1 NPC-2 (+ NPC-V audit, read-only) | face data is actually deleted 3 months after the event ends and supplier ID images 90 days after a decision — **today neither job exists** | `lib/` job registry + retention job shape | no |
+| ✅ **W2-B · Privacy deletion jobs — DONE 2026-08-24, do not re-run** | NPC-1 NPC-2 (+ NPC-V audit, read-only) | ~~today neither job exists~~ **Both ship and are verified applied in prod by the object** (PR [#4735](https://github.com/iscasasola/setnayan-platform/pull/4735)); the audit is dispatched in [`NPC_Pack_Findings_VERIFIED_2026-08-24.md`](NPC_Pack_Findings_VERIFIED_2026-08-24.md) — 9 confirmed · 2 refuted · 1 owner decision · 1 withheld | `lib/` job registry + retention job shape | no |
 | **W2-C · Admin** | S8-gold, then D-9 | admin text stops using the unreadable gold (**106 occurrences / 51 files**), then ~95 admin routes converge on one archetype | `app/admin/**` exclusively | no |
 
 **Intersection check:** guest tree · lib jobs · `app/admin/**`. **Pairwise: empty.**
@@ -180,6 +180,16 @@ table plus `chat_threads` reads, against the event-type tables.
 **W6 · Verified grab-bag** — CL-P1, CL-P2, WL-c and any fixes queued by W2-B's audit. **Nothing
 here has been re-verified since 2026-08-06; expect several to be already fixed.** Measure each
 before touching it.
+
+> ✅ **W2-B's audit HAS now run (2026-08-24) and its queue is written up in
+> [`NPC_Pack_Findings_VERIFIED_2026-08-24.md`](NPC_Pack_Findings_VERIFIED_2026-08-24.md).**
+> ⚠ **Almost none of it is W6's to fix.** Of the 9 confirmed findings, **7 are corpus/DPO territory**
+> — the pack over-declares what we collect and omits processors we use — and belong to the owner, not
+> engineering. The two with engineering in them are: build the **analytics opt-out** `/privacy`
+> advertises and does not have, and either build the **30-day deletion grace** the pack promises or
+> stop declaring it (today it is ~24h and deletion anonymises rather than erases, which is correct
+> and merely misdescribed). **Read the verdicts before picking anything up — one finding was
+> reclassified as an owner decision and must NOT be "fixed".**
 
 ---
 

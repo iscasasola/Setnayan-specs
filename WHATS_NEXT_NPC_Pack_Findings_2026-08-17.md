@@ -1,6 +1,22 @@
 # WHAT'S NEXT — 15 unverified NPC-pack findings · 2026-08-17
 
-> **STATE: the verification did NOT run.** A fan-out of 8 verifiers + 1 synthesis agent was
+> # ✅ SUPERSEDED 2026-08-24 — THE VERIFICATION HAS NOW RUN. DO NOT RE-RUN IT.
+>
+> **All 13 findings in this file are dispatched in
+> [`NPC_Pack_Findings_VERIFIED_2026-08-24.md`](NPC_Pack_Findings_VERIFIED_2026-08-24.md)** —
+> 9 confirmed · 2 refuted · 1 reclassified as an owner decision · 1 deliberately withheld.
+> Checked against shipped code, the live production database and the pack PDFs.
+>
+> ⚠ **The "15" in this title is a counting error in this file** — its own table lists 13, and the
+> other seven were already closed in its "do NOT re-investigate" section.
+>
+> 🛠 **Some of them are already FIXED**, not merely verified: #14's face-blur veto shipped as PR
+> #4747 and #4749 on 2026-08-24. **Read the verified doc before acting on anything below**, or you
+> will rebuild work that has merged.
+>
+> **Everything under this banner is the state on 2026-08-17 and is kept as history.**
+
+> **STATE (2026-08-17): the verification did NOT run.** A fan-out of 8 verifiers + 1 synthesis agent was
 > launched and **all 9 failed on a session usage limit** (resets 21:50 Asia/Manila). It returned
 > `total: 0, confirmed: 0`.
 >
