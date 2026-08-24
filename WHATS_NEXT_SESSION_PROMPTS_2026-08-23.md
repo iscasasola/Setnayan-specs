@@ -30,7 +30,7 @@ not have to answer anything mid-session.**
 | ~~W3-C · A wake is not a celebration~~ | 🛑 **SUPERSEDED** — merged into W4-WORDS | — | — | — |
 | ~~W4-B · Sixty-three supplier screens~~ | ✅ **DONE** 08-24 · 6 PRs (#4772–#4779) | — | — | 4 |
 | ~~W4-C · Shut the doors nobody uses~~ | ✅ **DONE** 08-24 · 27 more grants closed, 2 views pinned | Opus 5 | xhigh | 4 |
-| **W4-ADMIN · The admin console, one shape** *(was W2-C2)* | ▶ **NOT STARTED** — ⚠ **108** routes now, not the 95 in its title | Opus 5 | high | 4 |
+| ~~W4-ADMIN · The admin console, one shape~~ | ✅ **DONE** 08-24 · 4 PRs (#4785 · #4787 · #4788 · #4789) · the header-row bill **54 → 0** | Opus 5 | high | 4 |
 | **W4-A · The four screens a couple lives in** | 🟡 **PARTLY — corrected from DONE by the session's OWN adversarial audit, 2026-08-24.** It did ~two-thirds and reported finished. HELD: nothing was rebuilt · the colour-NAME sweep is genuinely complete (53 bare uses left, all hand-verified as icons) · the overlay serif fix is real. DID NOT HOLD: 30+ raw hex values remain, several painting text · budget's three biggest numbers render in the body face while their own labels are mono, so "Paid" appears twice in two typefaces · the guests table ships EIGHT columns where the archetype specifies five and says the roster "never grows a selection column", with six fixed-width columns eating 78% of the table so names truncate to ~8 characters. 🚨 **And alaala's stage numerals paint at 2.03:1 — WORSE than the 3.37:1 gold the whole stream existed to remove — in a file it edited that day.** PR 4 in flight. | Opus 5 | medium | 4 |
 | **W4-WORDS · The words follow the occasion** | ▶ **NOT STARTED** — ⚠ its scope changed: the vocabulary is a DB table, not a lib file | Opus 5 (+ Fable for the words) | high | 4 |
 | **W5-A · A supplier's record survives a delete** | ▶ **NOT STARTED** — the most careful one | Opus 5 | **max** | 5 |
@@ -61,7 +61,7 @@ not have to answer anything mid-session.**
 > ⚠ **AND THIS TABLE IS A SUMMARY AND SUMMARIES GO STALE FIRST.** It disagreed with the section
 > markers below for several hours on 2026-08-24 — the same read-from-the-middle failure this file
 > has already produced twice. **A session's own section is the authority; if this table disagrees
-> with it, THE SECTION WINS.** 13 done · 8 open.
+> with it, THE SECTION WINS.** 14 done · 7 open.
 
 ---
 
@@ -1324,8 +1324,72 @@ One PR. Report the occurrence count before and after; "106 → 0" is the deliver
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
 
-### W4-ADMIN · The admin console, one shape · **Opus 5 · high** — wave 4
-*(was **W4-ADMIN**. Renamed 2026-08-24: a wave-4 session whose name began "W2" read as wave 2 and misled the owner. **A name that contradicts its position is a trap, not a label.**)*
+### ✅ W4-ADMIN · The admin console, one shape — **DONE 2026-08-24. DO NOT RUN THIS SECTION.**
+
+> **4 PRs, stacked in this order: [#4785](https://github.com/iscasasola/setnayan-platform/pull/4785)
+> (merged 10:06Z, verified) · [#4787](https://github.com/iscasasola/setnayan-platform/pull/4787) ·
+> [#4788](https://github.com/iscasasola/setnayan-platform/pull/4788) ·
+> [#4789](https://github.com/iscasasola/setnayan-platform/pull/4789).** Full row:
+> `DECISION_LOG.md` 2026-08-24.
+> ⚠ **VERIFY BEFORE TRUSTING THIS LINE** —
+> `gh pr view 4785 4787 4788 4789 -R iscasasola/setnayan-platform --json number,state,mergedAt`.
+> This corpus has been wrong about a PR's state three separate times.
+>
+> 📏 **THE PROMPT BELOW WAS STALE ON TWO OF ITS THREE PREMISES, AND MEASURING SAID SO IN MINUTES.**
+> It asks to converge **"33 raw tables"** — measured, **6 occurrences in 4 files**: `ConsoleTable`
+> shipped 2026-08-17, 33 surfaces are converted, the bill is down to **2 deliberate permanent
+> residents**. It asks to finish a gold sweep — measured, **0 offenders** by the guard's own regex
+> (W2-C1 closed it). It says ~95 routes; there are **108**. **Nothing in either half was rebuilt.**
+>
+> 🔑 **WHAT WAS ACTUALLY LEFT WAS THE PAGE-HEADER ROW, AND WHY IT SURVIVED IS THE LESSON.** The
+> owner-locked app-wide sweep of 2026-08-21 (PRs #4664 + #4669, rungs three and four of one
+> complaint that began 2026-07-21) touched 133 files and was recorded as *"gone app-wide"* — **but
+> it could only reach pages that were already `PageMasthead` call sites.** A page that hand-rolled
+> `<header><h1>Title</h1><p>lede</p></header>` was invisible to it. Measured on `origin/main` @
+> `c65c64e77`: **54 files under `app/admin` still drew a visible `<h1>`**, in eight different type
+> treatments. **Bill now 0.**
+>
+> ⚖ **THE LEDES WERE JUDGED ONE AT A TIME, NOT SWEPT.** Rung four's rule is that a sentence a
+> person needs in order to USE a page goes IN the page, beside what it governs. Orientation deleted;
+> about twenty kept and **pinned by the guard**, each the only warning on its screen — *"these are
+> not BIR ORs"* · *"Deleting is permanent and there is no undo"* over strangers' government IDs ·
+> *"Setnayan staff don't read chats"* · *"7-day auto-resolution timer"* · *"detect-and-review only …
+> never touches the image"*.
+>
+> 🖨 **ONE PAGE IS AN EXEMPTION, NOT A CONVERSION — `/admin/compliance/data-sheet`.** It is the one
+> admin screen that is a **document**: its own copy says *"copy or print this to file with the
+> National Privacy Commission"*, and `sr-only` is `position:absolute` + `clip`, **which does not
+> print**. Converting it would have handed the owner an NPC filing with no heading on it.
+> 🔑 **EIGHT RECORD PAGES WERE PORTED THE OTHER WAY** — on a record page the heading is a person's
+> name, a shop's name, a flag's reference. That is the CONTENT, and hiding it is deleting DATA
+> rather than chrome, so the visible line is unchanged and only its element moves to `<p>`.
+>
+> 🪤 **THREE OF THE NEW GUARD'S OWN PINS WERE DECORATIVE AND ONLY THE MUTATION RUN SAID SO** — the
+> pinned phrases occur MORE THAN ONCE in their own file (`chat-flags` repeats one on every row;
+> "starter content" appears **six** times), so deleting the lede left a second occurrence standing
+> and the guard reported GREEN at 2→1 and 3→2. Both rules now require **exactly one** occurrence,
+> which fails in both directions. **Assume a seventh decorative guard.**
+> 🔒 **AND TWO MASTHEAD GUARDS ALREADY EXISTED THAT COULD NOT SEE ANY OF THIS** — one polices the
+> COMPONENT, the other a `.sn-eye` inside a `<header>`, and **not one of that guard's 15 baselined
+> files is an admin file.** *A defect can live in the seam between two correct guards.*
+>
+> 🗑 **`MobileLandingAccordion` deleted** — built 2026-06-08 to replace the flat grid, **never
+> mounted, zero importers for eleven weeks**, superseded when the grid itself gained grouping,
+> search and a desktop width. The port-control baseline was regenerated and set-compared across all
+> 404 routes: **exactly one loss, zero unintended.**
+>
+> ⚠ **NAMED, NOT FIXED:** `/admin/subscriptions` still promises that confirming a payment *"grants
+> the bundled tokens"* and renders an *"incl. N tokens"* pill — the token currency was retired
+> 2026-08-07. Kept **verbatim** on purpose; changing what a screen claims about money is a change,
+> not a refactor, and it needs the confirm action read out of production first.
+> ⏭ **AND THE SAME DEBT EXISTS OUTSIDE THIS TREE — 65 more files under `app/dashboard` and
+> `app/vendor-dashboard` still draw a visible page title.** Out of W4-ADMIN's territory, named in
+> the guard's docblock so a green admin run is never read as "the app is done". **That is the
+> obvious next slice, and it is its own session.**
+
+<details><summary>The original prompt, kept for the record</summary>
+
+*(was **W2-C2**. Renamed 2026-08-24: a wave-4 session whose name began "W2" read as wave 2 and misled the owner. **A name that contradicts its position is a trap, not a label.**)*
 
 ```
 ✅ W2-C1's SWEEP HAS MERGED (PR #4738, 2026-08-23) — you are clear. Same territory:
@@ -1355,6 +1419,8 @@ wave and nothing customer-facing depends on it.
 
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
+
+</details>
 
 ---
 
