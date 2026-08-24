@@ -15,26 +15,34 @@ the session finishes its whole list, decides its own way past blocked checks and
 reports once at the end. It stops only at an item explicitly marked OWNER DECISION. **You should
 not have to answer anything mid-session.**
 
-| session | model | effort | wave |
-|---|---|---|---|
-| W0 · PR triage and land | Opus 5 | high | 0 — alone |
-| W1-A · A finished event tells the truth | Opus 5 | medium | 1 |
-| W1-B · Retire Pabati, let the buy pages sell | Opus 5 | **xhigh** | 1 |
-| W1-C · Make the paperwork true | Sonnet 5 | medium | 1 |
-| W2-A · A guest can keep their code | Opus 5 | high | 2 |
-| W2-B · Delete what we said we would delete | Opus 5 | **xhigh** | 2 |
-| W2-C1 · The gold nobody can read | Sonnet 5 | medium | 2 |
-| W2-C2 · Ninety-five admin routes, one shape | Opus 5 | high | 2 (after C1) |
-| ~~W3-A · "You have none" must mean none~~ ✅ **DONE 2026-08-24** | Opus 5 | high | 3 |
-| ✅ W3-B · A supplier's card earns its keep — **DONE 2026-08-24, 4 PRs** | Opus 5 | high | 4 |
-| W3-C · A wake is not a celebration | Opus 5 (+ Fable for the words) | high | 3 |
-| W4-A · The four screens a couple lives in | Opus 5 → Sonnet 5 | medium | 4 |
-| ✅ W4-B · Sixty-three supplier screens — DONE 2026-08-24 (6 PRs #4772–#4779, all merged) | — | — | — |
-| ✅ W4-C · Shut the doors nobody uses — DONE 2026-08-24 | Opus 5 | **xhigh** | 4 |
-| W5-A · A supplier's record survives a delete | Opus 5 | **max** | 5 |
-| W5-B · The surfaces nobody drew | Fable → Opus 5 | medium | 5 |
-| W5-C · Who is in my event? | Opus 5 | medium | 5 |
-| W6 · The grab-bag, verified first | Fable → Sonnet 5 | medium | 6 — alone |
+| session | state | model | effort | wave |
+|---|---|---|---|---|
+| ~~W0 · PR triage and land~~ | ✅ **DONE** 08-23 · 6 landed, 1 closed | Opus 5 | high | 0 |
+| ~~W1-A · A finished event tells the truth~~ | ✅ **DONE** 08-23 · 7 PRs | Opus 5 | medium | 1 |
+| ~~W1-B · Retire Pabati, let the buy pages sell~~ | ✅ **DONE** 08-23 · 4 PRs, verified by the object | Opus 5 | xhigh | 1 |
+| ~~W1-C · Make the paperwork true~~ | ✅ **DONE** 08-23 | Sonnet 5 | medium | 1 |
+| ~~W2-A · A guest can keep their code~~ | ✅ **DONE** 08-24 · ⏭ C7/C8 moved to W6 | Opus 5 | high | 2 |
+| ~~W2-B · Delete what we said we would delete~~ | ✅ **DONE** 08-24 · both jobs registered | Opus 5 | xhigh | 2 |
+| ~~W2-C1 · The gold nobody can read~~ | ✅ **DONE** 08-23 · 207 → 150 | Sonnet 5 | medium | 2 |
+| ~~W3-A · "You have none" must mean none~~ | ✅ **DONE** 08-24 · 5 PRs — reported complete TWICE before it was | Opus 5 | high | 3 |
+| ~~W3-B · A supplier's card earns its keep~~ | ✅ **DONE** 08-24 · 4 PRs | Opus 5 | high | 3 |
+| ~~W3-D · The guest page's design set~~ | ✅ **DONE** 08-24 | Opus 5 | medium | 3 |
+| ~~W3-C · A wake is not a celebration~~ | 🛑 **SUPERSEDED** — merged into W4-WORDS | — | — | — |
+| ~~W4-B · Sixty-three supplier screens~~ | ✅ **DONE** 08-24 · 6 PRs (#4772–#4779) | — | — | 4 |
+| ~~W4-C · Shut the doors nobody uses~~ | ✅ **DONE** 08-24 · 27 more grants closed, 2 views pinned | Opus 5 | xhigh | 4 |
+| **W2-C2 · Ninety-five admin routes, one shape** | ⏭ **OPEN** — ⚠ it is **108** routes now, not 95 | Opus 5 | high | 4 |
+| **W4-A · The four screens a couple lives in** | ⏭ **OPEN** — measure first, eroded twice over | Opus 5 → Sonnet 5 | medium | 4 |
+| **W4-WORDS · The words follow the occasion** | ⏭ **OPEN** — ⚠ its scope changed: the vocabulary is a DB table, not a lib file | Opus 5 (+ Fable for the words) | high | 4 |
+| **W5-A · A supplier's record survives a delete** | ⏭ **OPEN** — the most careful one | Opus 5 | **max** | 5 |
+| **W5-B · The surfaces nobody drew** | ⏭ **OPEN** — re-scope first | Fable → Opus 5 | medium | 5 |
+| **W5-C · Who is in my event?** | ⏭ **OPEN** | Opus 5 | medium | 5 |
+| **W6 · The grab-bag, verified first** | ⏭ **OPEN** — carries the orphans from waves 0–3 | Fable → Sonnet 5 | medium | 6 · alone |
+| **W8 · Guests can see who else is coming** | ⏭ **OPEN** — owner-ruled 08-23 | Opus 5 | high | 8 · alone |
+
+> ⚠ **THIS TABLE IS A SUMMARY AND SUMMARIES GO STALE FIRST.** It disagreed with the section
+> markers below for several hours on 2026-08-24 — the same read-from-the-middle failure this file
+> has already produced twice. **A session's own section is the authority; if this table disagrees
+> with it, THE SECTION WINS.** 13 done · 8 open.
 
 ---
 
