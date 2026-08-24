@@ -70,30 +70,77 @@ already ship, and produce errors.** The fix is this block. Keep it CURRENT — o
 stream, deleted or replaced when it finishes. If you finish a stream, update this block.
 
 > ### ✅ DONE 2026-08-24 — W4-A: THE FOUR SCREENS A COUPLE LIVES IN — do NOT rebuild any of it
-> **3 PRs, all merged:** [#4771](https://github.com/iscasasola/setnayan-platform/pull/4771) ·
+> **FOUR PRs, all merged and LIVE:** [#4771](https://github.com/iscasasola/setnayan-platform/pull/4771) ·
 > [#4780](https://github.com/iscasasola/setnayan-platform/pull/4780) ·
-> [#4782](https://github.com/iscasasola/setnayan-platform/pull/4782). Full row: `DECISION_LOG.md` 2026-08-24.
-> 🔑 **MEASURED FIRST, AND STRUCTURE ALREADY MATCHED ON ALL FOUR — nothing was redrawn.** Guests
-> matches the Roster archetype since its 2026-08-22 rework; the vendors LIST is claimed by NO
-> archetype (only `vendors/[vendor]` → Detail) and stays under its own locked 2026-05-31 spec;
-> budget already speaks the Ledger register; **alaala is the memory-arc PILLAR page (owner
-> 2026-06-15), not the gallery — the Gallery archetype's dashboard subject is `galleries/`,
-> untouched and unclaimed by any wave.** The REAL delta was colour/typography register: 46
-> gold-as-text sites → `terracotta-700`, one `-700-700` typo class that styled nothing, a gold
-> ERROR message → `danger-700`, stock-amber density badges → the gold ladder.
+> [#4782](https://github.com/iscasasola/setnayan-platform/pull/4782) ·
+> [#4791](https://github.com/iscasasola/setnayan-platform/pull/4791). Production self-reports
+> `28bb8e1` — #4791's own merge commit — so all four are SERVED, not merely merged. Rows:
+> `DECISION_LOG.md` 2026-08-24 (three of them: the stream, my correction of it, and the coordinator finding).
+>
+> 🛑 **READ THIS FIRST — I REPORTED THIS STREAM DONE AT 3 PRs AND IT WAS ~2/3 FINISHED.** An
+> adversarial audit of my OWN merged work (11 agents, every finding re-verified by hand) caught it;
+> CI and review did not. **The building was sound — nothing was rebuilt that existed — the
+> MEASURING was wrong.** 🔑 **THE ROOT CAUSE, WORTH MORE THAN THE FIXES: I swept for one SPELLING
+> of a colour (a class name), found every instance of that spelling, and reported the colour delta
+> CLOSED. These screens also paint in RAW HEX and INLINE CSS VARS, both invisible to that sweep.
+> A search that can only match one spelling is not a survey.** The worst survivor was **2.03:1 —
+> worse than the 3.37:1 gold the stream existed to remove — in a file PR 3 edited the same day**,
+> on the one screen (`alaala`) where my new guard's real coverage was **ZERO**.
+>
+> ⚖ **WHAT IS TRUE ABOUT THE STRUCTURE, CORRECTED:** guests did NOT already match — the Roster
+> archetype specifies 5 columns and says the roster *"never grows a selection column"*; shipped had
+> 8, six fixed-width eating **78%** of the table so names truncated ("Maria Vil…"). Fixed columns
+> are now **56%** and **no column was removed** (which columns exist was never ruled on, only
+> rows-not-tiles, owner 2026-06-05). Budget did NOT already speak the Ledger register — its three
+> biggest numbers render in the BODY face while their own labels are mono. ✅ Still true and
+> unchanged: the vendors LIST is claimed by NO archetype (only `vendors/[vendor]` → Detail) and
+> stays under its locked 2026-05-31 spec; **alaala is the memory-arc PILLAR page (owner
+> 2026-06-15), NOT the gallery — the Gallery archetype's dashboard subject is `galleries/`,
+> untouched and UNCLAIMED BY ANY WAVE.**
+>
+> 🎨 **What shipped:** 46+ gold-as-text sites → `terracotta-700`; a `-700-700` typo class that
+> styled NOTHING; **TWO** gold ERROR messages → `danger-700` (the second written as a hex, one file
+> from the first, found only by the audit); four search badges at 3.96–4.06:1 and two eyebrows at
+> 4.42:1 — 🔑 **gold has so little headroom it PASSES on paper and FAILS on its own tint, so the
+> repo's canonical text gold #8A6B39 is a FAIL on the #F4F2EC card**; the "coming soon" marker at
+> 3.67:1; and **a confirmation before deleting a saved plan** — a hard delete with no undo, while
+> CLEARING the rebuildable list beside it already confirmed. *The screen guarded the reversible
+> thing and not the irreversible one.*
 > 🔤 **THE VENDORS SEARCH OVERLAY'S SERIF HAD NEVER RENDERED** — `var(--font-serif,'Cormorant
 > Garamond',serif)` names a variable that exists nowhere and a family next/font never registers
 > (it hashes names), so every serif title computed the PHONE'S DEFAULT SERIF. Repointed at
 > `--font-editorial-display`. *Rejected-not-thrown, CSS edition — add "undefined CSS var" to that family.*
-> 📏 **THE INHERITED AP-2 TALLY IS ANSWERED: THE APP IS NOT FALLING BACK.** Derived from shipped
-> source (dashboards sit behind a login): body `font-sans` → `:root` → Hanken Grotesk, and
-> `.app-surface` re-pins the whole dashboard tree; 823 font-utility uses all resolve to
-> Hanken/Space Mono; the only system stacks are 3 print-only pages. **No build opened; the
-> shared-chrome typeface question (ONE_SHELL_PLAN §5.3) stays an OPEN OWNER DECISION.**
-> 🛡 Guard: `app/dashboard/[eventId]/gold-is-not-text.test.ts` — comments stripped, prefix-trap
-> lookahead, per-file bill checked BOTH directions (PRs 2/3 shrank it, live-proving direction 2),
-> mutation-tested by printed count ×4. ⚠ A first typecheck printed a FALSE GREEN through a pipe
-> (`tsc: command not found` masked by `tail`) — always print the exit code explicitly.
+> 📏 **THE INHERITED AP-2 TALLY IS ANSWERED: THE APP IS NOT FALLING BACK.** body `font-sans` →
+> `:root` → Hanken Grotesk, and `.app-surface` re-pins the whole dashboard tree; 823 font-utility
+> uses all resolve to Hanken/Space Mono; the only system stacks are 3 print-only pages. **No build
+> opened; the shared-chrome typeface question (ONE_SHELL_PLAN §5.3) stays an OPEN OWNER DECISION** —
+> the audit called that the single best judgement call in the stream. ⚠ **EVIDENCE GRADE: derived
+> from SOURCE, not from a computed style in a signed-in browser.** A real measurement would also
+> catch 2 components with private stylesheets and 6 overlays that portal OUTSIDE `.app-surface`.
+> **Do not upgrade this to "measured".**
+> 🛡 **Guard `app/dashboard/[eventId]/gold-is-not-text.test.ts` — REWRITTEN, because rev 1 was
+> decoration exactly where it mattered.** 4 rules now: the bare-gold bill (both directions), the
+> `-N-N` typo shape, **measured-below-AA values banned in ANY spelling (hex OR CSS var)**, and **an
+> inventory of alaala's literals with their ratios** — that tree has no colour classes, so a
+> banned-list only catches known failures while an inventory catches the NEXT one. 🔑 **Its file set
+> is RESOLVED FROM THE SCREENS' OWN IMPORTS, not hand-listed** (it picked up 3 shared components
+> that were invisible) — *a hand-enumerated list is a list of the files somebody thought of.*
+> ⚠ **THE ALAALA DENSITY LITERALS MUST STAY LITERALS** — the themed `terracotta-700` flips to
+> #A88340 in dark, where the white count reads **3.51:1, an AA fail**. "Just tokenize it" is the
+> obvious change and the wrong one.
+> 🪤 **THREE separate sabotages printed 0→0 — they never landed and reported CLEAN PASSES**, caught
+> only because the count is printed before → after. Plus a typecheck that printed a FALSE GREEN
+> through a pipe (`tsc: command not found` masked by `tail`) — **always print the exit code**.
+> 🔴 **OPEN OWNER DECISION, deliberately NOT built:** the desktop guest roster keeps its selection
+> column. A faithful "the avatar IS the checkbox" port LOSES what a native checkbox gives free
+> (announced state, Space to toggle, `indeterminate` on select-all, forced-colors), puts the target
+> at 36px against this repo's own 44px minimum, and silently reassigns a click that today opens the
+> guest. ⚠ **And "mobile already does it the approved way" is FALSE** — mobile SWAPS the checkbox
+> into the avatar's slot in select mode; it never makes the avatar the control, so the archetype's
+> note is implemented NOWHERE. **A design decision with an a11y cost, not a port.**
+> ⏭ **Deferred to whichever stream owns the six-state port, NOT oversights:** budget's total is not
+> pinned, its rows are not grouped by category, its cards never collapse. Individually small,
+> together a redesign of that screen.
 > ⏭ Reported, not churned: ~15 `bg-white/NN` alpha fills are visually inert on the #FFFFFF ground — debt, not defect.
 
 > ### ✅ DONE 2026-08-24 — W3-B: A SUPPLIER'S CARD EARNS ITS KEEP
