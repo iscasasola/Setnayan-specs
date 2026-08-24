@@ -42,6 +42,7 @@ not have to answer anything mid-session.**
 🚨 **THE TRAP THAT WOULD MAKE A CORRECT-LOOKING FIX A NO-OP — READ :99-100 BEFORE CHOOSING A PREDICATE.** The tail below that fallback **FAILS OPEN**: any delegate with `edit_all` and no explicit key gets `'edit'`. The file's own comment calls this *"NON-OPTIONAL, and the whole reason this function needed touching"*, and warns that adding an area without handling it *"would have silently handed the couple's guest photos to every existing delegate — including the accepted planner row live in production right now."* ⇒ **A gate written without reading that line admits exactly the delegate it exists to refuse.** | — | — | — |
 | ⭑**UNCLAIMED · 98 loading screens still draw the retired page title** | ▶ **NOT STARTED.** Belongs to the 2026-08-21 header retirement, not to any design wave. | — | — | — |
 | ⭑**UNCLAIMED · the dashboard `galleries/` surface** | ▶ **NOT STARTED — NO WAVE OWNS IT.** Surfaced by W4-A: `alaala` is the owner-directed memory-arc pillar page (2026-06-15), NOT the gallery. The Gallery archetype's dashboard subject is `galleries/`, a different surface nobody has claimed. Also unclaimed: the couple's vendors LIST route answers to no archetype by route and stays under its own locked spec. | — | — | — |
+| **SAMAHAN · the group, its stories and its chat** | 🏃 **RUNNING · integrated into this plan 2026-08-24.** 6 PRs merged (#4781 #4783 #4784 #4786 #4790), #4795 open. Owns `(account)/samahan` + `lib/communities` + its own migrations — no wave session owns those. 🔴 **Regenerates the FK-behaviour file and the exposure baseline: MUST NOT run at the same time as W5-A.** | — | — | alongside |
 | **W6 · The grab-bag, verified first** | ▶ **NOT STARTED** — carries the orphans from waves 0–3 | Fable → Sonnet 5 | medium | 6 · alone |
 | **W8 · ~~Guests can see who else is coming~~ → THE COORDINATOR CAN SEE THE GUEST LIST** | ▶ **NOT STARTED · RE-SCOPED 08-24 — the owner REVERSED his earlier yes.** *"no. only the owner of the event and coordinator (by request)."* ⛔ Nothing is published to guests. The accepted-only rule, the K-floor and the per-event switch **all fall away — do not build them.** It is now an ACCESS GRANT: the host already sees the list; a coordinator sees it ON REQUEST. Much smaller, and no longer a privacy disclosure. | Opus 5 | medium | 8 · alone |
 
@@ -55,13 +56,24 @@ not have to answer anything mid-session.**
 > 🔑 **OWNERSHIP IS DECIDED BY THE FILES A COMMIT TOUCHES, NEVER BY ITS TITLE.** Same class as
 > reading a PR title as evidence a session had started, which I also did today.
 >
-> ⛔ **SAMAHAN IS NOT TRACKED HERE — owner, 2026-08-24. It is built in its own stream and this
-> register does not follow it.** One operational constraint survives, and only because it is
-> invisible to a territory check: it regenerates
-> `apps/web/tests/db/user-fk-behaviour.generated.txt`, which is **W5-A's entire subject**. **Do not
-> run W5-A while a Samahan migration is in flight** — whoever regenerates last wins and the loser's
-> change vanishes in a merge that reports no conflict. Same for the exposure baseline (W8) if both
-> move at once. **That is the whole note. Nothing else about Samahan belongs in this file.**
+> 🔀 **SAMAHAN IS PART OF THIS PLAN AS OF 2026-08-24 — the owner integrated it.** It was running as
+> an untracked outside stream; it now follows the same rules as every wave session and gets a row.
+> **Its territory, derived from what it has actually merged rather than from a brief:**
+> `app/dashboard/(account)/samahan` · `lib/communities.ts` · `lib/samahan-stories.ts` ·
+> `lib/upload-prefix-tenancy.ts` · `app/api/profile` · its own `supabase/migrations` · its own
+> `tests/db/samahan-*` — **none of which any wave session owns.** The feature work does not collide.
+> 🔴 **BUT IT REGENERATES TWO SHARED FILES, AND THAT IS THE WHOLE REASON IT NEEDED INTEGRATING:**
+> · `apps/web/tests/db/user-fk-behaviour.generated.txt` — **W5-A's entire subject.**
+> · `supabase/security/exposure-surface.baseline.txt` — 6,230 lines; **W4-C moved it, W8 will.**
+> · it also edits `lib/erasure/coverage.ts` (W2-B's classification) and `lib/ugat/graph.ts`.
+> ⇒ **THE RULE THAT NOW BINDS BOTH SIDES: W5-A AND SAMAHAN MUST NOT RUN AT THE SAME TIME.** Whoever
+> regenerates last wins and the loser's change vanishes in a merge reporting NO CONFLICT — the
+> silent-revert shape that stopped production deploying on 2026-08-21. Check with
+> `gh pr list --state open` before starting AND before pushing.
+> 🔑 **THE GENERAL RULE THIS EARNED:** a territory check that looks only at feature folders passes
+> two streams that will overwrite each other, because **a generated file has no owner and nobody
+> thinks to claim it.** Every stream must declare which GENERATED files it regenerates, not just
+> which folders it edits.
 >
 > 🔑 **THREE STATES, NOT TWO — "OPEN" WAS AMBIGUOUS AND MISLED THE OWNER (2026-08-24).** He asked
 > why a session was "open" when one was plainly running it, and he was right: the word conflated
