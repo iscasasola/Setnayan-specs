@@ -46,7 +46,7 @@ not have to answer anything mid-session.**
 | ~~W5-D · The board tells the truth~~ | ✅ **DONE 2026-08-24 · 3 PRs (#4804 · #4805 · #4806).** All three phone findings are live: a celebrated card is **kept, not graded**, the score prints once, and the shelf stopped listing celebrations that already exist. 🔑 **#4806 did the thing worth more than the fixes — a guard that COMPARES TWO SURFACES**, the check whose absence let two of the three exist. | — | — | 5 |
 | ~~W5-E · Two surfaces nobody claimed~~ | ✅ **DONE 2026-08-25 · 2 PRs ([#4814](https://github.com/iscasasola/setnayan-platform/pull/4814) · [#4815](https://github.com/iscasasola/setnayan-platform/pull/4815)), no migration.** 🛑 **Item 1 closed on a MEASUREMENT and NOT built — the brief's premise was wrong.** The Gallery archetype's route chip is `/dashboard/[event-id]/**gallery**` (singular) and **that route does not exist**; `galleries/` is a **hub of three source rows**, and the archetype draws an obsidian photo mosaic. Not the same screen, and no other archetype draws a hub — a forced fit is worse than an unported screen. ⏭ Left as a **design** call, not a port. ✅ **Item 2 was true and shipped:** the supplier money figures wear the ledger face (*Paid* appeared twice on one screen in two typefaces), and each supplier card is now summary-first with its history on demand. ⏭ Pinning + grouping deliberately not taken, reasons in `DECISION_LOG.md` 2026-08-25. | Opus 5 | medium | 5 |
 | **W6 · The grab-bag, verified first** | ▶ **NOT STARTED** — carries the orphans from waves 0–3 | Fable → Sonnet 5 | medium | 6 · alone |
-| **W8 · ~~Guests can see who else is coming~~ → THE COORDINATOR CAN SEE THE GUEST LIST** | ▶ **NOT STARTED · RE-SCOPED 08-24 — the owner REVERSED his earlier yes.** *"no. only the owner of the event and coordinator (by request)."* ⛔ Nothing is published to guests. The accepted-only rule, the K-floor and the per-event switch **all fall away — do not build them.** It is now an ACCESS GRANT: the host already sees the list; a coordinator sees it ON REQUEST. Much smaller, and no longer a privacy disclosure. | Opus 5 | medium | 8 · alone |
+| ~~**W8 · The coordinator can see the guest list**~~ | ✅ **DONE 2026-08-25 · 3 PRs ([#4816](https://github.com/iscasasola/setnayan-platform/pull/4816) merged + **prod-verified by the object** · [#4817](https://github.com/iscasasola/setnayan-platform/pull/4817) · [#4818](https://github.com/iscasasola/setnayan-platform/pull/4818)).** RULE 0 turned it into a permission fix, not a screen: the ask, the host's line-by-line answer and the roster all already shipped. What was wrong is that **the resolver undid the answer the host gives** — an unnamed area inherited the legacy edit_all flag, so a planner granted the seat plan alone held the guest list too — and the read policy never asked which areas were granted while its write twin always had. **Closing one of two doors closes nothing:** a second policy admits coordinator MEMBERS, and every accepted delegate is one. Also: the "by request" half could only be reached on the event day. Full row: `DECISION_LOG.md` 2026-08-25. | Opus 5 | medium | 8 · alone |
 
 > 🛑 **AND I MISATTRIBUTED A COMMIT BY READING ITS TITLE INSTEAD OF ITS FILES (2026-08-24).** I told
 > W4-A that "the supplier screens stop writing in below-AA gold" was W4-B's work and that its own
@@ -66,7 +66,7 @@ not have to answer anything mid-session.**
 > `tests/db/samahan-*` — **none of which any wave session owns.** The feature work does not collide.
 > 🔴 **BUT IT REGENERATES TWO SHARED FILES, AND THAT IS THE WHOLE REASON IT NEEDED INTEGRATING:**
 > · `apps/web/tests/db/user-fk-behaviour.generated.txt` — **W5-A's entire subject.**
-> · `supabase/security/exposure-surface.baseline.txt` — 6,230 lines; **W4-C moved it, W8 will.**
+> · `supabase/security/exposure-surface.baseline.txt` — 6,209 lines; **W4-C moved it, and W8 did on 2026-08-25 (2 lines, both narrowings).**
 > · it also edits `lib/erasure/coverage.ts` (W2-B's classification) and `lib/ugat/graph.ts`.
 > ⇒ **THE RULE THAT NOW BINDS BOTH SIDES: W5-A AND SAMAHAN MUST NOT RUN AT THE SAME TIME.** Whoever
 > regenerates last wins and the loser's change vanishes in a merge reporting NO CONFLICT — the
@@ -285,7 +285,7 @@ event-words provider).
 | **5** | **W4-A** the couple's four daily screens · **W5-C** who is in my event + drafted invitation words · **W4-C** grant hardening | W4-C |
 | **6** | **W5-A** a supplier's record survives a delete · **W5-B** the undrawn surfaces | W5-A |
 | **7** | **W6** the grab-bag, ALONE | per finding |
-| **8** | ⭑**W8** guests can see who else is coming, ALONE — owner-ruled 2026-08-23 | W8 |
+| **8** | ~~⭑**W8** guests can see who else is coming~~ → **the coordinator can, by request** · ✅ DONE 2026-08-25 | W8 |
 
 ### The two structural changes, and why
 
@@ -434,7 +434,7 @@ TWO THAT CHANGED OUTCOMES:**
 | 6 | **H-6 weather — yes, scoped:** inside ~10 days only · coordinates required · **silent on any failure, no placeholder and no apology** · server-side | **W3-D** ⛔ **with a STOP CONDITION, see below** |
 | 7 | **Our wordmark on a shared card → ONCE** (three today) | 🟢 **DISSOLVES INTO H-3** — same file, no new slice |
 | 8 | **One event card on phone and laptop — yes, but SEQUENCED LAST**, after the small dashboard items land | **W1-A**, final PR, on its own |
-| 9 | **Guests can see the guest list** — default off, host chooses per event, accepted-only | ✅ **OWNER RULED IT HIMSELF, 2026-08-23 — "Yes, as scoped". NOW W8, its own wave.** |
+| 9 | ~~**Guests can see the guest list**~~ → **the COORDINATOR can, by request** | ✅ **REVERSED by the owner 2026-08-24 ("no. only the owner of the event and coordinator (by request)"), then BUILT 2026-08-25 as W8 — 3 PRs. Nothing is published to guests.** |
 
 ⛔ **#6 CARRIES A HARD STOP, NOT A PREFERENCE. FREE-TIER SOURCE ONLY.** If the only workable
 forecast provider charges anything, **that session STOPS and asks.** The deciding session has not
@@ -460,6 +460,30 @@ owner ruling** and carries the weight of one. The shape he approved:
 📋 **The grounds, recorded so nobody re-derives them:** the locked position says *"surfaces show
 presence… only the graph shows relationships, and the graph never talks"* — and that lock **names an
 event guest list as container membership, the explicitly permitted case**, not graph traversal.
+
+### ✅ ~~W8 · The coordinator can see the guest list~~ · **DONE 2026-08-25 — DO NOT RUN THIS AGAIN**
+
+> ✅ **SHIPPED as three PRs: [#4816](https://github.com/iscasasola/setnayan-platform/pull/4816)
+> (merged, migration **verified applied in prod BY THE OBJECT** — the live external planner now
+> resolves `seat_plan=view` and nothing else, where an hour earlier she held view on six areas) ·
+> [#4817](https://github.com/iscasasola/setnayan-platform/pull/4817) ·
+> [#4818](https://github.com/iscasasola/setnayan-platform/pull/4818).**
+> 🔑 **RULE 0 WAS THE WHOLE FIRST HALF AND IT PAID — this was a permission fix, not a screen.**
+> The roster (#4803), the ask, the host's line-by-line answer and the nine `moderator_area_level`
+> call sites all already shipped, exactly as the brief allowed for. The defect was that **the
+> resolver undid the answer the host gives**: an area an `areas` map did not name inherited the
+> legacy `edit_all` flag. And the read policy never asked which areas were granted while its
+> **write twin always had**.
+> 🚨 **Closing one of two doors closes nothing** — a second policy admits coordinator MEMBERS, and
+> a trigger makes every accepted delegate one. Narrowing the obvious policy alone would have
+> changed nothing and looked complete.
+> ⏱ **The "by request" half could only be reached ON THE EVENT DAY** — the ask was mounted only in
+> the live floor console, which redirects unless the booking is dated today.
+> Full row: `DECISION_LOG.md` 2026-08-25.
+> ⏭ **Open, and NOT an oversight of this session:** the moderator read policies on the seat plan,
+> schedule, suppliers and floor plan still admit any delegate. The owner ruled on the guest list;
+> those four are his call.
+> **The brief below is kept as history. Do not execute it.**
 
 ### ⭑ W8 · The coordinator can see the guest list · **Opus 5 · medium** — runs alongside W5-E
 
