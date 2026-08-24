@@ -174,7 +174,7 @@ table plus `chat_threads` reads, against the event-type tables.
 | session | carries | migration |
 |---|---|---|
 | **W5-A · Vendor data survives a delete** (measure first) | DEL-2 — reviews, money and quotes already land; the rest of the 153-FK classification is **mapped-but-unverified** and `vendor_activity_stats` still recomputes downward | **YES**, sole migration writer |
-| **W5-B · Undrawn surfaces** (measure first) | S7 — explore, tour, papic, onboarding. **Re-scope first:** the marketplace moved inside the event on 2026-08-22 | no |
+| ✅ **W5-B · Undrawn surfaces — DONE 2026-08-24 (re-scoped small: nearly all already drawn; delta = two tour handles, PRs #4798/#4797)** | S7 — explore, tour, papic, onboarding all measured drawn/shipped; /tour palette port flagged as its own future unit | no |
 | **W5-C · Small sweeps** | S11 roster half + the coordinator "Edit this site" dead end + WL-b (a host sees WHO holds a camera, not "Phone joined") | maybe |
 
 ### WAVE 6 — tail (one session)
@@ -236,7 +236,7 @@ by how many files it touches.**
 | W4-A / W4-B · design ports | **Opus 5 medium** for the first screen (it sets the pattern) · **Sonnet 5 medium** for the repeats | medium | The archetypes are binding; a delta is a defect in the port, not a design decision. |
 | ✅ W4-C · Grant hardening — DONE 2026-08-24 | **Opus 5** | **xhigh** | Grants and RLS fail silently at runtime and are green in every test. |
 | W5-A · Vendor data survives a delete | **Opus 5** | **max** | 152 of 162 FKs cascade, the classification's own adversarial check died at 31 of 71 agents, and being wrong destroys a supplier's record permanently. |
-| W5-B · Undrawn surfaces | **Fable** to re-scope · **Opus 5** medium to build | medium | Its scope genuinely moved last week. |
+| ✅ W5-B · Undrawn surfaces — DONE 2026-08-24 | **Fable** re-scoped and built (delta was small) | medium | Nearly all of it was already drawn. |
 | W5-C · Small sweeps | **Opus 5** | medium | |
 | W6 · grab-bag | **Fable** to verify · **Sonnet 5** medium to fix | medium | Most of it is expected to be already done. |
 
