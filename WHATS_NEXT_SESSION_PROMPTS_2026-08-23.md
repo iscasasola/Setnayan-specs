@@ -466,39 +466,55 @@ honest answer.
 ⏭ **It may swap with W6 (the grab-bag) if the owner wants it sooner — both run alone.**
 
 ```
-Guests can see who else is coming. The owner ruled this himself on 2026-08-23: "Yes, as scoped."
+🛑 **THIS SESSION WAS REVERSED BY THE OWNER ON 2026-08-24 AND THE BLOCK YOU ARE READING WAS REWRITTEN
+ON 2026-08-25. IT IS NOT "GUESTS CAN SEE WHO ELSE IS COMING".**
 
-THE SHAPE HE APPROVED, and none of it is yours to adjust:
-- OFF by default.
-- The HOST chooses, PER EVENT. Not global, not ours.
-- ONLY people who have ACCEPTED. NEVER invited-but-unanswered.
-  🔒 THE REASONING IS THE RULING, so protect it in code and in copy: being invited is the HOST's
-  choice about you; accepting is YOUR OWN. Publishing non-responses imposes a social cost on
-  GUESTS rather than on the host. If your implementation makes a non-response inferable — a count
-  that differs from the list, a gap in numbering, a "12 invited" anywhere near "8 coming" — YOU
-  HAVE BROKEN THE RULING even though the list itself is correct.
+He ruled "Yes, as scoped" on 2026-08-23 when asked directly. Re-reading the list the next day he
+said, verbatim: **"no. only the owner of the event and coordinator (by request)."** The later answer
+governs. Both are in DECISION_LOG because a ruling re-stated differently is the owner changing his
+mind, not a contradiction to resolve quietly.
 
-THE GROUNDS, so you do not re-derive them: the locked position is "surfaces show presence… only the
-graph shows relationships, and the graph never talks", and that lock NAMES an event guest list as
-container membership — the explicitly permitted case, not graph traversal. You are inside the lock,
-not bending it.
+⛔ **EVERYTHING THE OLD BRIEF SPECIFIED IS STRUCK. DO NOT BUILD ANY OF IT:** no guest-facing list ·
+no accepted-only filter · no per-event switch · no K-floor · no "12 invited near 8 coming" concern.
+**Nothing is published to guests at all.** If you find yourself writing a guest-visible list, you
+are building the reversed feature.
 
-BEFORE YOU BUILD — RULE 0, and this product has burned a session on exactly this shape before:
-grep for who already reads the guest list on a guest surface. A seat-finder, a table view, a
-check-in screen or the "find my table" page may already show guest names to guests in some phase,
-in which case your job is a CONTROL over something that exists, not a new disclosure. Report what
-you find before writing a migration.
+**WHAT IT IS NOW — an ACCESS GRANT, not a disclosure:**
+1. The HOST already sees the guest list. **Verify that and change nothing about it.**
+2. A COORDINATOR sees it **ON REQUEST** — the request being the point. Not automatic, not by virtue
+   of being a coordinator.
 
-THE DATABASE IS THE CONTROL, NEVER THE COMPONENT. Hiding the list in the UI while the rows remain
-readable is not a privacy feature — the anon key is public by construction and every public table
-is served over the REST API. The RLS policy is what decides this. Assert the refusal from an
-anonymous client, not from the screen.
-⚠ AND RLS ENABLED WITH NO POLICY READS EMPTY, SILENTLY — 22 prod tables are already in that state.
-A guest list that renders blank because you closed it too far looks identical to one that is
-switched off. Distinguish them.
+🔑 **RULE 0 IS THE WHOLE FIRST HALF OF THIS SESSION, and the ground has moved twice under it:**
+ · `/dashboard/[eventId]` gained **one screen answering "who is in my event"** on 2026-08-24
+   (#4803). **Read it first — your work may be a permission on a screen that now exists**, not a
+   screen.
+ · An **access-request mechanism already ships**: `app/dashboard/[eventId]/access-requests/actions.ts`
+   exists and its own comment says it *"reads through `moderator_area_level`. Nothing new decides
+   access."* **That is very likely your "on request" half, already built.**
+ · `moderator_area_level(p_event_id, p_area)` is **called correctly in nine files**. If the guest
+   list needs an area, **copy a working call site — do not invent one.**
+ ⇒ **Report what already exists before writing a migration.** It is entirely possible this session
+   is a call site and a screen state, with no schema at all.
 
-MIGRATION: yes — a per-event setting plus the read policy. You are the only session running.
-2 PRs: the setting and the policy, then the guest-facing surface.
+🚨 **AND READ `lib/delegate-areas.ts` :99-100 BEFORE CHOOSING ANY PREDICATE.** The tail there
+**FAILS OPEN**: a delegate with `edit_all` and no explicit key gets `'edit'`. Its own comment warns
+this would have *"silently handed the couple's guest photos to every existing delegate."* A gate
+written without reading it admits exactly the delegate it exists to refuse.
+
+⚠ **SCHEDULING:** you and the **Samahan** stream both regenerate
+`supabase/security/exposure-surface.baseline.txt`. **Confirm no Samahan PR is open before you start
+and again before you push** (`gh pr list --state open | grep -i samahan`) — whoever regenerates last
+wins and the loser's change vanishes in a merge reporting NO CONFLICT.
+
+**THE DATABASE IS THE CONTROL, NEVER THE COMPONENT.** Hiding a list in the UI while the rows stay
+readable is not a privacy feature — the anon key is public and every public table is served over
+the REST API. Assert any refusal from an anonymous client, not from the screen.
+⚠ **RLS ENABLED WITH NO POLICY READS EMPTY, SILENTLY** — 22 prod tables are already in that state.
+A list that renders blank because you closed it too far looks identical to one that is switched
+off. Distinguish them.
+
+MIGRATION: **decide, do not assume.** If the access-request mechanism and `moderator_area_level`
+already carry this, there may be none. 1–2 PRs.
 
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
