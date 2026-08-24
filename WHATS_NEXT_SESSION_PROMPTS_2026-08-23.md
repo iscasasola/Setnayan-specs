@@ -1279,6 +1279,14 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 
 ### 🛑 W3-A · "You have none" must mean none — **DONE 2026-08-24. DO NOT RUN THIS SECTION.**
 
+> ⚠ **IT TOOK FOUR PRs, NOT THREE — the first three were reported as complete and were not.**
+> The guard could not see `const [{ data: a }, { data: b }] = await Promise.all([…])`, and **72
+> unbound reads sat inside that shape** while it reported the tree clean. PR
+> [#4756](https://github.com/iscasasola/setnayan-platform/pull/4756) closes it, and with it the
+> *"fail toward the caveat"* requirement — five composed screens (check-in desk · souvenir table ·
+> who runs this event · walkthrough · photo moderation) now say when part of them is missing.
+> 🔑 **A stream is finished when its REQUIREMENTS are met, not when its PRs merge.**
+>
 > ✅ **3 PRs, ALL MERGED: [#4746](https://github.com/iscasasola/setnayan-platform/pull/4746) ·
 > [#4751](https://github.com/iscasasola/setnayan-platform/pull/4751) ·
 > [#4752](https://github.com/iscasasola/setnayan-platform/pull/4752). Full row:

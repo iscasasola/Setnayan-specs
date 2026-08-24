@@ -12,15 +12,25 @@ the regenerated pack PDFs in `apps/web/assets/npc-docs/` — never against anoth
 
 | verdict | count | findings |
 |---|---|---|
-| 🔴 **CONFIRMED** | **9** | 6 · 8 · 9 · 10 · 11 · 12 · 13 · **14** · 16 |
-
-⚠ **#14 was retracted and then RE-CONFIRMED on 2026-08-24.** The retraction was my error, caught the
-same hour by reading the live read path instead of the writer. It is confirmed: withdrawal **hides**
-the photo rather than blurring it, which is the behaviour owner ruling 2 explicitly ruled against.
-The flip-flop is written up under #14 because the method that settled it generalises.
+| 🔴 **CONFIRMED** | **9** | 6 · 8 · 9 · 10 · 11 · 12 · 13 · **14 (since FIXED — see below)** · 16 |
 | ✅ **REFUTED** | 2 | 19 · 20 |
 | ⚖ **RECLASSIFIED — owner decision, not a defect** | 1 | 17 |
 | ⏭ **UNRESOLVED** | 1 | 15 |
+
+⚠ **#14 was retracted and then RE-CONFIRMED the same day.** The retraction was my error, caught
+within the hour by reading the live read path instead of the writer. Confirmed: withdrawal **hid**
+the photo rather than blurring it — the behaviour owner ruling 2 explicitly ruled against. The
+flip-flop is written up under #14 because the method that settled it generalises.
+
+✅ **AND #14 IS NOW FIXED — do not re-open it.** PR
+[#4747](https://github.com/iscasasola/setnayan-platform/pull/4747), merged and **verified applied in
+production by the object** (`pg_get_functiondef` on both wall functions): withdrawal now requires a
+baked blur derivative exactly as FaceBlock does, so the photo is blurred and kept instead of vetoed.
+Fail-closed is preserved — un-baked is still withheld. **The pack sentence *"withdrawal triggers
+face-blur in captures"* is therefore TRUE as of 2026-08-24**, having been false since it was written.
+Rulings 3 and 4 shipped alongside it in
+[#4749](https://github.com/iscasasola/setnayan-platform/pull/4749). **Ruling 1 — blur on the public
+event page and shared pool — is scoped and NOT built** (`DECISION_LOG.md` 2026-08-24).
 
 ⚠ **The source doc says "THE 15 STILL UNVERIFIED" and its table lists 13.** All 13 are dispatched
 above. The missing two are a counting error in that header, not two lost findings — findings 1–5,
@@ -138,7 +148,13 @@ Measured: every form control on the profile page is `display_name` · `phone` ·
 
 **This is a right we advertise on a live public page and do not provide.**
 
-### #14 · Withdrawing consent HIDES the photo. It does not blur it. — CONFIRMED
+### #14 · Withdrawing consent HID the photo instead of blurring it — CONFIRMED, and ✅ FIXED 2026-08-24
+
+> ✅ **FIXED THE SAME DAY — PR [#4747](https://github.com/iscasasola/setnayan-platform/pull/4747),
+> merged and verified applied in production by the object. Do NOT re-open this.** Everything below
+> describes the state BEFORE that fix and is kept because the method that settled it generalises.
+> Withdrawal now requires a baked blur derivative exactly as FaceBlock does — blurred and kept, not
+> vetoed — with fail-closed preserved. **This section is history, not a live defect.**
 **Evidence.** Privacy Manual §7: *"…can withdraw at any time via a 'Photo Consent' toggle;
 **withdrawal triggers face-blur in captures** and revocation of face data."*
 
