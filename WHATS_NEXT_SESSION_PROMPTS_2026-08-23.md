@@ -1790,6 +1790,15 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 ```
 You are the ONLY migration writer in this wave. This is the most careful piece of work in the plan.
 
+🔴 **ONE SCHEDULING CONSTRAINT FROM OUTSIDE THE WAVES, AND IT IS INVISIBLE TO A TERRITORY CHECK.**
+A separate Samahan stream runs alongside this plan and is NOT tracked here — except for this: it
+regenerates `apps/web/tests/db/user-fk-behaviour.generated.txt`, the file recording what happens to
+every user-referencing column when an account is deleted. **That file is YOUR ENTIRE SUBJECT.**
+⇒ **CONFIRM NO SAMAHAN MIGRATION IS IN FLIGHT BEFORE YOU START, AND AGAIN BEFORE YOU PUSH**
+(`gh pr list --state open` and look for samahan). **Whoever regenerates it last wins, and the
+loser's change vanishes in a merge that reports NO CONFLICT.** That is the same silent-revert shape
+that stopped production deploying on 2026-08-21. If one is open, wait or coordinate — do not race it.
+
 Read VENDOR_DATA_SURVIVES_DELETION_2026-08-21.md and the owner's rules in the project CLAUDE.md
 (2026-08-21) before anything else.
 
