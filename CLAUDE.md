@@ -131,11 +131,34 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > 8, six fixed-width eating **78%** of the table so names truncated ("Maria Vil…"). Fixed columns
 > are now **56%** and **no column was removed** (which columns exist was never ruled on, only
 > rows-not-tiles, owner 2026-06-05). Budget did NOT already speak the Ledger register — its three
-> biggest numbers render in the BODY face while their own labels are mono. ✅ Still true and
-> unchanged: the vendors LIST is claimed by NO archetype (only `vendors/[vendor]` → Detail) and
-> stays under its locked 2026-05-31 spec; **alaala is the memory-arc PILLAR page (owner
-> 2026-06-15), NOT the gallery — the Gallery archetype's dashboard subject is `galleries/`,
-> untouched and UNCLAIMED BY ANY WAVE.**
+> biggest numbers render in the BODY face while their own labels are mono. ✅ **CLOSED 2026-08-25 —
+> W5-E, 5 PRs (#4814 · #4815 · #4819 · #4821 · #4822).** The typeface delta is fixed, each supplier
+> card is now summary-first with its history on demand, and the guard that pins it censuses **every
+> rendered money figure** instead of matching one component SHAPE — which is how it found a
+> right-aligned money column ("Next payments") the first pass had walked straight past. ✅ Still true
+> and unchanged: the vendors LIST is claimed by NO archetype (only `vendors/[vendor]` → Detail) and
+> stays under its locked 2026-05-31 spec.
+>
+> 🛑 **AND THE GALLERY SENTENCE THAT USED TO SIT HERE WAS WRONG — CORRECTED 2026-08-25, measured.**
+> It said *"the Gallery archetype's dashboard subject is `galleries/`, untouched and unclaimed."*
+> **`alaala` is not the gallery — and neither is `galleries/`.** What ships at `galleries/` is a
+> **hub of three source rows** (Papic · Live Studio · your own photos), one link out each; the
+> archetype draws an obsidian photo **mosaic** with a lightbox and per-tile camera credit.
+> ⚠ **AND THE TEST I FIRST CLOSED IT WITH WAS ALSO WRONG:** I ruled the archetype out because its
+> route chip `/dashboard/[event-id]/`**`gallery`** (singular) names a route that does not exist.
+> Measured: **two of its four chips name routes that never existed** (that one and
+> `/alaala/[event-id]`), so **a chip in these prototypes is a LABEL, not an address** — deciding
+> what a design governs by whether one string resolves is the one-spelling test that has already
+> cost this project twice.
+> 🔑 **THE ARCHETYPE'S REAL, SHIPPED SUBJECTS ARE THREE, AND ALL THREE ARE UNPORTED** (measured on
+> `origin/main`: **zero** occurrences of the obsidian `#17160F`, **zero** per-tile camera credit in
+> any of them): the couple's **Papic gallery grid**
+> (`studio/papic/_components/papic-gallery-grid.tsx` — the only one with a lightbox, and it is
+> clips-only), the guest **"your photos"** widget on the invitation page
+> (`app/[slug]/_components/your-photos-widget.tsx`), and the **day-of live wall card**
+> (`app/[slug]/_components/live-wall-block.tsx`). **The gallery item is NOT done.** ⏭ Whether
+> `galleries/` — a hub of links — belongs to the Gallery archetype at all is a **design/owner call**;
+> the three screens above need no ruling at all.
 >
 > 🎨 **What shipped:** 46+ gold-as-text sites → `terracotta-700`; a `-700-700` typo class that
 > styled NOTHING; **TWO** gold ERROR messages → `danger-700` (the second written as a hex, one file
