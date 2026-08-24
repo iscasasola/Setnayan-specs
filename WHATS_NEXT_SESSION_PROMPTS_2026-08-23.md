@@ -38,7 +38,7 @@ not have to answer anything mid-session.**
 | **W5-C · Who is in my event?** | ▶ **NOT STARTED** | Opus 5 | medium | 5 |
 | ⭑**UNCLAIMED · the dashboard `galleries/` surface** | ▶ **NOT STARTED — NO WAVE OWNS IT.** Surfaced by W4-A: `alaala` is the owner-directed memory-arc pillar page (2026-06-15), NOT the gallery. The Gallery archetype's dashboard subject is `galleries/`, a different surface nobody has claimed. Also unclaimed: the couple's vendors LIST route answers to no archetype by route and stays under its own locked spec. | — | — | — |
 | **W6 · The grab-bag, verified first** | ▶ **NOT STARTED** — carries the orphans from waves 0–3 | Fable → Sonnet 5 | medium | 6 · alone |
-| **W8 · Guests can see who else is coming** | ▶ **NOT STARTED** — owner-ruled 08-23 | Opus 5 | high | 8 · alone |
+| **W8 · ~~Guests can see who else is coming~~ → THE COORDINATOR CAN SEE THE GUEST LIST** | ▶ **NOT STARTED · RE-SCOPED 08-24 — the owner REVERSED his earlier yes.** *"no. only the owner of the event and coordinator (by request)."* ⛔ Nothing is published to guests. The accepted-only rule, the K-floor and the per-event switch **all fall away — do not build them.** It is now an ACCESS GRANT: the host already sees the list; a coordinator sees it ON REQUEST. Much smaller, and no longer a privacy disclosure. | Opus 5 | medium | 8 · alone |
 
 > 🛑 **AND I MISATTRIBUTED A COMMIT BY READING ITS TITLE INSTEAD OF ITS FILES (2026-08-24).** I told
 > W4-A that "the supplier screens stop writing in below-AA gold" was W4-B's work and that its own
@@ -1814,6 +1814,19 @@ TOUCHING IT, and report the closures as results.
    photographer cannot see their own shots after the day; the band-as-emcee package does not reach
    the coordinator's message box.
 4. Anything queued for you by W2-B's privacy verification.
+4d. ✅ **H-2 — THE FILM'S LETTERING. OWNER APPROVED IT 2026-08-24 ("lettering YES") after being shown
+   a side-by-side.** It was owner-gated; it is not any more, and its own session (W3-D) has closed,
+   so it lands here.
+   **THE CHANGE IS ONE VALUE:** `lib/std-themes.ts:64` — `labelCls` is
+   `'font-mono text-sm uppercase tracking-[0.18em] text-terracotta'`. Only the FACE changes, to the
+   editorial serif the couple's names are already set in.
+   🔒 **SCOPE, AND IT IS TIGHT:** the size, the tracking, the uppercase and the tone all STAY. ⛔ It
+   must NOT touch the 9px "Created at Setnayan" watermark or the 0.66rem gild eyebrows — both
+   protected. ⚠ And `text-terracotta` is the GOLD `#A9834B` at 3.37:1; if you are moving the colour
+   as well you have exceeded the approval. **Face only.**
+   📍 **WHERE IT SHOWS:** the SAVE-THE-DATE page only — `revealEnabled: showSaveTheDate`
+   (`lib/site-body-plan.ts:365`), confirmed in code. It is NOT across the event hub.
+
 4c. 🧹 THE ORPHANS FROM WAVES 0–3 — audited 2026-08-24, and MOST OF THE LIST TURNED OUT DONE.
    Measured on main: the After-stage stub and its fictional "7-day review window" are GONE · the
    guest can name a plus-one · the seat page now binds its errors (0 → 11) · the "pending" chip was
