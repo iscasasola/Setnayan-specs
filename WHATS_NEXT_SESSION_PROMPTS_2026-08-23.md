@@ -31,14 +31,25 @@ not have to answer anything mid-session.**
 | ~~W4-B · Sixty-three supplier screens~~ | ✅ **DONE** 08-24 · 6 PRs (#4772–#4779) | — | — | 4 |
 | ~~W4-C · Shut the doors nobody uses~~ | ✅ **DONE** 08-24 · 27 more grants closed, 2 views pinned | Opus 5 | xhigh | 4 |
 | **W4-ADMIN · The admin console, one shape** *(was W2-C2)* | ▶ **NOT STARTED** — ⚠ **108** routes now, not the 95 in its title | Opus 5 | high | 4 |
-| **W4-A · The four screens a couple lives in** | 🏃 **RUNNING** since 2026-08-24 · 🟡 **PARTLY COVERED — MEASURE BEFORE RUNNING.** Three commits already closed colour-register deltas on **guests · budget · alaala** ("the gold slot stops painting words on the guests screens", "budget and alaala close their colour-register deltas"). The **vendors** screen is not named in any of them, and whether the COMPOSITION port was done at all is unverified. It may be a quarter of a session, not a whole one. | Opus 5 → Sonnet 5 | medium | 4 |
+| ~~W4-A · The four screens a couple lives in~~ | ✅ **DONE** 08-24 · 3 PRs (#4771 · #4780 · #4782) — and it was **a QUARTER of a session**, as the re-measure predicted: all four screens already matched their archetypes STRUCTURALLY, so nothing was redrawn. 46 gold-as-text sites moved off the failing gold · a typo class that styled nothing · a gold error message moved to danger · and one real typeface fallback (the vendors category-search overlay asked for a `--font-serif` that is defined NOWHERE, so its serif titles had rendered in the phone's default since it shipped). | Opus 5 → Sonnet 5 | medium | 4 |
 | **W4-WORDS · The words follow the occasion** | ▶ **NOT STARTED** — ⚠ its scope changed: the vocabulary is a DB table, not a lib file | Opus 5 (+ Fable for the words) | high | 4 |
 | **W5-A · A supplier's record survives a delete** | ▶ **NOT STARTED** — the most careful one | Opus 5 | **max** | 5 |
 | **W5-B · The surfaces nobody drew** | ▶ **NOT STARTED** — re-scope first | Fable → Opus 5 | medium | 5 |
 | **W5-C · Who is in my event?** | ▶ **NOT STARTED** | Opus 5 | medium | 5 |
+| ⭑**UNCLAIMED · the dashboard `galleries/` surface** | ▶ **NOT STARTED — NO WAVE OWNS IT.** Surfaced by W4-A: `alaala` is the owner-directed memory-arc pillar page (2026-06-15), NOT the gallery. The Gallery archetype's dashboard subject is `galleries/`, a different surface nobody has claimed. Also unclaimed: the couple's vendors LIST route answers to no archetype by route and stays under its own locked spec. | — | — | — |
 | **W6 · The grab-bag, verified first** | ▶ **NOT STARTED** — carries the orphans from waves 0–3 | Fable → Sonnet 5 | medium | 6 · alone |
 | **W8 · Guests can see who else is coming** | ▶ **NOT STARTED** — owner-ruled 08-23 | Opus 5 | high | 8 · alone |
 
+> 🛑 **AND I MISATTRIBUTED A COMMIT BY READING ITS TITLE INSTEAD OF ITS FILES (2026-08-24).** I told
+> W4-A that "the supplier screens stop writing in below-AA gold" was W4-B's work and that its own
+> vendors screen was untouched. **Wrong on both.** That commit touches ONLY
+> `app/dashboard/[eventId]/**` — the couple's view of their suppliers — with **zero** files in
+> `app/vendor-dashboard/**`, and its changelog fragment is named `w4a-gold-is-not-text-vendors.md`.
+> **"Supplier screens" means two different surfaces in this product** — the couple's view of their
+> suppliers, and the shop-side dashboard — and I read the word rather than the path.
+> 🔑 **OWNERSHIP IS DECIDED BY THE FILES A COMMIT TOUCHES, NEVER BY ITS TITLE.** Same class as
+> reading a PR title as evidence a session had started, which I also did today.
+>
 > 🔑 **THREE STATES, NOT TWO — "OPEN" WAS AMBIGUOUS AND MISLED THE OWNER (2026-08-24).** He asked
 > why a session was "open" when one was plainly running it, and he was right: the word conflated
 > *nobody has this* with *somebody has this and has not finished*. **✅ DONE · 🏃 RUNNING · ▶ NOT
