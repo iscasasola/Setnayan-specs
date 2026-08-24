@@ -483,6 +483,27 @@ event guest list as container membership, the explicitly permitted case**, not g
 > ⏭ **Open, and NOT an oversight of this session:** the moderator read policies on the seat plan,
 > schedule, suppliers and floor plan still admit any delegate. The owner ruled on the guest list;
 > those four are his call.
+>
+> 🔬 **THEN I AUDITED MY OWN THREE PRs AND FOUND A REGRESSION I HAD SHIPPED THAT MORNING — 4 more
+> PRs ([#4823](https://github.com/iscasasola/setnayan-platform/pull/4823) ·
+> [#4824](https://github.com/iscasasola/setnayan-platform/pull/4824) ·
+> [#4826](https://github.com/iscasasola/setnayan-platform/pull/4826) ·
+> [#4828](https://github.com/iscasasola/setnayan-platform/pull/4828)). CI was green through every
+> one.** 🚨 **A GRANT BUTTON HAD BECOME A WITHDRAWAL:** four write paths edit one area by spreading
+> the existing map, and on a row with no map — which is what the couple's own invite door mints for
+> every role except the coordinator — that writes a map naming ONE area. Pressing *"Allow event
+> photos"* on a ninong's row took away five other things. **Prod's `bride` and `groom` rows both
+> carry no map**, so one press would have locked a bride out of her own wedding.
+> 🚪 **Four doors bypassed the closure entirely** by reading guest names through the service-role
+> client; two had no authorization of their own at all.
+> ⚑ **The ask box landed on one branch of a feature flag** whose production value is not readable
+> from a session.
+> 🪤 **Five guards were decoration, three of them revisions of the same one** — the original carried
+> *"DERIVED FROM THE COMPONENT, NOT FROM A LIST I TYPED"* above a hand-typed list of two, and that
+> is exactly how the two day-of desks shipped ungated.
+> ⏭ **STILL OPEN AND OWNER TERRITORY:** nine delegate WRITE policies never ask the area, so a
+> delegate granted the seat plan alone can rewrite where wedding gift money is sent; and the ask
+> box offers the guest list to **any booked supplier**, not only a coordinator.
 > **The brief below is kept as history. Do not execute it.**
 
 ### ⭑ W8 · The coordinator can see the guest list · **Opus 5 · medium** — runs alongside W5-E
