@@ -1742,7 +1742,9 @@ ITS REPORT BEFORE YOU START. Two consequences for you:
     seating print routes, the email template, the monogram markup. Those entities are XSS
     protection. DO NOT TOUCH THEM.
 
-Five items, all measured on a real anonymous guest render (see below).
+FIVE items, all measured on a real anonymous guest render (see below): AP-3 · AP-10/H-4 · H-1 ·
+H-3 · H-5. Two more sit in your territory and are NOT yours — the weather (deferred) and H-7
+(merged into a later session). Both are called out where they used to appear.
 
  AP-3 THE INVITATION READS LIKE A RECEIPT, NOT AN INVITATION — a monospaced data face where the
    editorial serif belongs. The guest-facing editorial stack (Cormorant/Manrope) deliberately lives
@@ -1782,12 +1784,9 @@ Five items, all measured on a real anonymous guest render (see below).
    `app/[slug]/_components/save-the-date-film.tsx:726`, inside the film component itself — which is
    exactly WHY a guest who leaves early never sees it. The premise holds; the address changed.
    🔑 GREP THE STRING, NEVER THE LINE, AND NEVER THE FILE A BRIEF NAMES.
- H-7 A BIRTHDAY PAGE CALLS THE FAMILY "THE COUPLE" — 69 guest-read instances across 16 event types.
-   THE LARGEST ITEM HERE AND THE ONE WITH THE MOST GUEST-VISIBLE PAYOFF.
-   🔑 IT IS THREADING, NOT BUILDING: the words provider is ALREADY MOUNTED in the guest tree
-   (event-words-provider.tsx, proven by countdown.tsx consuming it) and the per-type terminology is
-   already seeded. 🔒 WEDDINGS MUST READ BYTE-IDENTICALLY AFTERWARDS — assert it, do not assume it.
-
+ 🔀 H-7 (a birthday page calling the family "the couple") WAS LISTED HERE AND IS **NOT YOURS** —
+   it merged into **W4-WORDS**, one wave later, because it and the wake's per-type wording are the
+   SAME mechanism. Building it here would be the duplication that merge exists to prevent.
 
 📏 WHAT IS ALREADY MEASURED FOR YOU — an anonymous GET of a real invitation page (no cookies,
 iPhone UA) returned 200 and 271,675 bytes, reproduced twice:
