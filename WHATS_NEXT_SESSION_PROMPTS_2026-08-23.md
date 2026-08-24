@@ -30,8 +30,8 @@ not have to answer anything mid-session.**
 | ~~W3-C · A wake is not a celebration~~ | 🛑 **SUPERSEDED** — merged into W4-WORDS | — | — | — |
 | ~~W4-B · Sixty-three supplier screens~~ | ✅ **DONE** 08-24 · 6 PRs (#4772–#4779) | — | — | 4 |
 | ~~W4-C · Shut the doors nobody uses~~ | ✅ **DONE** 08-24 · 27 more grants closed, 2 views pinned | Opus 5 | xhigh | 4 |
-| **W4-ADMIN · The admin console, one shape** *(was W4-ADMIN)* | ⏭ **OPEN** — ⚠ **108** routes now, not the 95 in its title | Opus 5 | high | 4 |
-| **W4-A · The four screens a couple lives in** | ⏭ **OPEN** — measure first, eroded twice over | Opus 5 → Sonnet 5 | medium | 4 |
+| **W4-ADMIN · The admin console, one shape** *(was W2-C2)* | ⏭ **OPEN** — ⚠ **108** routes now, not the 95 in its title | Opus 5 | high | 4 |
+| **W4-A · The four screens a couple lives in** | 🟡 **PARTLY COVERED — MEASURE BEFORE RUNNING.** Three commits already closed colour-register deltas on **guests · budget · alaala** ("the gold slot stops painting words on the guests screens", "budget and alaala close their colour-register deltas"). The **vendors** screen is not named in any of them, and whether the COMPOSITION port was done at all is unverified. It may be a quarter of a session, not a whole one. | Opus 5 → Sonnet 5 | medium | 4 |
 | **W4-WORDS · The words follow the occasion** | ⏭ **OPEN** — ⚠ its scope changed: the vocabulary is a DB table, not a lib file | Opus 5 (+ Fable for the words) | high | 4 |
 | **W5-A · A supplier's record survives a delete** | ⏭ **OPEN** — the most careful one | Opus 5 | **max** | 5 |
 | **W5-B · The surfaces nobody drew** | ⏭ **OPEN** — re-scope first | Fable → Opus 5 | medium | 5 |
