@@ -1935,14 +1935,19 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 > 🪤 **ABSENT ≠ EMPTY, and backwards it WIPES the target** — an empty `budget_pesos` legitimately means "clear my budget", so hiding the field without changing the write would have made every delegate save silently delete the couple's figure.
 > ⚖ **Fail-OPEN for the owner of the money, fail-CLOSED for a delegate.** 🔒 `'view'` never becomes `'edit'` (locked D1).
 >
-> 📋 **THE ROSTER `/dashboard/[eventId]/people` IS BUILT ABOVE THE FIVE ROUTES, NEVER INSTEAD OF THEM.** ⛔ **Roster only — no broadcast** (owner decision; the guard matches the SHAPES a messaging surface takes, not one spelling). 🔑 A row you cannot open is a dead end, so the gate decides the QUERIES, not just the markup.
+> 📋 **THE ROSTER `/dashboard/[eventId]/people` IS BUILT ABOVE THE FIVE ROUTES, NEVER INSTEAD OF THEM.** ⛔ **Roster only — no broadcast** (the guard matches the SHAPES a messaging surface takes, not one spelling). ⚠ **I called that an OPEN OWNER DECISION and it was already SHIPPED AND DECIDED — see the correction below.** 🔑 A row you cannot open is a dead end, so the gate decides the QUERIES, not just the markup.
 > ⚠ **A TEST I WROTE ASSERTED THE WRONG RULE AND THE CODE WAS RIGHT** — `moderator_area_level` ends `… ELSE 'view'` for guest_list/vendors, so a delegate with no explicit key holds **view** on both. That is the DECISION; the roster mirrors it rather than narrowing it.
 >
 > 🚪 **The coordinator's "Edit this site" dead end** is fixed by sending them to their planning desk, **not** by deleting the button — that link is the guest site's only way back into the product.
 > 📷 **The Live Studio controller now names who holds each camera.** **RULE 0 paid: `crewHolderName` already solved this for Papic and is REUSED — no migration.** ⚠ It must stay on the SERVICE-ROLE client, or `public.users` returns zero rows with no error and every camera reads as unheld.
 > ✍ **AP-11** drafts the invitation words deterministically, saves nothing until Save, and 🕊 **never drafts a wake a celebration**.
 >
-> ⏭ **STILL OPEN, and NOT this session's to decide:** whether a coordinator nobody promoted may message all the guests (the broadcast half — deliberately unbuilt).
+> 🛑 **CORRECTED 2026-08-24 BY THE OWNER — I FLAGGED A SETTLED, SHIPPED FEATURE AS AN OPEN DECISION.** Owner: *"yes on the event hub they have an announcement they can type on."* He is right, and it is live end to end:
+> · **The composer ships** — `coordinator-broadcast-card.tsx` on the couple's day-of screen, writing `coordinator_broadcasts`.
+> · **Guests read it ON THE EVENT HUB** — `loadDayOfBroadcast` → `<DayOfAnnouncement>` in `site-body.tsx`, **verified mounted end to end**, not merely defined. **Live window only** (an announcement has no meaning the week before or the month after) and **the latest one only, never a feed**.
+> · **The gate is already exactly the rule I was worried about:** the couple, **or a delegate the couple gave `schedule: 'edit'`** (`resolveBroadcastAuthority`, and the DB INSERT policy is the real gate). ⇒ **A coordinator nobody promoted has no schedule-edit and therefore cannot.** The question answers itself.
+> · The Data Privacy control `coordinator_day_of_broadcast` is **`active` in production** (approved 2026-07-22), and migration `20271132843141` derives the sender columns from `auth.uid()` so nobody can sign somebody else's name to an announcement.
+> 🔑 **THIS IS "A DECISION LOOKS LIKE A DEFECT", IN THE FILE THAT WARNS ABOUT IT.** I withheld a feature as owner-gated when the product had already built, gated and shipped it — the cost of NOT running the decision-log/`grep` step on my own caveat. **The roster still correctly has no compose box** (the composer belongs on the day-of screen, where it is); what was wrong was calling the rule unsettled.
 
 <details><summary>Original prompt, kept for the record</summary>
 
@@ -1955,6 +1960,9 @@ Three small things, all verified still true on 2026-08-23.
    routes, all still separate. Build one screen above them; do not replace them.
    ⛔ THE BROADCAST HALF IS NOT YOURS — whether a coordinator nobody promoted may message all the
    guests is an owner decision. Roster only.
+   🛑 [CORRECTED 2026-08-24: THIS LINE IS WRONG. It is not an open decision — the announcement
+   ships, guests read it on the Event Hub, and only the couple or a schedule-edit delegate may
+   type one. See the DONE banner above this block.]
 2. THE COORDINATOR'S "EDIT THIS SITE" IS A DEAD END. lib/owner-ribbon.ts (~:118) links
    unconditionally to an editor that gates on member_type='couple' (website/editor/page.tsx
    ~:118). They press it and are refused. Either don't show it or make it work — a control that
