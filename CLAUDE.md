@@ -155,6 +155,35 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > question about a supplier collecting guest photos. **This ships the counting rule, not the
 > lane** — prod holds 0 captures, so every card reports 0.
 >
+> 🗜 **THEN HE RULED TWICE MORE ON THAT SAME FEATURE, AND BOTH ARE BUILT** — PRs
+> [#4765](https://github.com/iscasasola/setnayan-platform/pull/4765) (merged) +
+> [#4767](https://github.com/iscasasola/setnayan-platform/pull/4767). A supplier's photographs
+> were outside TWO of the rules every other photograph obeys, and both failures were silent.
+> **DELETE:** the rows cascade with the celebration, the FILES did not — so the couple was told
+> their photographs were gone while the objects sat in storage, unreachable because the rows that
+> named them were gone. **COMPRESS** (owner: *"compress it as well"*): they had no web copy at
+> all, so the retention sweep could not see them and their originals stayed full-size forever.
+> 🔑 **THE INVERSE HAD TO SHIP FIRST.** Nothing was copying a supplier's captures out to the
+> couple's Drive, and the sweep refuses to drop anything the couple has not received — so wiring
+> compression alone would have been **inert on Drive-connected celebrations and unsafe on
+> unconnected ones**. ⛔ A vendor CLIP keeps its video and **no column pretends otherwise**: the
+> couple-side copy is transcoded in the guest's own BROWSER, and a column with no writer is the
+> seventh gate with no handle. Its still compresses; a vendor clip is capped at 10s.
+> 🚨 **AND MUTATION-TESTING IT FOUND THE SAME SAFETY FILTER UNGUARDED ON THE COUPLE'S OWN
+> PHOTOGRAPHS** — removing `.not('display_r2_key','is',null)` from the guest-capture query passed
+> **all 9785 tests**. That line is all that stands between the sweep and deleting an original
+> with nothing to replace it. 🪤 My first guard for it was **decoration**: a file-level match on a
+> string THREE queries share, green at 3 → 2. It now DERIVES the query list from the code and is
+> FLOORED, and the later counts were measured **inside each query block** — because the first
+> honest count had sabotaged a different query than the one it aimed at.
+>
+> ⚠ **TWO THINGS I TOLD THE OWNER ABOUT THIS FEATURE WERE WRONG, both from reading the ORIGINAL
+> migration instead of the live object.** The clip cap is **10 seconds, not 5** (his own override
+> 2026-07-22; the DB CHECK was relaxed to match). And the allowance is **not 10 photos + 3
+> clips** — that model is dead; the live one is the points gift he set 2026-07-22 (50 pts scaling
+> to 200 with the booking fee, photo=1, clip=7) and **it IS enforced**, in the capture route.
+> The `photo_cap`/`clip_cap` columns nothing reads are leftovers. **Read the object.**
+>
 > ⛔ **Also deliberately untouched:** whether a minted package should publish with its service
 > instead of landing `is_active:false` (the OWNER_DECISION half of the same handoff note), and
 > `isFirstLookEligible`, which feeds RANKING rather than a claim.
