@@ -223,7 +223,7 @@ event-words provider).
 | ~~0~~ | ~~PR triage~~ ✅ **DONE 2026-08-22** | — |
 | **1** | **W1-A** finished event + launcher + dashboard polish · **W1-B** Pabati + buy pages + story-editing goes free · **W1-C** paperwork | W1-B |
 | **2** | **W2-A** guest activation + the cookie banner + honest reads in the hub · **W2-B** the two deletion jobs · **W2-C1** the admin gold | — |
-| **3** | ~~**W3-A** honest reads in the couple tree~~ **✅ DONE 2026-08-24** · ~~**W3-B** supplier cards~~ **✅ DONE 2026-08-24** · **W3-D** ⭑NEW the guest page's design set | — (both gates closed; **W3-D is the only one left in this wave**) |
+| **3** | ~~**W3-A** honest reads in the couple tree~~ **✅ DONE** · ~~**W3-B** supplier cards~~ **✅ DONE** · ~~**W3-D** the guest page's design set~~ **✅ DONE 2026-08-24 — 5 PRs, #4754 · #4755 · #4757 · #4758 · #4759** | ✅ **WAVE 3 IS COMPLETE.** W3-C was superseded into W4-WORDS. |
 | **4** | **W4-WORDS** ⭑NEW the words follow the occasion · **W4-B** supplier screens · **W2-C2** admin archetype | W4-WORDS |
 | **5** | **W4-A** the couple's four daily screens · **W5-C** who is in my event + drafted invitation words · **W4-C** grant hardening | W4-C |
 | **6** | **W5-A** a supplier's record survives a delete · **W5-B** the undrawn surfaces | W5-A |
@@ -373,7 +373,7 @@ TWO THAT CHANGED OUTCOMES:**
 | 2 | **D-4 one terracotta action per screen — proceeds**, no gate | **W1-A**, ungated |
 | 3 | **"% planned" — DO NOT UNIFY.** The checklist keeps "% planned"; the focal adopts the already-shipping **"% locked in"** | 🟢 **DISSOLVES WORK** — closes owner decision 0. Nothing to compute once, nothing to migrate. It is the rename already scheduled, and no more |
 | 4 | **The button stays "Add guest"** — drop the PROVISIONAL comment in `customer-nav-fab.tsx` | trivial, fold into any **W1-A** PR |
-| 5 | **H-2, the film's label face — yes.** Only the face; watermark and gild eyebrows protected | **W3-D**, ungated |
+| 5 | **H-2, the film's label face — yes.** Only the face; watermark and gild eyebrows protected | **W3-D** — ⚠ **THIS CELL SAID "ungated" AND THAT CONTRADICTED § 0d**, whose table marks H-2 🔴 owner-gated and whose prose says *"the cinematic look is approved and paid for, so it is his call"*. Per this file's own precedence rule (§ 0c and § 0d GOVERN), **§ 0d wins: H-2 is OWNER-GATED and was NOT built.** Corrected 2026-08-24 by W3-D, which was told both things at once and had to resolve it before touching a font. The delegated *decision* stands — the direction is settled (**sans, not DM Mono**) — but the owner has not been shown it, so it is a ready-to-build item, not a scheduled one. |
 | 6 | **H-6 weather — yes, scoped:** inside ~10 days only · coordinates required · **silent on any failure, no placeholder and no apology** · server-side | **W3-D** ⛔ **with a STOP CONDITION, see below** |
 | 7 | **Our wordmark on a shared card → ONCE** (three today) | 🟢 **DISSOLVES INTO H-3** — same file, no new slice |
 | 8 | **One event card on phone and laptop — yes, but SEQUENCED LAST**, after the small dashboard items land | **W1-A**, final PR, on its own |
@@ -1751,7 +1751,34 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 
 ## ⭑ NEW SESSIONS FROM THE 2026-08-23 RE-BALANCE (see § 0c)
 
-### W3-D · The guest page's design set · **Opus 5 · medium** — wave 3
+### ✅ W3-D · The guest page's design set — **DONE 2026-08-24. DO NOT RUN THIS SECTION.**
+
+> **5 PRs:** [#4754](https://github.com/iscasasola/setnayan-platform/pull/4754) (the venue map + its gate) ·
+> [#4755](https://github.com/iscasasola/setnayan-platform/pull/4755) (Add to calendar throughout) ·
+> [#4757](https://github.com/iscasasola/setnayan-platform/pull/4757) (the veil's voice) ·
+> [#4758](https://github.com/iscasasola/setnayan-platform/pull/4758) (the share card names us once) ·
+> [#4759](https://github.com/iscasasola/setnayan-platform/pull/4759) (the invitation is not a receipt).
+> ⚠ **Verify before trusting this line** — this file has been wrong about a PR's state three separate
+> times: `gh pr view 4754 4755 4757 4758 4759 -R iscasasola/setnayan-platform --json number,state,mergedAt`.
+>
+> 🔴 **THE ONE THING THAT WAS NOT BUILT, AND IT IS A SECURITY CALL, NOT AN OVERSIGHT.** H-3's photo
+> half. The brief said the couple's photo belongs on the share card and warned the benefit was
+> unverified. **Measured: 0 events have a hero photo, 0 editorials are published, 0 have a monogram.**
+> One event DOES have a photograph — `std_media.posterKey`, its save-the-date poster frame — and it is
+> **deliberately not used**: that key is the COUPLE'S OWN OBJECT, and SEC-6 exists so guests are served
+> a SEALED, screened copy at `events/{id}/std-screened/…` after three rounds of hardening against a
+> real attack. Feeding it to a public unauthenticated OG route walks back into that. **Pinned by a
+> test in both files.** The sanctioned path (a published editorial hero via the stable streaming
+> route) already ships, already prefers the stable URL over a presign, and simply has no data yet.
+>
+> 🪤 **AP-3 IS NOT A WHOLE-TREE SWEEP AND THE NEXT SESSION SHOULD NOT TREAT IT AS ONE.** `font-mono`
+> appears **153 times across 42 files** in the guest tree once the film, the reveal and the gild
+> eyebrows are excluded. What shipped is the set a guest **demonstrably reads on a live invitation**
+> (13 labels, 3 files). Three of the remaining files were open in W2-A's PR at the time.
+>
+> ⛔ **H-2 AND H-6 REMAIN THE OWNER'S**, and three tests now make H-2 impossible to ship by accident.
+
+<details><summary>The original prompt, kept for its reasoning</summary>
 
 ```
 You own app/[slug]/** this wave. W2-A owned it the wave before and its defects have landed; do not
@@ -1779,7 +1806,9 @@ H-3 · H-5. Two more sit in your territory and are NOT yours — the weather (de
    DO NOT BUILD IT AND DO NOT SCOPE IT. It is the only item in the plan that would add a permanent
    outside dependency — a supplier, a recurring cost, a licence, and a third party's name printed
    on a guest's page — for one line of text. The scoping survives in § 0d for whenever a real
-   couple asks. This session has FOUR items, not five.
+   couple asks. ⚠ THIS LINE SAID "FOUR items, not five" UNTIL 2026-08-24 AND WAS WRONG —
+   it was written when H-7 was still listed here, and it survived H-7's removal. The list at
+   the top of this block is the authority: FIVE items, and the weather is not one of them.
  AP-10 / H-4 — GUESTS GET A LINE OF TEXT WHERE A MAP BELONGS. (Same item; H-4 is its measured form.)
    🛑 I TOLD YOU THE CSP MUST CHANGE IN THIS PR. THAT WAS WRONG AND I CHECKED IT MYSELF —
    `https://www.openstreetmap.org` IS ALREADY IN the enforced frame-src (next.config.ts ~:203), and
@@ -1843,6 +1872,8 @@ And the wording per event type is W4-WORDS, one wave later. Do not start it here
 
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
+
+</details>
 
 ### W4-WORDS · The words follow the occasion · **Opus 5 · high · the wording drafted by Fable** — wave 4
 

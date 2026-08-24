@@ -147,13 +147,14 @@ intersection check that proves it.
 **Intersection check:** guest tree · lib jobs · `app/admin/**`. **Pairwise: empty.**
 🔒 W2-A needs W1-B merged — they share `site-body.tsx`.
 
-### WAVE 3 — three concurrent
+### WAVE 3 — ✅ COMPLETE 2026-08-24 (W3-A · W3-B · W3-D; W3-C superseded into W4-WORDS)
 
 | session | carries | what a person gets | migration |
 |---|---|---|---|
 | ✅ **W3-A · Honest reads, couple tree — DONE 2026-08-24** | S3-A | ~58 reads across the couple tree stop rendering a refusal as "you have none" — ⚠ **the "45 unbound reads on the vendors page" in this row was FALSE: measured 3, with 12 already bound, and all three are a documented fail-open decision** — plus the per-tree guard, whose bill is now 16 sites, none in `[eventId]` | no |
 | ✅ **W3-B · Vendor card features — DONE 2026-08-24** | CF-3a 3b 3c 3f | shipped in 4 PRs (#4741 · #4742 · #4744 · #4745). ⚠ **NOT a new table** — the picks were already frozen in the lock snapshot by #3862; what was missing was the card↔package LINK. CF-3c's Papic half is an OWNER/DPO gate, not built. | **YES** — two columns + a reader, no new table |
-| **W3-C · A wake is not a celebration** | S17 | a family planning a wake gets an event that does not say "celebrate" anywhere | **YES** (event-type) |
+| ~~**W3-C · A wake is not a celebration**~~ | S17 | 🛑 **SUPERSEDED 2026-08-23** — merged into **W4-WORDS**, because the wake's per-type wording and the birthday's are the same mechanism. | — |
+| ✅ **W3-D · The guest page's design set — DONE 2026-08-24** | AP-3 AP-10/H-4 H-1 H-3 H-5 | the venue shows real streets · "Add to calendar" is there the whole film · the veil asks like an invitation · a shared invitation names us once, not three times · the invitation stops reading like a receipt | no |
 
 **Intersection check:** couple dashboard · vendor dashboard · 3 lib files + guest strings. **Empty.**
 Two migration writers at once is allowed **only because their table sets are disjoint** — a new
