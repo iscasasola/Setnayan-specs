@@ -160,6 +160,15 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > `galleries/` — a hub of links — belongs to the Gallery archetype at all is a **design/owner call**;
 > the three screens above need no ruling at all.
 >
+> ⚠ **AND TWO THINGS THE BUDGET HALF DID NOT DO, stated because my own first write-up implied
+> otherwise.** The Ledger rule has two halves — Space Mono **and** right-aligned in a column — and
+> only the **face** shipped; each supplier's three amounts still sit in three tinted boxes across a
+> row. **Do not read this as "the Ledger port is done."** And the running total is still not pinned:
+> the reason I first recorded (*"the shell cannot carry a pinned bar"*) is **FALSE** — the budget
+> screen already ships a `sticky bottom-3` *Save plan* bar. The real constraint is that a second
+> pinned bar would **STACK** with it and with the phone's bottom nav, which is what
+> `lint-no-stacked-pinned-bars.mjs` exists to catch.
+>
 > 🎨 **What shipped:** 46+ gold-as-text sites → `terracotta-700`; a `-700-700` typo class that
 > styled NOTHING; **TWO** gold ERROR messages → `danger-700` (the second written as a hex, one file
 > from the first, found only by the audit); four search badges at 3.96–4.06:1 and two eyebrows at
