@@ -1894,6 +1894,31 @@ Three small things, all verified still true on 2026-08-23.
    joined" with no name (panood/control/[eventId]/page.tsx ~:2276). The camera claim knows who
    claimed it.
 
+🔴 ALSO YOURS, AND DO IT FIRST — A PLANNER CAN READ THE COUPLE'S BUDGET TARGET. It is thematically
+your item 2 wearing different clothes: a delegate meeting a surface that should refuse her and does
+not. **Prod-verified 2026-08-24, and there is a LIVE ROW: an active `wedding_planner_external` on an
+event that has a budget.**
+ · `events_host` carries `estimated_budget_centavos` and admits ANY accepted moderator;
+   `current_moderator_event_ids()` has NO area filter; `budget/page.tsx` adds no role check.
+ · She is told TWO untrue things at once — a budget she should not see, and **"Paid ₱0" on every
+   supplier**, because the line items are correctly refused and a refused read returns NO ROWS.
+ ⛔ **THIS IS NOT A PERMISSION CHANGE. DO NOT WIDEN OR NARROW RLS, AND DO NOT TOUCH THE VIEW.** The
+   coordinator legitimately needs that event for her other areas; narrowing it kills a working
+   feature quietly.
+ ✅ **THE DECISION IS ALREADY MADE AND THE MECHANISM ALREADY WORKS ELSEWHERE.** `'budget'` is a
+   first-class area in `lib/delegate-areas.ts` — declared, labelled, **defaulted OFF** — with its
+   own resolver at ~:97: `if (area === 'budget') return perms.checkout ? 'view' : null;` And
+   `moderator_area_level` is CALLED CORRECTLY IN NINE OTHER FILES. **Copy a working call site; do
+   not invent one.** Gate MODERATORS ONLY, never the couple: fail-OPEN for the owner of the money,
+   fail-CLOSED for a delegate. Then render the Ledger archetype's DENIED state — state 4 of 6, copy
+   already written.
+ 🚨 **READ `delegate-areas.ts` :99-100 BEFORE CHOOSING YOUR PREDICATE.** The tail below that
+   fallback **FAILS OPEN**: any delegate with `edit_all` and no explicit key gets `'edit'`. The
+   file's own comment calls this non-optional and warns it would have *"silently handed the
+   couple's guest photos to every existing delegate — including the accepted planner row live in
+   production right now."* **A gate written without reading that line admits exactly the delegate it
+   exists to refuse.**
+
 ALSO YOURS — AP-11 FROM THE APPLE-INVITES COMPARISON (see § 0b): THE COUPLE FACES A BLANK BOX
 WHERE THEIR INVITATION WORDS GO. Apple drafts them; we ask the couple to write from nothing. It
 lands in this session because it touches dashboard/[eventId]/website/** and the Setnayan AI
@@ -1911,7 +1936,7 @@ like an uncalled function — and the fix is to copy a working call site, not to
 building any of the three, grep for a WRITER, not just a column or a function: the mechanism may
 already exist with nothing calling it, in which case your job is the handle, not the gate.
 
-2 PRs. A migration only if the camera claim genuinely lacks the name — check first.
+3 PRs — the budget refusal FIRST, on its own, because it is the only one with a real person on the other side. A migration only if the camera claim genuinely lacks the name — check first.
 
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
