@@ -732,6 +732,11 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 
 ## WAVE 1 — three at once
 
+### ✅ W1-A · A finished event tells the truth — **COMPLETE 2026-08-23. DO NOT RUN.**
+*7 PRs merged (#4728–#4734), all live. Verified: the After stub and its fictional "7-day review window" are GONE, the bottom bar renders from the layout, the caption names what it counts, the event card carries a photograph, phone and laptop show one card.*
+
+<details><summary>the original prompt</summary>
+
 ### W1-A · A finished event tells the truth · **Opus 5 · medium**
 
 ```
@@ -884,6 +889,11 @@ No migration.
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
 
+### ✅ W1-B · Retire Pabati, and let the buy pages sell — **COMPLETE 2026-08-23. DO NOT RUN.**
+*4 PRs merged. Verified BY THE OBJECT in prod: `pabati_clips` dropped, 0 pabati challenges left, the greeting row converted to `clip` (284 → 285), and `llms.txt` is 17,276 bytes — NOT the 603-byte stub that a retired-but-still-advertised row would have caused. Story-editing is free.*
+
+<details><summary>the original prompt</summary>
+
 ### W1-B · Retire Pabati, and let the buy pages sell · **Opus 5 · xhigh**
 
 ```
@@ -983,6 +993,11 @@ runs as superuser and will not catch a permissions problem.
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
 
+### ✅ W1-C · Make the paperwork true — **COMPLETE 2026-08-23. DO NOT RUN.**
+*Prototypes reconciled to the shipped palette, committed to the corpus. The compliance half turned out mostly already correct, which was the predicted and acceptable outcome.*
+
+<details><summary>the original prompt</summary>
+
 ### W1-C · Make the paperwork true · **Sonnet 5 · medium**
 *(It briefly gained two app-wide CSS items from the Apple-Invites comparison and was raised to
 Opus. **Both were withdrawn on 2026-08-23 — they would have reversed an owner lock (§ 0b).** It is
@@ -1041,6 +1056,11 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 ---
 
 ## WAVE 2 — three at once
+
+### ✅ W2-A · A guest can keep their code — **COMPLETE 2026-08-24. DO NOT RUN.**
+*Verified on main: the guest QR download exists, a guest can name a plus-one, the seat page binds its errors (0 → 11), the "pending" chip was reworded with its reasoning recorded, the email can be changed but not emptied (the owner's ruling), and the cookie banner stopped re-asking. ⏭ C7/C8 — the two false camera refusals — are NOT done and moved to W6.*
+
+<details><summary>the original prompt</summary>
 
 ### W2-A · A guest can keep their code · **Opus 5 · high**
 
@@ -1230,6 +1250,11 @@ fix that falls outside your territory rather than applying it.
 
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
+
+### ✅ W2-C1 · The gold nobody can read — **COMPLETE 2026-08-23. DO NOT RUN.**
+*PR #4738. Gold-as-text in `app/admin` 207 → 150 by raw grep; the remainder is icons and comments, which the guard's own regex excludes and which are allowed to stay.*
+
+<details><summary>the original prompt</summary>
 
 ### W2-C1 · The gold nobody can read · **Sonnet 5 · medium**
 
