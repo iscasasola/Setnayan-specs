@@ -182,6 +182,64 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > together a redesign of that screen.
 > ⏭ Reported, not churned: ~15 `bg-white/NN` alpha fills are visually inert on the #FFFFFF ground — debt, not defect.
 
+> ### ✅ DONE 2026-08-24 — A SAMAHAN BECAME A PLACE (6 PRs) + the bug that made it hollow
+> **Contract: [`WHATS_NEXT_Samahan_2026-08-24.md`](WHATS_NEXT_Samahan_2026-08-24.md).**
+> Owner asked for "the same setlog concept" and it grew from there. **Do NOT rebuild any of it.**
+> #4781 (24-hour hourly **stories**) · #4783 (the composer is a **3-second camera**, not an
+> upload) · #4784 (**anyone** can rename + a **group photo**) · #4790 (both edited **ON the
+> header** — tap the photo, tap the name) · #4786 (**Usapan**, the group chat) · #4795 (below).
+> ⚠ Verify each with `gh pr view <#> --json state,mergedAt` — this file has been wrong about a
+> PR's state four times.
+>
+> 🚨 **NOBODY COULD LEAVE A SAMAHAN. NOBODY, EVER — and the buttons looked fine.**
+> `community_members` shipped a DELETE **policy** with **no DELETE grant**; Postgres checks the
+> grant FIRST, so every leave was refused before RLS was consulted and the policy was never once
+> reached. Dead callers: *"Leave this samahan"* for every member, and an organizer removing
+> anybody. 🔑 **Where it came from is a RULE, not a mishap:** `20271023100000` revoked ALL and
+> granted back *"the three verbs the shipped paths actually use"* — a list written from
+> **REMEMBERED PATHS** while a DELETE policy sat in the same schema declaring DELETE is one.
+> **ENUMERATE THE VERBS FROM THE POLICIES.** Same family as the phantom column · enum value ·
+> RPC argument · blocked iframe: **refused, not thrown; the only symptom is a button that does
+> nothing.** 🛡 New guard asks it for every table — and it **must count COLUMN grants**, or it
+> reports `events` (deliberately revoked 2026-08-21) and cries wolf: **25 rows → 9 measured**.
+> The 7 survivors are each grepped to a service-role writer and recorded WITH A REASON.
+>
+> ⚖ **OWNER RULINGS — do not re-ask:**
+> · *"the only way to close a group/samahan is when all members leave … for as long as there is
+>   one, the group lives."* Closing is a **consequence**, never an act performed on other people.
+>   `archiveCommunity` is **deleted**; the DB refuses a close while any membership row remains.
+>   **The button is not the door** — `communities` is served over PostgREST to a public key.
+> · **Anyone may rename**; `archived` stays organizer-side. 🔑 **A POLICY IS ROW-LEVEL** — widening
+>   it alone would also have handed every member the close switch and the identity columns.
+> · **Group chat does NOT reuse `chat_threads`**, overturning the 2026-07-15 "reuse 0019 chat"
+>   lock: that table is a couple↔vendor **booking negotiation** (`event_id` + `vendor_profile_id`
+>   both NOT NULL, `agreed_price_centavos`, `locked_at`). **One query overturned a plan estimate.**
+> · **Stories:** one per member per clock hour · 24h by RLS · screened BEFORE the row exists, so
+>   no unscreened state can exist · take-down soft, never a rewrite.
+>
+> 🛑 **A FALSE CLAIM I MADE TWICE, CORRECTED HERE: "we have no push notifications."**
+> **PUSH IS BUILT AND MOUNTED** — `PushToggle` on the profile page · `emitNotification` with **61
+> call sites** · `/api/notify` sending via `web-push` + VAPID · `push_subscriptions` in prod with
+> **0 rows**. So the hourly bell is a **wiring** job plus confirming the VAPID keys in Vercel
+> (**not readable from a session** — the route merely warns and continues). **Do NOT scope a push
+> build.**
+>
+> ⏭ **LEFT:** the bell · the day coming back as **one stitched film** (the renderer already ships
+> and is shared by four features) · **inviting a whole samahan into a guest list** — the bridge to
+> what Setnayan actually sells, `guest_groups.source_community_id` **verified absent** · nesting ·
+> discovery · memories · chat attachments.
+> 🔴 **THE ONE BLOCKING OWNER DECISION: what a samahan KEEPS after 24 hours, and whether keeping
+> is what we sell.** The feed is the hook; Papic on a group event is the existing archive product.
+>
+> 🪤 **Traps paid for, beyond the grant one:** a branch whose base predates a merge **will revert
+> it** (twice; one push would have deleted the 3-second recorder) · a rebase conflict where both
+> sides **appended** functions offers mine-or-theirs and either choice deletes a feature · a
+> programmatic delete searching backwards for a docblock took **five** functions instead of one
+> (`tsc` caught it) · `npx tsx --test` on a `[communityId]` path prints **`# tests 0` and exits
+> GREEN** (escape as `[[]communityId[]]`) · `SECURITY DEFINER` **disarms** a `current_user` check ·
+> **a stale page is not a missing feature** (Usapan was reported "still coming soon" after it
+> merged — prod had it, the browser did not; check `/api/health` against the merge commit first).
+
 > ### ✅ DONE 2026-08-24 — W3-B: A SUPPLIER'S CARD EARNS ITS KEEP
 > **5 PRs — the fifth is an owner ruling he made mid-session, closing the item the other four left open.**
 > ** Do NOT rebuild any of it.** Row: `DECISION_LOG.md` 2026-08-24.

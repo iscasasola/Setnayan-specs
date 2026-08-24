@@ -1,5 +1,36 @@
 # WHATS_NEXT_INDEX — master compilation for the "run all what's-next" session (2026-07-18)
 
+> ### ▶▶▶▶▶▶▶▶ NEWEST — SAMAHAN BECAME A PLACE (2026-08-24)
+> **[`WHATS_NEXT_Samahan_2026-08-24.md`](WHATS_NEXT_Samahan_2026-08-24.md)** — six PRs in one
+> day: hourly 24-hour **stories**, a **3-second camera** (not an upload), **anyone can rename**
+> + a **group photo** edited ON the header, **Usapan** the group chat, and the fix for a bug
+> that made the whole thing hollow.
+>
+> 🚨 **NOBODY COULD LEAVE A SAMAHAN — NOBODY, EVER.** `community_members` had a DELETE **policy**
+> and **no DELETE grant**, so Postgres refused before RLS was consulted: "Leave this samahan" and
+> "remove a member" were both dead buttons since `20271023100000`, whose own comment granted back
+> *"the three verbs the shipped paths actually use"* — written from **remembered paths** while a
+> DELETE policy sat in the same schema. **Enumerate the verbs from the POLICIES.** New guard
+> counts **column** grants too (without that it reports `events` and cries wolf: 25 rows → 9).
+>
+> ⚖ **OWNER RULINGS, do not re-ask:** *"for as long as there is one, the group lives"* — closing
+> is a consequence of the last member leaving, never an act performed on others (`archiveCommunity`
+> deleted; the DB refuses it independently). And **group chat does NOT reuse `chat_threads`** —
+> that table is a couple↔vendor booking negotiation, which **overturns the 2026-07-15 "reuse 0019
+> chat" lock**; one query against prod overturned a plan estimate.
+>
+> 🛑 **A CORRECTION THIS FILE SHOULD CARRY: push notifications ARE BUILT.** I told the owner twice
+> they were not. `PushToggle` is mounted, `emitNotification` has **61 call sites**, `/api/notify`
+> sends via web-push + VAPID, `push_subscriptions` exists with **0 rows**. The hourly bell is
+> therefore a *wiring* job plus confirming VAPID keys in the hosting settings — **not** a push
+> build. **Do not scope one.**
+>
+> ⏭ **LEFT:** the bell · the day coming back as one stitched film · **inviting a whole samahan
+> into a guest list** (the bridge to what Setnayan sells; `guest_groups.source_community_id`
+> verified absent) · nesting · discovery · memories.
+> 🔴 **OWNER DECISION, the only blocking one:** what a samahan KEEPS after 24 hours, and whether
+> keeping is what we sell.
+
 > ### ▶▶▶▶▶▶▶ NEWEST — THE EXECUTION PLAN. READ THIS BEFORE PICKING UP ANY STREAM (2026-08-23)
 > **[`WHATS_NEXT_EXECUTION_PLAN_2026-08-23.md`](WHATS_NEXT_EXECUTION_PLAN_2026-08-23.md)** — every
 > open item in this whole register, assessed against `origin/main` @ `c984e0caf` and live
