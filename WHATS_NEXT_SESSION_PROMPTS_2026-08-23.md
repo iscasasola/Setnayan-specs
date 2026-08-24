@@ -43,6 +43,7 @@ not have to answer anything mid-session.**
 | ⭑**UNCLAIMED · 98 loading screens still draw the retired page title** | ▶ **NOT STARTED.** Belongs to the 2026-08-21 header retirement, not to any design wave. | — | — | — |
 | ⭑**UNCLAIMED · the dashboard `galleries/` surface** | ▶ **NOT STARTED — NO WAVE OWNS IT.** Surfaced by W4-A: `alaala` is the owner-directed memory-arc pillar page (2026-06-15), NOT the gallery. The Gallery archetype's dashboard subject is `galleries/`, a different surface nobody has claimed. Also unclaimed: the couple's vendors LIST route answers to no archetype by route and stays under its own locked spec. | — | — | — |
 | **SAMAHAN · the group, its stories and its chat** | 🏃 **RUNNING · integrated into this plan 2026-08-24.** 6 PRs merged (#4781 #4783 #4784 #4786 #4790), #4795 open. Owns `(account)/samahan` + `lib/communities` + its own migrations — no wave session owns those. 🔴 **Regenerates the FK-behaviour file and the exposure baseline: MUST NOT run at the same time as W5-A.** | — | — | alongside |
+| ⭑**W5-D · The board tells the truth** | ▶ **NOT STARTED — created 2026-08-24 from the owner looking at his own phone.** A celebrated event scored "0% planned" · the percentage printed twice on every card · "Worth planning" listing weddings that already exist. **Two of the three are fixes that shipped on another surface and never reached the board.** | Opus 5 | medium | 5 |
 | **W6 · The grab-bag, verified first** | ▶ **NOT STARTED** — carries the orphans from waves 0–3 | Fable → Sonnet 5 | medium | 6 · alone |
 | **W8 · ~~Guests can see who else is coming~~ → THE COORDINATOR CAN SEE THE GUEST LIST** | ▶ **NOT STARTED · RE-SCOPED 08-24 — the owner REVERSED his earlier yes.** *"no. only the owner of the event and coordinator (by request)."* ⛔ Nothing is published to guests. The accepted-only rule, the K-floor and the per-event switch **all fall away — do not build them.** It is now an ACCESS GRANT: the host already sees the list; a coordinator sees it ON REQUEST. Much smaller, and no longer a privacy disclosure. | Opus 5 | medium | 8 · alone |
 
@@ -1993,6 +1994,60 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 ---
 
 ## WAVE 6 — runs ALONE
+
+### ⭑ W5-D · The board tells the truth · **Opus 5 · medium** — wave 5, alongside the others
+
+*Created 2026-08-24 from the owner opening the product on a phone. All three were found on the
+FIRST SCREEN, none was in any session's brief, and two are fixes that already shipped somewhere
+else.*
+
+```
+Three defects on the My Events board, observed live signed-in at 375x812 and confirmed in the
+served page text. Small, and the reason they exist is worth more than the fixes.
+
+1. A FINISHED CELEBRATION IS SCORED ON PLANNING, AND SCORED ZERO.
+   "Movie Night · Aug 20" reads **Celebrated** and, one line below, a 0% ring and "0% planned".
+   The day happened. The product is telling the owner he planned none of it.
+   🛑 THIS IS NOT THE DEFECT W1-A FIXED. That fixed the CHECKLIST PAGE's awareness of the
+   lifecycle. The BOARD still scores a celebrated event. Same disease, different surface.
+   ⚖ Decide what a finished celebration should show INSTEAD of a planning score — not what number
+   to show. A score is the wrong shape for a day that has happened.
+
+2. THE PERCENTAGE IS PRINTED TWICE ON EVERY CARD.
+   The ring says `7%`; the line beside it says `7% planned`. Also `18%`/`18% planned`,
+   `0%`/`0% planned`.
+   🛑 THIS IS D-6 — "the card stops printing 117 twice" — which W1-A CLOSED ON THE EVENT DASHBOARD
+   AND NOT HERE. Second one-site-only fix in the same ten minutes of looking.
+
+3. "WORTH PLANNING" IS LISTING CELEBRATIONS THAT ALREADY EXIST.
+   It shows "Cale & Ice — your wedding" and "Maria & Jose — your wedding" with an **Open plan**
+   action, while both sit in **Planning** on the same screen.
+   🔑 THIS CONTRADICTS THE OWNER'S OWN NAMING RULING (DECISION_LOG 2026-08-21, PR #4678):
+   *Upcoming* became *Worth planning* precisely "because Planning holds celebrations that EXIST and
+   that shelf holds days that do not."
+   🔍 THE TELL IS IN THE BUTTONS: **Start planning** for a day that does not exist, **Open plan**
+   for one that does. If a row renders "Open plan", it does not belong on that shelf.
+   ⛔ DO NOT "fix" this by renaming the shelf or by deleting the shelf. The shelf is his and its
+   name is his. Fix which rows reach it.
+
+TERRITORY: `app/dashboard/(launcher)/page.tsx` and whatever computes those shelves. ⚠ Three wave-5
+sessions are running — W5-A is in migrations, W5-B in `(shell)`/tour/onboarding, W5-C in a new
+dashboard route + budget + panood + website. **None of them owns the launcher board.** Confirm with
+`gh pr list --state open` before you push anyway.
+
+🔑 THE LESSON THAT SHOULD SHAPE HOW YOU WORK THIS: TWO OF THREE ARE FIXES THAT LANDED ON ONE
+SURFACE WHILE AN IDENTICAL SURFACE KEPT THE DEFECT. So for each one you fix here, GREP FOR THE
+OTHER PLACES THAT RENDER THE SAME THING before you close it — a percentage ring, a lifecycle
+badge, a shelf membership test. **A fix at one site is not a fix**, and this repo has now proved
+that three separate times in two days.
+⚠ And ~70 changes shipped in two days, all tested, with these sitting on the first screen. **No
+test asks whether a screen contradicts the screen beside it.** If you can express any of these as
+a guard that compares two surfaces rather than checking one, that is worth more than the fix.
+
+2 PRs. No migration.
+
+RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
+```
 
 ### W6 · The grab-bag, verified first · **Fable (verify) → Sonnet 5 (fix) · medium**
 
