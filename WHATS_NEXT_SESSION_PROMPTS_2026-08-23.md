@@ -30,16 +30,22 @@ not have to answer anything mid-session.**
 | ~~W3-C · A wake is not a celebration~~ | 🛑 **SUPERSEDED** — merged into W4-WORDS | — | — | — |
 | ~~W4-B · Sixty-three supplier screens~~ | ✅ **DONE** 08-24 · 6 PRs (#4772–#4779) | — | — | 4 |
 | ~~W4-C · Shut the doors nobody uses~~ | ✅ **DONE** 08-24 · 27 more grants closed, 2 views pinned | Opus 5 | xhigh | 4 |
-| **W4-ADMIN · The admin console, one shape** *(was W2-C2)* | ⏭ **OPEN** — ⚠ **108** routes now, not the 95 in its title | Opus 5 | high | 4 |
-| **W4-A · The four screens a couple lives in** | 🟡 **PARTLY COVERED — MEASURE BEFORE RUNNING.** Three commits already closed colour-register deltas on **guests · budget · alaala** ("the gold slot stops painting words on the guests screens", "budget and alaala close their colour-register deltas"). The **vendors** screen is not named in any of them, and whether the COMPOSITION port was done at all is unverified. It may be a quarter of a session, not a whole one. | Opus 5 → Sonnet 5 | medium | 4 |
-| **W4-WORDS · The words follow the occasion** | ⏭ **OPEN** — ⚠ its scope changed: the vocabulary is a DB table, not a lib file | Opus 5 (+ Fable for the words) | high | 4 |
-| **W5-A · A supplier's record survives a delete** | ⏭ **OPEN** — the most careful one | Opus 5 | **max** | 5 |
-| **W5-B · The surfaces nobody drew** | ⏭ **OPEN** — re-scope first | Fable → Opus 5 | medium | 5 |
-| **W5-C · Who is in my event?** | ⏭ **OPEN** | Opus 5 | medium | 5 |
-| **W6 · The grab-bag, verified first** | ⏭ **OPEN** — carries the orphans from waves 0–3 | Fable → Sonnet 5 | medium | 6 · alone |
-| **W8 · Guests can see who else is coming** | ⏭ **OPEN** — owner-ruled 08-23 | Opus 5 | high | 8 · alone |
+| **W4-ADMIN · The admin console, one shape** *(was W2-C2)* | ▶ **NOT STARTED** — ⚠ **108** routes now, not the 95 in its title | Opus 5 | high | 4 |
+| **W4-A · The four screens a couple lives in** | 🏃 **RUNNING** since 2026-08-24 · 🟡 **PARTLY COVERED — MEASURE BEFORE RUNNING.** Three commits already closed colour-register deltas on **guests · budget · alaala** ("the gold slot stops painting words on the guests screens", "budget and alaala close their colour-register deltas"). The **vendors** screen is not named in any of them, and whether the COMPOSITION port was done at all is unverified. It may be a quarter of a session, not a whole one. | Opus 5 → Sonnet 5 | medium | 4 |
+| **W4-WORDS · The words follow the occasion** | ▶ **NOT STARTED** — ⚠ its scope changed: the vocabulary is a DB table, not a lib file | Opus 5 (+ Fable for the words) | high | 4 |
+| **W5-A · A supplier's record survives a delete** | ▶ **NOT STARTED** — the most careful one | Opus 5 | **max** | 5 |
+| **W5-B · The surfaces nobody drew** | ▶ **NOT STARTED** — re-scope first | Fable → Opus 5 | medium | 5 |
+| **W5-C · Who is in my event?** | ▶ **NOT STARTED** | Opus 5 | medium | 5 |
+| **W6 · The grab-bag, verified first** | ▶ **NOT STARTED** — carries the orphans from waves 0–3 | Fable → Sonnet 5 | medium | 6 · alone |
+| **W8 · Guests can see who else is coming** | ▶ **NOT STARTED** — owner-ruled 08-23 | Opus 5 | high | 8 · alone |
 
-> ⚠ **THIS TABLE IS A SUMMARY AND SUMMARIES GO STALE FIRST.** It disagreed with the section
+> 🔑 **THREE STATES, NOT TWO — "OPEN" WAS AMBIGUOUS AND MISLED THE OWNER (2026-08-24).** He asked
+> why a session was "open" when one was plainly running it, and he was right: the word conflated
+> *nobody has this* with *somebody has this and has not finished*. **✅ DONE · 🏃 RUNNING · ▶ NOT
+> STARTED.** A register that cannot tell the second from the third will keep sending people to
+> start work already in flight — which is the collision the whole wave rule exists to prevent.
+>
+> ⚠ **AND THIS TABLE IS A SUMMARY AND SUMMARIES GO STALE FIRST.** It disagreed with the section
 > markers below for several hours on 2026-08-24 — the same read-from-the-middle failure this file
 > has already produced twice. **A session's own section is the authority; if this table disagrees
 > with it, THE SECTION WINS.** 13 done · 8 open.
