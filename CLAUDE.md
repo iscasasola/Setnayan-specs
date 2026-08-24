@@ -132,7 +132,7 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > are now **56%** and **no column was removed** (which columns exist was never ruled on, only
 > rows-not-tiles, owner 2026-06-05). Budget did NOT already speak the Ledger register — its three
 > biggest numbers render in the BODY face while their own labels are mono. ✅ **CLOSED 2026-08-25 —
-> W5-E, 5 PRs (#4814 · #4815 · #4819 · #4821 · #4822).** The typeface delta is fixed, each supplier
+> W5-E, **9 PRs, all merged and SERVED** (#4814 · #4815 · #4819 · #4820 · #4821 · #4822 · #4825 · #4827 · #4829).** The typeface delta is fixed, each supplier
 > card is now summary-first with its history on demand, and the guard that pins it censuses **every
 > rendered money figure** instead of matching one component SHAPE — which is how it found a
 > right-aligned money column ("Next payments") the first pass had walked straight past. ✅ Still true
