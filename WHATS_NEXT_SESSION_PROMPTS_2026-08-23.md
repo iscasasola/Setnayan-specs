@@ -32,7 +32,7 @@ not have to answer anything mid-session.**
 | ~~W4-C · Shut the doors nobody uses~~ | ✅ **DONE** 08-24 · 27 more grants closed, 2 views pinned | Opus 5 | xhigh | 4 |
 | ~~W4-ADMIN · The admin console, one shape~~ | ✅ **DONE** 08-24 · 4 PRs (#4785 · #4787 · #4788 · #4789) · the header-row bill **54 → 0** | Opus 5 | high | 4 |
 | ~~W4-A · The four screens a couple lives in~~ | ✅ **DONE 2026-08-24 · 4 PRs (#4771 · #4780 · #4782 · #4791), SERVED not merely merged** — #4791's merge commit is an ancestor of the build production is running. 🔑 **It reported itself DONE at 3 PRs when it was two-thirds finished; its OWN adversarial audit caught that, CI and review did not.** Root cause, recorded as the headline rather than buried: it swept for one SPELLING of a colour, found every instance of that spelling, and called the colour delta closed — while those screens also paint in raw hex and inline CSS vars. ⏭ Three things stay open and are NOT debt: the guest roster's selection column (owner decision) · budget's total/grouping/collapse (a redesign, for whoever owns the six-state port) · and two unclaimed surfaces. | Opus 5 | medium | 4 |
-| **W4-WORDS · The words follow the occasion** | ▶ **NOT STARTED** — ⚠ its scope changed: the vocabulary is a DB table, not a lib file | Opus 5 (+ Fable for the words) | high | 4 |
+| ~~W4-WORDS · The words follow the occasion~~ | ✅ **DONE** 08-24 · 1 PR [#4793](https://github.com/iscasasola/setnayan-platform/pull/4793), **SERVED and verified in prod by the object** (funeral vocab row · `register:'solemn'` profile · 7 scoped tiles · the quiet onboarding intro). 🔑 **Step 1 (threading) was ALREADY SHIPPED as S13** — the brief's "69 guest-read instances" was stale; a real comment-stripper found ONE rendered remainder, already on the S13 bill deliberately. The whole session became the wake. Six coverage guards fired on the new type (the sixth — role sets — only in CI, because it lives in the db suite); each answered as a decision. | Fable 5 | high | 4 |
 | **W5-A · A supplier's record survives a delete** | ▶ **NOT STARTED** — the most careful one | Opus 5 | **max** | 5 |
 | **W5-B · The surfaces nobody drew** | ▶ **NOT STARTED** — re-scope first | Fable → Opus 5 | medium | 5 |
 | **W5-C · Who is in my event?** | ▶ **NOT STARTED** | Opus 5 | medium | 5 |
@@ -262,7 +262,7 @@ event-words provider).
 | **1** | **W1-A** finished event + launcher + dashboard polish · **W1-B** Pabati + buy pages + story-editing goes free · **W1-C** paperwork | W1-B |
 | **2** | **W2-A** guest activation + the cookie banner + honest reads in the hub · **W2-B** the two deletion jobs · **W2-C1** the admin gold | — |
 | **3** | ~~**W3-A** honest reads in the couple tree~~ **✅ DONE** · ~~**W3-B** supplier cards~~ **✅ DONE** · ~~**W3-D** the guest page's design set~~ **✅ DONE 2026-08-24 — 5 PRs, #4754 · #4755 · #4757 · #4758 · #4759** | ✅ **WAVE 3 IS COMPLETE.** W3-C was superseded into W4-WORDS. |
-| **4** | **W4-WORDS** ⭑NEW the words follow the occasion · **W4-B** supplier screens · **W4-ADMIN** the admin console | W4-WORDS |
+| **4** | ~~**W4-WORDS**~~ ✅ **DONE 08-24** (PR #4793 — the funeral built; threading was already S13) · ~~**W4-B**~~ ✅ DONE · **W4-ADMIN** the admin console | W4-ADMIN (or wave 5) |
 | **5** | **W4-A** the couple's four daily screens · **W5-C** who is in my event + drafted invitation words · **W4-C** grant hardening | W4-C |
 | **6** | **W5-A** a supplier's record survives a delete · **W5-B** the undrawn surfaces | W5-A |
 | **7** | **W6** the grab-bag, ALONE | per finding |
@@ -326,7 +326,7 @@ in this table, it does not exist in the plan — say so rather than inventing a 
 | D-4 | one button per screen means "do this now" | — | 🔴 owner: were the gold buttons a deliberate signature? |
 | D-5 | the chip stops saying "pick one" when it is picked | **W1-A** | scheduled |
 | D-6 | the card stops printing 117 twice | **W1-A** | scheduled |
-| D-7 | the words-provider seam | **W4-WORDS** | already mounted — threading, not building |
+| D-7 | the words-provider seam | **W4-WORDS** | ✅ DONE 08-24 — was already mounted AND threaded (S13); the wake now rides it |
 | D-8 | mono keeps digits, loses words | **W1-A** | scheduled |
 | H-1 | the veil instruction reads like an invitation | **W3-D** | scheduled ⚠ open it in a browser first |
 | H-2 | the film's small announcements read as engraved small caps, not terminal type | **W3-D** | 🔴 owner-gated — scoped, do not build until he rules |
@@ -334,7 +334,7 @@ in this table, it does not exist in the plan — say so rather than inventing a 
 | H-4 | the venue shows real streets | **W3-D** | scheduled ⚠ do NOT touch the CSP |
 | H-5 | "Add to calendar" in the same place at every stage | **W3-D** | scheduled — measured |
 | H-6 | one quiet line of weather under the date, and nothing when there is no reliable forecast | **W3-D** | 🔴 owner-gated — **= AP-9**; whether at all, AND which source |
-| H-7 | a birthday page stops calling the family "the couple" | **W4-WORDS** | scheduled — the largest, most visible one |
+| H-7 | a birthday page stops calling the family "the couple" | **W4-WORDS** | ✅ CLOSED 08-24 — measured with a real comment-stripper: S13 had already threaded it; the only rendered remainder was one deliberately-unreachable string on the S13 bill. The "69 instances" was stale. |
 
 ### ✅ THE TWO GAPS ARE CLOSED — both exist, both are OWNER-GATED, neither is lost work
 
@@ -2099,7 +2099,46 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 
 </details>
 
-### W4-WORDS · The words follow the occasion · **Opus 5 · high · the wording drafted by Fable** — wave 4
+### ✅ W4-WORDS · The words follow the occasion — **DONE 2026-08-24. DO NOT RUN THIS SECTION.**
+
+**1 PR, [#4793](https://github.com/iscasasola/setnayan-platform/pull/4793), merged and SERVED**
+(`/api/health` → `2eb7b2d`), the migration **verified applied in prod BY THE OBJECT**: the
+`funeral` vocab row (🕊️, enabled) · the profile with `register:'solemn'` / `occasion_noun:
+'gathering'` / organizer `family` / event word `wake` · the quiet onboarding intro · exactly
+seven scoped marketplace tiles. Full row: `DECISION_LOG.md` 2026-08-24 (🕊️).
+
+🔑 **STEP 1 OF THIS BRIEF WAS ALREADY SHIPPED — measure before building, again.** The "69
+guest-read instances still say 'the couple'" premise was stale: S13 had already threaded the
+guest tree and holds it with an exact-bill guard. A REAL comment-stripper (state machine, not
+line prefixes — most survivors of a prefix filter are continuation lines of block comments)
+found ONE rendered remainder, already on the S13 bill as deliberately unreachable. The entire
+session became step 2, the wake.
+
+🔑 **THE TONE SWITCH IS DATA.** `event_type_profiles.terminology` is JSONB, so the register
+rides the existing column — the brief's suspicion ("the migration may be a data insert, not
+schema") was exactly right. `EventWords` gains `occasion` + `solemn`; a hardcoded
+`FUNERAL_PROFILE` keeps a wake solemn on a DB read error. The solemn no-save-the-date gate is
+keyed on the REGISTER, deliberately NOT on `surfaceEnabled('save_the_date')` — the general
+wedding-parts gate is S15's scope and the funeral must not ride along with it.
+
+🪤 **SIX coverage guards fired on the new type — the design working, not failing.** Five in the
+unit suite (papic offer · cadence · checklist def · sample story · AI tier), each answered as a
+decision; the SIXTH (host role sets) fired **only in CI**, because it lives in the db suite and
+the session had run only its own two db files. The whole `test:db` suite (1512) now run and
+green. Papic is OFFERED at wakes per the standing 2026-08-01 "offer Papic everywhere" ruling —
+one line to reverse. **Baptism deliberately NOT added** (the 2026-08-17 ruling: christening
+covers it).
+
+🪤 **A trap fixed in passing:** the admin profile editor REBUILT the terminology blob from its
+six form fields — any admin save would have silently stripped the solemn register with no
+error. It now merges over the stored blob, pinned by test.
+
+⏭ **OPEN OWNER DECISIONS (flagged in the PR, not decided):** the funeral's AI-planner tier
+(today the explicit ₱499 standard default — whether the planner should offer itself at a
+funeral at all is his) · whether wakes stay in the Papic offer · a funeral-home taxonomy leaf
+(none exists).
+
+<details><summary>The completed prompt</summary>
 
 ```
 This session MERGES two that were building one mechanism: "a birthday page stops calling the family
@@ -2165,3 +2204,5 @@ disagree, the one with the measurement behind it wins.**
 
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
+
+</details>
