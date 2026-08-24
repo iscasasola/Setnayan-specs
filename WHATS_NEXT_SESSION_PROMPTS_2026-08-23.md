@@ -41,10 +41,10 @@ not have to answer anything mid-session.**
 🔑 **AND THE DECISION IS ALREADY MADE — ONLY THE CALL SITE IS MISSING.** Verified in `lib/delegate-areas.ts`: `'budget'` is a **first-class declared area** — in the type union (:29), the `as const` array (:49), the label map (:60), and **defaulted OFF** (`budget: null`, :76) — with its own explicit resolver at **:97**: `if (area === 'budget') return perms.checkout ? 'view' : null;` **The product already decided what a delegate holding checkout may see of the money. It simply never asks on the one door where money lives.**
 🚨 **THE TRAP THAT WOULD MAKE A CORRECT-LOOKING FIX A NO-OP — READ :99-100 BEFORE CHOOSING A PREDICATE.** The tail below that fallback **FAILS OPEN**: any delegate with `edit_all` and no explicit key gets `'edit'`. The file's own comment calls this *"NON-OPTIONAL, and the whole reason this function needed touching"*, and warns that adding an area without handling it *"would have silently handed the couple's guest photos to every existing delegate — including the accepted planner row live in production right now."* ⇒ **A gate written without reading that line admits exactly the delegate it exists to refuse.** | — | — | — |
 | ⭑**UNCLAIMED · 98 loading screens still draw the retired page title** | ▶ **NOT STARTED.** Belongs to the 2026-08-21 header retirement, not to any design wave. | — | — | — |
-| ⭑**UNCLAIMED · the dashboard `galleries/` surface** | ▶ **NOT STARTED — NO WAVE OWNS IT.** Surfaced by W4-A: `alaala` is the owner-directed memory-arc pillar page (2026-06-15), NOT the gallery. The Gallery archetype's dashboard subject is `galleries/`, a different surface nobody has claimed. Also unclaimed: the couple's vendors LIST route answers to no archetype by route and stays under its own locked spec. | — | — | — |
+| ~~UNCLAIMED · the dashboard `galleries/` surface~~ | 🛑 **CLOSED 2026-08-25 BY MEASUREMENT (W5-E) — THIS ROW'S PREMISE WAS FALSE. Do not re-open it as a port.** `alaala` is indeed not the gallery — **and neither is `galleries/`.** The archetype's dashboard chip is `/dashboard/[event-id]/**gallery**`, SINGULAR, and **no such route exists**; `galleries/` is a hub of three source rows (Papic · Live Studio · your own photos) while the archetype draws an obsidian photo mosaic with a lightbox and per-tile camera credit, and calls its subject *"The Alaala memory hub"*. The real photo grid a couple reaches from that hub is the **Papic recap**, owned by no wave. ⏭ **What is genuinely open is a DESIGN decision:** either the Gallery archetype gains a hub state, or `galleries/` is declared outside it. **Owner/design, not engineering.** ⏭ Still unclaimed and untouched: the couple's vendors LIST route answers to no archetype and stays under its own locked spec. | — | — | — |
 | **SAMAHAN · the group, its stories and its chat** | 🏃 **RUNNING · integrated into this plan 2026-08-24.** 6 PRs merged (#4781 #4783 #4784 #4786 #4790), #4795 open. Owns `(account)/samahan` + `lib/communities` + its own migrations — no wave session owns those. 🔴 **Regenerates the FK-behaviour file and the exposure baseline: MUST NOT run at the same time as W5-A.** | — | — | alongside |
 | ~~W5-D · The board tells the truth~~ | ✅ **DONE 2026-08-24 · 3 PRs (#4804 · #4805 · #4806).** All three phone findings are live: a celebrated card is **kept, not graded**, the score prints once, and the shelf stopped listing celebrations that already exist. 🔑 **#4806 did the thing worth more than the fixes — a guard that COMPARES TWO SURFACES**, the check whose absence let two of the three exist. | — | — | 5 |
-| ⭑**W5-E · Two surfaces nobody claimed** | ▶ **NOT STARTED — created 2026-08-25 from the unclaimed rows.** The dashboard `galleries/` surface (the Gallery archetype's real subject, skipped because it was assumed to be `alaala`) and the budget screen's archetype gap. Runs alongside W8. | Opus 5 | medium | 5 |
+| ~~W5-E · Two surfaces nobody claimed~~ | ✅ **DONE 2026-08-25 · 2 PRs ([#4814](https://github.com/iscasasola/setnayan-platform/pull/4814) · [#4815](https://github.com/iscasasola/setnayan-platform/pull/4815)), no migration.** 🛑 **Item 1 closed on a MEASUREMENT and NOT built — the brief's premise was wrong.** The Gallery archetype's route chip is `/dashboard/[event-id]/**gallery**` (singular) and **that route does not exist**; `galleries/` is a **hub of three source rows**, and the archetype draws an obsidian photo mosaic. Not the same screen, and no other archetype draws a hub — a forced fit is worse than an unported screen. ⏭ Left as a **design** call, not a port. ✅ **Item 2 was true and shipped:** the supplier money figures wear the ledger face (*Paid* appeared twice on one screen in two typefaces), and each supplier card is now summary-first with its history on demand. ⏭ Pinning + grouping deliberately not taken, reasons in `DECISION_LOG.md` 2026-08-25. | Opus 5 | medium | 5 |
 | **W6 · The grab-bag, verified first** | ▶ **NOT STARTED** — carries the orphans from waves 0–3 | Fable → Sonnet 5 | medium | 6 · alone |
 | **W8 · ~~Guests can see who else is coming~~ → THE COORDINATOR CAN SEE THE GUEST LIST** | ▶ **NOT STARTED · RE-SCOPED 08-24 — the owner REVERSED his earlier yes.** *"no. only the owner of the event and coordinator (by request)."* ⛔ Nothing is published to guests. The accepted-only rule, the K-floor and the per-event switch **all fall away — do not build them.** It is now an ACCESS GRANT: the host already sees the list; a coordinator sees it ON REQUEST. Much smaller, and no longer a privacy disclosure. | Opus 5 | medium | 8 · alone |
 
@@ -2100,7 +2100,31 @@ a guard that compares two surfaces rather than checking one, that is worth more 
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
 
-### ⭑ W5-E · Two surfaces nobody claimed · **Opus 5 · medium** — runs alongside W8
+### ~~⭑ W5-E · Two surfaces nobody claimed~~ · ✅ **DONE 2026-08-25** — do NOT run this again
+
+> 🛑 **READ THIS BEFORE THE PROMPT BELOW — ITEM 1'S PREMISE DID NOT SURVIVE MEASUREMENT.**
+> The prompt says *"the Gallery archetype's dashboard subject is `galleries/`"*. It is not.
+> The archetype's own route chip reads `/dashboard/[event-id]/`**`gallery`** — **singular** — and
+> **that route does not exist in the app.** What ships at `galleries/` is a **hub of three source
+> rows** (Papic · Live Studio · the couple's own photos), each a name, a Collecting/Ready pill and
+> one link out. The archetype draws an obsidian photo **mosaic** with a lightbox, per-tile camera
+> credit and five non-ideal states, and names its subject *"The Alaala memory hub"*.
+> **Not the same screen — and none of the other eleven page archetypes draws a hub of links
+> either**, so per this prompt's own instruction the port was **not attempted**.
+> 🔑 **The correction runs BOTH WAYS: `alaala` is not the gallery, and `galleries/` is not the
+> Gallery.** W4-A refused the first substitution and made the second one in the same sentence.
+> ⏭ **The open item is a DESIGN call, not a port** — either the Gallery archetype gains a hub
+> state, or `galleries/` is declared outside its scope.
+>
+> ✅ **Item 2 was true and is built — 2 PRs, no migration:**
+> [#4814](https://github.com/iscasasola/setnayan-platform/pull/4814) the money figures wear the
+> ledger face · [#4815](https://github.com/iscasasola/setnayan-platform/pull/4815) each supplier
+> card is summary-first, history on demand. Full row: `DECISION_LOG.md` 2026-08-25.
+> ⏭ **The pinned total and the category grouping were deliberately NOT taken** and each has a
+> measured reason there — the pin needs a layout the archetype does not draw for this shell, and
+> the grouping's own subtotal would be built on a read that can be refused.
+
+**The original prompt is kept below as history.**
 
 *Created 2026-08-25 from the unclaimed rows. Both were surfaced by other sessions working nearby
 and fell outside every brief — which is exactly why they survived.*
