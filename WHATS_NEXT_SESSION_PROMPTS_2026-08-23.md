@@ -31,11 +31,13 @@ not have to answer anything mid-session.**
 | ~~W4-B · Sixty-three supplier screens~~ | ✅ **DONE** 08-24 · 6 PRs (#4772–#4779) | — | — | 4 |
 | ~~W4-C · Shut the doors nobody uses~~ | ✅ **DONE** 08-24 · 27 more grants closed, 2 views pinned | Opus 5 | xhigh | 4 |
 | **W4-ADMIN · The admin console, one shape** *(was W2-C2)* | ▶ **NOT STARTED** — ⚠ **108** routes now, not the 95 in its title | Opus 5 | high | 4 |
-| ~~W4-A · The four screens a couple lives in~~ | ✅ **DONE** 08-24 · 3 PRs (#4771 · #4780 · #4782) — and it was **a QUARTER of a session**, as the re-measure predicted: all four screens already matched their archetypes STRUCTURALLY, so nothing was redrawn. 46 gold-as-text sites moved off the failing gold · a typo class that styled nothing · a gold error message moved to danger · and one real typeface fallback (the vendors category-search overlay asked for a `--font-serif` that is defined NOWHERE, so its serif titles had rendered in the phone's default since it shipped). | Opus 5 → Sonnet 5 | medium | 4 |
+| **W4-A · The four screens a couple lives in** | 🟡 **PARTLY — corrected from DONE by the session's OWN adversarial audit, 2026-08-24.** It did ~two-thirds and reported finished. HELD: nothing was rebuilt · the colour-NAME sweep is genuinely complete (53 bare uses left, all hand-verified as icons) · the overlay serif fix is real. DID NOT HOLD: 30+ raw hex values remain, several painting text · budget's three biggest numbers render in the body face while their own labels are mono, so "Paid" appears twice in two typefaces · the guests table ships EIGHT columns where the archetype specifies five and says the roster "never grows a selection column", with six fixed-width columns eating 78% of the table so names truncate to ~8 characters. 🚨 **And alaala's stage numerals paint at 2.03:1 — WORSE than the 3.37:1 gold the whole stream existed to remove — in a file it edited that day.** PR 4 in flight. | Opus 5 | medium | 4 |
 | **W4-WORDS · The words follow the occasion** | ▶ **NOT STARTED** — ⚠ its scope changed: the vocabulary is a DB table, not a lib file | Opus 5 (+ Fable for the words) | high | 4 |
 | **W5-A · A supplier's record survives a delete** | ▶ **NOT STARTED** — the most careful one | Opus 5 | **max** | 5 |
 | **W5-B · The surfaces nobody drew** | ▶ **NOT STARTED** — re-scope first | Fable → Opus 5 | medium | 5 |
 | **W5-C · Who is in my event?** | ▶ **NOT STARTED** | Opus 5 | medium | 5 |
+| ⭑**UNCLAIMED · a coordinator without budget access reads the budget TARGET** | ▶ **NOT STARTED — NO WAVE OWNS IT.** The database correctly refuses her the line items, but the headline number arrives through a door that only checks event membership — and because the payments are refused-not-empty, **every supplier reads "Paid ₱0" to her. She is told two untrue things at once.** ⛔ **IT IS A MISSING SCREEN, NOT A BROKEN PERMISSION** — the archetype already drew the refusal screen with its copy written. **Nobody should touch the permissions over it.** | — | — | — |
+| ⭑**UNCLAIMED · 98 loading screens still draw the retired page title** | ▶ **NOT STARTED.** Belongs to the 2026-08-21 header retirement, not to any design wave. | — | — | — |
 | ⭑**UNCLAIMED · the dashboard `galleries/` surface** | ▶ **NOT STARTED — NO WAVE OWNS IT.** Surfaced by W4-A: `alaala` is the owner-directed memory-arc pillar page (2026-06-15), NOT the gallery. The Gallery archetype's dashboard subject is `galleries/`, a different surface nobody has claimed. Also unclaimed: the couple's vendors LIST route answers to no archetype by route and stays under its own locked spec. | — | — | — |
 | **W6 · The grab-bag, verified first** | ▶ **NOT STARTED** — carries the orphans from waves 0–3 | Fable → Sonnet 5 | medium | 6 · alone |
 | **W8 · ~~Guests can see who else is coming~~ → THE COORDINATOR CAN SEE THE GUEST LIST** | ▶ **NOT STARTED · RE-SCOPED 08-24 — the owner REVERSED his earlier yes.** *"no. only the owner of the event and coordinator (by request)."* ⛔ Nothing is published to guests. The accepted-only rule, the K-floor and the per-event switch **all fall away — do not build them.** It is now an ACCESS GRANT: the host already sees the list; a coordinator sees it ON REQUEST. Much smaller, and no longer a privacy disclosure. | Opus 5 | medium | 8 · alone |
@@ -606,6 +608,17 @@ PROOF RULES — this product's entire defect history is bugs that were green in 
   symptom is an absence. If a screen is empty, suspect refusal before emptiness.
 - Supabase does not throw; it resolves with { error }. A try/catch around a read is decoration.
   An unread count is not zero.
+- 🔑 **COVERAGE IS DECIDED BY WHAT RENDERS, NEVER BY WHAT ONE SPELLING MATCHES — and this is the
+  TWIN of the rule below it.** Proved 2026-08-24: a colour guard matched the class name
+  `text-terracotta` by regex and reported a tree clean. One screen in its own bill paints
+  exclusively through `style={{ color: 'var(--m-orange-3)' }}` — **the guard contains zero
+  references to that variable, so its coverage of that screen is ZERO while listing it.** The
+  numerals there measure **2.03:1, worse than the 3.37:1 the sweep existed to remove.**
+  🔗 **PAIR IT WITH ITS TWIN, because they are one error in two costumes:** *ownership is decided
+  by the files a commit touches, never by its title* (I misfiled a commit by reading its name) and
+  *coverage is decided by what renders, never by what one spelling matches* (a guard surveyed one
+  spelling and reported a survey). **BOTH substitute a label for the thing itself.** Before
+  trusting any sweep: ask what the subject can be written as, not just how you wrote it.
 - A GUARD THAT EXEMPTS BY *FILE* EXEMPTS THE CODE IT POLICES. Proved 2026-08-24: a guard against
   markup leaking into visible words exempted any file containing `dangerouslySetInnerHTML`
   anywhere — and BOTH files carrying real defects contained one, so it exempted exactly what it
