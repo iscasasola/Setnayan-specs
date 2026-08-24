@@ -220,10 +220,29 @@ the shadow, never adds a fill.** Check BOTH themes on every tinted block.
 
 ---
 
-# S17 · A wake is not a celebration
+# S17 · A wake is not a celebration — ✅ **BUILT 2026-08-24, as W4-WORDS. Do NOT run this section.**
 
-✅ **Approved 2026-08-17** (owner: *"yes to all four"*). 🛑 **Its own session. Do NOT fold it into
-S15 — it is not a row in a table.**
+**This session became W3-C, then merged into W4-WORDS (the 2026-08-23 plan), and W4-WORDS
+shipped it**: PR [#4793](https://github.com/iscasasola/setnayan-platform/pull/4793), merged,
+SERVED, migration verified in prod by the object. The `funeral` type exists with a
+`register:'solemn'` profile; the guest tree never says celebrate, never counts down, never
+offers a save-the-date, and money reads "a gift of sympathy". Full row: `DECISION_LOG.md`
+2026-08-24 🕊️.
+
+⚠ **THREE DELTAS FROM THE SKETCH BELOW, stated rather than discovered.** The parenthetical
+scope under "which parts a wake gets" was this doc's PROPOSAL from the drawn prototype, not an
+owner ruling, and the executed plan did not carry it:
+- **RSVP is ON** — with solemn reply labels ("Will be there / Unable to come"), because a
+  family arranging vigil nights genuinely needs to know who is coming; the surface is the
+  family's to use or ignore.
+- **Seating is ON** — same posture: a tool available, nothing forced onto the page.
+- **The guest camera is OFFERED** — the standing 2026-08-01 "offer Papic everywhere" ruling
+  post-dates this sketch and governs; it is flagged to the owner as reversible in one line.
+The parts the sketch and the ruling agreed on — no countdown, no save-the-date, money gently —
+are built exactly as written. **Baptism was NOT added** (measured stance below stands:
+christening covers it).
+
+🛑 **Its own session. Do NOT fold it into S15 — it is not a row in a table.**
 
 **WHY IT IS BIGGER THAN IT LOOKS, and this was flagged the hour it was approved:** the other 15
 types are all celebrations and share one voice. The Event Hub says *celebration · party · guests ·
@@ -247,8 +266,9 @@ checklist already exists in the project notes; the mechanical cost is known and 
 
 ## Deliberately NOT in S13–S16
 
-- **Adding funeral and baptism as event types.** Neither exists. The drawn wake is a proposal,
-  not a repair. `OWNER_DECISION`.
+- ~~**Adding funeral and baptism as event types.** Neither exists.~~ ✅ **The funeral EXISTS
+  as of 2026-08-24** (W4-WORDS, PR #4793 — see the S17 banner above). Baptism deliberately
+  still not added: christening covers it (the 2026-08-17 ruling).
 - **Anything that makes the Event Hub editable.** It is a PLACE, not a control panel
   (owner-locked). The host keeps a read-only ribbon.
 - **Re-drawing the July "Pahina" look.** Seven merged changes already rebuilt this page's
