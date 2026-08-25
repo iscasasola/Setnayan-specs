@@ -65,6 +65,72 @@ committed docs on purpose.
 
 ## 🚦 ACTIVE WORK — READ THIS BEFORE ANYTHING ELSE (updated 2026-08-01)
 
+> ### ▶ ACTIVE 2026-08-26 — PAPIC IS THE EVENT'S ONE MEDIA LIBRARY (purpose LOCKED)
+> **Contract: [`WHATS_NEXT_Papic_Uploads_Are_A_Way_In_2026-08-26.md`](WHATS_NEXT_Papic_Uploads_Are_A_Way_In_2026-08-26.md).**
+> Owner: *"papic is the source where they collect media files for that event. that will be our
+> purpose. so the only exceptions will be the save the date video, or event video."*
+> Design (BINDING, ported not redrawn):
+> [`prototypes/papic_control_center_2026-08-25.html`](prototypes/papic_control_center_2026-08-25.html).
+>
+> ✅ **FOUR PRs — do NOT rebuild any of it.** [#4851](https://github.com/iscasasola/setnayan-platform/pull/4851)
+> (the two questions deleted — photo quality and "where your photos go"; Drive becomes an offer to
+> sync) · [#4856](https://github.com/iscasasola/setnayan-platform/pull/4856) (the camera dates show
+> in WHICHEVER room the couple lands in) · [#4857](https://github.com/iscasasola/setnayan-platform/pull/4857)
+> (four facts above every room) · [#4854](https://github.com/iscasasola/setnayan-platform/pull/4854)
+> ("Papic Pool" / "Papic One" leave everything a customer reads).
+> ⚠ **#4856 and #4857 merged INTO #4851's branch, not `main`** — their auto-merge fired against the
+> stacked base, so #4851 carries all three. **Verify with `gh pr view <n> --json state,mergedAt`
+> before trusting this line; this file has been wrong about a PR's state four times.**
+>
+> 🚨 **THE STORAGE QUESTION WAS NEVER REAL.** `events.papic_storage_target` is read by exactly THREE
+> files — the card that drew it, the actions that wrote it, and the Drive disconnect route — and by
+> **no capture, upload or storage path**; the comment describing that branch is still a `TODO(0012)`.
+> *"Use my Google Drive only · CONNECTED"* never made anything Drive-only, on the owner's own event
+> included. It also broke a promise we make aloud: we keep the gallery **for life**, impossible for
+> photos we never held.
+>
+> ⛔ **DO NOT WRITE A SECOND CAPTURE PATH FOR UPLOADS.** *"Give this person a camera of their own"*
+> is already generalised — `lib/papic-guest-own-camera.ts`, **no new schema**
+> (`paparazzi_seats.guest_id` + a unique index already exist). `ensureGuestOwnCameraAdmin` mints,
+> `papic_reserve_capture_split` spends the camera's own credits first and the pot pays the
+> remainder, and `/api/upload` **already whitelists video**. 🔑 **Dedicated credits are a FLOOR,
+> never a ceiling** — do not reintroduce a two-call sequence; the first call mutates and the second
+> then cannot tell "spent its last credit" from "never had any". ⚠ The real risk is **the unwind**:
+> two reserve sites, one give-back. Getting it wrong charges a couple for a photo they do not have.
+> ⚖ **An uploaded photo costs ONE credit** (owner: *"it will take up the same spot as 1 papic
+> photo"*). Not for storage — a kept photo costs ~₱0.06 for **fifty years** — but because a free
+> upload lane is a free door around the whole product.
+>
+> 🔢 **CONSOLIDATING IS FREE TODAY: every alternate media home in prod is EMPTY** (couple's own
+> uploads 0 · invitation hero film 0 · photographer handover 0 · Patiktok 0 · supplier captures 0 ·
+> venue walkthrough 0). Only Papic has anything — **14 photos**. The moment somebody fills the wrong
+> pile that stops being true.
+>
+> ✅ **FACE TAGGING IS LIVE — do NOT scope a build for it.** A session read **0 enrolments** as
+> *not built*; zero means nobody has used it yet ([[feedback_empty_is_the_plan_not_a_finding]]).
+> Measured: the model + `face-api.js` serve **HTTP 200** from R2 right now, switched on
+> **2026-06-19** and verified with a real face. Registration already sits on the Event Hub (the RSVP
+> widget + a day-of card). 🔑 **The QR says who HOLDS the camera; the face says who is IN the
+> picture** — different axes, so one shared QR traps nobody. The real split is **registered vs
+> not**, never custom-QR vs generic-QR.
+>
+> 🔴 **OWNER, NOT ENGINEERING:** the **DPO ruling** that opens the supplier capture lane (built,
+> switched off, route 403s) — and until it opens, **a photographer can only hand over a LINK**,
+> never files into the couple's library. That is the one genuinely new build left.
+> ⏭ Also unbuilt and needed for per-person folders: `papic_photos.captured_by_person_id` has
+> **zero writers**, so *"each person's own folder"* is not reading something we already store.
+>
+> 🪤 **TRAPS PAID FOR — assume a sixth.** **Not everything in `scripts/` is a check:**
+> `swap-status-color-tokens.mjs` is a **CODEMOD** that exited 0, printed nothing, read as PASS and
+> **rewrote 60 files**; caught only by `git status`. **A zero exit code means "it ran", not "it
+> changed nothing".** · **A claim to mirror something is not a mirror**, twice in one change — three
+> different values for one tier title (seed `Papic Mini` · code `Papic One` · **prod `Dedicated
+> camera (legacy)`**). · **A comparison keyed on a field that does not exist always agrees with
+> you** (`components` vs the real `blocks`). · **"The sabotage landed" needs its own measurement** —
+> a mutation that moved a component *before* a room instead of *inside* one passed and meant
+> nothing. · 🎨 **`mulberry-700` is 3.05:1 in DARK** (5.86 light) — use `mulberry-600`.
+
+
 **The owner's #1 complaint about new sessions: they start without the plan, rebuild things that
 already ship, and produce errors.** The fix is this block. Keep it CURRENT — one active work
 stream, deleted or replaced when it finishes. If you finish a stream, update this block.
