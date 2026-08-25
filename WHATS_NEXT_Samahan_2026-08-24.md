@@ -148,13 +148,17 @@ deferred this item since 2026-07-15 — it never has to be answered.**
   the caller's own session and its INSERT policy demands membership; a story is written with the
   service-role client, which is exactly when a read policy stops being defence in depth and becomes
   the entire fence. Ask a FACT (is there a membership row), with a client no policy can widen.
-- 🚨 **AUTOPLAY IS A GESTURE RULE, AND A REEL THAT ADVANCES ON `ended` IS A CHAIN OF NON-GESTURES.**
-  "Play the day" could only ever play its FIRST clip on an iPhone: every clip after it is mounted
-  from an `ended` handler, iOS refuses to autoplay audio without a user gesture, and these clips
-  always carry audio — so clip two sat on a still frame and nothing could ever reach another
-  `ended`. Green CI, passing guard, feature dead on the devices the PWA is installed on. **If the
-  only thing that advances a sequence is the media ending, the sequence dies the first time the
-  media does not start.** Fall back to muted and keep going; step over a clip that cannot load.
+- ◐ **AUTOPLAY IS A GESTURE RULE, AND A REEL THAT ADVANCES ON `ended` IS A CHAIN OF NON-GESTURES.**
+  Every clip after the first is mounted from an `ended` handler; iOS refuses to autoplay audio
+  without a user gesture, and these clips always carry audio — so on a phone the film **stopped
+  advancing by itself**. ⚠ **THE FIRST WRITE-UP OF THIS SAID "DEAD" AND "COULD NEVER MOVE AGAIN",
+  AND THE REFUTATION PASS KILLED THAT**: the viewer renders Back/Next, binds the arrow keys, and
+  the video carries `controls`, so the browser's own play button is both a retry and a gesture —
+  nobody is stranded. What breaks is the AUTOMATIC promise, which is the whole feature.
+  **If the only thing that advances a sequence is the media ending, the sequence stops the first
+  time the media does not start.** Fall back to muted and keep going; step over a clip that cannot
+  load. 🔑 And **unmuted-with-controls is the house shape** for a clip somebody tapped to watch
+  (`papic-gallery-grid.tsx`); every muted `<video>` in this app is an ambient one.
 - 🪤 **A LABEL IS NOT A MEMBERSHIP.** The samahan chip filtered by typing the group's name into the
   search box — a substring match over `from`, which carries `via[0]` only and is replaced entirely
   when cross-source de-duplication keeps a richer row. Real members were silently left out of "the
@@ -163,10 +167,20 @@ deferred this item since 2026-07-15 — it never has to be answered.**
 - 🪤 **NO SILENT CAPS.** `picks.slice(0, 200)` counted nothing past 200, so a 340-pick add returned
   `added: 200, failed: 0` and the sheet closed as if it had worked. The cap was old; a one-tap
   bulk control made it reachable.
+- 🪤 **A PICK YOU CANNOT SEE CAN HOLD A BUTTON SHUT.** Add is disabled while a chosen one-word name
+  has no surname — computed over EVERY loaded row, while the "Last name" box that satisfies it
+  renders only for rows ON SCREEN. Chip → *choose all 12* → clear the chip, and three picks sat off
+  screen holding Add shut, unnamed and uncounted; closing the sheet was the only escape and it
+  discarded the selection. **Samahan rows are the population it bites** — one display-name string,
+  and a group-chat handle is one word far more often than a guest-list entry. Fixed in PR #4847:
+  the footer names the blockage and IS the control. ⚖ **A rule computed over everything, with a
+  remedy rendered for a subset, is a dead end waiting for a bulk control to make it reachable.**
 - 🛑 **AND THE AUDIT ITSELF NEARLY READ AS A CLEAN RESULT.** Five finders completed; **all eleven
   skeptic and critic agents died on a session usage limit**, so the run returned an empty survivor
   list. The findings were in `journal.jsonl` the whole time. **When a fan-out reports nothing,
   check whether it ran** — and verify unrefuted findings by hand rather than discarding them.
+  ✅ **Resumed after the limit reset: 16/16 agents, finders replayed from cache. 7 of 10 survived,
+  3 refuted, and the completeness critic found an 8th defect nobody had looked for.**
 
 
 - 🚨 **A POLICY WITHOUT ITS GRANT CAN NEVER FIRE.** `community_members` had a DELETE policy and
