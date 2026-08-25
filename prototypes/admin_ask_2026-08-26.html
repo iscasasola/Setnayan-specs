@@ -1,0 +1,477 @@
+<title>The Admin You Ask</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap">
+
+<style>
+/* Tokens from prototypes/admin_designed_2026-08-03.html — approved 2026-08-04.
+   gold #A9834B is 3.37:1 on white: rules and icons only, never text. */
+:root{
+  --ground:#FFFFFF; --panel:#FBFAF7; --sunk:#F4F2EC;
+  --ink:#2C2A29; --ink-soft:#4F535B; --ink-faint:#767A82;
+  --line:#E6E0D6; --line-soft:#F1ECE3;
+  --gold:#A9834B; --gold-text:#8A6B39; --gold-soft:#F5EEE1;
+  --slate:#3B4E67; --ok:#4F6B4A; --ok-soft:#EDF1E8;
+  --late:#B65A3A; --late-soft:#F7E9E6; --cta:#C24E25;
+  --shadow:0 1px 2px rgba(44,42,41,.05), 0 10px 28px -22px rgba(44,42,41,.38);
+  --pop:0 24px 60px -28px rgba(44,42,41,.42), 0 2px 8px rgba(44,42,41,.07);
+  --sans:"Hanken Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"Space Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ground:#191817; --panel:#221F1D; --sunk:#2A2724;
+  --ink:#EFEBE4; --ink-soft:#B5B0A8; --ink-faint:#8B857D;
+  --line:#3A3531; --line-soft:#2F2B27;
+  --gold:#C2A06A; --gold-text:#D6B87F; --gold-soft:#332B1E;
+  --slate:#9BB2CE; --ok:#9BBE93; --ok-soft:#232B21;
+  --late:#E08A66; --late-soft:#33221C; --cta:#E8703F;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -22px rgba(0,0,0,.8);
+  --pop:0 24px 60px -28px rgba(0,0,0,.9), 0 2px 8px rgba(0,0,0,.5);
+}}
+:root[data-theme="dark"]{
+  --ground:#191817; --panel:#221F1D; --sunk:#2A2724;
+  --ink:#EFEBE4; --ink-soft:#B5B0A8; --ink-faint:#8B857D;
+  --line:#3A3531; --line-soft:#2F2B27;
+  --gold:#C2A06A; --gold-text:#D6B87F; --gold-soft:#332B1E;
+  --slate:#9BB2CE; --ok:#9BBE93; --ok-soft:#232B21;
+  --late:#E08A66; --late-soft:#33221C; --cta:#E8703F;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -22px rgba(0,0,0,.8);
+  --pop:0 24px 60px -28px rgba(0,0,0,.9), 0 2px 8px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
+     font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.page{max-width:1140px;margin:0 auto;padding:44px 22px 90px}
+h1{font-size:clamp(1.8rem,4vw,2.5rem);line-height:1.1;letter-spacing:-.02em;margin:0;font-weight:700;text-wrap:balance}
+h2{font-size:1.22rem;margin:0;font-weight:700;letter-spacing:-.01em}
+p{margin:0}
+.eyebrow{font-family:var(--mono);font-size:.66rem;font-weight:700;letter-spacing:.16em;
+         text-transform:uppercase;color:var(--gold-text)}
+.lede{font-size:1.06rem;color:var(--ink-soft);max-width:66ch;margin-top:14px}
+.rule{height:3px;width:60px;background:var(--gold);border-radius:2px;margin-bottom:18px}
+.sub{color:var(--ink-soft);font-size:.9rem}
+.mono{font-family:var(--mono)}
+
+/* ── honesty strip ───────────────────────────────────────── */
+.honest{margin:26px 0 6px;border:1px solid var(--line);border-left:3px solid var(--gold);
+        border-radius:12px;background:var(--panel);padding:15px 17px;display:grid;gap:9px}
+.honest .t{font-family:var(--mono);font-size:.63rem;font-weight:700;letter-spacing:.14em;
+           text-transform:uppercase;color:var(--ink-faint)}
+.honest ul{margin:0;padding-left:18px;color:var(--ink-soft);font-size:.9rem}
+.honest li{margin:3px 0}
+.honest b{color:var(--ink)}
+
+/* ── segmented switcher ──────────────────────────────────── */
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:28px 0 20px;
+          padding:13px 15px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.controls .lbl{font-family:var(--mono);font-size:.61rem;font-weight:700;letter-spacing:.13em;
+               text-transform:uppercase;color:var(--ink-faint)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--ground);flex-wrap:wrap}
+.seg button{appearance:none;border:0;background:transparent;font:inherit;font-size:.8rem;
+            padding:8px 15px;cursor:pointer;color:var(--ink-soft);transition:background .18s var(--ease)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--ground);font-weight:600}
+.seg button:hover:not([aria-pressed="true"]){background:var(--sunk)}
+
+/* ── device frames ───────────────────────────────────────── */
+.stage{margin-top:8px}
+.laptop{border:1px solid var(--line);border-radius:16px;background:var(--panel);
+        box-shadow:var(--pop);overflow:hidden}
+.chrome{display:flex;align-items:center;gap:7px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--sunk)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
+.url{margin-left:8px;font-family:var(--mono);font-size:.66rem;color:var(--ink-faint)}
+.app{display:grid;grid-template-columns:186px 1fr;min-height:520px;background:var(--ground)}
+@media(max-width:760px){.app{grid-template-columns:1fr}.side{display:none}}
+
+/* sidebar — the six menus, dimmed on purpose */
+.side{border-right:1px solid var(--line);background:var(--panel);padding:16px 12px;display:grid;align-content:start;gap:3px}
+.brand{font-weight:700;letter-spacing:-.01em;padding:2px 8px 12px;font-size:.95rem}
+.side a{display:block;padding:7px 9px;border-radius:8px;text-decoration:none;color:var(--ink-faint);font-size:.85rem}
+.side a.on{background:var(--sunk);color:var(--ink);font-weight:600}
+.side .faded{opacity:.45}
+.side .note{margin-top:14px;padding:9px;border-top:1px dashed var(--line);color:var(--ink-faint);font-size:.7rem;line-height:1.4}
+
+/* main pane */
+.main{padding:22px 24px 30px;display:grid;align-content:start;gap:16px}
+
+/* the ask bar */
+.askwrap{display:grid;gap:10px}
+.ask{display:flex;align-items:center;gap:11px;border:1px solid var(--line);border-radius:12px;
+     background:var(--panel);padding:13px 15px;box-shadow:var(--shadow)}
+.ask.live{border-color:var(--cta);box-shadow:0 0 0 3px color-mix(in srgb,var(--cta) 14%,transparent)}
+.ask .ic{width:17px;height:17px;flex:none;color:var(--gold)}
+.ask .txt{flex:1;font-size:.98rem;color:var(--ink);min-height:1.5em}
+.ask .txt.empty{color:var(--ink-faint)}
+.caret{display:inline-block;width:1.5px;height:1.05em;background:var(--cta);vertical-align:-.18em;margin-left:1px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.kbd{font-family:var(--mono);font-size:.63rem;border:1px solid var(--line);border-radius:5px;
+     padding:3px 6px;color:var(--ink-faint);background:var(--ground);white-space:nowrap}
+.samples{display:flex;flex-wrap:wrap;gap:7px}
+.samples button{appearance:none;font:inherit;font-size:.78rem;cursor:pointer;
+                border:1px solid var(--line);background:var(--ground);color:var(--ink-soft);
+                border-radius:999px;padding:6px 12px;transition:all .18s var(--ease);text-align:left}
+.samples button:hover{border-color:var(--gold);color:var(--ink)}
+.samples button[aria-pressed="true"]{background:var(--ink);color:var(--ground);border-color:var(--ink);font-weight:600}
+
+/* answer card */
+.answer{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden;
+        animation:rise .34s var(--ease) both}
+@keyframes rise{from{opacity:0;transform:translateY(9px)}}
+.answer .head{padding:15px 17px 13px;border-bottom:1px solid var(--line-soft);display:flex;gap:12px;align-items:flex-start}
+.spark{width:26px;height:26px;flex:none;border-radius:8px;background:var(--gold-soft);
+       display:grid;place-items:center;color:var(--gold-text);font-size:.8rem}
+.answer .head .said{font-size:.97rem;font-weight:600;letter-spacing:-.01em}
+.answer .head .why{color:var(--ink-soft);font-size:.86rem;margin-top:3px}
+.answer .body{padding:15px 17px}
+
+/* price rows */
+.rows{border:1px solid var(--line);border-radius:11px;overflow:hidden;background:var(--ground)}
+.row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:11px 14px}
+.row+.row{border-top:1px solid var(--line-soft)}
+.row .nm{font-size:.92rem}
+.row .pr{font-family:var(--mono);font-size:.9rem;font-weight:700;white-space:nowrap}
+.row.head{background:var(--sunk);font-family:var(--mono);font-size:.63rem;letter-spacing:.13em;
+          text-transform:uppercase;color:var(--ink-faint);padding:8px 14px}
+.tag{font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;
+     border-radius:999px;padding:3px 7px;margin-left:8px;vertical-align:1px}
+.tag.on{background:var(--ok-soft);color:var(--ok)}
+.tag.off{background:var(--sunk);color:var(--ink-faint)}
+.tag.add{background:var(--gold-soft);color:var(--gold-text)}
+.foldaway{margin-top:10px;font-size:.84rem;color:var(--ink-soft)}
+.foldaway b{color:var(--ink)}
+
+/* conversation */
+.turns{display:grid;gap:11px}
+.turn{display:grid;gap:5px}
+.turn .who{font-family:var(--mono);font-size:.6rem;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-faint)}
+.bubble{border:1px solid var(--line);border-radius:11px;padding:11px 13px;background:var(--ground);font-size:.92rem}
+.turn.me .bubble{background:var(--sunk);border-color:var(--line-soft)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.chip{font-size:.76rem;border:1px solid var(--line);border-radius:999px;padding:5px 10px;color:var(--ink-soft);background:var(--ground)}
+.chip.pick{border-color:var(--gold);color:var(--ink);font-weight:600;background:var(--gold-soft)}
+
+/* review + actions */
+.review{border:1px solid var(--line);border-radius:11px;background:var(--ground);overflow:hidden;margin-top:4px}
+.review .r{display:grid;grid-template-columns:150px 1fr;gap:10px;padding:9px 14px;font-size:.88rem}
+.review .r+.r{border-top:1px solid var(--line-soft)}
+.review .k{color:var(--ink-faint);font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;padding-top:2px}
+.review .v b{font-weight:600}
+.was{color:var(--ink-faint);text-decoration:line-through;margin-right:8px}
+.actions{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:14px}
+.btn{appearance:none;font:inherit;font-size:.88rem;font-weight:600;cursor:pointer;border-radius:10px;
+     padding:10px 17px;border:1px solid transparent;transition:all .18s var(--ease)}
+.btn.primary{background:var(--cta);color:#fff}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.ghost{background:var(--ground);border-color:var(--line);color:var(--ink-soft)}
+.btn.ghost:hover{border-color:var(--ink-faint);color:var(--ink)}
+.yours{font-size:.8rem;color:var(--ink-soft);display:flex;align-items:center;gap:7px}
+.yours .pin{width:6px;height:6px;border-radius:50%;background:var(--cta);flex:none}
+
+/* the refusal note */
+.stop{margin-top:14px;border:1px solid var(--line);border-left:3px solid var(--late);
+      background:var(--late-soft);border-radius:11px;padding:12px 14px;font-size:.87rem;color:var(--ink)}
+.stop b{font-weight:700}
+
+/* phone */
+.phonewrap{display:flex;justify-content:center}
+.phone{width:330px;border:1px solid var(--line);border-radius:30px;background:var(--ground);
+       box-shadow:var(--pop);overflow:hidden}
+.phone .bar{height:26px;background:var(--sunk);border-bottom:1px solid var(--line);
+            display:grid;place-items:center;font-family:var(--mono);font-size:.6rem;color:var(--ink-faint)}
+.phone .inner{padding:16px 15px 26px;display:grid;gap:13px;min-height:520px;align-content:start}
+.phone .h{font-size:1.12rem;font-weight:700;letter-spacing:-.01em}
+.case{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:12px 13px;display:grid;gap:8px}
+.case .top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.case .t{font-size:.92rem;font-weight:600}
+.case .amt{font-family:var(--mono);font-size:.9rem;font-weight:700}
+.case .m{font-size:.82rem;color:var(--ink-soft)}
+.proof{height:64px;border-radius:8px;border:1px dashed var(--line);background:var(--sunk);
+       display:grid;place-items:center;font-size:.72rem;color:var(--ink-faint)}
+.case .go{display:flex;gap:8px}
+.case .go .btn{padding:8px 14px;font-size:.83rem;border-radius:9px}
+.nomenu{margin-top:6px;border-top:1px dashed var(--line);padding-top:11px;font-size:.8rem;color:var(--ink-faint)}
+
+/* footer notes */
+.notes{margin-top:34px;display:grid;gap:12px}
+.note{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:14px 16px}
+.note .t{font-weight:700;font-size:.95rem;margin-bottom:4px}
+.note .d{color:var(--ink-soft);font-size:.88rem}
+.hide{display:none}
+</style>
+
+<div class="page">
+  <div class="rule"></div>
+  <p class="eyebrow">Admin · drawn 26 Aug 2026</p>
+  <h1>The admin you ask</h1>
+  <p class="lede">You type what you want in plain words. It either <b>takes you to the exact spot</b>,
+  or it <b>asks the missing questions and fills the form in front of you</b> — and you press the button.
+  Four states below, drawn on your real menus, your real Papic prices and your real 15 service folders.</p>
+
+  <div class="honest">
+    <p class="t">What is real today · what is only drawn</p>
+    <ul>
+      <li><b>Already shipping:</b> a hidden type-and-go box in your admin — press <span class="mono">⌘K</span> and type three letters to jump to any of the 108 pages by name.</li>
+      <li><b>Already shipping:</b> Setnayan uses AI inside the admin today — when you verify a shop, it researches that business on the open web for you.</li>
+      <li><b>Already shipping:</b> everything the assistant fills in below is a real form you have today — add a category, put it in a folder, change a price.</li>
+      <li><b>Only drawn:</b> the box understanding a sentence, landing you on a <b>row</b> instead of a page, and gathering answers before it fills that form.</li>
+    </ul>
+  </div>
+
+  <div class="controls">
+    <span class="lbl">Show me</span>
+    <div class="seg" id="seg">
+      <button data-s="a" aria-pressed="true">Take me there</button>
+      <button data-s="b" aria-pressed="false">Do it for me</button>
+      <button data-s="c" aria-pressed="false">Never on its own</button>
+      <button data-s="d" aria-pressed="false">On the phone</button>
+    </div>
+    <span class="lbl" style="margin-left:auto">Light</span>
+    <div class="seg" id="theme">
+      <button data-t="light" aria-pressed="true">Day</button>
+      <button data-t="dark" aria-pressed="false">Night</button>
+    </div>
+  </div>
+
+  <!-- ───────────────────────── DESK STATES ───────────────────────── -->
+  <div class="stage" id="desk">
+    <div class="laptop">
+      <div class="chrome"><i class="dot"></i><i class="dot"></i><i class="dot"></i>
+        <span class="url" id="url">setnayan.com/admin</span></div>
+      <div class="app">
+        <nav class="side">
+          <div class="brand">Setnayan</div>
+          <a href="#" class="on">Overview</a>
+          <a href="#" class="faded">Accounts</a>
+          <a href="#" class="faded">Studio</a>
+          <a href="#" class="faded">Ugat Console</a>
+          <a href="#" class="faded">App Performance</a>
+          <a href="#" class="faded">Money &amp; Settings</a>
+          <p class="note">The six menus stay. Asking is a faster door into the same rooms — never the only one.</p>
+        </nav>
+
+        <div class="main">
+          <div class="askwrap">
+            <div class="ask live">
+              <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9Z"/><path d="M18 15.5 19 18l2.5 1-2.5 1L18 22.5 17 20l-2.5-1L17 18Z"/></svg>
+              <div class="txt" id="typed"><span class="empty">Ask for anything — “take me to…”, “add a…”, “how many…”</span></div>
+              <span class="kbd">⌘K</span>
+            </div>
+            <div class="samples" id="samples">
+              <button data-s="a" aria-pressed="true">take me to the pricing for papic services</button>
+              <button data-s="b" aria-pressed="false">i want to add a new category on the taxonomy service</button>
+              <button data-s="c" aria-pressed="false">drop papic 3,000 shots to <span class="mono">₱800</span></button>
+            </div>
+          </div>
+
+          <!-- A · TAKE ME THERE -->
+          <section class="answer" id="pane-a">
+            <div class="head">
+              <div class="spark">✦</div>
+              <div>
+                <p class="said">Papic prices — 5 on sale, 17 retired.</p>
+                <p class="why">You are on the pricing page, scrolled to the Papic rows, retired ones folded away.</p>
+              </div>
+            </div>
+            <div class="body">
+              <div class="rows">
+                <div class="row head"><span>Shots — the ladder</span><span>Price</span></div>
+                <div class="row"><span class="nm">Papic — add 100 shots <span class="tag on">on sale</span></span><span class="pr">₱50</span></div>
+                <div class="row"><span class="nm">Papic — add 3,000 shots <span class="tag on">on sale</span></span><span class="pr">₱1,000</span></div>
+                <div class="row"><span class="nm">Papic — add 10,000 shots <span class="tag on">on sale</span></span><span class="pr">₱3,000</span></div>
+                <div class="row"><span class="nm">Papic — add 20,000 shots <span class="tag on">on sale</span></span><span class="pr">₱5,000</span></div>
+                <div class="row head"><span>Add-on</span><span>Price</span></div>
+                <div class="row"><span class="nm">Thank You film <span class="tag add">add-on</span></span><span class="pr">₱2,499</span></div>
+              </div>
+              <p class="foldaway">17 older Papic rows are off sale — Papic One, Papic Pool, the per-camera day passes, Stories, SDE.
+              <b>Show them</b> · they stay in the list so nothing breaks, and nobody can buy them.</p>
+              <div class="actions">
+                <button class="btn ghost">Open the whole pricing page</button>
+                <span class="yours"><i class="pin"></i> Reading only — nothing here changed.</span>
+              </div>
+              <div class="stop" style="border-left-color:var(--gold);background:var(--gold-soft)">
+                <b>The difference from today.</b> Press ⌘K now and type “papic” and you land on
+                <b>Papic storage</b> — a different page. Type “pricing” and you land at the top of a long
+                catalogue and hunt. Asking puts you on the rows you meant.
+              </div>
+            </div>
+          </section>
+
+          <!-- B · DO IT FOR ME -->
+          <section class="answer hide" id="pane-b">
+            <div class="head">
+              <div class="spark">✦</div>
+              <div>
+                <p class="said">Adding a service category. Three questions.</p>
+                <p class="why">You have 15 folders and 276 categories. I fill your existing form — you press the button.</p>
+              </div>
+            </div>
+            <div class="body">
+              <div class="turns">
+                <div class="turn"><span class="who">Setnayan</span><div class="bubble">What is it called, the way a couple would say it?</div></div>
+                <div class="turn me"><span class="who">You</span><div class="bubble">Drone photographer</div></div>
+                <div class="turn"><span class="who">Setnayan</span><div class="bubble">
+                  I would put it in <b>Documentary</b> — that is where the other camera work lives (16 categories).
+                  <div class="chips">
+                    <span class="chip pick">Documentary · 16</span><span class="chip">Look · 54</span><span class="chip">Venue · 55</span>
+                    <span class="chip">Booths · 44</span><span class="chip">Design · 29</span><span class="chip">Program · 20</span>
+                    <span class="chip">…9 more folders</span>
+                  </div></div></div>
+                <div class="turn me"><span class="who">You</span><div class="bubble">Yes, documentary</div></div>
+                <div class="turn"><span class="who">Setnayan</span><div class="bubble">
+                  Which celebrations can hire one?
+                  <div class="chips"><span class="chip pick">All 16 kinds</span><span class="chip">Only weddings</span><span class="chip">Let me pick</span></div></div></div>
+              </div>
+
+              <div class="review">
+                <div class="r"><span class="k">Name</span><span class="v"><b>Drone photographer</b></span></div>
+                <div class="r"><span class="k">Folder</span><span class="v">Documentary — beside Videographer, Photo &amp; video team</span></div>
+                <div class="r"><span class="k">Its address</span><span class="v mono">drone_photographer</span></div>
+                <div class="r"><span class="k">Celebrations</span><span class="v">All 16 kinds</span></div>
+                <div class="r"><span class="k">Shows up in</span><span class="v">the marketplace, the shop sign-up list, a couple’s supplier list</span></div>
+              </div>
+
+              <div class="actions">
+                <button class="btn primary">Add it</button>
+                <button class="btn ghost">Change something</button>
+                <span class="yours"><i class="pin"></i> One press, and it is yours.</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- C · NEVER ON ITS OWN -->
+          <section class="answer hide" id="pane-c">
+            <div class="head">
+              <div class="spark">✦</div>
+              <div>
+                <p class="said">I have filled it in. I will not press this one.</p>
+                <p class="why">Money, prices and anything that goes public are yours — the assistant only ever prepares them.</p>
+              </div>
+            </div>
+            <div class="body">
+              <div class="review">
+                <div class="r"><span class="k">Change</span><span class="v">Papic — add 3,000 shots</span></div>
+                <div class="r"><span class="k">Price</span><span class="v"><span class="was mono">₱1,000</span><b class="mono">₱800</b></span></div>
+                <div class="r"><span class="k">Couples see it</span><span class="v">on the Papic buy page and in the shot ladder, straight away</span></div>
+                <div class="r"><span class="k">Already sold at <span class="mono">₱1,000</span></span><span class="v">0 times — nobody is affected</span></div>
+                <div class="r"><span class="k">Careful</span><span class="v"><span class="mono">₱800</span> for 3,000 makes it cheaper per shot than the 10,000 rung. The ladder stops rewarding the bigger buy.</span></div>
+              </div>
+              <div class="actions">
+                <button class="btn primary">Change the price — you</button>
+                <button class="btn ghost">Leave it</button>
+              </div>
+              <div class="stop">
+                <b>The line, and it is your own rule.</b> The assistant never confirms a payment, never moves a price,
+                never approves a shop and never publishes anything by itself. It reads, it takes you there, it fills things in.
+                The press is always a person’s. That is the same rule your one-person admin plan already sets:
+                the machine may hold something back, it may never be the thing that lets it through.
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- D · PHONE -->
+  <div class="stage hide" id="phonestage">
+    <div class="phonewrap">
+      <div class="phone">
+        <div class="bar">setnayan.com/admin</div>
+        <div class="inner">
+          <p class="h">Two things need you</p>
+          <p class="sub" style="margin-top:-6px">Tuesday, 9:12 AM</p>
+
+          <div class="ask" style="padding:11px 13px">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9Z"/></svg>
+            <div class="txt empty" style="font-size:.9rem">Ask me anything</div>
+          </div>
+
+          <div class="case">
+            <div class="top"><span class="t">Money arrived — Setnayan AI</span><span class="amt">₱2,499</span></div>
+            <p class="m">Ana Villamor · GCash · ref SNEY7K2QP4</p>
+            <div class="proof">the receipt she sent</div>
+            <div class="go"><button class="btn primary">Yes, that matches</button><button class="btn ghost">Not yet</button></div>
+          </div>
+
+          <div class="case">
+            <div class="top"><span class="t">A shop wants in</span><span class="amt mono">2 days</span></div>
+            <p class="m">Banawe Blooms · florist · Quezon City · papers all read clean</p>
+            <div class="go"><button class="btn primary">Let them in</button><button class="btn ghost">Open the file</button></div>
+          </div>
+
+          <p class="nomenu">No menu here, on purpose — this phone only answers what needs a decision.
+          Prices, categories, the website and settings are editing; they wait for the computer,
+          and asking for one here says exactly that.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────────────── NOTES ───────────────────────── -->
+  <div class="notes">
+    <div class="note">
+      <p class="t">Why a menuless admin still keeps its menus</p>
+      <p class="d">Asking is faster when you know what you want and useless when you do not.
+      The six menus stay so you can still wander and discover; the ask box is for the 90% of days
+      when you already know. The moment something is reachable <i>only</i> by typing the right sentence,
+      that is a hole in the menu, not a feature of the assistant.</p>
+    </div>
+    <div class="note">
+      <p class="t">What it costs to run</p>
+      <p class="d">Pennies. One short question to the AI per sentence you type — and only when the
+      plain word-match cannot answer it on its own. If the AI is ever unreachable, the box quietly
+      goes back to being today’s type-and-go, so the admin never stops working.</p>
+    </div>
+    <div class="note">
+      <p class="t">What it can never do</p>
+      <p class="d">Confirm money. Move a price. Approve a shop. Publish anything. Delete anything.
+      It can prepare every one of those and hand it to you finished — the press stays yours.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const seg=document.getElementById('seg'), samples=document.getElementById('samples');
+const typed=document.getElementById('typed'), url=document.getElementById('url');
+const desk=document.getElementById('desk'), phone=document.getElementById('phonestage');
+const SENT={
+  a:{q:'take me to the pricing for papic services', url:'setnayan.com/admin/pricing#papic'},
+  b:{q:'i want to add a new category on the taxonomy service', url:'setnayan.com/admin/taxonomy'},
+  c:{q:'drop papic 3,000 shots to 800 pesos', url:'setnayan.com/admin/pricing#papic'}
+};
+let timer=null;
+function type(text,done){
+  clearInterval(timer);
+  // A backgrounded tab throttles timers to ~1/sec, which would leave the answer
+  // "still typing" for a minute. If nobody is watching, skip straight to it.
+  if(document.hidden){ typed.textContent=text; done(); return; }
+  let i=0; typed.innerHTML='<span class="caret"></span>';
+  timer=setInterval(()=>{
+    i++; typed.innerHTML=text.slice(0,i).replace(/</g,'&lt;')+'<span class="caret"></span>';
+    if(i>=text.length){clearInterval(timer); setTimeout(done,190);}
+  }, 21);
+}
+function show(s){
+  seg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.s===s)));
+  if(s==='d'){ desk.classList.add('hide'); phone.classList.remove('hide'); return; }
+  desk.classList.remove('hide'); phone.classList.add('hide');
+  samples.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.s===s)));
+  ['a','b','c'].forEach(k=>document.getElementById('pane-'+k).classList.add('hide'));
+  type(SENT[s].q, ()=>{
+    document.getElementById('pane-'+s).classList.remove('hide');
+    url.textContent=SENT[s].url;
+  });
+}
+seg.addEventListener('click',e=>{const b=e.target.closest('button'); if(b) show(b.dataset.s);});
+samples.addEventListener('click',e=>{const b=e.target.closest('button'); if(b) show(b.dataset.s);});
+document.getElementById('theme').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  document.documentElement.setAttribute('data-theme', b.dataset.t);
+  e.currentTarget.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed', String(x===b)));
+});
+show('a');
+</script>
