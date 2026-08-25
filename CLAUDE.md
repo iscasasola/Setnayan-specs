@@ -65,6 +65,79 @@ committed docs on purpose.
 
 ## 🚦 ACTIVE WORK — READ THIS BEFORE ANYTHING ELSE (updated 2026-08-01)
 
+> ### ▶ ACTIVE 2026-08-26 — THE EVENT HUB IS A SUPPLIER'S ON THE DAY (PLANNED, NOT BUILT)
+> **Contract: [`WHATS_NEXT_Vendor_Hub_And_Answers_2026-08-26.md`](WHATS_NEXT_Vendor_Hub_And_Answers_2026-08-26.md).**
+> Owner: *"event hub is the same on the day for vendors plus their special features. since
+> everything will be communicated there."* Then: **_"do not start building. we will do this on
+> what's next. just plan for now."_** ⛔ **HONOUR THAT — the nine slices are a PLAN.**
+> 📖 **Read § 3.4 BEFORE § 3.2.** Three slices are wrong as written; the corrections are the
+> valuable part.
+>
+> ✅ **ONE THING SHIPPED — do NOT rebuild it.** The shop-dashboard re-sort, PR
+> [#4863](https://github.com/iscasasola/setnayan-platform/pull/4863) (⚠ verify with
+> `gh pr view 4863 --json state,mergedAt`; this file has been wrong about a PR's state four
+> times): **Overview → Today** · My Customers ahead of My Shop · **Contracts + Proposals into My
+> Customers** · **services opens FIRST on My Shop** · the 14 tools on **three named shelves** ·
+> "(BEO)" out of the menu. **Same five keys, nothing deleted, every href byte-identical.**
+> 🚨 **TWO SURFACES WERE ALREADY IN TWO PLACES AT ONCE** — the phone bar lit **Customers** for
+> `/contracts` and `/proposals` while the laptop rendered them under **My Shop**. Ended, not
+> started. ⚠ **The rename registry's LABEL WINS over the code's**, so a half-rename shows one word
+> on a fresh deploy and another on a failed read; a derived guard with a floor of five now pins it.
+>
+> 🔑 **THE RULING IS NOT A REVERSAL — it is the half never finished.** His own 2026-08-16 Event Hub
+> lock already names the audience as *"the guests, **vendors**, etc."* What ships gives a booked
+> supplier a one-line strip pointing them **AWAY**, and it **has never rendered for anybody**.
+> ⛔ **Do NOT reopen the Event Hub vocabulary lock** — three words, three things, settled.
+>
+> 🚨 **THREE FINDINGS BREAK THE PLAN'S OWN HEADLINE** (7 mappers · 17 claims refuted · then a
+> completeness critic. **The citations were accurate; the COVERAGE was not** — that distinction is
+> the lesson):
+> 1. **THE ROOM HAS NO DOOR.** Grepped: **no supplier surface anywhere reads or renders a couple's
+>    event slug.** A supplier cannot reach a client's event page from inside Setnayan at all, so
+>    *"opens the couple's address"* is delivered by **no slice**.
+> 2. **A GUARD THE PLAN PRICED IS ACTUALLY A HOLE.** The guard stopping guest copy saying *"the
+>    couple"* at a wake **scans one directory**; the room's couple-worded strings live in the
+>    components the plan says to REUSE. **Imported files are not in the scanned set** ⇒ *"the
+>    couple"* at a funeral, every check green.
+> 3. **CONSOLIDATION STRANDS THE HIRED NIGHT CREW** — a third population (grantees) deferred, never
+>    added, then redirected into a room that refuses them. That path **structurally needs a
+>    privileged read**, so the plan's own admin-client rule **forbids a slice it also promises.**
+>
+> 🔒 **THE MOST IMPORTANT LINE:** `/{slug}` reads with the **service role**, so every RLS rule
+> keeping a supplier out of the guest list and the private schedule is **INERT there**. Event data
+> must come from `get_vendor_event_brief` or RLS-bound reads under the supplier's own session.
+> ⚠ And `event_schedule_blocks_booked_vendor_read` has **no public/private filter** — the room
+> would render, at a public address, content withheld from anonymous readers.
+>
+> 🚨 **A LIVE DEFECT WITH NO FLAG:** `resolveVendorCapability` grants on a **LINK, not a booking**,
+> and `respond_vendor_proposal` stamps that link at `'shortlisted'` ungated ⇒ a shortlisted
+> supplier is told *"You are booked here"* **and is then refused by the page the strip links to.**
+> Its test only ever feeds `'contracted'` or `null` — *a test that never supplies the dangerous
+> value cannot fail on it.*
+>
+> ⏭ **THE ANSWERS DESK is the cheap, independent win.** **SIXTEEN kinds, not fourteen** (three
+> totals were in circulation), and two were missing from every map: a **couple-proposed meeting**
+> (it already emits *"confirm or propose a new time"*) and **an unanswered message in an accepted
+> thread** — the commonest answer a supplier owes, and the thing we publish as their reply speed.
+> 🚨 **A ONE-STAR review can NEVER reach the desk** — the filter is five-stars-and-no-reply.
+> ⛔ **Four rows must not exist until the answer works:** the waitlist's *"Pick this couple"*
+> **does nothing and reports success** (RLS-bound client on an owner-only policy) · a crew shift
+> **cannot be posted, seen or accepted by a non-admin** · **nobody can ask for a song** · a payment
+> claim **has no "no"** and cannot be undone.
+>
+> 🔴 **FIVE OWNER DECISIONS (§ 4)** — loudest: *may a supplier read the couple's private
+> run-of-show notes at the couple's own **public** address?* ⛔ **A sixth was retired before it
+> reached him:** the Papic route's own header already settled it — *"THE SHUTTER IS DAY-BOUND.
+> LOOKING BACK IS NOT"* — and the plan had **both re-asked it and written the defect it settled
+> into the new route.**
+> 🪤 **Traps paid for this session:** `npx tsc` **aborts at exit 134 while printing `errors=0`**
+> (the repo script sets `--max-old-space-size=7168` — *print the exit code beside the error
+> count*) · under `tsx --test` an `@/lib/…` import returns a module with **empty named exports**,
+> so a new guard's loop ran zero times and **reported a pass** · a single `deepEqual` pinning an
+> owner-locked SET and a re-cuttable ORDER together makes a legitimate re-order read as a lock
+> being broken · **another session moved `origin/main` three times in one hour** and the branch
+> went CONFLICTING on a generated file.
+
 > ### ▶ ACTIVE 2026-08-26 — PAPIC IS THE EVENT'S ONE MEDIA LIBRARY (purpose LOCKED)
 > **Contract: [`WHATS_NEXT_Papic_Uploads_Are_A_Way_In_2026-08-26.md`](WHATS_NEXT_Papic_Uploads_Are_A_Way_In_2026-08-26.md).**
 > Owner: *"papic is the source where they collect media files for that event. that will be our
