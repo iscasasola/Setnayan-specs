@@ -130,6 +130,35 @@ film. Those are produced, not collected.
 
 ---
 
+## § 3b · ✅ THE SUPPLIER LANE — RULED AND PART-BUILT (2026-08-26)
+
+Owner ruled it in five parts. **Do not re-ask any of them.**
+
+| # | ruling | state |
+|---|---|---|
+| 1 | free shots = **one per ₱5 of booking fee paid**, floor 50, ceiling 2,000 | ✅ built, [#4861](https://github.com/iscasasola/setnayan-platform/pull/4861) |
+| 2 | **video unlocks at 800 credits** | ✅ built |
+| 3 | suppliers **upload their work via papic credits, per event** | ⏭ unbuilt — § 2 is the seam |
+| 4 | suppliers **buy shots**, collected in an album they have | ⏭ unbuilt |
+| 5 | **the host allows access; only shots from the sponsored challenge** | ✅ built |
+
+⚠ **RULING 4 REVERSES HIS OWN 2026-07-18 DECISION** (*"not allow upgrade +50 if it is difficult"*). Recorded as a reversal, and he stated it explicitly — do not treat it as inferred.
+
+🚨 **THE 2026-07-22 RULING HAD BEEN WRITTEN, TESTED, AND CALLED BY NOTHING.** `vendorPapicPointsForBookingFee` carried ten passing assertions and **zero application callers** — so every supplier got the flat tier number whatever they paid, and **no test failed**, because a pure function tested in isolation passes whether or not anybody uses it. The reason was honest when written (the fee mechanism was unbuilt); it shipped since, and **nothing was watching for the reason to expire**. 🔑 **A decided rule needs a CALLER, and something that checks it has one.**
+
+**Two rules that are the whole safety of the allowance wire** — keep them:
+- **The fee can only RAISE, never lower.** A comped supplier on 70 would otherwise be handed the 50 floor and lose 20 points to a wire being connected.
+- **An unproven fee grants nothing.** `null` is a failed read, never *"they paid nothing"* — the mirror of the spend read, which fails CLOSED. Neither invents generosity out of an outage.
+- 🚨 **`waived_free5` means they paid ₱0** — reading the first-5-free rule as `paid` hands the free five a 200-point allowance.
+
+**Ruling 5's chain already existed in the schema** and is now enforced in `lib/vendor-sponsored-shots.ts` — **eight gates**, each somebody's decision: this event · their own challenge · a vendor challenge · **the host approved it** (that clause IS the access grant; un-approving is the revoke) · still active · **the guest consented, per photograph** · not taken down · screened clean.
+⚠ **The screen check is an ALLOWLIST.** Two of the five states in that column are filtered on elsewhere and **written by nothing** — a deny-list would pass every state nobody thought of, `unscreened` included.
+⚠ **Service-role read ⇒ the app-side gate is the whole fence.** RLS is a floor, not a scope; there is no policy underneath to catch a dropped clause. `vendor-sponsored-shots-are-scoped.test.ts` is what stands in for one.
+
+⛔ **The whole lane is still switched off** behind the DPO flag. Every line above is inert until the owner opens it.
+
+---
+
 ## § 4 · 🔴 WHAT NEEDS THE OWNER, NOT ENGINEERING
 
 1. **The photographer cannot put photos in.** Today a booked photographer hands
