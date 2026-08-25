@@ -1,86 +1,123 @@
-# Blur reaches the public page — parts 2 and 3 · SCHEDULED 2026-08-25
+# Blur — RE-MEASURED 2026-08-25 (second pass). Much smaller than this file first said.
 
-**Why this file exists.** W6 was asked to "find out what is left [of blur] and
-either schedule it or close it." It is **not closeable**: part 1 shipped
-deliberately INERT, and the change that alters what a person actually sees has
-not been made. This is the scope, measured.
+> 🛑 **THIS FILE'S FIRST REVISION WAS WRONG IN ITS HEADLINE AND IS CORRECTED IN
+> PLACE.** It said *"only the venue wall is honoured today"* and scoped two
+> multi-surface parts from that. Re-measured against `origin/main` **4fdc3ac49**
+> and the live production database: **all three surfaces in the owner's
+> 2026-08-17 ruling blur today.** What is left is ONE pipeline, not everything.
+>
+> 🔑 **WHY IT WAS WRONG, AND IT IS THE FAILURE THIS REPO KEEPS PAYING FOR.** The
+> first pass anchored on `a8f8601` and searched ONE SPELLING of "the blurred
+> copy" — the `safe_*_r2_key` columns. The venue-wall blur has always been
+> `wall_safe_r2_key`, a *second* spelling, and the readers reach it through
+> `getWallSnapshot()` rather than by naming a column at all. A search that can
+> only match one spelling is not a survey. The anchor was **57 commits stale on
+> the same day it was written.**
 
 ---
 
-## What already ships (PR #4760, merged — do NOT rebuild any of it)
+## Measured state — `origin/main` 4fdc3ac49, 2026-08-25
 
-- `generateSafeDerivatives` writes three **blurred** AVIF copies in the exact
-  sizes public pages read (`safe_display_r2_key` 1280 · `safe_tile_r2_key` 640 ·
-  `safe_thumb_r2_key` 320), fired straight after the wall bake.
-- `papic_capture_needs_blur(p_event_id, p_source_table, p_source_id)` — **verified
-  live in production by the object** — is the single definition of "does this need
-  blurring?", replacing two inline copies. FaceBlock is **event-wide**; withdrawn
-  consent is **per-photo**. Both shapes are pinned by test; folding them together
-  is the likeliest wrong simplification.
+**The blurred copy has EIGHT reader call sites, not one.** All resolve
+`wall_safe_r2_key` through the shared `getWallSnapshot()` in `lib/live-wall.ts`:
 
-## What is genuinely NOT built — measured on `origin/main` a8f8601
+| # | call site | audience |
+|---|---|---|
+| 1 | `app/wall/[eventId]/page.tsx:58` | venue projection |
+| 2 | `app/api/wall/[eventId]/feed/route.ts:33` | projector feed |
+| 3 | `app/[slug]/_lib/loaders.ts:772` | **public** event hub |
+| 4 | `app/[slug]/hub/page.tsx:428` | **public** live hub |
+| 5 | `app/[slug]/live-wall/route.ts:52` | **public** JSON feed |
+| 6 | `app/tour/gallery/page.tsx:110` | **public** tour |
+| 7 | `lib/auto-recap.ts:196` | recap |
+| 8 | `lib/chapter-picture.ts:94` | **public** profile chapters |
 
-- **`papic_capture_needs_blur` has ZERO callers in application code.** The SQL
-  function is the rule and nothing in the app ever asks it.
-- **One reader of the safe copies exists** — `app/[slug]/_components/editorial/
-  consent-veto.ts`. Every other public read still serves `display_r2_key` /
-  `tile_r2_key` / `thumb_r2_key`: the UNBLURRED web copies.
+Plus two direct readers the first pass also missed
+(`app/dashboard/[eventId]/live/page.tsx`, `…/studio/papic/_components/live-wall-card.tsx`).
 
-⇒ Against the owner's ruling of 2026-08-17 — *"blur on the venue wall, the public
-event page, and the shared pool other guests browse"* — **only the venue wall is
-honoured today.**
+**And a public surface now serves a blurred STAND-IN where it used to serve
+nothing** — `app/[slug]/_components/editorial/consent-veto.ts` substitutes
+`COALESCE(safe_display_r2_key, wall_safe_r2_key)` for a vetoed capture instead
+of dropping it, honouring the owner's *"blurs and KEEPS, not hides"* ruling.
 
-## Why nothing is on fire, stated as arithmetic and not as optimism
+### The owner's three surfaces are all honoured
 
-Queried production 2026-08-25:
+| surface | blurs? | landed |
+|---|---|---|
+| venue wall | ✅ | 2026-08-24 |
+| public event page | ✅ | 2026-08-18 (`consent-veto.ts`) |
+| shared pool | ✅ | 2026-08-24 (`20271160706865_the_pool_blurs_and_keeps.sql`) |
+
+⚠ **"`papic_capture_needs_blur` has ZERO callers" was true only of TypeScript.**
+It has **SQL** callers — `guest_pool_gallery` and both wall functions ask it.
+The rule is consulted; it is not an orphan. Do not rebuild it.
+
+## Production, re-queried 2026-08-25
 
 | | |
 |---|---|
-| `papic_photos` | **14** |
-| rows where `papic_capture_needs_blur(...)` is true | **0** |
-| rows carrying a `safe_display_r2_key` | **0** |
+| `papic_photos` · `papic_guest_captures` | **14** · **0** |
+| guests with `faceblock_enabled` | **0** |
+| guests with `photo_consent = FALSE` | **0** |
+| captures where `papic_capture_needs_blur(...)` is true | **0** |
 
-No capture in production needs a blur, so no unblurred face is being served
-today. **That is the window this should be built in, not a reason to defer it.**
+**Nothing is on fire and nothing is exposed today.** The gap below is latent —
+it needs one FaceBlock guest or one withdrawal to become real.
 
-## Part 2 — the public read paths serve the safe copy, or withhold
+---
 
-PR #4760's own body names it. One resolver, consulted by every public read:
-given a capture, either hand back the safe derivative, or **withhold the frame**.
-Never fall back to the unblurred copy.
+## 🔴 THE ONE THING GENUINELY LEFT — the guest tagged-photo pipeline
 
-🔑 Follow `lib/papic-gallery.ts`'s existing rule rather than inventing one: *"a
-public frame is ALWAYS a metadata-stripped display/thumb derivative — NEVER the
-geo-bearing original. A frame with no such derivative is SKIPPED."* Withholding
-is already the established behaviour for a missing derivative.
+Four guest-facing reads resolve the **UNBLURRED** `display_r2_key` /
+`thumb_r2_key` (and one the full-res ORIGINAL), gated only on
+`moderation_state = 'clean'`. None asks `papic_capture_needs_blur`:
+
+- `lib/guest-live-gallery.ts` — "photos of you, so far" on the day-of page
+- `lib/guest-stories.ts` — the free guest reel
+- `app/papic/me/[token]/photo/route.ts` — **serves `r2_object_key`, the full-res
+  original**, EXIF-stripped on the fly. The geo is stripped; the faces are not.
+- `app/papic/me/[token]/download/route.ts` — same pipeline
+
+🚨 **AND THE GATE THEY ALL LEAN ON CANNOT FIRE. `consent_withheld` and
+`faceblock_withheld` HAVE NO WRITER ANYWHERE** — not in a migration, not in app
+code. Measured: `nsfw_blocked` has two writers (`lib/nsfw-screen.ts`), the two
+privacy states have **zero**, and production has **0 rows** in either. So the
+strict `moderation_state = 'clean'` allowlist these modules trust — and whose
+docblocks say it means *"FaceBlock not withheld"* — **works for NSFW and is
+inert for both privacy reasons.** A FaceBlock capture stays `'clean'` and is
+served unblurred.
+
+🔑 **A gate with no handle, in a new costume: a filter-only enum value.** The
+column permits the state, four modules filter on it, and nothing can ever set
+it. Same family as the phantom column · enum value · RPC argument · missing
+grant — **refused-or-inert, never thrown; the only symptom is an absence.**
+
+### Scope — this is a short slice, not a session
+
+Route these four through the existing rule. `papic_captures_needing_blur(event,
+table, ids[])` already exists for exactly this list shape. Then decide the
+`moderation_state` question: either give the two privacy states a writer, or
+delete them and let the blur predicate be the single answer. **Do not do both**
+— two rules for one promise is the defect the pool migration was written to
+remove.
 
 ⚠ **Fail CLOSED.** A read error about whether a capture needs blurring must
-withhold, not serve. This repo has paid twice for the opposite (a rejected query
-returning an absence that reads as "nothing to hide").
+withhold, not serve.
 
-## Part 3 — three surfaces that bypass the shared resolver
+⛔ **Do NOT rebuild:** the eight wall readers, the pool RPC, the editorial
+consent veto, `generateSafeDerivatives`, or `papic_capture_needs_blur`.
 
-The shared pool, the memories wall, and a guest's own "photos of you" each read
-independently today. Route them through the part-2 resolver rather than letting
-each grow its own check.
+## Traps carried forward (all still true)
 
-🔑 **Checking a column in three places is three chances to forget, and the next
-surface makes four.** The photo wall has already cost this product exactly that:
-three guest surfaces each asked SKU-ownership and nothing else.
-
-## Traps carried forward from part 1
-
-- **Never a CSS/overlay blur.** It ships the real photo to the device and is two
-  taps from being switched off. `lib/face-blur.ts` blurs *"into the pixels, never
-  CSS"*, and every other blur in the product is decoration.
-- **Never a presigned URL baked into a crawler-visible page** — it expires and
-  the frame breaks later with nothing to blame.
-- **The two blur reasons keep different shapes** (event-wide vs per-photo), and
-  the FaceBlock half filters `deleted_at` while the withdrawal half deliberately
-  does not. Both pinned; do not "tidy" either into the other.
+- **Never a CSS/overlay blur.** It ships the real photo to the device.
+  `lib/face-blur.ts` blurs *"into the pixels, never CSS"*.
+- **Never a presigned URL baked into a crawler-visible page** — it expires.
+- **The two blur reasons keep different shapes** (FaceBlock event-wide vs
+  withdrawal per-photo). Both pinned by test; do not tidy either into the other.
+- **A clip needing a blur is DROPPED** — no video blur exists. Keep that.
 
 ## Owner call, flagged not decided
 
-Whether a withheld frame leaves a visible gap or is silently absent from a public
-gallery. Silence is the safer default and is what a missing derivative already
-does — but it changes what a couple sees of their own album on a public page.
+Whether a withheld frame leaves a visible gap or is silently absent from a
+public gallery. Silence is the safer default and is what a missing derivative
+already does.
