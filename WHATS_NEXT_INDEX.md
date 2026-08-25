@@ -1,5 +1,73 @@
 # WHATS_NEXT_INDEX — master compilation for the "run all what's-next" session (2026-07-18)
 
+> ### ▶▶▶▶▶▶▶▶▶ NEWEST — THE EVENT HUB IS A SUPPLIER'S ON THE DAY (2026-08-26 · PLAN ONLY)
+> **[`WHATS_NEXT_Vendor_Hub_And_Answers_2026-08-26.md`](WHATS_NEXT_Vendor_Hub_And_Answers_2026-08-26.md)**
+> — owner: *"do not start building. we will do this on what's next. just plan for now."*
+> **NOTHING IN § 3.2 IS BUILT.** Read § 3.4 BEFORE § 3.2 — three of the nine slices are wrong as
+> written and the corrections are the valuable part.
+>
+> ⚖ **OWNER RULING, 2026-08-26, do not re-ask:** *"event hub is the same on the day for vendors
+> plus their special features. since everything will be communicated there."*
+> 🔑 **THIS IS NOT A REVERSAL — it is the half that was never finished.** His own 2026-08-16 Event
+> Hub lock already names the audience as *"the guests, **vendors**, etc."* What ships gives a
+> booked supplier a one-line strip that points them **away**, and that strip **has never rendered
+> for anybody** (0 marketplace bookings). There is nothing to unpick.
+>
+> ✅ **SHIPPED THE SAME DAY, do NOT rebuild:** the shop-dashboard re-sort, PR
+> [#4863](https://github.com/iscasasola/setnayan-platform/pull/4863) — Overview → **Today** · My
+> Customers ahead of My Shop · Contracts + Proposals into My Customers · **services opens first**
+> on My Shop · the 14 tools on three shelves · "(BEO)" out of the menu. **Same five keys, nothing
+> deleted.** ⚠ Verify with `gh pr view 4863 --json state,mergedAt` — this register has been wrong
+> about a PR's state four times.
+>
+> 🚨 **THE THREE FINDINGS THAT BREAK THE PLAN'S OWN HEADLINE** (found by a completeness critic
+> after 7 mappers and 17 refuted claims — **the mapping's citations were accurate; its COVERAGE
+> was not**):
+> 1. **THE ROOM HAS NO DOOR.** Grepped: **no supplier surface anywhere in the product reads or
+>    renders a couple's event slug.** A supplier cannot reach a client's event page from inside
+>    Setnayan at all — so *"opens the couple's address"* is produced by **no slice**, and after the
+>    consolidation the only three doors are still on the shop dashboard.
+> 2. **A GUARD THE PLAN BUDGETS FOR CANNOT FIRE.** The guard that stops guest copy saying *"the
+>    couple"* at a wake **recurses one directory only**, and the room's couple-worded strings live
+>    in the components the plan says to REUSE. **Imported files are not in the scanned set** ⇒ the
+>    room ships *"the couple"* at a funeral with every check green. **A cost the plan priced is
+>    actually a hole.**
+> 3. **THE CONSOLIDATION SILENTLY REVOKES THE CONSOLE FROM THE HIRED NIGHT CREW** — a third
+>    population (grantees) that the plan defers, never adds, then strands. And that path
+>    **structurally needs a privileged read**, so the plan's own admin-client rule **forbids a
+>    slice it also promises.**
+>
+> 🔒 **THE RULE FOR THE ROOM, and it is the most important line in the plan:** the couple's page
+> reads with the **service role**, so every permission rule keeping a supplier out of the guest
+> list and the private schedule is **inert there**. Event data comes from the brief RPC or from
+> permission-bound reads under the supplier's own session. ⚠ And the policy that lets a booked
+> supplier read schedule blocks has **no public/private filter**, so the room would render — at a
+> public address — content deliberately withheld from anonymous readers.
+>
+> 🚨 **ONE LIVE DEFECT, NO FLAG IN FRONT OF IT:** the doorway grants on a **link**, not a booking.
+> A couple accepting a quote stamps that link at `'shortlisted'` through an ungated routine ⇒ a
+> shortlisted supplier is told *"You are booked here"* **and is then refused by the page the strip
+> links to.** Its test only ever feeds the safe values — *a test that never supplies the dangerous
+> value cannot fail on it.*
+>
+> ⏭ **THE ANSWERS DESK is the cheap independent win** — one list of every answer a supplier owes,
+> oldest first. **The count is SIXTEEN, not fourteen** (three totals were in circulation), and two
+> were missing from every map: a **couple-proposed meeting** (which already emits *"confirm or
+> propose a new time"*) and **an unanswered message in an accepted thread** — the commonest answer
+> any supplier owes, and the very thing we publish as their reply speed. 🚨 **A ONE-STAR review can
+> never reach the desk at all** — the filter is five-stars-and-no-reply, so the review that most
+> needs an answer is excluded by construction.
+> ⛔ **Four rows must not exist until the answers behind them work:** *"Pick this couple"* on the
+> waitlist **does nothing and reports success**; a crew shift **cannot be posted, seen or accepted
+> by anyone who is not a Setnayan admin**; song requests **have no way for a guest to ask**; a
+> payment claim **has no "no" and cannot be undone.**
+>
+> 🔴 **FIVE OWNER DECISIONS in § 4** — loudest: *may a supplier read the couple's private
+> run-of-show notes at the couple's own **public** address?* ⛔ **A sixth was RETIRED before it
+> reached him** — the photo route's own header already settled it (*"THE SHUTTER IS DAY-BOUND.
+> LOOKING BACK IS NOT"*), and the plan had both re-asked it **and** written the defect it settled
+> into the new route.
+
 > ### ▶▶▶▶▶▶▶▶ NEWEST — SAMAHAN BECAME A PLACE (2026-08-24)
 > **[`WHATS_NEXT_Samahan_2026-08-24.md`](WHATS_NEXT_Samahan_2026-08-24.md)** — six PRs in one
 > day: hourly 24-hour **stories**, a **3-second camera** (not an upload), **anyone can rename**
