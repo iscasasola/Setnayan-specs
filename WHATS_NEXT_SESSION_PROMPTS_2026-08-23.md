@@ -45,7 +45,7 @@ not have to answer anything mid-session.**
 | **SAMAHAN · the group, its stories and its chat** | 🏃 **RUNNING · integrated into this plan 2026-08-24.** 6 PRs merged (#4781 #4783 #4784 #4786 #4790), #4795 open. Owns `(account)/samahan` + `lib/communities` + its own migrations — no wave session owns those. 🔴 **Regenerates the FK-behaviour file and the exposure baseline: MUST NOT run at the same time as W5-A.** | — | — | alongside |
 | ~~W5-D · The board tells the truth~~ | ✅ **DONE 2026-08-24 · 3 PRs (#4804 · #4805 · #4806).** All three phone findings are live: a celebrated card is **kept, not graded**, the score prints once, and the shelf stopped listing celebrations that already exist. 🔑 **#4806 did the thing worth more than the fixes — a guard that COMPARES TWO SURFACES**, the check whose absence let two of the three exist. | — | — | 5 |
 | ~~W5-E · Two surfaces nobody claimed~~ | ✅ **DONE 2026-08-25 · 9 PRs, ALL MERGED AND SERVED** — #4814 · #4815 · #4819 · #4821 · #4822 · #4825 · #4827 · #4829 (budget/ledger) + #4820 (galleries hub). **No migration in any of them.** ⚠ Verify with `gh pr view <#> --json state,mergedAt` — this corpus has been wrong about a PR's state four times. ✅ **Item 2 shipped, and an adversarial audit of it then found a money column the first pass missed, a PUBLIC no-login copy still carrying the defect, and three defects inside my own change.** 🛑 **ITEM 1 IS NOT DONE — my first closure of it was TOO BROAD. Read the correction row in `DECISION_LOG.md` 2026-08-25 before touching it.** ⛔ ~~The brief's premise was wrong.~~ The Gallery archetype's route chip is `/dashboard/[event-id]/**gallery**` (singular) and **that route does not exist**; `galleries/` is a **hub of three source rows**, and the archetype draws an obsidian photo mosaic. Not the same screen — **and that part stands.** ❌ **But the DISQUALIFIER did not:** two of the archetype's four route chips name routes that never existed, so a chip here is a LABEL, not an address. **Its three real, shipped subjects — the Papic gallery grid, the guest "your photos" widget, the day-of live wall card — are all unported, measured.** ⏭ Pinning + grouping on budget deliberately not taken, reasons in the same rows. | Opus 5 | medium | 5 |
-| **W6 · The grab-bag, verified first** | ▶ **NOT STARTED** — carries the orphans from waves 0–3 | Fable → Sonnet 5 | medium | 6 · alone |
+| ~~**W6 · The grab-bag, verified first**~~ | ✅ **DONE 2026-08-25 · 6 PRs (#4831 · #4832 · #4834 · #4835 · #4836 · #4837); a 7th (#4830) closed as superseded by a parallel session's #4833.** The prediction held — **8 of 14 items were already done**. ⏭ **Still open and deliberately not built:** blur parts 2 + 3, scoped in [`WHATS_NEXT_Blur_Parts_2_And_3_2026-08-25.md`](WHATS_NEXT_Blur_Parts_2_And_3_2026-08-25.md), and the remaining P3 duplicate-definition findings 8–13. Full row: `DECISION_LOG.md` 2026-08-25 🧺. | — | — | — |
 | ~~**W8 · The coordinator can see the guest list**~~ | ✅ **DONE 2026-08-25 · 3 PRs ([#4816](https://github.com/iscasasola/setnayan-platform/pull/4816) merged + **prod-verified by the object** · [#4817](https://github.com/iscasasola/setnayan-platform/pull/4817) · [#4818](https://github.com/iscasasola/setnayan-platform/pull/4818)).** RULE 0 turned it into a permission fix, not a screen: the ask, the host's line-by-line answer and the roster all already shipped. What was wrong is that **the resolver undid the answer the host gives** — an unnamed area inherited the legacy edit_all flag, so a planner granted the seat plan alone held the guest list too — and the read policy never asked which areas were granted while its write twin always had. **Closing one of two doors closes nothing:** a second policy admits coordinator MEMBERS, and every accepted delegate is one. Also: the "by request" half could only be reached on the event day. Full row: `DECISION_LOG.md` 2026-08-25. | Opus 5 | medium | 8 · alone |
 
 > 🛑 **AND I MISATTRIBUTED A COMMIT BY READING ITS TITLE INSTEAD OF ITS FILES (2026-08-24).** I told
@@ -2230,6 +2230,40 @@ take** — that sentence is how the next unclaimed surface gets found.
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
 
+### ✅ W6 · The grab-bag, verified first — **DONE 2026-08-25. DO NOT RUN THIS SECTION.**
+
+> **6 PRs merged/armed:** [#4831](https://github.com/iscasasola/setnayan-platform/pull/4831) (the
+> film's lettering) · [#4832](https://github.com/iscasasola/setnayan-platform/pull/4832) (the
+> analytics opt-out) · [#4834](https://github.com/iscasasola/setnayan-platform/pull/4834) (the two
+> camera refusals) · [#4835](https://github.com/iscasasola/setnayan-platform/pull/4835) (two
+> doorways) · [#4836](https://github.com/iscasasola/setnayan-platform/pull/4836) (one lane order) ·
+> [#4837](https://github.com/iscasasola/setnayan-platform/pull/4837) (empty screens).
+> ⚠ Verify with `gh pr view` before trusting this line — this file has been wrong about a PR's
+> state four times.
+>
+> 🔑 **THE LIST'S OWN PREDICTION HELD: 8 OF 14 ITEMS WERE ALREADY DONE.** All three on-the-day
+> gaps · the lucky-date card · cleanliness 4, 6 and 14 · and half of what the orphan list carried.
+> **Verify before touching; report the closures as results.**
+>
+> 🚨 **THE ONE THAT MATTERED MOST WAS DIAGNOSED AGAINST PROD, NOT AGAINST THE BRIEF.**
+> `/papic/me/[token]` — the page a PRINTED personal QR opens — asked only about the paid Limited
+> ROLL camera. Production holds **zero** Limited snapshots, ever, so **40 of 40 guests on all 5
+> events** read *"the host hasn't turned on Papic"* while the pool applied on every one of those
+> events and the camera was open one redirect away.
+>
+> ⏭ **STILL OPEN, deliberately:** blur parts 2 + 3 (scoped in
+> [`WHATS_NEXT_Blur_Parts_2_And_3_2026-08-25.md`](WHATS_NEXT_Blur_Parts_2_And_3_2026-08-25.md) —
+> `papic_capture_needs_blur` has ZERO application callers and every public read still serves the
+> unblurred copy) · cleanliness findings 8–13 (all P3, none reachable by a person today) · the
+> ~36 remaining bare-sentence empty states, most of which are inside search sheets where a card
+> would be worse.
+>
+> 🔴 **OPEN OWNER DECISIONS from this session:** whether a real unpaid ₱499 test order should be
+> cancelled before it confuses the payment queue (inherited, still true), and whether a withheld
+> blurred frame leaves a visible gap or is silently absent.
+
+<details><summary>The completed prompt</summary>
+
 ### W6 · The grab-bag, verified first · **Fable (verify) → Sonnet 5 (fix) · medium**
 
 ```
@@ -2306,6 +2340,8 @@ any file — one at a time.
 
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
+
+</details>
 
 ---
 
