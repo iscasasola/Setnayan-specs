@@ -46,7 +46,7 @@ four separate times.
 ### ✅ 2a · NOTHING RINGS — BUILT 2026-08-25 (PR #4841). Do NOT rebuild it.
 🛑 **CORRECTION: I told the owner twice that we have no push infrastructure. That was FALSE.**
 It ships and is mounted: `PushToggle` on the profile page · `savePushSubscription` /
-`removePushSubscription` · `emitNotification` with **61 call sites** · `/api/notify` sending via
+`removePushSubscription` · `emitNotification` with **61 files · 108 call sites** (measured 2026-08-25) · `/api/notify` sending via
 `web-push` + VAPID. `push_subscriptions` exists in prod with **0 rows** — nobody has switched it
 on.
 ⏭ **The work was therefore:** (1) confirm the VAPID keys are set in the hosting settings —

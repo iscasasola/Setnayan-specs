@@ -250,8 +250,8 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 >   no unscreened state can exist · take-down soft, never a rewrite.
 >
 > 🛑 **A FALSE CLAIM I MADE TWICE, CORRECTED HERE: "we have no push notifications."**
-> **PUSH IS BUILT AND MOUNTED** — `PushToggle` on the profile page · `emitNotification` with **61
-> call sites** · `/api/notify` sending via `web-push` + VAPID · `push_subscriptions` in prod with
+> **PUSH IS BUILT AND MOUNTED** — `PushToggle` on the profile page · `emitNotification` with **61 files ·
+> 108 call sites** (re-measured 2026-08-25) · `/api/notify` sending via `web-push` + VAPID · `push_subscriptions` in prod with
 > **0 rows**. So the hourly bell is a **wiring** job plus confirming the VAPID keys in Vercel
 > (**not readable from a session** — the route merely warns and continues). **Do NOT scope a push
 > build.**
