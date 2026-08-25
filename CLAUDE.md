@@ -247,7 +247,24 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > left the import standing and it reported a clean pass; and one "mutation" was a comment instead
 > of a real reorder — **a reordering mutation cannot be measured by counting a string.**
 >
-> ⏭ **NEXT, AND MEASURED AS THE REAL GAP: the box answers a WORD, never a SENTENCE.** Verified
+> ✅ **THAT NEXT GAP IS NOW CLOSED — 3 more PRs, all shipped:**
+> [#4866](https://github.com/iscasasola/setnayan-platform/pull/4866) the box answers a SENTENCE
+> (every one of the owner's phrasings returned NOTHING before; a guard runs all ~900 words the
+> admin knows through the old and new algorithms and fails if one re-orders) ·
+> [#4870](https://github.com/iscasasola/setnayan-platform/pull/4870) it lands on a price ROW ·
+> [#4873](https://github.com/iscasasola/setnayan-platform/pull/4873) it answers words nobody
+> listed, once, then free.
+> ⚖ **The 2026-08-03 "Admin AI is removed as a concept" lock is SUPERSEDED by the owner's own
+> 2026-08-26 request — recorded in `DECISION_LOG.md`, not assumed.** The old objection is
+> answered on its terms: this is not a new screen, it is the ⌘K box already on every admin page.
+> ⏭ **OWNER ACTION, the only one: set `ANTHROPIC_API_KEY` in Vercel.** Without it the box says
+> the assistant is not switched on and everything else still works.
+> 🚨 **AND IT FOUND A REPO-WIDE BLIND SPOT: `relrowsecurity` IS VACUOUS IN THE PGlite REPLAY** —
+> a brand-new table with no policy and no `ALTER` already reports row security ON. **15 db test
+> files assert that flag and in the replay none of them can fail.** Pinned with a live probe;
+> **named, not fixed.**
+>
+> ~~⏭ **NEXT, AND MEASURED AS THE REAL GAP: the box answers a WORD, never a SENTENCE.**~~ Verified
 > against merged code — *"take me to the pricing for papic services"*, *"show me the prices of
 > papic"* and even the two-word *"papic prices"* all return **NOTHING**; only a single word
 > prefixing a label works. That fix is **deterministic and free**. The AI is only for words
