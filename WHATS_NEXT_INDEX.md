@@ -25,9 +25,25 @@
 > therefore a *wiring* job plus confirming VAPID keys in the hosting settings — **not** a push
 > build. **Do not scope one.**
 >
-> ⏭ **LEFT:** the bell · the day coming back as one stitched film · **inviting a whole samahan
-> into a guest list** (the bridge to what Setnayan sells; `guest_groups.source_community_id`
-> verified absent) · nesting · discovery · memories.
+> ✅ **THREE OF THOSE ARE DONE 2026-08-25 — PRs
+> [#4841](https://github.com/iscasasola/setnayan-platform/pull/4841) ·
+> [#4842](https://github.com/iscasasola/setnayan-platform/pull/4842) ·
+> [#4843](https://github.com/iscasasola/setnayan-platform/pull/4843). Do NOT rebuild them.**
+> **The bell rings** (a story or an Usapan message reaches the other members; collapsed to one
+> unread notice per samahan per person **within an hour**, because Open marks nothing read and
+> collapsing on "has an unread one" is a permanent mute). **The day plays through** — Play the day,
+> oldest → newest, each clip once; `loop` was what made a day unwatchable. **A whole samahan joins
+> a guest list** in two taps.
+> 🚨 That first PR also found **three notification types the database has never had** —
+> `connection_request` · `connection_confirmed` · `order_cancelled`, four live emit sites, no
+> migration ever, refused-not-thrown, green CI. Added, with a floored guard that derives both
+> sides.
+> ⚖ **2d's premise was half stale:** the picker has offered samahan co-members since 2026-08-21, so
+> nobody was retyping names — only the GROUP gesture was missing. And the group is a **filter, not
+> a stored link**, which retires the snapshot-vs-live question that deferred it.
+> ⏭ **LEFT:** the **hourly nudge** (needs § 3.2 AND a trigger — this project is cron-free) · a
+> **join** never announces itself · the day as one **stitched file that outlives the clips**
+> (gated on the owner decision below) · nesting · discovery · memories · chat attachments.
 > 🔴 **OWNER DECISION, the only blocking one:** what a samahan KEEPS after 24 hours, and whether
 > keeping is what we sell.
 

@@ -43,33 +43,78 @@ four separate times.
 
 ## 2 · WHAT IS LEFT — the order I would do it
 
-### ▶ 2a · NOTHING RINGS *(and it is far smaller than previously claimed)*
+### ✅ 2a · NOTHING RINGS — BUILT 2026-08-25 (PR #4841). Do NOT rebuild it.
 🛑 **CORRECTION: I told the owner twice that we have no push infrastructure. That was FALSE.**
 It ships and is mounted: `PushToggle` on the profile page · `savePushSubscription` /
 `removePushSubscription` · `emitNotification` with **61 call sites** · `/api/notify` sending via
 `web-push` + VAPID. `push_subscriptions` exists in prod with **0 rows** — nobody has switched it
 on.
-⏭ **The work is therefore:** (1) confirm the VAPID keys are set in the hosting settings —
+⏭ **The work was therefore:** (1) confirm the VAPID keys are set in the hosting settings —
 **not readable from a session**, `/api/notify` merely warns *"VAPID keys not set — skipping web
-push"* and continues; (2) emit an hourly nudge for stories through the machinery that already
-exists. **Do not scope a push build.**
+push"* and continues; (2) emit a nudge through the machinery that already exists. **Do not scope a
+push build.**
 
-### ▶ 2b · THE DAY DOES NOT COME BACK AS ANYTHING
+**WHAT SHIPPED 2026-08-25 — PR [#4841](https://github.com/iscasasola/setnayan-platform/pull/4841).**
+Measured first: **61 files · 108 `emitNotification` call sites · ZERO of them in the samahan
+tree.** Two new types (`samahan_story`, `samahan_message`), one shared fan-out called from the
+story route and the Usapan post action through `after()`.
+- **Collapsed to one unread notice per samahan per person, WITHIN AN HOUR.** 🔑 The window is not
+  decoration: the tray's **Open** button marks nothing read — clearing is a separate press many
+  people never make — so collapsing on "holds any unread notice" would have **muted a samahan
+  permanently** for anybody with one stale notice. Bursts are minutes apart; a mute is forever.
+- **The collapse read fails toward RINGING** (a refused read looks exactly like "nobody is
+  ringing"), and **no message preview is stored** — take-down is soft, and a preview in a
+  notification row has no inverse.
+- **Neither type is on the email or push allowlist**, deliberately: § 3.2 below is still the
+  owner's. The tray rings; no phone buzzes.
+🚨 **AND IT FOUND THREE TYPES THE DATABASE HAS NEVER HAD** — `connection_request` (2 sites),
+`connection_confirmed`, `order_cancelled` — emitted by four live call sites with **no migration,
+ever**. 70 labels in the migrations, the same 70 in prod, 72 in the union. **Refused, not thrown**;
+`lib/connection-notifications.test.ts` has 11 passing tests about two of them and could not see it.
+Added, plus a floored guard that derives BOTH sides from the code.
+⏭ **STILL OPEN and deliberately NOT built:** the **hourly nudge** ("post your story this hour") —
+it needs § 3.2 answered AND this project is cron-free, so it must hang off a trigger, not a
+schedule. And **nothing announces that somebody JOINED** a samahan (verified: the join action
+emits nothing) — named, not built, because a third notice type is a decision, not an oversight.
+
+### ◐ 2b · THE DAY DOES NOT COME BACK AS ANYTHING — HALF BUILT 2026-08-25 (PR #4842)
 Setlog's actual engine is the nightly stitch — everyone's clips as one continuous vlog. Ours
 expire one by one and nothing is assembled. **The renderer already exists and is shared by four
 features** (`compressVideoForWeb` / the browser render path used by Patiktok, the thank-you film,
 guest stories, the Papic reel maker), so this is a screen on a working engine, not a render farm.
 ⚠ Interacts with 2c: a stitched film that also expires at 24h may be worth less than the clips.
 
+**SHIPPED 2026-08-25 — the WATCHING half, PR
+[#4842](https://github.com/iscasasola/setnayan-platform/pull/4842).** Measured first: the viewer
+opened ONE clip, on `loop`, behind a close button — so a day made of 3-second clips could never be
+watched through, and `loop` was the mechanism (a looping clip has no end, so nothing could come
+next). Now **Play the day**: oldest → newest, each clip plays once and hands over, with position,
+a segment bar, Back/Next and arrow keys; tapping any clip plays from there to now. The strip stays
+newest-first.
+🔑 **NOTHING IS STITCHED AND NOTHING IS KEPT** — same clips, same 24 hours, played in order. The
+**stitch** (one continuous file that outlives the clips) is still unbuilt and is gated on § 3.1,
+because a stitch that survives IS a decision about what a samahan keeps.
+
 ### ▶ 2c · A SAMAHAN KEEPS NOTHING — and this is where money could sit
 Stories die by design; chat is text. There is no shelf where a group's good moments survive.
 **OWNER DECISION (see § 3).**
 
-### ▶ 2d · YOU CANNOT INVITE A WHOLE SAMAHAN TO AN EVENT
-Verified absent: `guest_groups.source_community_id` does **not** exist. Today a barkada and a
-guest list are strangers — you retype every name. **This is the bridge between samahan and the
-products Setnayan actually sells**, and the 2026-07-15 plan deferred it on unresolved fan-out
-design (snapshot vs live membership, plus-ones, cap interactions) — still unresolved.
+### ✅ 2d · A WHOLE SAMAHAN, IN ONE GO — BUILT 2026-08-25 (PR #4843)
+🛑 **THE PREMISE HERE WAS HALF FALSE AND MEASURING IT CHANGED THE BUILD.** This row used to say
+*"today a barkada and a guest list are strangers — you retype every name."* Against `origin/main`:
+`getPeopleYouCanInvite` has carried a **`samahan` source since 2026-08-21**, second-degree members
+included, so a barkada already appeared in the guest-list picker and **nobody retyped anything**.
+What was missing was the GROUP — twelve taps for twelve friends.
+
+So the smaller fix shipped: **a chip per samahan** (derived from the rows, never hand-listed) that
+filters the picker, and **"Choose all N shown"**, which never touches somebody already on the list
+and never disturbs a pick that is not currently shown. Every pick still goes through
+`quickAddGuest` — a way to choose, not a second way to write.
+
+🔑 **THE GROUP IS A FILTER, NOT A STORED LINK.** `guest_groups.source_community_id` is still
+verified absent and was deliberately NOT added: a wedding list that changed because somebody left
+a group chat is not a list the couple owns. **That also retires the snapshot-vs-live question that
+deferred this item since 2026-07-15 — it never has to be answered.**
 
 ### ▶ 2e · SMALLER, VERIFIED ABSENT
 - No photos/attachments in Usapan (deliberate: another moderation surface).

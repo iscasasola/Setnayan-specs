@@ -256,10 +256,39 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > (**not readable from a session** — the route merely warns and continues). **Do NOT scope a push
 > build.**
 >
-> ⏭ **LEFT:** the bell · the day coming back as **one stitched film** (the renderer already ships
-> and is shared by four features) · **inviting a whole samahan into a guest list** — the bridge to
-> what Setnayan actually sells, `guest_groups.source_community_id` **verified absent** · nesting ·
-> discovery · memories · chat attachments.
+> ✅ **THREE OF THOSE SHIPPED 2026-08-25 — PRs
+> [#4841](https://github.com/iscasasola/setnayan-platform/pull/4841) ·
+> [#4842](https://github.com/iscasasola/setnayan-platform/pull/4842) ·
+> [#4843](https://github.com/iscasasola/setnayan-platform/pull/4843). Do NOT rebuild them.**
+> **THE BELL RINGS.** Measured first: 61 files · **108** `emitNotification` call sites · **zero**
+> in the samahan tree, so a 3-second story that dies in 24 hours was posted in silence. A story or
+> an Usapan message now reaches the other members, **collapsed to one unread notice per samahan per
+> person within an hour**. 🔑 The window is load-bearing: the tray's **Open** button marks nothing
+> read, so collapsing on *"holds any unread notice"* would have **muted a samahan permanently** for
+> anyone with one stale notice — bursts are minutes apart, a mute is forever. Both types are OFF
+> the email and push allowlists on purpose; quiet hours are still the owner's call.
+> 🚨 **AND IT FOUND THREE NOTIFICATION TYPES THE DATABASE HAS NEVER HAD** — `connection_request`
+> (2 sites) · `connection_confirmed` · `order_cancelled`, four live emit sites, **no migration
+> ever**. 70 labels in the migrations, the same 70 in prod, **72** in the union. Refused, not
+> thrown; `connection-notifications.test.ts` has 11 passing tests about two of them and could not
+> see it. So: somebody adding you to their people never reached you, and "your bill was cancelled
+> with the celebration you removed" never reached the buyer. Fixed, with a **floored guard that
+> derives both sides from the code**.
+> **THE DAY PLAYS THROUGH.** `loop` on the viewer's video is what made a day of 3-second clips
+> unwatchable — a looping clip has no end, so nothing could ever come next. Play the day now runs
+> oldest → newest, each clip once. ⛔ **Nothing is stitched and nothing is kept** — the stitched
+> FILE is still unbuilt and is gated on the owner decision below.
+> ⚖ **AND ONE PREMISE IN THIS BLOCK WAS HALF FALSE:** *"inviting a whole samahan… you retype every
+> name"*. The guest-list picker has offered samahan co-members (second degree too) **since
+> 2026-08-21** — nobody retyped anything; only the GROUP gesture was missing. Shipped as a chip per
+> samahan + "Choose all N shown". 🔑 **The group is a FILTER, not a stored link** —
+> `guest_groups.source_community_id` stays absent, so no guest list can change because somebody
+> left a group chat, **and the snapshot-vs-live question that deferred this since 2026-07-15 never
+> has to be answered.**
+> ⏭ **LEFT:** the **hourly nudge** (§ 3.2 owner decision AND this project is cron-free, so it needs
+> a trigger, not a schedule) · **a join announces itself to nobody** (verified: the join action
+> emits nothing — named, not built) · the day as **one stitched file that outlives the clips**
+> (gated below) · nesting · discovery · memories · chat attachments.
 > 🔴 **THE ONE BLOCKING OWNER DECISION: what a samahan KEEPS after 24 hours, and whether keeping
 > is what we sell.** The feed is the hook; Papic on a group event is the existing archive product.
 >
