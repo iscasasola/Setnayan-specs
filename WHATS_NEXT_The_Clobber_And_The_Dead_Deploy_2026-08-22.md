@@ -225,11 +225,13 @@ engineering.**
 
 ### Owner decisions
 
-1. 💰 **A REAL UNPAID ₱499 ORDER IS SITTING IN PRODUCTION** — `S89O-GCR6BDC4Z6`,
-   Setnayan AI ×1, status `submitted`, ref `SNEYGV00WY`. It is the owner's own
-   test walk from 2026-08-20. Decide whether to cancel it **before it confuses
-   the admin payment queue**, which is the one place a real order and a test
-   order look identical.
+1. ✅ ~~💰 A REAL UNPAID ₱499 ORDER IS SITTING IN PRODUCTION~~ — **CLOSED, NOT A
+   DECISION. `S89O-GCR6BDC4Z6` is `status='cancelled'`**, cancelled 2026-08-20
+   at the owner's own instruction 5h28m after it was minted, never paid (0
+   payment rows, 0 receipts), with an admin note. Struck 2026-08-25 after a
+   session repeated this line to the owner as live and sent him hunting an admin
+   screen for a bill he had already cancelled himself. **Prod holds exactly one
+   order, ever, and it is this one.**
 2. 🏷 **THE PUBLIC `/alaala` PAGE STILL SAYS "ALAALA"** while the app rail now
    says **Memories** (owner 2026-08-21, reversing the 2026-07-31 rename). The
    app-side surfaces were renamed; the **public marketing page and its route

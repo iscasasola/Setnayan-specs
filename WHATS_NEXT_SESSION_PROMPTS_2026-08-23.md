@@ -2258,9 +2258,18 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 > ~36 remaining bare-sentence empty states, most of which are inside search sheets where a card
 > would be worse.
 >
-> 🔴 **OPEN OWNER DECISIONS from this session:** whether a real unpaid ₱499 test order should be
-> cancelled before it confuses the payment queue (inherited, still true), and whether a withheld
-> blurred frame leaves a visible gap or is silently absent.
+> 🔴 **OPEN OWNER DECISION from this session:** whether a withheld blurred frame leaves a visible
+> gap on a public gallery or is silently absent.
+>
+> 🛑 **AND ONE I GOT WRONG THE SAME DAY, KEPT HERE BECAUSE THE SHAPE REPEATS.** This block first
+> listed *"whether a real unpaid ₱499 test order should be cancelled — inherited, still true"*.
+> **It was not still true.** That order was `cancelled` on 2026-08-20 at the owner's own
+> instruction, and the contract file had said so since 08-23 — including the sentence *"every
+> 'decide whether to cancel the unpaid ₱499 order' line in this register is stale"*. I copied the
+> summary out of the auto-loaded `CLAUDE.md`, wrote *"inherited, still true"* without running the
+> one query that settles it, and the owner went looking at an admin screen for a bill he had
+> already dealt with. **I marked it "inherited" and treated that as a reason not to check, when it
+> is the reason to check.** All four copies are corrected now, the auto-loaded file first.
 
 <details><summary>The completed prompt</summary>
 

@@ -128,10 +128,18 @@ concluded and wrote down.
   `setnayan_ai_per_event_pricing_enabled` is **TRUE in prod** (read live). That is all correct —
   noted only so nobody "fixes" the amount.
 
-🔴 **THERE IS A REAL UNPAID ₱499 ORDER SITTING IN PROD RIGHT NOW** (`SNEYGV00WY`, status
-`submitted`). It is the owner's own test, so nobody is out of pocket — but it is the first order
-this flow has ever minted, and it is stuck. Decide whether to cancel it before it confuses the
-admin payment queue.
+✅ ~~**THERE IS A REAL UNPAID ₱499 ORDER SITTING IN PROD RIGHT NOW**~~ — **STRUCK 2026-08-25.
+`SNEYGV00WY` / `S89O-GCR6BDC4Z6` is `status='cancelled'`**, cancelled 2026-08-20 at the owner's own
+instruction, never paid. It was the first and still the ONLY order this flow — or any flow — has
+ever minted. Nothing is stuck and there is nothing to decide.
+
+🔑 **WHY THIS PARAGRAPH SURVIVED TWO DAYS AFTER THE CLOSURE AT THE TOP OF THIS SAME FILE.** The
+banner in § 1 has said *"CLOSED — DO NOT RE-ASK IT"* since 2026-08-23 and even declared every
+"decide whether to cancel" line stale — while this paragraph, ninety lines down, went on saying
+*"decide whether to cancel it"*. On 2026-08-25 that instruction reached the owner as a live task.
+**A doc that records a decision at the top and contradicts it in the middle will be read from the
+middle.** Grep the whole file for the old wording when you close something; a correction at one
+site is not a correction.
 
 ---
 

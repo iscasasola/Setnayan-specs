@@ -503,8 +503,9 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > 🔴 **THE MONEY ONE FIRST, AND THE OBVIOUS DIAGNOSIS IS WRONG.** Owner: *"i had a price to pay.
 > but i there was no payment. it just created."* The tempting read — the charge was refused, so
 > the flow fell through to the ordinary dashboard — is **FALSE**. Production holds the order:
-> **`S89O-GCR6BDC4Z6` · Setnayan AI ×1 · ₱499 · status `submitted` · ref `SNEYGV00WY`**, minted
-> 0.7s after the event. He WAS redirected — to the **Papic photo studio**, whose banner names
+> **`S89O-GCR6BDC4Z6` · Setnayan AI ×1 · ₱499 · ref `SNEYGV00WY`**, minted
+> 0.7s after the event — `submitted` when that was measured, **`cancelled` since 2026-08-20**
+> (see the closure below). He WAS redirected — to the **Papic photo studio**, whose banner names
 > **no amount** (`papic_amount` is never set by the onboarding mint), gives **no bank details**,
 > and says *"your **cameras** activate"* to a man who bought the assisted planner. The services
 > step had promised, verbatim, *"We'll show you where to send it right after this."*
@@ -512,8 +513,23 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > contract and returns `paymentPath: null` on every failure — a story that fits the symptom
 > perfectly and did not happen. **One query settled it. Query prod before writing a diagnosis
 > from a plausible code path.**
-> ⏭ **A REAL UNPAID ₱499 ORDER IS SITTING IN PROD** (the owner's own test) — decide whether to
-> cancel it before it confuses the admin payment queue.
+> ✅ **THAT ORDER IS CANCELLED AND THIS ITEM IS CLOSED — DO NOT RE-ASK IT.** Read out of
+> production 2026-08-25: `S89O-GCR6BDC4Z6` is **`status='cancelled'`**, cancelled 2026-08-20 at
+> **the owner's own instruction**, 5h28m after it was minted, carrying an admin note explaining
+> that the celebration it was bought for was removed by its organiser, that it was never paid
+> (**0 payment rows, 0 receipts**), and that it predates the sever-connections trigger which
+> cancels such bills automatically from now on. **Prod holds exactly ONE order, ever, and it is
+> this one.** There is nothing in any admin queue and nothing for the owner to do.
+>
+> 🔑 **THIS LINE IS WHY THE CORRECTION IS HERE AND NOT ONLY IN THE CONTRACT.** It previously read
+> *"A REAL UNPAID ₱499 ORDER IS SITTING IN PROD — decide whether to cancel it"*. The contract file
+> had ALREADY closed it on 2026-08-23 and said, in terms, *"every 'decide whether to cancel the
+> unpaid ₱499 order' line in this register is stale"* — and nobody edited the copies. On
+> 2026-08-25 a session read THIS file, repeated the stale line to the owner as fact, and sent him
+> hunting through an admin screen for a bill he had personally cancelled five days earlier.
+> **A correction that lands only in the detail doc has not landed.** When a gate closes, edit
+> every row that asserts it is open, in the same commit — and the auto-loaded file first, because
+> it is the one that gets read.
 >
 > 🔑 **RULE 0 PAID AGAIN ON THE SECOND ONE — THE OWNER'S EXACT SENTENCE IS ALREADY CODED.** The
 > date screen already flips to *"When are you celebrating?"* with three day chips; it is gated on
