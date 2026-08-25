@@ -1,0 +1,1011 @@
+<title>The Clickable Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap">
+
+<style>
+/* Tokens from prototypes/admin_designed_2026-08-03.html — approved 2026-08-04.
+   ⚠ gold #A9834B is 3.37:1 on white: rules and icons only, never text. */
+:root{
+  --ground:#FFFFFF; --panel:#FBFAF7; --sunk:#F4F2EC;
+  --ink:#2C2A29; --ink-soft:#4F535B; --ink-faint:#767A82;
+  --line:#E6E0D6; --line-soft:#F1ECE3;
+  --gold:#A9834B; --gold-text:#8A6B39; --gold-soft:#F5EEE1;
+  --slate:#3B4E67; --ok:#4F6B4A; --ok-soft:#EDF1E8;
+  --late:#B65A3A; --late-soft:#F7E9E6; --cta:#C24E25;
+  --shadow:0 1px 2px rgba(44,42,41,.05), 0 10px 28px -22px rgba(44,42,41,.38);
+  --pop:0 24px 60px -28px rgba(44,42,41,.42), 0 2px 8px rgba(44,42,41,.07);
+  --sans:"Hanken Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"Space Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ground:#191817; --panel:#221F1D; --sunk:#2A2724;
+  --ink:#EFEBE4; --ink-soft:#B5B0A8; --ink-faint:#8B857D;
+  --line:#3A3531; --line-soft:#2F2B27;
+  --gold:#C2A06A; --gold-text:#D6B87F; --gold-soft:#332B1E;
+  --slate:#9BB2CE; --ok:#9BBE93; --ok-soft:#232B21;
+  --late:#E08A66; --late-soft:#33221C; --cta:#E8703F;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -22px rgba(0,0,0,.8);
+  --pop:0 24px 60px -28px rgba(0,0,0,.9), 0 2px 8px rgba(0,0,0,.5);
+}}
+:root[data-theme="dark"]{
+  --ground:#191817; --panel:#221F1D; --sunk:#2A2724;
+  --ink:#EFEBE4; --ink-soft:#B5B0A8; --ink-faint:#8B857D;
+  --line:#3A3531; --line-soft:#2F2B27;
+  --gold:#C2A06A; --gold-text:#D6B87F; --gold-soft:#332B1E;
+  --slate:#9BB2CE; --ok:#9BBE93; --ok-soft:#232B21;
+  --late:#E08A66; --late-soft:#33221C; --cta:#E8703F;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -22px rgba(0,0,0,.8);
+  --pop:0 24px 60px -28px rgba(0,0,0,.9), 0 2px 8px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
+     font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.page{max-width:1140px;margin:0 auto;padding:44px 22px 90px}
+h1{font-size:clamp(1.8rem,4vw,2.5rem);line-height:1.1;letter-spacing:-.02em;margin:0;font-weight:700;text-wrap:balance}
+p{margin:0}
+.eyebrow{font-family:var(--mono);font-size:.66rem;font-weight:700;letter-spacing:.16em;
+         text-transform:uppercase;color:var(--gold-text)}
+.lede{font-size:1.06rem;color:var(--ink-soft);max-width:64ch;margin-top:14px}
+.rule{height:3px;width:60px;background:var(--gold);border-radius:2px;margin-bottom:18px}
+
+/* ── controls ──────────────────────────────────────────────── */
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:30px 0 18px;
+          padding:13px 15px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.controls .lbl{font-family:var(--mono);font-size:.61rem;font-weight:700;letter-spacing:.13em;
+               text-transform:uppercase;color:var(--ink-faint)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--ground)}
+.seg button{appearance:none;border:0;background:transparent;font:inherit;font-size:.8rem;
+            padding:7px 14px;cursor:pointer;color:var(--ink-soft);transition:background .18s var(--ease)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--ground);font-weight:600}
+.seg button:focus-visible{outline:2px solid var(--cta);outline-offset:-2px}
+.hint{font-size:.78rem;color:var(--ink-faint);margin-left:auto}
+kbd{font-family:var(--mono);font-size:.71rem;border:1px solid var(--line);border-radius:4px;
+    padding:2px 6px;background:var(--ground);color:var(--ink-soft)}
+
+/* ── the real top bar — ONE search, where the product already puts it ── */
+.topbar{display:flex;align-items:center;gap:12px;padding:9px 14px;border-bottom:1px solid var(--line);
+        background:var(--ground)}
+.brandmark{font-weight:700;font-size:.84rem;letter-spacing:-.01em;flex:none}
+.tsearch{flex:1;display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:999px;
+         background:var(--panel);padding:7px 13px;cursor:text;font:inherit;color:inherit;
+         text-align:left;max-width:430px;transition:border-color .16s var(--ease),background .16s var(--ease)}
+.tsearch:hover{border-color:var(--ink-faint);background:var(--ground)}
+.tsearch:focus-visible{outline:2px solid var(--cta);outline-offset:2px}
+.tsearch .ph{flex:1;font-size:.79rem;color:var(--ink-faint)}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:9px;flex:none}
+.pill{font-size:.72rem;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--ink-soft)}
+.pill.hot{background:var(--late-soft);color:var(--late);border-color:transparent;font-weight:600}
+.avatar{width:25px;height:25px;border-radius:50%;background:var(--gold-soft);color:var(--gold-text);
+        display:grid;place-items:center;font-size:.66rem;font-weight:700}
+
+/* ── frame ─────────────────────────────────────────────────── */
+.frame{border:1px solid var(--line);border-radius:16px;overflow:hidden;
+       box-shadow:var(--shadow);background:var(--ground);position:relative}
+.chrome{display:flex;align-items:center;gap:8px;padding:11px 15px;
+        border-bottom:1px solid var(--line);background:var(--panel)}
+.chrome .d{width:9px;height:9px;border-radius:50%;background:var(--line)}
+.chrome .who{margin-left:6px;font-size:.77rem;color:var(--ink-soft);font-weight:600}
+.chrome .crumb{margin-left:8px;font-size:.77rem;color:var(--ink-faint)}
+.chrome .when{margin-left:auto;font-family:var(--mono);font-size:.67rem;color:var(--ink-faint)}
+.bodyg{display:grid;grid-template-columns:196px 1fr;min-height:530px}
+@media(max-width:760px){.bodyg{grid-template-columns:1fr}.rail{display:none}}
+
+/* ── rail ──────────────────────────────────────────────────── */
+.rail{border-right:1px solid var(--line);background:var(--panel);padding:15px 11px;
+      display:flex;flex-direction:column;gap:2px}
+.rail .grp{font-family:var(--mono);font-size:.57rem;font-weight:700;letter-spacing:.14em;
+           text-transform:uppercase;color:var(--gold-text);padding:5px 9px 7px}
+.rail button.nav{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;
+        padding:7px 9px;border-radius:7px;font:inherit;font-size:.82rem;color:var(--ink-soft);
+        background:transparent;border:0;cursor:pointer;text-align:left;
+        transition:background .16s var(--ease)}
+.rail button.nav:hover{background:var(--sunk)}
+.rail button.nav[aria-current="true"]{background:var(--sunk);color:var(--ink);font-weight:600}
+.rail button.nav:focus-visible{outline:2px solid var(--cta);outline-offset:-2px}
+.rail .n{font-family:var(--mono);font-size:.65rem;color:var(--ink-faint)}
+.rail .n.hot{color:var(--late);font-weight:700}
+.rail .foot{margin-top:auto;padding:9px;font-size:.65rem;color:var(--ink-faint);line-height:1.45;
+            border-top:1px solid var(--line)}
+
+/* ── main ──────────────────────────────────────────────────── */
+.main{padding:19px 21px 26px;display:flex;flex-direction:column;gap:15px;min-width:0}
+.find{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;
+      background:var(--ground);padding:11px 14px;cursor:text;width:100%;text-align:left;
+      font:inherit;color:inherit;transition:border-color .16s var(--ease)}
+.find:hover{border-color:var(--ink-faint)}
+.find:focus-visible{outline:2px solid var(--cta);outline-offset:2px}
+.find .ph{flex:1;font-size:.85rem;color:var(--ink-faint)}
+.sec-lbl{font-family:var(--mono);font-size:.59rem;font-weight:700;letter-spacing:.14em;
+         text-transform:uppercase;color:var(--gold-text)}
+
+.calm{display:flex;gap:12px;align-items:flex-start;padding:15px;border-radius:11px;background:var(--ok-soft)}
+.calm .tick{flex:none;width:21px;height:21px;border-radius:50%;background:var(--ok);color:var(--ground);
+            display:grid;place-items:center;font-size:12px;font-weight:700;line-height:1}
+.calm b{display:block;font-size:.9rem;margin-bottom:2px}
+.calm span{font-size:.79rem;color:var(--ink-soft)}
+.wrow{display:flex;align-items:center;justify-content:space-between;gap:11px;padding:12px 14px;
+      border:1px solid var(--line);border-radius:10px;background:var(--ground);flex-wrap:wrap;
+      animation:rise .34s var(--ease) both}
+.wrow + .wrow{margin-top:7px}
+.wrow .mid{flex:1;min-width:0;display:flex;gap:11px;align-items:center}
+.wrow .l{min-width:0}
+.wrow b{display:block;font-size:.85rem;font-weight:600}
+.wrow small{font-family:var(--mono);font-size:.65rem;color:var(--ink-faint)}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.wrow{animation:none}}
+.act{flex:none;font:inherit;font-size:.75rem;font-weight:600;padding:6px 13px;border-radius:999px;
+     border:0;background:var(--cta);color:#fff;cursor:pointer}
+.act.ghost{background:transparent;color:var(--slate);border:1px solid var(--line)}
+.act:focus-visible{outline:2px solid var(--cta);outline-offset:2px}
+.proof{flex:none;width:44px;height:56px;border-radius:6px;border:1px solid var(--line);
+       overflow:hidden;background:var(--sunk);cursor:zoom-in;padding:0;display:block}
+.proof svg{width:100%;height:100%;display:block}
+.proof:focus-visible{outline:2px solid var(--cta);outline-offset:2px}
+.noproof{flex-basis:100%;margin-top:9px;padding:9px 11px;border-radius:8px;
+         background:var(--late-soft);color:var(--late);font-size:.75rem;line-height:1.45}
+
+/* a small inline form — for actions the code refuses to run without details */
+.miniform{flex-basis:100%;margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.miniform select,.miniform input{font:inherit;font-size:.76rem;padding:5px 9px;border-radius:7px;
+  border:1px solid var(--line);background:var(--ground);color:var(--ink)}
+.miniform select:focus-visible,.miniform input:focus-visible{outline:2px solid var(--cta);outline-offset:1px}
+.miniform .why{flex:1;min-width:120px}
+.shape{font-family:var(--mono);font-size:.56rem;font-weight:700;letter-spacing:.11em;
+  text-transform:uppercase;padding:2px 7px;border-radius:999px;white-space:nowrap}
+.shape.fact{background:var(--ok-soft);color:var(--ok)}
+.shape.form{background:var(--gold-soft);color:var(--gold-text)}
+.shape.judge{background:var(--sunk);color:var(--ink-faint)}
+.evid{flex:none;width:44px;height:44px;border-radius:7px;border:1px solid var(--line);
+  overflow:hidden;background:var(--sunk);cursor:zoom-in;padding:0;display:block}
+.evid svg{width:100%;height:100%;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.75rem;color:var(--ink-soft);
+  padding:10px 12px;border:1px dashed var(--line);border-radius:9px}
+.legend span{display:flex;align-items:center;gap:6px}
+
+/* the six */
+.six{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+@media(max-width:660px){.six{grid-template-columns:repeat(2,1fr)}}
+.card{border:1px solid var(--line);border-radius:11px;background:var(--ground);padding:14px 13px;
+      display:flex;flex-direction:column;gap:5px;min-height:88px;cursor:pointer;text-align:left;
+      font:inherit;color:inherit;transition:border-color .18s var(--ease),transform .18s var(--ease)}
+.card:hover{border-color:var(--gold);transform:translateY(-2px)}
+.card:focus-visible{outline:2px solid var(--cta);outline-offset:2px}
+.card b{font-size:.87rem;font-weight:600;line-height:1.25}
+.card small{font-family:var(--mono);font-size:.62rem;color:var(--ink-faint);margin-top:auto}
+.card .share{height:3px;border-radius:2px;background:var(--gold);margin-top:6px}
+
+/* ── A MENU NEVER SHOWS YOU ANOTHER MENU ───────────────────────
+   Opening a menu opens its main page. Its siblings sit above it as a
+   compact strip of small buttons — which is what /admin/studio already
+   does today (it defaults to the Website editor and renders a tab row).
+   Thirteen equal cards was my invention, and it repeated the fault of
+   the old home: everything the same weight, nothing saying what matters. */
+.chips{display:flex;flex-wrap:wrap;gap:5px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.chips button{font:inherit;font-size:.76rem;padding:5px 11px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--line);background:var(--ground);color:var(--ink-soft);white-space:nowrap;
+  transition:background .16s var(--ease),border-color .16s var(--ease),color .16s var(--ease);
+  animation:enter .3s var(--ease) both;animation-delay:calc(var(--i,0) * 18ms)}
+.chips button:hover{border-color:var(--gold);color:var(--ink)}
+.chips button[aria-current="true"]{background:var(--ink);border-color:var(--ink);color:var(--ground);font-weight:600}
+.chips button:focus-visible{outline:2px solid var(--cta);outline-offset:2px}
+.chips .dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--gold);
+  margin-left:6px;vertical-align:middle}
+.movednote{font-size:.74rem;color:var(--ink-faint);margin-top:-4px}
+@media(prefers-reduced-motion:reduce){.chips button{animation:none}}
+
+/* menu contents list */
+.itemlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:6px}
+.itemlist button{display:flex;align-items:center;justify-content:space-between;gap:8px;
+      border:1px solid var(--line);border-radius:9px;background:var(--ground);padding:10px 12px;
+      font:inherit;font-size:.81rem;color:var(--ink);cursor:pointer;text-align:left;
+      transition:border-color .16s var(--ease)}
+.itemlist button:hover{border-color:var(--gold)}
+.itemlist button:focus-visible{outline:2px solid var(--cta);outline-offset:2px}
+.itemlist .tag{font-family:var(--mono);font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;
+      color:var(--ink-faint);white-space:nowrap}
+.itemlist .tag.moved{color:var(--gold-text)}
+
+/* a menu's main thing, above its list */
+.lead{border:1px solid var(--line);border-radius:12px;padding:15px;background:var(--ground)}
+.lead .leadnote{font-size:.76rem;color:var(--ink-faint);margin-top:10px;line-height:1.45}
+.scroller{overflow-x:auto}
+.ledger{width:100%;border-collapse:collapse;font-size:.79rem}
+.ledger th{font-family:var(--mono);font-size:.58rem;font-weight:700;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-faint);text-align:left;padding:0 8px 7px;
+  border-bottom:1px solid var(--line)}
+.ledger td{padding:9px 8px;border-bottom:1px solid var(--line-soft)}
+.ledger .r{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.pill2{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.68rem;font-weight:600}
+.pill2.paid{background:var(--ok-soft);color:var(--ok)}
+.pill2.cancel{background:var(--sunk);color:var(--ink-faint)}
+
+/* a stub page */
+.stub{border:1px dashed var(--line);border-radius:12px;padding:26px 22px;background:var(--panel);
+      display:flex;flex-direction:column;gap:10px}
+.stub h3{margin:0;font-size:1.08rem;font-weight:600}
+.stub p{font-size:.85rem;color:var(--ink-soft);max-width:56ch}
+.back{align-self:flex-start;font:inherit;font-size:.78rem;color:var(--slate);background:transparent;
+      border:1px solid var(--line);border-radius:999px;padding:6px 13px;cursor:pointer}
+.back:focus-visible{outline:2px solid var(--cta);outline-offset:2px}
+
+/* the split-job banner */
+.banner{border-radius:10px;padding:12px 14px;font-size:.81rem;line-height:1.5}
+.banner.bad{background:var(--late-soft);color:var(--late)}
+.banner.good{background:var(--ok-soft);color:var(--ok)}
+.banner b{font-weight:700}
+
+/* overlays */
+.scrim{position:absolute;inset:0;background:rgba(44,42,41,.34);display:none;
+       align-items:flex-start;justify-content:center;padding-top:74px;z-index:5}
+.scrim[data-open="true"]{display:flex;animation:fade .18s var(--ease) both}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.pal{width:min(500px,92%);background:var(--ground);border:1px solid var(--line);border-radius:13px;
+     box-shadow:var(--pop);overflow:hidden;animation:pop .24s var(--ease) both}
+@keyframes pop{from{opacity:0;transform:translateY(-9px) scale(.985)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.scrim[data-open="true"],.pal{animation:none}}
+.pal input{width:100%;border:0;border-bottom:1px solid var(--line);padding:15px 17px;font:inherit;
+           font-size:.92rem;background:transparent;color:var(--ink)}
+.pal input:focus{outline:none}
+.pal ul{list-style:none;margin:0;padding:6px;max-height:268px;overflow-y:auto}
+.pal li button{display:flex;justify-content:space-between;gap:11px;padding:9px 12px;border-radius:8px;
+          font:inherit;font-size:.84rem;color:var(--ink);width:100%;background:transparent;border:0;
+          cursor:pointer;text-align:left}
+.pal li button:hover,.pal li[data-sel="true"] button{background:var(--sunk)}
+.pal li .grp{font-family:var(--mono);font-size:.62rem;color:var(--ink-faint)}
+.pal .none{padding:22px 17px;font-size:.84rem;color:var(--ink-faint);text-align:center}
+.lb{position:absolute;inset:0;background:rgba(44,42,41,.62);display:none;
+    align-items:center;justify-content:center;z-index:7;padding:26px}
+.lb[data-open="true"]{display:flex}
+.lb .sheet{background:var(--ground);border-radius:12px;padding:13px;box-shadow:var(--pop);max-width:300px;width:100%}
+.lb .sheet p{font-size:.73rem;color:var(--ink-faint);margin-top:9px;text-align:center}
+
+/* ── PHONE ─────────────────────────────────────────────────────
+   The bottom strip is a LOCKED ≤5-tab shortcut, never the full menu —
+   "More" is. So an eight-menu desktop set costs the phone nothing; what
+   it changes is WHICH four earn a tab. Today's four (Overview · Accounts
+   · Ugat Console · App Performance) include two the owner's own record
+   shows almost no use of, while Sell (52% of everything he does) and
+   Money have no tab at all. */
+.frame.phone{max-width:390px;margin:0 auto}
+.frame.phone .bodyg{grid-template-columns:1fr;min-height:600px}
+.frame.phone .rail{display:none}
+.frame.phone .botnav{display:none}
+.frame.phone .six{display:none}
+.frame.phone .banner{display:none}
+.deskonly{display:none}
+.frame.phone .deskonly{display:flex;gap:10px;align-items:flex-start;margin-top:4px;
+  padding:12px 13px;border:1px dashed var(--line);border-radius:10px;
+  font-size:.78rem;color:var(--ink-soft);line-height:1.5}
+.frame.phone .deskonly .ico{font-size:16px;color:var(--ink-faint);margin-top:1px}
+.frame.phone .sec-lbl{margin-bottom:8px}
+.frame.phone .topbar{padding:8px 11px;gap:8px}
+.frame.phone .brandmark{font-size:.76rem}
+.frame.phone .tsearch{max-width:none;padding:6px 11px}
+.frame.phone .tsearch .ph{font-size:.74rem}
+.frame.phone .tsearch kbd{display:none}
+.frame.phone .main{padding:14px 13px 18px;gap:12px}
+.frame.phone .six{grid-template-columns:repeat(2,1fr)}
+.frame.phone .chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:11px;
+  scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+.frame.phone .chips button{flex:none}
+.frame.phone .wrow{align-items:flex-start}
+.frame.phone .act{margin-left:auto}
+.frame.phone .itemlist{grid-template-columns:1fr}
+.frame.phone .chrome .crumb{display:none}
+
+.botnav{display:none;grid-auto-flow:column;border-top:1px solid var(--line);
+  background:var(--ground);position:sticky;bottom:0}
+.botnav button{display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:9px 4px calc(9px + env(safe-area-inset-bottom,0px));font:inherit;font-size:.62rem;
+  background:transparent;border:0;cursor:pointer;color:var(--ink-faint);position:relative;
+  transition:color .16s var(--ease)}
+.botnav button .ico{font-size:19px}
+.botnav button[aria-current="true"]{color:var(--ink);font-weight:600}
+.botnav button[aria-current="true"] .ico{color:var(--gold)}
+.botnav button:focus-visible{outline:2px solid var(--cta);outline-offset:-3px}
+.botnav .bdot{position:absolute;top:5px;left:50%;margin-left:7px;min-width:15px;height:15px;
+  border-radius:999px;background:var(--late);color:#fff;font-family:var(--mono);font-size:.55rem;
+  font-weight:700;display:grid;place-items:center;padding:0 3px}
+.botnav button[aria-current="true"]::after{content:'';position:absolute;top:0;left:22%;right:22%;
+  height:2px;background:var(--gold);border-radius:0 0 2px 2px;animation:enter .3s var(--ease) both}
+
+/* ── ICONS ─────────────────────────────────────────────────────
+   Inline SVG in the product's own idiom (24-box, currentColor stroke,
+   round caps) — the CSP admits no icon CDN, and an icon that silently
+   fails to load is worse than none. */
+.ico{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:1.7;
+     stroke-linecap:round;stroke-linejoin:round;overflow:visible;
+     transition:transform .22s var(--ease),color .16s var(--ease)}
+.rail button.nav .ico{font-size:15px;color:var(--ink-faint)}
+.rail button.nav:hover .ico{transform:translateX(1.5px);color:var(--gold)}
+.rail button.nav[aria-current="true"] .ico{color:var(--gold)}
+.chips button .ico{font-size:12.5px;margin-right:5px;vertical-align:-1.5px}
+.chips button:hover .ico{transform:scale(1.12)}
+.card .ico{font-size:17px;color:var(--gold);margin-bottom:2px}
+.card:hover .ico{transform:scale(1.1) rotate(-3deg)}
+.shape .ico{font-size:10px;margin-right:3px;vertical-align:-1px;stroke-width:2.4}
+.tsearch .ico{font-size:14px;color:var(--ink-faint)}
+.navrow{display:flex;align-items:center;gap:8px;min-width:0}
+
+@keyframes icoIn{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+.ico.anim{animation:icoIn .34s var(--ease) both;animation-delay:calc(var(--i,0) * 26ms + 60ms)}
+/* the tick draws itself rather than appearing */
+@keyframes draw{from{stroke-dashoffset:22}to{stroke-dashoffset:0}}
+.calm .tick svg path{stroke-dasharray:22;animation:draw .45s var(--ease) both;animation-delay:.22s}
+@media(prefers-reduced-motion:reduce){
+  .ico.anim,.calm .tick svg path{animation:none !important}
+  .ico{transition:none !important}
+}
+
+/* ── MOTION ────────────────────────────────────────────────────
+   One easing for everything that enters, one for everything that
+   leaves. Staggers are driven by --i set at paint time, so a list of
+   any length settles in the same rhythm instead of arriving at once. */
+@keyframes enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes enterX{from{opacity:0;transform:translateX(-7px)}to{opacity:1;transform:none}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes popIn{0%{opacity:0;transform:scale(.6)}60%{transform:scale(1.12)}100%{opacity:1;transform:scale(1)}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(169,131,75,0)}
+                40%{box-shadow:0 0 0 4px rgba(169,131,75,.22)}}
+@keyframes leave{to{opacity:0;transform:translateX(26px)}}
+
+.stagger{animation:enter .38s var(--ease) both;animation-delay:calc(var(--i,0) * 26ms)}
+.rail button.nav{animation:enterX .32s var(--ease) both;animation-delay:calc(var(--i,0) * 30ms)}
+.card .share{transform-origin:left center;animation:grow .55s var(--ease) both;
+             animation-delay:calc(180ms + var(--i,0) * 55ms)}
+.calm .tick{animation:popIn .42s var(--ease) both;animation-delay:.1s}
+.itemlist .tag.moved{animation:glow 1.1s var(--ease) both;animation-delay:calc(var(--i,0) * 26ms);
+                     border-radius:999px}
+.wrow.going{animation:leave .22s ease-in forwards}
+.banner{animation:enter .4s var(--ease) both}
+.pal li{animation:enter .22s var(--ease) both;animation-delay:calc(var(--i,0) * 16ms)}
+/* the rail count changing is a real event — mark it */
+.rail .n.bump{animation:popIn .34s var(--ease) both}
+
+@media(prefers-reduced-motion:reduce){
+  .stagger,.rail button.nav,.card .share,.calm .tick,.itemlist .tag.moved,
+  .wrow,.wrow.going,.banner,.pal li,.rail .n.bump{animation:none !important}
+  .card,.itemlist button,.rail button.nav{transition:none !important}
+}
+
+/* notes */
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(238px,1fr));gap:16px;margin-top:34px}
+.note{border-top:2px solid var(--line);padding-top:13px}
+.note b{display:block;font-size:.86rem;margin-bottom:5px}
+.note p{font-size:.82rem;color:var(--ink-soft);line-height:1.5}
+.note.keep{border-top-color:var(--ok)}
+.note.change{border-top-color:var(--gold)}
+.note.fix{border-top-color:var(--late)}
+footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
+       font-size:.78rem;color:var(--ink-faint);max-width:74ch;line-height:1.6}
+</style>
+
+<div class="page">
+  <div class="rule"></div>
+  <p class="eyebrow">Interaction prototype · 25 August 2026</p>
+  <h1>The clickable admin</h1>
+  <p class="lede">Both menu sets, side by side and working. Switch between the menus you have today
+    and the proposed ones, click any menu, open anything inside it, and press ⌘K to jump. Same
+    pages, same data — only the grouping and the front screen change.</p>
+
+  <div class="controls">
+    <span class="lbl">Menus</span>
+    <span class="seg" role="group" aria-label="Which menu set">
+      <button type="button" id="mNow" aria-pressed="true">Today’s</button>
+      <button type="button" id="mNew" aria-pressed="false">Proposed</button>
+    </span>
+    <span class="lbl" style="margin-left:8px">The day</span>
+    <span class="seg" role="group" aria-label="Quiet or busy">
+      <button type="button" id="bQuiet" aria-pressed="true">Quiet</button>
+      <button type="button" id="bBusy" aria-pressed="false">Busy</button>
+    </span>
+    <span class="lbl" style="margin-left:8px">Screen</span>
+    <span class="seg" role="group" aria-label="Desktop or phone">
+      <button type="button" id="sDesk" aria-pressed="true">Desktop</button>
+      <button type="button" id="sPhone" aria-pressed="false">Phone</button>
+    </span>
+    <span class="hint">Press <kbd>⌘K</kbd> anywhere</span>
+  </div>
+
+  <div class="frame">
+    <div class="chrome">
+      <span class="d"></span><span class="d"></span><span class="d"></span>
+      <span class="who">Setnayan HQ</span>
+      <span class="crumb" id="crumb"></span>
+      <span class="when">Tue 25 Aug</span>
+    </div>
+    <div class="topbar">
+      <span class="brandmark">SETNAYAN</span>
+      <button class="tsearch" id="find" type="button" aria-haspopup="dialog"
+              aria-label="Search Setnayan — pages, events, people and shops">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"
+          fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m20 20-4.5-4.5"
+          fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <span class="ph" id="findPh">Search Setnayan</span>
+        <kbd>⌘K</kbd>
+      </button>
+      <span class="tb-right">
+        <span class="pill" id="tbWork">All clear</span>
+        <span class="avatar" aria-hidden>IC</span>
+      </span>
+    </div>
+    <div class="bodyg">
+      <nav class="rail" aria-label="Console"><span class="grp">Setnayan HQ</span>
+        <div id="railItems"></div>
+        <span class="foot" id="railFoot"></span>
+      </nav>
+      <main class="main" id="main"></main>
+    </div>
+
+    <nav class="botnav" id="botnav" aria-label="Console (phone)"></nav>
+
+    <div class="lb" id="lb" data-open="false">
+      <div class="sheet" role="dialog" aria-modal="true" aria-label="Payment screenshot">
+        <div id="lbimg"></div><p>Click anywhere to close</p>
+      </div>
+    </div>
+    <div class="scrim" id="scrim" data-open="false">
+      <div class="pal" role="dialog" aria-modal="true" aria-label="Go to any page">
+        <input id="q" type="text" placeholder="Go to… payouts, taxonomy, secrets, venues" autocomplete="off">
+        <ul id="hits"></ul>
+      </div>
+    </div>
+  </div>
+
+  <p id="integrity" class="banner" style="margin-top:16px"></p>
+
+  <div class="notes">
+    <div class="note fix"><b>My table was wrong — App Performance</b>
+      <p>The seven I proposed silently dropped it, leaving nine pages homeless. It is back as its
+        own menu, <em>Numbers</em>, which makes the proposed set <strong>eight</strong>. If you
+        want to stay at seven, Sell folds into Money — say which and I will set it.</p></div>
+    <div class="note change"><b>Nothing is deleted</b>
+      <p>All 78 items exist in both sets. Switch between them and the counts stay 78. Items that
+        moved are marked <em>moved</em> so you can see exactly what changed.</p></div>
+    <div class="note change"><b>The phone answers; it does not edit</b>
+      <p>Switch Screen to Phone. There is no menu bar, because there is nowhere else to go — the
+        phone is the list of things waiting on you and the means to answer them. Prices, the
+        website and settings are editing, so they stay on the computer and the screen says so.</p></div>
+    <div class="note change"><b>A booking fee is just a purchase</b>
+      <p>It mints a real order on the same rail as any sale and lands here as an ordinary payment
+        with a receipt. Only the amount differs — 5% of what the supplier declared. Two fee rows
+        are shown: one paid with proof, one that is still only an expectation.</p></div>
+    <div class="note change"><b>Your six jobs stop splitting</b>
+      <p>Today, Shops sits in three menus and Test data in two. Open any menu in each set — the
+        banner tells you which of your jobs are scattered.</p></div>
+    <div class="note keep"><b>Still flat, still no submenus</b>
+      <p>Every menu is one tap to a list, exactly as locked in July. The proposal changes what is
+        grouped together, never the shape.</p></div>
+  </div>
+
+  <footer>
+    Item lists are the real ones, read out of the shipped console: 78 entries across the six groups
+    plus All surfaces. Usage shares come from your own activity record (65 actions, 20 May – 8 Aug).
+    A stub page stands in for each destination — the pages themselves are unchanged by this proposal.
+  </footer>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+
+  /* Lucide-idiom glyphs, drawn here because no icon host is reachable. */
+  const P = {
+    today:'<path d="M4 6h16M4 12h16M4 18h10"/><circle cx="19.5" cy="18" r="2.2"/>',
+    money:'<rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 12h.01M18 12h.01"/>',
+    sell:'<path d="M3 11.5V4.5A1.5 1.5 0 0 1 4.5 3h7L21 12.5 12.5 21 3 11.5Z"/><circle cx="7.5" cy="7.5" r="1.3"/>',
+    people:'<circle cx="9" cy="8" r="3.2"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16.5 5.6a3.2 3.2 0 0 1 0 6M18 20a6.4 6.4 0 0 0-2-4.6"/>',
+    studio:'<rect x="2.5" y="6.5" width="19" height="12" rx="2"/><path d="m10 10.5 5 3-5 3z"/><path d="M6 3.5h12"/>',
+    numbers:'<path d="M3 20V4"/><path d="M3 20h18"/><path d="m7 15 3.5-4.5L14 14l4-6"/>',
+    setup:'<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M21.5 12h-3M5.5 12h-3M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1M18.7 18.7l-2.1-2.1M7.4 7.4 5.3 5.3"/>',
+    all:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+    accounts:'<circle cx="12" cy="7.5" r="3.5"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/>',
+    ugat:'<circle cx="12" cy="4.5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M12 6.5v5M12 11.5 6 17M12 11.5 18 17"/>',
+    perf:'<path d="M2.5 12h4l2.5-6 4 12 2.5-6h6"/>',
+    search:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.5-4.5"/>',
+    fact:'<path d="M4 12.5 9.5 18 20 6.5"/>',
+    form:'<path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17v3z"/>',
+    judge:'<path d="M12 4v16M6 8h12"/><path d="m4 14 2.5-6L9 14a2.5 2.5 0 0 1-5 0ZM15 14l2.5-6L20 14a2.5 2.5 0 0 1-5 0Z"/>',
+    tag:'<path d="M3 11.5V4.5A1.5 1.5 0 0 1 4.5 3h7L21 12.5 12.5 21 3 11.5Z"/><circle cx="7.5" cy="7.5" r="1.3"/>',
+    shapes:'<circle cx="7" cy="17" r="4"/><rect x="12" y="12" width="9" height="9" rx="1.5"/><path d="m12.5 8.5 4-6 4 6z"/>',
+    flask:'<path d="M9.5 3v6L4 19a2 2 0 0 0 1.8 3h12.4A2 2 0 0 0 20 19l-5.5-10V3"/><path d="M8 3h8M7 15h10"/>',
+    store:'<path d="M3.5 9.5 5 4h14l1.5 5.5"/><path d="M3.5 9.5a3 3 0 0 0 5.7 1 3 3 0 0 0 5.6 0 3 3 0 0 0 5.7-1"/><path d="M5 11.5V20h14v-8.5"/>',
+    globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18"/>',
+    team:'<circle cx="10" cy="8" r="3.4"/><path d="M3 20a7 7 0 0 1 14 0"/><path d="M18.5 12.5v4M16.5 14.5h4"/>',
+  };
+  const ico = (k, anim) =>
+    `<svg class="ico${anim ? ' anim' : ''}" viewBox="0 0 24 24" aria-hidden="true">${P[k] ?? P.all}</svg>`;
+
+  /* 📱 THE PHONE ANSWERS; IT DOES NOT EDIT — owner, 2026-08-26:
+     "for mobile version, we only provide quick answers. no editing of settings
+      or features. just responses for those that needs decision and response."
+
+     So the phone has NO menu bar, because there is nowhere else to go. Today is
+     the whole app: the things waiting on a decision, and the means to give it.
+     Prices, categories, the website, stats and settings are editing — they stay
+     on the computer, and the phone says so rather than offering a door that
+     leads somewhere you should not be working.
+
+     ⚠ This RETIRES the ≤5-tab strip on the phone rather than re-cutting it. The
+     old lock governed how MANY tabs a subset shortcut may have; it never
+     required one to exist. A bar of five doors, four of which open editors, is
+     the opposite of this ruling. */
+  /* The phone may reach the QUEUES — the things that wait on an answer — and
+     nothing else. Derived from the proposed Today menu plus the money queues,
+     so it can never drift from the grouping above. */
+  /* ⚠ LAZY ON PURPOSE. As a top-level `const` this read NEW before its own
+     declaration ran and the whole script died in the temporal dead zone —
+     search returned nothing, silently. A function defers the read to call time. */
+  let _answerable = null;
+  const answerable = () => (_answerable ??= new Set([
+    ...NEW.find(g => g.k === 'today').items,
+    ...NEW.find(g => g.k === 'money').items,
+  ]));
+  const onPhone = () => document.querySelector('.frame').classList.contains('phone');
+
+  /* menu key → glyph, for BOTH sets */
+  const MENU_ICON = {overview:'today', today:'today', money:'money', sell:'sell',
+    people:'people', accounts:'accounts', studio:'studio', ugat:'ugat',
+    perf:'perf', numbers:'numbers', setup:'setup', all:'all'};
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  /* ── THE REAL 78, read out of the shipped console ──────────────── */
+  const NOW = [
+    {k:'overview', t:'Overview', items:['Overview','All work','Verify','ID documents','Partnerships',
+      'Payments','Fees owed','Payouts','Subscriptions','Payment options','Disputes','Pax changes',
+      'Force majeure','Completions','Reviews','Setnayan AI abuse','Account deletions','User reports',
+      'Chat contact flags','Repost watch','Profile corrections','Data Privacy & NPC Filing',
+      'Integrity watch','Fraud queue','Approvals','Pakanta queue','Editorial review','Help']},
+    {k:'accounts', t:'Accounts', items:['Users','Founder seats','Vendors','Demo vendors','Events','Venues']},
+    {k:'studio', t:'Studio', items:['Website','Live Studio channels','Background videos','Website media',
+      'Reveal Studio','Real Stories','Recaps','Patiktok','Songs','Moodboard library','Social queue',
+      'Spotlight Awards','Journal Spotlights','Discount codes','Referrals']},
+    {k:'ugat', t:'Ugat Console', items:['Menus & icons','Taxonomy','Onboarding','Wedding traditions',
+      'Setnayan AI brain','Entity map']},
+    {k:'perf', t:'App Performance', items:['App Performance','Growth','Intelligence','Demand Radar',
+      'SEO & GEO','Funnels','Operations & Hiring','Connection logs','Offline daemon']},
+    {k:'money', t:'Money & Settings', items:['Pricing','Custom plans','Papic storage',
+      'Vendor recommendations','Price bands','Budget Planner','Receipts','Payment methods','Settings',
+      'Compliance','Notifications','Demo mode','Integrations','Secrets & Rotation']},
+    {k:'all', t:'All surfaces', items:[]},
+  ];
+
+  const NEW = [
+    {k:'today', t:'Today', items:['Overview','All work','Disputes','Pax changes','Force majeure',
+      'Completions','Reviews','Setnayan AI abuse','Account deletions','User reports',
+      'Chat contact flags','Repost watch','Profile corrections','Data Privacy & NPC Filing',
+      'Integrity watch','Fraud queue','Approvals','Pakanta queue','Editorial review','Help']},
+    {k:'money', t:'Money', items:['Payments','Fees owed','Payouts','Subscriptions','Payment options',
+      'Receipts','Payment methods']},
+    {k:'sell', t:'Sell', items:['Pricing','Custom plans','Price bands','Discount codes','Referrals',
+      'Vendor recommendations']},
+    {k:'people', t:'People & shops', items:['Users','Founder seats','Events','Venues','Vendors',
+      'Verify','ID documents','Partnerships']},
+    {k:'studio', t:'Studio', items:['Website','Live Studio channels','Background videos','Website media',
+      'Reveal Studio','Real Stories','Recaps','Patiktok','Songs','Moodboard library','Social queue',
+      'Spotlight Awards','Journal Spotlights']},
+    {k:'numbers', t:'Numbers', items:['App Performance','Growth','Intelligence','Demand Radar',
+      'SEO & GEO','Funnels','Operations & Hiring','Connection logs','Offline daemon']},
+    {k:'setup', t:'Set up', items:['Taxonomy','Onboarding','Wedding traditions',
+      'Setnayan AI brain','Entity map','Menus & icons','Demo vendors','Demo mode','Budget Planner',
+      'Papic storage','Settings','Compliance','Notifications','Integrations','Secrets & Rotation']},
+    {k:'all', t:'All surfaces', items:[]},
+  ];
+
+  /* Which of the owner's six jobs each set scatters. Derived below, not typed. */
+  const JOBS = {
+    'Prices & what we sell':['Pricing','Custom plans','Price bands','Discount codes','Referrals','Vendor recommendations'],
+    'Categories':['Taxonomy','Event types','Onboarding','Wedding traditions'],
+    'Test data':['Demo vendors','Demo mode'],
+    'Shops':['Verify','ID documents','Partnerships','Vendors'],
+    'The website':['Website','Website media','Background videos'],
+    'Your team':['Users','Founder seats'],
+  };
+
+  const SIX = [
+    {t:'Prices & what we sell', n:'34 changes · 52%', w:100, go:'Pricing', i:'tag'},
+    {t:'Categories',            n:'9 changes',        w:26,  go:'Taxonomy', i:'shapes'},
+    {t:'Test data',             n:'9 changes',        w:26,  go:'Demo vendors', i:'flask'},
+    {t:'Shops',                 n:'6 changes · 2 shops', w:18, go:'Verify', i:'store'},
+    {t:'The website',           n:'4 changes',        w:12,  go:'Website', i:'globe'},
+    {t:'Your team',             n:'3 changes · 1 admin', w:9, go:'Users', i:'team'},
+  ];
+
+  const RECEIPT = `<svg viewBox="0 0 120 152" xmlns="http://www.w3.org/2000/svg" role="img"
+      aria-label="Payment screenshot: GCash transfer of 2,499 pesos, reference SN9B5605B1">
+    <rect width="120" height="152" fill="#F7F7F9"/><rect width="120" height="26" fill="#1a6fd4"/>
+    <text x="10" y="17" font-family="sans-serif" font-size="10" fill="#fff" font-weight="bold">GCash</text>
+    <text x="10" y="46" font-family="sans-serif" font-size="7" fill="#6b7280">Sent to</text>
+    <text x="10" y="57" font-family="sans-serif" font-size="8.5" fill="#111">SETNAYAN</text>
+    <text x="10" y="78" font-family="sans-serif" font-size="16" fill="#111" font-weight="bold">&#8369;2,499</text>
+    <line x1="10" y1="90" x2="110" y2="90" stroke="#e5e7eb"/>
+    <text x="10" y="104" font-family="sans-serif" font-size="6.5" fill="#6b7280">Ref. No.</text>
+    <text x="10" y="114" font-family="monospace" font-size="7.5" fill="#111">SN9B5605B1</text>
+    <text x="10" y="130" font-family="sans-serif" font-size="6.5" fill="#6b7280">25 Aug 2026 · 9:04 PM</text>
+    <circle cx="98" cy="126" r="11" fill="#16a34a"/>
+    <path d="M93 126 l4 4 l7 -8" stroke="#fff" stroke-width="2.4" fill="none"
+          stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+  /* Every row carries the shape its own action demands — read out of the
+     shipped code, never chosen by feel (owner's rule, 2026-08-05):
+       fact   ⇒ one click is honest
+       form   ⇒ the action refuses to run without details
+       judge  ⇒ no button at all, only the case file */
+  const REPORTED = `<svg viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" role="img"
+      aria-label="The reported photo, blurred pending review">
+    <rect width="44" height="44" fill="#DED8CE"/><circle cx="22" cy="16" r="7" fill="#C4BCB0"/>
+    <path d="M6 40c3-9 9-13 16-13s13 4 16 13z" fill="#C4BCB0"/>
+    <rect width="44" height="44" fill="#F7E9E6" opacity=".55"/>
+    <text x="22" y="26" text-anchor="middle" font-family="sans-serif" font-size="8"
+      fill="#B65A3A" font-weight="bold">FLAGGED</text></svg>`;
+
+  const WORK = [
+    {t:'₱2,499 from Ice Casasola', s:'GCash · ref SN9B5605B1 · 11 min ago',
+     shape:'fact', a:'Money arrived', p:true, proof:true},
+    /* A BOOKING FEE IS A PURCHASE (owner, 2026-08-26). It mints a real order on
+       the same GCash/BDO rail as any other sale and arrives here as an ordinary
+       payment with a receipt — one click, exactly like the row above. The only
+       thing that differs is the amount, which comes from what the supplier
+       declared. So it needs no queue of its own; "Fees owed" stays the list of
+       who has not paid yet, deliberately without buttons. */
+    {t:'₱1,500 booking fee · Saysay Live Band', s:'GCash · ref SNBF3K21J · 5% of a ₱30,000 declared booking',
+     shape:'fact', a:'Money arrived', p:true, proof:true},
+    /* 🚨 AND THE SAME KIND OF ROW WITH NOTHING TO CHECK. A fee charge opens the
+       moment a supplier says they paid the deposit — before any money moves —
+       with no reference and no screenshot. It looks identical to the row above
+       until you ask whether the proof is there. */
+    {t:'₱900 booking fee · Ilaw Productions', s:'Opened at lock · supplier has not sent anything yet',
+     shape:'fact', a:null, p:false,
+     no:'No reference and no screenshot — nothing here to check the money against. This is not a payment yet, only an expectation of one.'},
+    {t:'Ganda Beauty Co. wants to be checked', s:'Shop · waiting 2 days',
+     shape:'fact', a:'Approve the shop', p:true},
+    {t:'Kutis Glow raised a help ticket', s:'“My calendar shows the wrong date” · 6h',
+     shape:'form', a:'Save', p:true,
+     form:[{kind:'select', label:'Set to', opts:['Working on it','Closed']},
+           {kind:'text', label:'Note to them', ph:'Optional — they will see this'}]},
+    {t:'A message tried to take a deal off Setnayan', s:'Sulyap Studios → Maria & Jose · 2h',
+     shape:'form', a:'Save', p:true,
+     form:[{kind:'select', label:'Decision', opts:['Reviewed — leave it','Dismiss the flag']}]},
+    {t:'A guest reported a photo', s:'Maria & Jose · reported 40 min ago',
+     shape:'judge', a:'Open the case', p:false, evidence:true,
+     note:'A person is asking us to take down a photograph of them. No quick button — this one gets read.'},
+  ];
+
+  /* 🛡 THE TWO SETS MUST HOLD THE SAME PAGES — checked live, not asserted.
+     A regrouping that quietly gains or loses a page is the whole failure this
+     proposal exists to avoid, and the first draft of this file DID gain one
+     ("Event types", a real route that is not in the nav). A typed total would
+     have agreed with itself; comparing the arrays is what caught it.
+     ⚠ This function was deleted once by a careless slice-edit and the whole
+     prototype went blank — restored, and now guarded by the check below. */
+  function integrity(){
+    const flat = a => a.filter(g => g.k !== 'all').flatMap(g => g.items);
+    const A = flat(NOW), B = flat(NEW);
+    const sa = new Set(A), sb = new Set(B);
+    return {
+      now: A.length, proposed: B.length,
+      gained: [...sb].filter(x => !sa.has(x)),
+      lost:   [...sa].filter(x => !sb.has(x)),
+      dupNow: A.length !== sa.size, dupNew: B.length !== sb.size,
+    };
+  }
+
+  /* ── state ─────────────────────────────────────────────────────── */
+  let usingNew = false, busy = false, menu = 'overview', page = null, work = WORK.slice();
+  const set = () => usingNew ? NEW : NOW;
+  const grp = () => set().find(g => g.k === menu) ?? set()[0];
+
+  /** Where does each item live in a given set? Derived, never hand-listed. */
+  function homeOf(setArr, item){
+    const g = setArr.find(x => x.items.includes(item));
+    return g ? g.t : null;
+  }
+  /** Jobs whose items land in more than one menu of this set. */
+  function splitJobs(setArr){
+    const out = [];
+    for (const [job, items] of Object.entries(JOBS)){
+      const homes = new Set(items.map(i => homeOf(setArr, i)).filter(Boolean));
+      if (homes.size > 1) out.push(`${job} (${[...homes].join(' + ')})`);
+    }
+    return out;
+  }
+
+  /* ── rail ──────────────────────────────────────────────────────── */
+  let lastCount = null;
+  function paintRail(){
+    $('railItems').innerHTML = set().map(g => {
+      const isHome = g.k === 'overview' || g.k === 'today';
+      const n = isHome && busy ? `<span class="n hot">${work.length}</span>`
+              : g.items.length ? `<span class="n">${g.items.length}</span>` : '';
+      return `<button class="nav" type="button" data-menu="${g.k}"
+                aria-current="${g.k === menu}"><span class="navrow">${
+                ico(MENU_ICON[g.k], true)}<span>${esc(g.t)}</span></span>${n}</button>`;
+    }).join('');
+    stagger('button.nav', $('railItems'));
+    const badge = $('railItems').querySelector('.n.hot');
+    const now = badge ? badge.textContent : null;
+    if (badge && lastCount !== null && now !== lastCount) badge.classList.add('bump');
+    lastCount = now;
+    $('railFoot').textContent = usingNew
+      ? 'Eight doorways, still flat. Nothing removed — all 78 pages are here.'
+      : 'Seven doorways, no submenus — exactly as locked.';
+  }
+
+  /* ── main ──────────────────────────────────────────────────────── */
+  function needsBlock(){
+    if (!busy) return `<div class="calm"><span class="tick" aria-hidden><svg viewBox="0 0 24 24" width="12" height="12"><path d="M4 12.5 9.5 18 20 6.5"
+        fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span><b>Nothing needs you.</b><span>Money, shops and reports are all clear. The one overdue
+      item is our own test data.</span></span></div>`;
+    return `<p class="sec-lbl" style="margin-bottom:9px">Needs you · ${work.length}</p>` +
+      `<div class="legend"><span><b class="shape fact">${ico('fact')}fact</b> one click</span>
+       <span><b class="shape form">${ico('form')}form</b> needs details</span>
+       <span><b class="shape judge">${ico('judge')}judgement</b> no button, on purpose</span></div>` +
+      work.map(w => `<div class="wrow"><span class="mid">
+        ${w.proof ? `<button class="proof" type="button" aria-label="Enlarge the payment screenshot">${RECEIPT}</button>` : ''}
+        ${w.evidence ? `<button class="evid" type="button" aria-label="Enlarge the reported photo">${REPORTED}</button>` : ''}
+        <span class="l"><b>${esc(w.t)}</b><small>${esc(w.s)}</small></span></span>
+        <span class="shape ${w.shape}">${ico(w.shape)}${w.shape === 'judge' ? 'judgement' : w.shape}</span>
+        ${w.a ? `<button class="act${w.p ? '' : ' ghost'}" type="button">${esc(w.a)}</button>` : ''}
+        ${w.no ? `<span class="noproof">${esc(w.no)}</span>` : ''}
+        ${w.note ? `<span class="noproof" style="background:var(--sunk);color:var(--ink-soft)">${esc(w.note)}</span>` : ''}
+        ${w.form ? `<span class="miniform">` + w.form.map(f => f.kind === 'select'
+            ? `<label style="font-size:.74rem;color:var(--ink-faint)">${esc(f.label)}
+               <select>${f.opts.map(o => `<option>${esc(o)}</option>`).join('')}</select></label>`
+            : `<input class="why" type="text" placeholder="${esc(f.ph)}" aria-label="${esc(f.label)}">`
+          ).join('') + `</span>` : ''}
+      </div>`).join('');
+  }
+
+  function homeView(){
+    const splits = splitJobs(set());
+    const banner = splits.length
+      ? `<div class="banner bad"><b>${splits.length} of your six jobs are split across menus.</b><br>${
+          splits.map(esc).join('<br>')}</div>`
+      : `<div class="banner good"><b>All six of your jobs live in one menu each.</b> Nothing is
+          scattered — you never have to remember a second place to look.</div>`;
+    return banner + needsBlock() +
+      `<div><p class="sec-lbl" style="margin-bottom:9px">What you change</p><div class="six">` +
+      SIX.map(c => `<button class="card" type="button" data-go="${esc(c.go)}">
+        ${ico(c.i, true)}<b>${esc(c.t)}</b><small>${esc(c.n)}</small>
+        <span class="share" style="width:${c.w}%"></span></button>`).join('') + `</div></div>`;
+  }
+
+  /* A menu with an obvious main thing OPENS that thing, with its pages
+     listed underneath — it does not hand you a menu of menus. This is what
+     already shipped on the real Money page: the ledger above the grid. */
+  const LEDGER = [
+    ['25 Aug','Ice Casasola','Setnayan AI','₱2,499','Paid','paid'],
+    ['20 Aug','Ice Casasola','Assisted planner','₱499','Cancelled','cancel'],
+  ];
+  function moneyLead(){
+    return `<div class="lead">
+      <p class="sec-lbl" style="margin-bottom:8px">Every transaction</p>
+      <div class="scroller"><table class="ledger"><thead><tr>
+        <th>When</th><th>Who</th><th>What</th><th class="r">Amount</th><th>Stands</th>
+      </tr></thead><tbody>` +
+      LEDGER.map(r => `<tr><td class="num">${esc(r[0])}</td><td>${esc(r[1])}</td>
+        <td>${esc(r[2])}</td><td class="r">${esc(r[3])}</td>
+        <td><span class="pill2 ${r[5]}">${esc(r[4])}</span></td></tr>`).join('') +
+      `</tbody></table></div>
+      <p class="leadnote">Received ₱2,499 · nothing waiting. This shipped yesterday — it is the
+      only page in the proposal that is already built.</p></div>`;
+  }
+
+  function menuView(g){
+    if (g.k === 'all'){
+      const all = set().filter(x => x.k !== 'all').flatMap(x => x.items);
+      return `<p class="sec-lbl">All surfaces · ${all.length}</p><div class="itemlist">` +
+        all.slice().sort().map(i => `<button type="button" data-go="${esc(i)}">${esc(i)}
+          <span class="tag">${esc(homeOf(set(), i) ?? '')}</span></button>`).join('') + `</div>`;
+    }
+    // The surface you land on: the one you use most in this menu.
+    const open = page && g.items.includes(page) ? page : g.items[0];
+    const moved = i => usingNew && homeOf(NOW, i) !== homeOf(NEW, i);
+    const movedCount = g.items.filter(moved).length;
+    const chips = `<div class="chips" role="tablist" aria-label="${esc(g.t)}">` +
+      g.items.map(i => `<button type="button" role="tab" data-surface="${esc(i)}"
+        aria-current="${i === open}">${ico(MENU_ICON[g.k])}${esc(i)}${moved(i) ? '<span class="dot" aria-hidden></span>' : ''}
+        </button>`).join('') + `</div>` +
+      (movedCount ? `<p class="movednote">${movedCount} of these moved here — marked with a dot.</p>` : '');
+    const lead = (g.k === 'money' && usingNew && open === g.items[0]) ? moneyLead() : surfaceStub(open, g);
+    return chips + lead;
+  }
+
+  /** A stand-in for the real page — this proposal does not change them. */
+  function surfaceStub(name, g){
+    const was = homeOf(NOW, name);
+    const here = g.t;
+    const note = usingNew && was && was !== here
+      ? `Reached from <strong>${esc(here)}</strong> now; it used to be under <strong>${esc(was)}</strong>.
+         The page itself is untouched.`
+      : `Unchanged by this proposal — only the way you reach it is being redesigned.`;
+    return `<div class="stub"><h3>${esc(name)}</h3><p>${note}</p>
+      <p style="color:var(--ink-faint)">You never passed through a menu screen to get here.</p></div>`;
+  }
+
+  function pageView(name){
+    const here = homeOf(set(), name);
+    const was = homeOf(NOW, name);
+    const note = usingNew && was && was !== here
+      ? `This used to live under <strong>${esc(was)}</strong>. Nothing about the page itself changes —
+         only where you reach it from.`
+      : `This page is unchanged by the proposal. Only how you get here is being redesigned.`;
+    return `<button class="back" type="button" id="back">← Back to ${esc(here ?? 'the menu')}</button>
+      <div class="stub"><h3>${esc(name)}</h3>
+      <p>${note}</p>
+      <p style="color:var(--ink-faint)">A stand-in — this prototype redesigns the way through the
+      console, not the pages at the end of it.</p></div>`;
+  }
+
+  /** Give every child in a group its place in the stagger. */
+  function stagger(sel, root){
+    (root ?? document).querySelectorAll(sel).forEach((el, i) => {
+      el.style.setProperty('--i', String(Math.min(i, 18)));
+    });
+  }
+
+  function paint(){
+    const g = grp();
+    $('crumb').textContent = page ? `${g.t} › ${page}`
+      : (g.k === 'overview' || g.k === 'today') ? g.t : `${g.t}`;
+    /* Labels first — the phone branch returns early, and setting them after it
+       meant the search kept promising pages the phone must never open. */
+    const ph = $('findPh');
+    if (ph) ph.textContent = onPhone() ? 'Find something to answer' : 'Search Setnayan';
+    const qbox = $('q');
+    if (qbox) qbox.placeholder = onPhone()
+      ? 'Find a payment, a shop, a report…'
+      : 'Go to… payouts, taxonomy, secrets, venues';
+
+    if (onPhone()){
+      // The phone only ever shows the decisions. There is no menu to be lost in.
+      menu = usingNew ? 'today' : 'overview';
+      $('main').innerHTML = homeView() + `
+        <p class="deskonly">${ico('setup')}<span><b>Prices, the website and settings are on the
+        computer.</b> This screen is for answering — anything that changes how Setnayan works is
+        deliberately not here.</span></p>`;
+      paintRail();
+      const pill0 = $('tbWork');
+      if (pill0){ pill0.textContent = busy ? `${work.length} to answer` : 'All clear';
+                  pill0.className = 'pill' + (busy ? ' hot' : ''); }
+      stagger('.card, .wrow', $('main'));
+      return;
+    }
+    const home = (g.k === 'overview' || g.k === 'today');
+    $('main').innerHTML = home ? (page ? pageView(page) : homeView()) : menuView(g);
+    // Everything that just arrived enters in sequence.
+    $('main').querySelectorAll('.card, .itemlist button, .wrow, .stub')
+      .forEach(el => el.classList.add('stagger'));
+    stagger('.card, .itemlist button, .wrow', $('main'));
+    stagger('.chips button', $('main'));
+    stagger('.itemlist .tag.moved', $('main'));
+    const pill = $('tbWork');
+    if (pill){
+      pill.textContent = busy ? `${work.length} need you` : 'All clear';
+      pill.className = 'pill' + (busy ? ' hot' : '');
+    }
+    paintRail();
+  }
+
+  /* ── the finder ────────────────────────────────────────────────── */
+  const allItems = () => {
+    const every = set().filter(g => g.k !== 'all')
+      .flatMap(g => g.items.map(i => ({label:i, grp:g.t})));
+    // 📱 On the phone the search offers only what can be ANSWERED. Offering an
+    // editor here would be a door that must not open — worse than no result.
+    return onPhone() ? every.filter(d => answerable().has(d.label)) : every;
+  };
+  const everySurface = () => set().filter(g => g.k !== 'all').flatMap(g => g.items);
+  function hits(term){
+    const t = term.trim().toLowerCase();
+    const list = t ? allItems().filter(d => d.label.toLowerCase().includes(t)) : allItems().slice(0,8);
+    $('hits').innerHTML = list.length
+      ? list.slice(0,40).map((d,i) => `<li data-sel="${i===0}"><button type="button" data-go="${esc(d.label)}">
+          <span>${esc(d.label)}</span><span class="grp">${esc(d.grp)}</span></button></li>`).join('')
+      : `<li class="none">${onPhone() && everySurface().some(d => d.toLowerCase().includes(t))
+            ? `<b>${esc(term.trim())}</b> is on the computer.<br>This screen is for answering what
+               needs a decision — it cannot change how Setnayan works.`
+            : 'Nothing by that name. Try &ldquo;payment&rdquo;, &ldquo;shop&rdquo; or &ldquo;report&rdquo;.'}</li>`;
+    stagger('li', $('hits'));
+  }
+  const openPal = () => { $('scrim').dataset.open='true'; $('q').value=''; hits(''); $('q').focus(); };
+  const closePal = () => { $('scrim').dataset.open='false'; };
+
+  function goTo(name){
+    const g = set().find(x => x.items.includes(name));
+    if (g) menu = g.k;
+    page = name; closePal(); paint();
+  }
+
+  /* ── events ────────────────────────────────────────────────────── */
+  document.addEventListener('click', e => {
+    const nav = e.target.closest('button.nav');
+    if (nav){ menu = nav.dataset.menu; page = null; paint(); return; }
+    const chip = e.target.closest('[data-surface]');
+    if (chip){ page = chip.dataset.surface; paint(); return; }
+    const go = e.target.closest('[data-go]');
+    if (go){ goTo(go.dataset.go); return; }
+    if (e.target.closest('#back')){ page = null; paint(); return; }
+    if (e.target.closest('#find')){ openPal(); return; }
+    if (e.target.closest('.proof')){ $('lbimg').innerHTML = RECEIPT; $('lb').dataset.open='true'; return; }
+    if (e.target.closest('.evid')){ $('lbimg').innerHTML = REPORTED; $('lb').dataset.open='true'; return; }
+    if (e.target.closest('#lb')){ $('lb').dataset.open='false'; return; }
+    if (e.target === $('scrim')){ closePal(); return; }
+    const act = e.target.closest('.act');
+    if (act){
+      const row = act.closest('.wrow');
+      const i = [...row.parentNode.querySelectorAll('.wrow')].indexOf(row);
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const finish = () => {
+        work.splice(i,1);
+        if (!work.length){ work = WORK.slice(); setDay(false); } else paint();
+      };
+      if (reduce) return finish();
+      // Slide it out, then collapse the gap it leaves, so the rows below
+      // travel up instead of jumping.
+      row.classList.add('going');
+      setTimeout(() => {
+        const h = row.offsetHeight;
+        row.style.transition = 'height .2s var(--ease), margin .2s var(--ease), opacity .2s';
+        row.style.height = h + 'px'; row.style.overflow = 'hidden';
+        requestAnimationFrame(() => { row.style.height = '0px'; row.style.marginTop = '0px'; });
+        setTimeout(finish, 210);
+      }, 220);
+    }
+  });
+  $('q').addEventListener('input', e => hits(e.target.value));
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')){
+      e.preventDefault(); $('scrim').dataset.open === 'true' ? closePal() : openPal();
+    } else if (e.key === 'Escape'){
+      if ($('lb').dataset.open === 'true'){ $('lb').dataset.open='false'; e.preventDefault(); }
+      else if ($('scrim').dataset.open === 'true'){ closePal(); e.preventDefault(); }
+    }
+  });
+
+  function setSet(v){
+    usingNew = v;
+    $('mNow').setAttribute('aria-pressed', String(!v));
+    $('mNew').setAttribute('aria-pressed', String(v));
+    menu = v ? 'today' : 'overview'; page = null; paint();
+  }
+  function setDay(v){
+    busy = v; work = WORK.slice();
+    $('bQuiet').setAttribute('aria-pressed', String(!v));
+    $('bBusy').setAttribute('aria-pressed', String(v));
+    paint();
+  }
+  function setScreen(phone){
+    document.querySelector('.frame').classList.toggle('phone', phone);
+    $('sDesk').setAttribute('aria-pressed', String(!phone));
+    $('sPhone').setAttribute('aria-pressed', String(phone));
+    paint();
+  }
+  $('sDesk').addEventListener('click', () => setScreen(false));
+  $('sPhone').addEventListener('click', () => setScreen(true));
+
+  $('mNow').addEventListener('click', () => setSet(false));
+  $('mNew').addEventListener('click', () => setSet(true));
+  $('bQuiet').addEventListener('click', () => setDay(false));
+  $('bBusy').addEventListener('click', () => setDay(true));
+
+  // Report the count check in the open, whichever way it comes out.
+  (() => {
+    const r = integrity(), el = $('integrity');
+    const ok = !r.gained.length && !r.lost.length && !r.dupNow && !r.dupNew;
+    el.className = 'banner ' + (ok ? 'good' : 'bad');
+    el.innerHTML = ok
+      ? `<b>Both sets hold the same ${r.now} pages.</b> Nothing was gained or lost in the
+         regrouping — checked by comparing the two lists just now, not by trusting a total.`
+      : `<b>The sets do not match.</b> ${r.gained.length ? 'Gained: ' + r.gained.map(esc).join(', ') + '. ' : ''}${
+          r.lost.length ? 'Lost: ' + r.lost.map(esc).join(', ') + '.' : ''}`;
+  })();
+
+  paint();
+})();
+</script>
