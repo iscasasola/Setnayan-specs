@@ -289,6 +289,36 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > a trigger, not a schedule) · **a join announces itself to nobody** (verified: the join action
 > emits nothing — named, not built) · the day as **one stitched file that outlives the clips**
 > (gated below) · nesting · discovery · memories · chat attachments.
+>
+> 🔬 **THEN AN ADVERSARIAL AUDIT OF THOSE THREE PRs FOUND TEN THINGS — PRs
+> [#4844](https://github.com/iscasasola/setnayan-platform/pull/4844) ·
+> [#4845](https://github.com/iscasasola/setnayan-platform/pull/4845) ·
+> [#4846](https://github.com/iscasasola/setnayan-platform/pull/4846). Three would have been felt by
+> a person.**
+> 🛑 **AND THE AUDIT NEARLY READ AS A CLEAN RESULT: its five finders completed and ALL ELEVEN
+> skeptic/critic agents died on a session usage limit**, so it returned an empty survivor list —
+> the 2026-08-20 lesson repeating exactly. **The findings were in `journal.jsonl` the whole time.**
+> Every one was then re-verified BY HAND, because nothing had refuted them.
+> 🚨 **A SETNAYAN ADMIN COULD POST A CLIP INTO ANY PRIVATE SAMAHAN.** The story route gated on
+> whether the caller could READ the community row — a policy carrying `OR is_admin()`. **RLS IS A
+> FLOOR, NOT A SCOPE**, third time this shape has cost us. Usapan never had the hole (a message
+> goes through the caller's own session); a story is written with the service role, so the
+> app-side gate IS the whole fence. It now asks whether a membership row exists.
+> 🚨 **"PLAY THE DAY" COULD ONLY EVER PLAY ITS FIRST CLIP ON A PHONE.** Every clip after the first
+> is mounted from an `ended` handler with **no user gesture**, and iOS refuses to autoplay audio
+> without one — so clip two sat on a still frame and nothing could ever reach another `ended`.
+> **Dead on the devices this product is installed on, with green CI and a passing guard.** A
+> refused play now falls back to muted and keeps going.
+> 🚨 **"THE WHOLE BARKADA" LEFT REAL MEMBERS OUT AND COULD PICK STRANGERS** — the chip typed its
+> name into the search box, so it was a substring match over a label that is lossy twice
+> (`from: via[0]`, and dedup keeps the richest row). Now an exact membership test over every
+> samahan a person is in. Plus the 200-pick cap, which dropped the overflow **and reported
+> success** — not new, but made reachable in one tap by the bulk control shipped that morning.
+> 🪤 **FOUR OF MY OWN GUARDS WERE DECORATION**, every one found by mutation and none by review —
+> including a test asserting an output did not contain a string the function had no parameter to
+> receive, and an ordering guard that never tied the library to the screen.
+> 🔑 **THE RULE: audit your own merged work — and when the auditor reports nothing, check whether
+> the auditor ran.**
 > 🔴 **THE ONE BLOCKING OWNER DECISION: what a samahan KEEPS after 24 hours, and whether keeping
 > is what we sell.** The feed is the hook; Papic on a group event is the existing archive product.
 >
