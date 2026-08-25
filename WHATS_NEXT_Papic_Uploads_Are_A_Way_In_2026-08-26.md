@@ -159,6 +159,62 @@ Owner ruled it in five parts. **Do not re-ask any of them.**
 
 ---
 
+## § 3c · ✅ WHAT SHIPPED 2026-08-26 (9 PRs) AND WHAT IS LEFT
+
+⚠ **Verify every row with `gh pr view <n> --json state,mergedAt` before trusting it** — this
+project's registers have been wrong about a PR's state five times.
+
+| PR | what a person gets | state |
+|---|---|---|
+| [#4851](https://github.com/iscasasola/setnayan-platform/pull/4851) | the two questions deleted · the required act in the landing room · the four facts | ✅ merged, LIVE |
+| [#4854](https://github.com/iscasasola/setnayan-platform/pull/4854) | "Papic Pool / Papic One" gone from customer copy | ✅ merged, LIVE |
+| [#4864](https://github.com/iscasasola/setnayan-platform/pull/4864) | the look is one quiet row opening a sheet | ✅ merged |
+| [#4861](https://github.com/iscasasola/setnayan-platform/pull/4861) | supplier free shots scale with the fee · video at 800 · challenge-scoped access | ✅ merged |
+| [#4865](https://github.com/iscasasola/setnayan-platform/pull/4865) | 🔒 a couple could add photos without spending a credit | ✅ merged |
+| [#4867](https://github.com/iscasasola/setnayan-platform/pull/4867) | 🔒 a supplier could reset their own meter / mark their own file screened | ✅ merged |
+| [#4868](https://github.com/iscasasola/setnayan-platform/pull/4868) | three silent failures in the credit meter | ✅ merged |
+| [#4872](https://github.com/iscasasola/setnayan-platform/pull/4872) | the couple's **Uploads camera** (index 150) | ⏳ open |
+
+### ⏭ WHAT IS LEFT — one coherent build
+
+**The file picker**, and the **toggle** that decides who other than the couple may use it. ⛔ **Do
+not build the toggle first**: a switch with nothing behind it is a gate with no handle, which is
+the shape this project keeps paying for.
+
+The camera exists now, so the delta is: find the Uploads seat → claim it for the couple → render a
+picker that PUTs to the shipped `/api/upload` seat path and calls `recordSeatCapture`.
+
+### 🪤 THREE THINGS THE BUILD PLAN GOT WRONG — all caught against the live system
+
+1. 🚨 **`seat_index = 110` WOULD HAVE CREATED NOTHING AND REPORTED SUCCESS.** The plan specified
+   110; production already holds the free dedicated camera there **on four events**, and the upsert
+   uses `ignoreDuplicates: true`. Shipped at **150** (clear of the free block 100–102, of 110, and
+   of the paid base 200). **Always read the live index space before reserving one.**
+2. 🚨 **`claimPapicSeat` REDIRECTS TO `/papic/seat/${token}` ON SUCCESS.** The plan said to post the
+   studio's claim button at it. That navigates the couple **out of their own studio onto the camera
+   screen**. The picker needs a studio-scoped claim that returns to the studio — or the claim folded
+   into the first upload.
+3. ⛔ **NO SERVER ACTION MAY MINT THE CAMERA.** `provisionUploadsCameraAdmin` is a service-role
+   write; an action taking a client-supplied `eventId` lets a signed-in stranger mint a live seat on
+   somebody else's wedding and claim it, after which **every downstream gate passes them** — the
+   upload presign and the record path check *claimer identity* and nothing else. It is called ONLY
+   from the studio render, after that page's couple check. 🔑 **The rule is the CALL SITE, not the
+   function**, and `lib/the-uploads-camera-has-no-back-door.test.ts` is what holds it.
+
+### 🔒 AND THE INVARIANT IS STILL NOT ENFORCED AT THE DATABASE LAYER — say so honestly
+
+#4865 closed the couple's unmetered insert door. **`papic_photos_claimer_own` still admits any
+insert from a live-seat claimer with no credit check** — and #4872 makes every host a claimer by
+design, so that door is now reachable by the couple again.
+
+🔑 **The real fix is ATOMICITY, not permission:** a `SECURITY DEFINER` record RPC that reserves the
+credit and inserts the row in ONE transaction, on the model of `papic_record_guest_capture`, with
+direct INSERT revoked. **It also deletes the unwind problem outright** — there is nothing to give
+back if the two cannot come apart. ⚠ **Do not claim "a photo cannot exist without a credit" until
+that exists.**
+
+---
+
 ## § 4 · 🔴 WHAT NEEDS THE OWNER, NOT ENGINEERING
 
 1. **The photographer cannot put photos in.** Today a booked photographer hands

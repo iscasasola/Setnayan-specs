@@ -139,6 +139,43 @@ committed docs on purpose.
 > went CONFLICTING on a generated file.
 
 > ### ▶ ACTIVE 2026-08-26 — PAPIC IS THE EVENT'S ONE MEDIA LIBRARY (purpose LOCKED)
+>
+> 🔢 **NINE PRs SHIPPED 2026-08-26 — do NOT rebuild any of it.** #4851 · #4854 · #4864 · #4861 ·
+> #4865 · #4867 · #4868 (all merged) · #4872 (open). ⚠ Verify with
+> `gh pr view <n> --json state,mergedAt` — this file has been wrong about a PR's state five times.
+> Full table + what is left: the contract file below, § 3c.
+>
+> 🔒 **TWO LIVE SECURITY HOLES WERE FOUND AND CLOSED**, both by an adversarial pass over the upload
+> DESIGN rather than over code: **(a)** `papic_photos_couple_full` was `FOR ALL`, so a signed-in
+> couple could POST a photo row through PostgREST with **no order, no payment, no approval, no
+> metering** (#4865); **(b)** `vendor_papic_captures_vendor_update` constrains **no column** and
+> `authenticated` holds UPDATE on all 23 — so a supplier could PATCH `hidden_at` to **reset their own
+> spent-points meter** and shoot the allowance again, and set `nsfw_checked = true` to push an
+> **unscreened file to the couple** (#4867). 🔑 **THE ROW IS YOURS, THE FIELD IS NOT** — the eighth
+> instance of that shape in this schema.
+>
+> 🪤 **AND MY OWN SECURITY FIX CONTAINED A WIDENING.** `CREATE POLICY` with no `TO` clause defaults
+> to **PUBLIC**, which includes `anon` — and `anon` holds SELECT on all 45 columns of `papic_photos`.
+> The exposure-freeze guard caught it; **regenerating the baseline would have RECORDED my mistake as
+> intended.** Never let "regenerate the baseline" be the reflex — read the diff first, and count it.
+>
+> ⛔ **THE UPLOAD SEAM: DO NOT WRITE A SECOND CAPTURE PATH, AND DO NOT MINT THE CAMERA FROM A SERVER
+> ACTION.** `provisionUploadsCameraAdmin` is a service-role write; an action taking a client-supplied
+> `eventId` lets a signed-in stranger mint a live seat on somebody else's wedding and claim it, after
+> which **every downstream gate passes them** (presign and record both check *claimer identity* and
+> nothing else). 🔑 **The rule is the CALL SITE, not the function.**
+> 🪤 The build plan said `seat_index = 110`; production already holds the free dedicated camera there
+> **on four events**, and the upsert ignores duplicates — it would have created NOTHING, reported
+> success, and left every couple with no camera and no error. Shipped at **150**.
+> 🪤 `claimPapicSeat` redirects to `/papic/seat/${token}` on success — posting the studio's claim
+> button at it navigates the couple **out of their own studio**.
+>
+> 🔴 **THE CREDIT INVARIANT IS STILL NOT ENFORCED AT THE DATABASE LAYER.** #4865 closed the couple's
+> door; `papic_photos_claimer_own` still admits any insert from a live-seat claimer with no credit
+> check, and #4872 makes every host a claimer. **The real fix is ATOMICITY** — a `SECURITY DEFINER`
+> record RPC that reserves and inserts in ONE transaction, with direct INSERT revoked, which also
+> deletes the unwind problem outright. **Do not claim "a photo cannot exist without a credit" until
+> it exists.**
 > **Contract: [`WHATS_NEXT_Papic_Uploads_Are_A_Way_In_2026-08-26.md`](WHATS_NEXT_Papic_Uploads_Are_A_Way_In_2026-08-26.md).**
 > Owner: *"papic is the source where they collect media files for that event. that will be our
 > purpose. so the only exceptions will be the save the date video, or event video."*
