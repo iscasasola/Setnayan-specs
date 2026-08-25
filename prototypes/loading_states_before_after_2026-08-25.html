@@ -1,0 +1,385 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Skeleton at Rest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap">
+<style>
+  :root{
+    --paper:#FFFFFF; --wash:#FAF7F4; --ink:#2C2A29; --cta:#C24E25; --gold:#A9834B;
+    --link:#3B4E67; --line:rgba(44,42,41,.14); --soft:rgba(44,42,41,.60); --faint:rgba(44,42,41,.45);
+    --panel:#FFFFFF; --hatch:rgba(194,78,37,.10); --hatchline:rgba(194,78,37,.34);
+    --sans:"Hanken Grotesk",ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:"Space Mono",ui-monospace,Menlo,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#151312; --wash:#1B1917; --ink:#EDE8E3; --line:rgba(237,232,227,.16);
+      --soft:rgba(237,232,227,.62); --faint:rgba(237,232,227,.45); --panel:#201D1B;
+      --cta:#E0713F; --gold:#C9A46A; --link:#9DB4D0;
+      --hatch:rgba(224,113,63,.14); --hatchline:rgba(224,113,63,.42);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#151312; --wash:#1B1917; --ink:#EDE8E3; --line:rgba(237,232,227,.16);
+    --soft:rgba(237,232,227,.62); --faint:rgba(237,232,227,.45); --panel:#201D1B;
+    --cta:#E0713F; --gold:#C9A46A; --link:#9DB4D0;
+    --hatch:rgba(224,113,63,.14); --hatchline:rgba(224,113,63,.42);
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--wash);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .bar{background:var(--ink);color:var(--paper);padding:12px 20px;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline}
+  .bar b{font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:700}
+  .bar span{font-size:12px;letter-spacing:.06em;opacity:.72;font-family:var(--mono)}
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 20px 72px}
+  .eye{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin:0 0 10px;font-weight:600}
+  h1{font-size:clamp(26px,4vw,38px);line-height:1.12;margin:0 0 10px;font-weight:700;letter-spacing:-.02em;text-wrap:balance}
+  h2{font-size:20px;margin:0 0 6px;font-weight:650;letter-spacing:-.01em;text-wrap:balance}
+  p{margin:0 0 12px;max-width:66ch;color:var(--soft)}
+  p.lead{color:var(--ink);font-size:17px}
+  section{margin-top:44px}
+
+  .rule-card{border-left:3px solid var(--gold);background:var(--panel);border-radius:0 12px 12px 0;padding:18px 22px;margin:22px 0 0}
+  .rule-card q{display:block;font-size:19px;font-weight:650;quotes:none;margin-bottom:6px}
+  .rule-card cite{font-style:normal;font-size:12px;font-family:var(--mono);color:var(--faint)}
+
+  .picker{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px}
+  .picker button{font-family:var(--sans);border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:8px 15px;font-size:13.5px;cursor:pointer;transition:border-color .15s,background .15s}
+  .picker button:hover{border-color:var(--faint)}
+  .picker button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .picker button:focus-visible{outline:2px solid var(--cta);outline-offset:2px}
+
+  .lab{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+  @media (max-width:720px){.lab{grid-template-columns:1fr}}
+  .side{min-width:0}
+  .sidehead{display:flex;align-items:baseline;gap:10px;margin:0 0 10px}
+  .sidehead h3{margin:0;font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  .sidehead .tag{font-family:var(--mono);font-size:11px;color:var(--faint)}
+
+  /* The device is the product, and the product is a light surface.
+     It keeps its own explicit colours in both themes on purpose. */
+  .phone{background:#FFFFFF;border:1px solid rgba(44,42,41,.18);border-radius:18px;overflow:hidden;
+         box-shadow:0 1px 2px rgba(44,42,41,.06),0 12px 28px rgba(44,42,41,.08);color:#2C2A29}
+  .topbar{height:38px;border-bottom:1px solid rgba(44,42,41,.10);display:flex;align-items:center;padding:0 14px;gap:7px}
+  .topbar .mark{width:16px;height:16px;border-radius:4px;background:#C24E25;opacity:.85}
+  .topbar .name{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(44,42,41,.5);font-weight:600}
+  .screen{padding:16px 14px 22px;min-height:326px;position:relative}
+
+  .sk{background:linear-gradient(100deg,rgba(44,42,41,.07) 30%,rgba(44,42,41,.13) 50%,rgba(44,42,41,.07) 70%);
+      background-size:220% 100%;border-radius:6px;animation:sheen 1.4s linear infinite}
+  @keyframes sheen{from{background-position:180% 0}to{background-position:-80% 0}}
+  @media (prefers-reduced-motion: reduce){.sk{animation:none;background:rgba(44,42,41,.10)}}
+
+  .phantom{display:grid;background-image:repeating-linear-gradient(135deg,transparent 0 6px,var(--hatchline) 6px 7px);
+           background-color:var(--hatch);border-radius:8px;padding:8px;margin:0 0 24px}
+  .phantom .sk{opacity:.9}
+  .stack{display:grid}
+  .row{display:flex;align-items:center;gap:11px;border:1px solid rgba(44,42,41,.10);border-radius:12px;padding:11px;background:#FFF}
+  .row .av{width:34px;height:34px;border-radius:50%;flex:0 0 auto}
+  .row .lines{flex:1;min-width:0;display:grid;gap:7px}
+  .tile{border:1px solid rgba(44,42,41,.10);border-radius:12px;padding:12px;display:grid;gap:8px;background:#FFF}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .btnstub{height:44px;width:112px;border-radius:8px;margin-left:auto}
+  .actrow{display:flex;margin:0 0 24px}
+
+  .real .t{font-weight:650;font-size:14px}
+  .real .m{font-size:12px;color:rgba(44,42,41,.58)}
+  .real .num{font-family:var(--mono);font-size:19px;font-weight:700}
+  .real .cap{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:rgba(44,42,41,.5)}
+  .pill{margin-left:auto;font-size:11px;border:1px solid rgba(44,42,41,.16);border-radius:999px;padding:3px 9px;color:rgba(44,42,41,.62)}
+  .btnreal{margin-left:auto;background:#C24E25;color:#fff;border:0;border-radius:8px;height:44px;padding:0 16px;font-size:13.5px;font-weight:600;font-family:inherit}
+
+  .fade{transition:opacity .22s ease}
+  @media (prefers-reduced-motion: reduce){.fade{transition:none}}
+
+  .controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:22px 0 0}
+  .replay{font-family:var(--sans);font-weight:600;font-size:14px;background:var(--cta);color:#fff;border:0;border-radius:9px;padding:11px 20px;cursor:pointer}
+  .replay:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  .readout{font-family:var(--mono);font-size:13px;color:var(--soft);font-variant-numeric:tabular-nums}
+  .readout b{color:var(--cta);font-size:15px}
+
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+  table{border-collapse:collapse;width:100%;min-width:620px;font-size:14px}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-weight:700}
+  tr:last-child td{border-bottom:0}
+  td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+  td.n b{color:var(--cta)}
+  .after0{color:var(--faint)}
+
+  .opens{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(258px,1fr))}
+  .open{border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:var(--panel)}
+  .open h4{margin:0 0 6px;font-size:15px;font-weight:650}
+  .open p{margin:0;font-size:13.5px}
+  .open .q{display:inline-block;margin-top:10px;font-size:12px;font-family:var(--mono);color:var(--link)}
+
+  .note{border-top:1px solid var(--line);margin-top:44px;padding-top:18px;font-size:13px;color:var(--faint)}
+  .note b{color:var(--soft)}
+</style></head>
+<body>
+<div class="bar">
+  <b>Setnayan · Prototype</b>
+  <span>Loading states · 25 Aug 2026</span>
+  <span>archetype 03 · already approved</span>
+</div>
+
+<div class="wrap">
+
+  <p class="eye">What you are looking at</p>
+  <h1>The skeleton at rest</h1>
+  <p class="lead">Every screen shows a grey placeholder while it fetches. On about a hundred and thirty screens that placeholder drew a page title — and the screen it turned into hasn&rsquo;t had one since August. Press <b>Replay</b> and watch the right-hand phone hold still while the left one jumps.</p>
+
+  <div class="rule-card">
+    <q>A skeleton is the layout at rest.</q>
+    <p style="margin:0 0 8px;font-size:14px">It copies the real content&rsquo;s geometry one&#8209;to&#8209;one, then dissolves into the data. Never a spinner, never a full-viewport blocker.</p>
+    <cite>Archetype 03 · Empty &amp; Loading States · approved 4 Aug 2026, no changes requested</cite>
+  </div>
+
+  <section>
+    <p class="eye">Pick a screen</p>
+    <div class="picker" id="picker" role="group" aria-label="Which screen to compare"></div>
+
+    <div class="lab">
+      <div class="side">
+        <div class="sidehead"><h3>Before</h3><span class="tag" id="tagBefore"></span></div>
+        <div class="phone">
+          <div class="topbar"><span class="mark"></span><span class="name">Setnayan</span></div>
+          <div class="screen" id="screenBefore"></div>
+        </div>
+      </div>
+      <div class="side">
+        <div class="sidehead"><h3>Now</h3><span class="tag" id="tagAfter"></span></div>
+        <div class="phone">
+          <div class="topbar"><span class="mark"></span><span class="name">Setnayan</span></div>
+          <div class="screen" id="screenAfter"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="replay" id="replay" type="button">Replay the load</button>
+      <span class="readout" id="readout">Measuring in your browser, not quoted from a note.</span>
+    </div>
+    <p style="margin-top:14px;font-size:13.5px">The hatched block is the part that never arrives. Everything under it is what a person actually gets — so the moment the data lands, the whole screen slides up by the height of the hatching.</p>
+  </section>
+
+  <section>
+    <p class="eye">Every case, measured</p>
+    <h2>How far each screen jumped</h2>
+    <p>Heights the browser reports for the real placeholders, live on this page. &ldquo;Now&rdquo; is nothing at all except where the screen really does have a button or a heading of its own.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Screen</th><th>What the placeholder drew</th><th>Jump</th><th>Now</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <p class="eye">Not done, and not an oversight</p>
+    <h2>Three things I left for you to rule on</h2>
+    <p>All three are about the <em>shape</em> of a placeholder, not the retired title. Each is a design call rather than a defect, so I stopped and drew them instead of deciding.</p>
+    <div class="opens">
+      <div class="open">
+        <h4>The invitation doors</h4>
+        <p>A guest opening an invitation link gets a wide full-width form shape, then lands on a small centred paper card. The placeholder is honest about the title and wrong about the shape.</p>
+        <span class="q">Redraw the door placeholders?</span>
+      </div>
+      <div class="open">
+        <h4>The Studio buy pages</h4>
+        <p>These open with a large display heading. The placeholder reserves a bar about a fifth of its height, so the page still shifts — the opposite mistake, and a smaller one.</p>
+        <span class="q">Match the hero, or leave it?</span>
+      </div>
+      <div class="open">
+        <h4>The supplier&rsquo;s shared shape</h4>
+        <p>Eighteen supplier screens borrow the shop home placeholder, which paints a briefing strip and a tile grid they don&rsquo;t have. Their titles are right; their bodies aren&rsquo;t.</p>
+        <span class="q">Worth its own pass?</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="note">
+    <p style="margin:0"><b>How honest this page is.</b> The placeholder shapes are rebuilt here from the real code, and the jump numbers are measured by your own browser as the page runs — not copied from my notes. What it is <em>not</em> is a photograph of the running app: these screens sit behind a login, so nobody has yet opened one on a real phone. If anything here looks wrong to you, trust the phone over the prototype.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  var sk = function(h,w){ return '<div class="sk" style="height:'+h+'px;width:'+w+'px;max-width:100%"></div>'; };
+
+  var BODY = {
+    rows: function(){
+      var out='<div class="stack" style="gap:9px">';
+      var d=[['Aling Nena Dizon','Table 1 · Confirmed','Confirmed'],['Lolo Ben Santos','Table 1 · Family','Confirmed'],['Paolo Mercado','Table 4 · Barkada','Pending']];
+      for(var i=0;i<3;i++){out+='<div class="row"><div class="av" style="background:rgba(44,42,41,.10)"></div><div class="lines"><div class="t">'+d[i][0]+'</div><div class="m">'+d[i][1]+'</div></div><span class="pill">'+d[i][2]+'</span></div>';}
+      return out+'</div>';
+    },
+    rowsSk: function(){
+      var out='<div class="stack" style="gap:9px">';
+      for(var i=0;i<3;i++){out+='<div class="row"><div class="av sk"></div><div class="lines">'+sk(13,110)+sk(11,74)+'</div>'+sk(20,58)+'</div>';}
+      return out+'</div>';
+    },
+    tiles: function(){
+      var out='<div class="grid2">';
+      var d=[['4','Waiting on you'],['12','Paid'],['2','To verify'],['0','Disputes']];
+      for(var i=0;i<4;i++){out+='<div class="tile"><div class="num">'+d[i][0]+'</div><div class="cap">'+d[i][1]+'</div></div>';}
+      return out+'</div>';
+    },
+    tilesSk: function(){
+      var out='<div class="grid2">';
+      for(var i=0;i<4;i++){out+='<div class="tile">'+sk(22,34)+sk(10,72)+'</div>';}
+      return out+'</div>';
+    }
+  };
+
+  var CASES = [
+    { id:'most', label:'Most screens', tag:'100 screens',
+      note:'Payments · Vendors · Contracts · Your profile · and 96 more',
+      phantom:[[12,112],[32,224]], pgap:8, body:'rows', keepsButton:false },
+    { id:'alaala', label:'Alaala + 7 more', tag:'borrowed',
+      note:'Alaala · checklist · galleries · people · launch · the suite · access requests · story assignments',
+      phantom:[[40,256],[16,192]], pgap:8, body:'rows', keepsButton:false },
+    { id:'supplier', label:'13 supplier screens', tag:'borrowed',
+      note:'Clients · fees owed · payday · calendar · proposals · partnerships · and 7 more',
+      phantom:[[12,144],[40,224],[24,96]], pgap:8, body:'rows', keepsButton:false },
+    { id:'hq', label:'Setnayan HQ', tag:'admin',
+      note:'The overview, and the 46 admin pages behind it',
+      phantom:[[12,144],[40,176],[14,240]], pgap:8, body:'tiles', keepsButton:false },
+    { id:'notifs', label:'Notifications', tag:'worst case',
+      note:'A back link, a title and a subtitle — the page has none of the three',
+      phantom:[[28,128],[36,208],[14,250]], pgap:14, body:'rows', keepsButton:false },
+    { id:'orders', label:'Orders', tag:'keeps its button',
+      note:'This one really does have a button — so the placeholder still holds room for it',
+      phantom:[[12,112],[32,224]], pgap:8, body:'rows', keepsButton:true }
+  ];
+
+  var current = CASES[0], results = {};
+
+  function phantomHTML(c){
+    var h='<div class="phantom" style="gap:'+c.pgap+'px">';
+    for(var i=0;i<c.phantom.length;i++) h+=sk(c.phantom[i][0],c.phantom[i][1]);
+    return h+'</div>';
+  }
+  function buttonStub(){ return '<div class="actrow">'+'<div class="sk btnstub"></div>'+'</div>'; }
+  function buttonReal(){ return '<div class="actrow"><button class="btnreal" type="button">New order</button></div>'; }
+
+  function render(side, c, loading){
+    var isBefore = side === 'before';
+    var html = '';
+    if (loading){
+      if (isBefore) html += phantomHTML(c);
+      if (c.keepsButton) html += buttonStub();
+      html += '<div class="anchor"></div>' + BODY[c.body+'Sk']();
+    } else {
+      if (c.keepsButton) html += buttonReal();
+      html += '<div class="anchor"></div>' + BODY[c.body]();
+    }
+    return '<div class="fade">'+html+'</div>';
+  }
+
+  var elB = document.getElementById('screenBefore'),
+      elA = document.getElementById('screenAfter'),
+      tagB = document.getElementById('tagBefore'),
+      tagA = document.getElementById('tagAfter'),
+      readout = document.getElementById('readout');
+
+  // offsetTop, not getBoundingClientRect().top — a viewport rect moves with the
+  // scroll position, which made the first cut of this page report a 2975px
+  // "jump" that was really the page scroll. The anchor's offset inside its own
+  // .screen cannot be contaminated that way.
+  function anchorTop(el){
+    var a = el.querySelector('.anchor');
+    return a ? a.offsetTop : 0;
+  }
+
+  function paint(c, loading){
+    elB.innerHTML = render('before', c, loading);
+    elA.innerHTML = render('after', c, loading);
+  }
+
+  var timer = null;
+  function play(c){
+    if (timer) { clearTimeout(timer); timer = null; }
+    paint(c, true);
+    var beforeTop = anchorTop(elB), afterTop = anchorTop(elA);
+    readout.textContent = 'Loading…';
+    timer = setTimeout(function(){
+      var fadeB = elB.firstChild, fadeA = elA.firstChild;
+      if (fadeB) fadeB.style.opacity = '0';
+      if (fadeA) fadeA.style.opacity = '0';
+      setTimeout(function(){
+        paint(c, false);
+        var jump = Math.round(anchorTop(elB) - beforeTop);
+        var still = Math.round(anchorTop(elA) - afterTop);
+        results[c.id] = jump;
+        readout.innerHTML = 'This screen jumped <b>' + Math.abs(jump) + 'px</b> · now it moves ' +
+          (still === 0 ? '<b>0px</b>' : Math.abs(still) + 'px');
+        fillTable();
+      }, 220);
+    }, 1100);
+  }
+
+  function select(c){
+    current = c;
+    tagB.textContent = c.note;
+    tagA.textContent = c.keepsButton ? 'the button, and nothing else' : 'starts at the content';
+    var btns = document.querySelectorAll('#picker button');
+    for (var i=0;i<btns.length;i++) btns[i].setAttribute('aria-pressed', String(btns[i].dataset.id === c.id));
+    play(c);
+  }
+
+  var picker = document.getElementById('picker');
+  CASES.forEach(function(c){
+    var b = document.createElement('button');
+    b.type = 'button'; b.textContent = c.label; b.dataset.id = c.id;
+    b.setAttribute('aria-pressed','false');
+    b.addEventListener('click', function(){ select(c); });
+    picker.appendChild(b);
+  });
+
+  document.getElementById('replay').addEventListener('click', function(){ play(current); });
+
+  // Measure every case once, off-screen, so the table is real rather than quoted.
+  function measureAll(){
+    var probe = document.createElement('div');
+    probe.style.cssText = 'position:absolute;left:-9999px;top:0;width:300px;visibility:hidden';
+    // (the inner .screen is position:relative, so .anchor.offsetTop is measured
+    //  inside it and is independent of where this probe sits on the page)
+    document.body.appendChild(probe);
+    CASES.forEach(function(c){
+      probe.innerHTML = '<div class="screen">'+render('before', c, true)+'</div>';
+      var a = probe.querySelector('.anchor').offsetTop;
+      probe.innerHTML = '<div class="screen">'+render('before', c, false)+'</div>';
+      var b = probe.querySelector('.anchor').offsetTop;
+      results[c.id] = Math.round(a - b);
+    });
+    document.body.removeChild(probe);
+  }
+
+  var WHAT = {
+    most:'An eyebrow and a page title',
+    alaala:'A title and a subtitle, borrowed from event home',
+    supplier:'An eyebrow, a title and two chips, borrowed from the shop home',
+    hq:'An eyebrow, a title and a subtitle',
+    notifs:'A back link, a title and a subtitle',
+    orders:'An eyebrow and a page title'
+  };
+  function fillTable(){
+    var t = document.getElementById('tbody'); t.innerHTML='';
+    CASES.forEach(function(c){
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td><strong>'+c.label+'</strong><div style="font-size:12.5px;color:var(--faint);margin-top:2px">'+c.note+'</div></td>'+
+        '<td>'+WHAT[c.id]+'</td>'+
+        '<td class="n"><b>'+(results[c.id]||0)+'px</b></td>'+
+        '<td class="n '+(c.keepsButton?'':'after0')+'">'+(c.keepsButton?'44px button':'nothing')+'</td>';
+      t.appendChild(tr);
+    });
+  }
+
+  measureAll();
+  fillTable();
+  select(CASES[0]);
+})();
+</script>
+</body>
+</html>
