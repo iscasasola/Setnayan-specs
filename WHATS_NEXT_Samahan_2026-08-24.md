@@ -138,6 +138,37 @@ deferred this item since 2026-07-15 — it never has to be answered.**
 
 ## 4 · TRAPS THIS STREAM ALREADY PAID FOR
 
+### Added 2026-08-25, by an adversarial audit of that day's own merged work
+
+- 🚨 **RLS IS A FLOOR, NOT A SCOPE — AND THE STORY ROUTE LEANED ON IT.** Its gate asked whether the
+  caller could READ the community row, with a comment calling that airtight. The policy is
+  `USING (community_id IN (SELECT current_community_ids()) OR public.is_admin())`, so a Setnayan
+  admin who was never a member could post a clip into any private samahan — and, after the bell
+  shipped, ring every member with it. **Usapan never had the hole**: a message is written through
+  the caller's own session and its INSERT policy demands membership; a story is written with the
+  service-role client, which is exactly when a read policy stops being defence in depth and becomes
+  the entire fence. Ask a FACT (is there a membership row), with a client no policy can widen.
+- 🚨 **AUTOPLAY IS A GESTURE RULE, AND A REEL THAT ADVANCES ON `ended` IS A CHAIN OF NON-GESTURES.**
+  "Play the day" could only ever play its FIRST clip on an iPhone: every clip after it is mounted
+  from an `ended` handler, iOS refuses to autoplay audio without a user gesture, and these clips
+  always carry audio — so clip two sat on a still frame and nothing could ever reach another
+  `ended`. Green CI, passing guard, feature dead on the devices the PWA is installed on. **If the
+  only thing that advances a sequence is the media ending, the sequence dies the first time the
+  media does not start.** Fall back to muted and keep going; step over a clip that cannot load.
+- 🪤 **A LABEL IS NOT A MEMBERSHIP.** The samahan chip filtered by typing the group's name into the
+  search box — a substring match over `from`, which carries `via[0]` only and is replaced entirely
+  when cross-source de-duplication keeps a richer row. Real members were silently left out of "the
+  whole barkada", and a group called "Ana" swept up Diana. Carry every group on the candidate and
+  test membership exactly.
+- 🪤 **NO SILENT CAPS.** `picks.slice(0, 200)` counted nothing past 200, so a 340-pick add returned
+  `added: 200, failed: 0` and the sheet closed as if it had worked. The cap was old; a one-tap
+  bulk control made it reachable.
+- 🛑 **AND THE AUDIT ITSELF NEARLY READ AS A CLEAN RESULT.** Five finders completed; **all eleven
+  skeptic and critic agents died on a session usage limit**, so the run returned an empty survivor
+  list. The findings were in `journal.jsonl` the whole time. **When a fan-out reports nothing,
+  check whether it ran** — and verify unrefuted findings by hand rather than discarding them.
+
+
 - 🚨 **A POLICY WITHOUT ITS GRANT CAN NEVER FIRE.** `community_members` had a DELETE policy and
   no DELETE grant, so **leaving was refused for every member since `20271023100000`** — whose own
   comment says it granted back *"the three verbs the shipped paths actually use"*, a list written
