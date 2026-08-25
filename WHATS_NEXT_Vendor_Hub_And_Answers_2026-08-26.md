@@ -610,6 +610,15 @@ that ruling rather than re-create the defect it settled.**
   shop's prices; a delete request erases a wedding; a payment confirmation cannot be undone.
 - ⛔ **Do not show a row for an answer nobody can give.** Crew shifts, song requests and day-of
   requests all have machinery and **no reachable way in**. A row would be a door onto nothing.
+- ⛔ **THE ROOM HAS NOT BEEN DRAWN.** Nothing in § 3 is a picture — it is a map of what exists and
+  what it would take. **Draw it before building it**, per the standing rule that tests catch wrong
+  code and never a wrong-looking screen. The drawing is also what lets the owner answer decisions
+  1 and 5 without reading any of this.
+- ⛔ **Do not resolve a GENERATED file's merge conflict by choosing a side.** It cost this stream a
+  red CI run: the rebase conflicted on the lost-controls baseline, taking one side left it
+  describing a tree that no longer existed, and the guard failed in CI having passed locally an
+  hour earlier. **Regenerate it from the merged tree, then read the diff line by line.** The other
+  session's own commit titles say they had already learned this.
 - ⛔ **Do not trust a docblock in this tree.** In this one mapping run, four separate docblocks
   asserted mechanisms that measurement refuted — including one claiming a module had *"zero
   production consumers"* while two files imported it.
