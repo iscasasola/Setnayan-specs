@@ -135,6 +135,55 @@ committed docs on purpose.
 already ship, and produce errors.** The fix is this block. Keep it CURRENT — one active work
 stream, deleted or replaced when it finishes. If you finish a stream, update this block.
 
+> ### ✅ DONE 2026-08-26 — THE ADMIN HAS A MAP, AND IT IS SCANNED — do NOT rebuild it
+> **2 PRs, both merged:** [#4859](https://github.com/iscasasola/setnayan-platform/pull/4859)
+> (the route map) · [#4862](https://github.com/iscasasola/setnayan-platform/pull/4862) (the job
+> checklists). Full row: `DECISION_LOG.md` 2026-08-26. Prototype the owner approved the shape
+> from: `prototypes/admin_ask_2026-08-26.html`.
+>
+> 🔑 **RULE 0 PAID TWICE BEFORE A LINE WAS WRITTEN.** The ⌘K palette **already ships** and
+> already navigates the admin by name — it is keyboard-only and unlabelled, which is why the
+> owner had never met it. And **Claude is already wired into this app** (the vendor deep-search
+> dossier on `/admin/verify`, with a keyless fallback), so an admin assistant needs **no new
+> plumbing**. Nothing was rebuilt.
+>
+> 🚨 **THE PALETTE'S DOCBLOCK CLAIMED IT "indexes all 108 admin surfaces". IT INDEXED THE 78
+> MENU ITEMS.** Measured: **96 destinations** (55 pages + 41 redirect stubs) · **7 pages in no
+> menu at all** (*Money*, *Directory* among them) · **~40 pages that moved into tabs** were
+> unfindable under the address people still type. Each stub's old address is now a search word
+> on its target and lands on the **tab** (`/admin/songs` → `/admin/studio?tab=songs`).
+> **278 jobs, 180 form-driven**, each carrying the fields it reads, the ones it provably refuses
+> when empty, whether it is destructive, and the page you would actually open.
+>
+> 🪤 **Traps paid for, all found by guards rather than by reading:** a page that calls
+> `redirect()` is **not** a redirect stub (three real pages bounce a signed-out caller to
+> `/login`; reading them as stubs would have deleted three destinations) · nearly every stub ends
+> `…?${out}`, so testing for a bare `?` made **24 of 41 stubs lose their tab**, and the variable
+> is `out`, not `params` — **match the CALL, never a remembered variable name** · **five jobs
+> live in a folder with NO page** (two are the storyteller controls, whose screen moved into a
+> Studio tab while the actions stayed behind) · and **my own join ran in the wrong ORDER**, so
+> three jobs on the demo-vendor inquiries screen were dropped, silently unsearchable.
+>
+> ⚠ **The field is `refusedWhenEmpty`, NOT `required`.** Validation is written at least four ways
+> in this admin; a scan catching two of them would, under the name "required", assert that
+> everything else is optional (22 jobs → 46 once both shapes were read).
+> 🔒 **The map must not resurrect what a feature flag deliberately hides** — the scan records
+> whether the menu **source** mentions an address, which tells a deliberate hide from an omission.
+> 🛡 **18 assertions · 21 mutations, all RED — and TWO of my own guards were DECORATION**, both
+> caught only by measuring: one matched the bare word `buildDestinations`, so gutting the call
+> left the import standing and it reported a clean pass; and one "mutation" was a comment instead
+> of a real reorder — **a reordering mutation cannot be measured by counting a string.**
+>
+> ⏭ **NEXT, AND MEASURED AS THE REAL GAP: the box answers a WORD, never a SENTENCE.** Verified
+> against merged code — *"take me to the pricing for papic services"*, *"show me the prices of
+> papic"* and even the two-word *"papic prices"* all return **NOTHING**; only a single word
+> prefixing a label works. That fix is **deterministic and free**. The AI is only for words
+> nobody listed, and what it learns is written back so a repeat costs ₱0.
+> ⚖ **OWNER SCOPE, do not widen it:** the brain remembers **how to navigate — where to go, what
+> to open, what a job asks for**. NOT product decisions or rulings (he ruled that out explicitly).
+> ⛔ **The assistant may prepare and may hold back; it may never be the thing that lets money, a
+> price, an approval or a publish through** (one-person admin plan, 2026-07-11).
+
 > ### ✅ DONE 2026-08-24 — W4-WORDS: THE FUNERAL, THE FIRST SOLEMN EVENT TYPE — do NOT rebuild it
 > **1 PR, merged and SERVED:** [#4793](https://github.com/iscasasola/setnayan-platform/pull/4793)
 > (`/api/health` → `2eb7b2d`), migration `20271163083797` **verified applied in prod BY THE
