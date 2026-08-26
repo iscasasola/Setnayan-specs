@@ -41,6 +41,49 @@
 > is the tripwire) · `papic_guest_captures` has **no capturer-person column**, so "each person's own
 > folder" covers cameras and not guests · the supplier capture lane is still the **DPO's** call.
 
+> ### ▶▶▶▶▶▶▶▶▶▶ NEWEST — THE ADMIN YOU CAN TALK TO (2026-08-26 · 7 PRs SHIPPED, work left)
+> **[`WHATS_NEXT_Admin_Search_And_Assistant_2026-08-26.md`](WHATS_NEXT_Admin_Search_And_Assistant_2026-08-26.md)**
+> — what is NOT done. Shipped and LIVE (production self-reports `1b4fada`): a **scanned** route map
+> (96 destinations), the **job checklists** (284, 185 form-driven), a box that answers a **whole
+> sentence**, price **rows** as destinations, an assistant that learns a phrasing **once then free**,
+> a **visible** search field, and a create button that **follows the surface**.
+>
+> 🔴 **THE SECOND HALF OF THE OWNER'S OWN EXAMPLE IS NOT BUILT.** *"i want to add a new category on
+> the taxonomy service — ask me what to add and where to place it."* Today it TAKES YOU TO
+> Taxonomy; it does not ask. The checklist that would let it is generated and committed and
+> **nothing reads it but the search haystack.** ⛔ Build it as *fill the form, show the finished
+> thing, the person presses* — gathering is fine, pressing is not.
+>
+> 🔬 **AN ADVERSARIAL AUDIT OF THOSE 7 PRs FOUND 33 CANDIDATES; REFUTATION WAS STILL IN FLIGHT WHEN
+> THIS WAS WRITTEN.** ⚠ Do not act on one until it survives the skeptic pass — a third of audit
+> candidates here are a correct fact with an invented consequence. 🔑 **AND READ THE JOURNAL BEFORE
+> CONCLUDING IT FOUND NOTHING** (`wf_867e7d84-c54/journal.jsonl`) — twice this month an audit
+> returned an empty list because its agents died on a usage limit with real findings already
+> written down. **Three were repeated by four independent lenses and all RAN:** the phone's "All
+> surfaces" filter **requires EVERY word** so a sentence **hides all 79 cards** (the exact bug its
+> own docblock says it fixes, reintroduced); **the admin lost its phone top-bar search entirely**
+> (the new box is `lg:` only AND replaced the shared one); and **"No page has the word X" prints
+> above hits whose names contain X.**
+>
+> 🔴 **THE LEARNED MEMORY HAS NO SURFACE** — nothing shows, corrects or deletes a phrase, so a wrong
+> answer is learned forever. And `learned_from` admits `'admin'` with **no writer** — the
+> gate-with-no-handle shape, sixth instance.
+>
+> ⏭ **ROWS ARE ONLY PRICES** (276 categories · 69 tiles · 15 folders · 16 event types unindexed).
+> ⏭ **NAMED, NOT FIXED: `relrowsecurity` is VACUOUS in the PGlite replay** — a fresh table with no
+> policy reports row security ON, so **15 db test files assert a flag that cannot fail.** Prod is
+> genuinely protected; the hole is in the checking. Second shim deviation after `auth.role()`.
+> ⏭ **OWNER ACTION, the only one: set `ANTHROPIC_API_KEY` in Vercel.** Everything else works
+> without it and the box says so.
+> ⛔ **Locks: the assistant ROUTES, never acts** · the brain remembers **navigation only** (owner:
+> *"not our decisions"*) · the 2026-08-03 "Admin AI is removed" lock is **superseded on the record**
+> · the word **CREATE** stays in the top-bar button · **generated, never authored** — never
+> hand-edit the map or the checklist.
+> 🪤 **A fix nobody can reach is no fix** (third instance — the whole thing shipped behind an
+> unlabelled ⌘K and the OWNER found it, not CI) · **back up by PATH, never basename** (a harness
+> restored the admin layout over the vendor one) · **a re-export does not bind the name inside the
+> module** · **a regex that cannot match is not a negative result.**
+
 > ### ▶▶▶▶▶▶▶▶▶ NEWEST — THE SUPPLIER'S ROOM IN THE EVENT HUB (2026-08-26 · PLAN ONLY)
 > **[`WHATS_NEXT_Vendor_Hub_And_Answers_2026-08-26.md`](WHATS_NEXT_Vendor_Hub_And_Answers_2026-08-26.md)**
 > — nine pieces, smallest first, every correction folded into the piece it affects.
