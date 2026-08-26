@@ -4,9 +4,11 @@
 > **[`WHATS_NEXT_Papic_Meter_Ladder_And_Uploads_2026-08-26.md`](WHATS_NEXT_Papic_Meter_Ladder_And_Uploads_2026-08-26.md)**
 > Written at the owner's instruction: *"save all unfinished to what's next now."*
 >
-> ⏳ **CHECK § 0 FIRST — two things were IN FLIGHT when it was written**: PR
-> [#4879](https://github.com/iscasasola/setnayan-platform/pull/4879) (auto-merge armed) and the
-> 16-rung ladder branch, **committed but not pushed**. Verify both before doing anything else.
+> ⏳ **CHECK § 0 FIRST.** PR [#4879](https://github.com/iscasasola/setnayan-platform/pull/4879)
+> **MERGED** (`7f6abfb59`) — but **a merge is not a ship**, and deploy had not caught up when this
+> was written. § 0 carries the query that proves it landed **by the object**: 14 photos credited of
+> 14, and zero columns insertable by a browser role. The 16-rung ladder branch was **committed but
+> not pushed**. Verify both before doing anything else.
 >
 > 🔴 **THE ONE REAL BUILD IS ATOMICITY.** `recordSeatCapture` reserves the credits and then writes
 > the row — **two steps**, so a death in the gap leaks the reserved credits. It errs against US, not

@@ -12,8 +12,24 @@
 
 | what | branch / PR | state at time of writing |
 |---|---|---|
-| The meter fix + the capturer trigger | [#4879](https://github.com/iscasasola/setnayan-platform/pull/4879) `claude/who-took-this-photo` | **OPEN, auto-merge ARMED**, CI running, conflict with `main` already resolved |
+| The meter fix + the capturer trigger | [#4879](https://github.com/iscasasola/setnayan-platform/pull/4879) `claude/who-took-this-photo` | ✅ **MERGED 2026-08-26** — merge commit `7f6abfb59`. ⏳ Deploy had NOT caught up when this line was written (prod served `2bb67d5`). **A merge is not a ship** — check `/api/health`, then verify the two migrations applied **BY THE OBJECT** (§ 6), never by `schema_migrations`. |
 | The 16-rung ladder | `claude/the-papic-ladder-is-repriced` | **COMMITTED, NOT PUSHED.** Waiting on the full db + unit suites; `tsc` 0, 18 lints pass, prod dry-run clean |
+
+### ⏭ THE FIRST THING TO DO: PROVE #4879 ACTUALLY LANDED IN THE DATABASE
+
+Merging is not applying. Run the per-column privilege query in § 6 — **zero is the answer** — and
+confirm the trigger exists and the 14 production photos now carry a capturer:
+
+```sql
+SELECT count(*) FILTER (WHERE captured_by_person_id IS NOT NULL) AS credited,
+       count(*) AS photos,
+       (SELECT count(*) FROM pg_trigger
+         WHERE tgrelid='public.papic_photos'::regclass AND tgname='stamp_capturer_person') AS trigger_exists
+  FROM public.papic_photos;
+```
+
+**Expected: 14 credited of 14, trigger 1.** Anything else means the migration did not apply and the
+meter is still advisory — say so plainly rather than assuming the merge did it.
 
 ⏭ **If the ladder branch is still unpushed:** re-run `pnpm test:db` and `pnpm test:unit` in
 `apps/web`, then push and open the PR. Its changelog fragment
