@@ -196,13 +196,50 @@ committed docs on purpose.
 > success, and left every couple with no camera and no error. Shipped at **150**.
 > 🪤 `claimPapicSeat` redirects to `/papic/seat/${token}` on success — posting the studio's claim
 > button at it navigates the couple **out of their own studio**.
+> 🚨 **AND A NEW COLUMN ON `events` IS NOT DONE WHEN IT EXISTS.** That table revokes table-level
+> SELECT and re-grants a **per-column allowlist**, so a column with no `GRANT SELECT (col)` makes
+> PostgREST refuse the **WHOLE query** — every user-session read of `events` goes silently empty —
+> and `events_host` has an explicit projection computed from those grants, while
+> `/dashboard/[eventId]/details` **THROWS** on a query error. `lint-events-column-grants` is the only
+> thing that catches it: **the db coverage tests structurally cannot**, because their `before()`
+> re-applies the lockdown and recomputes the allowlist over the new column.
+> 🪤 **AND THE UPLOADS SWITCH SHIPPED GOVERNING NOTHING, past six of my own guard's rules.** The page
+> read `papic_uploads_open` off its **main event select, which never named the column** — always
+> `undefined`, `?? true` reported OPEN, and the picker rendered for a couple who had switched it off.
+> The column existed, the control was mounted, the branch was wired, the save was confirmed. **I
+> guarded the branch and not the source.** ⚠ Its fix is its OWN round trip on purpose: naming an
+> unknown column in the main select makes PostgREST refuse that query, and the page answers an
+> unreadable event with `notFound()` — the one-line version turns a missing migration into **a live
+> celebration rendering as missing**.
 >
-> 🔴 **THE CREDIT INVARIANT IS STILL NOT ENFORCED AT THE DATABASE LAYER.** #4865 closed the couple's
-> door; `papic_photos_claimer_own` still admits any insert from a live-seat claimer with no credit
-> check, and #4872 makes every host a claimer. **The real fix is ATOMICITY** — a `SECURITY DEFINER`
-> record RPC that reserves and inserts in ONE transaction, with direct INSERT revoked, which also
-> deletes the unwind problem outright. **Do not claim "a photo cannot exist without a credit" until
-> it exists.**
+> 🔒 **THE THIRD HOLE — AND IT WAS THE BIG ONE. `recordSeatCapture` REFUSES A CAPTURE EIGHT WAYS AND
+> ALL EIGHT WERE ADVISORY.** The burst limiter, the 10s clip cap, the capture window, the paid-order
+> gate, the put-away gate, the RA 10173 geo control and the credit reservation its own docblock calls
+> *"the AUTHORITATIVE, race-safe gate"* — the row went in through the CLAIMER'S OWN SESSION while
+> `authenticated` held INSERT, so the same person could POST to `/rest/v1/papic_photos` with the
+> public anon key and skip the lot: **no credits spent**, no length checked, outside the window, on an
+> unpaid camera, on a put-away celebration, carrying geolocation on an event that had switched geo
+> off. 🔑 **AND `has_table_privilege(…,'INSERT')` ANSWERS *FALSE* — the grant was held on all 39
+> COLUMNS, so a table-level audit reads the table as closed while it is open.** The samahan sweep
+> already paid for this: 25 tables reported, **9** measured, after it was taught to count column
+> grants. ⚖ Until this week a claimer was a friend handed a camera; #4872 made every host one.
+> **Revoked at TABLE level** (that is what drops column grants — column-by-column leaves the NEXT
+> column granted) and the claimer's `FOR ALL` split into SELECT/UPDATE/DELETE with the SAME
+> predicates. Dry-run against prod in `BEGIN…ROLLBACK`, because the PGlite replay runs as superuser.
+> ⛔ **RESERVE AND INSERT ARE STILL TWO STEPS, NOT ONE TRANSACTION** — a death in the gap leaks the
+> reserved credits, which errs against US, not the meter. **Do not read "service role" as "atomic".**
+> 🔑 **And the repair is not a new idea: `papic_record_guest_capture` ALREADY does gates + reserve +
+> insert in one `SECURITY DEFINER` function, which is why `anon` never needed an INSERT grant. The
+> seat path is the odd one out — copy the guest function's shape.**
+>
+> 🔴 **`captured_by_person_id` HAS NEVER HELD A VALUE IN PRODUCTION. NOT ONE ROW, EVER.** Measured,
+> not grepped: **14 photos · 14 carry a seat · 14 have a claimer whose person row resolves right
+> now · 0 carry the value.** Column, partial index and a reader that groups a person's own-event
+> frames by capturer all shipped in May; the one-time backfill matched nothing because every photo
+> postdates it. **The sixth gate with no handle**, and the read has been grouping an empty set for
+> three months while looking exactly like a feature nobody uses. Fixed with a trigger (the value is a
+> JOIN, not a decision — so it covers every capture path, not the ones somebody remembered) plus a
+> re-backfill. ⚠ **A BACKFILL IS A POINT-IN-TIME ACT** — never cite an old one as ongoing coverage.
 > **Contract: [`WHATS_NEXT_Papic_Uploads_Are_A_Way_In_2026-08-26.md`](WHATS_NEXT_Papic_Uploads_Are_A_Way_In_2026-08-26.md).**
 > Owner: *"papic is the source where they collect media files for that event. that will be our
 > purpose. so the only exceptions will be the save the date video, or event video."*
