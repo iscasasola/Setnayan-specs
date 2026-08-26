@@ -200,6 +200,19 @@ mood board, the shot list built in advance — **is not the day.** Only the day 
 | **S8** | **THE ANSWERS DESK.** One list of every answer a supplier owes anybody, oldest first | independent — can run in parallel |
 | **S9** | Two answers that today do nothing are repaired BEFORE they are given a row | must precede those rows in S8 |
 
+🛑 **THREE OF THESE NINE ARE WRONG AS WRITTEN, and the correction is inline so nobody reads the
+table without it:**
+- **S4 is incomplete twice over.** Its day gate re-implements the multi-day defect the same plan
+  names as a trap (§ 3.4 · 10), and its copy guard cannot fire on the components it reuses
+  (§ 3.4 · 3). **S4 does not ship until both are answered.**
+- **S5 is unsafe as scoped.** It strands the hired night crew (§ 3.4 · 2), orphans the photo route
+  (§ 3.4 · 8), and re-points **one** revalidation site when there are **seventeen**, one of them
+  on the couple's own screen (§ 3.4 · 7).
+- **S3 has no counterpart for the far-away booking** — it adds a date line and never says what the
+  doorway link does on an event months away (§ 3.4 · 5).
+- ⚠ **And no slice at all delivers the headline** (§ 3.4 · 1): **no screen in the product shows a
+  supplier their client's event address.** The door is its own slice and it does not exist yet.
+
 ### 🚨 S1 IS A LIVE DEFECT TODAY, WITH NO FLAG IN FRONT OF IT
 
 `resolveVendorCapability` (`app/[slug]/_lib/site-identity.ts:274-289`) denies only *"no account"*
@@ -283,6 +296,17 @@ on every row** — which is what the six-card feed already does.
 | 14 | Something on the floor tonight | ⛔ belongs in the room at the event; only the booked coordinator can answer one |
 | 15 | A song a guest asked for | ⛔ belongs in the room — and **nobody can ask yet.** The two ways a guest would submit one exist in the database and **nothing in the product calls them.** A row would be a promise the product cannot keep |
 | 16 | A paid crew shift on an event you are already working | ⛔ **does not join at all.** It cannot be posted, cannot be seen and cannot be accepted by anyone who is not a Setnayan admin — **the database refuses all three, silently.** A row would be a door onto nothing |
+
+### 🆕 The two nobody counted — found by the critic, absent from every map
+
+| | The answer | Verdict |
+|---|---|---|
+| 17 | **A couple proposed a MEETING time** | ✅ **joins.** Real rows, inserted by the couple's own screen, which **already emits a notice saying *"confirm or propose a new time"***. ⚠ Its deadline is **the meeting itself passing** — a **fifth time-box shape** the four below have no slot for. A tasting that already happened must not sit in a list ordered by who waited longest |
+| 18 | **An unanswered message in an ACCEPTED thread** | ✅ **joins — and it is probably the most common row of all.** The desk's enquiry lane is **pre-accept only**, so a reply owed to a couple you have already booked appears nowhere. 🔑 **This is the exact thing the product measures and publishes as that shop's reply speed.** A list called *every answer you owe* that omits it is not that list |
+
+🚨 **AND ROW 5 IS NARROWER THAN IT LOOKS: a ONE-STAR review can never reach the desk at all.**
+The filter is *five stars **and** no reply*. **The review that most needs an answer is excluded by
+construction** — and repairing the row cap makes the desk *look* complete while that stays true.
 
 ### What the list does when a window closes
 
@@ -497,11 +521,16 @@ poisoned fixture · the lost-controls baseline (**3 destinations / 54 blocks** o
 directories BY HAND**, so a new room directory is unguarded against a loading file — and that is
 how every unknown address becomes a soft-404.
 
-**6 · Two surfaces, two answers — three of them, today.** The tool pills pass `null` for the saved
-override while the room reads it. Sections are gated on one taxonomy while the toggles write to
-another, and the two never meet. And the rail badge derives its count **in SQL** while the feed
-derives the same number **in JS** — they agree today, and the existing guard watches
-sidebar-vs-phone drift, **not feed-vs-badge drift.** Adding a badge for the desk opens that seam.
+**6 · Two surfaces, two answers — and the middle one is HALF the size the plan gives it.**
+The tool pills on the shop's landing page pass `null` for the saved override while the launched
+day-of app reads it — **same booking, two answers, today.**
+⚠ **CORRECTED BY A SKEPTIC:** the plan says *"the toggles do not control the sections."* **They
+do** — on the launched day-of app, which reads the saved override and gates on it. The defect is
+confined to the **landing page's pill row**, not to the console. *A defect stated one size too
+large gets fixed in the wrong place.*
+And the rail badge derives its count **in SQL** while the feed derives the same number **in JS** —
+they agree today, and the existing guard watches sidebar-vs-phone drift, **not feed-vs-badge
+drift.** Adding a badge for the desk opens that seam.
 
 **7 · The clock says three things.** Three screens say the window is "T-1h → T+8h"; the real gate
 is the whole civil day. **The dead numbers survive in five places** — including a docblock sitting
@@ -540,6 +569,62 @@ send lane exists from chat whose failure cleanup is best-effort — **a stranded
 as work owed.** The `'expired'` proposal status **has no writer**, so its validity date is
 decorative. And the song-desk switch **seeds the whole kit from current defaults on its no-row
 path** — inserting the bare flag would **switch that act's entire kit off as a side effect.**
+
+---
+
+## 3.6 · WHAT THE SKEPTICS CORRECTED — carried here because the plan absorbed only some of it
+
+**17 claims did not survive.** The plan's own trap list carried ten of them. **These are the ones
+it did not**, and each changes something a builder would otherwise get wrong:
+
+- 🔁 **A supplier IS already an audience on the couple's page — in TWO places, not zero.** The
+  mapper's *"a supplier is in none of the five communication surfaces"* is wrong in the very file
+  it cites: the editorial content is handed a viewer whose *belongs-to-event* flag is true for a
+  supplier with a capability, and the event-scoped stories enumerate them. **The hub already
+  speaks to suppliers; it just says very little.**
+- 🔁 **The day-of landing's non-photo card switches DESTINATION on the booking, not on the trade.**
+  With a booking today, a caterer is sent to the production sheet and a coordinator or band
+  elsewhere — the *copy* switches on trade, the *link* does not. Anyone porting that card by
+  reading its words will send people to the wrong place.
+- 🔁 **When there is no event today the supplier does NOT get a degraded console** — a compact
+  view renders instead, with its own picker of other bookings. **Do not design the empty state; it
+  exists.**
+- 🔁 **The open-task list is ~75% a second copy of the feed** — three of its four sources are the
+  same rows. **And three card kinds have no open-task row at all**, of which the consequential one
+  is the couple asking to remove a celebration. **Two lists, one population, different omissions.**
+- 🔁 **Stage notes are an ADDRESSED channel and the shipped path is supplier→supplier**, not
+  event-side→supplier as mapped. They display on **two** screens, not one. And the claim that a
+  note *"waits for the emcee to reload"* is **struck** — the run-of-show header is mounted on that
+  page and does receive live changes.
+- 🔁 **The two partnership bundle kinds were RENAMED at the source** to say what they mean. Using
+  the old names is how two independent readers previously concluded we sell paid placement.
+  **Never re-introduce the old spelling.**
+- 🔁 **The headcount card is reachable from at least four or five places, not one** — three of them
+  the booked population the card exists for. Any "it is buried" claim about it is wrong.
+- 🔁 **The "floor items are switched off in production" framing is contradicted in-repo, and the
+  grep behind it could not match.** ⚠ **Read it out of production; do not build the dark branch as
+  the main case.**
+- 🔁 **The "how much of the couple's private plan may a supplier see" question is NOT an open owner
+  decision** — through the supplier portal they already see counts and never guest identities. The
+  live question is the narrow one in § 4 · 1: the same notes at a **public address**.
+
+---
+
+## 3.7 · 🛑 WHAT IS STILL NOT COVERED — the honest edge of this plan
+
+1. **The critic was never itself refuted.** Every mapper's finding was attacked by an independent
+   reader. **The critic's twelve gaps were not** — they are spot-checked by their own author and
+   nothing else. Treat § 3.4 as strong, not proven.
+2. **THE ROOM HAS NOT BEEN DRAWN.** There is no picture of it anywhere. Per this project's own
+   rule, tests catch wrong code and never a wrong-*looking* screen. **Draw it before building it**
+   — it is also what lets the owner answer decisions 1 and 5 without reading any of this.
+3. **No slice is sized.** There are no estimates and no sequencing against anything else in flight.
+4. **The desk's own sort order is unproven.** Oldest-first is asserted; nobody checked what a
+   supplier with forty rows actually needs at the top, or whether *waiting longest* and *most
+   urgent* are the same thing. Two of the sixteen kinds carry a hard deadline; the rest do not.
+5. **Nothing was measured against production.** Every claim is read from source at one commit. The
+   platform is pre-launch and nearly empty, so **no part of this plan has been exercised by a real
+   supplier on a real event day.**
 
 ---
 
