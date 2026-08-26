@@ -74,9 +74,9 @@ committed docs on purpose.
 > valuable part.
 >
 > ✅ **ONE THING SHIPPED — do NOT rebuild it.** The shop-dashboard re-sort, PR
-> [#4863](https://github.com/iscasasola/setnayan-platform/pull/4863) (⚠ verify with
-> `gh pr view 4863 --json state,mergedAt`; this file has been wrong about a PR's state four
-> times): **Overview → Today** · My Customers ahead of My Shop · **Contracts + Proposals into My
+> [#4863](https://github.com/iscasasola/setnayan-platform/pull/4863), **MERGED 2026-08-25T21:22Z**
+> (verified by `gh pr view`, not by reading; re-verify anyway — this file has been wrong about a
+> PR's state four times): **Overview → Today** · My Customers ahead of My Shop · **Contracts + Proposals into My
 > Customers** · **services opens FIRST on My Shop** · the 14 tools on **three named shelves** ·
 > "(BEO)" out of the menu. **Same five keys, nothing deleted, every href byte-identical.**
 > 🚨 **TWO SURFACES WERE ALREADY IN TWO PLACES AT ONCE** — the phone bar lit **Customers** for

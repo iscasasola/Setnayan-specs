@@ -99,9 +99,9 @@ past yesterday has nowhere to fall back to.
 
 ## 2 · WHAT SHIPPED TODAY — do NOT rebuild it
 
-**PR [#4863](https://github.com/iscasasola/setnayan-platform/pull/4863)** — the re-sort the
-owner approved. ⚠ **Verify its state with `gh pr view 4863 --json state,mergedAt` before
-trusting this line; this project's own register has been wrong about a PR's state four times.**
+**PR [#4863](https://github.com/iscasasola/setnayan-platform/pull/4863) — ✅ MERGED 2026-08-25T21:22Z**,
+verified by `gh pr view`, not by reading. ⚠ Re-verify before acting on it anyway; this project's
+own register has been wrong about a PR's state four times.
 
 Overview → **Today** (all five places it is written, registry included) · **My Customers moves
 ahead of My Shop** · **Contracts + Proposals move into My Customers** · **Your services opens
