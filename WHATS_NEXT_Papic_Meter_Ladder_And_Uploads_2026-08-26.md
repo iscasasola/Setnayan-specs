@@ -13,7 +13,7 @@
 | what | branch / PR | state at time of writing |
 |---|---|---|
 | The meter fix + the capturer trigger | [#4879](https://github.com/iscasasola/setnayan-platform/pull/4879) | ✅ **MERGED, SHIPPED AND VERIFIED IN PRODUCTION BY THE OBJECT** — see below. Nothing left to do. |
-| The 16-rung ladder | `claude/the-papic-ladder-is-repriced` | **COMMITTED, NOT PUSHED.** Waiting on the full db + unit suites; `tsc` 0, 18 lints pass, prod dry-run clean |
+| The 16-rung ladder | [#4884](https://github.com/iscasasola/setnayan-platform/pull/4884) | ✅ **OPEN, auto-merge ARMED.** tsc 0 · unit 10,193/0 · db 1,591/0 · 18 lints · prod dry-run clean. **A merge is not a ship** — when it lands, verify the 16 rungs by querying the catalog (§ 6), not by reading this. |
 
 ### ✅ #4879 IS VERIFIED IN PRODUCTION — measured on the live objects, not inferred from the merge
 
@@ -36,9 +36,12 @@ one on every row that exists.
 ⛔ **This does NOT make the credit invariant atomic** — see § 1. Reserve and insert are still two
 steps.
 
-⏭ **If the ladder branch is still unpushed:** re-run `pnpm test:db` and `pnpm test:unit` in
-`apps/web`, then push and open the PR. Its changelog fragment
-(`changelog.d/the-papic-ladder-is-repriced.md`) is written and is the PR body.
+🪤 **A NEAR-MISS WORTH THE LINE: the first push of that branch was a commit missing six staged
+files, and it would have failed CI.** `git status --porcelain` printed them with a leading `M `/`A `
+— **staged** — and I read that as a clean tree and said so out loud. Staged-but-uncommitted is work
+that exists on disk and nowhere else. What was left behind was the half that makes the branch pass.
+**Before pushing, run `git show --stat HEAD` and check the commit contains what you wrote** — "no
+deletions" and "no stray edits" are different questions and neither answers this one.
 
 ✅ **Already merged today — do NOT rebuild:** the couple's file picker and the switch for who may
 add photos by hand ([#4875](https://github.com/iscasasola/setnayan-platform/pull/4875), carrying

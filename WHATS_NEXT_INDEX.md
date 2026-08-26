@@ -51,7 +51,8 @@
 > can insert into `papic_photos` (was 39) · **0** policies admitting INSERT · the trigger present ·
 > **14 photos credited of 14**, on a column that had never held a value. ⛔ It does **not** make the
 > credit invariant atomic — § 1 is still the real build.
-> ⏳ The 16-rung ladder branch was **committed but not pushed** when this was written. Check § 0.
+> ⏳ The 16-rung ladder is [#4884](https://github.com/iscasasola/setnayan-platform/pull/4884),
+> **auto-merge armed**. Check § 0, and verify the rungs by querying the catalog when it lands.
 >
 > 🔴 **THE ONE REAL BUILD IS ATOMICITY.** `recordSeatCapture` reserves the credits and then writes
 > the row — **two steps**, so a death in the gap leaks the reserved credits. It errs against US, not
