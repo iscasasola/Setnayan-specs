@@ -9,6 +9,42 @@
 
 ---
 
+## THE SHORT VERSION — read this and stop, unless you are the one building it
+
+**What we are doing.** On the day of a wedding, a supplier opens the couple's own link and lands in
+their own workroom — the venue, how to get there, the running order, and the tools they already
+have. Everyone else who opens that link sees the couple's page and never knows the room is there.
+
+**Nothing needs you to start.** Seven of the nine steps are ours. Two need a word from you, and both
+come late.
+
+**The order, one line each:**
+
+| | | Needs you? |
+|---|---|---|
+| 1 | Stop telling a booked supplier they have no event when they do | no |
+| 2 | Stop calling every host "the couple" — it is on public pages today | no |
+| 3 | Make the check that catches that actually able to see new pages | no |
+| 4 | **Stop treating a guest who scanned a QR as a host** — they can read the couple's unfinished story today | no |
+| 5 | Agree on one answer to "is this shop booked?" — there are two today | no |
+| 6 | Stop bouncing booked suppliers off pages the app drew for them | no |
+| 7 | **The room itself** | one question first |
+| 8 | A booking made by locked QR reserves its date like every other | no |
+| 9 | The night before, email the supplier that tomorrow is the day | one question first |
+
+**Steps 2 and 4 are live problems right now**, and neither is about suppliers. Do them first whether
+or not the rest ever happens.
+
+**The two questions, when we get to them:**
+- Before step 7 — **may a supplier read the couple's private run-of-show notes at the couple's own
+  public web address?** They already read them inside their own dashboard. This changes *where*.
+- Before step 9 — **may we email a supplier automatically at an address they never gave us?** Today
+  a person pressing send is what makes it allowed.
+
+**Everything below is the working detail.** It is written for whoever builds this, not for you.
+
+---
+
 ## 0 · THE OWNER'S RULINGS — do not re-ask any of these
 
 | Date | Verbatim | What it settles |
@@ -290,35 +326,44 @@ separate sabotages here have printed 0→0 and read as clean passes.
 
 ---
 
-## 7 · 🔴 WHAT REMAINS THE OWNER'S
+## 7 · WHAT NEEDS THE OWNER — sorted by when, not by importance
 
-1. **May we email a supplier automatically at an address the supplier never gave us?** Today the
-   human button press **is** the consent. Removing the press removes the stated basis. Piece 9 ships
-   switched off until he says.
-2. **What is a supplier who has not yet been paid entitled to see?** Measured and not decided: the
-   booked-events helper **already gives every soft-hold supplier the run-of-show and the couple's
-   song picks — including up to three competing shops on one date.** Either that is the intended
-   boundary or it is a disclosure wider than the room itself. **No measurement settles it.**
-3. **Does "booked" for the room mean the deposit, or the supplier's yes?** Piece 5 answers *either*,
-   which bends his 2026-06-12 deposit-fact vocabulary **for this one purpose**. Defensible because
-   the room is not capacity — **but it is his word, not an engineering call.**
-4. **May a supplier read the couple's private run-of-show notes at the couple's own PUBLIC address?**
-   They read them today inside their own dashboard, marked *don't read aloud*. **This changes WHERE.**
-5. **Should the three day-of kits be free during launch?** They need a paid plan and **no real shop
-   has one**, so the room opens nearly empty for everybody without this.
-6. **Should a supplier be able to say "I did not receive that money"?** Today the only possible
-   answer is yes, and it cannot be taken back.
-7. **The console in the wedding LETTERING** — measured and narrower than first written: only the
-   typefaces change at the new address; **the colours survive.** A type call.
-8. **Should the eve-of notice also reach the couple and the coordinator, or only suppliers?**
-   Scoped to suppliers here deliberately.
-9. **Should the couple be able to switch the room off for a particular supplier?** Not built, not
-   assumed either way.
+**Nothing blocks the start.** Steps 1–6 and 8 are ours.
 
-⛔ **RETIRED BEFORE IT REACHED HIM — do not ask it.** *"Does the room close at midnight?"* **He
-already decided it inside the feature:** the photo route's own header reads *"THE SHUTTER IS
-DAY-BOUND. LOOKING BACK IS NOT — at midnight the door shut on the photographer's own pictures, and
-the next morning, which is exactly when they want to confirm a shot landed, it was closed."*
+### Before step 7 — the room opens
+
+**May a supplier read the couple's private run-of-show notes at the couple's own public web
+address?** They read them today inside their own dashboard, marked *don't read aloud*. This changes
+*where* they are shown, not who sees them — and the where is a public address.
+
+### Before step 9 — the eve-of email
+
+**May we email a supplier automatically at an address the supplier never gave us?** Today a person
+pressing send is what makes it allowed. Removing the press removes the basis. It ships switched off
+until he says.
+
+### Not urgent — answer whenever
+
+- **What is a supplier who has not been paid yet entitled to see?** Measured and not decided: a
+  soft-hold supplier **already** gets the run-of-show and the couple's song picks — including up to
+  three competing shops on one date. Either that is the boundary you meant, or it is wider than the
+  room. No measurement settles it.
+- **Does "booked" mean the deposit, or the supplier's yes?** The plan answers *either*, which bends
+  your 2026-06-12 deposit-fact wording for this one purpose. Defensible — the room is not capacity —
+  but it is your word.
+- **Should the day-of kits be free during launch?** They need a paid plan and no real shop has one,
+  so the room opens nearly empty for everyone without this.
+- **Should a supplier be able to say "I did not receive that money"?** Today the only answer is yes,
+  and it cannot be taken back.
+- **The console in the wedding lettering.** Only the typefaces change at the new address; the
+  colours survive. A type call, nothing more.
+- **Should the eve-of email also reach the couple and the coordinator?** Scoped to suppliers here.
+- **Should the couple be able to switch the room off for one supplier?** Not built, not assumed.
+
+⛔ **RETIRED BEFORE IT REACHED HIM — do not ask it.** *"Does the room close at midnight?"* He already
+decided it inside the feature: the photo route's own header reads *"THE SHUTTER IS DAY-BOUND.
+LOOKING BACK IS NOT — at midnight the door shut on the photographer's own pictures, and the next
+morning, which is exactly when they want to confirm a shot landed, it was closed."*
 
 ---
 
