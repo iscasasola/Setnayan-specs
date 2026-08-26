@@ -1,5 +1,46 @@
 # WHATS_NEXT_INDEX — master compilation for the "run all what's-next" session (2026-07-18)
 
+> ### ▶▶▶▶▶▶▶▶▶ NEWEST — PAPIC: THE METER, THE LADDER, AND WHAT UPLOADS LEFT OPEN (2026-08-26)
+> **[`WHATS_NEXT_Papic_Meter_Ladder_And_Uploads_2026-08-26.md`](WHATS_NEXT_Papic_Meter_Ladder_And_Uploads_2026-08-26.md)**
+> Written at the owner's instruction: *"save all unfinished to what's next now."*
+>
+> ⏳ **CHECK § 0 FIRST — two things were IN FLIGHT when it was written**: PR
+> [#4879](https://github.com/iscasasola/setnayan-platform/pull/4879) (auto-merge armed) and the
+> 16-rung ladder branch, **committed but not pushed**. Verify both before doing anything else.
+>
+> 🔴 **THE ONE REAL BUILD IS ATOMICITY.** `recordSeatCapture` reserves the credits and then writes
+> the row — **two steps**, so a death in the gap leaks the reserved credits. It errs against US, not
+> the meter, which is why it can stand; but **do not claim "a photo cannot exist without a credit"
+> until the repair exists.** 🔑 That repair already ships on the other half of this feature:
+> `papic_record_guest_capture` does gates + reserve + insert in ONE `SECURITY DEFINER` function,
+> which is why `anon` never needed an INSERT grant. **Copy its shape** — but it writes a DIFFERENT
+> table, so it is a model, not a second writer.
+>
+> ⚖ **PRICING IS SETTLED — 16 rungs, ₱1 = 1 credit discounted 50%→80%, 50 free, cameras free.**
+> **40,000 is deliberately ABSENT** (his first table priced it the same as 50,000, so nobody could
+> rationally choose it; surfaced, and he removed it — a db guard now fails if anybody re-adds it).
+> ⚠ **NEVER re-type the numbers** — the catalog is the source and
+> `apps/web/tests/db/papic-ladder.expected.ts` is the ONE pinned expectation.
+> 🚨 **A rung is THREE places**: catalog row, tier row, AND a line in `lib/sku-activation.ts` — a
+> sellable rung missing from that map takes the money and grants **zero** shots, silently.
+> ⏭ **His, not engineering's:** whether suppliers buy off this same ladder.
+>
+> 🚨 **THE TRAP THAT MATTERS MOST — NEVER POINT AN AUDIT AT A LIVE WORKING TREE YOU ARE ALSO
+> EDITING.** An audit agent commented out the two `REVOKE` lines — **the entire security fix** — in
+> the window between my pre-commit `git diff` and the `git add -A` two commands later. **It was
+> committed and pushed.** Two more stray edits in the same sweep, one inside an already-applied
+> migration; another narrowed the shipped backfill to clips while the suite reported **6 pass, 0
+> fail**. **Give subagents a detached read-only worktree. Diffing before `add` is not enough.**
+>
+> 🔑 **`has_table_privilege(…,'INSERT')` ANSWERS FALSE WHILE COLUMN GRANTS STAND** — it hid the hole
+> AND made the guard about it decoration. Ask per column, over a census. Revoke at TABLE level.
+> 🔑 **`SECURITY DEFINER` disarms a `current_user` check** (second time) — inside one, `current_user`
+> is the OWNER, never the caller.
+>
+> ⏭ **Also open:** the switch must be read **server-side** when guests/suppliers can upload (rule 8
+> is the tripwire) · `papic_guest_captures` has **no capturer-person column**, so "each person's own
+> folder" covers cameras and not guests · the supplier capture lane is still the **DPO's** call.
+
 > ### ▶▶▶▶▶▶▶▶▶ NEWEST — THE SUPPLIER'S ROOM IN THE EVENT HUB (2026-08-26 · PLAN ONLY)
 > **[`WHATS_NEXT_Vendor_Hub_And_Answers_2026-08-26.md`](WHATS_NEXT_Vendor_Hub_And_Answers_2026-08-26.md)**
 > — nine pieces, smallest first, every correction folded into the piece it affects.
