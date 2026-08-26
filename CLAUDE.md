@@ -2292,9 +2292,31 @@ has credits anywhere. This was shipped wrong once — the pool stood down for an
 (`papic_reserve_capture_split`); do NOT reintroduce a two-call sequence, because the first call
 mutates and the second then cannot tell "spent its last credit" from "never had any".
 
-⚠ Prices live in the catalog, never here. `PAPIC_CAMERA_MINI_DAY` is retired as a rung but is
-**still load-bearing** (the `sku_code` of every 'mini' seat + the legacy grant path) — deactivate,
-never drop.
+⚠ Prices live in the catalog, never here.
+
+🛠 **THE BUILD HALF LANDED IN PR [#4882](https://github.com/iscasasola/setnayan-platform/pull/4882)
+(migration `20271170435163`), NOT before it.** The 2026-08-26 DECISION_LOG row for this ladder says
+*"Built as given"* and that was **false when written** — measured the same day: no migration on
+`origin/main`, no branch carrying `PAPIC_GUEST_50K` outside one negative test fixture, no open PR.
+Verify with `gh pr view 4882 --json state,mergedAt` before trusting this line.
+🔑 **A DECISION LOG IS NOT EVIDENCE THAT CODE EXISTS — grep for the object.** This is the same
+failure shape as the migration comments this file already warns about, one level up.
+
+🛑 **CORRECTED 2026-08-26 — `PAPIC_CAMERA_MINI_DAY` IS NOT LOAD-BEARING.** This line used to say it
+was *"still load-bearing (the `sku_code` of every 'mini' seat + the legacy grant path) — deactivate,
+never drop."* Measured against prod, not read: **0** seats carry it as `sku_code` (prod seats are
+`PAPIC_CAMERA_FREE` ×9 · `PAPIC_CAMERA_ONE_FREE` ×4), **0** seats are `tier='mini'`, and **0** rows
+exist in `papic_one_orders`. The legacy grant path reads it as
+`WHERE service_code='PAPIC_CAMERA_MINI_DAY' **AND t.is_active**` — that row is `is_active=false`, so
+the lookup already misses and `COALESCE(v_per, 50)` supplies a hardcoded 50. **The stored value is
+also 50.** It is held by a CASCADE foreign key, not by behaviour.
+🔑 **THE RULE THIS TAUGHT: a removability check must ask "has this done anything", not only "does
+anything point at it".** An FK is a pointer, not a job. Measuring pointers alone reported 22
+untouchable retired rows when most of that pile is dead wiring holding up dead names — all 13
+`papic_*` ones are exactly the rows still titled *"Papic Pool" / "Papic One" / "Papic Mini" /
+"Papic Ltd" / "Papic Max"*, the two-product model retired 2026-08-11. ⚠ Still verify per-row before
+sweeping: an inert pointer can be woken by a code change, and `CREATE OR REPLACE` on that very
+function has silently reverted a guard before.
 
 ### Hard product constraints
 
