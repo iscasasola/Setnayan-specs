@@ -1,5 +1,60 @@
 # WHATS_NEXT_INDEX — master compilation for the "run all what's-next" session (2026-07-18)
 
+> ### ▶ ACTIVE 2026-08-26 — THE ADMIN'S NAMES, AND WHETHER IT CAN REACH YOU
+> **Contract: [`WHATS_NEXT_Admin_Names_And_Alerts_2026-08-26.md`](WHATS_NEXT_Admin_Names_And_Alerts_2026-08-26.md).**
+> Owner, the morning after the menu recut merged and deployed: ***"it still looks the same."***
+> **He was right, and the rename was real — the name he READS was a different copy.**
+>
+> ✅ **TWO PRs MERGED AND VERIFIED LIVE — do NOT rebuild:**
+> [#4874](https://github.com/iscasasola/setnayan-platform/pull/4874) (merge `5219cc3`, the rail +
+> the phone) · [#4881](https://github.com/iscasasola/setnayan-platform/pull/4881) (merge `73a89dc`,
+> the destination pages). ⏳ **ONE OPEN:**
+> [#4885](https://github.com/iscasasola/setnayan-platform/pull/4885), auto-merge armed.
+> ⚠ Verify each with `gh pr view <n> --json state,mergedAt` — this register has been wrong about a
+> PR's state five times.
+>
+> 🔑 **THE MENU NAME LIVED IN THREE PLACES AND ONLY ONE WAS RENAMED.** The wide-rail label was
+> renamed; **`STRIP_CAPTION`** (the word under the icon **between 1024 and 1280px**, where the
+> stylesheet hides the full label — *at that width the caption IS the menu*) was not; and
+> **`NAV_SLOT_DEFAULTS['admin.bottom-nav.*']`**, which is overlaid **on top of** the hardcoded
+> label so **the registry wins on every phone**, was not. Both stale copies out-ranked the renamed
+> one on the exact two screens he uses. **A rename that reaches the source and not the copies is
+> not a rename — it is a diff.**
+> 🔍 **The tell was in the product the whole time: Money was the ONE phone tab reading correctly,
+> and it is the one tab with NO registry slot.** When a change lands unevenly, the odd one out
+> names the cause. **The sidebar is a THIRD overlay of the same kind** (62 slots; one already
+> drifting — code "Real Stories", registry "Stories", registry winning).
+>
+> 🚨 **AND ONE PAGE NAME HAD BECOME FALSE, NOT MERELY STALE:** `/admin/money` still titled itself
+> **"Money & Settings"** while the recut had moved every settings surface out of Money into Set up.
+> ⚠ **Of six wrong page names, exactly ONE was on screen** — `PageMasthead` renders its title
+> **`sr-only`**, so an `<h1>` in the HTML (and even `offsetParent !== null`) proves nothing;
+> only `getBoundingClientRect()` does.
+> ⚠ **Renaming a menu label silently DELETES a search word** — an item's searchable words are
+> label + group + description + alias, and **the route is not among them**. `ADMIN_NAV_ALIASES` is
+> the fix, in the same commit, proved by running the search.
+>
+> 🚨 **THE VENDOR NOTIFICATION CARD WAS A DEAD END AND ONLY `tsc` FOUND IT.** It is a *different
+> component* from the shared toggle, it **cannot enable at all**, and when blocked it rendered five
+> words then `: null` — no control, nowhere to go. ⛔ **Do NOT replace it with the shared toggle:**
+> it owns `deactivateAllPushTokens`, a SERVER-side switch-off across every device, which the shared
+> one lacks. Consolidating them is real work.
+>
+> 🔴 **FOUR OWNER ACTIONS (§ 3), none of them engineering:** unblock notifications in the browser
+> you actually use (measured `denied`; VAPID keys were already set — **a site can never re-prompt
+> itself**) · press Force-complete on the `SONGDESK TEST` fixture, the only "1 overdue" in the
+> console · rule on the **AI search box** another session is building, which appears to reverse
+> your own 2026-08-03 "admin AI runs autonomously or not at all" lock · decide whether the **Ugat
+> subsystem itself** should be renamed (only the words a person reads were changed).
+>
+> 🪤 **Traps paid for:** `tsc` printed **`errors=0` at EXIT 134 — a SIGABRT crash, not a pass** ·
+> **`git checkout --` silently reverted an un-committed guard widening**, caught only by
+> `git commit` saying "nothing to commit" · **two of my own guards were decoration**, both caught
+> only by mutation (one walked `page.tsx` and missed the single VISIBLE offender; one asserted a
+> copy map existed while nothing checked the render *used* it) · **a DOM probe filtered to leaf
+> nodes could not match** a heading containing a `<span>` and reported it absent while it rendered
+> at 391×23px · **a grep whose `--include` flag errored printed a zero I read as a result.**
+
 > ### ▶▶▶▶▶▶▶▶▶ NEWEST — MANAGING PRICES: THE ADMIN SCREEN, AND THE LADDER THAT SHIPPED (2026-08-26)
 > **[`WHATS_NEXT_Managing_Prices_2026-08-26.md`](WHATS_NEXT_Managing_Prices_2026-08-26.md)**
 > Written at the owner's instruction: *"save all unfinished to what's next now."*
