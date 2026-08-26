@@ -14,7 +14,25 @@ state five separate times.
 |---|---|---|
 | [#4874](https://github.com/iscasasola/setnayan-platform/pull/4874) | the six menus finally **show** their new names — rail + phone | **MERGED**, merge `5219cc3`, verified live at width 1133 and 375 |
 | [#4881](https://github.com/iscasasola/setnayan-platform/pull/4881) | the **destination pages** say what the menus say | **MERGED**, merge `73a89dc`, verified live on all 8 pages |
-| [#4885](https://github.com/iscasasola/setnayan-platform/pull/4885) | a blocked device is **told how to unblock**, per device — on the admin/couple toggle **and** the vendor card | ⏳ **OPEN, auto-merge armed** — see § 2 |
+| [#4885](https://github.com/iscasasola/setnayan-platform/pull/4885) | a blocked device is **told how to unblock**, per device — on the admin/couple toggle **and** the vendor card | ✅ **MERGED** `2026-08-26T08:35:08Z`, all 15 checks green |
+| [#4887](https://github.com/iscasasola/setnayan-platform/pull/4887) | the vendor card's "Enable" button **actually enables** instead of pointing at a banner that may be hidden | ⏳ **OPEN, auto-merge armed** |
+
+✅ **UPDATE 2026-08-26, LATER SAME DAY — #4885 CONFIRMED MERGED, AND THE ONE REMAINING GAP IT LEFT
+IS NOW #4887.** #4885's "cannot enable at all" fix only reached the DENIED branch (it told a
+blocked vendor how to unblock). The DEFAULT branch — permission never asked yet — still said
+*"Allow via banner below"*, and `PushNotificationRegistrar` hides that banner for **30 days** once
+a vendor dismisses it once. A vendor who dismissed the banner and later opened Settings meaning to
+turn push on found a sentence pointing at nothing on screen. #4887 makes the card enable inline
+(same `registerPushToken('web')` path the registrar uses) so the button always does something,
+regardless of the banner's own state. `deactivateAllPushTokens` (disable) is unchanged — still the
+reason this card is not simply replaced by the shared admin/couple toggle.
+🔑 **`ADMIN_NAV_ALIASES` was checked against #4874/#4881 and needs nothing added** — both renames
+that reach the search index (`overview`→"Today", `app-performance`→"Numbers") already have alias
+entries, added in the same 2026-08-26 session that made the renames.
+`the-menu-name-has-one-source.test.ts` passes its "renamed item keeps its old name findable"
+assertion (9/9). The bottom-nav-only caption changes ("Accounts"→"People", the retired
+"Performance" tab) do not feed the search index at all — `admin-destinations.ts` never reads
+`NAV_SLOT_DEFAULTS` — so there is no alias gap to fill for them.
 
 🚨 **THE VENDOR CARD WAS THE WORST OF THE THREE AND WAS FOUND ONLY BY A COMPILER ERROR.** It is a
 *different component* from the shared toggle. It **cannot enable at all** — it defers to a banner
@@ -63,18 +81,26 @@ screen-reader names. All worth fixing — but say which is which.
 
 ## 2 · IN FLIGHT — the only thing not finished
 
-### ⏳ PR [#4885](https://github.com/iscasasola/setnayan-platform/pull/4885) — "the switch says how to unblock"
-**OPEN, auto-merge armed, gated on CI's `typecheck + lint` job.** Local typecheck was not run to
-completion (it exceeded the session's foreground budget twice); **CI is the authority and
-auto-merge will not fire without it.**
+### ✅ PR [#4885](https://github.com/iscasasola/setnayan-platform/pull/4885) — "the switch says how to unblock" — MERGED
+Confirmed `2026-08-26T08:35:08Z`, all 15 checks (typecheck+lint, e2e, lighthouse, prod build,
+bundle size, secret scan, 8 admin lints, migration guard) SUCCESS. **Do not re-verify this one —
+it is done.**
 
-**To finish:**
-1. `gh pr view 4885 --json state,mergedAt,statusCheckRollup` — confirm it merged and no check failed.
+### ⏳ PR [#4887](https://github.com/iscasasola/setnayan-platform/pull/4887) — "the push card can enable itself"
+**OPEN, auto-merge armed.** Closes the one thing #4885 left open (see § 1 update above): the
+vendor card's DEFAULT-state "Enable" pointed at a banner that hides itself for 30 days once
+dismissed. Now enables inline. Local `tsc --noEmit` ran clean (0 errors) and both test files it
+touches pass in full (9/9, 11/11) — nothing here needs re-checking beyond confirming the merge.
+
+**To finish (#4887):**
+1. `gh pr view 4887 --json state,mergedAt,statusCheckRollup` — confirm it merged and no check failed.
 2. Confirm production serves it: `curl -s https://www.setnayan.com/api/health` and check the merge
    commit is an **ancestor** of the served version (other sessions merge constantly, so the served
    commit will not equal yours).
-3. Then verify the thing itself, on a **blocked** device: open **Set up → Notifications**
-   (`/admin/settings?tab=notifications`) and confirm numbered steps appear naming your browser.
+3. Then verify the thing itself, in **`/vendor-dashboard/notifications`** on a device that has
+   dismissed the layout's push banner (or never seen it): confirm an "Enable" button appears and
+   pressing it opens the browser's own permission dialog, rather than a sentence with nothing to
+   press.
 
 **What it does:** `Notification.requestPermission()` opens a dialog **once per device**. After a
 denial it resolves to `'denied'` instantly with **no prompt, ever again**, and no code can re-open
