@@ -12,24 +12,29 @@
 
 | what | branch / PR | state at time of writing |
 |---|---|---|
-| The meter fix + the capturer trigger | [#4879](https://github.com/iscasasola/setnayan-platform/pull/4879) `claude/who-took-this-photo` | ✅ **MERGED 2026-08-26** — merge commit `7f6abfb59`. ⏳ Deploy had NOT caught up when this line was written (prod served `2bb67d5`). **A merge is not a ship** — check `/api/health`, then verify the two migrations applied **BY THE OBJECT** (§ 6), never by `schema_migrations`. |
+| The meter fix + the capturer trigger | [#4879](https://github.com/iscasasola/setnayan-platform/pull/4879) | ✅ **MERGED, SHIPPED AND VERIFIED IN PRODUCTION BY THE OBJECT** — see below. Nothing left to do. |
 | The 16-rung ladder | `claude/the-papic-ladder-is-repriced` | **COMMITTED, NOT PUSHED.** Waiting on the full db + unit suites; `tsc` 0, 18 lints pass, prod dry-run clean |
 
-### ⏭ THE FIRST THING TO DO: PROVE #4879 ACTUALLY LANDED IN THE DATABASE
+### ✅ #4879 IS VERIFIED IN PRODUCTION — measured on the live objects, not inferred from the merge
 
-Merging is not applying. Run the per-column privilege query in § 6 — **zero is the answer** — and
-confirm the trigger exists and the 14 production photos now carry a capturer:
+`/api/health` reported `7f6abfb`, the merge commit itself, so the deploy is the one carrying it.
+Then the database was asked directly:
 
-```sql
-SELECT count(*) FILTER (WHERE captured_by_person_id IS NOT NULL) AS credited,
-       count(*) AS photos,
-       (SELECT count(*) FROM pg_trigger
-         WHERE tgrelid='public.papic_photos'::regclass AND tgname='stamp_capturer_person') AS trigger_exists
-  FROM public.papic_photos;
-```
+| | measured |
+|---|---|
+| columns a browser role can INSERT into `papic_photos` | **0** (was 39) |
+| columns `authenticated` may still UPDATE | **39** — the camera can still finish a clip |
+| policies admitting INSERT | **0** |
+| policies present | the 7 narrow ones, no `FOR ALL` |
+| `stamp_capturer_person` trigger | **1** |
+| photos · credited | **14 · 14** |
+| `anon` may EXECUTE the trigger function | **false** |
 
-**Expected: 14 credited of 14, trigger 1.** Anything else means the migration did not apply and the
-meter is still advisory — say so plainly rather than assuming the merge did it.
+So the meter is now the only door, and the column that had **never held a value in production** holds
+one on every row that exists.
+
+⛔ **This does NOT make the credit invariant atomic** — see § 1. Reserve and insert are still two
+steps.
 
 ⏭ **If the ladder branch is still unpushed:** re-run `pnpm test:db` and `pnpm test:unit` in
 `apps/web`, then push and open the PR. Its changelog fragment
