@@ -68,7 +68,10 @@ committed docs on purpose.
 > ### ▶ ACTIVE 2026-08-26 — THE SUPPLIER'S ROOM IN THE EVENT HUB (PLANNED, NOT BUILT)
 > **Contract: [`WHATS_NEXT_Vendor_Hub_And_Answers_2026-08-26.md`](WHATS_NEXT_Vendor_Hub_And_Answers_2026-08-26.md)**
 > — **rewritten 2026-08-26 as ONE plan**, nine pieces, every correction folded into the piece it
-> affects. **Drawn:** [`prototypes/vendor_room_in_the_hub_2026-08-26.html`](prototypes/vendor_room_in_the_hub_2026-08-26.html).
+> affects, and it **opens with a one-page version** (the owner: *"we just want it to be easier to
+> understood and not overwhelming"*). **Drawn:**
+> [`prototypes/vendor_room_in_the_hub_2026-08-26.html`](prototypes/vendor_room_in_the_hub_2026-08-26.html)
+> · **design BINDING, port it:** [`Vendor_Room_Design_2026-08-26.md`](Vendor_Room_Design_2026-08-26.md).
 > Owner: *"event hub is the same on the day for vendors plus their special features. since
 > everything will be communicated there."* Then: **_"do not start building… just plan for now."_**
 > ⛔ **HONOUR THAT.** ⚖ Also ruled: **a teammate reaches ONLY the events they were given.**

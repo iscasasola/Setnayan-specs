@@ -2,7 +2,9 @@
 
 > **Owner, 2026-08-26: _"do not start building. we will do this on what's next. just plan for now."_**
 > **NOTHING IN § 3 IS BUILT.** Everything is measured against `origin/main` (`de0c557e3`).
-> The room is DRAWN: [`prototypes/vendor_room_in_the_hub_2026-08-26.html`](prototypes/vendor_room_in_the_hub_2026-08-26.html).
+> The room is DRAWN: [`prototypes/vendor_room_in_the_hub_2026-08-26.html`](prototypes/vendor_room_in_the_hub_2026-08-26.html)
+> and its design is BINDING: [`Vendor_Room_Design_2026-08-26.md`](Vendor_Room_Design_2026-08-26.md) —
+> **port it, do not redraw it.**
 > ⚠ **This file was rewritten as ONE plan on 2026-08-26.** The earlier version recorded its
 > corrections BESIDE the steps they corrected, which is the read-from-the-middle failure this
 > project keeps paying for. **Every correction is now inside the step it affects.**

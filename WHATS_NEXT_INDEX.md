@@ -3,7 +3,8 @@
 > ### ▶▶▶▶▶▶▶▶▶ NEWEST — THE SUPPLIER'S ROOM IN THE EVENT HUB (2026-08-26 · PLAN ONLY)
 > **[`WHATS_NEXT_Vendor_Hub_And_Answers_2026-08-26.md`](WHATS_NEXT_Vendor_Hub_And_Answers_2026-08-26.md)**
 > — nine pieces, smallest first, every correction folded into the piece it affects.
-> **Drawn:** [`prototypes/vendor_room_in_the_hub_2026-08-26.html`](prototypes/vendor_room_in_the_hub_2026-08-26.html).
+> **Drawn:** [`prototypes/vendor_room_in_the_hub_2026-08-26.html`](prototypes/vendor_room_in_the_hub_2026-08-26.html)
+> · **design (BINDING, port it):** [`Vendor_Room_Design_2026-08-26.md`](Vendor_Room_Design_2026-08-26.md).
 > Owner: *"do not start building. we will do this on what's next. just plan for now."* ⛔ **Honour it.**
 > ⚖ Owner rulings to obey: *"event hub is the same on the day for vendors plus their special
 > features"* · *"the ones they were given"* (a teammate reaches only the events granted to them).
