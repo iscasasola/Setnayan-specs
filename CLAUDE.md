@@ -325,6 +325,19 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > the panel takes focus on open, so the first keystroke lands in a box about to be replaced.
 > ⚖ **Desktop only**, per the 2026-08-26 phone ruling (this box opens editing doors).
 >
+> 🔘 **AND THE CREATE BUTTON NOW FOLLOWS THE SURFACE — [#4880](https://github.com/iscasasola/setnayan-platform/pull/4880), merged and SERVED.**
+> Owner: *"this needs to change depending on where they are. Home - Create Event. Shop - Create
+> Service Card. HQ - Create what?"* Measured: **ONE hardcoded `+ Create event` on all six
+> signed-in trees**, so **a supplier in their own Shop was one press from a couple's wedding
+> wizard.** `createSlot` has THREE states and the middle one is the point: `undefined` keeps
+> today's button · a node replaces it · `null` means this surface makes nothing. A `??` fallback
+> would send HQ's `null` back to the wizard.
+> ⚖ **HQ MAKES NOTHING, FROM THE RECORD:** of **65** admin actions ever logged only **NINE**
+> created anything; **31 were price edits.** Its primary action is the overdue pill already there.
+> 🔒 The word **CREATE** stays (a rename reads as a deletion — owner 2026-08-15) and
+> `.fd-btn-gold` is never re-styled per surface. A guard pins that **exactly two** surfaces
+> override the slot.
+>
 > ⏭ **OWNER ACTION, the only one: set `ANTHROPIC_API_KEY` in Vercel.** Without it the box says
 > the assistant is not switched on and everything else still works.
 > 🚨 **AND IT FOUND A REPO-WIDE BLIND SPOT: `relrowsecurity` IS VACUOUS IN THE PGlite REPLAY** —
