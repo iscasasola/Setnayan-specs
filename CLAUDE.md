@@ -2271,15 +2271,17 @@ When code lands ahead of a spec update, the repo appends a `[PENDING]` line to `
 one shared pot; the host can set some aside for a single camera's QR, where nobody else can spend
 them, and take unspent ones back. **Cameras are free and unlimited.**
 
-**Ladder — RECUT 2026-08-26 to a SCROLLABLE list of 17 rungs, priced off ₱1 = 1 credit.** The
+**Ladder — RECUT 2026-08-26 to a SCROLLABLE list of 16 rungs, priced off ₱1 = 1 credit.** The
 regular price IS the credit count; what you pay is a bundle discount off it, deepening as the
 number grows. **50 free on every event, on top, and every rung repeatable.**
 `100 ₱50 · 200 ₱100 · 300 ₱150 · 400 ₱200 · 500 ₱250 · 1,000 ₱500 · 2,000 ₱1,000 · 3,000 ₱1,200 ·
 4,000 ₱1,600 · 5,000 ₱2,000 · 6,000 ₱2,400 · 7,000 ₱2,800 · 10,000 ₱3,200 · 20,000 ₱5,000 ·
-30,000 ₱7,500 · 40,000 ₱10,000 · 50,000 ₱10,000` (50% → 80% off).
+30,000 ₱7,500 · 50,000 ₱10,000` (50% → 80% off).
 ⚠ **NEVER re-type these** — `platform_retail_catalog_v2` is the source and
-`papic-rungs-are-fundable.db.test.ts` pins the set. 🔴 **40,000 and 50,000 are both ₱10,000, so the
-40,000 rung can never be anybody's best choice** — flagged to the owner, built as given, his call.
+`papic-rungs-are-fundable.db.test.ts` pins the set. ⚖ **40,000 is deliberately ABSENT:** his first
+table had it at ₱10,000, the same price as 50,000, so nobody could rationally choose it. Surfaced
+rather than silently corrected, and he removed it — *"remove the 40,000"*. **Do not re-add it
+without a price of its own.**
 🚨 **A rung is THREE places:** the catalog row, the tier row, AND a line in `sku-activation.ts` —
 a sellable rung missing from that map takes the money and grants **zero** shots, silently.
 
