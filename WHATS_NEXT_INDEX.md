@@ -1,5 +1,47 @@
 # WHATS_NEXT_INDEX — master compilation for the "run all what's-next" session (2026-07-18)
 
+> ### ▶▶▶▶▶▶▶▶▶ NEWEST — MANAGING PRICES: THE ADMIN SCREEN, AND THE LADDER THAT SHIPPED (2026-08-26)
+> **[`WHATS_NEXT_Managing_Prices_2026-08-26.md`](WHATS_NEXT_Managing_Prices_2026-08-26.md)**
+> Written at the owner's instruction: *"save all unfinished to what's next now."*
+> Owner: *"There are a lot here that is already retired and we want to improve how to manage the
+> prices here."*
+>
+> 🚨 **READ THIS BEFORE THE BLOCK BELOW — TWO SESSIONS BUILT THE SAME LADDER.** The entry below
+> says its 16-rung ladder branch was **"committed but not pushed."** This session, not knowing
+> that, measured the ladder as unbuilt (it was: nothing on `origin/main`, no branch, no PR) and
+> shipped it as **PR [#4882](https://github.com/iscasasola/setnayan-platform/pull/4882)** —
+> migration `20271170435163` + 10 activation hooks + the guard rewrite, auto-merge armed.
+> ⛔ **DO NOT PUSH THE OTHER BRANCH.** Two migrations writing the same catalog rows is a mess even
+> though both are idempotent. Verify with `gh pr view 4882 --json state,mergedAt`, then delete the
+> unpushed branch or rebase whatever it has that #4882 lacks.
+> ⚠ **`apps/web/tests/db/papic-ladder.expected.ts` — which the block below calls "the ONE pinned
+> expectation" — DOES NOT EXIST ANYWHERE IN THE REPO.** #4882 pins the 16-rung ladder inline in
+> `papic-rungs-are-fundable.db.test.ts` instead. If that shared file ever lands, collapse the two;
+> do not leave both.
+> 🔑 **THE LESSON, TWICE IN ONE DAY: A DECISION LOG IS NOT EVIDENCE THAT CODE EXISTS.** The
+> `DECISION_LOG.md` row for this ladder said **"Built as given"** while nothing was built, and this
+> register named a test file that was never written. **Grep for the object.**
+>
+> 🔴 **THE LIVE DEFECT ON THE PRICE SCREEN — fix first.** Every "Save all changes" **blanks the
+> description of every row whose ⓘ was closed**, because the textarea is not in the DOM and the
+> save reads the absent field as empty. **Measured: 32 of the last 34 saved rows lost their note, 0
+> kept one; 32 of 58 customer rows have none left.** The fix is by SHAPE — a per-row card that
+> submits only itself — not a patch.
+> 🔴 **Seven price fields need an engineer**, including a **LIVE, CHARGED ₱1,499 sign-up price**.
+> ✅ **Price history already exists** in the audit log and is simply never drawn — do NOT build a table.
+> 🧹 **The retired pile:** 57 of 91 rows. Of the 45 retired customer rows, 22 are "wired" and 23
+> free — **but "pointed at" is NOT "load-bearing"**: all 13 Papic ones are exactly the rows still
+> titled *Papic Pool / One / Mini / Ltd / Max*, and their wiring is inert (the row everyone calls
+> load-bearing is read `AND is_active`, is inactive, and its stored value equals the hardcoded
+> fallback). **A removability check must ask "has this DONE anything", not only "does anything
+> point at it."**
+> 📐 **The design is DONE and unbuilt** — clickable before/after prototype with real prod data:
+> [`prototypes/admin_pricing_manager_2026-08-26.html`](prototypes/admin_pricing_manager_2026-08-26.html).
+> **"The sell sheet, and the back room"**: open on the 34 things you can sell today; everything
+> retired moves to a room that measures itself toward empty.
+> 🪤 **Gitleaks reads a one-line `IN ('A','B','C','D')` of SKU codes as four leaked API keys.** Split
+> one per line — **a baseline is a bill, not a decision.**
+
 > ### ▶▶▶▶▶▶▶▶▶ NEWEST — PAPIC: THE METER, THE LADDER, AND WHAT UPLOADS LEFT OPEN (2026-08-26)
 > **[`WHATS_NEXT_Papic_Meter_Ladder_And_Uploads_2026-08-26.md`](WHATS_NEXT_Papic_Meter_Ladder_And_Uploads_2026-08-26.md)**
 > Written at the owner's instruction: *"save all unfinished to what's next now."*
