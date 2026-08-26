@@ -65,105 +65,61 @@ committed docs on purpose.
 
 ## 🚦 ACTIVE WORK — READ THIS BEFORE ANYTHING ELSE (updated 2026-08-01)
 
-> ### ▶ ACTIVE 2026-08-26 — THE EVENT HUB IS A SUPPLIER'S ON THE DAY (PLANNED, NOT BUILT)
-> **Contract: [`WHATS_NEXT_Vendor_Hub_And_Answers_2026-08-26.md`](WHATS_NEXT_Vendor_Hub_And_Answers_2026-08-26.md).**
+> ### ▶ ACTIVE 2026-08-26 — THE SUPPLIER'S ROOM IN THE EVENT HUB (PLANNED, NOT BUILT)
+> **Contract: [`WHATS_NEXT_Vendor_Hub_And_Answers_2026-08-26.md`](WHATS_NEXT_Vendor_Hub_And_Answers_2026-08-26.md)**
+> — **rewritten 2026-08-26 as ONE plan**, nine pieces, every correction folded into the piece it
+> affects. **Drawn:** [`prototypes/vendor_room_in_the_hub_2026-08-26.html`](prototypes/vendor_room_in_the_hub_2026-08-26.html).
 > Owner: *"event hub is the same on the day for vendors plus their special features. since
-> everything will be communicated there."* Then: **_"do not start building. we will do this on
-> what's next. just plan for now."_** ⛔ **HONOUR THAT — the nine slices are a PLAN.**
-> 📖 **Read § 3.4 BEFORE § 3.2.** Three slices are wrong as written; the corrections are the
-> valuable part.
+> everything will be communicated there."* Then: **_"do not start building… just plan for now."_**
+> ⛔ **HONOUR THAT.** ⚖ Also ruled: **a teammate reaches ONLY the events they were given.**
 >
-> ✅ **ONE THING SHIPPED — do NOT rebuild it.** The shop-dashboard re-sort, PR
+> 🚨 **PIECE 4 IS A LIVE DISCLOSURE AND HAS NOTHING TO DO WITH SUPPLIERS.**
+> `lib/slug-access.ts:170-195` selects `member_type` and **never compares it**, returning
+> `Boolean(memberRow)` — so **any signed-in event member, including a guest who merely scanned the
+> event QR, is treated as a HOST.** They walk into every private sub-page, and
+> `who-can-see-your-story.ts:110-113` returns true for a host **before** it tests the audience, so
+> **they can read the couple's unfinished keepsake story months before it is published.**
+> 🔑 **This is the exact bug its twin `app/[slug]/_lib/host-scope.ts` was written to kill — the twin
+> was fixed and pinned; this clone never inherited it.** *A clone inherits the bug its twin fixed,
+> third instance.* ⚠ **Narrowing it ALONE breaks people:** the shared gate has **no seat-holder arm
+> for `private`**, which the over-wide host check was masking — a seat-holder whose 60-day cookie
+> expired would start being bounced off all seven sub-pages. **Both halves ship in one commit.**
+>
+> 🚨 **AND "THE COUPLE" IS ON PUBLIC PAGES RIGHT NOW** — twelve rendered strings in four files,
+> counted not estimated, incl. **nine in the join door and two of them in the SIGNED-OUT arm** a
+> QR-scanning guest actually lands in. **A funeral's gift page says *"help the family"* in one line
+> and *"the couple's account"* three lines below.** 🔒 **The funeral noun is `family`, never `host`.**
+> 🪤 **And the guard that should catch it matches its exemption list by BARE BASENAME**, so
+> `'page.tsx'` alone exempts 11 files: **36 of 127 files — 28% of that tree — are exempt, and a room
+> shipping a `page.tsx` would be born unguarded.** Making it exact produces **zero new offenders**.
+>
+> ✅ **SHIPPED, do NOT rebuild:** the shop-dashboard re-sort, PR
 > [#4863](https://github.com/iscasasola/setnayan-platform/pull/4863), **MERGED 2026-08-25T21:22Z**
-> (verified by `gh pr view`, not by reading; re-verify anyway — this file has been wrong about a
-> PR's state four times): **Overview → Today** · My Customers ahead of My Shop · **Contracts + Proposals into My
-> Customers** · **services opens FIRST on My Shop** · the 14 tools on **three named shelves** ·
-> "(BEO)" out of the menu. **Same five keys, nothing deleted, every href byte-identical.**
-> 🚨 **TWO SURFACES WERE ALREADY IN TWO PLACES AT ONCE** — the phone bar lit **Customers** for
-> `/contracts` and `/proposals` while the laptop rendered them under **My Shop**. Ended, not
-> started. ⚠ **The rename registry's LABEL WINS over the code's**, so a half-rename shows one word
-> on a fresh deploy and another on a failed read; a derived guard with a floor of five now pins it.
+> (verified by `gh pr view`): Overview → **Today** · Customers ahead of Shop · Contracts + Proposals
+> into Customers · **services opens first** · 14 tools on three shelves · "(BEO)" out of the menu.
 >
-> 🔑 **THE RULING IS NOT A REVERSAL — it is the half never finished.** His own 2026-08-16 Event Hub
-> lock already names the audience as *"the guests, **vendors**, etc."* What ships gives a booked
-> supplier a one-line strip pointing them **AWAY**, and it **has never rendered for anybody**.
-> ⛔ **Do NOT reopen the Event Hub vocabulary lock** — three words, three things, settled.
+> 🔒 **THE RULE FOR THE ROOM, the most important line in the plan:** `/{slug}` reads with the
+> **service role**, so every RLS rule keeping a supplier out of the guest list and the private
+> schedule is **INERT there**. *Authorization* reads may use the service role scoped by an id
+> resolved from the session; **event content NEVER does.** ⚠ And the booked-supplier schedule policy
+> has **no public/private filter**, so the room would render private cues at a public address —
+> no-index, redirect, and a test that fetches it anonymously.
+> ⛔ **A bare team-membership union looks equivalent, is shorter, and silently retires per-event
+> grants — which the owner has now ruled against. Do not write one.**
 >
-> 🚨 **THREE FINDINGS BREAK THE PLAN'S OWN HEADLINE** (7 mappers · 17 claims refuted · then a
-> completeness critic. **The citations were accurate; the COVERAGE was not** — that distinction is
-> the lesson):
-> 1. **THE ROOM HAS NO DOOR.** Grepped: **no supplier surface anywhere reads or renders a couple's
->    event slug.** A supplier cannot reach a client's event page from inside Setnayan at all, so
->    *"opens the couple's address"* is delivered by **no slice**.
-> 2. **A GUARD THE PLAN PRICED IS ACTUALLY A HOLE.** The guard stopping guest copy saying *"the
->    couple"* at a wake **scans one directory**; the room's couple-worded strings live in the
->    components the plan says to REUSE. **Imported files are not in the scanned set** ⇒ *"the
->    couple"* at a funeral, every check green.
-> 3. **CONSOLIDATION STRANDS THE HIRED NIGHT CREW** — a third population (grantees) deferred, never
->    added, then redirected into a room that refuses them. That path **structurally needs a
->    privileged read**, so the plan's own admin-client rule **forbids a slice it also promises.**
->
-> 🔒 **THE MOST IMPORTANT LINE:** `/{slug}` reads with the **service role**, so every RLS rule
-> keeping a supplier out of the guest list and the private schedule is **INERT there**. Event data
-> must come from `get_vendor_event_brief` or RLS-bound reads under the supplier's own session.
-> ⚠ And `event_schedule_blocks_booked_vendor_read` has **no public/private filter** — the room
-> would render, at a public address, content withheld from anonymous readers.
->
-> 🚨 **A LIVE DEFECT WITH NO FLAG:** `resolveVendorCapability` grants on a **LINK, not a booking**,
-> and `respond_vendor_proposal` stamps that link at `'shortlisted'` ungated ⇒ a shortlisted
-> supplier is told *"You are booked here"* **and is then refused by the page the strip links to.**
-> Its test only ever feeds `'contracted'` or `null` — *a test that never supplies the dangerous
-> value cannot fail on it.*
->
-> ⏭ **THE ANSWERS DESK is the cheap, independent win.** **SIXTEEN kinds, not fourteen** (three
-> totals were in circulation), and two were missing from every map: a **couple-proposed meeting**
-> (it already emits *"confirm or propose a new time"*) and **an unanswered message in an accepted
-> thread** — the commonest answer a supplier owes, and the thing we publish as their reply speed.
-> 🚨 **A ONE-STAR review can NEVER reach the desk** — the filter is five-stars-and-no-reply.
-> ⛔ **Four rows must not exist until the answer works:** the waitlist's *"Pick this couple"*
-> **does nothing and reports success** (RLS-bound client on an owner-only policy) · a crew shift
-> **cannot be posted, seen or accepted by a non-admin** · **nobody can ask for a song** · a payment
-> claim **has no "no"** and cannot be undone.
->
-> 🔴 **FIVE OWNER DECISIONS (§ 4)** — loudest: *may a supplier read the couple's private
-> run-of-show notes at the couple's own **public** address?* ⛔ **A sixth was retired before it
-> reached him:** the Papic route's own header already settled it — *"THE SHUTTER IS DAY-BOUND.
-> LOOKING BACK IS NOT"* — and the plan had **both re-asked it and written the defect it settled
-> into the new route.**
->
-> 🔬 **THEN THE CRITIC WAS ATTACKED TOO — two of its gaps SHRANK, two GREW, and three sweeps over
-> ground nobody had covered found SIXTEEN more things (§ 3.7–§ 3.9).**
-> ✅ **"The room has no door" was a search that could not match** — two supplier screens already
-> read a couple's event address and link straight to it. **Precedent to copy, not a mechanism to
-> invent.** ✅ **"The night crew gets stranded" is REFUTED both halves** — everyone grantable is
-> already a teammate, so the teammate slice covers them, **and the admin-client rule does not have
-> to be argued after all.** ⚠ But the risk runs the other way: **widening to the whole team retires
-> per-event access as a side effect** (new owner decision).
-> 🚨 **THE WEDDING-WORDS LEAK IS NOT A FUTURE COST — IT IS LIVE ON THE PUBLIC PAGE TODAY.** *"The
-> couple"* is hardcoded into the guest photo challenges and rendered on the Event Hub right now:
-> **74 seeded prompts**, plus a DB fallback for anybody with no bride-or-groom side. **A birthday,
-> graduation or funeral guest reads it this minute.** **182 more lines** sit in borrowed modules
-> the guard cannot see, and its exemption list waves through **16 files by filename — including the
-> one rendering the live instance.**
-> 🚨 **AND THE THREE THAT BREAK THE BUILD:** (1) **a supplier's phone can NEVER be reached and
-> their screen says it can** — the console writes one store, the sender reads another, and the
-> vendor sender is off; (2) **nothing anywhere says "your event is today"**, and this platform is
-> cron-free so it needs a trigger, not a schedule; (3) **a supplier booked the NEW way gets no On
-> the Day screen EVER** — every day-of screen resolves from a schedule reservation the lock
-> handshake's own definition says it never creates. **The room's gate inherits that.**
-> ⏭ **§ 3.9 IS THE ONLY LIST THAT MATTERS: SIX UNKNOWNS that must close before anybody builds.**
-> ✅ **The answers desk touches NONE of them and can start now** — it is what the owner actually
-> complained about.
-> 🔴 **SEVEN owner decisions now, not five.** Two new: *does a teammate reach every booked event or
-> only the ones they were given?* and *who at a shop gets told?* (almost everything reaches one
-> account; **a move to remove a co-owner reaches nobody at all**).
-> 🪤 **Traps paid for this session:** `npx tsc` **aborts at exit 134 while printing `errors=0`**
-> (the repo script sets `--max-old-space-size=7168` — *print the exit code beside the error
-> count*) · under `tsx --test` an `@/lib/…` import returns a module with **empty named exports**,
-> so a new guard's loop ran zero times and **reported a pass** · a single `deepEqual` pinning an
-> owner-locked SET and a re-cuttable ORDER together makes a legitimate re-order read as a lock
-> being broken · **another session moved `origin/main` three times in one hour** and the branch
-> went CONFLICTING on a generated file.
+> ⏭ **THE ANSWERS DESK is the cheap independent win and can start now** — **SIXTEEN kinds, six
+> doors**, while we publish every shop's reply speed publicly. ⛔ **Four rows must not exist until
+> the answer works:** the waitlist pick **does nothing and reports success** · a crew shift **cannot
+> be posted, seen or accepted by a non-admin** · **nobody can ask for a song** · a payment claim
+> **has no "no"**. 🚨 **A ONE-STAR review can never reach the desk** (the filter is five-stars).
+> 🔴 **NINE owner decisions in § 7** — loudest: *may a supplier read the couple's private
+> run-of-show notes at a **public** address?* and *may we email a supplier at an address they never
+> gave us?* ⛔ One was **retired before it reached him** — the photo route's own header already
+> settled whether the room closes at midnight.
+> 🪤 **Traps paid for:** a **generated file's merge conflict has no correct side** (regenerate from
+> the merged tree — this cost a CI run) · `npx tsc` **aborts at 134 while printing `errors=0`** ·
+> under `tsx --test` an `@/lib/…` import can return **empty named exports**, so a guard ran zero
+> checks and **reported a pass** · **another session moved `origin/main` three times in one hour.**
 
 > ### ▶ ACTIVE 2026-08-26 — PAPIC IS THE EVENT'S ONE MEDIA LIBRARY (purpose LOCKED)
 >
