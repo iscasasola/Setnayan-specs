@@ -711,8 +711,14 @@ owner decision 5 to a type call.
    cron. **This is the plan's headline and it currently has no delivery layer at all.**
 3. **Move the booked-supplier admission into the SHARED gate.** It lives inside one page today.
    Until it moves, every new room repeats the silent bounce — **including the one being built.**
-4. **Decide whether a teammate reaches every booked event, or only the ones they were granted.**
-   The moment team access widens, **the per-event grant stops meaning anything.**
+4. ✅ **CLOSED 2026-08-26 — owner: _"the ones they were given."_** A teammate reaches **only the
+   events they were specifically granted.** ⇒ **the room's gate is: the shop is booked AND (the
+   caller manages the shop OR holds a grant for THIS event).** Admin runs the store and reaches
+   all of it; **agent and viewer reach only what they were given.**
+   ⚠ **This CORRECTS slice S2 for the room.** The team union is still right for identity parity —
+   three objects answer *"who is this shop's crew"* three different ways — **but parity of IDENTITY
+   must not become parity of REACH.** The per-event grant is UNIQUE per event precisely so a night
+   crew hired for one wedding reaches that wedding and no other.
 5. **Fix the wedding-words leak that is already live, and extend the rule to borrowed files** —
    before the room mounts, not as part of it. **It is a bug on the public page now.**
 6. **Draw the room, including its phone chrome** — a room at the couple's address starts with no
@@ -762,9 +768,8 @@ now** — it touches none of the six, and it is the thing the owner actually com
 5. 🆕 **A working console — a clock, a cue bar, a floor log — rendered in the WEDDING LETTERING.**
    ✅ **NARROWED BY MEASUREMENT:** only the typefaces change at the new address — **the console's
    colours survive intact.** So this is a type call, not a re-skin.
-6. 🆕 **Should a teammate reach EVERY one of the shop's booked events, or only the ones they were
-   specifically given?** Opening the room to teams — which the plan requires — **quietly retires
-   per-event access.** Nobody asked for that; it would arrive as a side effect.
+6. ✅ **ANSWERED 2026-08-26 — _"the ones they were given."_** Recorded in `DECISION_LOG.md`; the
+   gate is in § 3.9 · 4. **Do not re-ask.**
 7. 🆕 **Who at a shop gets told?** Almost everything today reaches **one account**. A manager can
    see the work and is alerted to none of it — and **a move to remove a co-owner reaches nobody at
    all.**
