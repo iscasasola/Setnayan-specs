@@ -9,13 +9,13 @@
 > 🚨 **READ THIS BEFORE THE BLOCK BELOW — TWO SESSIONS BUILT THE SAME LADDER.** The entry below
 > says its 16-rung ladder branch was **"committed but not pushed."** This session, not knowing
 > that, measured the ladder as unbuilt (it was: nothing on `origin/main`, no branch, no PR) and
-> shipped it as **PR [#4882](https://github.com/iscasasola/setnayan-platform/pull/4882)** —
+> shipped it as **PR [#4883](https://github.com/iscasasola/setnayan-platform/pull/4883)** —
 > migration `20271170435163` + 10 activation hooks + the guard rewrite, auto-merge armed.
 > ⛔ **DO NOT PUSH THE OTHER BRANCH.** Two migrations writing the same catalog rows is a mess even
-> though both are idempotent. Verify with `gh pr view 4882 --json state,mergedAt`, then delete the
+> though both are idempotent. Verify with `gh pr view 4883 --json state,mergedAt`, then delete the
 > unpushed branch or rebase whatever it has that #4882 lacks.
 > ⚠ **`apps/web/tests/db/papic-ladder.expected.ts` — which the block below calls "the ONE pinned
-> expectation" — DOES NOT EXIST ANYWHERE IN THE REPO.** #4882 pins the 16-rung ladder inline in
+> expectation" — DOES NOT EXIST ANYWHERE IN THE REPO.** #4883 pins the 16-rung ladder inline in
 > `papic-rungs-are-fundable.db.test.ts` instead. If that shared file ever lands, collapse the two;
 > do not leave both.
 > 🔑 **THE LESSON, TWICE IN ONE DAY: A DECISION LOG IS NOT EVIDENCE THAT CODE EXISTS.** The

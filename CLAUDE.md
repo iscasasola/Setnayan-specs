@@ -2297,11 +2297,11 @@ mutates and the second then cannot tell "spent its last credit" from "never had 
 
 ⚠ Prices live in the catalog, never here.
 
-🛠 **THE BUILD HALF LANDED IN PR [#4882](https://github.com/iscasasola/setnayan-platform/pull/4882)
+🛠 **THE BUILD HALF LANDED IN PR [#4883](https://github.com/iscasasola/setnayan-platform/pull/4883)
 (migration `20271170435163`), NOT before it.** The 2026-08-26 DECISION_LOG row for this ladder says
 *"Built as given"* and that was **false when written** — measured the same day: no migration on
 `origin/main`, no branch carrying `PAPIC_GUEST_50K` outside one negative test fixture, no open PR.
-Verify with `gh pr view 4882 --json state,mergedAt` before trusting this line.
+Verify with `gh pr view 4883 --json state,mergedAt` before trusting this line.
 🔑 **A DECISION LOG IS NOT EVIDENCE THAT CODE EXISTS — grep for the object.** This is the same
 failure shape as the migration comments this file already warns about, one level up.
 

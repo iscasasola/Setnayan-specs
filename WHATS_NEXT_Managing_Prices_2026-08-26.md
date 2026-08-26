@@ -20,10 +20,10 @@ acting on anything here.
 
 | | |
 |---|---|
-| **PR [#4882](https://github.com/iscasasola/setnayan-platform/pull/4882)** | The 16-rung Papic ladder — migration `20271170435163` + 10 activation hooks + guard rewrite. **Auto-merge armed; was BLOCKED on a gitleaks false positive, fixed in `c869fcf1d`.** |
+| **PR [#4883](https://github.com/iscasasola/setnayan-platform/pull/4883)** | The 16-rung Papic ladder — migration `20271170435163` + 10 activation hooks + guard rewrite. Auto-merge armed. **Supersedes #4882 (CLOSED), which had the identical final tree** — gitleaks scans EVERY COMMIT in a PR, not the final tree, so correcting the file in a later commit left the scan red. Rebuilt as one clean commit off current `main` rather than rewriting history (`reset --soft` to squash is forbidden here — see [[feedback_never_soft_reset_onto_origin_main]]). |
 | **Prototype** | [`prototypes/admin_pricing_manager_2026-08-26.html`](prototypes/admin_pricing_manager_2026-08-26.html) — clickable, two panes (what ships now vs. the recommendation), real production data. **Design is done. The build is not.** |
 
-⚠ **Verify the PR state with `gh pr view 4882 --json state,mergedAt` before trusting the row above.**
+⚠ **Verify the PR state with `gh pr view 4883 --json state,mergedAt` before trusting the row above.**
 This register has been wrong about a PR's state five times.
 
 ---
