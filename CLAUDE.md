@@ -294,6 +294,17 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > ⚖ **The 2026-08-03 "Admin AI is removed as a concept" lock is SUPERSEDED by the owner's own
 > 2026-08-26 request — recorded in `DECISION_LOG.md`, not assumed.** The old objection is
 > answered on its terms: this is not a new screen, it is the ⌘K box already on every admin page.
+> 🔴 **AND THE LAST MILE WAS MISSED ONCE — [#4876](https://github.com/iscasasola/setnayan-platform/pull/4876), merged and SERVED.**
+> Owner, on the finished feature: ***"i do not see the AI searchbar."*** He was right and nothing
+> was broken: **all of it opened with ⌘K and nothing else** — no button, no label, no shortcut on
+> a phone — while the only VISIBLE box on the admin bar belonged to the **shared** palette, which
+> searches the person's own events. The console had an assistant and the control on screen opened
+> something else. ***A fix nobody can reach is no fix*** — third time. The shell now takes an
+> optional `searchSlot`; the admin hands in its own field and ⌘K still opens the same panel.
+> 🔑 **It LOOKS like a field and IS a button** — a real input means two inputs for one search, and
+> the panel takes focus on open, so the first keystroke lands in a box about to be replaced.
+> ⚖ **Desktop only**, per the 2026-08-26 phone ruling (this box opens editing doors).
+>
 > ⏭ **OWNER ACTION, the only one: set `ANTHROPIC_API_KEY` in Vercel.** Without it the box says
 > the assistant is not switched on and everything else still works.
 > 🚨 **AND IT FOUND A REPO-WIDE BLIND SPOT: `relrowsecurity` IS VACUOUS IN THE PGlite REPLAY** —
