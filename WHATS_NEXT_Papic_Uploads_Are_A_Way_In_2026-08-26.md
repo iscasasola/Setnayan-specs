@@ -175,14 +175,47 @@ project's registers have been wrong about a PR's state five times.
 | [#4868](https://github.com/iscasasola/setnayan-platform/pull/4868) | three silent failures in the credit meter | ✅ merged |
 | [#4872](https://github.com/iscasasola/setnayan-platform/pull/4872) | the couple's **Uploads camera** (index 150) | ⏳ open |
 
-### ⏭ WHAT IS LEFT — one coherent build
+### ✅ BOTH ARE BUILT — 2026-08-26. Do NOT rebuild them.
 
-**The file picker**, and the **toggle** that decides who other than the couple may use it. ⛔ **Do
-not build the toggle first**: a switch with nothing behind it is a gate with no handle, which is
-the shape this project keeps paying for.
+**The file picker** (#4875, with the toggle folded in via #4877 + #4878) and the **switch** for who
+may add photos by hand. The toggle was deliberately built SECOND: a switch with nothing behind it
+is a gate with no handle, which is the shape this project keeps paying for.
 
-The camera exists now, so the delta is: find the Uploads seat → claim it for the couple → render a
-picker that PUTs to the shipped `/api/upload` seat path and calls `recordSeatCapture`.
+⚖ **The switch defaults OPEN**, as a stated choice — Papic is the event's media library, a library
+that refuses the most obvious way to put something into it is closed against its own point, and an
+upload already costs a credit, so an open door is not a free one. ⚠ Its siblings default differently
+and that is not an inconsistency: `papic_guest_capture_early` defaults FALSE because it hands a
+capability to **other people**. 🔑 Today it governs the couple's own picker. **When guests or
+suppliers gain an upload path they read the same column — and the SERVER must read it then, not just
+the screen.** Hiding a control is not closing a door.
+
+### 🚨 THREE THINGS THAT NEARLY SHIPPED BROKEN, all caught before anyone met them
+
+1. 🔒 **THE METER WAS ADVICE.** `recordSeatCapture` refuses a capture eight ways and every one was
+   skippable: the row went in through the CLAIMER'S OWN SESSION while `authenticated` held INSERT
+   on `papic_photos`, so a POST to PostgREST with the public anon key spent no credits, checked no
+   length, ignored the window, the paid gate, the put-away gate and the geo control.
+   🔑 **`has_table_privilege(…,'INSERT')` ANSWERS FALSE** — the grant was on all 39 COLUMNS, so a
+   table-level audit reads the table as closed while it is open. ⚖ Until this week a claimer was a
+   friend handed a camera; the Uploads camera made **every host** one.
+   ⛔ Reserve and insert are STILL two steps — that leaks credits against **us**, not the meter.
+   **Do not read "service role" as "atomic".** 🔑 The repair is not a new idea:
+   `papic_record_guest_capture` already does gates + reserve + insert in ONE `SECURITY DEFINER`
+   function. **Copy the guest function's shape.**
+2. 🚨 **A NEW COLUMN ON `events` IS NOT DONE WHEN IT EXISTS.** That table revokes table-level SELECT
+   and re-grants a **per-column allowlist**, so a column with no `GRANT SELECT (col)` makes
+   PostgREST refuse the **WHOLE query** and every user-session read of `events` goes silently empty
+   — while `events_host` has an explicit projection computed from those grants and
+   `/dashboard/[eventId]/details` **THROWS** on a query error. Only `lint-events-column-grants`
+   catches it: **the db coverage tests structurally cannot**, because their `before()` re-applies
+   the lockdown and recomputes the allowlist over the new column.
+3. 🪤 **THE SWITCH SHIPPED GOVERNING NOTHING, past six of my own guard's rules.** The page read
+   `papic_uploads_open` off its **main event select, which never named the column** — always
+   `undefined`, `?? true` reported OPEN, and the picker rendered for a couple who had switched it
+   off. Column existed, control mounted, branch wired, save confirmed. **I guarded the branch and
+   not the source.** ⚠ Its fix is its OWN round trip on purpose: naming an unknown column in the
+   main select makes PostgREST refuse that query, and the page answers an unreadable event with
+   `notFound()` — a live celebration would render as missing.
 
 ### 🪤 THREE THINGS THE BUILD PLAN GOT WRONG — all caught against the live system
 
@@ -201,11 +234,21 @@ picker that PUTs to the shipped `/api/upload` seat path and calls `recordSeatCap
    from the studio render, after that page's couple check. 🔑 **The rule is the CALL SITE, not the
    function**, and `lib/the-uploads-camera-has-no-back-door.test.ts` is what holds it.
 
-### 🔒 AND THE INVARIANT IS STILL NOT ENFORCED AT THE DATABASE LAYER — say so honestly
+### ✅ THE UNMETERED DOOR IS CLOSED — but read what that does and does not mean
 
-#4865 closed the couple's unmetered insert door. **`papic_photos_claimer_own` still admits any
-insert from a live-seat claimer with no credit check** — and #4872 makes every host a claimer by
-design, so that door is now reachable by the couple again.
+**There are now ZERO browser-role doors into `papic_photos`.** INSERT is revoked from
+`authenticated` and `anon` at TABLE level (that is what drops the column grants), the claimer's
+`FOR ALL` policy is three verbs with no INSERT arm, and the capture row is written by the service
+role after the eight gates run.
+
+⛔ **It is still NOT atomic.** The reservation and the insert are two steps with an app-side unwind;
+a process that dies in the gap leaks the reserved credits. That errs against us rather than against
+the meter, which is the right direction to fail while it stands — but **do not claim "a photo
+cannot exist without a credit" until the `SECURITY DEFINER` record function exists.**
+
+~~#4865 closed the couple's unmetered insert door. `papic_photos_claimer_own` still admits any
+insert from a live-seat claimer with no credit check — and #4872 makes every host a claimer by
+design, so that door is now reachable by the couple again.~~
 
 🔑 **The real fix is ATOMICITY, not permission:** a `SECURITY DEFINER` record RPC that reserves the
 credit and inserts the row in ONE transaction, on the model of `papic_record_guest_capture`, with
@@ -225,12 +268,15 @@ that exists.**
    ruling about a supplier collecting guest photos
    (`isVendorPapicCaptureEnabled`, default off; the route 403s). Flipping it is
    a privacy decision, not an engineering one.
-3. **Nothing records who took a photo.** `papic_photos.captured_by_person_id`
-   has **zero writers** — verified by grepping every non-test file under `app/`
-   and `lib/`. So *"each person's own folder"* is not reading something we
-   already store; the uploader's identity has to be written down as part of the
-   upload build. Small, but real, and it must land WITH the upload or the folder
-   idea has nothing to key on.
+3. ✅ **CLOSED 2026-08-26 — `captured_by_person_id` HAS A WRITER NOW.** It was worse than
+   *"zero writers"*: measured in production, **14 photos · 14 carry a seat · 14 have a claimer whose
+   person row resolves right now · 0 carry the value.** The column has **never held a value at all**
+   — the 2026-05-23 backfill matched nothing because every photo postdates it. ⚠ **A BACKFILL IS A
+   POINT-IN-TIME ACT; never cite an old one as ongoing coverage.** Fixed with a trigger (the value
+   is a JOIN, not a decision, so it covers every capture path rather than the ones somebody
+   remembered) plus an idempotent re-backfill. ⏭ Named, not hidden: the Uploads camera is claimed by
+   ONE host, so a co-host is credited to the claimer — per-uploader credit is a different fact and
+   needs its own column.
 
 ---
 
