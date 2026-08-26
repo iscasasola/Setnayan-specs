@@ -610,11 +610,123 @@ it did not**, and each changes something a builder would otherwise get wrong:
 
 ---
 
-## 3.7 · 🛑 WHAT IS STILL NOT COVERED — the honest edge of this plan
+## 3.7 · 🔬 THE CRITIC WAS THEN ATTACKED TOO — two gaps shrank, two grew
 
-1. **The critic was never itself refuted.** Every mapper's finding was attacked by an independent
-   reader. **The critic's twelve gaps were not** — they are spot-checked by their own author and
-   nothing else. Treat § 3.4 as strong, not proven.
+Every mapper's finding was refuted by an independent reader. **The critic's twelve were not** — so
+four of the load-bearing ones were each handed to a skeptic told to refute them or show they were
+the wrong SIZE. **Two came back smaller. Two came back worse.**
+
+### ✅ SMALLER — "THE ROOM HAS NO DOOR" was a search that could not match
+
+**Two supplier screens already read a couple's event address and link straight to it** — the
+Stories screen links to the Event Hub itself, the Recaps screen to the couple's recap page. **So
+there is precedent to copy, not a mechanism to invent.**
+🔑 **The real gap is narrower and truer: those two doors only open AFTER the wedding, only for
+weddings, and only once the couple has published something.** The supplier's working screen
+*during the job* has no door. ✅ And the slugless-event worry is near-empty — **no path a customer
+can take creates one**, and both existing readers already skip them.
+*`vendor-dashboard/real-stories/page.tsx:109` · `vendor-dashboard/recaps/page.tsx:103` ·
+`lib/slugs.ts:29-69` returns a string on every branch.*
+
+### ✅ SMALLER — "THE HIRED NIGHT CREW GETS STRANDED" is REFUTED, both halves
+
+**Everybody the product can grant access to is already a member of that shop's team** — the grant
+screen only lists teammates — so the slice that admits teammates already covers them. And the
+supporting fears are refuted: a granted teammate **can** read their own shop's profile under
+ordinary permissions, and the brief **does** answer for them. **The rule the plan called "the
+single most important line" does not have to be argued after all.**
+🔴 **BUT THE RISK RUNS THE OTHER WAY INSTEAD:** widening access to the whole team **throws away
+the per-event scoping the grant exists for** — afterwards every teammate reaches every booked
+event. **That is a new owner decision (§ 4 · 6), not a fix.**
+*only writer `on-the-day/actions.ts:550-593` fed from `on-the-day/page.tsx:794-815` ·
+`20260821000000_vendor_role_aware_rls.sql:160-164` · `20270810694086_vendor_event_access_grants.sql:43`.*
+
+### 🚨 WORSE — THE WEDDING-WORDS LEAK IS NOT A FUTURE COST. IT IS LIVE, TODAY, ON THE PUBLIC PAGE
+
+The plan priced this as something the room would have to pay. **It is already bleeding.**
+*"The couple"* is hardcoded into the guest photo challenges and **rendered on the Event Hub right
+now** — **74 seeded prompts** carry it, and the database repeats the same fallback for anybody with
+no bride-or-groom side. **A birthday, graduation or funeral guest reads "the couple" this minute.**
+Under the guard's own rule there are **182 more such lines** in the modules the guest page borrows
+from, **none of which the guard can see** — and its exemption list waves through **sixteen files by
+filename, including the very file rendering the live one.**
+*`lib/papic-missions.ts:289,321-343` · `app/[slug]/_components/editorial/data.ts:24,2035` ·
+`20271125220401_papic_story_challenges.sql:163-167,182` · guard scope
+`app/[slug]/_lib/s13-is-finished.test.ts:31,77-85,96`.*
+
+### 🚨 WORSE — A THIRD MISSING ANSWER, AND IT IS THE WORST-SERVED OF ALL
+
+**A co-owner moving to demote or remove another owner of the same shop.** Fully built and votable.
+**It notifies nobody at all, and it never expires** — the only way to learn somebody has moved to
+strip you of your own shop is to open the team page.
+⚖ Two corrections in the plan's favour: an unanswered message in an accepted booking **does** raise
+the messages badge (**missing from the desk, not from the product**) and is **NOT** dragging the
+shop's published reply time down. And a **one-star review does reach the shop and can be replied
+to** — the desk simply filters it out, **a setting to reverse, not a feature to build**.
+*`20270401574089_vendor_org_multi_admin.sql:148-163` · `team/actions.ts:293-315` mounted at
+`team/page.tsx:198,208`, zero notification calls in either · median filter
+`lib/vendor-activity.ts:413-427` · desk filter `lib/vendor-overview.ts:322`.*
+
+---
+
+## 3.8 · 🚨 SIXTEEN THINGS NOBODY KNEW — found by sweeping ground no mapper covered
+
+Three sweeps went over what happens **before and after the event day**, **how a supplier is
+actually reached**, and **what any of this does on a phone**. Ranked by whether a person feels it.
+
+| # | What a person experiences | Mechanism |
+|---|---|---|
+| **1** | 🚨 **A supplier's phone can never be reached, and their screen says it can.** The console saves their phone into one store; the sender reads a different one — and the vendor sender is switched off and recorded as dormant. Their toggle reads *"On — you'll get an instant alert when a couple sends an inquiry."* | `lib/web-push.ts:52` reads `push_subscriptions`; `vendor-dashboard/actions/push-tokens.ts:71` writes `vendor_push_tokens` · copy at `notifications/push-toggle.tsx:66` |
+| **2** | 🚨 **Nothing anywhere says "your event is today."** No such notice exists and the day-of screens send none. The only thing carrying a call time is a button a coordinator must press, behind a setting off by default, **sent to whatever email the couple typed — never the supplier's account** | `lib/notification-emit.ts:17-20` · zero emits across the day-of trees · `day-of-broadcast.ts:126,151` |
+| **3** | **The only warning about an upcoming booking fires when the supplier opens the app.** The notice written for the supplier who is not paying attention is triggered by the supplier paying attention | `lib/vendor-email-triggers.ts:248` called only from `lib/ghosting.ts:171` |
+| **4** | 🚨 **A new booking enquiry sends no email at all** — the most valuable moment in the product is a badge inside an app they are not in, on a channel that (see 1) cannot reach their phone | `notification-emit.ts:22` vs the 35-item email list at `:62-172`, enquiry absent |
+| **5** | 🔴 **A supplier booked the NEW way gets no On the Day screen, ever.** Every day-of screen resolves from a schedule reservation the new booking handshake **states in its own definition that it never creates**. Between agreeing and the deposit there is no console, and **no screen says why.** ⚠ **This breaks the plan structurally — the room's gate inherits it** | `lib/vendor-schedule.ts:305-315` → `on-the-day/page.tsx:186-189` · `20271144258091_lock_handshake_slice_b.sql:749` |
+| **6** | **At midnight the supplier running the room loses it, mid-reception.** The couple's own desk deliberately stays open until 6am for exactly the Filipino reception that runs past midnight; the supplier's shuts on the calendar rollover with no warning — clock, scanner, running order, floor log, gone | `live/[eventId]/page.tsx:72,181-185` vs `lib/day-of-mode.ts:47-83` |
+| **7** | **A booked supplier is bounced off every sub-page of a private wedding.** They open the main page, then the floor plan, the recap, the seat finder and five more silently return them. **The rule that lets them in was written inside one page instead of the shared gate, so it does not travel** — and any new room copying the standard gate inherits the bounce | `lib/slug-access.ts:42-70` vs the inline admission at `app/[slug]/page.tsx:498-556`; 7 callers |
+| **8** | **For every wedding more than three months away, "You are booked here" is painted UNDERNEATH a full-screen film** — in the page, invisible and untappable, during exactly the months a supplier is working on the job | `vendor-doorway.tsx:35-38` (no layer) under `save-the-date-film.tsx:1758` (`fixed inset-0 z-[50]`) |
+| **9** | **A shop's staff are told nothing.** Almost every notice goes to the one owner account. The answers list is shop-wide, so a manager sees the work; the alert tray is person-wide, so their tray is permanently empty | 34 owner-only lookups; the single team fan-out is `delete-actions.ts:634` · tray scope `lib/notifications.ts:558` |
+| **10** | **Money arriving, and a booking being cancelled, are both in-app only** — each reaches the supplier as a badge and nothing else, **and the cancellation code's own comment claims the opposite** | `notification-emit.ts:95` vs `:21-35` · `vendors/actions.ts:3965` vs `:3991` |
+| **11** | **Two of the desk's own lanes can never fire.** The late-delivery card reads a state **nothing writes and the database has no permission to write**; the owner's ruled *"one reminder"* on a delete request **has no sender anywhere** | `vendor-overview.ts:736` · `deletion_request_nudge` declared 4×, emitted 0 |
+| **12** | **A supplier's own photographs turn into broken tiles when the retention sweep runs** — on their screen and in the couple's gallery, because neither was taught about the compressed copy. And their screen promises that a photo the couple hides disappears for them too; **the couple's control writes something else entirely** | `lib/papic-fullres-drop.ts:630-634` · `own-captures-strip.tsx:42-47,152-157` vs `vendor-visibility-actions.ts:62` |
+| **13** | **The morning after a wedding, the shop's screen reports zero work and a future launch** — clips and photos read 0 with dead links, the review card says *"not yet"*, and a wedding that already happened is labelled *"Launches on"* its own date | `on-the-day/page.tsx:255-308,563,571,595,838-842` |
+| **14** | **The one genuinely dangerous control has no time limit on the screen that offers it.** A booked coordinator can press *"start next"* on the couple's real running order **four months early or a week late**, writing into the timeline every day-of screen treats as truth — while the screen designed for that action is shut every day but one | `clients/[eventId]/page.tsx:2804` (`canAdvance` literal, no date test) · no date term in the RPC either |
+| **15** | **Two working channels are readable on exactly one calendar day** — the coordinator's notes to the emcee cannot be read before the wedding or ever again after it, and the photo-review page **built specifically to survive the day** has nothing linking to it off the day | `stage-script.tsx:133` inside the console that shuts at midnight · `live/[eventId]/papic/page.tsx:53-84` |
+| **16** | 📱 **On a phone, a room at the couple's address starts with NO navigation at all.** The guest bar has exactly one owner and does not travel to sibling pages; five things already compete for that bottom edge after a month lost to two bars covering each other; and the guard policing it is **a hand-typed list of four files that can never see a new room** | sole importer `site-body.tsx:35` · 5 claimants · `lint-no-stacked-pinned-bars.mjs:196-207` · `bottom-edge.test.ts:44-49` |
+
+✅ **TWO USEFUL FACTS FROM THE PHONE SWEEP:** the day-of console is **already phone-shaped** —
+fluid, no fixed widths across twenty components — so **port it, do not rebuild it**. And **only
+the LETTERING changes at the new address; the console's colours survive intact**, which narrows
+owner decision 5 to a type call.
+
+---
+
+## 3.9 · 🛑 WHAT WOULD MAKE IT COMPLETE — six unknowns, none of them a build plan
+
+1. **Decide what makes a supplier "booked" for the room.** Two different facts claim it today and
+   **the newer booking path never produces the one every day-of screen reads.** Until that is one
+   answer, the room's front gate is guessing.
+2. **Decide how a supplier learns the day has come — and PROVE one channel arrives.** Fix the phone
+   channel onto one store, or add an email; pick one and test that a message lands. ⚠ **This
+   platform runs nothing on a schedule**, so *"tell them the morning of"* needs a trigger, not a
+   cron. **This is the plan's headline and it currently has no delivery layer at all.**
+3. **Move the booked-supplier admission into the SHARED gate.** It lives inside one page today.
+   Until it moves, every new room repeats the silent bounce — **including the one being built.**
+4. **Decide whether a teammate reaches every booked event, or only the ones they were granted.**
+   The moment team access widens, **the per-event grant stops meaning anything.**
+5. **Fix the wedding-words leak that is already live, and extend the rule to borrowed files** —
+   before the room mounts, not as part of it. **It is a bug on the public page now.**
+6. **Draw the room, including its phone chrome** — a room at the couple's address starts with no
+   navigation and nothing guards its bottom edge, so the drawing has to answer that too.
+
+⚖ **Everything else in this plan is buildable once those close.** ✅ **The answers desk can start
+now** — it touches none of the six, and it is the thing the owner actually complained about.
+
+---
+
+## 3.10 · 🛑 WHAT IS STILL NOT COVERED — the honest edge, after two adversarial passes
+
+1. ✅ **The critic HAS now been attacked** — see § 3.7. Two of its four load-bearing gaps shrank
+   and two grew. **The other eight of its twelve remain unchallenged.**
 2. **THE ROOM HAS NOT BEEN DRAWN.** There is no picture of it anywhere. Per this project's own
    rule, tests catch wrong code and never a wrong-*looking* screen. **Draw it before building it**
    — it is also what lets the owner answer decisions 1 and 5 without reading any of this.
@@ -647,9 +759,15 @@ it did not**, and each changes something a builder would otherwise get wrong:
    Say so if you meant more.
 4. **Should a supplier be able to say "I did not receive that money"?** Today the only possible
    answer to a couple's payment claim is **yes**, and **it cannot be taken back.**
-5. 🆕 **A working console — a clock, a cue bar, a floor log — rendered in the WEDDING typeface.**
-   At the couple's address the display, body and mono faces all change, and the room sits outside
-   the wrapper that pins the dashboard's own faces. **That is a look decision, not a port detail.**
+5. 🆕 **A working console — a clock, a cue bar, a floor log — rendered in the WEDDING LETTERING.**
+   ✅ **NARROWED BY MEASUREMENT:** only the typefaces change at the new address — **the console's
+   colours survive intact.** So this is a type call, not a re-skin.
+6. 🆕 **Should a teammate reach EVERY one of the shop's booked events, or only the ones they were
+   specifically given?** Opening the room to teams — which the plan requires — **quietly retires
+   per-event access.** Nobody asked for that; it would arrive as a side effect.
+7. 🆕 **Who at a shop gets told?** Almost everything today reaches **one account**. A manager can
+   see the work and is alerted to none of it — and **a move to remove a co-owner reaches nobody at
+   all.**
 
 ⛔ **RETIRED BEFORE IT REACHED YOU — do not answer this one.** *"Does the room close at midnight,
 or can a supplier come back and look at what happened?"* **You already decided it, inside the
