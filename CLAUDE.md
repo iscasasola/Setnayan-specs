@@ -2256,8 +2256,19 @@ When code lands ahead of a spec update, the repo appends a `[PENDING]` line to `
 
 **There is no "Papic Pool" and no "Papic One".** There is **Papic**. A couple buys credits into
 one shared pot; the host can set some aside for a single camera's QR, where nobody else can spend
-them, and take unspent ones back. **Ladder:** 50 free · 100 ₱50 · 3,000 ₱1,000 · 10,000 ₱3,000 ·
-20,000 ₱5,000 — free added on top, every rung repeatable. **Cameras are free and unlimited.**
+them, and take unspent ones back. **Cameras are free and unlimited.**
+
+**Ladder — RECUT 2026-08-26 to a SCROLLABLE list of 17 rungs, priced off ₱1 = 1 credit.** The
+regular price IS the credit count; what you pay is a bundle discount off it, deepening as the
+number grows. **50 free on every event, on top, and every rung repeatable.**
+`100 ₱50 · 200 ₱100 · 300 ₱150 · 400 ₱200 · 500 ₱250 · 1,000 ₱500 · 2,000 ₱1,000 · 3,000 ₱1,200 ·
+4,000 ₱1,600 · 5,000 ₱2,000 · 6,000 ₱2,400 · 7,000 ₱2,800 · 10,000 ₱3,200 · 20,000 ₱5,000 ·
+30,000 ₱7,500 · 40,000 ₱10,000 · 50,000 ₱10,000` (50% → 80% off).
+⚠ **NEVER re-type these** — `platform_retail_catalog_v2` is the source and
+`papic-rungs-are-fundable.db.test.ts` pins the set. 🔴 **40,000 and 50,000 are both ₱10,000, so the
+40,000 rung can never be anybody's best choice** — flagged to the owner, built as given, his call.
+🚨 **A rung is THREE places:** the catalog row, the tier row, AND a line in `sku-activation.ts` —
+a sellable rung missing from that map takes the money and grants **zero** shots, silently.
 
 🔑 **DEDICATED CREDITS ARE A FLOOR, NOT A CEILING.** A capture spends the camera's own credits
 first and the pot pays the remainder ("spend 2 and take 6"); a camera never stops while the event
