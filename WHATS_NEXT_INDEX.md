@@ -17,8 +17,7 @@
 > [#4863](https://github.com/iscasasola/setnayan-platform/pull/4863) — Overview → **Today** · My
 > Customers ahead of My Shop · Contracts + Proposals into My Customers · **services opens first**
 > on My Shop · the 14 tools on three shelves · "(BEO)" out of the menu. **Same five keys, nothing
-> deleted.** ⚠ Verify with `gh pr view 4863 --json state,mergedAt` — this register has been wrong
-> about a PR's state four times.
+> deleted.** ✅ **MERGED 2026-08-25T21:22Z**, verified by `gh pr view`.
 >
 > 🚨 **THE THREE FINDINGS THAT BREAK THE PLAN'S OWN HEADLINE** (found by a completeness critic
 > after 7 mappers and 17 refuted claims — **the mapping's citations were accurate; its COVERAGE
