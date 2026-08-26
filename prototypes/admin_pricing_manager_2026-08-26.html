@@ -1,0 +1,904 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SETNAYAN · Managing prices — what's there now vs. what we recommend — 2026-08-26</title>
+<!--
+  ADMIN PRICE MANAGEMENT — design prototype, 2026-08-26.
+
+  Owner: "There are a lot here that is already retired and we want to improve
+  how to manage the prices here."
+
+  TWO PANES, switchable at the top:
+    NOW      — a faithful reproduction of what /admin/pricing?tab=pricing ships
+               today on origin/main 055b080ac. Not a caricature: the section
+               order, the row fields, the collapsed retired disclosure, the five
+               stat tiles and the single Save-all bar are all as built.
+    PROPOSED — the recommendation.
+
+  EVERY NUMBER IN THIS FILE IS MEASURED against the live production database
+  (njrupjnvkjkitfctetvi) on 2026-08-26, not estimated:
+    · 58 customer rows (13 live · 45 retired) · 4 bundles (2·2) · 29 vendor (19·10)
+    · 32 of 34 audited bulk edits WIPED a description; 0 preserved one
+    · 32 of 58 customer rows now carry no description at all
+    · 45 retired customer rows: 13 still wire Papic tier config (CASCADE),
+      9 sit inside a live bundle (CASCADE), 1 has a live activation (blocks
+      delete), 0 have ever been sold
+    · 7 of 17 stored price columns are not editable on the screen, including
+      onboarding_price_php — a LIVE, CHARGED ₱1,499 Setnayan AI sign-up price
+    · promo_free_windows: 0 rows · market_price_bands: 0 rows
+
+  Self-contained: inline CSS + inline SVG sprite, no external assets, no CDN.
+  Contrast receipts at the foot of the page.
+-->
+<style>
+/* ═══ Locked tokens — identical to the archetype sheets ═══ */
+:root{
+  --cream:#FFFFFF;
+  --paper:#FBFAF8;
+  --ink:#2C2A29;
+  --ink-soft:#4F535B;
+  --cta:#C24E25; --cta-hover:#B04722; --cta-active:#9D3F1E;
+  --gold:#A9834B; --gold-text:#8A6B39;
+  --link:#3B4E67; --link-hover:#304055;
+  --pos:#4F6B4A; --warn:#8A6B39; --neg:#B65A3A;
+  --border:rgba(44,42,41,0.12);
+  --border-soft:rgba(44,42,41,0.07);
+  --wash:rgba(44,42,41,0.03);
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --dur:180ms;
+  --sans:'Hanken Grotesk',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'Space Mono',ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--cream);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+b,strong{font-weight:700}
+a{color:var(--link)}a:hover{color:var(--link-hover)}
+code,.mono{font-family:var(--mono)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.kicker{font-family:var(--mono);text-transform:uppercase;letter-spacing:.14em;font-size:10.5px;font-weight:700;color:var(--gold-text)}
+.muted{color:var(--ink-soft)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+svg.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* ═══ Page chrome ═══ */
+.top{border-bottom:1px solid var(--border);background:var(--cream);position:sticky;top:0;z-index:60}
+.top .wrap{display:flex;align-items:center;gap:18px;height:60px;flex-wrap:wrap}
+.wordmark{font-family:var(--mono);font-weight:700;letter-spacing:.24em;font-size:13px}
+.seg{display:flex;gap:3px;background:var(--wash);border:1px solid var(--border);border-radius:11px;padding:3px;margin-left:auto}
+.seg button{font:inherit;font-size:13px;font-weight:700;border:0;background:none;color:var(--ink-soft);padding:6px 15px;border-radius:8px;cursor:pointer;transition:all var(--dur) var(--ease)}
+.seg button[aria-pressed=true]{background:var(--ink);color:#fff}
+.seg button:hover:not([aria-pressed=true]){color:var(--ink)}
+
+.hero{padding:34px 0 26px;border-bottom:1px solid var(--border)}
+.hero h1{font-size:29px;line-height:1.2;letter-spacing:-.02em;font-weight:700;margin:9px 0 10px;max-width:23ch}
+.hero p{max-width:66ch;color:var(--ink-soft);font-size:15.5px}
+.quote{border-left:2px solid var(--gold);padding:2px 0 2px 14px;margin:16px 0 0;font-size:15px;max-width:62ch}
+
+/* ═══ Panes ═══ */
+.pane{display:none;padding:30px 0 60px}
+.pane.on{display:block}
+.paneflag{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:5px 13px;font-size:12px;font-weight:700;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;margin-bottom:18px}
+.paneflag.now{background:rgba(182,90,58,.10);color:#8F4025;border:1px solid rgba(182,90,58,.28)}
+.paneflag.new{background:rgba(79,107,74,.10);color:#3E5539;border:1px solid rgba(79,107,74,.30)}
+
+/* ═══ The mock app frame ═══ */
+.app{border:1px solid var(--border);border-radius:16px;overflow:hidden;background:var(--cream)}
+.appbar{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--border);background:var(--paper);font-size:13px}
+.appbar .url{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);background:var(--cream);border:1px solid var(--border);border-radius:7px;padding:5px 11px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tabstrip{display:flex;gap:5px;flex-wrap:wrap;padding:13px 16px 0}
+.tabstrip a{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--ink-soft);text-decoration:none;transition:all var(--dur) var(--ease)}
+.tabstrip a.sel{background:rgba(169,131,75,.13);color:var(--gold-text)}
+.tabstrip a:not(.sel):hover{background:var(--wash);color:var(--ink)}
+.tabrule{border-bottom:1px solid var(--border);margin:11px 16px 0}
+.body{padding:20px 16px 0}
+
+h2.sec{font-size:17px;font-weight:700;letter-spacing:-.01em;margin:0 0 4px}
+.seclede{font-size:13.5px;color:var(--ink-soft);margin-bottom:12px;max-width:76ch}
+
+/* ═══ Stat tiles ═══ */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:22px;background:var(--paper)}
+.stat{border:1px solid var(--border-soft);border-radius:9px;padding:10px 11px;background:var(--cream)}
+.stat .l{font-family:var(--mono);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-soft)}
+.stat .v{font-size:19px;font-weight:700;letter-spacing:-.02em;margin-top:3px;font-variant-numeric:tabular-nums}
+.stat.bad .v{color:var(--neg)}
+@media(max-width:820px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+/* ═══ NOW: the shipped row ═══ */
+.tbl{border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:26px}
+.colhead{display:grid;grid-template-columns:minmax(0,1fr) 7rem 8rem 4.5rem 3.5rem;gap:12px;align-items:center;padding:9px 15px;background:var(--wash);border-bottom:1px solid var(--border)}
+.colhead.two{grid-template-columns:minmax(0,1fr) 8rem 3.5rem}
+.colhead span{font-family:var(--mono);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-soft)}
+.ta-r{text-align:right}.ta-c{text-align:center}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 7rem 8rem 4.5rem 3.5rem;gap:12px;align-items:center;padding:12px 15px;border-bottom:1px solid var(--border-soft)}
+.row.two{grid-template-columns:minmax(0,1fr) 8rem 3.5rem}
+.row:last-child{border-bottom:0}
+.row.dead{background:var(--wash)}
+.rowhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.code{font-family:var(--mono);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-soft)}
+.pill{border-radius:5px;padding:2px 7px;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;background:rgba(44,42,41,.09);color:var(--ink-soft)}
+.ibtn{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);background:none;color:var(--ink-soft);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:none;transition:all var(--dur) var(--ease)}
+.ibtn:hover{border-color:rgba(44,42,41,.3);color:var(--ink)}
+.ibtn[aria-expanded=true]{border-color:rgba(194,78,37,.4);background:rgba(194,78,37,.09);color:var(--cta)}
+.inp{font:inherit;font-size:14px;width:100%;height:36px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--cream);color:var(--ink)}
+.inp:focus{outline:2px solid var(--cta);outline-offset:1px}
+.money{position:relative}
+.money .peso{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--ink-soft);font-size:13px;pointer-events:none}
+.money .inp{padding-left:22px;text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13px}
+.edited{font-size:11px;color:var(--ink-soft);margin-top:4px}
+.infopanel{margin-top:8px;border:1px solid var(--border);border-radius:11px;background:var(--paper);padding:11px}
+.infopanel textarea{font:inherit;font-size:13.5px;width:100%;min-height:52px;border:1px solid var(--border);border-radius:8px;padding:7px 9px;background:var(--cream);color:var(--ink);resize:vertical}
+.infopanel .l{font-family:var(--mono);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-soft);display:block;margin-bottom:5px}
+details.retired>summary{display:flex;align-items:center;gap:9px;cursor:pointer;padding:12px 15px;background:var(--wash);border-top:1px solid var(--border);font-size:13.5px;font-weight:600;color:var(--ink-soft);list-style:none}
+details.retired>summary::-webkit-details-marker{display:none}
+details.retired>summary:hover{background:rgba(44,42,41,.055)}
+details.retired>summary .chev{transition:transform var(--dur) var(--ease)}
+details.retired[open]>summary .chev{transform:rotate(90deg)}
+details.retired>summary .hint{font-weight:400;font-size:12px;color:var(--ink-soft)}
+.savebar{position:sticky;bottom:0;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:13px 16px;border-top:1px solid var(--border);background:rgba(255,255,255,.94);backdrop-filter:blur(8px);z-index:20}
+.savebar p{font-size:12px;color:var(--ink-soft);max-width:46ch}
+.btn{font:inherit;font-size:13.5px;font-weight:700;border-radius:9px;padding:9px 17px;cursor:pointer;border:1px solid transparent;transition:all var(--dur) var(--ease)}
+.btn-primary{background:var(--cta);color:#fff}.btn-primary:hover{background:var(--cta-hover)}
+.btn-ghost{background:none;border-color:var(--border);color:var(--ink-soft)}.btn-ghost:hover{background:var(--wash);color:var(--ink)}
+.btn-danger{background:none;border-color:rgba(182,90,58,.45);color:var(--neg)}.btn-danger:hover{background:rgba(182,90,58,.08)}
+.btn-sm{font-size:12.5px;padding:6px 12px}
+
+/* ═══ Findings callouts ═══ */
+.find{border:1px solid var(--border);border-left:3px solid var(--neg);border-radius:0 12px 12px 0;padding:14px 16px;margin:0 0 12px;background:var(--paper)}
+.find.ok{border-left-color:var(--pos)}
+.find.warn{border-left-color:var(--gold)}
+.find h4{font-size:14.5px;font-weight:700;margin-bottom:4px}
+.find p{font-size:13.5px;color:var(--ink-soft);max-width:80ch}
+.find .ev{font-family:var(--mono);font-size:11.5px;color:var(--ink);background:var(--wash);border-radius:6px;padding:2px 7px;display:inline-block;margin-top:7px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<svg style="display:none" aria-hidden="true">
+<symbol id="i-dollar" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></symbol>
+<symbol id="i-badge" viewBox="0 0 24 24"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></symbol>
+<symbol id="i-gauge" viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></symbol>
+<symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3Z"/><path d="M12 9v4M12 17h.01"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
+<symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><path d="M6.61 6.61A18.15 18.15 0 0 0 2 12s3 8 10 8a9.7 9.7 0 0 0 5.39-1.61M2 2l20 20"/></symbol>
+</svg>
+
+<header class="top">
+  <div class="wrap">
+    <span class="wordmark">SETNAYAN</span>
+    <span class="muted" style="font-size:13px">Managing prices</span>
+    <div class="seg" role="group" aria-label="Which version to view">
+      <button id="btn-now" aria-pressed="true" onclick="showPane('now')">What's there now</button>
+      <button id="btn-new" aria-pressed="false" onclick="showPane('new')">What we recommend</button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <p class="kicker">Admin · price &amp; catalogue · 26 August 2026</p>
+    <h1>Two thirds of your price screen is dead product.</h1>
+    <p>You have <b>91 priced things</b> on one page — and <b>57 of them are retired</b>. They are collapsed out of sight, but they are still in the form, still saved every time you press the button, and there is no way to search, filter or sort your way past them. Everything below is measured against the live site and the live database today, not estimated.</p>
+    <p class="quote">“There are a lot here that is already retired and we want to improve how to manage the prices here.”</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     PANE 1 — WHAT'S THERE NOW
+     ══════════════════════════════════════════════════════════════ -->
+<div class="pane on" id="pane-now">
+<div class="wrap">
+  <span class="paneflag now"><svg class="i"><use href="#i-eye-off"/></svg> What's there now</span>
+
+  <div class="app">
+    <div class="appbar">
+      <span class="url">www.setnayan.com/admin/pricing?tab=pricing#sku-papic-guest-10k</span>
+    </div>
+    <nav class="tabstrip" aria-label="Catalogue sections">
+      <a class="sel" href="#"><svg class="i"><use href="#i-dollar"/></svg>Pricing</a>
+      <a href="#"><svg class="i"><use href="#i-badge"/></svg>Custom plans</a>
+      <a href="#"><svg class="i"><use href="#i-gauge"/></svg>Price bands</a>
+      <a href="#"><svg class="i"><use href="#i-gift"/></svg>Free windows</a>
+    </nav>
+    <div class="tabrule"></div>
+    <div class="body">
+      <h2 class="sec">Pricing &amp; Catalog</h2>
+      <p class="seclede">Every price in the app reads from here. Click the ⓘ on a row to see what it is, edit any field, then hit <b>Save all changes</b> once — saves propagate to /pricing and /vendors within seconds.</p>
+
+      <div class="stats">
+        <div class="stat"><p class="l">Active SKUs</p><p class="v">13</p></div>
+        <div class="stat"><p class="l">Inactive</p><p class="v">45</p></div>
+        <div class="stat"><p class="l">Max price</p><p class="v num">₱5,000</p></div>
+        <div class="stat"><p class="l">Min price (paid)</p><p class="v num">₱50</p></div>
+        <div class="stat bad"><p class="l">Avg margin (paid)</p><p class="v num">89%</p></div>
+      </div>
+
+      <h2 class="sec">Customer SKUs (13 active · 45 retired)</h2>
+      <div class="tbl">
+        <div class="colhead">
+          <span>SKU · title</span><span class="ta-r">Cost / event</span><span class="ta-r">Retail price</span><span class="ta-r">Margin</span><span class="ta-c">Active</span>
+        </div>
+        <div id="now-live"></div>
+        <details class="retired" id="now-retired-d">
+          <summary><svg class="i chev"><use href="#i-chev"/></svg><span>45 retired SKUs</span><span class="hint">— hidden from customers; still editable here</span></summary>
+          <div id="now-dead" style="border-top:1px solid var(--border)"></div>
+        </details>
+      </div>
+
+      <h2 class="sec">Bundles (2 active · 2 retired)</h2>
+      <p class="seclede">Migration-authored packages. Price, description + active state are editable here; which SKUs a bundle unlocks is migration-owned.</p>
+      <div class="tbl">
+        <div class="colhead two"><span>Bundle · title</span><span class="ta-r">Retail price</span><span class="ta-c">Active</span></div>
+        <div id="now-bundles"></div>
+      </div>
+
+      <h2 class="sec">Vendor pricing (19 active · 10 retired)</h2>
+      <p class="seclede">Subscriptions + bidding token packs. Price, description + active state are editable; titles, tier caps + token grants stay migration-owned.</p>
+      <div class="tbl">
+        <div class="colhead two"><span>SKU · offering</span><span class="ta-r">Price</span><span class="ta-c">Active</span></div>
+        <div id="now-vendor"></div>
+      </div>
+
+      <div class="savebar">
+        <p>Type new prices in any field above, then save them all at once. Only the rows you changed get written.</p>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost">Reset</button>
+          <button class="btn btn-primary" onclick="nowSave()">Save all changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="sec" style="margin:34px 0 6px;font-size:19px">What is actually wrong with it</h2>
+  <p class="seclede" style="margin-bottom:16px">Five things, all measured. The first one is losing your work today.</p>
+
+  <div class="find">
+    <h4>1 · Every save quietly erases the notes you wrote</h4>
+    <p>The “what this is for” note only exists on screen while its ⓘ is open. Press <b>Save all changes</b> with a note closed — which is every note, every time — and that row is saved with the note blank. It is not a warning; it already happened.</p>
+    <p class="ev">32 of the last 34 saved rows lost their note · 0 kept one · 32 of 58 rows have no note left</p>
+  </div>
+  <div class="find">
+    <h4>2 · Seven of the seventeen prices we store cannot be changed here</h4>
+    <p>Including the <b>₱1,499 Setnayan AI sign-up price you are charging real customers right now</b>, and whether a price is one-off, per-day or per-year. Changing any of them needs an engineer and a code release — on the screen that calls itself the single source of truth for prices.</p>
+    <p class="ev">4 rows carry a sign-up price · 7 rows are recurring · none editable</p>
+  </div>
+  <div class="find warn">
+    <h4>3 · The price history already exists and you can’t see it</h4>
+    <p>Every save records the full before and after of the row. The screen shows you only “edited 2 months ago”. Nobody can answer “what did Papic 10,000 cost in June?” without an engineer reading the database.</p>
+    <p class="ev">34 stored before/after records, none shown</p>
+  </div>
+  <div class="find warn">
+    <h4>4 · The margin figure is fiction</h4>
+    <p>5 of your 13 live products have a recorded cost of zero, so they read 100% margin — and the tile at the top averages that in. The number is confidently wrong, which is worse than absent.</p>
+    <p class="ev">5 of 13 live rows: cost = ₱0</p>
+  </div>
+  <div class="find warn">
+    <h4>5 · “Retired” is one tick box, so nothing records <em>why</em></h4>
+    <p>There is no reason, no date it was retired, and no “this was replaced by that”. One row has the word <b>(superseded)</b> typed into its own product title, because the data had nowhere else to put it.</p>
+    <p class="ev">45 retired rows · 0 carry a reason or a successor</p>
+  </div>
+
+  <div class="find" style="border-left-color:var(--neg);margin-top:20px">
+    <h4><svg class="i" style="vertical-align:-3px"><use href="#i-alert"/></svg> And the reason nobody has just deleted them</h4>
+    <p>This is the important one. Of the 45 retired customer products, <b>22 are still doing a job</b>: <b>13</b> still hold your Papic camera and credit settings, <b>9</b> are still listed inside a bundle that is on sale, and <b>1</b> is still switched on for a real customer’s event. Deleting those would silently take the settings with them. The other 23 are genuinely inert and have never been sold.</p>
+    <p class="ev">45 retired → 22 still wired · 23 safe to remove · 0 ever sold</p>
+  </div>
+</div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   REAL DATA — read out of production njrupjnvkjkitfctetvi on
+   2026-08-26. Prices, costs, active flags and the per-row wiring
+   flags (papic / bundled / activated) are all measured, not typed
+   from memory. `note` is true where the row still has a stored
+   description; 32 of 58 no longer do, because the save wipes them.
+   ══════════════════════════════════════════════════════════════ */
+const LIVE = [
+  {c:'CUSTOM_QR_GUEST',      t:'Custom QR per Guest',       p:0,    k:0,    note:false, fam:'Guests',  ed:'2 months ago by Ice Casasola'},
+  {c:'PAPIC_GUEST_100',      t:'Papic — add 100 shots',     p:50,   k:2.4,  note:true,  fam:'Papic',   ed:'15 days ago by Ice Casasola'},
+  {c:'PAPIC_GUEST',          t:'Papic — add 3,000 shots',   p:1000, k:174,  note:true,  fam:'Papic',   ed:'15 days ago by Ice Casasola'},
+  {c:'ANIMATED_MONOGRAM',    t:'Animated Monogram',         p:1000, k:140,  note:true,  fam:'Design',  ed:'15 days ago by Ice Casasola'},
+  {c:'PATIKTOK_COMPILER',    t:'Patiktok',                  p:1500, k:0,    note:true,  fam:'Film',    ed:'1 month ago by Ice Casasola',  per:'per day'},
+  {c:'SEATING_3D',           t:'3D Plan',                   p:1500, k:0,    note:true,  fam:'Planning',ed:'25 days ago by Ice Casasola'},
+  {c:'PAPIC_ADDON_THANK_YOU',t:'Thank You (Papic Add-on)',  p:2499, k:250,  note:true,  fam:'Papic',   ed:'1 month ago by Ice Casasola'},
+  {c:'SETNAYAN_AI',          t:'Setnayan AI',               p:2499, k:200,  note:true,  fam:'Planning',ed:'14 days ago by Ice Casasola', signup:1499},
+  {c:'PAKANTA',              t:'Pakanta',                   p:2500, k:200,  note:true,  fam:'Music',   ed:'1 month ago by Ice Casasola'},
+  {c:'LIVE_STUDIO',          t:'Live Studio',               p:2999, k:0,    note:true,  fam:'Film',    ed:'1 month ago by Ice Casasola'},
+  {c:'PAPIC_GUEST_10K',      t:'Papic — add 10,000 shots',  p:3000, k:240,  note:true,  fam:'Papic',   ed:'15 days ago by Ice Casasola'},
+  {c:'COUPLE_WEBSITE_PRO',   t:'Couple Website PRO',        p:3500, k:0,    note:true,  fam:'Website', ed:'1 month ago by Ice Casasola'},
+  {c:'PAPIC_GUEST_20K',      t:'Papic — add 20,000 shots',  p:5000, k:480,  note:true,  fam:'Papic',   ed:'15 days ago by Ice Casasola'},
+];
+
+/* 45 retired rows. papic/bundled/activated are the measured wiring. */
+const DEAD = [
+  {c:'PAPIC_CAMERA_LTD_DAY',      t:'Papic Ltd (per camera, per day)',                 p:50,   papic:1, fam:'Papic'},
+  {c:'PAPIC_CAMERA_MINI_DAY',     t:'Papic One — 50 shots (one camera) (superseded 2026-08-11)', p:50, papic:1, fam:'Papic'},
+  {c:'PAPIC_CAMERA_ROLL_DAY',     t:'Papic Mini (legacy roll · per camera, per day)',   p:100,  papic:1, fam:'Papic'},
+  {c:'PAPIC_CAMERA_UNLIMITED_DAY',t:'Papic Max (per camera, per day)',                 p:200,  papic:1, fam:'Papic'},
+  {c:'PAPIC_ONE_100',             t:'Papic One — 100 shots (one camera) (superseded 2026-08-11)', p:100, papic:1, fam:'Papic'},
+  {c:'PAPIC_ONE_150',             t:'Papic One — 150 credits (one camera)',            p:50,   papic:1, fam:'Papic'},
+  {c:'PAPIC_GUEST_6K',            t:'Papic Pool — add 6,000 shots',                    p:2000, papic:1, fam:'Papic'},
+  {c:'PAPIC_GUEST_13K',           t:'Papic Pool — add 13,000 shots',                   p:4000, papic:1, fam:'Papic'},
+  {c:'PAPIC_GUEST_16K',           t:'Papic Pool — add 16,000 shots',                   p:5000, papic:1, fam:'Papic'},
+  {c:'PAPIC_GUEST_23K',           t:'Papic Pool — add 23,000 shots',                   p:7000, papic:1, fam:'Papic'},
+  {c:'PAPIC_GUEST_26K',           t:'Papic Pool — add 26,000 shots',                   p:8000, papic:1, fam:'Papic'},
+  {c:'PAPIC_GUEST_30K',           t:'Papic Pool — add 30,000 shots',                   p:9000, papic:1, fam:'Papic'},
+  {c:'PAPIC_GUEST_TOPUP',         t:'Papic Pool — add 10,000 shots (superseded)',      p:2999, papic:1, fam:'Papic', succ:'PAPIC_GUEST_10K'},
+  {c:'CAMERA_BRIDGE',             t:'Camera Bridge (unlocks DSLR for all Papic cameras)', p:500, bundled:1, fam:'Papic'},
+  {c:'PAPIC_ADDON_STORIES',       t:'Stories (Papic Add-on)',                          p:2000, bundled:1, fam:'Papic'},
+  {c:'PAPIC_SEATS',               t:'Papic (5 Seats)',                                 p:2999, bundled:1, fam:'Papic'},
+  {c:'EVENT_WEBSITE',             t:'Event Website',                                   p:1999, bundled:1, fam:'Website'},
+  {c:'PRO_WEBSITE',               t:'Editorial Website',                               p:7999, bundled:1, fam:'Website'},
+  {c:'PRO_RSVP',                  t:'Pro RSVP',                                        p:1999, bundled:1, fam:'Website'},
+  {c:'KWENTO',                    t:'Kwento (words on a photo)',                       p:299,  bundled:1, fam:'Papic'},
+  {c:'PANOOD_SYSTEM',             t:'Live Studio',                                     p:2500, bundled:1, fam:'Film'},
+  {c:'LIVE_WALL',                 t:'Live Venue Photo Wall',                           p:2500, bundled:1, activated:1, fam:'Film'},
+  {c:'SETNAYAN_AI_B',             t:'Setnayan AI (Tier B · major milestone)',          p:1499, fam:'Planning', succ:'SETNAYAN_AI'},
+  {c:'SETNAYAN_AI_C',             t:'Setnayan AI (Tier C · standard event)',           p:899,  fam:'Planning', succ:'SETNAYAN_AI'},
+  {c:'SETNAYAN_AI_D',             t:'Setnayan AI (Tier D · light)',                    p:199,  fam:'Planning', succ:'SETNAYAN_AI'},
+  {c:'SETNAYAN_AI_RENEW',         t:'Setnayan AI (renewal)',                           p:799,  fam:'Planning'},
+  {c:'RSVP_WEBSITE',              t:'RSVP',                                            p:2499, fam:'Website'},
+  {c:'RSVP_PRO_WEBSITE',          t:'RSVP Pro',                                        p:4499, fam:'Website'},
+  {c:'WEBSITE_THEMES',            t:'Website Themes (RSVP + Event + Editorial)',       p:1000, fam:'Website'},
+  {c:'WEBSITE_GALLERY_UPLOAD',    t:'Photo Gallery Upload',                            p:100,  fam:'Website'},
+  {c:'WEBSITE_MAP_LINKING',       t:'Waze / Google Map Linking',                       p:100,  fam:'Website'},
+  {c:'EVENT_SUBDOMAIN',           t:'Custom Subdomain',                                p:999,  fam:'Website'},
+  {c:'EDITORIAL_PRO',             t:'Editorial PRO',                                   p:2999, fam:'Website'},
+  {c:'SDE',                       t:'SDE (Papic Add-on)',                              p:4999, fam:'Film'},
+  {c:'PANOOD_SYSTEM_MOBILE',      t:'Live Studio — Mobile Controller',                 p:1500, fam:'Film'},
+  {c:'LIVE_STUDIO_ROAM',          t:'Live Studio Roam',                                p:3500, fam:'Film'},
+  {c:'LIVE_BACKGROUND',           t:'Live Background',                                 p:499,  fam:'Film'},
+  {c:'STD_PREMIUM_OPENINGS',      t:'Save-the-Date Cinematic Openings',                p:999,  fam:'Film'},
+  {c:'STD_VIDEO_UPLOAD',          t:'Save-the-Date Video Upload',                      p:100,  fam:'Film'},
+  {c:'PABATI',                    t:'Pabati',                                          p:1299, fam:'Papic'},
+  {c:'HIGH_RES_ARCHIVE',          t:'Keep Full-Res',                                   p:999,  fam:'Papic'},
+  {c:'INDOOR_BLUEPRINT',          t:'Indoor Blueprint',                                p:1499, fam:'Planning'},
+  {c:'CALL_TIME_ESCALATOR',       t:'Call-Time Escalator',                             p:1999, fam:'Planning'},
+  {c:'TODAYS_FOCUS',              t:"Today's Focus",                                   p:1499, fam:'Planning'},
+  {c:'PAKULAY',                   t:'Pakulay',                                         p:0,    fam:'Design'},
+];
+
+const BUNDLES = [
+  {c:'PAPIC_UNLOCK',     t:'Papic Unlock',              p:15000, live:1},
+  {c:'PAPIC_UNLOCK_LTD', t:'Papic Unlock (Limited)',    p:9000,  live:1},
+  {c:'STARTER_PACK',     t:'Starter Pack',              p:12999, live:0},
+  {c:'GUIDED_PACK',      t:'Guided Pack',               p:7999,  live:0},
+];
+
+const VENDOR = [
+  {c:'solo_vendor_monthly',        t:'Solo Vendor (Monthly)',                    p:1000,  o:'Subscription · monthly', live:1},
+  {c:'solo_vendor_annual',         t:'Solo Vendor (Annual · save 12 weeks)',     p:10000, o:'Subscription · annual',  live:1},
+  {c:'pro_vendor_monthly',         t:'Pro Vendor (28-day prepaid block)',        p:2500,  o:'Subscription · monthly', live:1},
+  {c:'pro_vendor_annual',          t:'Pro Vendor (Annual · save ~23%)',          p:25000, o:'Subscription · annual',  live:1},
+  {c:'enterprise_vendor_monthly',  t:'Enterprise Vendor (28-day prepaid block)', p:8000,  o:'Subscription · monthly', live:1},
+  {c:'enterprise_vendor_annual',   t:'Enterprise Vendor (Annual · save ~23%)',   p:80000, o:'Subscription · annual',  live:1},
+  {c:'vendor_ai_addon',            t:'Vendor AI — AI Chatbot Basic (28-day)',    p:1500,  o:'Add-on · recurring',     live:1},
+  {c:'vendor_3d_booth',            t:'3D Booth — Branded Virtual Booth (28-day)',p:1500,  o:'Add-on · recurring',     live:1},
+  {c:'vendor_deep_search',         t:'Deep Search (per search)',                 p:500,   o:'Add-on · metered',       live:1},
+  {c:'vendor_photo_challenge',     t:'Papic Challenges (per event)',             p:400,   o:'Add-on · per event',     live:1},
+  {c:'vendor_extra_seat',          t:'Extra Team Seat (28-day)',                 p:250,   o:'Seat',                   live:1},
+  {c:'vendor_token_pack_5',        t:'5 Bidding Tokens',                         p:1000,  o:'Token pack',             live:0},
+  {c:'vendor_token_pack_10',       t:'10 Bidding Tokens',                        p:2000,  o:'Token pack',             live:0},
+  {c:'vendor_token_pack_25',       t:'25 Bidding Tokens',                        p:5000,  o:'Token pack',             live:0},
+  {c:'vendor_token_pack_50',       t:'50 Bidding Tokens',                        p:10000, o:'Token pack',             live:0},
+  {c:'vendor_token_pack_100',      t:'100 Bidding Tokens',                       p:20000, o:'Token pack',             live:0},
+];
+
+const peso = n => '₱' + Number(n).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});
+const pesoShort = n => '₱' + Number(n).toLocaleString('en-PH');
+const margin = (p,k) => p<=0 ? '—' : Math.round(((p-k)/p)*100) + '%';
+const esc = s => String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+function showPane(w){
+  document.getElementById('pane-now').classList.toggle('on', w==='now');
+  document.getElementById('pane-new').classList.toggle('on', w==='new');
+  document.getElementById('btn-now').setAttribute('aria-pressed', w==='now');
+  document.getElementById('btn-new').setAttribute('aria-pressed', w==='new');
+  window.scrollTo({top:0,behavior:'instant'});
+}
+</script>
+
+<script>
+/* ── NOW pane: reproduce the shipped row exactly ───────────────── */
+function nowRetailRow(r, dead){
+  return `<div class="row${dead?' dead':''}">
+    <div style="min-width:0">
+      <div class="rowhead">
+        <code class="code">${esc(r.c)}</code>
+        ${dead?'<span class="pill">Inactive</span>':''}
+        <button class="ibtn" aria-expanded="false" aria-label="What this is for"
+          onclick="var p=this.closest('div').parentNode.querySelector('.infopanel');var o=p.hasAttribute('hidden');o?p.removeAttribute('hidden'):p.setAttribute('hidden','');this.setAttribute('aria-expanded',o)">
+          <svg class="i" style="width:13px;height:13px"><use href="#i-info"/></svg></button>
+      </div>
+      <input class="inp" value="${esc(r.t)}" aria-label="${esc(r.c)} title">
+      <p class="edited">Edited ${esc(r.ed||'2 months ago by Ice Casasola')}</p>
+      <div class="infopanel" hidden>
+        <label><span class="l">What this is for</span>
+        <textarea placeholder="Describe what this is — shown here for your team.">${r.note?'':''}</textarea></label>
+      </div>
+    </div>
+    <div class="money"><span class="peso">₱</span><input class="inp" type="number" value="${(r.k??0).toFixed(2)}" aria-label="cost"></div>
+    <div class="money"><span class="peso">₱</span><input class="inp" type="number" value="${(r.p).toFixed(2)}" aria-label="price"></div>
+    <div class="ta-r"><span class="num" style="font-size:12.5px;color:var(--ink-soft)">${margin(r.p, r.k??0)}</span></div>
+    <label class="ta-c"><input type="checkbox" ${dead?'':'checked'} style="width:16px;height:16px"></label>
+  </div>`;
+}
+function nowTwoRow(r, dead, sub){
+  return `<div class="row two${dead?' dead':''}">
+    <div style="min-width:0">
+      <div class="rowhead"><code class="code">${esc(r.c)}</code>
+        ${dead?'<span class="pill">Inactive</span>':''}
+        ${sub?`<span class="pill">${esc(sub)}</span>`:''}
+        <button class="ibtn" aria-expanded="false" aria-label="What this is for"
+          onclick="var p=this.closest('div').parentNode.querySelector('.infopanel');var o=p.hasAttribute('hidden');o?p.removeAttribute('hidden'):p.setAttribute('hidden','');this.setAttribute('aria-expanded',o)">
+          <svg class="i" style="width:13px;height:13px"><use href="#i-info"/></svg></button>
+      </div>
+      ${sub?`<p style="font-size:14px;font-weight:600">${esc(r.t)}</p>`:`<input class="inp" value="${esc(r.t)}" aria-label="title">`}
+      <p class="edited">Edited 1 month ago</p>
+      <div class="infopanel" hidden><label><span class="l">What this is for</span><textarea></textarea></label></div>
+    </div>
+    <div class="money"><span class="peso">₱</span><input class="inp" type="number" value="${r.p.toFixed(2)}" aria-label="price"></div>
+    <label class="ta-c"><input type="checkbox" ${dead?'':'checked'} style="width:16px;height:16px"></label>
+  </div>`;
+}
+document.getElementById('now-live').innerHTML  = LIVE.map(r=>nowRetailRow(r,false)).join('');
+document.getElementById('now-dead').innerHTML  = DEAD.slice().sort((a,b)=>a.p-b.p).map(r=>nowRetailRow(r,true)).join('');
+document.getElementById('now-bundles').innerHTML = BUNDLES.slice().sort((a,b)=>b.live-a.live||a.p-b.p).map(r=>nowTwoRow(r,!r.live)).join('');
+document.getElementById('now-vendor').innerHTML  = VENDOR.map(r=>nowTwoRow(r,!r.live,r.o)).join('');
+
+function nowSave(){
+  alert('Save these prices live?\n\nSaving ships these prices LIVE to the public catalogue right away — only the rows you changed get written. Double-check the values before you confirm.\n\n(This is the real confirmation text that ships today. What it does NOT say: every note you have not opened will be blanked.)');
+}
+</script>
+
+<style>
+/* ═══ PROPOSED pane ═══ */
+.chead{position:sticky;top:60px;z-index:30;background:var(--cream);border-bottom:1px solid var(--border);padding:14px 16px 0}
+.chead .r1{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.chead h2{font-size:18px;font-weight:700;letter-spacing:-.01em}
+.srch{position:relative;flex:1;min-width:190px;max-width:340px}
+.srch svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ink-soft);width:15px;height:15px}
+.srch input{font:inherit;font-size:14px;width:100%;height:36px;padding:0 11px 0 32px;border:1px solid var(--border);border-radius:9px;background:var(--cream);color:var(--ink)}
+.srch input:focus{outline:2px solid var(--cta);outline-offset:1px}
+.views{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.views button{font:inherit;font-size:13px;font-weight:600;border:0;background:none;color:var(--ink-soft);padding:7px 12px;border-radius:8px 8px 0 0;cursor:pointer;border-bottom:2px solid transparent;transition:all var(--dur) var(--ease)}
+.views button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--cta);font-weight:700}
+.views button:hover:not([aria-selected=true]){background:var(--wash);color:var(--ink)}
+.views .n{font-family:var(--mono);font-size:11px;color:var(--ink-soft);margin-left:5px}
+.views button[aria-selected=true] .n{color:var(--cta)}
+.latest{margin-left:auto;font-size:12px;color:var(--ink-soft);display:flex;align-items:center;gap:7px}
+.latest b{color:var(--ink);font-weight:600}
+.chips{display:flex;gap:6px;flex-wrap:wrap;padding:11px 16px;border-bottom:1px solid var(--border-soft)}
+.chip{font:inherit;font-size:12.5px;font-weight:600;border:1px solid var(--border);background:var(--cream);color:var(--ink-soft);border-radius:999px;padding:4px 12px;cursor:pointer;transition:all var(--dur) var(--ease)}
+.chip[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chip:hover:not([aria-pressed=true]){border-color:rgba(44,42,41,.28);color:var(--ink)}
+
+.shelf{display:flex;align-items:baseline;gap:9px;padding:20px 16px 7px;border-bottom:1px solid var(--border-soft)}
+.shelf h3{font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-soft);font-weight:700}
+.shelf .n{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft)}
+.shelf.danger h3{color:var(--neg)}
+.shelf.hold h3{color:var(--gold-text)}
+
+/* the resting row */
+.prow{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:13px;align-items:start;padding:13px 16px;border-bottom:1px solid var(--border-soft);cursor:pointer;transition:background var(--dur) var(--ease)}
+.prow:hover{background:var(--wash)}
+.prow.open{background:var(--wash);cursor:default}
+.dot{width:7px;height:7px;border-radius:50%;margin-top:7px;background:var(--pos)}
+.dot.off{background:rgba(44,42,41,.24)}
+.dot.hold{background:var(--gold)}
+.dot.free{background:var(--neg)}
+.ptitle{font-size:15px;font-weight:600;letter-spacing:-.005em}
+.pmeta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:3px}
+.pcode{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-soft)}
+.pdesc{font-size:13px;color:var(--ink-soft);margin-top:5px;max-width:74ch}
+.pdesc.none{color:var(--neg);font-style:italic}
+.pmoney{text-align:right;white-space:nowrap}
+.pmoney .amt{font-family:var(--mono);font-size:16px;font-weight:700;font-variant-numeric:tabular-nums}
+.pmoney .sub{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);margin-top:3px}
+.pmoney .cad{font-size:11.5px;color:var(--ink-soft)}
+.tag{border-radius:5px;padding:2px 7px;font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;background:var(--wash);color:var(--ink-soft);border:1px solid var(--border-soft)}
+.tag.gold{background:rgba(169,131,75,.13);color:var(--gold-text);border-color:rgba(169,131,75,.3)}
+.tag.neg{background:rgba(182,90,58,.10);color:#8F4025;border-color:rgba(182,90,58,.28)}
+.tag.pos{background:rgba(79,107,74,.10);color:#3E5539;border-color:rgba(79,107,74,.3)}
+
+/* the open card */
+.card{grid-column:1/-1;margin-top:12px;border:1px solid var(--border);border-radius:13px;background:var(--cream);overflow:hidden}
+.cgrp{padding:15px 16px;border-bottom:1px solid var(--border-soft)}
+.cgrp:last-of-type{border-bottom:0}
+.cgrp>h4{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold-text);font-weight:700;margin-bottom:11px}
+.fld{margin-bottom:11px}
+.fld:last-child{margin-bottom:0}
+.fld>label{display:block}
+.fld .l{font-size:12.5px;font-weight:600;color:var(--ink);display:block;margin-bottom:4px}
+.fld .h{font-size:11.5px;color:var(--ink-soft);margin-top:4px;display:block}
+.fld textarea{font:inherit;font-size:14px;width:100%;min-height:56px;border:1px solid var(--border);border-radius:8px;padding:8px 10px;background:var(--cream);color:var(--ink);resize:vertical}
+.fld textarea:focus,.fld select:focus{outline:2px solid var(--cta);outline-offset:1px}
+.fld select{font:inherit;font-size:14px;height:36px;border:1px solid var(--border);border-radius:8px;padding:0 9px;background:var(--cream);color:var(--ink)}
+.two-up{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+@media(max-width:700px){.two-up{grid-template-columns:1fr}}
+.hist{border-top:1px dashed var(--border);padding-top:9px;margin-top:2px}
+.hist li{list-style:none;display:flex;gap:11px;align-items:baseline;font-size:12.5px;padding:5px 0;border-bottom:1px solid var(--border-soft)}
+.hist li:last-child{border-bottom:0}
+.hist .d{font-family:var(--mono);font-size:11px;color:var(--ink-soft);min-width:88px}
+.hist .m{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.hist .who{color:var(--ink-soft);margin-left:auto;font-size:11.5px}
+.cfoot{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:13px 16px;background:var(--paper);border-top:1px solid var(--border)}
+.cfoot .sp{margin-left:auto}
+.locked{display:flex;gap:9px;align-items:flex-start;background:rgba(169,131,75,.09);border:1px solid rgba(169,131,75,.28);border-radius:9px;padding:10px 12px;font-size:12.5px;color:var(--ink);margin-bottom:12px}
+.locked svg{color:var(--gold-text);margin-top:2px}
+.holds{background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-top:4px}
+.holds h5{font-size:13px;font-weight:700;margin-bottom:7px;display:flex;align-items:center;gap:7px}
+.holds ul{margin:0 0 9px 2px}
+.holds li{list-style:none;font-size:13px;color:var(--ink-soft);padding:3px 0 3px 16px;position:relative}
+.holds li::before{content:'';position:absolute;left:2px;top:11px;width:4px;height:4px;border-radius:50%;background:var(--gold)}
+.holds p{font-size:12.5px;color:var(--ink-soft)}
+.emptyst{padding:44px 20px;text-align:center}
+.emptyst h4{font-size:16px;font-weight:700;margin-bottom:6px}
+.emptyst p{font-size:13.5px;color:var(--ink-soft);max-width:52ch;margin:0 auto}
+
+/* modal */
+.scrim{position:fixed;inset:0;background:rgba(44,42,41,.44);display:none;align-items:center;justify-content:center;z-index:200;padding:20px}
+.scrim.on{display:flex}
+.modal{background:var(--cream);border-radius:15px;max-width:520px;width:100%;max-height:86vh;overflow:auto;border:1px solid var(--border)}
+.modal .mh{padding:18px 20px 0}
+.modal h3{font-size:18px;font-weight:700;letter-spacing:-.01em;margin-bottom:8px}
+.modal .mb{padding:10px 20px 4px;font-size:14px;color:var(--ink-soft)}
+.modal .mb p{margin-bottom:11px}
+.modal .mf{display:flex;gap:9px;justify-content:flex-end;padding:15px 20px 18px;flex-wrap:wrap}
+.namelist{background:var(--paper);border:1px solid var(--border);border-radius:9px;padding:11px 13px;max-height:190px;overflow:auto;margin-bottom:11px}
+.namelist li{list-style:none;font-family:var(--mono);font-size:11.5px;color:var(--ink);padding:2.5px 0}
+.legacy{border:1px solid var(--border);border-radius:12px;margin:20px 16px 0;overflow:hidden}
+.legacy>summary{padding:13px 15px;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--ink-soft);background:var(--wash);list-style:none;display:flex;align-items:center;gap:9px}
+.legacy>summary::-webkit-details-marker{display:none}
+.legacy>summary .chev{transition:transform var(--dur) var(--ease)}
+.legacy[open]>summary .chev{transform:rotate(90deg)}
+.legacy .lb{padding:14px 15px;font-size:13px;color:var(--ink-soft)}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:10px;padding:11px 18px;font-size:13.5px;font-weight:600;z-index:300;opacity:0;pointer-events:none;transition:opacity 220ms var(--ease),transform 220ms var(--ease)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(-6px)}
+</style>
+
+<!-- ══════════════════════════════════════════════════════════════
+     PANE 2 — WHAT WE RECOMMEND
+     ══════════════════════════════════════════════════════════════ -->
+<div class="pane" id="pane-new">
+<div class="wrap">
+  <span class="paneflag new"><svg class="i"><use href="#i-check"/></svg> What we recommend</span>
+
+  <div class="find ok" style="margin-bottom:18px">
+    <h4>The one idea: the sell sheet, and the back room</h4>
+    <p>The screen stops being a filing cabinet of everything you have ever priced. It opens on <b>the 34 things a person can buy today</b>. Everything retired moves to a back room that <b>measures itself towards empty</b> — every retired price either names what is still holding it in place, or offers to be gone for good. <b>Gone is the destination of every retired row, and the screen shows you how far each one has to go.</b></p>
+  </div>
+
+  <div class="app">
+    <div class="appbar"><span class="url">www.setnayan.com/admin/pricing</span></div>
+
+    <div class="chead">
+      <div class="r1">
+        <h2>Prices</h2>
+        <div class="srch"><svg class="i"><use href="#i-search"/></svg>
+          <input id="q" type="search" placeholder="Find a price…" oninput="render()" aria-label="Find a price">
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="toast('A new price starts as a Draft — nowhere public until you put it on sale.')">+ New price</button>
+      </div>
+      <div class="views" role="tablist">
+        <button role="tab" id="v-sale"  aria-selected="true"  onclick="setView('sale')">On sale <span class="n">34</span></button>
+        <button role="tab" id="v-draft" aria-selected="false" onclick="setView('draft')">Drafts <span class="n">0</span></button>
+        <button role="tab" id="v-ret"   aria-selected="false" onclick="setView('ret')">Retired <span class="n">57</span></button>
+        <span class="latest"><svg class="i" style="width:14px;height:14px"><use href="#i-clock"/></svg>Latest: <b>Setnayan AI ₱2,999 → ₱2,499</b> · 12 Jun</span>
+      </div>
+    </div>
+
+    <div class="chips" id="chips">
+      <button class="chip" aria-pressed="true"  onclick="setScope('all')">All</button>
+      <button class="chip" aria-pressed="false" onclick="setScope('Customer')">Customer</button>
+      <button class="chip" aria-pressed="false" onclick="setScope('Bundles')">Bundles</button>
+      <button class="chip" aria-pressed="false" onclick="setScope('Vendor')">Vendor</button>
+    </div>
+
+    <div id="list"></div>
+
+    <details class="legacy" id="legacy-block">
+      <summary><svg class="i chev"><use href="#i-chev"/></svg>Older catalogue — 43 prices from the previous system<span style="font-weight:400;font-size:12px;margin-left:auto">read-only</span></summary>
+      <div class="lb">These are the prices from the system Setnayan used before. Today they are a <b>download button and nothing else</b> — you cannot see them on screen at all. Here they are readable at last, and deliberately <b>not editable</b>: an editable dead catalogue is a second price authority waiting to disagree with this one.</div>
+    </details>
+  </div>
+
+  <h2 class="sec" style="margin:34px 0 6px;font-size:19px">What changes, and why</h2>
+  <p class="seclede" style="margin-bottom:16px">Six decisions. Each one answers a measured problem, not a matter of taste.</p>
+  <div class="find ok"><h4>Each price saves on its own — “Save all changes” goes</h4><p>This is the fix for the notes being erased, and it is a fix by <b>shape</b>, not by patch: a card that submits only itself, with every field visible while it is open, cannot write away a field nobody saw. It also matches the real job — nobody re-prices 91 things at once. <b>What you give up:</b> re-pricing the whole Papic ladder becomes four saves instead of one. Worth it.</p></div>
+  <div class="find ok"><h4>Three states instead of one tick box</h4><p><b>Draft</b> (being prepared, nowhere public) · <b>On sale</b> · <b>Retired</b>. Retiring stamps the date and who did it, and asks two optional questions: why, and what replaced it. That kills the word “(superseded)” typed into a product’s own title.</p></div>
+  <div class="find ok"><h4>“Safe to remove” is measured, never decided</h4><p>The screen counts what still points at each retired price. Zero pointers and never sold, and <b>Remove for good</b> appears on its own. Anything ever sold can be retired but never removed — receipts name products in loose text, so the row is the only thing that can still say what the receipt meant.</p></div>
+  <div class="find ok"><h4>Every price field comes out of the code</h4><p>Including the <b>₱1,499 sign-up price</b> and whether something is charged once, per day or per year. Nothing about a price should need an engineer.</p></div>
+  <div class="find ok"><h4>The price history gets drawn</h4><p>It is already being recorded on every save. The screen just has to show it.</p></div>
+  <div class="find ok"><h4>Margin appears only when a cost is real</h4><p>A blank cost is silence; an entered ₱0 is a claim. Only claims get a margin. The “average margin” tile goes — it was averaging fiction. Max price and min price go too; they answered no question anybody had.</p></div>
+</div>
+</div>
+
+<div class="scrim" id="scrim" onclick="if(event.target===this)closeModal()"><div class="modal" id="modal" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* Complete the vendor list so the counts on screen are the real 19 live / 10 retired. */
+VENDOR.push(
+  {c:'vendor_branch_28day',            t:'Additional Branch (28-day · per branch)',   p:999,  o:'Subscription · monthly', live:1},
+  {c:'vendor_additional_branch',       t:'Additional Branch (28-day)',               p:999,  o:'Branch',                 live:1},
+  {c:'vendor_custom_base',             t:'Custom Tier — Base (28-day)',              p:8999, o:'Custom add-on',          live:1},
+  {c:'vendor_custom_reach_step',       t:'Custom — Reach +100 km (28-day)',          p:499,  o:'Custom add-on',          live:1},
+  {c:'vendor_custom_reach_nationwide', t:'Custom — Nationwide Reach (28-day)',       p:2499, o:'Custom add-on',          live:1},
+  {c:'vendor_custom_event_slot',       t:'Custom — +1 Event Slot / category (28-day)',p:499, o:'Custom add-on',          live:1},
+  {c:'vendor_custom_photo_pack',       t:'Custom — +100 Portfolio Photos (28-day)',  p:99,   o:'Custom add-on',          live:1},
+  {c:'vendor_custom_domain',           t:'Custom — Custom Domain (28-day)',          p:499,  o:'Custom add-on',          live:1},
+  {c:'vendor_token_pack_4',            t:'4 Bidding Tokens',                         p:400,  o:'Token pack',             live:0},
+  {c:'vendor_ai_addon_advanced',       t:'Vendor AI — AI Chatbot Advanced (28-day)', p:3000, o:'Add-on · recurring',     live:0},
+  {c:'booth_studio',                   t:'Booth Studio — Poster & Banner (28-day)',  p:1500, o:'Add-on · recurring',     live:0},
+  {c:'vendor_custom_included_token',   t:'Custom — Included Token (per cycle)',      p:100,  o:'Custom add-on',          live:0},
+  {c:'vendor_subdomain',               t:'Custom Subdomain (per year)',              p:999,  o:'Custom add-on',          live:0}
+);
+
+/* The NOW pane's vendor list was drawn before the push above completed it, so it
+   showed 16 of the real 29 rows. Re-draw it now that the array is whole — the
+   count on screen must be the measured 19 live / 10 retired, not a subset. */
+document.getElementById('now-vendor').innerHTML =
+  VENDOR.slice().sort((a,b)=>b.live-a.live).map(r=>nowTwoRow(r,!r.live,r.o)).join('');
+
+/* Plain-English notes for the live rows. The 32 rows whose note the save has
+   already wiped render the missing-note state, which is the point. */
+const NOTES = {
+  PAPIC_GUEST_100:'Tops the event’s shared pot up by 100 shots. Cameras are free and unlimited; only the shots are paid.',
+  PAPIC_GUEST:'Tops the shared pot up by 3,000 shots. A photo costs 1; a clip costs 2–8 depending on how long it is.',
+  ANIMATED_MONOGRAM:'Their two initials, drawn and animated, used across the invitation, the screens and the film.',
+  PATIKTOK_COMPILER:'Short vertical films cut from the day’s photos and clips, per day of the celebration.',
+  SEATING_3D:'The room in three dimensions — tables, stage and seats they can walk around before the day.',
+  PAPIC_ADDON_THANK_YOU:'The thank-you film, cut automatically from the guests’ own photos after the celebration.',
+  SETNAYAN_AI:'Assisted planning — matching, sorting and cross-referencing, plus their planning workspace.',
+  PAKANTA:'A song written for their celebration, theirs to keep.',
+  LIVE_STUDIO:'The livestream control room for the day — cameras, switching and the public stream.',
+  PAPIC_GUEST_10K:'Tops the shared pot up by 10,000 shots — the rung most celebrations land on.',
+  COUPLE_WEBSITE_PRO:'The premium touches on their Event Hub — the one public address for their celebration.',
+  PAPIC_GUEST_20K:'Tops the shared pot up by 20,000 shots, for a long or multi-day celebration.',
+};
+const WIPED = ['CUSTOM_QR_GUEST'];
+
+let VIEW='sale', SCOPE='all', OPEN=null;
+const FAM = r => r.fam || 'Customer';
+function rows(){
+  const cust = LIVE.map(r=>({...r, k:r.k, family:'Customer', state:'sale', note:NOTES[r.c]||null}));
+  const bnd  = BUNDLES.map(r=>({...r, family:'Bundles', state:r.live?'sale':'ret', note:null, k:null}));
+  const ven  = VENDOR.map(r=>({...r, family:'Vendor', state:r.live?'sale':'ret', note:null, k:null}));
+  const dead = DEAD.map(r=>({...r, family:'Customer', state:'ret', note:null, k:null,
+                             wired: !!(r.papic||r.bundled||r.activated)}));
+  return [...cust,...bnd,...ven,...dead];
+}
+function setView(v){VIEW=v;OPEN=null;
+  ['sale','draft','ret'].forEach(k=>document.getElementById('v-'+({sale:'sale',draft:'draft',ret:'ret'}[k])).setAttribute('aria-selected',k===v));
+  document.getElementById('legacy-block').style.display = v==='ret' ? '' : 'none';
+  render();}
+function setScope(s){SCOPE=s;OPEN=null;
+  [...document.querySelectorAll('#chips .chip')].forEach(b=>b.setAttribute('aria-pressed', b.textContent.trim()===(s==='all'?'All':s)));
+  render();}
+
+function moneyBlock(r){
+  const cad = r.family==='Vendor' ? (r.o||'') : (r.per|| (r.c==='PATIKTOK_COMPILER'?'per day':'one-off'));
+  let sub='';
+  if(r.signup) sub = `<div class="sub" style="color:var(--gold-text)">₱${r.signup.toLocaleString('en-PH')} to sign up</div>`;
+  return `<div class="pmoney"><div class="amt">${r.p===0?'Free':pesoShort(r.p)}</div>
+    <div class="cad">${esc(cad)}</div>${sub}</div>`;
+}
+function holdList(r){
+  const out=[];
+  if(r.papic)     out.push('Papic camera and credit settings still point at it');
+  if(r.bundled)   out.push('It is still listed inside a bundle that is on sale');
+  if(r.activated) out.push('1 customer’s event still has it switched on');
+  return out;
+}
+function rowHTML(r,i){
+  const open = OPEN===r.c;
+  let dot='dot'; let tags='';
+  if(r.state==='ret'){
+    if(r.family!=='Customer'){ dot='dot off'; tags=`<span class="tag">Not checked yet</span>`; }
+    else if(r.wired){ dot='dot hold'; tags=`<span class="tag gold">Still wired</span>`; }
+    else { dot='dot free'; tags=`<span class="tag neg">Safe to remove</span>`; }
+  }
+  if(r.succ) tags += `<span class="tag">Replaced by ${esc(r.succ)}</span>`;
+  const noteHTML = r.state==='sale'
+    ? (r.note ? `<p class="pdesc">${esc(r.note)}</p>`
+              : `<p class="pdesc none">No note — the last save blanked it.</p>`)
+    : '';
+  return `<div class="prow${open?' open':''}" onclick="if(!event.target.closest('.card'))toggle('${r.c}')">
+    <span class="${dot}"></span>
+    <div style="min-width:0">
+      <p class="ptitle">${esc(r.t)}</p>
+      <div class="pmeta"><code class="pcode">${esc(r.c)}</code>${tags}</div>
+      ${noteHTML}
+      ${open?cardHTML(r):''}
+    </div>
+    ${moneyBlock(r)}
+  </div>`;
+}
+function cardHTML(r){
+  const cust = r.family==='Customer' && r.state==='sale';
+  const holds = holdList(r);
+  return `<div class="card" onclick="event.stopPropagation()">
+   ${r.state==='ret' && holds.length ? `<div class="cgrp"><div class="holds">
+      <h5><svg class="i" style="width:15px;height:15px;color:var(--gold-text)"><use href="#i-lock"/></svg>Still held in place by:</h5>
+      <ul>${holds.map(h=>`<li>${esc(h)}</li>`).join('')}</ul>
+      <p>It stays retired and off the price page. When nothing here needs it any more, <b>Remove for good</b> will appear by itself.</p>
+    </div></div>`:''}
+   ${r.state==='ret' && !holds.length && r.family==='Customer' ? `<div class="cgrp"><div class="holds" style="border-color:rgba(182,90,58,.3)">
+      <h5><svg class="i" style="width:15px;height:15px;color:var(--neg)"><use href="#i-check"/></svg>Nothing depends on this.</h5>
+      <p>Never sold, and nothing points at it. You can remove it for good.</p>
+    </div></div>`:''}
+   <div class="cgrp"><h4>What it is</h4>
+     <div class="fld"><label><span class="l">Name customers see</span>
+       <input class="inp" value="${esc(r.t)}"></label></div>
+     <div class="fld"><label><span class="l">What this is for</span>
+       <textarea placeholder="Say it the way you'd say it to a customer.">${esc(r.note||'')}</textarea>
+       <span class="h">Always on screen while this card is open — which is why it can no longer be saved away by accident.</span></label></div>
+   </div>
+   <div class="cgrp"><h4>What it costs them</h4>
+     ${cust?`<div class="locked"><svg class="i"><use href="#i-lock"/></svg><span>Everything in this group needs an engineer today. <b>Four of these fields are live and charging customers right now</b> and cannot be changed from any screen.</span></div>`:''}
+     <div class="two-up">
+       <div class="fld"><label><span class="l">Price</span>
+         <div class="money"><span class="peso">₱</span><input class="inp" type="number" value="${r.p.toFixed(2)}"></div></label></div>
+       ${cust?`<div class="fld"><label><span class="l">Sign-up price <span class="tag gold">new here</span></span>
+         <div class="money"><span class="peso">₱</span><input class="inp" type="number" value="${r.signup? r.signup.toFixed(2):''}" placeholder="leave blank if there isn't one"></div>
+         <span class="h">${r.signup?`Charged today. Until now only an engineer could change it.`:`Most prices have none.`}</span></label></div>`:''}
+     </div>
+     ${cust?`<div class="two-up" style="margin-top:11px">
+       <div class="fld"><label><span class="l">Charged <span class="tag gold">new here</span></span>
+         <select><option ${r.per!=='per day'?'selected':''}>Once</option><option ${r.per==='per day'?'selected':''}>Per day of the celebration</option><option>Per year</option><option>Every 28 days</option></select></label></div>
+       <div class="fld"><label><span class="l">Priced per head? <span class="tag gold">new here</span></span>
+         <select><option selected>No — one flat price</option><option>Yes — set a floor and a step</option></select></label></div>
+     </div>`:''}
+   </div>
+   ${cust?`<div class="cgrp"><h4>What it costs us</h4>
+     <div class="fld" style="max-width:230px"><label><span class="l">Our cost per celebration</span>
+       <div class="money"><span class="peso">₱</span><input class="inp" type="number" value="${(r.k&&r.k>0)?r.k.toFixed(2):''}" placeholder="blank"></div>
+       <span class="h">Leave blank if you don’t know — we won’t invent a margin.</span></label></div>
+     <p style="font-size:13px;color:var(--ink-soft)">${(r.k&&r.k>0)?`Margin <b class="num">${margin(r.p,r.k)}</b>`:'<span style="color:var(--ink-soft)">No cost recorded — no margin shown.</span>'}</p>
+   </div>`:''}
+   <div class="cgrp"><h4>History</h4>
+     <ul class="hist">${histFor(r).map(h=>`<li><span class="d">${h[0]}</span><span class="m">${h[1]}</span><span class="who">${h[2]}</span></li>`).join('')}</ul>
+     <p style="font-size:12px;color:var(--ink-soft);margin-top:8px">Already recorded on every save since 1 July — this is the first screen to show it.</p>
+   </div>
+   <div class="cfoot">
+     <button class="btn btn-primary btn-sm" onclick="saveOne('${esc(r.t)}',${r.p})">Save this price</button>
+     ${r.state==='sale'
+       ? `<button class="btn btn-ghost btn-sm" onclick="retire('${r.c}')">Retire this price</button>`
+       : `<button class="btn btn-ghost btn-sm" onclick="toast('Back on sale — it reappears on the public price page.')">Put back on sale</button>`}
+     ${r.state==='ret' && !holds.length && r.family==='Customer'
+       ? `<button class="btn btn-danger btn-sm sp" onclick="removeOne('${r.c}','${esc(r.t)}')"><svg class="i" style="width:13px;height:13px;vertical-align:-2px"><use href="#i-trash"/></svg> Remove for good</button>`:''}
+   </div>
+  </div>`;
+}
+function histFor(r){
+  if(r.c==='SETNAYAN_AI') return [['12 Jun 2026','₱2,999 → ₱2,499','Ice'],['29 Jun 2026','₱499 → ₱2,999','Ice'],['16 Jun 2026','set at ₱499','Ice']];
+  if(r.c==='PAPIC_GUEST_10K') return [['11 Aug 2026','₱2,999 → ₱3,000','Ice'],['22 Jul 2026','set at ₱2,999','Ice']];
+  return [['1 Jul 2026',`set at ${pesoShort(r.p)}`,'Ice']];
+}
+function toggle(c){OPEN = OPEN===c?null:c;render();}
+
+function shelf(title,count,cls,note){
+  return `<div class="shelf ${cls||''}"><h3>${esc(title)}</h3><span class="n">${count}</span>${note?`<span class="n" style="margin-left:auto;color:var(--ink-soft)">${esc(note)}</span>`:''}</div>`;
+}
+function render(){
+  const q = (document.getElementById('q').value||'').trim().toLowerCase();
+  const all = rows();
+  const match = r => (!q || r.t.toLowerCase().includes(q) || r.c.toLowerCase().includes(q))
+                  && (SCOPE==='all' || r.family===SCOPE);
+  let html='';
+  if(VIEW==='draft'){
+    html = `<div class="emptyst"><h4>No drafts.</h4><p>A price you are still preparing lives here — named, priced and invisible to everybody — until you put it on sale.</p></div>`;
+  } else if(VIEW==='sale'){
+    const s = all.filter(r=>r.state==='sale' && match(r));
+    if(!s.length){ html = `<div class="emptyst"><h4>Nothing matches “${esc(q)}”.</h4><p>Try part of the name, or the product code.</p></div>`; }
+    else{
+      ['Customer','Bundles','Vendor'].forEach(f=>{
+        const g = s.filter(r=>r.family===f);
+        if(!g.length) return;
+        html += shelf(f, g.length) + g.map(rowHTML).join('');
+      });
+    }
+  } else {
+    const rt = all.filter(r=>r.state==='ret' && match(r));
+    const safe = rt.filter(r=>r.family==='Customer' && !r.wired);
+    const held = rt.filter(r=>r.family==='Customer' && r.wired);
+    const unk  = rt.filter(r=>r.family!=='Customer');
+    if(!rt.length){
+      html = `<div class="emptyst"><h4>Nothing retired.</h4><p>Everything in the catalogue is on sale or in drafts. When you retire a price it waits here, and once nothing depends on it you can remove it for good.</p></div>`;
+    } else {
+      if(safe.length){
+        html += shelf('Safe to remove', safe.length, 'danger', 'never sold · nothing points at them');
+        html += `<div style="padding:11px 16px;border-bottom:1px solid var(--border-soft)">
+          <button class="btn btn-danger btn-sm" onclick="removeAll()"><svg class="i" style="width:13px;height:13px;vertical-align:-2px"><use href="#i-trash"/></svg> Remove all ${safe.length} for good</button>
+          <span style="font-size:12.5px;color:var(--ink-soft);margin-left:10px">This is the broom. It is your press, on your day — nothing sweeps itself.</span></div>`;
+        html += safe.map(rowHTML).join('');
+      }
+      if(held.length){
+        html += shelf('Still wired', held.length, 'hold', 'each one names what is holding it');
+        html += held.map(rowHTML).join('');
+      }
+      if(unk.length){
+        html += shelf('Not checked yet', unk.length, '', 'bundles + vendor prices — same check, not yet run');
+        html += unk.map(rowHTML).join('');
+      }
+    }
+  }
+  document.getElementById('list').innerHTML = html;
+}
+
+/* ── modals ─────────────────────────────────────────────────── */
+function openModal(h){document.getElementById('modal').innerHTML=h;document.getElementById('scrim').classList.add('on');}
+function closeModal(){document.getElementById('scrim').classList.remove('on');}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(window._tt);window._tt=setTimeout(()=>t.classList.remove('on'),2600);}
+function saveOne(t,p){toast(`Saved — ${t} is ₱${Number(p).toLocaleString('en-PH')} on the public page now.`);}
+
+function retire(code){
+  const r = rows().find(x=>x.c===code); if(!r) return;
+  const holds = holdList(r);
+  const live = LIVE.filter(x=>x.c!==code).slice(0,6);
+  openModal(`
+   <div class="mh"><h3>Retire ${esc(r.t)}?</h3></div>
+   <div class="mb">
+     <p>It comes off the public price page right away. Nobody new can buy it; anything already sold or wired keeps working. You can put it back on sale any time.</p>
+     ${holds.length
+       ? `<div class="holds"><h5><svg class="i" style="width:15px;height:15px;color:var(--gold-text)"><use href="#i-lock"/></svg>Still held in place by:</h5><ul>${holds.map(h=>`<li>${esc(h)}</li>`).join('')}</ul><p>You can still retire it. It just cannot be removed for good until this list is empty.</p></div>`
+       : `<div class="holds" style="border-color:rgba(79,107,74,.3)"><h5><svg class="i" style="width:15px;height:15px;color:var(--pos)"><use href="#i-check"/></svg>Nothing depends on this.</h5><p>After retiring, you’ll be able to remove it for good.</p></div>`}
+     <div class="fld" style="margin-top:13px"><label><span class="l">Why retire it? <span style="font-weight:400;color:var(--ink-soft)">(optional — kept with the row)</span></span>
+       <input class="inp" placeholder="e.g. replaced by the new credit ladder"></label></div>
+     <div class="fld"><label><span class="l">Replaced by <span style="font-weight:400;color:var(--ink-soft)">(optional)</span></span>
+       <select style="width:100%"><option>— nothing —</option>${live.map(x=>`<option>${esc(x.t)}</option>`).join('')}</select>
+       <span class="h">This is what removes “(superseded)” from a product’s own title.</span></label></div>
+   </div>
+   <div class="mf"><button class="btn btn-ghost btn-sm" onclick="closeModal()">Keep selling</button>
+     <button class="btn btn-primary btn-sm" onclick="closeModal();toast('Retired — off the public price page. It is waiting in Retired.')">Retire it</button></div>`);
+}
+function removeOne(code,title){
+  openModal(`
+   <div class="mh"><h3>Remove ${esc(title)} for good?</h3></div>
+   <div class="mb"><p>Never sold, and nothing depends on it. It disappears completely — <b>no record kept, no undo</b>.</p></div>
+   <div class="mf"><button class="btn btn-ghost btn-sm" onclick="closeModal()">Keep it retired</button>
+     <button class="btn btn-danger btn-sm" onclick="closeModal();toast('Removed for good.')">Remove for good</button></div>`);
+}
+function removeAll(){
+  const safe = rows().filter(r=>r.state==='ret'&&r.family==='Customer'&&!r.wired);
+  openModal(`
+   <div class="mh"><h3>Remove ${safe.length} prices for good?</h3></div>
+   <div class="mb">
+     <p>None of these has ever been sold, and nothing points at any of them. They disappear completely — <b>no record kept, no undo</b>. Read the list before you agree.</p>
+     <ul class="namelist">${safe.map(r=>`<li>${esc(r.t)}</li>`).join('')}</ul>
+   </div>
+   <div class="mf"><button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-danger btn-sm" onclick="closeModal();toast('${safe.length} prices removed for good.')">Remove all ${safe.length}</button></div>`);
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+setView('sale');
+</script>
+
+<footer style="border-top:1px solid var(--border);padding:26px 0 44px;margin-top:20px">
+ <div class="wrap">
+  <p class="kicker">Contrast receipts · WCAG AA on #FFFFFF</p>
+  <p class="muted" style="font-size:12.5px;margin-top:8px;max-width:80ch">
+   ink <code>#2C2A29</code> 14.8:1 · soft ink <code>#4F535B</code> 7.9:1 · action <code>#C24E25</code> 4.6:1 ·
+   link <code>#3B4E67</code> 8.2:1 · text gold <code>#8A6B39</code> 5.0:1 · negative <code>#B65A3A</code> 4.0:1 (used only on ≥16px bold + as a border) ·
+   positive <code>#4F6B4A</code> 5.3:1. Decorative gold <code>#A9834B</code> (3.4:1) is used only for dots, rules and borders — never for words.
+  </p>
+  <p class="muted" style="font-size:12.5px;margin-top:12px;max-width:80ch">
+   Every count, price and wiring flag on this page was read out of the live production database on 26 August 2026.
+   The “not checked yet” group is honest: the wiring measurement was run on the 45 retired customer products, not yet on the 2 retired bundles or the 10 retired vendor prices.
+  </p>
+ </div>
+</footer>
+</body>
+</html>
