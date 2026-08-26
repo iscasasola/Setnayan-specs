@@ -62,6 +62,33 @@
 > by anyone who is not a Setnayan admin**; song requests **have no way for a guest to ask**; a
 > payment claim **has no "no" and cannot be undone.**
 >
+>
+> 🔬 **THEN THE CRITIC WAS ATTACKED TOO — two of its gaps SHRANK, two GREW, and three sweeps over
+> ground nobody had covered found SIXTEEN more things (§ 3.7–§ 3.9).**
+> ✅ **"The room has no door" was a search that could not match** — two supplier screens already
+> read a couple's event address and link straight to it. **Precedent to copy, not a mechanism to
+> invent.** ✅ **"The night crew gets stranded" is REFUTED both halves** — everyone grantable is
+> already a teammate, so the teammate slice covers them, **and the admin-client rule does not have
+> to be argued after all.** ⚠ But the risk runs the other way: **widening to the whole team retires
+> per-event access as a side effect** (new owner decision).
+> 🚨 **THE WEDDING-WORDS LEAK IS NOT A FUTURE COST — IT IS LIVE ON THE PUBLIC PAGE TODAY.** *"The
+> couple"* is hardcoded into the guest photo challenges and rendered on the Event Hub right now:
+> **74 seeded prompts**, plus a DB fallback for anybody with no bride-or-groom side. **A birthday,
+> graduation or funeral guest reads it this minute.** **182 more lines** sit in borrowed modules
+> the guard cannot see, and its exemption list waves through **16 files by filename — including the
+> one rendering the live instance.**
+> 🚨 **AND THE THREE THAT BREAK THE BUILD:** (1) **a supplier's phone can NEVER be reached and
+> their screen says it can** — the console writes one store, the sender reads another, and the
+> vendor sender is off; (2) **nothing anywhere says "your event is today"**, and this platform is
+> cron-free so it needs a trigger, not a schedule; (3) **a supplier booked the NEW way gets no On
+> the Day screen EVER** — every day-of screen resolves from a schedule reservation the lock
+> handshake's own definition says it never creates. **The room's gate inherits that.**
+> ⏭ **§ 3.9 IS THE ONLY LIST THAT MATTERS: SIX UNKNOWNS that must close before anybody builds.**
+> ✅ **The answers desk touches NONE of them and can start now** — it is what the owner actually
+> complained about.
+> 🔴 **SEVEN owner decisions now, not five.** Two new: *does a teammate reach every booked event or
+> only the ones they were given?* and *who at a shop gets told?* (almost everything reaches one
+> account; **a move to remove a co-owner reaches nobody at all**).
 > 🔴 **FIVE OWNER DECISIONS in § 4** — loudest: *may a supplier read the couple's private
 > run-of-show notes at the couple's own **public** address?* ⛔ **A sixth was RETIRED before it
 > reached him** — the photo route's own header already settled it (*"THE SHUTTER IS DAY-BOUND.
