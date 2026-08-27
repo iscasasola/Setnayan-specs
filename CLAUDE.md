@@ -316,8 +316,11 @@ committed docs on purpose.
 > fails if a second way to say no appears. 🧾 The receipt is shown at last — `proofUrl` had been
 > fetched into that card since it was written and **never rendered once.**
 > ✅ **AND THE WIPE IS FIXED — owner ruled the same day: _"yes they keep their record."_** PR
-> [#4927](https://github.com/iscasasola/setnayan-platform/pull/4927), **merged 2026-08-27T17:19Z**,
-> merge `73cee68` verified an ancestor of `origin/main` · migration `20271175634994`. The
+> [#4927](https://github.com/iscasasola/setnayan-platform/pull/4927), **merged 2026-08-27T17:19Z AND
+> SERVED** (prod `/api/health` → `73cee68`); migration `20271175634994` **verified applied in prod
+> BY THE OBJECT** — the live `reject_vendor_deposit` carries **no** claim-erasure and **no** ledger
+> DELETE, `acknowledge_vendor_deposit` clears the refusal, and the guard covers the refusal while
+> still covering the acknowledgement. The
 > refusal is a MARK now, not a deletion: the couple keeps their amount, receipt, method AND ledger
 > row; their card quotes the supplier's words and offers **Send it again**; re-sending clears the
 > refusal, which is the only thing that puts the question back on the supplier's desk.
