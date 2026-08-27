@@ -87,7 +87,8 @@ committed docs on purpose.
 > **without** touching the schedule pool every day-of screen was reading. S4 PR
 > [#4913](https://github.com/iscasasola/setnayan-platform/pull/4913) (merged + SERVED) — a Locked-QR
 > booking finally reserves its date. S2 PR
-> [#4914](https://github.com/iscasasola/setnayan-platform/pull/4914) — **a booked supplier gets
+> [#4914](https://github.com/iscasasola/setnayan-platform/pull/4914) (merged + SERVED, `df63d11`) —
+> **a booked supplier gets
 > through the door on a private celebration**: the page and the shared gate had drifted, so a
 > supplier who could open the couple's private page was bounced off all seven sub-pages of it, and
 > **every one of those refusals is byte-identical to a stranger's, so a gate wrong in that direction

@@ -21,7 +21,7 @@ S5 ships flag-off pending the owner's gate.
 |---|---|---|---|---|
 | ⚠ **S0** | A booked supplier stops being told "No event today" | — | — | **NOT on `main`** — no file, no PR, no branch (measured 2026-08-27). S1 created the module it was said to own. |
 | ✅ **S1** | One honest answer to *"is this shop booked?"* | **Opus 5** | **high** | **MERGED 2026-08-27T11:24Z · PR [#4912](https://github.com/iscasasola/setnayan-platform/pull/4912)** |
-| ✅ **S2** | A booked supplier gets through the door on a private celebration | **Opus 5** | **high** | **BUILT — PR [#4914](https://github.com/iscasasola/setnayan-platform/pull/4914), auto-merge armed. Verify state before trusting this.** |
+| ✅ **S2** | A booked supplier gets through the door on a private celebration | **Opus 5** | **high** | **MERGED + SERVED** — PR [#4914](https://github.com/iscasasola/setnayan-platform/pull/4914) |
 | **S3** | **The vendors are integrated into the Event Hub on the day** | **Opus 5** | **high** | S1 · S2 |
 | ✅ **S4** | A booking made by locked QR holds its date | **Opus 5** | **medium** | **MERGED + SERVED** — PR [#4913](https://github.com/iscasasola/setnayan-platform/pull/4913) |
 | ✅ **S5** | The night-before email (ships switched OFF) | **Sonnet 5** | **medium** | **BUILT + PR'd** — PR [#4915](https://github.com/iscasasola/setnayan-platform/pull/4915), auto-merge armed |
@@ -139,9 +139,11 @@ scope.
 with its count unchanged at **0 → 0** — the pattern was case-wrong and the sabotage had never
 landed. *A red result is not evidence the sabotage applied.*
 
-### ✅ S2 — DONE. PR [#4914](https://github.com/iscasasola/setnayan-platform/pull/4914). Do NOT rebuild it.
-⚠ Verify with `gh pr view 4914 --json state,mergedAt` before trusting this line — this corpus has
-been wrong about a PR's state five times. It was OPEN with auto-merge armed when this was written.
+### ✅ S2 — DONE. PR [#4914](https://github.com/iscasasola/setnayan-platform/pull/4914), **MERGED 2026-08-27T13:33Z AND SERVED**. Do NOT rebuild it.
+✅ `/api/health` self-reports **`df63d11`** — the PR's own merge commit, verified an ancestor of
+`origin/main`. **A merge is not a ship; this one is both.**
+⚠ Still re-verify with `gh pr view 4914 --json state,mergedAt` before acting — this corpus has been
+wrong about a PR's state five times.
 
 **Shipped:** the rule lives ONCE, in a pure `lib/closed-event-admission.ts` that both
 `app/[slug]/page.tsx` and `canViewSlugEvent` ask; and "did they book you?" is ONE read —
