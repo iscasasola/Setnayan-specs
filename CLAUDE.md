@@ -286,9 +286,21 @@ committed docs on purpose.
 > picture** — different axes, so one shared QR traps nobody. The real split is **registered vs
 > not**, never custom-QR vs generic-QR.
 >
-> 🔴 **OWNER, NOT ENGINEERING:** the **DPO ruling** that opens the supplier capture lane (built,
-> switched off, route 403s) — and until it opens, **a photographer can only hand over a LINK**,
-> never files into the couple's library. That is the one genuinely new build left.
+> 🛑 **CORRECTED 2026-08-27 — THE SUPPLIER CAPTURE LANE IS *ON* IN PRODUCTION, AND HAS BEEN SINCE
+> 16 JULY.** This block said for six weeks that it was *"built, switched off, route 403s"* and that
+> the DPO ruling was still pending. **Read out of prod by the object, not from a doc:**
+> `data_privacy_controls.vendor_papic_capture` is **`status='active'`, `approved_at`
+> 2026-07-16 04:51 UTC**, approved by the owner's own user id. The route's gate reads that control,
+> so it no longer 403s. ⇒ *"a photographer can only hand over a LINK"* is **FALSE**.
+> 🔑 **This was not a rogue flip — the owner approved it. The defect is that NO DOCUMENT CAUGHT UP**,
+> so six weeks of planning treated an open lane as closed, and a session summarising this file told
+> the owner it was DPO-gated on the day it was already live. **A privacy control's state lives in
+> the database; a doc describing it is a claim with an expiry date.** ⚠ The route's own docblock
+> (`app/api/vendor/papic-capture/route.ts`) still asserts the old default — applied code comments
+> are not edited, so read the control, never the comment.
+> ⏭ **STILL GENUINELY OWNER'S:** whether that lane *should* stay open now that it is (an RA 10173
+> question about a supplier collecting guests' images), and the retention/consent copy that ought to
+> accompany it.
 > ⏭ Also unbuilt and needed for per-person folders: `papic_photos.captured_by_person_id` has
 > **zero writers**, so *"each person's own folder"* is not reading something we already store.
 >
