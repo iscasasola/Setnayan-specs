@@ -10,6 +10,35 @@ V1 is built on Vercel + Supabase + Cloudflare R2 + GitHub plus seven third-party
 
 ---
 
+## ⛔ READ THIS BEFORE THE PUNCH LIST — EVERY PERMIT, TAX AND BANK ROW BELOW IS DEFERRED TO JANUARY 2027
+
+**Owner ruling, 2026-07-30, verbatim: *"we will do everything on january 2027 but let this run
+truthfully until then."*** He has since had to repeat it — *"we already agreed to just approve this
+until january"* (2026-08-20) and *"isn't this for january?"* — and it has now been re-raised at
+least **four** times by sessions reading this very file.
+
+🔑 **WHY IT KEEPS HAPPENING, AND IT IS MECHANICAL, NOT A MEMORY LAPSE.** The deferral lives in
+`DECISION_LOG.md` and in `scripts/check-corpus-facts.mjs` (which names it explicitly) — and until
+today this file contained the word "January" **zero times**. So every red 🔴 below reads as *open
+work* to anyone who lands here, and the punch list is exactly where a session looking for "what do
+we still need?" lands. **A fact written in more than one place with nothing keeping the copies equal
+is the disease this corpus has CI for.**
+
+⛔ **DO NOT PUT ANY OF THESE ON THE OWNER'S PLATE BEFORE JANUARY 2027:** Mayor's Permit · BIR
+registration / Form 1905 / ATP · BDO business account · GCash business account · the DTI trade-name
+change · NPC filing · PH counsel engagement · the entity's tax posture. **A 🔴 on those rows means
+"scheduled for January", NOT "overdue".**
+
+✅ **WHAT IS STILL LIVE WORK TODAY:** anything a *customer or the product itself* touches — the
+service credentials that make features run, and keeping every public claim **truthful in the
+meantime**, which is the other half of his ruling and is not deferred.
+
+⚖ **AND TWO ROWS BELOW ARE STALE IN THE OTHER DIRECTION** — verify before repeating them: the DPO
+row shows 🔴 while the owner registered on the NPC system **2026-07-07**; the checklist has not been
+re-audited since **2026-05-22**, three months ago. Treat every status mark here as *unverified*.
+
+---
+
 ## 🚨 Owner Admin Punch List (V1 Launch · 2026-05-16)
 
 Consolidated punch list of every **owner-side action** needed to unblock V1 launch. Walkthrough items #17-20 closed here. Each row links back to the detailed section below. Status column: 🔴 not started · 🟡 in progress · ✅ done · ⚪ V1.5+ deferred (can wait).
