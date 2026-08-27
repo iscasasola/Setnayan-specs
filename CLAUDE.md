@@ -107,8 +107,9 @@ committed docs on purpose.
 > their tools — through to **06:00 the morning after**, because a reception runs past midnight.
 > Nobody else ever sees a trace.
 > ⏳ **AND `hub2` GAVE IT THE OTHER 335 DAYS — PR
-> [#4932](https://github.com/iscasasola/setnayan-platform/pull/4932), **MERGED 2026-08-27T19:32Z**
-> (merge `b9f8f3c`, verified an ancestor of `origin/main`). DO NOT REBUILD ANY OF IT.**
+> [#4932](https://github.com/iscasasola/setnayan-platform/pull/4932), **MERGED 2026-08-27T19:32Z AND
+> SERVED** — merge `b9f8f3c`, verified an ancestor of `origin/main` AND of the commit production's
+> `/api/health` self-reports. DO NOT REBUILD ANY OF IT.**
 > S3's room lived about **thirty hours** and the binding design's strongest sentence is against
 > exactly that (*"a day-only room recreates the midnight-door mistake"*). Four states now: the
 > **call sheet** before (date · *"43 days to go"* · the venue once set · the running order once
