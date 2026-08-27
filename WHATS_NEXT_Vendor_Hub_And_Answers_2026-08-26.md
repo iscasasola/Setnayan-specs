@@ -339,9 +339,16 @@ separate sabotages here have printed 0→0 and read as clean passes.
 
 ### Before step 7 — the room opens
 
-**May a supplier read the couple's private run-of-show notes at the couple's own public web
+✅ **ANSWERED 2026-08-27 — YES: the same notes, in a new place. Do not re-ask.**
+Owner chose it over *schedule only* and *only during the event window*, both of which are recorded
+in `DECISION_LOG.md` as turned down so they are not re-proposed. The safety comes from the DOOR, not
+from thinning the content: the room refuses everyone who is not a booked supplier (or a teammate
+holding a live grant for THIS event) with a redirect byte-identical to a stranger's, and the page is
+no-indexed. A guest, a stranger and a supplier who was only ASKED never learn it exists.
+
+~~**May a supplier read the couple's private run-of-show notes at the couple's own public web
 address?** They read them today inside their own dashboard, marked *don't read aloud*. This changes
-*where* they are shown, not who sees them — and the where is a public address.
+*where* they are shown, not who sees them — and the where is a public address.~~
 
 ### Before step 9 — the eve-of email
 
