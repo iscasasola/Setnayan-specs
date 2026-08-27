@@ -242,6 +242,27 @@ committed docs on purpose.
 > ⛔ **Three answers still do NOT join, recorded once as data** (`ANSWERS_THAT_DO_NOT_JOIN`, read by
 > the guard): the waitlist pick **does nothing and reports success** · a crew shift **cannot be
 > posted, seen or accepted by a non-admin** · **nobody can ask for a song**.
+> 📋 **ALL THREE ARE NOW PLANNED, NOT BUILT — contract:
+> [`WHATS_NEXT_The_Three_Dead_Answers_2026-08-27.md`](WHATS_NEXT_The_Three_Dead_Answers_2026-08-27.md).**
+> Measured against prod by the object, and **it corrected the brief it was written from three
+> times.** ⚠ **NOTHING BLOCKS ANY OF THE THREE — no owner decision, all three empty in prod.**
+> 🚨 **THE FINDING WORTH MORE THAN THE PLAN: the crew shift is not four missing policies, it is a
+> SCHEMA DRIFT.** `manpower_gigs.vendor_profile_id` is **`NOT NULL` in production** while the repo's
+> own `CREATE TABLE` declares it **nullable** — a `CREATE TABLE IF NOT EXISTS` that no-op'd against
+> a pre-existing prod table of a different shape (the same drift `20271011120000` already had to
+> repair for `posted_by_user_id` on this very table; **both migrations are applied and prod still
+> disagrees with the repo on two columns**). The app's whole model is *"an open gig has a NULL
+> vendor"*, so **posting dies on a NOT-NULL violation even with a perfect INSERT policy.**
+> 🔴 **AND THE CONSEQUENCE IS BIGGER THAN THE FEATURE: the PGlite replay builds from the REPO file,
+> so it has the nullable column. A db test for this door would PASS IN THE REPLAY AND PROVE NOTHING
+> ABOUT PRODUCTION.** Not permissiveness — **a different table.** ⇒ dry-run in prod inside
+> `BEGIN…ROLLBACK` and put the transcript in the PR body. ⏭ **A full prod-vs-repo catalogue diff is
+> its own session** — only three tables were checked.
+> 🔑 Also corrected: `accepted_at` does **not** have zero readers (the *picked N/cap* count reads it)
+> — what is true is that **no couple-facing reader and no gate reader exists**; and the gig post's
+> refusal is **not** silent (an INSERT denial throws, so the host sees a raw database sentence in a
+> banner). *A survey that finds "zero readers" and stops has not asked whether the readers it found
+> decide anything.*
 > ✅ **THE FOURTH IS BUILT, MERGED AND SERVED — "somebody says they paid you" can be answered NO**
 > (owner 2026-08-27: *"yes. they can declare it."*). PR
 > [#4923](https://github.com/iscasasola/setnayan-platform/pull/4923); production's `/api/health`
