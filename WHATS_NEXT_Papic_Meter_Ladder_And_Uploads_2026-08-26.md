@@ -14,6 +14,7 @@
 |---|---|---|
 | The meter fix + the capturer trigger | [#4879](https://github.com/iscasasola/setnayan-platform/pull/4879) | ✅ **MERGED, SHIPPED AND VERIFIED IN PRODUCTION BY THE OBJECT** — see below. Nothing left to do. |
 | The 16-rung ladder | [#4884](https://github.com/iscasasola/setnayan-platform/pull/4884) | ✅ **OPEN, auto-merge ARMED.** tsc 0 · unit 10,193/0 · db 1,591/0 · 18 lints · prod dry-run clean. **A merge is not a ship** — when it lands, verify the 16 rungs by querying the catalog (§ 6), not by reading this. |
+| **Atomicity (§ 1) + the server-side uploads switch (§ 2.1) + the guest capturer column (§ 2.2)** | branch `claude/papic-seat-capture-atomicity` — **NOT PUSHED** | ⏳ **BUILT, TESTED, UNMERGED.** 3 commits, 17 files, migrations `20271170528490` + `20271171474426`. tsc 0/0 · unit 10,242/0 · db 1,618/0 · 12/12 mutations RED · prod dry-run clean in `BEGIN…ROLLBACK` and verified rolled back. ⛔ **NOTHING IS APPLIED TO PRODUCTION** — the push needed a permission the session did not have. Until it merges, § 1 and § 2.1 describe code that exists only on that branch. |
 
 ### ✅ #4879 IS VERIFIED IN PRODUCTION — measured on the live objects, not inferred from the merge
 
@@ -33,8 +34,8 @@ Then the database was asked directly:
 So the meter is now the only door, and the column that had **never held a value in production** holds
 one on every row that exists.
 
-⛔ **This does NOT make the credit invariant atomic** — see § 1. Reserve and insert are still two
-steps.
+⛔ **This does NOT make the credit invariant atomic** — see § 1, which is now BUILT on an unmerged
+branch. Until that branch lands, reserve and insert are still two steps in production.
 
 🪤 **A NEAR-MISS WORTH THE LINE: the first push of that branch was a commit missing six staged
 files, and it would have failed CI.** `git status --porcelain` printed them with a leading `M `/`A `
@@ -50,63 +51,102 @@ add photos by hand ([#4875](https://github.com/iscasasola/setnayan-platform/pull
 
 ---
 
-## § 1 · 🔴 THE ONE THING THAT IS A REAL BUILD — ATOMICITY
+## § 1 · ~~🔴 THE ONE THING THAT IS A REAL BUILD — ATOMICITY~~ ✅ BUILT 2026-08-26
 
-**Do not claim "a photo cannot exist without a credit" until this exists.**
+⏳ **BUILT AND TESTED, NOT YET MERGED.** Branch `claude/papic-seat-capture-atomicity`, migration
+`20271170528490`. **Verify before trusting this line** — `gh pr view` for its state, and query the
+live object, not this file.
 
-`recordSeatCapture` reserves the credits and then writes the row. **Two steps.** A process that
-dies between them leaks the reserved credits — the couple charged for a photo that does not exist.
-It errs against **us**, not against the meter, which is the right direction to fail while it stands,
-and the unwind in application code (`abortReleaseDedicated` / `abortReleasePool`) handles the
-ordinary failure. But it is debt, and it is written into the migration, the guard and the changelog
-on purpose so nobody quotes them as proof of an invariant they do not test.
+**`papic_record_seat_capture`** is `SECURITY DEFINER` and does the authorization, the split reserve
+and the `papic_photos` insert in ONE transaction. `recordSeatCapture` makes one call, and the
+application unwind on that path is **deleted, not kept as a belt** — there is no longer a state
+between the spend and the row for anything to clean up. It follows `papic_record_guest_capture`'s
+shape without reusing it (different table).
 
-🔑 **THE REPAIR IS NOT A NEW IDEA — IT ALREADY SHIPS, ON THE OTHER HALF OF THIS FEATURE.**
-`papic_record_guest_capture` is `SECURITY DEFINER` and does the whole thing in one function:
-resolve the guest, check the event owns the service, check the uploader is not blocked, check terms
-were accepted, check the unlock pass, reserve from the pool, insert. **That is why `anon` has never
-needed an INSERT grant.** The seat path is the odd one out. **Copy the guest function's shape.**
+⚖ **THE "EIGHT GATES" PARAGRAPH BELOW WAS THE RIGHT WORRY AND THE WRONG CONCLUSION.** Three moved
+in — seat authorization, the split reserve, the row. **Five stayed out and each one refuses BEFORE a
+credit is touched**, which is the only property that mattered: the Upstash burst limiter (cannot
+move, and fails open by design), the clip-length cap (decided before anything is presigned), the
+capture window, the paid-order gate and the put-away gate. The geo control passes its DECISION in as
+columns, so `buildPapicGeoFields` stays the one place that rule is written. **"Every check in SQL"
+would have been a rewrite that bought nothing.**
 
-⚠ **It writes a DIFFERENT table** — `papic_guest_captures`, and nothing copies between them. It is
-a model to follow, not a second writer of `papic_photos`. (Measured: all 14 `papic_photos` rows in
-prod carry a seat; none exists without one.)
+⛔ **EXECUTE IS `service_role` ONLY, and that is load-bearing** — a browser role holding it would let
+a claimer name their own id and walk past all five gates above, which is the hole `20271169487222`
+closed, one door over. Revoked from **PUBLIC** (naming the two roles alone leaves the PUBLIC grant
+and every future role arrives holding it), and the migration refuses to apply if the door did not
+close.
 
-⛔ **The hard part is not the SQL.** Eight app-side gates would have to move into it — a burst
-limiter that lives in Upstash, the clip-length cap, the capture window, the paid-order gate, the
-put-away gate, the RA 10173 geo control, the unlock pass, and the split reserve. Some of those
-cannot move (the rate limiter). Decide which are the transaction's and which stay the action's, and
-say so in the function's comment.
+🪤 **`current_user` INSIDE A `SECURITY DEFINER` FUNCTION IS ITS OWNER — third time this project has
+had to say it.** `auth.uid()` is empty too, because the caller is the service role. Identity arrives
+as `p_claimer_user_id`, resolved outside under the caller's own session, exactly as
+`papic_record_guest_capture` receives `p_guest_id`. A db rule asserts neither symbol appears in the
+body.
+
+🛡 **PROVEN, NOT ASSERTED.** A db rule adds a CHECK constraint, forces a real insert failure through
+the real function, and reads BOTH meters back unmoved. That is not ceremony: an `EXCEPTION` block
+added around the insert is an implicit subtransaction and would commit the reserve while discarding
+the row, and every structural rule would still pass. It was mutation-tested and goes red.
+
+⚠ **STILL NOT PROMISED:** the bytes are in R2 before the function runs and R2 is not in the
+transaction, so a refusal leaves an orphaned object. Orphaned bytes cost storage; a leaked credit
+costs a couple a photograph.
 
 ---
 
 ## § 2 · 🔴 WHAT THE UPLOAD WORK LEFT OPEN
 
-### 2.1 · The switch must be read on the SERVER when anybody else can upload
+### 2.1 · ~~The switch must be read on the SERVER when anybody else can upload~~ ✅ BUILT 2026-08-26
 
-`events.papic_uploads_open` governs the couple's own picker today, and the couple's picker is the
-only manual-upload path in the product — so hiding the control **is** closing the door, because the
-only person it could stop is the person who set it.
+**It is read on the server NOW — the condition was not waited for.** Same branch as § 1. A server
+action is a public endpoint, so a hidden button was already one `fetch` from not being hidden;
+waiting for a guest or supplier upload path meant betting that nothing else would reach the write
+first.
 
-🚨 **The moment a guest or a supplier gains an upload path, that stops being true.** Hiding a
-control is not closing a door: the live photo wall mirrored to every guest's phone while the only
-"off" switch closed the venue screens. **Gate the write, not the button.**
+🔑 **IT KEYS ON THE SEAT, NOT ON WHICH SCREEN CALLED.** `lib/papic-uploads-open.ts` asks whether the
+capture is on the **Uploads camera** (`seat_index`) — a fact about a row in the database rather than
+a claim the client makes — so it already covers a surface nobody has written yet. Asked on BOTH
+server paths: the presign (`/api/upload`, orphan-byte leak guard) and the write
+(`recordSeatCapture`, the door, **above the credit spend** so a refusal never charges anybody).
 
-🛡 **The tripwire is already armed:** rule 8 of
-`app/dashboard/[eventId]/studio/papic/_lib/the-uploads-switch-is-real.test.ts` fails when a
-**fourth** thing records a capture. When it fires, two things happen together and neither is
-optional — the new path reads the column server-side, and the `events.papic_uploads_open` line comes
-out of `tests/db/handles-have-gates.baseline.txt`, which currently says the switch's effect is local.
+⛔ **EVERY OTHER SEAT PASSES THROUGH UNTOUCHED.** The switch must never stop a paparazzo
+photographing a wedding — which is what the OFF copy promises: *"Only what your cameras capture."*
+⚠ **Fails OPEN** on an absent, null or refused read, matching the column's `DEFAULT TRUE`: failing
+closed on a pre-migration database takes uploading from every couple with no explanation.
 
-### 2.2 · "Each person's own folder" is solved for seat captures ONLY
+🛡 **THE BASELINE LINE IS DELETED, AND THAT WAS NOT A CHOICE.** `handles-have-gates.db.test.ts`
+failed the moment the server started reading the column and demanded it. ⚠ **A first attempt
+REWROTE that line to describe the new arrangement and was refused too, correctly** — that file is a
+list of screen-local switches, not a place to explain one that stopped being screen-local.
 
-`papic_photos.captured_by_person_id` now has a writer. **`papic_guest_captures` has no
-capturer-person column at all.** A guest phone's captures live in that separate table and nothing
-copies between them, so the folder idea covers the cameras and not the guests. That is a separate
-build and it needs a guest-to-person resolution that does not exist yet.
+⏭ **WHAT RULE 8 STILL DEFENDS IS THE COPY, NOT THE GATE.** A path recording on a DIFFERENT seat is
+outside the gate by design, and at that moment *"Nothing can be added from a phone or laptop"*
+becomes a promise the product does not keep. The tripwire still fires on a fourth recorder.
+
+### 2.2 · ~~"Each person's own folder" is solved for seat captures ONLY~~ ✅ BUILT 2026-08-26
+
+~~`papic_photos.captured_by_person_id` now has a writer. **`papic_guest_captures` has no
+capturer-person column at all.**~~ **`papic_guest_captures.captured_by_person_id` now exists, with
+a trigger deriving it** (migration `20271171474426`). Both halves of Papic answer *which person
+took this frame*.
+
+🔑 **AND THE SENTENCE BELOW WAS WRONG — the resolution it says does not exist has shipped since
+May.** This said the build *"needs a guest-to-person resolution that does not exist yet."*
+Measured against the live database rather than read: **`guests.person_id` exists**, and the
+`set_guest_person` BEFORE INSERT OR UPDATE OF email trigger has resolved it from the guest's email
+address since `20270514555975`. Nothing new had to be invented — one hop, not a new mechanism.
+*RULE 0 paid again, in the register whose job is to stop exactly this.*
+
+⚠ **AND IT IS EMPTY IN PRODUCTION, WHICH IS NOT THE SAME THING.** All 40 guest rows carry
+`person_id IS NULL` (none was added with an email matching a `people` row), and prod holds **0**
+`papic_guest_captures`. So the column is NULL everywhere today — the resolver having nothing to
+resolve, **not a gate with no handle**. The writer runs on every insert and fills in the moment a
+guest is added by an address the person spine already knows. ⚠ The migration's backfill matched
+nothing on the way in; **a backfill is a point-in-time act and must never be cited as coverage.**
 
 ⚠ **The Uploads camera is claimed by ONE host**, so a co-host adding photos through it is credited
-to the claimer. The column means *"whose camera shot this frame"*, which is what the seat answers.
-Per-uploader credit is a **different fact** and needs its own column, not a redefinition of this one.
+to the claimer. The column means *"whose camera shot this frame"*. Per-uploader credit is a
+**different fact** and still needs its own column — that part of the note stands.
 
 ### 2.3 · The supplier lane — still the DPO's, not engineering's
 
