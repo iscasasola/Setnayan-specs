@@ -78,8 +78,27 @@ committed docs on purpose.
 > the specification of exactly what changes.
 > ✅ **OWNER ANSWERED the § 7 gate: the private run-of-show notes DO show in the hub** — same notes,
 > new place. He turned down *schedule only* and *only during the event window*. **Do not re-ask.**
-> ✅ **S0 IS BUILT** — a booked supplier waiting on a downpayment is no longer told *"No event
-> today"*; its guard found a SECOND rendered copy of that same false sentence.
+> ⚠ **S0's ✅ WAS WRONG — it is NOT on `main`** (no file, no PR, no branch; measured 2026-08-27).
+> Its claim, kept in case it lands: a booked supplier waiting on a downpayment is no longer told
+> *"No event today"*, and its guard found a SECOND rendered copy of that same false sentence.
+> ✅ **S1 · S2 · S4 ARE BUILT — do NOT rebuild any of them.** S1 PR
+> [#4912](https://github.com/iscasasola/setnayan-platform/pull/4912) (merged) — one honest answer to
+> *"is this shop booked?"*, three arms, because the Agree RPC and the Locked-QR claim both book
+> **without** touching the schedule pool every day-of screen was reading. S4 PR
+> [#4913](https://github.com/iscasasola/setnayan-platform/pull/4913) (merged + SERVED) — a Locked-QR
+> booking finally reserves its date. S2 PR
+> [#4914](https://github.com/iscasasola/setnayan-platform/pull/4914) — **a booked supplier gets
+> through the door on a private celebration**: the page and the shared gate had drifted, so a
+> supplier who could open the couple's private page was bounced off all seven sub-pages of it, and
+> **every one of those refusals is byte-identical to a stranger's, so a gate wrong in that direction
+> is silent by design.**
+> 🚨 **S2 also closed a LIVE disclosure nobody had asked for:** *"is this viewer a booked supplier?"*
+> had **three** copies and **two asked only whether a LINK existed** — so a supplier the couple was
+> merely SHORTLISTED was told *"You are booked here"* and counted as one of "the people of this
+> celebration", which is the whole gate on a keepsake story kept to those people. *A rule written
+> three times had two copies laxer, and the lax ones were the two deciding a disclosure.*
+> ⚠ **Verify every PR state above with `gh pr view <n> --json state,mergedAt`** — this file has been
+> wrong about a PR's state five times.
 > 🔴 **STILL OPEN, his:** may we email a supplier at an address they never gave us? **Ships OFF.**
 >
 > ### ▶ SUPERSEDED 2026-08-26 — THE SUPPLIER'S ROOM IN THE EVENT HUB (PLANNED, NOT BUILT)
