@@ -363,8 +363,13 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > `.fd-btn-gold` is never re-styled per surface. A guard pins that **exactly two** surfaces
 > override the slot.
 >
-> ⏭ **OWNER ACTION, the only one: set `ANTHROPIC_API_KEY` in Vercel.** Without it the box says
-> the assistant is not switched on and everything else still works.
+> ✅ **CLOSED 2026-08-27 — `ANTHROPIC_API_KEY` IS SET AND THE ASSISTANT IS LIVE. Do NOT send the
+> owner to Vercel for it.** Proven BY THE OBJECT, not inferred: prod `admin_search_phrases` holds
+> the owner's own sentence *"add a new category on the taxonomy service"* → `createTaxonomyNode`,
+> stamped **`learned_from='ai'`** at 05:45:56Z. That value has exactly ONE writer, reached only
+> after a successful model call, which `aiConfigured()` gates on the key — and a local process
+> could not have written it (no `.env*` exists in the checkout). **This errand was live in FOUR
+> files including this one; a correction at one site is not a correction.**
 > 🚨 **AND IT FOUND A REPO-WIDE BLIND SPOT: `relrowsecurity` IS VACUOUS IN THE PGlite REPLAY** —
 > a brand-new table with no policy and no `ALTER` already reports row security ON. **15 db test
 > files assert that flag and in the replay none of them can fail.** Pinned with a live probe;

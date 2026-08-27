@@ -79,12 +79,26 @@
 
 ---
 
-## 0 · THE ONE THING WAITING ON THE OWNER
+## 0 · ✅ NOTHING IS WAITING ON THE OWNER — THE KEY IS SET AND THE ASSISTANT IS LIVE
 
-**Set `ANTHROPIC_API_KEY` in Vercel.** Without it every deterministic half works and the box says
-*"The assistant is not switched on here."* rather than failing. ⚠ **Its production value is not
-readable from a session** — do not report it as set or unset from the code default; read it in the
-hosting settings and say which you did.
+**CLOSED 2026-08-27. `ANTHROPIC_API_KEY` is set in Vercel and the assistant answered in production.**
+Proven **BY THE OBJECT**, which is the only grade of evidence that settles this: prod
+`admin_search_phrases` holds exactly one row — the owner's own sentence *"add a new category on the
+taxonomy service"* → `/admin/taxonomy?admin_ask=createTaxonomyNode`, label *Create taxonomy node*,
+**`learned_from='ai'`**, created **05:45:56Z**. That value has exactly ONE writer (`rememberPhrase`,
+called only after `askTheModel` returns non-null, which `aiConfigured()` gates on the key), and a
+local process could not have written it — **no `.env*` file exists in the checkout**, so nothing
+here can reach either the service role or a model. Vercel's own production runtime log shows the
+matching `POST /admin/taxonomy 200` two seconds earlier.
+
+🔑 **AND THE PRICE OF LEAVING IT: this errand was live in FOUR files at once** — this one,
+`CLAUDE.md` (auto-loaded, read first), `WHATS_NEXT_INDEX.md`, and
+`WHATS_NEXT_SESSION_PROMPTS_2026-08-26.md`. All four corrected in one commit.
+**A correction at one site is not a correction** — the same failure that sent the owner hunting an
+admin queue for an order he had personally cancelled five days earlier.
+⚠ The old warning here — *"its production value is not readable from a session"* — is **true about
+the VALUE and was wrong as a stopping point.** You cannot read the secret; you CAN read what only a
+successful call could have left behind. **Look for the object the mechanism writes.**
 
 ---
 

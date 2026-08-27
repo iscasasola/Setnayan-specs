@@ -116,8 +116,9 @@ Do not touch: the admin route map generator, the job checklist generator (never 
 output — regenerate), or the assistant's core "routes only, never acts" boundary.
 
 When done: changelog fragment + plain-English summary of what the admin can now do that they
-couldn't before, and confirm the owner's one remaining action (ANTHROPIC_API_KEY in Vercel) is
-still the only non-engineering blocker.
+couldn't before. ✅ Do NOT re-raise `ANTHROPIC_API_KEY` — it was set on 2026-08-27 and the
+assistant is LIVE in production (proven by a `learned_from='ai'` row in prod, a value only a
+successful model call can write). There is no non-engineering blocker on this stream.
 ```
 
 ---

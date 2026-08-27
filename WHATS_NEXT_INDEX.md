@@ -174,8 +174,10 @@
 > ⏭ **NAMED, NOT FIXED: `relrowsecurity` is VACUOUS in the PGlite replay** — a fresh table with no
 > policy reports row security ON, so **15 db test files assert a flag that cannot fail.** Prod is
 > genuinely protected; the hole is in the checking. Second shim deviation after `auth.role()`.
-> ⏭ **OWNER ACTION, the only one: set `ANTHROPIC_API_KEY` in Vercel.** Everything else works
-> without it and the box says so.
+> ✅ **CLOSED 2026-08-27 — the key IS set and the assistant is LIVE in production.** Proven by the
+> object: prod `admin_search_phrases` holds the owner's own sentence stamped `learned_from='ai'`,
+> a value only a successful model call can write. **There is no owner action here. Do not re-raise
+> it** — it was stale in four files at once.
 > ⛔ **Locks: the assistant ROUTES, never acts** · the brain remembers **navigation only** (owner:
 > *"not our decisions"*) · the 2026-08-03 "Admin AI is removed" lock is **superseded on the record**
 > · the word **CREATE** stays in the top-bar button · **generated, never authored** — never
