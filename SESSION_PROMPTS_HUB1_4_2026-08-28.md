@@ -9,8 +9,8 @@ need the owner rather than a session.
 |---|---|---|---|
 | `hub1` · the four photo names | **Opus** | low | no — start it |
 | `hub2` · the supplier's desk gets a life | **Opus** | high | no — the design is binding |
-| `hub3` · each kind offers only its own rooms | **Fable** to measure → **Opus** | high | **yes — owner decision 4** |
-| `hub4` · a shop's teammate can open the desk | **Opus** | medium | **yes — owner decision 1** |
+| `hub3` · each kind offers only its own rooms | **Fable** to measure → **Opus** | high | ✅ **RULED 2026-08-28 — go** |
+| `hub4` · a shop's teammate can open the desk | **Opus** | medium | ✅ **RULED 2026-08-28 — go** |
 
 ⚠ **Two at a time, never more.** Ten parallel builds once shipped 44 defects.
 ⚠ **`hub1` and `hub3` both touch event-type wording — never run them together.**
@@ -121,9 +121,10 @@ says so honestly. It is its own project.
 ```
 You are picking up the session named hub3 in the Setnayan project.
 
-🛑 BLOCKED ON OWNER DECISION 4 (EVENT_HUB_UNISON_2026-08-28.md § 7). Do not build
-until he has ruled: enforce the approved per-kind room grid, or keep today's
-everything-available posture. Use Fable to measure and present the choice.
+✅ RULED 2026-08-28 — THE OWNER SAID "ONLY ITS OWN ROOMS". Build it. He was shown
+the alternative (keep everything available for every kind) and chose enforcement.
+Do not re-ask it. Use Fable to measure which rooms each kind should keep, then
+build; the measuring is still worth doing, the DECISION is not.
 
 THE MEASUREMENT THAT MAKES IT REAL (verified 2026-08-28, live database):
   · 17 event kinds. FIFTEEN of them carry an IDENTICAL 7-surface list.
@@ -158,24 +159,28 @@ TRAPS:
 ```
 You are picking up the session named hub4 in the Setnayan project.
 
-🛑 BLOCKED ON OWNER DECISION 1 (EVENT_HUB_UNISON_2026-08-28.md § 7).
+✅ RULED 2026-08-28 — "STAFF GET BOTH". Build the arm.
 
-The owner already ruled that a shop's staff handle the event fully. The arm is
-held back for a reason worth understanding before you build it: the same switch
-that lets a granted teammate open the desk ALSO counts that teammate as "one of
-the people of this celebration" — which unlocks a private keepsake the host did
-not choose to share with them.
+The owner was asked precisely this: a granted teammate opening the desk ALSO
+counts as "one of the people of this celebration", which unlocks a private
+keepsake the host did not choose to share with them. He was offered the careful
+option — separate the two, so they work the event without becoming one of its
+people — AND HE DECLINED IT. Working the event makes you one of its people,
+keepsake included.
 
-⚖ SO THE QUESTION IS NOT "may staff work the event" (answered: yes). It is
-whether working the event makes somebody one of its people. That is his, and it
-is the whole of this session.
+⚠ SO DO NOT BUILD THE SEPARATION. It was considered and refused; re-proposing it
+is re-asking a settled decision. Build the straightforward version.
+⚠ AND SAY IT OUT LOUD IN THE PRODUCT. A host granting a shop access should be
+able to see that the shop's staff come with it — this ruling widens who can see
+something private, so the widening must be visible to the person it affects,
+not buried in a permission table.
 
 WHAT A PERSON GETS, once ruled: the photographer's second shooter opens the same
 desk the shop owner does, instead of being turned away from a celebration their
 own shop is booked for.
 
-FIRST, MEASURE: confirm the grant mechanism and exactly which surfaces read the
-"one of the people" membership today. If the two can be separated cleanly — a
-teammate who works the event without becoming one of its people — say so, because
-that would answer the owner's concern rather than asking him to accept it.
+FIRST, MEASURE: confirm the grant mechanism and exactly WHICH surfaces read the
+"one of the people" membership today — because those are precisely the surfaces a
+shop's teammate is about to gain, and the owner is entitled to a list of them
+rather than a promise. Report that list in the PR body.
 ```
