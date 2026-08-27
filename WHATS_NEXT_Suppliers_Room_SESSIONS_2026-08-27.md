@@ -18,8 +18,8 @@
 
 | | What a person gets | Model | Effort | Runs after |
 |---|---|---|---|---|
-| ✅ **S0** | A booked supplier stops being told "No event today" | — | — | **DONE** |
-| **S1** | One honest answer to *"is this shop booked?"* | **Opus 5** | **high** | — |
+| ⚠ **S0** | A booked supplier stops being told "No event today" | — | — | **NOT on `main`** — no file, no PR, no branch (measured 2026-08-27). S1 created the module it was said to own. |
+| ✅ **S1** | One honest answer to *"is this shop booked?"* | **Opus 5** | **high** | **PR [#4912](https://github.com/iscasasola/setnayan-platform/pull/4912) — auto-merge armed** |
 | **S2** | A booked supplier gets through the door on a private celebration | **Opus 5** | **high** | S1 |
 | **S3** | **The vendors are integrated into the Event Hub on the day** | **Opus 5** | **high** | S1 · S2 |
 | ⚠ **S4** | A booking made by locked QR holds its date | — | — | **ALREADY RUNNING elsewhere — do not start** |
@@ -29,9 +29,13 @@
 **Never more than two at once** (10 parallel builds once shipped 44 defects).
 🚨 **AND THE MACHINE IS THE HARDER CAP, MEASURED 2026-08-27:** with **four** other sessions
 typechecking at once this machine ran out of memory and killed mine **twice** — `tsc` exits **143**
-(and **134**) while printing `errors=0`, so a session under contention can read its own typecheck as
-a pass. **Count the worktrees before you start**, and always print the exit code beside the error
-count.
+(and **134**, and **144**) while printing `errors=0`, so a session under contention can read its own
+typecheck as a pass. **Count the worktrees before you start**, and always print the exit code beside
+the error count.
+🔴 **CONFIRMED AGAIN IN S1, AND IT WAS A REAL FALSE GREEN, NOT A NEAR MISS.** A typecheck exited
+**144 with a COMPLETELY EMPTY output file** — `grep -c 'error TS'` on it returns `0`, which reads
+exactly like a clean run. Re-run alone it found **7 real errors**. ⇒ **An empty tsc log is not a
+clean tsc log. Require `TSC_EXIT=0` printed beside `ERROR_LINES=0`; either one alone is a lie.**
 **Safe pairs: S1+S4 · S2+S5 · S6 with anything.** ⛔ **Never S1 with S2, never S2 with S3** — they
 edit the same booking reads and the same gate.
 
@@ -61,24 +65,74 @@ written-down trap list gets Sonnet.
 
 ## THE SESSIONS
 
-### ✅ S0 — DONE. Do not rebuild.
+### ⚠ S0 — NOT ON `main`. This register's ✅ was wrong when S1 checked it (2026-08-27).
+Measured, not read: no `lib/vendor-room-access.ts` on `origin/main`, no `explainNoRoom` anywhere,
+no PR for it in `gh pr list --state all`, no branch on the remote. **S1 therefore CREATED that
+file.** If S0 lands later its `explainNoRoom` is an additive edit to the same module — no conflict.
+🔑 *A ✅ in a register is not evidence; grep for the object.*
+
+### ✅ S0 — the claim as written. Do not rebuild if it does land.
 A booked supplier waiting on a downpayment record is no longer told "No event today"; they are told
 which of the two things is true. **Its guard found a SECOND rendered copy of the same false sentence
 elsewhere on that screen** — count rendered sites, never trust that one branch is the branch.
 
-### S1 — One honest answer to "is this shop booked?" · **Opus 5 · high**
-**What a person gets:** a supplier who said yes and is waiting on the downpayment stops being
-invisible; a supplier booked through a locked QR — money already moved — stops being invisible to
-every day-of screen.
-**Shape:** `fetchVendorRoomEvents(client, vendorProfileId)` in the existing
-`lib/vendor-room-access.ts`. **Id in, client in, no session resolution inside** — a shipped path
-passes a grant-derived id for a per-event grantee who is not the shop, and a resolver that reads the
-caller from the session breaks that role.
-⛔ **Swap ten call sites; LEAVE THIRTEEN on the raw pool read with a one-line reason each** — they
-are about capacity, not the room. **Especially the public shop page: the new arm there would publish
-agreed-but-unpaid bookings to strangers.**
-🪤 **`BOOKED_VENDOR_STATUSES` EXISTS TWICE** — `lib/vendors.ts` (typed) and `lib/event-deletion-gate.ts`.
-Import the typed one; do not retype the four strings, and say in the PR which copy you took.
+### ✅ S1 — DONE. PR [#4912](https://github.com/iscasasola/setnayan-platform/pull/4912), auto-merge armed. Do NOT rebuild it.
+⚠ Verify with `gh pr view 4912 --json state,mergedAt` before trusting this line — this corpus has
+been wrong about a PR's state five times.
+
+**What a person gets:** a supplier who said yes and is waiting on the downpayment stops being told
+*"No event today"*; and a supplier booked through a Locked QR — money already moved — stops being
+invisible to every day-of screen.
+
+**Shipped:** `fetchVendorRoomEvents(client, vendorProfileId)` in a NEW `lib/vendor-room-access.ts`
+(the file this register called "existing" — **S0 has not merged, so it did not exist**), with the
+pure decision in `lib/vendor-room-access-rule.ts`. **Ten call sites swapped in six files, twelve
+readers left on the raw pool read with a stated reason each** (this register said thirteen; twelve
+is the measured count).
+
+🚨 **THE SPECIFIED ARM 2 WOULD HAVE MISSED HALF THE BUG, AND WOULD HAVE LOOKED GREEN.** The plan
+prescribed `marketplace_vendor_id` + `lock_request_state = 'agreed'`. Read out of production,
+**`vendor_claim_locked_qr` never writes `lock_request_state` at all** — so that arm cannot match a
+Locked-QR booking, and the "money already moved" half of the promise would have shipped as a filter
+that can never fire. ⇒ **arm 3: a CLAIMED Locked QR token issued by this shop.**
+🔒 **A shop CAN write its own token rows**, so the token alone is not the proof — arm 3 also requires
+the `event_vendors` row to name this shop. Two sides, one booking.
+
+🔢 **Measured, not remembered:** `vendor_schedule_pool_bookings` has **one writer**
+(`acquire_schedule_pools`) with **one caller** (`acquire_service_time_slot`). Neither
+`vendor_agree_to_lock` nor `vendor_claim_locked_qr` reaches it. That is the whole bug.
+
+🪤 **A PLACEHOLDER DATE IS NOT A BOOKING DAY.** An `event_vendors` row carries no date, so arms 2/3
+take it from `events.event_date` — which holds a value even at `event_date_precision='year'`.
+**Prod holds such a row today (4 at 'day', 1 at 'year').** Without the precision filter a supplier
+gets a full day-of console on a date nobody has agreed to.
+
+🔒 **`event_vendors` HAS NO VENDOR-SIDE POLICY — four policies, all couple or moderator.** A
+supplier reading it through their own session gets **zero rows, silently, forever**. So arms 2/3 are
+service-role reads scoped in SQL by the id the caller proved. **Authorization only; no event
+content.** S2 and S3 inherit this rule.
+
+⛔ **`app/v/[slug]` MUST NEVER ADOPT THE ROOM READ** (a test pins it) — it admits an
+agreed-but-unpaid booking. Same reason `real-stories` and `shop` stay on the pool read: their event
+ids become the shop's **public** "Featured editorials" picker.
+
+🪤 **`server-only` IS NOT AN INSTALLED PACKAGE HERE.** Next aliases it at build time; plain node
+throws `MODULE_NOT_FOUND`, so a `server-only` module **cannot be imported by a `node:test` file**.
+Split the pure rule out, as `papic-uploads-open-rule.ts` and seven others already do.
+⚠ `scripts/lint-server-only-boundary.mjs` claims the opposite in its own docblock. That sentence is
+false; the lint itself is correct and passes.
+
+⏭ **NAMED, NOT FIXED (do not re-report as oversights):** `lib/vendor-overview.ts` keys React ids on
+`poolBookingId`, which an agreed booking has none of — widening it needs a stable id first.
+`recaps` and `proposals` are the same room question one screen over, outside this piece's day-of
+scope.
+
+🔢 **Safe by arithmetic at merge:** 45 `event_vendors` rows · **1** with a `marketplace_vendor_id` ·
+**0** at `'agreed'` · **0** claimed Locked QR tokens. Arms 2/3 match nothing today.
+
+🛡 18 tests · **14 mutations, occurrence count printed before → after, all RED.** One reported RED
+with its count unchanged at **0 → 0** — the pattern was case-wrong and the sabotage had never
+landed. *A red result is not evidence the sabotage applied.*
 
 ### S2 — A booked supplier gets through the door · **Opus 5 · high** · after S1
 **What a person gets:** a booked supplier can open the venue page, the recap, the seat finder and
