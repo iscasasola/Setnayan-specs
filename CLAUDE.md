@@ -315,10 +315,21 @@ committed docs on purpose.
 > had no no.** A 334-line duplicate migration was written and deleted on finding it; the guard now
 > fails if a second way to say no appears. 🧾 The receipt is shown at last — `proofUrl` had been
 > fetched into that card since it was written and **never rendered once.**
-> 🔴 **STILL THE OWNER'S, and worth his ruling:** that refusal **wipes the couple's own record of
-> paying** — clears their markers and proof URL and DELETES their ledger row (matched on a notes
-> SUBSTRING, unscoped by amount or date) — so their screen then looks as though they never recorded
-> anything, and the only trace is the email.
+> ✅ **AND THE WIPE IS FIXED — owner ruled the same day: _"yes they keep their record."_** The
+> refusal is a MARK now, not a deletion: the couple keeps their amount, receipt, method AND ledger
+> row; their card quotes the supplier's words and offers **Send it again**; re-sending clears the
+> refusal, which is the only thing that puts the question back on the supplier's desk.
+> 🚨 **THE DOWNSTREAM EFFECT THAT WOULD HAVE BITTEN, and it is the reason to grep the readers before
+> keeping a fact alive:** `supplierWasPaid` counts a recorded deposit AND a ledger row as *paid*,
+> and a paid unreleased supplier **blocks the couple deleting their own celebration**. Keeping those
+> two facts would have made a celebration **permanently undeletable behind a supplier who says they
+> were never paid for it.** The refusal now suppresses exactly those two signals and nothing else —
+> byte-equivalent to what the old erasure left behind, asserted in the gate's own suite.
+> 🪤 **AND A COLUMN-LEVEL REVOKE ON `event_vendors` IS INERT** — its grants are TABLE-level, so
+> narrowing the three new columns needs the table-level revoke + a 73-column allowlist (the `events`
+> pattern). **Named as debt, not attempted.** The exposure diff was read and counted instead: three
+> lines, byte-identical in shape to `deposit_acknowledged_at` and `lock_answered_by_user_id`, and
+> **`anon` reaches zero rows of that table** (4 policies, none naming anon or PUBLIC).
 > 🔴 **NINE owner decisions in § 7** — loudest: *may a supplier read the couple's private
 > run-of-show notes at a **public** address?* and *may we email a supplier at an address they never
 > gave us?* ⛔ One was **retired before it reached him** — the photo route's own header already
