@@ -189,6 +189,68 @@ capability to **other people**. 🔑 Today it governs the couple's own picker. *
 suppliers gain an upload path they read the same column — and the SERVER must read it then, not just
 the screen.** Hiding a control is not closing a door.
 
+### ✅ AND THE SCREEN ITSELF IS THE DRAWING NOW — 2026-08-27. Do NOT re-port it.
+
+🛑 **THIS ROW EXISTS BECAUSE THE REGISTER DID NOT HAVE ONE.** Owner, 2026-08-27:
+*"the papic control center is still not fixed"* — then, asked what was wrong, he
+picked **all four** offered readings at once: it still has the three tabs ·
+something doesn't work · the numbers are wrong · it looks unfinished.
+
+🔑 **THE PARTS WERE PORTED AND THE SHAPE NEVER WAS, and nothing was tracking the
+shape.** Everything this file's § 1 and § 3c list as shipped is real — the four
+facts, the two deleted questions, the upload sheet, the switch, the quiet setting
+rows. But the drawing's **central move** is replacing the tab bar with the thing
+itself, *four ways into the library*, and that was never built. Measured on
+`origin/main` the morning after: the page still opened on **Photos · Cameras &
+shots · Set up**. ⚠ **Every entry in this register was about the MONEY side**
+(meter · ladder · upload lane · supplier lane); *"the screen looks like the
+approved drawing"* was on no row anywhere, which is part of why it kept not
+getting done. **When a stream is drawn and part-ported, the un-ported half needs
+its own row or it is nobody's.**
+
+**Shipped:** the four facts → exactly ONE next step (the dates while unset,
+otherwise the QRs still in the couple's pocket) → **four ways in** → the library →
+the credits → what is made from it → what the couple has a say over → the
+set-once rows → the offers **LAST**. `_lib/rooms.ts` is DELETED, not disabled;
+`?tab=` is accepted and ignored so printed links and bookmarks still land.
+
+🔢 **NOTHING WAS LOST WITH THE TABS — measured, not asserted.** All **40**
+controls the three-room page mounted are still mounted, and the guard's bill is
+**DERIVED** from that page (every capitalised JSX tag minus the icons) rather
+than hand-written. 🔑 *A hand-enumerated list is a list of the controls somebody
+thought of.* The port lint agrees independently: across **406 routes exactly ONE
+entry disappears** — the `?tab=` link, which is the tabs.
+
+⚠ **THE SUPPLIERS ROW IS DELIBERATELY INERT** — visible, no sheet, no link, and
+it says *"Not open yet"*. The lane is built and dark behind the DPO ruling in § 4,
+so a door there would be a control that cannot do the thing it names.
+
+🪤 **THREE EXISTING GUARDS BROKE AND TWO WERE KEYED ON THE WRONG THING — worth
+more than the fix.** One reported the look picker missing because it matched *the
+first* `SettingRow` rather than the one **labelled** *Your Papic look*: **a guard
+keyed on position answers a question about position.** One compared against
+`indexOf("room === '")`, which returns **−1** once the rooms are gone — so it
+would pass or fail for reasons unrelated to its own rule. And my first
+replacement **cried wolf**, flagging any `if (…) {` around a self-heal, which
+caught the two that are *supposed* to be data-gated; narrowed to conditions
+derived from the URL, which is what *"only in the Cameras room"* actually was.
+🛡 **7 mutations, each measured by occurrence count or line position before →
+after, all 7 RED.**
+
+🚨 **AND ONE SUSPECTED DEFECT WAS DISPROVED BY QUERYING RATHER THAN READING.**
+The credits fact looked certain to render *"—"* on every real event: it is null
+unless `pool.status.applies`, and `lib/papic-event-pool.ts`'s own docblock says
+the pool *"applies ONLY to events holding an ACTIVE flat pass"* — and nobody has
+ever bought one. **Production says `applies = true` on all five events**, and the
+number is right (50 free everywhere, 29 left on the one with photos). **A
+docblock describing a fence is not the fence.** It was one query, and it stopped
+a "fix" to something that works.
+
+⏭ **STILL OPEN FROM HIS FOUR:** *"something doesn't work"* and *"the numbers are
+wrong"* were not named, and the shape port does not automatically answer either.
+**Ask which control and which number rather than guessing** — the guessing is
+what produced this row.
+
 ### 🚨 THREE THINGS THAT NEARLY SHIPPED BROKEN, all caught before anyone met them
 
 1. 🔒 **THE METER WAS ADVICE.** `recordSeatCapture` refuses a capture eight ways and every one was
