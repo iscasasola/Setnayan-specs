@@ -221,6 +221,28 @@ list and the private schedule is **INERT there**. And the booked-supplier schedu
 public/private filter** — no-index the surface and add a test that fetches it anonymously.
 **Port the drawing, do not redraw it** — only the typefaces change.
 
+#### ⏩ WHAT LANDED AFTER THIS BRIEF WAS WRITTEN — build on it, do not re-derive it
+This brief predates S1 and S2. Both shipped modules S3 must use, and re-deriving either is how the
+third disagreeing answer to "is this shop booked?" gets written.
+
+| Use | From | Why not your own |
+|---|---|---|
+| `viewerIsBookedSupplier(...)` · `loadVendorBooking(...)` | `lib/booked-supplier.ts` (S2) | The shared gate's supplier arm. It is already the thing that decides a supplier may be on `/{slug}` at all — the room's admission must agree with the door's, or a supplier gets through one and not the other. |
+| `fetchVendorRoomEvents(client, vendorProfileId)` | `lib/vendor-room-access.ts` (S1) | **THREE** arms, not the two this plan specified. |
+
+🚨 **AND S1 FOUND THE THING THIS PLAN GOT WRONG — the room's admission inherits it.** The plan said
+filter on `lock_request_state = 'agreed'`. **`vendor_claim_locked_qr` never writes that column at
+all** — verified by reading the live function body out of production, not the migration that created
+it. So a supplier booked by locked QR, **money already moved**, fails that test. An admission written
+from this plan's original two arms **locks the paid supplier out of the room.** Use S1's resolver.
+
+🔑 **The strip still links away — 1 link-out site on `main`** — so nothing has pre-empted the
+redesign, and the "before the day it stays a link" half is still exactly what ships.
+
+⚠ **`loadVendorBooking` is `cache()`d per request**, so asking it again inside the room costs
+nothing. Do not thread its result down through props to avoid a second call; that is how a prop
+becomes the second definition.
+
 ### ✅ S4 — DONE. Do not rebuild. PR [#4913](https://github.com/iscasasola/setnayan-platform/pull/4913) · migration `20271174176372`
 ✅ **MERGED 2026-08-27T11:24:37Z AND SERVED** — `/api/health` self-reports `205a1ad`, the PR's own
 merge commit, which is an ancestor of `origin/main`. **A merge is not a ship; this one is both.**
