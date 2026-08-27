@@ -131,7 +131,32 @@ committed docs on purpose.
 > 🔑 *A cast is not a read.*
 > ⚠ **Verify every PR state above with `gh pr view <n> --json state,mergedAt`** — this file has been
 > wrong about a PR's state five times.
-> 🔴 **STILL OPEN, his:** may we email a supplier at an address they never gave us? **Ships OFF.**
+> ⚖ **OWNER RULED ON SIX SUPPLIER QUESTIONS 2026-08-27 — do NOT re-ask any of them.**
+> · **_"no paid booking fee, no connect."_** and **_"yes this is free to use for as long as they pay
+>   the booking fee."_** ⇒ **the entitlement to be connected at all, and to every day-of tool free,
+>   is the SHOP'S BOOKING FEE TO US** — not the couple's deposit, not a subscription tier. That
+>   supersedes the old "are the day-of kits free during launch" item and re-answers "what is an
+>   unpaid supplier entitled to see" on a different axis.
+>   🔴 **NOT BUILT — TWO READINGS, AND THEY DIFFER BY EVERY BOOKING WE HAVE.** The fee is flag-dark
+>   with **0 charges ever** against **13 booked suppliers**: *(a)* a fee OWED and UNPAID blocks the
+>   connection — cuts nobody off, because his own model makes the first 5 sourced bookings free and
+>   BYO/returning free forever; *(b)* nobody has paid, so nobody connects — **disconnects all 13**.
+>   **Proceeding on (a); it is being put back to him.** ⚠ A gate on money must **fail OPEN** on a
+>   read error, never closed.
+> · **_"no. their papic service is only for documentation of their products."_** ⇒ **a supplier's
+>   camera documents their OWN WORK, never the guests** — a narrowing of a lane LIVE since
+>   2026-07-16. 🔑 **It is a policy and no filter can enforce it**: a photograph of a cake or a
+>   dressed room has guests in it. Say it on the capture screen and to the couple, keep those frames
+>   out of guest face-matching — never promise a guest they will not appear.
+> · **_"the staff who handles the event will handle the event fully but the vendor owner also has
+>   access to oversight all their business."_** ⇒ **the granted teammate gets the same desk on that
+>   celebration; the owner gets it on all their bookings.** 🔒 That gate also feeds "one of the
+>   people of this celebration", which unlocks a keepsake story kept private — *"fully"* answers
+>   that yes, and it ships with the fact named, never as a silent widening.
+> · **_"no."_** ⇒ **a couple may NOT switch a supplier's desk off.** Struck, not deferred.
+> 🔴 **STILL OPEN, and he asked a question back — _"email for what?"_** The night-before notice
+> **ships OFF** until he answers. What he is owed: *the night before, a shop booked for tomorrow
+> gets ONE message — tomorrow is the day, here is your call time, here is the way into your tools.*
 >
 > ### ▶ SUPERSEDED 2026-08-26 — THE SUPPLIER'S ROOM IN THE EVENT HUB (PLANNED, NOT BUILT)
 > **Contract: [`WHATS_NEXT_Vendor_Hub_And_Answers_2026-08-26.md`](WHATS_NEXT_Vendor_Hub_And_Answers_2026-08-26.md)**

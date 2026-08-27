@@ -391,23 +391,52 @@ address?** They read them today inside their own dashboard, marked *don't read a
 pressing send is what makes it allowed. Removing the press removes the basis. It ships switched off
 until he says.
 
+### ✅ ANSWERED 2026-08-27 — five of these are CLOSED. Do not re-ask them.
+
+| His words | What it settles |
+|---|---|
+| *"no paid booking fee, no connect."* | **The vendor's booking fee to Setnayan is the entitlement to be connected at all** — not the couple's deposit, not a subscription tier. ⚠ **Two readings, and they differ by every booking we have — see below.** |
+| *"no. their papic service is only for documentation of their products."* | **A supplier's camera documents their OWN WORK, never the guests.** A narrowing of a lane that has been LIVE since 2026-07-16. 🔑 **It is a policy and no filter can enforce it** — a photograph of a cake or a dressed room has guests in it. Say it on the capture screen, say it to the couple, keep those frames out of guest face-matching, review on that basis; never promise a guest they will not appear. |
+| *"the staff who handles the event will handle the event fully but the vendor owner also has access to oversight all their business."* | **The granted teammate gets the same desk on that celebration; the owner gets it on all of their bookings.** 🔒 That gate also feeds *"one of the people of this celebration"*, which unlocks a keepsake story the organiser kept private — *"fully"* answers that yes, and it ships with the fact named. |
+| *"yes this is free to use for as long as they pay the booking fee."* | **The day-of tools are FREE.** Same axis as the first row: the fee is the entitlement. Supersedes *"should the day-of kits be free during launch"*. |
+| *"no."* | **A couple may NOT switch a supplier's desk off.** Struck, not deferred. |
+
+🔴 **THE ONE THING STILL OPEN IN THIS BLOCK — *"no paid booking fee, no connect"* HAS TWO READINGS.**
+The fee is **flag-dark** and production has **0 fee charges ever** against **13 booked suppliers**.
+**(a)** *a fee that is OWED and UNPAID blocks the connection* — cuts nobody off, because his own
+2026-07-25 model makes a verified shop's **first 5 sourced bookings free** and BYO / vendor-invited /
+returning clients **free forever**, so nothing owes anything today. **(b)** *no fee has been paid, so
+nobody connects* — **disconnects all 13**, his own test shops included.
+⇒ **Proceeding on (a)**, the only non-destructive reading and the one consistent with the locked fee
+model — but it is his sentence, so it is being put back to him rather than assumed. ⚠ **A gate on
+money must fail OPEN on a read error**, never closed: a broken read that locks a supplier out of a
+wedding they are working is worse than a fee going uncollected for a day.
+
+🔴 **AND ONE QUESTION CAME BACK AS A QUESTION:** on the night-before email he asked **_"email for
+what?"_** — so the S5 gate is **still shut**. The answer owed him: *the night before a celebration
+they are booked for, a shop gets one message saying tomorrow is the day, with their call time and a
+link straight into their tools* — nothing else, once, and only to a shop with a real account.
+
 ### Not urgent — answer whenever
 
-- **What is a supplier who has not been paid yet entitled to see?** Measured and not decided: a
+- ⚖ **RE-ANSWERED ON A DIFFERENT AXIS 2026-08-27 — *"no paid booking fee, no connect"*. The money
+  that decides access is what the SHOP owes US, not what the couple has paid them.** The original
+  framing is kept below because the measurement in it is still true. ~~A
   soft-hold supplier **already** gets the run-of-show and the couple's song picks — including up to
   three competing shops on one date. Either that is the boundary you meant, or it is wider than the
   room. No measurement settles it.
 - **Does "booked" mean the deposit, or the supplier's yes?** The plan answers *either*, which bends
   your 2026-06-12 deposit-fact wording for this one purpose. Defensible — the room is not capacity —
   but it is your word.
-- **Should the day-of kits be free during launch?** They need a paid plan and no real shop has one,
-  so the room opens nearly empty for everyone without this.
+- ~~**Should the day-of kits be free during launch?**~~ ✅ **ANSWERED 2026-08-27: free, for as long
+  as they pay the booking fee.** The entitlement is the fee, not a plan.
 - **Should a supplier be able to say "I did not receive that money"?** Today the only answer is yes,
   and it cannot be taken back.
 - **The console in the wedding lettering.** Only the typefaces change at the new address; the
   colours survive. A type call, nothing more.
 - **Should the eve-of email also reach the couple and the coordinator?** Scoped to suppliers here.
-- **Should the couple be able to switch the room off for one supplier?** Not built, not assumed.
+- ~~**Should the couple be able to switch the room off for one supplier?**~~ ✅ **ANSWERED
+  2026-08-27: no.**
 
 ⛔ **RETIRED BEFORE IT REACHED HIM — do not ask it.** *"Does the room close at midnight?"* He already
 decided it inside the feature: the photo route's own header reads *"THE SHUTTER IS DAY-BOUND.
