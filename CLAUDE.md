@@ -663,10 +663,21 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > 6 tests): `--test "app/[[]slug[]]/…"` · `--test "app/[slug]/…"` · `--test "./app/[slug]/…"` ALL
 > print `# tests 0 … # fail 0` and exit **0**. What DOES run it: **`npx tsx <path>` with no
 > `--test` flag** · `npx tsx --test "app/**/<name>.test.ts"` · or `cd` into the directory and pass
-> the bare filename. 🔑 **THE TRAP DOCUMENTATION WAS ITSELF A TRAP** — this file taught the escape
-> for weeks, so every session that "verified" a bracketed test that way verified **nothing**, and
-> the green it read was the bug. Always require `# tests ` to be **non-zero** before believing a
-> pass · `SECURITY DEFINER` **disarms** a `current_user` check ·
+> the bare filename.
+> 🔑 **BUT DO NOT READ THIS AS "BRACKETED PATHS NEED ESCAPING" — THAT FRAMING STILL BURNS YOU.**
+> **ANY `--test` invocation that matches NOTHING behaves identically**: a renamed file, a typo'd
+> suite, a path that moved. The bracket case is merely the one where the path *looks* right.
+> ⇒ **THE DURABLE RULE IS THE NON-ZERO CHECK, NEVER THE ESCAPE: require `# tests ` to be non-zero
+> before believing any pass.** Zero-tests-zero-failures is byte-identical to success and exits 0 —
+> the runner's dialect of [[feedback_verify_the_sabotage_by_occurrence_count]].
+> 🦠 **AND THE TRAP DOCUMENTATION WAS ITSELF THE VECTOR.** This file taught that escape for weeks,
+> so a session doing everything right — reading the corpus, using the documented escape, seeing
+> green — verified **nothing** and had every reason to believe otherwise. An undocumented trap
+> leaves you suspicious; a documented broken one **rewards diligence with a lie**. *A DOCUMENTED
+> WORKAROUND IS NOT EVIDENCE THAT THE WORKAROUND WORKS* — one level up from *"a migration comment
+> is not evidence"*. **Anything this corpus teaches as a TECHNIQUE must carry the measurement that
+> proves it** (the command, the target, the observed non-zero count) or it rots into exactly this.
+> · `SECURITY DEFINER` **disarms** a `current_user` check ·
 > **a stale page is not a missing feature** (Usapan was reported "still coming soon" after it
 > merged — prod had it, the browser did not; check `/api/health` against the merge commit first).
 
