@@ -25,7 +25,7 @@ S5 ships flag-off pending the owner's gate.
 | **S3** | **The vendors are integrated into the Event Hub on the day** | **Opus 5** | **high** | S1 · S2 |
 | ✅ **S4** | A booking made by locked QR holds its date | **Opus 5** | **medium** | **MERGED + SERVED** — PR [#4913](https://github.com/iscasasola/setnayan-platform/pull/4913) |
 | ✅ **S5** | The night-before email (ships switched OFF) | **Sonnet 5** | **medium** | **BUILT + PR'd** — PR [#4915](https://github.com/iscasasola/setnayan-platform/pull/4915), auto-merge armed |
-| **S6** | The Answers Desk — its own stream, can start today | **Opus 5** | **high** | — |
+| ✅ **S6** | The Answers Desk — every answer a shop owes, answered on the row | **Opus 5** | **high** | **BUILT + PR'd** — PR [#4917](https://github.com/iscasasola/setnayan-platform/pull/4917), auto-merge armed |
 
 **Never more than two at once** (10 parallel builds once shipped 44 defects).
 🚨 **AND THE MACHINE IS THE HARDER CAP, MEASURED 2026-08-27:** with **four** other sessions
@@ -297,13 +297,72 @@ branch and fires on approximately no page loads, so the job would ship dead with
 ⛔ **Do not force Manila time onto the stored call time** — that once emailed a 2 PM ceremony as
 10 PM. **Take the idempotency lock BEFORE the send.** **No cron** — 16 jobs already run without one.
 
-### S6 — The Answers Desk · **Opus 5 · high** · its own stream, no dependencies
-**What a person gets:** a supplier answers everything people ask them from one place, and we can
-publish every shop's reply speed honestly.
-**Sixteen kinds, six doors.** ⛔ **Four rows must NOT exist until the answer works:** the waitlist
-pick **does nothing and reports success** · a crew shift **cannot be posted, seen or accepted by a
-non-admin** · **nobody can ask for a song** · a payment claim **has no "no"**.
-🚨 **A ONE-STAR review can never reach the desk today** — the filter is five-stars.
+### ✅ S6 — DONE. PR [#4917](https://github.com/iscasasola/setnayan-platform/pull/4917). Do NOT rebuild it.
+⚠ Verify with `gh pr view 4917 --json state,mergedAt` before trusting this line — this corpus has
+been wrong about a PR's state five times. It was OPEN with auto-merge armed when this was written.
+
+**RULE 0 paid a third time in this stream: the desk ALREADY SHIPS.** It is the "What's new" feed on
+`/vendor-dashboard` — one list across all a shop's celebrations, oldest waiting first, assembled in
+`lib/vendor-overview.ts`. **Nothing was redrawn.** The delta was what REACHES the list, and whether
+the answer can be given ON it.
+
+🚨 **THE ONE-STAR REVIEW IS FIXED, AND THE BRIEF UNDERSTATED IT — the desk could not TAKE the answer
+either.** The card named an unanswered review and then linked away, which is the one thing a list of
+answers you owe must not do with the answer it is asking for. Every unanswered review joins now at
+any rating, with the reply box ON the row; the rating decides the words AND the colour through one
+resolver, so a one-star can never wear a gold "praise" eyebrow, and an unreadable rating errs toward
+care rather than congratulation.
+
+🪤 **A LAPSED BOOKING ASK SAID "LAST DAY TO ANSWER" FOREVER — a live defect nobody had listed.**
+Read out of the function body: `vendor_agree_to_lock` expires **LAZILY**, on the answer path, and
+**no sweeper exists** — so a lapsed ask keeps `lock_request_state='pending'`, the query cannot tell
+it from a live one, and the day count floors at 0. Pressing Agree returns `expired`. It is now its
+own card kind: one grey line, in the same place, **no control at all**, gone after a week.
+🔑 *A row that vanishes reads as one you answered; a button that refuses the person it is shown to is
+worse than no button.*
+
+**FOUR KINDS JOINED:** a reply owed in an **accepted** conversation (the commonest of all — the
+enquiry lane is pre-accept only, and this is the exact thing we publish as that shop's reply speed;
+asked of the last message's AUTHOR, never of an unread marker) · a **meeting time the couple
+proposed** (deadlined by the meeting itself — a passed one becomes a closed line sorted by the time
+that passed, so a tasting that already happened cannot claim the top of a waited-longest list) · a
+**quote** and a **contract** written and never sent, which OPEN and never send (sending retires every
+other live quote out with that couple; the contract MOVED off the separate open-task list rather than
+being listed twice with two clocks).
+
+🚨 **`--sn-warn` IS NOT A TOKEN AND NEVER WAS.** The booking-ask card named it for its accent bar and
+its eyebrow; no stylesheet defines it, an undefined `var()` is **rejected, not thrown**, so the bar
+drew nothing and the eyebrow inherited the body ink — a card whose own comment explains at length why
+it is deliberately amber **has never once rendered amber**. Found by DERIVING the guard's token list
+from the file rather than checking the colour I was editing. Same family as the undefined
+`--font-serif`. Fixed to `--sn-warning` (fill) / `--sn-warning-deep` (text weight — the fill is
+2.92:1 as text).
+
+⛔ **THE FOUR STAY OUT, and are now recorded ONCE as data** (`ANSWERS_THAT_DO_NOT_JOIN`, which the
+guard reads): the waitlist pick **does nothing and reports success** · a crew shift **cannot be
+posted, seen or accepted by a non-admin** · **nobody can ask for a song** · a payment claim **has no
+"no"** (that last one is an owner decision, not an engineering gap).
+
+🔢 **Safe by arithmetic, measured in prod by query: 0 chat threads · 0 appointments · 0 proposals ·
+0 draft contracts · 0 pending asks · 0 reviews.** Every new lane matches nothing today — and that
+also means **none of it has been exercised by a real supplier**. ⚠ Zero rows is never the proof; the
+pure rules and the guard carry the weight.
+🔒 **Read out of PRODUCTION, not from migrations:** all three new reads' SELECT policies exist and
+cover the vendor's own session, and `authenticated` holds SELECT at table level **and on every
+column** (17/17 · 16/16 · 21/21) — a policy with no grant is dead, and `has_table_privilege` answers
+*false* while column grants stand.
+
+🛡 13 tests · **14 mutations, occurrence count printed before → after, ALL RED** — and **the mutation
+run caught one of my own guards as decoration**: "every card kind is drawn" matched the kind name
+anywhere in the file, which the card body's own `Extract<…{ kind: 'meeting' }>` signature satisfies,
+so unmounting the branch left the count at 1 → 0 and the test GREEN. It asks about the DISPATCH now.
+A 15th "mutation" reported nothing because its anchor matched three times. *Neither a red nor a green
+result is evidence until you have counted.*
+🔑 **The card kinds are DERIVED FROM THE UNION IN THE SOURCE, across BOTH files that declare one** —
+the pre-accept enquiry card lives in its own module, so reading only the union block finds ten of
+eleven kinds and reports a complete survey.
+⏭ **NAMED, NOT FIXED:** the Upcoming list still keys React ids on `poolBookingId`, which an agreed
+booking has none of (inherited from S1 — it needs a stable id first).
 
 ---
 

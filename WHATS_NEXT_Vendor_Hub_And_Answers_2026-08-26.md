@@ -434,7 +434,25 @@ never the proof.** So:
 
 ---
 
-## 9 · THE ANSWERS DESK — A SEPARATE STREAM, AND IT CAN START NOW
+## 9 · THE ANSWERS DESK — ✅ BUILT 2026-08-27, PR [#4917](https://github.com/iscasasola/setnayan-platform/pull/4917)
+
+> ✅ **DO NOT REBUILD IT.** Rows 5 · 10 · 11 · 17 · 18 shipped, row 3 already said what disappears,
+> row 6 got its sentence, and rows 8 · 13 · 15 · 16 are recorded as deliberately absent in
+> `ANSWERS_THAT_DO_NOT_JOIN` (`apps/web/lib/answers-desk.ts`), which the guard reads. The full
+> account is the S6 section of
+> [`WHATS_NEXT_Suppliers_Room_SESSIONS_2026-08-27.md`](WHATS_NEXT_Suppliers_Room_SESSIONS_2026-08-27.md).
+> ⚠ Verify with `gh pr view 4917 --json state,mergedAt` before trusting this line.
+>
+> 🔑 **RULE 0: the desk was never a new page** — it is the "What's new" feed that already ships on
+> `/vendor-dashboard`. Nothing here was redrawn.
+> 🪤 **THIS SECTION MISSED A LIVE DEFECT that the build found:** a booking ask that has LAPSED kept
+> rendering as answerable and saying *"Last day to answer"* forever, because expiry in this product
+> is **lazy** — flipped only on the answer path, no sweeper — so the query cannot tell a dead ask
+> from a live one and the day count floors at 0. § 9's "what the list does when a window closes"
+> described the remedy without knowing the window never actually closed.
+> 🪤 **And a second:** `var(--sn-warn)`, the amber this desk's booking-ask card is painted with, is
+> **not a token and never was** — so that accent bar drew nothing and its eyebrow inherited the body
+> ink. Rejected, not thrown.
 
 > It touches NONE of the nine pieces above and NONE of the six things fixed first. It is what the
 > owner actually complained about. **Sixteen kinds of answer, six doors, two to four taps deep —

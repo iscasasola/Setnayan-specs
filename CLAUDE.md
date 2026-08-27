@@ -169,11 +169,23 @@ committed docs on purpose.
 > ⛔ **A bare team-membership union looks equivalent, is shorter, and silently retires per-event
 > grants — which the owner has now ruled against. Do not write one.**
 >
-> ⏭ **THE ANSWERS DESK is the cheap independent win and can start now** — **SIXTEEN kinds, six
-> doors**, while we publish every shop's reply speed publicly. ⛔ **Four rows must not exist until
-> the answer works:** the waitlist pick **does nothing and reports success** · a crew shift **cannot
-> be posted, seen or accepted by a non-admin** · **nobody can ask for a song** · a payment claim
-> **has no "no"**. 🚨 **A ONE-STAR review can never reach the desk** (the filter is five-stars).
+> ✅ **THE ANSWERS DESK IS BUILT — PR [#4917](https://github.com/iscasasola/setnayan-platform/pull/4917),
+> auto-merge armed. Do NOT rebuild it.** ⚠ Verify with `gh pr view 4917 --json state,mergedAt`.
+> 🔑 **RULE 0 paid again: it was never a new page** — the desk IS the "What's new" feed already
+> shipping on `/vendor-dashboard`. **A ONE-STAR review could not reach it** (the filter was
+> five-stars) **and the desk could not TAKE the answer either** — it named an unanswered review and
+> linked away. Every unanswered review joins now, at any rating, with the reply box on the row.
+> 🪤 **AND A LAPSED BOOKING ASK SAID "LAST DAY TO ANSWER" FOREVER:** expiry is **lazy** — flipped
+> only on the answer path, there is no sweeper — so a dead ask keeps `pending`, looks live to every
+> query, and answers `expired` when pressed. It is a grey closed line now, in the same place, with
+> no control at all. **A row that vanishes reads as one you answered.**
+> 🚨 **`--sn-warn` IS NOT A TOKEN AND NEVER WAS** — that card's amber accent bar drew nothing and
+> its eyebrow inherited the body ink. Rejected, not thrown; found by deriving the guard's token list
+> from the file instead of checking the one colour being edited. Same family as `--font-serif`.
+> ⛔ **Four answers still do NOT join, now recorded once as data** (`ANSWERS_THAT_DO_NOT_JOIN`, read
+> by the guard): the waitlist pick **does nothing and reports success** · a crew shift **cannot be
+> posted, seen or accepted by a non-admin** · **nobody can ask for a song** · a payment claim **has
+> no "no"** — that last one is the OWNER'S call, not an engineering gap.
 > 🔴 **NINE owner decisions in § 7** — loudest: *may a supplier read the couple's private
 > run-of-show notes at a **public** address?* and *may we email a supplier at an address they never
 > gave us?* ⛔ One was **retired before it reached him** — the photo route's own header already
