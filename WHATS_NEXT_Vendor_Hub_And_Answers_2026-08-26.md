@@ -216,10 +216,14 @@ money-gift page refuses.**
 > 🚨 **The shortcut in § 4 was real and was measured:** `get_vendor_event_brief`'s `timeline` is one
 > fewer round trip and carries the **coordinator-only** lines the booked-supplier policy excludes,
 > because the function is `SECURITY DEFINER` and that select has no visibility filter at all.
-> 🔴 **A live divergence found here and NOT fixed, because it is a disclosure call:** trap #4's two
-> columns are already apart in production — the one `contracted` marketplace row carries
-> `marketplace_vendor_id` and **no** `linked_vendor_profile_id`, so the shop the brief admits gets
-> no doorway and no desk. Aligning them widens `belongsToThisEvent`. **Owner's.**
+> 🔴 **TRAP #4 HAS A NAMED CULPRIT NOW, and it is not the one I first reported.** The single
+> production row where the two columns are apart is a **seeded test fixture** (`SONGDESK TEST`), so
+> nobody is affected — my first write-up called it a live victim and that is **withdrawn**. Read out
+> of production: every real booking path stamps both columns **except `vendor_claim_locked_qr`**,
+> which sets `marketplace_vendor_id` and never mentions the other — **the path where money has
+> already moved**, and the same defect #4488 fixed in its twin. Fixed separately; **no owner
+> decision needed**. What IS the owner's is the teammate-grant arm, because that one widens
+> `belongsToThisEvent`.
 > ⚠ The teammate-grant arm of the admission below is therefore **NOT built** — same reason.
 
 🛑 **CORRECTED 2026-08-27 BY THE OWNER, TWICE, BEFORE A LINE WAS WRITTEN — THIS IS A REDESIGN, NOT A

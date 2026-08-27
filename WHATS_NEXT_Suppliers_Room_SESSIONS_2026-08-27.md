@@ -227,16 +227,25 @@ booked-supplier RLS policy excludes exactly those rows. Read out of production, 
 migration. The running order comes from `fetchRunOfShowBlocks` under the supplier's own session,
 which is narrower AND carries `run_state` besides.
 
-🔴 **A LIVE DIVERGENCE, MEASURED, NAMED AND DELIBERATELY NOT FIXED — read this before touching the
-doorway's audience.** Three readers answer "is this shop booked here?" off **two different
-columns**: `get_vendor_event_brief` and the schedule policy use `marketplace_vendor_id`;
+🔴 **THE TWO-COLUMN DIVERGENCE — CORRECTED 2026-08-27, THE SAME DAY. My first write-up of this
+overstated it, and the correction points at a WORSE place.** Three readers answer *"is this shop
+booked here?"*: `get_vendor_event_brief` and the schedule policy use `marketplace_vendor_id`;
 `resolveVendorCapability` (the doorway, and therefore this desk) uses `linked_vendor_profile_id`.
-Production holds **45 rows · 1 with a marketplace id · 0 with a linked id**, and that one row is
-**`contracted`** — so the only genuinely booked marketplace supplier in production gets the full
-brief inside their own dashboard and **no doorway and no desk on the celebration's page.**
-⛔ **Aligning them is NOT a port.** `resolveVendorCapability` also feeds `belongsToThisEvent`, the
-single boolean gating a keepsake story the organiser kept to the people of their day — the thing S2
-had to tighten three days ago. Widening it is a **disclosure decision and needs the owner.**
+⚠ **WITHDRAWN:** *"the only genuinely booked marketplace supplier in production gets no doorway and
+no desk."* The one production row that is apart is **`Saysay Live Band (SONGDESK TEST)` on
+`Song Desk Test Night (SONGDESK TEST)`, seeded straight into the database on 2026-07-30** — a
+FIXTURE. Nobody is affected today, and this corpus had already recorded that row as seeded.
+*Zero rows is never the proof, and neither is one row you did not open.*
+✅ **WHAT IS TRUE, read out of production by `pg_get_functiondef`:** every real booking path stamps
+BOTH columns — `acquire_service_time_slot` · `vendor_agree_to_lock` (since #4488) · the wizard's
+lock action — **except `vendor_claim_locked_qr`, which sets `marketplace_vendor_id` and never
+mentions `linked_vendor_profile_id` at all.** That is the path where **money has already changed
+hands**, and it is the SAME defect #4488 fixed in its twin, surviving in the clone. Inert today
+(zero locked-QR tokens, ever). 🔑 **It needs no owner decision** — stamping the link on a path that
+has already taken money makes a Locked-QR booking equal to every other booking. Fixed separately.
+⛔ **What DOES need the owner is the teammate arm, and only that:** `resolveVendorCapability` also
+feeds `belongsToThisEvent`, the boolean gating a keepsake story the organiser kept to the people of
+their day. Widening it is a **disclosure decision.**
 
 🔴 **IT ALSO FOUND A LATENT ONE, FIXED IN THE SAME PR: `events.event_end_date` and `cleared_at` were
 being READ BEFORE THEY WERE SELECTED.** The page has cast for the end date since the day-of

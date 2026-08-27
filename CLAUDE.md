@@ -115,13 +115,17 @@ committed docs on purpose.
 > and carries the **coordinator-only** lines the supplier's read policy excludes — that function is
 > `SECURITY DEFINER` and its select has no visibility filter at all. Read out of prod, not from a
 > migration.
-> 🔴 **AND IT MEASURED A LIVE DIVERGENCE IT DELIBERATELY DID NOT FIX:** three readers answer *"is
-> this shop booked here?"* off **two different columns**, and production is already apart — the ONE
-> `contracted` marketplace booking carries `marketplace_vendor_id` and **no**
-> `linked_vendor_profile_id`, so the shop the brief admits gets **no doorway and no desk on the
-> celebration's page**. Aligning them widens `belongsToThisEvent`, the boolean gating a keepsake
-> story kept to the people of the day — **a disclosure call, the owner's, not a port.** Same reason
-> a shop's granted TEAMMATE does not get the desk yet.
+> 🔴 **AND IT FOUND THE REAL CULPRIT BEHIND THE TWO-COLUMN TRAP — after I first reported it wrong
+> and withdrew that the same day.** Three parts of the app answer *"is this shop booked here?"* off
+> **two different columns**. ⚠ I said the one production row apart was a real booking losing its
+> doorway; it is a **seeded `SONGDESK TEST` fixture** — nobody is affected. ✅ What IS true, read out
+> of prod by the function body: every real booking path stamps both columns **except
+> `vendor_claim_locked_qr` — the path where MONEY HAS ALREADY MOVED — which never mentions
+> `linked_vendor_profile_id` at all.** Same defect #4488 fixed in its twin, surviving in the clone;
+> inert today (zero locked-QR tokens ever) and **needing no owner decision**.
+> ⛔ What DOES need him is the **granted TEAMMATE** arm, because widening `resolveVendorCapability`
+> also widens `belongsToThisEvent`, the boolean gating a keepsake story kept to the people of the
+> day. *One row you did not open is not a finding.*
 > 🔴 **A LATENT ONE FIXED ON THE WAY: `events.event_end_date` and `cleared_at` were being READ
 > BEFORE THEY WERE SELECTED**, so the multi-day arm of the day-of lifecycle **has never once run**.
 > 🔑 *A cast is not a read.*
