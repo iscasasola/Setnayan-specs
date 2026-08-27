@@ -1,3 +1,5 @@
+> ⏩ **SUPERSEDED 2026-08-28: S12 is done and this paste-block carries pre-correction numbers (15 types · 103 words · a shared shell) that must not be quoted — read [`EVENT_HUB_UNISON_2026-08-28.md`](EVENT_HUB_UNISON_2026-08-28.md) instead.**
+
 # S12 · The Event Hub, drawn as one universal place — ready to paste, 17 August 2026
 
 > 📄 **COPY-PASTE PAGE:** <https://claude.ai/code/artifact/2f24f879-3f9c-41b7-9193-0372d39f96e7>

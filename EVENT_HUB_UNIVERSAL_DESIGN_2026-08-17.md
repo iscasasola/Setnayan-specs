@@ -1,3 +1,5 @@
+> ⏩ **SUPERSEDED 2026-08-28: the word map is executed, the wedding-parts gate ships, the grid ruling is tracked there (§ 5.4/§ 7.4); only its § D what-not-to-change list still binds — read [`EVENT_HUB_UNISON_2026-08-28.md`](EVENT_HUB_UNISON_2026-08-28.md) instead.**
+
 # The Event Hub for every kind of event — the written half
 
 **Date:** 2026-08-17 · **Status:** DESIGN DOCUMENT ONLY — the drawings are being produced separately (`prototypes/event_hub_universal_2026-08-17.html`, not by this document's author). No code changes.

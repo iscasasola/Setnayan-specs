@@ -1,3 +1,5 @@
+> ⏩ **SUPERSEDED 2026-08-28: both findings (no way between rooms; the wedding words) are fixed and shipped — read [`EVENT_HUB_UNISON_2026-08-28.md`](EVENT_HUB_UNISON_2026-08-28.md) instead.**
+
 # The Event Hub — the complete listing, and why it does not feel like one thing
 
 > **Owner, 2026-08-17:** *"session 1 was for the event hub. but the event hub still doesn't look

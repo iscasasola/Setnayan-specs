@@ -1,3 +1,5 @@
+> ⏩ **SUPERSEDED 2026-08-28: all four rows of its role table are stale — the supplier desk ships IN the Hub, the host body ships, the coordinator dead-end is fixed — read [`EVENT_HUB_UNISON_2026-08-28.md`](EVENT_HUB_UNISON_2026-08-28.md) instead.**
+
 # WHATS NEXT — The Event Hub for all four roles (scoped 2026-08-15)
 
 > Owner, verbatim: *"all events will have an event hub where each assigned vendors, host,

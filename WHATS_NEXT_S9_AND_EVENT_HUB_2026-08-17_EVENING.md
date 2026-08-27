@@ -1,3 +1,5 @@
+> ⏩ **SUPERSEDED 2026-08-28 FOR THE EVENT HUB BLOCKS ONLY (S13–S15 shipped) — the S9 grants block is a separate stream and still stands — read [`EVENT_HUB_UNISON_2026-08-28.md`](EVENT_HUB_UNISON_2026-08-28.md) instead.**
+
 # S9 · batch 3 and the Event Hub remainder — ready to paste, 17 August 2026 (late evening)
 
 > 📄 **COPY-PASTE PAGE:** <https://claude.ai/code/artifact/2a02d520-3e13-4cfe-b27f-ff36d8dffcab>

@@ -1,3 +1,5 @@
+> ⏩ **SUPERSEDED 2026-08-28: S13 · S14 · S15 · S16 and the wake (S17) have ALL SHIPPED — nothing in this file is left to run — read [`EVENT_HUB_UNISON_2026-08-28.md`](EVENT_HUB_UNISON_2026-08-28.md) instead.**
+
 # S13 – S16 · The Event Hub builds, combined into the S register — 17 August 2026 (evening)
 
 > **This supersedes the "EH1–EH4" numbering I used earlier today.** The Event Hub already had a
