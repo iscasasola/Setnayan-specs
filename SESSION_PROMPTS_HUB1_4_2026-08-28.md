@@ -8,7 +8,7 @@ need the owner rather than a session.
 | Session | Model | Effort | Blocked? |
 |---|---|---|---|
 | `hub1` · the four photo names | **Opus** | low | no — start it |
-| `hub2` · the supplier's desk gets a life | **Opus** | high | ✅ **DONE 2026-08-28 — PR [#4932](https://github.com/iscasasola/setnayan-platform/pull/4932). Do not restart it.** |
+| `hub2` · the supplier's desk gets a life | **Opus** | high | ✅ **DONE — PR [#4932](https://github.com/iscasasola/setnayan-platform/pull/4932), MERGED 2026-08-27T19:32Z. Do not restart it.** |
 | `hub3` · each kind offers only its own rooms | **Fable** to measure → **Opus** | high | ✅ **RULED 2026-08-28 — go** |
 | `hub4` · a shop's teammate can open the desk | **Opus** | medium | ✅ **BUILT 2026-08-28 — PR [#4933](https://github.com/iscasasola/setnayan-platform/pull/4933). Do NOT rebuild it.** |
 
@@ -74,8 +74,9 @@ after. An unmeasured mutation proves nothing.
 
 ## `hub2` — THE SUPPLIER'S DESK GETS A LIFE, NOT ONE DAY
 
-> ✅ **DONE 2026-08-28 — PR [#4932](https://github.com/iscasasola/setnayan-platform/pull/4932),
-> two commits. DO NOT RUN THIS SESSION AGAIN.** Four states (call sheet · today · look back · one
+> ✅ **DONE — PR [#4932](https://github.com/iscasasola/setnayan-platform/pull/4932), **MERGED**
+> (merge `b9f8f3c`, an ancestor of `origin/main`; the migration verified applied in prod by the
+> object). DO NOT RUN THIS SESSION AGAIN.** Four states (call sheet · today · look back · one
 > quiet line), nothing on the desk rebuilt, nothing about the read widened — and a ribbon above the
 > Save-the-Date film, without which the call sheet would have been invisible for ~9 months of every
 > booking. **The same-day bridge (design § E) is built too**, as a `SECURITY DEFINER` function

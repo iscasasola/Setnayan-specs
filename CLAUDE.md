@@ -107,7 +107,8 @@ committed docs on purpose.
 > their tools — through to **06:00 the morning after**, because a reception runs past midnight.
 > Nobody else ever sees a trace.
 > ⏳ **AND `hub2` GAVE IT THE OTHER 335 DAYS — PR
-> [#4932](https://github.com/iscasasola/setnayan-platform/pull/4932). DO NOT REBUILD EITHER HALF.**
+> [#4932](https://github.com/iscasasola/setnayan-platform/pull/4932), **MERGED 2026-08-27T19:32Z**
+> (merge `b9f8f3c`, verified an ancestor of `origin/main`). DO NOT REBUILD ANY OF IT.**
 > S3's room lived about **thirty hours** and the binding design's strongest sentence is against
 > exactly that (*"a day-only room recreates the midnight-door mistake"*). Four states now: the
 > **call sheet** before (date · *"43 days to go"* · the venue once set · the running order once
@@ -144,6 +145,12 @@ committed docs on purpose.
 > 🪤 **AND `gates-have-handles` READ `o.is_sample = FALSE` IN A WHERE CLAUSE AS A WRITER** — its
 > scan is `\mcol\M\s*=[^=]` over every function body, which a comparison matches as well as an
 > assignment. Write `NOT col` on a NOT NULL column; the trap is recorded in that migration.
+> ✅ **THE MIGRATION IS VERIFIED APPLIED IN PROD BY THE OBJECT** (not by `schema_migrations`, not by
+> a migration comment): the live `get_vendor_same_day_bookings(p_event_id uuid, p_day date)` is
+> `SECURITY DEFINER`, its body contains **no** `vendor_team_members` — the load-bearing claim — it
+> carries the multi-day `COALESCE(event_end_date, event_date) >= p_day` span and the `NOT
+> o.is_sample` form, and EXECUTE is held by `authenticated` · `service_role` · `postgres` and
+> **not `anon`, not PUBLIC**.
 > ⏭ **STILL NOT BUILT, named:** the weak-signal venue (§ H) — the design calls it its own project.
 > **Everything else in `Vendor_Room_Design_2026-08-26.md` now ships.**
 > 🔒 **THE RULE THAT DECIDED IT, worth more than the feature:** *authorization may be answered with
