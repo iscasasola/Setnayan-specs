@@ -1054,11 +1054,33 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > anything complained. **Print the occurrence count before → after, and when a well-formed
 > sabotage reports GREEN, suspect the sabotage before the guard.**
 
-> ### 🔴 NEWEST — THE CREATE FLOW ASKS WHAT IT ALREADY KNOWS (2026-08-20 evening, NOTHING BUILT)
+> ### ✅ DONE 2026-08-20 — THE CREATE FLOW ASKS WHAT IT ALREADY KNOWS. Do NOT rebuild any of it.
 > **Contract: [`WHATS_NEXT_Onboarding_Asks_What_It_Knows_2026-08-20.md`](WHATS_NEXT_Onboarding_Asks_What_It_Knows_2026-08-20.md).**
-> Five defects the owner found in ONE walk from *Your Year* → birthday. **No branch, no PR.**
-> Recovered from a session that hit its weekly usage limit mid-investigation, then re-verified
-> against `origin/main` (`f5fd0fcc2`) and the live production database.
+> Five defects the owner found in ONE walk from *Your Year* → birthday.
+> 🛑 **THIS HEADER SAID "NOTHING BUILT · No branch, no PR" FOR SEVEN DAYS AFTER ALL FIVE SHIPPED.**
+> **ALL FIVE ARE MERGED:** PRs [#4604](https://github.com/iscasasola/setnayan-platform/pull/4604) ·
+> [#4606](https://github.com/iscasasola/setnayan-platform/pull/4606) ·
+> [#4608](https://github.com/iscasasola/setnayan-platform/pull/4608), all 2026-08-20, **re-verified
+> BY THE OBJECT on `origin/main` `b1fcccbb7` (2026-08-27)**, not by the PR list: the bill now
+> redirects to `/dashboard/{id}/orders/{orderId}?created=1` (the page that already renders the
+> total, the reference and the bank details) instead of the photo studio · the celebrant screen
+> branches on `knowsCelebrant` and folds the box into a Change chip · the day title keys on
+> `anchorDate || momentDayISO` · the age-band screen is **skipped in transit, never removed** · and
+> 186 option keys carry real words with a humanising fallback for the 187th. **48 guard tests, all
+> green.** ⚠ Verify with `gh pr view <n> --json state,mergedAt` before trusting this line.
+> 🔑 **The contract file has carried its own ✅ banner since the day it shipped. This file — the one
+> that is auto-loaded and therefore the one that gets read — went on saying the opposite.** Fourth
+> instance of *a correction that lands only in the detail doc has not landed*; the money paragraph
+> two blocks down records the third.
+> ✅ **AND THE LAST OPEN MEASUREMENT IS CLOSED (2026-08-27):** the contract's § 4 warned that an
+> admin row in `event_type_onboarding.questions` could override the birthday questions wholesale,
+> so the code defaults might not be what the live site renders. **Read out of prod: that table holds
+> exactly ONE row — `wake` — and its `questions` is NULL.** There is no birthday override; the code
+> defaults ARE what ships.
+> 🪤 **THE TRAP THE BUILD AVOIDED, worth keeping:** the age fix is deliberately **NOT** routed
+> through `deriveOnboardingPrefill`, because that seam is gated by a fail-closed flag that is OFF —
+> a fix written behind it would have shipped switched off and looked done. A test pins the
+> independence.
 >
 > 🔴 **THE MONEY ONE FIRST, AND THE OBVIOUS DIAGNOSIS IS WRONG.** Owner: *"i had a price to pay.
 > but i there was no payment. it just created."* The tempting read — the charge was refused, so
@@ -1098,11 +1120,16 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > defaults to the literal `'wedding'`, so a birthday would render **"Our wedding falls on Wed 16
 > Dec 2026"**, naming a wedding that does not exist.
 >
-> 🔑 **THE OTHER THREE ARE A MISSING HANDOVER, NOT MISSING MACHINERY** — the question-drop filter
-> ships and works, and the answer already exists twice (the Year page computes "turning 40" and
-> throws it away). ⚠ Its seam is **inert by default**, so a fix written behind it ships switched
-> off. ⚠ The raw `1st_birthday` / `adult_regular` chips are **unfixable at the renderer** — the
-> option type has no label slot at all.
+> 🔑 **THE OTHER THREE WERE A MISSING HANDOVER, NOT MISSING MACHINERY** — the question-drop filter
+> shipped and worked, and the answer already existed twice (the Year page computes "turning 40" and
+> threw it away). ⚠ Its seam is **inert by default**, so a fix written behind it ships switched
+> off — which is why the shipped fix goes around it. ⚠ The raw `1st_birthday` / `adult_regular`
+> chips were **unfixable at the renderer** (the option type has no label slot at all), so the fix is
+> a LOOKUP plus a humanising fallback, not a type change: the stored value IS the key, it is already
+> written into live rows, and a spec authored in the database could never be reached by a type.
+> ⚖ **AND IT WAS 187 OPTION VALUES ACROSS EVERY EVENT TYPE, not the two chips he saw** — `ninong`,
+> `pamamanhikan`, `cord_yugal`, `summa_cum_laude` all rendered raw. Fixing only the birthday two
+> would have been a correction at one site.
 > ⛔ **Do NOT drop a screen at runtime** — out of range is a render-time THROW, removal disarms
 > the "you already have one of these" walk-back for exactly the people it targets, and the file's
 > own comment justifying "nothing is removed" gives a reason that is **not true**.

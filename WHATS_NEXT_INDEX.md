@@ -506,19 +506,24 @@
 > `mergeStateStatus`), verify the six shop redirects are back **by reading the deployed build**,
 > and finish the review that lost 17 of 57 agents to a usage limit. One small OWNER DECISION in §2.
 
-> ### ▶▶▶▶ NEWEST — UNBUILT WORK, RECOVERED FROM A CUT-OFF SESSION (2026-08-20 evening)
+> ### ✅ DONE 2026-08-20 — RECOVERED FROM A CUT-OFF SESSION, THEN BUILT. Do NOT rebuild it.
 > **[`WHATS_NEXT_Onboarding_Asks_What_It_Knows_2026-08-20.md`](WHATS_NEXT_Onboarding_Asks_What_It_Knows_2026-08-20.md)**
-> — five defects the owner found in ONE walk from *Your Year* → birthday. **NOTHING IS BUILT:
-> no branch, no PR, no worktree.** The session that found them hit its weekly usage limit before
-> it could write them down; this file is the rescue, re-verified against `origin/main`
-> (`f5fd0fcc2`) and the live production database.
-> 🔴 **One of the five is money and its obvious diagnosis is WRONG** — the order was minted and is
-> **unpaid in prod right now** (₱499 Setnayan AI, ref `SNEYGV00WY`); the buyer was redirected to
-> the **photo studio**, shown no amount and no bank details, and told his *cameras* would activate.
-> 🔑 **A code path that CAN fail silently is not proof that it DID.** Query prod before writing a
-> diagnosis from a plausible code path.
-> ⚠ It does NOT supersede the entry below — that one is about shipped work; this one is about work
-> not started.
+> — five defects the owner found in ONE walk from *Your Year* → birthday. **ALL FIVE SHIPPED THE
+> SAME DAY:** PRs [#4604](https://github.com/iscasasola/setnayan-platform/pull/4604) ·
+> [#4606](https://github.com/iscasasola/setnayan-platform/pull/4606) ·
+> [#4608](https://github.com/iscasasola/setnayan-platform/pull/4608), re-verified **by the object**
+> on `origin/main` `b1fcccbb7` (2026-08-27) with 48 guard tests green.
+> 🛑 **THIS ROW SAID "NOTHING IS BUILT: no branch, no PR, no worktree" FOR SEVEN DAYS AFTER THEY
+> MERGED**, while the contract file it points at carried a ✅ banner from the day it shipped. The
+> money paragraph in that same contract taught this exact lesson three days earlier and the copies
+> were still not swept. **A correction that lands only in the detail doc has not landed.**
+> ✅ **THE MONEY ONE IS CLOSED TWICE OVER** — the redirect now lands on the order's own bill page
+> (total, reference, BDO + GCash, screenshot upload), and the one order that ever existed
+> (`SNEYGV00WY`) was cancelled 2026-08-20 at the owner's own instruction. **Nothing is in any admin
+> queue and there is nothing for him to do.**
+> 🔑 **A code path that CAN fail silently is not proof that it DID.** The tempting diagnosis — the
+> charge was refused — was FALSE, and one query settled it. Query prod before writing a diagnosis
+> from a plausible code path.
 
 > ### ▶▶▶ NEWEST — READ THIS FIRST (2026-08-20)
 > **[`WHATS_NEXT_HANDOFF_2026-08-20.md`](WHATS_NEXT_HANDOFF_2026-08-20.md)** — written for a

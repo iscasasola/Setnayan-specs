@@ -115,14 +115,21 @@ ELSE'S PAGE.** A person who is ready to pay and is shown no amount and no accoun
 conclude "I'll find it later" — he concludes **nothing was charged**, which is what the owner
 concluded and wrote down.
 
-### ⏭ WHAT TO BUILD (not started)
+### ✅ WHAT WAS BUILT — verified by the object on `origin/main` `b1fcccbb7`, 2026-08-27
 
-- Carry the amount into the redirect, and split the destination by what was actually bought:
-  an AI-only order must not land on the Papic studio.
-- The banner copy must name the product bought, not "cameras".
-- ⚠ **UNVERIFIED, CHECK IT:** whether the *"payment instructions are on the way"* email actually
-  sends. That needs `RESEND_API_KEY`, which **cannot be read from a session** (server-only). If it
-  is unset, this order has no route to payment at all, on any surface. **Do not assume either way.**
+- **The destination was corrected, not decorated.** The redirect is now
+  `/dashboard/{eventId}/orders/{orderId}?created=1` — the order's own bill page, which already
+  rendered *"Total to pay"*, the reference with a copy button, the BDO + GCash instructions and
+  the payment-logging form with its screenshot upload. 🔑 **RULE 0: nothing was designed; a
+  destination was corrected.** Carrying an amount into the studio URL would have been the smaller
+  diff and the wrong fix — it would have put a price on a page that still sells cameras.
+- ⚖ **The Papic buyer moved too, deliberately.** The 2026-08-11 studio landing was an engineering
+  call, not an owner lock, and nothing is provisioned until an admin approves the payment.
+- ✅ **THE EMAIL QUESTION IS ANSWERED, AND BETTER THAN "CHECK THE KEY".** It was never a question
+  about `RESEND_API_KEY`: **there is no `payment_instructions` notification type in the app at
+  all**, so the message could not have sent whatever the key holds. The sentence is gone from
+  every Papic buy path and the banner links to the bill instead. 🔑 **The instructions were not on
+  the way — they were one tap away.** A guard now fails if any buy path promises them again.
 - ⚠ **THE ₱499 IS ALSO A PRICE QUESTION.** Birthday is Tier C, whose *sign-up* price is ₱499 and
   regular is ₱899 (`platform_retail_catalog_v2`, read live). The flag
   `setnayan_ai_per_event_pricing_enabled` is **TRUE in prod** (read live). That is all correct —
@@ -191,9 +198,15 @@ which is provable from source. **A rendering failure that hid Card 1 entirely is
 and would look identical from the owner's chair. **First act on the copy; if he still reports it
 missing after that, the next step is to observe the page signed in as him, not to re-read code.**
 
-⏭ **THE FIX IS COPY AND AFFORDANCE, NOT MACHINERY** — do not rebuild the picker. Name the action
-on the control, show what the next press costs before it is pressed, and stop the closing line
-pointing at another page while a live control sits above it.
+✅ **BUILT — AND IT WAS COPY AND AFFORDANCE, NOT MACHINERY.** The picker was not rebuilt. All
+three landed: the stepper's buttons are labelled *Fewer shots* / *More shots*; a line under it
+names what the next press buys **before** it is pressed (*"Press + to add 2,950 more for ₱1,000"*);
+and the closing line now reads *"Add shots here now, or top up later from your Papic studio"* —
+its own control first. At the top rung the line changes to say that is the biggest pool we sell in
+one go, so the dead `+` explains itself.
+⚠ **The honest limit below still stands and was never resolved:** nobody observed the rendered
+page signed in as him. If he reports the control missing again, **observe the page — do not
+re-read the code.**
 
 ---
 
@@ -273,9 +286,13 @@ is no 50 in the ladder.** A 40-year-old maps to `'adult'` by elimination. There 
 constant anywhere in the codebase**; any age→option mapping must be written from scratch, so
 write it against the ladder, not against the labels.
 
-⚠ **UNVERIFIED:** `event_type_onboarding.questions` can override these questions wholesale from an
-admin DB row. Nobody checked whether a `birthday` override exists in prod. **Check before editing
-the code defaults — you may be editing something the live site does not render.**
+✅ **VERIFIED 2026-08-27 — THERE IS NO OVERRIDE.** `event_type_onboarding` can override these
+questions wholesale from an admin DB row, and nobody had checked. Read out of production: that
+table holds **exactly ONE row — `wake` — and its `questions` is NULL.** So the code defaults ARE
+what the live site renders, for birthday and for every other type. This was the last unmeasured
+claim in this file.
+⚠ **Re-ask it when adding a type.** Admin-created rows exist only in prod and no migration makes
+them, so this answer has an expiry date — it is true of the table as it stands, not forever.
 
 ---
 
@@ -351,10 +368,22 @@ concluding a workflow returned nothing.**
 
 ---
 
-## 8 · SUGGESTED ORDER
+## 8 · ~~SUGGESTED ORDER~~ — ALL FIVE ARE BUILT. THIS SECTION IS HISTORY.
 
-1. **§ 1 (money)** — a real unpaid order exists and the promise *"we'll show you where to send it"*
-   is currently broken for every Setnayan AI buyer. Everything else is friction; this is revenue.
-2. **§ 3 (date title)** — the smallest real win; the sentence is already written.
-3. **§ 2 (this one's yours)** — copy the shipped chip.
-4. **§ 5 + § 4 (labels, then the handover)** — the labels are mechanical and land value alone.
+**Verified by the object on `origin/main` `b1fcccbb7`, 2026-08-27** — not by the PR list, and not
+by the banner at the top of this file:
+
+| § | what it was | shipped as | how it was re-checked |
+|---|---|---|---|
+| 1 (money) | AI buyer sent to the photo studio, no amount, no bank details | `paymentPath` → `/dashboard/{id}/orders/{orderId}?created=1` | read the return statement in `lib/onboarding-services-orders.ts` |
+| 1b(b) | the shots card's every word said free; the only way to buy was a bare `+` | labelled stepper · a line naming the next press's shots and peso price · the closing line points at itself first | read `services-step.tsx` |
+| 2 (celebrant) | *"This one's yours"* over an empty box | branches on `knowsCelebrant`, folds to a Change chip that reopens | guard asserts the branch AND that a blocked celebrant always sees the field |
+| 3 (the day) | *"When are you celebrating?"* gated on an anniversary-only value | keys on `anchorDate \|\| momentDayISO`; the carried day gets its own sentence | guard asserts the carry is never poured into `anchorDate` |
+| 4 (the age) | asks the band it already knows | age carried from the Year row, and derived from the reader's own profile for every other door | guard asserts it does NOT depend on the fail-closed brief flag |
+| 5 (raw keys) | `1st_birthday` at a customer | 186 keys given words + a humanising fallback for the 187th | ran the suite: **48 tests, 48 pass** |
+
+🔑 **THE TWO TRAPS THIS FILE WARNED ABOUT WERE BOTH AVOIDED, and that is why they are worth
+keeping:** the age fix goes AROUND `deriveOnboardingPrefill` rather than through it (that seam is
+gated by a flag that is fail-closed and OFF, so a fix behind it ships switched off and looks done),
+and the age-band screen is **skipped in transit, never removed** from `screens` (out of range is a
+render-time throw, and removal disarms the walk-back for exactly the people it targets).
