@@ -30,7 +30,7 @@ come late.
 | 4 | ✅ **DONE 2026-08-27 — PR #4890, merged.** Stop treating a guest who scanned a QR as a host | — |
 | 5 | Agree on one answer to "is this shop booked?" — there are two today | no |
 | 6 | Stop bouncing booked suppliers off pages the app drew for them | no |
-| 7 | **The room itself** | one question first |
+| 7 | **The supplier's tools, integrated INTO the event hub on the day** (not a new page — owner 2026-08-27) | ✅ answered |
 | 8 | A booking made by locked QR reserves its date like every other | no |
 | 9 | The night before, email the supplier that tomorrow is the day | one question first |
 
@@ -207,11 +207,27 @@ money-gift page refuses.**
 **Must not merge before Piece 4.**
 
 ### PIECE 7 — THE ROOM
-**After it:** on the day, a booked supplier — or the teammate that shop granted access for **this**
-event — opens the couple's own address and lands in a full-screen room of their own. **Everyone
-else, including a supplier who was only asked, never learns the room exists.**
-**Where:** new route under the event's address (a sub-path, so it cannot collide with reserved
-words). **Admission — do not invent one; mirror the shipped grant pattern:** the shop is booked
+🛑 **CORRECTED 2026-08-27 BY THE OWNER, TWICE, BEFORE A LINE WAS WRITTEN — THIS IS A REDESIGN, NOT A
+NEW PAGE.** *"we are redesigning not placing a new page."* Then, plainly: *"on the day. is the
+integration of the vendors to the event's event hub. so we would still want to to be an event hub."*
+⛔ **So there is NO new route.** The Event Hub stays the Event Hub; on the day a booked supplier
+opens the same `/{slug}` everyone else opens and their own tools are **integrated into it**. This
+matches his original 2026-08-16 wording — *"event hub is the same on the day for vendors PLUS their
+special features"* — which the sentence below had quietly turned into a second product.
+🔑 **AND THE THING TO EXTEND ALREADY SHIPS:** `app/[slug]/_components/vendor-doorway.tsx`, the strip
+a booked supplier already sees on the couple's page. Its own docblock calls it *"A DOOR, NOT A
+ROOM"* and says it *"carries NOTHING about the event"*. **That docblock is the specification of what
+changes** — on the day it stops being a door and becomes the room, in place. Before the day it stays
+exactly the link-out it is now, and one of its stated reasons still holds and must survive the
+redesign: *"a supplier works many weddings; their week, their invoices and their other clients do
+not belong inside one couple's page."* Bring THIS event's tools; bring nothing else.
+⚠ **Its safety note becomes load-bearing rather than descriptive.** It renders only from a
+`VendorCapability` produced by `resolveVendorCapability`, and a compile-time assertion proves no
+visitor can smuggle one in. Today that guards a link. **The moment it carries the run-of-show it
+guards event CONTENT**, so the gate is the whole fence.
+
+~~**Where:** new route under the event's address (a sub-path, so it cannot collide with reserved
+words).~~ **Admission — do not invent one; mirror the shipped grant pattern:** the shop is booked
 (Piece 5) **AND** the caller either manages the shop **or holds a live grant for THIS event**.
 ⛔ **A bare team-membership union looks equivalent, is shorter, and silently retires per-event
 grants — which the owner has now ruled against. Do not write one.**

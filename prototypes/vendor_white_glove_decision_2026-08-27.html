@@ -1,0 +1,876 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SETNAYAN · What "white-glove" should actually be — 2026-08-27</title>
+<!--
+  ══════════════════════════════════════════════════════════════════════════
+  WHITE-GLOVE — a decision prototype. 27 August 2026.
+  Companion to prototypes/vendor_custom_subscription_2026-08-27.html — same
+  register, same locked tokens, same contrast discipline. The configurator is
+  NOT redrawn here; this page is only about the four human promises.
+  ══════════════════════════════════════════════════════════════════════════
+
+  WHAT WAS SIGNED (DECISION_LOG.md, 2026-07-04, verbatim construction):
+    "Base = Enterprise ₱7,499 + ₱1,500 white-glove premium (dedicated account
+     manager · QBR · priority disputes · negotiated onboarding)"
+  and from 2026-05-20, the original numbers behind two of them:
+    "priority 4-hr SLA + named account manager · white-glove 1-hr onboarding"
+
+  MEASURED TODAY against origin/main 8512e6f56 and prod njrupjnvkjkitfctetvi.
+  ⚠ ONE CORRECTION TO THE BRIEF THAT COMMISSIONED THIS PAGE. It stated that
+  none of the four exists. Three do not. THE FOURTH PARTLY DOES:
+
+    · Dedicated account manager — NOTHING. No assignment, no field, no screen.
+      Two rendered marketing sentences and nothing behind either.
+    · Quarterly business review — NOTHING schedules, records or reminds. The
+      only "quarterly" machinery in the product is BIR Form 2307 tax filing,
+      unrelated.
+    · Personal onboarding — NOTHING. No session, no booking, no record.
+    · Priority disputes — HALF BUILT, AND IT ALREADY FAVOURS CUSTOM.
+      app/admin/disputes/page.tsx resolves each disputed shop's tier and
+      re-sorts the queue by tier rank descending, and 'custom' is the last
+      entry in VENDOR_TIERS, so it ranks top. What does NOT exist: any
+      response-time promise, any separate lane, and any signal to the supplier
+      that it happened. Its own docblock lists the ranking as
+      "enterprise > pro > solo > verified > free" and forgets to mention
+      custom — the code is right and the comment is stale.
+      It has also never run on real data: prod holds 0 disputes, ever.
+
+  THE COPY CONTRADICTION, confirmed on one file:
+    app/_components/home/vendor-benefits.ts:179 lists 'Quarterly business
+    review' with soon:true, and :191 says of Custom that a dedicated account
+    manager and quarterly business review "come with it", unqualified.
+    Same page. Same two things. One says later, one says included.
+
+  THE ₱500: the signed card built Custom as Enterprise + ₱1,500. Today's
+  ruling is Enterprise ₱10,000 and Custom ₱11,000 — a ₱1,000 premium. Shown
+  on the page as an open tension; deliberately NOT resolved here.
+
+  PROD, so the stakes are stated plainly on the page: 2 shops exist, both on
+  the entry tier, 0 have ever been on Custom, 0 disputes ever, 0 chat threads
+  ever. Nobody has been promised any of this. This is a decision about what to
+  BUILD, not a repair of a broken promise to a real customer.
+
+  ⚠ EVERY HOUR FIGURE ON THIS PAGE IS AN ESTIMATE, NOT A MEASUREMENT. There is
+  no Custom customer to measure. The assumptions are written out in full in the
+  "How these hours were worked out" section rather than buried — read them and
+  change any you disagree with; the arithmetic re-runs from four numbers.
+
+  Self-contained: inline CSS + inline SVG. No CDN, no external fonts.
+  prefers-reduced-motion respected. Contrast receipts at the foot.
+-->
+<style>
+/* ═══ Locked tokens — identical to vendor_custom_subscription_2026-08-27 ═══ */
+:root{
+  --cream:#FFFFFF;
+  --paper:#FBFAF8;
+  --ink:#2C2A29;
+  --ink-soft:#4F535B;
+  --cta:#C24E25; --cta-hover:#B04722;
+  --gold:#A9834B; --gold-text:#8A6B39;
+  --link:#3B4E67; --link-hover:#304055;
+  --pos:#4F6B4A; --neg:#B65A3A;
+  --border:rgba(44,42,41,0.12);
+  --border-soft:rgba(44,42,41,0.07);
+  --wash:rgba(44,42,41,0.03);
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --dur:180ms;
+  --sans:'Hanken Grotesk',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'Space Mono',ui-monospace,'SF Mono',Menlo,monospace;
+  --gold-ink:#7A5F33;   /* gold-ish TEXT on a gold tint — 5.4:1 */
+  --rust:#9E4526;       /* the only rust used as words — 6.3:1 on white */
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--cream);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+b,strong{font-weight:700}
+a{color:var(--link)}a:hover{color:var(--link-hover)}
+code,.mono{font-family:var(--mono)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.kicker{font-family:var(--mono);text-transform:uppercase;letter-spacing:.14em;font-size:10.5px;font-weight:700;color:var(--gold-text)}
+.muted{color:var(--ink-soft)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+svg.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* ═══ Chrome ═══ */
+.top{border-bottom:1px solid var(--border);background:var(--cream);position:sticky;top:0;z-index:60}
+.top .wrap{display:flex;align-items:center;gap:16px;height:60px;flex-wrap:wrap}
+.wordmark{font-family:var(--mono);font-weight:700;letter-spacing:.24em;font-size:13px}
+.seg{display:flex;gap:3px;background:var(--wash);border:1px solid var(--border);border-radius:11px;padding:3px;margin-left:auto;flex-wrap:wrap}
+.seg button{font:inherit;font-size:12.5px;font-weight:700;border:0;background:none;color:var(--ink-soft);padding:6px 13px;border-radius:8px;cursor:pointer;transition:all var(--dur) var(--ease)}
+.seg button[aria-pressed=true]{background:var(--ink);color:#fff}
+.seg button:hover:not([aria-pressed=true]){color:var(--ink)}
+
+.hero{padding:34px 0 26px;border-bottom:1px solid var(--border)}
+.hero h1{font-size:29px;line-height:1.2;letter-spacing:-.02em;font-weight:700;margin:9px 0 10px;max-width:25ch}
+.hero p{max-width:68ch;color:var(--ink-soft);font-size:15.5px}
+.hero p+p{margin-top:9px}
+.quote{border-left:2px solid var(--gold);padding:2px 0 2px 14px;margin:16px 0 0;font-size:15px;max-width:64ch}
+
+h2.sec{font-size:19px;font-weight:700;letter-spacing:-.015em;margin:0 0 5px}
+.seclede{font-size:13.5px;color:var(--ink-soft);margin-bottom:14px;max-width:80ch}
+.sn-eye{font-family:var(--mono);text-transform:uppercase;letter-spacing:.15em;font-size:10px;font-weight:700;color:var(--gold-text)}
+
+/* ═══ The record strip — four promises, four states ═══ */
+.record{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:6px}
+@media(max-width:900px){.record{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.record{grid-template-columns:1fr}}
+.rec-i{border:1px solid var(--border);border-radius:12px;padding:13px;background:var(--paper)}
+.rec-i .st{display:inline-flex;align-items:center;gap:6px;border-radius:6px;padding:2px 8px;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+.st.none{background:rgba(182,90,58,.10);color:#8F4025;border:1px solid rgba(182,90,58,.28)}
+.st.half{background:rgba(169,131,75,.13);color:var(--gold-ink);border:1px solid rgba(169,131,75,.34)}
+.rec-i h4{font-size:14px;font-weight:700;margin-top:8px}
+.rec-i p{font-size:12.5px;color:var(--ink-soft);margin-top:4px}
+
+/* ═══ Shape panes ═══ */
+.pane{display:none}
+.pane.on{display:block}
+.shapehead{border:1px solid var(--border);border-radius:14px;padding:16px 18px;background:var(--paper);margin-bottom:14px}
+.shapehead .tag{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:4px 12px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700}
+.tag.a{background:rgba(79,107,74,.10);color:#3E5539;border:1px solid rgba(79,107,74,.30)}
+.tag.b{background:var(--wash);color:var(--ink-soft);border:1px solid var(--border)}
+.tag.c{background:rgba(194,78,37,.09);color:var(--rust);border:1px solid rgba(194,78,37,.30)}
+.shapehead h3{font-size:21px;font-weight:700;letter-spacing:-.02em;margin-top:9px}
+.shapehead p{font-size:14px;color:var(--ink-soft);margin-top:6px;max-width:74ch}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+@media(max-width:940px){.two{grid-template-columns:1fr}}
+.side{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--cream)}
+.side>.sh{padding:11px 15px;border-bottom:1px solid var(--border);background:var(--wash);display:flex;align-items:center;gap:9px}
+.side>.sh .l{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--ink-soft)}
+.side>.sb{padding:15px}
+
+/* ═══ Supplier-side mock ═══ */
+.appbar{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:9px;background:var(--paper);margin-bottom:12px}
+.appbar .url{font-family:var(--mono);font-size:11px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ccard{border:1px solid rgba(194,78,37,.42);border-radius:13px;overflow:hidden;box-shadow:0 1px 2px rgba(44,42,41,.04),0 14px 32px -24px rgba(44,42,41,.4)}
+.ccard .ch{padding:14px 15px 12px;border-bottom:1px solid var(--border-soft)}
+.ccard h3{font-size:17px;font-weight:700;letter-spacing:-.015em}
+.ccard .price{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:23px;font-weight:700;letter-spacing:-.025em;margin-top:5px}
+.ccard .price small{font-family:var(--sans);font-size:12px;font-weight:400;color:var(--ink-soft);margin-left:5px;letter-spacing:0}
+.ccard .cb{padding:12px 15px 15px}
+.wg{list-style:none;font-size:13.5px}
+.wg li{display:flex;gap:9px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--border-soft)}
+.wg li:last-child{border-bottom:0}
+.wg li .tk{margin-top:2px;flex:none}
+.wg li.on .tk{color:var(--pos)}
+.wg li.off{color:var(--ink-soft)}
+.wg li.off .tk{color:var(--ink-soft)}
+.wg li b{display:block}
+.wg li span.s{font-size:12.5px;color:var(--ink-soft);display:block;margin-top:1px}
+.dashglimpse{border:1px solid var(--border);border-radius:11px;background:var(--paper);padding:12px;margin-top:12px}
+.dashglimpse .l{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+.person{display:flex;align-items:center;gap:10px;margin-top:9px}
+.person .av{width:36px;height:36px;border-radius:50%;background:rgba(169,131,75,.16);border:1px solid rgba(169,131,75,.4);display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--gold-ink);flex:none}
+.person .nm{font-size:13.5px;font-weight:700}
+.person .rl{font-size:12px;color:var(--ink-soft)}
+.nothinghere{border:1px dashed var(--border);border-radius:10px;padding:11px 13px;font-size:12.5px;color:var(--ink-soft);background:var(--wash);margin-top:12px}
+
+/* ═══ Owner-cost side ═══ */
+.cost{border:1px solid var(--border);border-radius:11px;padding:12px 13px;margin-bottom:9px;background:var(--paper)}
+.cost .ct{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.cost .cn{font-size:13.5px;font-weight:700}
+.cost .cv{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13.5px;font-weight:700;flex:none}
+.cost .cd{font-size:12.5px;color:var(--ink-soft);margin-top:4px}
+.cost.free{background:var(--cream);border-style:dashed}
+.cost.free .cn,.cost.free .cv{color:var(--ink-soft)}
+.bigcost{border:1px solid var(--border);border-radius:12px;padding:14px;background:var(--cream);margin-top:12px}
+.bigcost .g{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.bc{border:1px solid var(--border-soft);border-radius:9px;padding:10px 11px;background:var(--paper)}
+.bc .l{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-soft)}
+.bc .v{font-size:20px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin-top:3px;font-family:var(--mono)}
+.bc .s{font-size:11.5px;color:var(--ink-soft);margin-top:2px}
+.bc.hot .v{color:var(--rust)}
+.leave{border-left:3px solid var(--gold);background:var(--paper);border:1px solid var(--border);border-left-width:3px;border-radius:0 11px 11px 0;padding:12px 14px;margin-top:12px}
+.leave h5{font-size:13px;font-weight:700}
+.leave p{font-size:12.5px;color:var(--ink-soft);margin-top:4px}
+
+/* ═══ Copy block ═══ */
+.copyblk{border:1px solid var(--border);border-radius:13px;overflow:hidden;margin-top:16px}
+.copyblk .h{padding:11px 15px;background:var(--wash);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--ink-soft)}
+.copyrow{display:grid;grid-template-columns:8.5rem minmax(0,1fr);gap:14px;padding:11px 15px;border-bottom:1px solid var(--border-soft);font-size:13.5px}
+.copyrow:last-child{border-bottom:0}
+.copyrow .w{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-soft);padding-top:3px}
+.copyrow .old{color:var(--ink-soft);text-decoration:line-through;text-decoration-color:rgba(158,69,38,.6)}
+.copyrow .new{color:var(--ink)}
+.copyrow .gone{color:var(--ink-soft);font-style:italic}
+
+/* ═══ Comparison table (D) ═══ */
+.tblwrap{border:1px solid var(--border);border-radius:14px;overflow-x:auto}
+table.cmp{width:100%;border-collapse:collapse;font-size:13px;min-width:760px}
+table.cmp th,table.cmp td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--border-soft);vertical-align:top}
+table.cmp thead th{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-soft);border-bottom:1px solid var(--border);background:var(--wash);white-space:nowrap}
+table.cmp thead th.hi{color:var(--ink)}
+table.cmp tbody th{font-weight:600;font-size:13px;width:16rem}
+table.cmp td{font-variant-numeric:tabular-nums}
+table.cmp tr.band td,table.cmp tr.band th{background:var(--wash)}
+table.cmp td.no{color:var(--ink-soft)}
+table.cmp td.yes{color:var(--pos);font-weight:700}
+table.cmp td.bad{color:var(--rust);font-weight:700}
+table.cmp td.n{font-family:var(--mono)}
+.colA{background:rgba(79,107,74,.045)}
+.colC{background:rgba(194,78,37,.04)}
+
+/* ═══ Findings ═══ */
+.find{border:1px solid var(--border);border-left:3px solid var(--neg);border-radius:0 12px 12px 0;padding:14px 16px;margin:0 0 12px;background:var(--paper)}
+.find.ok{border-left-color:var(--pos)}
+.find.warn{border-left-color:var(--gold)}
+.find h4{font-size:14.5px;font-weight:700;margin-bottom:4px}
+.find p{font-size:13.5px;color:var(--ink-soft);max-width:84ch}
+.find p+p{margin-top:6px}
+.find .ev{font-family:var(--mono);font-size:11.5px;color:var(--ink);background:var(--wash);border-radius:6px;padding:2px 7px;display:inline-block;margin-top:7px}
+
+/* ═══ Assumptions ═══ */
+.asm{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+@media(max-width:760px){.asm{grid-template-columns:1fr}}
+.asm-i{border:1px solid var(--border);border-radius:12px;padding:13px;background:var(--cream)}
+.asm-i h5{font-size:13.5px;font-weight:700;display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.asm-i h5 span{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13px;flex:none}
+.asm-i p{font-size:12.5px;color:var(--ink-soft);margin-top:5px}
+.estflag{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:5px 13px;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;background:rgba(169,131,75,.13);color:var(--gold-ink);border:1px solid rgba(169,131,75,.36)}
+
+/* ═══ Phones ═══ */
+.phones{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+.phone{width:322px;flex:none;border:1px solid var(--border);border-radius:26px;background:var(--cream);overflow:hidden;box-shadow:0 1px 2px rgba(44,42,41,.04),0 18px 40px -26px rgba(44,42,41,.45)}
+.phone .pnotch{height:24px;background:var(--paper);border-bottom:1px solid var(--border-soft);display:flex;align-items:center;justify-content:center}
+.phone .pnotch i{display:block;width:64px;height:5px;border-radius:3px;background:rgba(44,42,41,.16)}
+.phone .pbody{padding:13px;display:flex;flex-direction:column;gap:10px}
+.phone .pbar{display:flex;border-top:1px solid var(--border);background:var(--paper)}
+.phone .pbar div{flex:1;text-align:center;padding:8px 2px;font-size:10px;color:var(--ink-soft);line-height:1.25}
+.phone .pbar div[data-on="1"]{color:var(--ink);font-weight:700}
+.phonecap{font-size:12.5px;color:var(--ink-soft);margin-top:9px;max-width:322px}
+
+table.rcpt{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px}
+table.rcpt th,table.rcpt td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--border-soft)}
+table.rcpt th{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);border-bottom:1px solid var(--border)}
+table.rcpt td.n{font-family:var(--mono);font-variant-numeric:tabular-nums}
+table.rcpt td.sw i{display:inline-block;width:13px;height:13px;border-radius:3px;border:1px solid var(--border);vertical-align:-2px;margin-right:7px}
+
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<svg style="display:none" aria-hidden="true">
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+<symbol id="i-half" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+<symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+<symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></symbol>
+<symbol id="i-door" viewBox="0 0 24 24"><path d="M13 2H6v20h7"/><path d="M13 2l5 3v14l-5 3"/><path d="M15 12h.01"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3Z"/><path d="M12 9v4M12 17h.01"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-8 10-8 10 8 10 8-4 8-10 8-10-8-10-8Z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-wallet" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h13v4"/><path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H5"/><path d="M17 13h.01"/></symbol>
+<symbol id="i-plane" viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5a2.1 2.1 0 0 0-3-3L13 8 4.8 6.2a.5.5 0 0 0-.5.8l3.5 4-2 2-2.5-.5a.5.5 0 0 0-.4.9L6 15l1.6 3.1a.5.5 0 0 0 .9-.4L8 15.2l2-2 4 3.5a.5.5 0 0 0 .8-.5Z"/></symbol>
+<symbol id="i-note" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></symbol>
+</svg>
+
+<header class="top">
+  <div class="wrap">
+    <span class="wordmark">SETNAYAN</span>
+    <span class="muted" style="font-size:13px">White-glove</span>
+    <div class="seg" role="group" aria-label="Which shape to look at">
+      <button id="b-a" aria-pressed="true"  onclick="shape('a')">A · Smaller, real</button>
+      <button id="b-b" aria-pressed="false" onclick="shape('b')">B · No person</button>
+      <button id="b-c" aria-pressed="false" onclick="shape('c')">C · All four</button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <p class="kicker">Vendor · Custom tier · 27 August 2026</p>
+    <h1>You are selling an hour of your own time, forever, for ₱1,000 a month.</h1>
+    <p>"White-glove" is not a vague word in our papers — it was written down precisely, and it is <b>the entire reason Custom costs more than Enterprise</b>. It is four promises: a named person who is theirs, a sit-down over their numbers every three months, their problems handled first, and a personal setup session. Three of the four do not exist anywhere in the product. The fourth partly does, and nobody has ever been told.</p>
+    <p><b>Nobody has ever bought Custom.</b> Two shops exist and both are on the entry plan. So this is not fixing a promise you broke — it is choosing which promise to make. You can pick any of these freely and nobody is let down.</p>
+    <p class="quote">The three shapes below are the same choice seen from two sides: what a supplier reads, and what it takes out of your week. The second column is the one that decides this.</p>
+  </div>
+</section>
+
+<!-- ══════════════════ THE RECORD ══════════════════ -->
+<section style="padding:28px 0 6px">
+<div class="wrap">
+  <h2 class="sec">What was written down, and what is actually there</h2>
+  <p class="seclede">The four promises, in the words they were signed in. The state under each one was checked in the product today, not read from a document.</p>
+  <div class="record">
+    <div class="rec-i">
+      <span class="st none"><svg class="i" style="width:11px;height:11px"><use href="#i-x"/></svg> Nothing there</span>
+      <h4>A named person who is theirs</h4>
+      <p>Nobody can be assigned to a shop. There is no place to put a name and no screen that would show it. It is two sentences of marketing and nothing behind either one.</p>
+    </div>
+    <div class="rec-i">
+      <span class="st none"><svg class="i" style="width:11px;height:11px"><use href="#i-x"/></svg> Nothing there</span>
+      <h4>A review of their numbers every three months</h4>
+      <p>Nothing schedules one, reminds you of one, or records that one happened. The only three-monthly thing in the product is the tax filing, which is unrelated.</p>
+    </div>
+    <div class="rec-i">
+      <span class="st half"><svg class="i" style="width:11px;height:11px"><use href="#i-half"/></svg> Half there</span>
+      <h4>Their problems handled first</h4>
+      <p><b>This one surprised me.</b> Your complaints screen already puts the higher-paying shops at the top of the list, and Custom already sits above everyone. What does not exist: any promise of how fast, any separate queue — and the supplier is never told it happened.</p>
+    </div>
+    <div class="rec-i">
+      <span class="st none"><svg class="i" style="width:11px;height:11px"><use href="#i-x"/></svg> Nothing there</span>
+      <h4>A personal setup session</h4>
+      <p>Originally written as one hour with you when they join. There is no booking, no session and no record of one anywhere.</p>
+    </div>
+  </div>
+
+  <div class="find" style="margin-top:16px">
+    <h4><svg class="i" style="vertical-align:-3px"><use href="#i-alert"/></svg> Your own homepage argues with itself about this, on one page</h4>
+    <p>In the Enterprise list, "Quarterly business review" and "Priority dispute + account management" both carry a <b>coming soon</b> mark. Twelve lines further down, the Custom description says a dedicated account manager and quarterly business review <b>"come with it"</b> — flatly, no mark, no qualifier. Same page, same two things, one says later and one says included.</p>
+    <p>This matters for the decision because it means <b>doing nothing is not on the menu</b>. Whichever shape you pick, that sentence has to change — it is the only sentence in the product that promises a person will be there.</p>
+    <p class="ev">2 rendered claims · 1 marked "soon" · 1 unqualified · same file, 12 lines apart</p>
+  </div>
+
+  <div class="find warn">
+    <h4><svg class="i" style="vertical-align:-3px"><use href="#i-wallet"/></svg> And the premium quietly shrank by ₱500 today</h4>
+    <p>The signed card built this price as <b>Enterprise plus ₱1,500 for white-glove</b>. Today you set Enterprise at ₱10,000 and Custom at ₱11,000 — so the premium is now <b>₱1,000</b>. That is not wrong, it is just no longer the number that was agreed, and it changes what the four promises have to be worth.</p>
+    <p>Shown here, not settled. Two of the three shapes below make ₱1,000 easy to defend; one of them makes even ₱1,500 look cheap for what it takes out of you.</p>
+    <p class="ev">signed: Enterprise + ₱1,500 → today: Enterprise + ₱1,000</p>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════ THE SHAPES ══════════════════ -->
+<section style="padding:14px 0 6px">
+<div class="wrap">
+  <h2 class="sec">Three shapes. Pick by looking.</h2>
+  <p class="seclede">Left is what the supplier reads. Right is what it takes out of your week. Switch between them with the buttons at the top of the page.</p>
+
+  <!-- ── SHAPE A ─────────────────────────────────────────────── -->
+  <div class="pane on" id="pane-a">
+    <div class="shapehead">
+      <span class="tag a"><svg class="i" style="width:12px;height:12px"><use href="#i-check"/></svg> Shape A</span>
+      <h3>Make it real, but smaller.</h3>
+      <p>Promise only the two things one person can actually keep every week of every year: <b>a named contact</b> and <b>their problems first</b>. Drop the three-monthly review entirely — from Custom and from Enterprise, where it has been marked "coming soon" for months. Keep the setup session; it happens once.</p>
+    </div>
+
+    <div class="two">
+      <div class="side">
+        <div class="sh"><svg class="i" style="color:var(--ink-soft)"><use href="#i-eye"/></svg><span class="l">What the supplier sees</span></div>
+        <div class="sb">
+          <div class="appbar"><span class="url">setnayan.com/vendor-dashboard/subscription</span></div>
+          <div class="ccard">
+            <div class="ch">
+              <h3>Custom</h3>
+              <p class="price">from ₱11,000<small>per 28 days</small></p>
+              <p style="font-size:13px;color:var(--ink-soft);margin-top:6px">Everything Enterprise gives you, with none of it capped — <b style="color:var(--ink)">and a person here who knows you.</b></p>
+            </div>
+            <div class="cb">
+              <ul class="wg">
+                <li class="on"><span class="tk"><svg class="i"><use href="#i-user"/></svg></span><span><b>Someone here is yours</b><span class="s">A named person at Setnayan, not a form. You get their name the day you join.</span></span></li>
+                <li class="on"><span class="tk"><svg class="i"><use href="#i-bolt"/></svg></span><span><b>Your problems go first</b><span class="s">If something goes wrong with a booking, yours sits at the top of our list.</span></span></li>
+                <li class="on"><span class="tk"><svg class="i"><use href="#i-door"/></svg></span><span><b>We set you up ourselves</b><span class="s">One session together when you join — your shop, your team, your calendar, done with you.</span></span></li>
+              </ul>
+              <p style="font-size:12px;color:var(--ink-soft);margin-top:10px;border-top:1px solid var(--border-soft);padding-top:9px">Three things, and every one of them happens. Nothing on this card is coming later.</p>
+            </div>
+          </div>
+          <div class="dashglimpse">
+            <p class="l">And inside their dashboard, on every page</p>
+            <div class="person">
+              <span class="av">IC</span>
+              <div><p class="nm">Ice — your contact at Setnayan</p><p class="rl">Message him · usually answers same day</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="side">
+        <div class="sh"><svg class="i" style="color:var(--rust)"><use href="#i-clock"/></svg><span class="l">What it costs you</span></div>
+        <div class="sb">
+          <div class="cost">
+            <div class="ct"><span class="cn">Being a named person</span><span class="cv">~30 min / customer / month</span></div>
+            <p class="cd">Not a meeting — messages, at unpredictable times, that only you can answer because your name is on it. This cannot be batched and cannot be handed over.</p>
+          </div>
+          <div class="cost">
+            <div class="ct"><span class="cn">Their problems first</span><span class="cv">~0 extra minutes</span></div>
+            <p class="cd">Your complaints list already sorts this way. Finishing it means telling the supplier it happened, and deciding how fast is "first". <b>The work is a promise, not hours.</b></p>
+          </div>
+          <div class="cost">
+            <div class="ct"><span class="cn">Setup session</span><span class="cv">~1½ hours, once ever</span></div>
+            <p class="cd">One hour with them plus half an hour reading up first. It never comes back.</p>
+          </div>
+          <div class="cost free">
+            <div class="ct"><span class="cn">Three-monthly review</span><span class="cv">dropped</span></div>
+            <p class="cd">Not promised, so not owed. This is the whole difference between A and C.</p>
+          </div>
+
+          <div class="bigcost">
+            <p class="l" style="font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-soft)">What that becomes</p>
+            <div class="g" style="margin-top:9px">
+              <div class="bc"><p class="l">At 5 customers</p><p class="v">2½ h</p><p class="s">a month, plus 7½ hours of setups spread over however long it takes to sign five</p></div>
+              <div class="bc"><p class="l">At 50 customers</p><p class="v">25 h</p><p class="s">a month — about three working days, every month, forever</p></div>
+            </div>
+            <div class="g" style="margin-top:9px">
+              <div class="bc"><p class="l">New screen you'd live in</p><p class="v" style="font-size:15px">One list</p><p class="s">who is assigned to whom, and when you last spoke</p></div>
+              <div class="bc"><p class="l">Premium earned per hour of your time</p><p class="v">₱2,000</p><p class="s">₱1,000 × 50 customers ÷ 25 hours</p></div>
+            </div>
+          </div>
+
+          <div class="leave">
+            <h5><svg class="i" style="width:14px;height:14px;vertical-align:-2px;color:var(--gold)"><use href="#i-plane"/></svg> When you are away</h5>
+            <p>Messages queue and you answer them when you are back. Nothing is missed and nothing is broken — a named contact who is slow for a week is still a named contact. <b>This is the property that makes A survivable.</b></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="copyblk">
+      <div class="h">The honest words, under shape A</div>
+      <div class="copyrow"><span class="w">Enterprise now</span><span class="old">Quarterly business review — coming soon</span></div>
+      <div class="copyrow"><span class="w">Enterprise, A</span><span class="gone">Line removed entirely. A "coming soon" that will never come is still a promise.</span></div>
+      <div class="copyrow"><span class="w">Enterprise now</span><span class="old">Priority dispute + account management — coming soon</span></div>
+      <div class="copyrow"><span class="w">Enterprise, A</span><span class="new">Your problems handled first. <span class="muted">— and the "soon" comes off, because that half already works.</span></span></div>
+      <div class="copyrow"><span class="w">Custom now</span><span class="old">A dedicated account manager and quarterly business review come with it.</span></div>
+      <div class="copyrow"><span class="w">Custom, A</span><span class="new">A named person here who knows your business, and your problems handled first.</span></div>
+    </div>
+  </div>
+
+  <!-- ── SHAPE B ─────────────────────────────────────────────── -->
+  <div class="pane" id="pane-b">
+    <div class="shapehead">
+      <span class="tag b"><svg class="i" style="width:12px;height:12px"><use href="#i-x"/></svg> Shape B</span>
+      <h3>Stop selling your attention.</h3>
+      <p>Custom earns its price on one thing: <b>nothing about it is capped</b>. No person is promised, so no person can be let down. Every line about account managers and reviews comes out of the product — from Custom <em>and</em> from Enterprise. You still help people; you just never sold it by the month.</p>
+    </div>
+
+    <div class="two">
+      <div class="side">
+        <div class="sh"><svg class="i" style="color:var(--ink-soft)"><use href="#i-eye"/></svg><span class="l">What the supplier sees</span></div>
+        <div class="sb">
+          <div class="appbar"><span class="url">setnayan.com/vendor-dashboard/subscription</span></div>
+          <div class="ccard">
+            <div class="ch">
+              <h3>Custom</h3>
+              <p class="price">from ₱11,000<small>per 28 days</small></p>
+              <p style="font-size:13px;color:var(--ink-soft);margin-top:6px">Everything Enterprise gives you, at the same figures — <b style="color:var(--ink)">and not one of them is capped.</b></p>
+            </div>
+            <div class="cb">
+              <ul class="wg">
+                <li class="on"><span class="tk"><svg class="i"><use href="#i-check"/></svg></span><span><b>Every ceiling comes off</b><span class="s">Team, reach, bookings a day, photos — raise any of them as far as you need.</span></span></li>
+                <li class="on"><span class="tk"><svg class="i"><use href="#i-check"/></svg></span><span><b>Two things no other plan can do</b><span class="s">List nationwide, and run on your own web address.</span></span></li>
+                <li class="on"><span class="tk"><svg class="i"><use href="#i-check"/></svg></span><span><b>You pay only for the height you take</b><span class="s">₱11,000 is the whole bill if you add nothing to it.</span></span></li>
+              </ul>
+              <p style="font-size:12px;color:var(--ink-soft);margin-top:10px;border-top:1px solid var(--border-soft);padding-top:9px">No claims about people. Everything on this card is a switch, and every switch is already built.</p>
+            </div>
+          </div>
+          <div class="nothinghere">
+            <b>Nothing appears in their dashboard.</b> There is no contact card, no name, no promise of a reply. Support is the same good support everybody gets — which today is you, answering, because there is nobody else. The difference is you never wrote it on a price tag.
+          </div>
+        </div>
+      </div>
+
+      <div class="side">
+        <div class="sh"><svg class="i" style="color:var(--rust)"><use href="#i-clock"/></svg><span class="l">What it costs you</span></div>
+        <div class="sb">
+          <div class="cost free"><div class="ct"><span class="cn">Being a named person</span><span class="cv">not promised</span></div><p class="cd">You still answer people. You are just not on the hook by name, by the month, for as long as they pay.</p></div>
+          <div class="cost free"><div class="ct"><span class="cn">Three-monthly review</span><span class="cv">not promised</span></div></div>
+          <div class="cost free"><div class="ct"><span class="cn">Setup session</span><span class="cv">not promised</span></div></div>
+          <div class="cost"><div class="ct"><span class="cn">Their problems first</span><span class="cv">keep it silently</span></div><p class="cd">The sorting already exists and costs nothing. Under B you simply never advertise it — you just quietly help your biggest customers first, which is what everybody does anyway.</p></div>
+
+          <div class="bigcost">
+            <p class="l" style="font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-soft)">What that becomes</p>
+            <div class="g" style="margin-top:9px">
+              <div class="bc"><p class="l">At 5 customers</p><p class="v">0 h</p><p class="s">a month, committed</p></div>
+              <div class="bc"><p class="l">At 50 customers</p><p class="v">0 h</p><p class="s">a month, committed — the only shape that does not grow with sales</p></div>
+            </div>
+            <div class="g" style="margin-top:9px">
+              <div class="bc"><p class="l">New screen you'd live in</p><p class="v" style="font-size:15px">None</p><p class="s">nothing new to build and nothing new to check</p></div>
+              <div class="bc"><p class="l">What you give up</p><p class="v" style="font-size:15px">The reason</p><p class="s">₱1,000 now has to be earned by removing caps alone</p></div>
+            </div>
+          </div>
+
+          <div class="leave">
+            <h5><svg class="i" style="width:14px;height:14px;vertical-align:-2px;color:var(--gold)"><use href="#i-plane"/></svg> When you are away</h5>
+            <p>Nothing happens, because nothing was owed. <b>This is the only shape where going on leave has no cost at all</b> — and the only one that does not get heavier every time you make a sale.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="copyblk">
+      <div class="h">The honest words, under shape B</div>
+      <div class="copyrow"><span class="w">Enterprise now</span><span class="old">Quarterly business review — coming soon</span></div>
+      <div class="copyrow"><span class="w">Enterprise, B</span><span class="gone">Removed.</span></div>
+      <div class="copyrow"><span class="w">Enterprise now</span><span class="old">Priority dispute + account management — coming soon</span></div>
+      <div class="copyrow"><span class="w">Enterprise, B</span><span class="gone">Removed. You keep doing it; you stop selling it.</span></div>
+      <div class="copyrow"><span class="w">Custom now</span><span class="old">A dedicated account manager and quarterly business review come with it.</span></div>
+      <div class="copyrow"><span class="w">Custom, B</span><span class="new">Everything Enterprise has, and not one of it capped. Nationwide, and your own web address — neither is possible on any other plan.</span></div>
+    </div>
+  </div>
+
+  <!-- ── SHAPE C ─────────────────────────────────────────────── -->
+  <div class="pane" id="pane-c">
+    <div class="shapehead">
+      <span class="tag c"><svg class="i" style="width:12px;height:12px"><use href="#i-alert"/></svg> Shape C</span>
+      <h3>Build all four, properly.</h3>
+      <p>The most faithful reading of what was signed, and the strongest card a supplier could be handed. It is also the only shape where <b>your calendar fills up automatically every time you make a sale</b>, and where being away has a cost that cannot be paid later.</p>
+    </div>
+
+    <div class="two">
+      <div class="side">
+        <div class="sh"><svg class="i" style="color:var(--ink-soft)"><use href="#i-eye"/></svg><span class="l">What the supplier sees</span></div>
+        <div class="sb">
+          <div class="appbar"><span class="url">setnayan.com/vendor-dashboard/subscription</span></div>
+          <div class="ccard">
+            <div class="ch">
+              <h3>Custom</h3>
+              <p class="price">from ₱11,000<small>per 28 days</small></p>
+              <p style="font-size:13px;color:var(--ink-soft);margin-top:6px">Everything Enterprise gives you, uncapped — <b style="color:var(--ink)">and Setnayan works your business with you.</b></p>
+            </div>
+            <div class="cb">
+              <ul class="wg">
+                <li class="on"><span class="tk"><svg class="i"><use href="#i-user"/></svg></span><span><b>Someone here is yours</b><span class="s">A named person at Setnayan. You get their name the day you join.</span></span></li>
+                <li class="on"><span class="tk"><svg class="i"><use href="#i-cal"/></svg></span><span><b>We sit down over your numbers, four times a year</b><span class="s">What is working, what is not, where the bookings are going. Booked in advance, every quarter.</span></span></li>
+                <li class="on"><span class="tk"><svg class="i"><use href="#i-bolt"/></svg></span><span><b>Your problems go first, within four hours</b><span class="s">A real answer inside four working hours, not a place in a queue.</span></span></li>
+                <li class="on"><span class="tk"><svg class="i"><use href="#i-door"/></svg></span><span><b>We set you up ourselves</b><span class="s">A full hour together when you join.</span></span></li>
+              </ul>
+            </div>
+          </div>
+          <div class="dashglimpse">
+            <p class="l">And inside their dashboard</p>
+            <div class="person">
+              <span class="av">IC</span>
+              <div><p class="nm">Ice — your contact at Setnayan</p><p class="rl">Message him · answers within 4 working hours</p></div>
+            </div>
+            <div style="border-top:1px solid var(--border-soft);margin-top:11px;padding-top:10px;display:flex;align-items:center;gap:10px">
+              <span style="width:36px;height:36px;border-radius:9px;background:rgba(194,78,37,.09);border:1px solid rgba(194,78,37,.28);display:inline-flex;align-items:center;justify-content:center;flex:none;color:var(--rust)"><svg class="i"><use href="#i-cal"/></svg></span>
+              <div><p style="font-size:13.5px;font-weight:700">Your next review — Thu 16 Oct, 2:00 pm</p><p style="font-size:12px;color:var(--ink-soft)">Third quarter · with Ice</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="side">
+        <div class="sh"><svg class="i" style="color:var(--rust)"><use href="#i-clock"/></svg><span class="l">What it costs you</span></div>
+        <div class="sb">
+          <div class="cost"><div class="ct"><span class="cn">Being a named person</span><span class="cv">~30 min / customer / month</span></div><p class="cd">Unscheduled messages only you can answer.</p></div>
+          <div class="cost"><div class="ct"><span class="cn">The three-monthly review</span><span class="cv">~2 h each, 4× a year</span></div><p class="cd">Pull their numbers and actually read them (45 min) · the meeting itself (1 h) · notes and what you promised in it (15 min). That is <b>8 hours per customer per year</b>, and it arrives whether the week is busy or not.</p></div>
+          <div class="cost"><div class="ct"><span class="cn">Four-hour answer promise</span><span class="cv">~0 extra hours — but you cannot leave the desk</span></div><p class="cd">The hours are near nothing at today's volume. The cost is <b>availability</b>: a four-hour promise means you can never be unreachable for a working day, and it is broken by one hospital visit.</p></div>
+          <div class="cost"><div class="ct"><span class="cn">Setup session</span><span class="cv">~1½ hours, once ever</span></div></div>
+
+          <div class="bigcost">
+            <p class="l" style="font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-soft)">What that becomes</p>
+            <div class="g" style="margin-top:9px">
+              <div class="bc"><p class="l">At 5 customers</p><p class="v">~6 h</p><p class="s">a month — plus 20 booked meetings a year</p></div>
+              <div class="bc hot"><p class="l">At 50 customers</p><p class="v">~58 h</p><p class="s">a month — over <b>seven working days</b>, every month, forever</p></div>
+            </div>
+            <div class="g" style="margin-top:9px">
+              <div class="bc hot"><p class="l">Booked meetings a year, at 50</p><p class="v">200</p><p class="s">about four a week, every week, that you cannot move without breaking the promise</p></div>
+              <div class="bc"><p class="l">Premium earned per hour of your time</p><p class="v">₱855</p><p class="s">₱1,000 × 50 customers ÷ 58 hours</p></div>
+            </div>
+            <div class="g" style="margin-top:9px;grid-template-columns:1fr">
+              <div class="bc"><p class="l">New screens you'd live in</p><p class="v" style="font-size:15px">Three</p><p class="s">who is assigned to whom · a review calendar that books itself four times a year per customer · a notes file per shop so the next review knows what the last one said</p></div>
+            </div>
+          </div>
+
+          <div class="leave">
+            <h5><svg class="i" style="width:14px;height:14px;vertical-align:-2px;color:var(--gold)"><use href="#i-plane"/></svg> When you are away</h5>
+            <p>At 50 customers a fortnight away is <b>about eight reviews that have to move</b>, each one a message to a paying customer explaining why. The four-hour promise simply breaks — there is nobody to hand it to, because the whole promise is that it is <em>you</em>. <b>This is the shape that cannot be paused.</b></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="copyblk">
+      <div class="h">The honest words, under shape C</div>
+      <div class="copyrow"><span class="w">Enterprise now</span><span class="old">Quarterly business review — coming soon</span></div>
+      <div class="copyrow"><span class="w">Enterprise, C</span><span class="new">A review of your numbers with us, four times a year. <span class="muted">— the "soon" comes off only once it is genuinely running.</span></span></div>
+      <div class="copyrow"><span class="w">Custom now</span><span class="old">A dedicated account manager and quarterly business review come with it.</span></div>
+      <div class="copyrow"><span class="w">Custom, C</span><span class="new">A named person here who knows your business, a sit-down over your numbers every quarter, and an answer to anything urgent inside four working hours.</span></div>
+      <div class="copyrow"><span class="w">⚠</span><span class="new" style="color:var(--rust);font-weight:700">Under C the words only become honest on the day the fourth thing is built. Until then this page's sentence stays false — so C is the only shape with a gap between deciding and telling the truth.</span></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════ D · THE EVIDENCE TABLE ══════════════════ -->
+<section style="padding:32px 0 6px">
+<div class="wrap">
+  <h2 class="sec">All of it side by side — including what it costs you</h2>
+  <p class="seclede">Today's column is what a supplier would be told right now if one signed up this afternoon. The hour figures are estimates and the assumptions behind every one are written out underneath.</p>
+
+  <div class="tblwrap">
+    <table class="cmp">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Today</th>
+          <th class="hi colA">A · Smaller, real</th>
+          <th class="hi">B · No person</th>
+          <th class="hi colC">C · All four</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><th>A named person who is theirs</th><td class="bad">promised, does not exist</td><td class="yes colA">yes — new build</td><td class="no">not offered</td><td class="yes colC">yes — new build</td></tr>
+        <tr><th>Review of their numbers, 4× a year</th><td class="bad">promised twice, one says "soon"</td><td class="no colA">dropped</td><td class="no">dropped</td><td class="yes colC">yes — new build</td></tr>
+        <tr><th>Their problems first</th><td class="no">half there — sorts, but silent</td><td class="yes colA">finished + they are told</td><td class="no">kept, never advertised</td><td class="yes colC">finished + a 4-hour promise</td></tr>
+        <tr><th>Personal setup session</th><td class="bad">promised, does not exist</td><td class="yes colA">yes</td><td class="no">not offered</td><td class="yes colC">yes</td></tr>
+
+        <tr class="band"><th>Your time, per customer, per month</th><td class="n">none — nothing runs</td><td class="n colA">~30 min</td><td class="n">none</td><td class="n colC">~1 h 10 min</td></tr>
+        <tr><th>At 5 customers</th><td class="n">—</td><td class="n colA">~2½ h a month</td><td class="n">none</td><td class="n colC">~6 h a month</td></tr>
+        <tr><th>At 50 customers</th><td class="n">—</td><td class="n colA">~25 h a month<br><span class="muted" style="font-size:11.5px">≈ 3 working days</span></td><td class="n">none</td><td class="bad colC">~58 h a month<br><span style="font-size:11.5px;font-weight:400">≈ 7 working days</span></td></tr>
+        <tr><th>Meetings you must book, per year, at 50</th><td class="n">—</td><td class="n colA">none</td><td class="n">none</td><td class="bad colC">200 · about 4 a week</td></tr>
+        <tr><th>One-time setup hours, per customer</th><td class="n">—</td><td class="n colA">~1½ h</td><td class="n">none</td><td class="n colC">~1½ h</td></tr>
+
+        <tr class="band"><th>New screens you would live in</th><td class="n">—</td><td class="n colA">1 — a contact list</td><td class="n">none</td><td class="n colC">3 — contacts, a review calendar, notes per shop</td></tr>
+        <tr><th>When you are away for a fortnight</th><td class="n">—</td><td class="colA">messages queue · nothing breaks</td><td>nothing is owed</td><td class="bad colC">~8 reviews move · the 4-hour promise breaks</td></tr>
+        <tr><th>Does the workload grow with sales?</th><td class="n">—</td><td class="bad colA">yes, in a straight line</td><td class="yes">no — the only one</td><td class="bad colC">yes, steeply</td></tr>
+        <tr><th>Can any of it be handed to someone else?</th><td class="n">—</td><td class="colA">only by hiring a second named person</td><td>not applicable</td><td class="bad colC">no — the promise is that it is you</td></tr>
+
+        <tr class="band"><th>Premium earned per hour of your time</th><td class="n">—</td><td class="n colA">≈ ₱2,000</td><td class="yes">no time spent</td><td class="n colC">≈ ₱855</td></tr>
+        <tr><th>Is the ₱1,000 honest?</th><td class="bad">no</td><td class="yes colA">yes</td><td class="yes">yes — on removing caps alone</td><td class="yes colC">yes, and ₱1,500 would be too</td></tr>
+        <tr><th>Words have to change</th><td class="bad">they are false today</td><td class="colA">3 lines</td><td>3 lines</td><td class="colC">2 lines — but only after the building</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="find warn" style="margin-top:18px">
+    <h4><svg class="i" style="vertical-align:-3px"><use href="#i-wallet"/></svg> The one line in that table that decides it</h4>
+    <p><b>Premium earned per hour of your time.</b> Everything else Setnayan sells is software: you build it once and the hundredth customer costs you nothing. White-glove is the opposite — it is the only thing in the whole product where <b>every peso of revenue costs a fixed slice of one person's finite week, forever</b>. That is why the figure barely moves between 5 customers and 50: the cost grows exactly as fast as the money does.</p>
+    <p>Under A that trade is roughly <b>₱2,000 an hour of your time</b>, which is a fair rate for work you were half doing anyway. Under C it is <b>₱855</b> — and it buys 200 meetings a year you cannot move. <b>Under B it is not a trade at all</b>, because no hours are sold.</p>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════ ASSUMPTIONS ══════════════════ -->
+<section style="padding:30px 0 6px">
+<div class="wrap">
+  <span class="estflag"><svg class="i" style="width:12px;height:12px"><use href="#i-alert"/></svg> Estimates, not measurements</span>
+  <h2 class="sec" style="margin-top:13px">How these hours were worked out</h2>
+  <p class="seclede">Nobody has ever been a Custom customer, so there is nothing to measure — every hour figure above is a judgement, and every one of them comes from the four numbers below. If you disagree with a number, change it and the whole table moves. What <em>is</em> measured, and stated as such, is the state of the product: what exists, what does not, and what the words currently say.</p>
+
+  <div class="asm">
+    <div class="asm-i">
+      <h5>Being a named person <span>30 min / customer / month</span></h5>
+      <p>Assumes two or three real exchanges a month with a business paying you ₱11,000 — a question about a booking, a complaint, a favour. Could easily be 15 minutes for a quiet shop or two hours in a bad month. <b>The number that matters is not the size but the shape: it arrives unannounced and only you can answer it.</b></p>
+    </div>
+    <div class="asm-i">
+      <h5>A review of their numbers <span>2 h each, 4× a year</span></h5>
+      <p>45 minutes pulling their figures and forming a view worth hearing, 1 hour in the meeting, 15 minutes writing down what you promised. A review you have not prepared for is worse than no review, so the prep is not optional. <b>If you think you could do it in one hour, halve every C figure — it is still 100 meetings a year at 50 customers.</b></p>
+    </div>
+    <div class="asm-i">
+      <h5>Their problems first <span>≈ 0 extra hours</span></h5>
+      <p>The sorting exists already and costs nothing to keep. There have been <b>no complaints at all</b> in the product so far, so there is genuinely no volume to price. The four-hour version costs no hours either — it costs the freedom to be unreachable, which is not measurable in hours and is the real price.</p>
+    </div>
+    <div class="asm-i">
+      <h5>Setup session <span>1½ h, once</span></h5>
+      <p>The signed papers say one hour. Half an hour of reading their shop first is what makes the hour useful. <b>This is the cheapest of the four by a distance and the only one that never comes back</b> — it appears in every shape except B for that reason.</p>
+    </div>
+  </div>
+
+  <div class="find" style="margin-top:16px">
+    <h4>What is measured, and is not a judgement call</h4>
+    <p><b>Two shops exist and both are on the entry plan. None has ever been on Custom. There have been no complaints and no vendor conversations at all.</b> The three-monthly review, the named person and the setup session do not exist anywhere in the product. The problems-first sorting does exist, does already put Custom at the top, and has never had two things in the queue to sort. The homepage does say both "coming soon" and "comes with it" about the same two things, twelve lines apart.</p>
+    <p class="ev">2 shops · 0 on Custom · 0 complaints ever · 0 vendor conversations ever</p>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════ PHONE ══════════════════ -->
+<section style="padding:30px 0 6px">
+<div class="wrap">
+  <h2 class="sec">On a phone — what the supplier reads under each shape</h2>
+  <p class="seclede">375 wide. Switching the shape at the top of the page changes this card too. The difference between the three is three lines of type, which is exactly how big this decision looks to the person paying for it — and exactly how differently it lands on your week.</p>
+
+  <div class="phones">
+    <div>
+      <div class="phone">
+        <div class="pnotch"><i></i></div>
+        <div class="pbody">
+          <p class="sn-eye">Beyond Enterprise</p>
+          <div class="ccard" style="border-radius:11px">
+            <div class="ch" style="padding:12px 13px 10px">
+              <h3 style="font-size:15px">Custom</h3>
+              <p class="price" style="font-size:20px">from ₱11,000<small style="font-size:11px">/ 28 days</small></p>
+              <p id="ph-lede" style="font-size:12.5px;color:var(--ink-soft);margin-top:5px">Everything Enterprise gives you, with none of it capped — and a person here who knows you.</p>
+            </div>
+            <div class="cb" style="padding:10px 13px 13px">
+              <ul class="wg" id="ph-list" style="font-size:12.5px"></ul>
+            </div>
+          </div>
+          <div id="ph-dash"></div>
+        </div>
+        <div class="pbar"><div>Home</div><div>Shop</div><div>Customers</div><div data-on="1">Plans</div><div>On the Day</div></div>
+      </div>
+      <p class="phonecap" id="ph-cap">Shape A. Three promises, all of them true on the day it ships.</p>
+    </div>
+
+    <div>
+      <div class="phone">
+        <div class="pnotch"><i></i></div>
+        <div class="pbody">
+          <p class="sn-eye" style="color:var(--rust)">And on your side, the same day</p>
+          <div class="bigcost" style="padding:12px">
+            <p style="font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-soft)">Your time at 50 customers</p>
+            <p class="v" id="ph-hours" style="font-size:30px;font-weight:700;letter-spacing:-.025em;font-family:var(--mono);margin-top:4px">25 h</p>
+            <p class="s" id="ph-hours-s" style="font-size:12px;color:var(--ink-soft)">a month — about three working days, every month, forever</p>
+          </div>
+          <div class="cost" style="margin-bottom:0">
+            <div class="ct"><span class="cn">Meetings you must book</span><span class="cv" id="ph-meet">none</span></div>
+            <p class="cd" id="ph-meet-s">Nothing goes in your calendar that you did not put there.</p>
+          </div>
+          <div class="cost" style="margin-bottom:0">
+            <div class="ct"><span class="cn">Earned per hour of you</span><span class="cv" id="ph-rate">₱2,000</span></div>
+          </div>
+          <div class="leave" style="margin-top:0">
+            <h5><svg class="i" style="width:13px;height:13px;vertical-align:-2px;color:var(--gold)"><use href="#i-plane"/></svg> If you go away for two weeks</h5>
+            <p id="ph-leave">Messages queue and you answer them when you are back. Nothing breaks.</p>
+          </div>
+        </div>
+        <div class="pbar"><div>Home</div><div data-on="1">HQ</div><div>Money</div><div>Shops</div><div>People</div></div>
+      </div>
+      <p class="phonecap">The same shape from your side. This screen is the reason the decision is not obvious from the supplier's card alone — the three cards look almost identical and these three do not.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════ WHAT I WOULD DO ══════════════════ -->
+<section style="padding:32px 0 10px">
+<div class="wrap">
+  <h2 class="sec">What makes one of these obviously wrong</h2>
+  <p class="seclede">Two things, and neither is a matter of taste.</p>
+
+  <div class="find">
+    <h4>C is refused by arithmetic, not by opinion</h4>
+    <p>Fifty Custom customers means <b>200 booked meetings a year — about four every week, forever</b> — for a company whose entire admin is one person, and whose own standing plan is built on you <em>not</em> having to be present for things to work. It is also the one promise that cannot be handed over, delegated or paused, because its whole value is that it is you. And the moment it starts slipping it does more damage than never offering it: a missed review is a broken promise with a date on it.</p>
+    <p>The honest version of C is not "never" — it is "not while the admin is one person". <b>It is a thing to sell when there is a second employee, priced then at what a second employee costs.</b></p>
+  </div>
+
+  <div class="find ok">
+    <h4>A is cheaper than it looks, because a quarter of it is already built</h4>
+    <p>This is the finding that changes the shape of the choice, and it was not in the brief for this page. <b>Your complaints screen already sorts by who pays you most, and Custom already sits at the top of that sort.</b> So "their problems handled first" is not a build — it is a build you finished some time ago and never told anybody about. What is left is telling the supplier it is true and deciding what "first" means.</p>
+    <p>That leaves A as: one new list of who is assigned to whom, one sentence in the supplier's dashboard, and a habit. Against ₱1,000 a month per customer it is the best-value promise of the three.</p>
+    <p class="ev">the sorting is real, favours Custom, and has never had two things to sort</p>
+  </div>
+
+  <div class="find warn">
+    <h4>And B is genuinely viable — do not read it as giving up</h4>
+    <p>Custom already justifies its price without any of this: it is the only plan that removes every cap, and the only one that can list nationwide or run on the shop's own web address. Neither is possible at any price below it. <b>A price defended entirely by switches is a price that never needs your Tuesday.</b> B is the right answer if you would rather spend the next year building than meeting.</p>
+    <p>The real cost of B is not the supplier's — it is that you lose the reason the ₱1,000 was invented in the first place, and the tier has to stand on caps alone from then on.</p>
+  </div>
+
+  <div class="find warn">
+    <h4>Whatever you pick, one thing has to happen this week</h4>
+    <p>The sentence promising a dedicated account manager and a quarterly review is on the public site right now, unqualified, and it is not true. Nobody has been misled yet because nobody has bought Custom — <b>but that sentence is live in front of every shop looking at your prices today.</b> Under A it becomes a smaller true sentence, under B it goes, under C it stays and waits. There is no version where it survives untouched.</p>
+  </div>
+
+  <div class="find" style="border-left-color:var(--gold)">
+    <h4><svg class="i" style="vertical-align:-3px"><use href="#i-wallet"/></svg> And the ₱500 is still open</h4>
+    <p>The signed construction was Enterprise plus ₱1,500. Today's numbers make it ₱1,000. Under <b>A</b> the smaller premium fits the smaller promise, and ₱1,000 is right. Under <b>C</b> you are giving away eight hours of your year per customer for ₱12,000 of premium — which is why C would need the ₱1,500 back, and arguably more. Under <b>B</b> the question dissolves: there is no white-glove premium at all, only a price for a plan with no ceilings.</p>
+    <p><b>This is deliberately not answered here.</b> It only has an answer once you have picked a shape.</p>
+  </div>
+</div>
+</section>
+
+<footer style="border-top:1px solid var(--border);padding:26px 0 44px;margin-top:24px">
+ <div class="wrap">
+  <p class="kicker">Contrast receipts · WCAG AA · every pair measured</p>
+  <table class="rcpt">
+    <thead><tr><th>Text</th><th>On</th><th>Ratio</th><th>Where</th></tr></thead>
+    <tbody>
+      <tr><td class="sw"><i style="background:#2C2A29"></i><code>#2C2A29</code> ink</td><td class="n">#FFFFFF</td><td class="n">14.3:1</td><td>All body copy, headings, figures</td></tr>
+      <tr><td class="sw"><i style="background:#4F535B"></i><code>#4F535B</code> soft ink</td><td class="n">#FFFFFF</td><td class="n">7.7:1</td><td>Ledes, captions, sub-lines</td></tr>
+      <tr><td class="sw"><i style="background:#4F535B"></i><code>#4F535B</code> soft ink</td><td class="n">#FBFAF8 paper</td><td class="n">7.4:1</td><td>Cost-block descriptions</td></tr>
+      <tr><td class="sw"><i style="background:#4F535B"></i><code>#4F535B</code> soft ink</td><td class="n">3% ink wash</td><td class="n">7.3:1</td><td>Table headers, banded rows</td></tr>
+      <tr><td class="sw"><i style="background:#3B4E67"></i><code>#3B4E67</code> link</td><td class="n">#FFFFFF</td><td class="n">8.5:1</td><td>Links</td></tr>
+      <tr><td class="sw"><i style="background:#8A6B39"></i><code>#8A6B39</code> text gold</td><td class="n">#FFFFFF</td><td class="n">5.0:1</td><td>Eyebrows and kickers — white ground only</td></tr>
+      <tr><td class="sw"><i style="background:#7A5F33"></i><code>#7A5F33</code> gold ink</td><td class="n">10% gold tint</td><td class="n">5.4:1</td><td>"Half there" badge, the estimates flag, the contact initials. <b>#8A6B39 on that same tint is 4.5:1 and fails</b> — the trap.</td></tr>
+      <tr><td class="sw"><i style="background:#9E4526"></i><code>#9E4526</code> rust</td><td class="n">#FFFFFF</td><td class="n">6.3:1</td><td>The only rust used as words</td></tr>
+      <tr><td class="sw"><i style="background:#9E4526"></i><code>#9E4526</code> rust</td><td class="n">#FBFAF8 paper</td><td class="n">6.1:1</td><td>Hot figures in the cost blocks</td></tr>
+      <tr><td class="sw"><i style="background:#9E4526"></i><code>#9E4526</code> rust</td><td class="n">9% action tint</td><td class="n">5.6:1</td><td>Shape C tag. <b>#C24E25 on that tint is 4.2:1 and fails.</b></td></tr>
+      <tr><td class="sw"><i style="background:#9E4526"></i><code>#9E4526</code> rust</td><td class="n">4% action tint (table)</td><td class="n">6.0:1</td><td>The C column's worst figures</td></tr>
+      <tr><td class="sw"><i style="background:#4F6B4A"></i><code>#4F6B4A</code> positive</td><td class="n">#FFFFFF</td><td class="n">5.9:1</td><td>"yes" cells, ticks</td></tr>
+      <tr><td class="sw"><i style="background:#4F6B4A"></i><code>#4F6B4A</code> positive</td><td class="n">4.5% green tint</td><td class="n">5.6:1</td><td>The A column's "yes" cells</td></tr>
+      <tr><td class="sw"><i style="background:#3E5539"></i><code>#3E5539</code> deep green</td><td class="n">10% green tint</td><td class="n">7.6:1</td><td>Shape A tag</td></tr>
+      <tr><td class="sw"><i style="background:#8F4025"></i><code>#8F4025</code> deep rust</td><td class="n">10% rust tint</td><td class="n">6.1:1</td><td>"Nothing there" badges</td></tr>
+      <tr><td class="sw"><i style="background:#FFFFFF;border-color:#999"></i><code>#FFFFFF</code> white</td><td class="n">#2C2A29 ink</td><td class="n">14.3:1</td><td>The pressed shape button</td></tr>
+    </tbody>
+  </table>
+  <p class="muted" style="font-size:12.5px;margin-top:12px;max-width:86ch">
+    Decorative gold <code>#A9834B</code> (3.4:1 on white) is used only as a rule, a border and an icon — <b>never as a word</b>, at any size, on any ground. <code>#B65A3A</code> (4.5:1) appears only as a 3px border on the findings blocks; wherever that colour had to carry text it is <code>#9E4526</code>.
+  </p>
+  <p class="muted" style="font-size:12.5px;margin-top:12px;max-width:86ch">
+    <b>Companion to</b> <code>vendor_custom_subscription_2026-08-27.html</code>, which draws the Custom plan builder itself. That builder is not redrawn here.
+    The state of the product, the wording on the site and the shop counts were read on 27 August 2026 out of the live product and the live database. <b>Every hour figure is an estimate</b>, derived from the four assumptions written out above — there is no Custom customer in existence to measure.
+  </p>
+ </div>
+</footer>
+
+<script>
+var SHAPES = {
+  a: {
+    lede: 'Everything Enterprise gives you, with none of it capped — and a person here who knows you.',
+    list: [
+      ['i-user','Someone here is yours','A named person at Setnayan, not a form.'],
+      ['i-bolt','Your problems go first','Yours sits at the top of our list.'],
+      ['i-door','We set you up ourselves','One session together when you join.']
+    ],
+    dash: '<div class="dashglimpse"><p class="l">On every page of their dashboard</p><div class="person"><span class="av">IC</span><div><p class="nm">Ice — your contact</p><p class="rl">Usually answers same day</p></div></div></div>',
+    cap:  'Shape A. Three promises, all of them true on the day it ships.',
+    hours:'25 h', hoursS:'a month — about three working days, every month, forever',
+    meet:'none', meetS:'Nothing goes in your calendar that you did not put there.',
+    rate:'₱2,000',
+    leave:'Messages queue and you answer them when you are back. Nothing breaks.'
+  },
+  b: {
+    lede: 'Everything Enterprise gives you, at the same figures — and not one of them is capped.',
+    list: [
+      ['i-check','Every ceiling comes off','Team, reach, bookings a day, photos.'],
+      ['i-check','Two things no other plan can do','List nationwide, and your own web address.'],
+      ['i-check','Pay only for the height you take','₱11,000 is the whole bill if you add nothing.']
+    ],
+    dash: '<div class="nothinghere"><b>Nothing appears in their dashboard.</b> No contact card, no name, no promise of a reply — and nothing that can be broken.</div>',
+    cap:  'Shape B. No claims about people. Every line is a switch that already works.',
+    hours:'0 h', hoursS:'a month — the only shape that does not grow when you sell more',
+    meet:'none', meetS:'Nothing is owed, so nothing is scheduled.',
+    rate:'no time sold',
+    leave:'Nothing happens, because nothing was owed. Go.'
+  },
+  c: {
+    lede: 'Everything Enterprise gives you, uncapped — and Setnayan works your business with you.',
+    list: [
+      ['i-user','Someone here is yours','A named person at Setnayan.'],
+      ['i-cal','Your numbers, four times a year','A sit-down every quarter, booked ahead.'],
+      ['i-bolt','Answered within four hours','A real answer, not a place in a queue.'],
+      ['i-door','We set you up ourselves','A full hour together when you join.']
+    ],
+    dash: '<div class="dashglimpse"><p class="l">On every page of their dashboard</p><div class="person"><span class="av">IC</span><div><p class="nm">Ice — your contact</p><p class="rl">Answers within 4 working hours</p></div></div><div style="border-top:1px solid var(--border-soft);margin-top:10px;padding-top:9px"><p style="font-size:12.5px;font-weight:700">Your next review — Thu 16 Oct, 2:00 pm</p><p style="font-size:11.5px;color:var(--ink-soft)">Third quarter · with Ice</p></div></div>',
+    cap:  'Shape C. The strongest card of the three — and the only one that books your week for you.',
+    hours:'58 h', hoursS:'a month — over seven working days, every month, forever',
+    meet:'200 a year', meetS:'About four a week, every week, that you cannot move without breaking a promise.',
+    rate:'₱855',
+    leave:'About eight reviews have to move, each one a message to a paying customer. The four-hour promise simply breaks — there is nobody to hand it to.'
+  }
+};
+
+function shape(k){
+  ['a','b','c'].forEach(function(x){
+    document.getElementById('pane-'+x).className = 'pane' + (x===k?' on':'');
+    document.getElementById('b-'+x).setAttribute('aria-pressed', x===k);
+  });
+  var s = SHAPES[k], i, h='';
+  document.getElementById('ph-lede').textContent = s.lede;
+  for(i=0;i<s.list.length;i++){
+    h += '<li class="on"><span class="tk"><svg class="i"><use href="#'+s.list[i][0]+'"/></svg></span>'
+      +  '<span><b>'+s.list[i][1]+'</b><span class="s">'+s.list[i][2]+'</span></span></li>';
+  }
+  document.getElementById('ph-list').innerHTML = h;
+  document.getElementById('ph-dash').innerHTML = s.dash;
+  document.getElementById('ph-cap').textContent = s.cap;
+  document.getElementById('ph-hours').textContent = s.hours;
+  document.getElementById('ph-hours-s').textContent = s.hoursS;
+  document.getElementById('ph-meet').textContent = s.meet;
+  document.getElementById('ph-meet-s').textContent = s.meetS;
+  document.getElementById('ph-rate').textContent = s.rate;
+  document.getElementById('ph-leave').textContent = s.leave;
+}
+shape('a');
+</script>
+</body>
+</html>

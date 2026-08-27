@@ -1,0 +1,995 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SETNAYAN · Custom — the tier that removes the ceilings — 2026-08-27</title>
+<!--
+  ══════════════════════════════════════════════════════════════════════════
+  VENDOR CUSTOM SUBSCRIPTION — design prototype, 2026-08-27.
+  Owner ruling today (do not reopen): Custom stays SELF-SERVICE and à-la-carte;
+  Custom's entry price is ₱11,000 / 28 days and must always sit above Enterprise.
+  ══════════════════════════════════════════════════════════════════════════
+
+  RULE 0 — WHAT ALREADY SHIPS (read before drawing; nothing below was invented):
+
+    apps/web/app/vendor-dashboard/subscription/custom/page.tsx
+      "Compose a Custom plan." — a full, working configurator. Verified-store
+      gate. Reads its unit prices SERVER-SIDE from the admin catalog
+      (vendor_billing_catalog) with per-axis fallbacks. If the vendor already
+      runs Custom it renders their live composition read-only with "Adjust".
+
+    .../custom/_components/custom-configurator.tsx  (562 lines)
+      SEVEN controls already built — Branches · Service reach (+ Nationwide
+      override) · Team seats · Event slots/category · Portfolio photos ·
+      Included tokens/cycle · Custom domain. A sticky quote card with a LIVE
+      28-day figure, a live annual figure, a per-line breakdown, a BDO/GCash
+      channel picker with the real account numbers, and a submit.
+
+    apps/web/lib/vendor-custom-pricing.ts
+      computeCustomQuote() — pure, tested. Included baselines (CUSTOM_BASE):
+      100 km reach · 10 seats · 8 slots/category · 300 photos · 1 branch.
+      charmRoundUp() rounds every quote UP to the next ‑99. Floor at base.
+      annual = charm(final28 × 10). Admin-only discount arm (amount or %).
+
+    apps/web/lib/vendor-custom-catalog.ts + .../custom/actions.ts
+      NINE unit prices read from the catalog. The submit already mints a real
+      `orders` row (status submitted) + a pending `payments` row through the
+      money-writer, at a price RE-COMPUTED server-side. Apply-then-pay is BUILT.
+
+  WHAT IS MISSING — and this is the whole delta:
+
+    1. Nowhere on that screen does the word "Enterprise" appear except inside
+       one line-item label. A supplier cannot see what stepping up buys them.
+       There is no comparison of any kind, on any surface.
+    2. What the base INCLUDES (100 km · 10 seats · 8 slots · 300 photos) is
+       never stated. It is implied only by the minimum value of each slider.
+    3. The button says "Request this plan" and the success banner says the team
+       "reviews your composition and sends payment instructions" — while the
+       code has already minted the order and the payment. The MECHANISM is
+       self-service; only the WORDS are a request queue. Owner ruled it stays
+       self-service ⇒ this is a copy fix, not a build.
+    4. No empty state and no loaded state are distinguished — the composer opens
+       at the baseline and looks identical to a plan with nothing chosen.
+
+  WHAT I DREW (the delta only — the seven controls, the sticky quote, the
+  breakdown, the channel picker and the verified gate are all REPRODUCED, not
+  redesigned):
+    · a doorway card on /vendor-dashboard/subscription — Enterprise vs Custom,
+      built on one sentence: Enterprise is a set of ceilings; Custom is the same
+      room with the ceilings removed.
+    · an "already yours at the floor" ledger above the paid axes, so every
+      priced row reads as a delta against a stated included figure.
+    · a running total that never leaves the screen, at both widths, showing the
+      ₱11,000 floor and what each tick adds to it.
+    · the empty state (floor only) and the fully-loaded state as switchable.
+    · phone at 375 for the doorway, the builder and the total bar.
+    · an honest panel for the annual price, which the screen computes and
+      NOBODY CAN BUY (see finding 6).
+
+  MEASURED, not estimated — live production database njrupjnvkjkitfctetvi and
+  origin/main 8512e6f56, both read 2026-08-27:
+    · vendor_custom_base = ₱8,999 · active. (Today's ruling moves it to ₱11,000.)
+    · enterprise_vendor_monthly = ₱8,000 · enterprise_vendor_annual = ₱80,000
+      — in the LIVE CATALOG *and* in the code matrix TIER_PRICE_PHP. The brief
+      for this drawing gives Enterprise as ₱10,000 / ₱104,000. Both cannot be
+      true. I have DRAWN the brief's ₱10,000 as the ruling input, and flagged
+      the difference as owner decision 5 rather than silently picking one.
+      Custom at ₱11,000 sits above Enterprise on either rate card.
+    · every shipped annual is exactly 28-day × 10 (solo 1,000→10,000 ·
+      pro 2,500→25,000 · enterprise 8,000→80,000), NOT × 10.4.
+    · vendor_custom_included_token is is_active = FALSE in prod — and the
+      composer still charges ₱100 per token, because fetchCustomUnitPrices
+      filters on is_active and then falls back to the hardcoded literal.
+      Retiring the row did nothing. Tokens were retired as a currency on
+      2026-08-07 and this axis is still on the screen.
+    · 2 vendor profiles exist, both `solo`. Nobody has ever bought Enterprise
+      or Custom. Every screen here is drawn for launch-day-empty first.
+
+  Self-contained: inline CSS, inline SVG sprite. No CDN, no external fonts.
+  prefers-reduced-motion respected. Contrast receipts at the foot of the page.
+-->
+<style>
+/* ═══ Locked tokens — copied from admin_pricing_manager_2026-08-26.html ═══ */
+:root{
+  --cream:#FFFFFF;
+  --paper:#FBFAF8;
+  --ink:#2C2A29;
+  --ink-soft:#4F535B;
+  --cta:#C24E25; --cta-hover:#B04722; --cta-active:#9D3F1E;
+  --gold:#A9834B; --gold-text:#8A6B39;
+  --link:#3B4E67; --link-hover:#304055;
+  --pos:#4F6B4A; --warn:#8A6B39; --neg:#B65A3A;
+  --border:rgba(44,42,41,0.12);
+  --border-soft:rgba(44,42,41,0.07);
+  --wash:rgba(44,42,41,0.03);
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --dur:180ms;
+  --sans:'Hanken Grotesk',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'Space Mono',ui-monospace,'SF Mono',Menlo,monospace;
+  /* Added for AA on TINTED grounds — the gold/rust above fail there.
+     Receipts for all four are in the footer. */
+  --gold-ink:#7A5F33;   /* gold-ish TEXT on a gold tint — 5.4:1 */
+  --rust:#9E4526;       /* the only rust used as WORDS — 6.3:1 on white */
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--cream);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+b,strong{font-weight:700}
+a{color:var(--link)}a:hover{color:var(--link-hover)}
+code,.mono{font-family:var(--mono)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.kicker{font-family:var(--mono);text-transform:uppercase;letter-spacing:.14em;font-size:10.5px;font-weight:700;color:var(--gold-text)}
+.muted{color:var(--ink-soft)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+svg.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* ═══ Page chrome ═══ */
+.top{border-bottom:1px solid var(--border);background:var(--cream);position:sticky;top:0;z-index:60}
+.top .wrap{display:flex;align-items:center;gap:18px;height:60px;flex-wrap:wrap}
+.wordmark{font-family:var(--mono);font-weight:700;letter-spacing:.24em;font-size:13px}
+.seg{display:flex;gap:3px;background:var(--wash);border:1px solid var(--border);border-radius:11px;padding:3px;margin-left:auto}
+.seg button{font:inherit;font-size:13px;font-weight:700;border:0;background:none;color:var(--ink-soft);padding:6px 15px;border-radius:8px;cursor:pointer;transition:all var(--dur) var(--ease)}
+.seg button[aria-pressed=true]{background:var(--ink);color:#fff}
+.seg button:hover:not([aria-pressed=true]){color:var(--ink)}
+
+.hero{padding:34px 0 26px;border-bottom:1px solid var(--border)}
+.hero h1{font-size:29px;line-height:1.2;letter-spacing:-.02em;font-weight:700;margin:9px 0 10px;max-width:24ch}
+.hero p{max-width:66ch;color:var(--ink-soft);font-size:15.5px}
+.quote{border-left:2px solid var(--gold);padding:2px 0 2px 14px;margin:16px 0 0;font-size:15px;max-width:62ch}
+
+/* ═══ Panes ═══ */
+.pane{display:none;padding:30px 0 60px}
+.pane.on{display:block}
+.paneflag{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:5px 13px;font-size:12px;font-weight:700;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;margin-bottom:18px}
+.paneflag.now{background:rgba(182,90,58,.10);color:#8F4025;border:1px solid rgba(182,90,58,.28)}
+.paneflag.new{background:rgba(79,107,74,.10);color:#3E5539;border:1px solid rgba(79,107,74,.30)}
+
+/* ═══ The mock app frame ═══ */
+.app{border:1px solid var(--border);border-radius:16px;overflow:hidden;background:var(--cream)}
+.appbar{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--border);background:var(--paper);font-size:13px}
+.appbar .url{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);background:var(--cream);border:1px solid var(--border);border-radius:7px;padding:5px 11px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.body{padding:22px 20px 24px}
+.back{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-soft);text-decoration:none}
+.back:hover{color:var(--ink)}
+
+h2.sec{font-size:17px;font-weight:700;letter-spacing:-.01em;margin:0 0 4px}
+.seclede{font-size:13.5px;color:var(--ink-soft);margin-bottom:12px;max-width:78ch}
+.sn-eye{font-family:var(--mono);text-transform:uppercase;letter-spacing:.15em;font-size:10px;font-weight:700;color:var(--gold-text)}
+.sn-h1{font-size:25px;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+
+/* ═══ Controls (reproduced from the shipped configurator) ═══ */
+.ctrl{border:1px solid var(--border);border-radius:12px;padding:14px;background:var(--paper);margin-bottom:10px}
+.ctrl .hd{display:flex;align-items:flex-start;gap:10px}
+.ctrl .hd .ic{color:var(--ink-soft);margin-top:2px}
+.ctrl .lbl{font-size:14px;font-weight:600}
+.ctrl .hint{font-size:12.5px;color:var(--ink-soft);margin-top:1px;max-width:56ch}
+.stepper{display:flex;align-items:center;gap:11px;margin-top:11px}
+.stepper .sq{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--cream);color:var(--ink);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:none;transition:all var(--dur) var(--ease)}
+.stepper .sq:hover:not(:disabled){border-color:rgba(44,42,41,.32)}
+.stepper .sq:disabled{opacity:.32;cursor:not-allowed}
+.stepper input[type=range]{flex:1;min-width:0;height:3px;accent-color:var(--cta);cursor:pointer}
+.stepper input[type=range]:disabled{opacity:.4;cursor:not-allowed}
+.stepper .val{width:4.6rem;text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13.5px;font-weight:700;flex:none}
+.chk{display:flex;align-items:center;gap:9px;margin-top:11px;font-size:13.5px;cursor:pointer}
+.chk input{width:16px;height:16px;accent-color:var(--cta);cursor:pointer}
+
+/* ═══ Quote card ═══ */
+.quotecard{border:1px solid var(--border);border-radius:14px;padding:17px;background:var(--paper)}
+.quotecard .big{font-size:30px;font-weight:700;letter-spacing:-.025em;font-family:var(--mono);font-variant-numeric:tabular-nums;margin-top:6px}
+.quotecard .per{font-family:var(--sans);font-size:13px;font-weight:400;color:var(--ink-soft);letter-spacing:0;margin-left:5px}
+.qline{display:flex;align-items:baseline;justify-content:space-between;gap:12px;font-size:12.5px;padding:3px 0}
+.qline span:first-child{color:var(--ink-soft)}
+.qline span:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums;flex:none}
+.qline.floor span{color:var(--ink);font-weight:700}
+.qrule{border-top:1px solid var(--border);margin:11px 0 8px}
+.fineprint{font-size:11.5px;line-height:1.5;color:var(--ink-soft);margin-top:10px}
+
+/* ═══ Buttons ═══ */
+.btn{font:inherit;font-size:13.5px;font-weight:700;border-radius:9px;padding:9px 17px;cursor:pointer;border:1px solid transparent;transition:all var(--dur) var(--ease)}
+.btn-primary{background:var(--cta);color:#fff}.btn-primary:hover{background:var(--cta-hover)}
+.btn-ink{background:var(--ink);color:#fff}.btn-ink:hover{opacity:.9}
+.btn-ghost{background:none;border-color:var(--border);color:var(--ink-soft)}.btn-ghost:hover{background:var(--wash);color:var(--ink)}
+.btn-wide{width:100%;display:block;text-align:center}
+.btn-sm{font-size:12.5px;padding:6px 12px}
+
+/* ═══ Findings ═══ */
+.find{border:1px solid var(--border);border-left:3px solid var(--neg);border-radius:0 12px 12px 0;padding:14px 16px;margin:0 0 12px;background:var(--paper)}
+.find.ok{border-left-color:var(--pos)}
+.find.warn{border-left-color:var(--gold)}
+.find h4{font-size:14.5px;font-weight:700;margin-bottom:4px}
+.find p{font-size:13.5px;color:var(--ink-soft);max-width:82ch}
+.find p+p{margin-top:6px}
+.find .ev{font-family:var(--mono);font-size:11.5px;color:var(--ink);background:var(--wash);border-radius:6px;padding:2px 7px;display:inline-block;margin-top:7px}
+
+/* ═══ Ladder + comparison ═══ */
+.ladder{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin:14px 0 6px}
+.rung{border:1px solid var(--border);border-radius:12px;padding:12px;background:var(--cream)}
+.rung.hi{border-color:rgba(169,131,75,.5);background:rgba(169,131,75,.06)}
+.rung .t{font-size:13px;font-weight:700}
+.rung .p{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:17px;font-weight:700;margin-top:3px;letter-spacing:-.02em}
+.rung .y{font-size:11.5px;color:var(--ink-soft);margin-top:2px}
+.rung.hi .y{color:var(--gold-ink)}
+@media(max-width:820px){.ladder{grid-template-columns:repeat(2,1fr)}}
+
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:14px}
+@media(max-width:860px){.vs{grid-template-columns:1fr}}
+.card{border:1px solid var(--border);border-radius:14px;background:var(--cream);overflow:hidden}
+.card.pick{border-color:rgba(194,78,37,.42);box-shadow:0 1px 2px rgba(44,42,41,.04),0 14px 32px -22px rgba(44,42,41,.4)}
+.card .ch{padding:15px 16px 13px;border-bottom:1px solid var(--border-soft)}
+.card .cb{padding:13px 16px 16px}
+.card h3{font-size:18px;font-weight:700;letter-spacing:-.015em}
+.card .price{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:26px;font-weight:700;letter-spacing:-.025em;margin-top:6px}
+.card .price small{font-family:var(--sans);font-size:12.5px;font-weight:400;color:var(--ink-soft);letter-spacing:0;margin-left:5px}
+/* min-height so the two columns' rows line up across the gutter — the card's
+   whole argument is "read the first four rows across and they are identical",
+   which a one-line difference in the tagline quietly destroys. */
+.tagline{font-size:13.5px;color:var(--ink-soft);margin-top:7px;max-width:44ch;min-height:63px}
+.phone .tagline{min-height:0}
+.caps{list-style:none;font-size:13.5px}
+.caps li{display:flex;gap:9px;align-items:flex-start;padding:5px 0;border-bottom:1px solid var(--border-soft);min-height:33px}
+.caps li:last-child{border-bottom:0}
+.caps li .k{flex:1;min-width:0}
+.caps li .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:12.5px;flex:none;text-align:right}
+.cap-ceil{color:var(--ink-soft)}
+.cap-open{color:var(--pos);font-weight:700}
+.cap-no{color:var(--ink-soft)}
+.ceilbadge{display:inline-flex;align-items:center;gap:5px;border-radius:6px;padding:2px 7px;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+.ceilbadge.cap{background:var(--wash);color:var(--ink-soft)}
+.ceilbadge.open{background:rgba(79,107,74,.10);color:#3E5539}
+
+/* ═══ Builder layout ═══ */
+.builder{display:grid;grid-template-columns:minmax(0,1fr) 20rem;gap:18px;align-items:start}
+@media(max-width:900px){.builder{grid-template-columns:1fr}}
+.stickyq{position:sticky;top:76px}
+@media(max-width:900px){.stickyq{position:static}}
+.included{border:1px solid rgba(79,107,74,.32);border-radius:12px;background:rgba(79,107,74,.055);padding:14px;margin-bottom:14px}
+.included h4{font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:8px}
+.included .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+@media(max-width:640px){.included .grid{grid-template-columns:repeat(2,1fr)}}
+.inc{background:var(--cream);border:1px solid var(--border-soft);border-radius:9px;padding:8px 10px}
+.inc .l{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-soft)}
+.inc .v{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px}
+.delta{font-size:11.5px;color:var(--gold-ink);font-weight:700;margin-top:1px;min-height:1.4em}
+
+.presets{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:13px}
+.chip{font:inherit;font-size:12.5px;font-weight:700;border:1px solid var(--border);background:var(--cream);color:var(--ink-soft);border-radius:999px;padding:6px 13px;cursor:pointer;transition:all var(--dur) var(--ease)}
+.chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+.chip:hover:not([aria-pressed=true]){color:var(--ink);border-color:rgba(44,42,41,.3)}
+
+.emptynote{border:1px dashed var(--border);border-radius:11px;padding:12px 14px;font-size:13px;color:var(--ink-soft);background:var(--wash)}
+
+/* ═══ Phone frames ═══ */
+.phones{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;margin-top:8px}
+.phone{width:322px;flex:none;border:1px solid var(--border);border-radius:26px;background:var(--cream);overflow:hidden;box-shadow:0 1px 2px rgba(44,42,41,.04),0 18px 40px -26px rgba(44,42,41,.45)}
+.phone .pnotch{height:24px;background:var(--paper);border-bottom:1px solid var(--border-soft);display:flex;align-items:center;justify-content:center}
+.phone .pnotch i{display:block;width:64px;height:5px;border-radius:3px;background:rgba(44,42,41,.16)}
+.phone .pbody{padding:13px;display:flex;flex-direction:column;gap:10px}
+.phone .pbar{display:flex;border-top:1px solid var(--border);background:var(--paper)}
+.phone .pbar div{flex:1;text-align:center;padding:8px 2px;font-size:10px;color:var(--ink-soft);line-height:1.25}
+.phone .pbar div[data-on="1"]{color:var(--ink);font-weight:700}
+.phone .ctrl{padding:11px;margin-bottom:0}
+.phone .ctrl .lbl{font-size:13px}
+.phone .ctrl .hint{font-size:11.5px}
+.phonecap{font-size:12.5px;color:var(--ink-soft);margin-top:9px;max-width:322px}
+.totalbar{position:sticky;bottom:0;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 13px;border-top:1px solid var(--border);background:rgba(255,255,255,.96);backdrop-filter:blur(8px)}
+.totalbar .tb-n{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:19px;font-weight:700;letter-spacing:-.02em}
+.totalbar .tb-l{font-size:10.5px;color:var(--ink-soft);font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase}
+
+/* ═══ Honest / dead states ═══ */
+.dead{border:1px solid var(--border);border-radius:12px;background:repeating-linear-gradient(135deg,var(--wash),var(--wash) 7px,transparent 7px,transparent 14px);padding:14px 16px}
+.dead h4{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;color:var(--ink)}
+.dead p{font-size:13px;color:var(--ink-soft);margin-top:5px;max-width:76ch}
+
+/* ═══ Owner decisions ═══ */
+.dec{border:1px solid var(--border);border-radius:13px;background:var(--cream);padding:0;margin-bottom:11px;overflow:hidden}
+.dec .dh{display:flex;gap:11px;align-items:flex-start;padding:14px 16px 11px}
+.dec .n{width:26px;height:26px;flex:none;border-radius:50%;background:var(--ink);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;font-weight:700}
+.dec h4{font-size:15px;font-weight:700;letter-spacing:-.01em}
+.dec .q{font-size:13.5px;color:var(--ink-soft);margin-top:4px;max-width:80ch}
+.dec .rec{border-top:1px solid var(--border-soft);background:rgba(194,78,37,.055);padding:11px 16px 13px}
+.dec .rec .l{font-family:var(--mono);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--rust);font-weight:700}
+.dec .rec p{font-size:13.5px;margin-top:4px;max-width:80ch}
+
+table.rec{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px}
+table.rec th,table.rec td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--border-soft)}
+table.rec th{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);border-bottom:1px solid var(--border)}
+table.rec td.n{font-family:var(--mono);font-variant-numeric:tabular-nums}
+table.rec td.sw i{display:inline-block;width:13px;height:13px;border-radius:3px;border:1px solid var(--border);vertical-align:-2px;margin-right:7px}
+
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<svg style="display:none" aria-hidden="true">
+<symbol id="i-crown" viewBox="0 0 24 24"><path d="M3 6l4.5 4L12 4l4.5 6L21 6l-1.6 12H4.6L3 6Z"/></symbol>
+<symbol id="i-ceiling" viewBox="0 0 24 24"><path d="M3 4h18"/><path d="M12 20V9"/><path d="m8 13 4-4 4 4"/></symbol>
+<symbol id="i-open" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5-7 7 7 7" transform="rotate(90 12 12)"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+<symbol id="i-map" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></symbol>
+<symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+<symbol id="i-img" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20Z"/></symbol>
+<symbol id="i-branch" viewBox="0 0 24 24"><path d="M6 3v12"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></symbol>
+<symbol id="i-coins" viewBox="0 0 24 24"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4M16.71 13.88l.7.71-2.82 2.82"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3Z"/><path d="M12 9v4M12 17h.01"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol>
+<symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-receipt" viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1V2l-2 1-2-1-2 1-2-1-2 1-2-1Z"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
+</svg>
+
+<header class="top">
+  <div class="wrap">
+    <span class="wordmark">SETNAYAN</span>
+    <span class="muted" style="font-size:13px">Custom subscription</span>
+    <div class="seg" role="group" aria-label="Which version to view">
+      <button id="btn-now" aria-pressed="true" onclick="showPane('now')">What's there now</button>
+      <button id="btn-new" aria-pressed="false" onclick="showPane('new')">What we recommend</button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <p class="kicker">Vendor · subscriptions · 27 August 2026</p>
+    <h1>Custom now costs more than Enterprise. Nothing on the screen says why.</h1>
+    <p>Custom's floor moves to <b>₱11,000 every 28 days</b> — a thousand pesos above Enterprise. The screen a supplier lands on to buy it never mentions Enterprise, never says what the floor already includes, and calls itself a <em>request</em> even though the code takes the order on the spot. The builder is real and it works; what it is missing is the one sentence that earns the extra thousand.</p>
+    <p class="quote">Enterprise is a room with ceilings. Custom is the same room with the ceilings taken out. The thousand pesos buys the right to go past them; every step past one is priced on its own.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     PANE 1 — WHAT'S THERE NOW
+     ══════════════════════════════════════════════════════════════ -->
+<div class="pane on" id="pane-now">
+<div class="wrap">
+  <span class="paneflag now"><svg class="i"><use href="#i-alert"/></svg> What's there now</span>
+
+  <div class="app">
+    <div class="appbar">
+      <span class="url">www.setnayan.com/vendor-dashboard/subscription/custom</span>
+    </div>
+    <div class="body">
+      <a class="back" href="#"><svg class="i"><use href="#i-back"/></svg>Plans &amp; tokens</a>
+      <header style="margin:12px 0 20px">
+        <p class="sn-eye">Beyond Enterprise</p>
+        <h1 class="sn-h1" style="margin-top:4px">Compose a Custom plan.</h1>
+        <p style="margin-top:8px;max-width:64ch;font-size:13.5px;color:var(--ink-soft)">Everything in Enterprise plus white-glove support, then dial in exactly the branches, reach, seats, listings, photos and tokens your business needs. Custom starts at <b style="color:var(--ink)">₱11,000</b> per 28 days.</p>
+      </header>
+
+      <div class="builder">
+        <div>
+          <div class="ctrl"><div class="hd"><span class="ic"><svg class="i"><use href="#i-branch"/></svg></span><div><p class="lbl">Branches</p><p class="hint">Main address is included. Add branches to widen your listing footprint.</p></div></div>
+            <div class="stepper"><button class="sq" disabled aria-label="Decrease branches"><svg class="i"><use href="#i-minus"/></svg></button><input type="range" min="1" max="50" value="1" aria-label="Branches"><button class="sq" aria-label="Increase branches"><svg class="i"><use href="#i-plus"/></svg></button><span class="val">1</span></div>
+            <p style="text-align:right;font-size:11px;color:var(--ink-soft);margin-top:3px">main only</p></div>
+
+          <div class="ctrl"><div class="hd"><span class="ic"><svg class="i"><use href="#i-map"/></svg></span><div><p class="lbl">Service reach</p><p class="hint">Base 100 km included. Step to 500 km, or go nationwide.</p></div></div>
+            <div class="stepper"><button class="sq" disabled aria-label="Decrease reach"><svg class="i"><use href="#i-minus"/></svg></button><input type="range" min="100" max="500" step="100" value="100" aria-label="Service reach"><button class="sq" aria-label="Increase reach"><svg class="i"><use href="#i-plus"/></svg></button><span class="val">100km</span></div>
+            <label class="chk"><input type="checkbox"> Nationwide reach <span style="color:var(--ink-soft);font-size:12px">(overrides the km slider)</span></label></div>
+
+          <div class="ctrl"><div class="hd"><span class="ic"><svg class="i"><use href="#i-users"/></svg></span><div><p class="lbl">Team seats</p><p class="hint">Base 10 included. Each extra seat lets one more teammate in.</p></div></div>
+            <div class="stepper"><button class="sq" disabled aria-label="Decrease seats"><svg class="i"><use href="#i-minus"/></svg></button><input type="range" min="10" max="500" value="10" aria-label="Team seats"><button class="sq" aria-label="Increase seats"><svg class="i"><use href="#i-plus"/></svg></button><span class="val">10</span></div></div>
+
+          <div class="ctrl"><div class="hd"><span class="ic"><svg class="i"><use href="#i-cal"/></svg></span><div><p class="lbl">Event slots / category</p><p class="hint">Base 8 included. Bookings you can hold per category, per day.</p></div></div>
+            <div class="stepper"><button class="sq" disabled aria-label="Decrease slots"><svg class="i"><use href="#i-minus"/></svg></button><input type="range" min="8" max="200" value="8" aria-label="Event slots"><button class="sq" aria-label="Increase slots"><svg class="i"><use href="#i-plus"/></svg></button><span class="val">8</span></div></div>
+
+          <div class="ctrl"><div class="hd"><span class="ic"><svg class="i"><use href="#i-img"/></svg></span><div><p class="lbl">Portfolio photos</p><p class="hint">Base 300 included. Priced per +100.</p></div></div>
+            <div class="stepper"><button class="sq" disabled aria-label="Decrease photos"><svg class="i"><use href="#i-minus"/></svg></button><input type="range" min="300" max="5000" step="100" value="300" aria-label="Portfolio photos"><button class="sq" aria-label="Increase photos"><svg class="i"><use href="#i-plus"/></svg></button><span class="val">300</span></div></div>
+
+          <div class="ctrl" style="border-color:rgba(182,90,58,.45)"><div class="hd"><span class="ic"><svg class="i"><use href="#i-coins"/></svg></span><div><p class="lbl">Included tokens / cycle</p><p class="hint">Tokens granted to your wallet every 28-day cycle.</p></div></div>
+            <div class="stepper"><button class="sq" disabled aria-label="Decrease tokens"><svg class="i"><use href="#i-minus"/></svg></button><input type="range" min="0" max="500" step="25" value="0" aria-label="Included tokens"><button class="sq" aria-label="Increase tokens"><svg class="i"><use href="#i-plus"/></svg></button><span class="val">0</span></div>
+            <p style="font-size:11.5px;color:var(--rust);font-weight:700;margin-top:8px"><svg class="i" style="width:13px;height:13px;vertical-align:-2px"><use href="#i-alert"/></svg> Tokens were retired as a currency on 7 August. This control is still on the live screen and still charges ₱100 each.</p></div>
+
+          <div class="ctrl"><div class="hd"><span class="ic"><svg class="i"><use href="#i-globe"/></svg></span><div><p class="lbl">Custom domain</p><p class="hint">Serve your event website on your own domain.</p></div></div>
+            <label class="chk"><input type="checkbox"> Not included</label></div>
+        </div>
+
+        <aside class="stickyq">
+          <div class="quotecard">
+            <p class="sn-eye">Your Custom plan</p>
+            <p class="big">₱11,099<span class="per">per 28 days</span></p>
+            <p style="font-size:13px;color:var(--ink-soft);margin-top:3px" class="num">₱110,999 <span style="font-family:var(--sans);font-size:11.5px">per year — 13 cycles, pay 10 (3 free)</span></p>
+            <div class="qrule"></div>
+            <div class="qline"><span>Base — Enterprise + white-glove</span><span>₱11,000</span></div>
+            <p class="fineprint">Custom starts at ₱11,000. Prices are charm-rounded and can never quote below the base.</p>
+            <p style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-top:14px">Pay with</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
+              <button class="btn btn-sm" style="border-color:var(--cta);background:rgba(194,78,37,.09);color:var(--ink)">BDO</button>
+              <button class="btn btn-sm btn-ghost">GCash</button>
+            </div>
+            <button class="btn btn-ink btn-wide" style="margin-top:14px">Request this plan</button>
+            <p class="fineprint">Request sent — the SETNAYAN team reviews and sends payment instructions. Nothing is charged until you approve.</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="sec" style="margin:34px 0 6px;font-size:19px">What is actually wrong with it</h2>
+  <p class="seclede" style="margin-bottom:16px">Six things. The builder itself is sound — five of the six are about what the screen does not say, and the sixth is a price nobody can pay.</p>
+
+  <div class="find">
+    <h4>1 · The word "Enterprise" appears once, inside a receipt line</h4>
+    <p>A supplier who is on Enterprise at ₱10,000 and lands here is asked for ₱11,000 with no statement of what the extra thousand buys. There is no comparison on this page, on the plans page, or anywhere else in the product. The only place the two tiers meet is the phrase <em>"Base — Enterprise + white-glove"</em> in the price breakdown, which a person reads after they have already decided.</p>
+    <p class="ev">1 occurrence of "Enterprise" in the rendered screen · 0 comparisons anywhere</p>
+  </div>
+  <div class="find">
+    <h4>2 · What the floor already includes is never written down</h4>
+    <p>The floor includes <b>100 km of reach, 10 team seats, 8 event slots per category, 300 portfolio photos and your main branch</b>. Those figures exist — they are the minimum value of each slider — and they are never said. So every priced row on the screen reads as a cost with nothing to compare it to.</p>
+    <p class="ev">5 included figures · 0 stated · each discoverable only by dragging a slider to its stop</p>
+  </div>
+  <div class="find">
+    <h4>3 · It calls itself a request, and it is not one</h4>
+    <p>The button says <b>Request this plan</b> and the confirmation says the team reviews the composition and sends payment instructions. The code does no such thing: it creates the order and the pending payment there and then, at a price it recomputes on the server, and the bank details are already on screen two inches above the button. The mechanism is self-service. Only the words are a queue — and they tell a supplier to sit and wait for an email that is not coming.</p>
+    <p class="ev">order + payment minted in the same action · BDO/GCash numbers already rendered · copy says "reviews"</p>
+  </div>
+  <div class="find warn">
+    <h4>4 · A retired currency is still on sale here</h4>
+    <p>"Included tokens / cycle" charges <b>₱100 per token</b>. Tokens were retired across the whole product on 7 August. The catalogue row was switched off — and switching it off did nothing, because the price reader skips inactive rows and then falls back to a figure written into the code. A supplier can still put 500 dead tokens on their plan and be charged ₱50,000 a cycle for them.</p>
+    <p class="ev">vendor_custom_included_token · is_active = false in prod · fallback ₱100 still charged</p>
+  </div>
+  <div class="find warn">
+    <h4>5 · The floor is not the floor — it quotes ₱11,099</h4>
+    <p>Every quote is rounded up to the next ‑99 ending. So a Custom plan with nothing added at all, on a ₱11,000 floor, prices at <b>₱11,099</b>. The screen says "starts at ₱11,000" three lines above a number that is not ₱11,000. The rounding is deliberate and fine for composed totals; applying it to the untouched floor makes the headline price a lie by ₱99.</p>
+    <p class="ev">charmRoundUp(11000) = 11099 · headline and quote disagree on an empty plan</p>
+  </div>
+  <div class="find">
+    <h4>6 · There is an annual price on the card and no way on earth to buy it</h4>
+    <p>The quote card prints a per-year figure and explains it — <em>13 cycles, pay 10</em>. The order it creates is <b>always the 28-day amount</b>. There is no annual Custom product, no annual toggle on this screen, and no code path anywhere that charges the yearly number. It has been displayed and unbuyable since the day it shipped.</p>
+    <p class="ev">order amount = the 28-day figure, on every path · 0 annual Custom SKUs exist</p>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     PANE 2 — WHAT WE RECOMMEND
+     ══════════════════════════════════════════════════════════════ -->
+<div class="pane" id="pane-new">
+<div class="wrap">
+  <span class="paneflag new"><svg class="i"><use href="#i-check"/></svg> What we recommend</span>
+
+  <!-- ── A · THE LADDER + THE DOORWAY ───────────────────────────── -->
+  <h2 class="sec" style="font-size:19px">A · Where Custom sits, before anybody clicks anything</h2>
+  <p class="seclede">On the plans page the five tiers already sit in a row. Custom joins it with the one thing the others cannot say: no ceiling on the line.</p>
+
+  <div class="ladder">
+    <div class="rung"><p class="t">Free</p><p class="p">₱0</p><p class="y">3 bookings at a time</p></div>
+    <div class="rung"><p class="t">Solo</p><p class="p">₱1,000</p><p class="y">₱10,400 a year</p></div>
+    <div class="rung"><p class="t">Pro</p><p class="p">₱2,500</p><p class="y">₱26,000 a year</p></div>
+    <div class="rung"><p class="t">Enterprise</p><p class="p">₱10,000</p><p class="y">₱104,000 a year</p></div>
+    <div class="rung hi"><p class="t">Custom</p><p class="p">from ₱11,000</p><p class="y">no ceilings · build your own</p></div>
+  </div>
+  <p class="muted" style="font-size:12px">Per 28 days. <b>Measured note:</b> the live catalogue and the code both price Enterprise at <span class="num">₱8,000 / ₱80,000</span> today, and every shipped annual is exactly 28-day × 10. The ₱10,000 / ₱104,000 above is the figure this drawing was given — see owner decision 5.</p>
+
+  <div class="app" style="margin-top:16px">
+    <div class="appbar"><span class="url">www.setnayan.com/vendor-dashboard/subscription</span></div>
+    <div class="body">
+      <p class="sn-eye">The step up</p>
+      <h2 class="sec" style="margin-top:5px;font-size:20px">You have hit every ceiling Enterprise has.</h2>
+      <p class="seclede">This card appears on the plans page. It is a comparison first and a sales pitch second — a supplier can answer "should I?" without opening the builder.</p>
+
+      <div class="vs">
+        <div class="card">
+          <div class="ch">
+            <span class="ceilbadge cap"><svg class="i" style="width:12px;height:12px"><use href="#i-ceiling"/></svg> Fixed ceilings</span>
+            <h3 style="margin-top:8px">Enterprise</h3>
+            <p class="price">₱10,000<small>per 28 days</small></p>
+            <p class="tagline">The largest fixed plan. Everything in Pro, at ten times the room — and it stops where it stops.</p>
+          </div>
+          <div class="cb">
+            <ul class="caps">
+              <li><span class="k">Team seats</span><span class="v cap-ceil">10 max</span></li>
+              <li><span class="k">Service reach</span><span class="v cap-ceil">100 km max</span></li>
+              <li><span class="k">Categories you can list in</span><span class="v cap-open">unlimited</span></li>
+              <li><span class="k">Event slots per category</span><span class="v cap-ceil">8 a day</span></li>
+              <li><span class="k">Portfolio photos</span><span class="v cap-ceil">300</span></li>
+              <li><span class="k">Nationwide listing</span><span class="v cap-no">not available</span></li>
+              <li><span class="k">Your own web address</span><span class="v cap-no">not available</span></li>
+              <li><span class="k">Booking fee</span><span class="v cap-ceil">5% / 1%</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card pick">
+          <div class="ch">
+            <span class="ceilbadge open"><svg class="i" style="width:12px;height:12px"><use href="#i-open"/></svg> No ceilings</span>
+            <h3 style="margin-top:8px">Custom</h3>
+            <p class="price">from ₱11,000<small>per 28 days</small></p>
+            <p class="tagline"><b>Everything Enterprise gives you, at the same figures</b> — and every one of them can now go higher. You pay for the height you actually take.</p>
+          </div>
+          <div class="cb">
+            <ul class="caps">
+              <li><span class="k">Team seats</span><span class="v"><span class="cap-ceil">10 included</span> <span class="cap-open">· +₱250 each</span></span></li>
+              <li><span class="k">Service reach</span><span class="v"><span class="cap-ceil">100 km</span> <span class="cap-open">· +₱499 per 100 km</span></span></li>
+              <li><span class="k">Categories you can list in</span><span class="v cap-open">unlimited</span></li>
+              <li><span class="k">Event slots per category</span><span class="v"><span class="cap-ceil">8 a day</span> <span class="cap-open">· +₱499 each</span></span></li>
+              <li><span class="k">Portfolio photos</span><span class="v"><span class="cap-ceil">300</span> <span class="cap-open">· +₱99 per 100</span></span></li>
+              <li><span class="k">Nationwide listing</span><span class="v cap-open">+₱2,499</span></li>
+              <li><span class="k">Your own web address</span><span class="v cap-open">+₱499</span></li>
+              <li><span class="k">Booking fee</span><span class="v cap-ceil">5% / 1% — the same</span></li>
+            </ul>
+            <button class="btn btn-primary btn-wide" style="margin-top:13px" onclick="showPane('new');document.getElementById('anchor-build').scrollIntoView({block:'start'})">Build my plan &nbsp;→</button>
+            <p class="fineprint" style="text-align:center">Nothing is charged until you order. The ₱11,000 is the whole bill if you add nothing.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="find ok" style="margin-top:16px">
+        <h4>Why this card is the whole answer to "why does it cost more?"</h4>
+        <p>Read the two columns down the middle and the first four rows are <b>identical numbers</b>. That is deliberate, and it is true — the Custom floor includes exactly what Enterprise includes. So the extra ₱1,000 is not buying a bigger allowance; it is buying the <b>right to exceed every allowance</b>, which is a thing a supplier at the ceiling can price for themselves in about four seconds. Two rows Enterprise simply cannot do at any price — nationwide and your own web address — are what closes it.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── B · THE BUILDER ─────────────────────────────────────────── -->
+  <h2 class="sec" style="margin:36px 0 6px;font-size:19px" id="anchor-build">B · The builder — desktop</h2>
+  <p class="seclede">The seven controls, the sticky quote and the payment picker are the ones that already ship and are not redrawn. What is added: the included ledger at the top, a delta under every control, the floor stated inside the running total, and a button that says what it does. <b>Tick things — every figure on this page moves, including the phone below.</b></p>
+
+  <div class="presets">
+    <button class="chip" id="p-empty" aria-pressed="true" onclick="preset('empty')">Nothing added — the floor</button>
+    <button class="chip" id="p-full" aria-pressed="false" onclick="preset('full')">A fully-loaded plan</button>
+  </div>
+
+  <div class="app">
+    <div class="appbar"><span class="url">www.setnayan.com/vendor-dashboard/subscription/custom</span></div>
+    <div class="body">
+      <a class="back" href="#"><svg class="i"><use href="#i-back"/></svg>Plans</a>
+      <header style="margin:12px 0 18px">
+        <p class="sn-eye">Beyond Enterprise</p>
+        <h1 class="sn-h1" style="margin-top:4px">Build your Custom plan.</h1>
+        <p style="margin-top:8px;max-width:66ch;font-size:13.5px;color:var(--ink-soft)">Custom is Enterprise with the ceilings taken out. The floor is <b style="color:var(--ink)">₱11,000 every 28 days</b> and it already carries everything Enterprise carries. Raise any line below and only that line is added to the bill.</p>
+      </header>
+
+      <div class="builder">
+        <div>
+          <div class="included">
+            <h4><svg class="i" style="color:var(--pos)"><use href="#i-check"/></svg> Already yours at ₱11,000 — before you add anything</h4>
+            <div class="grid">
+              <div class="inc"><p class="l">Team seats</p><p class="v" id="inc-seats">10</p><p class="delta" id="d-seats"></p></div>
+              <div class="inc"><p class="l">Service reach</p><p class="v" id="inc-reach">100 km</p><p class="delta" id="d-reach"></p></div>
+              <div class="inc"><p class="l">Slots / category</p><p class="v" id="inc-slots">8 a day</p><p class="delta" id="d-slots"></p></div>
+              <div class="inc"><p class="l">Portfolio photos</p><p class="v" id="inc-photos">300</p><p class="delta" id="d-photos"></p></div>
+              <div class="inc"><p class="l">Branches</p><p class="v" id="inc-branches">1 · main</p><p class="delta" id="d-branches"></p></div>
+              <div class="inc"><p class="l">Categories</p><p class="v">Unlimited</p><p class="delta" style="color:var(--ink-soft);font-weight:400">nothing to add</p></div>
+            </div>
+            <p style="font-size:12px;color:var(--ink-soft);margin-top:10px">Every one of these is exactly what Enterprise gives you. Enterprise stops here; you do not have to.</p>
+          </div>
+
+          <!-- Reach -->
+          <div class="ctrl">
+            <div class="hd"><span class="ic"><svg class="i"><use href="#i-map"/></svg></span><div><p class="lbl">Service reach</p><p class="hint">100 km is included. Step to 500 km, or list nationwide — nationwide replaces the km ladder.</p></div></div>
+            <div class="stepper">
+              <button class="sq" id="reach-dn" onclick="bump('reachKm',-100)" aria-label="Decrease reach"><svg class="i"><use href="#i-minus"/></svg></button>
+              <input type="range" id="r-reach" min="100" max="500" step="100" value="100" oninput="setv('reachKm',+this.value)" aria-label="Service reach in kilometres">
+              <button class="sq" id="reach-up" onclick="bump('reachKm',100)" aria-label="Increase reach"><svg class="i"><use href="#i-plus"/></svg></button>
+              <span class="val" id="v-reach">100km</span>
+            </div>
+            <label class="chk"><input type="checkbox" id="c-nation" onchange="setv('nationwide',this.checked)"> List nationwide — <b>₱2,499</b> <span style="color:var(--ink-soft)">· Enterprise cannot do this at any price</span></label>
+          </div>
+
+          <!-- Seats -->
+          <div class="ctrl">
+            <div class="hd"><span class="ic"><svg class="i"><use href="#i-users"/></svg></span><div><p class="lbl">Team seats</p><p class="hint">10 included — Enterprise's hard cap. Each extra seat is <b>₱250</b>.</p></div></div>
+            <div class="stepper">
+              <button class="sq" id="seats-dn" onclick="bump('seats',-1)" aria-label="Decrease seats"><svg class="i"><use href="#i-minus"/></svg></button>
+              <input type="range" id="r-seats" min="10" max="60" value="10" oninput="setv('seats',+this.value)" aria-label="Team seats">
+              <button class="sq" onclick="bump('seats',1)" aria-label="Increase seats"><svg class="i"><use href="#i-plus"/></svg></button>
+              <span class="val" id="v-seats">10</span>
+            </div>
+          </div>
+
+          <!-- Slots -->
+          <div class="ctrl">
+            <div class="hd"><span class="ic"><svg class="i"><use href="#i-cal"/></svg></span><div><p class="lbl">Event slots per category</p><p class="hint">8 a day included. How many bookings you can hold in one category on one day. Each extra slot is <b>₱499</b>.</p></div></div>
+            <div class="stepper">
+              <button class="sq" id="slots-dn" onclick="bump('slots',-1)" aria-label="Decrease slots"><svg class="i"><use href="#i-minus"/></svg></button>
+              <input type="range" id="r-slots" min="8" max="40" value="8" oninput="setv('slots',+this.value)" aria-label="Event slots per category">
+              <button class="sq" onclick="bump('slots',1)" aria-label="Increase slots"><svg class="i"><use href="#i-plus"/></svg></button>
+              <span class="val" id="v-slots">8</span>
+            </div>
+          </div>
+
+          <!-- Photos -->
+          <div class="ctrl">
+            <div class="hd"><span class="ic"><svg class="i"><use href="#i-img"/></svg></span><div><p class="lbl">Portfolio photos</p><p class="hint">300 included. Sold in hundreds at <b>₱99</b> per 100.</p></div></div>
+            <div class="stepper">
+              <button class="sq" id="photos-dn" onclick="bump('photos',-100)" aria-label="Decrease photos"><svg class="i"><use href="#i-minus"/></svg></button>
+              <input type="range" id="r-photos" min="300" max="3000" step="100" value="300" oninput="setv('photos',+this.value)" aria-label="Portfolio photos">
+              <button class="sq" onclick="bump('photos',100)" aria-label="Increase photos"><svg class="i"><use href="#i-plus"/></svg></button>
+              <span class="val" id="v-photos">300</span>
+            </div>
+          </div>
+
+          <!-- Branches -->
+          <div class="ctrl">
+            <div class="hd"><span class="ic"><svg class="i"><use href="#i-branch"/></svg></span><div><p class="lbl">Branches</p><p class="hint">Your main address is included. Each additional branch is <b>₱999</b> and gets its own place in the listings.</p></div></div>
+            <div class="stepper">
+              <button class="sq" id="branches-dn" onclick="bump('branches',-1)" aria-label="Decrease branches"><svg class="i"><use href="#i-minus"/></svg></button>
+              <input type="range" id="r-branches" min="1" max="12" value="1" oninput="setv('branches',+this.value)" aria-label="Branches">
+              <button class="sq" onclick="bump('branches',1)" aria-label="Increase branches"><svg class="i"><use href="#i-plus"/></svg></button>
+              <span class="val" id="v-branches">1</span>
+            </div>
+          </div>
+
+          <!-- Domain -->
+          <div class="ctrl">
+            <div class="hd"><span class="ic"><svg class="i"><use href="#i-globe"/></svg></span><div><p class="lbl">Your own web address</p><p class="hint">Your shop and your event pages served on a domain you own. <b>₱499</b> — Enterprise cannot do this at any price.</p></div></div>
+            <label class="chk"><input type="checkbox" id="c-domain" onchange="setv('domain',this.checked)"> <span id="l-domain">Not included</span></label>
+          </div>
+
+          <!-- The retired axis, drawn as what it should be -->
+          <div class="dead" style="margin-top:12px">
+            <h4><svg class="i" style="color:var(--ink-soft)"><use href="#i-lock"/></svg> Included tokens / cycle — removed</h4>
+            <p>The shipped builder still sells tokens at ₱100 each. Tokens were retired across the whole product on 7 August; switching the catalogue row off did not switch the charge off, because the reader falls back to a price written into the code. <b>This control comes off the screen and the fallback price goes with it</b> — otherwise a supplier can still buy 500 units of a currency that no longer exists.</p>
+          </div>
+
+          <div class="dead" style="margin-top:10px">
+            <h4><svg class="i" style="color:var(--ink-soft)"><use href="#i-lock"/></svg> API access — real, priced at nothing, and only staff can tick it</h4>
+            <p>A Custom plan can carry an API-access permission. It is stored on the plan, it opens a real gate in the product, it is <b>not in the price at all</b>, and there is no control for it on the supplier's screen — only an internal one. Drawn here as absent on purpose: putting it in the builder means pricing it first. See owner decision 4.</p>
+          </div>
+        </div>
+
+        <!-- ── Sticky quote ── -->
+        <aside class="stickyq">
+          <div class="quotecard">
+            <p class="sn-eye">Your Custom plan</p>
+            <p class="big"><span id="q-total">₱11,000</span><span class="per">per 28 days</span></p>
+            <p id="q-charm" style="font-size:11.5px;color:var(--rust);margin-top:4px;font-weight:700;display:none"></p>
+
+            <div class="qrule"></div>
+            <div class="qline floor"><span>Custom floor — everything Enterprise has</span><span>₱11,000</span></div>
+            <div id="q-lines"></div>
+            <div id="q-nothing" class="emptynote" style="margin-top:9px">Nothing added yet. <b>₱11,000</b> is the whole bill — and it already carries every figure Enterprise carries.</div>
+            <div class="qrule"></div>
+            <div class="qline" style="font-size:14px"><span style="color:var(--ink);font-weight:700">Added to the floor</span><span id="q-added" style="font-weight:700">₱0</span></div>
+
+            <p class="fineprint" id="q-vs">The same room at Enterprise costs ₱10,000. This plan is <b id="q-delta">₱1,000</b> more every 28 days.</p>
+
+            <p style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-top:14px">Pay with</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
+              <button class="btn btn-sm" id="ch-bdo" onclick="chan('bdo')" style="border-color:var(--cta);background:rgba(194,78,37,.09);color:var(--ink)">BDO</button>
+              <button class="btn btn-sm btn-ghost" id="ch-gcash" onclick="chan('gcash')">GCash</button>
+            </div>
+            <p class="fineprint" id="ch-detail">0012 3456 7890 · SETNAYAN TECHNOLOGIES</p>
+
+            <button class="btn btn-primary btn-wide" style="margin-top:12px">Order this plan — <span id="q-btn">₱11,000</span></button>
+            <p class="fineprint">You will get a reference number and the bank details on the next screen. Your plan starts the moment we confirm your payment.</p>
+          </div>
+
+          <div class="dead" style="margin-top:12px">
+            <h4><svg class="i" style="color:var(--ink-soft)"><use href="#i-lock"/></svg> Pay for a year — not sold</h4>
+            <p>Every other tier can be paid yearly. Custom cannot: the old screen printed a yearly figure it had no way to charge. Rather than draw a button that does nothing, the slot is drawn empty and honest. <b>Owner decision 1</b> settles whether it fills.</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── C · PHONE ──────────────────────────────────────────────── -->
+  <h2 class="sec" style="margin:36px 0 6px;font-size:19px">C · The same two screens on a phone</h2>
+  <p class="seclede">375 wide. The comparison becomes one card you scroll rather than two columns; the builder keeps the controls and moves the total to a bar that never leaves the bottom of the screen. <b>The total below is live</b> — it follows whatever you ticked in the builder above.</p>
+
+  <div class="phones">
+    <div>
+      <div class="phone">
+        <div class="pnotch"><i></i></div>
+        <div class="pbody">
+          <p class="sn-eye">The step up</p>
+          <p style="font-size:17px;font-weight:700;letter-spacing:-.015em;line-height:1.25">You have hit every ceiling Enterprise has.</p>
+          <div class="card" style="border-radius:11px">
+            <div class="ch" style="padding:11px 12px 9px">
+              <span class="ceilbadge cap"><svg class="i" style="width:11px;height:11px"><use href="#i-ceiling"/></svg> Now</span>
+              <h3 style="font-size:15px;margin-top:6px">Enterprise · ₱10,000</h3>
+            </div>
+            <div class="cb" style="padding:9px 12px 12px">
+              <ul class="caps" style="font-size:12.5px">
+                <li><span class="k">Seats</span><span class="v cap-ceil">10 max</span></li>
+                <li><span class="k">Reach</span><span class="v cap-ceil">100 km max</span></li>
+                <li><span class="k">Slots a day</span><span class="v cap-ceil">8 max</span></li>
+                <li><span class="k">Photos</span><span class="v cap-ceil">300 max</span></li>
+                <li><span class="k">Nationwide</span><span class="v cap-no">no</span></li>
+                <li><span class="k">Own address</span><span class="v cap-no">no</span></li>
+              </ul>
+            </div>
+          </div>
+          <div class="card pick" style="border-radius:11px">
+            <div class="ch" style="padding:11px 12px 9px">
+              <span class="ceilbadge open"><svg class="i" style="width:11px;height:11px"><use href="#i-open"/></svg> The step up</span>
+              <h3 style="font-size:15px;margin-top:6px">Custom · from ₱11,000</h3>
+              <p class="tagline" style="font-size:12.5px;margin-top:5px">Same figures, none of them fixed. ₱1,000 more buys the right to go past every one.</p>
+            </div>
+            <div class="cb" style="padding:9px 12px 12px">
+              <ul class="caps" style="font-size:12.5px">
+                <li><span class="k">Seats</span><span class="v"><span class="cap-ceil">10</span> <span class="cap-open">+₱250</span></span></li>
+                <li><span class="k">Reach</span><span class="v"><span class="cap-ceil">100 km</span> <span class="cap-open">+₱499</span></span></li>
+                <li><span class="k">Slots a day</span><span class="v"><span class="cap-ceil">8</span> <span class="cap-open">+₱499</span></span></li>
+                <li><span class="k">Photos</span><span class="v"><span class="cap-ceil">300</span> <span class="cap-open">+₱99</span></span></li>
+                <li><span class="k">Nationwide</span><span class="v cap-open">+₱2,499</span></li>
+                <li><span class="k">Own address</span><span class="v cap-open">+₱499</span></li>
+              </ul>
+              <button class="btn btn-primary btn-wide btn-sm" style="margin-top:10px">Build my plan &nbsp;→</button>
+            </div>
+          </div>
+        </div>
+        <div class="pbar"><div>Home</div><div>Shop</div><div>Customers</div><div data-on="1">Plans</div><div>On the Day</div></div>
+      </div>
+      <p class="phonecap">The comparison, stacked. Enterprise first because that is where the reader is standing — you cannot feel a ceiling lift until you have been shown the ceiling.</p>
+    </div>
+
+    <div>
+      <div class="phone">
+        <div class="pnotch"><i></i></div>
+        <div class="pbody" style="padding-bottom:6px">
+          <p class="sn-eye">Beyond Enterprise</p>
+          <p style="font-size:17px;font-weight:700;letter-spacing:-.015em">Build your Custom plan.</p>
+          <div class="included" style="padding:11px">
+            <h4 style="font-size:12.5px"><svg class="i" style="color:var(--pos);width:14px;height:14px"><use href="#i-check"/></svg> Already yours at ₱11,000</h4>
+            <div class="grid" style="grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">
+              <div class="inc" style="padding:6px 8px"><p class="l">Seats</p><p class="v" style="font-size:13.5px" id="pinc-seats">10</p></div>
+              <div class="inc" style="padding:6px 8px"><p class="l">Reach</p><p class="v" style="font-size:13.5px" id="pinc-reach">100 km</p></div>
+              <div class="inc" style="padding:6px 8px"><p class="l">Slots</p><p class="v" style="font-size:13.5px" id="pinc-slots">8 a day</p></div>
+              <div class="inc" style="padding:6px 8px"><p class="l">Photos</p><p class="v" style="font-size:13.5px" id="pinc-photos">300</p></div>
+            </div>
+          </div>
+          <div class="ctrl">
+            <div class="hd"><span class="ic"><svg class="i"><use href="#i-map"/></svg></span><div><p class="lbl">Service reach</p><p class="hint">100 km included. +₱499 per 100 km.</p></div></div>
+            <div class="stepper"><button class="sq" onclick="bump('reachKm',-100)" aria-label="Decrease reach on phone"><svg class="i"><use href="#i-minus"/></svg></button><span class="val" id="pv-reach" style="flex:1;text-align:center">100km</span><button class="sq" onclick="bump('reachKm',100)" aria-label="Increase reach on phone"><svg class="i"><use href="#i-plus"/></svg></button></div>
+            <label class="chk" style="font-size:12.5px"><input type="checkbox" id="pc-nation" onchange="setv('nationwide',this.checked)"> Nationwide — ₱2,499</label>
+          </div>
+          <div class="ctrl">
+            <div class="hd"><span class="ic"><svg class="i"><use href="#i-users"/></svg></span><div><p class="lbl">Team seats</p><p class="hint">10 included. +₱250 each.</p></div></div>
+            <div class="stepper"><button class="sq" onclick="bump('seats',-1)" aria-label="Decrease seats on phone"><svg class="i"><use href="#i-minus"/></svg></button><span class="val" id="pv-seats" style="flex:1;text-align:center">10</span><button class="sq" onclick="bump('seats',1)" aria-label="Increase seats on phone"><svg class="i"><use href="#i-plus"/></svg></button></div>
+          </div>
+          <div class="ctrl">
+            <div class="hd"><span class="ic"><svg class="i"><use href="#i-img"/></svg></span><div><p class="lbl">Portfolio photos</p><p class="hint">300 included. +₱99 per 100.</p></div></div>
+            <div class="stepper"><button class="sq" onclick="bump('photos',-100)" aria-label="Decrease photos on phone"><svg class="i"><use href="#i-minus"/></svg></button><span class="val" id="pv-photos" style="flex:1;text-align:center">300</span><button class="sq" onclick="bump('photos',100)" aria-label="Increase photos on phone"><svg class="i"><use href="#i-plus"/></svg></button></div>
+          </div>
+          <p style="font-size:12px;color:var(--ink-soft);text-align:center">Slots · branches · your own address ↓</p>
+        </div>
+        <div class="totalbar">
+          <div>
+            <p class="tb-l">Per 28 days</p>
+            <p class="tb-n" id="pq-total">₱11,000</p>
+            <p style="font-size:11px;color:var(--ink-soft)" id="pq-added">floor only — nothing added</p>
+          </div>
+          <button class="btn btn-primary btn-sm">Order</button>
+        </div>
+        <div class="pbar"><div>Home</div><div>Shop</div><div>Customers</div><div data-on="1">Plans</div><div>On the Day</div></div>
+      </div>
+      <p class="phonecap">The running total is pinned. On a phone the breakdown is a tap on the number, not a column — the one thing that must never scroll away is what this is going to cost.</p>
+    </div>
+  </div>
+
+  <!-- ── D · WHAT CHANGES ───────────────────────────────────────── -->
+  <h2 class="sec" style="margin:36px 0 6px;font-size:19px">D · What changes, and what deliberately does not</h2>
+  <p class="seclede" style="margin-bottom:16px">The builder is not rebuilt. Seven working controls, the sticky quote, the live breakdown, the payment picker, the verified-store gate and the server-side re-pricing all stay exactly as they are.</p>
+
+  <div class="find ok"><h4>The floor states what it includes, and the figures are Enterprise's own</h4><p>Six included values above the controls, and a small delta under each one as it is raised. This is the whole comparison, made permanent — a supplier reading the builder never loses sight of where Enterprise stopped.</p></div>
+  <div class="find ok"><h4>The button says Order, and the price is on the button</h4><p>The code already takes the order. Saying "request" made a self-service purchase look like a queue, and told suppliers to wait for an email nobody sends. Putting the figure on the button is the last honest thing a checkout can do.</p></div>
+  <div class="find ok"><h4>The floor is exempt from the ‑99 rounding</h4><p>₱11,000 is a price the owner set; ₱11,099 is a price arithmetic set. A plan with nothing added quotes the floor exactly. Everything composed on top still rounds as it does today — the drawing shows the rounded figure in small type whenever the two differ, so nothing is hidden.</p></div>
+  <div class="find ok"><h4>The tokens control comes off, and the fallback price comes off with it</h4><p>Retiring the catalogue row was not enough — the price reader skips inactive rows and then uses a figure held in the code. Removing the row without removing the fallback is the shape this project keeps paying for: the switch flips and the charge stays.</p></div>
+  <div class="find warn"><h4>What does NOT change: the booking fee</h4><p>5% on the first ₱100,000, 1% above, ₱50 floor, no cap — sourced clients only, first five free once verified. Identical on Free and identical on Custom. Drawn as the same row in both columns on purpose, because a supplier will look for a discount there. <b>Owner decision 3</b> is whether there should be one.</p></div>
+  <div class="find warn"><h4>What does NOT change: no discount control for the supplier</h4><p>The pricing engine has a per-shop discount arm — an amount off or a percentage off. It is staff-side and stays staff-side. A supplier always composes at list.</p></div>
+
+  <!-- ── E · OWNER DECISIONS ────────────────────────────────────── -->
+  <h2 class="sec" style="margin:38px 0 6px;font-size:19px">E · Owner decisions — five things this drawing will not decide for you</h2>
+  <p class="seclede" style="margin-bottom:16px">Each one carries a recommendation. None of them blocks the drawing; all of them change what ships.</p>
+
+  <div class="dec">
+    <div class="dh"><span class="n">1</span><div>
+      <h4>Custom has no yearly price. Should it?</h4>
+      <p class="q">Every other tier has one. The Custom screen already prints a yearly figure and explains it — and no code path anywhere can charge it, so it has been decoration since it shipped. At 28-day × 10.4 the figure would be <b class="num">₱114,400</b>; at the multiplier the rest of the product actually uses today (× 10) it is <b class="num">₱110,000</b>. There is a real reason it might stay unsold: a Custom plan is a composition a shop is expected to adjust, and a year is a long time to be locked to one shape.</p>
+    </div></div>
+    <div class="rec"><p class="l">Recommendation</p><p><b>Yes, sell it — and delete the printed figure until you do.</b> A supplier paying ₱11,000 a month is exactly who wants the three free cycles, and refusing them the only discount in the ladder makes the top tier the worst value in it. Let a mid-year adjustment be pro-rated against what they already paid, the way an upgrade already is. Whichever way you rule, the number on screen today must go: an unbuyable price is worse than no price.</p></div>
+  </div>
+
+  <div class="dec">
+    <div class="dh"><span class="n">2</span><div>
+      <h4>Should the five add-on prices move too? Only the floor moved.</h4>
+      <p class="q">Nationwide is ₱2,499 — on an ₱8,999 floor that was 28% on top; on ₱11,000 it is 23%, and the pair costs <b class="num">₱13,499</b> a cycle. Meanwhile ₱99 per hundred photos is now under 1% of the floor, and a shop can take 3,000 photos for ₱2,673 — cheap enough that nobody will ever think about it, which is either the point or a leak. Extra seats at ₱250 are the one to watch: at 10 included, a 30-person outfit adds ₱5,000 a cycle and starts doing arithmetic about whether Setnayan is worth it.</p>
+    </div></div>
+    <div class="rec"><p class="l">Recommendation</p><p><b>Leave all five alone for now — nobody has ever bought one.</b> Two shops exist and both are on the entry tier; there is no evidence to reprice against, and moving the base and the axes in the same week means you will never learn which one moved anything. The one I would revisit first is <b>seats</b>, and only when a real shop hits eight of them.</p></div>
+  </div>
+
+  <div class="dec">
+    <div class="dh"><span class="n">3</span><div>
+      <h4>Does Custom get a break on the booking fee?</h4>
+      <p class="q">Today the fee is identical at every tier — 5% on the first ₱100,000, 1% above, no cap. A Custom shop is by definition the one doing the largest and the most bookings, so it pays the most fees <em>and</em> the most subscription. The counter-argument is strong: the fee pays for the introduction, and an introduction costs the same to make whoever receives it. Discounting it also makes the fee negotiable in a supplier's head, which is the one thing it must never be.</p>
+    </div></div>
+    <div class="rec"><p class="l">Recommendation</p><p><b>Keep it identical, and say so out loud on the comparison card</b> — which is why that row is drawn in both columns reading the same. A supplier who has to hunt for the fee assumes it is being hidden. If you ever want to reward the top of the ladder, do it with <b>more free sourced bookings</b> (today every verified shop gets five) rather than a lower rate: a bigger free run is a gift you can end, a lower rate is a precedent you cannot.</p></div>
+  </div>
+
+  <div class="dec">
+    <div class="dh"><span class="n">4</span><div>
+      <h4>API access is a real Custom-only capability, and it costs nothing</h4>
+      <p class="q">Found while reading the code. A Custom plan can carry an API-access permission; it is stored on the plan, it opens a real gate in the product, only staff can tick it, and it is <b>not in the price at all</b>. So the single most valuable thing Custom can do is invisible on the screen that sells Custom, and free when it is granted. It is the strongest argument the tier has and it is not being made.</p>
+    </div></div>
+    <div class="rec"><p class="l">Recommendation</p><p><b>Put it on the comparison card as the headline Custom-only row, and price it.</b> It cannot go in the builder until it has a price — a tick box with no figure beside it in a list of priced figures reads as free. Until you set one, the honest interim is a line on the card saying it is available on Custom and arranged with us, which is at least true.</p></div>
+  </div>
+
+  <div class="dec">
+    <div class="dh"><span class="n">5</span><div>
+      <h4>Enterprise is ₱8,000 in the live product, not ₱10,000</h4>
+      <p class="q">This drawing was given Enterprise at ₱10,000 / ₱104,000 and drew that. Measured today, the live price list <em>and</em> the code both say <b class="num">₱8,000</b> a cycle and <b class="num">₱80,000</b> a year — and every yearly price that ships is exactly ten cycles, never 10.4. Custom at ₱11,000 sits above Enterprise either way, so nothing here breaks. But the comparison card's whole job is to show a ₱1,000 step, and against ₱8,000 the step is ₱3,000 — which is a different sentence and possibly a different design.</p>
+    </div></div>
+    <div class="rec"><p class="l">Recommendation</p><p><b>Say which rate card is real before this ships, because the card's headline depends on it.</b> If Enterprise is moving to ₱10,000 in the same change as Custom's ₱11,000, the drawing is correct as it stands. If Enterprise stays at ₱8,000, the step-up card should stop leaning on "just ₱1,000 more" and lead with the two things Enterprise cannot do at any price — nationwide, and your own web address. One line of copy either way.</p></div>
+  </div>
+
+  <div class="find" style="margin-top:18px">
+    <h4><svg class="i" style="vertical-align:-3px"><use href="#i-alert"/></svg> And one thing the design cannot honestly represent at all</h4>
+    <p>The comparison card promises that Custom's floor carries <b>everything Enterprise carries</b>. For the five figures drawn — seats, reach, slots, photos, categories — that is true and checkable. For <b>white-glove support</b>, which the shipped copy has promised since day one, there is nothing to check: no support tier, no response-time promise, no separate queue, nothing anywhere in the product that behaves differently for a Custom shop. It is a phrase in a paragraph.</p>
+    <p>I have kept it off the comparison card rather than draw a row for it, because a row implies a thing you could point at. <b>Either define what it means — a named person, an answer within X hours, a number they can call — or stop selling it.</b> It is the only claim on this screen a supplier could hold us to and we would have nothing to show.</p>
+    <p class="ev">"white-glove" · 1 rendered sentence · 0 mechanisms of any kind</p>
+  </div>
+</div>
+</div>
+
+<footer style="border-top:1px solid var(--border);padding:26px 0 44px;margin-top:20px">
+ <div class="wrap">
+  <p class="kicker">Contrast receipts · WCAG AA · every pair measured, none estimated</p>
+  <table class="rec">
+    <thead><tr><th>Text</th><th>On</th><th>Ratio</th><th>Where it is used</th></tr></thead>
+    <tbody>
+      <tr><td class="sw"><i style="background:#2C2A29"></i><code>#2C2A29</code> ink</td><td class="n">#FFFFFF</td><td class="n">14.3:1</td><td>All body copy, headings, figures</td></tr>
+      <tr><td class="sw"><i style="background:#4F535B"></i><code>#4F535B</code> soft ink</td><td class="n">#FFFFFF</td><td class="n">7.7:1</td><td>Ledes, hints, captions</td></tr>
+      <tr><td class="sw"><i style="background:#4F535B"></i><code>#4F535B</code> soft ink</td><td class="n">#FBFAF8 paper</td><td class="n">7.4:1</td><td>Control hints on the panel ground</td></tr>
+      <tr><td class="sw"><i style="background:#3B4E67"></i><code>#3B4E67</code> link</td><td class="n">#FFFFFF</td><td class="n">8.5:1</td><td>Links</td></tr>
+      <tr><td class="sw"><i style="background:#8A6B39"></i><code>#8A6B39</code> text gold</td><td class="n">#FFFFFF</td><td class="n">5.0:1</td><td>Eyebrows, kickers — white ground only</td></tr>
+      <tr><td class="sw"><i style="background:#8A6B39"></i><code>#8A6B39</code> text gold</td><td class="n">#FBFAF8 paper</td><td class="n">4.7:1</td><td>Eyebrow inside a quote card</td></tr>
+      <tr><td class="sw"><i style="background:#7A5F33"></i><code>#7A5F33</code> gold ink</td><td class="n">gold tint 10%</td><td class="n">5.4:1</td><td>Deltas + the highlighted rung. <b>#8A6B39 on that same tint is 4.5:1 and fails</b> — this is the trap.</td></tr>
+      <tr><td class="sw"><i style="background:#9E4526"></i><code>#9E4526</code> rust</td><td class="n">#FFFFFF</td><td class="n">6.3:1</td><td>The only rust used as words</td></tr>
+      <tr><td class="sw"><i style="background:#9E4526"></i><code>#9E4526</code> rust</td><td class="n">CTA tint 9%</td><td class="n">5.6:1</td><td>Recommendation labels. <b>#C24E25 on that tint is 4.2:1 and fails.</b></td></tr>
+      <tr><td class="sw"><i style="background:#4F6B4A"></i><code>#4F6B4A</code> positive</td><td class="n">#FFFFFF</td><td class="n">5.9:1</td><td>"Unlimited" / open-ceiling values</td></tr>
+      <tr><td class="sw"><i style="background:#3E5539"></i><code>#3E5539</code> deep green</td><td class="n">green tint 10%</td><td class="n">7.6:1</td><td>The "No ceilings" badge</td></tr>
+      <tr><td class="sw"><i style="background:#8F4025"></i><code>#8F4025</code> deep rust</td><td class="n">rust tint 10%</td><td class="n">6.1:1</td><td>The "What's there now" flag</td></tr>
+      <tr><td class="sw"><i style="background:#FFFFFF;border-color:#999"></i><code>#FFFFFF</code> white</td><td class="n">#C24E25 action</td><td class="n">4.8:1</td><td>Order / Build buttons</td></tr>
+      <tr><td class="sw"><i style="background:#FFFFFF;border-color:#999"></i><code>#FFFFFF</code> white</td><td class="n">#2C2A29 ink</td><td class="n">14.3:1</td><td>Pressed segment, preset chips</td></tr>
+    </tbody>
+  </table>
+  <p class="muted" style="font-size:12.5px;margin-top:12px;max-width:84ch">
+    Decorative gold <code>#A9834B</code> (3.4:1 on white) appears only as a rule, an icon, a border and a card tint — <b>never as a word</b>, at any size, on any ground. <code>#B65A3A</code> measures 4.5:1 on white and is used only as a 3px border on the findings blocks; where that colour had to become text it is <code>#9E4526</code> instead.
+  </p>
+  <p class="muted" style="font-size:12.5px;margin-top:12px;max-width:84ch">
+    Every price, count and code claim on this page was read on 27 August 2026 out of the live production database and out of <code>origin/main</code> at <code>8512e6f56</code>. Where the brief for this drawing and the live product disagree — Enterprise's price, and the annual multiplier — both figures are printed and the difference is owner decision 5, not a silent choice.
+  </p>
+ </div>
+</footer>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   One state, two widths. Prices are the measured catalogue figures.
+   ══════════════════════════════════════════════════════════════════ */
+var FLOOR = 11000;
+var ENTERPRISE = 10000;
+var P = { nationwide:2499, reachStep:499, seat:250, slot:499, photoPack:99, branch:999, domain:499 };
+var BASE = { reachKm:100, seats:10, slots:8, photos:300, branches:1 };
+var S = { reachKm:100, nationwide:false, seats:10, slots:8, photos:300, branches:1, domain:false };
+
+var N = new Intl.NumberFormat('en-PH');
+function peso(n){ return '₱' + N.format(Math.round(n)); }
+/* The shipped rule: round UP to the next -99. Reproduced exactly. */
+function charm(n){ if(!isFinite(n)||n<=0) return 0; return Math.ceil((n+1)/100)*100-1; }
+
+function clampAll(){
+  S.reachKm = Math.max(100, Math.min(500, S.reachKm));
+  S.seats   = Math.max(10,  Math.min(60,  S.seats));
+  S.slots   = Math.max(8,   Math.min(40,  S.slots));
+  S.photos  = Math.max(300, Math.min(3000,S.photos));
+  S.branches= Math.max(1,   Math.min(12,  S.branches));
+}
+function setv(k,v){ S[k]=v; clampAll(); render(); }
+function bump(k,d){ S[k]=S[k]+d; clampAll(); render(); }
+function chan(c){
+  var b=document.getElementById('ch-bdo'), g=document.getElementById('ch-gcash');
+  var on='border-color:var(--cta);background:rgba(194,78,37,.09);color:var(--ink)';
+  if(c==='bdo'){ b.setAttribute('style',on); b.className='btn btn-sm'; g.setAttribute('style',''); g.className='btn btn-sm btn-ghost';
+    document.getElementById('ch-detail').textContent='0012 3456 7890 · SETNAYAN TECHNOLOGIES'; }
+  else { g.setAttribute('style',on); g.className='btn btn-sm'; b.setAttribute('style',''); b.className='btn btn-sm btn-ghost';
+    document.getElementById('ch-detail').textContent='0917 555 0142 · SETNAYAN TECHNOLOGIES'; }
+}
+function preset(which){
+  if(which==='empty'){ S={reachKm:100,nationwide:false,seats:10,slots:8,photos:300,branches:1,domain:false}; }
+  else { S={reachKm:100,nationwide:true,seats:20,slots:16,photos:1000,branches:3,domain:true}; }
+  document.getElementById('p-empty').setAttribute('aria-pressed', which==='empty');
+  document.getElementById('p-full').setAttribute('aria-pressed', which==='full');
+  render();
+}
+
+function lines(){
+  var out=[];
+  if(S.nationwide){ out.push(['Nationwide listing', P.nationwide]); }
+  else { var steps=Math.round((S.reachKm-BASE.reachKm)/100);
+    if(steps>0) out.push(['Reach to '+N.format(S.reachKm)+' km · '+steps+' × '+peso(P.reachStep), steps*P.reachStep]); }
+  var xs=S.seats-BASE.seats;   if(xs>0) out.push([xs+' extra team seat'+(xs===1?'':'s')+' · '+xs+' × '+peso(P.seat), xs*P.seat]);
+  var xl=S.slots-BASE.slots;   if(xl>0) out.push([xl+' extra slot'+(xl===1?'':'s')+' per category · '+xl+' × '+peso(P.slot), xl*P.slot]);
+  var pk=Math.ceil((S.photos-BASE.photos)/100); if(pk>0) out.push([N.format(S.photos-BASE.photos)+' more photos · '+pk+' × '+peso(P.photoPack), pk*P.photoPack]);
+  var xb=S.branches-BASE.branches; if(xb>0) out.push([xb+' additional branch'+(xb===1?'':'es')+' · '+xb+' × '+peso(P.branch), xb*P.branch]);
+  if(S.domain) out.push(['Your own web address', P.domain]);
+  return out;
+}
+
+function render(){
+  var L=lines(), added=0, i;
+  for(i=0;i<L.length;i++) added+=L[i][1];
+  var exact = FLOOR + added;
+  var rounded = charm(exact);
+
+  /* range inputs + values */
+  var set=function(id,v){ var e=document.getElementById(id); if(e) e.value=v; };
+  var txt=function(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; };
+  set('r-reach',S.reachKm); set('r-seats',S.seats); set('r-slots',S.slots);
+  set('r-photos',S.photos); set('r-branches',S.branches);
+  var cn=document.getElementById('c-nation'); if(cn) cn.checked=S.nationwide;
+  var pn=document.getElementById('pc-nation'); if(pn) pn.checked=S.nationwide;
+  var cd=document.getElementById('c-domain'); if(cd) cd.checked=S.domain;
+  txt('l-domain', S.domain?'Included — ₱499':'Not included');
+
+  var reachLabel = S.nationwide ? 'Nationwide' : N.format(S.reachKm)+'km';
+  txt('v-reach',reachLabel); txt('pv-reach',reachLabel);
+  txt('v-seats',N.format(S.seats));   txt('pv-seats',N.format(S.seats));
+  txt('v-slots',N.format(S.slots));
+  txt('v-photos',N.format(S.photos)); txt('pv-photos',N.format(S.photos));
+  txt('v-branches',N.format(S.branches));
+
+  var rr=document.getElementById('r-reach'); if(rr) rr.disabled=S.nationwide;
+  var rd=document.getElementById('reach-dn'); if(rd) rd.disabled=S.nationwide||S.reachKm<=100;
+  var ru=document.getElementById('reach-up'); if(ru) ru.disabled=S.nationwide||S.reachKm>=500;
+  var d;
+  d=document.getElementById('seats-dn');    if(d) d.disabled=S.seats<=10;
+  d=document.getElementById('slots-dn');    if(d) d.disabled=S.slots<=8;
+  d=document.getElementById('photos-dn');   if(d) d.disabled=S.photos<=300;
+  d=document.getElementById('branches-dn'); if(d) d.disabled=S.branches<=1;
+
+  /* included ledger + deltas */
+  txt('inc-seats',  N.format(S.seats));  txt('pinc-seats',  N.format(S.seats));
+  txt('inc-reach',  S.nationwide?'Nationwide':N.format(S.reachKm)+' km');
+  txt('pinc-reach', S.nationwide?'Nationwide':N.format(S.reachKm)+' km');
+  txt('inc-slots',  N.format(S.slots)+' a day'); txt('pinc-slots', N.format(S.slots)+' a day');
+  txt('inc-photos', N.format(S.photos)); txt('pinc-photos', N.format(S.photos));
+  txt('inc-branches', S.branches===1?'1 · main':N.format(S.branches));
+  txt('d-seats',  S.seats>10 ?  '+'+(S.seats-10)+' past Enterprise' : '');
+  txt('d-reach',  S.nationwide ? 'past Enterprise entirely' : (S.reachKm>100 ? '+'+N.format(S.reachKm-100)+' km past Enterprise' : ''));
+  txt('d-slots',  S.slots>8 ?   '+'+(S.slots-8)+' past Enterprise' : '');
+  txt('d-photos', S.photos>300 ? '+'+N.format(S.photos-300)+' past Enterprise' : '');
+  txt('d-branches', S.branches>1 ? '+'+(S.branches-1)+' more listed' : '');
+
+  /* quote card */
+  var box=document.getElementById('q-lines');
+  if(box){
+    var h='';
+    for(i=0;i<L.length;i++) h+='<div class="qline"><span>'+L[i][0]+'</span><span>'+peso(L[i][1])+'</span></div>';
+    box.innerHTML=h;
+  }
+  var none=document.getElementById('q-nothing'); if(none) none.style.display = L.length?'none':'block';
+  txt('q-total', peso(exact));
+  txt('q-btn',   peso(exact));
+  txt('pq-total',peso(exact));
+  txt('q-added', added?peso(added):'₱0');
+  txt('pq-added', added ? peso(added)+' added to the floor' : 'floor only — nothing added');
+  txt('q-delta', peso(exact-ENTERPRISE));
+
+  var charmEl=document.getElementById('q-charm');
+  if(charmEl){
+    if(rounded!==exact){
+      charmEl.style.display='block';
+      charmEl.textContent = 'Today’s code rounds every quote up to the next ‑99 — it would charge '+peso(rounded)+'.';
+    } else { charmEl.style.display='none'; }
+  }
+}
+
+function showPane(which){
+  document.getElementById('pane-now').className = 'pane' + (which==='now'?' on':'');
+  document.getElementById('pane-new').className = 'pane' + (which==='new'?' on':'');
+  document.getElementById('btn-now').setAttribute('aria-pressed', which==='now');
+  document.getElementById('btn-new').setAttribute('aria-pressed', which==='new');
+}
+render();
+</script>
+</body>
+</html>
