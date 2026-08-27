@@ -5,6 +5,77 @@
 >
 > ⚠ **Verify any PR state here with `gh pr view <#> --json state,mergedAt` before acting** — this
 > register has been wrong about a PR's state four separate times.
+>
+> ### 🛑 2026-08-27 — #4888 SHIPPED THE FORM-FILL, THE OWNER HIT § 1 IN PRODUCTION, AND #4892 DID **NOT** FIX IT
+>
+> He typed the flagship sentence — ***"add a new category on the taxonomy service"*** — into prod
+> and landed on Taxonomy. No questions, no form. #4892 (**MERGED** 2026-08-27T01:52Z) tried to fix
+> it and **an adversarial pass proved it does not** — 21 agents, every survivor confirmed BY
+> EXECUTION and past two skeptics told to refute it. **Do not read #4892 as a fix.**
+>
+> 🚨 **THE OFFER IS UNREACHABLE BY THE GESTURE THAT PRODUCED THE BUG REPORT — FOURTH INSTANCE OF
+> *A FIX NOBODY CAN REACH IS NO FIX*.** The Enter handler is **byte-identical** on both refs
+> (`hits[sel]` → `router.push`); `sel` resets to 0 on every keystroke; arrows cycle
+> `% hits.length`. Measured for that query: **16 hits · 15 group headers · hits[0] = Taxonomy ·
+> ~966px of content above the offer inside a 430px scroll box = 2.2 screens.** The offer is in
+> **neither** the selection ring **nor** the Enter path.
+>
+> 🪤 **AND ITS GUARDS COULD NOT HAVE CAUGHT ANY OF IT.** `display:none` on the whole offer →
+> **111/111 admin tests green**. Threshold `3 → 6` or `→ 99` → **its own 4 tests green**, because
+> the test file **declares its own copy** of the constant and greps source for the *identifier*,
+> never the number. The flagship tokenises to exactly **5**, so only 3/4/5 work and nothing pins it.
+>
+> 🔴 **THE BIGGEST ONE, AND IT IS UPSTREAM OF THE WHOLE FEATURE: 82% OF JOBS CAN NEVER PRODUCE A
+> FORM.** `ask-actions.ts` sends `choices.slice(0, 120)` and the palette feeds it
+> `[...86 pages, ...185 jobs]` — **pages first**. Measured: **34 of 185 jobs survive (18%), 151
+> never reach the model.** `createCanonicalLeaf` sits at **index 116 — a margin of three**;
+> `createTaxonomyNode` is **already cut at 123**. Mutating the cap to `slice(0, 86)` — severing
+> every job from the model — changes **nothing** in 200 tests. **An alphabetical cut is amputating
+> the feature.** Rank by relevance, then slice.
+>
+> 🪤 **AND USING IT WHILE ALREADY ON THE DESTINATION PAGE DISCARDS EVERY ANSWER** — the prefill
+> effect does not re-fire on a same-route navigation, so the page just sits there. #4892 is what
+> made that dead end reachable, from the page he is most likely to start on.
+>
+> ### ⚖ 2026-08-27 — TWO OWNER RULINGS ON RECORD SEARCH — do not re-ask
+>
+> 1. **The admin search box stays DESKTOP-ONLY.** Owner: *"yes desktop only since it will be for
+>    desktop use since mobile use is for answering requests and tasks that need decision making or
+>    confirmation."* This **confirms and explains** the 2026-08-26 phone ruling — the phone admin
+>    answers and confirms; it does not open editing doors. A record band will **not** reach the
+>    phone's `/admin/more` grid, which is static and structurally cannot host a live query.
+>    **Write that asymmetry down as a decision; do not ship it silently.**
+> 2. **Guests and people MUST be findable, WITH the admin's actions attached.** Owner: *"yes. we
+>    must be able to find them and have our actions as admin available when we find them."*
+>    🔑 **That second half connects two things built separately** — the 284-job checklist already
+>    records what every admin action needs, so a found record should offer the jobs that act on it,
+>    not merely a link. Prod holds **40 guests · 34 people** no admin search can reach by name.
+>
+> ### ✅ RULE 0 PAID AGAIN — THE CROSS-RECORD SEARCH ALREADY SHIPS. DO NOT BUILD ONE.
+>
+> `ugatSearchInner` (`lib/ugat/data.ts`) already searches **vendor_profiles · events · users ·
+> orders · canonical_service_taxonomy**, admin-gated through `fetchUgatSearch`
+> (`app/admin/ugat/actions.ts`, `requireAdminAction()` on its first line), **mounted and
+> reachable** at `/admin/ugat/map` — menu label **"Entity map"**, inside a collapsed *Set up*
+> group. Its placeholder literally reads *"Search vendors · events · users · orders · taxonomy"*.
+> **Typing `setnaprod` there finds the shop today.** The owner had never met it because of where
+> it lives — the same reason he had never met the ⌘K palette.
+>
+> 🪤 **BUT `UgatSearchHit.href` HAS ZERO READERS — a SEVENTH gate with no handle.** The only
+> consumer calls `onOpenRecord(h.typeNodeId)`, which highlights the **type node** — the generic
+> word *"Vendors"* — not SetnaProd. All five hrefs are **unwritten, not half-working**: treat them
+> as new and test each. Real per-record destinations that DO exist:
+> `/admin/users/[userId]` · `/admin/vendors/[vendorProfileId]/edit`.
+> ⇒ **The delta is ~30 lines** in the palette (debounce, call the existing admin-gated action,
+> render a fourth band) **plus authoring the five links.** Nothing new is authorized or granted.
+>
+> 🔢 **The footer's "N of 155" is EXACT, not approximate:** 79 nav `href:` entries + 8 map-only
+> pages + **68** live `platform_retail_catalog_v2` rows = 155. Jobs are **not** destinations —
+> their words fold into the host page's haystack and `matchJobs` runs separately.
+>
+> ⛔ **There is no full-text or trigram search anywhere in this product** — `to_tsquery` ·
+> `tsvector` · `pg_trgm` · `similarity(` all return **zero** across every migration. `ilike` is the
+> only mechanism it has.
 
 ---
 
