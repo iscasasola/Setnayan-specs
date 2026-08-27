@@ -239,10 +239,20 @@ committed docs on purpose.
 > 🚨 **`--sn-warn` IS NOT A TOKEN AND NEVER WAS** — that card's amber accent bar drew nothing and
 > its eyebrow inherited the body ink. Rejected, not thrown; found by deriving the guard's token list
 > from the file instead of checking the one colour being edited. Same family as `--font-serif`.
-> ⛔ **Four answers still do NOT join, now recorded once as data** (`ANSWERS_THAT_DO_NOT_JOIN`, read
-> by the guard): the waitlist pick **does nothing and reports success** · a crew shift **cannot be
-> posted, seen or accepted by a non-admin** · **nobody can ask for a song** · a payment claim **has
-> no "no"** — that last one is the OWNER'S call, not an engineering gap.
+> ⛔ **Three answers still do NOT join, recorded once as data** (`ANSWERS_THAT_DO_NOT_JOIN`, read by
+> the guard): the waitlist pick **does nothing and reports success** · a crew shift **cannot be
+> posted, seen or accepted by a non-admin** · **nobody can ask for a song**.
+> ✅ **THE FOURTH IS NOW BUILT — "somebody says they paid you" can be answered NO** (owner
+> 2026-08-27: *"yes. they can declare it."*). 🔑 **AND THAT ROW'S PREMISE WAS FALSE: the refusal was
+> already shipped** (`vendorRejectDeposit` → `reject_vendor_deposit`, ownership-gated,
+> single-winner, reason reaches the couple) and wired to the supplier's customer card — **the DESK
+> had no no.** A 334-line duplicate migration was written and deleted on finding it; the guard now
+> fails if a second way to say no appears. 🧾 The receipt is shown at last — `proofUrl` had been
+> fetched into that card since it was written and **never rendered once.**
+> 🔴 **STILL THE OWNER'S, and worth his ruling:** that refusal **wipes the couple's own record of
+> paying** — clears their markers and proof URL and DELETES their ledger row (matched on a notes
+> SUBSTRING, unscoped by amount or date) — so their screen then looks as though they never recorded
+> anything, and the only trace is the email.
 > 🔴 **NINE owner decisions in § 7** — loudest: *may a supplier read the couple's private
 > run-of-show notes at a **public** address?* and *may we email a supplier at an address they never
 > gave us?* ⛔ One was **retired before it reached him** — the photo route's own header already

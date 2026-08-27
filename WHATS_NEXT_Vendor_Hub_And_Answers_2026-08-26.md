@@ -430,8 +430,10 @@ link straight into their tools* — nothing else, once, and only to a shop with 
   but it is your word.
 - ~~**Should the day-of kits be free during launch?**~~ ✅ **ANSWERED 2026-08-27: free, for as long
   as they pay the booking fee.** The entitlement is the fee, not a plan.
-- **Should a supplier be able to say "I did not receive that money"?** Today the only answer is yes,
-  and it cannot be taken back.
+- ✅ **ANSWERED 2026-08-27 — "yes. they can declare it."** Do not re-ask. ⚠ And the question's own
+  premise was wrong: the refusal existed and worked; it was **unreachable from the desk**, which is
+  what shipped. 🔴 What IS still his: whether that refusal should keep **wiping the couple's own
+  record of paying** (it clears their markers and proof and deletes their ledger row today).
 - **The console in the wedding lettering.** Only the typefaces change at the new address; the
   colours survive. A type call, nothing more.
 - **Should the eve-of email also reach the couple and the coordinator?** Scoped to suppliers here.
@@ -525,7 +527,7 @@ on every row** — which is what the six-card feed already does.
 | | The answer | Verdict |
 |---|---|---|
 | 7 | Another shop wants to name you their partner | ⛔ **Sentence and a way in, never a fast button.** Saying yes publishes a claim about **the other shop's prices** to the public, and the terms then freeze — changing your mind takes the badge down and needs them to agree again |
-| 8 | Somebody says they paid you | ✅ **joins — after S9.** A fact: money either arrived or it did not. But only once the row carries the **receipt image** and there is a **second button**. Today the only possible answer is *"yes I got it"*, and it cannot be undone |
+| 8 | Somebody says they paid you | ✅ **BUILT 2026-08-27** — owner: *"yes. they can declare it."* Both conditions shipped: the row carries the receipt (*"See what they sent"* — `proofUrl` had been fetched into that card since it was written and **never rendered once**, so the answer was made blind) and a second button behind a fold. 🔑 **THIS ROW'S PREMISE WAS WRONG: the "no" was ALREADY BUILT** — `vendorRejectDeposit` → the `reject_vendor_deposit` RPC, with an ownership gate, a single-winner UPDATE and a reason that reaches the couple, wired to a control on the supplier's customer card. **The DESK had no no**; the mechanism did. A 334-line duplicate migration was written and deleted on finding it. 🔴 **STILL THE OWNER'S:** that RPC **wipes the couple's own record of paying** — it clears the markers and the proof URL and DELETES their ledger row (matched on a `notes LIKE '%awaiting vendor confirmation%'` substring, unscoped by amount or date), so after a refusal their screen looks as though they never recorded anything and the only trace is the email |
 | 9 | The guest count moved, so your price may move | ⛔ **Stays in that couple's thread.** The number **is recomputed the instant you press**, not when the row was drawn — and **nothing records when it began waiting**, so it cannot honestly sit in a list ordered by who has waited longest |
 | 10 | A quote you wrote and never sent | ✅ joins as a reminder that **opens the quote — never a Send button**: sending **retires any other live quote** you have out with that couple. ⚠ A quote can also be created-and-sent in one step from a chat thread, so a drafts list is **blind to that lane** — say so rather than implying the list is complete |
 | 11 | A contract you drafted and never sent | ✅ same shape, same treatment; move it off the separate open-task list |
