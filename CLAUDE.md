@@ -137,12 +137,16 @@ committed docs on purpose.
 >   is the SHOP'S BOOKING FEE TO US** — not the couple's deposit, not a subscription tier. That
 >   supersedes the old "are the day-of kits free during launch" item and re-answers "what is an
 >   unpaid supplier entitled to see" on a different axis.
->   🔴 **NOT BUILT — TWO READINGS, AND THEY DIFFER BY EVERY BOOKING WE HAVE.** The fee is flag-dark
->   with **0 charges ever** against **13 booked suppliers**: *(a)* a fee OWED and UNPAID blocks the
->   connection — cuts nobody off, because his own model makes the first 5 sourced bookings free and
->   BYO/returning free forever; *(b)* nobody has paid, so nobody connects — **disconnects all 13**.
->   **Proceeding on (a); it is being put back to him.** ⚠ A gate on money must **fail OPEN** on a
->   read error, never closed.
+>   ✅ **RESOLVED 2026-08-27 AND IT WAS MOOT — _"as of today no one has booked because we are still
+>   building. but we will test it after all these builds are done and try if the booking fee process
+>   works."_** ⚠ **MY OWN "13 BOOKED SUPPLIERS" WAS A MISLEADING COUNT AND I USED IT THREE TIMES
+>   BEFORE HE CORRECTED IT.** Measured: of the 13 committed rows, **12 carry no shop account at all**
+>   (a name a couple typed into their own list) and **the 13th is the seeded `SONGDESK TEST`
+>   fixture** ⇒ **ZERO real shop bookings exist in production.** 🔑 *That column counts a LIST, not a
+>   MARKETPLACE* — reading it as "13 shops we would disconnect" turned a moot question into an owner
+>   decision and cost him a round trip. ⇒ **The gate needs no grandfather clause, blocks nobody, and
+>   ships with the booking-fee TEST ROUND — not now.** The fee flow has to work end to end first.
+>   ⚠ When it is built, a gate on money must **fail OPEN** on a read error, never closed.
 > · **_"no. their papic service is only for documentation of their products."_** ⇒ **a supplier's
 >   camera documents their OWN WORK, never the guests** — a narrowing of a lane LIVE since
 >   2026-07-16. 🔑 **It is a policy and no filter can enforce it**: a photograph of a cake or a
@@ -154,9 +158,20 @@ committed docs on purpose.
 >   people of this celebration", which unlocks a keepsake story kept private — *"fully"* answers
 >   that yes, and it ships with the fact named, never as a silent widening.
 > · **_"no."_** ⇒ **a couple may NOT switch a supplier's desk off.** Struck, not deferred.
-> 🔴 **STILL OPEN, and he asked a question back — _"email for what?"_** The night-before notice
-> **ships OFF** until he answers. What he is owed: *the night before, a shop booked for tomorrow
-> gets ONE message — tomorrow is the day, here is your call time, here is the way into your tools.*
+> ✅ **ANSWERED 2026-08-27 — _"email. yes"_. THE NIGHT-BEFORE SUPPLIER EMAIL IS APPROVED; the S5
+> gate is CLOSED. Do not re-ask it.** ⚖ The answer is narrower than the question and the code was
+> already built that way: it uses the address on the **shop's OWN account**, the one they gave US at
+> signup — never the name a couple typed on their behalf. 🔢 **Safe by arithmetic at the flip: ZERO
+> bookings would receive it today**, so switching it on sends nothing to nobody and starts working on
+> the first real booking. 🔍 **Audited before the switch** (an email cannot be taken back): it is
+> mounted in the real traffic-driven daily runner, **not** the scheduled-launch branch that fires on
+> approximately no page loads; the idempotency claim is **insert-first, before the send**; and the
+> call time prints the venue's own wall-clock digits, so the 2 PM-emailed-as-10 PM trap is handled.
+> 🔑 **And the Locked-QR link fix (#4922) was load-bearing for it without either session knowing** —
+> this job filters on the same column, so a supplier booked by Locked QR would have been silently
+> skipped by the email too. ⏭ **THE FLIP IS THE OWNER'S:** set
+> `SUPPLIER_NIGHT_BEFORE_EMAIL_ENABLED=true` in Vercel, then redeploy. **Never auto-flip a
+> production flag.**
 >
 > ### ▶ SUPERSEDED 2026-08-26 — THE SUPPLIER'S ROOM IN THE EVENT HUB (PLANNED, NOT BUILT)
 > **Contract: [`WHATS_NEXT_Vendor_Hub_And_Answers_2026-08-26.md`](WHATS_NEXT_Vendor_Hub_And_Answers_2026-08-26.md)**
