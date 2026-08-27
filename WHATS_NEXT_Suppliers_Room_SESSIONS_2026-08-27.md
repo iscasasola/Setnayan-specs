@@ -22,7 +22,7 @@
 | ✅ **S1** | One honest answer to *"is this shop booked?"* | **Opus 5** | **high** | **PR [#4912](https://github.com/iscasasola/setnayan-platform/pull/4912) — auto-merge armed** |
 | **S2** | A booked supplier gets through the door on a private celebration | **Opus 5** | **high** | S1 |
 | **S3** | **The vendors are integrated into the Event Hub on the day** | **Opus 5** | **high** | S1 · S2 |
-| ⚠ **S4** | A booking made by locked QR holds its date | — | — | **ALREADY RUNNING elsewhere — do not start** |
+| ✅ **S4** | A booking made by locked QR holds its date | **Opus 5** | **medium** | **PR [#4913](https://github.com/iscasasola/setnayan-platform/pull/4913) — auto-merge armed** |
 | **S5** | The night-before email (ships switched OFF) | **Sonnet 5** | **medium** | — |
 | **S6** | The Answers Desk — its own stream, can start today | **Opus 5** | **high** | — |
 
@@ -169,15 +169,39 @@ list and the private schedule is **INERT there**. And the booked-supplier schedu
 public/private filter** — no-index the surface and add a test that fetches it anonymously.
 **Port the drawing, do not redraw it** — only the typefaces change.
 
-### S4 — A booking made by locked QR holds its date · ⚠ **ALREADY CLAIMED — DO NOT START**
-🛑 **A session is building this RIGHT NOW.** Measured, not assumed: the branch
-`claude/locked-qr-holds-its-date` is checked out at
-`~/Documents/Claude/Projects/wt-lockedqr` and was typechecking on this machine at the moment this
-register was written. **Starting it again is duplicate work and a guaranteed conflict** — the
-worktree and the branch are the evidence, so `git worktree list` before you start anything here.
-The brief below is kept only so whoever owns it can check their own work against it.
+### ✅ S4 — DONE. Do not rebuild. PR [#4913](https://github.com/iscasasola/setnayan-platform/pull/4913) · migration `20271174176372`
+⚠ **Verify with `gh pr view 4913 --json state,mergedAt` before trusting this line** — this corpus has
+been wrong about a PR's state five times.
+Built as the brief below specifies: the acquire is step (e), it resolves by category, and every
+non-OK outcome degrades OPEN and warns. It additionally runs inside a plpgsql `EXCEPTION WHEN OTHERS`
+subtransaction, because the brief's degrade-open rule covers the RPC's STATUSES and not a throw —
+without it one bad calendar row takes the whole booking down.
+🔑 **ORDERING TURNED OUT TO BE MORE LOAD-BEARING THAN THE DEGRADE.** The acquire must sit after the
+block that narrows `event_date_precision` to `'day'`, because `acquire_schedule_pools` degrades open
+without a day-precise date — hoisted above it, **every** claim returns `no_date` and reserves nothing
+**while reporting success**. The guard asserts the ORDER, not the presence of the call; a
+presence-only check passes against a function that reserves nothing.
+🪤 **THE NEUTRALISATION CASE FAILED FIRST, AND WAS RIGHT TO.** Turning the degrade-open warning into
+an abort did **not** refuse the claim — the `EXCEPTION WHEN OTHERS` handler swallowed the injected
+abort. **A sabotage neutralised by the mechanism under test proves nothing**; reproducing the
+regression took TWO changes, both counted. That failure is also what proved the handler is
+load-bearing, so it is pinned now.
+🔢 **Prod at build time: ZERO locked-QR tokens, ever** — none claimed, none pending, and zero
+`event_vendors` rows sourced `vendor_locked_qr`. Defence-in-depth, exactly as the brief insists.
+✅ Verified: new suite **7/7** · **whole db suite 1635/1635, exit 0** · `tsc` errors=0 **EXIT=0** ·
+2 mutations printed **1 → 0**, both RED.
+⏭ **FOUND HERE, NAMED NOT FIXED — belongs to whoever owns the vendor-acknowledge path:**
+`vendorAcknowledgeDeposit` fires its schedule reservation with a **service-role** client, and
+measured in prod with `auth.uid()` NULL all three arms of the acquire's authorization are false, so
+it returns `not_authorized` and the call site swallows it. **The same silent no-op migration
+`20271103100000` exists to prevent, reintroduced at the CALL SITE.** 🔑 *Widening a function's
+authorization does not help a caller who arrives as nobody.* ⛔ Do not read prod's 3
+reservation-less booked rows as evidence — all three lack a marketplace link and legitimately
+resolve to `no_pools`.
 
-~~**Opus 5 · medium**~~
+<details><summary>The original S4 brief, kept for the record</summary>
+
+**Opus 5 · medium**
 **What a person gets:** a supplier booked by scanning the couple's locked QR — where money already
 changed hands — gets a room like every other booked supplier, and their calendar and daily capacity
 finally agree.
@@ -188,6 +212,8 @@ the row carries no service id.
 ⛔ **Every non-OK return must degrade OPEN and warn.** Aborting reads like correctness and refuses a
 couple who has already paid, on a single-use token — one stale manual block is enough.
 ⛔ **Do not write "fixes a double-sell" in the PR body.** Defence-in-depth, not a live bug.
+
+</details>
 
 ### S5 — The night-before email · **Sonnet 5 · medium** · ships OFF
 **What a person gets:** the night before, a booked supplier gets an email saying tomorrow is the
