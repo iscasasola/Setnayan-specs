@@ -658,7 +658,15 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > sides **appended** functions offers mine-or-theirs and either choice deletes a feature · a
 > programmatic delete searching backwards for a docblock took **five** functions instead of one
 > (`tsc` caught it) · `npx tsx --test` on a `[communityId]` path prints **`# tests 0` and exits
-> GREEN** (escape as `[[]communityId[]]`) · `SECURITY DEFINER` **disarms** a `current_user` check ·
+> GREEN** — 🛑 **AND THE ESCAPE THIS LINE USED TO RECOMMEND (`[[]communityId[]]`) DOES NOT WORK
+> EITHER.** Measured 2026-08-27 against a real existing file (`app/[slug]/_lib/announcement-live.test.ts`,
+> 6 tests): `--test "app/[[]slug[]]/…"` · `--test "app/[slug]/…"` · `--test "./app/[slug]/…"` ALL
+> print `# tests 0 … # fail 0` and exit **0**. What DOES run it: **`npx tsx <path>` with no
+> `--test` flag** · `npx tsx --test "app/**/<name>.test.ts"` · or `cd` into the directory and pass
+> the bare filename. 🔑 **THE TRAP DOCUMENTATION WAS ITSELF A TRAP** — this file taught the escape
+> for weeks, so every session that "verified" a bracketed test that way verified **nothing**, and
+> the green it read was the bug. Always require `# tests ` to be **non-zero** before believing a
+> pass · `SECURITY DEFINER` **disarms** a `current_user` check ·
 > **a stale page is not a missing feature** (Usapan was reported "still coming soon" after it
 > merged — prod had it, the browser did not; check `/api/health` against the merge commit first).
 
