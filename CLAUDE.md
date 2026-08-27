@@ -65,7 +65,24 @@ committed docs on purpose.
 
 ## 🚦 ACTIVE WORK — READ THIS BEFORE ANYTHING ELSE (updated 2026-08-01)
 
-> ### ▶ ACTIVE 2026-08-26 — THE SUPPLIER'S ROOM IN THE EVENT HUB (PLANNED, NOT BUILT)
+> ### ▶ ACTIVE 2026-08-27 — THE SUPPLIER'S ROOM IS BUILDING. **SESSION REGISTER:**
+> **[`WHATS_NEXT_Suppliers_Room_SESSIONS_2026-08-27.md`](WHATS_NEXT_Suppliers_Room_SESSIONS_2026-08-27.md)**
+> — six sessions with their model and effort, the safe pairs, and the two pairs that must never run
+> together. Owner lifted the plan-only hold: **_"start the other half"_**.
+> 🛑 **AND HE CORRECTED THE SHAPE TWICE BEFORE A LINE WAS WRITTEN — THERE IS NO NEW PAGE.**
+> *"we are redesigning not placing a new page"* · *"on the day. is the integration of the vendors to
+> the event's event hub. so we would still want to to be an event hub."* The plan had turned his own
+> 2026-08-16 wording (*"the same on the day for vendors PLUS their special features"*) into a second
+> product at a sub-route. **Piece 7 is a redesign of `app/[slug]/_components/vendor-doorway.tsx`,
+> which SHIPS** — its own docblock (*"A DOOR, NOT A ROOM"*, *"carries NOTHING about the event"*) is
+> the specification of exactly what changes.
+> ✅ **OWNER ANSWERED the § 7 gate: the private run-of-show notes DO show in the hub** — same notes,
+> new place. He turned down *schedule only* and *only during the event window*. **Do not re-ask.**
+> ✅ **S0 IS BUILT** — a booked supplier waiting on a downpayment is no longer told *"No event
+> today"*; its guard found a SECOND rendered copy of that same false sentence.
+> 🔴 **STILL OPEN, his:** may we email a supplier at an address they never gave us? **Ships OFF.**
+>
+> ### ▶ SUPERSEDED 2026-08-26 — THE SUPPLIER'S ROOM IN THE EVENT HUB (PLANNED, NOT BUILT)
 > **Contract: [`WHATS_NEXT_Vendor_Hub_And_Answers_2026-08-26.md`](WHATS_NEXT_Vendor_Hub_And_Answers_2026-08-26.md)**
 > — **rewritten 2026-08-26 as ONE plan**, nine pieces, every correction folded into the piece it
 > affects, and it **opens with a one-page version** (the owner: *"we just want it to be easier to
