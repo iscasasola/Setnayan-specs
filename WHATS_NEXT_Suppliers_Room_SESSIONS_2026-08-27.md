@@ -14,15 +14,15 @@
 
 ## THE SHORT VERSION
 
-**Five sessions, plus one that is its own stream.** Four are built (S1 · S2 · S4 · S5) —
-S5 ships flag-off pending the owner's gate.
+**Five sessions, plus one that is its own stream.** All five are built (S1 · S2 · S3 · S4 · S5) —
+S5 ships flag-off pending the owner's gate. **Only S6, its own stream, is left.**
 
 | | What a person gets | Model | Effort | Runs after |
 |---|---|---|---|---|
 | ⚠ **S0** | A booked supplier stops being told "No event today" | — | — | **NOT on `main`** — no file, no PR, no branch (measured 2026-08-27). S1 created the module it was said to own. |
 | ✅ **S1** | One honest answer to *"is this shop booked?"* | **Opus 5** | **high** | **MERGED 2026-08-27T11:24Z · PR [#4912](https://github.com/iscasasola/setnayan-platform/pull/4912)** |
 | ✅ **S2** | A booked supplier gets through the door on a private celebration | **Opus 5** | **high** | **MERGED + SERVED** — PR [#4914](https://github.com/iscasasola/setnayan-platform/pull/4914) |
-| **S3** | **The vendors are integrated into the Event Hub on the day** | **Opus 5** | **high** | S1 · S2 |
+| ✅ **S3** | **The vendors are integrated into the Event Hub on the day** | **Opus 5** | **high** | **BUILT + PR'd** — PR [#4919](https://github.com/iscasasola/setnayan-platform/pull/4919), auto-merge armed |
 | ✅ **S4** | A booking made by locked QR holds its date | **Opus 5** | **medium** | **MERGED + SERVED** — PR [#4913](https://github.com/iscasasola/setnayan-platform/pull/4913) |
 | ✅ **S5** | The night-before email (ships switched OFF) | **Sonnet 5** | **medium** | **BUILT + PR'd** — PR [#4915](https://github.com/iscasasola/setnayan-platform/pull/4915), auto-merge armed |
 | ✅ **S6** | The Answers Desk — every answer a shop owes, answered on the row | **Opus 5** | **high** | **BUILT + PR'd** — PR [#4917](https://github.com/iscasasola/setnayan-platform/pull/4917), auto-merge armed |
@@ -198,7 +198,70 @@ money-gift page refuses.
 
 </details>
 
-### S3 — The vendors are integrated into the Event Hub on the day · **Opus 5 · high** · after S1+S2
+### ✅ S3 — DONE. PR [#4919](https://github.com/iscasasola/setnayan-platform/pull/4919), auto-merge armed. Do NOT rebuild it.
+⚠ Verify with `gh pr view 4919 --json state,mergedAt` before trusting this line — this corpus has
+been wrong about a PR's state five times. **A merge is not a ship:** check `/api/health` against the
+merge commit afterwards.
+
+**What a person gets:** on the day, a booked supplier opens the same link every guest opens and
+finds their own desk on it — the venue and its address, the running order live, the whole running
+order with the organiser's private lines **shown and marked**, the live headcount, and their tools.
+Every other day of the year it is the one-line link-out it has always been. Nobody else sees a trace.
+
+**Shipped:** the pure rules in `lib/supplier-desk-rule.ts`, the content read in
+`app/[slug]/_lib/supplier-desk.server.ts`, the render in `_components/supplier-desk.tsx`, mounted
+from the doorway's OWN already-guarded mount point (a second mount is a second gate). `moduleHref`
+moved out of the floor console into `lib/vendor-dayof-module-href.ts` so the desk and the console
+read ONE route map. The now/next line is the shared `RunOfShowHeader`, realtime included —
+`canAdvance` left false, because only the coordinator runs the programme.
+
+🔒 **THE RULE THAT DECIDED THE BUILD, and it is the one to carry forward:** *authorization may be
+answered with the service role scoped by a session-proved id; **event content never is**.* The admin
+client is in scope on the very line the desk is resolved on — the loader opens its own cookie-scoped
+client instead, and a guard asserts by source that the file never gains a `createAdminClient`.
+
+🚨 **AND THE OBVIOUS READ WAS THE LEAKY ONE. `get_vendor_event_brief` returns a `timeline`, it was
+one fewer round trip, and it carries the COORDINATOR-ONLY lines** — the function is
+`SECURITY DEFINER` and its timeline select has **no visibility filter at all**, while the
+booked-supplier RLS policy excludes exactly those rows. Read out of production, not from a
+migration. The running order comes from `fetchRunOfShowBlocks` under the supplier's own session,
+which is narrower AND carries `run_state` besides.
+
+🔴 **A LIVE DIVERGENCE, MEASURED, NAMED AND DELIBERATELY NOT FIXED — read this before touching the
+doorway's audience.** Three readers answer "is this shop booked here?" off **two different
+columns**: `get_vendor_event_brief` and the schedule policy use `marketplace_vendor_id`;
+`resolveVendorCapability` (the doorway, and therefore this desk) uses `linked_vendor_profile_id`.
+Production holds **45 rows · 1 with a marketplace id · 0 with a linked id**, and that one row is
+**`contracted`** — so the only genuinely booked marketplace supplier in production gets the full
+brief inside their own dashboard and **no doorway and no desk on the celebration's page.**
+⛔ **Aligning them is NOT a port.** `resolveVendorCapability` also feeds `belongsToThisEvent`, the
+single boolean gating a keepsake story the organiser kept to the people of their day — the thing S2
+had to tighten three days ago. Widening it is a **disclosure decision and needs the owner.**
+
+🔴 **IT ALSO FOUND A LATENT ONE, FIXED IN THE SAME PR: `events.event_end_date` and `cleared_at` were
+being READ BEFORE THEY WERE SELECTED.** The page has cast for the end date since the day-of
+lifecycle learned about ranges and the event shell's select named neither column, so the cast
+resolved `undefined` on every render and **the multi-day arm of `getLifecyclePhase` has never once
+run**. Both are selected and typed now. 🔑 *A cast is not a read — `as` silences the compiler about
+a field the query never asked for.* ⚠ Safe here only because the shell reads with the **service
+role**; the same two names in a user-session query must clear the `events` per-column allowlist
+first, or PostgREST refuses the whole query.
+
+⏭ **NAMED, NOT BUILT — do not re-report these as oversights:** the granted-teammate arm (above) ·
+the **Papic capture tool** stays off the celebration's page (its own page is day-bound and would
+bounce a supplier opening the desk the afternoon before, and § 6.4 holds that lane back until its
+INSERT policy is read out of production) · **no pinned bar** (that edge already has five claimants,
+which is what `lint-no-stacked-pinned-bars` exists to catch) · the pre-day call-sheet state and the
+two-celebrations-in-one-day bridge.
+
+✅ `tsc` **EXIT=0 ERROR_LINES=0** · unit **10541/10541** · db **1644/1644** · 11 lints exit 0 ·
+**13 mutations, every one RED**. 🪤 One of them counted a needle the replacement kept as a
+substring, so its **1 → 1** proved nothing even though the test went red — re-run with a real
+counter (**0 → 1**). *A red result is not evidence the sabotage applied.*
+
+<details><summary>The original S3 brief, kept for the record</summary>
+
+**Opus 5 · high** · after S1+S2
 🛑 **THIS IS A REDESIGN OF SOMETHING THAT SHIPS. THERE IS NO NEW PAGE AND NO NEW ROUTE.**
 Owner, twice. The Event Hub stays the Event Hub; on the day a booked supplier opens the same
 `/{slug}` everyone else opens and **their own tools are integrated into it**.
@@ -242,6 +305,8 @@ redesign, and the "before the day it stays a link" half is still exactly what sh
 ⚠ **`loadVendorBooking` is `cache()`d per request**, so asking it again inside the room costs
 nothing. Do not thread its result down through props to avoid a second call; that is how a prop
 becomes the second definition.
+
+</details>
 
 ### ✅ S4 — DONE. Do not rebuild. PR [#4913](https://github.com/iscasasola/setnayan-platform/pull/4913) · migration `20271174176372`
 ✅ **MERGED 2026-08-27T11:24:37Z AND SERVED** — `/api/health` self-reports `205a1ad`, the PR's own

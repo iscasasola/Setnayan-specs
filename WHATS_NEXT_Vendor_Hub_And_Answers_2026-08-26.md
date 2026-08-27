@@ -30,7 +30,7 @@ come late.
 | 4 | ✅ **DONE 2026-08-27 — PR #4890, merged.** Stop treating a guest who scanned a QR as a host | — |
 | 5 | Agree on one answer to "is this shop booked?" — there are two today | no |
 | 6 | Stop bouncing booked suppliers off pages the app drew for them | no |
-| 7 | **The supplier's tools, integrated INTO the event hub on the day** (not a new page — owner 2026-08-27) | ✅ answered |
+| 7 | ✅ **DONE 2026-08-27 — PR #4919.** The supplier's tools, integrated INTO the event hub on the day (not a new page — owner 2026-08-27) | — |
 | 8 | A booking made by locked QR reserves its date like every other | no |
 | 9 | The night before, email the supplier that tomorrow is the day | one question first |
 
@@ -206,7 +206,22 @@ answer is yes"* — a later path made that false, so **the money-gift card is dr
 money-gift page refuses.**
 **Must not merge before Piece 4.**
 
-### PIECE 7 — THE ROOM
+### ✅ PIECE 7 — THE ROOM · **BUILT 2026-08-27, PR [#4919](https://github.com/iscasasola/setnayan-platform/pull/4919)** (auto-merge armed). Do NOT rebuild it.
+> **Built as the correction below specifies: no new page, no new route.** The doorway strip opens
+> IN PLACE from the day the celebration begins until 06:00 the morning after it ends, carrying the
+> venue and its address, the running order live, the whole running order with the organiser's
+> private lines **shown and marked**, the live headcount and their own tools; byte-identical to
+> before on every other day. Full write-up, with the two findings it produced, in
+> [`WHATS_NEXT_Suppliers_Room_SESSIONS_2026-08-27.md`](WHATS_NEXT_Suppliers_Room_SESSIONS_2026-08-27.md) § S3.
+> 🚨 **The shortcut in § 4 was real and was measured:** `get_vendor_event_brief`'s `timeline` is one
+> fewer round trip and carries the **coordinator-only** lines the booked-supplier policy excludes,
+> because the function is `SECURITY DEFINER` and that select has no visibility filter at all.
+> 🔴 **A live divergence found here and NOT fixed, because it is a disclosure call:** trap #4's two
+> columns are already apart in production — the one `contracted` marketplace row carries
+> `marketplace_vendor_id` and **no** `linked_vendor_profile_id`, so the shop the brief admits gets
+> no doorway and no desk. Aligning them widens `belongsToThisEvent`. **Owner's.**
+> ⚠ The teammate-grant arm of the admission below is therefore **NOT built** — same reason.
+
 🛑 **CORRECTED 2026-08-27 BY THE OWNER, TWICE, BEFORE A LINE WAS WRITTEN — THIS IS A REDESIGN, NOT A
 NEW PAGE.** *"we are redesigning not placing a new page."* Then, plainly: *"on the day. is the
 integration of the vendors to the event's event hub. so we would still want to to be an event hub."*

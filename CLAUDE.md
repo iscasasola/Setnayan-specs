@@ -81,7 +81,8 @@ committed docs on purpose.
 > ⚠ **S0's ✅ WAS WRONG — it is NOT on `main`** (no file, no PR, no branch; measured 2026-08-27).
 > Its claim, kept in case it lands: a booked supplier waiting on a downpayment is no longer told
 > *"No event today"*, and its guard found a SECOND rendered copy of that same false sentence.
-> ✅ **S1 · S2 · S4 ARE BUILT — do NOT rebuild any of them.** S1 PR
+> ✅ **S1 · S2 · S3 · S4 · S5 ARE ALL BUILT — do NOT rebuild any of them. ONLY S6 (the Answers
+> Desk) IS LEFT.** S1 PR
 > [#4912](https://github.com/iscasasola/setnayan-platform/pull/4912) (merged) — one honest answer to
 > *"is this shop booked?"*, three arms, because the Agree RPC and the Locked-QR claim both book
 > **without** touching the schedule pool every day-of screen was reading. S4 PR
@@ -98,6 +99,32 @@ committed docs on purpose.
 > merely SHORTLISTED was told *"You are booked here"* and counted as one of "the people of this
 > celebration", which is the whole gate on a keepsake story kept to those people. *A rule written
 > three times had two copies laxer, and the lax ones were the two deciding a disclosure.*
+> 🚪 **S3 PR [#4919](https://github.com/iscasasola/setnayan-platform/pull/4919) (auto-merge armed) —
+> THE SUPPLIER'S DESK OPENS INSIDE THE EVENT HUB, IN PLACE, ON THE DAY.** No new page and no new
+> route, exactly as the owner corrected it twice: on the day the strip a booked supplier already
+> sees stops being a link out and carries the venue and its address, the running order live, **the
+> organiser's private lines shown and MARKED** (his own ruling the same day), the headcount and
+> their tools — through to **06:00 the morning after**, because a reception runs past midnight.
+> Every other day of the year it is byte-identical to before, and nobody else ever sees a trace.
+> 🔒 **THE RULE THAT DECIDED IT, worth more than the feature:** *authorization may be answered with
+> the service role scoped by a session-proved id; **event content never is**.* `/{slug}` renders
+> with an admin client that sits in scope on the very line the desk is resolved — one import and
+> every rule keeping a supplier out of the guest list and the private cues stops applying, with
+> nothing looking wrong.
+> 🚨 **AND THE OBVIOUS READ WAS THE LEAKY ONE:** the brief's own `timeline` is one fewer round trip
+> and carries the **coordinator-only** lines the supplier's read policy excludes — that function is
+> `SECURITY DEFINER` and its select has no visibility filter at all. Read out of prod, not from a
+> migration.
+> 🔴 **AND IT MEASURED A LIVE DIVERGENCE IT DELIBERATELY DID NOT FIX:** three readers answer *"is
+> this shop booked here?"* off **two different columns**, and production is already apart — the ONE
+> `contracted` marketplace booking carries `marketplace_vendor_id` and **no**
+> `linked_vendor_profile_id`, so the shop the brief admits gets **no doorway and no desk on the
+> celebration's page**. Aligning them widens `belongsToThisEvent`, the boolean gating a keepsake
+> story kept to the people of the day — **a disclosure call, the owner's, not a port.** Same reason
+> a shop's granted TEAMMATE does not get the desk yet.
+> 🔴 **A LATENT ONE FIXED ON THE WAY: `events.event_end_date` and `cleared_at` were being READ
+> BEFORE THEY WERE SELECTED**, so the multi-day arm of the day-of lifecycle **has never once run**.
+> 🔑 *A cast is not a read.*
 > ⚠ **Verify every PR state above with `gh pr view <n> --json state,mergedAt`** — this file has been
 > wrong about a PR's state five times.
 > 🔴 **STILL OPEN, his:** may we email a supplier at an address they never gave us? **Ships OFF.**
