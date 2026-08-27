@@ -1,5 +1,18 @@
 # WHATS_NEXT_INDEX — master compilation for the "run all what's-next" session (2026-07-18)
 
+
+> ### ▶ ACTIVE 2026-08-28 — THE SERVICE CARD MAKER: ONE DOOR, TWO ANSWERS
+> **Register: [`WHATS_NEXT_Service_Card_SESSIONS_2026-08-28.md`](WHATS_NEXT_Service_Card_SESSIONS_2026-08-28.md)**
+> · prompts: [`WHATS_NEXT_Service_Card_SESSION_PROMPTS_2026-08-28.md`](WHATS_NEXT_Service_Card_SESSION_PROMPTS_2026-08-28.md)
+> · what shipped and how it was measured: [`WHATS_NEXT_Service_Card_Maker_2026-08-28.md`](WHATS_NEXT_Service_Card_Maker_2026-08-28.md)
+> · the binding drawing: `prototypes/service_card_wizard_2026-08-28.html`.
+> **Built in PR [#4930](https://github.com/iscasasola/setnayan-platform/pull/4930)** (verify with
+> `gh pr view 4930 --json state,mergedAt`): "+ Create service card" opens the CARD · the kind is a
+> field on it, coverage-first, plan-blocked kinds greyed WITH THE REASON **before** the work · a
+> one-trade shop is asked nothing · a blank card asks **two questions** (the whole publish gate) ·
+> a half-finished card is kept in the browser and offered back · one door from the top bar AND from
+> My Shop. 🛑 **S3 and S4 both edit `canvas-maker.tsx` — never together.**
+
 > ### ▶ ACTIVE 2026-08-26 — THE ADMIN'S NAMES, AND WHETHER IT CAN REACH YOU
 > **Contract: [`WHATS_NEXT_Admin_Names_And_Alerts_2026-08-26.md`](WHATS_NEXT_Admin_Names_And_Alerts_2026-08-26.md).**
 > Owner, the morning after the menu recut merged and deployed: ***"it still looks the same."***
