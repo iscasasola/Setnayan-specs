@@ -78,8 +78,9 @@ after. An unmeasured mutation proves nothing.
 > two commits. DO NOT RUN THIS SESSION AGAIN.** Four states (call sheet · today · look back · one
 > quiet line), nothing on the desk rebuilt, nothing about the read widened — and a ribbon above the
 > Save-the-Date film, without which the call sheet would have been invisible for ~9 months of every
-> booking. **The same-day bridge (design § E) is the one piece still unbuilt**, and it wants a
-> `SECURITY DEFINER` function scoped to the caller rather than an admin read inside `/{slug}`.
+> booking. **The same-day bridge (design § E) is built too**, as a `SECURITY DEFINER` function
+> scoped to the caller — the only piece of the binding design still unbuilt is the weak-signal
+> venue (§ H), which the design itself calls its own project.
 > ⚠ Verify with `gh pr view 4932 --json state,mergedAt` before trusting this line.
 
 ```

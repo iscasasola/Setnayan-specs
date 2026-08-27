@@ -254,11 +254,12 @@ Measured, not remembered. None of these is broken; each is a seam a person can f
    for the week after, and **one quiet line** long after — a supplier's past work is their
    portfolio, so the door goes quiet rather than shutting. Nothing about the read widened: the
    database was always willing to tell a booked supplier these facts, and only this surface was
-   shut. ⏭ **The same-day bridge is still not built** and is now the only piece of the design's
-   § E outstanding — it needs the shop's OTHER bookings, which today can only be read with the
-   service role, so it wants a `SECURITY DEFINER` function scoped to the caller rather than an
-   admin read inside this page. ⚠ Verify with `gh pr view 4932 --json state,mergedAt` before
-   trusting this line.
+   shut. 🌉 **The same-day bridge is built too, in the same PR** — on the day, the desk names the
+   shop's OTHER celebrations running today, through a `SECURITY DEFINER` function that resolves
+   the caller from their session and admits profiles they own only, so a teammate granted one
+   celebration never learns the others exist. ⏭ **The only piece of the binding design still
+   unbuilt is the weak-signal venue (§ H), which the design itself calls its own project.**
+   ⚠ Verify with `gh pr view 4932 --json state,mergedAt` before trusting this line.
 4. ~~**A shop's granted teammate cannot open the desk.**~~ ✅ **CLOSED 2026-08-28 — PR
    [#4933](https://github.com/iscasasola/setnayan-platform/pull/4933), built as ruled.** Runs the
    shop (owner or top team role) ⇒ every booking of it; a live per-event grant ⇒ that one

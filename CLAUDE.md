@@ -132,9 +132,20 @@ committed docs on purpose.
 > 🪤 **AND THREE OF EIGHTEEN MUTATIONS FIRST READ AS DECORATIVE GUARDS AND WERE MEASUREMENT
 > ERRORS**, one of them a sabotage that hit a **docblock's** `z-[90]` rather than the className's.
 > *An occurrence count proves a sabotage landed somewhere, not that it landed where you aimed.*
-> ⏭ **STILL NOT BUILT, named:** the same-day bridge (design § E — it wants a `SECURITY DEFINER`
-> function scoped to the caller, because a shop's OTHER bookings can today only be read with the
-> service role) and the weak-signal venue (§ H, its own project).
+> 🌉 **AND THE SAME-DAY BRIDGE IS BUILT TOO, IN THE SAME PR** (it was #4935, which auto-merged into
+> the hub2 BRANCH rather than main — the repo arms auto-merge on every PR and a topic branch has no
+> required checks, so **#4932 carries all three pieces**; the merged tip was checked file by file
+> and nothing was lost). On the day and no other day, the desk names the shop's OTHER celebrations
+> running today. 🔒 **A `SECURITY DEFINER` function, never a query in the page** — and the tempting
+> reuse, `fetchVendorRoomEvents`, **opens `createAdminClient()` internally.** ⛔ **It deliberately
+> does NOT union `vendor_team_members`, which `get_vendor_event_brief` does:** *"an agent granted
+> only the christening never learns the reception exists."* A db test asserts the teammate gets
+> nothing AND that the owner still gets their second booking.
+> 🪤 **AND `gates-have-handles` READ `o.is_sample = FALSE` IN A WHERE CLAUSE AS A WRITER** — its
+> scan is `\mcol\M\s*=[^=]` over every function body, which a comparison matches as well as an
+> assignment. Write `NOT col` on a NOT NULL column; the trap is recorded in that migration.
+> ⏭ **STILL NOT BUILT, named:** the weak-signal venue (§ H) — the design calls it its own project.
+> **Everything else in `Vendor_Room_Design_2026-08-26.md` now ships.**
 > 🔒 **THE RULE THAT DECIDED IT, worth more than the feature:** *authorization may be answered with
 > the service role scoped by a session-proved id; **event content never is**.* `/{slug}` renders
 > with an admin client that sits in scope on the very line the desk is resolved — one import and
