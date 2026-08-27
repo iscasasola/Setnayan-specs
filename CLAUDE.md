@@ -152,9 +152,31 @@ committed docs on purpose.
 > `vendor_claim_locked_qr` — the path where MONEY HAS ALREADY MOVED — which never mentions
 > `linked_vendor_profile_id` at all.** Same defect #4488 fixed in its twin, surviving in the clone;
 > inert today (zero locked-QR tokens ever) and **needing no owner decision**.
-> ⛔ What DOES need him is the **granted TEAMMATE** arm, because widening `resolveVendorCapability`
-> also widens `belongsToThisEvent`, the boolean gating a keepsake story kept to the people of the
-> day. *One row you did not open is not a finding.*
+> ✅ **THE granted TEAMMATE ARM IS RULED, BUILT AND MERGED 2026-08-28 — PR
+> [#4933](https://github.com/iscasasola/setnayan-platform/pull/4933). Do NOT rebuild it, and do NOT
+> re-ask the decision.** Owner: *"the staff who handles the event will handle the event fully but the
+> vendor owner also has access to oversight all their business"* + *"the ones they were given"* ⇒
+> **runs the shop** (owner or top team role) reaches **every** booking of that shop · **a live
+> per-event grant** reaches **that one** celebration · **`agent`/`viewer` with no grant is refused**.
+> ⛔ **The careful separation — staff work the day WITHOUT becoming one of its people — WAS OFFERED
+> AND DECLINED. Re-proposing it is re-asking a settled decision.**
+> 🔴 **AND RULE 0 PAID IN THE OPPOSITE DIRECTION TO THE ONE EXPECTED.** `loadVendorBooking` resolved
+> the caller's shops with ONE query — `vendor_profiles.user_id = <viewer>`, the registered owner and
+> nobody else — under a comment claiming *"owns **or administers**"*. Meanwhile the shop's own day-of
+> console and `get_vendor_event_brief` (read out of prod BY THE OBJECT: *profile owner UNION
+> `vendor_team_members`*) had admitted **every teammate, at any role, with no grant**, all along.
+> **The celebration page held the STRICTEST copy of a rule the rest of the app had long since
+> widened** — the mirror image of the two-lax-copies defect logged one paragraph up, and the reason
+> the "widening" is smaller than it reads. ⚠ Those two are **still wider than the desk**; named in
+> the PR, deliberately NOT narrowed (narrowing a live read is its own change and its own question).
+> 🗣 **THE WIDENING IS SAID OUT LOUD WHERE THE HOST DECIDES**, because it moves who reads something
+> private: the audience note under *"The people of this celebration"* ended *"and the suppliers who
+> worked it"* and now names **the shops you booked and the staff those shops send** — changed in
+> **BOTH** places that choice is offered and guarded against each other.
+> 🔢 **Safe by arithmetic at the merge, read out of prod:** 2 shops · **0 teammates who are not the
+> shop's own owner** · **0 grants EVER** · 45 `event_vendors` rows carrying **0
+> `linked_vendor_profile_id`** ⇒ nobody gains anything today. *One row you did not open is not a
+> finding.*
 > 🔴 **A LATENT ONE FIXED ON THE WAY: `events.event_end_date` and `cleared_at` were being READ
 > BEFORE THEY WERE SELECTED**, so the multi-day arm of the day-of lifecycle **has never once run**.
 > 🔑 *A cast is not a read.*

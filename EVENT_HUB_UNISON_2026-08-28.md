@@ -155,9 +155,11 @@ Evidence for every ✅ is in § 9.
 | 40 | **The supplier's own camera** — documenting *their work* (owner: never the guests) | — | — | capture lane exists | 🌑 BUILT-BUT-DARK — the route refuses everyone until the data-privacy ruling (the owner, as DPO) opens it; it is also deliberately kept off the desk until its rules are re-read |
 | 41 | **The night-before email** — "tomorrow is the day," call time, link to the desk | — | — | one email, once | 🌑 BUILT-BUT-DARK — merged 2026-08-27, ships switched off; the gate is the owner's (§ 7, decision 2) |
 
-**Unbuilt but ruled or drawn (the ⬜ three):** the **teammate arm of the desk** (a shop's granted
+**Unbuilt but ruled or drawn (the ⬜ three):** ✅ the **teammate arm of the desk** is **BUILT
+2026-08-28** (PR [#4933](https://github.com/iscasasola/setnayan-platform/pull/4933)) — the entry
+below is kept as written, struck, because the diagnosis in it was half wrong. ~~(a shop's granted
 staff member opening the desk — ruled yes by the owner, deliberately held because it widens "one of
-the people of this celebration", § 7 decision 1) · the **pre-day call-sheet states of the desk**
+the people of this celebration", § 7 decision 1)~~ · the **pre-day call-sheet states of the desk**
 (the drawn "your booking — Ana & Marco, Sat 14 Feb" ribbon months out, and the two-events-in-one-day
 bridge — the binding design has them; what shipped is the day itself, and before the day the strip
 stays the one-line link it always was) · the **gathered control centre for the event page** (the
@@ -257,9 +259,15 @@ Measured, not remembered. None of these is broken; each is a seam a person can f
    service role, so it wants a `SECURITY DEFINER` function scoped to the caller rather than an
    admin read inside this page. ⚠ Verify with `gh pr view 4932 --json state,mergedAt` before
    trusting this line.
-4. **A shop's granted teammate cannot open the desk.** The owner ruled staff handle the event
-   fully; the arm is held back because the same switch also counts that teammate as "one of the
-   people of this celebration", which unlocks a keepsake the host kept private (§ 7, decision 1).
+4. ~~**A shop's granted teammate cannot open the desk.**~~ ✅ **CLOSED 2026-08-28 — PR
+   [#4933](https://github.com/iscasasola/setnayan-platform/pull/4933), built as ruled.** Runs the
+   shop (owner or top team role) ⇒ every booking of it; a live per-event grant ⇒ that one
+   celebration; `agent`/`viewer` with no grant ⇒ refused. The keepsake widening ships **named**, and
+   is said on screen where the host picks that audience. ⚠ **And the gap was narrower than this
+   entry claimed:** the shop's own day-of console and `get_vendor_event_brief` already admitted
+   **every teammate, at any role, with no grant** — the celebration page held the *strictest* copy of
+   a rule the rest of the app had long since widened. Those two are still wider than the desk;
+   named, deliberately not narrowed.
 5. ~~**The two supplier surfaces after the day still point away.**~~ ✅ **CLOSED 2026-08-28 by the
    same PR.** The Hub's after-stage now offers a booked supplier a look-back for the week
    following: the day as it ran, with the lines the floor actually advanced marked — and, when
@@ -288,10 +296,10 @@ path now stamps both booking links and reserves its date (both halves fixed 2026
 
 ## 7 · Owner decisions — flagged, not made
 
-1. **Let a shop's granted teammate open the desk?** You already ruled the staff member handles
-   the event fully. Building it also makes that teammate count as "one of the people of this
-   celebration", which unlocks the keepsake story a host kept to the people of their day. Say
-   "build it" and it ships with that fact named; nothing else waits on it.
+1. ~~**Let a shop's granted teammate open the desk?**~~ ✅ **ANSWERED AND BUILT 2026-08-28 — do
+   NOT re-ask.** You said staff get both; you were offered the separation and turned it down. PR
+   [#4933](https://github.com/iscasasola/setnayan-platform/pull/4933). Nobody gains anything today —
+   production holds **0 teammates who are not their shop's own owner** and **0 grants, ever**.
 2. **Switch on the night-before email?** It is built and off. Your question — *"email for
    what?"* — deserves its answer: the night before a celebration they are booked for, a shop
    gets one message saying tomorrow is the day, their call time, and a link straight into their

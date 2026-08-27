@@ -10,7 +10,7 @@ need the owner rather than a session.
 | `hub1` · the four photo names | **Opus** | low | no — start it |
 | `hub2` · the supplier's desk gets a life | **Opus** | high | ✅ **DONE 2026-08-28 — PR [#4932](https://github.com/iscasasola/setnayan-platform/pull/4932). Do not restart it.** |
 | `hub3` · each kind offers only its own rooms | **Fable** to measure → **Opus** | high | ✅ **RULED 2026-08-28 — go** |
-| `hub4` · a shop's teammate can open the desk | **Opus** | medium | ✅ **RULED 2026-08-28 — go** |
+| `hub4` · a shop's teammate can open the desk | **Opus** | medium | ✅ **BUILT 2026-08-28 — PR [#4933](https://github.com/iscasasola/setnayan-platform/pull/4933). Do NOT rebuild it.** |
 
 ⚠ **Two at a time, never more.** Ten parallel builds once shipped 44 defects.
 ⚠ **`hub1` and `hub3` both touch event-type wording — never run them together.**
@@ -163,6 +163,20 @@ TRAPS:
 ---
 
 ## `hub4` — A SHOP'S TEAMMATE CAN OPEN THE DESK
+
+> ✅ **DONE 2026-08-28 — PR [#4933](https://github.com/iscasasola/setnayan-platform/pull/4933),
+> auto-merge armed. Do NOT run this prompt again.** Two ways in, exactly as ruled: runs the shop
+> (owner or top team role) ⇒ every booking of that shop · a live per-event grant ⇒ that one
+> celebration · `agent`/`viewer` with no grant ⇒ refused. The measured list the prompt asked for is
+> in the PR body: **four** surfaces widen together — the private lock screen, the shared gate the
+> seven sub-pages ask, the print keepsake, and `belongsToThisEvent` (the keepsake story). The
+> widening is said on screen in **both** places the audience is chosen.
+> 🔴 **RULE 0 PAID:** the narrow query was NOT the only answer in the product — the shop's day-of
+> console and `get_vendor_event_brief` already admitted every teammate, at any role, with no grant.
+> **The celebration page held the strictest copy of a rule the rest of the app had already widened.**
+> ⚠ That leaves the console and the brief WIDER than this desk — named in the PR, deliberately not
+> fixed. 🔢 Safe by arithmetic: 0 non-owner teammates and 0 grants in prod.
+> ⛔ The careful separation was offered and **declined**. Do not re-propose it.
 
 ```
 You are picking up the session named hub4 in the Setnayan project.
