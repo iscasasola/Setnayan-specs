@@ -14,11 +14,20 @@
 > ### ⚠ UPDATE 2026-08-27 — IT IS **17** TYPES NOW, AND THE 17th IS UNDOCUMENTED
 > Re-measured against the live database and `origin/main` (`333e1ee50`). Everything below is still
 > accurate; two things changed since 11 August:
-> 1. 🕊️ **A funeral is the 17th live type** (shipped 2026-08-24). It is the **only type this brief
->    does not describe** — see the new row in §2 and the note at the end of §3C. It asks **no**
->    signature question and has **no** detail screen; the only thing authored for it is a quieter
->    opening line. That is deliberate for a wake, but it means a funeral runs the plainest flow we
->    have, on the shared generic plan.
+> 1. 🕊️ **A funeral is the 17th live type** (shipped 2026-08-24), and it is now described here like
+>    every other — see §2, §3C and §3D.
+>
+>    ⚠ **AND WHAT THIS BRIEF FOUND WHEN IT WENT LOOKING FOR IT WAS A LIVE HARM, NOW FIXED.** The
+>    solemn wording shipped through the guest tree and **stopped at the front door**, so a family
+>    arranging a wake was walked through the celebratory quiz in §3B word for word — *"What would
+>    make the day unforgettable?"* · *"How big does it feel? **Grand & full-house — the more the
+>    merrier**"* · *"What's the energy of the day? **Joyful & lively — music, dancing, and a packed
+>    floor**"* — and then handed a persona card reading **"The Grand Celebration."** Corrected in
+>    the same pass: the funeral now has its own five questions in a solemn voice, its own six
+>    reveal cards, three signature questions of its own and a 14-field detail screen.
+>    🔑 **The solemn copy lives in code, not in the admin override table**, because that read fails
+>    open — a database hiccup would have put "Joyful & lively" back in front of a grieving family.
+>    HQ can still edit the words; it cannot lose them.
 > 2. **A services step now exists after the persona reveal** on all three flows (a Papic card and a
 >    Setnayan AI card — informational, no checkout). It is **switched off by default** and its live
 >    value cannot be read from here; if it is on, add one screen before *Congrats* everywhere.
@@ -123,8 +132,9 @@ All seventeen are switched on and can be planned today.
 | 17 | 🕊️ Funeral | yes (7 categories) | no |
 
 Wedding has its own dedicated wizard. The other sixteen share one flow whose questions change by
-type. **A funeral runs that shared flow in its quietest form** — no countdown, no save-the-date, no
-upsells, and a gentler opening line; see the note at the end of §3C.
+type. **A funeral runs that shared flow in a solemn voice of its own** — no countdown, no
+save-the-date, no upsells, a gentler opening and closing, and all five shared questions reworded;
+see the note at the end of §3C.
 
 ---
 
@@ -205,8 +215,8 @@ The five shared experience questions, non-wedding wording:
 ### 3C · The signature questions, by event
 
 Every option quietly adds the right vendor categories to the plan, so these are not decoration.
-**Five events have none at all and go straight from "where" to the generic quiz — they feel the
-thinnest: Gala Night, Simple Event, Date, Hangout — and, since 2026-08-24, the Funeral.**
+**Four events have none at all and go straight from "where" to the generic quiz — they feel the
+thinnest: Gala Night, Simple Event, Date, Hangout.**
 
 <details open>
 <summary><b>Birthday</b> — 4 questions</summary>
@@ -306,11 +316,26 @@ thinnest: Gala Night, Simple Event, Date, Hangout — and, since 2026-08-24, the
 - **The extras · Any special touch?** — Matching shirts & souvenirs · A photo booth · Live music / karaoke · Just the essentials
 </details>
 
-**🕊️ The funeral, added 2026-08-24 — the one type with nothing tailored.** It asks no signature
-question, shows no detail screen, and draws on the shared generic plan rather than one of its own.
-What *was* authored for it is tone, not questions: a quieter opening line, no countdown, no
-save-the-date, and no upsells anywhere in the flow. Whether a wake should be asked anything at all
-is a judgement call the design should make, not an omission to fill in by reflex.
+<details open>
+<summary><b>🕊️ Funeral</b> — 3 questions, and the whole quiz is reworded</summary>
+
+- **The service · How will the farewell be held?** — A funeral Mass · A memorial service · Quietly, family only · Not decided yet
+- **Those far away · Some who loved them cannot be here.** — Let them watch the service · Share photographs afterwards · Both · Everyone will be here
+- **What would help · What would take the most off your hands?** — Food for those keeping vigil · Flowers and the chapel setting · Memorial cards and the tarpaulin · Transport for the procession · Someone to handle the arrangements
+
+**Unlike every other event, the five SHARED questions change too.** A wake is asked *"What matters
+most in the days ahead?"*, *"How many do you expect?"*, *"How would you like the days to feel?"*
+(quiet and prayerful · warm and full of stories · formal and composed), *"How closely will you keep
+to tradition?"* and *"How much should we take off your hands?"* — and its six reveal cards are
+**Something to Keep · The Wide Circle · Held With Care · Close and Quiet · Simple and Clear · As
+Tradition Asks**, on one dignified palette instead of six moods. The closing screen is a dove and
+*"Everything is in one place"*, never a sparkle and *"You're all set"*.
+
+⚖ **Every option maps to one of the eight kinds of supplier a funeral can actually reach** — food,
+flowers, photo & video, printing, choir, shuttle, coordinator, livestream — and the starter plan
+offers **no paid camera**, because a bereaved family is not upsold.
+
+</details>
 
 ### 3D · "A few details that make it yours" — one optional screen per event
 
@@ -335,7 +360,7 @@ celebration, and right now it looks like a tax form.
 | **Celebration** | 4 | **Pasasalamat** and **despedida** as first-class occasions |
 | **Simple Event** | 4 | Deliberately light — a genuinely one-tap path |
 | **Date · Hangout** | none | Nothing is asked. |
-| **Funeral** | none | Nothing is asked. The only thing authored for a wake is a quieter opening line — *"A few quiet questions, and everything is arranged in one place."* |
+| **Funeral** | 14 | The **pasiyam** asked for by name · burial or cremation · nights of lamay · uncapped rosters of who is speaking and who is carrying · a few words for the notice, which can wait |
 
 ---
 
