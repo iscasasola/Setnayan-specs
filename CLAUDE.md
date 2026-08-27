@@ -256,8 +256,36 @@ committed docs on purpose.
 > 🔴 **AND THE CONSEQUENCE IS BIGGER THAN THE FEATURE: the PGlite replay builds from the REPO file,
 > so it has the nullable column. A db test for this door would PASS IN THE REPLAY AND PROVE NOTHING
 > ABOUT PRODUCTION.** Not permissiveness — **a different table.** ⇒ dry-run in prod inside
-> `BEGIN…ROLLBACK` and put the transcript in the PR body. ⏭ **A full prod-vs-repo catalogue diff is
-> its own session** — only three tables were checked.
+> `BEGIN…ROLLBACK` and put the transcript in the PR body. ✅ **THAT CATALOGUE DIFF IS DONE —
+> [`SCHEMA_DRIFT_AUDIT_2026-08-27.md`](SCHEMA_DRIFT_AUDIT_2026-08-27.md). THE ANSWER IS REASSURING:
+> 4,738 columns across 386 tables, four axes, ELEVEN differences, and `manpower_gigs` is the ONLY
+> live defect.** 5 latent (all one shape — **prod is STRICTER than the replay**, so an insert
+> omitting a column passes every test and is refused in prod) · 5 cosmetic (2 prod-only tables
+> already in `KNOWN_GAPS` · 2 pgvector types that are the replay's OWN documented shim · 3
+> `extensions.`-qualified defaults). **It is not a widespread rot.**
+> 🔑 **RULE 0 PAID FIRST: A DRIFT CHECK ALREADY SHIPS** — `apps/web/tests/db/schema-drift.db.test.ts`,
+> on every PR, no prod credentials, anti-vacuity guarded, plus `.github/workflows/migration-drift-monitor.yml`.
+> **Nothing was rebuilt.** And **its own HONEST LIMITS § 1 already said nullability, defaults, types,
+> constraints and indexes are NOT compared** — so this drift was **invisible by design, and the design
+> said so in writing.** Baseline measured before touching anything: that test is **GREEN (`# tests 6`,
+> exit 0)**, so column existence genuinely agrees and every finding sits in an axis it never checked.
+> 🚨 **THE FINDING NOBODY ASKED FOR: THE COMMITTED PROD SNAPSHOT IS 201 MIGRATIONS STALE** — it
+> records 1,025 migrations · 380 tables · 4,618 columns; prod holds **1,226 · 388 · 4,749**. Not
+> unsafe: **both of its halves come from the same stale moment, so it is self-consistent** — it is
+> simply not checking the last 201. ⇒ run `pnpm --filter @setnayan/web schema:snapshot`.
+> 🔑 **And it is why the audit read the ledger LIVE FROM PROD:** replaying the snapshot's ledger
+> against today's prod would have reported **8 tables and 131 columns as drift, every one a false
+> positive.** *A stale reference is how a clean method produces a confident wrong answer.*
+> 🧪 **PROVED, NOT ARGUED:** the app's exact gig insert was run against prod inside a
+> self-rolling-back transaction and came back **`23502 null value in column "vendor_profile_id"`**,
+> with the table verified at **0 rows afterwards**; a deliberate control (flipping one column's
+> nullability) moved the diff **4 → 5** and named the injected column; and the audit's
+> column-existence result (**0 diffs**) independently reproduces the shipped guard's green by a
+> different method. **Two methods agreeing is why the other axes are believable.**
+> ⛔ **NOT COVERED, stated rather than buried: CHECK / UNIQUE / FK constraints, indexes, triggers,
+> grants, policies, functions, views, and every schema but `public`.** Only base-table COLUMNS were
+> compared — **a CHECK that exists in prod and not in the replay would be invisible to this audit**,
+> and this table family is proven to drift. **That is the obvious next sweep and it was not done.**
 > 🔑 Also corrected: `accepted_at` does **not** have zero readers (the *picked N/cap* count reads it)
 > — what is true is that **no couple-facing reader and no gate reader exists**; and the gig post's
 > refusal is **not** silent (an INSERT denial throws, so the host sees a raw database sentence in a
