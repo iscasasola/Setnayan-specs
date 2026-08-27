@@ -970,19 +970,42 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 >   ⚠ Scoped: it does NOT convert the couple's private planning (budget, shortlist, who they
 >   rejected) into vendor data. **The test is whether the supplier took part in it.**
 >
-> ⏭ **TWO THINGS ARE GENUINELY UNBUILT — start here, and do not mistake them for done:**
-> 1. 🔴 **THE VENDOR CANNOT ANSWER.** The handshake machinery is LIVE (`delete_request_state` +
->    `request_event_deletion` · `vendor_answer_event_deletion` · `cancel_event_deletion_request`,
->    all applied in prod) and the couple can ask and withdraw — but **no screen shows a supplier
->    the question.** A supplier can be asked and cannot reply. **A granted RPC nothing calls is a
->    gate with no handle**; this one has a couple-side caller only.
-> 2. 🔴 **VENDOR DATA DOES NOT SURVIVE A DELETE — the product does the OPPOSITE of the owner's
->    rule today.** `vendor_reviews.event_id` is **NOT NULL and CASCADEs**, so a review cannot
->    outlive its event; **152 FKs to events cascade, only 10 survive.** The 65-table
->    classification is written up in
+> ✅ **BOTH OF THE "GENUINELY UNBUILT" ITEMS BELOW ARE NOW FALSE — re-measured 2026-08-27 against
+> prod and `origin/main` by the `papic2` session. They are kept, struck, because the LESSON in how
+> they were measured is the valuable part.**
+> 1. ~~🔴 **THE VENDOR CANNOT ANSWER.**~~ **STALE.** `vendorAgreeToDeletion` /
+>    `vendorDeclineDeletion` are exported AND passed into `app/vendor-dashboard/page.tsx:313`.
+>    **The supplier can answer. Do not rebuild it.**
+> 2. ~~🔴 **VENDOR DATA DOES NOT SURVIVE A DELETE**~~ — **STALE IN BOTH ITS NUMBERS AND ITS
+>    VERDICT.** `vendor_reviews.event_id` is **SET NULL** in prod, so a review already outlives its
+>    event. The FK split is **141 cascade · 22 survive** (not 152/10).
+>    🔑 **AND THE FK CENSUS IS THE WRONG INSTRUMENT — this is the durable lesson.** **Six
+>    `BEFORE DELETE` triggers rewrite the outcome before any FK rule fires**, so counting
+>    `ON DELETE` rules over- AND under-states survival at once: `event_vendors` reads CASCADE and
+>    **survives** (its `event_id` is nulled and `event_type_at_delete` / `event_date_at_delete`
+>    stamped), `vendor_reviews` reads SET NULL and a **self-dealt one is destroyed**, and
+>    `event_vendor_payments` carries its own CASCADE to `events` yet **survives** by following the
+>    preserved booking through an `ON UPDATE CASCADE`. **Measure a deletion by deleting, in a
+>    rolled-back transaction — never by reading the constraint catalogue.**
+>    ⚖ **MEASURED THAT WAY, THE OWNER'S RULE IS MET ON THE ROWS:** booking · contract · confirmed
+>    payment · review all survive (1 → 1 each). Line items, the supplier's own captures, the
+>    gallery handover and meetings go with the celebration.
+>    🚨 **BUT THE PUBLIC CARD WAS NOT READING THE ROW IT PRESERVED** — `service_card_records`
+>    inner-joined `events` in every CTE, so ONE couple's deletion took `booked_count` 3 → 2 and
+>    **emptied the type mix and the whole dated ledger** by dropping the card under the minimum-N
+>    floor. Fixed: PR [#4920](https://github.com/iscasasola/setnayan-platform/pull/4920), migration
+>    `20271174846565`. ⚠ Verify with `gh pr view 4920 --json state,mergedAt`.
+>    🔑 **THE FIFTH COSTUME OF "STORED DOES NOT MEAN SURVIVES": the three matviews were taught to
+>    tolerate an orphan and this function, written the same week, was not. ENUMERATE THE READERS OF
+>    A PRESERVED ROW — a fix applied to one of them is not a fix.**
+>    ⛔ **STILL FALLING, DELIBERATELY, AND ONE IS THE OWNER'S:** `documented_events` drops because
+>    captures cascade under his own **photos-are-deleted** ruling — *two of his 2026-08-21 rulings
+>    collide, and which wins is HIS call.* `option_mix` drops because `event_vendor_packages`
+>    cascades whole (a new preserve, not a read fix).
+>    ⚠ The 65-table classification in
 >    [`VENDOR_DATA_SURVIVES_DELETION_2026-08-21.md`](VENDOR_DATA_SURVIVES_DELETION_2026-08-21.md)
->    — ⚠ **its adversarial check is INCOMPLETE** (31 of 71 agents cut off by an account session
->    limit; the synthesis never ran), so treat every row as **mapped-but-unverified**.
+>    still has an **INCOMPLETE** adversarial check (31 of 71 agents cut off; synthesis never ran) —
+>    treat every row as **mapped-but-unverified**.
 >    🚨 **And "stored" does not mean "survives"**: `vendor_activity_stats` is recomputed by
 >    unrelated events, so a saved snapshot silently drops to the smaller number.
 >

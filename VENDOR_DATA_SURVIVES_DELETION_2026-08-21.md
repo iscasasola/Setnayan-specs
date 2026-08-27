@@ -4,6 +4,41 @@
 > for the vendor stays, including the reviews, statistics, etc that the vendor needs
 > for their website."*
 
+> ## ✅ RE-MEASURED 2026-08-27 (`papic2`) — THE ROWS MEET THE OWNER'S RULE. ONE PUBLIC READER DID NOT.
+> ### Read this before acting on any row below.
+>
+> 🔑 **THE FK CENSUS THIS DOCUMENT IS ORGANISED AROUND IS THE WRONG INSTRUMENT.** Measured in
+> prod: **141 CASCADE · 22 SET NULL** (not the 152/10 the register carried). But **six
+> `BEFORE DELETE` triggers rewrite the outcome before any FK rule fires**, so counting
+> `ON DELETE` rules over- AND under-states survival at once:
+>
+> | table | FK says | actually |
+> |---|---|---|
+> | `event_vendors` | CASCADE | **SURVIVES** — `event_id` nulled, `event_type_at_delete` / `event_date_at_delete` stamped |
+> | `vendor_reviews` | SET NULL | survives — **unless self-dealt, which is destroyed** |
+> | `event_vendor_payments` | CASCADE (own FK to `events`) | **SURVIVES** — follows the preserved booking via `ON UPDATE CASCADE` |
+>
+> ⇒ **Measure a deletion BY DELETING, in a rolled-back transaction. Never by reading the
+> constraint catalogue.** Seeded one arm's-length job in production and deleted it (before → after):
+> **booking 1→1 · contract 1→1 · confirmed payment 1→1 · review 1→1** · line items 1→0 · own
+> captures 1→0 · gallery handover 1→0 · meetings 1→0. **The owner's rule is met on the rows.**
+>
+> 🚨 **WHAT WAS BROKEN WAS THE PUBLIC NUMBER, AGAIN, IN A NEW READER.**
+> `service_card_records` inner-joined `events` in every CTE, so one couple's deletion took
+> `booked_count` 3 → 2 and **emptied the type mix and the whole dated ledger** by dropping the card
+> under the minimum-N floor. Fixed by PR
+> [#4920](https://github.com/iscasasola/setnayan-platform/pull/4920) / migration `20271174846565`.
+> 🔑 **FIFTH COSTUME OF "STORED DOES NOT MEAN SURVIVES": the three matviews below were taught to
+> tolerate an orphan and this function, written the same week, was not. ENUMERATE THE READERS OF A
+> PRESERVED ROW — a fix applied to one of them is not a fix.**
+>
+> ⛔ **STILL FALLING, DELIBERATELY:** `documented_events` (captures cascade under the owner's own
+> **photos-are-deleted** ruling — *two of his 2026-08-21 rulings collide and which wins is HIS
+> call*) and `option_mix` (`event_vendor_packages` cascades whole — that would be a NEW preserve).
+>
+> ⚠ **The 65-table classification below still has an INCOMPLETE adversarial check** (31 of 71
+> agents cut off; synthesis never ran). Treat every row as **mapped-but-unverified**.
+
 > ## 🚨 SLICES 1–6 PRESERVED THE ROWS AND EVERY PUBLISHED NUMBER STILL WENT TO ZERO
 > ### — re-measured in PRODUCTION 2026-08-24 (W5-A). Read this before any remaining slice.
 >
