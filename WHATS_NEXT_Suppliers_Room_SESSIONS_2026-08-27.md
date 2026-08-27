@@ -22,11 +22,16 @@
 | **S1** | One honest answer to *"is this shop booked?"* | **Opus 5** | **high** | — |
 | **S2** | A booked supplier gets through the door on a private celebration | **Opus 5** | **high** | S1 |
 | **S3** | **The vendors are integrated into the Event Hub on the day** | **Opus 5** | **high** | S1 · S2 |
-| **S4** | A booking made by locked QR holds its date | **Opus 5** | **medium** | — |
+| ⚠ **S4** | A booking made by locked QR holds its date | — | — | **ALREADY RUNNING elsewhere — do not start** |
 | **S5** | The night-before email (ships switched OFF) | **Sonnet 5** | **medium** | — |
 | **S6** | The Answers Desk — its own stream, can start today | **Opus 5** | **high** | — |
 
 **Never more than two at once** (10 parallel builds once shipped 44 defects).
+🚨 **AND THE MACHINE IS THE HARDER CAP, MEASURED 2026-08-27:** with **four** other sessions
+typechecking at once this machine ran out of memory and killed mine **twice** — `tsc` exits **143**
+(and **134**) while printing `errors=0`, so a session under contention can read its own typecheck as
+a pass. **Count the worktrees before you start**, and always print the exit code beside the error
+count.
 **Safe pairs: S1+S4 · S2+S5 · S6 with anything.** ⛔ **Never S1 with S2, never S2 with S3** — they
 edit the same booking reads and the same gate.
 
@@ -110,7 +115,15 @@ list and the private schedule is **INERT there**. And the booked-supplier schedu
 public/private filter** — no-index the surface and add a test that fetches it anonymously.
 **Port the drawing, do not redraw it** — only the typefaces change.
 
-### S4 — A booking made by locked QR holds its date · **Opus 5 · medium**
+### S4 — A booking made by locked QR holds its date · ⚠ **ALREADY CLAIMED — DO NOT START**
+🛑 **A session is building this RIGHT NOW.** Measured, not assumed: the branch
+`claude/locked-qr-holds-its-date` is checked out at
+`~/Documents/Claude/Projects/wt-lockedqr` and was typechecking on this machine at the moment this
+register was written. **Starting it again is duplicate work and a guaranteed conflict** — the
+worktree and the branch are the evidence, so `git worktree list` before you start anything here.
+The brief below is kept only so whoever owns it can check their own work against it.
+
+~~**Opus 5 · medium**~~
 **What a person gets:** a supplier booked by scanning the couple's locked QR — where money already
 changed hands — gets a room like every other booked supplier, and their calendar and daily capacity
 finally agree.
