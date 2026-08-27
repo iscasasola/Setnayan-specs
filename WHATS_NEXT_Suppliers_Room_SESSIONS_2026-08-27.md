@@ -22,7 +22,7 @@
 | ✅ **S1** | One honest answer to *"is this shop booked?"* | **Opus 5** | **high** | **MERGED 2026-08-27T11:24Z · PR [#4912](https://github.com/iscasasola/setnayan-platform/pull/4912)** |
 | **S2** | A booked supplier gets through the door on a private celebration | **Opus 5** | **high** | S1 |
 | **S3** | **The vendors are integrated into the Event Hub on the day** | **Opus 5** | **high** | S1 · S2 |
-| ✅ **S4** | A booking made by locked QR holds its date | **Opus 5** | **medium** | **PR [#4913](https://github.com/iscasasola/setnayan-platform/pull/4913) — auto-merge armed** |
+| ✅ **S4** | A booking made by locked QR holds its date | **Opus 5** | **medium** | **MERGED + SERVED** — PR [#4913](https://github.com/iscasasola/setnayan-platform/pull/4913) |
 | **S5** | The night-before email (ships switched OFF) | **Sonnet 5** | **medium** | — |
 | **S6** | The Answers Desk — its own stream, can start today | **Opus 5** | **high** | — |
 
@@ -170,8 +170,15 @@ public/private filter** — no-index the surface and add a test that fetches it 
 **Port the drawing, do not redraw it** — only the typefaces change.
 
 ### ✅ S4 — DONE. Do not rebuild. PR [#4913](https://github.com/iscasasola/setnayan-platform/pull/4913) · migration `20271174176372`
-⚠ **Verify with `gh pr view 4913 --json state,mergedAt` before trusting this line** — this corpus has
-been wrong about a PR's state five times.
+✅ **MERGED 2026-08-27T11:24:37Z AND SERVED** — `/api/health` self-reports `205a1ad`, the PR's own
+merge commit, which is an ancestor of `origin/main`. **A merge is not a ship; this one is both.**
+✅ **The migration is verified applied IN PROD BY THE OBJECT**, not by `schema_migrations`: the live
+`vendor_claim_locked_qr` body calls `acquire_schedule_pools`, carries `EXCEPTION WHEN OTHERS`,
+contains **no** `RAISE EXCEPTION`, and the `event_date_precision = 'day'` write still precedes the
+acquire. 🔒 **The 2026-08-09 `COALESCE(source, 'vendor_locked_qr')` rule SURVIVED the rewrite** —
+checked explicitly, because this change reproduced the whole function body.
+⚠ Still re-verify with `gh pr view 4913 --json state,mergedAt` before acting — this corpus has been
+wrong about a PR's state five times.
 Built as the brief below specifies: the acquire is step (e), it resolves by category, and every
 non-OK outcome degrades OPEN and warns. It additionally runs inside a plpgsql `EXCEPTION WHEN OTHERS`
 subtransaction, because the brief's degrade-open rule covers the RPC's STATUSES and not a throw —
