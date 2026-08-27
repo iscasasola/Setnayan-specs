@@ -3,6 +3,30 @@
 **Date:** 11 August 2026 · **For:** design partner working on the look and feel of onboarding
 **Prepared by:** engineering, from the live site, the live database and the shipped code — not from older documents.
 
+> ### 📌 THIS IS THE RECORD FOR **EVERY** EVENT TYPE — NOT JUST THE WEDDING
+> Wedding is the only type with its own dedicated documents and prototype, which makes it *look*
+> like the only one written down. It is not. **§3A is the wedding. §3B–§3D are all the others**,
+> every question and every detail field, measured off the live site rather than copied from a plan.
+> Companion reading: [`../Event_Onboarding_Signals_All_Types_2026-07-12.md`](../Event_Onboarding_Signals_All_Types_2026-07-12.md)
+> (why each type asks what it asks) · [`Onboarding_Map_2026-07-04.md`](Onboarding_Map_2026-07-04.md)
+> (every *other* kind of onboarding we run — vendor, guest, co-host, admin).
+>
+> ### ⚠ UPDATE 2026-08-27 — IT IS **17** TYPES NOW, AND THE 17th IS UNDOCUMENTED
+> Re-measured against the live database and `origin/main` (`333e1ee50`). Everything below is still
+> accurate; two things changed since 11 August:
+> 1. 🕊️ **A funeral is the 17th live type** (shipped 2026-08-24). It is the **only type this brief
+>    does not describe** — see the new row in §2 and the note at the end of §3C. It asks **no**
+>    signature question and has **no** detail screen; the only thing authored for it is a quieter
+>    opening line. That is deliberate for a wake, but it means a funeral runs the plainest flow we
+>    have, on the shared generic plan.
+> 2. **A services step now exists after the persona reveal** on all three flows (a Papic card and a
+>    Setnayan AI card — informational, no checkout). It is **switched off by default** and its live
+>    value cannot be read from here; if it is on, add one screen before *Congrats* everywhere.
+>
+> Counts re-verified 2026-08-27 and unchanged: 11 types carry signature questions (birthday · debut ·
+> gender reveal · christening · corporate · tournament · travel · celebration · anniversary ·
+> graduation · reunion) and 14 carry a detail screen.
+
 ---
 
 ## 0 · What we want from you
@@ -74,9 +98,9 @@ designed as *kicker → question → helper* arrive as a bare question.
 
 ---
 
-## 2 · The events we have — 16, all live
+## 2 · The events we have — 17, all live *(16 at the time of writing; the funeral joined 2026-08-24)*
 
-All sixteen are switched on and can be planned today.
+All seventeen are switched on and can be planned today.
 
 | # | Event | Vendors? | Runs over several days? |
 |---|---|---|---|
@@ -96,9 +120,11 @@ All sixteen are switched on and can be planned today.
 | 14 | 📅 Simple Event | **no — deliberately vendor-free** | no |
 | 15 | 💕 Date | yes (6 categories) | no |
 | 16 | 🍿 Hangout | yes (4 categories) | no |
+| 17 | 🕊️ Funeral | yes (7 categories) | no |
 
-Wedding has its own dedicated wizard. The other fifteen share one flow whose questions change by
-type.
+Wedding has its own dedicated wizard. The other sixteen share one flow whose questions change by
+type. **A funeral runs that shared flow in its quietest form** — no countdown, no save-the-date, no
+upsells, and a gentler opening line; see the note at the end of §3C.
 
 ---
 
@@ -179,8 +205,8 @@ The five shared experience questions, non-wedding wording:
 ### 3C · The signature questions, by event
 
 Every option quietly adds the right vendor categories to the plan, so these are not decoration.
-**Four events have none at all and go straight from "where" to the generic quiz — they feel the
-thinnest: Gala Night, Simple Event, Date, Hangout.**
+**Five events have none at all and go straight from "where" to the generic quiz — they feel the
+thinnest: Gala Night, Simple Event, Date, Hangout — and, since 2026-08-24, the Funeral.**
 
 <details open>
 <summary><b>Birthday</b> — 4 questions</summary>
@@ -280,6 +306,12 @@ thinnest: Gala Night, Simple Event, Date, Hangout.**
 - **The extras · Any special touch?** — Matching shirts & souvenirs · A photo booth · Live music / karaoke · Just the essentials
 </details>
 
+**🕊️ The funeral, added 2026-08-24 — the one type with nothing tailored.** It asks no signature
+question, shows no detail screen, and draws on the shared generic plan rather than one of its own.
+What *was* authored for it is tone, not questions: a quieter opening line, no countdown, no
+save-the-date, and no upsells anywhere in the flow. Whether a wake should be asked anything at all
+is a judgement call the design should make, not an omission to fill in by reflex.
+
 ### 3D · "A few details that make it yours" — one optional screen per event
 
 All optional, all skippable. This screen is currently a stack of plain form fields and is the
@@ -303,6 +335,7 @@ celebration, and right now it looks like a tax form.
 | **Celebration** | 4 | **Pasasalamat** and **despedida** as first-class occasions |
 | **Simple Event** | 4 | Deliberately light — a genuinely one-tap path |
 | **Date · Hangout** | none | Nothing is asked. |
+| **Funeral** | none | Nothing is asked. The only thing authored for a wake is a quieter opening line — *"A few quiet questions, and everything is arranged in one place."* |
 
 ---
 
@@ -478,12 +511,12 @@ Subdomain ₱999/yr.)*
 
 ## 6 · What we are asking for, ranked
 
-1. **Bring the fifteen non-wedding flows up to the wedding flow's craft.** One system, not two. The
+1. **Bring the sixteen non-wedding flows up to the wedding flow's craft.** One system, not two. The
    frame, the kicker, the imagery slot, the option rows, the bottom bar.
 2. **Design the persona reveal.** Six named outcomes, each with a line of copy, arriving after five
    questions. Today it is a heading. It should be the moment someone screenshots.
-3. **Solve imagery for fifteen event types.** The wedding flow uses real photography. The others use
-   one emoji. Whatever you propose has to be producible for sixteen events without a photo shoot per
+3. **Solve imagery for sixteen event types.** The wedding flow uses real photography. The others use
+   one emoji. Whatever you propose has to be producible for seventeen events without a photo shoot per
    type — illustration, pattern, colour field, type-led. Your call.
 4. **Redesign the "details that make it yours" screen.** Uncapped ninong/ninang lists, 18 Roses,
    the palabunutan, the balikbayan roster. This is where the product is most Filipino and least
