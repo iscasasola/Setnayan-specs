@@ -14,16 +14,17 @@
 
 ## THE SHORT VERSION
 
-**Five sessions, plus one that is its own stream.** One is already done.
+**Five sessions, plus one that is its own stream.** Four are built (S1 · S2 · S4 · S5) —
+S5 ships flag-off pending the owner's gate.
 
 | | What a person gets | Model | Effort | Runs after |
 |---|---|---|---|---|
 | ⚠ **S0** | A booked supplier stops being told "No event today" | — | — | **NOT on `main`** — no file, no PR, no branch (measured 2026-08-27). S1 created the module it was said to own. |
 | ✅ **S1** | One honest answer to *"is this shop booked?"* | **Opus 5** | **high** | **MERGED 2026-08-27T11:24Z · PR [#4912](https://github.com/iscasasola/setnayan-platform/pull/4912)** |
-| **S2** | A booked supplier gets through the door on a private celebration | **Opus 5** | **high** | S1 |
+| ✅ **S2** | A booked supplier gets through the door on a private celebration | **Opus 5** | **high** | **BUILT — PR [#4914](https://github.com/iscasasola/setnayan-platform/pull/4914), auto-merge armed. Verify state before trusting this.** |
 | **S3** | **The vendors are integrated into the Event Hub on the day** | **Opus 5** | **high** | S1 · S2 |
 | ✅ **S4** | A booking made by locked QR holds its date | **Opus 5** | **medium** | **MERGED + SERVED** — PR [#4913](https://github.com/iscasasola/setnayan-platform/pull/4913) |
-| **S5** | The night-before email (ships switched OFF) | **Sonnet 5** | **medium** | — |
+| ✅ **S5** | The night-before email (ships switched OFF) | **Sonnet 5** | **medium** | **BUILT + PR'd** — PR [#4915](https://github.com/iscasasola/setnayan-platform/pull/4915), auto-merge armed |
 | **S6** | The Answers Desk — its own stream, can start today | **Opus 5** | **high** | — |
 
 **Never more than two at once** (10 parallel builds once shipped 44 defects).
@@ -36,6 +37,10 @@ the error count.
 **144 with a COMPLETELY EMPTY output file** — `grep -c 'error TS'` on it returns `0`, which reads
 exactly like a clean run. Re-run alone it found **7 real errors**. ⇒ **An empty tsc log is not a
 clean tsc log. Require `TSC_EXIT=0` printed beside `ERROR_LINES=0`; either one alone is a lie.**
+🔴 **AND AGAIN IN S2, a second independent false green:** exit **134**, `ERROR_LINES=0`, an empty log
+whose only content was a V8 *"heap out of memory"* trace — with **TEN** typechecks running on this
+machine at once. Re-running with `NODE_OPTIONS=--max-old-space-size=8192` gave a real
+`TSC_EXIT=0 ERROR_LINES=0`. ⇒ **raise the heap; the EXIT CODE is what tells you which run to believe.**
 **Safe pairs: S1+S4 · S2+S5 · S6 with anything.** ⛔ **Never S1 with S2, never S2 with S3** — they
 edit the same booking reads and the same gate.
 
@@ -134,7 +139,50 @@ scope.
 with its count unchanged at **0 → 0** — the pattern was case-wrong and the sabotage had never
 landed. *A red result is not evidence the sabotage applied.*
 
-### S2 — A booked supplier gets through the door · **Opus 5 · high** · after S1
+### ✅ S2 — DONE. PR [#4914](https://github.com/iscasasola/setnayan-platform/pull/4914). Do NOT rebuild it.
+⚠ Verify with `gh pr view 4914 --json state,mergedAt` before trusting this line — this corpus has
+been wrong about a PR's state five times. It was OPEN with auto-merge armed when this was written.
+
+**Shipped:** the rule lives ONCE, in a pure `lib/closed-event-admission.ts` that both
+`app/[slug]/page.tsx` and `canViewSlugEvent` ask; and "did they book you?" is ONE read —
+`lib/booked-supplier.ts` → `viewerIsBookedSupplier` — moved out of `app/[slug]/_lib/loaders.ts`,
+whose own header forbids cross-route imports.
+
+⛔ **THE GUARD THE PLAN PRESCRIBED CANNOT BE WRITTEN.** *"Feed one fixture to both gates and assert
+they agree across all five identities"* is impossible here: `slug-access.ts` is `server-only`, which
+in this repo cannot be imported by a `node:test` file at all, and the page's copy sits inside a
+1,000-line server component. **Agreement is STRUCTURAL instead** — one rule — and the guard pins that
+both sides still call it and still resolve **every fact it takes, derived from `NO_CLAIM`** rather
+than hand-typed, so a sixth fact fails until both sides establish it.
+
+🚨 **AND THE SAME SHAPE ONE LEVEL DOWN WAS A LIVE DISCLOSURE, NOT IN THE BRIEF.** "Is this viewer a
+booked supplier?" had **three** copies and **two asked whether a LINK existed**.
+`reusable-bookings.server.ts` mints a linked row at `'shortlisted'`, so a supplier the couple was
+merely CONSIDERING was shown the doorway strip that says, in words, **"You are booked here"** — and
+counted by `belongsToThisEvent`, **the single boolean gating a keepsake story the couple kept to the
+people of their day**, on the screen AND at `/{slug}/print`. The strict copy sat one file away.
+🔑 *A rule written three times had two copies laxer — and the lax ones were the two deciding a
+disclosure.*
+
+🪤 **THE DERIVED GUARD FOUND A FOURTH SURFACE THE HAND LIST HAD MISSED** —
+`_components/site-body.tsx`, the one feeding the fact straight into `belongsToThisEvent`. It reads
+every ASSIGNMENT of the fact under `app/` + `lib/` now and allows exactly two sources.
+
+🔢 **Safe by arithmetic, measured in prod 2026-08-27 by query:** 45 `event_vendors` rows, **ZERO
+carrying a `linked_vendor_profile_id`**; 5 events, **3 private**, none `'invited_accounts'`. So it
+admits nobody new today. ⚠ **This register's "4 of 6 production events are private" is STALE** — it
+is 3 of 5, and the figure was copied into four code comments before being corrected.
+
+✅ `tsc` errors=0 **EXIT=0** · unit **10466/10466** · db **1644/1644** · 8 mutations, occurrence
+count printed **1 → 0**, all RED.
+🔴 **AND THE FIRST TYPECHECK WAS A FALSE GREEN AGAIN — exit 134, ERROR_LINES=0, an empty log**, with
+**ten** typechecks on the machine at once. `NODE_OPTIONS=--max-old-space-size=8192` fixed it.
+⏭ **NAMED, NOT FIXED:** `lib/the-venue-respects-privacy.test.ts` still uses the hand-rolled regex
+comment stripper that `lib/strip-comments.ts` exists to replace (its assertions are presence checks,
+so it fails RED rather than green — but it should be swapped).
+
+<details><summary>The original S2 brief, kept for the record</summary>
+
 **What a person gets:** a booked supplier can open the venue page, the recap, the seat finder and
 the live hub of a private celebration they are working on — instead of being silently bounced by
 doors the page itself drew for them.
@@ -145,6 +193,8 @@ add the arm for **both** closed visibilities.
 gets. ⚠ Also fix the comment justifying a shortcut with *"the gate at the top has ALREADY proved the
 answer is yes"* — a later path made that false, so the money-gift card is drawn for a supplier the
 money-gift page refuses.
+
+</details>
 
 ### S3 — The vendors are integrated into the Event Hub on the day · **Opus 5 · high** · after S1+S2
 🛑 **THIS IS A REDESIGN OF SOMETHING THAT SHIPS. THERE IS NO NEW PAGE AND NO NEW ROUTE.**
@@ -223,6 +273,14 @@ couple who has already paid, on a single-use token — one stale manual block is
 </details>
 
 ### S5 — The night-before email · **Sonnet 5 · medium** · ships OFF
+✅ **BUILT 2026-08-27 — PR [#4915](https://github.com/iscasasola/setnayan-platform/pull/4915),
+auto-merge armed. Do NOT rebuild it.** `SUPPLIER_NIGHT_BEFORE_EMAIL_ENABLED` ships OFF —
+nothing sends until the owner gate below is answered and the flag is flipped. Reads only a
+booked supplier's real registered-account email (`linked_vendor_profile_id`), never the
+couple-typed `contact_email`. The two named traps are both handled: the call time is read off
+its own stored wall-clock digits without re-zoning to Manila, and the job is wired into the
+existing cron-free daily-email runner rather than the near-dead `after()` branch on `/{slug}`.
+
 **What a person gets:** the night before, a booked supplier gets an email saying tomorrow is the
 day, with the call time and a link straight into their tools.
 🔴 **OWNER GATE, still open:** *may we email a supplier automatically at an address they never gave
