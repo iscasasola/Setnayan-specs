@@ -25,17 +25,22 @@ come late.
 | | | Needs you? |
 |---|---|---|
 | 1 | Stop telling a booked supplier they have no event when they do | no |
-| 2 | Stop calling every host "the couple" — it is on public pages today | no |
+| 2 | ✅ **DONE 2026-08-27 — PR #4891, merged.** Stop calling every host "the couple" | — |
 | 3 | Make the check that catches that actually able to see new pages | no |
-| 4 | **Stop treating a guest who scanned a QR as a host** — they can read the couple's unfinished story today | no |
+| 4 | ✅ **DONE 2026-08-27 — PR #4890, merged.** Stop treating a guest who scanned a QR as a host | — |
 | 5 | Agree on one answer to "is this shop booked?" — there are two today | no |
 | 6 | Stop bouncing booked suppliers off pages the app drew for them | no |
 | 7 | **The room itself** | one question first |
 | 8 | A booking made by locked QR reserves its date like every other | no |
 | 9 | The night before, email the supplier that tomorrow is the day | one question first |
 
-**Steps 2 and 4 are live problems right now**, and neither is about suppliers. Do them first whether
-or not the rest ever happens.
+✅ **STEPS 2 AND 4 ARE DONE — merged 2026-08-27, verified by `gh pr view`. Do NOT rebuild them.**
+They were the two live problems and neither was about suppliers. Steps 1, 3, 5, 6, 7, 8 and 9 remain.
+
+⚖ **AND THE OWNER RULED FURTHER ON STEP 2 THE SAME DAY:** a **host** and a **celebrant** are two
+different people — *"there can be multiple hosts for every event, but the one celebratiing is the
+celebrant that can be single, couple, or multiple people."* Built in PR #4896; it supersedes the
+2026-08-18 "keep one noun, drop the person" compromise. See `DECISION_LOG.md` 2026-08-27.
 
 **The two questions, when we get to them:**
 - Before step 7 — **may a supplier read the couple's private run-of-show notes at the couple's own

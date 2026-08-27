@@ -76,8 +76,15 @@ committed docs on purpose.
 > everything will be communicated there."* Then: **_"do not start building… just plan for now."_**
 > ⛔ **HONOUR THAT.** ⚖ Also ruled: **a teammate reaches ONLY the events they were given.**
 >
-> 🚨 **PIECE 4 IS A LIVE DISCLOSURE AND HAS NOTHING TO DO WITH SUPPLIERS.**
-> `lib/slug-access.ts:170-195` selects `member_type` and **never compares it**, returning
+> ✅ **PIECE 4 IS DONE — PR [#4890](https://github.com/iscasasola/setnayan-platform/pull/4890),
+> MERGED 2026-08-27T01:51Z (verified by `gh pr view`). Do NOT rebuild it.** Both halves shipped in
+> the one commit the paragraph below demanded: the host read now filters on the shared
+> `HOST_MEMBER_TYPES`, and the shared gate grew the seat-holder arm the narrowing would otherwise
+> have broken. ⚖ **Owner 2026-08-27 confirmed the model on the record:** *"they log in as guests or
+> vendors. the only hosts are the event owners which is their own email address."* **The diagnosis
+> is kept below because the LESSON generalises — a clone inherits the bug its twin fixed.**
+>
+> 🔴 **WHAT IT WAS.** `lib/slug-access.ts:170-195` selected `member_type` and **never compared it**, returning
 > `Boolean(memberRow)` — so **any signed-in event member, including a guest who merely scanned the
 > event QR, is treated as a HOST.** They walk into every private sub-page, and
 > `who-can-see-your-story.ts:110-113` returns true for a host **before** it tests the audience, so
@@ -88,7 +95,22 @@ committed docs on purpose.
 > for `private`**, which the over-wide host check was masking — a seat-holder whose 60-day cookie
 > expired would start being bounced off all seven sub-pages. **Both halves ship in one commit.**
 >
-> 🚨 **AND "THE COUPLE" IS ON PUBLIC PAGES RIGHT NOW** — twelve rendered strings in four files,
+> ✅ **AND "THE COUPLE" ON PUBLIC PAGES IS DONE — PR
+> [#4891](https://github.com/iscasasola/setnayan-platform/pull/4891), MERGED 2026-08-27T02:02Z.
+> Do NOT rebuild it.** All twelve read the event's own terminology; a wedding is byte-identical and
+> a funeral's noun is `family`. The basename-matching guard is exact now, with zero new offenders.
+>
+> ⚖ **AND THE OWNER THEN RULED SOMETHING LARGER THE SAME DAY — a HOST and a CELEBRANT are two
+> different people.** *"each event can be set to a single host or multiple host … there can be
+> multiple hosts for every event, but the one celebratiing is the celebrant that can be single,
+> couple, or multiple people."* One noun was doing both jobs; there are two now, plus a per-event
+> celebrant shape, and the seven admin sentences that used to DROP the person name the host
+> instead. 🔑 **This SUPERSEDES the 2026-08-18 "keep one noun, drop the person" compromise — it does
+> not reverse it.** Hosts get **no column**: how many an event has is already stored, as who holds a
+> host's key to it. See `DECISION_LOG.md` 2026-08-27 and PR
+> [#4896](https://github.com/iscasasola/setnayan-platform/pull/4896).
+>
+> 🔴 **WHAT IT WAS** — twelve rendered strings in four files,
 > counted not estimated, incl. **nine in the join door and two of them in the SIGNED-OUT arm** a
 > QR-scanning guest actually lands in. **A funeral's gift page says *"help the family"* in one line
 > and *"the couple's account"* three lines below.** 🔒 **The funeral noun is `family`, never `host`.**
