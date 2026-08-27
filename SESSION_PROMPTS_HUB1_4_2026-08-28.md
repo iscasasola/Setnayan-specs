@@ -8,7 +8,7 @@ need the owner rather than a session.
 | Session | Model | Effort | Blocked? |
 |---|---|---|---|
 | `hub1` · the four photo names | **Opus** | low | no — start it |
-| `hub2` · the supplier's desk gets a life | **Opus** | high | no — the design is binding |
+| `hub2` · the supplier's desk gets a life | **Opus** | high | ✅ **DONE 2026-08-28 — PR [#4932](https://github.com/iscasasola/setnayan-platform/pull/4932). Do not restart it.** |
 | `hub3` · each kind offers only its own rooms | **Fable** to measure → **Opus** | high | ✅ **RULED 2026-08-28 — go** |
 | `hub4` · a shop's teammate can open the desk | **Opus** | medium | ✅ **RULED 2026-08-28 — go** |
 
@@ -73,6 +73,14 @@ after. An unmeasured mutation proves nothing.
 ---
 
 ## `hub2` — THE SUPPLIER'S DESK GETS A LIFE, NOT ONE DAY
+
+> ✅ **DONE 2026-08-28 — PR [#4932](https://github.com/iscasasola/setnayan-platform/pull/4932),
+> two commits. DO NOT RUN THIS SESSION AGAIN.** Four states (call sheet · today · look back · one
+> quiet line), nothing on the desk rebuilt, nothing about the read widened — and a ribbon above the
+> Save-the-Date film, without which the call sheet would have been invisible for ~9 months of every
+> booking. **The same-day bridge (design § E) is the one piece still unbuilt**, and it wants a
+> `SECURITY DEFINER` function scoped to the caller rather than an admin read inside `/{slug}`.
+> ⚠ Verify with `gh pr view 4932 --json state,mergedAt` before trusting this line.
 
 ```
 You are picking up the session named hub2 in the Setnayan project.

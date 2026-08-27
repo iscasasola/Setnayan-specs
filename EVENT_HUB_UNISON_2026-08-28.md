@@ -27,9 +27,13 @@ day itself, and the story and album afterwards. The guest never gets a second li
 - The **host** (and a co-host they appointed) sees their own page as themselves, with a slim
   control ribbon on top. The Hub itself stays a place, not a control panel — every real editing
   tool lives in their planning dashboard, one tap away through the ribbon.
-- A **booked supplier** who signs in sees, on any ordinary day, one strip pointing to their tools —
-  and on the day of the event that strip opens in place into their own desk: the venue and its
-  address, the running order live, the headcount, their tools. Nobody else ever sees a trace of it.
+- A **booked supplier** who signs in gets, in that same one place, a desk that changes with the
+  calendar: a **call sheet** in the run-up (the date and how far off it is, the venue and its
+  address once set, the running order once written, the headcount so far, and the conversation
+  they already have with the organiser), their **live desk** on the day, a **look back** for the
+  week after, and one quiet line long after that. Nobody else ever sees a trace of it.
+  *(Updated 2026-08-28 — until then it was one strip pointing away, opening in place on the day
+  alone. See § 6 gap 3.)*
 
 **Settled vocabulary (owner-locked 2026-08-16, unchanged here):** *Event Hub* = the one public
 address · *Live hub* = the fullscreen day-of view inside it, reachable only around the day itself ·
@@ -240,18 +244,28 @@ Measured, not remembered. None of these is broken; each is a seam a person can f
    Deliberate (a guest needs it in both), but the two mounts must forever agree with the host's
    one on/off switch; today they do because both ask the same single question. Watch that it
    stays one question.
-3. **The supplier's desk is day-of only.** The binding design gives it a whole life — a call-sheet
-   ribbon months before, "43 days to go", a bridge between two same-day events, a look-back
-   after — and its own strongest argument ("a day-only room recreates the midnight-door mistake")
-   argues against what shipped. What shipped does stay open until 6 a.m. after, and the before/
-   after states are named-not-built. The gap is known and deliberate, not forgotten.
+3. ~~**The supplier's desk is day-of only.**~~ ✅ **CLOSED 2026-08-28 — PR
+   [#4932](https://github.com/iscasasola/setnayan-platform/pull/4932).** The desk has four states
+   now: the **call sheet** before (the date, *"43 days to go"*, the venue once set, the running
+   order once written, the headcount marked *not settled*, the console's own setup view, and the
+   conversation the supplier and the organiser already have), **today** unchanged, **look back**
+   for the week after, and **one quiet line** long after — a supplier's past work is their
+   portfolio, so the door goes quiet rather than shutting. Nothing about the read widened: the
+   database was always willing to tell a booked supplier these facts, and only this surface was
+   shut. ⏭ **The same-day bridge is still not built** and is now the only piece of the design's
+   § E outstanding — it needs the shop's OTHER bookings, which today can only be read with the
+   service role, so it wants a `SECURITY DEFINER` function scoped to the caller rather than an
+   admin read inside this page. ⚠ Verify with `gh pr view 4932 --json state,mergedAt` before
+   trusting this line.
 4. **A shop's granted teammate cannot open the desk.** The owner ruled staff handle the event
    fully; the arm is held back because the same switch also counts that teammate as "one of the
    people of this celebration", which unlocks a keepsake the host kept private (§ 7, decision 1).
-5. **The two supplier surfaces after the day still point away.** A supplier's published recaps
-   and real-stories screens link from their dashboard *to* the event address, but the Hub's
-   after-stage offers a booked supplier nothing supplier-shaped — the desk closes at 6 a.m. and
-   their look-back lives in their own dashboard. Matches the design's look-back state: not built.
+5. ~~**The two supplier surfaces after the day still point away.**~~ ✅ **CLOSED 2026-08-28 by the
+   same PR.** The Hub's after-stage now offers a booked supplier a look-back for the week
+   following: the day as it ran, with the lines the floor actually advanced marked — and, when
+   nobody advanced anything, that said plainly rather than dressed up as history. Their published
+   recaps and real stories still live in their own dashboard, which is where a portfolio belongs;
+   what changed is that the celebration's own address stops going blank on them at 6 a.m.
 6. **The catalog row is still titled "Couple Website PRO"** while every couple-facing screen now
    says "Event Hub PRO". One admin-side title, one word (§ 7, decision 6).
 7. **A weak-signal venue defeats the desk.** The design names this honestly: the room assumes a

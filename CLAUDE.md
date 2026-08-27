@@ -105,7 +105,36 @@ committed docs on purpose.
 > sees stops being a link out and carries the venue and its address, the running order live, **the
 > organiser's private lines shown and MARKED** (his own ruling the same day), the headcount and
 > their tools — through to **06:00 the morning after**, because a reception runs past midnight.
-> Every other day of the year it is byte-identical to before, and nobody else ever sees a trace.
+> Nobody else ever sees a trace.
+> ⏳ **AND `hub2` GAVE IT THE OTHER 335 DAYS — PR
+> [#4932](https://github.com/iscasasola/setnayan-platform/pull/4932). DO NOT REBUILD EITHER HALF.**
+> S3's room lived about **thirty hours** and the binding design's strongest sentence is against
+> exactly that (*"a day-only room recreates the midnight-door mistake"*). Four states now: the
+> **call sheet** before (date · *"43 days to go"* · the venue once set · the running order once
+> written · the headcount marked *not settled* · the console's own setup view · the conversation
+> they already have), **today** byte-for-byte as it shipped, **look back** for the week after, and
+> **one quiet line** long after — a supplier's past work is their portfolio.
+> 🔑 **NOTHING ABOUT THE READ WIDENED, and the reason generalises: the database was ALWAYS willing
+> to tell a booked supplier these facts.** Neither `get_vendor_event_brief` nor
+> `event_schedule_blocks_booked_vendor_read` has a date gate (read out of prod by the object).
+> **Only the surface was shut** — so "the data is not available yet" was never why, and nobody had
+> checked.
+> 🎬 **AND THE CALL SHEET WOULD HAVE BEEN INVISIBLE FOR ~9 MONTHS OF EVERY BOOKING.** More than 90
+> days out the page IS the Save-the-Date film (`fixed inset-0 z-[50]`, veil z-[60]) and the
+> supplier's strip renders in flow **underneath both**. A slim ribbon now sits above it, and both
+> halves were PORTED: the chrome is the host's own `owner-ribbon.tsx` (whose docblock had already
+> worked out that `sticky top-0 z-[90]` clears that stack) and the way out is the film's own
+> `STD_FILM_EXIT_EVENT`, which the veil also listens for — so *"Watch our film"* still brings back
+> a **paid** product.
+> 🚨 **`lint-port-no-lost-controls` CAUGHT MY OWN FIRST COMMIT AND WAS RIGHT TO:** one computed
+> `href` made the whole route read as having LOST the console, and the tempting fix — regenerating
+> the baseline — would have **recorded a removal that never happened**.
+> 🪤 **AND THREE OF EIGHTEEN MUTATIONS FIRST READ AS DECORATIVE GUARDS AND WERE MEASUREMENT
+> ERRORS**, one of them a sabotage that hit a **docblock's** `z-[90]` rather than the className's.
+> *An occurrence count proves a sabotage landed somewhere, not that it landed where you aimed.*
+> ⏭ **STILL NOT BUILT, named:** the same-day bridge (design § E — it wants a `SECURITY DEFINER`
+> function scoped to the caller, because a shop's OTHER bookings can today only be read with the
+> service role) and the weak-signal venue (§ H, its own project).
 > 🔒 **THE RULE THAT DECIDED IT, worth more than the feature:** *authorization may be answered with
 > the service role scoped by a session-proved id; **event content never is**.* `/{slug}` renders
 > with an admin client that sits in scope on the very line the desk is resolved — one import and
