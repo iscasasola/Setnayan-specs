@@ -37,6 +37,19 @@ share the Papic tables and the migration prefix space.
 
 ---
 
+## ✅ `papic1` — DONE 2026-08-27. PR [#4921](https://github.com/iscasasola/setnayan-platform/pull/4921), MERGED AND SERVED (`/api/health` → `14ce5b0`). **Do NOT run this prompt again.**
+
+> 🔑 **Two things this prompt had wrong, both found by its own measurement step —
+> which is the page's whole argument, working.** (1) `your-photos-widget.tsx` has
+> **never rendered a photograph**; the guest's real gallery was an unnamed section
+> inside `site-body.tsx`, now `photos-of-you-gallery.tsx`. *A three-item list built
+> from filenames is a list of files, not of screens.* (2) The gold/mulberry advice
+> is about `html.dark` and **does not apply to a dark island on a light-locked
+> page** — measured there, `mulberry-600` is WORSE than the value the prompt
+> rejects. 🚨 And the credit's column has a value on all 14 production photographs
+> with **no name behind any of them**: 32 of 34 rows in the person spine are
+> nameless. Full row: `DECISION_LOG.md` 2026-08-27 🖼.
+
 ## `papic1` — THE PHOTO SCREENS STILL WEAR THE OLD SKIN
 
 ```
