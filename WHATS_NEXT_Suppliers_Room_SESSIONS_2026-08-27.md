@@ -19,7 +19,7 @@
 | | What a person gets | Model | Effort | Runs after |
 |---|---|---|---|---|
 | ⚠ **S0** | A booked supplier stops being told "No event today" | — | — | **NOT on `main`** — no file, no PR, no branch (measured 2026-08-27). S1 created the module it was said to own. |
-| ✅ **S1** | One honest answer to *"is this shop booked?"* | **Opus 5** | **high** | **PR [#4912](https://github.com/iscasasola/setnayan-platform/pull/4912) — auto-merge armed** |
+| ✅ **S1** | One honest answer to *"is this shop booked?"* | **Opus 5** | **high** | **MERGED 2026-08-27T11:24Z · PR [#4912](https://github.com/iscasasola/setnayan-platform/pull/4912)** |
 | **S2** | A booked supplier gets through the door on a private celebration | **Opus 5** | **high** | S1 |
 | **S3** | **The vendors are integrated into the Event Hub on the day** | **Opus 5** | **high** | S1 · S2 |
 | ✅ **S4** | A booking made by locked QR holds its date | **Opus 5** | **medium** | **PR [#4913](https://github.com/iscasasola/setnayan-platform/pull/4913) — auto-merge armed** |
@@ -76,7 +76,7 @@ A booked supplier waiting on a downpayment record is no longer told "No event to
 which of the two things is true. **Its guard found a SECOND rendered copy of the same false sentence
 elsewhere on that screen** — count rendered sites, never trust that one branch is the branch.
 
-### ✅ S1 — DONE. PR [#4912](https://github.com/iscasasola/setnayan-platform/pull/4912), auto-merge armed. Do NOT rebuild it.
+### ✅ S1 — DONE. PR [#4912](https://github.com/iscasasola/setnayan-platform/pull/4912), **MERGED 2026-08-27T11:24Z** (verified by `gh pr view`). Do NOT rebuild it.
 ⚠ Verify with `gh pr view 4912 --json state,mergedAt` before trusting this line — this corpus has
 been wrong about a PR's state five times.
 
