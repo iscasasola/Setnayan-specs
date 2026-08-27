@@ -15,7 +15,13 @@
 ## 1. Subscription tiers + capability matrix
 Prices billed per 28-day cycle (platform standard; ⚠ confirm 28d vs calendar month at build).
 
-| | **Free** | **Solo** ₱1,000 | **Pro** ₱2,500 | **Enterprise** ₱8,000 |
+> 🔁 **OWNER PRICE SHEET, 2026-08-27 — migration `20271171000513`.** Enterprise 28-day **₱8,000 → ₱10,000**. Annuals: Solo **₱10,000 → ₱10,400** · Pro **₱25,000 → ₱26,000** · Enterprise **₱80,000 → ₱104,000**. Additional Branch **₱999 → ₱1,000**; 3D Booth **₱1,500 → ₱2,500**. Every annual figure is exactly `28-day × 10.4` — thirteen periods with 20% off — **recorded as an observation, never encoded**; a stored second copy of a pricing rule is how prices drift, and he must stay free to break it on any one row.
+>
+> 🔴 **THE CUSTOM TIER IS RETIRED. ENTERPRISE IS NOW THE TOP PURCHASABLE TIER.** All six `vendor_custom_*` catalogue rows are `is_active=false`; anyone above Enterprise's caps is handled **by hand, off-platform**. `vendor_tier_rank()` and the `vendor_tier_state` enum are deliberately untouched — retiring what can be BOUGHT was the ruling, deleting the tier is not. Verified against production first: **zero** vendors on custom (two profiles, both `solo`), so no rank can move. ⚠ **The flag alone does NOT close the Custom door** — `lib/vendor-custom-catalog.ts` falls back to hardcoded literals for a missing row and the configurator is still linked from the subscription page; closing it means deleting the axes from `CUSTOM_SKU_CODES` + `CUSTOM_UNIT_PRICE_FALLBACK`. Reported, not silently half-built.
+>
+> ⚠ **AND FOUR ANNUAL ADD-ON PRICES ON THAT SHEET WERE NOT CREATED** (branch ₱10,400 · seat ₱2,600 · Vendor AI ₱15,600 · 3D Booth ₱26,000). The billing machinery cannot charge or honour an annual add-on: every add-on term is a hardcoded 28 days, each price reader selects one literal `sku_code`, and the only function that turns `subscription_annual` into a 365-day term maps sku→tier by `LIKE 'solo|pro|enterprise_vendor_%'` and raises `UNMAPPED_SKU_TIER` for anything else. A priced row nothing can fulfil takes the money and grants nothing.
+
+| | **Free** | **Solo** ₱1,000 | **Pro** ₱2,500 | **Enterprise** ₱10,000 |
 |---|:---:|:---:|:---:|:---:|
 | **— RUN —** | | | | |
 | Verified badge · BYO/returning clients | ✓ | ✓ | ✓ | ✓ |
@@ -60,13 +66,15 @@ Prices billed per 28-day cycle (platform standard; ⚠ confirm 28d vs calendar m
 | Deep Search — About You | ₱1,000 | ₱500 |
 | Deep Search — Market Scan | ₱2,000 | ₱1,500 |
 
-**Principle:** bundling an add-on "free" into a tier is not free — it must be priced into that tier's sub. Nothing is currently bundled free, so subs stay ₱1,000/₱2,500/₱8,000.
+**Principle:** bundling an add-on "free" into a tier is not free — it must be priced into that tier's sub. Nothing is currently bundled free, so subs stay ₱1,000/₱2,500/**₱10,000** (Enterprise repriced 2026-08-27).
+
+> 🪤 **A CONFLICT WORTH NAMING, 2026-08-27.** The owner set the **3D Booth / Virtual Booth catalogue price to ₱2,500**, but the "3D Plan Ads" row in the matrix above is the same product's TIERED price (₱2,000 entry / ₱1,500 growth) and it lives in code, not the catalogue. Today the tiered matrix is **inert** — `NEXT_PUBLIC_VENDOR_ADDON_TIERED_PRICING` defaults OFF, so checkout charges the flat catalogue price and ₱2,500 is what a vendor pays. **If that flag is ever flipped, the booth silently reverts to ₱2,000/₱1,500 and the owner's ₱2,500 is ignored.** Not changed here — he ruled on the catalogue price, not on the tiered matrix — but the two must be reconciled before that flag goes on.
 
 ## 3. Sourced-lead finder's fee
 - **Applies ONLY to clients Setnayan sourced** (client discovered the vendor through the marketplace). BYO / vendor-invited / returning = **free**.
 - **Rate:** **5% on the first ₱100,000 of a booking, then 1% on the amount above.** Applies to the **first booking AND every repeat** of a sourced client with that vendor.
   - ₱60k → ₱3,000 · ₱300k → ₱7,000 · ₱1M → ₱14,000 · ₱10M → ₱104,000.
-- **Deals above ~₱3–5M → Enterprise/Custom (hand-priced),** not the automatic formula.
+- **Deals above ~₱3–5M → Enterprise, then hand-priced off-platform,** not the automatic formula. _(This line said "Enterprise/Custom"; the Custom TIER was retired 2026-08-27 and "hand-priced" is now literal — there is no priced ladder above Enterprise.)_
 - **Attribution — the anti-gaming core:** *sourced-vs-BYO is stamped ONCE at first contact* (how the client arrived: marketplace-discovered vs vendor-invited/own-link), and is **immutable**. NOT decided by booking size or order → kills the "book a small event first" dodge.
   - 🛡 **ENFORCEMENT POINT NAMED 2026-08-09 — "immutable" was a sentence, not a mechanism, and one path was silently rewriting it.** Owner, restating the rule the same day: *"we have a rule. to check the user first if they found each other first on the website or not."* The stamp lives in `event_vendors.source`. `vendor_claim_locked_qr()` upserts that row on a Locked-QR scan, and on the **UPDATE** branch — i.e. precisely when a row already existed because the couple had **already found the vendor on Setnayan** — it overwrote `source` with `'vendor_locked_qr'`. `host_marketplace_search` became vendor-brought in one scan. Against the live classifier `vendor_source_attribution()` (which buckets `host_marketplace_search` + `auto_cascade_from_finalize` → **setnayan**, `host_manual` + `admin` → **off_platform**, everything else → **unattributed**) a genuinely Setnayan-sourced booking silently left the "Setnayan sourced" column on the vendor's own My Performance page. Fixed in migration `20271121904105` (`COALESCE(source, 'vendor_locked_qr')` — the INSERT branch still stamps, because with no prior row the QR genuinely IS how they met), pinned by `tests/db/locked-qr-preserves-source.db.test.ts` with a neutralisation case.
   - ⚠ **Read this as ATTRIBUTION, not billing.** The fee engine reads a **thread's** `inquiry_source` via `booking_fee_is_sourced_surface()`, not this column, and `bookingFeeSendGate` still has **no live caller** (prod: 0 fee charges). Nobody was mis-billed. It matters because the fee is scoped *sourced clients only* and this is the column whose NAME answers that question — so it is what a future wiring reaches for, and it had to still be there when it does. **The Shortlist QR never had the bug**: its import path returns `already_saved` on a pre-existing row and writes nothing.
@@ -117,7 +125,7 @@ Setnayan bundles THREE things competitors sell separately, at less than any one 
 | Creative CRM (tools only) | HoneyBook, Dubsado, Táve, 17hats | $22–109 (~₱1,300–6,300) | no marketplace, no leads, no couple event site, no AI answerer, no 3D |
 | Lead marketplace (US) | The Knot, WeddingWire | $125–1,200 (~₱7,250–70,000) | no CRM/tools, low-quality leads, 12-mo lock-in |
 | SEA/PH marketplace | Bridestory (Gold ≈₱2,440), Kasal.com, eKasal | ~₱2,440 / quote-hidden | thin CRM, no AI/3D/market-intel, opaque pricing |
-| **Setnayan** | — | **Free / ₱1,000 / ₱2,500 / ₱8,000** | **all of the above in ONE** |
+| **Setnayan** | — | **Free / ₱1,000 / ₱2,500 / ₱10,000** | **all of the above in ONE** |
 
 **Stack-replacement math:** a vendor buying best-of-breed today pays ≈ HoneyBook Essentials ($49) + a Knot listing (~$125) + a standalone AI tool (~$30) ≈ **$204/mo ≈ ₱11,800/mo** — and still gets no 3D booths, no market intel, no couple-facing event layer, across two logins. **Setnayan Pro delivers all of it for ₱2,500.**
 
@@ -125,7 +133,7 @@ Setnayan bundles THREE things competitors sell separately, at less than any one 
 - **Free ₱0** — no competitor offers a real marketplace-listed + CRM + inbox free tier. Best free in market; pure acquisition weapon.
 - **Solo ₱1,000 (~$17)** — undercuts *every* Western CRM (cheapest is Táve $22) AND adds marketplace + leads they don't have.
 - **Pro ₱2,500 (~$43)** — priced at Bridestory Gold / below HoneyBook Essentials, but bundles a ~₱12k/mo stack. The flagship value tier.
-- **Enterprise ₱8,000 (~$138)** — below a *single* Knot listing, adds 10 seats + API + everything.
+- **Enterprise ₱10,000 (~$172)** — still below a *single* Knot listing, adds 10 seats + API + everything. _(Was ₱8,000 / ~$138 until the owner's 2026-08-27 price sheet.)_
 
 **Verdict:** strictly more value per peso at every tier. If anything Solo/Pro are *underpriced* vs the bundle — deliberately correct for a supply-starved launch (win vendors now, revisit Pro/Enterprise upward once value is proven). **Recommendation: HOLD current prices through launch; revisit after traction.**
 
