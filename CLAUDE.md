@@ -242,10 +242,10 @@ committed docs on purpose.
 > ⛔ **Three answers still do NOT join, recorded once as data** (`ANSWERS_THAT_DO_NOT_JOIN`, read by
 > the guard): the waitlist pick **does nothing and reports success** · a crew shift **cannot be
 > posted, seen or accepted by a non-admin** · **nobody can ask for a song**.
-> ✅ **THE FOURTH IS NOW BUILT AND MERGED — "somebody says they paid you" can be answered NO** (owner
-> 2026-08-27: *"yes. they can declare it."*). PR
-> [#4923](https://github.com/iscasasola/setnayan-platform/pull/4923), merged 15:36Z, merge
-> `97cfe10` verified an ancestor of `origin/main`. ⚠ Verify with `gh pr view 4923`. 🔑 **AND THAT ROW'S PREMISE WAS FALSE: the refusal was
+> ✅ **THE FOURTH IS BUILT, MERGED AND SERVED — "somebody says they paid you" can be answered NO**
+> (owner 2026-08-27: *"yes. they can declare it."*). PR
+> [#4923](https://github.com/iscasasola/setnayan-platform/pull/4923); production's `/api/health`
+> self-reports the merge commit `97cfe10`. ⚠ Verify with `gh pr view 4923`. 🔑 **AND THAT ROW'S PREMISE WAS FALSE: the refusal was
 > already shipped** (`vendorRejectDeposit` → `reject_vendor_deposit`, ownership-gated,
 > single-winner, reason reaches the couple) and wired to the supplier's customer card — **the DESK
 > had no no.** A 334-line duplicate migration was written and deleted on finding it; the guard now
