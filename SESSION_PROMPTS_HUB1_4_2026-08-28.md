@@ -126,6 +126,54 @@ says so honestly. It is its own project.
 
 ## `hub3` — EACH KIND OF EVENT OFFERS ONLY ITS OWN ROOMS
 
+> ### 🛑 SLICE 1 IS BUILT — AND THIS PROMPT'S FRAMING BELOW IS WRONG. READ THIS FIRST.
+> **PR [#4934](https://github.com/iscasasola/setnayan-platform/pull/4934) · migration
+> `20271175884168` · `DECISION_LOG.md` 2026-08-28.** ⚠ Verify with
+> `gh pr view 4934 --json state,mergedAt` — this corpus has been wrong about a PR's state
+> five times.
+>
+> 🚨 **THE TWO AXES ARE NOT THE SAME AXIS, AND THE MEASUREMENT BELOW MEASURES THE WRONG ONE.**
+> The prompt says "15 of 17 kinds carry an identical 7-surface list, so enforce it." Those 7
+> are **`enabled_surfaces` — 9 HOST-SIDE surfaces**. The grid the owner actually approved
+> ([`EVENT_HUB_UNIVERSAL_DESIGN_2026-08-17.md`](EVENT_HUB_UNIVERSAL_DESIGN_2026-08-17.md) § A)
+> is **13 GUEST-FACING ROOMS**. They intersect at `website` (a master switch) and `seating`,
+> **and nowhere else.** Measured: of that grid's **28 "—" cells, a pure `enabled_surfaces`
+> data edit delivers AT MOST 3.** ⇒ **hub3 is GATE WIRING, not a settings change.** A session
+> that "just fixes the data" ships almost none of it and reports the job done.
+>
+> 🔑 **AND THE ENFORCEMENT ENGINE ALREADY SHIPS — do not build one.** `surfaceEnabled()` has
+> gated per-kind surfaces since iteration 0053. The four seat rooms simply never ASKED the
+> `seating` surface; they gated on `website` only.
+>
+> ✅ **SLICE 1 CLOSED 12 OF THE 28 CELLS** — the seat pass, find-my-seat, the table map and
+> the 3D venue walk are absent for travel · date · hangout. 🔒 **Its lesson generalises to
+> every remaining cell: NARROWING A READER MAKES EVERY WRITER A CLIFF.** Gating those four
+> guest rooms alone would have re-created a defect already repaired once — nothing gated the
+> HOST side, so a host could still build a plan and buy the **₱1,499 `CUSTOM_QR_GUEST`** pass
+> whose guests then 404. **For each remaining room, find the writer and the PURCHASE before
+> you narrow the reader.**
+>
+> ⏭ **THE 16 CELLS LEFT, each with the mechanism it needs — this is the real remaining scope:**
+> · **`gifts` — 6 cells, the most common "—" in the whole grid — has NO `ProfileSurface` at
+>   all.** Needs a new surface value in `ALL_SURFACES` **and** `PROFILE_SURFACES` (the admin
+>   editor's roster) — ⚠ a stored value the code does not know is **silently DROPPED** when
+>   the row is parsed, not an error. Decide whether it joins
+>   `SURFACES_THAT_RENDER_ON_THE_WEBSITE`; by that rule's own logic it should.
+> · **Live hub + photo wall — 6 cells.** `day_of` is stored on all 17 rows and has **ZERO
+>   readers**. Wiring it is semantically exact (the hub IS the day-of page) but it is a design
+>   call — flag it rather than assume it.
+> · **`welcome` (2) and `recap` + `print` (2)** — fit no existing surface. These are the
+>   per-room table § A's own commentary calls *"the largest single piece of engineering in
+>   this plan"*.
+>
+> 🔴 **THE WAKE'S ENTIRE ROW IS UNRULED AND THE GRID DOES NOT CONTAIN IT** — the `wake` row was
+> created 2026-08-24, a week AFTER the grid was approved. Its **gifts** cell is already
+> answered by shipped code (the abuloy wording keys on `register='solemn'`); the rest is
+> genuinely the owner's and cannot be derived.
+>
+> ⚠ **`gala_night`'s ✓\* is not a gate** — the money room already words itself from the
+> event's terminology, so donation-shaped copy is a wording edit, not a room decision.
+
 ```
 You are picking up the session named hub3 in the Setnayan project.
 
