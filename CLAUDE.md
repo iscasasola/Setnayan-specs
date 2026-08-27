@@ -196,9 +196,9 @@ committed docs on purpose.
 > ⛔ **A bare team-membership union looks equivalent, is shorter, and silently retires per-event
 > grants — which the owner has now ruled against. Do not write one.**
 >
-> ✅ **THE ANSWERS DESK IS BUILT AND MERGED — PR [#4917](https://github.com/iscasasola/setnayan-platform/pull/4917),
-> merged 2026-08-27T14:21Z, merge `df74779` verified an ancestor of `origin/main`. Do NOT rebuild
-> it.** ⚠ Verify with `gh pr view 4917 --json state,mergedAt` before trusting this line.
+> ✅ **THE ANSWERS DESK IS BUILT, MERGED AND SERVED — PR [#4917](https://github.com/iscasasola/setnayan-platform/pull/4917),
+> merged 2026-08-27T14:21Z; production's `/api/health` self-reports the merge commit `df74779`. Do
+> NOT rebuild it.** ⚠ Verify with `gh pr view 4917 --json state,mergedAt` before trusting this line.
 > 🔑 **RULE 0 paid again: it was never a new page** — the desk IS the "What's new" feed already
 > shipping on `/vendor-dashboard`. **A ONE-STAR review could not reach it** (the filter was
 > five-stars) **and the desk could not TAKE the answer either** — it named an unanswered review and

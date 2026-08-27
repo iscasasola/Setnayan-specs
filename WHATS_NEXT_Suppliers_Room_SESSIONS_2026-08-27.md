@@ -25,7 +25,7 @@ S5 ships flag-off pending the owner's gate. **Only S6, its own stream, is left.*
 | ✅ **S3** | **The vendors are integrated into the Event Hub on the day** | **Opus 5** | **high** | **BUILT + PR'd** — PR [#4919](https://github.com/iscasasola/setnayan-platform/pull/4919), auto-merge armed |
 | ✅ **S4** | A booking made by locked QR holds its date | **Opus 5** | **medium** | **MERGED + SERVED** — PR [#4913](https://github.com/iscasasola/setnayan-platform/pull/4913) |
 | ✅ **S5** | The night-before email (ships switched OFF) | **Sonnet 5** | **medium** | **BUILT + PR'd** — PR [#4915](https://github.com/iscasasola/setnayan-platform/pull/4915), auto-merge armed |
-| ✅ **S6** | The Answers Desk — every answer a shop owes, answered on the row | **Opus 5** | **high** | **MERGED 2026-08-27T14:21:44Z** — PR [#4917](https://github.com/iscasasola/setnayan-platform/pull/4917), merge `df74779` verified an ancestor of `origin/main` |
+| ✅ **S6** | The Answers Desk — every answer a shop owes, answered on the row | **Opus 5** | **high** | **MERGED + SERVED** — PR [#4917](https://github.com/iscasasola/setnayan-platform/pull/4917); `/api/health` self-reports `df74779`, the PR's own merge commit |
 
 **Never more than two at once** (10 parallel builds once shipped 44 defects).
 🚨 **AND THE MACHINE IS THE HARDER CAP, MEASURED 2026-08-27:** with **four** other sessions
@@ -384,7 +384,9 @@ branch and fires on approximately no page loads, so the job would ship dead with
 ⛔ **Do not force Manila time onto the stored call time** — that once emailed a 2 PM ceremony as
 10 PM. **Take the idempotency lock BEFORE the send.** **No cron** — 16 jobs already run without one.
 
-### ✅ S6 — DONE. PR [#4917](https://github.com/iscasasola/setnayan-platform/pull/4917), **MERGED 2026-08-27T14:21:44Z**. Do NOT rebuild it.
+### ✅ S6 — DONE. PR [#4917](https://github.com/iscasasola/setnayan-platform/pull/4917), **MERGED 2026-08-27T14:21:44Z AND SERVED**. Do NOT rebuild it.
+✅ **A merge is not a ship; this one is both** — production's `/api/health` self-reports `df74779`,
+the PR's own merge commit, which is an ancestor of `origin/main`.
 ⚠ Verify with `gh pr view 4917 --json state,mergedAt` before trusting this line — this corpus has
 been wrong about a PR's state five times. Merge commit `df74779` was checked with
 `git merge-base --is-ancestor`, not read off the PR page.
