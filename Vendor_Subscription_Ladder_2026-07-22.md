@@ -24,7 +24,15 @@ The vendor buys a base subscription, then **chooses modules.** The through-line:
 | **+ Photo Challenge** /event | — | +₱400/event | +₱400/event |
 | **Deep Search** (metered) | ₱500/search | 1 free/cycle, then ₱500 | 1 free/cycle, then ₱500 |
 
-*(Also: **Free ₱0** base — the floor, no add-ons; **Custom from ₱8,999** — the unlimited tier above Enterprise. ⚠ With Enterprise now ₱8,000, round Custom's floor to ₱9,000 for consistency.)*
+*(Also: **Free ₱0** base — the floor, no add-ons; **Custom** — the unlimited tier above Enterprise, **₱11,000/28d** since 2026-08-27. ⚠ **NEVER RE-TYPE EITHER FIGURE** — `vendor_billing_catalog` is the source; the numbers in this table are a snapshot.)*
+
+> 🔓 **THE RULE, NOT A NUMBER: CUSTOM'S FLOOR TRACKS ₱1,000 ABOVE ENTERPRISE.** When Enterprise moves, Custom's base moves with it, because Custom is sold as the tier ABOVE Enterprise and a shop comparing them must never be asked to pay more for less.
+>
+> 🚨 **THIS LINE USED TO BE THE WARNING THAT PROVED WHY A DOC CANNOT HOLD A RULE.** For five weeks it read *"⚠ With Enterprise now ₱8,000, round Custom's floor to ₱9,000 for consistency"* — correct, unactioned, and by 2026-08-27 doubly stale (both figures had moved). Nobody actioned it, and on 2026-08-27 the owner raised Enterprise to ₱10,000 while Custom's base sat at ₱8,999: **the tier above cost ₱1,001 LESS than the tier below.** Caught before anyone was quoted it — production held two vendor profiles and both were `solo`.
+>
+> ✅ **SO THE RULE IS NOW ENFORCED IN CODE, AND THIS DOC IS NO LONGER THE ONLY THING HOLDING IT.** `apps/web/tests/db/custom-sits-above-enterprise.db.test.ts` reads BOTH prices out of the catalog — neither is typed into the guard — and fails the build if Custom's base is ever less than or equal to Enterprise's 28-day price. It pins the RELATIONSHIP, never the amounts, so any reprice the owner likes still passes as long as the ladder stays the right way up. Owner, 2026-08-27: *"tie it to Enterprise so it can never invert again."*
+>
+> 🔴 **AN OPEN ₱500 QUESTION SITS ON THAT ₱11,000.** It follows the ₱1,000-above shape of the old warning. The **signed** rate card states a different construction — *"owner-decided 2026-07-04: lean base = Enterprise ₱7,499 + **₱1,500 white-glove premium**"* (`VENDOR_TIERS_AND_BENEFITS.md` §11), which is literally how the live ₱8,999 was derived and whose floor note says *"the white-glove premium is the point of Custom"*. That rule gives **₱11,500** at Enterprise ₱10,000 — and it also shows the old warning was already off its own precedent (₱8,000 + ₱1,500 = ₱9,500, not ₱9,000). ₱11,000 stands because it is what the owner ruled on 2026-08-27; the discrepancy is recorded rather than silently corrected, because the number is his.
 
 **Anchors:** Pro ₱2,500 ≈ **Bridestory Gold parity** (≈₱2,440) — but inbox never gated + 3D booth + market intel Bridestory has no equivalent of. Base prices **rounded to clean numbers** (was ₱999/₱2,499/₱7,999) — this diverges from the live-DB catalog; update owed (§6). Fee buy-down (2.0→1.5→1.0%) is a **sweetener** (₱4,000 cap makes it marginal), not the price basis.
 
