@@ -17,7 +17,7 @@
 | ~~**S1**~~ | ✅ **DONE 2026-08-28 · PR [#4953](https://github.com/iscasasola/setnayan-platform/pull/4953)** — a dispute is not an eraser | **Opus 5** | **medium** | S2 · S3 | — |
 | **S2** | ✅ **DONE** — the shop tells the truth | **Opus 5** | **medium** | S1 · S3 | — |
 | **S3** | ✅ **DONE** — a card that can be found | **Opus 5** | **high** | S1 · S2 | — |
-| **S4** | 🔓 **UNBLOCKED** — the customer page answers | **Opus 5** | **high** | S3 · S5 | ~~S1~~ — |
+| ~~**S4**~~ | ✅ **DONE 2026-08-28 · PR [#4957](https://github.com/iscasasola/setnayan-platform/pull/4957)** — the customer page answers | **Opus 5** | **high** | S3 · S5 | ~~S1~~ — |
 | **S5** | ⚠ **A FLAG FLIP, NOT A BUILD** — price decides reach | **Opus 5** | **medium** | S4 | ~~S3~~ — |
 
 **S1, S2 and S3 touch disjoint files and may all run at once.** ⛔ **Never two sessions in
@@ -30,7 +30,7 @@
 | ~~**S1**~~ | ✅ **MERGED AND SERVED — PR [#4953](https://github.com/iscasasola/setnayan-platform/pull/4953)** (merge `f2001515`, prod `/api/health` self-reports it; migration verified applied **BY THE OBJECT**).** Its premise was dead (the erasure was fixed the day before the plan was written, PR #4927) and the ONE thing genuinely left — **nowhere for Setnayan to settle by hand** — is what shipped. ⚠ Verify with `gh pr view 4953 --json state,mergedAt`. |
 | **S2** | ✅ **MERGED AND SERVED** · PR [#4950](https://github.com/iscasasola/setnayan-platform/pull/4950), merged 06:36Z, merge `320c42b` — **production's own `/api/health` reports `320c42b`**, so it is live, not merely merged. All 16 checks green. |
 | **S3** | ✅ **MERGED** 2026-08-28T06:39Z · PR [#4951](https://github.com/iscasasola/setnayan-platform/pull/4951), merge `1ddb503`. ⏳ *Serving* not yet confirmed — prod was still on `320c42b` two minutes later. **A merge is not a ship**; re-check `/api/health` before claiming it live. |
-| **S4** | 🔓 **UNBLOCKED** — the half of S1 it waited on already shipped. Still the riskiest piece in the plan, and it has a **new** constraint: its four states are behind `NEXT_PUBLIC_LOCK_HANDSHAKE_ENABLED`, still unflipped. |
+| ~~**S4**~~ | ✅ **BUILT — PR [#4957](https://github.com/iscasasola/setnayan-platform/pull/4957), auto-merge armed.** ⚠ Verify with `gh pr view 4957 --json state,mergedAt`. **AND THE FLAG CONSTRAINT ABOVE WAS OVERSTATED — corrected below: all four lanes work with the flag off; only the booking-ask KIND is unreachable.** |
 | **S5** | ✅ **MERGED AND SERVED 2026-08-28 · PR [#4954](https://github.com/iscasasola/setnayan-platform/pull/4954)** (merge `70988bc`; production's own `/api/health` reports `70988bc`, so it is live, not merely merged) · **+ PR [#4956](https://github.com/iscasasola/setnayan-platform/pull/4956)**, the same-day follow-on that tells a couple when we ranked them on a guess — gap 1 below is closed: the couple's budget FEEL now becomes a number and the search uses it, and a shop is told the reach its price is earning. ⚠ Verify with `gh pr view 4954 --json state,mergedAt`. Gap 2 (should a couple browsing publicly see what a shop charges?) is **still the owner's** and is untouched. |
 
 ⚠ **Every state above is a claim with an expiry date.** Verify with
@@ -271,7 +271,55 @@ and printed nothing at all. ⏭ **NOT built, deliberately:** the per-card
 reach bar on the Services list (the prototype's *"1 of 2 — one card is reaching nobody"*) — with the
 gate in place no NEW card can lack a price, so that row can only ever describe legacy rows.
 
-### S4 — The customer page answers · **Opus 5 · high** · ⚠ **NO LONGER BLOCKED BY S1**
+### ✅ S4 — The customer page answers · **DONE 2026-08-28** · PR [#4957](https://github.com/iscasasola/setnayan-platform/pull/4957)
+
+🛑 **READ THIS BEFORE THE BRIEF — TWO CLAIMS IN IT ARE FALSE, BOTH MEASURED.**
+
+1. ⚠ **"A Customers page built on four states would render TWO of them" IS WRONG.** Only the
+   **booking-ask KIND** is unreachable while `NEXT_PUBLIC_LOCK_HANDSHAKE_ENABLED` is dark. The
+   *enquiry* half of **Waiting on you**, plus **Talking**, **Booked** and **Finished**, all read
+   columns the flag never touches — `chat_threads.inquiry_status` and `event_vendors.status`. **All
+   four lanes work in production today**, and a test runs the whole set through
+   `handshakeEnabled = false` to prove it rather than argue it. The page still ASKS the flag (it is
+   registered as a gate in `flag-chokepoint-scan.test.ts`), so the dark arm is the couple's own
+   answer, not a second guess.
+2. ⚠ **"Booked and Waitlist filters already exist in `customers/page.tsx`" IS FALSE.** The PILL
+   existed; the FILTER never did. `STATUS_PILL` mapped five statuses and the assembly loop could
+   produce exactly **two** — `booked` and `in_conversation`. `locked`, `whitelist` and `waitlist`
+   were unreachable by construction. It is deleted.
+
+✅ **WHAT SHIPPED.** The roster is the page's **first** block, above the month calendar, carrying
+four lanes — **Waiting on you** (an unanswered enquiry OR an unanswered booking ask, one list,
+oldest first) · **Talking** · **Booked** · **Finished** — with chips that narrow the same list.
+**Nothing was deleted to make room:** calendar, summary tiles, QR panel all still render below, and
+*Book of business* was deliberately carried across (`lint-port-no-lost-controls` is what makes that
+checkable). And a shop can **ask a booked customer for a payment** from the Quote & Payments tab,
+beside the balance; the couple is told and reads it above their own deposit card.
+
+🔴 **AND IT FOUND TWO SHIPPED FEATURES THAT COULD NEVER HAVE WORKED — repaired in the same PR.**
+`vendorPostHandover` (a supplier delivering a gallery link, proof or sign-off) and
+`vendorRaiseChangeOrder` (a supplier proposing an add-on) each resolved their booking on **the
+vendor's own session**, under a comment asserting *"RLS already scopes vendor reads to their own
+bookings."* **Measured against production as the shop's own authenticated role, in a rolled-back
+transaction: `event_vendors` carries four policies — couple read, couple write, moderator read,
+moderator write — and NOT ONE admits a vendor.** The shop genuinely booked on the one marketplace
+booking in prod reads **ZERO rows** of it. Both bounced to their own error flag on every attempt,
+for every shop, always. *An RLS denial and an empty read are the same value.*
+
+⏭ **OPEN OWNER DECISIONS, deliberately NOT built:**
+· **48 hours or 7 days?** The 2026-06-02 lock says 48h; the shipped fuse is the materialized
+  `lock_request_expires_at` (~7 days). Surfaced, unchanged, exactly as this register asked.
+· **A fifth lane, "Holding"** — you said yes, they have not booked. The shared core maps
+  `agreed`-but-unconfirmed to `cancelled` with its reasons written down there; re-deciding it on one
+  screen is how two screens start disagreeing about who is booked.
+· **Whether the Waitlist should be a lane at all** — it is deliberately absent, because picking
+  somebody off the waitlist does nothing today and still reports success.
+
+**The original brief is kept below.**
+
+---
+
+#### The brief, as written
 
 🔓 **THE DEPENDENCY IS DISCHARGED.** S4 waited on S1 because the Payments tab shows a deposit whose
 meaning S1 was going to change. **S1's data-model half already shipped** (PR
