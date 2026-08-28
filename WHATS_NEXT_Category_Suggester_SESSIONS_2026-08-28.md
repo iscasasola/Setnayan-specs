@@ -75,6 +75,35 @@ close the naming gap on their own. **If nothing after C2 is ever built, the gap 
 
 ---
 
+## 🔴 ONE OPEN ACTION — C2 MERGES INERT UNTIL SOMEBODY RUNS THIS
+
+**C2 ships the machinery and an EMPTY word list.** Nothing a supplier types behaves differently
+until the list is filled and reviewed. That takes two steps, in order:
+
+**1 · Propose the words** — from the code repo:
+
+```
+pnpm -F @setnayan/web exec tsx scripts/seed-trade-aliases.ts
+```
+
+It asks Claude for Filipino / English / Taglish words for each trade and files them for review.
+Needs `ANTHROPIC_API_KEY`. Nothing it proposes can answer anybody yet.
+
+**2 · Approve them** at **`/admin/taxonomy/aliases`**. An unreviewed word answers nobody — by
+design, because a wrong word is worse than no word: if *"catering"* were taught to mean *Funeral
+Home*, every supplier typing it lands in the wrong trade, for everyone.
+
+⚖ **A BUTTON FOR STEP 1 WAS BUILT AND THEN REVERSED — owner, 2026-08-28: _"then leave it as a
+command."_ Do not re-propose it.** The reversal is recorded because the risk it was meant to cover
+is real and now sits here instead: **a feature that ships correct and switched off is the shape this
+repo keeps rediscovering weeks later.** The screen's own empty state names the exact command, which
+is the whole mitigation.
+
+🔑 **This is also why C3 is not urgent.** C3 remembers wordings the alias list MISSES — and until
+step 1 runs, the list misses everything, so C3 would be learning around an empty cache.
+
+---
+
 ## ⛔ RULE 0 — pre-answered. Do NOT rebuild any of this.
 
 | Somebody will want to build… | It already ships |
