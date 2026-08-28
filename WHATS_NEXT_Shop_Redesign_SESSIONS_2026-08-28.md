@@ -21,21 +21,29 @@
 | **S5** | Price decides reach | **Opus 5** | **high** | — | **S3** |
 
 **S1, S2 and S3 touch disjoint files and may all run at once.** ⛔ **Never two sessions in
-`nav-registry-defaults.ts`** — S2 owns it alone.
+`nav-registry-defaults.ts`** — S2 owns it alone. *(S2 is done, so that lock is released.)*
 
 ### WHERE THE STREAM STANDS — 2026-08-28
 
 | | state |
 |---|---|
-| **S1** | 🛑 **ITS PREMISE IS DEAD — the erasure was fixed the DAY BEFORE this plan was written.** No branch, no PR, and **most of what it describes no longer exists.** Read the corrected brief below before scoping it. What is left is small, and it still blocks S4. |
+| **S1** | 🛑 **ITS PREMISE IS DEAD — the erasure was fixed the DAY BEFORE this plan was written** (PR #4927, verified by reading the live function out of prod). No branch, no PR, and **most of what it describes no longer exists.** What is left is one thing: **`deposit_declined_at` has no admin reader**, so there is nowhere for Setnayan to settle by hand. Re-scoped to **medium**. It **no longer blocks S4.** |
 | **S2** | ✅ built · PR [#4950](https://github.com/iscasasola/setnayan-platform/pull/4950) OPEN, auto-merge armed |
 | **S3** | ✅ built · PR [#4951](https://github.com/iscasasola/setnayan-platform/pull/4951) OPEN, auto-merge armed |
-| **S4** | **BLOCKED on S1**, and unchanged: it is still the riskiest piece in the plan. |
+| **S4** | 🔓 **UNBLOCKED** — the half of S1 it waited on already shipped. Still the riskiest piece in the plan, and it has a **new** constraint: its four states are behind `NEXT_PUBLIC_LOCK_HANDSHAKE_ENABLED`, still unflipped. |
 | **S5** | **UNBLOCKED** — S3 is built, so a declared price now exists to segment on. |
 
 ⚠ **Every state above is a claim with an expiry date.** Verify with
 `gh pr view <n> --json state,mergedAt` before acting on it; this corpus has been wrong about a PR's
 state five times. Neither PR was merged when this was written — *armed is not merged*.
+At the last check both stood at **15 checks passed · 1 pending · 2 skipped**, `mergeStateStatus`
+BLOCKED (which is what a pending required check looks like, not a refusal).
+
+🔎 **HOW THIS BLOCK WAS MEASURED**, so the next session knows what to redo rather than trust:
+`gh pr list --state all` for every PR state · `pg_get_functiondef` on the live
+`reject_vendor_deposit` · `pg_constraint` for the lock-request CHECKs · row counts read straight out
+of production. **No claim here came from a migration file, a docblock or an earlier handoff** — the
+one claim in the original plan that did (S1's) is the one that turned out to be false.
 
 🔑 **AND S5's PREMISE IS NOW TRUE IN A WAY IT WAS NOT THIS MORNING.** Its brief says both halves
 exist and nothing joins them. Half of that was optimistic: `starting_price_php` existed as a
