@@ -17,8 +17,8 @@
 | **S1** | ⚠ **HALF ALREADY SHIPPED** — a dispute is not an eraser | **Opus 5** | **medium** | S2 · S3 | — |
 | **S2** | ✅ **DONE** — the shop tells the truth | **Opus 5** | **medium** | S1 · S3 | — |
 | **S3** | ✅ **DONE** — a card that can be found | **Opus 5** | **high** | S1 · S2 | — |
-| **S4** | The customer page answers | **Opus 5** | **high** | S3 | **S1** |
-| **S5** | Price decides reach | **Opus 5** | **high** | — | **S3** |
+| **S4** | 🔓 **UNBLOCKED** — the customer page answers | **Opus 5** | **high** | S3 · S5 | ~~S1~~ — |
+| **S5** | ⚠ **A FLAG FLIP, NOT A BUILD** — price decides reach | **Opus 5** | **medium** | S4 | ~~S3~~ — |
 
 **S1, S2 and S3 touch disjoint files and may all run at once.** ⛔ **Never two sessions in
 `nav-registry-defaults.ts`** — S2 owns it alone. *(S2 is done, so that lock is released.)*
@@ -31,7 +31,7 @@
 | **S2** | ✅ built · PR [#4950](https://github.com/iscasasola/setnayan-platform/pull/4950) OPEN, auto-merge armed |
 | **S3** | ✅ built · PR [#4951](https://github.com/iscasasola/setnayan-platform/pull/4951) OPEN, auto-merge armed |
 | **S4** | 🔓 **UNBLOCKED** — the half of S1 it waited on already shipped. Still the riskiest piece in the plan, and it has a **new** constraint: its four states are behind `NEXT_PUBLIC_LOCK_HANDSHAKE_ENABLED`, still unflipped. |
-| **S5** | **UNBLOCKED** — S3 is built, so a declared price now exists to segment on. |
+| **S5** | ⚠ **UNBLOCKED, AND SMALLER THAN BRIEFED.** The matcher already ships whole, behind `NEXT_PUBLIC_SMART_SORT_ENABLED`. Re-scoped high → medium — it is a flag flip and a verification. Two real gaps remain and neither is the one the brief named (see below). |
 
 ⚠ **Every state above is a claim with an expiry date.** Verify with
 `gh pr view <n> --json state,mergedAt` before acting on it; this corpus has been wrong about a PR's
