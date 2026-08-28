@@ -449,12 +449,23 @@ mode.** Fail-open, by construction, in the shipped code.
    shipped matcher uses a different number entirely: the Budget Planner's **recommended ₱ for that
    category**. *There are two notions of "the couple's budget" in this product and the brief named
    the one nothing ranks on.*
-2. 🔴 **STILL OPEN, AND STILL THE OWNER'S.** **THE PUBLIC MARKETPLACE DOES NO BUDGET MATCHING
-   WHATEVER**, and deliberately shows **no price
-   on a real shop's card** — `explore/page.tsx` resolves a starts-at only for DEMO rows, under its
-   own comment saying real cards are a V1.1 candidate. 🔴 **That is an OWNER DECISION, not
-   engineering: should a couple browsing publicly see what a shop charges?** Everything above is
-   inside a couple's own event.
+2. ◐ **HALF CLOSED 2026-08-28 — the OWNER DECISION half was answered, and the question was
+   wrong.** It read: *should a couple browsing publicly see what a shop charges?* ⚖ **Owner:
+   _"their service cards has the prices."* They already could, and had since 2026-07-16** — the
+   **2026-05-16 hide-prices lock this row cited was SUPERSEDED** by `hide_prices_publicly`, an
+   opt-in-to-HIDE defaulting to SHOW, which `/v/[slug]` has honoured ever since. There was no
+   decision to make, only one screen that never got the memo.
+   ✅ **The price half is BUILT — PR [#4958](https://github.com/iscasasola/setnayan-platform/pull/4958)**,
+   merged 09:24Z (`0f9ad6ae`). ⚠ Verify with `gh pr view 4958 --json state,mergedAt`.
+   🔑 **RULE 0 paid almost the whole change:** the grid ALREADY computed every visible shop's
+   cheapest active `starting_price_php` and the card could ALWAYS render it — one ternary
+   (`v.is_demo === true && …`) threw it away. 🔒 The real risk was the opposite direction — printing
+   a price a shop OPTED OUT of — so the hide rule now has **one home and two callers**, is read once
+   per page, and fails OPEN.
+   ⏭ **STILL OPEN, and still not an owner decision: EXPLORE DOES NO BUDGET MATCHING.** Its sort
+   keys are reviews / rating / newest / name; the word *budget* appears **zero** times in its 4,588
+   lines. Deliberately NOT bundled into the price PR — ordering a public marketplace by what a
+   visitor can afford is its own change, and a signed-out visitor has no budget at all.
 
 🔢 **AND IT CANNOT BE VERIFIED LIVE YET.** Production holds 2 cards, both on a hidden fixture shop,
 both with no price; the one real published shop has none. Flipping the flag today changes what
