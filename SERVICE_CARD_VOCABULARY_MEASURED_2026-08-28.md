@@ -330,6 +330,28 @@ Each is measured, none was touched (this session builds nothing). Worth filing.
 
 ---
 
+## 7b · ✅ AN UNSTATED SIDE EFFECT OF #4942, FOUND BY THE FABLE PASS — and it is in the couple's favour
+
+**THREE readers already compare a card's `category` against CANONICAL LEAF keys**, not against the
+52 legacy ones — verified on `origin/main` = `795aa14ae` (which production self-reports serving):
+
+| Reader | What it feeds | What its own comment records |
+|---|---|---|
+| `lib/wizard-recommendations.ts:638` | the service photo on a wizard recommendation tile | *"NO wizard recommendation tile ever showed a service photo"* — a phantom-column 42703 it has already been repaired from once |
+| `lib/budget-allocation-data.ts:185` | the market median / min / p25 / p75 a couple sees | *"has been showing NO market median … for any leaf"* |
+| `lib/plausibility-scanner.ts:165` | the price plausibility check | — |
+
+⇒ **A card filed under the shop's own leaf now matches all three. A legacy-keyed card never
+did, and still does not.** So #4942 quietly turned on photo enrichment, market pricing and the
+plausibility check for exactly the cards the new door produces.
+
+⚖ **This is a behaviour change nobody wrote down, and it is a good one** — but it is also the
+answer to *"why does one card show a market price and another does not?"*, which is the kind of
+question that otherwise gets diagnosed from scratch six months later. **Zero rows are affected
+today** (both prod cards are the hidden fixture), so nothing changed for anybody yet.
+
+---
+
 ## 8 · How to re-measure this, exactly
 
 Nothing above should be believed because it is written down.
