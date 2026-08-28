@@ -20,25 +20,42 @@
 
 | # | What a person gets | Model · effort | Gate | Touches |
 |---|---|---|---|---|
-| **C1** | **Typing finds the real trade.** All 262 live trades become searchable in the maker, properly ranked — *"sorbetes"*, *"generator"*, *"tent"*, *"photobooth"* as one word. No model, no new schema. | Sonnet · medium | none | `canvas-maker.tsx` · `services/new/page.tsx` |
-| **C2** | **It remembers what suppliers call things.** A wording somebody typed and confirmed answers instantly for the next shop, free. | Sonnet · medium | none | one migration · `canvas-maker.tsx` · a new action |
-| **C3** | **It matches by meaning.** *"sound hire"* → **Lights & Sound**. The first embeddings ever generated in this repo. | **Opus · high** | **a new data processor — see § Owner** | migration + backfill + a Workers AI call |
-| **C4** | **A trade we do not have arrives ready to press.** Claude drafts the proposal with its near-matches above the button. | **Opus · high** | **owner flips it on; ships dark** | `proposeCategory` · `/admin/taxonomy` |
-| **C5** | **Their website fills it in at sign-up.** Reuses the dossier we already take. | Sonnet · medium | **owner rules on tone first** | vendor onboarding |
+| **C0** | **A category can be undone.** Combine two trades into one, and make an old name still land on its replacement. **Build this BEFORE anything proposes new trades.** | **Opus · high** | none | `admin/taxonomy/actions.ts` · one migration |
+| **C1** | **Typing finds the real trade.** All live trades searchable in the maker, properly ranked — *"sorbetes"*, *"generator"*, *"tent"*, *"photobooth"* as one word. No model, no new schema. | Sonnet · medium | none | `canvas-maker.tsx` · `services/new/page.tsx` |
+| **C2** | **One trade, many names.** An alias list — *sorbetes · sorbetero · ice cream cart* all find the same trade. Written once by Claude **offline**, checked by a person, then free forever. | Sonnet · medium | none — supplier text never leaves the server | one migration · the ranker · an admin review screen |
+| **C3** | **It remembers what suppliers confirm.** Only for phrases the alias list missed. | Sonnet · medium | **⚠ read the poisoning risk first** | one migration · `canvas-maker.tsx` |
+| **C4** | **A trade we do not have arrives ready to press.** Claude drafts the proposal with its near-matches above the button. | **Opus · high** | **ships dark; owner flips** | `proposeCategory` · `/admin/taxonomy` |
+| **C5** | **Their website fills it in at sign-up.** | Sonnet · medium | 🔴 **owner + DPO: lawful basis, not just tone** | vendor onboarding |
+| ~~Cx~~ | ~~Match by meaning (embeddings)~~ | — | 🛑 **DEMOTED — do not build it yet** | — |
+
+🛑 **THE EMBEDDINGS SESSION WAS REMOVED AFTER A FABLE ADVERSARIAL PASS.** Its evidence turned out
+to be a **supervised classifier trained on labelled history** (we have none — 0 authored cards); its
+already-chosen model is **English-only** for a feature about *sorbetes · pabati · ninong · abuloy*;
+and it is **untestable here** — the PGlite replay rewrites `extensions.vector(N)` → `text`, so every
+db test about it would be vacuous. **C2 does the same job at our size for a fraction of the risk.**
+Revisit only if the alias list measurably misses real supplier phrases.
 
 ### 🛑 Never run together
 
-- **C1 and C2 both edit `canvas-maker.tsx`.** Two sessions in that file is how a rebase conflict
+- **C1 and C3 both edit `canvas-maker.tsx`.** Two sessions in that file is how a rebase conflict
   deletes a feature — both sides *append*, and either choice loses one. **Never together.**
-- **C3 and C4 both edit the suggestion path.** C4 is only reached when C3 returns nothing, so a
-  session that changes C3's confidence floor changes when C4 fires. **Never together.**
-- **C1 pairs safely with C5**; C2 pairs safely with C5. **Never more than two at once.**
+- **C2 and C3 both change what answers a typed phrase.** C3 only fires when C2 missed, so a session
+  changing one changes when the other runs. **Never together.**
+- **C0 and C4 both touch `admin/taxonomy/actions.ts`.** **Never together.**
+- **C0 pairs safely with C1.** **Never more than two at once.**
 
 ### Suggested order
 
-**C1 → C2 → C3 → C4 → C5.** C1 and C2 need no model at all and are the whole feature for a
-supplier who types a word we already have — which, on the measured taxonomy, is most of them.
-**If nothing after C2 is ever built, the naming gap is still closed.**
+**C0 → C1 → C2 → C3 → C4 → C5.**
+
+**C0 first, and this is the owner's own question answered:** we can rename a category freely and
+safely today, we can combine two *branches*, and we **cannot combine or reroute a TRADE at all** —
+the column for it has existed since 2026-08-03 with zero writers and zero readers. Building the undo
+before anything starts proposing new trades is the difference between a mistake that costs a click
+and one that is permanent.
+
+**C1 + C2 are the whole feature for most suppliers**, need no supplier text to leave the server, and
+close the naming gap on their own. **If nothing after C2 is ever built, the gap is still closed.**
 
 ---
 
@@ -52,30 +69,41 @@ supplier who types a word we already have — which, on the measured taxonomy, i
 | "AI reads a shop's website and says what they sell" | **`lib/vendor-deep-search.ts`** → `detected_services` |
 | A "tell us what you do" intake | **`proposeCategory`** → `taxonomy_category_requests` |
 | An admin queue + **four outcomes** + **a real mint** | **`promoteCategoryRequest` · `mapCategoryRequest` · `resolveCategoryRequest`** (`kept_private`/`rejected`) + `createTaxonomyNode` |
-| pgvector | **Installed in production, v0.8.0** |
-| The embedding model decision | **Already made and written down:** `bge-small-en-v1.5` via Cloudflare Workers AI, 384 dims — `20260518500000_iteration_0016_wizard_architecture_schema.sql` |
+| **Renaming a category** | **`renameTaxonomyNode`** — writes `label_en` ONLY, never the key. Safe and audit-logged |
+| **Moving a trade to another branch** | **`remapCanonical`** · **`moveTileToFolder`** |
+| **Combining two BRANCHES** | **`deleteTileWithDestination`** — refuses to delete a non-empty branch without a destination, then re-points everything. Copy this pattern for C0 |
 
-🔴 **But do NOT read that last row as "embeddings are already built."** Measured 2026-08-28:
-**zero code anywhere generates an embedding and zero rows hold one.** The columns exist, the model
-was chosen, the wiring never happened. **C3 is a first build.**
+🔴 **AND THE TWO THINGS THAT DO NOT EXIST — this is C0's whole scope.** There is **no leaf-level
+merge and no leaf-level delete** anywhere in the admin, and `service_categories.merged_into_category_id`
+has existed since 2026-08-03 with **0 writers · 0 readers · 0 values**. Meanwhile
+`vendor_coverages.canonical_service`, `vendor_services.category` and `vendor_profiles.services[]`
+carry **no foreign key at all**, so nothing would stop a trade being deleted out from under the
+shops that listed under it.
 
 ---
 
 ## ⚖ Owner decisions these sessions wait on
 
-1. **C3 sends a supplier's typed words to Cloudflare Workers AI.** That is plausibly a **new data
-   processor** under RA 10173, and this project maintains a declared-processor list. *Needs a
-   ruling before C3 ships, not after.* ⚠ Note we are already a Cloudflare customer for R2 —
-   **storing files with a vendor is not the same as sending them text to process**, and this corpus
-   has already been burned once by treating those as the same thing.
-2. **When C4 goes on.** It only fires when a supplier's words match nothing at all — and production
+1. **When C4 goes on.** It only fires when a supplier's words match nothing at all — and production
    has had **0 category requests, ever**. *Recommendation: build it dark, switch it on when a real
    supplier first hits an empty result.*
-3. **C5's tone.** *"Your website says you do X"* is useful and is also us telling a shop we read
-   their website. It is already declared for verification; using it to pre-fill their public listing
-   is a **different purpose** and may need its own line.
-4. **Who may teach the box a wording** (C2) — only an admin, or does a supplier's own confirmed pick
-   teach it for everybody? *Recommendation: a supplier's pick teaches it, but only on a SAVED card.*
+2. 🔴 **C5 is bigger than "tone", and its premise was wrong.** `vendor_web_dossiers` holds **0 rows,
+   ever** — there is no stored reading to reuse, so C5 means *running* Deep Search per shop at
+   sign-up. And the privacy notice declares Deep Search as **"a paid tool"** the **vendor initiates**
+   about their own business, with rolling 180-day deletion. Auto-running it free, on our initiative,
+   is a **lawful-basis and purpose change**, not a wording choice. Needs the owner as DPO.
+3. **Does a supplier's own confirmed pick teach C3 for everybody, or only an admin?**
+   ⚠ Unlike `admin_search_phrases` — whose writers are admins and a validated model — C3's writers
+   would be **untrusted accounts writing a cross-tenant cache**. A supplier could type *"catering"*,
+   deliberately pick **Funeral Home**, save a real card, and teach that to everyone.
+   *Recommendation: only learn a phrase the alias list and search BOTH missed (which caps it to
+   obscure wordings), never rank a remembered answer above search, and ship the review/unteach
+   screen in the same PR.*
+4. ⚖ **Embeddings are demoted, not deleted.** If the owner still wants them later, the Cloudflare
+   Workers AI processor question comes back with them — **and it is a real one**: the privacy notice
+   declares Cloudflare for **R2 storage and the call relay**, not for AI inference on typed text.
+   *Storing files with a vendor is not sending them text to process* — this corpus has been burned
+   by that exact conflation before.
 
 ---
 

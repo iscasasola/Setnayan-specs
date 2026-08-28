@@ -24,15 +24,24 @@
 > suggestion. The evidence says that is the wrong instrument for this job**, so the plan below is
 > revised. Sources at the end of this section.
 
-**1 · For picking a category from a fixed list, embeddings beat LLM prompting — decisively, and on
-every axis we care about.** *Beyond the Hype: Embeddings vs. Prompting for Multiclass
-Classification* (Kokkodis, Demsyn-Jones & Raghavan, arXiv 2504.04277) measured **49.5% higher
-accuracy** for embeddings over the best LLM prompts, plus better **calibration, latency and cost**.
+> 🛑 **CORRECTION, 2026-08-28, after a Fable adversarial pass — AND I HAD ALREADY TOLD THE OWNER
+> THE WRONG NUMBER.** The claim below was the load-bearing evidence for putting embeddings in the
+> middle of this plan. **It does not apply to what was proposed.**
 
-🔑 **And it is almost exactly our problem, not a distant analogy: they predict PROFESSIONAL SERVICE
-CATEGORIES from free-text project descriptions on Thumbtack** — home services, a fixed
-professional taxonomy, a person typing what they need in their own words. That is a supplier typing
-*"sorbetes cart"* at our 262 trades.
+**1 · ~~For picking a category from a fixed list, embeddings beat LLM prompting — 49.5% higher
+accuracy.~~ STRUCK.** *Beyond the Hype* (arXiv 2504.04277) does measure that — for a **SUPERVISED
+softmax classifier trained on Thumbtack's own labelled history**. Verified by fetching the
+abstract: *"we build embeddings-based softmax models"*, and the paper conditions its own result on
+problems *"that can leverage **proprietary datasets**"*.
+
+🔴 **We have no such dataset and will not for months: production holds ZERO supplier-authored
+service cards, so there are zero labelled examples to train on.** What this plan actually proposed
+was **zero-shot cosine similarity against label text** — a different and much weaker method that
+the paper never measured and never endorses. Citing its number for it was a category error.
+
+⚖ **The domain match was real and is the only part that survives** — they predict professional
+service categories from free text, which is our shape. That makes the *problem* comparable. It does
+not make the *result* transferable.
 
 **2 · The standard production recipe is "embed the taxonomy once, offline".** Each category is
 embedded from its own name/description; at runtime the typed words are embedded with the same
@@ -86,16 +95,34 @@ three cheap ones; we are just not using them here.
 
 | Step | What it does | Cost | Status |
 |---|---|---|---|
-| 1 | Rank the real 262 trades against the words they typed | ₱0, instant | **Written and tested — not wired into the maker** |
-| 2 | Remember a wording somebody used before | ₱0, one indexed read | **Shipping on the admin side** |
-| 3 | **Match by MEANING — embeddings + nearest neighbour** (*"sorbetes cart"* → **Ice Cream Cart**) | 262 embeddings ever + one tiny one per new phrase | 🔴 **pgvector live, model chosen — but nothing has ever generated an embedding here** |
-| 4 | Ask Claude — **only** to propose a genuinely new trade, never to pick an existing one | pennies, rare | **Pattern ships on the admin side** |
-| 5 | Read their website and pre-fill it at sign-up | one call per shop | **Half-built** — Claude already reads shop websites, for the approval screen only |
+| 1 | Rank the real trades against the words they typed | ₱0, instant | **Written and tested — not wired into the maker** |
+| 2 | **An ALIAS list** — *sorbetes · ice cream cart · sorbetero* all point at the same trade, written once and checked by a person | one offline pass, then ₱0 forever | new, small, and needs no new supplier |
+| 3 | Remember a wording a supplier confirmed | ₱0 | **Pattern ships on the admin side** — but see the poisoning risk in § 6 |
+| 4 | Ask Claude — **only** to propose a trade we do not have | pennies, rare | **Pattern ships on the admin side** |
+| — | ~~Match by meaning (embeddings)~~ | — | 🛑 **DEMOTED — see below** |
+| 5 | Read their website and pre-fill it at sign-up | one call per shop | 🔴 **thinner than written — 0 dossiers exist, ever** |
 
-⚠ **Steps 3 and 4 swapped after the research.** The first draft had the LLM doing the matching;
-the measured result is that embeddings do it better, cheaper and more predictably, and the LLM's
-right job is the one embeddings genuinely cannot do — **writing a proposal for a trade that does not
-exist yet.**
+🛑 **THE EMBEDDINGS SLICE IS DEMOTED, NOT DELETED — and this is the biggest change.** It was the
+centre of the plan an hour ago. Three measured reasons killed its priority:
+
+1. **Its evidence does not apply** (§ R, corrected above) — the cited win is a trained classifier;
+   we have nothing to train on.
+2. **The chosen model is ENGLISH.** `bge-small-en-v1.5` — and the whole point of this feature is
+   *sorbetes · pabati · ninong sets · abuloy · Taglish spellings*, which is exactly where an
+   English-only model degrades. ⚠ And that choice rests on **an inline comment in a 2026-05
+   migration** on a column nothing has ever written — the evidence class this corpus explicitly
+   says is never evidence.
+3. **It cannot be tested here.** The PGlite replay rewrites `extensions.vector(N)` → `text` and
+   no-ops `CREATE EXTENSION vector` (`tests/db/replay-migrations.ts:272-274`), so the `<=>` operator
+   does not exist in the replay. **Every db test about it would be vacuous by construction** — the
+   same shape as the `relrowsecurity` blind spot this corpus already pinned.
+
+⇒ **An alias list does the same job for our size** — 288 trades, 2 shops, 0 authored cards. It is
+written once by the model we already declare, **checked by a person**, stored beside the taxonomy,
+and matched by the ranker we already have. Supplier text **never leaves the server**, so there is no
+new processor, no new secret, and no privacy-notice change. It degrades to step 1 if empty.
+**Revisit embeddings only if the alias list measurably misses real supplier phrases** — a condition
+production cannot currently produce one data point for.
 
 **The economics are already proved in this codebase:** the admin box asks the model only when the
 first two steps have nothing, and writes the answer back, so *the feature gets cheaper the more it
@@ -217,6 +244,51 @@ word for this"*.
 > proper proposal already written, for one press.
 
 **At no point does the card refuse them.** Miscellaneous is still on the same screen, always.
+
+---
+
+## 3b · 🔴 CAN WE UNDO ONE? — measured, because it decides everything else
+
+> **Owner, 2026-08-28:** *"if ever a category added a new one, are we capable of rerouting them,
+> combining them to an existing, or renaming the category in the future?"*
+>
+> **The right question, and the answer is mixed. Renaming is free. Rerouting and combining a TRADE
+> are not built at all — and the column for it exists, unwired.**
+
+| What you asked | Can we? | Measured |
+|---|---|---|
+| **Rename a category** | ✅ **Yes, safely, any time** | `renameTaxonomyNode` writes **`label_en` only — never the key.** Everything that stored the old key keeps working; only the words on screen change. Audit-logged. **Renaming is genuinely free and reversible.** |
+| **Move a trade to a different branch** | ✅ Yes | `remapCanonical` re-points one leaf; `moveTileToFolder` moves a whole branch |
+| **Combine two BRANCHES** | ✅ Yes, and it is well built | `deleteTileWithDestination` **refuses to delete a non-empty branch without a destination**, then re-points every trade and refinement to it. Its own rule: *"never strand a canonical"* |
+| **Combine two TRADES into one** | 🔴 **No. Nothing exists.** | There is no leaf-level merge and no leaf-level delete action anywhere in the admin |
+| **Reroute an old trade to its replacement** | 🔴 **No — and the column for it has existed since 2026-08-03, unwired** | `service_categories.merged_into_category_id`, FK to itself. **0 writers · 0 readers · 0 values in production.** The **ninth** gate with no handle in this corpus |
+
+### 🚨 And the shop-side columns have no seatbelt
+
+`vendor_coverages.canonical_service`, `vendor_services.category` and `vendor_profiles.services[]`
+(a text array — it cannot have one) carry **NO foreign key** to the taxonomy. So the database would
+not stop a trade being deleted out from under them; those shops would silently hold a key pointing
+at nothing.
+
+Three other tables *do* hold `RESTRICT` foreign keys — `event_vendor_preferences`,
+`vendor_service_attributes`, `event_vendors.category_key` — so a delete is blocked **only if one of
+those rows happens to exist.** Protection by coincidence, not by design.
+
+### ⇒ What this changes about the plan
+
+**The undo must be built BEFORE anything starts proposing new trades at scale.** It is cheap: the
+column exists, and the branch-level merge is a working precedent to copy. Three things:
+
+1. **A leaf-level merge** — combine trade A into trade B, moving every shop that listed under A, on
+   the `deleteTileWithDestination` pattern that already refuses to strand anything.
+2. **Wire `merged_into_category_id`** so an old key still resolves to its replacement, exactly as a
+   renamed shop address forwards. ⚠ The precedent carries its own warning: **slug forwarding was
+   written and then had no reader for months.** Ship the reader in the same PR.
+3. **A guard that fails when a shop-held key points at nothing**, because no foreign key will.
+
+🔑 **This softens the "close to permanent" warning in § 4 — but only once it is built.** Today that
+warning stands exactly as written: we can rename freely, and we cannot combine or reroute a trade
+at all.
 
 ---
 

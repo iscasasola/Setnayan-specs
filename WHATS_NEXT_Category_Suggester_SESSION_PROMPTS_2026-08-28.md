@@ -2,7 +2,7 @@
 
 > One prompt per session. **Paste the SHARED HEADER first, then one session block.**
 > Register: [`WHATS_NEXT_Category_Suggester_SESSIONS_2026-08-28.md`](WHATS_NEXT_Category_Suggester_SESSIONS_2026-08-28.md).
-> 🛑 **Never more than two at once. Never C1 with C2 (same file). Never C3 with C4 (same path).**
+> 🛑 **Never more than two at once. Never C1 with C3 (same file). Never C2 with C3 (same answer path). Never C0 with C4 (same file).**
 
 ---
 
@@ -64,6 +64,53 @@ processor, reversing a lock). Stop at every gate your session names.
 
 ---
 
+## C0 · A CATEGORY CAN BE UNDONE
+
+**Opus · high · build this BEFORE anything proposes new trades · 🛑 NEVER with C4**
+
+```
+Make a category mistake reversible. This is the owner's own question (2026-08-28): "if ever a
+category added a new one, are we capable of rerouting them, combining them to an existing, or
+renaming the category in the future?"
+
+MEASURED ANSWER — verify it, then build the gap:
+  ✅ RENAME IS ALREADY SAFE. renameTaxonomyNode writes label_en ONLY, never the key. Everything
+     stored keeps working. Do not touch it.
+  ✅ MOVING a trade between branches ships (remapCanonical), as does moving a whole branch
+     (moveTileToFolder).
+  ✅ COMBINING TWO BRANCHES ships and is well built: deleteTileWithDestination refuses to delete
+     a non-empty branch without a destination, then re-points every trade and refinement. Its own
+     rule is "never strand a canonical". COPY THIS PATTERN — do not invent a second one.
+  🔴 COMBINING TWO TRADES does not exist. No leaf-level merge, no leaf-level delete, anywhere.
+  🔴 service_categories.merged_into_category_id has existed since 2026-08-03 (FK to itself) with
+     ZERO writers, ZERO readers and ZERO values in production. A gate with no handle.
+
+BUILD:
+  1. A leaf-level MERGE: fold trade A into trade B. It must move every shop that listed under A —
+     vendor_coverages.canonical_service, vendor_services.category, and vendor_profiles.services[]
+     (a TEXT ARRAY: the update is array surgery, not a scalar swap, and a shop may end up holding
+     B twice — dedupe).
+     🚨 NONE of those three has a foreign key to the taxonomy, so the DATABASE WILL NOT STOP YOU
+     and will not tell you what you missed. Enumerate the holders BY GREPPING THE COLUMN, never
+     from a remembered list. Three other tables DO hold RESTRICT FKs
+     (event_vendor_preferences, vendor_service_attributes, event_vendors.category_key) and will
+     block a delete — handle them explicitly rather than being surprised.
+  2. WIRE merged_into_category_id so an old key still resolves to its replacement.
+     ⚠ THE PRECEDENT CARRIES ITS OWN WARNING: slug forwarding in this repo was WRITTEN and then
+     HAD NO READER FOR MONTHS — two screens promised it and nothing read the ledger. SHIP THE
+     READER IN THE SAME PR, and prove it with a test that resolves an old key end to end.
+  3. A guard that FAILS when a shop-held key points at no live trade. No foreign key will do it.
+
+Dry-run the merge against PRODUCTION inside BEGIN…ROLLBACK, count the rows moved on every one of
+the three shop-side holders, and put the transcript in the PR body. Prod is tiny (2 shops, 2
+coverage rows, 2 cards) so seed a realistic case rather than proving it on nothing.
+
+Guard it and mutate the guard: the merge moves all three holders · an old key resolves to its
+replacement THROUGH A REAL READER · the dangling-key guard actually fires.
+```
+
+---
+
 ## C1 · TYPING FINDS THE REAL TRADE
 
 **Sonnet · medium · no model, no new schema · 🛑 NEVER with C2**
@@ -95,6 +142,12 @@ BUILD:
     matched while results sit above it.
 
 WATCH FOR:
+  · 🚨 THE OBVIOUS VERSION RESURRECTS THE DEFECT THIS SHEET WAS BUILT TO KILL. rankTaxonomyOptions
+    returns bare {key,label}; standing (covered / open / locked + the greyed reason) is computed
+    only for the legacy pills. Render ranked results WITHOUT standing and a capped supplier picks
+    a trade, writes the whole card, and is refused at SAVE — which is exactly the "refusal used to
+    arrive after the card was written" defect canvas-maker's own docblock records repairing. Every
+    result must pass through standingForCategory and render as a KindPill.
   · Payload. ~262 options reach the client. The couple-side explore already ships ~192 the same
     way — cite that precedent, and check the bundle-size CI job does not move.
   · A leaf whose label the taxonomy read could not resolve must never render as a raw key.
@@ -106,14 +159,69 @@ before → after.
 
 ---
 
-## C2 · IT REMEMBERS WHAT SUPPLIERS CALL THINGS
+## C2 · ONE TRADE, MANY NAMES — the alias list
 
-**Sonnet · medium · one migration, no model · 🛑 NEVER with C1**
+**Sonnet · medium · offline, no supplier text leaves the server · 🛑 NEVER with C3**
+
+```
+Make "sorbetes", "sorbetero" and "ice cream cart" all find the same trade — the semantic step,
+done the cheap way.
+
+⚖ WHY NOT EMBEDDINGS. A Fable adversarial pass killed that slice: its evidence was a SUPERVISED
+classifier trained on labelled history (we have none — 0 authored cards); the already-chosen
+model is bge-small-en-v1.5, ENGLISH, for a feature about sorbetes/pabati/ninong/abuloy; and the
+PGlite replay rewrites extensions.vector(N) -> text, so every db test about it would be vacuous.
+Do not build embeddings in this session. If somebody argues for them, read § R of the plan.
+
+BUILD:
+  · A table of aliases: phrase -> canonical_service, plus who wrote it and whether a person has
+    reviewed it. UNIQUE on the normalised phrase.
+  · SEED IT OFFLINE, ONCE: ask Claude (the processor we ALREADY declare, with a working key) for
+    Filipino / English / Taglish synonyms per trade. This runs as a script an admin triggers —
+    NOT in the supplier's request path. Supplier text never leaves the server, which is why this
+    slice needs no new processor and no privacy-notice change.
+  · A PERSON REVIEWS BEFORE IT COUNTS. An unreviewed alias must not answer anybody. The 51
+    orphan trades in the measurement doc are the natural first review batch and double as the
+    eval set — if the aliases do not find those, the approach has failed and you should say so
+    rather than ship it.
+  · Extend the ranker to match label OR alias. ⛔ Do not fork rankTaxonomyOptions — pass aliases
+    in as searchable text on the option and keep ONE matcher.
+  · An alias must resolve to a LIVE trade at READ time. A trade can be retired or merged after
+    the row is written; a stale alias must fall through to search silently, never render.
+
+Guard it and mutate the guard: an unreviewed alias answers nobody · an alias pointing at a dead
+trade renders nothing · there is still exactly ONE matcher.
+```
+
+---
+
+## C3 · IT REMEMBERS WHAT SUPPLIERS CONFIRM
+
+**Sonnet · medium · one migration, no model · 🛑 NEVER with C1 or C2 · ⚠ read the risk first**
 
 ```
 When a supplier types words we have no exact match for and then PICKS a trade and SAVES the
 card, remember that pairing. The next supplier who types the same words gets the answer with no
 search and no model.
+
+🚨 THE RISK THAT SHAPES THIS WHOLE SESSION, and it is why C2 exists first. Unlike
+admin_search_phrases — whose writers are ADMINS and a validated model, CHECK learned_from IN
+('ai','admin') — this cache is written by UNTRUSTED ACCOUNTS and served CROSS-TENANT. A supplier
+can type "catering", deliberately pick Funeral Home, save a real card, and teach that pairing to
+every future supplier. So:
+  · ONLY learn a phrase that C1's search AND C2's aliases BOTH missed. A phrase search already
+    answers must never enter the cache — that alone caps poisoning to obscure wordings.
+  · NEVER rank a remembered answer above search. Beside it, labelled, or below it.
+  · Ship the admin review/unteach screen IN THE SAME PR. A cache nobody can inspect is a cache
+    nobody can fix.
+  · State the retention story: a supplier can type a phone number into that box, and it would
+    otherwise be stored globally forever.
+
+🪤 AND THE SHAPE YOU ARE MIRRORING HAS A TRAP: admin_search_phrases has RLS ON with ZERO policies
+and ZERO grants (service-role only, REVOKE ALL). A mirror read through a USER-SESSION client
+returns SILENT EMPTY — which in this feature is indistinguishable from "no remembered phrase", so
+the cache would ship dead and green. All reads and writes go through server actions on the admin
+client, and a test must prove a remembered phrase round-trips through the maker's REAL path.
 
 ⛔ RULE 0: mirror `admin_search_phrases` — do not invent a shape. Read
 20271169224135_the_box_remembers_the_words_you_use.sql and lib/admin-map/ask-the-admin.ts
@@ -137,49 +245,19 @@ re-validated on read · normalisation matches on both sides.
 
 ---
 
-## C3 · IT MATCHES BY MEANING
+## ~~Cx · IT MATCHES BY MEANING (embeddings)~~ — 🛑 DEMOTED, DO NOT BUILD
 
-**Opus · high · FIRST EMBEDDING BUILD IN THIS REPO · 🛑 NEVER with C4 · ⚖ OWNER-GATED**
+**Removed 2026-08-28 after a Fable adversarial pass.** Three measured reasons, in full in § R and
+§ 2 of the plan: the cited evidence is a **supervised classifier trained on labelled history** and
+we have **zero** labelled examples; the already-chosen model is **English-only** for a feature whose
+whole point is Filipino trade words; and the **PGlite replay rewrites `extensions.vector(N)` →
+`text`**, so every db test about it would be **vacuous by construction**.
 
-```
-Make "sound hire" find Lights & Sound, and "sorbetes cart" find Ice Cream Cart. Letters never
-match those; meaning does. Reached only when C1 and C2 both come back empty.
-
-⚖ STOP AT THE GATE FIRST. This sends a supplier's typed words to Cloudflare Workers AI, which
-is plausibly a NEW DATA PROCESSOR under RA 10173, and this project maintains a declared-
-processor list. Get the owner's ruling in writing before shipping. ⚠ We are already a
-Cloudflare customer for R2 — storing files with a vendor is NOT the same as sending them text
-to process, and this corpus has already been burned once by treating those as the same thing.
-Build up to the gate; do not flip anything.
-
-WHAT IS ALREADY DECIDED FOR YOU (do not re-litigate):
-  · pgvector is INSTALLED IN PRODUCTION, v0.8.0 — verified by the object.
-  · The model was chosen in May and written down: bge-small-en-v1.5 via Cloudflare Workers AI,
-    384 dims (20260518500000_iteration_0016_wizard_architecture_schema.sql).
-
-🔴 AND WHAT IS NOT: NOTHING IN THIS REPO HAS EVER GENERATED AN EMBEDDING. Zero writers, zero
-rows (concierge_brain_chunks = 0). The columns exist and the wiring never happened — the eighth
-"gate with no handle" in this corpus. Scope this as a FIRST BUILD, not a reuse.
-
-BUILD:
-  · Embed the 262 trades ONCE — name + branch + folder as the text — onto the taxonomy row,
-    with a cosine index. Re-embed only when an admin adds or renames one. That is the whole
-    cost story: 262 ever, then one tiny embedding per new phrase.
-  · At runtime embed the typed phrase with the SAME instruction. A different instruction on the
-    two sides silently degrades every match and looks fine.
-  · 🔑 USE THE TREE. The literature treats this as hierarchical; a match whose branch is far
-    from anything the shop covers should rank below one that is close.
-  · 🔒 A SIMILARITY SCORE IS NOT A DECISION. Below a floor, show NOTHING and fall through. Say
-    in the PR how you chose the floor and what you tested it against — an unjustified floor is
-    the whole feature's accuracy in one unmeasured constant.
-  · An admin renaming a trade must not leave a stale embedding answering for the old name.
-    Say what happens; a re-embed with no trigger is a backfill, and a backfill is a
-    point-in-time act, not ongoing coverage.
-  · 🔒 FAILS SILENT. No key, no network, a bad shape → the box behaves exactly as after C1.
-
-Dry-run the migration against production inside BEGIN…ROLLBACK and put the transcript in the PR
-body — the PGlite replay runs as superuser and can agree with a database prod does not have.
-```
+**C2's alias list does the same job at our size.** Revisit this only if the alias list *measurably*
+misses real supplier phrases — a condition production cannot currently produce one data point for.
+If it is ever revisited, the **Cloudflare Workers AI processor question comes back with it**: the
+privacy notice declares Cloudflare for R2 storage and the call relay, **not** for AI inference on
+typed text.
 
 ---
 
@@ -227,10 +305,17 @@ button · the supplier's path is never blocked.
 **Sonnet · medium · ⚖ OWNER RULES ON TONE FIRST · pairs with C1 or C2**
 
 ```
-BLOCKED UNTIL THE OWNER ANSWERS. "Your website says you do X — shall we add these?" is useful,
-and it is also us telling a shop we read their website. That reading is already declared for
-VERIFICATION; using it to pre-fill their public listing is a different purpose and may need its
-own line in the privacy notice. Ask, and stop.
+BLOCKED UNTIL THE OWNER ANSWERS — AND THIS IS BIGGER THAN THE "TONE" IT WAS FIRST SCOPED AS.
+
+🔴 THE PREMISE WAS WRONG AND WAS CORRECTED 2026-08-28. This slice was written as "reuse the
+reading we already take". MEASURED: vendor_web_dossiers holds ZERO ROWS, EVER. There is no
+stored reading to reuse. So C5 means RUNNING Deep Search per shop at sign-up — a real per-shop
+model cost, not a free reuse.
+
+🔴 AND THE PRIVACY NOTICE BINDS IT. app/(shell)/privacy declares Deep Search as "a PAID tool"
+that "the VENDOR initiates" about their own business, with rolling 180-day deletion. Running it
+free, on OUR initiative, at sign-up, is a LAWFUL-BASIS AND PURPOSE CHANGE — not a wording
+choice. It needs the owner as DPO, plus a notice edit shipped in the same PR.
 
 ⛔ RULE 0: lib/vendor-deep-search.ts ALREADY asks Claude what a shop advertises and stores
 detected_services in vendor_web_dossiers. Do not build a second reader.
@@ -238,6 +323,8 @@ detected_services in vendor_web_dossiers. Do not build a second reader.
 BUILD (once ruled):
   · Run the dossier's detected_services — free text — through C1–C3 to turn them into real
     trades, and offer them as suggested COVERAGE at sign-up.
+  · ⚠ The 180-day deletion means a pre-fill can never lean on an old dossier even once they
+    exist. Say what happens for a shop whose dossier has aged out.
   · ⚖ SUGGESTED, NEVER APPLIED. Coverage decides what couples find a shop under; writing it
     silently from a web guess changes a shop's own listing without them.
   · This is the only slice that costs a model call per SHOP rather than per new wording. Say so.
@@ -247,7 +334,9 @@ BUILD (once ruled):
 
 ## ⏭ Not sessions — the owner's, whenever he wants them
 
-1. **Is Cloudflare Workers AI a new declared processor?** Gates C3. Not an engineering call.
-2. **When C4 switches on.** Recommendation: the day a real supplier first hits an empty result.
-3. **Does a supplier's own pick teach the box for everybody** (C2), or only an admin's?
-4. **C5's tone**, per its own gate above.
+1. **When C4 switches on.** Recommendation: the day a real supplier first hits an empty result.
+2. **Does a supplier's own confirmed pick teach the box for everybody** (C3), or only an admin's?
+   The poisoning risk in C3's own block is the reason this is a decision and not a default.
+3. **C5's lawful basis and cost**, per its own gate above — not a tone question.
+4. **Whether embeddings are ever wanted.** Demoted, not deleted. If they come back, so does the
+   Cloudflare Workers AI processor question, which is a DPO decision.
