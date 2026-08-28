@@ -357,6 +357,42 @@ Naming somebody means something: a specific allotment is **protected all night**
 ✅ **And there is already a way out** — the couple lowering her allotment returns the unspent part
 to the pot, through the same target-not-delta call as 7b. **Nothing is ever permanently stranded.**
 
+## § 7d · 🔴 THE OFFLINE RULE — added 2026-08-29 from the competitor research
+
+The competitor deep-dive raises offline capture as an unanswered risk: *"If Controlled Shots
+enforces its budget server-side, you will fail in exactly the provincial venues where you most
+need to win."* Scene built offline-first deliberately; Philippine venue WiFi is unreliable.
+
+✅ **WE ALREADY HAVE OFFLINE CAPTURE** — `enqueuePapicGuestCapture` +
+`lib/offline/service-handlers/papic-drain.ts`. The research lists this as *not yet answered*; it
+ships. **But the ceiling lands on top of it, and that is where the harm is.**
+
+🚨 **A CEILING REFUSAL MUST NEVER BE A TERMINAL DRAIN ERROR, AND MUST NEVER BE UNREGISTERED
+EITHER.** `PAPIC_TERMINAL_ERRORS` decides what happens to a shot already taken:
+
+- **Unregistered** ⇒ it falls through to the queue branch and retries up to 50 times until the
+  7-day TTL evicts it silently. The file's own docblock records the cost of exactly this, from
+  2026-08-18: *"They finish the night believing they captured dozens of photos that do not
+  exist."*
+- **Registered as terminal** ⇒ the shot is thrown away. **The guest watched themselves take that
+  photograph.**
+
+⚖ **THE RULE: a shot already taken is honoured, even if it crosses the ceiling.** The ceiling
+stops you TAKING more; it does not reach back and destroy one you already took. So a drained
+offline capture is admitted above the ceiling, and the overshoot is bounded by what the phone
+actually holds.
+
+🔒 **The POT still binds** — that is the money gate and it is untouched. The ceiling is a
+*fairness* rule between guests, and bending fairness for photographs that already exist is the
+right direction to fail. ⚠ A crafted client could claim an ordinary capture is a drain; the
+exposure is bounded by the pot, which is the only thing anyone pays for. Say this out loud in the
+migration rather than discovering it later.
+
+⇒ **S2 must decide the drain classification explicitly and test it.** A per-guest ceiling shipped
+without touching `PAPIC_TERMINAL_ERRORS` is the 2026-08-18 defect with a new trigger.
+
+---
+
 ## § 8 · Sequence — four PRs, in this order
 
 | PR | What | Safe because |
