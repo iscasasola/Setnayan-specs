@@ -340,9 +340,32 @@ for every shop, always. *An RLS denial and an empty read are the same value.*
   🔢 **Safe by arithmetic:** prod has never held a lock request (0 pending · 0 ever stamped · 0 ever
   nudged), the deadline is MATERIALIZED so no existing promise is shortened retroactively, and the
   handshake is still behind its unflipped flag.
-· **A fifth lane, "Holding"** — you said yes, they have not booked. The shared core maps
-  `agreed`-but-unconfirmed to `cancelled` with its reasons written down there; re-deciding it on one
-  screen is how two screens start disagreeing about who is booked.
+· ~~**A fifth lane, "Holding"**~~ ✅ **APPROVED 2026-08-28 — _"yes."_ BUILT THE SAME DAY: PR
+  [#4969](https://github.com/iscasasola/setnayan-platform/pull/4969), auto-merge armed. DO NOT
+  RE-ASK IT.** ⚠ Verify with `gh pr view 4969 --json state,mergedAt`.
+  🔑 **AND THE RISK THIS ROW WARNED ABOUT WAS MEASURED AWAY, NOT MANAGED.** The row said the shared
+  core maps `agreed`-but-unconfirmed to `cancelled`, so a Holding lane would force a second mapping
+  of "who is booked" across six surfaces. **That is true of the OBVIOUS build and the obvious build
+  is wrong:** read out of the live production object, `vendor_agree_to_lock` writes
+  `status = 'contracted'` **in the same statement** as `lock_request_state = 'agreed'` — **a shop's
+  yes IS the booking**, so `agreed` implies `contracted`, `lockRequestStateOf` answers `'locked'`,
+  and there is no agreed-but-unbooked state to build on. The state the owner described lives in the
+  **ENQUIRY** (answered, no booking, thread quiet for 7 days) — which is what the drawing's own nudge
+  copy says: *"9 days since you REPLIED"*. **`lockRequestStateOf` is untouched.** Recorded as its own
+  `DECISION_LOG.md` row 2026-08-28 🔑, because the next person will re-derive that state from the
+  spec vocabulary and be wrong the same way.
+  📐 **Shipped:** a `Holding` lane second in the order (it is where money leaks), *"quiet 9 days"* on
+  the row, and **the exposure line the owner actually described** — *"One date has more than one
+  customer holding it. 14 Feb · 3. You can only take one."* ⛔ It counts **only** holding (a live
+  conversation is work, not exposure) and **never an undated customer** (they cannot be
+  double-promised a day), and it is computed over EVERY customer rather than the filtered list — a
+  warning that vanishes under a chip is not a warning.
+  🪤 **AND IT CAUGHT ONE OF MY OWN EDITS DOING NOTHING:** a find-and-replace whose target did not
+  match — the one block in that batch with no assertion on the match count — so `PipelineThread`
+  never declared `lastActivityAt`. Runtime was correct and **every test passed** (the tests build
+  plain objects); only `tsc` could see it, and `tsc` was invisible for several rounds because four
+  concurrent typechecks on a 16 GB machine kept exiting **144 with an empty log**. *An unverified
+  gate is not a passed one — in either direction.*
 · **Whether the Waitlist should be a lane at all** — it is deliberately absent, because picking
   somebody off the waitlist does nothing today and still reports success.
 
