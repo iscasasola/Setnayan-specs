@@ -235,11 +235,14 @@ BUILD:
     (lib/service-merge-forward*.ts). Reuse it; do not write a second one.
   · misc (Miscellaneous) stays reachable in every state.
 
-⚠ REPORT THE HONEST GAP, do not bury it: 107 categories carry ONLY a name (sorbetes_cart's
-attributes are {} and its facets are []). Mining covers 153 of 276 and leaves the rest thin —
-and the thin ones are disproportionately the 51 trades that had no word to begin with. Say how
-many of those 51 mining actually helps. That number decides whether step 2 (collecting) and step
-3 (a model) are ever needed, so it must be honest, not flattering.
+🔑 THIS IS FRAMEWORK, NOT TUNING — owner, 2026-08-28: "we are just building the framework now."
+Ship the MECHANISM: a store, a review gate, a matcher, wired into the maker. How many words it
+holds on day one is FILL, and fill arrives with real suppliers. So:
+  · Do NOT block, gate or delay the PR on coverage numbers.
+  · Do NOT tune the mining rules to chase a percentage.
+  · DO report the coverage you got, in one line, as information for later — 107 categories carry
+    only a name (sorbetes_cart's attributes are {} and facets []), so mining will be uneven and
+    that is expected, not a defect to fix now.
 
 PROVE IT: TSC_EXIT beside the error count · a NON-ZERO "# tests" count · the full unit suite
 reported · a MEASURED mutation on every guard (occurrence count before -> after, shown going
