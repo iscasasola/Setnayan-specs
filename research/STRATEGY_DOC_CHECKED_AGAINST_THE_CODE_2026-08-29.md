@@ -160,3 +160,46 @@ the biometric opt-out claim quarterly, because it is the one most likely to be c
   or the ASKING.
 - ⏭ Messenger stays worth doing after that, and its § 10 item 5 stands: **verify Meta's
   business-initiated messaging rules and the 24-hour window before committing engineering.**
+
+---
+
+## § 7 · "Never concede unlimited uploads" — RIGHT INSTRUCTION, WRONG REASON FOR US
+
+The strategy's § 7 makes this the one thing never to give up, and argues it from cost: face
+indexing at **~$0.001 per image** from a vendor, so unlimited uploads on a ₱499 album spend more on
+AI than the album earns.
+
+⚠ **THAT IS NOT OUR COST SHAPE, AND THE DIFFERENCE IS CHECKABLE BY ANYONE WE SAY IT TO.**
+
+| What actually costs us | Per photo | Note |
+|---|---|---|
+| Face matching | **No vendor fee at all** | The PHONE computes the descriptor; **our own server compares vectors** — `lib/face-match.ts`: *"no model, no cloud face API… only the small vectors move."* |
+| Objectionable-content screening | **Our own compute, every photo** | `screenCapture` is called unconditionally on **both** capture paths, self-hosted, and by corpus hard constraint **cannot be disabled**. |
+| The FaceBlock blur bake | **~3.2 s of CPU per photo** | Tiled detector sweep, self-hosted — but only on events where a guest asked not to be shown. |
+| Storage | **~₱0.06 for fifty years** | R2, zero egress. Genuinely not the constraint. |
+
+🔑 **So the marginal cost of an extra photo is OUR OWN COMPUTE, not an invoice — and the dearest
+part is the PRIVACY feature, not the AI search.** Quoting "a cent an image" to a coordinator is a
+number we cannot defend if they ask how.
+
+### The three reasons that ARE ours, in order
+
+1. **The shot ladder is the entire price of Papic.** Unlimited uploads do not merely raise a cost —
+   they delete the only thing the product sells. This is the strongest argument and it needs no
+   arithmetic.
+2. **Scarcity is the product.** A finite roll changes how people shoot: they wait, they compose,
+   they pick the moment. Unlimited gives a couple four thousand photos and nine hundred of the same
+   blurry dance floor. A coordinator can feel this argument; they cannot check it and do not want
+   to.
+3. **Every photo does cost us real compute** — screening on every one, blur on privacy events —
+   even though no vendor bills us for it. True, defensible, and second-line.
+
+### And we already hold the better answer to coordinator pressure
+
+**We do not need to match "unlimited" because we beat it at the door: Papic starts FREE.** Fifty
+shots on every celebration, and the live wall free too, against a market whose cheapest entry is
+₱499. *Unlimited-but-₱499* loses to *free-then-₱50* at the moment somebody decides. Lead there and
+the unlimited question does not get asked.
+
+⇒ **Keep the instruction. Re-derive § 3's arithmetic on our own numbers before any of it reaches a
+deck, a page or a sales call.**
