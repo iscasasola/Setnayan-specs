@@ -15,7 +15,7 @@
 > |---|---|---|
 > | **EXACT** | the leaf key *is* one of the 52 card-kind keys | **16** |
 > | **FAMILY** | no leaf-level equivalent — a card kind claims the leaf's TILE. This is the bridge the maker uses today, and it is correct; it is not the two lists agreeing | **195** |
-> | **NONE** | no card kind claims the tile at all. A shop covering this leaf is offered **no** card kind for it | **51** |
+> | **NONE** | no card kind **means this trade**. ⚠ The shop can still make a card — `misc` (*Miscellaneous*) is on the same screen for everybody and is exempt from the family cap — it just has no honest word to file it under (owner's correction 2026-08-28: *"the card is universal fit for any service"*) | **51** |
 >
 > The 51 NONE leaves sit across **19 tiles that hold leaves** (plus 2 empty orphan tiles, `editorial`
 > and `filipiniana_barongs`). Loudest of them: **Food Cart (8 leaves) · Outdoor (9) · Women's Attire

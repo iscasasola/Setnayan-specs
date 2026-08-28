@@ -13,6 +13,9 @@
 > session** — that page normalised onto `displayServiceLabel`, which humanises rather than printing
 > the key; and item **4** (no database-level validation) is unchanged but the app-side gate is
 > wider and still closed. Items 1, 2, 5 and 6 stand.
+>
+> 🛑 **AND A THIRD CORRECTION, FROM THE OWNER HIMSELF: *"why can't other shops create their card? the card is universal fit for any service."*** **He is right.** Wherever this document implied a trade with no card kind could not MAKE a card, that was **overstated and is corrected in place below.** `misc` (*Miscellaneous*) sits in the picker's Other group, is offered to every shop, and is **exempt from the family cap** (`parentsOfCategory('misc')` → `[]` → always `'open'`), so the card was **always universal and always makeable**. The 51 leaves and the 3 ungrouped funeral kinds are a **NAMING** gap — a real defect, and a smaller one than first written.
+> 🔑 **An absent option is not a closed door when a catch-all sits on the same screen.** Check for the catch-all before calling anything unreachable — the same shape as reading an empty column as a missing mechanism.
 
 > **Session S2** of [`WHATS_NEXT_Service_Card_SESSIONS_2026-08-28.md`](WHATS_NEXT_Service_Card_SESSIONS_2026-08-28.md).
 > **Measurement only. Nothing was built, nothing was migrated, no leaf was renamed, no category was
@@ -86,7 +89,7 @@ disagree.
 |---|---|---|
 | **EXACT** — the leaf key *is* one of the 52 card-kind keys | **16** | 6% |
 | **FAMILY only** — a card kind claims the leaf's tile, but no word matches | **195** | 74% |
-| **NONE** — no card kind claims the tile at all | **51** | 19% |
+| **NONE** — no card kind **means this trade**. ⚠ The shop can still make a card — see the correction at the top; it just has to file it under *Miscellaneous* or a department that is not theirs | **51** | 19% |
 
 The 51 orphans sit across **19 tiles that hold leaves**. The loudest:
 
@@ -124,8 +127,9 @@ halves, and I am correcting it rather than repeating it.** Measured:
   then collapse (photographer+videographer → *Photo & Video*; makeup+hair → *HMUA*; choir+string
   quartet → *Choir*) — so **49 grouped members render as 46 pills in 6 groups**, not 34.
 * **3 of the 52 keys are in no group at all** — `funeral_home`, `cremation`, `memorial_park`, added
-  2026-08-27 with the wake work and never added to `SERVICE_GROUPS`. **A funeral home cannot reach
-  a card kind from that picker at all.**
+  2026-08-27 with the wake work and never added to `SERVICE_GROUPS`. **No funeral-shaped word
+  renders in that picker at all** — a funeral home could still make cards, it just had to file
+  them under *Miscellaneous*.
 * **33 of the 46 pills show a word that is not the word the value is stored under.** Mostly
   harmless case changes. Three are not:
 
@@ -235,7 +239,7 @@ is this card for?"* — for the owner's own shop, that is **two** choices, not 4
   coverage. Only the stored value is still legacy.
 * **It fixes the requirements pop-up for all trades instead of 16 of 52** — for free, because the
   lookup already keys on a leaf.
-* **It closes the 51-leaf hole.** A generator-hire or sorbetes-cart shop can make a card, and every
+* **It closes the 51-leaf hole.** A generator-hire or sorbetes-cart shop can NAME its card, and every
   future admin-added leaf is reachable **with no deploy** — which is the whole reason the taxonomy
   is in the database.
 * **It splits the three dishonest pills.** Band and DJ, bridal car and van rental, and the seven
