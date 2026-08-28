@@ -75,19 +75,53 @@ close the naming gap on their own. **If nothing after C2 is ever built, the gap 
 
 ---
 
+## 🛑 OWNER RULING 2026-08-28 — COLLECT FIRST, THEN RECOMMEND. THIS REORDERS THE STREAM.
+
+> **Owner, verbatim:** *"when we do not have data yet, do not recommend. collect first. and use
+> the collected data for recommendation."*
+
+**What it strikes:** the seeding step — asking Claude to INVENT Filipino/English/Taglish synonyms
+for 262 trades with **zero real supplier usage to check them against**. Production has **0
+supplier-authored cards and 0 category requests, ever**, so "an admin reviews it" would have been
+reviewing fiction, and an approved guess is still a guess — but now it carries the authority of
+being stored.
+
+**What survives, and it is most of C2:** the alias table, its **review gate** (an unreviewed word
+answers nobody), the matching, and the merge-forward that keeps a word pointing at the right trade.
+**Those are the STORE.** Only the SOURCE of the words changes.
+
+### ⇒ The order is now C3 → C2
+
+| was | now | |
+|---|---|---|
+| C2 seed then C3 remember | **C3 first — COLLECT** | Record what suppliers actually type and what they then pick. Real evidence, no invention. |
+| | **C2 second — RECOMMEND** | Once there is a body of real wordings, propose aliases FROM IT, into the same review queue. |
+
+⛔ **DO NOT RUN `scripts/seed-trade-aliases.ts`.** It is the invention step. It stays in the tree
+as the eventual mechanism, but it must be fed by collected wordings, not by a cold model. The
+review screen's empty state should say *"nothing collected yet"*, not *"run the seeding script"*.
+
+🔑 **AND THIS GENERALISES — it is not a category rule.** Any *"AI suggests X"* in this product must
+first answer **what real data is this drawn from?** If the answer is *"none yet"*, build the
+collection and stop. Pairs with the standing rule that **empty is the honest state**, not a hole to
+fill with fiction.
+
+⚠ **The honest consequence, said out loud:** with 0 suppliers there is nothing to collect either,
+so the suggester genuinely cannot recommend anything until real suppliers use the product. That is
+the ruling working as intended — it trades a feature that looks alive for one that is actually
+true.
+
+---
+
 ## 🔴 ONE OPEN ACTION — C2 MERGES INERT UNTIL SOMEBODY RUNS THIS
 
 **C2 ships the machinery and an EMPTY word list.** Nothing a supplier types behaves differently
 until the list is filled and reviewed. That takes two steps, in order:
 
-**1 · Propose the words** — from the code repo:
-
-```
-pnpm -F @setnayan/web exec tsx scripts/seed-trade-aliases.ts
-```
-
-It asks Claude for Filipino / English / Taglish words for each trade and files them for review.
-Needs `ANTHROPIC_API_KEY`. Nothing it proposes can answer anybody yet.
+**1 · ~~Propose the words with the seeding script~~ — 🛑 STRUCK by the owner ruling above.**
+That script asks a cold model to invent synonyms with nothing to check them against. **Do not run
+it.** The words must come from what suppliers actually type (C3), and only then be proposed from
+that. The script stays in the tree as the eventual mechanism, re-pointed at collected data.
 
 **2 · Approve them** at **`/admin/taxonomy/aliases`**. An unreviewed word answers nobody — by
 design, because a wrong word is worse than no word: if *"catering"* were taught to mean *Funeral
