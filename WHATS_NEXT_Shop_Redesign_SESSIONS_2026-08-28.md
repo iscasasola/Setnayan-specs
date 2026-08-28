@@ -27,7 +27,7 @@
 
 | | state |
 |---|---|
-| ~~**S1**~~ | ✅ **BUILT — PR [#4953](https://github.com/iscasasola/setnayan-platform/pull/4953), auto-merge armed.** Its premise was dead (the erasure was fixed the day before the plan was written, PR #4927) and the ONE thing genuinely left — **nowhere for Setnayan to settle by hand** — is what shipped. ⚠ Verify with `gh pr view 4953 --json state,mergedAt`. |
+| ~~**S1**~~ | ✅ **MERGED AND SERVED — PR [#4953](https://github.com/iscasasola/setnayan-platform/pull/4953)** (merge `f2001515`, prod `/api/health` self-reports it; migration verified applied **BY THE OBJECT**).** Its premise was dead (the erasure was fixed the day before the plan was written, PR #4927) and the ONE thing genuinely left — **nowhere for Setnayan to settle by hand** — is what shipped. ⚠ Verify with `gh pr view 4953 --json state,mergedAt`. |
 | **S2** | ✅ **MERGED AND SERVED** · PR [#4950](https://github.com/iscasasola/setnayan-platform/pull/4950), merged 06:36Z, merge `320c42b` — **production's own `/api/health` reports `320c42b`**, so it is live, not merely merged. All 16 checks green. |
 | **S3** | ✅ **MERGED** 2026-08-28T06:39Z · PR [#4951](https://github.com/iscasasola/setnayan-platform/pull/4951), merge `1ddb503`. ⏳ *Serving* not yet confirmed — prod was still on `320c42b` two minutes later. **A merge is not a ship**; re-check `/api/health` before claiming it live. |
 | **S4** | 🔓 **UNBLOCKED** — the half of S1 it waited on already shipped. Still the riskiest piece in the plan, and it has a **new** constraint: its four states are behind `NEXT_PUBLIC_LOCK_HANDSHAKE_ENABLED`, still unflipped. |
@@ -136,6 +136,15 @@ that asks WHO IS THIS.*
 📋 **NAMED, NOT FIXED:** the admin map scans `refusedWhenEmpty` only from the
 `String(formData.get(…))` idiom, so the **8 admin action files using the `nullIfBlank` helper are
 likely understating what they refuse.** Teaching the scanner belongs with the admin-map work.
+
+✅ **VERIFIED APPLIED IN PROD BY THE OBJECT** (2026-08-28, not by `schema_migrations` and not by a
+migration comment): 4 settlement columns exist · `settle_vendor_deposit_dispute` is
+`SECURITY DEFINER` and its body gates on `is_admin()` · EXECUTE is held by
+`postgres` · `service_role` · `authenticated` and **not `anon`, not PUBLIC** · the forgery guard is
+live in `guard_event_vendor_deposit_ack` · a fresh refusal reopens the dispute · and **PR #4927's
+non-erasure SURVIVED the `CREATE OR REPLACE`** (no proof wipe, no ledger DELETE) — the one thing
+most at risk, since this repo has silently reverted a guard that way before. **0 disputes open
+today.**
 
 🧪 **How it was proved, since a money path deserves saying:** the **EXACT migration file** was
 dry-run against **PROD** inside `BEGIN…ROLLBACK` (applies cleanly · 0 columns survive the rollback ·
