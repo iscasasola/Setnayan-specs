@@ -122,3 +122,41 @@ what the read paths gate on; it does **not** prove a guest can reach each contro
 inference-cost question (§ 1.3) is untouched. And the doc's own caveat stands: its novelty claims
 reflect an absence of evidence in the sources reviewed, which is not proof of absence — re-check
 the biometric opt-out claim quarterly, because it is the one most likely to be copied.
+
+---
+
+## § 6 · The two "firsts" the owner pulled out, measured (2026-08-29)
+
+### 6a · Multi-chapter journey — **genuinely first, genuinely unbuilt, and half-decided**
+
+- **Nothing links two celebrations in code.** No parent, no cluster, no relation — measured.
+- **The shot pot is strictly per-celebration by construction** (`papic_event_pool_config` ·
+  `papic_reserve_event_points(event_id)`). One pot across a year changes the primitive people pay
+  for, not a display.
+- ✅ **How the year divides was already settled 2026-07-15** — a separate *occasion* is its own
+  celebration, shown as a **linked cluster**; a multi-day celebration stays ONE celebration with
+  days. So the product question is answered; only the building is open.
+- 🔑 **The moat is structural, not featural.** It needs a planning platform underneath — a guest
+  list and dates months ahead. Kuha would have to build one from zero. **This is the only play on
+  the board that cannot be copied in a quarter.**
+
+### 6b · Messenger / Viber delivery — **absent, and we already own an unused channel**
+
+- **No Messenger, Viber or WhatsApp integration exists.** Every hit in the tree is marketing copy
+  or — notably — `lib/chat-contact-filter.ts`, which **BLOCKS** guests and vendors naming Viber /
+  Messenger / WhatsApp in chat, so the relationship does not walk off Setnayan. ⚠ **The product
+  therefore already holds a deliberate, defensive stance toward these apps.** Making one the
+  primary delivery channel is compatible (different context — delivering a guest's own photos, not
+  swapping contacts) but it must be a **decision taken knowingly**, not an accident.
+- 🔑 **WEB PUSH IS BUILT, MOUNTED AND WIRED TO 108 EMIT SITES — AND HAS ZERO SUBSCRIBERS IN
+  PRODUCTION.** `lib/web-push.ts` · `lib/push-actions.ts` · `lib/notification-emit.ts` ·
+  `push-unblock-steps` · VAPID keys in the secrets rotation registry.
+- ⇒ **RECOMMENDATION: ask for push at the moment a guest scans the QR at the venue, BEFORE
+  building anything with Meta.** That is the single best permission moment this product will ever
+  get — the guest is holding their phone, standing at the celebration, with the page already open —
+  and **we never ask.** Zero policy risk, zero new integration, already built. It answers the
+  strategy doc's real complaint (email delivery is where guest photo sets quietly die) at a
+  fraction of the cost, and it is the honest test of whether the delivery problem is the CHANNEL
+  or the ASKING.
+- ⏭ Messenger stays worth doing after that, and its § 10 item 5 stands: **verify Meta's
+  business-initiated messaging rules and the 24-hour window before committing engineering.**
