@@ -5,14 +5,71 @@
 > AI also generate a new category for the taxonomy?"*
 >
 > **Short answers:**
-> 1. **Yes — and three of the four pieces already ship.** What is missing is wiring, in
->    cheapest-first order. See § 2.
+> 1. **Yes — and most of it is wiring, not invention.** The lexical search, the
+>    ask-once-then-remember pattern and the website reader all already ship. ⚠ **The research
+>    changed the middle of the plan** — see § R: the matching should be done by **embeddings**, not
+>    by asking the model, and that is the one part nothing has ever done here.
 > 2. **Yes, AI can propose a new category — and it must never publish one.** The whole
 >    approve-and-mint path *already exists* (`promoteCategoryRequest`), with a person in the middle
 >    on purpose. AI writes the proposal; the owner presses once. See § 4.
 >
 > Measured against `origin/main` = `61715e8c3` and live production, 2026-08-28. Nothing below is
 > built yet.
+
+---
+
+## R · What the research says — and it CHANGED this plan
+
+> Searched 2026-08-28, after the first draft. **The first draft put the LLM in the middle of the
+> suggestion. The evidence says that is the wrong instrument for this job**, so the plan below is
+> revised. Sources at the end of this section.
+
+**1 · For picking a category from a fixed list, embeddings beat LLM prompting — decisively, and on
+every axis we care about.** *Beyond the Hype: Embeddings vs. Prompting for Multiclass
+Classification* (Kokkodis, Demsyn-Jones & Raghavan, arXiv 2504.04277) measured **49.5% higher
+accuracy** for embeddings over the best LLM prompts, plus better **calibration, latency and cost**.
+
+🔑 **And it is almost exactly our problem, not a distant analogy: they predict PROFESSIONAL SERVICE
+CATEGORIES from free-text project descriptions on Thumbtack** — home services, a fixed
+professional taxonomy, a person typing what they need in their own words. That is a supplier typing
+*"sorbetes cart"* at our 262 trades.
+
+**2 · The standard production recipe is "embed the taxonomy once, offline".** Each category is
+embedded from its own name/description; at runtime the typed words are embedded with the same
+instruction and matched by cosine similarity. The taxonomy side is computed **once**, not per query
+— which is the whole cost story: **262 embeddings ever, then one tiny embedding per new phrase.**
+
+**3 · LLM output cannot be controlled or interpreted precisely**, which the literature flags as
+disqualifying where you need controllable accuracy and recall. A category that decides what couples
+find a shop under is exactly that setting.
+
+**4 · Category prediction is conventionally treated as HIERARCHICAL** (folder → branch → leaf), not
+as 262 flat labels. Ours already is a tree; the match should use it rather than flatten it.
+
+### 🔢 What we already have for this, measured — and the one thing we do not
+
+| | |
+|---|---|
+| `pgvector` in production | ✅ **installed, v0.8.0** — read out of prod, not assumed |
+| An embedding model already chosen and written down | ✅ **`bge-small-en-v1.5` via Cloudflare Workers AI, 384 dims** — `20260518500000_iteration_0016_wizard_architecture_schema.sql` |
+| Vector columns already in prod | ✅ `concierge_brain_chunks.embedding` · `concierge_unanswered_questions.query_embedding` |
+| We are already a Cloudflare customer | ✅ (R2) |
+| **Anything that has ever GENERATED an embedding** | 🔴 **NO. Nothing, anywhere.** |
+
+🔴 **BE HONEST ABOUT THAT LAST ROW — it is the eighth "gate with no handle" in this corpus.** The
+columns exist, the model was chosen, the extension is live, and **zero code writes an embedding and
+zero rows hold one** (`concierge_brain_chunks` = 0 rows; a repo-wide grep for a writer finds only
+false positives — bidi "embedding", face-vector comments, prose). So this is a **first build, not a
+reuse.** The decision is made for us; the wiring has never existed. Do not scope it as "already
+there".
+
+**Sources:**
+[Beyond the Hype: Embeddings vs. Prompting for Multiclass Classification Tasks](https://arxiv.org/abs/2504.04277) ·
+[Deep Hierarchical Classification for Category Prediction in E-commerce](https://arxiv.org/pdf/2005.06692) ·
+[Text Classification for Predicting Multi-level Product Categories](https://arxiv.org/pdf/2109.01084) ·
+[Leveraging Taxonomy and LLMs for Improved Multimodal Hierarchical Classification](https://arxiv.org/abs/2501.06827) ·
+[Taxonomy Completion with Embedding Quantization and an LLM-based Pipeline](https://huggingface.co/blog/dcarpintero/taxonomy-completion) ·
+[What is pgvector? (Databricks)](https://www.databricks.com/blog/what-is-pgvector)
 
 ---
 
@@ -29,10 +86,16 @@ three cheap ones; we are just not using them here.
 
 | Step | What it does | Cost | Status |
 |---|---|---|---|
-| 1 | Rank the real 262 trades against what they typed | ₱0, instant | **Written and tested — not wired into the maker** |
+| 1 | Rank the real 262 trades against the words they typed | ₱0, instant | **Written and tested — not wired into the maker** |
 | 2 | Remember a wording somebody used before | ₱0, one indexed read | **Shipping on the admin side** |
-| 3 | Ask Claude, then **save the answer** so it is free next time | pennies, once per new wording | **Shipping on the admin side** |
-| 4 | Read their website and pre-fill it at sign-up | one call per shop | **Half-built** — Claude already reads shop websites, for the approval screen only |
+| 3 | **Match by MEANING — embeddings + nearest neighbour** (*"sorbetes cart"* → **Ice Cream Cart**) | 262 embeddings ever + one tiny one per new phrase | 🔴 **pgvector live, model chosen — but nothing has ever generated an embedding here** |
+| 4 | Ask Claude — **only** to propose a genuinely new trade, never to pick an existing one | pennies, rare | **Pattern ships on the admin side** |
+| 5 | Read their website and pre-fill it at sign-up | one call per shop | **Half-built** — Claude already reads shop websites, for the approval screen only |
+
+⚠ **Steps 3 and 4 swapped after the research.** The first draft had the LLM doing the matching;
+the measured result is that embeddings do it better, cheaper and more predictably, and the LLM's
+right job is the one embeddings genuinely cannot do — **writing a proposal for a trade that does not
+exist yet.**
 
 **The economics are already proved in this codebase:** the admin box asks the model only when the
 first two steps have nothing, and writes the answer back, so *the feature gets cheaper the more it
@@ -99,19 +162,37 @@ supplier who types the same words gets the answer with no search and no model.
 - ⚠ **A wrong answer learned once is served to everybody.** Only write the pairing when the
   supplier actually *picked* it and *saved the card* — not on hover, not on first tap.
 
-### Slice 3 · Claude suggests when nobody has ever used those words
+### Slice 3 · Match by MEANING — embeddings, not the model · **the evidence-backed core**
 
-Only reached when slices 1 and 2 both come back empty.
+Only reached when slices 1 and 2 both come back empty. This is what makes *"sorbetes cart"* find
+**Ice Cream Cart** and *"sound hire"* find **Lights & Sound** — matches no amount of letter-matching
+will ever make.
 
-- The model is handed the 262 trades and **must choose from them**; its answer is validated against
-  the live tree before it is shown or stored, exactly as `ask-the-admin.ts` validates against the
-  route map. **It cannot invent a trade.**
+- **Embed the 262 trades ONCE** (name + branch + folder as the text), store on the taxonomy row,
+  cosine index. Re-embed only when an admin adds or renames one.
+- At runtime embed the typed phrase with the **same instruction**, take the nearest few, show them
+  with their branch so two similar trades are told apart.
+- 🔑 **Use the tree, do not flatten it.** The literature treats this as hierarchical; a match whose
+  branch is miles from anything the shop covers deserves to rank below one that is close.
+- 🔒 **A similarity score is not a decision.** Below a floor, show nothing and fall through to
+  slice 4 — a confidently wrong suggestion is worse than none, because a supplier who trusts it
+  files their card under someone else's trade.
+- 🔴 **This is a FIRST BUILD.** `pgvector` is live and the model is chosen, but **nothing in this
+  repo has ever generated an embedding** (§ R). Budget it as new work.
+- 🔒 **Fails silent.** No key, no network, a bad shape → the box behaves exactly as in slice 1. A
+  supplier must never see an error about an assistant they did not ask for.
+
+### Slice 4 · Claude — only for a trade that does not exist yet
+
+Reached only when slices 1–3 have all come back empty, which by then genuinely means *"we have no
+word for this"*.
+
+- It does **not** pick from the list — embeddings already did that better (§ R). Its job is the one
+  thing they cannot do: **write the proposal** (§ 5).
 - It **suggests**; the supplier confirms. Nothing is stored under a kind the supplier did not press.
-- The answer is written back to slice 2, so that wording never reaches a model twice.
-- 🔒 **Fails silent.** No key, no network, a refusal, a bad shape → the search box behaves exactly as
-  in slice 1. A supplier must never see an error about an assistant they did not ask for.
+- Whatever the supplier picks is written back to slice 2, so that wording is free ever after.
 
-### Slice 4 · Pre-fill from what we already read about them
+### Slice 5 · Pre-fill from what we already read about them
 
 `vendor_deep_search` already asks Claude what a shop advertises on its own website, and stores
 `detected_services` — free text, admin-only, used on the approval screen.
@@ -181,13 +262,15 @@ should show its near-matches **above** the Promote button, not below it.
 
 ## 5 · ⚖ Owner decisions — the only things I will not decide
 
-1. **Should the AI step be on at launch, or after the first suppliers arrive?** It costs pennies and
-   fails silent, but it is a model in a supplier-facing screen. *Recommendation: slices 1–2 now,
-   slice 3 on when a real supplier first hits an empty search.*
+1. **Which of the two instruments goes on, and when.** They are different decisions now:
+   **slice 3 (embeddings)** is cheap, predictable and the measurement says it is the right tool —
+   *recommendation: build it as soon as 1–2 are in.* **Slice 4 (the LLM)** only ever fires when a
+   supplier's words match nothing at all — *recommendation: leave it off until a real supplier
+   actually hits that, which prod says has never happened (**0 category requests, ever**).*
 2. **Who may teach the box a wording** — only an admin, or does a supplier's own pick teach it for
    everybody? *Recommendation: a supplier's pick teaches it, because the alternative is a queue
    nobody works; but only on a saved card.*
-3. **Slice 4's tone.** *"Your website says you do X"* is useful and is also us telling a shop we read
+3. **Slice 5's tone.** *"Your website says you do X"* is useful and is also us telling a shop we read
    their website. It is already in the privacy notice for verification; using it to pre-fill their
    listing is a different purpose.
 
@@ -212,13 +295,17 @@ should show its near-matches **above** the Promote button, not below it.
 
 ## 7 · Order, and what blocks what
 
-| # | Slice | Depends on | New schema | AI |
+| # | Slice | Depends on | New schema | Model |
 |---|---|---|---|---|
-| 1 | Ranked search over all 262 | #4942 merged | none | no |
-| 2 | Remember a wording | 1 | one table | no |
-| 3 | Claude suggests, then it is free | 2 | none | yes |
-| 4 | Pre-fill from their website | 3 | none | yes (per shop) |
-| 4b | The proposal arrives ready to press | 3 | none | yes |
+| 1 | Ranked search over all 262 | ✅ #4942 merged | none | none |
+| 2 | Remember a wording | 1 | one table | none |
+| 3 | **Match by meaning (embeddings)** | 2 | a vector column + index on the taxonomy | embedding only, **262 once** + one per new phrase |
+| 4 | Claude proposes a trade that does not exist | 3 | none | LLM, rare |
+| 5 | Pre-fill from their website | 4 | none | LLM, once per shop |
 
-**Slices 1 and 2 are unblocked, cheap, and useful without any AI at all.** That is deliberate: if
-the model is never switched on, a supplier can still type *"sorbetes"* and find their trade.
+**Slices 1 and 2 are unblocked, cheap, and useful without any model at all.** That is deliberate:
+if nothing is ever switched on, a supplier can still type *"sorbetes"* and find their trade.
+
+⚖ **And the ordering is now evidence-backed, not taste:** the cheap deterministic steps first, then
+the instrument the measurement says is best at *choosing from a fixed list* (embeddings), and the
+LLM last and narrowest — proposing something that is not on the list at all.
