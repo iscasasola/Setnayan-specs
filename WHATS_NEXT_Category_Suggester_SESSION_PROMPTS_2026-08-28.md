@@ -184,40 +184,66 @@ before → after.
 
 ---
 
-## C2 · ONE TRADE, MANY NAMES — the alias list
+## C2 · ONE TRADE, MANY NAMES — mined from our own definitions
 
-**Sonnet · medium · offline, no supplier text leaves the server · 🛑 NEVER with C3**
+**Sonnet · medium · NO MODEL, NO INVENTION · 🛑 NEVER with C3**
 
 ```
-MODEL: Sonnet · EFFORT: medium · never run beside C3
+MODEL: Sonnet · EFFORT: medium · no model calls at all · never run beside C3
 
-Make "sorbetes", "sorbetero" and "ice cream cart" all find the same trade — the semantic step,
-done the cheap way.
+Make "360 booth", "sound engineer", "polaroid instax" find the right trade — using words WE
+ALREADY WROTE, not words a model invents.
 
-⚖ WHY NOT EMBEDDINGS. A Fable adversarial pass killed that slice: its evidence was a SUPERVISED
-classifier trained on labelled history (we have none — 0 authored cards); the already-chosen
-model is bge-small-en-v1.5, ENGLISH, for a feature about sorbetes/pabati/ninong/abuloy; and the
-PGlite replay rewrites extensions.vector(N) -> text, so every db test about it would be vacuous.
-Do not build embeddings in this session. If somebody argues for them, read § R of the plan.
+🟢 THE SOURCE, AND IT IS THE WHOLE POINT OF THIS SESSION. Owner, 2026-08-28: "initially, we
+already have a target service for each category. that is our initial data. then we start
+collecting the information of service cards."
+
+MEASURED IN PRODUCTION before you start (re-verify it, do not trust this line):
+  · 169 of 276 categories carry a real definition, not just a name
+  · 829 attribute fields across them
+  · 1,539 words inside those definitions — 1,248 distinct — across 153 categories
+  · photo_booth's own definition already contains: 360 booth, gif booth, polaroid instax,
+    selfie magic mirror, patiktok. lights_sound's contains: lighting design, sound engineer,
+    rooms handled, equipment brands.
+
+Those words live in canonical_service_schemas.category_specific_attributes (option values and
+labels) and filter_facets. TODAY THEY ARE USED ONLY TO FILTER A MARKETPLACE SEARCH. They have
+never been used to FIND a trade. That is the gap you are closing.
+
+⛔ DO NOT CALL A MODEL. Not once. An earlier version of this session asked Claude to invent
+synonyms and the owner struck it: "when we do not have data yet, do not recommend. collect
+first." Mining our own authored data is not recommending — it is reading what we already said.
 
 BUILD:
-  · A table of aliases: phrase -> canonical_service, plus who wrote it and whether a person has
-    reviewed it. UNIQUE on the normalised phrase.
-  · SEED IT OFFLINE, ONCE: ask Claude (the processor we ALREADY declare, with a working key) for
-    Filipino / English / Taglish synonyms per trade. This runs as a script an admin triggers —
-    NOT in the supplier's request path. Supplier text never leaves the server, which is why this
-    slice needs no new processor and no privacy-notice change.
-  · A PERSON REVIEWS BEFORE IT COUNTS. An unreviewed alias must not answer anybody. The 51
-    orphan trades in the measurement doc are the natural first review batch and double as the
-    eval set — if the aliases do not find those, the approach has failed and you should say so
-    rather than ship it.
-  · Extend the ranker to match label OR alias. ⛔ Do not fork rankTaxonomyOptions — pass aliases
-    in as searchable text on the option and keep ONE matcher.
-  · An alias must resolve to a LIVE trade at READ time. A trade can be retired or merged after
-    the row is written; a stale alias must fall through to search silently, never render.
+  · A table of aliases: normalised phrase -> canonical_service, its SOURCE (mined | collected |
+    proposed), whether a person reviewed it, timestamps. UNIQUE on the normalised phrase.
+    Reuse normalisePhrase from lib/admin-map/ask-the-admin.ts — same normalisation in and out or
+    a lookup never hits.
+  · A miner that walks every category's definition and harvests its option values and labels as
+    candidate phrases for THAT category. Humanise them ("polaroid_instax" -> "polaroid instax").
+    Deterministic, re-runnable, idempotent.
+  · ⚠ MINE, THEN JUDGE. Not every option value is a good alias: some are generic ("medium",
+    "small", "large" from footprint_size) and would match everything. Drop values that are not
+    distinctive — say in the PR how you decided, and show the count you dropped and why. A
+    silently over-broad alias list is worse than none, because "medium" matching 40 trades makes
+    the search useless.
+  · A PERSON REVIEWS BEFORE IT COUNTS. An unreviewed alias answers nobody. Ship the review
+    screen in the same PR.
+  · Extend the maker's search (lib/kind-search-trades.ts, shipped by C1) to match label OR alias.
+    ONE matcher — do not fork rankTaxonomyOptions.
+  · An alias must resolve to a LIVE trade at READ time, following C0's merge-forward
+    (lib/service-merge-forward*.ts). Reuse it; do not write a second one.
+  · misc (Miscellaneous) stays reachable in every state.
 
-Guard it and mutate the guard: an unreviewed alias answers nobody · an alias pointing at a dead
-trade renders nothing · there is still exactly ONE matcher.
+⚠ REPORT THE HONEST GAP, do not bury it: 107 categories carry ONLY a name (sorbetes_cart's
+attributes are {} and its facets are []). Mining covers 153 of 276 and leaves the rest thin —
+and the thin ones are disproportionately the 51 trades that had no word to begin with. Say how
+many of those 51 mining actually helps. That number decides whether step 2 (collecting) and step
+3 (a model) are ever needed, so it must be honest, not flattering.
+
+PROVE IT: TSC_EXIT beside the error count · a NON-ZERO "# tests" count · the full unit suite
+reported · a MEASURED mutation on every guard (occurrence count before -> after, shown going
+red) · allocate the migration timestamp with pnpm migration:new · read production BY THE OBJECT.
 ```
 
 ---

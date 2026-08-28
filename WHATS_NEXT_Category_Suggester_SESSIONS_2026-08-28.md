@@ -22,7 +22,7 @@
 |---|---|---|---|---|
 | ~~**C0**~~ ✅ **DONE — PR [#4946](https://github.com/iscasasola/setnayan-platform/pull/4946), MERGED 2026-08-28T04:24:55Z AND SERVED** (prod `/api/health` → `91b1fea`; merge `91b1feaba` verified an ancestor of `origin/main`). Migration `20271176753752` **verified applied in prod BY THE OBJECT**: the column, its FK and its no-self-merge CHECK; the function `SECURITY DEFINER` carrying **6** collision-deletes and the array de-dupe; it never deletes a trade row; EXECUTE held by `postgres`+`service_role` only. **0 of 288 trades merged — nothing moved.** Do NOT rebuild it.** Two trades can be combined and an old key still resolves. ⚠ Verify state with `gh pr view 4946 --json state,mergedAt` — this corpus has been wrong about a PR five times. | **Opus · high** | none | `admin/taxonomy/actions.ts` · migration `20271176753752` |
 | **C1** | **Typing finds the real trade.** All live trades searchable in the maker, properly ranked — *"sorbetes"*, *"generator"*, *"tent"*, *"photobooth"* as one word. No model, no new schema. | Sonnet · medium | none | `canvas-maker.tsx` · `services/new/page.tsx` |
-| **C2** | **One trade, many names.** An alias list — *sorbetes · sorbetero · ice cream cart* all find the same trade. Written once by Claude **offline**, checked by a person, then free forever. | Sonnet · medium | none — supplier text never leaves the server | one migration · the ranker · an admin review screen |
+| **C2** | **One trade, many names.** An alias list. 🟢 **RE-POINTED: the words are MINED from the 1,248 already inside our own category definitions — not invented by a model.** Still review-gated. | Sonnet · medium | none — no model, no supplier text leaves the server | one migration · the ranker · an admin review screen |
 | **C3** | **It remembers what suppliers confirm.** Only for phrases the alias list missed. | Sonnet · medium | **⚠ read the poisoning risk first** | one migration · `canvas-maker.tsx` |
 | **C4** | **A trade we do not have arrives ready to press.** Claude drafts the proposal with its near-matches above the button. | **Opus · high** | **ships dark; owner flips** | `proposeCategory` · `/admin/taxonomy` |
 | **C5** | **Their website fills it in at sign-up.** | Sonnet · medium | 🔴 **owner + DPO: lawful basis, not just tone** | vendor onboarding |
@@ -72,6 +72,46 @@ still unwired **and is now correctly described as out of scope**, not as the mis
 
 **C1 + C2 are the whole feature for most suppliers**, need no supplier text to leave the server, and
 close the naming gap on their own. **If nothing after C2 is ever built, the gap is still closed.**
+
+---
+
+## 🟢 OWNER CORRECTION 2026-08-28 (SECOND) — WE ALREADY WROTE THE INITIAL DATA. MINE IT.
+
+> **Owner, verbatim:** *"initially, we already have a target service for each category. that is our
+> initial data. then we start collecting the information of service cards."*
+>
+> **He is right, and I had swung too far.** After the collect-first ruling below I said we had
+> nothing to work from. **We do — we authored it ourselves.**
+
+**MEASURED IN PRODUCTION, 2026-08-28:**
+
+| | |
+|---|---|
+| Categories carrying a real definition, not just a name | **169 of 276** |
+| Attribute fields defined across them | **829** |
+| **Words already written inside those definitions** | **1,539 — 1,248 distinct** |
+| Categories those words come from | **153** |
+
+🔑 **AND THOSE WORDS ARE THE ONES A SUPPLIER TYPES.** `photo_booth`'s own definition already
+contains *360 booth · gif booth · polaroid instax · selfie magic mirror · patiktok*.
+`lights_sound`'s already contains *lighting design · sound engineer · rooms handled · equipment
+brands*. A supplier typing **"360 booth"** should land on Photo booth — **and we wrote that
+connection down ourselves.** It is used today only to FILTER a marketplace search; it has never
+been used to FIND a trade.
+
+### ⇒ The source order, corrected
+
+1. **MINE OUR OWN DEFINITIONS** — 1,248 words, **zero model calls, zero invention.** This is the
+   "initial data" the owner is naming. It needs no ruling and no new processor.
+2. **COLLECT** what suppliers actually type and then pick, as cards get made.
+3. **ONLY THEN** consider asking a model, for what 1 and 2 both still miss — and by then there is
+   real data to check its answers against, which is the whole point of the collect-first ruling.
+
+⚠ **THE HONEST GAP, because it is the opposite of flattering: 107 categories carry only a name.**
+`sorbetes_cart` is one of them — its attributes are `{}` and its facets are `[]`. So mining covers
+**153 of 276** well and leaves the rest thin, **and the thin ones are disproportionately the 51
+trades that had no word to begin with.** Mining helps most where we are already strong and least
+where we are weakest. Do not report "1,248 words" as if it solved the hard half.
 
 ---
 
