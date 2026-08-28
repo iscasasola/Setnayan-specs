@@ -321,6 +321,10 @@ typed text.
 
 ## C4 · A TRADE WE DO NOT HAVE ARRIVES READY TO PRESS
 
+> ✅ **BUILT 2026-08-28 — PR [#4959](https://github.com/iscasasola/setnayan-platform/pull/4959), auto-merge armed. DO NOT RUN THIS PROMPT AGAIN.** Ships DARK behind `CATEGORY_PROPOSAL_DRAFT_ENABLED` (default OFF). The brief below is kept as the record of what was asked for. ⚠ Verify with `gh pr view 4959 --json state,mergedAt`.
+> 🔑 **One thing it added beyond the brief, and it is load-bearing:** the drafted clean NAME has a reader — `promoteCategoryRequest` takes an optional `proposed_label_override`, because a suggestion nothing can apply is a stored value with no reader. Absent the field, the mint behaves byte-identically to before.
+> 🚨 **And the exposure-freeze guard failed on the first cut**: a new table in `public` arrives with the default ACL granting `authenticated` SELECT/INSERT/UPDATE on every column. **Revoke both session roles; never regenerate the baseline to make it green.**
+
 **Opus · high · SHIPS DARK · 🛑 NEVER with C3**
 
 ```

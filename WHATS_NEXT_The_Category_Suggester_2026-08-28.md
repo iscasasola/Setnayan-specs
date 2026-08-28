@@ -305,6 +305,8 @@ listings and cannot be undone, which is why the control asks an admin to type th
 
 ## 4 · 🔴 "Can AI also generate a new category?" — yes to the draft, no to the publish
 
+> ✅ **BUILT AND DARK 2026-08-28 — PR [#4959](https://github.com/iscasasola/setnayan-platform/pull/4959) (C4). Do NOT rebuild it.** Everything this section asks for ships behind `CATEGORY_PROPOSAL_DRAFT_ENABLED` (default OFF): the check-against-the-live-list-first half runs with **no model at all**, the proposal carries a clean name + the branch + the near-matches rejected with reasons, the near-matches render **above** the Promote button, and the model has **no path to the mint** (guard-enforced by a census, not by a docblock). ⏭ **The only thing left here is the owner's: when to switch it on.**
+
 **It can and should draft one. It must not be the thing that creates it.** Three measured reasons,
 not taste:
 
