@@ -1,5 +1,19 @@
 # One vocabulary instead of two — measured, and one recommendation
 
+> ## ✅ DECIDED AND BUILT — 2026-08-28
+> **The owner answered twice: *"1. yes 2. yes their own words."*** The recommendation in § 5 is the
+> one that shipped: a card's kind may now be a **coverage leaf**, the chooser's leading band is the
+> shop's own words, and the 52 legacy kinds stay one tap below. **Nothing was migrated — production
+> has never held a supplier-authored service card.** Branch
+> `claude/card-kind-in-the-shops-own-words`; `DECISION_LOG.md` row 2026-08-28.
+> **Do not re-ask the decision.** The measurement below is kept as the evidence it was made from.
+>
+> ⚠ **TWO THINGS IN § 7 BELOW ARE NOW STALE, corrected here rather than left to mislead:**
+> item **3** (the public shop page printing a raw key) was **already closed the same day by another
+> session** — that page normalised onto `displayServiceLabel`, which humanises rather than printing
+> the key; and item **4** (no database-level validation) is unchanged but the app-side gate is
+> wider and still closed. Items 1, 2, 5 and 6 stand.
+
 > **Session S2** of [`WHATS_NEXT_Service_Card_SESSIONS_2026-08-28.md`](WHATS_NEXT_Service_Card_SESSIONS_2026-08-28.md).
 > **Measurement only. Nothing was built, nothing was migrated, no leaf was renamed, no category was
 > added, and the family bridge was not touched.** This ends at an OWNER_DECISION.
