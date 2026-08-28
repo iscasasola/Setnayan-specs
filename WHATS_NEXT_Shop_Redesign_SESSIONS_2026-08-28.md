@@ -31,7 +31,7 @@
 | **S2** | ✅ **MERGED AND SERVED** · PR [#4950](https://github.com/iscasasola/setnayan-platform/pull/4950), merged 06:36Z, merge `320c42b` — **production's own `/api/health` reports `320c42b`**, so it is live, not merely merged. All 16 checks green. |
 | **S3** | ✅ **MERGED** 2026-08-28T06:39Z · PR [#4951](https://github.com/iscasasola/setnayan-platform/pull/4951), merge `1ddb503`. ⏳ *Serving* not yet confirmed — prod was still on `320c42b` two minutes later. **A merge is not a ship**; re-check `/api/health` before claiming it live. |
 | **S4** | 🔓 **UNBLOCKED** — the half of S1 it waited on already shipped. Still the riskiest piece in the plan, and it has a **new** constraint: its four states are behind `NEXT_PUBLIC_LOCK_HANDSHAKE_ENABLED`, still unflipped. |
-| **S5** | ⚠ **UNBLOCKED, AND SMALLER THAN BRIEFED.** The matcher already ships whole, behind `NEXT_PUBLIC_SMART_SORT_ENABLED`. Re-scoped high → medium — it is a flag flip and a verification. Two real gaps remain and neither is the one the brief named (see below). |
+| **S5** | ✅ **BUILT 2026-08-28 · PR [#4954](https://github.com/iscasasola/setnayan-platform/pull/4954)** — gap 1 below is closed: the couple's budget FEEL now becomes a number and the search uses it, and a shop is told the reach its price is earning. ⚠ Verify with `gh pr view 4954 --json state,mergedAt`. Gap 2 (should a couple browsing publicly see what a shop charges?) is **still the owner's** and is untouched. |
 
 ⚠ **Every state above is a claim with an expiry date.** Verify with
 `gh pr view <n> --json state,mergedAt` before acting on it; this corpus has been wrong about a PR's
@@ -322,7 +322,46 @@ the "Ask for a payment" button.** Recreating that screen is the defect this proj
 a notification kind row.
 ✅ Booked and Waitlist filters already exist in `customers/page.tsx`.
 
-### S5 — Price decides reach · **Opus 5 · high** · UNBLOCKED (S3 is built)
+### S5 — Price decides reach · **Opus 5 · high** · ✅ **BUILT 2026-08-28 — do NOT rebuild it**
+PR [#4954](https://github.com/iscasasola/setnayan-platform/pull/4954). ⚠ Verify with
+`gh pr view 4954 --json state,mergedAt` before trusting this line — this corpus has been wrong
+about a PR's state five times. Full row: `DECISION_LOG.md` 2026-08-28 💸.
+
+🛑 **AND IT CORRECTED THE MEASUREMENT BELOW, WHICH WAS RIGHT ABOUT THE GAPS AND WRONG ABOUT THE
+FLAG.** *"All of it behind `NEXT_PUBLIC_SMART_SORT_ENABLED`, off by default ⇒ S5 IS A FLAG FLIP"* is
+**false**, and it is the load-bearing half. Read out of `category-search.ts` + `compat-score.ts`:
+**budget-fit became part of the FREE compat score on 2026-07-12 and runs on EVERY search, flag or
+no flag** — `budgetFitRatio` is computed unconditionally and carries **weight 0.20, the
+second-largest dimension of the whole match %**. What the flag actually gates is three smaller
+things: the SOFT tail re-rank, the strict-mode hard filter, and the *"raise your budget?"* pressure
+flag. ⇒ **There was nothing to flip, and the fix takes effect for every couple immediately.**
+
+**WHAT SHIPPED — gap 1, closed.** A couple who picked a budget feel and a guest count and never
+typed a peso figure was, to the search, identical to a couple who answered nothing. Their band
+becomes a number now (`lib/budget-band-money.ts`) and the two ranking surfaces opt into it
+explicitly. 🔑 **The read needed no migration** — `budget_band` is already in the `events_host`
+projection and SELECT-granted to `authenticated` (verified by the column ACL in prod, not by a
+migration comment), so it rides along on a query the resolver already makes.
+
+🚨 **AND THE ARITHMETIC HAD TWO IMPLEMENTATIONS THAT NEVER MET.** The wedding onboarding stores the
+band's **TOP**; `create-event` stores its **MIDDLE**. Same band, same guest count, **two budgets ~20%
+apart depending on which door the couple came through** — and that number decides which shops they
+see. Both writers call one module now; **neither stored value was changed**, because moving a
+couple's saved budget is the owner's call, not a refactor's. ⚠ **It is an open question, named, not
+fixed.**
+
+⛔ **THE DRAWING'S OWN COPY WAS OVERSTATED AND IS NOT SHIPPED.** The prototype's Performance line
+says *"one card is reaching nobody — it has no price, so it never appears in a search"*. **That is
+not what happens**: a priceless card scores the neutral fit and stays in the results; what it loses
+is the ability to WIN on budget and the figure a couple would read. The shipped word is **limited**,
+and a test fails if the copy ever says *nobody*. The per-card line is on the Services list, where a
+shop already looks, not in a report.
+
+⏭ **DELIBERATELY NOT BUILT:** Performance's *"most couples looking at you are planning
+₱60k–₱120k"* — production holds 6 events, so that band would be an invented statistic printed to a
+shop as fact.
+
+**The measurement this session started from, kept because both gaps were right:**
 **What a person gets:** the price a shop declares actually decides which couples see the card.
 ⛔ **Segmentation, never paid placement.**
 
@@ -347,12 +386,13 @@ FALSE when the starts-at is unknown, so **a priceless card is never hidden — n
 mode.** Fail-open, by construction, in the shipped code.
 
 🚨 **TWO REAL GAPS REMAIN, AND NEITHER IS THE ONE THE BRIEF NAMED.**
-1. **`budget_band` FEEDS NO SEARCH AT ALL.** Measured: it is read by the Event Brief a supplier
+1. ✅ **CLOSED BY THIS PR.** **`budget_band` FEEDS NO SEARCH AT ALL.** Measured: it is read by the Event Brief a supplier
    sees, by event recurrence and by the create-event capture — **and by nothing in ranking**. The
    shipped matcher uses a different number entirely: the Budget Planner's **recommended ₱ for that
    category**. *There are two notions of "the couple's budget" in this product and the brief named
    the one nothing ranks on.*
-2. **THE PUBLIC MARKETPLACE DOES NO BUDGET MATCHING WHATEVER**, and deliberately shows **no price
+2. 🔴 **STILL OPEN, AND STILL THE OWNER'S.** **THE PUBLIC MARKETPLACE DOES NO BUDGET MATCHING
+   WHATEVER**, and deliberately shows **no price
    on a real shop's card** — `explore/page.tsx` resolves a starts-at only for DEMO rows, under its
    own comment saying real cards are a V1.1 candidate. 🔴 **That is an OWNER DECISION, not
    engineering: should a couple browsing publicly see what a shop charges?** Everything above is
