@@ -20,7 +20,7 @@
 
 | # | What a person gets | Model · effort | Gate | Touches |
 |---|---|---|---|---|
-| ~~**C0**~~ ✅ **BUILT — PR [#4946](https://github.com/iscasasola/setnayan-platform/pull/4946), held as a DRAFT at its own gate (auto-merge disarmed). Do NOT rebuild it; it needs the owner to mark it ready.** Two trades can be combined and an old key still resolves. ⚠ Verify state with `gh pr view 4946 --json state,mergedAt` — this corpus has been wrong about a PR five times. | **Opus · high** | none | `admin/taxonomy/actions.ts` · migration `20271176753752` |
+| ~~**C0**~~ ✅ **DONE — PR [#4946](https://github.com/iscasasola/setnayan-platform/pull/4946), MERGED 2026-08-28T04:24:55Z AND SERVED** (prod `/api/health` → `91b1fea`; merge `91b1feaba` verified an ancestor of `origin/main`). Migration `20271176753752` **verified applied in prod BY THE OBJECT**: the column, its FK and its no-self-merge CHECK; the function `SECURITY DEFINER` carrying **6** collision-deletes and the array de-dupe; it never deletes a trade row; EXECUTE held by `postgres`+`service_role` only. **0 of 288 trades merged — nothing moved.** Do NOT rebuild it.** Two trades can be combined and an old key still resolves. ⚠ Verify state with `gh pr view 4946 --json state,mergedAt` — this corpus has been wrong about a PR five times. | **Opus · high** | none | `admin/taxonomy/actions.ts` · migration `20271176753752` |
 | **C1** | **Typing finds the real trade.** All live trades searchable in the maker, properly ranked — *"sorbetes"*, *"generator"*, *"tent"*, *"photobooth"* as one word. No model, no new schema. | Sonnet · medium | none | `canvas-maker.tsx` · `services/new/page.tsx` |
 | **C2** | **One trade, many names.** An alias list — *sorbetes · sorbetero · ice cream cart* all find the same trade. Written once by Claude **offline**, checked by a person, then free forever. | Sonnet · medium | none — supplier text never leaves the server | one migration · the ranker · an admin review screen |
 | **C3** | **It remembers what suppliers confirm.** Only for phrases the alias list missed. | Sonnet · medium | **⚠ read the poisoning risk first** | one migration · `canvas-maker.tsx` |
@@ -32,8 +32,8 @@
 **"none"**; the session prompts file says **"none — but open the PR as a DRAFT"**, because C0 moves
 other people's data across tables with **no foreign key to catch a mistake**. A session reading only
 this file would arm auto-merge and sail through a hold. **The gate is recorded here now.** PR #4946
-was opened non-draft, then converted to draft when the discrepancy was found — it is waiting on the
-owner to mark it ready. 🔑 *Two corpus docs described the same gate differently, and the one a
+was opened non-draft, converted to draft when the discrepancy was found, and then merged on the
+owner's own instruction (*"complete it"*) — the hold did its job: a person decided. 🔑 *Two corpus docs described the same gate differently, and the one a
 session was pointed at was the laxer one — the same shape as a rule written twice with the lax copy
 deciding.*
 
