@@ -1,5 +1,26 @@
 # The category suggester — paste-ready session prompts · 2026-08-28
 
+## 🎛 MODEL · EFFORT — set these before you paste
+
+| # | Session | **Model** | **Effort** | Gate |
+|---|---|---|---|---|
+| **C0** | A category can be undone | **Opus** | **high** | none — but open the PR as a **DRAFT** |
+| **C1** | Typing finds the real trade | **Sonnet** | **medium** | none |
+| **C2** | One trade, many names (alias list) | **Sonnet** | **medium** | none |
+| **C3** | It remembers what suppliers confirm | **Sonnet** | **medium** | ⚠ read the poisoning risk in its block |
+| **C4** | A trade we do not have, ready to press | **Opus** | **high** | ships **dark**; owner flips |
+| **C5** | Their website fills it in at sign-up | **Sonnet** | **medium** | 🔴 owner + DPO: lawful basis |
+| ~~Cx~~ | ~~Match by meaning (embeddings)~~ | — | — | 🛑 **DEMOTED — do not build** |
+
+**Why Opus on C0 and C4:** C0 moves other people's data across three tables that have **no foreign
+key** to catch a mistake, and C4 writes into a queue that mints **permanent public** taxonomy.
+Everything else is well-specified wiring over modules that already exist and are tested.
+
+🛑 **Never more than two at once.** Never **C1 with C3** (same file) · never **C2 with C3** (same
+answer path) · never **C0 with C4** (same file). **C0 + C1 is the safe first pair.**
+
+---
+
 > One prompt per session. **Paste the SHARED HEADER first, then one session block.**
 > Register: [`WHATS_NEXT_Category_Suggester_SESSIONS_2026-08-28.md`](WHATS_NEXT_Category_Suggester_SESSIONS_2026-08-28.md).
 > 🛑 **Never more than two at once. Never C1 with C3 (same file). Never C2 with C3 (same answer path). Never C0 with C4 (same file).**
@@ -69,6 +90,8 @@ processor, reversing a lock). Stop at every gate your session names.
 **Opus · high · build this BEFORE anything proposes new trades · 🛑 NEVER with C4**
 
 ```
+MODEL: Opus · EFFORT: high · OPEN THE PR AS A DRAFT · never run beside C4
+
 Make a category mistake reversible. This is the owner's own question (2026-08-28): "if ever a
 category added a new one, are we capable of rerouting them, combining them to an existing, or
 renaming the category in the future?"
@@ -116,6 +139,8 @@ replacement THROUGH A REAL READER · the dangling-key guard actually fires.
 **Sonnet · medium · no model, no new schema · 🛑 NEVER with C2**
 
 ```
+MODEL: Sonnet · EFFORT: medium · never run beside C3
+
 Make the card maker's kind search find any of the 262 live trades, ranked.
 
 TODAY: the maker searches ~46 legacy department pills with `o.label.toLowerCase().includes(q)`.
@@ -164,6 +189,8 @@ before → after.
 **Sonnet · medium · offline, no supplier text leaves the server · 🛑 NEVER with C3**
 
 ```
+MODEL: Sonnet · EFFORT: medium · never run beside C3
+
 Make "sorbetes", "sorbetero" and "ice cream cart" all find the same trade — the semantic step,
 done the cheap way.
 
@@ -200,6 +227,8 @@ trade renders nothing · there is still exactly ONE matcher.
 **Sonnet · medium · one migration, no model · 🛑 NEVER with C1 or C2 · ⚠ read the risk first**
 
 ```
+MODEL: Sonnet · EFFORT: medium · never run beside C1 or C2
+
 When a supplier types words we have no exact match for and then PICKS a trade and SAVES the
 card, remember that pairing. The next supplier who types the same words gets the answer with no
 search and no model.
@@ -266,6 +295,8 @@ typed text.
 **Opus · high · SHIPS DARK · 🛑 NEVER with C3**
 
 ```
+MODEL: Opus · EFFORT: high · SHIPS DARK · never run beside C0
+
 When a supplier's words match nothing at all — after C1, C2 and C3 — Claude drafts the category
 proposal. It does NOT pick from the list; embeddings already do that better. Its only job is the
 one they cannot do: describing a trade we have no word for.
@@ -305,6 +336,8 @@ button · the supplier's path is never blocked.
 **Sonnet · medium · ⚖ OWNER RULES ON TONE FIRST · pairs with C1 or C2**
 
 ```
+MODEL: Sonnet · EFFORT: medium · BLOCKED on an owner/DPO ruling
+
 BLOCKED UNTIL THE OWNER ANSWERS — AND THIS IS BIGGER THAN THE "TONE" IT WAS FIRST SCOPED AS.
 
 🔴 THE PREMISE WAS WRONG AND WAS CORRECTED 2026-08-28. This slice was written as "reuse the
