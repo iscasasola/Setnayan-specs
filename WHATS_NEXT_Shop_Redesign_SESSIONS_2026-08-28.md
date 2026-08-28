@@ -107,8 +107,24 @@ price and shows no figure. It becomes literally unfindable when **S5** joins `bu
 `starting_price_php`.
 ⛔ **The meter measures COMPLETENESS, never the size of the price** — `PublishFacts` carries booleans
 only, and a test fails if a number is ever added to it.
-🛡 14 unit + 9 db tests · 14 mutations, all measured before → after, all RED. Migration dry-run
-against prod inside a self-rolling-back transaction. ⏭ **NOT built, deliberately:** the per-card
+📦 **PR [#4951](https://github.com/iscasasola/setnayan-platform/pull/4951), auto-merge armed.**
+⚠ Verify with `gh pr view 4951 --json state,mergedAt` — this register has been wrong about a PR's
+state before.
+🚨 **AND THE FIXTURES WERE ALREADY DESCRIBING IMPOSSIBLE ROWS.** The trigger made **91 db tests
+across 10 files** fail — the cliff, measured rather than pushed. **61 of the 91 refusals were for
+the SETNAYAN EXCLUSIVE**, the gate that has shipped since day one: `is_active` DEFAULTS TO TRUE, so
+15 fixture inserts were minting published cards the app itself could never have created. The price
+accounts for 28. All 15 now carry both; **124/124 pass.**
+🛡 Typecheck **0 errors / exit 0** · **9103** unit pass · **124** db pass · **15 mutations, all
+measured before → after, all RED**. Migration dry-run against prod inside a self-rolling-back
+transaction (8 cases), prod verified afterwards unchanged.
+🪤 **TWO TRAPS PAID FOR, BOTH ALREADY WRITTEN DOWN:** one of my own guards was **decoration** —
+reverting the wizard's `canPublish` left the import in the file, so a FILE-LEVEL census stayed GREEN
+while the button published priceless cards again (*a file-level count cannot say which EXPRESSION
+still asks*) — and **I piped a mutation run into `head`**, which killed it by SIGPIPE mid-run and
+left a sabotage applied, so the next baseline read two failures that were mine. Also: **an empty
+`tsc` log is not a clean one** — a run OOM'd at 4 GB against another session's concurrent typecheck
+and printed nothing at all. ⏭ **NOT built, deliberately:** the per-card
 reach bar on the Services list (the prototype's *"1 of 2 — one card is reaching nobody"*) — with the
 gate in place no NEW card can lack a price, so that row can only ever describe legacy rows.
 
