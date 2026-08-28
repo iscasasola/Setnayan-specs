@@ -31,7 +31,7 @@
 | **S2** | ✅ **MERGED AND SERVED** · PR [#4950](https://github.com/iscasasola/setnayan-platform/pull/4950), merged 06:36Z, merge `320c42b` — **production's own `/api/health` reports `320c42b`**, so it is live, not merely merged. All 16 checks green. |
 | **S3** | ✅ **MERGED** 2026-08-28T06:39Z · PR [#4951](https://github.com/iscasasola/setnayan-platform/pull/4951), merge `1ddb503`. ⏳ *Serving* not yet confirmed — prod was still on `320c42b` two minutes later. **A merge is not a ship**; re-check `/api/health` before claiming it live. |
 | **S4** | 🔓 **UNBLOCKED** — the half of S1 it waited on already shipped. Still the riskiest piece in the plan, and it has a **new** constraint: its four states are behind `NEXT_PUBLIC_LOCK_HANDSHAKE_ENABLED`, still unflipped. |
-| **S5** | ✅ **BUILT 2026-08-28 · PR [#4954](https://github.com/iscasasola/setnayan-platform/pull/4954)** — gap 1 below is closed: the couple's budget FEEL now becomes a number and the search uses it, and a shop is told the reach its price is earning. ⚠ Verify with `gh pr view 4954 --json state,mergedAt`. Gap 2 (should a couple browsing publicly see what a shop charges?) is **still the owner's** and is untouched. |
+| **S5** | ✅ **MERGED AND SERVED 2026-08-28 · PR [#4954](https://github.com/iscasasola/setnayan-platform/pull/4954)** (merge `70988bc`; production's own `/api/health` reports `70988bc`, so it is live, not merely merged) · **+ PR [#4956](https://github.com/iscasasola/setnayan-platform/pull/4956)**, the same-day follow-on that tells a couple when we ranked them on a guess — gap 1 below is closed: the couple's budget FEEL now becomes a number and the search uses it, and a shop is told the reach its price is earning. ⚠ Verify with `gh pr view 4954 --json state,mergedAt`. Gap 2 (should a couple browsing publicly see what a shop charges?) is **still the owner's** and is untouched. |
 
 ⚠ **Every state above is a claim with an expiry date.** Verify with
 `gh pr view <n> --json state,mergedAt` before acting on it; this corpus has been wrong about a PR's
@@ -356,6 +356,16 @@ not what happens**: a priceless card scores the neutral fit and stays in the res
 is the ability to WIN on budget and the figure a couple would read. The shipped word is **limited**,
 and a test fails if the copy ever says *nobody*. The per-card line is on the Services list, where a
 shop already looks, not in a report.
+
+🔴 **AND IT OPENED A HOLE THAT THE SAME DAY CLOSED — PR
+[#4956](https://github.com/iscasasola/setnayan-platform/pull/4956).** `budgetSource` shipped in
+#4954 with **zero readers**: the band-derived budget moves `budgetFit`, **weight 0.20, the
+second-largest dimension of the match %**, so a couple was being ranked against ~₱900,000 they never
+chose with nothing on screen saying so. A line above the results now names the band they picked, the
+figure we worked out and the way to set their own — shown **only where the estimate really decided
+something**, **not** behind the smart-sort flag (the estimate isn't either), and it stands the
+raise-your-budget nudge down. *A field with no reader is the shape this project keeps paying for,
+and this one was mine.*
 
 ⏭ **DELIBERATELY NOT BUILT:** Performance's *"most couples looking at you are planning
 ₱60k–₱120k"* — production holds 6 events, so that band would be an invented statistic printed to a
