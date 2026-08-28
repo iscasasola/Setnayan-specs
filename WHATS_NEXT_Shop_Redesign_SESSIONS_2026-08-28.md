@@ -307,10 +307,13 @@ booking in prod reads **ZERO rows** of it. Both bounced to their own error flag 
 for every shop, always. *An RLS denial and an empty read are the same value.*
 
 ⏭ **OPEN OWNER DECISIONS, deliberately NOT built:**
-· ~~**48 hours or 7 days?**~~ ✅ **RULED 2026-08-28 — _"48 hours"_. DO NOT RE-ASK IT.** Built the
-  same day: PR [#4962](https://github.com/iscasasola/setnayan-platform/pull/4962), migration
-  `20271178407226`, dry-run against prod inside `BEGIN…ROLLBACK` and rolled back clean. ⚠ Verify
-  with `gh pr view 4962 --json state,mergedAt`.
+· ~~**48 hours or 7 days?**~~ ✅ **RULED 2026-08-28 — _"48 hours"_. DO NOT RE-ASK IT.** Built,
+  merged and **SERVED** the same day: PR [#4962](https://github.com/iscasasola/setnayan-platform/pull/4962),
+  merge `313c635` (an ancestor of `origin/main`; production's own `/api/health` reports it),
+  migration `20271178407226` **verified applied IN PROD BY THE OBJECT** — the live
+  `guard_event_vendor_lock_handshake` stamps `INTERVAL '48 hours'`, `nudge_stale_lock_requests`
+  reads `p_days integer DEFAULT 1`, the trigger is **still bound**, and both forgery guards in the
+  replaced function survived the replace.
   🔑 **IT WAS NEVER ONE NUMBER.** The reminder fired on day 5 AND requires
   `lock_request_expires_at > NOW()`, so against a 48-hour deadline it could never match a row —
   the job would have swept nothing and reported success forever. **Shortening the window without
