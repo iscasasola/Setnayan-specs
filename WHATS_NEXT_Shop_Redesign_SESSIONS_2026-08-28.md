@@ -14,7 +14,7 @@
 
 | | Session | Model | Effort | Runs with | Waits for |
 |---|---|---|---|---|---|
-| **S1** | ⚠ **HALF ALREADY SHIPPED** — a dispute is not an eraser | **Opus 5** | **medium** | S2 · S3 | — |
+| ~~**S1**~~ | ✅ **DONE 2026-08-28 · PR [#4953](https://github.com/iscasasola/setnayan-platform/pull/4953)** — a dispute is not an eraser | **Opus 5** | **medium** | S2 · S3 | — |
 | **S2** | ✅ **DONE** — the shop tells the truth | **Opus 5** | **medium** | S1 · S3 | — |
 | **S3** | ✅ **DONE** — a card that can be found | **Opus 5** | **high** | S1 · S2 | — |
 | **S4** | 🔓 **UNBLOCKED** — the customer page answers | **Opus 5** | **high** | S3 · S5 | ~~S1~~ — |
@@ -27,7 +27,7 @@
 
 | | state |
 |---|---|
-| **S1** | 🛑 **ITS PREMISE IS DEAD — the erasure was fixed the DAY BEFORE this plan was written** (PR #4927, verified by reading the live function out of prod). No branch, no PR, and **most of what it describes no longer exists.** What is left is one thing: **`deposit_declined_at` has no admin reader**, so there is nowhere for Setnayan to settle by hand. Re-scoped to **medium**. It **no longer blocks S4.** |
+| ~~**S1**~~ | ✅ **BUILT — PR [#4953](https://github.com/iscasasola/setnayan-platform/pull/4953), auto-merge armed.** Its premise was dead (the erasure was fixed the day before the plan was written, PR #4927) and the ONE thing genuinely left — **nowhere for Setnayan to settle by hand** — is what shipped. ⚠ Verify with `gh pr view 4953 --json state,mergedAt`. |
 | **S2** | ✅ built · PR [#4950](https://github.com/iscasasola/setnayan-platform/pull/4950) OPEN, auto-merge armed |
 | **S3** | ✅ built · PR [#4951](https://github.com/iscasasola/setnayan-platform/pull/4951) OPEN, auto-merge armed |
 | **S4** | 🔓 **UNBLOCKED** — the half of S1 it waited on already shipped. Still the riskiest piece in the plan, and it has a **new** constraint: its four states are behind `NEXT_PUBLIC_LOCK_HANDSHAKE_ENABLED`, still unflipped. |
@@ -55,7 +55,7 @@ it fixes.
 
 ---
 
-### S1 — A dispute is not an eraser · **Opus 5 · medium** · ⚠ **RE-SCOPED 2026-08-28 — most of it already ships**
+### ✅ S1 — A dispute is not an eraser · **DONE 2026-08-28** · PR [#4953](https://github.com/iscasasola/setnayan-platform/pull/4953)
 
 🛑 **READ THIS BEFORE THE BRIEF. THE HEADLINE FINDING IS ALREADY FIXED, AND IT WAS FIXED THE DAY
 BEFORE THIS PLAN WAS WRITTEN** — PR
@@ -98,6 +98,55 @@ done. The **_settle it by hand_** half is not:
 · Anything it emits must have its notice kinds **inserted in the database**, not only emitted —
   guard: `lib/every-notice-type-exists-in-the-database.test.ts`. (Three notification types have
   shipped with live emit sites and no database row; that guard exists because of it.)
+
+#### ✅ AND THAT IS WHAT SHIPPED — PR [#4953](https://github.com/iscasasola/setnayan-platform/pull/4953)
+**Setnayan is the referee now.** `settle_vendor_deposit_dispute` (admin-only, `SECURITY DEFINER`)
+answers a refusal two ways — **the payment stands** (the booking proceeds) or **it did not arrive**
+(the refusal stands and the couple is asked to send it again) — and **neither deletes the couple's
+amount, receipt, method or ledger row.** It is a **section on `/admin/disputes`, not a new route**
+(a second address would need the nav entry S2 owns), the `disputes` badge counts **both** kinds
+through the sanctioned `digest` hatch so it cannot undercount its own page, and **both parties are
+told**. The couple sees the finding on their own workspace card.
+
+⛔ **REUSING `vendor_disputes` WAS MEASURED AND REJECTED — do not "simplify" it back later.** Its
+own `CHECK (payout_id IS NOT NULL OR order_id IS NOT NULL)` **cannot be satisfied** by off-platform
+couple→supplier money, and it feeds the **3-in-30 demotion cron** — putting a supplier who *raised*
+a dispute one boolean away from being demoted by it.
+
+🪤 **THE NOTICE-KIND WARNING ABOVE WAS MOOT, AND BETTER THAN MOOT: no new kind was needed.**
+`dispute_resolved` already existed, was already on the email allowlist, and had **ZERO emit
+sites** — a type with no handle, which now has one. **No enum migration, so nothing could drift.**
+
+🔒 **A FORGERY CLOSED ON THE WAY (the row is yours, the field is not — 9th instance):**
+`event_vendors_couple_write` is a PERMISSIVE `FOR ALL` policy and `authenticated` holds UPDATE on
+all 76 columns, so without a trigger guard a couple could PATCH *"Setnayan ruled the payment
+stands"* onto their own booking — **forging a referee's decision in the referee's name.**
+
+🪤 **THE SILENT MISS, GUARDED:** settle → couple re-sends → supplier refuses AGAIN. Without
+clearing the settlement the second dispute inherits *"already settled"* and **never reaches the
+queue** — no error, no log, a queue quietly wrong about how much work is waiting. Every writer of
+the refusal now also writes the settlement.
+
+🚨 **THE REPO'S OWN GUARD CAUGHT A DEAD FEATURE.** The settle RPC was first called on the
+**service-role** client, which carries no user ⇒ `auth.uid()` is NULL ⇒ `is_admin()` false ⇒
+**every settle refused in production**, while the feature looked finished.
+`lib/admin-gated-rpc-needs-a-session.test.ts` derives its list from the migrations, which is why it
+caught a function written the same hour. *Service_role bypasses RLS policies and fails every check
+that asks WHO IS THIS.*
+📋 **NAMED, NOT FIXED:** the admin map scans `refusedWhenEmpty` only from the
+`String(formData.get(…))` idiom, so the **8 admin action files using the `nullIfBlank` helper are
+likely understating what they refuse.** Teaching the scanner belongs with the admin-map work.
+
+🧪 **How it was proved, since a money path deserves saying:** the **EXACT migration file** was
+dry-run against **PROD** inside `BEGIN…ROLLBACK` (applies cleanly · 0 columns survive the rollback ·
+`CREATE OR REPLACE` provably kept #4927's non-erasure) — a retyped copy would have proved something
+other than what ships. 8 db tests, and **6 mutations each proven to LAND by occurrence count (1→0)
+before being believed**. ⚠ **The first mutation run had a `shift` bug: all six reported a clean
+pass and NONE had applied** (0→0). And one that did land stayed GREEN — a **measurement error in
+the sabotage**, not a decorative guard: it disabled one of four disjuncts while the test sets two
+columns. *An occurrence count proves a sabotage landed, not that it landed where you aimed.*
+⚠ `tsc` first **aborted at exit 134 while printing zero errors** — the documented trap; it needed a
+bigger heap, after which it was genuinely 0/0 with unit **10846/10846**.
 
 ⛔ **DO NOT rewrite `reject_vendor_deposit`.** A 334-line duplicate migration was already written
 and deleted once on discovering the refusal existed (PR
