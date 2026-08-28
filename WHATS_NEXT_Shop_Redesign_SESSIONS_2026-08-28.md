@@ -15,7 +15,7 @@
 | | Session | Model | Effort | Runs with | Waits for |
 |---|---|---|---|---|---|
 | **S1** | A dispute is not an eraser | **Opus 5** | **high** | S2 · S3 | — |
-| **S2** | The shop tells the truth | **Opus 5** | **medium** | S1 · S3 | — |
+| **S2** | ✅ **DONE** — the shop tells the truth | **Opus 5** | **medium** | S1 · S3 | — |
 | **S3** | A card that can be found | **Opus 5** | **high** | S1 · S2 | ✅ **BUILT 2026-08-28** |
 | **S4** | The customer page answers | **Opus 5** | **high** | S3 | **S1** |
 | **S5** | Price decides reach | **Opus 5** | **high** | — | **S3** |
@@ -37,7 +37,29 @@ disputed, settle in the admin.
 🪤 Its new notice kinds must be **inserted in the database**, not only emitted — guard:
 `lib/every-notice-type-exists-in-the-database.test.ts`.
 
-### S2 — The shop tells the truth · **Opus 5 · medium** · no dependencies
+### S2 — The shop tells the truth · **Opus 5 · medium** · ✅ **BUILT 2026-08-28 — do NOT rebuild it**
+PR [#4949](https://github.com/iscasasola/setnayan-platform/pull/4949). ⚠ Verify with
+`gh pr view 4949 --json state,mergedAt` before trusting this line — this corpus has been wrong
+about a PR's state five times. Full row: `DECISION_LOG.md` 2026-08-28 🏛.
+
+**Four corrections this session made to the brief below, every one measured:**
+· **The rename is SIX copies, not five.** The sixth is `vendor-rail-context.tsx`'s `CAPTION` map —
+  the 72px icon strip, keyed by the stable key — which would have gone on saying *"On the day"*
+  beside five renamed rows. And one of the five the brief DID name, `more/page.tsx`, is a
+  **redirect stub** carrying the word only in a comment. ✅ `nav_slot_override` holds **0 rows in
+  production**, so nothing out-ranks the code.
+· **"Both your shops are hidden today" is STALE.** Read out of prod: `SetnaProd` is
+  `verified`/`verified` and LIVE; the fixture shop is verified-but-hidden. The real gap is that the
+  first-steps rail reads ONE column (`verification_state`) while findability needs TWO — and
+  **nothing notifies a shop when its visibility changes at all**: `transitionVendorVisibility`
+  writes an audit row and calls no notifier, so the new banner is the only telling there is.
+· **The multi-day bug had a SECOND half** the brief did not name: `?event=<id>` names a celebration,
+  not a day, so the setup view's is-it-today branch was decided by array order.
+· **Performance ships NO invented statistic.** The drawing's *"booked twice as often"* is a number
+  we do not have — production holds zero marketplace bookings.
+
+**The original brief, kept:**
+
 **What a person gets:** the room is called what it is, a hidden shop learns why, a supplier
 working two days of one wedding sees both, and Performance says what its numbers mean.
 🔒 **THE RENAME IS LABELS ONLY. Never touch the `on-the-day` key or route** —
