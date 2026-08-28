@@ -383,13 +383,17 @@ the live function out of prod — see S1 above): a refusal is a mark, the receip
 card. **What is left of S1 is an ADMIN surface**, which a vendor screen does not depend on.
 ⇒ **S4 may start now. It is still the riskiest piece in the plan.**
 
-🔴 **AND A CONSTRAINT ITS BRIEF NEVER NAMED: THE FOUR STATES ARE BEHIND AN UNFLIPPED FLAG.**
-`lockRequestStateOf(row, enabled)` — the ONE shared translator — returns **only `'locked'` or
-`'none'`** when `enabled` is false, and `enabled` is `NEXT_PUBLIC_LOCK_HANDSHAKE_ENABLED`, which
-has been **waiting on the owner's press since 2026-08-16** and is *not readable from a session*
-(it inlines at build time). A Customers page built on four states would render **two** of them,
-look half-finished, and nobody would be able to tell that from a bug. **Design both arms, and say
-in the PR which one production is actually serving.**
+~~🔴 **AND A CONSTRAINT ITS BRIEF NEVER NAMED: THE FOUR STATES ARE BEHIND AN UNFLIPPED
+FLAG.**~~ ✅ **STALE — CORRECTED 2026-08-29. THE FLAG IS ON AND HAS BEEN FOR A LONG TIME**
+(owner, verbatim: *"the 3 vercel has been long time set to true and i just did a redeploy now"*).
+`lockRequestStateOf(row, enabled)` therefore returns its **full** vocabulary in production: the
+Customers page's four states are real, not two, and **pressing _Lock_ ASKS the supplier today.**
+⚠ **The reason this went unchecked was itself false and is repeated in several docs:** the value
+does NOT "inline at build time" anywhere a session could read it — measured, all **eight**
+importers of `lib/lock-handshake-flag.ts` are server components or server actions, so it never
+reaches a browser. `NEXT_PUBLIC_` makes a variable available to client code; it does not put it in
+the bundle unless client code reads it. 🔑 **A server-read flag's value can only be had by asking
+the owner — so ask, rather than inferring from the code default and writing the inference down.**
 
 ✅ **AND THE VOCABULARY MAPPING IS ALREADY WRITTEN — do NOT invent one.** `lib/lock-request-state.ts`
 translates the database's words to the couple-facing ones (`pending → requested`), handles the

@@ -2002,12 +2002,21 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > its own change. 🔑 **A sentence is not a mechanism — read the function body out
 > of prod before trusting a comment that says another object does something.**
 >
-> ⚖ **SO THE OWNER LOOKS AND FLIPS
-> `NEXT_PUBLIC_LOCK_HANDSHAKE_ENABLED` IN VERCEL.** Nothing changes for anybody
-> until he does — flag-off is *asserted* byte-identical to today, not assumed.
-> ⚠ **Its production value is NOT readable from a session** (it inlines at build
-> time, and the surfaces sit behind logins). **Do not report it as off because the
-> code default is off** — read it in the hosting settings and say which you did.
+> ✅ **CLOSED 2026-08-29 — THE FLAG IS ON, AND HAS BEEN FOR A LONG TIME. Owner,
+> unprompted: _"the 3 vercel has been long time set to true and i just did a
+> redeploy now."_ DO NOT ASK HIM TO FLIP IT AGAIN.**
+> 🔴 **SO THE HANDSHAKE IS LIVE: pressing _Lock_ ASKS the supplier, and their
+> yes is what makes the booking.** Every doc that calls this "waiting on one owner
+> press" — including this block until today — was wrong, and at least one session
+> designed a screen around the wrong arm because of it.
+> ⚠ **AND THE WIDELY-REPEATED REASON IT WENT UNCHECKED IS ITSELF FALSE.** Several
+> docs say the value "inlines at build time" so a signed-in bundle could reveal
+> it. **It cannot.** Measured 2026-08-29: all EIGHT importers of
+> `lib/lock-handshake-flag.ts` are server components or server actions, so the
+> value never reaches a browser. `NEXT_PUBLIC_` makes a variable *available* to
+> client code; it does not put it in the bundle unless client code reads it.
+> 🔑 **The only way to know a server-read flag's value is to ask the owner or read
+> the hosting settings — so ASK, rather than inferring from the code default.**
 >
 > 🔴 **`cancel_vendor_lock_request` HAD ZERO CALLERS FOR ITS WHOLE LIFE** — granted,
 > commented, db-tested, and unreachable, so a couple could not un-ask. **A forward
