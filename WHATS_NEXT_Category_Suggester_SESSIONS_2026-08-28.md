@@ -20,13 +20,22 @@
 
 | # | What a person gets | Model · effort | Gate | Touches |
 |---|---|---|---|---|
-| **C0** | **A category can be undone.** Combine two trades into one, and make an old name still land on its replacement. **Build this BEFORE anything proposes new trades.** | **Opus · high** | none | `admin/taxonomy/actions.ts` · one migration |
+| ~~**C0**~~ ✅ **BUILT — PR [#4946](https://github.com/iscasasola/setnayan-platform/pull/4946), held as a DRAFT at its own gate (auto-merge disarmed). Do NOT rebuild it; it needs the owner to mark it ready.** Two trades can be combined and an old key still resolves. ⚠ Verify state with `gh pr view 4946 --json state,mergedAt` — this corpus has been wrong about a PR five times. | **Opus · high** | none | `admin/taxonomy/actions.ts` · migration `20271176753752` |
 | **C1** | **Typing finds the real trade.** All live trades searchable in the maker, properly ranked — *"sorbetes"*, *"generator"*, *"tent"*, *"photobooth"* as one word. No model, no new schema. | Sonnet · medium | none | `canvas-maker.tsx` · `services/new/page.tsx` |
 | **C2** | **One trade, many names.** An alias list — *sorbetes · sorbetero · ice cream cart* all find the same trade. Written once by Claude **offline**, checked by a person, then free forever. | Sonnet · medium | none — supplier text never leaves the server | one migration · the ranker · an admin review screen |
 | **C3** | **It remembers what suppliers confirm.** Only for phrases the alias list missed. | Sonnet · medium | **⚠ read the poisoning risk first** | one migration · `canvas-maker.tsx` |
 | **C4** | **A trade we do not have arrives ready to press.** Claude drafts the proposal with its near-matches above the button. | **Opus · high** | **ships dark; owner flips** | `proposeCategory` · `/admin/taxonomy` |
 | **C5** | **Their website fills it in at sign-up.** | Sonnet · medium | 🔴 **owner + DPO: lawful basis, not just tone** | vendor onboarding |
 | ~~Cx~~ | ~~Match by meaning (embeddings)~~ | — | 🛑 **DEMOTED — do not build it yet** | — |
+
+🛑 **C0's GATE WAS REAL AND THIS FILE DID NOT CARRY IT.** This register's C0 row said gate =
+**"none"**; the session prompts file says **"none — but open the PR as a DRAFT"**, because C0 moves
+other people's data across tables with **no foreign key to catch a mistake**. A session reading only
+this file would arm auto-merge and sail through a hold. **The gate is recorded here now.** PR #4946
+was opened non-draft, then converted to draft when the discrepancy was found — it is waiting on the
+owner to mark it ready. 🔑 *Two corpus docs described the same gate differently, and the one a
+session was pointed at was the laxer one — the same shape as a rule written twice with the lax copy
+deciding.*
 
 🛑 **THE EMBEDDINGS SESSION WAS REMOVED AFTER A FABLE ADVERSARIAL PASS.** Its evidence turned out
 to be a **supervised classifier trained on labelled history** (we have none — 0 authored cards); its
@@ -48,11 +57,18 @@ Revisit only if the alias list measurably misses real supplier phrases.
 
 **C0 → C1 → C2 → C3 → C4 → C5.**
 
-**C0 first, and this is the owner's own question answered:** we can rename a category freely and
-safely today, we can combine two *branches*, and we **cannot combine or reroute a TRADE at all** —
-the column for it has existed since 2026-08-03 with zero writers and zero readers. Building the undo
-before anything starts proposing new trades is the difference between a mistake that costs a click
-and one that is permanent.
+~~**C0 first…**~~ ✅ **C0 IS BUILT (PR [#4946](https://github.com/iscasasola/setnayan-platform/pull/4946)) — the undo exists, so C4 is no longer gated on it.**
+Two trades can be combined, every stored key moves, and an old key still lands on its replacement.
+
+🛑 **AND C0 DISPROVED THE SENTENCE THAT USED TO SIT HERE.** This register said the column for
+rerouting "has existed since 2026-08-03 with zero writers and zero readers", implying it only needed
+wiring. **It cannot do the job at all:** `service_categories.merged_into_category_id` sits on a table
+holding **only tier-1 folders (16) and tier-2 tiles (78) — read out of prod, there is no tier 3.**
+Trades live in `canonical_service_taxonomy`. That column can forward a **BRANCH** and never a
+**TRADE**. The trade forwarder is a new `canonical_service_taxonomy.merged_into`; the tile column is
+still unwired **and is now correctly described as out of scope**, not as the missing piece.
+
+**Remaining order: C1 → C2 → C3 → C4 → C5.**
 
 **C1 + C2 are the whole feature for most suppliers**, need no supplier text to leave the server, and
 close the naming gap on their own. **If nothing after C2 is ever built, the gap is still closed.**
@@ -72,13 +88,36 @@ close the naming gap on their own. **If nothing after C2 is ever built, the gap 
 | **Renaming a category** | **`renameTaxonomyNode`** — writes `label_en` ONLY, never the key. Safe and audit-logged |
 | **Moving a trade to another branch** | **`remapCanonical`** · **`moveTileToFolder`** |
 | **Combining two BRANCHES** | **`deleteTileWithDestination`** — refuses to delete a non-empty branch without a destination, then re-points everything. Copy this pattern for C0 |
+| **Combining two TRADES** | ✅ **`mergeCanonicalService` → `merge_canonical_service()`** (C0, PR #4946) — one transaction, moves all twelve holders, drops the colliding source row on the six that would throw |
+| **An old trade key resolving to its replacement** | ✅ **`canonical_service_taxonomy.merged_into`** + **`lib/service-merge-forward.ts`**, read on `/explore`. Fails OPEN — an unknown key passes through unchanged |
+| **Knowing WHO stores a trade key** | ✅ **`lib/taxonomy-merge-holders.ts`** — the registry, twelve columns, guard-enforced |
+| **Finding a shop-held key that points at nothing** | ✅ **`lib/dangling-trade-keys.ts`** — no foreign key will ever tell you |
 
-🔴 **AND THE TWO THINGS THAT DO NOT EXIST — this is C0's whole scope.** There is **no leaf-level
-merge and no leaf-level delete** anywhere in the admin, and `service_categories.merged_into_category_id`
-has existed since 2026-08-03 with **0 writers · 0 readers · 0 values**. Meanwhile
-`vendor_coverages.canonical_service`, `vendor_services.category` and `vendor_profiles.services[]`
-carry **no foreign key at all**, so nothing would stop a trade being deleted out from under the
-shops that listed under it.
+✅ **THE TWO THINGS THAT DID NOT EXIST NOW SHIP — C0, PR [#4946](https://github.com/iscasasola/setnayan-platform/pull/4946). Do NOT rebuild either.**
+**`merge_canonical_service()`** folds trade A into trade B in ONE transaction, and
+**`canonical_service_taxonomy.merged_into`** forwards an old key — with its reader wired into
+`/explore` in the same change, because this repo has already shipped a forwarding ledger that
+nothing read for months.
+
+🚨 **AND C0 CORRECTED THREE THINGS THIS REGISTER ASSERTED. Any later session must work from these,
+not from the rows above:**
+
+1. **The holder list was THREE from memory. Enumerating the columns out of production found TWELVE** —
+   add `vendor_packages.primary_canonical_service`, `vendor_package_items`, `vendor_service_links`,
+   `vendor_service_attributes`, **`vendor_screen_name_sequences` (2052 live rows)**,
+   `event_vendor_preferences`, `budget_allocation_decisions`, `thread_service_interests`,
+   `vendor_schedule_pool_categories`. The list is declared once as data in
+   **`lib/taxonomy-merge-holders.ts`** and a guard fails when a column appears in neither the
+   move list nor the stated-reason list. **Read that file; never re-derive the list from memory.**
+2. **SIX of the twelve sit under a UNIQUE constraint that includes the trade key**, so a plain
+   `UPDATE … SET col = dest` throws `23505` the moment one shop holds both trades — the ordinary
+   case for a merge, not an edge case.
+3. ⚠ **`event_vendors.category_key` is a TILE id, not a trade key** (its own column comment says so),
+   so it does **not** constrain a trade merge — contrary to what the brief for C0 assumed.
+
+⚠ **Still true and still worth knowing:** `vendor_coverages.canonical_service`,
+`vendor_services.category` and `vendor_profiles.services[]` carry **no foreign key at all**, so the
+database will never report a stranded key. **`lib/dangling-trade-keys.ts`** is the report that asks.
 
 ---
 

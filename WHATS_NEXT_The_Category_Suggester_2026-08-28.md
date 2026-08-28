@@ -260,8 +260,8 @@ word for this"*.
 | **Rename a category** | ✅ **Yes, safely, any time** | `renameTaxonomyNode` writes **`label_en` only — never the key.** Everything that stored the old key keeps working; only the words on screen change. Audit-logged. **Renaming is genuinely free and reversible.** |
 | **Move a trade to a different branch** | ✅ Yes | `remapCanonical` re-points one leaf; `moveTileToFolder` moves a whole branch |
 | **Combine two BRANCHES** | ✅ Yes, and it is well built | `deleteTileWithDestination` **refuses to delete a non-empty branch without a destination**, then re-points every trade and refinement to it. Its own rule: *"never strand a canonical"* |
-| **Combine two TRADES into one** | 🔴 **No. Nothing exists.** | There is no leaf-level merge and no leaf-level delete action anywhere in the admin |
-| **Reroute an old trade to its replacement** | 🔴 **No — and the column for it has existed since 2026-08-03, unwired** | `service_categories.merged_into_category_id`, FK to itself. **0 writers · 0 readers · 0 values in production.** The **ninth** gate with no handle in this corpus |
+| **Combine two TRADES into one** | ✅ **YES — built 2026-08-28** | **`mergeCanonicalService` → `merge_canonical_service()`** (PR [#4946](https://github.com/iscasasola/setnayan-platform/pull/4946)). ONE transaction, moves all **twelve** columns that hold a trade key, drops the colliding source row on the **six** that sit under a UNIQUE constraint including the key. The source is TOMBSTONED, never deleted |
+| **Reroute an old trade to its replacement** | ✅ **YES — built 2026-08-28** | **`canonical_service_taxonomy.merged_into`**, read by `lib/service-merge-forward.ts` on `/explore`. 🛑 **NOT `service_categories.merged_into_category_id` — that column CANNOT do this.** It sits on a table holding only tier-1 folders (16) and tier-2 tiles (78); read out of prod, **there is no tier 3**, so it can forward a BRANCH and never a TRADE. It remains unwired, and that is now correct rather than a gap |
 
 ### 🚨 And the shop-side columns have no seatbelt
 
@@ -274,21 +274,32 @@ Three other tables *do* hold `RESTRICT` foreign keys — `event_vendor_preferenc
 `vendor_service_attributes`, `event_vendors.category_key` — so a delete is blocked **only if one of
 those rows happens to exist.** Protection by coincidence, not by design.
 
-### ⇒ What this changes about the plan
+### ⇒ ✅ ALL THREE ARE BUILT — PR [#4946](https://github.com/iscasasola/setnayan-platform/pull/4946), migration `20271176753752`. Do NOT rebuild any of it.
 
-**The undo must be built BEFORE anything starts proposing new trades at scale.** It is cheap: the
-column exists, and the branch-level merge is a working precedent to copy. Three things:
+⚠ Verify with `gh pr view 4946 --json state,mergedAt` before trusting this line.
 
-1. **A leaf-level merge** — combine trade A into trade B, moving every shop that listed under A, on
-   the `deleteTileWithDestination` pattern that already refuses to strand anything.
-2. **Wire `merged_into_category_id`** so an old key still resolves to its replacement, exactly as a
-   renamed shop address forwards. ⚠ The precedent carries its own warning: **slug forwarding was
-   written and then had no reader for months.** Ship the reader in the same PR.
-3. **A guard that fails when a shop-held key points at nothing**, because no foreign key will.
+1. ✅ **A leaf-level merge** — `merge_canonical_service()`, on the `deleteTileWithDestination`
+   never-strand pattern, but as **one SQL transaction rather than sequential writes**: twelve
+   tables with compensating rollback leaves shops HALF-MOVED on any failure.
+2. ✅ **The forward, with its reader in the same PR** — and on the **right object**: a new
+   `canonical_service_taxonomy.merged_into`, not `merged_into_category_id` (see the corrected
+   row above). `/explore?category=<old key>` resolves to the replacement.
+3. ✅ **The dangling-key report** — `lib/dangling-trade-keys.ts`.
 
-🔑 **This softens the "close to permanent" warning in § 4 — but only once it is built.** Today that
-warning stands exactly as written: we can rename freely, and we cannot combine or reroute a trade
-at all.
+🚨 **THREE CORRECTIONS THIS BUILD MADE TO THE PLAN ABOVE — later sessions must use these:**
+
+- **The holder list was THREE from memory; the columns say TWELVE.** Declared once as data in
+  `lib/taxonomy-merge-holders.ts`, guard-enforced. One of them, `vendor_screen_name_sequences`,
+  holds **2052 live production rows** and was not in the remembered list at all.
+- **Six of the twelve throw `23505` on a plain UPDATE** the moment one shop holds both trades —
+  the ordinary case for a merge, not an edge case.
+- **`event_vendors.category_key` is a TILE id, not a trade key**, so it does not constrain a
+  trade merge.
+
+🔑 **THE "close to permanent" WARNING IN § 4 IS NOW GENUINELY SOFTER — a duplicate trade is
+recoverable.** It is NOT free, and § 4 otherwise stands: a merge still moves other people's
+listings and cannot be undone, which is why the control asks an admin to type the trade's name.
+**AI still must not mint a category** — that reasoning is unchanged.
 
 ---
 
