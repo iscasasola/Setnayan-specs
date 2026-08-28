@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SETNAYAN · The category suggester — four steps, cheapest first · 2026-08-28</title>
+<!--
+  THE CATEGORY SUGGESTER — design prototype, 2026-08-28.
+
+  The owner's brief, verbatim:
+    "can we have an AI detect and recommend where they should be located? like how
+     shopee does when we try to add products on their app?"
+    "create the plan. and can AI also generate a new category for the taxonomy?"
+    "search the internet for the best approach for this."
+
+  ⛔ THIS IS NOT A NEW SCREEN. It is ONE SHEET of the approved card maker —
+  `service_card_wizard_2026-08-28.html` § "What kind of service?" — in the states it
+  does not have yet. Every token, chip, sheet and rule below is COPIED from that file,
+  not re-invented. Reconcile, never redraw.
+
+  WHAT IS BEING DRAWN. Today that sheet offers the shop's own coverage words, then ~46
+  legacy departments, and searches them with a plain substring match. Measured
+  2026-08-28: 51 live trades have NO word that means them, and three funeral kinds
+  render in no group at all. Those shops could always MAKE a card — the card is
+  universal (owner) — they just had to file it under "Miscellaneous".
+
+  THE LADDER, cheapest first. Research (arXiv 2504.04277, service-category prediction
+  on Thumbtack) measured embeddings at ~50% higher accuracy than the best LLM prompts
+  for choosing from a fixed list, with better calibration, latency and cost. So the
+  model is LAST and NARROWEST — it never picks; it only proposes a trade we do not have.
+
+    1 · YOUR SHOP     — what they already cover                          ₱0
+    2 · TYPED         — ranked lexical match over all 262 live trades    ₱0
+    3 · REMEMBERED    — a wording somebody used before                   ₱0
+    4 · CLOSEST       — meaning match (embeddings + nearest neighbour)   262 embeds, once
+    5 · NOT ON OUR LIST — Claude drafts a proposal, a person presses      rare
+
+  🔑 EVERY RESULT SAYS HOW IT WAS FOUND. The shipped admin assistant already returns
+  `from: 'remembered' | 'ai'` and shows it. Carried here on purpose: a supplier deserves
+  to know whether we KNOW this or GUESSED it, and it is the difference between a
+  suggestion they can weigh and one they just trust.
+
+  Self-contained: inline CSS + inline SVG + vanilla JS. Genuinely typeable — the search
+  really runs the four steps against a real slice of the live taxonomy.
+  prefers-reduced-motion respected. Contrast receipts at the bottom.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#FFFFFF;
+  --ink:#2C2A29;
+  --ink-soft:#4F535B;
+  --cta:#C24E25; --cta-hover:#B04722; --cta-active:#9D3F1E;
+  --gold:#A9834B; --gold-text:#8A6B39;
+  --link:#3B4E67; --link-hover:#304055;
+  --pos:#4F6B4A; --neg:#B65A3A;
+  --border:rgba(44,42,41,0.12);
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --dur:180ms;
+  --sans:'Hanken Grotesk',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'Space Mono',ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+body{background:var(--cream);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+b,strong{font-weight:700}
+a{color:var(--link)} a:hover{color:var(--link-hover)}
+.mono{font-family:var(--mono)}
+.kicker{font-family:var(--mono);text-transform:uppercase;letter-spacing:.14em;font-size:11px;font-weight:700;color:var(--gold-text)}
+.krule{display:inline-block;width:28px;height:2px;background:var(--gold);vertical-align:middle;margin-right:10px}
+svg.ic{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-2px}
+svg.ic.s{width:12px;height:12px}
+
+@keyframes rise{from{opacity:0;transform:translateY(8px)}}
+@keyframes slidein{from{opacity:0;transform:translateX(-10px)}}
+.rise{animation:rise 260ms var(--ease) both}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+
+.wrap{max-width:1120px;margin:0 auto;padding:40px 22px 80px}
+.masthead{border-bottom:1px solid var(--border);padding-bottom:20px;margin-bottom:30px}
+.masthead h1{font-size:29px;line-height:1.18;letter-spacing:-.015em;margin-top:9px;max-width:22ch}
+.mast-sub{color:var(--ink-soft);font-size:14.5px;margin-top:10px;max-width:66ch}
+.mast-meta{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);letter-spacing:.06em;margin-top:13px;text-transform:uppercase}
+
+.band{margin-top:42px;padding-top:26px;border-top:1px solid var(--border)}
+.band h2{font-size:19px;letter-spacing:-.01em;margin:9px 0 6px}
+.band p{color:var(--ink-soft);font-size:14px;max-width:72ch}
+.band p + p{margin-top:9px}
+
+/* ── the phone frame, same as the wizard prototype ── */
+.stage{display:grid;grid-template-columns:340px 1fr;gap:34px;margin-top:24px;align-items:start}
+@media (max-width:900px){.stage{grid-template-columns:1fr}}
+.frame{border:1px solid var(--border);border-radius:26px;padding:11px;background:var(--cream);box-shadow:0 1px 3px rgba(44,42,41,.05),0 10px 34px rgba(44,42,41,.06)}
+.screen{border:1px solid var(--border);border-radius:18px;overflow:hidden;background:var(--cream);min-height:600px;display:flex;flex-direction:column}
+.appbar{display:flex;align-items:center;gap:8px;padding:11px 13px;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--ink-soft)}
+.appbar b{color:var(--ink);font-size:13px}
+.pad{padding:14px 13px;flex:1}
+
+.qh{font-size:16.5px;font-weight:700;letter-spacing:-.01em}
+.qsub{font-size:12.5px;color:var(--ink-soft);margin-top:4px}
+
+.searchbox{display:flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:10px;padding:9px 11px;margin-top:13px;color:var(--ink-soft);transition:border-color var(--dur) var(--ease)}
+.searchbox:focus-within{border-color:rgba(194,78,37,.55)}
+.searchbox input{border:0;outline:none;background:transparent;font-family:var(--sans);font-size:13.5px;color:var(--ink);width:100%}
+.searchbox input::placeholder{color:var(--ink-soft)}
+
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.chip{border:1px solid var(--border);border-radius:999px;padding:7px 13px;font-size:12.5px;color:var(--ink);cursor:pointer;background:var(--cream);font-family:var(--sans);transition:border-color var(--dur) var(--ease),background var(--dur) var(--ease),transform 90ms var(--ease);text-align:left}
+.chip:hover{border-color:rgba(194,78,37,.5)}
+.chip:active{transform:scale(.95)}
+.chip.on{border-color:var(--cta);background:rgba(194,78,37,.08);color:var(--cta-active);font-weight:700}
+.chip.locked{border-style:dashed;color:var(--ink-soft);cursor:not-allowed}
+.chip.locked:hover{border-color:var(--border)}
+.chip .sub{display:block;font-size:10.5px;color:var(--ink-soft);font-weight:400;margin-top:1px}
+
+.grp{margin-top:15px}
+.cgk{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.cgk .dot{width:6px;height:6px;border-radius:50%;flex:none}
+.d1{background:var(--cta)} .d2{background:var(--ink)} .d3{background:var(--gold)} .d4{background:var(--link)} .d5{background:var(--neg)}
+
+/* the "how we found it" tag — honest provenance, carried from the shipped admin box */
+.prov{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--border);border-radius:5px;padding:2px 5px;color:var(--ink-soft);margin-left:6px;vertical-align:1px}
+
+.note{font-size:12px;color:var(--ink-soft);margin-top:13px;padding:10px 11px;border:1px solid var(--border);border-radius:10px;background:rgba(44,42,41,.02)}
+.note b{color:var(--ink)}
+
+.propose{margin-top:13px;border:1.5px dashed rgba(194,78,37,.5);border-radius:12px;padding:13px;background:rgba(194,78,37,.03)}
+.propose .pt{font-size:13px;font-weight:700;color:var(--cta-active)}
+.propose .pb{font-size:12px;color:var(--ink-soft);margin-top:4px}
+.btn{border:0;border-radius:9px;padding:9px 14px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;transition:background var(--dur) var(--ease),transform 90ms var(--ease)}
+.btn:active{transform:scale(.97)}
+.btn-cta{background:var(--cta);color:#fff}
+.btn-cta:hover{background:var(--cta-hover)}
+.btn-sec{background:transparent;color:var(--ink);border:1px solid var(--border)}
+.btn-sec:hover{border-color:rgba(194,78,37,.5)}
+.rowbtns{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap}
+
+/* ── the ladder explainer ── */
+.ladder{display:grid;gap:9px;margin-top:16px}
+.rung{display:grid;grid-template-columns:26px 1fr auto;gap:11px;align-items:start;border:1px solid var(--border);border-radius:12px;padding:11px 13px;transition:border-color var(--dur) var(--ease),background var(--dur) var(--ease)}
+.rung.lit{border-color:rgba(194,78,37,.45);background:rgba(194,78,37,.04)}
+.rung .n{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--ink-soft);border:1px solid var(--border);border-radius:6px;width:26px;height:22px;display:grid;place-items:center}
+.rung.lit .n{color:var(--cta-active);border-color:rgba(194,78,37,.45)}
+.rung .t{font-size:13.5px;font-weight:700}
+.rung .d{font-size:12px;color:var(--ink-soft);margin-top:2px}
+.rung .c{font-family:var(--mono);font-size:10px;color:var(--ink-soft);text-align:right;white-space:nowrap}
+
+.try{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.try button{border:1px solid var(--border);border-radius:999px;padding:6px 12px;font-size:12px;font-family:var(--mono);color:var(--link);cursor:pointer;background:var(--cream);transition:border-color var(--dur) var(--ease)}
+.try button:hover{border-color:var(--link)}
+
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+th{font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);font-weight:700}
+td.mono{font-family:var(--mono);font-size:11.5px}
+.ok{color:var(--pos);font-weight:700}
+.no{color:var(--neg);font-weight:700}
+ul{margin:9px 0 0 18px;color:var(--ink-soft);font-size:13.5px}
+li{margin-bottom:5px}
+li b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="kicker"><span class="krule"></span>Setnayan · supplier · the card maker</div>
+    <h1>Say what you do in your own words.</h1>
+    <p class="mast-sub">
+      One sheet of the card maker, in the states it does not have yet. A supplier types what they
+      actually sell — <b>“sorbetes cart”</b>, <b>“sound hire”</b>, <b>“drone pilot”</b> — and we find
+      the trade. Four steps, cheapest first, and the model is the last and narrowest of them:
+      it never picks a trade, it only proposes one we do not have.
+    </p>
+    <p class="mast-meta">Prototype · 2026-08-28 · extends service_card_wizard_2026-08-28.html § “What kind of service?”</p>
+  </header>
+
+  <section class="band" style="border-top:0;padding-top:0;margin-top:0">
+    <div class="kicker"><span class="krule"></span>Try it — it really runs</div>
+    <h2>The sheet</h2>
+    <p>
+      Type into the box. The results are labelled with <b>how they were found</b> — that tag is not
+      decoration: it is the difference between a suggestion you can weigh and one you just trust,
+      and the shipped admin assistant already works this way.
+    </p>
+
+    <div class="stage">
+      <div class="frame">
+        <div class="screen">
+          <div class="appbar">
+            <svg class="ic" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+            <b>What kind of service?</b>
+          </div>
+          <div class="pad">
+            <div class="qsub" id="sub">What you already do, in your own words. A kind can hold more than one card.</div>
+
+            <div class="searchbox">
+              <svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+              <input id="q" type="search" placeholder="Try “sorbetes”, “sound hire”, “drone”…" aria-label="Search kinds of service" autocomplete="off">
+            </div>
+
+            <div class="try">
+              <button onclick="demo('photobooth')">photobooth</button>
+              <button onclick="demo('sorbetes')">sorbetes</button>
+              <button onclick="demo('sound hire')">sound hire</button>
+              <button onclick="demo('drone pilot')">drone pilot</button>
+              <button onclick="demo('pet grooming')">pet grooming</button>
+            </div>
+
+            <div id="results"></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="kicker"><span class="krule"></span>What just happened</div>
+        <h2 style="margin-bottom:12px">Four steps, and it stops at the first one that answers</h2>
+        <div class="ladder" id="ladder">
+          <div class="rung" data-r="1"><div class="n">1</div><div><div class="t">Your shop</div><div class="d">What they already told us they cover. Their own words, already on screen.</div></div><div class="c">₱0</div></div>
+          <div class="rung" data-r="2"><div class="n">2</div><div><div class="t">Typed</div><div class="d">Ranked match over all 262 live trades. Already written and tested — it exists because one-word “photobooth” used to find nothing.</div></div><div class="c">₱0</div></div>
+          <div class="rung" data-r="3"><div class="n">3</div><div><div class="t">Somebody typed this before</div><div class="d">A wording another supplier used and confirmed. One indexed read.</div></div><div class="c">₱0</div></div>
+          <div class="rung" data-r="4"><div class="n">4</div><div><div class="t">Closest by meaning</div><div class="d">“sorbetes cart” → <b>Ice Cream Cart</b>. Letters never match that; meaning does.</div></div><div class="c">262 once</div></div>
+          <div class="rung" data-r="5"><div class="n">5</div><div><div class="t">Not on our list</div><div class="d">Only now does a model speak — and only to draft a proposal for a person to press.</div></div><div class="c">rare</div></div>
+        </div>
+        <div class="note" id="why"><b>Nothing typed yet.</b> The shop's own coverage leads the sheet — for most suppliers the question is already answered and never asked.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="kicker"><span class="krule"></span>The rule that shapes every state above</div>
+    <h2>It suggests. It never decides, and it never refuses.</h2>
+    <ul>
+      <li><b>Miscellaneous stays on the screen, always.</b> The card is universal (owner, 2026-08-28: <i>“the card is universal fit for any service”</i>). A supplier who disagrees with every suggestion must be able to walk past all of them without a fight.</li>
+      <li><b>A low-confidence match shows nothing.</b> A confidently wrong suggestion is worse than none — a supplier who trusts it files their card under somebody else's trade, and then couples find the wrong shop.</li>
+      <li><b>The model may not invent a trade.</b> At step 4 it chooses nothing at all; at step 5 it writes a <i>proposal</i>, and a person presses. Removing a trade later strands the shops that listed under it, so every one we mint is close to permanent.</li>
+      <li><b>Every step fails silent.</b> No key, no network, a refusal → the box behaves exactly as step 2. A supplier must never meet an error about an assistant they did not ask for.</li>
+    </ul>
+  </section>
+
+  <section class="band">
+    <div class="kicker"><span class="krule"></span>Step 5, drawn — the only place a model writes anything</div>
+    <h2>“We have no word for this yet”</h2>
+    <p>
+      This is what the owner sees, not the supplier. The request already lands in a queue that ships
+      today; what is new is that it arrives <b>ready to press</b> instead of as a bare label — and
+      that the near-matches sit <b>above</b> the button, not below it, so the answer has to be read
+      before it can be accepted.
+    </p>
+    <div style="max-width:520px;border:1px solid var(--border);border-radius:14px;padding:15px;margin-top:15px">
+      <div class="cgk"><span class="dot d5"></span>Category request · pending</div>
+      <div style="font-size:15px;font-weight:700">“Pet grooming for weddings”</div>
+      <div style="font-size:12.5px;color:var(--ink-soft);margin-top:3px">Asked by <b>Barkada Pet Studio</b> · their words: “we bathe and dress the couple's dogs before the ceremony”</div>
+
+      <div class="note" style="margin-top:13px">
+        <b>Closest things we already have</b> — read these first.<br>
+        · <b>Kids' Entertainer</b> — guest-facing, not animal care. <span class="mono" style="font-size:10.5px">weak</span><br>
+        · <b>HMUA</b> — grooming, but for people. <span class="mono" style="font-size:10.5px">weak</span><br>
+        <span style="color:var(--ink)">Neither is the same trade.</span>
+      </div>
+
+      <div class="propose">
+        <div class="pt">Proposed: <span class="mono">pet_attendant</span> — “Pet Attendants”</div>
+        <div class="pb">Under <b>Guest experiences › Kids' Entertainer</b>? — the branch is a suggestion and the weakest part of this draft. Change it before promoting.</div>
+        <div class="rowbtns">
+          <button class="btn btn-cta" onclick="alert('Prototype: mints the leaf under the chosen branch — the shipped promoteCategoryRequest path.')">Add it</button>
+          <button class="btn btn-sec" onclick="alert('Prototype: maps the request onto an existing trade instead.')">Map to an existing one</button>
+          <button class="btn btn-sec" onclick="alert('Prototype: kept private / rejected, with a note back to the supplier.')">No</button>
+        </div>
+      </div>
+      <div style="font-size:11.5px;color:var(--ink-soft);margin-top:10px">
+        Four outcomes, all already built: <span class="mono">promote · map · kept_private · rejected</span>.
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="kicker"><span class="krule"></span>Receipts</div>
+    <h2>Contrast, measured on this page's own white</h2>
+    <table>
+      <tr><th>Token</th><th>Used for</th><th>On #FFFFFF</th><th>AA</th></tr>
+      <tr><td class="mono">--ink #2C2A29</td><td>body, chip labels</td><td class="mono">14.6:1</td><td class="ok">pass</td></tr>
+      <tr><td class="mono">--ink-soft #4F535B</td><td>sub-lines, provenance tags</td><td class="mono">7.7:1</td><td class="ok">pass</td></tr>
+      <tr><td class="mono">--cta-active #9D3F1E</td><td>chosen chip text</td><td class="mono">6.3:1</td><td class="ok">pass</td></tr>
+      <tr><td class="mono">--gold-text #8A6B39</td><td>eyebrows only, never body</td><td class="mono">4.6:1</td><td class="ok">pass</td></tr>
+      <tr><td class="mono">--link #3B4E67</td><td>links</td><td class="mono">8.2:1</td><td class="ok">pass</td></tr>
+      <tr><td class="mono">--gold #A9834B</td><td class="mono">icon / rule ONLY</td><td class="mono">3.4:1</td><td class="no">text: no</td></tr>
+    </table>
+    <p style="margin-top:10px">
+      ⚠ <b>The gold slot is never text here.</b> It measures 3.4:1 on white — it clears the 3:1
+      non-text bar for the rule and the dots, and fails AA for body copy. That is the repo's own
+      standing trap: the token named <span class="mono">terracotta</span> is the gold, and the
+      action colour lives in the slot named <span class="mono">mulberry</span>.
+    </p>
+  </section>
+
+</div>
+
+<script>
+// A real slice of the live taxonomy: {key, label, branch, folder}. The lexical ranker
+// below is the SHIPPED four-tier algorithm from lib/taxonomy-search-rank.ts, copied so
+// this page demonstrates the real behaviour rather than an invented one.
+const TRADES = [
+  {k:'photo_booth', l:'Photo booth', b:'Photo Booth', f:'Booths, carts & bars'},
+  {k:'pabati', l:'Pabati', b:'Photo Booth', f:'Booths, carts & bars'},
+  {k:'booth_360', l:'360 Booth', b:'Photo Booth', f:'Booths, carts & bars'},
+  {k:'sorbetes_cart', l:'Sorbetes Cart', b:'Food Cart', f:'Booths, carts & bars'},
+  {k:'ice_cream_cart', l:'Ice Cream Cart', b:'Food Cart', f:'Booths, carts & bars'},
+  {k:'halo_halo_station', l:'Halo-Halo Station', b:'Food Cart', f:'Booths, carts & bars'},
+  {k:'lights_sound', l:'Lights & Sound (banquet)', b:'Lights & Sound', f:'Styling, flowers & lights'},
+  {k:'outdoor_sound_system', l:'Outdoor Sound System Specialist', b:'Outdoor', f:'Styling, flowers & lights'},
+  {k:'generator_rental', l:'Generator Rental', b:'Outdoor', f:'Styling, flowers & lights'},
+  {k:'tent_rental', l:'Tent / Outdoor-Cover Rental', b:'Outdoor', f:'Styling, flowers & lights'},
+  {k:'drone', l:'Drone Operator', b:'Photo & Video', f:'Photo & video'},
+  {k:'drone_videographer', l:'Drone Videographer', b:'Photo & Video', f:'Photo & video'},
+  {k:'photography', l:'Photography', b:'Photo & Video', f:'Photo & video'},
+  {k:'bridal_hmua', l:'Bridal Makeup Artists', b:'HMUA', f:'Attire, hair & make-up'},
+  {k:'kids_entertainer', l:"Kids' Entertainer", b:"Kids' Entertainer", f:'Hosts, music & program'},
+  {k:'wake_package', l:'Wake Package', b:'Funeral Home', f:'Funeral homes & farewell'},
+];
+
+// What this shop already covers — step 1.
+const COVERED = ['pabati'];
+
+// Step 3: wordings other suppliers typed and confirmed.
+const REMEMBERED = {'sound hire':'lights_sound'};
+
+// Step 4: meaning matches. In the real thing these come from a vector nearest-neighbour
+// over embeddings of the 262 trades; here they are the answers that search WOULD return,
+// so the page shows the real behaviour rather than pretending to run a model.
+const MEANING = {
+  'sorbetes':[['sorbetes_cart',0.91],['ice_cream_cart',0.78]],
+  'sorbetes cart':[['sorbetes_cart',0.96],['ice_cream_cart',0.81]],
+  'drone pilot':[['drone',0.88],['drone_videographer',0.84]],
+  'aerial video':[['drone_videographer',0.83],['drone',0.79]],
+  'sound hire':[['lights_sound',0.86],['outdoor_sound_system',0.74]],
+  'generator':[['generator_rental',0.94]],
+};
+const FLOOR = 0.70; // below this we show NOTHING — a confident wrong answer is worse than none.
+
+const MIN_Q = 2, MAX_S = 6;
+function rank(options, query, limit){
+  const t = query.trim().toLowerCase();
+  if (t.length < MIN_Q) return [];
+  const snake = t.replace(/\s+/g,'_');
+  const squash = t.replace(/[^a-z0-9]+/g,'');
+  const out = [];
+  for (const o of options){
+    const lab = o.l.toLowerCase(), key = o.k.toLowerCase();
+    let s = 0;
+    if (lab.startsWith(t)) s = 4;
+    else if (lab.includes(t)) s = 3;
+    else if (key.includes(snake)) s = 2;
+    else if (squash.length >= MIN_Q && lab.replace(/[^a-z0-9]+/g,'').includes(squash)) s = 1;
+    if (s > 0) out.push({o, s});
+  }
+  out.sort((a,b) => b.s - a.s || a.o.l.localeCompare(b.o.l));
+  return out.slice(0, limit || MAX_S).map(m => m.o);
+}
+
+const byKey = Object.fromEntries(TRADES.map(t => [t.k, t]));
+const el = id => document.getElementById(id);
+
+function chip(t, prov, extra){
+  const b = document.createElement('button');
+  b.className = 'chip rise';
+  b.innerHTML = `${t.l}<span class="prov">${prov}</span><span class="sub">${t.f} › ${t.b}${extra||''}</span>`;
+  b.onclick = () => {
+    [...document.querySelectorAll('#results .chip')].forEach(c => c.classList.remove('on'));
+    b.classList.add('on');
+    el('why').innerHTML = `<b>Filed as “${t.l}”.</b> Stored as the trade itself — the shop's own word, not a department it was rounded into. What they typed is remembered, so the next supplier who types it pays nothing.`;
+  };
+  return b;
+}
+
+function group(title, dot, nodes){
+  const g = document.createElement('div');
+  g.className = 'grp rise';
+  g.innerHTML = `<div class="cgk"><span class="dot ${dot}"></span>${title}</div>`;
+  const c = document.createElement('div');
+  c.className = 'chips';
+  nodes.forEach(n => c.appendChild(n));
+  g.appendChild(c);
+  return g;
+}
+
+function lightRung(n){
+  document.querySelectorAll('.rung').forEach(r => r.classList.toggle('lit', String(r.dataset.r) === String(n)));
+}
+
+function run(){
+  const q = el('q').value.trim();
+  const box = el('results');
+  box.innerHTML = '';
+
+  if (q.length < MIN_Q){
+    // Step 1 only — the shop's own words, always first, always visible.
+    box.appendChild(group('What you cover', 'd1', COVERED.map(k => chip(byKey[k], 'your shop'))));
+    box.appendChild(group('Or something else', 'd2',
+      [{k:'misc', l:'Miscellaneous', b:'', f:'Always available'}].map(t => chip(t, 'always'))));
+    lightRung(1);
+    el('why').innerHTML = `<b>Nothing typed yet.</b> The shop's own coverage leads the sheet — for most suppliers the question is already answered and never asked.`;
+    return;
+  }
+
+  const lex = rank(TRADES, q, MAX_S);
+  const remembered = REMEMBERED[q.toLowerCase()];
+  const meaning = (MEANING[q.toLowerCase()] || []).filter(([,s]) => s >= FLOOR);
+
+  let landed = 0;
+
+  if (lex.length){
+    box.appendChild(group('Matches what you typed', 'd2', lex.map(t => chip(t, 'typed'))));
+    landed = 2;
+  }
+  if (remembered && !lex.some(t => t.k === remembered)){
+    box.appendChild(group('Others called it this too', 'd3', [chip(byKey[remembered], 'typed before')]));
+    if (!landed) landed = 3;
+  }
+  const fresh = meaning.filter(([k]) => !lex.some(t => t.k === k) && k !== remembered);
+  if (fresh.length){
+    box.appendChild(group('Closest by meaning', 'd4',
+      fresh.map(([k, s]) => chip(byKey[k], 'closest', ` · ${Math.round(s*100)}% close`))));
+    if (!landed) landed = 4;
+  }
+
+  if (!landed){
+    const p = document.createElement('div');
+    p.className = 'propose rise';
+    p.innerHTML = `<div class="pt">We have no word for “${q}” yet.</div>
+      <div class="pb">Tell us what you do and we will add it — your card is not held up. You can file this one under <b>Miscellaneous</b> and change it later.</div>
+      <div class="rowbtns">
+        <button class="btn btn-cta" onclick="alert('Prototype: files the request — Claude drafts the proposal and a person presses.')">Tell us what you do</button>
+        <button class="btn btn-sec" onclick="alert('Prototype: files the card under Miscellaneous.')">Use Miscellaneous</button>
+      </div>`;
+    box.appendChild(p);
+    landed = 5;
+    el('why').innerHTML = `<b>Nothing matched — and that is an answer too.</b> Only here does a model speak, and only to draft a proposal a person presses. The card is never blocked: Miscellaneous is on the same screen.`;
+  } else {
+    const names = {2:'letters', 3:'a wording somebody used before', 4:'meaning'};
+    el('why').innerHTML = `<b>Answered at step ${landed} — by ${names[landed]}.</b> The steps below it never ran, so nothing was spent on them. ${landed === 4 ? 'Below the confidence floor we would have shown nothing at all rather than guess.' : ''}`;
+  }
+  lightRung(landed);
+}
+
+function demo(s){ el('q').value = s; run(); }
+el('q').addEventListener('input', run);
+run();
+</script>
+</body>
+</html>
