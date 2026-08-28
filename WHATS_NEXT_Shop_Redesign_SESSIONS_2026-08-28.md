@@ -14,7 +14,7 @@
 
 | | Session | Model | Effort | Runs with | Waits for |
 |---|---|---|---|---|---|
-| **S1** | A dispute is not an eraser | **Opus 5** | **high** | S2 · S3 | — |
+| **S1** | ⚠ **HALF ALREADY SHIPPED** — a dispute is not an eraser | **Opus 5** | **medium** | S2 · S3 | — |
 | **S2** | ✅ **DONE** — the shop tells the truth | **Opus 5** | **medium** | S1 · S3 | — |
 | **S3** | ✅ **DONE** — a card that can be found | **Opus 5** | **high** | S1 · S2 | — |
 | **S4** | The customer page answers | **Opus 5** | **high** | S3 | **S1** |
@@ -27,7 +27,7 @@
 
 | | state |
 |---|---|
-| **S1** | **NOT STARTED.** No branch, no PR. It is the only thing blocking S4. |
+| **S1** | 🛑 **ITS PREMISE IS DEAD — the erasure was fixed the DAY BEFORE this plan was written.** No branch, no PR, and **most of what it describes no longer exists.** Read the corrected brief below before scoping it. What is left is small, and it still blocks S4. |
 | **S2** | ✅ built · PR [#4950](https://github.com/iscasasola/setnayan-platform/pull/4950) OPEN, auto-merge armed |
 | **S3** | ✅ built · PR [#4951](https://github.com/iscasasola/setnayan-platform/pull/4951) OPEN, auto-merge armed |
 | **S4** | **BLOCKED on S1**, and unchanged: it is still the riskiest piece in the plan. |
@@ -47,7 +47,57 @@ it fixes.
 
 ---
 
-### S1 — A dispute is not an eraser · **Opus 5 · high** · no dependencies
+### S1 — A dispute is not an eraser · **Opus 5 · medium** · ⚠ **RE-SCOPED 2026-08-28 — most of it already ships**
+
+🛑 **READ THIS BEFORE THE BRIEF. THE HEADLINE FINDING IS ALREADY FIXED, AND IT WAS FIXED THE DAY
+BEFORE THIS PLAN WAS WRITTEN** — PR
+[#4927](https://github.com/iscasasola/setnayan-platform/pull/4927), merged and served 2026-08-27,
+migration `20271175634994`, from the owner's own ruling *"yes they keep their record."*
+
+✅ **MEASURED BY THE OBJECT, not by a migration file and not by a comment** — `pg_get_functiondef`
+on the LIVE production `reject_vendor_deposit` (2026-08-28):
+· it sets **`deposit_declined_at` · `deposit_decline_reason` · `deposit_declined_by_user_id`** and
+  nothing else;
+· it does **NOT** null `deposit_recorded_at`, `deposit_proof_url`, `deposit_method_id` or
+  `deposit_method_label`;
+· there is **no `DELETE FROM public.event_vendor_payments`** anywhere in the body;
+· and its own comment names the change: *"WHAT IS NO LONGER TOUCHED, AND IT IS THE WHOLE POINT OF
+  THIS MIGRATION."*
+So **the refusal is already a MARK, not a deletion.** The couple already keeps their amount,
+receipt, method and ledger row.
+
+🔑 **HOW THE BRIEF GOT IT WRONG, and the lesson is bigger than the item:** it cited
+`20270722461308_reject_vendor_deposit.sql` and said *"verified in the migration itself"*.
+**Applied migrations are never edited**, so that file still describes the erasure perfectly — a
+LATER migration replaced the function. *A migration file is not evidence of what the database
+does; read the object.* This corpus already carries that rule twice over, and the plan was written
+straight past it.
+
+⚠ **AND MY OWN FIRST PROBE OF IT RETURNED A FALSE NEGATIVE.** Searching the body for
+`deposit_rejected_at` found nothing — because the column is `deposit_declined_at`. *A search that
+cannot match is not a negative result.* Read the clause; never substring-test it.
+
+🔢 **NOTHING IS AT RISK TODAY EITHER WAY.** Production holds **45 bookings · 0 with a deposit
+recorded · 0 refusals ever · 3 ledger rows.** No couple has ever lost a receipt to this.
+
+#### ⏭ WHAT IS ACTUALLY LEFT — the second half of the owner's ruling
+⚖ **Owner 2026-08-28: _"no. do not. we will confirm it manually."_** The *keep the record* half is
+done. The **_settle it by hand_** half is not:
+· **`deposit_declined_at` has NO admin reader.** Grepped across the tree — its five readers are the
+  couple's own vendor screens, the vendor's customer card, the delete gate and the overview feed.
+  **Nothing in `/admin` can see that a supplier said "it never reached me"**, so there is nowhere
+  for Setnayan to settle it. That is the build.
+· Anything it emits must have its notice kinds **inserted in the database**, not only emitted —
+  guard: `lib/every-notice-type-exists-in-the-database.test.ts`. (Three notification types have
+  shipped with live emit sites and no database row; that guard exists because of it.)
+
+⛔ **DO NOT rewrite `reject_vendor_deposit`.** A 334-line duplicate migration was already written
+and deleted once on discovering the refusal existed (PR
+[#4923](https://github.com/iscasasola/setnayan-platform/pull/4923)), and a guard now fails if a
+second way to say no appears.
+
+<details><summary>The original brief, kept — every red claim in it is now false</summary>
+
 **What a person gets:** a couple who paid keeps their receipt. A supplier saying *"it never
 reached me"* raises a dispute Setnayan settles by hand, instead of deleting the evidence.
 🔴 **LIVE DATA DESTRUCTION, verified in the migration itself** (`20270722461308_reject_vendor_deposit.sql`):
@@ -58,6 +108,8 @@ not told, and the only party who benefits is the one making the claim.
 disputed, settle in the admin.
 🪤 Its new notice kinds must be **inserted in the database**, not only emitted — guard:
 `lib/every-notice-type-exists-in-the-database.test.ts`.
+
+</details>
 
 ### S2 — The shop tells the truth · **Opus 5 · medium** · ✅ **BUILT 2026-08-28 — do NOT rebuild it**
 PR [#4950](https://github.com/iscasasola/setnayan-platform/pull/4950). ⚠ Verify with
@@ -153,7 +205,42 @@ and printed nothing at all. ⏭ **NOT built, deliberately:** the per-card
 reach bar on the Services list (the prototype's *"1 of 2 — one card is reaching nobody"*) — with the
 gate in place no NEW card can lack a price, so that row can only ever describe legacy rows.
 
-### S4 — The customer page answers · **Opus 5 · high** · after S1
+### S4 — The customer page answers · **Opus 5 · high** · ⚠ **NO LONGER BLOCKED BY S1**
+
+🔓 **THE DEPENDENCY IS DISCHARGED.** S4 waited on S1 because the Payments tab shows a deposit whose
+meaning S1 was going to change. **S1's data-model half already shipped** (PR
+[#4927](https://github.com/iscasasola/setnayan-platform/pull/4927), 2026-08-27, verified by reading
+the live function out of prod — see S1 above): a refusal is a mark, the receipt survives, and
+`deposit_declined_at` / `deposit_decline_reason` exist and already render on the shop's customer
+card. **What is left of S1 is an ADMIN surface**, which a vendor screen does not depend on.
+⇒ **S4 may start now. It is still the riskiest piece in the plan.**
+
+🔴 **AND A CONSTRAINT ITS BRIEF NEVER NAMED: THE FOUR STATES ARE BEHIND AN UNFLIPPED FLAG.**
+`lockRequestStateOf(row, enabled)` — the ONE shared translator — returns **only `'locked'` or
+`'none'`** when `enabled` is false, and `enabled` is `NEXT_PUBLIC_LOCK_HANDSHAKE_ENABLED`, which
+has been **waiting on the owner's press since 2026-08-16** and is *not readable from a session*
+(it inlines at build time). A Customers page built on four states would render **two** of them,
+look half-finished, and nobody would be able to tell that from a bug. **Design both arms, and say
+in the PR which one production is actually serving.**
+
+✅ **AND THE VOCABULARY MAPPING IS ALREADY WRITTEN — do NOT invent one.** `lib/lock-request-state.ts`
+translates the database's words to the couple-facing ones (`pending → requested`), handles the
+`agreed`-but-not-confirmed hole deliberately, and lets a real booking outrank any stale marker it
+carries. Its own docblock explains each choice. **Reuse it; a second mapping is how two screens
+start disagreeing about who is booked.**
+
+✅ **The as-built machine is confirmed BY THE OBJECT, not from the brief** (prod, 2026-08-28):
+`event_vendors.lock_request_state` is **TEXT** — not an enum — with
+`event_vendors_lock_request_state_chk` admitting exactly
+`pending · agreed · declined · cancelled · expired`, plus a coherence CHECK pairing each state with
+its own timestamp and a marketplace CHECK requiring `marketplace_vendor_id` on `pending`. The
+spec's *requested → accepted → lock_requested → confirmed* exists nowhere in the database. **The
+brief's warning was right and is now measured.**
+
+🔢 **Prod, for scoping:** 45 bookings · **0 with a deposit recorded** · 0 refusals ever ·
+**0 enquiry threads ever** · 3 ledger rows. Every state this page draws will be empty on day one,
+so **the empty states are the deliverable**, not an afterthought.
+
 **What a person gets:** Customers opens on who is waiting, in four states, and a shop can ask a
 customer for money from the page where it sees the balance.
 🚨 **THE RISKIEST THING IN THE WHOLE PLAN.** The 2026-06-02 lock's vocabulary
@@ -169,10 +256,45 @@ the "Ask for a payment" button.** Recreating that screen is the defect this proj
 a notification kind row.
 ✅ Booked and Waitlist filters already exist in `customers/page.tsx`.
 
-### S5 — Price decides reach · **Opus 5 · high** · after S3
+### S5 — Price decides reach · **Opus 5 · high** · UNBLOCKED (S3 is built)
 **What a person gets:** the price a shop declares actually decides which couples see the card.
-Both halves exist and nothing joins them: couples' `budget_band`, cards' `starting_price_php`.
 ⛔ **Segmentation, never paid placement.**
+
+🛑 **READ THIS BEFORE STARTING — THE BRIEF'S PREMISE IS FALSE, MEASURED 2026-08-28.**
+It said *"both halves exist and nothing joins them."* **The join already ships, whole**, and it is
+switched off:
+· `lib/smart-sort.ts` — a pax-adaptive "starts at" (per-head × the couple's **live** headcount, not
+  the static estimate) plus `priceFitScore`, a soft [0,1] fit against the couple's remaining budget
+  for that category.
+· `_actions/category-search.ts` — wired in: soft re-rank · a strict-mode hard filter the couple has
+  to ask for · a *"raise your budget?"* pressure flag.
+· `category-search-overlay.tsx` — the screen for it. Plus `compat-score.ts`, `ranking-lenses.ts`
+  and `bench-sort.ts`, which all already reason about it.
+· **All of it behind `NEXT_PUBLIC_SMART_SORT_ENABLED`, off by default.** *(Whether it is on in
+  production has NOT been read — check Vercel. It is `NEXT_PUBLIC_` and used in a client component,
+  so unlike the canvas-maker flag this one IS readable from a signed-in bundle.)*
+⇒ **S5 IS A FLAG FLIP AND A VERIFICATION, NOT A BUILD.** Writing a second matcher is the
+paid-twice defect this project is named for.
+
+✅ **AND THE DANGER THIS REGISTER WARNED ABOUT IS ALREADY HANDLED:** `isBudgetFiltered` returns
+FALSE when the starts-at is unknown, so **a priceless card is never hidden — not even in strict
+mode.** Fail-open, by construction, in the shipped code.
+
+🚨 **TWO REAL GAPS REMAIN, AND NEITHER IS THE ONE THE BRIEF NAMED.**
+1. **`budget_band` FEEDS NO SEARCH AT ALL.** Measured: it is read by the Event Brief a supplier
+   sees, by event recurrence and by the create-event capture — **and by nothing in ranking**. The
+   shipped matcher uses a different number entirely: the Budget Planner's **recommended ₱ for that
+   category**. *There are two notions of "the couple's budget" in this product and the brief named
+   the one nothing ranks on.*
+2. **THE PUBLIC MARKETPLACE DOES NO BUDGET MATCHING WHATEVER**, and deliberately shows **no price
+   on a real shop's card** — `explore/page.tsx` resolves a starts-at only for DEMO rows, under its
+   own comment saying real cards are a V1.1 candidate. 🔴 **That is an OWNER DECISION, not
+   engineering: should a couple browsing publicly see what a shop charges?** Everything above is
+   inside a couple's own event.
+
+🔢 **AND IT CANNOT BE VERIFIED LIVE YET.** Production holds 2 cards, both on a hidden fixture shop,
+both with no price; the one real published shop has none. Flipping the flag today changes what
+nobody sees. S3 stops NEW cards being born priceless — it does not fill the old ones.
 
 ---
 
