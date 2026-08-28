@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Removing a Celebration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap">
+
+<style>
+  /* ── The app's own tokens. This is a PORT-READY drawing, not a new look:
+       every value below is lifted from apps/web/app/globals.css so a built
+       screen and this page cannot disagree. ────────────────────────────── */
+  :root {
+    --paper:        #FFFFFF;
+    --ground:       #F2EFE9;
+    --card:         #FFFFFF;
+    --ink:          #2C2A29;
+    --ink-600:      #4A4741;
+    --ink-500:      #6E6A62;
+    --hair:         rgba(44,42,41,0.10);
+    --hair-strong:  rgba(44,42,41,0.20);
+    --mulberry:     #C24E25;
+    --mulberry-600: #A8421D;
+    --danger:       #A6483B;
+    --danger-soft:  #F3E1DC;
+    --gold-text:    #8A6B39;
+    --gold-soft:    #F4EBDC;
+    --link:         #3B4E67;
+    --chip:         rgba(44,42,41,0.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:        #17150F;
+      --ground:       #100E0A;
+      --card:         #201D16;
+      --ink:          #F1EDE4;
+      --ink-600:      #CFC9BC;
+      --ink-500:      #A29B8D;
+      --hair:         rgba(241,237,228,0.12);
+      --hair-strong:  rgba(241,237,228,0.24);
+      --mulberry:     #E4744A;
+      --mulberry-600: #F08A5F;
+      --danger:       #E08472;
+      --danger-soft:  #3A231E;
+      --gold-text:    #C9A567;
+      --gold-soft:    #2C2418;
+      --link:         #9BB2CE;
+      --chip:         rgba(241,237,228,0.07);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:        #17150F;
+    --ground:       #100E0A;
+    --card:         #201D16;
+    --ink:          #F1EDE4;
+    --ink-600:      #CFC9BC;
+    --ink-500:      #A29B8D;
+    --hair:         rgba(241,237,228,0.12);
+    --hair-strong:  rgba(241,237,228,0.24);
+    --mulberry:     #E4744A;
+    --mulberry-600: #F08A5F;
+    --danger:       #E08472;
+    --danger-soft:  #3A231E;
+    --gold-text:    #C9A567;
+    --gold-soft:    #2C2418;
+    --link:         #9BB2CE;
+    --chip:         rgba(241,237,228,0.07);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "Hanken Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 68rem; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
+
+  /* ── masthead ─────────────────────────────────────────────────────────── */
+  .eyebrow {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--gold-text); margin: 0 0 0.5rem;
+  }
+  h1 {
+    font-size: clamp(1.9rem, 4.4vw, 2.9rem); line-height: 1.08;
+    font-weight: 800; letter-spacing: -0.02em; margin: 0 0 0.75rem;
+    text-wrap: balance;
+  }
+  .standfirst {
+    font-size: 1.0625rem; color: var(--ink-600); max-width: 42rem; margin: 0;
+  }
+  .rule { height: 1px; background: var(--hair); border: 0; margin: 2.5rem 0; }
+
+  /* ── the measured box ─────────────────────────────────────────────────── */
+  .measured {
+    margin-top: 1.75rem; border: 1px solid var(--hair-strong);
+    border-radius: 14px; background: var(--card); padding: 1.1rem 1.25rem;
+  }
+  .measured h2 {
+    font-size: 0.8125rem; font-weight: 800; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--ink-500); margin: 0 0 0.75rem;
+  }
+  .facts { display: grid; gap: 0.4rem; margin: 0; }
+  .fact {
+    display: grid; grid-template-columns: 11rem 1fr; gap: 0.75rem;
+    font-size: 0.9rem; align-items: baseline;
+  }
+  .fact dt { color: var(--ink-500); }
+  .fact dd { margin: 0; font-weight: 600; }
+  .mono { font-family: "Space Mono", ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
+
+  /* ── state rows ───────────────────────────────────────────────────────── */
+  .state {
+    display: grid; grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 2.25rem; align-items: start;
+    padding: 2rem 0; border-top: 1px solid var(--hair);
+  }
+  .state:first-of-type { border-top: 0; }
+  @media (max-width: 720px) {
+    .state { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+  }
+  .state h3 {
+    font-size: 1.3rem; font-weight: 800; letter-spacing: -0.015em;
+    margin: 0.35rem 0 0.5rem; text-wrap: balance;
+  }
+  .state p { margin: 0 0 0.7rem; color: var(--ink-600); font-size: 0.95rem; max-width: 34rem; }
+  .state p:last-child { margin-bottom: 0; }
+  .tag {
+    display: inline-block; font-size: 10.5px; font-weight: 800;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 0.22rem 0.5rem; border-radius: 999px;
+  }
+  .tag-new    { background: var(--gold-soft); color: var(--gold-text); }
+  .tag-ships  { background: var(--chip); color: var(--ink-500); }
+  .tag-wrong  { background: var(--danger-soft); color: var(--danger); }
+
+  .note {
+    margin-top: 0.85rem; padding-left: 0.85rem;
+    border-left: 2px solid var(--hair-strong);
+    font-size: 0.875rem; color: var(--ink-500);
+  }
+  .note strong { color: var(--ink); font-weight: 700; }
+
+  /* ── the popover, drawn at its real 280px ─────────────────────────────── */
+  .pop {
+    width: 280px; max-width: 100%;
+    border: 1px solid var(--hair); border-radius: 12px;
+    background: var(--card); color: var(--ink);
+    box-shadow: 0 10px 26px rgba(20,16,10,0.14);
+    padding: 0.6rem 0.75rem 0.7rem; position: relative;
+  }
+  .pop .h { font-size: 0.875rem; font-weight: 700; margin: 0 0 0.35rem; }
+  .pop .b { font-size: 12px; line-height: 1.42; color: var(--ink-600); margin: 0 0 0.55rem; }
+  .pop .b:last-child { margin-bottom: 0; }
+  .pop .b strong { color: var(--ink); font-weight: 700; }
+  .pop .quiet { color: var(--ink-500); }
+
+  .items { list-style: none; margin: 0 0 0.6rem; padding: 0; display: grid; gap: 0.3rem; }
+  .items li {
+    display: flex; justify-content: space-between; gap: 0.6rem;
+    font-size: 12px; padding: 0.34rem 0.45rem; border-radius: 7px;
+    background: var(--chip);
+  }
+  .items li span:first-child { font-weight: 600; }
+  .items li span:last-child { font-weight: 700; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0 0 0.55rem; }
+  .ch {
+    font-size: 11.5px; font-weight: 600; padding: 0.28rem 0.55rem;
+    border-radius: 999px; border: 1px solid var(--hair-strong);
+    color: var(--ink-600); background: transparent;
+  }
+  .ch.on { background: var(--mulberry); border-color: var(--mulberry); color: #FFF; }
+  :root[data-theme="dark"] .ch.on { color: #17150F; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ch.on { color: #17150F; } }
+
+  .field {
+    border: 1px solid var(--hair-strong); border-radius: 8px;
+    padding: 0.4rem 0.5rem; font-size: 12px; color: var(--ink-500);
+    background: var(--paper); margin-bottom: 0.55rem;
+  }
+  .label { font-size: 11.5px; font-weight: 700; color: var(--ink-600); margin: 0 0 0.25rem; }
+
+  .row { display: flex; justify-content: flex-end; gap: 0.4rem; margin-top: 0.7rem; align-items: center; }
+  .btn {
+    font-size: 12.5px; font-weight: 700; border-radius: 999px;
+    padding: 0.36rem 0.7rem; border: 0; white-space: nowrap;
+  }
+  .btn-ghost  { background: transparent; color: var(--ink-500); }
+  .btn-go     { background: var(--mulberry); color: #FFF; }
+  .btn-danger { background: var(--danger); color: #FFF; }
+  .btn-off    { background: var(--danger); color: #FFF; opacity: 0.4; }
+  .under { font-size: 12px; font-weight: 700; color: var(--ink-500); text-decoration: underline; text-underline-offset: 2px; }
+
+  .strike { background: var(--danger-soft); padding: 0 0.15em; border-radius: 3px; }
+
+  /* ── decision block ───────────────────────────────────────────────────── */
+  .decide {
+    margin-top: 2.5rem; border: 1px solid var(--danger);
+    border-radius: 14px; background: var(--card);
+    padding: 1.35rem 1.4rem;
+  }
+  .decide h2 { font-size: 1.15rem; font-weight: 800; margin: 0 0 0.55rem; }
+  .decide p { margin: 0 0 0.7rem; color: var(--ink-600); font-size: 0.95rem; }
+  .decide p:last-child { margin: 0; }
+  .decide .opt {
+    display: grid; grid-template-columns: auto 1fr; gap: 0.6rem;
+    align-items: baseline; margin: 0.55rem 0; font-size: 0.95rem;
+  }
+  .decide .opt b { color: var(--ink); }
+  .pick { color: var(--mulberry); font-weight: 800; }
+
+  a { color: var(--link); }
+  :focus-visible { outline: 2px solid var(--mulberry); outline-offset: 2px; border-radius: 4px; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="eyebrow">Removing a celebration · drawn 28 Aug 2026</p>
+  <h1>What a person sees when they try to remove a celebration they have paid for</h1>
+  <p class="standfirst">
+    Today there is one refusal and no way past it. This draws the six states it should
+    be, all inside the same small panel that already opens from the <span class="mono">⋯</span>
+    on a card — no new page, no new screen.
+  </p>
+
+  <section class="measured">
+    <h2>Why <em>Start of Life</em> is actually blocked — read out of the live database, not guessed</h2>
+    <dl class="facts">
+      <div class="fact"><dt>What was bought</dt><dd>Papic — 6,000 shots · Setnayan AI</dd></div>
+      <div class="fact"><dt>Amount</dt><dd class="mono">₱2,899.00</dd></div>
+      <div class="fact"><dt>Sent</dt><dd>GCash, ref <span class="mono">179598</span>, 28 Aug 2026 · with a screenshot</dd></div>
+      <div class="fact"><dt>Bill status</dt><dd>Submitted — <strong>not yet confirmed</strong></dd></div>
+      <div class="fact"><dt>Payment status</dt><dd>Pending — <strong>nobody has checked it</strong></dd></div>
+      <div class="fact"><dt>Official receipt</dt><dd>None issued</dd></div>
+    </dl>
+    <p class="note">
+      <strong>So the sentence on screen is not true yet.</strong> It says the celebration
+      “has already been paid for”. What is true is that a payment was sent four minutes
+      after the bill was made and is still waiting on us. The panel blocks correctly —
+      money may really have moved — but it tells the wrong story and offers nothing to do
+      about it.
+    </p>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ── 0 ─────────────────────────────────────────────────────────────── -->
+  <div class="state">
+    <div>
+      <span class="tag tag-wrong">Today · the dead end</span>
+      <h3>One sentence, one Cancel</h3>
+      <p>
+        Whatever the reason — a bill you paid us, a payment we have not looked at yet,
+        or a check that failed — you get the same words and a single way out, which is
+        to give up. “Message us” is written down but there is nothing to press.
+      </p>
+      <p class="note">
+        This is the panel in the screenshot, reproduced exactly.
+      </p>
+    </div>
+    <div class="pop">
+      <p class="h">Remove Start of Life?</p>
+      <p class="b">
+        Something on this celebration has <span class="strike">already been paid for, so
+        it can’t be removed here. Put it away</span> instead, or message us and we’ll help.
+      </p>
+      <div class="row"><button class="btn btn-ghost">Cancel</button></div>
+    </div>
+  </div>
+
+  <!-- ── 1 ─────────────────────────────────────────────────────────────── -->
+  <div class="state">
+    <div>
+      <span class="tag tag-new">New</span>
+      <h3>Nothing paid — we ask why, once, on the way out</h3>
+      <p>
+        The ordinary removal is unchanged: what disappears, the warning about the photos,
+        and the typed name. One thing is added — a row of reasons, and a box if none of
+        them fit. It is optional and it never blocks the button.
+      </p>
+      <p>
+        This is the only moment anyone will ever tell us why they left, and it costs them
+        one tap.
+      </p>
+    </div>
+    <div class="pop">
+      <p class="h">Remove Start of Life?</p>
+      <p class="b">
+        <strong>14 photos · 6 guests</strong> go with it, along with the page your guests
+        use. <strong>Your photos and everything about this celebration are deleted for
+        good</strong> — you can’t bring any of it back, and neither can we.
+      </p>
+      <p class="label">Why are you removing it? <span class="quiet" style="font-weight:400">Optional</span></p>
+      <div class="chips">
+        <span class="ch">Not happening any more</span>
+        <span class="ch on">Made it by mistake</span>
+        <span class="ch">Made a new one instead</span>
+        <span class="ch">Using something else</span>
+        <span class="ch">Costs too much</span>
+        <span class="ch">Something else</span>
+      </div>
+      <p class="label">Type <strong>Start of Life</strong> to confirm</p>
+      <div class="field">&nbsp;</div>
+      <div class="row">
+        <button class="btn btn-ghost">Cancel</button>
+        <button class="btn btn-off">Remove for good</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 2 ─────────────────────────────────────────────────────────────── -->
+  <div class="state">
+    <div>
+      <span class="tag tag-new">New</span>
+      <h3>We are still checking a payment you sent</h3>
+      <p>
+        The honest version of today’s refusal, and the one this celebration is actually in.
+        It names the amount, what it was for, and when it was sent — so the person knows
+        exactly which payment is holding things up.
+      </p>
+      <p>
+        The way out is to ask us. Pressing it opens the reason step and files a request a
+        person reads; nothing is removed and nothing is voided until we answer.
+      </p>
+      <p class="note">
+        <strong>The trap this closes:</strong> a couple can already cancel their own unpaid
+        bill from the bill’s own screen — and it would <em>not</em> unblock this, because
+        the payment they sent stays on file. They would cancel the bill, come back, and be
+        refused again with no explanation.
+      </p>
+    </div>
+    <div class="pop">
+      <p class="h">Remove Start of Life?</p>
+      <p class="b">
+        We’re still checking a payment on this celebration, so it can’t be removed yet.
+      </p>
+      <ul class="items">
+        <li><span>Papic — 6,000 shots</span><span class="mono">₱2,400</span></li>
+        <li><span>Setnayan AI</span><span class="mono">₱499</span></li>
+      </ul>
+      <p class="b quiet">
+        You sent <strong>₱2,899</strong> by GCash on 28 Aug. Once we’ve checked it we’ll
+        tell you where it stands.
+      </p>
+      <div class="row">
+        <button class="btn btn-ghost">Cancel</button>
+        <button class="btn btn-go">Ask us to remove it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 3 ─────────────────────────────────────────────────────────────── -->
+  <div class="state">
+    <div>
+      <span class="tag tag-new">New</span>
+      <h3>Paid and confirmed — here is exactly what ends</h3>
+      <p>
+        Once we have confirmed the money, the panel stops speaking in the abstract and
+        lists what was bought. This is the state where the words on screen become a promise
+        about money, so they are the ones to get right.
+      </p>
+      <p class="note">
+        <strong>The last line is yours to rule on</strong> — see the bottom of this page.
+        Drawn here as “we can’t put the money back automatically”, which is true whichever
+        way you decide, rather than “no refund”, which closes a door we may not want closed.
+      </p>
+    </div>
+    <div class="pop">
+      <p class="h">Remove Start of Life?</p>
+      <p class="b">Removing this ends what you’ve paid for on it:</p>
+      <ul class="items">
+        <li><span>Papic — 6,000 shots</span><span class="mono">₱2,400</span></li>
+        <li><span>Setnayan AI</span><span class="mono">₱499</span></li>
+      </ul>
+      <p class="b">
+        <strong>These stop working and don’t move to another celebration.</strong>
+        We can’t put the money back automatically, so tell us why and a person will
+        answer you.
+      </p>
+      <div class="row">
+        <button class="btn btn-ghost">Cancel</button>
+        <button class="btn btn-go">Ask us to remove it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 4 ─────────────────────────────────────────────────────────────── -->
+  <div class="state">
+    <div>
+      <span class="tag tag-new">New</span>
+      <h3>The reason, then the request</h3>
+      <p>
+        The same six reasons as the ordinary removal, so we get one comparable answer
+        however somebody leaves. Here the box is where they say what they actually want —
+        the money back, the service moved, or just the celebration gone.
+      </p>
+      <p class="note">
+        <strong>Nothing here is new machinery.</strong> Asking to close an <em>account</em>
+        already works exactly like this: you file it yourself with a reason, one request at
+        a time, you can take it back, and it lands in a queue in HQ. This is that, pointed
+        at one celebration instead of a whole account.
+      </p>
+    </div>
+    <div class="pop">
+      <p class="h">Ask us to remove Start of Life</p>
+      <p class="label">Why are you removing it?</p>
+      <div class="chips">
+        <span class="ch">Not happening any more</span>
+        <span class="ch on">Made it by mistake</span>
+        <span class="ch">Made a new one instead</span>
+        <span class="ch">Using something else</span>
+        <span class="ch">Costs too much</span>
+        <span class="ch">Something else</span>
+      </div>
+      <p class="label">Anything we should know? <span class="quiet" style="font-weight:400">Optional</span></p>
+      <div class="field">The party is off — can the shots go to my sister’s wedding instead?</div>
+      <div class="row">
+        <button class="btn btn-ghost">Cancel</button>
+        <button class="btn btn-go">Send it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 5 ─────────────────────────────────────────────────────────────── -->
+  <div class="state">
+    <div>
+      <span class="tag tag-new">New</span>
+      <h3>It’s with us</h3>
+      <p>
+        The card keeps its normal place on the board and the panel says where the request
+        stands. They can take it back — the same way they can withdraw the question sent
+        to a supplier today.
+      </p>
+    </div>
+    <div class="pop">
+      <p class="h">Remove Start of Life?</p>
+      <p class="b">
+        <strong>We have your request</strong> — sent 28 Aug. Nothing is removed until we
+        answer, and we’ll email you when we do.
+      </p>
+      <p class="b quiet">You said: made it by mistake.</p>
+      <div class="row">
+        <button class="under">Withdraw the request</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 6 ─────────────────────────────────────────────────────────────── -->
+  <div class="state">
+    <div>
+      <span class="tag tag-ships">Already ships · unchanged</span>
+      <h3>A supplier you paid is holding it</h3>
+      <p>
+        When it is a supplier rather than us, the couple already gets a real door: the
+        suppliers are asked, they answer, and the removal opens up. Nothing in this drawing
+        touches that.
+      </p>
+    </div>
+    <div class="pop">
+      <p class="h">Remove Maria &amp; Jose?</p>
+      <p class="b">
+        You’ve paid 2 suppliers for this celebration, so it can’t be removed yet — they’d
+        lose the booking they were paid for.
+      </p>
+      <div class="row">
+        <button class="btn btn-ghost">Cancel</button>
+        <button class="btn btn-go">Ask them to agree</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 7 ─────────────────────────────────────────────────────────────── -->
+  <div class="state">
+    <div>
+      <span class="tag tag-ships">Already ships · unchanged</span>
+      <h3>We couldn’t check</h3>
+      <p>
+        When a check fails we refuse rather than guess, and say so plainly. This one keeps
+        its dead end on purpose: there is nothing to request, because we do not yet know
+        whether there is anything to request about.
+      </p>
+    </div>
+    <div class="pop">
+      <p class="h">Remove Start of Life?</p>
+      <p class="b">
+        We couldn’t check what’s been paid for on this celebration, so we haven’t removed
+        it. Please try again in a moment, or message us and we’ll sort it out.
+      </p>
+      <div class="row"><button class="btn btn-ghost">Cancel</button></div>
+    </div>
+  </div>
+
+  <div class="decide">
+    <h2>The one thing that is yours, not mine</h2>
+    <p>
+      You asked whether the panel should say <em>refund is not available</em>. That sentence
+      is a promise about money on a screen, next to services carrying an official receipt, so
+      it is your call and not an engineering one. Three readings, and they are genuinely
+      different products:
+    </p>
+    <div class="opt"><b>A.</b><span><b>No refund, and they can press on anyway.</b> Fastest for the couple. It also means somebody can destroy ₱2,899 of paid service at 1 a.m. with nobody in the loop, and we have to honour the sentence when they write in the next morning.</span></div>
+    <div class="opt"><b>B.</b><span class="pick"><b>A person answers every one.</b> They tell us why and what they want; we void it, move it, or refund it. Recommended — one order has ever been placed, so the queue is empty, and it keeps the money decision with a human until there is enough of it to write a rule from.</span></div>
+    <div class="opt"><b>C.</b><span><b>Both.</b> A request by default, with “remove it anyway and lose what I paid for” underneath. More words on a small panel, and the second door makes the first one look optional.</span></div>
+    <p style="margin-top:0.9rem">
+      Everything else in this drawing needs no ruling and is safe to build now: the reasons,
+      the honest wording for a payment we have not checked, and the list of what ends.
+    </p>
+  </div>
+
+</div>
+</body>
+</html>
