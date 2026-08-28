@@ -38,8 +38,8 @@ disputed, settle in the admin.
 `lib/every-notice-type-exists-in-the-database.test.ts`.
 
 ### S2 — The shop tells the truth · **Opus 5 · medium** · ✅ **BUILT 2026-08-28 — do NOT rebuild it**
-PR [#4949](https://github.com/iscasasola/setnayan-platform/pull/4949). ⚠ Verify with
-`gh pr view 4949 --json state,mergedAt` before trusting this line — this corpus has been wrong
+PR [#4950](https://github.com/iscasasola/setnayan-platform/pull/4950). ⚠ Verify with
+`gh pr view 4950 --json state,mergedAt` before trusting this line — this corpus has been wrong
 about a PR's state five times. Full row: `DECISION_LOG.md` 2026-08-28 🏛.
 
 **Four corrections this session made to the brief below, every one measured:**
