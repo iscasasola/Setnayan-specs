@@ -60,7 +60,7 @@ answered.
    the card-kinds list.** Every supplier-discovery path filters the COVERAGE words, and every
    `?category=` link the app emits carries a canonical leaf key. Measurement + the 262-row table:
    [`SERVICE_CARD_VOCABULARY_MEASURED_2026-08-28.md`](SERVICE_CARD_VOCABULARY_MEASURED_2026-08-28.md).
-   Built on branch `claude/card-kind-in-the-shops-own-words`.
+   PR [#4942](https://github.com/iscasasola/setnayan-platform/pull/4942) (auto-merge armed) — ⚠ verify with `gh pr view 4942 --json state,mergedAt` before trusting this line.
    ⏭ **Two small things it deliberately did NOT do, each named rather than half-done:** the public
    shop page's exact leaf naming (S5's file — two PRs landed in it the same day), and the three
    kinds in no picker group at all (`funeral_home` · `cremation` · `memorial_park`), **so a funeral

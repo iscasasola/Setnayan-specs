@@ -4,8 +4,8 @@
 > **The owner answered twice: *"1. yes 2. yes their own words."*** The recommendation in § 5 is the
 > one that shipped: a card's kind may now be a **coverage leaf**, the chooser's leading band is the
 > shop's own words, and the 52 legacy kinds stay one tap below. **Nothing was migrated — production
-> has never held a supplier-authored service card.** Branch
-> `claude/card-kind-in-the-shops-own-words`; `DECISION_LOG.md` row 2026-08-28.
+> has never held a supplier-authored service card.** PR
+> [#4942](https://github.com/iscasasola/setnayan-platform/pull/4942); `DECISION_LOG.md` row 2026-08-28.
 > **Do not re-ask the decision.** The measurement below is kept as the evidence it was made from.
 >
 > ⚠ **TWO THINGS IN § 7 BELOW ARE NOW STALE, corrected here rather than left to mislead:**
