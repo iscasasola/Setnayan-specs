@@ -28,8 +28,8 @@
 | | state |
 |---|---|
 | ~~**S1**~~ | ✅ **BUILT — PR [#4953](https://github.com/iscasasola/setnayan-platform/pull/4953), auto-merge armed.** Its premise was dead (the erasure was fixed the day before the plan was written, PR #4927) and the ONE thing genuinely left — **nowhere for Setnayan to settle by hand** — is what shipped. ⚠ Verify with `gh pr view 4953 --json state,mergedAt`. |
-| **S2** | ✅ **MERGED** 2026-08-28T06:36Z · PR [#4950](https://github.com/iscasasola/setnayan-platform/pull/4950), merge `320c42b`, verified an ancestor of `origin/main`. All 16 checks green. ⏳ *Serving* not yet confirmed — prod's `/api/health` still reported `3081c25` a minute after the merge. **A merge is not a ship.** |
-| **S3** | ✅ built · PR [#4951](https://github.com/iscasasola/setnayan-platform/pull/4951) OPEN, auto-merge armed |
+| **S2** | ✅ **MERGED AND SERVED** · PR [#4950](https://github.com/iscasasola/setnayan-platform/pull/4950), merged 06:36Z, merge `320c42b` — **production's own `/api/health` reports `320c42b`**, so it is live, not merely merged. All 16 checks green. |
+| **S3** | ✅ **MERGED** 2026-08-28T06:39Z · PR [#4951](https://github.com/iscasasola/setnayan-platform/pull/4951), merge `1ddb503`. ⏳ *Serving* not yet confirmed — prod was still on `320c42b` two minutes later. **A merge is not a ship**; re-check `/api/health` before claiming it live. |
 | **S4** | 🔓 **UNBLOCKED** — the half of S1 it waited on already shipped. Still the riskiest piece in the plan, and it has a **new** constraint: its four states are behind `NEXT_PUBLIC_LOCK_HANDSHAKE_ENABLED`, still unflipped. |
 | **S5** | ⚠ **UNBLOCKED, AND SMALLER THAN BRIEFED.** The matcher already ships whole, behind `NEXT_PUBLIC_SMART_SORT_ENABLED`. Re-scoped high → medium — it is a flag flip and a verification. Two real gaps remain and neither is the one the brief named (see below). |
 
@@ -169,7 +169,7 @@ disputed, settle in the admin.
 </details>
 
 ### S2 — The shop tells the truth · **Opus 5 · medium** · ✅ **BUILT 2026-08-28 — do NOT rebuild it**
-PR [#4950](https://github.com/iscasasola/setnayan-platform/pull/4950) — **MERGED 2026-08-28T06:36Z**, merge `320c42b`. ⚠ Verify with
+PR [#4950](https://github.com/iscasasola/setnayan-platform/pull/4950) — **MERGED AND SERVED**, merge `320c42b`, confirmed by production's own `/api/health`. ⚠ Verify with
 `gh pr view 4950 --json state,mergedAt` before trusting this line — this corpus has been wrong
 about a PR's state five times. Full row: `DECISION_LOG.md` 2026-08-28 🏛.
 
