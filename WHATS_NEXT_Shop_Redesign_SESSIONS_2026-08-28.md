@@ -307,8 +307,36 @@ booking in prod reads **ZERO rows** of it. Both bounced to their own error flag 
 for every shop, always. *An RLS denial and an empty read are the same value.*
 
 ⏭ **OPEN OWNER DECISIONS, deliberately NOT built:**
-· **48 hours or 7 days?** The 2026-06-02 lock says 48h; the shipped fuse is the materialized
-  `lock_request_expires_at` (~7 days). Surfaced, unchanged, exactly as this register asked.
+· ~~**48 hours or 7 days?**~~ ✅ **RULED 2026-08-28 — _"48 hours"_. DO NOT RE-ASK IT.** Built the
+  same day: PR [#4962](https://github.com/iscasasola/setnayan-platform/pull/4962), migration
+  `20271178407226`, dry-run against prod inside `BEGIN…ROLLBACK` and rolled back clean. ⚠ Verify
+  with `gh pr view 4962 --json state,mergedAt`.
+  🔑 **IT WAS NEVER ONE NUMBER.** The reminder fired on day 5 AND requires
+  `lock_request_expires_at > NOW()`, so against a 48-hour deadline it could never match a row —
+  the job would have swept nothing and reported success forever. **Shortening the window without
+  shortening the reminder does not break it loudly, it deletes it.** Reminder → 24 hours.
+  🔑 **And the countdown had to leave days.** On a two-day fuse the day-granular label spent HALF
+  the window saying "Last day to answer" — the same words at 23 hours and at 3 minutes. All three
+  surfaces now share ONE phrasing (`lockRequestFuseLabel`) instead of wording it three ways.
+  🚨 **A FIFTH ASK PATH was still promising seven days** — `negotiation-actions.ts`, the
+  price-agreed lock — found by grepping the string, not from a remembered list of paths.
+  🛡 **One number, one place:** the DB decides it, `LOCK_ANSWER_WINDOW_HOURS` mirrors it for the
+  copy, and `the-answer-window-is-48-hours.db.test.ts` fails if they disagree, if the reminder
+  falls outside the window, if the runner and the function default drift, if the deadline stops
+  being stamped from the request time, if a forgery guard in the replaced function goes missing,
+  or if `CLOSED_WINDOW_GRACE_DAYS` — a DIFFERENT seven — is moved as though it were the window.
+  ⚠ **THE HONEST COST, recorded rather than left to be found:** the sweep is cron-free and
+  traffic-driven with a 20-hour floor. On a regular cadence a pass always lands in the 24 hours
+  between reminder and deadline. **If traffic goes quiet for more than a day — today's state — a
+  request can close having warned nobody.** No threshold fixes that; only a real schedule would.
+  🚨 **AND A GREEN TEST WAS PASSING FOR THE WRONG REASON.** Three db tests asserted seven days and
+  went red, correctly. A fourth stayed green: its "window still live" fixture was six days old,
+  which under 48 hours is EXPIRED, so the window clause excluded it and **the status floor that row
+  exists to test was never exercised** — the exact failure its own comment warns about, arriving
+  via a number changed somewhere else. Re-pointed to hours and proved by mutation.
+  🔢 **Safe by arithmetic:** prod has never held a lock request (0 pending · 0 ever stamped · 0 ever
+  nudged), the deadline is MATERIALIZED so no existing promise is shortened retroactively, and the
+  handshake is still behind its unflipped flag.
 · **A fifth lane, "Holding"** — you said yes, they have not booked. The shared core maps
   `agreed`-but-unconfirmed to `cancelled` with its reasons written down there; re-deciding it on one
   screen is how two screens start disagreeing about who is booked.
