@@ -16,12 +16,34 @@
 |---|---|---|---|---|---|
 | **S1** | A dispute is not an eraser | **Opus 5** | **high** | S2 · S3 | — |
 | **S2** | ✅ **DONE** — the shop tells the truth | **Opus 5** | **medium** | S1 · S3 | — |
-| **S3** | A card that can be found | **Opus 5** | **high** | S1 · S2 | ✅ **BUILT 2026-08-28** |
+| **S3** | ✅ **DONE** — a card that can be found | **Opus 5** | **high** | S1 · S2 | — |
 | **S4** | The customer page answers | **Opus 5** | **high** | S3 | **S1** |
 | **S5** | Price decides reach | **Opus 5** | **high** | — | **S3** |
 
 **S1, S2 and S3 touch disjoint files and may all run at once.** ⛔ **Never two sessions in
 `nav-registry-defaults.ts`** — S2 owns it alone.
+
+### WHERE THE STREAM STANDS — 2026-08-28
+
+| | state |
+|---|---|
+| **S1** | **NOT STARTED.** No branch, no PR. It is the only thing blocking S4. |
+| **S2** | ✅ built · PR [#4950](https://github.com/iscasasola/setnayan-platform/pull/4950) OPEN, auto-merge armed |
+| **S3** | ✅ built · PR [#4951](https://github.com/iscasasola/setnayan-platform/pull/4951) OPEN, auto-merge armed |
+| **S4** | **BLOCKED on S1**, and unchanged: it is still the riskiest piece in the plan. |
+| **S5** | **UNBLOCKED** — S3 is built, so a declared price now exists to segment on. |
+
+⚠ **Every state above is a claim with an expiry date.** Verify with
+`gh pr view <n> --json state,mergedAt` before acting on it; this corpus has been wrong about a PR's
+state five times. Neither PR was merged when this was written — *armed is not merged*.
+
+🔑 **AND S5's PREMISE IS NOW TRUE IN A WAY IT WAS NOT THIS MORNING.** Its brief says both halves
+exist and nothing joins them. Half of that was optimistic: `starting_price_php` existed as a
+COLUMN, and **every card in production carried NULL**. S3 does not fill the old ones — it stops new
+ones being born empty. **S5 must still handle a priceless legacy card**, and the honest answer is
+the one already shipped in `category-search.ts`: **fail OPEN to a neutral fit, never hide the
+card.** A segmentation that silently deletes a shop from the results is a worse defect than the one
+it fixes.
 
 ---
 
@@ -73,6 +95,9 @@ supplier booked on two days of one celebration loses the earlier one. Key on eve
 the per-day rows already come back from `fetchVendorPoolBookings`.
 
 ### S3 — A card that can be found · **Opus 5 · high** · ✅ **BUILT 2026-08-28 — do NOT rebuild it**
+PR [#4951](https://github.com/iscasasola/setnayan-platform/pull/4951). ⚠ Verify with
+`gh pr view 4951 --json state,mergedAt` before trusting this line. Full row: `DECISION_LOG.md`
+2026-08-28 💰.
 **What a person gets:** a shop can no longer publish a service card with no price. The maker asks
 for it alongside the cover photo and the Setnayan Exclusive, the card's own meter counts it as
 missing until it is there, and Publish stays shut. Saving a draft is never refused.
