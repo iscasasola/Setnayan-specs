@@ -1,0 +1,280 @@
+<title>Four Tabs and a Reach Meter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap">
+<style>
+  :root{
+    --ground:#FFFFFF; --paper:#F7F5F2; --ink:#2C2A29; --ink-soft:#4F535B; --ink-faint:#767A82;
+    --cta:#C24E25; --gold:#A9834B; --gold-text:#8A6B39; --gold-soft:#F5EEE1;
+    --line:#E4E0DA; --ok:#2F6B4A; --ok-soft:#EDF4EF; --warn:#8C5A0E; --warn-soft:#FBF3E4;
+    --body:"Hanken Grotesk","Helvetica Neue",Arial,sans-serif;
+    --mono:"Space Mono",ui-monospace,Menlo,monospace;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --ground:#191817; --paper:#211F1E; --ink:#EFEBE4; --ink-soft:#B5B0A8; --ink-faint:#8B857D;
+    --cta:#E8703F; --gold:#C2A06A; --gold-text:#D6B87F; --gold-soft:#332B1E;
+    --line:#332F2C; --ok:#7FBF97; --ok-soft:#1B2A21; --warn:#D9A648; --warn-soft:#2C2415;
+  }}
+  :root[data-theme="dark"]{
+    --ground:#191817; --paper:#211F1E; --ink:#EFEBE4; --ink-soft:#B5B0A8; --ink-faint:#8B857D;
+    --cta:#E8703F; --gold:#C2A06A; --gold-text:#D6B87F; --gold-soft:#332B1E;
+    --line:#332F2C; --ok:#7FBF97; --ok-soft:#1B2A21; --warn:#D9A648; --warn-soft:#2C2415;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--ground);color:var(--ink);font-family:var(--body);margin:0;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:62rem;margin:0 auto;padding:3rem 1.25rem 5rem;display:flex;flex-direction:column;gap:3rem}
+  .eyebrow{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 .6rem}
+  h1{font-size:clamp(1.8rem,4.6vw,2.5rem);line-height:1.14;margin:0;font-weight:700;letter-spacing:-.02em;text-wrap:balance}
+  .lede{color:var(--ink-soft);margin:.85rem 0 0;max-width:36rem}
+  h2{font-size:1.5rem;margin:0 0 .3rem;font-weight:700;letter-spacing:-.01em}
+  .sub{color:var(--ink-soft);margin:0 0 1.4rem;max-width:38rem}
+  section{border-top:1px solid var(--line);padding-top:2rem}
+
+  .row{display:flex;gap:2rem;flex-wrap:wrap;align-items:flex-start}
+  .note{flex:1 1 17rem;min-width:16rem}
+  .note h3{font-size:1rem;margin:0 0 .4rem;font-weight:700}
+  .note p{margin:0 0 .8rem;color:var(--ink-soft);font-size:.95rem}
+  .tag{display:inline-block;font-family:var(--mono);font-size:.63rem;letter-spacing:.1em;text-transform:uppercase;padding:.22rem .5rem;border-radius:2px;margin-bottom:.6rem}
+  .t-new{background:var(--ok-soft);color:var(--ok)} .t-keep{background:var(--gold-soft);color:var(--gold-text)} .t-fix{background:var(--warn-soft);color:var(--warn)}
+
+  /* phone */
+  .phone{flex:0 0 auto;width:19rem;border:1px solid var(--line);border-radius:22px;overflow:hidden;background:var(--ground);box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;flex-direction:column}
+  .status{display:flex;justify-content:space-between;padding:.5rem .9rem .2rem;font-family:var(--mono);font-size:.6rem;color:var(--ink-faint)}
+  .screen{padding:.35rem .8rem 0;display:flex;flex-direction:column;gap:.6rem;min-height:23rem}
+  .shead{display:flex;align-items:center;gap:.55rem;padding:.3rem 0 .1rem}
+  .av{width:30px;height:30px;border-radius:50%;background:var(--gold-soft);flex:none}
+  .shead b{font-size:.9rem} .shead span{display:block;font-size:.68rem;color:var(--ink-faint);font-family:var(--mono)}
+
+  .banner{background:var(--warn-soft);border-left:3px solid var(--warn);padding:.6rem .7rem;border-radius:2px;font-size:.76rem;line-height:1.45}
+  .banner b{color:var(--warn)}
+  .banner a{color:var(--cta);text-decoration:underline;font-weight:600}
+
+  .counts{display:grid;grid-template-columns:repeat(4,1fr);gap:.3rem;text-align:center;padding:.5rem 0}
+  .counts div{font-size:.66rem;color:var(--ink-faint)}
+  .counts b{display:block;font-size:1.15rem;color:var(--ink);font-family:var(--mono);font-weight:700}
+  .counts .hot b{color:var(--cta)}
+
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:.45rem;text-align:center}
+  .tile{background:var(--paper);border-radius:8px;padding:.55rem .25rem;font-size:.64rem;color:var(--ink-soft);line-height:1.25}
+  .tile i{display:block;width:20px;height:20px;margin:0 auto .3rem;border-radius:5px;background:var(--gold-soft)}
+
+  .card{border:1px solid var(--line);border-radius:8px;padding:.7rem .75rem}
+  .card h4{margin:0 0 .3rem;font-size:.85rem}
+  .card p{margin:0;font-size:.74rem;color:var(--ink-soft);line-height:1.45}
+
+  /* the meter */
+  .meter{padding:.15rem 0 .1rem}
+  .mtop{display:flex;justify-content:space-between;align-items:baseline;font-size:.72rem;margin-bottom:.35rem}
+  .mtop b{font-size:.8rem}
+  .mtop .n{font-family:var(--mono);color:var(--cta);font-weight:700}
+  .track{height:5px;border-radius:3px;background:var(--line);position:relative;overflow:hidden}
+  .fill{position:absolute;inset:0 auto 0 0;background:var(--cta);border-radius:3px}
+  .ticks{display:flex;justify-content:space-between;font-size:.6rem;color:var(--ink-faint);margin-top:.3rem;font-family:var(--mono);letter-spacing:.04em}
+  .ticks .on{color:var(--ok);font-weight:700}
+
+  .field{border:1px solid var(--line);border-radius:6px;padding:.5rem .6rem;display:flex;justify-content:space-between;align-items:center;font-size:.78rem}
+  .field .lab{color:var(--ink)} .field .req{color:var(--cta);font-weight:700}
+  .field .val{color:var(--ink-faint);font-family:var(--mono);font-size:.7rem}
+  .field.done{border-color:var(--ok)} .field.done .val{color:var(--ok)}
+
+  .why{background:var(--gold-soft);border-radius:6px;padding:.5rem .6rem;font-size:.72rem;color:var(--gold-text);line-height:1.45}
+
+  .btnrow{display:flex;gap:.5rem;padding:.2rem 0 .1rem}
+  .btn{flex:1;text-align:center;padding:.5rem;border-radius:6px;font-size:.78rem;font-weight:600;border:1px solid var(--line);color:var(--ink-faint)}
+  .btn.go{background:var(--cta);color:#fff;border-color:var(--cta)}
+  .btn.off{opacity:.45}
+
+  .chips{display:flex;gap:.35rem;overflow:hidden}
+  .chip{font-size:.7rem;padding:.3rem .55rem;border-radius:99px;border:1px solid var(--line);color:var(--ink-soft);white-space:nowrap}
+  .chip.on{background:var(--cta);color:#fff;border-color:var(--cta);font-weight:600}
+
+  .ask{border:1px solid var(--line);border-radius:8px;padding:.6rem .7rem;display:flex;gap:.55rem}
+  .ask .dot{width:7px;height:7px;border-radius:50%;background:var(--cta);margin-top:.42rem;flex:none}
+  .ask b{font-size:.8rem;display:block} .ask p{margin:.1rem 0 0;font-size:.72rem;color:var(--ink-soft);line-height:1.4}
+  .ask .when{font-family:var(--mono);font-size:.62rem;color:var(--ink-faint);margin-top:.25rem;display:block}
+
+  /* bottom nav */
+  .nav{margin-top:auto;display:grid;border-top:1px solid var(--line);background:var(--ground)}
+  .nav.four{grid-template-columns:repeat(4,1fr)} .nav.five{grid-template-columns:repeat(5,1fr)}
+  .nav div{text-align:center;padding:.5rem .1rem .6rem;font-size:.6rem;color:var(--ink-faint);position:relative}
+  .nav i{display:block;width:17px;height:17px;margin:0 auto .22rem;border-radius:4px;background:var(--line)}
+  .nav .sel{color:var(--cta);font-weight:700} .nav .sel i{background:var(--cta)}
+  .nav .b{position:absolute;top:.28rem;left:50%;margin-left:3px;background:var(--cta);color:#fff;font-family:var(--mono);font-size:.52rem;padding:0 .22rem;border-radius:99px;font-weight:700}
+  .nav .day i{background:var(--gold)} .nav .day{color:var(--gold-text)}
+
+  .caption{font-family:var(--mono);font-size:.62rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-faint);text-align:center;margin:.55rem 0 0}
+  .pair{display:flex;gap:1.25rem;flex-wrap:wrap}
+  ul{margin:.2rem 0 0;padding-left:1.05rem;color:var(--ink-soft);font-size:.95rem}
+  li{margin-bottom:.4rem}
+  footer{border-top:1px solid var(--line);padding-top:1.5rem;color:var(--ink-faint);font-size:.88rem}
+</style>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Setnayan · shop app · a delta, not a redraw</p>
+  <h1>Four tabs and a reach meter</h1>
+  <p class="lede">Two changes to the shop dashboard you approved on 26 August, both taken from what Shopee already proves works on a phone. Everything not shown here stays exactly as it is.</p>
+</header>
+
+<!-- 1 · THE BAR -->
+<section>
+  <h2>1 · The bar loses a tab and gains a job</h2>
+  <p class="sub">Five tabs today, all of them places to <em>look at</em> things. A supplier opens the app to <em>answer someone</em> — and there is nowhere to do that.</p>
+  <div class="pair">
+    <div>
+      <div class="phone">
+        <div class="status"><span>3:47</span><span>▪▪▪</span></div>
+        <div class="screen">
+          <div class="shead"><span class="av"></span><div><b>SetnaProd</b><span>setnaprod</span></div></div>
+          <div class="counts">
+            <div><b>0</b>Enquiries</div><div><b>1</b>Booked</div><div><b>0</b>To answer</div><div><b>0</b>Today</div>
+          </div>
+          <div class="card"><h4>Nothing needs you right now</h4><p>When a couple asks something, it lands here first.</p></div>
+        </div>
+        <div class="nav five">
+          <div class="sel"><i></i>Today</div><div><i></i>Customers</div><div><i></i>Shop</div><div><i></i>Performance</div><div><i></i>On the Day</div>
+        </div>
+      </div>
+      <p class="caption">Today — five tabs</p>
+    </div>
+    <div>
+      <div class="phone">
+        <div class="status"><span>3:47</span><span>▪▪▪</span></div>
+        <div class="screen">
+          <div class="shead"><span class="av"></span><div><b>SetnaProd</b><span>setnaprod</span></div></div>
+          <div class="counts">
+            <div><b>0</b>Enquiries</div><div><b>1</b>Booked</div><div class="hot"><b>3</b>To answer</div><div><b>0</b>Today</div>
+          </div>
+          <div class="tiles">
+            <div class="tile"><i></i>Customers</div><div class="tile"><i></i>My Shop</div><div class="tile"><i></i>Performance</div><div class="tile"><i></i>Money</div>
+          </div>
+          <div class="card"><h4>Your reach is limited</h4><p>One card has no price, so couples planning at that level never see it. <strong style="color:var(--cta)">Fix it →</strong></p></div>
+        </div>
+        <div class="nav four">
+          <div class="sel"><i></i>Today</div><div><i></i>Answers<span class="b">3</span></div><div><i></i>Grow</div><div><i></i>Me</div>
+        </div>
+      </div>
+      <p class="caption">Proposed — four tabs</p>
+    </div>
+  </div>
+  <div class="row" style="margin-top:1.4rem">
+    <div class="note"><span class="tag t-new">New tab</span><h3>Answers</h3><p>The one thing a supplier opens the app to do, with the count on it. Today it has no home at all.</p></div>
+    <div class="note"><span class="tag t-new">New tab</span><h3>Grow</h3><p>Where a shop sees where its pricing lands and adjusts, so it doesn't lose the market it serves. Nowhere to put this today.</p></div>
+    <div class="note"><span class="tag t-keep">Kept, moved</span><h3>Customers · Shop · Performance</h3><p>Not deleted — they become tiles inside Today, the way Shopee keeps Products and Orders behind Home. Same five rooms, one hub.</p></div>
+    <div class="note"><span class="tag t-fix">Conditional</span><h3>On the Day</h3><p>Appears in the bar <em>only</em> when there is an event today. It is dead weight the other 364 days.</p></div>
+  </div>
+</section>
+
+<!-- 2 · THE METER -->
+<section>
+  <h2>2 · The card maker shows the reach it is earning</h2>
+  <p class="sub">Your idea, their control. Instead of telling a shop afterwards that its price decides its market, the bar moves while they type — and Publish stays shut until the number is in.</p>
+  <div class="pair">
+    <div>
+      <div class="phone">
+        <div class="status"><span>3:39</span><span>▪▪▪</span></div>
+        <div class="screen">
+          <div class="meter">
+            <div class="mtop"><b>Limited reach</b><span class="n">2/6 done</span></div>
+            <div class="track"><span class="fill" style="width:33%"></span></div>
+            <div class="ticks"><span class="on">Limited</span><span>Findable</span><span>Full reach</span></div>
+          </div>
+          <div class="why">A price is what puts this card in front of the right couples. Without one it reaches nobody.</div>
+          <div class="field done"><span class="lab">Photos</span><span class="val">3 added ✓</span></div>
+          <div class="field done"><span class="lab">What it's called <span class="req">*</span></span><span class="val">Set ✓</span></div>
+          <div class="field"><span class="lab">Price <span class="req">*</span></span><span class="val">Not set</span></div>
+          <div class="field"><span class="lab">What's included <span class="req">*</span></span><span class="val">Not set</span></div>
+          <div class="field"><span class="lab">Who it's for</span><span class="val">Not set</span></div>
+          <div class="btnrow"><span class="btn">Save draft</span><span class="btn go off">Publish</span></div>
+        </div>
+        <div class="nav four"><div><i></i>Today</div><div><i></i>Answers</div><div class="sel"><i></i>Grow</div><div><i></i>Me</div></div>
+      </div>
+      <p class="caption">Making a card — mid-way</p>
+    </div>
+    <div class="note" style="padding-top:1rem">
+      <span class="tag t-new">The mechanism</span>
+      <h3>Why this beats a notice afterwards</h3>
+      <p>A warning after the fact reads as an accusation. A bar the shop is filling reads as progress — and it is the same rule, enforced earlier and more kindly.</p>
+      <h3 style="margin-top:1rem">Publish is disabled, not just asterisked</h3>
+      <p>Both of your existing cards have no price because the field is optional. Shopee greys out Publish until the required fields are in; that single choice is why their listings carry prices and yours don't.</p>
+      <h3 style="margin-top:1rem">The three rungs are honest</h3>
+      <p>Limited → Findable → Full reach describes what actually happens to the card, not a score we invented. If it doesn't change reach, it doesn't belong on the bar.</p>
+      <h3 style="margin-top:1rem">⛔ What it must never become</h3>
+      <p>A shop declaring a higher price to climb the bar. The rungs measure <em>completeness</em>, never the size of the number — otherwise we've sold placement.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 3 · HIDDEN -->
+<section>
+  <h2>3 · A hidden shop is told why, and how to fix it</h2>
+  <p class="sub">Both of your shops are invisible to couples right now. Neither is told anything. This is the cheapest change on the page and probably the reason your marketplace has never received an enquiry.</p>
+  <div class="row">
+    <div>
+      <div class="phone">
+        <div class="status"><span>3:47</span><span>▪▪▪</span></div>
+        <div class="screen">
+          <div class="shead"><span class="av"></span><div><b>SetnaProd</b><span>setnaprod</span></div></div>
+          <div class="banner"><b>Couples can't find you yet.</b> Your shop is hidden because it has no service card with a price. <a href="#">Add one →</a></div>
+          <div class="counts"><div><b>0</b>Enquiries</div><div><b>0</b>Booked</div><div><b>0</b>To answer</div><div><b>0</b>Today</div></div>
+          <div class="card"><h4>Two things left</h4><p>Add a priced service card, then we'll review your shop and switch it on — usually within a day.</p></div>
+        </div>
+        <div class="nav four"><div class="sel"><i></i>Today</div><div><i></i>Answers</div><div><i></i>Grow</div><div><i></i>Me</div></div>
+      </div>
+      <p class="caption">Hidden, and told why</p>
+    </div>
+    <div class="note" style="padding-top:1rem">
+      <span class="tag t-fix">Live problem</span>
+      <h3>What happens today</h3>
+      <p><strong>setnaprod</strong> — unpublished, no cards at all.<br><strong>saysay-live-band</strong> — published but hidden, two cards, neither priced.</p>
+      <p>Both sit silent. A supplier in that state has no way of knowing they are invisible, and no reason to think anything is wrong.</p>
+      <h3 style="margin-top:1rem">Say which of the two it is</h3>
+      <p>"Finish your card" and "we're reviewing you" are different states with different actions. Lumping them into one message means half the shops wait for us when they should be typing.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · ANSWERS -->
+<section>
+  <h2>4 · Answers opens on the unanswered</h2>
+  <p class="sub">Shopee's chat opens on <em>To manually reply</em>, not on the archive. The Answers Desk you already have in flight should hold to the same standard.</p>
+  <div class="row">
+    <div>
+      <div class="phone">
+        <div class="status"><span>3:47</span><span>▪▪▪</span></div>
+        <div class="screen">
+          <div class="shead"><div><b>Answers</b><span>3 waiting on you</span></div></div>
+          <div class="chips"><span class="chip on">To answer 3</span><span class="chip">Waiting</span><span class="chip">Done</span></div>
+          <div class="ask"><span class="dot"></span><div><b>Is 14 Feb still open?</b><p>Camille &amp; Rob · wedding, 180 guests</p><span class="when">asked 2 hours ago</span></div></div>
+          <div class="ask"><span class="dot"></span><div><b>Can you do a same-day edit?</b><p>Ana &amp; Marco · wedding, 90 guests</p><span class="when">asked yesterday</span></div></div>
+          <div class="ask"><span class="dot"></span><div><b>Downpayment received?</b><p>Grace &amp; Nino · ₱18,000 recorded</p><span class="when">asked yesterday</span></div></div>
+        </div>
+        <div class="nav four"><div><i></i>Today</div><div class="sel"><i></i>Answers<span class="b">3</span></div><div><i></i>Grow</div><div><i></i>Me</div></div>
+      </div>
+      <p class="caption">Answers — opens on the work</p>
+    </div>
+    <div class="note" style="padding-top:1rem">
+      <span class="tag t-keep">Already being built</span>
+      <h3>One list, every kind</h3>
+      <p>A date question, a service question and a money question are all the same thing to a supplier: somebody is waiting. They belong in one queue, sorted by who has waited longest.</p>
+      <h3 style="margin-top:1rem">The money row is the one to watch</h3>
+      <p>"Downpayment received?" is where a shop can say no — and today saying no erases the couple's proof of paying. That has to change before this ships to real people.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>What this changes in the plan</h2>
+  <ul>
+    <li><strong>Publish disabled until priced</strong> replaces "make the price required" — same fix, better shape, and it's the smallest change here.</li>
+    <li><strong>The reach meter replaces the gap notice</strong> as the first move. Telling a shop before they publish beats telling them after they book.</li>
+    <li><strong>"Hidden because…" is new</strong>, wasn't in the plan, and is live-relevant to both your shops today.</li>
+    <li><strong>The four-tab bar is a fresh decision</strong> on a layout approved three days ago — the only item here that undoes something.</li>
+  </ul>
+</section>
+
+<footer>
+  <p>Drawn against the palette and type of <em>The Shop Dashboard, Rearranged</em> (26 Aug), which this extends rather than replaces. Nothing here is built.</p>
+</footer>
+</div>
