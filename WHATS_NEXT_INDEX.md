@@ -1,5 +1,11 @@
 # WHATS_NEXT_INDEX — master compilation for the "run all what's-next" session (2026-07-18)
 
+> # 🧭 START AT **[`START_HERE_WHATS_NEXT_2026-08-29.md`](START_HERE_WHATS_NEXT_2026-08-29.md)**, NOT HERE.
+> That file names **the one open stream** in its first screen and triages the blocks below, several
+> of which finished without having their ACTIVE label struck. **This register is history and
+> background** — invaluable when you need the reasoning behind a decision, misleading if you use it
+> to choose what to work on.
+
 
 > ### ▶ ACTIVE 2026-08-29 — PAPIC: THE BUILD ORDER, SEVEN ITEMS, NO DECISIONS LEFT
 > **Register: [`WHATS_NEXT_Papic_Build_Order_2026-08-29.md`](WHATS_NEXT_Papic_Build_Order_2026-08-29.md)**
