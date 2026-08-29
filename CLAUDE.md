@@ -1968,7 +1968,9 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > pages (3D plan · event website · Patiktok · Live Studio · animated monogram · memories)
 > are each linked from the live homepage now, verified by fetching it. Everything else
 > spot-checked is unchanged, and prod is unchanged in substance (6 events · 39 guests ·
-> 2 shops, 1 published · **0 orders ever** · 0 of 45 booked suppliers is an account).
+> 2 shops, 1 published · ~~**0 orders ever**~~ · 0 of 45 booked suppliers is an account).
+> ⚠ **THAT ORDER COUNT IS STALE — re-measured 2026-08-29: SIX bills, FOUR PAID AND RECEIPTED.**
+> True when written; not true now. The rest of the row still holds.
 > 🚨 **AND IT FOUND ONE THE 08-12 PASS MISSED:** the homepage still promises
 > *"keep it forever"* / *"for life"* in the **page title, the meta description and every
 > social card**, while the ruling is free-for-5-years-then-paid. The 08-12 pass checked
@@ -2374,7 +2376,13 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 >
 > ⚠ **THESE NUMBERS ARE FROM 2026-08-07 AND THREE OF THEM ARE NOW FALSE. Re-measured 2026-08-19:
 > 8 events (not 5) · 14 Papic photos (not 0) · and the `setnaprod` shop is `verified` and no
-> longer hidden.** Still true: 0 orders ever, 0 fee charges. 🔑 **"Nothing is live to a stranger"
+> longer hidden.** ~~Still true: 0 orders ever, 0 fee charges.~~
+> 🛑 **"0 ORDERS EVER" IS NOW FALSE TOO — CORRECTED 2026-08-29. MONEY MOVES.** Six bills exist and
+> **FOUR ARE PAID AND RECEIPTED**: ₱2,499 · ₱2,899 · ₱147 · ₱49, three by GCash and one by BDO,
+> every one with a payment screenshot attached, hand-matched by an admin, and issuing a receipt.
+> The most recent completed **2026-08-29**. The customer payment path is PROVEN end to end — stop
+> describing it as untested. **0 fee charges is still true** (the booking fee is switched off).
+> 🔑 **"Nothing is live to a stranger"
 > is the claim that decays first, and it is the one people lean on to call a change risk-free.**
 > ~~**Verified prod, 2026-08-07:** 5 events · 2 vendors, **both hidden** · **0** photos ·
 > **0** fee charges · **0** livestream channels. **Nothing is live to a stranger.**
@@ -2708,14 +2716,23 @@ When code lands ahead of a spec update, the repo appends a `[PENDING]` line to `
 one shared pot; the host can set some aside for a single camera's QR, where nobody else can spend
 them, and take unspent ones back. **Cameras are free and unlimited.**
 
-**Ladder — RECUT 2026-08-26 to a SCROLLABLE list of 16 rungs, priced off ₱1 = 1 credit.** The
-regular price IS the credit count; what you pay is a bundle discount off it, deepening as the
-number grows. **50 free on every event, on top, and every rung repeatable.**
-`100 ₱50 · 200 ₱100 · 300 ₱150 · 400 ₱200 · 500 ₱250 · 1,000 ₱500 · 2,000 ₱1,000 · 3,000 ₱1,200 ·
-4,000 ₱1,600 · 5,000 ₱2,000 · 6,000 ₱2,400 · 7,000 ₱2,800 · 10,000 ₱3,200 · 20,000 ₱5,000 ·
-30,000 ₱7,500 · 50,000 ₱10,000` (50% → 80% off).
-⚠ **NEVER re-type these** — `platform_retail_catalog_v2` is the source and
-`papic-rungs-are-fundable.db.test.ts` pins the set. ⚖ **40,000 is deliberately ABSENT:** his first
+**Ladder — a SCROLLABLE list of rungs. 50 free on every event, on top, and every rung repeatable.**
+
+🛑 **THE FIGURES THAT USED TO BE TYPED HERE WERE WRONG — MEASURED AGAINST THE CATALOG 2026-08-29.**
+This block read `100 ₱50 · 200 ₱100 · … · 50,000 ₱10,000` and described the regular price as
+"₱1 = 1 credit". **The shop charges neither.** Read out of `platform_retail_catalog_v2`:
+100 = **₱70** regular / **₱49** at sign-up · 1,000 = **₱700** / **₱490** ·
+3,000 = **₱1,680** / **₱1,176** · 5,000 = **₱2,800** / **₱1,960** · 10,000 = **₱4,500** / **₱3,150** ·
+50,000 = **₱15,000** / **₱10,500** — and there is a **100,000 rung at ₱24,000 / ₱16,800** this block
+never listed at all. The sign-up column is a **30% discount** (`papic_signup_discount_pct`), and the
+per-shot cost falls **₱0.49 → ₱0.17** as the pool grows.
+🔑 **THE LESSON, WHICH IS WORTH MORE THAN THE NUMBERS: this block already said "NEVER re-type
+these" and then re-typed them.** A price written into a document is a promise nothing checks. **DO
+NOT restore a table here.** `platform_retail_catalog_v2` is the source, and
+`papic-rungs-are-fundable.db.test.ts` pins the set; the full read-out as of 2026-08-29 is in
+[`SETNAYAN_WHAT_THE_APP_OFFERS_2026-08-29.md`](SETNAYAN_WHAT_THE_APP_OFFERS_2026-08-29.md) § 3,
+which says on its own face that the catalogue outranks it.
+⚖ **40,000 is deliberately ABSENT:** his first
 table had it at ₱10,000, the same price as 50,000, so nobody could rationally choose it. Surfaced
 rather than silently corrected, and he removed it — *"remove the 40,000"*. **Do not re-add it
 without a price of its own.**

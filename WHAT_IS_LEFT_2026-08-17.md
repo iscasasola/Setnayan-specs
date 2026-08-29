@@ -95,8 +95,13 @@ that already exists.** That is the paid-twice mistake, in the register whose job
   went on, every booking it made would have been a supplier who is booked and invisible: no
   doorway, no photo credit, no run-of-show notes. Done while it was inert, which was the whole
   point. **The switch itself is still yours and nothing is on until you flip it.**
-- **There is no way to invite an off-platform supplier onto Setnayan** — which is how 44 of the 45
-  would ever become accounts. That is **your call (§6), not an engineering task.**
+- ~~**There is no way to invite an off-platform supplier onto Setnayan**~~ 🛑 **FALSE — CORRECTED
+  2026-08-29.** `createManualVendorInvite` ships and is mounted in
+  `app/dashboard/[eventId]/_components/new-manual-vendor-modal.tsx` — **on the same screen where a
+  couple adds a supplier by hand** — and it mints a claim link that lands on `/claim/[token]`. What
+  is true is that **nobody has ever used it**, which is why 44 of the 45 are still names typed into
+  a list. That is a go-to-market problem, not a build. **§ 6 item 6 is answered by the code and
+  should not be put to the owner as an open decision.**
 
 ### Still true, and smaller than I said
 
@@ -134,17 +139,34 @@ carries the six-slice framing and its slices 1 and 2 are the wrong shape.** Corr
 
 **Things that are built but nobody can reach**
 - **The avatar maker does not exist.** Everyone in the 3D room is a randomly-coloured stranger — 0 of 39 guests has a figure.
-- **The photo wall on the couple's own website can never have photos in it** — nothing anywhere picks them. 0 of 6 events.
+- ~~**The photo wall on the couple's own website can never have photos in it** — nothing anywhere picks them. 0 of 6 events.~~
+  🛑 **THIS MISREADS THE DESIGN — CORRECTED 2026-08-29.** `ingestToWall` is called from **BOTH**
+  capture paths — `app/papic/actions.ts` and `app/api/papic/guest-capture/route.ts` — so every shot,
+  crew and guest alike, is pushed onto the wall automatically once it clears screening. **Nothing
+  "picks" them because nothing is meant to.** The wall was empty because 14 photos exist in total,
+  not because a mechanism is missing. 🔑 *An empty surface whose feeder is automatic is a usage
+  fact, not a build gap — trace the WRITER before calling one missing.*
 - **A supplier still cannot say how many couples may hold the same date.** Permanently stuck at three, no screen.
 - ~~**The "we couldn't load this" screens were built and no page uses them** — 0 consumers.~~ ✅ **FALSE as of 2026-08-19: `ErrorState` has seven real import sites**, including the shared admin console table that fans out across the console. It was adopted on 2026-08-17 — the same day this register was written, which is why it recorded the pre-adoption state. ⚠ **The underlying DISEASE is still real and is the current stream** — a failed load rendering as "there is nothing here" — but it is a per-surface job, NOT "mount the unused primitives". See [`WHATS_NEXT_Silent_Failures_2026-08-19.md`](WHATS_NEXT_Silent_Failures_2026-08-19.md) §2 for the 10 confirmed instances with file:line.
 
 **Small but visible**
-- **A supplier can still only tap six fixed messages** to the coordinator — never a sentence.
+- ~~**A supplier can still only tap six fixed messages** to the coordinator — never a sentence.~~
+  🛑 **FALSE — CORRECTED 2026-08-29.** `stage-note-compose.tsx` renders a real `<textarea>`, capped
+  at `STAGE_NOTE_MAX`, placeholder *"e.g. Hold the toast — the father is still parking."* A
+  supplier can write a sentence. **Do not build this.**
 - **The host cannot see who is holding which camera.** Four say "Claimed", none say a name.
 - **A photographer can only look at their own shots during the wedding day itself.** At midnight the door shuts.
 - **If the band who also emcees was booked as one package, the coordinator's message box lists nobody** — the section silently disappears.
-- The old camera screen still opens with "You have 3 cameras free to test with" above eight slots.
-- **A brand-new shop is still born saying it only serves ballrooms, gardens and heritage houses** — both live shops still sit on that. There is still nowhere for a venue to say what kind of venue it is.
+- ~~The old camera screen still opens with "You have 3 cameras free to test with" above eight slots.~~
+  🛑 **ALREADY FIXED — verified 2026-08-29.** The only surviving occurrences are a code comment and a
+  test docblock, both *describing* the old fix. Nothing renders it.
+- **A brand-new shop is still born saying it only serves ballrooms, gardens and heritage houses** — both live shops still sit on that.
+  ⚠ ~~There is still nowhere for a venue to say what kind of venue it is.~~ **HALF FALSE — CORRECTED
+  2026-08-29.** `vendor_profiles.venue_type` **exists and is READ publicly** — by
+  `app/api/v1/vendor/profile/route.ts` and by the Explore search. Only the **vendor-side write
+  screen** is missing; today just an admin can set it, from `/admin/venues`. So this is one control
+  against a live field, not a feature to design. **Session C2 of
+  [`WHATS_NEXT_Completion_SESSIONS_2026-08-29.md`](WHATS_NEXT_Completion_SESSIONS_2026-08-29.md).**
 
 **Under the floor**
 - **306 of 383 tables still hand out a read permission nothing uses** — unchanged. No leak today; it means most of the database has one lock instead of two.
