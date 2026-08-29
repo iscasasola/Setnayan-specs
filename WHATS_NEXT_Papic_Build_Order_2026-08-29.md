@@ -98,7 +98,27 @@ proved. **Build beside the repo, and push the moment it typechecks.**
 > `lib/papic-chapters.ts` derives a chapter from `captured_at`, stores nothing, and is rendered
 > by the guest gallery and the pool grid. **The year — linking two celebrations — is what is
 > unbuilt.** The chapters line is pinned as still-sayable so nobody deletes a true claim.
-> ⏭ **STILL OWED, and it is the owner's:** nobody has looked at the new page on a real phone.
+> 📱 **THE PHONE LOOK HAPPENED 2026-08-29, AND IT FOUND THE REAL DEFECT — MEASURED, NOT
+> EYEBALLED.** At 375px the page ran **12,847px — 15.8 phone screens**, when the brief's own § 4
+> called the PREVIOUS version (5,514px) already too long and § 5 asked for *"shorter than today,
+> not longer"*. **It had grown 2.3× past the version that was already judged too long**, and ONE
+> block did it: *Everything it does* at **4,792px — 37% of the page, nearly six phone screens** —
+> sitting between the three steps and everything a buyer decides on.
+> ✅ **FIXED — owner ruled both halves (_"cut it down"_ · _"yes after the price"_): PR
+> [#5007](https://github.com/iscasasola/setnayan-platform/pull/5007), MERGED 2026-08-29T13:28Z,
+> merge `c216ac53d`, verified an ancestor of `origin/main`.** The six photographed spotlights are
+> untouched; the twenty short rows FOLD behind *"And everything else · N more"* (the `<details>`
+> pattern the FAQ on the same page already uses), and the section moved BELOW the cost block.
+> ⚠ **FOLDED, NOT DELETED** — several of those lines are the strongest material we have (the blur,
+> the screening, the moderation), and `<details>` keeps them **in the DOM**, so they stay indexed.
+> 🔑 **THE REMOUNT IS OUTSIDE THE COST BLOCK'S CONDITIONAL, DELIBERATELY.** That block renders only
+> when a price resolves and **fails quiet by design** — mounting the features inside it would make
+> **a third of the page vanish on a degraded price read**, with nothing on screen to say why. Pinned.
+> 🪤 **A PHONE LOOK IS A MEASUREMENT, NOT A GLANCE.** Every finding here came from reading the
+> rendered heights at 375px; none of it is visible in the source, and two prior reviews of this
+> page missed all of it.
+> ⏭ **STILL OWED, and it is the owner's:** the hero badge reads *"50 credits left"* — to a stranger
+> with no celebration, *left* implies a balance they already hold. Named, NOT changed.
 
 
 **Drawn and waiting: [`prototypes/papic_promotion_page_2026-08-28.html`](prototypes/papic_promotion_page_2026-08-28.html).**
