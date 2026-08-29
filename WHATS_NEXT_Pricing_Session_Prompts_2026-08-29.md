@@ -288,11 +288,15 @@ included — verify each claim against the aliases and the editor's gates before
 > ## ⚖ Owner rulings collected while building — do NOT re-ask
 > · **`verified` is 2 chasing / 1 waiting.** Asked directly, he answered *"we already had a table for
 >   this"* ⇒ the table wins. Both moves WIDEN; nobody loses a slot.
-> · **"Turn it on now"** — he wants the ceilings ON. ⏭ **THE FLIP IS STILL OWED**, deliberately:
->   `UPDATE public.platform_settings SET vendor_tier_pipeline_caps_enabled = TRUE WHERE id = 1;`
->   after #4985 is SERVED, never inside a migration and never before a supplier can see the number
->   that is about to bind them. Safe by arithmetic — both shops are Solo and neither is near its
->   numbers.
+> · **"Turn it on now"** — he wants the ceilings ON. ✅ **DONE 2026-08-29, AFTER #4985 WAS SERVED**
+>   (its merge commit `e4fc7e831` verified an ANCESTOR of the commit production's `/api/health`
+>   self-reports, not by the version merely changing). `vendor_tier_pipeline_caps_enabled` is now
+>   **TRUE** in production and the migration is verified applied BY THE OBJECT: the live
+>   `vendor_tier_limit` answers verified 2 / 1, `clamp_vendor_waitlist_to_tier` carries the
+>   grandfather guard, and both new functions exist. **Safe by arithmetic, measured at the flip:**
+>   2 shops · both Solo · both holding 1 with the waiting list off · **0 accepted chat threads in
+>   the entire database**, so there was no pipeline anywhere to bind. Both rows are byte-identical
+>   after the flip. Reversing it is one `UPDATE`.
 >
 > ## 🚨 The finding that outranks both builds
 > The live `papic_create_vendor_challenge` had **NO PAID GATE AT ALL** in production. `20271001130000`
@@ -305,7 +309,6 @@ included — verify each claim against the aliases and the editor's gates before
 > credit. ⇒ **Copy a function body out of `pg_get_functiondef`, never out of a migration.**
 >
 > ## ⏭ Still open from this lane
-> · The **switch flip** above (owner asked for it; do it once #4985 is served).
 > · **Custom's "buy past 10" dials** — named, not built. Custom is hidden from every public page, so
 >   that purchase would be a door onto nothing.
 > · `platform_settings.vendor_addon_tiered_pricing_enabled` is **TRUE in prod** while
