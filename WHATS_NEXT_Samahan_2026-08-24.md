@@ -46,7 +46,9 @@ four separate times.
 ### ✅ 2a · NOTHING RINGS — BUILT 2026-08-25 (PR #4841). Do NOT rebuild it.
 🛑 **CORRECTION: I told the owner twice that we have no push infrastructure. That was FALSE.**
 It ships and is mounted: `PushToggle` on the profile page · `savePushSubscription` /
-`removePushSubscription` · `emitNotification` with **61 files · 108 call sites** (measured 2026-08-25) · `/api/notify` sending via
+`removePushSubscription` · `emitNotification` is called from dozens of files across the app
+(⚠ **do not re-type a file/call-site count here — it was 108/61 on 2026-08-25 and had already moved
+twice by 2026-08-30; re-measure with `grep -rln emitNotification apps/web` for a current number**) · `/api/notify` sending via
 `web-push` + VAPID. `push_subscriptions` exists in prod with **0 rows** — nobody has switched it
 on.
 ⏭ **The work was therefore:** (1) confirm the VAPID keys are set in the hosting settings —

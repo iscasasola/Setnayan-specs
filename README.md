@@ -131,7 +131,7 @@ See CLAUDE.md decision log for the full chronology. Major locks:
 - **Payments:** 0% commission · **no Setnayan Pay convenience fee** (the 3%→5.0% fee was RETIRED at the 2026-06-07 reset; vendors settle off-platform, Setnayan does not hold money).
 - **Vendor tiers:** Boosted · Certified · Standard Verified. Certified requires on-site visit. Boost requires Certified.
 - **Admin roles (7 granular):** Ops Lead · Transactions · Verification · Disputes · Payments · Customer Accounts · Vendor Accounts. Two-admin approval for provisioning + role changes + grants >₱10K retail.
-- **Tech stack:** Vercel (Next.js) + Supabase (Postgres + Auth + Realtime + Edge Fns) + Cloudflare R2 (PH region) + GitHub. Multi-platform clients: web PWA, native iOS/Android (Papic capture), Tauri shell for macOS desktop.
+- **Tech stack:** Vercel (Next.js) + Supabase (Postgres + Auth + Realtime + Edge Fns) + Cloudflare R2 (Asia-Pacific/APAC — R2 has no PH region) + GitHub. Multi-platform clients: web PWA, native iOS/Android (Papic capture), Tauri shell for macOS desktop.
 - **Customer model:** Customer ≠ couple-only. Up to 2 co-organizers per event; one user can co-organize many events.
 - **Guest model:** Guests have full Setnayan accounts. Each guest has their own camera (5-sec clip cap matching Paparazzi). Papic global photos visible/shareable to all guests.
 - **Privacy:** RA 10173 compliant. Per-event face-vector scope. DPO contact dpo@setnayan.com. Breach notification within 72 hours per NPC.

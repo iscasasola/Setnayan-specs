@@ -73,9 +73,15 @@ sentence, or a ruling. Building around those items does not unblock them.
 *small* — If you download the compliance pack today to answer a lawyer or the privacy commission, it is missing everything written in the last two weeks — including the exact paragraphs added to fix the gap. It would look like nothing was done.
 <sub>The shipped records-of-processing PDF last changed 2026-07-23; the amendments closing the outstanding gates are dated 2026-07-31 to 2026-08-02 and exist only in the markdown source.</sub>
 
-### Four rows of the compliance register still say photos are stored in the Philippines
-*small* — We fixed the public page to stop saying photos sit in the Philippines, because they do not. The internal record we would file still says it in four places, including the row about the wedding photos themselves.
-<sub>Four rows still read APAC/PH; the 2026-07-31 correction was applied to one row and to the public privacy page only.</sub>
+### ✅ CLOSED 2026-08-30 (C10) — Four rows of the compliance register still say photos are stored in the Philippines
+~~*small* — We fixed the public page to stop saying photos sit in the Philippines, because they do not. The internal record we would file still says it in four places, including the row about the wedding photos themselves.~~
+**Re-measured 2026-08-30: zero matches for "APAC/PH" in
+`NPC_Compliance/02_Records_of_Processing_Activities_DRAFT_2026-07-05.md` and zero matches for "PH
+region"/"APAC/PH" in the shipped `apps/web/assets/npc-docs/03_Records_of_Processing_Activities.pdf`
+(`pdftotext` check) — both are clean now. The residual R2-region wording that DID still exist as of
+2026-08-30 was in two different files this register never named — corpus `README.md:134` and
+`API_Integration_Checklist.md:212` (both said "R2 (PH region)") — now corrected to "Asia-Pacific
+(APAC) — R2 has no PH region."
 
 ### The register describes a photo-keeping rule we replaced — three months on paper, six in the product
 *small* — The paper says we keep the big original files for three months; the app keeps them for six. Telling a regulator one number while doing another is the kind of small mismatch that costs credibility.

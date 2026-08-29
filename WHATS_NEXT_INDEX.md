@@ -289,7 +289,10 @@
 > chat" lock**; one query against prod overturned a plan estimate.
 >
 > 🛑 **A CORRECTION THIS FILE SHOULD CARRY: push notifications ARE BUILT.** I told the owner twice
-> they were not. `PushToggle` is mounted, `emitNotification` has **61 files · 108 call sites** (measured 2026-08-25), `/api/notify`
+> they were not. `PushToggle` is mounted, `emitNotification` is called from dozens of files across
+> the app (⚠ **do not re-type a file/call-site count here — it was 108/61 on 2026-08-25 and had
+> already moved twice by 2026-08-30; re-measure with `grep -rln emitNotification apps/web` if a
+> current number is genuinely needed**), `/api/notify`
 > sends via web-push + VAPID, `push_subscriptions` exists with **0 rows**. The hourly bell is
 > therefore a *wiring* job plus confirming VAPID keys in the hosting settings — **not** a push
 > build. **Do not scope one.**

@@ -209,7 +209,7 @@ These items unlock the 0038 iteration spec drafted 2026-05-19. None are V1 launc
 
 **Cost:** Free tier covers up to 500MB DB + 1GB Storage; Pro $25/month for ~8GB DB + 100GB Storage; scale as needed.
 
-### 1.4 Cloudflare R2 buckets (PH region)
+### 1.4 Cloudflare R2 buckets (APAC — R2 has no PH region)
 
 - [ ] Create Cloudflare account
 - [ ] Provision **all five** R2 buckets in APAC — the canonical set is `R2_BUCKETS` in `apps/web/lib/r2.ts`; a bucket the code names but R2 lacks fails EVERY upload to it with a masked network error (see § "Provisioning drift" 2026-07-05):
