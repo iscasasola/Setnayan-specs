@@ -1985,7 +1985,9 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > pages (3D plan · event website · Patiktok · Live Studio · animated monogram · memories)
 > are each linked from the live homepage now, verified by fetching it. Everything else
 > spot-checked is unchanged, and prod is unchanged in substance (6 events · 39 guests ·
-> 2 shops, 1 published · **0 orders ever** · 0 of 45 booked suppliers is an account).
+> 2 shops, 1 published · ~~**0 orders ever**~~ · 0 of 45 booked suppliers is an account).
+> ⚠ **THAT ORDER COUNT IS STALE — re-measured 2026-08-29: SIX bills, FOUR PAID AND RECEIPTED.**
+> True when written; not true now. The rest of the row still holds.
 > 🚨 **AND IT FOUND ONE THE 08-12 PASS MISSED:** the homepage still promises
 > *"keep it forever"* / *"for life"* in the **page title, the meta description and every
 > social card**, while the ruling is free-for-5-years-then-paid. The 08-12 pass checked
@@ -2391,7 +2393,13 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 >
 > ⚠ **THESE NUMBERS ARE FROM 2026-08-07 AND THREE OF THEM ARE NOW FALSE. Re-measured 2026-08-19:
 > 8 events (not 5) · 14 Papic photos (not 0) · and the `setnaprod` shop is `verified` and no
-> longer hidden.** Still true: 0 orders ever, 0 fee charges. 🔑 **"Nothing is live to a stranger"
+> longer hidden.** ~~Still true: 0 orders ever, 0 fee charges.~~
+> 🛑 **"0 ORDERS EVER" IS NOW FALSE TOO — CORRECTED 2026-08-29. MONEY MOVES.** Six bills exist and
+> **FOUR ARE PAID AND RECEIPTED**: ₱2,499 · ₱2,899 · ₱147 · ₱49, three by GCash and one by BDO,
+> every one with a payment screenshot attached, hand-matched by an admin, and issuing a receipt.
+> The most recent completed **2026-08-29**. The customer payment path is PROVEN end to end — stop
+> describing it as untested. **0 fee charges is still true** (the booking fee is switched off).
+> 🔑 **"Nothing is live to a stranger"
 > is the claim that decays first, and it is the one people lean on to call a change risk-free.**
 > ~~**Verified prod, 2026-08-07:** 5 events · 2 vendors, **both hidden** · **0** photos ·
 > **0** fee charges · **0** livestream channels. **Nothing is live to a stranger.**

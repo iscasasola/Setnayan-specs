@@ -167,6 +167,15 @@ one of his own locks.
 
 **Reference, when you need it:**
 
+- [`SETNAYAN_WHAT_THE_APP_OFFERS_2026-08-29.md`](SETNAYAN_WHAT_THE_APP_OFFERS_2026-08-29.md) — **the
+  whole offer in one place**, read from the code, the live database and the live site: the free
+  layer, every price the catalogue actually charges, the supplier tiers, and § 12 naming what is
+  **not** part of the offer. Read it before writing any customer- or supplier-facing sentence.
+- [`WHATS_NEXT_Completion_SESSIONS_2026-08-29.md`](WHATS_NEXT_Completion_SESSIONS_2026-08-29.md) —
+  **what stands between here and a complete website**, beyond the Papic stream above: ten sessions
+  with model, effort and safe pairs, plus four things that are not builds. ⚠ **It is a SECOND open
+  stream and § 1 of this file has not been updated to say so** — the Papic items are still the
+  ordered queue; these are the gaps found by auditing 47 capabilities on 2026-08-29.
 - [`PAPIC_PAGE_BRIEF_FOR_CHAT_2026-08-29.md`](PAPIC_PAGE_BRIEF_FOR_CHAT_2026-08-29.md) — what may
   and may not be claimed on either Papic surface, plus the design locks and the exact palette
 - [`research/STRATEGY_DOC_CHECKED_AGAINST_THE_CODE_2026-08-29.md`](research/STRATEGY_DOC_CHECKED_AGAINST_THE_CODE_2026-08-29.md)
