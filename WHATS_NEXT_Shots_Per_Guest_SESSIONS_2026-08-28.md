@@ -90,6 +90,34 @@ is precisely the rule the camera's own docblock says it broke. Leave it alone.
 
 ## S2 · The limit becomes real  *(money logic — one atomic PR)*
 
+> ✅ **BUILT 2026-08-30** — migration `20271184624871_papic_shots_per_guest_ceiling.sql`,
+> branch `claude/shots-per-guest-ceiling`, opened as a **DRAFT with no auto-merge** (money
+> logic; the owner looks first). 22 db tests + 4 unit tests, **18 sabotages all RED**, and a
+> `BEGIN…ROLLBACK` dry-run against production in the PR body: the migration applied clean,
+> `papic_event_pool_status` returned byte-identical rows for every event, all three new
+> columns came back `select=true update=true in_events_host=true`, and **the ceiling refused
+> a real capture on an event whose pool applies while the pot sat untouched at 5,050** — the
+> exact condition under which four previous limits on this surface shipped governing nothing.
+>
+> **Three claims in the spec measured FALSE and corrected in it:** two live overloads, not
+> three · a defaulted parameter beside an existing overload raises `42725` **and the route's
+> fallback regex matches that error**, so it would have silently recorded every clip as a
+> photo · `papic_event_pool_status.guest_count` is hard-coded 0 on every grant-driven event,
+> so the equal share would have divided by zero.
+>
+> ⛔ **ONE THING DELIBERATELY NOT BUILT, for the owner:** § 7d's "admit a drained offline
+> capture above the ceiling". The only signal that a POST is a replay is a field the client
+> sets and this RPC is `anon`-callable, so honouring it would put a *skip the ceiling* switch
+> on the public surface — the negation of this session's own title. Shipped closed, with the
+> refusal classified **non-terminal** so the shot waits visibly and lands if the couple
+> raises the number or releases. Owner to choose.
+>
+> ⏳ **S3 is unblocked** — the contract (column names, the two RPCs, the arithmetic) was sent
+> the moment it was stable. `events.papic_guest_spend_ceiling_on` carries one temporary line
+> in `gates-have-handles.baseline.txt`, because the switch necessarily merges one PR ahead of
+> the sheet that flips it; that guard's own staleness test deletes the line when S3 lands.
+
+
 Spec §§ 2–5. Storage, the stored per-capture cost, the gate, and the release.
 
 - **Storage:** the per-guest allotments (mirror `papic_seat_allocations`' shape), the on/off switch,

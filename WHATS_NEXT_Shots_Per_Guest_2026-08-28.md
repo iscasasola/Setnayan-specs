@@ -124,9 +124,24 @@ excess = (P − A) − share × (G − n)      -- tier 3, open to all
 ceiling(guest) = allotment(guest)  OR  share
 ```
 
-✅ **`papic_event_pool_status` already computes `guest_count`, `total_points`, `used_points`,
-`remaining_points` and `soft_stop_at` in one call** (`20271131476413_papic_host_hands_out_shots_to_a_camera.sql:129`).
-The equal share is one division on numbers the spend path already has in hand.
+✅ **`papic_event_pool_status` already computes `total_points`, `used_points`,
+`remaining_points` and `soft_stop_at` in one call** (`20271131476413_papic_host_hands_out_shots_to_a_camera.sql`).
+
+🔴 **CORRECTED 2026-08-30, MEASURED AGAINST PRODUCTION — `G` IS NOT `guest_count`.** That
+column is populated **only on the flat-pass branch**; on a grant-driven event it returns a
+hard-coded `0`. Every celebration is grant-driven (a 50-credit free grant is armed at
+creation), so `FLOOR((P − A) / (G − n))` as written above **divides by zero on every event
+this feature would ever run on.** S2 therefore extracted the headcount into
+`public.papic_event_guest_headcount(event_id)` — `GREATEST(final_pax, estimated_pax,
+non-declined guests)`, lifted verbatim out of `papic_event_pool_status`, which now calls
+it — so the pot's size and a guest's share divide by the same number rather than two copies
+of one expression. **`G = papic_event_guest_headcount(event_id)`, never `guest_count`.**
+
+⚖ **And the derived share is floored at 1.** A 200-guest celebration holding only the free
+50 divides to a share of zero, and a ceiling of zero would refuse every guest their FIRST
+photograph — with copy that says they have spent an allowance they never had. The pot is
+the money gate; this is a fairness rule between guests and must never be the thing that
+stops the party.
 
 🔴 **DERIVE AT SPEND TIME — NEVER STAMP A SHARE ON A GUEST.** Both inputs move: the couple tops
 up (P grows) and guests keep accepting (G grows). A stamped share is stale the moment either
@@ -156,11 +171,26 @@ bypassable by exactly that caller.** Only what is inside this function binds.
 
 **Four rules the implementation must obey, each from a defect already paid for:**
 
-1. **`CREATE OR REPLACE` the newest body. Do NOT add an overload.**
-   Three live overloads already exist (2-arg · 3-arg · 6-arg) and the route carries a
-   signature-fallback ladder keyed on error-message regexes (`route.ts:512-524`). A fourth can
-   make the newest call ambiguous. *"A NEW NAME, not an extra parameter"* — `20271131963489`.
-   ⚠ And a ceiling added only to a new signature is **silently skipped by that fallback ladder**.
+1. **One function, one gate — and the count in this line was wrong.**
+   🔴 **CORRECTED 2026-08-30, read out of production:** there are **TWO** live overloads
+   (2-arg and 6-arg), not three. The 3-arg exists in the repo's migrations and is **not
+   applied in prod**.
+
+   The instinct behind this rule was right and the mechanism was worse than described.
+   Storing what a capture cost needs the cost passed in, and in PostgreSQL a new parameter —
+   **even a defaulted one** — is a NEW FUNCTION. **Probed in a rolled-back transaction
+   against prod before a line was written:** with two candidates both matching, a named call
+   fails **`42725 function … is not unique`** — and the route's fallback ladder is keyed on
+   the regex `/function .*papic_record_guest_capture/`, which **matches that error**. So a
+   fourth overload would not merely have been "ambiguous": every live guest capture would
+   have failed, the ladder would have caught its own error, retried the 2-arg shape, and
+   **recorded every clip as a photo with no duration and no poster.** Silent data loss.
+
+   ⇒ **S2 DROPS all three signatures and CREATES one 7-argument function** (migration
+   `20271184624871`). An old deploy still calling with six named arguments lands on it with
+   `p_points_cost` defaulted, which is exactly the rollout behaviour wanted; the 2-arg shape
+   had been unreachable for as long as the 6-arg existed, so nothing could depend on it.
+   A migration assertion refuses to apply if more than one overload survives.
 2. **Never take the ceiling from the caller.** `papic_reserve_camera_capture` was closed for
    exactly this — `p_limit IS NULL ⇒ unconditional TRUE` (`20271114597183:31-33`). The function
    **reads the couple's number from a table itself.**
@@ -222,6 +252,23 @@ gets this right; keep it.
 **A new column on `public.events`** — every couple-set per-event Papic choice already lives there
 (`papic_window_start/end`, `papic_style`, `papic_uploads_open`, `papic_guest_capture_early`,
 `face_tagging_declined_by_couple`).
+
+✅ **BUILT 2026-08-30 (migration `20271184624871`) — the names, so nothing else has to guess:**
+
+| Object | What it holds |
+|---|---|
+| `events.papic_guest_spend_ceiling_on` | the switch · `BOOLEAN NOT NULL DEFAULT FALSE` |
+| `events.papic_guest_spend_ceiling_points` | the "everyone else" number · NULL = derive the share · `CHECK (> 0)` |
+| `events.papic_guest_spend_ceiling_released_at` | the couple's "open the rest to everyone" stamp |
+| `papic_guest_spend_ceilings` | tier 1 — one row per NAMED guest (`guest_id` PK, `ceiling_points`) |
+| `papic_guest_captures.points_cost` | what a capture was charged, written at write time |
+| `papic_guest_spend_ceiling(guest)` | **the ONE resolver** — NULL means nothing binds |
+| `papic_set_guest_spend_ceiling(...)` · `papic_set_guest_spend_ceiling_release(...)` | the two writes, both TARGET-not-delta |
+
+⚠ **THE NAMES ARE LONG ON PURPOSE.** `papic_event_pool_config.points_per_guest` (default
+150) is already shipped and means the opposite thing — credits the pot **GAINS** per head,
+not credits a guest may **SPEND**. Naming this `points_per_guest` would have been one rule
+written twice under one name, which is the disease this whole build exists to cure.
 
 🚨 **A NEW COLUMN ON `events` IS NOT DONE WHEN IT EXISTS.** That table revokes table-level SELECT
 and re-grants a per-column allowlist, so a column with no `GRANT SELECT (col)` makes PostgREST
