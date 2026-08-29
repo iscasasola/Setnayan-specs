@@ -65,6 +65,17 @@ committed docs on purpose.
 
 ## 🚦 ACTIVE WORK — READ THIS BEFORE ANYTHING ELSE (updated 2026-08-01)
 
+> # 🧭 COLD START? READ **[`START_HERE_WHATS_NEXT_2026-08-29.md`](START_HERE_WHATS_NEXT_2026-08-29.md)** FIRST.
+> **SIX blocks below are headed `▶ ACTIVE`. Only ONE is open work** — Papic items 3–7. The other
+> five are finished streams or standing rules that never had the label struck: the supplier's room
+> (its Answers Desk shipped as PR #4917), the Papic media library (nine PRs shipped), and three
+> that were never work streams at all but LESSONS — *a rejected query is not a thrown error*
+> (6 PRs merged), *Papic timing* (three locked numbers), and *TIME* (shipped in #4095 · #4098 ·
+> #4101 · #4105).
+> 🔑 **Six competing ACTIVE labels is exactly how a fresh session rebuilds something that already
+> ships — the owner's stated number-one complaint. If you finish a stream, strike its label in the
+> same commit.**
+
 > ### ▶ ACTIVE 2026-08-29 — PAPIC: THE BUILD ORDER. **REGISTER:**
 > **[`WHATS_NEXT_Papic_Build_Order_2026-08-29.md`](WHATS_NEXT_Papic_Build_Order_2026-08-29.md)** —
 > seven items, ordered, **nothing on it awaiting an owner decision.** Prompts for items 1–2:
