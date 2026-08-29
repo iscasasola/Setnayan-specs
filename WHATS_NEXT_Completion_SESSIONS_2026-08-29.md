@@ -31,6 +31,7 @@ looks — the product is already substantially complete. Only **two** sessions a
 | **C7** | The public copy stops being wedding-only | **Opus 5** | **medium** | after C6 |
 | **C8** | Notifications finally have a subscriber | **Sonnet 5** | **medium** | any time |
 | **C9** | Four small promises we do not keep | **Sonnet 5** | **medium** | any time |
+| 🆕 **C11** | The keepsake page stops having a section that can never fill | **Sonnet 5** | **medium** | any time |
 | **P3** | The supplier journey proven end to end | — | — | **NOT A BUILD.** Run one real celebration. **After C1–C3.** |
 
 🛑 **NEVER MORE THAN TWO SESSIONS AT ONCE.** Ten parallel builds once shipped 44 defects.
@@ -491,6 +492,52 @@ Four unrelated small fixes, safe to run alongside anything.
    that way. Do not "fix" it to match a stale note; read it first.
 
 PROVE IT: each of the four separately, with the occurrence count before → after.
+```
+
+---
+
+### 🆕 C11 — the keepsake page stops having a section that can never fill · Sonnet 5 · medium
+
+> **ADDED 2026-08-30.** Found by the C10 session and **independently re-verified here** before it
+> was written down. It is the seventh instance of this project's most recurring shape: **a read
+> with no writer.**
+
+```
+The couple's post-event editorial page renders a "Live Photo Wall" section from
+events.photo_wall_photos. That column has NO WRITER ANYWHERE in apps/web.
+
+MEASURED 2026-08-30 — every occurrence of `photo_wall_photos` outside tests:
+  · app/[slug]/_components/editorial/data.ts       — SELECTED (twice) and resolved to display URLs
+  · app/[slug]/_components/editorial/editorial-content.tsx — a docblock describing the section
+  · lib/event-media-sweep.ts                        — listed in EVENT_JSON_COLUMNS, i.e. DELETED on wipe
+  · lib/security/events-column-privileges.ts        — in the column allowlist
+Reads, a comment, a delete and a grant. NOT ONE WRITE.
+
+So the section is structurally empty on every celebration, forever, and will look to a
+couple like a feature that is broken rather than one nobody filled.
+
+⚠ DO NOT CONFUSE IT WITH THE LIVE WALL. They are two different walls and conflating them
+is what made an earlier correction wrong:
+  · The LIVE wall (LiveWallBlock, on /[slug] and /[slug]/hub during the event) is FINE —
+    ingestToWall is called from BOTH capture paths and it fills automatically once a photo
+    clears screening. Nothing "picks" for it because nothing is meant to. DO NOT TOUCH IT.
+  · This item is ONLY the STATIC editorial recap section on the after-the-day page.
+
+TWO HONEST OPTIONS — the choice is the owner's, so surface it, do not pick silently:
+  (a) BUILD THE WRITER — let the couple choose the photographs that go into their keepsake
+      page, which is what the section was clearly designed for.
+  (b) REMOVE THE SECTION and read the live wall's own screened feed instead, so the recap
+      shows the day's photos with nobody curating.
+
+⚠ A NEW COLUMN OR A CHANGED READ ON `events` IS NOT DONE WHEN IT COMPILES. That table
+revokes table-level SELECT and re-grants a per-column allowlist: a column with no
+GRANT SELECT makes PostgREST refuse the WHOLE query, so every user-session read of `events`
+goes silently empty. `photo_wall_photos` is already in the allowlist — keep it there, and if
+you add anything beside it, add the grant in the same migration.
+
+PROVE IT: whichever option is chosen, a celebration with photographs shows something on its
+after-the-day page, and one without shows an honest empty state rather than a broken-looking
+section.
 ```
 
 ---
