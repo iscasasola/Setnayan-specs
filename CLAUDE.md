@@ -77,13 +77,29 @@ committed docs on purpose.
 > unconnected or unsaid: the ninong/ninang + cord/veil/coin/candle roles, the ceremony sequence
 > through to the money dance, offline capture, screening-before-display, and **the live wall being
 > FREE on every event**.
-> 🔴 **ITEM 1 IS LIVE AND HARMING GUESTS — START THERE.** The camera counts down from a hardcoded
-> **150** and **hides its own shutter**, while the database applies **no per-guest limit at all**
+> ✅ **ITEM 1 IS BUILT — PR [#5002](https://github.com/iscasasola/setnayan-platform/pull/5002).
+> Do NOT rebuild it.** ⚠ Verify with `gh pr view 5002 --json state,mergedAt` before trusting this
+> line. **No migration.** The camera counted down from a hardcoded **150** and **hid its own
+> shutter**, while the database applied **no per-guest limit at all**
 > (`v_unlimited := v_unlimited OR COALESCE(v_pool_applies, FALSE)` in `20270920602517`, mirrored in
 > `fetchGuestQuota` on the Unlock half ONLY). The route does **not** pre-check `remaining`, so
 > **the browser was the sole enforcer of a rule nobody chose.**
-> ⚠ **IT WAS BUILT, PROVED (6 assertions · 8/8 mutations red) AND LOST** — the worktree was in
-> `/tmp`, **zero commits ever made**. 🔑 **BUILD BESIDE THE REPO, PUSH THE MOMENT IT TYPECHECKS.**
+> The rule now lives ONCE — `lib/papic-guest-cap.ts`, **one entry per write to `v_unlimited`** — and
+> the guard DERIVES the count from the migration (both `v_unlimited :=` **and**
+> `SELECT … INTO v_unlimited`), so a third condition added in SQL fails until the TypeScript learns
+> it. A personal countdown is drawn only where one is real; **"Unlimited" is retired, because a pot
+> is finite.**
+> 🔑 **AND THE POOL REFUSAL GOT ITS OWN SENTENCE.** `res.status === 409 || json.status ===
+> 'quota_exhausted'` collapsed POOL-EMPTY into the per-guest congratulation in **both** handlers —
+> a guest three photos in was congratulated for a shot that was thrown away while the buy panel
+> opened to sell shots that also could not be taken.
+> 🪤 **A SABOTAGE THAT APPENDS CANNOT BE MEASURED BY ITS OWN NEEDLE COUNT** — the third-SQL-write
+> mutation read **1 → 1** and proved nothing until it was re-measured on the string it actually adds
+> (**1 → 2**). *An occurrence count only measures a sabotage that REPLACES.*
+> 🪤 **`TSC_EXIT=144` WITH AN EMPTY LOG IS TWO CONCURRENT TYPECHECKS**, and a killed one reports
+> **143** while the harness announces the wrapper's exit as **0**. Both were hit in one session.
+> ⚠ It had been **built, proved and lost** once — the worktree was in `/tmp`, **zero commits ever
+> made**. 🔑 **BUILD BESIDE THE REPO, COMMIT BEFORE THE FIRST MUTATION.**
 > ⛔ **The three shots-per-guest decisions are RULED (2026-08-28) — do not re-ask:** the release
 > (a button **plus** an automatic one late in the night, which never opens a NAMED guest's
 > allotment) · the buyer's choice (**both** — keep them, or give them to the room) · a named
@@ -92,7 +108,7 @@ committed docs on purpose.
 > never had a single subscriber.** Ask for it at the QR scan first — that is the best permission
 > moment this product will ever get, and we never ask.
 > ⛔ **DO NOT claim on any page:** a latency figure (nothing measures one) · per-guest limits
-> (unbuilt; and Lense has them — ours is limits **paired with a live wall**) · chapters/the year
+> (unbuilt; and Lense has them — ours is limits **paired with a live wall**) · the year — one pot across several celebrations (⚠ chapters WITHIN one celebration SHIP and may be claimed — corrected 2026-08-29)
 > (unbuilt) · *"the live service closes after six months"* (**nothing closes** — six months is the
 > SHOOTING window). Full list: `PAPIC_PAGE_BRIEF_FOR_CHAT_2026-08-29.md` § 3.
 > ⚖ **The coordinator partner offer is OWNER territory** — and it is how the strongest local rival

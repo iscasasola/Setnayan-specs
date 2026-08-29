@@ -19,8 +19,8 @@ awaiting a decision. Registered in WHATS_NEXT_INDEX.md and in the corpus CLAUDE.
 
 | # | What | Size | State |
 |---|---|---|---|
-| **1** | The browser stops enforcing a limit that does not exist | days | **live defect · start here** |
-| **2** | Say what is already true, on the promotion page | days | drawn, waiting |
+| **1** | The browser stops enforcing a limit that does not exist | days | ✅ **DONE** — PR [#5002](https://github.com/iscasasola/setnayan-platform/pull/5002) |
+| **2** | Say what is already true, on the promotion page | days | ✅ **DONE** — page shipped 2026-08-29, guard PR #TBD |
 | **3** | Shots per guest (+ sponsors default to a bigger share) | several sessions | ruled, spec written |
 | **4** | Timed challenges reach the wall | 1 session | ruled |
 | **5** | Challenges hang on the ceremony sequence | small | — |
@@ -33,7 +33,27 @@ Bisaya · civil weddings · the coordinator partner offer (**owner territory, no
 
 ---
 
-## 1 · The browser stops enforcing a limit that does not exist — **START HERE**
+## 1 · The browser stops enforcing a limit that does not exist — ✅ **BUILT 2026-08-29**
+
+> ✅ **DONE — PR [#5002](https://github.com/iscasasola/setnayan-platform/pull/5002). Do NOT rebuild
+> it.** ⚠ Verify with `gh pr view 5002 --json state,mergedAt` before trusting this line; this corpus
+> has been wrong about a PR's state five times. **No migration.** The rule now lives once, in
+> `lib/papic-guest-cap.ts`, with **one entry per write to `v_unlimited`** — and the guard
+> `lib/papic-guest-quota-mirrors-sql.test.ts` DERIVES the count from the migration (both
+> `v_unlimited :=` **and** `SELECT … INTO v_unlimited`) rather than restating it, so a third
+> condition added in SQL fails there until the TypeScript learns it too.
+> 🔑 **The pool refusal got its own sentence.** `res.status === 409 || json.status ===
+> 'quota_exhausted'` collapsed POOL-EMPTY into the per-guest congratulation in **both** handlers, so
+> a guest three photos in was congratulated for a shot that was thrown away while the buy panel
+> opened to sell shots that also could not be taken.
+> 🪤 **A SABOTAGE THAT APPENDS CANNOT BE MEASURED BY ITS OWN NEEDLE COUNT** — the third-SQL-write
+> mutation read 1 → 1 and proved nothing until it was re-measured on the string it actually adds
+> (`v_unlimited :=` 1 → 2). *An occurrence count only measures a sabotage that REPLACES.*
+> 🪤 **Two concurrent typechecks abort at `TSC_EXIT=144` with an EMPTY log, and a killed one reports
+> 143 while the harness announces the wrapper's exit as 0.** Both were hit in this session.
+> ⛔ `app/papic/decorate` looks like the same bug and is NOT — it keys on the refusal's STATUS rather
+> than the bare 409, which is the rule the camera broke. Left alone, deliberately.
+
 
 **Full spec: [`WHATS_NEXT_Shots_Per_Guest_2026-08-28.md`](WHATS_NEXT_Shots_Per_Guest_2026-08-28.md) § 1.
 Session detail: [`WHATS_NEXT_Shots_Per_Guest_SESSIONS_2026-08-28.md`](WHATS_NEXT_Shots_Per_Guest_SESSIONS_2026-08-28.md) S1.**
@@ -53,6 +73,28 @@ proved. **Build beside the repo, and push the moment it typechecks.**
 ---
 
 ## 2 · Say what is already true
+
+> ✅ **DONE 2026-08-29 — do NOT rebuild any of it, and do not re-run the item-2 prompt as written.**
+> 🔑 **THE PAGE HALF WAS ALREADY SHIPPED WHEN THIS ROW WAS WRITTEN.** This file said *"drawn,
+> waiting"* at 15:59; measured against `origin/main`, the whole page half had merged hours
+> earlier (`3fc9f54d9` → `b782d91e7`, last commit 15:13). **The sixteen-row price wall is
+> already a `+`/`−` dial showing ONE rung · the cost block already has a heading · "Two ways to
+> run it" already sits above it · and all nine facts below are already on the page**, including
+> the free floor in three places and the free live wall. *A planning doc written the same
+> afternoon is not evidence — grep the object.*
+> ✅ **WHAT WAS ACTUALLY MISSING WAS THE GUARD, AND IT IS BUILT:**
+> `apps/web/lib/papic-page-says-only-what-is-true.test.ts` — 13 assertions, 16 mutations, all
+> RED. Nine prohibitions from one list (a ninth is one line), each carrying the claim as
+> somebody actually wrote it, so **a pattern that rots fails instead of going quiet**, and each
+> carrying the true near-miss sentences it must NOT fire on. Plus the three structural repairs
+> pinned: the wall cannot come back, the cost heading stays, and the headline keeps no eyebrow
+> and no explaining line.
+> 🛑 **ONE PROHIBITION IN THE BRIEF WAS TOO WIDE AND IS CORRECTED: "chapters" SHIPS.**
+> `lib/papic-chapters.ts` derives a chapter from `captured_at`, stores nothing, and is rendered
+> by the guest gallery and the pool grid. **The year — linking two celebrations — is what is
+> unbuilt.** The chapters line is pinned as still-sayable so nobody deletes a true claim.
+> ⏭ **STILL OWED, and it is the owner's:** nobody has looked at the new page on a real phone.
+
 
 **Drawn and waiting: [`prototypes/papic_promotion_page_2026-08-28.html`](prototypes/papic_promotion_page_2026-08-28.html).**
 **Brief for whoever writes it: [`PAPIC_PAGE_BRIEF_FOR_CHAT_2026-08-29.md`](PAPIC_PAGE_BRIEF_FOR_CHAT_2026-08-29.md).**

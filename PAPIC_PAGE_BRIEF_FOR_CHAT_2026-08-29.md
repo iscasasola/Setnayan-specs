@@ -90,7 +90,7 @@ seconds.**
 |---|---|
 | **Any speed or latency number** — "0.4 seconds", "1.4s", "the only published latency figure" | Nothing in the product measures this. An invented number becomes a number a competitor tests. |
 | **"Hand every guest a camera that holds twelve shots"** — or any per-guest limit | **Not built yet.** It is being built now; the page may claim it only after it ships. |
-| **Chapters / the whole year / engagement-to-wedding / a reel cut from the year** | **Not built.** Nothing links two celebrations. |
+| **The whole year / engagement-to-wedding / one pot of credits across several celebrations / a reel cut from the year** | **Not built.** Nothing in the code links two celebrations, and the credit pot is per-celebration by construction. ⚠ **CORRECTED 2026-08-29 — this row used to ban "chapters" as well, and that was too wide.** A gallery reading in CHAPTERS **within one celebration ships**: `lib/papic-chapters.ts` derives a chapter from `captured_at` with nothing stored, and the guest's own gallery and the pool grid render it. **Chapters may be claimed; the year may not.** The line is pinned as still-sayable in `papic-page-says-only-what-is-true.test.ts`, so it cannot be tidied off the page by a reader acting on the old wording. |
 | **"The live service closes after six months"** | Nothing closes. The six months is how long you may SHOOT for, not how long we keep anything. **Never turn our shooting window into an expiry date** — being the one without an expiry is our best line. |
 | **Prices in dollars, or any second currency** | Pesos only. |
 | **A separate address like `papic.setnayan.com`** | No such thing, deliberately. It contradicts our own argument that Papic is not a separate site. |
