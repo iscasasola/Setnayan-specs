@@ -1,6 +1,34 @@
 # WHATS_NEXT_INDEX — master compilation for the "run all what's-next" session (2026-07-18)
 
 
+> ### ▶ ACTIVE 2026-08-29 — PAPIC: THE BUILD ORDER, SEVEN ITEMS, NO DECISIONS LEFT
+> **Register: [`WHATS_NEXT_Papic_Build_Order_2026-08-29.md`](WHATS_NEXT_Papic_Build_Order_2026-08-29.md)**
+> · prompts for items 1–2: [`WHATS_NEXT_Papic_Items_1_2_PROMPTS_2026-08-29.md`](WHATS_NEXT_Papic_Items_1_2_PROMPTS_2026-08-29.md)
+> · the shots-per-guest spec + sessions: the two `WHATS_NEXT_Shots_Per_Guest_*` files
+> · what may and may not be claimed on either Papic surface:
+> [`PAPIC_PAGE_BRIEF_FOR_CHAT_2026-08-29.md`](PAPIC_PAGE_BRIEF_FOR_CHAT_2026-08-29.md)
+> · position analysis + competitor research: `research/`.
+>
+> 🔑 **PAPIC DOES NOT HAVE A FEATURE PROBLEM.** Five times in one week something the market calls
+> *"nobody has this"* turned out already built here and simply **not connected, or never said out
+> loud** — the Filipino sponsor roles, the ceremony sequence, offline capture, screening before
+> display, and the live wall being free. **Items 2–6 are wiring and sentences. Only item 7 is
+> construction.**
+>
+> 🔴 **ITEM 1 IS A LIVE DEFECT AND STARTS FIRST.** A guest's camera counts down from a hardcoded
+> 150 and **hides its own shutter**, on every celebration, where the database applies **no
+> per-guest limit at all** — one rule written twice and only the SQL copy learned the one-pool
+> model. A guest at a large wedding is locked out of a celebration still holding thousands of
+> shots. ⚠ **It was built, proved and LOST** — the worktree was in `/tmp`, zero commits were ever
+> made. **Build beside the repo and push the moment it typechecks.**
+>
+> ⛔ **Do NOT re-ask the three shots-per-guest decisions** (the release · the buyer's choice ·
+> protected allotments) — all ruled 2026-08-28.
+> ⛔ **Do NOT start Messenger** — web push is built, wired to 108 sites and has **never had one
+> subscriber**. Ask at the QR scan first.
+> ⚖ **The coordinator partner offer is OWNER territory**, not engineering — and it is how the
+> strongest local rival actually wins.
+
 > ### ▶ ACTIVE 2026-08-28 — THE SERVICE CARD MAKER: ONE DOOR, TWO ANSWERS
 > **Register: [`WHATS_NEXT_Service_Card_SESSIONS_2026-08-28.md`](WHATS_NEXT_Service_Card_SESSIONS_2026-08-28.md)**
 > · prompts: [`WHATS_NEXT_Service_Card_SESSION_PROMPTS_2026-08-28.md`](WHATS_NEXT_Service_Card_SESSION_PROMPTS_2026-08-28.md)

@@ -65,6 +65,36 @@ committed docs on purpose.
 
 ## 🚦 ACTIVE WORK — READ THIS BEFORE ANYTHING ELSE (updated 2026-08-01)
 
+> ### ▶ ACTIVE 2026-08-29 — PAPIC: THE BUILD ORDER. **REGISTER:**
+> **[`WHATS_NEXT_Papic_Build_Order_2026-08-29.md`](WHATS_NEXT_Papic_Build_Order_2026-08-29.md)** —
+> seven items, ordered, **nothing on it awaiting an owner decision.** Prompts for items 1–2:
+> [`WHATS_NEXT_Papic_Items_1_2_PROMPTS_2026-08-29.md`](WHATS_NEXT_Papic_Items_1_2_PROMPTS_2026-08-29.md).
+> 🔑 **PAPIC DOES NOT HAVE A FEATURE PROBLEM — items 2–6 are WIRING AND SENTENCES.** Five times in
+> one week something the market calls *"nobody has this"* was already built here and merely
+> unconnected or unsaid: the ninong/ninang + cord/veil/coin/candle roles, the ceremony sequence
+> through to the money dance, offline capture, screening-before-display, and **the live wall being
+> FREE on every event**.
+> 🔴 **ITEM 1 IS LIVE AND HARMING GUESTS — START THERE.** The camera counts down from a hardcoded
+> **150** and **hides its own shutter**, while the database applies **no per-guest limit at all**
+> (`v_unlimited := v_unlimited OR COALESCE(v_pool_applies, FALSE)` in `20270920602517`, mirrored in
+> `fetchGuestQuota` on the Unlock half ONLY). The route does **not** pre-check `remaining`, so
+> **the browser was the sole enforcer of a rule nobody chose.**
+> ⚠ **IT WAS BUILT, PROVED (6 assertions · 8/8 mutations red) AND LOST** — the worktree was in
+> `/tmp`, **zero commits ever made**. 🔑 **BUILD BESIDE THE REPO, PUSH THE MOMENT IT TYPECHECKS.**
+> ⛔ **The three shots-per-guest decisions are RULED (2026-08-28) — do not re-ask:** the release
+> (a button **plus** an automatic one late in the night, which never opens a NAMED guest's
+> allotment) · the buyer's choice (**both** — keep them, or give them to the room) · a named
+> guest's shots stay hers.
+> ⛔ **DO NOT START MESSENGER.** Web push is **built, mounted, wired to 108 emit sites and has
+> never had a single subscriber.** Ask for it at the QR scan first — that is the best permission
+> moment this product will ever get, and we never ask.
+> ⛔ **DO NOT claim on any page:** a latency figure (nothing measures one) · per-guest limits
+> (unbuilt; and Lense has them — ours is limits **paired with a live wall**) · chapters/the year
+> (unbuilt) · *"the live service closes after six months"* (**nothing closes** — six months is the
+> SHOOTING window). Full list: `PAPIC_PAGE_BRIEF_FOR_CHAT_2026-08-29.md` § 3.
+> ⚖ **The coordinator partner offer is OWNER territory** — and it is how the strongest local rival
+> actually wins.
+
 > ### ▶ ACTIVE 2026-08-27 — THE SUPPLIER'S ROOM IS BUILDING. **SESSION REGISTER:**
 > **[`WHATS_NEXT_Suppliers_Room_SESSIONS_2026-08-27.md`](WHATS_NEXT_Suppliers_Room_SESSIONS_2026-08-27.md)**
 > — six sessions with their model and effort, the safe pairs, and the two pairs that must never run
