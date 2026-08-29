@@ -48,10 +48,13 @@ trade-offs, or reversing an owner lock.
 When the owner says **"what's next"** (or *whats next* / *what next*), that is a standing
 instruction to **pick up all unfinished work**:
 
-1. Open **[`WHATS_NEXT_INDEX.md`](WHATS_NEXT_INDEX.md)** — the master register of every active
-   handoff, its gates, and its repo/worktree rules. **Read it fully before touching anything.**
-2. Then open the contract for whichever stream you are executing (each row in the register names
-   its own contract file).
+1. 🧭 **Open [`START_HERE_WHATS_NEXT_2026-08-29.md`](START_HERE_WHATS_NEXT_2026-08-29.md) FIRST.**
+   It names **the one open stream** in its first screen, triages the six blocks that claim to be
+   ACTIVE (five are finished or are standing rules), and inlines the verification rules, the house
+   rules and the reply shape — written to work on an account with **no memory files**.
+2. Then the contract it points you at. (The older master register,
+   [`WHATS_NEXT_INDEX.md`](WHATS_NEXT_INDEX.md), is still there for history and for streams the
+   front door does not cover — read it when you need the background, not to decide what to do.)
 3. Obey the register's global safety rules: build up to a gate, stop at it, list it. Never
    auto-flip a prod flag, never `db push` a counsel-gated migration, never make an
    `OWNER_DECISION` yourself.
