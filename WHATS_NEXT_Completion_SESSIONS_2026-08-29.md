@@ -21,7 +21,7 @@ looks — the product is already substantially complete. Only **two** sessions a
 |---|---|---|---|---|
 | **P0-a** | Live Studio can actually start | — | — | **NOT A BUILD.** Owner re-authorises YouTube, then streams for 5 minutes. |
 | **P0-b** | We know which features are switched on | — | — | **NOT A BUILD.** Owner reads the hosting settings. **Do P0-b before C1 and C4.** |
-| **C10** | Our own notes stop being wrong | **Sonnet 5** | **medium** | any time · do it early |
+| ✅ **C10** | Our own notes stop being wrong | **Sonnet 5** | **medium** | **DONE 2026-08-30**, commit `86a2a92` — and it found **twelve**, not eight |
 | **C1** | Your family tree, drawn | **Opus 5** | **high** | after P0-b |
 | **C2** | A venue says what kind of venue it is | **Sonnet 5** | **medium** | any time |
 | **C3** | Photos remember who took them | **Opus 5** | **medium** | any time |
@@ -117,7 +117,36 @@ Working rules for this session, all of which have cost this project real work be
 
 ## 3 · THE SESSION PROMPTS
 
-### C10 — our own notes stop being wrong · Sonnet 5 · medium
+### ✅ C10 — our own notes stop being wrong · Sonnet 5 · medium — **DONE 2026-08-30**
+
+> **SHIPPED as commit `86a2a92`, and it went WIDER than this brief: twelve claims, not eight** —
+> the four extra were found during re-verification itself, **two of which had already drifted again
+> since 2026-08-30 wrote them down.** It also corrected `Pricing.md`, `README.md`,
+> `API_Integration_Checklist.md`, `WHATS_NEXT_INDEX.md` and `WHATS_NEXT_Samahan_2026-08-24.md`,
+> which this brief never named.
+>
+> 🔑 **TWO OF ITS DECISIONS BEAT THE ONES IN THIS BRIEF, AND BOTH ARE WORTH LEARNING FROM.**
+>
+> **1 · The Papic ladder.** This brief said "replace the table with a pointer to the catalog". The
+> shipped fix went further and is correct: it removes the figures **and** documents the mechanism —
+> `lib/papic-anchor-ladder.ts` derives every non-anchor rung from a handful of owner-typed anchor
+> prices, and the admin pricing screen writes the derived prices into the catalog, so the catalog is
+> what is charged and the rung COUNT changes independently of any document. A pointer alone would
+> have gone stale about the shape; this cannot.
+>
+> **2 · The photo wall — and this one refutes item 5 of the brief below.** 🛑 **The original register
+> row was NOT simply wrong, and my correction over-corrected it.** There are **TWO different walls**.
+> The **live** wall does fill automatically from both capture paths, as the brief says. But the
+> **separate static editorial recap section** — `events.photo_wall_photos`, read in
+> `app/[slug]/_components/editorial/data.ts` — has **zero writers anywhere in `apps/web`**, so the
+> couple's post-event page genuinely will never show anything there. That is a real dead column and
+> it is exactly what the original row described.
+>
+> ⚠ **THE LESSON, WHICH THIS FILE ALREADY WARNED ABOUT AND THEN COMMITTED ANYWAY:** *a correction
+> pass that over-corrects is its own defect.* Item 5 below is left standing, unedited, as the
+> evidence — read it against the refutation above before trusting any other item in this brief.
+
+### The original brief, kept for the record
 
 ```
 Correct eight claims in this project's own documents that were measured FALSE on 2026-08-29. This

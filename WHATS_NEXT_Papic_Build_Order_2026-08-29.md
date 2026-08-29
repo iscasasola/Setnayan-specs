@@ -153,7 +153,19 @@ anyone's · a button and an automatic release late in the night.
 
 ➕ **ONE ADDITION, made here:** **sponsors default to a bigger share.** `lib/event-sponsors.ts`
 already models principal sponsors (ninong/ninang by side, paired), plus cord, veil, coin and
-candle. Nothing acts on it. Defaulting an allotment by role is a small addition **inside work
+candle.
+
+> ⚠ **CORRECTED 2026-08-30 — this row used to say “Nothing acts on it,” and that is FALSE.**
+> `lib/event-sponsors.ts` has **four non-test importers** and a **shipped sponsors dashboard**
+> (`app/dashboard/[eventId]/sponsors/` — `page.tsx`, `actions.ts`, `add-sponsor-modal.tsx`,
+> `pair-target-picker.tsx`). It exports `SponsorTier` (`principal|cord|veil|coin|candle`),
+> `SponsorSide`, `sponsorRoleHonorific()` and `PRINCIPAL_PAIR_DEFAULT = 4`. **The roles are real,
+> user-authored data.** What is true is only that *Papic’s allotment logic* does not read them yet.
+> 🔑 This matters because the wrong sentence sends a session to MODEL data that is already
+> authored — strictly more expensive, and it invents a second source of truth for the roles.
+> Measured on `origin/main` f8e58005f by two independent sessions (oversight + S3).
+
+Defaulting an allotment by role is a small addition **inside work
 already being paid for**, and it collects the "genuinely first, nobody has it" Filipino-roles win
 for free.
 

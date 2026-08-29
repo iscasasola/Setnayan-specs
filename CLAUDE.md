@@ -909,8 +909,11 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 >   no unscreened state can exist · take-down soft, never a rewrite.
 >
 > 🛑 **A FALSE CLAIM I MADE TWICE, CORRECTED HERE: "we have no push notifications."**
-> **PUSH IS BUILT AND MOUNTED** — `PushToggle` on the profile page · `emitNotification` with **61 files ·
-> 108 call sites** (re-measured 2026-08-25) · `/api/notify` sending via `web-push` + VAPID · `push_subscriptions` in prod with
+> **PUSH IS BUILT AND MOUNTED** — `PushToggle` on the profile page · `emitNotification` is called from
+> dozens of files across the app (⚠ **NEVER re-type a count here — it moved from 108/61 to 186/55 in
+> five days (2026-08-25 → 2026-08-30) and moved again by 2026-08-30** [`grep -rln emitNotification
+> apps/web/lib apps/web/app | wc -l` for files, drop `-l` for call sites; both counts rise with every
+> new notification type, so treat any number in this doc as already stale]) · `/api/notify` sending via `web-push` + VAPID · `push_subscriptions` in prod with
 > **0 rows**. So the hourly bell is a **wiring** job plus confirming the VAPID keys in Vercel
 > (**not readable from a session** — the route merely warns and continues). **Do NOT scope a push
 > build.**
@@ -2730,26 +2733,21 @@ When code lands ahead of a spec update, the repo appends a `[PENDING]` line to `
 one shared pot; the host can set some aside for a single camera's QR, where nobody else can spend
 them, and take unspent ones back. **Cameras are free and unlimited.**
 
-**Ladder — a SCROLLABLE list of rungs. 50 free on every event, on top, and every rung repeatable.**
-
-🛑 **THE FIGURES THAT USED TO BE TYPED HERE WERE WRONG — MEASURED AGAINST THE CATALOG 2026-08-29.**
-This block read `100 ₱50 · 200 ₱100 · … · 50,000 ₱10,000` and described the regular price as
-"₱1 = 1 credit". **The shop charges neither.** Read out of `platform_retail_catalog_v2`:
-100 = **₱70** regular / **₱49** at sign-up · 1,000 = **₱700** / **₱490** ·
-3,000 = **₱1,680** / **₱1,176** · 5,000 = **₱2,800** / **₱1,960** · 10,000 = **₱4,500** / **₱3,150** ·
-50,000 = **₱15,000** / **₱10,500** — and there is a **100,000 rung at ₱24,000 / ₱16,800** this block
-never listed at all. The sign-up column is a **30% discount** (`papic_signup_discount_pct`), and the
-per-shot cost falls **₱0.49 → ₱0.17** as the pool grows.
-🔑 **THE LESSON, WHICH IS WORTH MORE THAN THE NUMBERS: this block already said "NEVER re-type
-these" and then re-typed them.** A price written into a document is a promise nothing checks. **DO
-NOT restore a table here.** `platform_retail_catalog_v2` is the source, and
-`papic-rungs-are-fundable.db.test.ts` pins the set; the full read-out as of 2026-08-29 is in
-[`SETNAYAN_WHAT_THE_APP_OFFERS_2026-08-29.md`](SETNAYAN_WHAT_THE_APP_OFFERS_2026-08-29.md) § 3,
-which says on its own face that the catalogue outranks it.
-⚖ **40,000 is deliberately ABSENT:** his first
-table had it at ₱10,000, the same price as 50,000, so nobody could rationally choose it. Surfaced
-rather than silently corrected, and he removed it — *"remove the 40,000"*. **Do not re-add it
-without a price of its own.**
+**Ladder — a SCROLLABLE list of rungs, priced off ₱1 = 1 credit.** The regular price IS the credit
+count; what you pay is a bundle discount off it, deepening as the number grows, plus a deeper
+sign-up-only discount on the same rungs.
+⚠ **NEVER re-type the figures here — they have gone stale before (caught + corrected 2026-08-29,
+this row) and will again.** `platform_retail_catalog_v2` is the ONLY source (`retail_price_php` for
+the regular price, `onboarding_price_php` for the sign-up price, by `service_code` — the
+`PAPIC_GUEST*` rows); `papic-rungs-are-fundable.db.test.ts` pins the live set; the rung count and
+top rung both change independently of this doc (a 100,000-credit rung exists in prod that no
+version of this table ever listed). **Ladder MECHANICS that don't drift with the numbers:**
+`apps/web/lib/papic-anchor-ladder.ts` derives every non-anchor rung from five/six owner-typed anchor
+prices (a step function of per-credit rate); the admin pricing screen writes the derived prices
+straight into the catalog, so the catalog — never this file, never the anchor module's own
+`PAPIC_ANCHORS_DEFAULT` fallback — is what's charged. ⚖ **A rung can be deliberately absent** (the
+owner has removed one before, when a lower rung priced the same as a higher one made it
+irrational to choose) — check the live catalog for the current set, don't assume any prior list.
 🚨 **A rung is THREE places:** the catalog row, the tier row, AND a line in `sku-activation.ts` —
 a sellable rung missing from that map takes the money and grants **zero** shots, silently.
 

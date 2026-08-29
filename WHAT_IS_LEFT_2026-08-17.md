@@ -37,7 +37,7 @@ evidence. Neither is this file.**
 | events | 6 · guests 39 |
 | suppliers | 2, of which **1** is published |
 | photos taken | 14 |
-| **orders ever placed** | **0** |
+| **orders ever placed** | ~~0~~ ⚠ **CORRECTED 2026-08-30 (C10): 6 as of 2026-08-29** — four paid and receipted (₱2,499 GCash · ₱2,899 GCash · ₱147 GCash · ₱49 BDO), each with proof uploaded, hand-matched and a receipt issued; two cancelled. Money moved for the first time on 2026-08-25 and most recently on 2026-08-29 — re-measure before relying on either number. |
 | accounts | 9 |
 | booked suppliers who are Setnayan accounts | **0 of 45** |
 
@@ -95,13 +95,12 @@ that already exists.** That is the paid-twice mistake, in the register whose job
   went on, every booking it made would have been a supplier who is booked and invisible: no
   doorway, no photo credit, no run-of-show notes. Done while it was inert, which was the whole
   point. **The switch itself is still yours and nothing is on until you flip it.**
-- ~~**There is no way to invite an off-platform supplier onto Setnayan**~~ 🛑 **FALSE — CORRECTED
-  2026-08-29.** `createManualVendorInvite` ships and is mounted in
-  `app/dashboard/[eventId]/_components/new-manual-vendor-modal.tsx` — **on the same screen where a
-  couple adds a supplier by hand** — and it mints a claim link that lands on `/claim/[token]`. What
-  is true is that **nobody has ever used it**, which is why 44 of the 45 are still names typed into
-  a list. That is a go-to-market problem, not a build. **§ 6 item 6 is answered by the code and
-  should not be put to the owner as an open decision.**
+- ⚠ **CORRECTED 2026-08-30 (C10):** ~~There is no way to invite an off-platform supplier onto
+  Setnayan~~ — FALSE. `createManualVendorInvite` ships and is mounted in
+  `new-manual-vendor-modal.tsx`, on the same screen where a couple adds a supplier by hand. **What
+  is true, and is still your call, is that nobody has USED it** — so 44 of the 45 remain
+  non-accounts not because the door is missing but because nobody has walked through it. That is
+  **your call (§6), not an engineering task.**
 
 ### Still true, and smaller than I said
 
@@ -139,34 +138,40 @@ carries the six-slice framing and its slices 1 and 2 are the wrong shape.** Corr
 
 **Things that are built but nobody can reach**
 - **The avatar maker does not exist.** Everyone in the 3D room is a randomly-coloured stranger — 0 of 39 guests has a figure.
-- ~~**The photo wall on the couple's own website can never have photos in it** — nothing anywhere picks them. 0 of 6 events.~~
-  🛑 **THIS MISREADS THE DESIGN — CORRECTED 2026-08-29.** `ingestToWall` is called from **BOTH**
-  capture paths — `app/papic/actions.ts` and `app/api/papic/guest-capture/route.ts` — so every shot,
-  crew and guest alike, is pushed onto the wall automatically once it clears screening. **Nothing
-  "picks" them because nothing is meant to.** The wall was empty because 14 photos exist in total,
-  not because a mechanism is missing. 🔑 *An empty surface whose feeder is automatic is a usage
-  fact, not a build gap — trace the WRITER before calling one missing.*
+- ⚠ **RESTATED 2026-08-30 (C10) — THIS ROW WAS CONFLATING TWO DIFFERENT WALLS.** **The LIVE
+  wall (`LiveWallBlock`, mirrored on `/[slug]/hub` and the public site body during the event)
+  MISREADS THE DESIGN as broken: `ingestToWall` is called from BOTH capture paths
+  (`app/papic/actions.ts` and `app/api/papic/guest-capture/route.ts`) and it fills automatically
+  once a photo is screened — nothing "picks" photos for it because nothing is meant to.** ~~But~~
+  **the SEPARATE, STATIC editorial recap section — `events.photo_wall_photos`, read in
+  `app/[slug]/_components/editorial/data.ts` — genuinely IS still what this row originally
+  described: re-checked 2026-08-30, zero writers anywhere in `apps/web` write to that column, so
+  the couple's post-event page will never show anything in that section.** 0 of 6 events reflects a
+  real dead column on the editorial side, not a missing live-wall mechanism.
 - **A supplier still cannot say how many couples may hold the same date.** Permanently stuck at three, no screen.
 - ~~**The "we couldn't load this" screens were built and no page uses them** — 0 consumers.~~ ✅ **FALSE as of 2026-08-19: `ErrorState` has seven real import sites**, including the shared admin console table that fans out across the console. It was adopted on 2026-08-17 — the same day this register was written, which is why it recorded the pre-adoption state. ⚠ **The underlying DISEASE is still real and is the current stream** — a failed load rendering as "there is nothing here" — but it is a per-surface job, NOT "mount the unused primitives". See [`WHATS_NEXT_Silent_Failures_2026-08-19.md`](WHATS_NEXT_Silent_Failures_2026-08-19.md) §2 for the 10 confirmed instances with file:line.
 
 **Small but visible**
-- ~~**A supplier can still only tap six fixed messages** to the coordinator — never a sentence.~~
-  🛑 **FALSE — CORRECTED 2026-08-29.** `stage-note-compose.tsx` renders a real `<textarea>`, capped
-  at `STAGE_NOTE_MAX`, placeholder *"e.g. Hold the toast — the father is still parking."* A
-  supplier can write a sentence. **Do not build this.**
+- ✅ ~~A supplier can still only tap six fixed messages to the coordinator — never a sentence.~~
+  **FIXED — PR #4505, same day this register was written.** `stage-note-compose.tsx` has a real
+  textarea (placeholder *"Hold the toast — the father is still parking"*); `submitDayRequest`
+  already shipped and was filed on the vendor lane, only the coordinator's inbox hadn't mounted the
+  box. Wiring, not authoring. Re-confirmed live 2026-08-30 (C10).
 - **The host cannot see who is holding which camera.** Four say "Claimed", none say a name.
 - **A photographer can only look at their own shots during the wedding day itself.** At midnight the door shuts.
 - **If the band who also emcees was booked as one package, the coordinator's message box lists nobody** — the section silently disappears.
-- ~~The old camera screen still opens with "You have 3 cameras free to test with" above eight slots.~~
-  🛑 **ALREADY FIXED — verified 2026-08-29.** The only surviving occurrences are a code comment and a
-  test docblock, both *describing* the old fix. Nothing renders it.
-- **A brand-new shop is still born saying it only serves ballrooms, gardens and heritage houses** — both live shops still sit on that.
-  ⚠ ~~There is still nowhere for a venue to say what kind of venue it is.~~ **HALF FALSE — CORRECTED
-  2026-08-29.** `vendor_profiles.venue_type` **exists and is READ publicly** — by
-  `app/api/v1/vendor/profile/route.ts` and by the Explore search. Only the **vendor-side write
-  screen** is missing; today just an admin can set it, from `/admin/venues`. So this is one control
-  against a live field, not a feature to design. **Session C2 of
-  [`WHATS_NEXT_Completion_SESSIONS_2026-08-29.md`](WHATS_NEXT_Completion_SESSIONS_2026-08-29.md).**
+- ✅ ~~The old camera screen still opens with "You have 3 cameras free to test with" above eight
+  slots.~~ **ALREADY FIXED — PR #4505, same day this register was written.** The line was narrower
+  than reported: it is gated on the free tier, where the cap genuinely is 3, so it was true as
+  written; it broke because seats arrive by a second path that never removed the top-up. The count
+  is now spoken only when the roster agrees with it. Re-checked live 2026-08-30 (C10): only a
+  comment describing the old fix survives in the file.
+- ⚠ **CORRECTED 2026-08-30 (C10) — HALF FALSE, restated:** ~~There is still nowhere for a venue to
+  say what kind of venue it is~~. `venue_type` exists as a column and IS read by the public vendor
+  profile API and by Explore. What is actually missing is only the **vendor-side WRITE screen** —
+  no dashboard surface lets a venue set its own `venue_type` — which is why **a brand-new shop is
+  still born saying it only serves ballrooms, gardens and heritage houses**: the default, not the
+  absence of the field. That write screen is session **C2**.
 
 **Under the floor**
 - **306 of 383 tables still hand out a read permission nothing uses** — unchanged. No leak today; it means most of the database has one lock instead of two.
