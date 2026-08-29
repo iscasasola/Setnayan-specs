@@ -69,6 +69,9 @@ committed docs on purpose.
 > **[`WHATS_NEXT_Papic_Build_Order_2026-08-29.md`](WHATS_NEXT_Papic_Build_Order_2026-08-29.md)** —
 > seven items, ordered, **nothing on it awaiting an owner decision.** Prompts for items 1–2:
 > [`WHATS_NEXT_Papic_Items_1_2_PROMPTS_2026-08-29.md`](WHATS_NEXT_Papic_Items_1_2_PROMPTS_2026-08-29.md).
+> 🆕 **ITEMS 3–7 RUN ON A DIFFERENT CLAUDE ACCOUNT. Their handoff is SELF-CONTAINED and assumes
+> `~/.claude/.../memory/` DOES NOT EXIST (476 notes do not travel):
+> [`WHATS_NEXT_Papic_Items_3_7_HANDOFF_2026-08-29.md`](WHATS_NEXT_Papic_Items_3_7_HANDOFF_2026-08-29.md).**
 > 🔑 **PAPIC DOES NOT HAVE A FEATURE PROBLEM — items 2–6 are WIRING AND SENTENCES.** Five times in
 > one week something the market calls *"nobody has this"* was already built here and merely
 > unconnected or unsaid: the ninong/ninang + cord/veil/coin/candle roles, the ceremony sequence

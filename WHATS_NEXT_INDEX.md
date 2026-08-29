@@ -4,6 +4,8 @@
 > ### ▶ ACTIVE 2026-08-29 — PAPIC: THE BUILD ORDER, SEVEN ITEMS, NO DECISIONS LEFT
 > **Register: [`WHATS_NEXT_Papic_Build_Order_2026-08-29.md`](WHATS_NEXT_Papic_Build_Order_2026-08-29.md)**
 > · prompts for items 1–2: [`WHATS_NEXT_Papic_Items_1_2_PROMPTS_2026-08-29.md`](WHATS_NEXT_Papic_Items_1_2_PROMPTS_2026-08-29.md)
+> · 🆕 **items 3–7 move to a NEW CLAUDE ACCOUNT — self-contained handoff, assumes NO memory files:**
+> **[`WHATS_NEXT_Papic_Items_3_7_HANDOFF_2026-08-29.md`](WHATS_NEXT_Papic_Items_3_7_HANDOFF_2026-08-29.md)**
 > · the shots-per-guest spec + sessions: the two `WHATS_NEXT_Shots_Per_Guest_*` files
 > · what may and may not be claimed on either Papic surface:
 > [`PAPIC_PAGE_BRIEF_FOR_CHAT_2026-08-29.md`](PAPIC_PAGE_BRIEF_FOR_CHAT_2026-08-29.md)
