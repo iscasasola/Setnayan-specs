@@ -20,7 +20,7 @@ awaiting a decision. Registered in WHATS_NEXT_INDEX.md and in the corpus CLAUDE.
 | # | What | Size | State |
 |---|---|---|---|
 | **1** | The browser stops enforcing a limit that does not exist | days | ✅ **DONE** — PR [#5002](https://github.com/iscasasola/setnayan-platform/pull/5002) |
-| **2** | Say what is already true, on the promotion page | days | ✅ **DONE** — page shipped 2026-08-29, guard PR [#5003](https://github.com/iscasasola/setnayan-platform/pull/5003) |
+| **2** | Say what is already true, on the promotion page | days | ✅ **DONE** — page shipped 2026-08-29, guard PR [#5003](https://github.com/iscasasola/setnayan-platform/pull/5003) MERGED |
 | **3** | Shots per guest (+ sponsors default to a bigger share) | several sessions | ruled, spec written |
 | **4** | Timed challenges reach the wall | 1 session | ruled |
 | **5** | Challenges hang on the ceremony sequence | small | — |
@@ -84,7 +84,9 @@ proved. **Build beside the repo, and push the moment it typechecks.**
 > afternoon is not evidence — grep the object.*
 > ✅ **WHAT WAS ACTUALLY MISSING WAS THE GUARD, AND IT IS BUILT:**
 > `apps/web/lib/papic-page-says-only-what-is-true.test.ts` — PR
-> [#5003](https://github.com/iscasasola/setnayan-platform/pull/5003), auto-merge armed. ⚠ Verify
+> [#5003](https://github.com/iscasasola/setnayan-platform/pull/5003), **MERGED 2026-08-29T12:41Z**
+> — merge `3966c5b76`, verified an ancestor of `origin/main` and the file verified present in that
+> tree, not inferred from the merge. ⚠ Verify
 > with `gh pr view 5003 --json state,mergedAt` before trusting this line. 13 assertions, 16
 > mutations, all
 > RED. Nine prohibitions from one list (a ninth is one line), each carrying the claim as
