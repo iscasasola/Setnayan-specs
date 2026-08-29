@@ -265,9 +265,16 @@ included — verify each claim against the aliases and the editor's gates before
 > # ✅ DONE 2026-08-29 — BOTH BUILDS. DO NOT RUN THIS SESSION AGAIN.
 > **Build 1:** PR [#4985](https://github.com/iscasasola/setnayan-platform/pull/4985) — **MERGED
 > 2026-08-29T05:43Z**, migration `20271180727490`.
-> **Build 2:** PR [#4988](https://github.com/iscasasola/setnayan-platform/pull/4988), migration
-> `20271181420277`. ⚠ Verify each with `gh pr view <n> --json state,mergedAt` before trusting this
-> banner. Full rows: `DECISION_LOG.md` 2026-08-29 (two of them). Drawn first:
+> **Build 2:** PR [#4988](https://github.com/iscasasola/setnayan-platform/pull/4988) — **MERGED
+> 2026-08-29T07:08Z**, migration `20271181420277`, **verified applied in prod BY THE OBJECT**: the
+> paid gate is back in BOTH `papic_create_vendor_challenge` AND `papic_vendor_challenge_photos`
+> through the one shared `vendor_papic_challenge_entitled` (not callable by `authenticated` or
+> `anon`), `guard_vendor_profiles_entitlement` carries the new column AND still carries the
+> self-verification guard — so the near-miss described below did NOT ship — and the catalogue row
+> reads ₱2,500 · `vendor_addon_recurring` · active.
+> **Doc fix:** PR [#4989](https://github.com/iscasasola/setnayan-platform/pull/4989) — merged; the
+> shop-tiers doc no longer says the ceilings are switched off.
+> ⚠ Verify each with `gh pr view <n> --json state,mergedAt` before trusting this banner. Full rows: `DECISION_LOG.md` 2026-08-29 (two of them). Drawn first:
 > [`prototypes/vendor_plan_ceilings_2026-08-29.html`](prototypes/vendor_plan_ceilings_2026-08-29.html).
 >
 > ## ⛔ TWO THINGS THIS PROMPT SAID THAT WERE FALSE — corrected here, at the site that gets read
