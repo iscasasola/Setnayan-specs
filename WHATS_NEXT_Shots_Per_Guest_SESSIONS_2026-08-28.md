@@ -408,6 +408,31 @@ number could never distinguish the case feared from the case hoped for — which
 means it was never evidence. Ask what the check would print if the thing you fear
 were FALSE; if the answer is "the same", you have not measured yet.
 
+**4. 🐚 THE SHELL CAN MANGLE YOUR QUERY AND RETURN A CLEAN NOTHING.** This shell
+is **zsh**, and in `git show "$BRANCH:apps/web/..."` the `:a` is eaten as a zsh
+PATH MODIFIER. The command that actually ran was
+
+    git show '/Users/…/setnayan-platform/origin/claude/papic-credit-estimatepps/web/lib/…'
+
+— note `estimate` + `pps/web/…`, the `:a` consumed and the cwd prefixed. It
+returns "unknown revision or path", which through `2>&1 | wc -c` or a bare
+`| grep` reads as **the file has no matches**. Oversight hit this twice in one
+minute and twice concluded a file lacked a string it plainly contained.
+⇒ **Put the revision in a variable and the PATH in a variable too**
+(`git show "$SHA:$P"`), or use an explicit SHA. Never write a literal path
+starting with `a` directly after `$VAR:`.
+
+⇒ **AND THE GENERAL FORM, WHICH IS THE FIFTH INSTANCE OF ONE FAMILY IN A DAY:**
+truncated output read as a count · a patch that never applied, its silence read
+as evidence · an abbreviated SHA returning `total_count: 0` · a watchdog that
+declared success on an empty check list · and now a shell-mangled path. **Every
+one produced a confident, well-formed NOTHING.**
+🔑 **AN EMPTY RESULT IS A CLAIM ABOUT YOUR INSTRUMENT UNTIL YOU PROVE OTHERWISE.**
+Before believing an absence: confirm the file is readable (byte count), confirm
+the patch landed (occurrence count before → after), confirm the identifier is
+complete, confirm the tool ran at all (elapsed time, `--listFiles`, a positive
+control that MUST match).
+
 ⇒ **THE CHEAP HABIT:** when a check comes back clean and something important rests on it, ask *what
 would this tool report if the thing I fear were true?* If the answer is *“the same,”* you have not
 measured yet.
