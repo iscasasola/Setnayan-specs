@@ -241,7 +241,43 @@ register is not merely at risk of being lost — it is UNSEARCHABLE, so the rule
 do not bind anyone who did not happen to open that file.** That is a sharper argument for
 committing such a file than data-loss is.
 
-## \U0001f6a8 THE ONE RULE THE WHOLE 2026-08-30 SESSION WAS PAYING FOR
+## 🚨 “DO NOT ARM AUTO-MERGE” IS NOT A HOLD ON THIS REPO
+
+**Recorded 2026-08-30, after running a four-PR hold all day on a mechanism I had
+misread.** `.github/workflows/auto-merge.yml` (`auto-enable-automerge`, owner
+2026-06-14) **ARMS AUTO-MERGE ON EVERY NON-DRAFT PR, AUTOMATICALLY.** So telling
+a session *“do not arm auto-merge, I will merge you”* controls nothing: the
+moment it runs `gh pr ready`, the workflow arms the PR and branch protection
+merges it as soon as the checks go green.
+
+That is exactly how S4's #5019 merged — correctly, and with nobody at fault. The
+session confirmed `autoMergeRequest: null` before undrafting, precisely as
+instructed. **Undrafting is what armed it.**
+
+🔑 **THE DRAFT WAS LOAD-BEARING, NOT THE INSTRUCTION.** The hold held for S2, S3
+and S4 only because they were also told to stay drafts. Had any of them undrafted
+on green CI — a reasonable reading of *“undraft when green”* — it would have
+shipped without the overseer ever seeing it.
+
+✅ **THE REAL HOLDS, from the workflow's own comment, in order of safety:**
+1. **Label `do-not-auto-merge`** — PREFERRED, and *the only one that is safe*,
+   because it works **at any time, including on an already-armed PR**: it fires
+   the `disarm-on-hold-label` job, which actually runs `gh pr merge --disable-auto`.
+2. `DO NOT AUTO-MERGE` in the title.
+3. Open as a DRAFT — the workflow skips drafts. **A hold only for as long as
+   nobody undrafts.**
+
+⚠ And that recovery job is NEWER than the comment describing it: before
+2026-08-07, labelling an already-armed PR did nothing — **which is how #4186 and
+#4209 merged while wearing the label.**
+
+⇒ **If a PR genuinely must not ship without a human — money logic, a migration,
+anything irreversible — LABEL IT.** Do not rely on an instruction to a session,
+and do not rely on draft status alone.
+
+---
+
+## 🚨 THE ONE RULE THE WHOLE 2026-08-30 SESSION WAS PAYING FOR
 
 **A SINGLE GREEN MEASUREMENT IS A HYPOTHESIS, NOT A RESULT.** Every expensive moment of that day
 was a tool answering confidently while measuring nothing — and in every case the fix was **a second
@@ -259,7 +295,7 @@ measurement taken a DIFFERENT WAY**, not a more careful look at the first.
 | a green CI run | belonged to a commit older than the push being described | checking the **head SHA** the run belongs to |
 | a local checkout | 2,237 commits behind the branch it claimed to measure | `git merge-base --is-ancestor` against a fetched `origin/main` |
 
-\U0001f511 **THE PATTERN: THE FIRST TOOL AND THE DEFECT SHARE A BLIND SPOT.** A grep cannot see what
+🔑 **THE PATTERN: THE FIRST TOOL AND THE DEFECT SHARE A BLIND SPOT.** A grep cannot see what
 a grep mis-parses; a stripper cannot report the code it deleted; a CI badge cannot know which commit
 you meant. So the confirming measurement must come **from a different mechanism** — a compiler
 instead of a regex, a hash instead of a match, a database instead of a document, a count printed

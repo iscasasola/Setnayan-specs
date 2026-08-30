@@ -116,23 +116,23 @@ everything.
   camera's own credits first and the pot pays the remainder. **Never build a ceiling out of them.**
 
 **Production state, measured 2026-08-28** — and *empty is the plan, not a finding*: ~6 celebrations,
-14 Papic photos, **0 face enrolments**, ~~0 orders that were ever paid~~ (FALSE \u2014 see below), **0 push subscribers**. Almost
+14 Papic photos, **0 face enrolments**, ~~0 orders that were ever paid~~ (FALSE — see below), **0 push subscribers**. Almost
 nothing has been used by a stranger yet. **This is why almost every change below is safe by
 arithmetic** — say so in the PR when it applies.
 
-> \U0001f6a8 **CORRECTED 2026-08-30 \u2014 \u201c0 ORDERS THAT WERE EVER PAID\u201d IS FALSE, AND IT WAS
+> 🚨 **CORRECTED 2026-08-30 — “0 ORDERS THAT WERE EVER PAID” IS FALSE, AND IT WAS
 > BEING REPEATED INTO PR BODIES.** Measured against the live production database, not inferred:
 > `select status::text, count(*), sum(coalesce(confirmed_total_php, requested_total_php, 0)) from public.orders group by status`
-> \u2192 **paid 4 \u00b7 \u20b15,594** \u00b7 **cancelled 2 \u00b7 \u20b1548**, most recent **2026-08-29**. Real money has
-> moved through this system. **\u201cSafe by arithmetic because production is empty\u201d may no longer be
+> → **paid 4 · ₱5,594** · **cancelled 2 · ₱548**, most recent **2026-08-29**. Real money has
+> moved through this system. **“Safe by arithmetic because production is empty” may no longer be
 > used unqualified.**
 >
-> \u2705 **What survives, checked rather than assumed:** the paid rows are 3 \u00d7 `ONBOARDING_SERVICES`
-> (no `event_id`) and 1 \u00d7 `SETNAYAN_AI`. **There is no `PAPIC_UNLOCK` / `PAPIC_UNLOCK_LTD` order in
+> ✅ **What survives, checked rather than assumed:** the paid rows are 3 × `ONBOARDING_SERVICES`
+> (no `event_id`) and 1 × `SETNAYAN_AI`. **There is no `PAPIC_UNLOCK` / `PAPIC_UNLOCK_LTD` order in
 > production at all**, so the pass branch every Papic gate consults still binds on nothing, and the
-> blast-radius arguments for items 3\u20137 hold \u2014 for THAT reason, not for the one above.
+> blast-radius arguments for items 3–7 hold — for THAT reason, not for the one above.
 >
-> \U0001f511 **The line was TRUE when written and rotted within days** \u2014 the first paid order landed
+> 🔑 **The line was TRUE when written and rotted within days** — the first paid order landed
 > after this handoff was authored. **Re-measure; cite the QUERY, never the count.** Repo `CLAUDE.md`
 > rule 7 as of C10b: *an anchor is a string, never a number.*
 
