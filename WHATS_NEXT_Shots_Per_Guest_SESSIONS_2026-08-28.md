@@ -42,7 +42,7 @@ committed. S1 is a re-run of known work, not a rediscovery. What it did, exactly
 | **S3** | The couple names guests and sets the numbers | the Papic control centre | S1 · S2 | — |
 | **S4** | The guest sees their real number, and an honest “no” | the camera + Event Hub | S3 | S1 |
 | **S5** | A guest who buys chooses: keep them, or give them to the room | the buy panel | S3 · S4 | S2 |
-| **S6** | The promotion page may finally say it | `/papic` | anything | — |
+| **S6** | ✅ **BUILT** ([#5024](https://github.com/iscasasola/setnayan-platform/pull/5024)) — the promotion page may finally say it | `/papic` | anything | — |
 
 **Order that matters:** S1 → S2 → S3 → S4 → S6. S5 may land any time after S2.
 ⛔ **S3 must not merge before S2** — *gate the write, not the button*. A control that saves a
@@ -179,7 +179,49 @@ reachable — a flag's default in code is not its value in production.
 
 ---
 
-## S6 · The promotion page
+## S6 · The promotion page  — ✅ **BUILT 2026-08-30, PR [#5024](https://github.com/iscasasola/setnayan-platform/pull/5024)**
+
+**The gate was verified, not assumed.** S6 could not merge until S3 and S4 were SERVING, and they
+are: `#5002 · #5017 · #5014 · #5019` are all ancestors of `0d0b265`, whose Vercel deployment is
+`READY`, `target: production`.
+
+**What shipped is ONE SENTENCE in the existing "Let the whole room shoot" card** — not a section.
+Verbatim: *"You can decide how many credits one guest may spend — name the few who should have
+more, and the rest split what is left evenly. Nothing is carved out, so whatever a guest doesn't
+use is still there for everyone else."* Credits, not shots; no fixed number, because the couple
+picks it.
+
+🔑 **THE SECOND HALF IS TRUE BY CONSTRUCTION, WHICH IS WHY IT IS SAFE TO SELL.** The ceiling is a
+CEILING, NOT A RESERVATION — `20271184624871`'s own header: *"Nothing is carved out of the pot; no
+guest holds a wallet; unspent credits stay shared."* There is no release to wait on and no way for
+the sentence to drift out of true unless the mechanism itself changes. **A marketing claim grounded
+in the mechanism rather than the intent cannot rot.**
+
+📏 **MEASURED AT 375px, BOTH REVISIONS ON ONE SERVER** (Vercel skipped the preview build):
+**10,803px → 10,903px, +100px · +0.9%.** Live `/papic` is 11,133px, so it lands at ~11,233px — down
+from the 12,847px of 2026-08-29, not back toward it. The base section measures **428px both
+locally and in production**, which is what makes the local delta trustworthy.
+
+🚨 **AND THE COPY GUARD CARRIED A FALSE MECHANISM — worth more than the copy.**
+`papic-page-says-only-what-is-true.test.ts` claimed `stillSayable` *"pins the chapters line so a
+later reader cannot tidy a true claim off the page."* **IT DOES NOT.** `stillSayable` asserts a
+pattern does not FIRE on a true sentence; **nothing asserted the sentence was present.** Measured by
+deleting the claim: every `stillSayable` test stayed green, and exactly one test noticed — the new
+one. ⚠ **The chapters line is still unpinned.**
+
+Two prohibitions were rewritten rather than deleted: *"a per-guest shot limit — not built yet"*
+became *"a per-guest number the couple did not choose"* (never print a figure; the sponsor default
+is a PLACEHOLDER, never an allowance), and a tenth was added — claiming we **invented** per-guest
+limits, which a rival ships. Ratchet `>= 9` → `>= 10`.
+
+⚠️ **CROSS-PROGRAMME:** `build-sessions/C7.md`'s do-not-claim list still reads *"per-guest photo
+limits — unbuilt, and a rival has them"*. C7 is unrun and rewrites `HOME_TITLE` and the llms-txt
+prose; its prompt would forbid a claim we now ship. Not edited here — that file sits inside open
+PR #5023.
+
+---
+
+*Original brief, kept because it is what was asked for:*
 
 Spec § 6c. The claim: *decide how many shots each guest gets, and whatever they don't use goes back
 to the room.* ⛔ **No explaining line under the headline** — the kicker/lede were removed by owner
