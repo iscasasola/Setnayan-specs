@@ -208,3 +208,34 @@ moved above it. **That drawing may ship on its own at any time** — it needs no
 7. Changelog fragment in `changelog.d/`, never `CHANGELOG.md` or `STATUS.md` directly.
 8. Auto-merge is the standing default (`gh pr merge <n> --auto --merge`) — **except S2**, which
    moves money logic and should carry its prod dry-run transcript for a look first.
+
+---
+
+## 🚨 TWO TRAPS THIS STREAM PAID FOR, AND THEY ARE THE SAME DISCIPLINE
+
+Added 2026-08-30 by oversight. Both were hit by a session that was measuring carefully at the
+time — that is what makes them worth writing down. Each is **a true observation carrying an
+invented consequence**, which is the exact shape of the migration-prefix belief the code repo's
+`CLAUDE.md` says this project has now paid for twice.
+
+**1. AN ABSENT MECHANISM IS NOT A MISSING MECHANISM UNTIL YOU LOOK WHERE ELSE IT COULD LIVE.**
+S3 observed — correctly — that `lib/supabase/admin.ts` carries no `import 'server-only'` line, and
+concluded it was unprotected: *"672 importers held together by a comment."* FALSE. The protection
+lives in a different file: `apps/web/scripts/lint-server-only-boundary.mjs` names it in
+`EXTRA_BOUNDARY_MODULES`, and that entry's own comment says it *"is what makes that a mechanism
+instead of a sentence."* Somebody had already done the job, and left a note saying so.
+🔑 Caught only because a sabotage expected to prove the pin was load-bearing went red naming
+something else. **Before reporting a missing guard, grep for the property, not for the idiom.**
+
+**2. A GREEN RUN IS NOT *THIS* GREEN RUN UNTIL YOU CHECK THE HEAD IT RAN ON.**
+S3 reported "15/15 green" off a CI run that predated its own most recent push. Re-measured on the
+real head: 10 SUCCESS, 5 still IN_PROGRESS. Nothing was failing — but the report was of a
+different commit than the one being described.
+🔁 **The same session made the same class of error twice in one sitting**, on unrelated
+subjects: first reading a local checkout 2237 commits behind `origin/main`, then reading a CI run
+older than its own commit. **Both are "I reported a reading without re-checking that the thing I
+had since changed was inside it."**
+
+⇒ THE COMBINED RULE: **state what you measured, and state WHEN — a claim without its head SHA or
+its timestamp is a claim about the past wearing the present tense.** This applies to CI, to
+`origin/main`, to production, and to any document in this corpus. Including this one.
