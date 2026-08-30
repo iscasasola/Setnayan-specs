@@ -167,15 +167,51 @@ counter moved. The counter is advisory; the function is the truth. Say so in the
 
 ---
 
-## S5 · The buyer chooses  *(owner 7b)*
+## S5 · The buyer chooses  *(owner 7b)* — ⚙ **GATE HALF BUILT 2026-08-31, PR [#5034](https://github.com/iscasasola/setnayan-platform/pull/5034)** (held DRAFT + `do-not-auto-merge`)
 
 At the moment a guest buys: **keep them for me** (their money, outside the couple's limit) or
 **add them to the celebration** (into the shared pot; they revert to an ordinary share).
-✅ `papic_dedicate_shots` takes a **TARGET, not a delta**, so giving and taking back are the same
-call — this is that call in the pot direction. Nothing new.
+
+🔑 **THE CHOICE WAS ALREADY SHIPPED — WHAT WAS MISSING WAS THE GATE HONOURING IT.**
+`app/papic/_components/papic-buy-shell.tsx` has offered both buttons since 2026-07-29 (*"This
+camera only"* → `one_reload`, *"Everyone's pool"* → `pool_topup`) on both live capture surfaces.
+But `papic_record_guest_capture` metered `SUM(points_cost)` over **every** capture with no
+distinction of funding source, so a NAMED guest who chose *keep them for me* had the shots she
+paid for counted against the couple's number and was refused early — **her own purchase consumed
+by somebody else's limit.** Fixed by migration `20271185324597`, which derives the funding source
+from stored state (`papic_seat_point_usage.points_used`, bounded by the seat grants traceable to
+her own `papic_guest_orders` rows of kind `one_reload`).
+⛔ **Never from the caller.** `papic_record_guest_capture` is anon-callable, so a client-settable
+*"this one is mine"* would be one word past the ceiling entirely.
+
+❌ **CORRECTION 2026-08-31 — THE MECHANISM NAMED BELOW WAS WRONG, IN BOTH HALVES.** The line used
+to read *"✅ `papic_dedicate_shots` takes a TARGET, not a delta … this is that call in the pot
+direction. Nothing new."* Measured against the shipped functions:
+
+- **At purchase, `papic_dedicate_shots` is not involved at all.** The two choices are two
+  different ORDER KINDS, resolved at approval: a `pool_topup` lands a SHARED grant
+  (`papic_event_point_grants.seat_id IS NULL`, via `grantPapicPassPoints`); a `one_reload` lands a
+  SEAT-scoped grant (via `papic_grant_camera_points`). That is what makes *add them to the
+  celebration* mean the pot.
+- **And the "give the unspent part back later" half is NOT buildable that way.**
+  `papic_dedicate_shots` reads and writes `papic_seat_allocations` ONLY — the host's hand-out
+  layer. A guest's purchase is a *grant*, which that function cannot reach: on a camera whose
+  dedicated balance is entirely grants the allocation row is `0`, and the function rejects
+  `p_points < 0` outright. So *"nothing new"* was true for the purchase choice and false for the
+  release. **A buyer-side release of unspent bought credits remains UNBUILT and needs its own
+  primitive.** ⏭ Owner call whether it is wanted at all.
+
 ⚠ **What a camera has already SHOT can never come back.** The buyer's screen must say so.
 ⚠ Verify `NEXT_PUBLIC_PAPIC_GUEST_BUY` in the hosting settings before assuming the buy panel is
-reachable — a flag's default in code is not its value in production.
+reachable — a flag's default in code is not its value in production. *(Verified 2026-08-31: it is
+**ON** in the real Vercel Production environment.)*
+
+⏭ **STILL OPEN ON S5, FOR THE OWNER, NOT ENGINEERING:** credits the **host** hands a guest's
+camera (`papic_seat_allocations`) still count against her ceiling — they are the couple's own pot
+money, and the 2026-08-28 ruling is about *"a guest who **buys** credits"*. A couple who both name
+her at 20 and hand her camera 200 have given two contradictory instructions and the tighter one
+wins. Whether a hand-out should lift her ceiling the way her own purchase does is one predicate
+away, and is his decision.
 
 ---
 
@@ -342,6 +378,35 @@ a grep mis-parses; a stripper cannot report the code it deleted; a CI badge cann
 you meant. So the confirming measurement must come **from a different mechanism** — a compiler
 instead of a regex, a hash instead of a match, a database instead of a document, a count printed
 before and after instead of a pass/fail.
+
+### Two more detectors, 2026-08-31 — both from the replay-ordering session
+
+**1. ONE RUN OF A VARIABLE QUANTITY IS NOT A MEASUREMENT.** That session first
+reported its change cost the test suite *"+29 s (+5.8 %)"*. Re-measured on the
+rebased base it read **+189 s (+40 %)** — and two runs of near-identical code
+differed by **131 s**. Whole-suite wall clock on a laptop is noise with a number
+attached. It republished the **per-replay** figure (~6.0 → ~7.8 s, median of 3
+each) as the reliable one and printed BOTH suite pairs rather than the flattering
+one. ⇒ Before quoting a duration as a cost, run it more than once and see whether
+the spread is smaller than the effect. If it is not, that number is not evidence.
+
+**2. `--listFiles` AS A POSITIVE CONTROL FOR `tsc`.** An empty typecheck log is
+not by itself a clean one — this register already records `TSC_EXIT=134/143/144`
+producing silence. The session added the missing half: `tsc --listFiles` proves
+the compiler actually LOADED the files you changed. Exit code says it did not
+fail; `--listFiles` says it did not skip. ⇒ Use both when a typecheck is the
+evidence for a claim.
+
+🪤 **AND ONE FROM OVERSIGHT, THE SAME DAY, WHICH IS THE WORST-SHAPED OF THE THREE:**
+`gh api actions/runs?head_sha=<ABBREVIATED SHA>` returns a clean `total_count: 0`
+— valid JSON, no error — because GitHub matches `head_sha` EXACTLY and a 9-char
+prefix matches nothing. Oversight used that zero to tell a session its correct
+finding was measured with a bad instrument, and invented a plausible mechanism to
+explain the number its own malformed query had produced. The full 40-char SHA
+returned **6**. ⇒ **A healthy PR would have returned 0 to that query too**, so the
+number could never distinguish the case feared from the case hoped for — which
+means it was never evidence. Ask what the check would print if the thing you fear
+were FALSE; if the answer is "the same", you have not measured yet.
 
 ⇒ **THE CHEAP HABIT:** when a check comes back clean and something important rests on it, ask *what
 would this tool report if the thing I fear were true?* If the answer is *“the same,”* you have not
