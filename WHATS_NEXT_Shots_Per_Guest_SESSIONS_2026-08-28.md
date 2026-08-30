@@ -227,6 +227,25 @@ instead of a sentence."* Somebody had already done the job, and left a note sayi
 🔑 Caught only because a sabotage expected to prove the pin was load-bearing went red naming
 something else. **Before reporting a missing guard, grep for the property, not for the idiom.**
 
+🔄 **IT HAPPENED AGAIN THE SAME DAY, TO OVERSIGHT, AND THE SECOND INSTANCE NAMES THE
+MECHANISM.** Asked whether a rule capped concurrent build sessions, oversight grepped the session
+register, the items 3–7 handoff and the build order, found nothing, and told a session *"there is
+no rule anywhere."* **FALSE.** The rule is real and its recorded price is 44 defects:
+`BUILD_SESSIONS.md:124` — *"Never more than TWO build sessions at once. Ten parallel builds once
+shipped 44 defects"* — scoped to the C-programme, not to this stream, which is why the conclusion
+survived and the premise did not.
+
+🚨 **WHY NO SEARCH COULD HAVE FOUND IT: THE FILE IS UNTRACKED.** `git grep` cannot see it,
+a corpus grep cannot see it, and no session on another machine can see it at all. **An untracked
+register is not merely at risk of being lost — it is UNSEARCHABLE, so the rules inside it silently
+do not bind anyone who did not happen to open that file.** That is a sharper argument for
+committing such a file than data-loss is.
+
+⇒ **SEARCHING MORE PLACES THAN LAST TIME IS NOT SEARCHING EVERYWHERE.** Before concluding *no such
+rule exists*, enumerate what your search CANNOT reach — untracked files, another programme's
+register, a second repo, a machine you are not on — and say so, or say "not in X, Y, Z" instead of
+"nowhere".
+
 **2. A GREEN RUN IS NOT *THIS* GREEN RUN UNTIL YOU CHECK THE HEAD IT RAN ON.**
 S3 reported "15/15 green" off a CI run that predated its own most recent push. Re-measured on the
 real head: 10 SUCCESS, 5 still IN_PROGRESS. Nothing was failing — but the report was of a
