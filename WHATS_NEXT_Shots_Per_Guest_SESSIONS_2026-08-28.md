@@ -241,6 +241,36 @@ register is not merely at risk of being lost — it is UNSEARCHABLE, so the rule
 do not bind anyone who did not happen to open that file.** That is a sharper argument for
 committing such a file than data-loss is.
 
+## \U0001f6a8 THE ONE RULE THE WHOLE 2026-08-30 SESSION WAS PAYING FOR
+
+**A SINGLE GREEN MEASUREMENT IS A HYPOTHESIS, NOT A RESULT.** Every expensive moment of that day
+was a tool answering confidently while measuring nothing — and in every case the fix was **a second
+measurement taken a DIFFERENT WAY**, not a more careful look at the first.
+
+| what reported success | what it was actually doing | what caught it |
+|---|---|---|
+| `noComments` / the shared stripper | blanked 16,218 chars of a file down to 6,430 — six guards asserting against nothing | TypeScript's own parser as an oracle over 4,735 files |
+| the phantom-column scanner | went blind to `.select(CONSTANT)` — 74 selects unchecked, reporting green | resolving the constants and re-counting |
+| a mutation that reported **SKIPPED** | the sabotage never landed; read like a working guard | printing the occurrence count **before → after** |
+| a test at 500 credits | right answer and wrong answer both rounded to 505 | re-running with the values **pulled apart** (1,000, differing by 55) |
+| `TSC_EXIT=134` / `144`, empty log | heap exhaustion and killed processes, indistinguishable from a clean pass | printing the **exit code beside** the error count |
+| *“0 orders that were ever paid”* | true when written, false within two days, repeated three times | `select count(*)` against production |
+| a `grep -c` returning **0** | oversight nearly reported a clobber that never happened | comparing **blob hashes**, which were byte-identical |
+| a green CI run | belonged to a commit older than the push being described | checking the **head SHA** the run belongs to |
+| a local checkout | 2,237 commits behind the branch it claimed to measure | `git merge-base --is-ancestor` against a fetched `origin/main` |
+
+\U0001f511 **THE PATTERN: THE FIRST TOOL AND THE DEFECT SHARE A BLIND SPOT.** A grep cannot see what
+a grep mis-parses; a stripper cannot report the code it deleted; a CI badge cannot know which commit
+you meant. So the confirming measurement must come **from a different mechanism** — a compiler
+instead of a regex, a hash instead of a match, a database instead of a document, a count printed
+before and after instead of a pass/fail.
+
+⇒ **THE CHEAP HABIT:** when a check comes back clean and something important rests on it, ask *what
+would this tool report if the thing I fear were true?* If the answer is *“the same,”* you have not
+measured yet.
+
+---
+
 ⇒ **SEARCHING MORE PLACES THAN LAST TIME IS NOT SEARCHING EVERYWHERE.** Before concluding *no such
 rule exists*, enumerate what your search CANNOT reach — untracked files, another programme's
 register, a second repo, a machine you are not on — and say so, or say "not in X, Y, Z" instead of
