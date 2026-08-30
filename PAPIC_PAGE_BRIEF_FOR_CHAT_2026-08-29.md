@@ -89,7 +89,7 @@ seconds.**
 | Do not say | Why |
 |---|---|
 | **Any speed or latency number** — "0.4 seconds", "1.4s", "the only published latency figure" | Nothing in the product measures this. An invented number becomes a number a competitor tests. |
-| **"Hand every guest a camera that holds twelve shots"** — or any per-guest limit | **Not built yet.** It is being built now; the page may claim it only after it ships. |
+| ~~**"Hand every guest a camera that holds twelve shots"** — or any per-guest limit~~ | ✅ **UNLOCKED 2026-08-30 — IT HAS SHIPPED AND IS SERVING.** PRs #5002 · #5017 · #5014 · #5019, all four ancestors of the deployed commit `0d0b265`, verified against `/api/health` and the live database rather than off the merge. The page MAY now claim it. ⚠ **Say it in CREDITS, not shots** (owner 2026-08-29: only the currency word moved; a photograph is still a shot). ⚠ And claim what actually exists: the couple sets a number per named guest, everyone else splits the remainder equally, the leftover is anyone's, and unused shares open late in the celebration. **Do NOT claim a fixed number like "twelve"** — the couple chooses it. |
 | **The whole year / engagement-to-wedding / one pot of credits across several celebrations / a reel cut from the year** | **Not built.** Nothing in the code links two celebrations, and the credit pot is per-celebration by construction. ⚠ **CORRECTED 2026-08-29 — this row used to ban "chapters" as well, and that was too wide.** A gallery reading in CHAPTERS **within one celebration ships**: `lib/papic-chapters.ts` derives a chapter from `captured_at` with nothing stored, and the guest's own gallery and the pool grid render it. **Chapters may be claimed; the year may not.** The line is pinned as still-sayable in `papic-page-says-only-what-is-true.test.ts`, so it cannot be tidied off the page by a reader acting on the old wording. |
 | **"The live service closes after six months"** | Nothing closes. The six months is how long you may SHOOT for, not how long we keep anything. **Never turn our shooting window into an expiry date** — being the one without an expiry is our best line. |
 | **Prices in dollars, or any second currency** | Pesos only. |
@@ -100,7 +100,7 @@ seconds.**
 | **"Unlimited uploads"** | Never. The shots ladder is the entire price of the product. |
 | **Any claim about a competitor's retention or pricing** | Only with a source and a date we can stand behind. |
 | **"Papic Pool" or "Papic One"** | Retired product names. There is one product: **Papic**. |
-| **Ninongs/ninangs getting bigger allowances** | The roles are modelled but **nothing acts on them yet.** |
+| **Ninongs/ninangs getting bigger allowances** | ⚠ **PARTLY UNLOCKED 2026-08-30 — AND THE PRECISION MATTERS.** This row is no longer simply false: `guest-allotments-choice.tsx` derives each guest's role from real `sponsor_tier` data and opens their box with `suggestedAllotment(role, perHead)` — principal ×3, cord/veil/coin/candle ×2. **But it is a PLACEHOLDER the couple overwrites, not an allowance anybody receives.** The lib's own docblock: *"IT IS ONLY A DEFAULT. Nothing enforces it, nothing re-applies it after the couple has edited a row, and a named guest's saved number always wins."* ⇒ **SAYABLE:** the sheet opens with a bigger suggested number for the sponsors, which the couple can change. ⛔ **NOT SAYABLE:** that ninongs and ninangs GET more, or that the product gives them more. One is a helpful default; the other is a rule we do not have. |
 
 ---
 
