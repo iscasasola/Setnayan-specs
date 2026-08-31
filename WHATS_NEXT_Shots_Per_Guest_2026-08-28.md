@@ -386,11 +386,64 @@ guest buys shots they pick:
 | **Keep them for me** | That guest's own camera | **No.** Their money, their shots — they shoot past the limit. |
 | **Add them to the celebration** | The shared pot | They go back to being an ordinary guest on the equal share. It is a gift to the room. |
 
-✅ **BUILDABLE WITH A SHIPPED PRIMITIVE — nothing new.** `papic_dedicate_shots`
-(`20271131476413`) takes a **TARGET, not a delta**, and its own header says why: *“lowering it IS
-the inverse — there is no second function that could be forgotten, because giving and taking back
-are the same call.”* So “add them to the celebration” is that same call in the pot direction, and
-a buyer who changes their mind later can release the unspent part with it too.
+❌ **CORRECTED 2026-08-31 — THIS SECTION USED TO SAY “BUILDABLE WITH A SHIPPED PRIMITIVE —
+nothing new”, NAMING `papic_dedicate_shots`. THAT WAS FALSE FOR THE RELEASE HALF, AND A SESSION
+BUILT AND SHIPPED THE BUTTON ON IT (PR #5028). IT INCREASED THE GUEST'S BALANCE AND DEBITED THE
+COUPLE'S POT. Removed from production 2026-08-31 by PR #5038.**
+
+Split the two halves, because only one of them was ever true:
+
+- ✅ **THE PURCHASE-TIME CHOICE SHIPS, and needs no new primitive** — but not via
+  `papic_dedicate_shots`, which is not involved at all. The two choices are two different ORDER
+  KINDS resolved at approval: *add them to the celebration* lands a SHARED grant
+  (`papic_event_point_grants.seat_id IS NULL`, via `grantPapicPassPoints`); *keep them for me*
+  lands a SEAT-scoped grant (via `papic_grant_camera_points`).
+- ❌ **“A buyer who changes their mind later can release the unspent part” IS NOT BUILDABLE THAT
+  WAY.** `papic_dedicate_shots` reads and writes `papic_seat_allocations` ONLY — the HOST's
+  hand-out layer. A guest's purchase is a **grant**, which that function cannot reach: on a camera
+  whose dedicated balance is entirely grants the allocation row is `0`, so a target of *her spend*
+  is a POSITIVE delta and the function runs its **giving** branch. Measured on the replayed
+  migrations (pot 3,000 · bought 137 · shot 41): her balance went **137 → 178** and the shared pot
+  **3,050 → 3,009**, while the button read *“Give 96 to the celebration”*. Passing a negative is
+  refused outright (`p_points < 0`), so there is no way in.
+
+🔑 **WHY THIS LINE IS DANGEROUS AND WAS WRITTEN TWICE.** `papic_dedicate_shots`' own header
+genuinely says *“lowering it IS the inverse … giving and taking back are the same call.”* That
+sentence is TRUE — **about allocations**. Carrying it across to grants is the whole defect. A
+primitive's docblock describes the column it owns, not every column that looks like it.
+
+✅ **THE OWNER SAID YES ON 2026-08-31, AND IT IS BUILT.** Asked plainly whether he wanted a
+buyer-side give-back at all — the question the correction above had parked — he answered *"oh
+sounds nice. yes allow that."* Built the same day on its own primitive, migration
+`20271185813837`:
+
+- **`papic_seat_grant_releases`** — a third mutable layer, one row per camera, cumulative credits
+  given back. Composed by the same two read functions that already compose the hand-out layer, so
+  every gate, meter and capture path follows for free:
+  `dedicated = seat grants + allocation − RELEASED` and
+  `pot = shared grants − allocations + RELEASES`.
+- **`papic_seat_releasable_grants`** — ONE expression, TWO readers. The panel displays it and
+  `papic_release_seat_grants` re-evaluates it under its row lock. 🔑 **That gap is exactly where
+  #5028 died** (page said 96, call moved 41 the other way), so a migration assertion now fails if
+  the mover ever stops reading it.
+- **`papic_release_seat_grants`** — takes **NO amount**. Not in the form, not in the action, not in
+  the signature. A stale page, a double-tap and a hostile POST have no number to name; a second
+  press returns 0 by construction rather than by a guard somebody has to remember.
+
+⛔ **`papic_event_point_grants` IS STILL NEVER TOUCHED.** It is the append-only money record an
+admin reconciles orders against, and `papic_guest_self_funded_spend` reads it to decide what is
+exempt from the couple's ceiling — shrinking it would retroactively shrink the exemption for shots
+she had already legitimately taken with her own money.
+
+⚠ **TWO CEILINGS ON WHAT CAN MOVE, both load-bearing:** only her OWN un-released bought credits
+(what the HOST handed her camera is the couple's money and comes back via `papic_dedicate_shots`),
+and never below what the camera has already SHOT. So the number is **not** `dedicated − spent`, and
+any surface computing it that way is failing a guard on purpose.
+
+`releasesContract` — written in PR #5038 *before* any implementation existed, so the bar was not
+set by whoever built the function — now lives in
+`apps/web/tests/db/papic-release-contract.ts` and passes against the real primitive.
+
 ⚠ **What can never come back is what the camera already SHOT** — the floor on any target is that
 camera's own spend, and the refusal is explicit rather than a silent clamp. The buyer's screen
 must say so.

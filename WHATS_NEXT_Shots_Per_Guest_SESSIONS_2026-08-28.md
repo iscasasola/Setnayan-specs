@@ -201,6 +201,25 @@ direction. Nothing new."* Measured against the shipped functions:
   release. **A buyer-side release of unspent bought credits remains UNBUILT and needs its own
   primitive.** ⏭ Owner call whether it is wanted at all.
 
+🔴 **AND IT WAS NOT MERELY UNBUILT — IT WAS BUILT WRONG, SHIPPED, AND WENT LIVE.** PR
+[#5028](https://github.com/iscasasola/setnayan-platform/pull/5028) (merged 2026-08-31) added the
+guest-facing *"Give the unused N to the celebration"* button on `papic_dedicate_shots`, from the
+§ 7b line above **before** it was corrected. Reachable by real guests —
+`NEXT_PUBLIC_PAPIC_GUEST_BUY` is ON in production. Measured: her balance **137 → 178** (+ her own
+spend) and the couple's shared pot **3,050 → 3,009** (− the same), while the button offered 96.
+**Removed 2026-08-31 by PR #5038**, which also lands the two guards that keep it removed.
+✅ **AND THEN REBUILT THE SAME DAY, CORRECTLY, BECAUSE THE OWNER ASKED FOR IT.** Shown what the
+feature actually was, he said *"oh sounds nice. yes allow that."* — so the open call above is
+CLOSED. Migration `20271185813837` adds `papic_seat_grant_releases` (a third composed layer),
+`papic_seat_releasable_grants` (ONE expression, displayed by the panel and re-evaluated by the
+mover under its row lock) and `papic_release_seat_grants` (takes NO amount). Details in § 7b of the
+main doc. The removal PR's guard was **re-aimed, not relaxed** — two of its three tests asserted
+the path was ABSENT, which stopped being the rule; it now asserts the properties that make the
+rebuild correct, and every one of them is narrower than what it replaced.
+🔑 **THE PR'S OWN TESTS WERE GREEN.** They were written from the same wrong premise and never
+built a grant-funded camera — every one exercised the allocation column, where the primitive is
+correct. *A test that shares the defect's premise cannot see the defect.*
+
 ⚠ **What a camera has already SHOT can never come back.** The buyer's screen must say so.
 ⚠ Verify `NEXT_PUBLIC_PAPIC_GUEST_BUY` in the hosting settings before assuming the buy panel is
 reachable — a flag's default in code is not its value in production. *(Verified 2026-08-31: it is
@@ -456,3 +475,34 @@ had since changed was inside it."**
 ⇒ THE COMBINED RULE: **state what you measured, and state WHEN — a claim without its head SHA or
 its timestamp is a claim about the past wearing the present tense.** This applies to CI, to
 `origin/main`, to production, and to any document in this corpus. Including this one.
+
+### 🚨 `CREATE OR REPLACE FUNCTION` IN A NEW MIGRATION IS A TIME MACHINE — 2026-08-31, caught on PR #5044
+
+**A migration that replaces a shared function reinstates whatever body its author copied — and git
+shows NO CONFLICT, because the two changes live in different files.** A revert with no conflict
+marker, that merges green and renders identically to success. This is the stream's own disease
+(*a failure that looks exactly like success*) arriving through the schema instead of the UI.
+
+**Measured:** PR #5044 (the give-back rebuild) was branched 13 commits behind `origin/main` and did
+`CREATE OR REPLACE FUNCTION public.papic_event_pool_status` — which it legitimately had to, since
+releasing grants changes the pot arithmetic. But the body it carried forward predated S2's
+extraction of `papic_event_guest_headcount` that same morning:
+
+- `SELECT COUNT(*) FROM public.guests g` — back at L217
+- occurrences of `papic_event_guest_headcount` in the whole migration: **0**
+
+That is precisely the two-headcounts drift S2 removed and S3 nearly shipped a screen on. Nobody
+wrote a bug; a stale copy was carried forward over a fresh fix.
+
+✅ **What caught it:** S2's guard, written that morning, asserting BOTH halves —
+`assert.match(def, /papic_event_guest_headcount/)` **and**
+`assert.doesNotMatch(def, /SELECT COUNT\(\*\) FROM public\.guests/, 'the headcount expression must
+be GONE from pool_status, not merely also present elsewhere')`. 🔑 **The second half is what did the
+work.** A guard that only checks the new call is present would have passed this migration: the
+inline count sat right beside it. **When you extract a shared helper, assert the OLD expression is
+gone — not merely that the new one exists.**
+
+⇒ THE RULE: **rebase onto `origin/main` BEFORE you copy a function body forward, and diff your
+`CREATE OR REPLACE` against the CURRENT definition, not against the one your branch remembers.**
+With several sessions writing migrations against shared Papic functions at once, whoever merges
+last silently wins.

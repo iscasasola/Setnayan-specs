@@ -1,0 +1,855 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SETNAYAN · Prices, clustered — 2026-08-29</title>
+<!--
+  ADMIN PRICING — GROUPING PROTOTYPE, 2026-08-29.
+  EXTENDS prototypes/admin_pricing_manager_2026-08-26.html (BINDING, approved,
+  and since PORTED — catalog-editor.tsx IS that design). This file is the DELTA
+  on top of it, in the same visual language. Owner:
+  "i think it would be better to fix the clustering of the prices since there
+  are only a few and we can organize them neatly."
+
+  WHAT CHANGED vs 2026-08-26, and why — a delta, not a redescription:
+
+  1 · THE PAPIC LADDER COLLAPSES TO ONE ROW. The 08-26 design (and the shipped
+      screen) lists all 17 credit sizes as 17 peer rows sorted by price, so ONE
+      product interleaves through the owner's nine real products. The ladder
+      already has its own tab where it is edited as a ladder — repeating it
+      here row-by-row is duplication that buries the sell sheet. It is now one
+      summary row that expands in place (read-only rungs) and points at its
+      own tab. Setnayan AI keeps its single row but gains the same
+      "bands edit on their own tab" pointer chip.
+  2 · GROUPED BY WHAT A CUSTOMER BUYS, NOT BY PRICE. The 08-26 shelves were
+      only Customer / Bundles / Vendor with price-ascending rows inside.
+      Customer now sub-groups by product family (Papic · Planning · The day on
+      film · Design & music · The Event Hub); Vendor sub-groups by offering
+      (Subscriptions · Add-ons · Seats & branches · Custom tier). Customer and
+      vendor stay clearly separate, as before.
+  3 · "SWITCHED OFF" REPLACES A MISFILED "DRAFTS". Measured: retired_at is
+      NULL on every row in both catalogs, so the shipped three-state model
+      files all switched-off rows as DRAFTS — a dead price reads as work in
+      progress. The third tab is now SWITCHED OFF: dead styling (greyed, price
+      struck), a stamp of when it went off, and a measured DISTANCE-FROM-
+      DELETABLE meter per row (the 08-26 removability check, promoted from a
+      tag to the row's main fact). Drafts remains, honest at 0. Retired-with-
+      a-stamp rows would file here too — off is off; the reason/successor
+      stays on the card.
+  4 · THE BLANKED-NOTE DAMAGE IS TALLIED ONCE, KEPT PER ROW. Six on-sale rows
+      still show "No note — the last save blanked it." That is real damage
+      and stays on the row (quieter, amber not red), with one shelf-level
+      tally instead of six shouting lines.
+  NOTHING REMOVED: search (it now reaches INSIDE the collapsed ladder),
+  the three view tabs, the four scope chips, the per-row card with every
+  field (name · note · price · sign-up price · cadence · per-head · cost ·
+  history), Retire with reason + replaced-by, Put back on sale, Remove for
+  good, the remove-all broom, and the page sections below the list
+  (set-up discount · platform fee · vendor booking fee · legacy catalog).
+
+  DATA: headline counts are the brief's production measurements of
+  2026-08-28 (On sale 44 = 26 customer + 18 vendor · switched-off 24 ·
+  retired_at NULL everywhere · 6 blanked notes). The MEMBERSHIP of the 24
+  switched-off rows is drawn from the 2026-08-26 measured retired list and is
+  illustrative where the two measurements differ. The ₱15,000 price on the
+  100,000-credit rung could not be verified from a session (the corpus's locked
+  ladder stops at 50,000; the brief counts 17 sizes incl. 100K) — flagged, not
+  asserted.
+
+  Self-contained: inline CSS + inline SVG, no external assets. Light + dark.
+  Contrast receipts for BOTH themes at the foot of the page.
+-->
+<style>
+/* ═══ Locked tokens — identical to the 08-26 binding sheet (light) ═══ */
+:root{
+  --cream:#FFFFFF;
+  --paper:#FBFAF8;
+  --ink:#2C2A29;
+  --ink-soft:#4F535B;
+  --cta:#C24E25; --cta-hover:#B04722;
+  --gold:#A9834B; --gold-text:#8A6B39;
+  --link:#3B4E67;
+  --pos:#4F6B4A; --neg:#B65A3A; --neg-text:#9E4526;
+  --border:rgba(44,42,41,0.12);
+  --border-soft:rgba(44,42,41,0.07);
+  --wash:rgba(44,42,41,0.03);
+  --wash2:rgba(44,42,41,0.055);
+  --dead-ink:rgba(44,42,41,0.45);
+  --tag-gold-bg:rgba(169,131,75,.13); --tag-gold-bd:rgba(169,131,75,.3);
+  --tag-neg-bg:rgba(182,90,58,.10); --tag-neg-bd:rgba(182,90,58,.28); --tag-neg-ink:#8F4025;
+  --tag-pos-bg:rgba(79,107,74,.10); --tag-pos-bd:rgba(79,107,74,.3); --tag-pos-ink:#3E5539;
+  --scrim:rgba(44,42,41,.44);
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --dur:180ms;
+  --sans:'Hanken Grotesk',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'Space Mono',ui-monospace,'SF Mono',Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --cream:#211F1D;
+    --paper:#282523;
+    --ink:#ECE9E4;
+    --ink-soft:#B3ADA5;
+    --cta:#D96A42; --cta-hover:#E27950;
+    --gold:#A9834B; --gold-text:#C2A05F;
+    --link:#9FB4D0;
+    --pos:#8FAE88; --neg:#D98A66; --neg-text:#E09873;
+    --border:rgba(236,233,228,0.16);
+    --border-soft:rgba(236,233,228,0.09);
+    --wash:rgba(236,233,228,0.045);
+    --wash2:rgba(236,233,228,0.08);
+    --dead-ink:rgba(236,233,228,0.45);
+    --tag-gold-bg:rgba(194,160,95,.14); --tag-gold-bd:rgba(194,160,95,.34);
+    --tag-neg-bg:rgba(217,138,102,.13); --tag-neg-bd:rgba(217,138,102,.32); --tag-neg-ink:#E09873;
+    --tag-pos-bg:rgba(143,174,136,.13); --tag-pos-bd:rgba(143,174,136,.32); --tag-pos-ink:#A5C29E;
+    --scrim:rgba(0,0,0,.55);
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--cream);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+b,strong{font-weight:700}
+a{color:var(--link)}
+code,.mono{font-family:var(--mono)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.kicker{font-family:var(--mono);text-transform:uppercase;letter-spacing:.14em;font-size:10.5px;font-weight:700;color:var(--gold-text)}
+.muted{color:var(--ink-soft)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+svg.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* ═══ Page chrome — same register as 08-26 ═══ */
+.top{border-bottom:1px solid var(--border);background:var(--cream);position:sticky;top:0;z-index:60}
+.top .wrap{display:flex;align-items:center;gap:18px;height:60px;flex-wrap:wrap}
+.wordmark{font-family:var(--mono);font-weight:700;letter-spacing:.24em;font-size:13px}
+.hero{padding:30px 0 24px;border-bottom:1px solid var(--border)}
+.hero h1{font-size:28px;line-height:1.2;letter-spacing:-.02em;font-weight:700;margin:9px 0 10px;max-width:26ch}
+.hero p{max-width:68ch;color:var(--ink-soft);font-size:15.5px}
+.quote{border-left:2px solid var(--gold);padding:2px 0 2px 14px;margin:14px 0 0;font-size:15px;max-width:66ch}
+
+/* state switcher */
+.states{display:flex;gap:5px;flex-wrap:wrap;margin:20px 0 14px}
+.states button{font:inherit;font-size:12.5px;font-weight:700;border:1px solid var(--border);background:var(--cream);color:var(--ink-soft);border-radius:999px;padding:6px 14px;cursor:pointer;transition:all var(--dur) var(--ease)}
+.states button[aria-pressed=true]{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+.states button:hover:not([aria-pressed=true]){border-color:var(--ink-soft);color:var(--ink)}
+.statenote{font-size:13px;color:var(--ink-soft);margin:0 0 14px;max-width:80ch}
+
+/* ═══ The mock app frame ═══ */
+.app{border:1px solid var(--border);border-radius:16px;overflow:hidden;background:var(--cream)}
+.appbar{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--border);background:var(--paper);font-size:13px}
+.appbar .url{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);background:var(--cream);border:1px solid var(--border);border-radius:7px;padding:5px 11px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tabstrip{display:flex;gap:5px;flex-wrap:wrap;padding:13px 16px 0}
+.tabstrip a{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--ink-soft);text-decoration:none;transition:all var(--dur) var(--ease)}
+.tabstrip a.sel{background:var(--tag-gold-bg);color:var(--gold-text)}
+.tabstrip a:not(.sel):hover{background:var(--wash);color:var(--ink)}
+.tabrule{border-bottom:1px solid var(--border);margin:11px 16px 0}
+
+/* controls head */
+.chead{padding:14px 16px 0}
+.chead .r1{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.chead h2{font-size:18px;font-weight:700;letter-spacing:-.01em}
+.srch{position:relative;flex:1;min-width:190px;max-width:340px}
+.srch svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ink-soft);width:15px;height:15px}
+.srch input{font:inherit;font-size:14px;width:100%;height:36px;padding:0 11px 0 32px;border:1px solid var(--border);border-radius:9px;background:var(--cream);color:var(--ink)}
+.srch input:focus{outline:2px solid var(--cta);outline-offset:1px}
+.views{display:flex;gap:4px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--border)}
+.views button{font:inherit;font-size:13px;font-weight:600;border:0;background:none;color:var(--ink-soft);padding:7px 12px;border-radius:8px 8px 0 0;cursor:pointer;border-bottom:2px solid transparent;transition:all var(--dur) var(--ease)}
+.views button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--cta);font-weight:700}
+.views button:hover:not([aria-selected=true]){background:var(--wash);color:var(--ink)}
+.views .n{font-family:var(--mono);font-size:11px;color:var(--ink-soft);margin-left:5px}
+.views button[aria-selected=true] .n{color:var(--cta)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;padding:11px 16px;border-bottom:1px solid var(--border-soft)}
+.chip{font:inherit;font-size:12.5px;font-weight:600;border:1px solid var(--border);background:var(--cream);color:var(--ink-soft);border-radius:999px;padding:4px 12px;cursor:pointer;transition:all var(--dur) var(--ease)}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+.chip:hover:not([aria-pressed=true]){border-color:var(--ink-soft);color:var(--ink)}
+
+/* shelves + family sub-heads */
+.shelf{display:flex;align-items:baseline;gap:9px;padding:20px 16px 7px;border-bottom:1px solid var(--border-soft);flex-wrap:wrap}
+.shelf h3{font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-soft);font-weight:700}
+.shelf .n{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft)}
+.shelf.danger h3{color:var(--neg-text)}
+.shelf.hold h3{color:var(--gold-text)}
+.fam{display:flex;align-items:baseline;gap:8px;padding:14px 16px 4px}
+.fam h4{font-size:12.5px;font-weight:700;letter-spacing:.01em;color:var(--ink)}
+.fam .n{font-family:var(--mono);font-size:10px;color:var(--ink-soft)}
+
+/* the resting row */
+.prow{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:13px;align-items:start;padding:12px 16px;border-bottom:1px solid var(--border-soft);cursor:pointer;transition:background var(--dur) var(--ease)}
+.prow:hover{background:var(--wash)}
+.prow.open{background:var(--wash);cursor:default}
+.dot{width:7px;height:7px;border-radius:50%;margin-top:7px;background:var(--pos)}
+.dot.dead{background:transparent;border:1.5px solid var(--dead-ink)}
+.dot.hold{background:var(--gold)}
+.dot.free{background:var(--neg)}
+.ptitle{font-size:15px;font-weight:600;letter-spacing:-.005em}
+.pmeta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:3px}
+.pcode{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-soft)}
+.pdesc{font-size:13px;color:var(--ink-soft);margin-top:5px;max-width:74ch}
+.pdesc.none{color:var(--gold-text);font-style:italic}
+.pmoney{text-align:right;white-space:nowrap}
+.pmoney .amt{font-family:var(--mono);font-size:16px;font-weight:700;font-variant-numeric:tabular-nums}
+.pmoney .cad{font-size:11.5px;color:var(--ink-soft)}
+.pmoney .sub{font-family:var(--mono);font-size:10.5px;color:var(--gold-text);margin-top:3px}
+.tag{border-radius:5px;padding:2px 7px;font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;background:var(--wash);color:var(--ink-soft);border:1px solid var(--border-soft)}
+.tag.gold{background:var(--tag-gold-bg);color:var(--gold-text);border-color:var(--tag-gold-bd)}
+.tag.neg{background:var(--tag-neg-bg);color:var(--tag-neg-ink);border-color:var(--tag-neg-bd)}
+.tag.pos{background:var(--tag-pos-bg);color:var(--tag-pos-ink);border-color:var(--tag-pos-bd)}
+button.tag{cursor:pointer}
+mark{background:var(--tag-gold-bg);color:inherit;border-radius:3px;padding:0 1px}
+
+/* DEAD styling — the whole point of change #3 */
+.prow.deadrow .ptitle{color:var(--dead-ink)}
+.prow.deadrow .amt{color:var(--dead-ink);text-decoration:line-through;text-decoration-thickness:1px;font-weight:600}
+.prow.deadrow .pdesc{color:var(--dead-ink)}
+.offstamp{font-size:11.5px;color:var(--ink-soft);margin-top:4px}
+.meter{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft);margin-top:5px}
+.meter .pips{display:inline-flex;gap:3px}
+.meter .pip{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--gold);background:var(--gold)}
+.meter .pip.clear{background:transparent;border-color:var(--border)}
+.meter.freeable .pip{border-color:var(--neg);background:transparent}
+.meter b{color:var(--ink)}
+
+/* ladder summary row + expansion */
+.ladderbadge{display:inline-flex;align-items:center;gap:6px}
+.rungs{grid-column:1/-1;margin-top:10px;border:1px solid var(--border);border-radius:12px;background:var(--cream);overflow:hidden}
+.rungs .rh{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:11px 14px;border-bottom:1px solid var(--border-soft);background:var(--paper)}
+.rungs .rh p{font-size:12.5px;color:var(--ink-soft);max-width:60ch}
+.runggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1px;background:var(--border-soft)}
+.rung{background:var(--cream);padding:9px 12px}
+.rung.hit{background:var(--tag-gold-bg)}
+.rung .s{font-family:var(--mono);font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums}
+.rung .p{font-family:var(--mono);font-size:12px;color:var(--ink-soft);font-variant-numeric:tabular-nums;margin-top:1px}
+.rung .o{font-size:10.5px;color:var(--gold-text)}
+.rung .note-miss{font-size:10px;color:var(--gold-text);font-style:italic}
+.rungs .rf{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:11px 14px;border-top:1px solid var(--border-soft)}
+.rungs .rf p{font-size:12px;color:var(--ink-soft)}
+
+/* the open card — same anatomy as shipped */
+.card{grid-column:1/-1;margin-top:12px;border:1px solid var(--border);border-radius:13px;background:var(--cream);overflow:hidden}
+.cgrp{padding:15px 16px;border-bottom:1px solid var(--border-soft)}
+.cgrp:last-of-type{border-bottom:0}
+.cgrp>h4{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold-text);font-weight:700;margin-bottom:11px}
+.fld{margin-bottom:11px}
+.fld:last-child{margin-bottom:0}
+.fld .l{font-size:12.5px;font-weight:600;color:var(--ink);display:block;margin-bottom:4px}
+.fld .h{font-size:11.5px;color:var(--ink-soft);margin-top:4px;display:block}
+.inp{font:inherit;font-size:14px;width:100%;height:36px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--cream);color:var(--ink)}
+.inp:focus{outline:2px solid var(--cta);outline-offset:1px}
+.fld textarea{font:inherit;font-size:14px;width:100%;min-height:56px;border:1px solid var(--border);border-radius:8px;padding:8px 10px;background:var(--cream);color:var(--ink);resize:vertical}
+.fld textarea:focus,.fld select:focus{outline:2px solid var(--cta);outline-offset:1px}
+.fld select{font:inherit;font-size:14px;height:36px;border:1px solid var(--border);border-radius:8px;padding:0 9px;background:var(--cream);color:var(--ink)}
+.two-up{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+@media(max-width:700px){.two-up{grid-template-columns:1fr}}
+.money{position:relative}
+.money .peso{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--ink-soft);font-size:13px;pointer-events:none}
+.money .inp{padding-left:22px;text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13px}
+.hist li{list-style:none;display:flex;gap:11px;align-items:baseline;font-size:12.5px;padding:5px 0;border-bottom:1px solid var(--border-soft)}
+.hist li:last-child{border-bottom:0}
+.hist .d{font-family:var(--mono);font-size:11px;color:var(--ink-soft);min-width:88px}
+.hist .m{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.hist .who{color:var(--ink-soft);margin-left:auto;font-size:11.5px}
+.cfoot{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:13px 16px;background:var(--paper);border-top:1px solid var(--border)}
+.cfoot .sp{margin-left:auto}
+.holds{background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.holds h5{font-size:13px;font-weight:700;margin-bottom:7px;display:flex;align-items:center;gap:7px}
+.holds ul{margin:0 0 9px 2px}
+.holds li{list-style:none;font-size:13px;color:var(--ink-soft);padding:3px 0 3px 16px;position:relative}
+.holds li::before{content:'';position:absolute;left:2px;top:11px;width:4px;height:4px;border-radius:50%;background:var(--gold)}
+.holds p{font-size:12.5px;color:var(--ink-soft)}
+.emptyst{padding:44px 20px;text-align:center}
+.emptyst h4{font-size:16px;font-weight:700;margin-bottom:6px}
+.emptyst p{font-size:13.5px;color:var(--ink-soft);max-width:52ch;margin:0 auto}
+.btn{font:inherit;font-size:13.5px;font-weight:700;border-radius:9px;padding:9px 17px;cursor:pointer;border:1px solid transparent;transition:all var(--dur) var(--ease)}
+.btn-primary{background:var(--cta);color:#fff}.btn-primary:hover{background:var(--cta-hover)}
+.btn-ghost{background:none;border-color:var(--border);color:var(--ink-soft)}.btn-ghost:hover{background:var(--wash);color:var(--ink)}
+.btn-danger{background:none;border-color:var(--tag-neg-bd);color:var(--neg-text)}.btn-danger:hover{background:var(--tag-neg-bg)}
+.btn-sm{font-size:12.5px;padding:6px 12px}
+.damage{display:flex;align-items:baseline;gap:8px;padding:9px 16px;border-bottom:1px solid var(--border-soft);font-size:12.5px;color:var(--ink-soft)}
+.damage b{color:var(--gold-text)}
+.belowline{padding:13px 16px;border-top:1px solid var(--border);background:var(--paper);font-size:12.5px;color:var(--ink-soft)}
+
+/* modal + toast */
+.scrim{position:fixed;inset:0;background:var(--scrim);display:none;align-items:center;justify-content:center;z-index:200;padding:20px}
+.scrim.on{display:flex}
+.modal{background:var(--cream);border-radius:15px;max-width:520px;width:100%;max-height:86vh;overflow:auto;border:1px solid var(--border)}
+.modal .mh{padding:18px 20px 0}
+.modal h3{font-size:18px;font-weight:700;letter-spacing:-.01em;margin-bottom:8px}
+.modal .mb{padding:10px 20px 4px;font-size:14px;color:var(--ink-soft)}
+.modal .mb p{margin-bottom:11px}
+.modal .mf{display:flex;gap:9px;justify-content:flex-end;padding:15px 20px 18px;flex-wrap:wrap}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:var(--cream);border-radius:10px;padding:11px 18px;font-size:13.5px;font-weight:600;z-index:300;opacity:0;pointer-events:none;transition:opacity 220ms var(--ease),transform 220ms var(--ease)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(-6px)}
+.find{border:1px solid var(--border);border-left:3px solid var(--pos);border-radius:0 12px 12px 0;padding:14px 16px;margin:0 0 12px;background:var(--paper)}
+.find h4{font-size:14.5px;font-weight:700;margin-bottom:4px}
+.find p{font-size:13.5px;color:var(--ink-soft);max-width:80ch}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  .prow.freegrant{background:color-mix(in srgb, var(--pos) 5%, transparent);}
+  .prow.freegrant .amt{color:var(--pos);}
+</style>
+</head>
+<body>
+<svg style="display:none" aria-hidden="true">
+<symbol id="i-dollar" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></symbol>
+<symbol id="i-badge" viewBox="0 0 24 24"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></symbol>
+<symbol id="i-camera" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></symbol>
+<symbol id="i-gauge" viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></symbol>
+<symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
+<symbol id="i-power" viewBox="0 0 24 24"><path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.77.04"/></symbol>
+</svg>
+
+<header class="top">
+  <div class="wrap">
+    <span class="wordmark">SETNAYAN</span>
+    <span class="muted" style="font-size:13px">Prices, clustered</span>
+    <span class="muted" style="font-size:12px;margin-left:auto">extends the approved 26 Aug design</span>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <p class="kicker">Admin · price &amp; catalogue · 29 August 2026</p>
+    <h1>Nine products were hiding inside one ladder.</h1>
+    <p>Of the 26 customer prices on sale, <b>17 are one product</b> — Papic credits, in 17 sizes — and the price-ascending sort scatters them through the nine things a customer actually chooses between. The ladder already has its own tab. Below: it collapses to one row, the list groups by what a customer buys, and a switched-off price finally looks <b>dead</b> instead of drafted.</p>
+    <p class="quote">“i think it would be better to fix the clustering of the prices since there are only a few and we can organize them neatly.”</p>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="states" role="group" aria-label="Show a state">
+    <button aria-pressed="true"  onclick="demo('default')">① Default — the sell sheet</button>
+    <button aria-pressed="false" onclick="demo('ladder')">② The ladder, expanded</button>
+    <button aria-pressed="false" onclick="demo('dead')">③ The dead shelf</button>
+    <button aria-pressed="false" onclick="demo('search')">④ A search result</button>
+  </div>
+  <p class="statenote" id="statenote">The default view. Customer and vendor stay separate; inside each, rows group by what a customer buys — and the 17 Papic sizes sit behind one row.</p>
+
+  <div class="app">
+    <div class="appbar"><span class="url">www.setnayan.com/admin/pricing?tab=pricing</span></div>
+    <nav class="tabstrip" aria-label="Catalogue sections">
+      <a class="sel" href="#" onclick="return false"><svg class="i"><use href="#i-dollar"/></svg>Pricing</a>
+      <a href="#" onclick="toast('The ladder edits there — every rung, as a ladder.');return false"><svg class="i"><use href="#i-camera"/></svg>Papic credit prices</a>
+      <a href="#" onclick="toast('The sign-up bands edit there.');return false"><svg class="i"><use href="#i-gauge"/></svg>Setnayan AI prices</a>
+      <a href="#" onclick="return false"><svg class="i"><use href="#i-badge"/></svg>Custom plans</a>
+      <a href="#" onclick="return false"><svg class="i"><use href="#i-gift"/></svg>Free windows</a>
+    </nav>
+    <div class="tabrule"></div>
+
+    <div class="chead">
+      <div class="r1">
+        <h2>Prices</h2>
+        <div class="srch"><svg class="i"><use href="#i-search"/></svg>
+          <input id="q" type="search" placeholder="Find a price…" oninput="render()" aria-label="Find a price">
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="toast('A new price starts as a Draft — nowhere public until you put it on sale.')">+ New price</button>
+      </div>
+      <div class="views" role="tablist" aria-label="Price state">
+        <button role="tab" id="v-sale" aria-selected="true"  onclick="setView('sale')">On sale <span class="n">44</span></button>
+        <button role="tab" id="v-draft" aria-selected="false" onclick="setView('draft')">Drafts <span class="n">0</span></button>
+        <button role="tab" id="v-dead" aria-selected="false" onclick="setView('dead')">Switched off <span class="n">24</span></button>
+      </div>
+    </div>
+
+    <div class="chips" id="chips" role="group" aria-label="Which catalogue">
+      <button class="chip" aria-pressed="true"  onclick="setScope('all')">All</button>
+      <button class="chip" aria-pressed="false" onclick="setScope('Customer')">Customer</button>
+      <button class="chip" aria-pressed="false" onclick="setScope('Bundles')">Bundles</button>
+      <button class="chip" aria-pressed="false" onclick="setScope('Vendor')">Vendor</button>
+    </div>
+
+    <div id="list"></div>
+
+    <div class="belowline">
+      Below the list, unchanged and still reachable: <b>Set-up discount</b> · <b>Platform fee</b> · <b>Vendor booking fee</b> · <b>Older catalogue (read-only)</b> · the legacy catalog report download.
+    </div>
+  </div>
+
+  <h2 style="font-size:19px;font-weight:700;margin:34px 0 6px">What changed vs the approved 26 Aug screen</h2>
+  <p class="muted" style="font-size:13.5px;margin-bottom:16px;max-width:78ch">Three moves, each answering a measured problem. Everything the shipped screen can do, this one can still do.</p>
+  <div class="find"><h4>One product, one row</h4><p>The 17 Papic sizes stop interleaving the list. One summary row carries the whole ladder — expand it to read the rungs, edit them where they already edit: on the <b>Papic credit prices</b> tab. Setnayan AI keeps its row and gains the same pointer to its bands tab. Search still reaches every rung — typing “10,000” opens the ladder to the matching size.</p></div>
+  <div class="find"><h4>Grouped by what a customer buys</h4><p>Customer rows cluster into five small families (Papic · Planning · The day on film · Design &amp; music · The Event Hub); vendor rows cluster by offering (Subscriptions · Add-ons · Seats &amp; branches · Custom tier). Nine products read as nine products. Nothing sorts by price any more.</p></div>
+  <div class="find"><h4>Dead means dead — and shows its distance from gone</h4><p>Every switched-off row was filing under <b>Drafts</b>, because the retirement stamp is NULL on all of them — a dead price read as work in progress. The third tab is now <b>Switched off</b>: greyed title, struck price, the date it went off, and a per-row meter of what still holds it in place. Zero holds and never sold → <b>Remove for good</b> offers itself, exactly as the 26 Aug design ruled.</p></div>
+</div>
+
+<div class="scrim" id="scrim" onclick="if(event.target===this)closeModal()"><div class="modal" id="modal" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   DATA. Headline counts are the 2026-08-28 production measurements from the
+   task brief (44 on sale = 26 customer + 18 vendor · 24 switched off ·
+   retired_at NULL everywhere · 6 blanked notes). Prices for the nine products
+   are the owner's own list. Ladder prices are the owner-locked 2026-08-26
+   recut; the 100,000-credit price is UNVERIFIED (marked in the rung).
+   Membership of the 24 switched-off rows is illustrative, drawn from the
+   2026-08-26 measured retired list. ═══════════════════════════════════════ */
+
+const LADDER = [
+  [100,50],[200,100],[300,150],[400,200],[500,250],[1000,500],[2000,1000],
+  [3000,1200],[4000,1600],[5000,2000],[6000,2400],[7000,2800],[10000,3200],
+  [20000,5000],[30000,7500],[50000,10000],[100000,15000,true] // true = price unverified from a session
+];
+const LADDER_BLANKED = 3; // rungs whose note the old bulk-save wiped
+
+/* The nine real customer products, grouped by family. noteGone = one of the
+   six on-sale rows still carrying "the last save blanked it". */
+const PRODUCTS = [
+ {fam:'Papic', rows:[
+   {c:'PAPIC_LADDER', ladder:true},
+   {c:'PAPIC_ADDON_THANK_YOU', t:'Thank You (Papic Add-on)', p:2500, k:250, cad:'one-off',
+    note:'The thank-you film, cut automatically from the guests’ own photos after the celebration.', ed:'1 month ago'},
+ ]},
+ {fam:'Planning', rows:[
+   {c:'SETNAYAN_AI', t:'Setnayan AI', p:2499, k:200, cad:'one-off', signup:1499, bands:true,
+    note:'Assisted planning — matching, sorting and cross-referencing, plus their planning workspace.', ed:'14 days ago'},
+   {c:'SEATING_3D', t:'3D Plan', p:1500, k:0, cad:'one-off',
+    note:'The room in three dimensions — tables, stage and seats they can walk around before the day.', ed:'25 days ago'},
+ ]},
+ {fam:'The day on film', rows:[
+   {c:'LIVE_STUDIO', t:'Live Studio', p:3000, k:0, cad:'one-off', noteGone:true, ed:'1 month ago'},
+   {c:'PATIKTOK_COMPILER', t:'Patiktok', p:1500, k:0, cad:'per day', noteGone:true, ed:'1 month ago'},
+ ]},
+ {fam:'Design & music', rows:[
+   {c:'ANIMATED_MONOGRAM', t:'Animated Monogram', p:1000, k:140, cad:'one-off',
+    note:'Their two initials, drawn and animated, used across the invitation, the screens and the film.', ed:'15 days ago'},
+   {c:'PAKANTA', t:'Pakanta', p:2500, k:200, cad:'one-off',
+    note:'A song written for their celebration, theirs to keep.', ed:'1 month ago'},
+ ]},
+ {fam:'The Event Hub', rows:[
+   {c:'COUPLE_WEBSITE_PRO', t:'Event Hub Pro', p:3500, k:0, cad:'one-off',
+    note:'The premium touches on their Event Hub — the one public address for their celebration.', ed:'1 month ago'},
+   {c:'CUSTOM_QR_GUEST', t:'Custom QR per Guest', p:0, k:0, cad:'one-off', noteGone:true, ed:'2 months ago'},
+ ]},
+];
+
+/* 18 live vendor prices, grouped by offering. */
+const VENDOR = [
+ {fam:'Subscriptions', rows:[
+   {c:'solo_vendor_monthly', t:'Solo Vendor', p:1000, cad:'every 28 days'},
+   {c:'solo_vendor_annual', t:'Solo Vendor (Annual)', p:10000, cad:'per year'},
+   {c:'pro_vendor_monthly', t:'Pro Vendor', p:2500, cad:'every 28 days'},
+   {c:'pro_vendor_annual', t:'Pro Vendor (Annual)', p:25000, cad:'per year'},
+   {c:'enterprise_vendor_monthly', t:'Enterprise Vendor', p:8000, cad:'every 28 days'},
+   {c:'enterprise_vendor_annual', t:'Enterprise Vendor (Annual)', p:80000, cad:'per year'},
+ ]},
+ {fam:'Add-ons', rows:[
+   {c:'vendor_ai_addon', t:'Vendor AI — Chatbot Basic', p:1500, cad:'every 28 days'},
+   {c:'vendor_3d_booth', t:'3D Booth — Branded Virtual Booth', p:1500, cad:'every 28 days'},
+   {c:'vendor_deep_search', t:'Deep Search', p:500, cad:'per search'},
+   {c:'vendor_photo_challenge', t:'Papic Challenges', p:400, cad:'per event'},
+ ]},
+ {fam:'Seats & branches', rows:[
+   {c:'vendor_extra_seat', t:'Extra Team Seat', p:250, cad:'every 28 days'},
+   {c:'vendor_branch_28day', t:'Additional Branch', p:999, cad:'every 28 days'},
+ ]},
+ {fam:'Custom tier', rows:[
+   {c:'vendor_custom_base', t:'Custom Tier — Base', p:8999, cad:'every 28 days'},
+   {c:'vendor_custom_reach_step', t:'Custom — Reach +100 km', p:499, cad:'every 28 days'},
+   {c:'vendor_custom_reach_nationwide', t:'Custom — Nationwide Reach', p:2499, cad:'every 28 days'},
+   {c:'vendor_custom_event_slot', t:'Custom — +1 Event Slot / category', p:499, cad:'every 28 days'},
+   {c:'vendor_custom_photo_pack', t:'Custom — +100 Portfolio Photos', p:99, cad:'every 28 days'},
+   {c:'vendor_custom_domain', t:'Custom — Custom Domain', p:499, cad:'every 28 days'},
+ ]},
+];
+
+/* 24 switched-off rows. holds[] names what keeps each from deletable;
+   holds:[] + neverSold → Remove for good offers itself. checked:false =
+   the wiring measurement has not been run on this catalogue (honest, as in
+   the 26 Aug design). off = when it was switched off. */
+const HOLD_PAPIC = 'Papic camera & credit settings still point at it';
+const DEAD = [
+ {c:'PAPIC_CAMERA_LTD_DAY', t:'Papic Ltd (per camera, per day)', p:50, fam:'Customer', off:'11 Aug 2026', holds:[HOLD_PAPIC]},
+ {c:'PAPIC_CAMERA_MINI_DAY', t:'Papic One — 50 credits (one camera)', p:50, fam:'Customer', off:'11 Aug 2026', holds:[HOLD_PAPIC]},
+ {c:'PAPIC_CAMERA_ROLL_DAY', t:'Papic Mini (legacy roll)', p:100, fam:'Customer', off:'11 Aug 2026', holds:[HOLD_PAPIC]},
+ {c:'PAPIC_CAMERA_UNLIMITED_DAY', t:'Papic Max (per camera, per day)', p:200, fam:'Customer', off:'11 Aug 2026', holds:[HOLD_PAPIC]},
+ {c:'PAPIC_ONE_100', t:'Papic One — 100 credits (one camera)', p:100, fam:'Customer', off:'11 Aug 2026', holds:[HOLD_PAPIC]},
+ {c:'PAPIC_ONE_150', t:'Papic One — 150 credits (one camera)', p:50, fam:'Customer', off:'11 Aug 2026', holds:[HOLD_PAPIC]},
+ {c:'PAPIC_GUEST_6K', t:'Papic Pool — add 6,000 credits', p:2000, fam:'Customer', off:'26 Aug 2026', holds:[HOLD_PAPIC]},
+ {c:'PAPIC_GUEST_13K', t:'Papic Pool — add 13,000 credits', p:4000, fam:'Customer', off:'26 Aug 2026', holds:[HOLD_PAPIC]},
+ {c:'PAPIC_GUEST_16K', t:'Papic Pool — add 16,000 credits', p:5000, fam:'Customer', off:'26 Aug 2026', holds:[HOLD_PAPIC]},
+ {c:'PAPIC_GUEST_30K', t:'Papic Pool — add 30,000 credits', p:9000, fam:'Customer', off:'26 Aug 2026', holds:[HOLD_PAPIC]},
+ {c:'LIVE_WALL', t:'Live Venue Photo Wall', p:2500, fam:'Customer', off:'2 Jun 2026', holds:['1 customer’s event still has it switched on']},
+ {c:'PAPIC_GUEST_TOPUP', t:'Papic Pool — add 10,000 credits', p:2999, fam:'Customer', off:'11 Aug 2026', holds:[], neverSold:true, succ:'PAPIC_GUEST_10K'},
+ {c:'SETNAYAN_AI_RENEW', t:'Setnayan AI (renewal)', p:799, fam:'Customer', off:'12 Jun 2026', holds:[], neverSold:true},
+ {c:'STARTER_PACK', t:'Starter Pack', p:12999, fam:'Bundles', off:'10 Jul 2026', checked:false},
+ {c:'GUIDED_PACK', t:'Guided Pack', p:7999, fam:'Bundles', off:'10 Jul 2026', checked:false},
+ {c:'vendor_token_pack_4', t:'4 Bidding Tokens', p:400, fam:'Vendor', off:'7 Aug 2026', checked:false},
+ {c:'vendor_token_pack_5', t:'5 Bidding Tokens', p:1000, fam:'Vendor', off:'7 Aug 2026', checked:false},
+ {c:'vendor_token_pack_10', t:'10 Bidding Tokens', p:2000, fam:'Vendor', off:'7 Aug 2026', checked:false},
+ {c:'vendor_token_pack_25', t:'25 Bidding Tokens', p:5000, fam:'Vendor', off:'7 Aug 2026', checked:false},
+ {c:'vendor_token_pack_50', t:'50 Bidding Tokens', p:10000, fam:'Vendor', off:'7 Aug 2026', checked:false},
+ {c:'vendor_token_pack_100', t:'100 Bidding Tokens', p:20000, fam:'Vendor', off:'7 Aug 2026', checked:false},
+ {c:'vendor_ai_addon_advanced', t:'Vendor AI — Chatbot Advanced', p:3000, fam:'Vendor', off:'21 Jul 2026', checked:false},
+ {c:'booth_studio', t:'Booth Studio — Poster & Banner', p:1500, fam:'Vendor', off:'21 Jul 2026', checked:false},
+ {c:'vendor_custom_included_token', t:'Custom — Included Token (per cycle)', p:100, fam:'Vendor', off:'7 Aug 2026', checked:false},
+];
+
+/* ── helpers ─────────────────────────────────────────────────────────────── */
+const esc = s => String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const peso = n => n===0 ? 'Free' : '₱' + Number(n).toLocaleString('en-PH');
+const credits = n => Number(n).toLocaleString('en-PH');
+const offPct = (s,p) => Math.round((1 - p/s)*100);
+let VIEW='sale', SCOPE='all', OPEN=null, LADDER_OPEN=false;
+
+function hl(text, q){
+  if(!q) return esc(text);
+  const t = String(text); const i = t.toLowerCase().indexOf(q.toLowerCase());
+  if(i<0) return esc(t);
+  return esc(t.slice(0,i)) + '<mark>' + esc(t.slice(i,i+q.length)) + '</mark>' + esc(t.slice(i+q.length));
+}
+const norm = s => s.toLowerCase().replace(/[,\s]/g,'');
+
+function setView(v){VIEW=v;OPEN=null;LADDER_OPEN=false;
+  ['sale','draft','dead'].forEach(k=>document.getElementById('v-'+k).setAttribute('aria-selected',k===VIEW));
+  render();}
+function setScope(s){SCOPE=s;OPEN=null;
+  [...document.querySelectorAll('#chips .chip')].forEach(b=>b.setAttribute('aria-pressed', b.textContent.trim()===(s==='all'?'All':s)));
+  render();}
+function toggle(c){OPEN = OPEN===c?null:c;render();}
+function toggleLadder(){LADDER_OPEN=!LADDER_OPEN;render();}
+
+/* ── ladder: the one-row summary + expansion ─────────────────────────────── */
+function ladderMatches(q){
+  if(!q) return [];
+  const nq = norm(q);
+  return LADDER.filter(([s,p])=> norm(credits(s)).includes(nq) || norm(String(s)).includes(nq)
+    || norm(peso(p)).includes(nq) || norm(String(p)).includes(nq));
+}
+/*
+  THE FREE ALLOWANCE EVERY EVENT STARTS WITH — owner 2026-08-29:
+  "assign a cell to indicate how many free Papic Credits per event everybody has."
+
+  🔑 IT IS A REAL, LIVE NUMBER WITH NO EDITOR ANYWHERE. Measured against
+  production: `papic_event_pool_config.free_grant_points` = 50, five events in
+  prod carry a `free_grant` of exactly 50 — and NOTHING under apps/web/app reads
+  or writes that column. Same shape as the Setnayan AI band prices: a figure the
+  product depends on that only a migration could change.
+
+  It is deliberately NOT drawn as a price row. It is not sold, has no SKU and
+  costs nothing — filing it among the sell sheet's products would make it look
+  like something a customer could buy.
+*/
+function freeGrantRow(){
+  return `<div class="prow freegrant">
+    <span class="dot" style="background:var(--pos)"></span>
+    <div style="min-width:0">
+      <p class="ptitle">Free credits on every event</p>
+      <div class="pmeta">
+        <span class="tag pos">Given, never sold</span>
+        <span class="tag gold">No editor today</span>
+      </div>
+      <p class="pdesc">What every celebration starts with before anybody buys anything. Top-ups add on top of it.</p>
+    </div>
+    <div class="pmoney">
+      <div class="amt">50</div>
+      <div class="cad">credits per event</div>
+    </div>
+  </div>`;
+}
+function ladderRow(q){
+  const hits = ladderMatches(q);
+  const open = LADDER_OPEN || hits.length>0;
+  const hitSet = new Set(hits.map(h=>h[0]));
+  return `<div class="prow${open?' open':''}" onclick="if(!event.target.closest('.rungs'))toggleLadder()">
+    <span class="dot"></span>
+    <div style="min-width:0">
+      <p class="ptitle">Papic credits — the top-up ladder</p>
+      <div class="pmeta">
+        <code class="pcode">PAPIC_GUEST_*</code>
+        <span class="tag pos">One product · 17 sizes</span>
+        <span class="tag gold">Edits on its own tab</span>
+      </div>
+      <p class="pdesc">50 free credits on every event; these top the shared pot up. Until now the 17 sizes sat here as 17 separate rows, threaded through everything else by price.</p>
+      ${open?rungsHTML(hitSet):''}
+    </div>
+    <div class="pmoney">
+      <div class="amt">₱50 – ₱15,000</div>
+      <div class="cad">17 rungs · 50–85% off credits</div>
+    </div>
+  </div>`;
+}
+function rungsHTML(hitSet){
+  return `<div class="rungs" onclick="event.stopPropagation()">
+    <div class="rh">
+      <p><b>Read-only here.</b> The ladder is edited as a ladder — every rung, its discount curve and its guards — on the <b>Papic credit prices</b> tab, where it always has been. This row just stops it burying the sell sheet.</p>
+    </div>
+    <div class="runggrid">
+      ${LADDER.map(([s,p,unv],i)=>`<div class="rung${hitSet.has(s)?' hit':''}">
+        <p class="s">${credits(s)} credits</p>
+        <p class="p">${peso(p)} · ${offPct(s,p)}% off${unv?' <span class="o">· price to confirm</span>':''}</p>
+        ${i<LADDER_BLANKED?'<p class="note-miss">note blanked by the old save</p>':''}
+      </div>`).join('')}
+    </div>
+    <div class="rf">
+      <button class="btn btn-primary btn-sm" onclick="toast('Opens /admin/pricing?tab=papic — the ladder editor.')">Edit the ladder on its tab <svg class="i" style="width:13px;height:13px;vertical-align:-2px"><use href="#i-arrow"/></svg></button>
+      <p>3 of the 17 rungs lost their note to the old bulk save — fix them on the ladder tab.</p>
+    </div>
+  </div>`;
+}
+
+/* ── ordinary rows ───────────────────────────────────────────────────────── */
+function productRow(r,q){
+  const open = OPEN===r.c;
+  const noteHTML = r.noteGone
+    ? `<p class="pdesc none">No note — the last save blanked it.</p>`
+    : (r.note?`<p class="pdesc">${hl(r.note,'')}</p>`:'');
+  return `<div class="prow${open?' open':''}" onclick="if(!event.target.closest('.card'))toggle('${r.c}')">
+    <span class="dot"></span>
+    <div style="min-width:0">
+      <p class="ptitle">${hl(r.t,q)}</p>
+      <div class="pmeta">
+        <code class="pcode">${hl(r.c,q)}</code>
+        ${r.bands?'<span class="tag gold">Sign-up bands edit on their own tab</span>':''}
+      </div>
+      ${noteHTML}
+      ${open?cardHTML(r):''}
+    </div>
+    <div class="pmoney">
+      <div class="amt">${peso(r.p)}</div>
+      <div class="cad">${esc(r.cad||'one-off')}</div>
+      ${r.signup?`<div class="sub">₱${r.signup.toLocaleString('en-PH')} to sign up</div>`:''}
+    </div>
+  </div>`;
+}
+function deadRow(r,q){
+  const open = OPEN===r.c;
+  let meter;
+  if(r.checked===false){
+    meter = `<p class="meter"><span class="pips"><span class="pip clear"></span></span> Not measured yet — same wiring check as customer rows, not yet run on this catalogue</p>`;
+  } else if(r.holds.length===0){
+    meter = `<p class="meter freeable"><span class="pips"><span class="pip"></span></span> <b>Nothing holds it</b> — never sold · free to remove for good</p>`;
+  } else {
+    meter = `<p class="meter"><span class="pips">${r.holds.map(()=> '<span class="pip"></span>').join('')}</span> <b>${r.holds.length} thing${r.holds.length>1?'s':''}</b> still hold${r.holds.length>1?'':'s'} it — ${esc(r.holds[0])}${r.holds.length>1?' +'+(r.holds.length-1):''}</p>`;
+  }
+  return `<div class="prow deadrow${open?' open':''}" onclick="if(!event.target.closest('.card'))toggle('${r.c}')">
+    <span class="dot ${r.checked===false?'dead':(r.holds&&r.holds.length===0?'free':'hold')}"></span>
+    <div style="min-width:0">
+      <p class="ptitle">${hl(r.t,q)}</p>
+      <div class="pmeta">
+        <code class="pcode">${hl(r.c,q)}</code>
+        ${r.succ?`<span class="tag">Replaced by ${esc(r.succ)}</span>`:''}
+      </div>
+      <p class="offstamp">Switched off ${esc(r.off)} · nobody can buy it · anything already sold keeps working</p>
+      ${meter}
+      ${open?cardHTML(r,true):''}
+    </div>
+    <div class="pmoney"><div class="amt">${peso(r.p)}</div></div>
+  </div>`;
+}
+
+/* ── the open card — same anatomy as the shipped one ─────────────────────── */
+function cardHTML(r, dead){
+  const holds = dead ? (r.holds||[]) : [];
+  const freeable = dead && r.checked!==false && holds.length===0;
+  return `<div class="card" onclick="event.stopPropagation()">
+   ${dead && holds.length ? `<div class="cgrp"><div class="holds">
+      <h5><svg class="i" style="width:15px;height:15px;color:var(--gold-text)"><use href="#i-lock"/></svg>Still held in place by:</h5>
+      <ul>${holds.map(h=>`<li>${esc(h)}</li>`).join('')}</ul>
+      <p>It stays off the price page. When nothing here needs it any more, <b>Remove for good</b> appears by itself.</p>
+    </div></div>`:''}
+   ${freeable ? `<div class="cgrp"><div class="holds" style="border-color:var(--tag-neg-bd)">
+      <h5><svg class="i" style="width:15px;height:15px;color:var(--neg-text)"><use href="#i-check"/></svg>Nothing depends on this.</h5>
+      <p>Never sold, and nothing points at it. You can remove it for good.</p></div></div>`:''}
+   <div class="cgrp"><h4>What it is</h4>
+     <div class="fld"><label><span class="l">Name customers see</span>
+       <input class="inp" value="${esc(r.t)}"></label></div>
+     <div class="fld"><label><span class="l">What this is for</span>
+       <textarea placeholder="Say it the way you'd say it to a customer.">${esc(r.note||'')}</textarea>
+       <span class="h">Always on screen while this card is open — it can no longer be saved away by accident.</span></label></div>
+   </div>
+   <div class="cgrp"><h4>What it costs them</h4>
+     <div class="two-up">
+       <div class="fld"><label><span class="l">Price</span>
+         <div class="money"><span class="peso">₱</span><input class="inp" type="number" value="${(r.p??0).toFixed(2)}"></div></label></div>
+       <div class="fld"><label><span class="l">Sign-up price</span>
+         <div class="money"><span class="peso">₱</span><input class="inp" type="number" value="${r.signup?r.signup.toFixed(2):''}" placeholder="leave blank if there isn't one"></div></label></div>
+     </div>
+     <div class="two-up" style="margin-top:11px">
+       <div class="fld"><label><span class="l">Charged</span>
+         <select><option ${r.cad!=='per day'?'selected':''}>Once</option><option ${r.cad==='per day'?'selected':''}>Per day of the celebration</option><option ${r.cad==='per year'?'selected':''}>Per year</option><option ${r.cad==='every 28 days'?'selected':''}>Every 28 days</option></select></label></div>
+       <div class="fld"><label><span class="l">Priced per head?</span>
+         <select><option selected>No — one flat price</option><option>Yes — set a floor and a step</option></select></label></div>
+     </div>
+   </div>
+   ${!dead?`<div class="cgrp"><h4>What it costs us</h4>
+     <div class="fld" style="max-width:230px"><label><span class="l">Our cost per celebration</span>
+       <div class="money"><span class="peso">₱</span><input class="inp" type="number" value="${(r.k&&r.k>0)?r.k.toFixed(2):''}" placeholder="blank"></div>
+       <span class="h">Leave blank if you don’t know — we won’t invent a margin.</span></label></div>
+     <p style="font-size:13px;color:var(--ink-soft)">${(r.k&&r.k>0)?`Margin <b class="num">${Math.round(((r.p-r.k)/r.p)*100)}%</b>`:'No cost recorded — no margin shown.'}</p>
+   </div>`:''}
+   <div class="cgrp"><h4>History</h4>
+     <ul class="hist">${(r.c==='SETNAYAN_AI'
+        ?[['12 Jun 2026','₱2,999 → ₱2,499','Ice'],['29 Jun 2026','₱499 → ₱2,999','Ice']]
+        :[['1 Jul 2026','set at '+peso(r.p),'Ice']]
+       ).map(h=>`<li><span class="d">${h[0]}</span><span class="m">${h[1]}</span><span class="who">${h[2]}</span></li>`).join('')}</ul>
+   </div>
+   <div class="cfoot">
+     <button class="btn btn-primary btn-sm" onclick="toast('Saved — ${esc(r.t)} is on the public page now.')">Save this price</button>
+     ${dead
+       ? `<button class="btn btn-ghost btn-sm" onclick="toast('Back on sale — it reappears on the public price page.')">Put back on sale</button>`
+       : `<button class="btn btn-ghost btn-sm" onclick="retire('${r.c}')">Retire this price</button>`}
+     ${freeable?`<button class="btn btn-danger btn-sm sp" onclick="removeOne('${esc(r.t)}')"><svg class="i" style="width:13px;height:13px;vertical-align:-2px"><use href="#i-trash"/></svg> Remove for good</button>`:''}
+   </div>
+  </div>`;
+}
+
+/* ── shelves + render ────────────────────────────────────────────────────── */
+function shelf(title,count,cls,note){
+  return `<div class="shelf ${cls||''}"><h3>${esc(title)}</h3><span class="n">${count}</span>${note?`<span class="n" style="margin-left:auto">${esc(note)}</span>`:''}</div>`;
+}
+function fam(title,count){
+  return `<div class="fam"><h4>${esc(title)}</h4><span class="n">${count}</span></div>`;
+}
+const matches = (r,q)=> !q || r.t.toLowerCase().includes(q.toLowerCase()) || r.c.toLowerCase().includes(q.toLowerCase());
+
+function render(){
+  const q = (document.getElementById('q').value||'').trim();
+  let html='';
+  if(VIEW==='draft'){
+    html = `<div class="emptyst"><h4>No drafts.</h4><p>A price you are still preparing lives here — named, priced and invisible to everybody — until you put it on sale. A price that has been ON sale and was switched off is not a draft: it files under <b>Switched off</b>.</p></div>`;
+  }
+  else if(VIEW==='sale'){
+    /* CUSTOMER */
+    if(SCOPE==='all'||SCOPE==='Customer'){
+      const famBlocks = PRODUCTS.map(g=>{
+        const rows = g.rows.filter(r=> r.ladder ? (!q || 'papic credits ladder papic_guest'.includes(q.toLowerCase()) || ladderMatches(q).length>0) : matches(r,q));
+        if(!rows.length) return '';
+        return fam(g.fam, rows.length) + rows.map(r=> r.ladder ? (freeGrantRow() + ladderRow(q)) : productRow(r,q)).join('');
+      }).filter(Boolean);
+      if(famBlocks.length){
+        html += shelf('Customer — what a customer buys', 26, '', '9 products + the credit ladder');
+        html += `<div class="damage"><b>6 prices carry no note</b><span>— an old bulk save blanked them (3 products here, 3 ladder rungs). The per-row line stays until each is rewritten.</span></div>`;
+        html += famBlocks.join('');
+      }
+    }
+    /* BUNDLES */
+    if(SCOPE==='Bundles'){
+      html += shelf('Bundles', 0) + `<div class="emptyst"><h4>No bundle is on sale.</h4><p>Both packages were switched off — they wait under Switched off.</p></div>`;
+    }
+    /* VENDOR */
+    if(SCOPE==='all'||SCOPE==='Vendor'){
+      const famBlocks = VENDOR.map(g=>{
+        const rows = g.rows.filter(r=>matches(r,q));
+        if(!rows.length) return '';
+        return fam(g.fam, rows.length) + rows.map(r=>productRow(r,q)).join('');
+      }).filter(Boolean);
+      if(famBlocks.length){
+        html += shelf('Vendor', 18, '', 'what a shop pays us');
+        html += famBlocks.join('');
+      }
+    }
+    if(!html) html = `<div class="emptyst"><h4>Nothing matches “${esc(q)}”.</h4><p>Try part of the name, a product code, or a credit count — search reaches inside the ladder too.</p></div>`;
+  }
+  else { /* SWITCHED OFF */
+    const d = DEAD.filter(r=> matches(r,q) && (SCOPE==='all'||r.fam===SCOPE));
+    const free = d.filter(r=>r.checked!==false && r.holds.length===0);
+    const held = d.filter(r=>r.checked!==false && r.holds.length>0);
+    const unch = d.filter(r=>r.checked===false);
+    if(!d.length){
+      html = `<div class="emptyst"><h4>Nothing here${q?` matches “${esc(q)}”`:''}.</h4><p>A switched-off price waits here, dead, until nothing depends on it — then it can be removed for good.</p></div>`;
+    } else {
+      html += `<div class="damage"><b>These were filing under “Drafts”.</b><span> The retirement stamp is empty on every one, so a dead price read as work in progress. Off is off — it lives here now, with its distance from deletable measured per row.</span></div>`;
+      if(free.length){
+        html += shelf('Free to go', free.length, 'danger', 'never sold · nothing points at them');
+        html += `<div style="padding:11px 16px;border-bottom:1px solid var(--border-soft)">
+          <button class="btn btn-danger btn-sm" onclick="removeAll(${free.length})"><svg class="i" style="width:13px;height:13px;vertical-align:-2px"><use href="#i-trash"/></svg> Remove all ${free.length} for good</button>
+          <span style="font-size:12.5px;color:var(--ink-soft);margin-left:10px">The broom — your press, on your day.</span></div>`;
+        html += free.map(r=>deadRow(r,q)).join('');
+      }
+      if(held.length){
+        html += shelf('Still wired', held.length, 'hold', 'each names what is holding it');
+        html += held.map(r=>deadRow(r,q)).join('');
+      }
+      if(unch.length){
+        html += shelf('Not measured yet', unch.length, '', 'bundles + vendor prices — same check, not yet run');
+        html += unch.map(r=>deadRow(r,q)).join('');
+      }
+    }
+  }
+  document.getElementById('list').innerHTML = html;
+}
+
+/* ── modals + toast (capability parity with the shipped screen) ──────────── */
+function openModal(h){document.getElementById('modal').innerHTML=h;document.getElementById('scrim').classList.add('on');}
+function closeModal(){document.getElementById('scrim').classList.remove('on');}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(window._tt);window._tt=setTimeout(()=>t.classList.remove('on'),2600);}
+function retire(code){
+  const all = PRODUCTS.flatMap(g=>g.rows).concat(VENDOR.flatMap(g=>g.rows));
+  const r = all.find(x=>x.c===code); if(!r) return;
+  const live = PRODUCTS.flatMap(g=>g.rows).filter(x=>!x.ladder && x.c!==code).slice(0,6);
+  openModal(`
+   <div class="mh"><h3>Switch ${esc(r.t)} off?</h3></div>
+   <div class="mb">
+     <p>It comes off the public price page right away. Nobody new can buy it; anything already sold keeps working. It moves to <b>Switched off</b> — not Drafts — and you can put it back on sale any time.</p>
+     <div class="fld" style="margin-top:6px"><label><span class="l">Why? <span style="font-weight:400;color:var(--ink-soft)">(optional — kept with the row)</span></span>
+       <input class="inp" placeholder="e.g. replaced by the new credit ladder"></label></div>
+     <div class="fld"><label><span class="l">Replaced by <span style="font-weight:400;color:var(--ink-soft)">(optional)</span></span>
+       <select style="width:100%"><option>— nothing —</option>${live.map(x=>`<option>${esc(x.t)}</option>`).join('')}</select></label></div>
+   </div>
+   <div class="mf"><button class="btn btn-ghost btn-sm" onclick="closeModal()">Keep selling</button>
+     <button class="btn btn-primary btn-sm" onclick="closeModal();toast('Switched off — waiting under Switched off, dead, not drafted.')">Switch it off</button></div>`);
+}
+function removeOne(title){
+  openModal(`
+   <div class="mh"><h3>Remove ${esc(title)} for good?</h3></div>
+   <div class="mb"><p>Never sold, and nothing depends on it. It disappears completely — <b>no record kept, no undo</b>.</p></div>
+   <div class="mf"><button class="btn btn-ghost btn-sm" onclick="closeModal()">Keep it</button>
+     <button class="btn btn-danger btn-sm" onclick="closeModal();toast('Removed for good.')">Remove for good</button></div>`);
+}
+function removeAll(n){
+  const free = DEAD.filter(r=>r.checked!==false && r.holds.length===0);
+  openModal(`
+   <div class="mh"><h3>Remove ${n} prices for good?</h3></div>
+   <div class="mb"><p>None has ever been sold and nothing points at any of them. <b>No record kept, no undo.</b></p>
+   <ul style="background:var(--paper);border:1px solid var(--border);border-radius:9px;padding:11px 13px;margin-bottom:11px">${free.map(r=>`<li style="list-style:none;font-family:var(--mono);font-size:11.5px;padding:2.5px 0">${esc(r.t)}</li>`).join('')}</ul></div>
+   <div class="mf"><button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-danger btn-sm" onclick="closeModal();toast('${n} prices removed for good.')">Remove all ${n}</button></div>`);
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+/* ── the four demo states ────────────────────────────────────────────────── */
+const NOTES = {
+  default:'The default view. Customer and vendor stay separate; inside each, rows group by what a customer buys — and the 17 Papic sizes sit behind one row.',
+  ladder:'The ladder, opened in place: every rung readable, none editable here — the Edit button goes to the tab that already owns it. Three rungs still show the blanked-note damage.',
+  dead:'The dead shelf. These 24 rows were filing under “Drafts”. Dead styling, an off-date, and a per-row measure of distance from deletable: two are free to go, eleven name what holds them, twelve honestly say the check has not run on their catalogue.',
+  search:'Searching “10,000” reaches INSIDE the collapsed ladder — the row opens itself with the matching rung highlighted, and the switched-off 10K row is one tab away. Collapsing must never hide a row from search.',
+};
+function demo(s){
+  [...document.querySelectorAll('.states button')].forEach((b,i)=>b.setAttribute('aria-pressed',['default','ladder','dead','search'][i]===s));
+  document.getElementById('statenote').textContent = NOTES[s];
+  document.getElementById('q').value = s==='search' ? '10,000' : '';
+  OPEN=null; SCOPE='all';
+  [...document.querySelectorAll('#chips .chip')].forEach(b=>b.setAttribute('aria-pressed', b.textContent.trim()==='All'));
+  LADDER_OPEN = (s==='ladder');
+  if(s==='dead'){ setView('dead'); } else { VIEW='sale'; ['sale','draft','dead'].forEach(k=>document.getElementById('v-'+k).setAttribute('aria-selected',k==='sale')); render(); }
+}
+render();
+</script>
+
+<footer style="border-top:1px solid var(--border);padding:26px 0 44px;margin-top:34px">
+ <div class="wrap">
+  <p class="kicker">Contrast receipts · WCAG AA, both themes</p>
+  <p class="muted" style="font-size:12.5px;margin-top:8px;max-width:82ch">
+   <b>Light on #FFFFFF:</b> ink <code>#2C2A29</code> 14.8:1 · soft <code>#4F535B</code> 7.9:1 · action <code>#C24E25</code> 4.6:1 ·
+   link <code>#3B4E67</code> 8.2:1 · text gold <code>#8A6B39</code> 5.0:1 · negative text <code>#9E4526</code> 5.5:1 · positive <code>#4F6B4A</code> 5.3:1.
+   Decorative gold <code>#A9834B</code> (3.4:1) draws only dots, rules and borders — never words.
+  </p>
+  <p class="muted" style="font-size:12.5px;margin-top:8px;max-width:82ch">
+   <b>Dark on #211F1D:</b> ink <code>#ECE9E4</code> ≈13.6:1 · soft <code>#B3ADA5</code> ≈7.6:1 · action <code>#D96A42</code> ≈4.8:1 ·
+   link <code>#9FB4D0</code> ≈7.7:1 · text gold <code>#C2A05F</code> ≈6.6:1 · negative text <code>#E09873</code> ≈6.9:1 · positive <code>#A5C29E</code> ≈8.9:1.
+   The dead-row grey <code>rgba</code> at 45% is used only with a struck-through price beside a full-contrast meter line — state is never carried by colour alone.
+  </p>
+  <p class="muted" style="font-size:12.5px;margin-top:12px;max-width:82ch">
+   Headline counts are the 2026-08-28 production measurements from the task brief; ladder prices are the owner-locked 2026-08-26 recut.
+   Two honest gaps: the 100,000-credit rung's ₱15,000 is a placeholder (marked “price to confirm” on the rung), and the membership of the 24
+   switched-off rows is drawn from the 2026-08-26 measured retired list where the two measurements differ.
+  </p>
+ </div>
+</footer>
+</body>
+</html>
