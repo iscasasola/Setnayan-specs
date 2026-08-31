@@ -444,6 +444,27 @@ any surface computing it that way is failing a guard on purpose.
 set by whoever built the function — now lives in
 `apps/web/tests/db/papic-release-contract.ts` and passes against the real primitive.
 
+🔴 **THE GIVE-BACK AND THE CEILING INTERACT, AND NEITHER FEATURE IS WRONG ALONE.** Found by
+rebasing onto main after S5's gate (PR #5034) merged and **probing the two together** — no test of
+either feature could see it, and both suites were green. Measured: her camera holding her own 137,
+a 200 hand-out from the couple, 41 already shot. She could give back **all 137**, including the 41
+she had already fired; `papic_guest_self_funded_spend` then climbed to **137** as she kept shooting
+on the HAND-OUT. **The couple's own money was buying her a walk through the couple's own ceiling.**
+
+Both halves are fixed and pinned by a regression test:
+
+- `papic_seat_releasable_grants`' first ceiling now nets off her spend, so only her **unspent** own
+  credits can go (96, not 137). Her shots are attributed to her own purchase FIRST — not a new
+  rule, it is the attribution `papic_guest_self_funded_spend` already makes with
+  `LEAST(spent, paid)`.
+- `papic_guest_self_funded_spend` now nets off what she released, so donated credits stop counting
+  as hers (stays 41, whatever she shoots afterwards).
+
+🔑 **THE LESSON IS ABOUT WHERE DEFECTS LIVE.** This one existed only in the seam between two
+correct features built by two sessions days apart. Rebasing was what exposed it; reading either
+migration never would have. **After a rebase that brings in a related feature, probe the pair —
+do not re-read your own.**
+
 ⚠ **What can never come back is what the camera already SHOT** — the floor on any target is that
 camera's own spend, and the refusal is explicit rather than a silent clamp. The buyer's screen
 must say so.

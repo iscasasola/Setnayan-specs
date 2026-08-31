@@ -173,6 +173,22 @@ for free.
 
 ## 4 · Timed challenges reach the wall
 
+> ⚠ **RE-MEASURED 2026-08-31 — THIS ITEM IS SMALLER THAN IT READS, AND HALF OF IT ALREADY SHIPPED.**
+> The completion board is NOT missing. `papic_mission_completions` exists
+> (`supabase/migrations/20271117738153_papic_challenge_library_and_board.sql`, MATERIALIZE-ONCE /
+> NEVER-DELETE), is written, and **already has a working reader** in
+> `apps/web/app/[slug]/_components/editorial/data.ts` — copy that read, do not design a new one.
+> What is genuinely absent is only the wall side: **0** matches for challenge/mission/prompt in
+> `apps/web/app/api/wall/[eventId]/feed/route.ts` and in `live-wall-block.tsx`. So item 4 =
+> **one clock + one new reader**, not a board build.
+>
+> 🔑 **DO NOT MISTAKE `papic_challenge_expires_at` FOR THE CLOCK.** It exists, and it looks exactly
+> like a challenge window — it is on **`vendor_profiles`** (migration
+> `20271181420277_the_challenge_is_a_subscription.sql`) and is the VENDOR'S SUBSCRIPTION EXPIRY.
+> Reading the column name without reading its table is how this item gets reported as already done.
+> Confirm with `grep -n -B6 papic_challenge_expires_at supabase/migrations/*.sql`.
+
+
 Owner ruled 2026-08-28: *"we can add a timed challenge."*
 
 **Measured — more exists than expected.** A library of **500+ prompts** ships
@@ -200,6 +216,18 @@ Joining them means a coordinator sets up in two minutes instead of writing promp
 
 ## 6 · The guest chooses per audience
 
+> ⚠ **RE-MEASURED 2026-08-31 — IT IS FOUR FLAGS, NOT TWO.** `guests.face_recognition_excluded`,
+> `guests.faceblock_enabled`, `guests.photo_consent`, and `guests.scan_tracking_opt_out`.
+>
+> 🔑 **THE FOURTH ONE IS THE WHOLE POINT OF RULE 0 HERE.** `guests.scan_tracking_opt_out` was added
+> citing **RA 10173** (`supabase/migrations/20260513050000_iteration_0002_invitation.sql`) and has
+> **ZERO application references** — no reader AND no writer. It is dormant, so nobody's consent is
+> being violated today; the risk runs the other way: **this item will add a FIFTH flag beside a
+> column already designed for exactly this choice.** The repo half-knows — it sits in
+> `apps/web/tests/db/gates-have-handles.baseline.txt` as `NOT INVESTIGATED`. Decide whether to adopt
+> it or retire it BEFORE adding schema. Re-measure: `grep -rn scan_tracking_opt_out .`
+
+
 **The market's single clearest gap, and smaller than anyone assumes.** Nothing in the scanned
 competitive field lets a guest decline facial recognition; we already do. The finish is letting
 them choose **per audience** — *"keep me off the big screen but leave me in their album"* is a
@@ -221,6 +249,16 @@ Ship a plain consent receipt with it — what was collected, why, for how long, 
 ---
 
 ## 7 · The year
+
+> ⚠ **RE-MEASURED 2026-08-31 — THE NAME YOU WILL REACH FOR IS ALREADY TAKEN.** "Nothing links two
+> celebrations" still holds for CELEBRATIONS, but `related_event_id` already exists with an unrelated
+> meaning in `20260703000000_v2_phase_a_per_voucher_granularity.sql` and
+> `20260704010000_v2_phase_e_telemetry_events.sql`. Whoever builds the year will grep that name, get
+> false hits, and may reuse a column that means something else. **Pick a distinct name.**
+>
+> ✅ **THE PROTECTION BELOW STILL HOLDS, re-checked after the 2026-08-31 ceiling merges:** there is
+> still NO stored share column anywhere in `supabase/migrations`. The share is derived at spend time.
+
 
 **Ruled 2026-07-15 and unbuilt.** A separate *occasion* becomes its own celebration shown as a
 **linked cluster**; a multi-day celebration stays ONE celebration with days; somewhere to sleep is
