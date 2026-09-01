@@ -171,7 +171,35 @@ for free.
 
 ---
 
-## 4 · Timed challenges reach the wall — ⏱ **4a (THE CLOCK) BUILT 2026-09-01**
+## 4 · Timed challenges reach the wall — ✅ **BUILT 2026-09-01 (4a AND 4b)**
+
+> ✅ **BOTH HALVES ARE DONE. DO NOT REBUILD EITHER.** The clock is
+> `20271188446868_papic_challenge_clock.sql` + `20271188710305_papic_timed_challenge_duration.sql`;
+> the wall reads it via `fetchWallArmedChallenge` (`apps/web/lib/live-wall.ts`).
+> Re-measure with `grep -n papic_challenge_ends_at supabase/migrations/*.sql`.
+>
+> ⏱ **A TIMED CHALLENGE LASTS 30 MINUTES, AN HOUR, OR TWO — the couple picks, 30 by default**
+> (owner 2026-09-01, superseding the same day's "no duration column, no default number"; the
+> reasoning behind that clause — *don't guess a number that governs something* — is intact, and it
+> stopped applying the moment the owner chose). `papic_challenge_ends_at()` is the ONE place an end
+> instant is computed, and takes the **earliest** of three terms: the challenge's own timer, the
+> next arming, and the capture window.
+>
+> ⛔ **"ONE CHALLENGE, BUT THE OTHER CHALLENGES MAY STILL BE THERE"** (owner, same day) — the
+> sentence most likely to be mis-implemented by anyone reading only the function names.
+> `papic_challenge_is_open()` means *"is this the TIMED one running"*, **never** *"may a guest do
+> this"*. Arming takes nothing off a guest's board, expiry takes nothing off it either, and an
+> expired prompt can still be answered. A db test arms a challenge, runs its clock out and asserts
+> the guest's board is identical throughout; filtering the board by the resolver turns it red.
+>
+> 🪤 **THE STAND-IN THAT WAS RETIRED, AND THE HALF-DAY IT WAS LIVE.** `fetchWallArmedChallenge`
+> originally called the board's **FIRST SLOT** the armed challenge — correct while no clock
+> existed, flagged the moment 4a landed, and genuinely live once both PRs merged: the wall could
+> project one challenge while the couple's screen named another, each passing its own tests. Its
+> guard test **inverted** with the fix — it used to require the ordering rule to be PRESENT in that
+> file, and now requires it to be ABSENT. 🔑 **Two mechanisms that disagree about one fact each
+> pass their own suite; only a test that forbids the second mechanism catches it.**
+
 
 > ✅ **4a IS DONE. DO NOT REBUILD IT.** Migration `20271188446868_papic_challenge_clock.sql`
 > (branch `claude/a-papic-challenge-has-a-clock`) adds `papic_missions.armed_at` / `.closed_at`,
@@ -192,11 +220,6 @@ for free.
 > language. So the ruling's ARM had to be created, and the guest-side one was left alone. **Two
 > different things now share the word; read which one a file means before touching it.**
 >
-> ⏭ **4b (THE WALL) IS THE REMAINING HALF**, and it has a live divergence to close:
-> `fetchWallArmedChallenge` (`apps/web/lib/live-wall.ts`, PR #5067) picks the board's **first
-> slot** as "the armed challenge" — the stand-in it had to use because the clock did not exist
-> when it was written. It should call `papic_armed_challenge`, or the wall and the couple's screen
-> can name **different live challenges**, each passing its own tests.
 
 
 > ⚠ **RE-MEASURED 2026-08-31 — THIS ITEM IS SMALLER THAN IT READS, AND HALF OF IT ALREADY SHIPPED.**
@@ -254,12 +277,32 @@ Joining them means a coordinator sets up in two minutes instead of writing promp
 > wedding degrades nowhere, which is asserted so the fallback can never hide a hole. No duration,
 > no expiry — the sequence is the clock.
 >
-> 🚨 **THE ONE THING THAT WOULD MAKE THIS INVISIBLE TO THE ROOM IS STILL OPEN.**
+> 🚨 **THE WALL READ — FLAGGED, THEN FOUND ALREADY IN FLIGHT. DO NOT REBUILD IT.**
 > `fetchWallArmedChallenge` (`apps/web/lib/live-wall.ts`) picks the board's FIRST SLOT and does not
-> call `papic_armed_challenge` — flagged by the 4a session, re-measured against `origin/main`
-> 2026-09-01, deliberately not fixed here. Until it is, advancing the sequence changes the couple's
-> screen and NOT the wall, and the two name different live challenges while each passes its own
-> tests. Re-measure: `grep -n papic_armed_challenge apps/web/lib/live-wall.ts`.
+> call `papic_armed_challenge`, so advancing the sequence moves the couple's screen and NOT the
+> wall. Item 5 deliberately did not fix it — and on re-checking work in flight (RULE 0.8) a
+> **parallel session is already replacing exactly that function**, uncommitted in the worktree
+> `~/Documents/Claude/Projects/wt-papic-clock` on branch
+> `claude/a-timed-challenge-lasts-thirty-minutes`, together with the honesty guard that pins its
+> shape. ⚠ **Uncommitted is not shipped** — before acting, re-measure on `origin/main`:
+> `grep -n papic_armed_challenge apps/web/lib/live-wall.ts`. If it is there, this is done; if that
+> branch was abandoned, it is a one-function change and still worth doing.
+
+> 🔴 **THE "NO DURATION COLUMN" RULING WAS SUPERSEDED THE SAME DAY — 2026-09-01 — AND ITEM 5 STILL
+> COMPOSES WITH IT.** The brief item 5 was built from said *"No duration column, no default duration
+> number. THE SEQUENCE IS THE CLOCK."* The owner then chose **30 · 60 · 120 minutes, defaulting to
+> 30**, and that is what the branch above is building
+> (`supabase/migrations/20271188710305_papic_timed_challenge_duration.sql`,
+> `papic_missions.armed_duration_minutes`, a new `papic_challenge_ends_at()` that
+> `papic_challenge_is_open()` then defers to). Item 5 added **no duration of its own**, so nothing
+> it shipped has to be undone: the run of show arms through `armChallengeAction`, which that branch
+> extends with `p_duration_minutes`, and a form that posts none gets the owner's default.
+> ⚠ **AND ONE OPEN CONSEQUENCE, NOT DECIDED BY EITHER SESSION:** the run of show therefore arms
+> **every moment for 30 minutes** with no way to say otherwise, while a first dance is four minutes
+> and a cocktail hour is sixty. Whether a moment should carry its own length — or simply rely on the
+> next arming closing the previous, which it already does — is an owner call.
+> ⚠ Expect a **merge conflict in `apps/web/app/dashboard/[eventId]/studio/papic/actions.ts`**:
+> both changes edit `armChallengeAction`.
 >
 > ⚠ **OWNER CALL, LEFT OPEN:** the ten moments are wedding-shaped, and this screen offers all ten at
 > every event type — matching the shipped `/alaala/assignments` behaviour rather than inventing a
