@@ -192,6 +192,16 @@ for free.
 > expired prompt can still be answered. A db test arms a challenge, runs its clock out and asserts
 > the guest's board is identical throughout; filtering the board by the resolver turns it red.
 >
+> 🔐 **WHO SETS IT: THE HOST AND THE COORDINATOR, NOT THE GUESTS** (owner 2026-09-01) — measured as
+> ALREADY TRUE and pinned rather than built. `papic_missions_member_all` admits exactly
+> `member_type IN ('couple','coordinator')` + admin. ⚠ **"Host" IS `member_type = 'couple'` at every
+> event type** — there is no `'host'` member type; the enum is
+> `('couple','guest','vendor','coordinator')` and only the on-screen WORD varies. And a coordinator
+> passes TWO doors on TWO rows: the dashboard shell on an accepted `event_moderators` row, the
+> challenge policy on an `event_members` coordinator row minted by the `sync_delegate_membership`
+> trigger. A door that writes one and not the other yields somebody who can see a control that does
+> nothing.
+>
 > 🪤 **THE STAND-IN THAT WAS RETIRED, AND THE HALF-DAY IT WAS LIVE.** `fetchWallArmedChallenge`
 > originally called the board's **FIRST SLOT** the armed challenge — correct while no clock
 > existed, flagged the moment 4a landed, and genuinely live once both PRs merged: the wall could
