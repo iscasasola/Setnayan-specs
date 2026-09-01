@@ -2,7 +2,38 @@
 
 **Locked 2026-05-20.** Owner-side launch-prep guide for the three external app reviews that gate V1 launch: **Google Drive** (Photo Delivery + Papic), **YouTube** (Panood), **TikTok** (Patiktok). Each section has the audit summary, submission portal URL, field-by-field answers, demo video script, and common rejection reasons.
 
-> **Engineering-side prep is COMPLETE for all 3.** The privacy disclosure pages are shipped at `setnayan.com/privacy`, all OAuth scopes are minimum-necessary, and the OAuth flows are coded + deployed. What blocks each is the **submission package + demo video** that only the owner can record and submit.
+## ⚠ CORRECTED 2026-09-01 (L5) — Part 1 (Drive) does not need Google's OAuth verification review at all
+
+**`drive.file` is on Google's own non-sensitive scope list — the 100-user cap and the "Submit for
+Verification" review Part 1 walks through apply only to sensitive/restricted scopes.** Measured
+against `apps/web/lib/papic-drive.ts` @ `origin/main` 2026-09-01: `DRIVE_OAUTH_SCOPES` requests
+`https://www.googleapis.com/auth/drive.file` and nothing else — no broader Drive scope was ever
+added. That means Photo Delivery + Papic's Drive sync is **uncapped today, for every couple**,
+whether or not Part 1 below is ever submitted. Part 1's field-by-field answers and demo script stay
+useful as evidence of due diligence, but treating its submission as a **launch blocker is a false
+premise** — do not stall a release waiting on it.
+
+**Part 2 (YouTube)'s scope table is stale.** `youtube.upload` was dropped 2026-07-25 (Google refuses
+one consent covering a YouTube scope + `drive.file` together — see
+`apps/web/lib/google-oauth-scope-conflict.test.ts`). `apps/web/lib/panood-youtube.ts` requests only
+`https://www.googleapis.com/auth/youtube` now. The **100-user lifetime cap binds this one scope
+only**, and it is a PROJECT-wide cap: Live Studio (YouTube), Papic (Drive) and the platform's
+"Continue with Google" sign-in button are three OAuth clients — all client IDs begin
+`330619827695-` — **on one shared Cloud project**. Switching that project to Internal/Workspace to
+dodge the cap is off the table: it would refuse every external user on the sign-in client, breaking
+Google sign-in platform-wide. Re-verify Part 2's field text against `panood-youtube.ts` before using
+it in a submission — this file's own copy will rot again if the scope ever changes and this section
+isn't updated with it.
+
+**What's still genuinely unverified (needs the owner in the actual Cloud Console, not a grep):**
+consent-screen branding, the authorized-domains list, and confirming the live scope list shown on
+the consent screen is exactly `auth/youtube` (no leftover `auth/youtube.upload` grant sitting on the
+project from before the 2026-07-25 drop). See `apps/web/app/(shell)/privacy/google-access/page.tsx`
++ its guard test for the code-side half of this; that page and test already keep the *disclosed*
+scope list byte-matched to the code, which is a different claim from what's *configured on the
+console*.
+
+> **Engineering-side prep is COMPLETE for all 3.** The privacy disclosure pages are shipped at `setnayan.com/privacy`, all OAuth scopes are minimum-necessary, and the OAuth flows are coded + deployed. What blocks each is the **submission package + demo video** that only the owner can record and submit — except Part 1, which per the correction above may not need submitting at all.
 
 > **Submission timeline expectations.** Google + TikTok reviews take 1–4 weeks typical, sometimes 6+ if scopes need justification. Submit all three in parallel — they don't depend on each other. Each portal accepts updates without resetting the queue, so first submission can be incomplete and refined while waiting.
 

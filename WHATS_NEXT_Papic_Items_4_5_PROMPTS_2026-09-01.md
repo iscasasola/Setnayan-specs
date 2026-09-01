@@ -1,0 +1,178 @@
+<!-- Ready-to-paste session prompts for items 4 and 5 of
+WHATS_NEXT_Papic_Build_Order_2026-08-29.md. Paste ONE prompt per session, verbatim. -->
+
+# Papic items 4 & 5 — session prompts (2026-09-01)
+
+> ✅ **4a AND 4b ARE SAFE TO RUN TOGETHER.** 4a is a migration + resolver (schema side); 4b is the
+> wall feed and its component (read side). **Disjoint on every file**, and 4b deliberately renders
+> only what already ships, so it does NOT wait on 4a's columns.
+> ⛔ **ITEM 5 RUNS AFTER 4a MERGES** — it hangs challenges on the ceremony sequence and needs the
+> clock's shape settled first.
+> ⚠ Every session must `git fetch` before branching. `origin/main` moved 31 commits under a single
+> held PR during the last session.
+
+---
+
+## 🔴 ONE OWNER DECISION BLOCKS 4a — DO NOT GUESS IT
+
+**A challenge has no concept of time at all today** (verified 2026-08-31: no window, no countdown,
+no expiry anywhere). "Timed" therefore needs one ruling before a line is written:
+
+- **(A) fixed wall-clock** — the challenge expires at a time the couple picks; or
+- **(B) relative** — it runs for N minutes from the moment the couple arms it.
+
+They produce different columns and a different resolver. RULE 0 rule 9 applies with full force here
+(*"I flagged it" does not make a guessed number safe*) — **if this is unruled when the session
+starts, STOP and ask; do not ship a default and label it a guess.**
+
+---
+
+## SHARED HEADER — paste at the top of EVERY prompt below
+
+```
+Read the repo's own CLAUDE.md and the corpus CLAUDE.md first, then follow RULE 0: assume what you
+are about to build already exists, and locate it before writing anything. RULE 0 now covers work in
+flight, not just origin/main — run `gh pr list --state open --limit 40` and `git worktree list`
+before you start. A feature was rebuilt from scratch on 2026-08-31 while a better version sat open
+as a PR.
+
+Working rules for this session, all of which have cost this project real work before:
+
+1. Branch, then `git worktree add` IMMEDIATELY — beside the repo at
+   ~/Documents/Claude/Projects/wt-<name>. NEVER in /tmp: a finished, proved change was lost that
+   way on 2026-08-28 with zero commits ever made.
+2. `pnpm install` in the worktree BEFORE running anything. A run in an uninstalled worktree means
+   nothing — it resolves nothing and "passes".
+3. Run unit and db tests FROM apps/web (`cd apps/web && npx tsx --test tests/db/<file>`). From the
+   repo root every `@/…` import dies, including the repo's own guards.
+4. PUSH THE MOMENT IT TYPECHECKS. Do not batch a session's work into one commit at the end.
+5. Typecheck with the exit code printed beside the error count:
+   `npx tsc --noEmit -p tsconfig.json > /tmp/tsc.log 2>&1; echo "TSC_EXIT=$?"; grep -c 'error TS' /tmp/tsc.log`
+   An EMPTY log is NOT a clean one — tsc exits 144 on abort, and two concurrent typechecks cause
+   exactly that. Never run two.
+6. Require `# tests` to be NON-ZERO before believing any pass. Zero-tests-zero-failures is
+   byte-identical to success and exits 0.
+7. Mutation-test every assertion you add and PRINT THE OCCURRENCE COUNT before → after. An
+   unmeasured sabotage proves nothing. If a well-formed sabotage reports GREEN, suspect the
+   sabotage before the guard.
+8. 🚨 IF YOU WRITE `CREATE OR REPLACE FUNCTION`, DERIVE THE BODY FROM THE CURRENT DEFINITION, NOT
+   FROM YOUR BRANCH'S COPY. A replace reinstates whatever body its author copied, and git reports
+   NO CONFLICT when that body is stale — PR #5044 silently reverted a fix that had merged hours
+   earlier this way. Rebase first, then diff your copy against:
+     SELECT pg_get_functiondef('public.<fn>(<args>)'::regprocedure);
+9. Add a changelog fragment in changelog.d/ — never edit CHANGELOG.md or STATUS.md directly.
+10. Auto-merge is the standing default: `gh pr merge <n> --auto --merge` right after creating it.
+    EXCEPTION: anything touching money, credits, ceilings or an anon-callable SECURITY DEFINER path
+    opens as a DRAFT and carries the `do-not-auto-merge` label. The owner merges those.
+```
+
+---
+
+## ITEM 4a — a challenge acquires a clock
+
+```
+Give a Papic challenge a concept of time. Spec: WHATS_NEXT_Papic_Build_Order_2026-08-29.md § 4 in
+the corpus at ~/Documents/Claude/Projects/Setnayan — READ THE RE-MEASURED BLOCK AT THE TOP OF THAT
+SECTION FIRST; the item is smaller than its prose suggests.
+
+WHAT ALREADY SHIPS — do not rebuild any of it:
+
+- A library of 500+ prompts: lib/papic-challenge-pool.ts (CHALLENGE_POOL_FLOOR = 500), categorised
+  and filtered by event type.
+- A challenge can already be ARMED on a guest's camera; the viewfinder renders "Next shot: {prompt}".
+- A completion board: public.papic_mission_completions, MATERIALIZE-ONCE / NEVER-DELETE, created by
+  migration 20271117738153_papic_challenge_library_and_board.sql. It is WRITTEN and it is READ.
+
+🛑 THE TRAP THAT WILL MAKE YOU REPORT THIS AS ALREADY DONE: `papic_challenge_expires_at` EXISTS and
+reads exactly like a challenge clock. It is on **vendor_profiles** (migration
+20271181420277_the_challenge_is_a_subscription.sql) and is the VENDOR'S SUBSCRIPTION EXPIRY. Read
+the column's TABLE, never its name alone. Confirm for yourself:
+  grep -n -B6 papic_challenge_expires_at supabase/migrations/*.sql
+
+MEASURED 2026-08-31: a challenge has no window, no countdown and no expiry anywhere.
+
+BUILD:
+
+1. The owner's ruling on the clock's shape — fixed wall-clock, or N minutes from arming — decides
+   your columns. IF IT IS NOT RULED, STOP AND ASK. Do not ship a default.
+2. Schema FIRST, with RLS at CREATE TABLE time and the matching pattern from
+   02_Specifications/RLS_Policy_Pattern.md § 5. Allocate the prefix with `pnpm migration:new`.
+3. A resolver that answers "is this challenge live right now?" in ONE place, the way
+   papic_guest_spend_ceiling() is the one place a ceiling is decided. Two readers must never be able
+   to disagree about whether a challenge is open — that class of drift is what item 3 spent six
+   sessions removing.
+4. A db test that REFUSES something: arm a challenge, move past its end, assert it is closed. A test
+   that only asserts a column exists proves nothing — four limits have shipped on this surface
+   governing nothing.
+
+DO NOT touch the wall feed or live-wall components; a parallel session (4b) owns those files.
+```
+
+---
+
+## ITEM 4b — the wall shows the challenge and who has answered
+
+```
+Put the Papic challenge on the live wall. Spec: WHATS_NEXT_Papic_Build_Order_2026-08-29.md § 4 in
+the corpus at ~/Documents/Claude/Projects/Setnayan — READ THE RE-MEASURED BLOCK AT THE TOP FIRST.
+
+WHAT ALREADY SHIPS — this is a READER, not a board build:
+
+- public.papic_mission_completions already records who answered (MATERIALIZE-ONCE, NEVER-DELETE).
+- It ALREADY HAS A WORKING READER to copy:
+    apps/web/app/[slug]/_components/editorial/data.ts   (grep: papic_mission_completions)
+- The challenge library and the armed prompt already exist (lib/papic-challenge-pool.ts).
+
+MEASURED 2026-08-31, and this is the whole gap:
+  apps/web/app/api/wall/[eventId]/feed/route.ts        -> 0 matches for challenge|mission|prompt
+  apps/web/app/[slug]/_components/live-wall-block.tsx  -> 0 matches for challenge|mission|prompt
+
+BUILD:
+
+1. The wall feed carries the currently-armed challenge and a COUNT of guests who have answered it,
+   read from papic_mission_completions. Copy the existing read; do not invent a second shape.
+2. The wall renders both. A count nobody can see is the disease this whole stream exists to kill —
+   a log line never changed a pixel.
+3. ⚠ RENDER WHAT IS TRUE WHEN THE READ FAILS OR RETURNS NOTHING. A refused or empty read must never
+   render as "no challenge" indistinguishably from a genuinely un-armed wall. The pattern to copy is
+   in this repo: apps/web/lib/guests.ts + apps/web/lib/guests-read-is-honest.test.ts.
+4. A test that proves the count reaches the RENDER, not merely the query.
+
+DO NOT add columns and DO NOT write a migration — a parallel session (4a) owns the clock. Build
+against what ships today; the countdown lands after both merge.
+```
+
+---
+
+## ITEM 5 — challenges hang on the ceremony sequence
+
+```
+Join the challenge library to the ceremony sequence. Spec:
+WHATS_NEXT_Papic_Build_Order_2026-08-29.md § 5 in the corpus at ~/Documents/Claude/Projects/Setnayan.
+
+⛔ RUN THIS ONLY AFTER ITEM 4a HAS MERGED — the join is to a challenge that has a clock.
+
+WHAT ALREADY SHIPS — both halves exist and NOTHING joins them:
+
+- lib/kwento-moments.ts carries the sequence in order: bridal march · vows · veil & cord · first
+  kiss · leaving the church · cocktail hour · newlywed entrance · first dance · cake cutting ·
+  money dance.
+- lib/papic-challenge-pool.ts carries 500+ categorised prompts.
+- Measured 2026-08-31: zero references to kwento in the challenge pool, and no join anywhere.
+
+⇒ The value is that a coordinator sets up in two minutes instead of writing prompts from scratch.
+
+BUILD the join and the setup path that uses it. Prove it with a test that a moment yields the
+prompts a coordinator would expect, and that an unmapped moment degrades to the general pool rather
+than to nothing.
+```
+
+---
+
+## When these are done
+
+Item 6 is next, and it needs an owner ruling BEFORE any schema: `guests.scan_tracking_opt_out` was
+added citing RA 10173 and has ZERO application references — no reader and no writer. It is dormant,
+so no consent is being violated today; the risk is that item 6 adds a FIFTH consent flag beside a
+column already built for exactly that choice. Adopt it or retire it first. See the re-measured block
+at the top of § 6.
