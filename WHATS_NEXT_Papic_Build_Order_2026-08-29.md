@@ -236,13 +236,34 @@ shot: {prompt}"* today.
 
 ---
 
-## 5 · Challenges hang on the ceremony sequence
+## 5 · Challenges hang on the ceremony sequence — 🎼 **BUILT 2026-09-01**
 
 `lib/kwento-moments.ts` already carries the sequence in order — bridal march · vows · **veil &
 cord** · first kiss · leaving the church · cocktail hour · newlywed entrance · first dance · cake
 cutting · **money dance**. The challenge library exists. **Nothing joins them.**
 
 Joining them means a coordinator sets up in two minutes instead of writing prompts from scratch.
+
+> ✅ **BUILT 2026-09-01** — branch `claude/challenge-pool-joins-the-ceremony`, migration
+> `20271189223426`. The mapping is authored in `MOMENT_CHALLENGES`
+> (`apps/web/lib/papic-challenge-pool.ts`) **by slug**, regenerated through
+> `papic-challenge-sql.ts` into `papic_challenge_library.moment_keys` — never hand-written in SQL,
+> and no second table of prompts. The coordinator's screen is `/studio/papic/run-of-show`; it arms
+> through 4a's `papic_arm_challenge` and reads through `papic_armed_challenge` rather than
+> re-implementing either. An unmapped moment degrades to the general pool and **says it did**; a
+> wedding degrades nowhere, which is asserted so the fallback can never hide a hole. No duration,
+> no expiry — the sequence is the clock.
+>
+> 🚨 **THE ONE THING THAT WOULD MAKE THIS INVISIBLE TO THE ROOM IS STILL OPEN.**
+> `fetchWallArmedChallenge` (`apps/web/lib/live-wall.ts`) picks the board's FIRST SLOT and does not
+> call `papic_armed_challenge` — flagged by the 4a session, re-measured against `origin/main`
+> 2026-09-01, deliberately not fixed here. Until it is, advancing the sequence changes the couple's
+> screen and NOT the wall, and the two name different live challenges while each passes its own
+> tests. Re-measure: `grep -n papic_armed_challenge apps/web/lib/live-wall.ts`.
+>
+> ⚠ **OWNER CALL, LEFT OPEN:** the ten moments are wedding-shaped, and this screen offers all ten at
+> every event type — matching the shipped `/alaala/assignments` behaviour rather than inventing a
+> new gate. Whether a birthday should be shown a ceremony sequence at all is undecided.
 
 ---
 
