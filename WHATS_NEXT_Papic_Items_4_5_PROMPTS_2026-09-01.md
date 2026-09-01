@@ -159,28 +159,68 @@ against what ships today; the countdown lands after both merge.
 
 ## ITEM 5 — challenges hang on the ceremony sequence
 
+> ✅ **UNBLOCKED — 4a merged as PR #5070 and 4b as #5067 on 2026-09-01.** Rewritten against what
+> those actually shipped, so the session does not rediscover it.
+
 ```
-Join the challenge library to the ceremony sequence. Spec:
+Join the challenge pool to the ceremony sequence. Spec:
 WHATS_NEXT_Papic_Build_Order_2026-08-29.md § 5 in the corpus at ~/Documents/Claude/Projects/Setnayan.
 
-⛔ RUN THIS ONLY AFTER ITEM 4a HAS MERGED — the join is to a challenge that has a clock.
+WHAT 4a AND 4b JUST SHIPPED — build on these, do not re-invent them:
 
-WHAT ALREADY SHIPS — both halves exist and NOTHING joins them:
+- public.papic_missions gained `armed_at` and `closed_at`
+  (migration 20271188446868_papic_challenge_clock.sql).
+- public.papic_arm_challenge(p_mission_id UUID) RETURNS TIMESTAMPTZ — arming ONE closes the previous.
+- public.papic_armed_challenge(p_event_id UUID) RETURNS TABLE — the currently-armed one.
+- public.papic_challenge_is_open(p_mission_id UUID) RETURNS BOOLEAN — the ONE place "is it open?" is
+  decided. Every reader asks THIS. Do not add a second answer to that question.
+- The wall already renders the armed challenge and the answered count (live-wall-block.tsx).
 
-- lib/kwento-moments.ts carries the sequence in order: bridal march · vows · veil & cord · first
-  kiss · leaving the church · cocktail hour · newlywed entrance · first dance · cake cutting ·
-  money dance.
-- lib/papic-challenge-pool.ts carries 500+ categorised prompts.
-- Measured 2026-08-31: zero references to kwento in the challenge pool, and no join anywhere.
+OWNER RULING, 2026-09-01 (DECISION_LOG.md): the window is RELATIVE — it opens when the challenge is
+ARMED, never at a wall-clock time. THE SEQUENCE IS THE CLOCK. No duration column, no default
+duration number. Expiry closes the PROMPT, never the SHUTTER.
 
-⇒ The value is that a coordinator sets up in two minutes instead of writing prompts from scratch.
+🔑 THE ONE FACT THAT DECIDES HOW YOU BUILD THIS — THERE IS ONLY ONE PROMPT SOURCE:
 
-BUILD the join and the setup path that uses it. Prove it with a test that a moment yields the
-prompts a coordinator would expect, and that an unmapped moment degrades to the general pool rather
-than to nothing.
+  lib/papic-challenge-pool.ts  →  lib/papic-challenge-sql.ts  →  the migration INSERT
+                                                              →  public.papic_challenge_library
+
+  "The 631 challenges are authored once in papic-challenge-pool.ts and this turns them into the
+   INSERT a migration carries. Nothing is typed twice."  — papic-challenge-sql.ts, verbatim.
+
+⇒ ANY new per-challenge data — including a ceremony-moment mapping — IS AUTHORED IN THE POOL AND
+REGENERATED. Never hand-write library rows in SQL, and never add a second table of prompts. Doing
+either creates two mechanisms that disagree about one fact, each passing its own suite — the exact
+failure this project has paid for repeatedly.
+
+MEASURED 2026-09-01, so you do not have to:
+
+- lib/kwento-moments.ts is TEN ORDERED MOMENTS with NO time: `KwentoMoment = {key, label, eyebrow}` —
+  bridal_march · exchange_of_vows · veil_and_cord · first_kiss · leaving_the_church · cocktail_hour ·
+  newlywed_entrance · first_dance · cake_cutting · money_dance.
+- The library's `category` axis is THEMATIC, NOT CEREMONIAL — 12 categories over 631 rows in
+  production: stories(97) couple_family(57) anywhere(55) meet_room(55) fashion_candids(50)
+  greeting(50) selfie(50) food_drinks(47) decor_booth(46) stories_couple(43) band_dance(42)
+  big_moments(39). `big_moments` and `band_dance` are ADJACENT to moments but are NOT a mapping —
+  do not mistake either for one and report this as already done.
+- Nothing joins moments to prompts anywhere: zero references to kwento in the pool.
+
+BUILD:
+
+1. The moment→challenge mapping, authored in the POOL and regenerated through papic-challenge-sql.ts
+   into a new migration (allocate the prefix with `pnpm migration:new`). A moment maps to SEVERAL
+   candidate prompts; a prompt may suit more than one moment.
+2. The coordinator's setup path: pick a celebration's sequence, and each moment arms its challenge
+   via papic_arm_challenge when the coordinator says the moment is happening. The value being bought
+   is that setup takes two minutes instead of writing prompts from scratch.
+3. An UNMAPPED moment must degrade to the general pool, never to nothing. A ceremony that reaches a
+   moment with no mapping still has to offer the guests something.
+4. Tests: a moment yields the prompts a coordinator would expect; an unmapped moment degrades rather
+   than empties; and arming a moment's challenge closes the previous one (that behaviour is 4a's, so
+   assert you are USING it, not re-implementing it).
+
+⚠ DO NOT add a duration or an expiry of your own. The clock is 4a's and the ruling is settled.
 ```
-
----
 
 ## When these are done
 

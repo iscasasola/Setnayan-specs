@@ -171,7 +171,33 @@ for free.
 
 ---
 
-## 4 · Timed challenges reach the wall
+## 4 · Timed challenges reach the wall — ⏱ **4a (THE CLOCK) BUILT 2026-09-01**
+
+> ✅ **4a IS DONE. DO NOT REBUILD IT.** Migration `20271188446868_papic_challenge_clock.sql`
+> (branch `claude/a-papic-challenge-has-a-clock`) adds `papic_missions.armed_at` / `.closed_at`,
+> the partial unique index `papic_missions_one_armed_per_event` that makes "one live at a time per
+> celebration" a constraint rather than a habit, and **the one resolver**:
+> `papic_challenge_is_open(mission_id)` — FALSE in four distinct ways (never armed · closed by a
+> later arming · hidden from guests · the capture window ended), with
+> `papic_armed_challenge(event_id)` defined in terms of it so the two cannot disagree.
+> `papic_arm_challenge(mission_id)` does close-then-open in ONE transaction, SECURITY INVOKER, so
+> authorisation is Pattern B and nothing else. Re-measure with
+> `grep -n papic_challenge_is_open supabase/migrations/*.sql`.
+>
+> 🔎 **HOW A CHALLENGE WAS ARMED BEFORE THIS — the RULE 0 answer, and it is not what the word
+> suggests.** The shipped "arm" was **per guest and never persisted**: `useState` in
+> `papic-challenge-panel.tsx` meaning *"the next shutter press on THIS phone attaches to THIS
+> mission"* (SELECT → COMMENCE → RETAKE, owner 2026-07-23). There was **no celebration-level
+> arming in any form** — `grep -rn armed supabase/migrations/*.sql` returns only credit-pool
+> language. So the ruling's ARM had to be created, and the guest-side one was left alone. **Two
+> different things now share the word; read which one a file means before touching it.**
+>
+> ⏭ **4b (THE WALL) IS THE REMAINING HALF**, and it has a live divergence to close:
+> `fetchWallArmedChallenge` (`apps/web/lib/live-wall.ts`, PR #5067) picks the board's **first
+> slot** as "the armed challenge" — the stand-in it had to use because the clock did not exist
+> when it was written. It should call `papic_armed_challenge`, or the wall and the couple's screen
+> can name **different live challenges**, each passing its own tests.
+
 
 > ⚠ **RE-MEASURED 2026-08-31 — THIS ITEM IS SMALLER THAN IT READS, AND HALF OF IT ALREADY SHIPPED.**
 > The completion board is NOT missing. `papic_mission_completions` exists
@@ -188,7 +214,7 @@ for free.
 > Reading the column name without reading its table is how this item gets reported as already done.
 > Confirm with `grep -n -B6 papic_challenge_expires_at supabase/migrations/*.sql`.
 >
-> ✅ **THE CLOCK IS RULED — 2026-09-01, owner.** The window is **RELATIVE**: it opens when the
+> ✅ **THE CLOCK IS RULED — 2026-09-01, owner — AND BUILT THE SAME DAY (see the header above).** The window is **RELATIVE**: it opens when the
 > challenge is **ARMED**, never at a wall-clock time. ONE challenge live at a time per celebration —
 > arming the next closes the previous — and the last closes when `events.papic_window_end` passes.
 > **No duration column, no default duration number.** ⚠ Expiry closes the PROMPT, never the SHUTTER:
