@@ -6,24 +6,31 @@ WHATS_NEXT_Papic_Build_Order_2026-08-29.md. Paste ONE prompt per session, verbat
 > ✅ **4a AND 4b ARE SAFE TO RUN TOGETHER.** 4a is a migration + resolver (schema side); 4b is the
 > wall feed and its component (read side). **Disjoint on every file**, and 4b deliberately renders
 > only what already ships, so it does NOT wait on 4a's columns.
-> ⛔ **ITEM 5 RUNS AFTER 4a MERGES** — it hangs challenges on the ceremony sequence and needs the
-> clock's shape settled first.
+> ⛔ **ITEM 5 RUNS AFTER 4a MERGES** — it hangs challenges on the ceremony sequence, which is the
+> clock 4a builds.
 > ⚠ Every session must `git fetch` before branching. `origin/main` moved 31 commits under a single
 > held PR during the last session.
 
 ---
 
-## 🔴 ONE OWNER DECISION BLOCKS 4a — DO NOT GUESS IT
+## ✅ THE CLOCK IS RULED — 2026-09-01, owner. 4a IS UNBLOCKED.
 
-**A challenge has no concept of time at all today** (verified 2026-08-31: no window, no countdown,
-no expiry anywhere). "Timed" therefore needs one ruling before a line is written:
+**A challenge's window is RELATIVE, and the ceremony sequence is the clock.**
 
-- **(A) fixed wall-clock** — the challenge expires at a time the couple picks; or
-- **(B) relative** — it runs for N minutes from the moment the couple arms it.
+- It starts when the challenge is **ARMED**, never at a wall-clock time the couple sets.
+- **One challenge is live at a time per celebration.** Arming the next closes the previous.
+- The last one closes when the capture window ends — `events.papic_window_end`, which already ships
+  (migration `20270305885232_papic_capture_window_per_event.sql`). No new bound is invented.
+- ⚠ **EXPIRY CLOSES THE PROMPT, NEVER THE SHUTTER.** A guest is never refused a photo for lateness;
+  the challenge merely stops being the armed one.
+- **NO duration column and NO default duration number.** The design does not need one, so none is
+  invented (2026-08-31 `DEFAULT_CAPTURE_MIX` rule — *don't guess*). A per-challenge duration for
+  auto-close can be added later without redoing the schema, since `armed_at` is already its anchor.
 
-They produce different columns and a different resolver. RULE 0 rule 9 applies with full force here
-(*"I flagged it" does not make a guessed number safe*) — **if this is unruled when the session
-starts, STOP and ask; do not ship a default and label it a guess.**
+*Why:* `KwentoMoment` is `{key, label, eyebrow}` — ten ordered moments, **none scheduled**. A
+challenge tied to "First Dance" cannot know a wall-clock time, and weddings run late, so a challenge
+pinned to 7:00 PM fires during the wrong moment on the one day nobody can re-run. Full row in
+`DECISION_LOG.md`, 2026-09-01.
 
 ---
 
@@ -93,8 +100,14 @@ MEASURED 2026-08-31: a challenge has no window, no countdown and no expiry anywh
 
 BUILD:
 
-1. The owner's ruling on the clock's shape — fixed wall-clock, or N minutes from arming — decides
-   your columns. IF IT IS NOT RULED, STOP AND ASK. Do not ship a default.
+1. THE CLOCK IS RULED (2026-09-01, see DECISION_LOG.md): the window is RELATIVE — it opens when the
+   challenge is ARMED. ONE challenge live at a time per celebration; arming the next closes the
+   previous; the last closes when `events.papic_window_end` passes. Do NOT add a duration column and
+   do NOT invent a default duration — the design does not need one.
+   ⚠ EXPIRY CLOSES THE PROMPT, NEVER THE SHUTTER. A capture is never refused for lateness.
+   🔎 FIRST RULE 0 STEP: establish how a challenge is armed TODAY — per guest or per celebration.
+   That decides the wiring, not the ruling. `papic_challenge_pending` is a NOTIFICATION type
+   ("Papic Challenge to approve"), not the arming mechanism — do not mistake it for one.
 2. Schema FIRST, with RLS at CREATE TABLE time and the matching pattern from
    02_Specifications/RLS_Policy_Pattern.md § 5. Allocate the prefix with `pnpm migration:new`.
 3. A resolver that answers "is this challenge live right now?" in ONE place, the way

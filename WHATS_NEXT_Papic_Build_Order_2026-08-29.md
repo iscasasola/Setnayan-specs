@@ -187,6 +187,12 @@ for free.
 > `20271181420277_the_challenge_is_a_subscription.sql`) and is the VENDOR'S SUBSCRIPTION EXPIRY.
 > Reading the column name without reading its table is how this item gets reported as already done.
 > Confirm with `grep -n -B6 papic_challenge_expires_at supabase/migrations/*.sql`.
+>
+> ✅ **THE CLOCK IS RULED — 2026-09-01, owner.** The window is **RELATIVE**: it opens when the
+> challenge is **ARMED**, never at a wall-clock time. ONE challenge live at a time per celebration —
+> arming the next closes the previous — and the last closes when `events.papic_window_end` passes.
+> **No duration column, no default duration number.** ⚠ Expiry closes the PROMPT, never the SHUTTER:
+> a capture is never refused for lateness. Full row in `DECISION_LOG.md`.
 
 
 Owner ruled 2026-08-28: *"we can add a timed challenge."*
