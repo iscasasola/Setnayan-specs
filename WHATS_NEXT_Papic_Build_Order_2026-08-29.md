@@ -321,6 +321,28 @@ Joining them means a coordinator sets up in two minutes instead of writing promp
 ---
 
 ## 6 · The guest chooses per audience
+> ✅ **BUILT AND LIVE 2026-09-02 — BOTH HALVES. DO NOT REBUILD EITHER.**
+>
+> The owner's 2026-09-02 ruling replaced the four-audience consent matrix this section describes with
+> something simpler: **control is PER-PHOTO, not per-audience.** A guest controls the photos she SHOT
+> and the photos she is TAGGED in — both — and nobody else's.
+>
+> **6a · the un-post — PR #5081.** A guest takes her own photograph off the live wall.
+> `apps/web/lib/guest-wall-unpost.ts` carries a `WallScope = 'shot' | 'tagged'`; SHOT is her
+> `papic_guest_captures.guest_id` **plus** photos taken on her own `paparazzi_seats` roll, TAGGED is a
+> LIVE `photo_tags` row (`removed_at IS NULL`). It writes `wall_hidden_by_guest_id` beside the
+> pre-existing `wall_hidden_at` (*"transient wall-only kill switch (reversible)"*). 🔑 The decision is
+> made on the RETURNED ROW's own `event_id`/`guest_id`/`removed_at`, not on the `.eq()` chain — a
+> dropped chain link is not a compile error, a missing property is.
+> ⚠ **A guest "Not me" tag removal ALREADY EXISTED before this** (`photo_tags.removed_at` /
+> `removed_by='guest'`, migration `20270131081062`). It removes the ASSOCIATION and never the
+> photograph — which is exactly why the un-post was still needed. Do not confuse the two.
+>
+> **6b · the scan trail — PR #5086.** `guests.scan_tracking_opt_out` was ADOPTED, not retired (owner
+> chose the harder option). It went from **1 file — the migration alone — to 16**, and is now read on
+> every scan entry path: redeem, seat/claim, welcome, join, loaders. `apps/web/lib/scan-trail.ts` is
+> the one door; `apps/web/lib/every-scan-goes-through-one-door.test.ts` is what keeps it the only one.
+
 
 > ⚠ **RE-MEASURED 2026-08-31 — IT IS FOUR FLAGS, NOT TWO.** `guests.face_recognition_excluded`,
 > `guests.faceblock_enabled`, `guests.photo_consent`, and `guests.scan_tracking_opt_out`.
@@ -383,6 +405,30 @@ Ship a plain consent receipt with it — what was collected, why, for how long, 
 ---
 
 ## 7 · The year
+> ✅ **7a AND 7b BUILT AND LIVE 2026-09-02. 7c AND 7d REMAIN.**
+>
+> Owner ruled 2026-09-02: the year is the **full planning platform**, but **every celebration keeps
+> its own pot** — a cluster is presentation and planning, NEVER accounting.
+>
+> **7a · the cluster primitive — PR #5082.** `public.event_clusters` + `public.event_cluster_members`.
+> `UNIQUE (event_id)` = at most one cluster per celebration; a partial `UNIQUE INDEX WHERE is_anchor`
+> = at most one anchor. 🔑 **THE COLUMN IS `event_cluster_id`, NOT `cluster_id`** — the latter already
+> means an ANTI-FRAUD IDENTITY cluster (~20 hits, none a celebration). `events.cluster_id` was
+> rejected partly for **friction in the right direction**: it sits one word away from
+> `SUM(points) … WHERE cluster_id = $1`, the exact rollup the ruling forbids.
+> 🔒 Three structural guards in `apps/web/tests/db/a-pot-belongs-to-one-celebration.db.test.ts` fail
+> the moment anyone gives a cluster accounting meaning: no Papic table names a cluster, no Papic
+> function has learned the word, the cluster tables hold no value. **They are mutation-proved** — they
+> caught a real intrusion, not a drill. If your work makes them red, your work is wrong.
+>
+> **7b · one person, not three rows — PR #5087.** It added **NO new table**: it extended the EXISTING
+> person spine (`public.people`, `guests.person_id`, the unified resolver of migration
+> `20270514555975`).
+> 🔑 **THE DIAGNOSIS THAT MATTERS, so nobody "fixes" it again:** `guests.person_id` was NULL on all 40
+> guests, and **that was CORRECT, not broken.** The original resolver keys on EMAIL, and zero-account
+> guests are name-only, so no email ⇒ no link. The resolver was not broken, had not lost its caller,
+> and did not fail silently. 7b extended the signal rather than replacing the resolver.
+
 
 > ⚠ **RE-MEASURED 2026-08-31 — THE NAME YOU WILL REACH FOR IS ALREADY TAKEN.** "Nothing links two
 > celebrations" still holds for CELEBRATIONS, but `related_event_id` already exists with an unrelated
