@@ -224,8 +224,11 @@ BUILD:
 
 ## When these are done
 
-Item 6 is next, and it needs an owner ruling BEFORE any schema: `guests.scan_tracking_opt_out` was
-added citing RA 10173 and has ZERO application references — no reader and no writer. It is dormant,
-so no consent is being violated today; the risk is that item 6 adds a FIFTH consent flag beside a
-column already built for exactly that choice. Adopt it or retire it first. See the re-measured block
-at the top of § 6.
+Item 6 is next. ~~It needs an owner ruling BEFORE any schema~~ — **settled 2026-09-02: the fourth
+flag was ADOPTED and built (session 6b).** `guests.scan_tracking_opt_out` now has a writer (the
+guest's own switch, `setGuestScanTracking` + `_components/scan-trail-notice.tsx`) and a reader
+(`lib/scan-trail.ts` · `recordScan`, the one door that creates a `scan_events` row, guarded by
+`lib/every-scan-goes-through-one-door.test.ts`). **Item 6 builds on it and must not add a fifth flag
+for scans.** Two calls were made rather than inherited — the switch is guest-only, and
+`guest_checkins` is deliberately outside it; both are written up in the re-measured block at the top
+of § 6 of the build order, for the owner to disagree with there.

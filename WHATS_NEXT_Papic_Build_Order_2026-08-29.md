@@ -326,12 +326,40 @@ Joining them means a coordinator sets up in two minutes instead of writing promp
 > `guests.faceblock_enabled`, `guests.photo_consent`, and `guests.scan_tracking_opt_out`.
 >
 > 🔑 **THE FOURTH ONE IS THE WHOLE POINT OF RULE 0 HERE.** `guests.scan_tracking_opt_out` was added
-> citing **RA 10173** (`supabase/migrations/20260513050000_iteration_0002_invitation.sql`) and has
-> **ZERO application references** — no reader AND no writer. It is dormant, so nobody's consent is
-> being violated today; the risk runs the other way: **this item will add a FIFTH flag beside a
-> column already designed for exactly this choice.** The repo half-knows — it sits in
-> `apps/web/tests/db/gates-have-handles.baseline.txt` as `NOT INVESTIGATED`. Decide whether to adopt
-> it or retire it BEFORE adding schema. Re-measure: `grep -rn scan_tracking_opt_out .`
+> citing **RA 10173** (`supabase/migrations/20260513050000_iteration_0002_invitation.sql`) and had
+> **ZERO application references** — no reader AND no writer. It was dormant, so nobody's consent was
+> being violated; the risk ran the other way: **this item would have added a FIFTH flag beside a
+> column already designed for exactly this choice.** The repo half-knew — it sat in
+> `apps/web/tests/db/gates-have-handles.baseline.txt` as `NOT INVESTIGATED`.
+>
+> ✅ **SETTLED 2026-09-02 — ADOPTED, NOT RETIRED, AND BUILT (session 6b).** The flag now has a
+> handle and a gate. **Item 6 must build ON it and must not add a fifth flag for scans.**
+>   · **The gate** — `apps/web/lib/scan-trail.ts` · `recordScan()` is the ONLY place in the tree
+>     that creates a `scan_events` row. All four doors route through it (`redeem` · `seat/claim` ·
+>     `welcome` · `join`), and it records only on a **positive `false`**: an unreadable flag, a
+>     missing guest row or a thrown client all write nothing.
+>   · **The guard** — `apps/web/lib/every-scan-goes-through-one-door.test.ts` fails if any other
+>     file pairs `from('scan_events')` with a row-creating verb, or mentions the table outside a
+>     named allowlist. A fifth door goes through `recordScan` or turns that test red.
+>   · **The handle** — `setGuestScanTracking` in `app/[slug]/actions.ts`, rendered for **every**
+>     recognised guest by `_components/scan-trail-notice.tsx` (deliberately NOT behind the
+>     `photo_source === 'selfie'` gate that hides `FaceDataNotice` from most guests).
+>   · The baseline line is **deleted**, which is the proof — that guard fails on a stale line the
+>     moment a column acquires a writer.
+>
+> 🔑 **TWO CALLS WERE MADE, NOT INHERITED — disagree here rather than in the code.**
+> **(a) GUEST-ONLY.** No host-side writer was added, unlike `faceblock_enabled` (owner ruling 3 of
+> 2026-08-17 lets either side move that one). A host un-setting a data subject's own RA 10173
+> objection is not defensible, and no host screen has ever shown this flag.
+> **(b) `guest_checkins` IS NOT COVERED.** It carries `method = 'qr_scan'` and so is literally a
+> scan write path; it is excluded because it is the host's own door desk marking a guest arrived,
+> it drives that guest's arrival greeting, and a guest declining to be *tracked* should not vanish
+> from the check-in desk at their friend's wedding.
+>
+> ⚠ **THE PRICE, STATED:** the trail's only reader is the first-arrival greeting in
+> `app/[slug]/_lib/loaders.ts`, so an opted-out guest is greeted "Hi again" every time, including
+> their first. The control says so in its OFF state.
+> Re-measure any of this with: `grep -rn scan_tracking_opt_out .`
 
 
 **The market's single clearest gap, and smaller than anyone assumes.** Nothing in the scanned
