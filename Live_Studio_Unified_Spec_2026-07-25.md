@@ -1,5 +1,45 @@
 # Live Studio — Unified Spec (2026-07-25)
 
+> ## ⛔ SUPERSEDED IN FOUR PLACES — read this before quoting anything below (added 2026-09-02)
+>
+> The body of this document is left as written. It was true on 2026-07-25 and rewriting a dated
+> decision record makes it false in the other direction. These four corrections override it.
+>
+> **1. THE PRICE. `₱2,999 / event` APPEARS 20 TIMES BELOW AND IS WRONG IN BOTH HALVES.**
+> Live is **₱1,500 per EVENT-DAY** (`LIVE_STUDIO`), plus an optional **₱1,500** hosted-channel
+> add-on (`LIVE_STUDIO_HOSTED_CHANNEL`) taking it to ₱3,000 — owner-ruled 2026-09-02, migrations
+> `20271192082215` and `20271192528988`. Not "per event": days fold from the first go-live and
+> extra days can be bought.
+> 🔑 **NEVER QUOTE A PRICE FROM THIS DOCUMENT OR ANY OTHER.** `platform_retail_catalog_v2` is
+> admin-managed and is the only number a customer is charged:
+> `select service_code, retail_price_php, billing_period from platform_retail_catalog_v2;`
+>
+> **2. EVERY EVENT NO LONGER RIDES A SETNAYAN CHANNEL (§ 4h).** The DEFAULT is now the couple's
+> OWN YouTube: they create the broadcast, paste the watch link, and Setnayan embeds it. Riding a
+> Setnayan pool channel is the OPTIONAL paid add-on above. § 4h's pool reasoning still describes
+> the add-on correctly; it no longer describes the common case.
+>
+> **3. "§ 4c SCOPED A NATIVE CAPTURE APP" — IT DOES NOT.** § 4c is *"WAVE 1 + 2 SHIPPED —
+> corrections the build forced"* and scopes no capture app. The real scope is **B4** in
+> `Live_Studio_Cast_and_Roam_2026-07-23.md`. Four files in the repo carried this wrong citation.
+> ⚠ **AND B4 IS NOT THE DESKTOP ENCODER.** B4 is a PHONE app: it captures a kit phone's own
+> camera and pushes one RTMP stream per camera for **Roam**. The desktop encoder scoped in
+> `Live_Studio_Encoder_Scope_2026-09-03.md` captures the COMPOSITED PROGRAM OUTPUT and pushes
+> ONE stream for **Cast**. Different input, different topology, different product — **building
+> the desktop encoder does not deliver B4, and Roam still has no capture path afterwards.**
+>
+> **4. "A RELAY BREAKS THE ₱0 LOCK" IS TOO STRONG AS STATED.** The corpus rules relays out
+> categorically, but it was reasoning about a COMPOSITING relay, which re-encodes server-side —
+> that is what the transcode minute buys. A client that ships an already-composited, already-H.264
+> stream needs only a **remux** to FLV, which is far cheaper. The accurate claim is *"a
+> **transcoding** relay is unaffordable."* This does not change the recommendation (once the
+> client composites and encodes, the desktop path is strictly better — same client work, minus a
+> server, minus a runtime dependency on an unrepeatable day), but it must not rule out remuxing
+> on false grounds.
+>
+> Full reasoning and costs: `Live_Studio_Encoder_Scope_2026-09-03.md` (in the platform repo).
+
+
 **Owner decision (2026-07-25):** merge **Cast/Broadcast (Panood)** + **Roam** into ONE customer-facing **"Live Studio"** SKU — **₱2,999 / event**, **switching-based** controller. No compositing in V1 (phase-2 Pro). No monthly. No vendor plan. Streaming stays customer-facing (the person having the event streams it).
 
 ## 1. Model
@@ -157,8 +197,11 @@ Owner: *"we will achieve the exact look on our design prototype. scroll free con
 ⚠ **Found in passing, NOT fixed here (separate task):** the site-wide cookie-consent banner has **no route gating at all** (`app/_components/cookie-consent-banner.tsx`), so it renders over `/panood/program/[eventId]` — the surface a couple's OBS **window-captures into their live broadcast**. Pre-existing, not a Wave 8 regression, and out of scope because the fix touches every route.
 
 ### 4h. WAVE 9 — SETNAYAN-OWNED CHANNEL (owner-confirmed 2026-07-26 "go")
+
+> 🚨 **PARTIALLY SUPERSEDED 2026-09-02 (`DECISION_LOG.md` same date, LS5) — READ BEFORE ACTING ON THE BULLET BELOW.** The line *"Every wedding streams on a Setnayan channel; the couple never connects a Google account"* is now FALSE AS A DEFAULT. Owner ruling: the couple's own YouTube link is the default again; the Setnayan-owned pool built in this section is now an OPTIONAL, separately-priced add-on (`LIVE_STUDIO_HOSTED_CHANNEL`, ₱1,500/day, stacks on `LIVE_STUDIO`'s own ₱1,500/day for the owner's stated "₱3,000 total for the hosted option"). **The INFRASTRUCTURE below (channel grants, `provisionRoamBroadcasts`, `/admin/live-studio-channels`, `NEXT_PUBLIC_LIVE_STUDIO_POOL_ONLY`) is KEPT, unchanged and still correct** — it is the plumbing behind the add-on now, not the sole path, and pool-only stays ON for both tiers (it closes the BYO OAuth door, which is a compliance boundary independent of who pays for the channel). What changed is only the DEFAULT a non-add-on couple is told: paste their own already-running watch link (or start one from OBS/the YouTube app), not "there is nothing for you to connect." The pool-side file-handoff open question two paragraphs below is UNCHANGED by this ruling — still open, now scoped to add-on buyers specifically.
+
 Owner asked *"so we connect to our setnayan youtube account?"* → **YES, confirmed.** Reaffirms the 2026-07-23 channel-pool lock and rejects couple-BYO.
-- **ONE Setnayan YouTube account, connected once by the owner.** Every wedding streams on a Setnayan channel; **the couple never connects a Google account.**
+- **ONE Setnayan YouTube account, connected once by the owner.** Every wedding streams on a Setnayan channel; **the couple never connects a Google account.** ⚠ **AS OF 2026-09-02 THIS IS THE HOSTED-ADD-ON PATH, NOT EVERY WEDDING'S PATH** — see the superseding note above.
 - **🔑 THE DECISIVE REASON:** only Setnayan's own account authorizes → the consent screen can be **Internal** → **Google app verification is NOT required at all.** The scope/brand-verification wall hit 2026-07-25 evaporates. Couple-BYO would force External+verification (weeks) **and** impose YouTube's ~24-hour first-stream wait on *every couple* — a couple buying the day before the wedding could not stream.
 - **Costs accepted:** other couples' ceremonies live on Setnayan channels (a music copyright strike lands on us — mitigated by one-channel-per-event so the blast radius is a single wedding) · Setnayan must hand the recording back (resolved watch link on the dashboard — **no wipe**, retired 2026-08-31; the couple's own FILE comes from OBS "Start Recording", not a VOD pull) · YouTube Data API quota ceiling ≈ **12–15 weddings/day** (file for an increase early).
 - **⚠⚠ HONEST LIMIT — this does NOT make it fully turnkey.** Browsers cannot push RTMP, and the native capture app was scoped but never built (§4c). So even with the Setnayan channel connected, **something must still encode the program output to YouTube — today that is the couple's own OBS window-capture.** Wave 9 removes the requirement that the couple own/authorize a *YouTube account*; it does NOT remove the encoder. True zero-to-do needs one of: a native RTMP capture app, or a WebRTC→RTMP server relay (**breaks the ₱0 marginal-cost lock** — real per-minute compute). **Decide that separately; do not assume Wave 9 delivers it.**
