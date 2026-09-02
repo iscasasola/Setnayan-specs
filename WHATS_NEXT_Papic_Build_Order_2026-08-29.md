@@ -405,7 +405,7 @@ Ship a plain consent receipt with it — what was collected, why, for how long, 
 ---
 
 ## 7 · The year
-> ✅ **7a AND 7b BUILT AND LIVE 2026-09-02. 7c AND 7d REMAIN.**
+> ✅ **7a, 7b AND 7c BUILT AND LIVE 2026-09-02. ONLY 7d (BUDGETS) REMAINS.**
 >
 > Owner ruled 2026-09-02: the year is the **full planning platform**, but **every celebration keeps
 > its own pot** — a cluster is presentation and planning, NEVER accounting.
@@ -428,6 +428,21 @@ Ship a plain consent receipt with it — what was collected, why, for how long, 
 > guests, and **that was CORRECT, not broken.** The original resolver keys on EMAIL, and zero-account
 > guests are name-only, so no email ⇒ no link. The resolver was not broken, had not lost its caller,
 > and did not fail silently. 7b extended the signal rather than replacing the resolver.
+>
+> **7c · the cluster learns its own timeline — the planning surface.** `20271192016913` adds
+> `public.cluster_timeline()` (SECURITY INVOKER, inherits 7a's owner-or-couple RLS), the first cluster
+> SERVER ACTIONS — until then **no cluster row could ever exist in production**, because 7a shipped
+> both tables with no door — and the first cluster SCREEN, at `/dashboard/clusters`.
+> 🪤 **THE TRAP IT EXISTS TO AVOID: `events.event_date` IS NOT A DATE.** At `year`/`month` precision it
+> is a **first-of-range placeholder**, so `ORDER BY event_date` sorts *"Sometime in 2027"* as if the
+> host had said New Year's Day. **4 of 9 prod events are `year` precision holding a real-looking
+> date** — the common case. Each celebration therefore resolves to the range its precision claims and
+> sorts by that range's **MIDPOINT**; undated celebrations sort LAST.
+> ⚠ `sort_key` is a sort key and **never a label** — rendering it invents a day the host never chose.
+> ⛔ **Still nothing stored:** no `year`/`season`/`starts_on`/`ends_on`; the span is derived per read.
+> ⛔ **Still no money on the surface** — the pot guard runs unmodified and green.
+> 🔑 **FLAGGED FOR THE OWNER: the route is `/dashboard/clusters`, not `/dashboard/year`** — the latter is
+> taken and deliberately retired (2026-08-21) and meant the CALENDAR, not clusters.
 
 
 > ⚠ **RE-MEASURED 2026-08-31 — THE NAME YOU WILL REACH FOR IS ALREADY TAKEN.** "Nothing links two
