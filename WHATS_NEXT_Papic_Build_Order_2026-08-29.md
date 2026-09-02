@@ -370,8 +370,15 @@ Ship a plain consent receipt with it — what was collected, why, for how long, 
 **linked cluster**; a multi-day celebration stays ONE celebration with days; somewhere to sleep is
 never an event.
 
-**Measured:** nothing links two celebrations in code — no parent, no cluster, no relation. And the
-shot pot is **strictly per-celebration by construction**, which is the primitive people pay for.
+**Measured 2026-08-29, HALF OF IT CORRECTED 2026-09-02:** ~~nothing links two celebrations in
+code — no parent, no cluster, no relation.~~ **Phase 7a shipped that link**
+(`20271189765490_event_cluster_primitive.sql`: `event_clusters` + `event_cluster_members`,
+`event_cluster_id` — *not* `related_event_id`, *not* `cluster_id`, both taken with unrelated
+meanings). It is the PRIMITIVE ONLY: no screen, no server action, no read path, both tables empty.
+✅ **The other half still holds and is now GUARDED, not merely true:** the shot pot is strictly
+per-celebration, which is the primitive people pay for, and
+`tests/db/a-pot-belongs-to-one-celebration.db.test.ts` fails the required check the moment a Papic
+table or function learns what a cluster is — 11 sabotages, every one red.
 
 ⇒ **A project, not an adjustment.** It is also the only play on the board nobody can copy in a
 quarter, because it needs a planning platform underneath — a guest list and dates months ahead.

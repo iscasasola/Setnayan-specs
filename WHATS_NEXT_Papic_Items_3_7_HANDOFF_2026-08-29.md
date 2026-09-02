@@ -352,8 +352,17 @@ still get a good experience — manual browsing, filters, upload access. Do not 
 
 **Measured 2026-08-29:**
 
-- ❌ **Nothing links two celebrations in code** — no parent, no cluster, no relation. The linked
-  cluster is **specified and unbuilt.**
+- ✅ **CORRECTED 2026-09-02 — CELEBRATIONS CAN NOW BE LINKED. PHASE 7a SHIPPED.**
+  ~~Nothing links two celebrations in code — no parent, no cluster, no relation.~~ That held on
+  2026-08-29 and no longer does: `20271189765490_event_cluster_primitive.sql` adds
+  `event_clusters` + `event_cluster_members` (repo `setnayan-platform`).
+  ⚠ **THE PRIMITIVE ONLY.** Two tables, **no screen, no server action, no read path** — both ship
+  empty, so nothing a person can see has changed. The linked cluster is now *built underneath and
+  undrawn*, which is a different job from *unbuilt*: a later phase draws it, and does not re-create it.
+  🪤 **THE NAME IS `event_cluster_id`, AND BOTH NAMES YOU WILL REACH FOR ARE TAKEN** — the owner's
+  own `related_event_id` warning, and also `cluster_id`, which means an ANTI-FRAUD IDENTITY cluster
+  (`20270516600000`). Re-measure before acting on this bullet:
+  `git grep -n event_cluster_id origin/main -- supabase/migrations`
 - ❌ **The shot pot is strictly per-celebration by construction** — `papic_event_pool_config`,
   `papic_reserve_event_points(event_id)`. **One pot across a year changes the primitive people pay
   for**, not a display.
