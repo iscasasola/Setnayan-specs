@@ -405,7 +405,11 @@ Ship a plain consent receipt with it — what was collected, why, for how long, 
 ---
 
 ## 7 · The year
-> ✅ **7a, 7b AND 7c BUILT AND LIVE 2026-09-02. ONLY 7d (BUDGETS) REMAINS.**
+> ✅ **7a, 7b, 7c AND 7d ALL BUILT 2026-09-02. ITEM 7 IS COMPLETE.**
+>
+> ⚠ **"LIVE" WAS OPTIMISTIC WHEN THIS LINE FIRST SAID IT.** 7c is PR **#5090**, still OPEN and red on
+> `lint-one-comment-stripper` when 7d began; 7d is stacked on it. Re-measure with
+> `gh pr list --state open` before repeating "live" — a handoff decays fastest where it is read most.
 >
 > Owner ruled 2026-09-02: the year is the **full planning platform**, but **every celebration keeps
 > its own pot** — a cluster is presentation and planning, NEVER accounting.
@@ -443,6 +447,28 @@ Ship a plain consent receipt with it — what was collected, why, for how long, 
 > ⛔ **Still no money on the surface** — the pot guard runs unmodified and green.
 > 🔑 **FLAGGED FOR THE OWNER: the route is `/dashboard/clusters`, not `/dashboard/year`** — the latter is
 > taken and deliberately retired (2026-08-21) and meant the CALENDAR, not clusters.
+>
+> **7d · a year shows its budgets — the last phase.** `lib/cluster-budgets.ts` + a section appended to
+> 7c's timeline page. **NO MIGRATION: a rollup, not a schema.** Each celebration's budget TARGET, and a
+> total derived on every read and stored nowhere — 7a's guard already treats `budget` as a
+> value-bearing name, so a cluster money column fails the required check on arrival.
+> ⚖ **THE TARGET, NOT "COMMITTED", and it was measured rather than assumed.** The ruling above says a
+> cluster is *presentation and planning, NOT accounting*: a target is planning; committed/paid belongs
+> to `/budget`. 🔑 **`NEXT_PUBLIC_BUDGET_TRUTH_ENABLED` IS NOT SET IN VERCEL** (109 vars, no match), so
+> `resolveEventMoney()` — the ONE calculator — does not run in production; a committed figure here
+> would be blank, or would reproduce the page-local legacy formula and become the SIXTH definition of
+> "the budget" that `budget-truth.ts` exists to end.
+> ✅ **AND THE FLAG THIS DOCUMENT SAID WAS UNREADABLE IS READABLE.** `BUDGET_BUILD_ENABLED` is also
+> unset, and its code reads `!== 'false'` — so the Build feature is **ON** in production.
+> 🔑 **ABSENCE FROM `vercel env ls` IS DECISIVE WHENEVER THE DEFAULT IS KNOWN** — and it points in
+> OPPOSITE directions for these two flags. Do not repeat "server-side env is unreadable" as if it
+> settled the question; read the default in code, then check whether anything overrides it.
+> 🚨 **FOUR STATES, BECAUSE ₱0 IS A CLAIM:** `set` · `none` · `withheld` · `unknown`. The total is
+> **null whenever nothing contributed**, and a partial one says "Across 2 of 4 celebrations".
+> 🔒 `events_host` admits an accepted MODERATOR (the `budget-visibility.ts` leak: a live planner,
+> `checkout: false`, on a ₱930,000 event), so the rollup re-asks COUPLE membership on EVERY read —
+> 7a checks both halves at LINK time only, and a cluster outlives the access that justified it.
+> ⛔ **The pot guard runs unmodified and green.** 8 sabotages, every one red.
 
 
 > ⚠ **RE-MEASURED 2026-08-31 — THE NAME YOU WILL REACH FOR IS ALREADY TAKEN.** "Nothing links two
