@@ -238,13 +238,42 @@ Learns:     dismiss/act → calibrates the reliability floor
 
 ```
 [GRD-05] Over-budget drift                                            Enabled for: ALL
-Trigger:    committed + pending > total budget by ≥{threshold}
+Trigger:    committed > total budget          (BA8, 2026-09-03 — see note below)
 Slots:      {over_amount}, {top_driver_category}
 Copy: "You're ₱{over_amount} over budget right now — mostly {top_driver_category}.
        Want me to find a few places to trim, or raise the total?"
 Action:     [Show trims] [Raise budget]
 Learns:     trim vs raise → true budget ceiling
 ```
+
+> **BA8 · 2026-09-03 — GRD-05 reads `resolveEventMoney`, and its trigger
+> condition changed.** It was `committed + pending > total`, where both figures
+> came from the guard's OWN addition (paid/fulfilled `orders` + `contracted`-or-better
+> `event_vendors.total_cost_php`, plus `submitted` orders as `pending`). It is now
+> `committed > total`, straight off the shared money resolver — the same call
+> `/budget` renders.
+>
+> Two consequences worth reading as product, not plumbing:
+>
+> 1. **The guard sees money it never could.** A locked package's agreed total, a
+>    vendor's catalogue line items, a manual line on an off-platform supplier, a
+>    change-order credit, transport, crew meals, and a supplier-less `event_costs`
+>    row all now count. The number can move UP or DOWN, and the copy is unchanged
+>    either way.
+> 2. **`pending` is gone on purpose.** It summed `submitted` Setnayan orders —
+>    money the couple has APPLIED for and an admin has not approved. The resolver
+>    files those as `estimated`, and §18.5 rule 4 of
+>    `Explore_Replan_BUILD_SPEC_2026-07-27.md` gives "over budget" exactly one
+>    meaning: what the couple has AGREED exceeds their target. A guard warning on
+>    a number `/budget` does not print is the defect this closed.
+>
+> `{top_driver_category}` also changed source: it was the single costliest locked
+> vendor's raw category slug (`reception_venue`); it is now the biggest committed
+> BUCKET's label from `EventMoney.byBucket` — the same words `/budget` prints
+> ("Catering"). The copy above always had the slot; it never had the data.
+>
+> Delivery is unchanged: GRD-05 stays `ai_guard_alert`, IN-APP ONLY. GRD-01 remains
+> the only guard on the email allowlist (§ 4.1 restraint rules).
 
 ```
 [GRD-06] Date conflict / double-book                                  Enabled for: ALL
