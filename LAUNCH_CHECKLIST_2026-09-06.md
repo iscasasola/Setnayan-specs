@@ -20,6 +20,15 @@ without re-verification; treat their status as unknown until re-checked, not as 
 physical rehearsal has actually run once on real hardware. Nothing else on this list blocks
 opening the doors.
 
+> ⚠ **RE-VERIFIED ~2 hours after this file was first written, on the owner's own instinct that
+> some of it was already retired — and he was right.** Eight sessions merged in that window,
+> including the fix for the one item this file called RED. **The lesson is the file itself:**
+> even the just-merged `S13-PREFLIGHT.md` (PR #5250, merged 06:48:10Z) was already wrong by the
+> time it landed — a `build-desktop` run at 06:27:52Z (21 minutes *before* that PR merged) had
+> already succeeded with real notarization, on a commit after S11. **A handoff decays fastest
+> exactly where it is read most — check the corpus's own recurring lesson.** Do not treat
+> anything below as current without re-running the command next to it.
+
 ---
 
 ## 🔴 Owner-only — no engineering session can close these
@@ -30,26 +39,26 @@ opening the doors.
 | 2 | `R2_PUBLIC_URL` (Vercel prod env) | 🔴 **Set but EMPTY — and confirmed BROKEN LIVE.** The homepage's own "SetnaProd" shop card renders a blank box where its logo should be; the `<img>` never loads even though the underlying signed R2 URL itself returns 200. Screenshotted 2026-09-06. | Set to the media bucket's `r2.dev` subdomain or `media.setnayan.com` custom domain in Vercel → Production, then reload the homepage and confirm shop logos actually render (not just that the env var is non-empty). **~15 min + redeploy.** |
 | 3 | Business identity + payment accounts | ✅ **DONE — verified directly in prod DB today.** `business_tin` = `300-003-455-000` (not the old placeholder), BDO + GCash both `enabled = true` with real account numbers and QR codes on file. | Nothing — closed. Retire this line from `OWNER_ACTIONS.md`, it's stale there. |
 | 4 | `dpo@setnayan.com` inbox routing | ⚠️ **Could not verify from here** — this is Cloudflare Email Routing, no API access from this session. | Send a test email to `dpo@setnayan.com` and confirm it lands somewhere a person reads. RA 10173 requires this reachable before collecting PII. |
-| 5 | Apple Developer Program License Agreement | 🔴 **Still unaccepted** (per Encoder's S13 pre-flight, re-checked against the same commit that merged S11). This is ONE root cause blocking TWO workstreams: the Encoder's `build-desktop` notarization, and the desktop app's macOS notarization. | Sign in to the Apple Developer portal and accept the pending agreement. **One click closes two blockers.** |
+| ~~5~~ | ~~Apple Developer Program License Agreement~~ | ✅ **CLOSED — re-verified same day, ~2hrs after this file first said "still unaccepted."** `build-desktop` run [34016548173](https://github.com/iscasasola/setnayan-platform/actions/runs/34016548173) (2026-09-06T06:27:52Z, commit `c2a63956`, after S11) shows real notarization succeeding: `codesign`/`spctl` report `accepted` / `source=Notarized Developer ID`. The S13-PREFLIGHT report (merged 06:48:10Z) said this was still broken — it was already stale by the time it merged. | Nothing — closed. ⚠ One residual gap: the `.dmg` itself reports "does not have a ticket stapled to it" (stapling step didn't run/failed) — Gatekeeper still passes online via ticket lookup, but an offline install would fail. Worth a small fix, not a launch blocker. |
 | 6 | Windows OV code-signing cert | 🟡 Open, Phase 2 — not a launch blocker. Unsigned `.msi` just shows a SmartScreen warning on first run. | Purchase + configure whenever convenient; not urgent. |
 | 7 | Google Play Console account status | 🔴 **Unknown — nobody has confirmed one exists.** An upload keystore exists (2026-06-14) but that doesn't imply an account. The corpus checklist's own line for this is still an unchecked box, and CI has no Play service-account secret. | Confirm whether the account exists, and if so whether personal or organization, and when created. **This single fact reorders the entire Android timeline** — a fresh personal account needs 12 testers for 14 continuous days before production access. |
 | 8–22 | The 15 owner rulings from [`WHAT_IS_LEFT_2026-08-17.md`](WHAT_IS_LEFT_2026-08-17.md) §6 | ⚠️ **CARRIED, not re-verified today.** Two of the original 15 (compromised-password checking; the face-matching public-page claim) were already resolved by the time that doc was last touched — those are dropped here. The other 13 are copied below verbatim-in-spirit. | For each, give a one-line **"still open" / "already decided — see PR/commit" / "no longer relevant"**. Anything you confirm here retires permanently; anything you don't gets re-dated, not re-invented, next time this file refreshes. |
 
-### The 13 carried owner rulings (unverified today — confirm or retire each)
+### The 13 carried owner rulings — re-checked against `DECISION_LOG.md` today, 3 already closed
 
-1. Turn on the supplier handshake — built, merged, dark. Flipping it makes a couple's *Lock* ask the supplier first.
-2. How much of a couple's private plan may a booked supplier see? (Blocks the last Event Hub step.)
-3. May a coordinator who was booked but never promoted announce things to guests?
-4. Should day-of extras be free during launch?
-5. Should couples be able to invite off-platform suppliers onto Setnayan? (The invite mechanism already ships — `createManualVendorInvite` — so this may really be "should we promote it," not "should we build it.")
-6. Do wedding recordings stay on a channel forever, or get wiped when it's reused? (Specs currently say both.)
-7. The features page is frozen — two approved documents describe it as two different shapes.
-8. Guest photo-taking is live while two required privacy sign-offs have never been signed.
-9. The anti-fraud scoring that can hide a supplier has nobody's name against it.
-10. The corrected lawyer's brief on keeping a dead relative's memories — no record it was ever sent.
-11. The photo service has no "what this would otherwise cost you" figure — needs your honest number.
-12. Should suppliers still see the ~450-cell tier grid, now that each plan states what it adds?
-13. The public category words (*Look, Feast, Documentary, Booths*) are internal jargon — nobody types those. Rename or keep?
+1. ~~Turn on the supplier handshake~~ — ✅ **CLOSED.** Ruled 2026-08-18 ("the supplier must agree for the user's request before it is locked") AND actually flipped: `NEXT_PUBLIC_LOCK_HANDSHAKE_ENABLED="true"` confirmed in prod today.
+2. How much of a couple's private plan may a booked supplier see? (Blocks the last Event Hub step.) — still open.
+3. May a coordinator who was booked but never promoted announce things to guests? — ⚠ **LIKELY CLOSED, worth one owner confirm.** `DECISION_LOG.md` 2026-08-24 records the owner saying broadcasts are shipped and settled ("yes on the event hub they have an announcement they can type on") — but that entry doesn't speak to the specific "never promoted" edge case this line names. Confirm rather than assume.
+4. Should day-of extras be free during launch? — still open.
+5. Should couples be able to invite off-platform suppliers onto Setnayan? (The invite mechanism already ships — `createManualVendorInvite` — so this may really be "should we promote it," not "should we build it.") — still open.
+6. Do wedding recordings stay on a channel forever, or get wiped when it's reused? (Specs currently say both.) — still open; no `DECISION_LOG.md` entry found.
+7. The features page is frozen — two approved documents describe it as two different shapes. — still open.
+8. Guest photo-taking is live while two required privacy sign-offs have never been signed. — still open. Related but distinct: 2026-08-18 also ruled camera-seat photo consent (owner/account holder decides), which unblocked the gate the 14 production photos sit behind — worth checking whether that ruling covers this line too before treating it as separately open.
+9. ~~The anti-fraud scoring that can hide a supplier has nobody's name against it.~~ — ✅ **CLOSED 2026-08-18.** Approved and recorded (approver + timestamp written the same day).
+10. The corrected lawyer's brief on keeping a dead relative's memories — no record it was ever sent. — still open.
+11. The photo service has no "what this would otherwise cost you" figure — needs your honest number. — still open.
+12. Should suppliers still see the ~450-cell tier grid, now that each plan states what it adds? — still open.
+13. The public category words (*Look, Feast, Documentary, Booths*) are internal jargon — nobody types those. Rename or keep? — still open.
 
 ---
 
@@ -57,21 +66,21 @@ opening the doors.
 
 | Group | Item | Status |
 |---|---|---|
-| Vendor | [#5249](https://github.com/iscasasola/setnayan-platform/pull/5249), [#5251](https://github.com/iscasasola/setnayan-platform/pull/5251) | Open, auto-merge armed, healthy. No more work — just CI time. |
-| Papic | [#5254](https://github.com/iscasasola/setnayan-platform/pull/5254) (drift guard) | Open, healthy, auto-merge armed. |
-| Setnayan AI | [#5256](https://github.com/iscasasola/setnayan-platform/pull/5256) (deploy-drift monitor frozen-clock fix) | Open, auto-merge armed. Separate owner call: is the 20-min drift grace period still right given ~7min/build real deploy latency? |
-| MB | [#5253](https://github.com/iscasasola/setnayan-platform/pull/5253) | 🔴 **RED right now.** A migration has a Postgres syntax error (`RAISE EXCEPTION` string built with `||` instead of one literal). Root cause already diagnosed and handed to the working session; not yet confirmed fixed. |
-| Encoder | S12 (updater) | **Does not exist on `origin/main`.** A local worktree (`claude/s12-desktop-updater`) has 583 lines of uncommitted work toward it — needs a PR opened, not started from scratch. |
-| Encoder | `build-desktop` clean run | **No successful run since S10/S11 merged** — blocked on item 🔴5 above (Apple agreement). |
-| Desktop | Windows `.msi` | Built, but never run on an actual Windows machine — needs one verification pass before calling it "working" the way macOS is confirmed working. |
-| iOS | App Store submission | Build is ready and already carries the June rejection's fixes. Needs ~1hr of your input in App Store Connect (App Privacy answers, demo account, deletion recording), then submit → 24–48h review. Nothing engineering-side is left. |
+| Vendor | ~~[#5249](https://github.com/iscasasola/setnayan-platform/pull/5249), [#5251](https://github.com/iscasasola/setnayan-platform/pull/5251)~~ | ✅ **MERGED** (re-checked today). Nothing left. |
+| Papic | ~~[#5254](https://github.com/iscasasola/setnayan-platform/pull/5254)~~ (drift guard) | ✅ **MERGED**. Nothing left. |
+| Setnayan AI | ~~[#5256](https://github.com/iscasasola/setnayan-platform/pull/5256)~~ (deploy-drift monitor frozen-clock fix) | ✅ **MERGED**. Owner call still open: is the 20-min drift grace period still right given ~7min/build real deploy latency? |
+| MB | ~~[#5253](https://github.com/iscasasola/setnayan-platform/pull/5253)~~ | ✅ **MERGED** (re-checked today — the migration syntax fix landed and went green). This file called it RED two hours ago; it wasn't by the time anyone read that. |
+| Encoder | ~~S12 (updater)~~ | ✅ **MERGED** — [#5252](https://github.com/iscasasola/setnayan-platform/pull/5252), "S12 — auto-updater so a Rust encoder bug doesn't mean reinstalling." |
+| Encoder | ~~`build-desktop` clean run~~ | ✅ **SUCCEEDED** — see the Apple-agreement row above. One more dispatch on the current head (post-S12) as a final confirmation before scheduling S13 would be cheap and worthwhile, since this success predates the S12 merge by ~30 min. |
+| Desktop | Windows `.msi` | Still open — built, but never run on an actual Windows machine. Needs one verification pass before calling it "working" the way macOS now is. |
+| iOS | App Store submission | Still open. Build is ready and already carries the June rejection's fixes. Needs ~1hr of your input in App Store Connect (App Privacy answers, demo account, deletion recording), then submit → 24–48h review. Nothing engineering-side is left. |
 
 ---
 
 ## ⚪ Needs scoping — no stated "done" bar yet
 
 - **3D** — the "3D Oversight" session is actively running (5,500+ messages) with no stated remaining scope visible from outside. Needs a direct check-in, not a guess.
-- **Encoder S13 physical rehearsal** — cannot run inside any coding session by design (it requires disconnecting the network and closing the lid of the machine running it). Needs a real Mac + Windows machine + phones, only after S12 lands and one `build-desktop` run succeeds.
+- **Encoder S13 physical rehearsal** — cannot run inside any coding session by design (it requires disconnecting the network and closing the lid of the machine running it). ⚠ **UPDATE: all three preflight blockers this file originally listed are now closed** (S12 merged, a post-S11 `build-desktop` run succeeded with real notarization, both prod flags confirmed on). What's left is genuinely just scoping now: pick a real Mac + Windows machine + phones window, ideally after one more `build-desktop` dispatch on the current head to confirm post-S12 too.
 
 ---
 
