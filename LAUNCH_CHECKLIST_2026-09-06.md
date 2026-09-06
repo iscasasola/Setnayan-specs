@@ -1,6 +1,6 @@
 # LAUNCH CHECKLIST — 2026-09-06
 
-> Read-only page for the owner: (artifact link added after publish)
+> Interactive page for the owner (checkboxes persist across devices): <https://claude.ai/code/artifact/bb7a615b-86df-4f78-bbbe-ef20120ffff0>
 
 **Why this file exists.** Eight sessions are running against this project right now, each
 finding more real things to fix. That is not the same as getting closer to launch — until there
