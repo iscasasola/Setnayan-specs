@@ -20,6 +20,50 @@ without re-verification; treat their status as unknown until re-checked, not as 
 physical rehearsal has actually run once on real hardware. Nothing else on this list blocks
 opening the doors.
 
+> 🚨 **RE-VERIFIED AGAIN 2026-09-08 — PRODUCTION HAS BEEN STUCK ON `main`'s 2026-09-06 06:39
+> commit for over 24 hours, 430+ commits behind, and every deploy attempt since has failed.**
+> This is now the single highest-priority item on this file — nothing merged in the last day is
+> actually live, including the ENCRYPTION_KEY / R2_PUBLIC_URL fixes below. See §0.
+
+---
+
+## 🚨 §0 — Production deploy pipeline is broken (new top priority, found 2026-09-08)
+
+**Not caused by anything on this checklist — this started with PR #5287, before any of the R2/
+encryption work below.** Two separate, stacked failures:
+
+1. **A hard Vercel limit, not a bug in the code:** the mood-board Vercel Function grew past
+   Vercel's 250MB uncompressed function-size ceiling (`250.63mb` measured on PR #5287's build).
+   **Fix applied:** `VERCEL_SUPPORT_LARGE_FUNCTIONS` env var set and a redeploy triggered — by
+   the "Production deployment OOM kills" session, not this one.
+2. **A separate, flaky OOM during the build step itself** (V8 heap abort, exit 137) — confirmed
+   non-deterministic: the identical commit built successfully once and OOM'd three other times.
+   [PR #5299](https://github.com/iscasasola/setnayan-platform/pull/5299) raises the build heap
+   7168MB → 12288MB to fix this, but **is still open** (stuck on a slow `typecheck + lint` run,
+   auto-merge armed).
+
+**Both fixes are needed together** — re-verified 2026-09-08: a redeploy with only the
+large-functions flag set (not yet benefiting from #5299's heap raise) OOM'd during the build step
+before it ever reached the function-size check, exit 137, same signature as before.
+
+**Status as of this check:** `setnayan.com` / `www.setnayan.com` are correctly serving the last
+known-good deployment (PR #5288, verified via the Vercel API directly, not just CLI output) — the
+site is *stable*, just *stale*. Every commit merged since 2026-09-06 06:39, including the
+`ENCRYPTION_KEY` and `R2_PUBLIC_URL` fixes below, is sitting on `main` waiting for a deploy that
+actually completes.
+
+**What closes this:** #5299 merges, then one production build needs to actually go green — given
+the flakiness, that may take more than one attempt even after the heap fix lands.
+
+⚠ **Also found, not blocking but worth a look:** two sessions independently ran destructive git
+commands in the *shared* `setnayan-platform` checkout while investigating this (a `vercel --prod`
+from a dirty side-branch that briefly went live in production, and a `git checkout origin/main --
+.` staging 1180 files). Both were caught and reverted with no confirmed lasting damage, but that
+checkout has had two near-misses in two days. Treat it as read-only; do any write/deploy work from
+an isolated worktree.
+
+---
+
 > ⚠ **RE-VERIFIED ~2 hours after this file was first written, on the owner's own instinct that
 > some of it was already retired — and he was right.** Eight sessions merged in that window,
 > including the fix for the one item this file called RED. **The lesson is the file itself:**
@@ -35,8 +79,8 @@ opening the doors.
 
 | # | Item | Status | What closes it |
 |---|---|---|---|
-| 1 | `ENCRYPTION_KEY` (Vercel prod env) | 🔴 **Set but EMPTY** — verified via `vercel env pull` today | Paste a real generated key into Vercel → Production. OAuth token decrypt + cron endpoints depend on it. **~5 min.** |
-| 2 | `R2_PUBLIC_URL` (Vercel prod env) | 🔴 **Set but EMPTY — and confirmed BROKEN LIVE.** The homepage's own "SetnaProd" shop card renders a blank box where its logo should be; the `<img>` never loads even though the underlying signed R2 URL itself returns 200. Screenshotted 2026-09-06. | Set to the media bucket's `r2.dev` subdomain or `media.setnayan.com` custom domain in Vercel → Production, then reload the homepage and confirm shop logos actually render (not just that the env var is non-empty). **~15 min + redeploy.** |
+| 1 | `ENCRYPTION_KEY` (Vercel prod env) | ✅ **SET 2026-09-07, confirmed by the owner directly in the Vercel dashboard** (a real value, not empty). Generated via `openssl rand -base64 32`, exactly what `apps/web/lib/encryption-core.ts`'s own error message asks for. | Nothing — closed. Takes effect on the next successful deploy (it's read server-side at runtime, no rebuild needed for this one — unlike R2_PUBLIC_URL below). |
+| 2 | `R2_PUBLIC_URL` (Vercel prod env) | ✅ **SET 2026-09-07** to `https://pub-37d64fe618584c2981a88610a55dd439.r2.dev` (R2's built-in public dev URL — deliberately not a custom domain, since `setnayan.com` isn't a Cloudflare zone and binding one would mean migrating DNS for one feature). ⚠ **NOT LIVE YET — blocked by §0.** This value feeds `next.config.ts`'s image allowlist, which is baked in at *build* time, so the fix cannot take effect until a production build actually completes. | Nothing further to configure — just needs §0 resolved, then re-check the homepage shop-logo images actually render. |
 | 3 | Business identity + payment accounts | ✅ **DONE — verified directly in prod DB today.** `business_tin` = `300-003-455-000` (not the old placeholder), BDO + GCash both `enabled = true` with real account numbers and QR codes on file. | Nothing — closed. Retire this line from `OWNER_ACTIONS.md`, it's stale there. |
 | 4 | `dpo@setnayan.com` inbox routing | ⚠️ **Could not verify from here** — this is Cloudflare Email Routing, no API access from this session. | Send a test email to `dpo@setnayan.com` and confirm it lands somewhere a person reads. RA 10173 requires this reachable before collecting PII. |
 | ~~5~~ | ~~Apple Developer Program License Agreement~~ | ✅ **CLOSED — re-verified same day, ~2hrs after this file first said "still unaccepted."** `build-desktop` run [34016548173](https://github.com/iscasasola/setnayan-platform/actions/runs/34016548173) (2026-09-06T06:27:52Z, commit `c2a63956`, after S11) shows real notarization succeeding: `codesign`/`spctl` report `accepted` / `source=Notarized Developer ID`. The S13-PREFLIGHT report (merged 06:48:10Z) said this was still broken — it was already stale by the time it merged. | Nothing — closed. ⚠ One residual gap: the `.dmg` itself reports "does not have a ticket stapled to it" (stapling step didn't run/failed) — Gatekeeper still passes online via ticket lookup, but an offline install would fail. Worth a small fix, not a launch blocker. |
@@ -76,6 +120,7 @@ opening the doors.
 | Encoder | ~~`build-desktop` clean run~~ | ✅ **SUCCEEDED** — see the Apple-agreement row above. One more dispatch on the current head (post-S12) as a final confirmation before scheduling S13 would be cheap and worthwhile, since this success predates the S12 merge by ~30 min. |
 | Desktop | Windows `.msi` | Still open — built, but never run on an actual Windows machine. Needs one verification pass before calling it "working" the way macOS now is. |
 | iOS | App Store submission | Still open. Build is ready and already carries the June rejection's fixes. Needs ~1hr of your input in App Store Connect (App Privacy answers, demo account, deletion recording), then submit → 24–48h review. Nothing engineering-side is left. |
+| Security | OAuth refresh tokens stored in plaintext | **Found 2026-09-07, nobody assigned yet.** The YouTube, Google Drive, and Photo Delivery OAuth callback routes (`apps/web/app/api/oauth/{youtube,drive,photo-delivery}/callback/route.ts`) all write `refresh_token` to `oauth_grants` with no `encryptToken()` call — unlike the three sites `apps/web/lib/secrets/reencrypt.ts` documents as the actual encrypted set. 2 YouTube + 3 pooled-channel grants in prod currently hold live plaintext refresh tokens. `ENCRYPTION_KEY` being empty was never actually the risk here. |
 
 ---
 
