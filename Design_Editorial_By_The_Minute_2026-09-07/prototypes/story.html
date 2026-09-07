@@ -1,0 +1,1284 @@
+<title>Maria &amp; Juan, by the Minute</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;800;900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Archivo:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --bg:#EFEBE4; --bg2:#E6E0D6; --fg:#1B1A17; --mute:#6A655C; --line:rgba(27,26,23,.14); --line2:rgba(27,26,23,.3);
+    --taal:#2F6F6A; --candle:#D9A441; --candle-ink:#7A5A16; --live:#C2473B; --bone:#F7F3EC;
+    --card:rgba(255,255,255,.55); --card-ink:#1B1A17;
+    --f-time:'Big Shoulders Display','Arial Narrow',Impact,sans-serif;
+    --f-prose:'Newsreader',Georgia,'Times New Roman',serif;
+    --f-ui:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;
+    color-scheme:light;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+  body{margin:0;background:var(--bg);color:var(--fg);font:15.5px/1.55 var(--f-ui);-webkit-font-smoothing:antialiased;transition:background .6s linear,color .6s linear}
+  a{color:inherit}
+  button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+  :focus-visible{outline:2px solid var(--candle);outline-offset:3px;border-radius:3px}
+  h1,h2,h3{margin:0;text-wrap:balance} p{margin:0}
+  .ui{font-family:var(--f-ui);font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--mute)}
+  .time{font-family:var(--f-time);font-weight:800;letter-spacing:-.01em;line-height:.9;font-variant-numeric:tabular-nums}
+  .prose{font-family:var(--f-prose);font-variation-settings:"opsz" 18;font-size:19px;line-height:1.5;font-weight:400}
+  .wrap{width:100%;max-width:1120px;margin:0 auto;padding:0 18px} @media(min-width:900px){.wrap{padding:0 40px}}
+
+  /* plates */
+  .plate{position:relative;overflow:hidden;border-radius:6px;background:radial-gradient(120% 90% at 15% 95%,#3F2E28 0%,transparent 55%),radial-gradient(90% 70% at 85% 5%,#E9D6B4 0%,transparent 60%),linear-gradient(160deg,#8C9A80,#3E4A5C);isolation:isolate;color:#fff}
+  .plate::after{content:"";position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .2 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+  .plate .cap{position:absolute;left:12px;bottom:10px;right:12px;z-index:1;font:600 10px/1.3 var(--f-ui);letter-spacing:.12em;text-transform:uppercase;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+  .plate .tc{position:absolute;top:10px;left:12px;z-index:1;font:800 13px var(--f-time);letter-spacing:.04em;padding:3px 7px;background:rgba(0,0,0,.45);border-radius:3px;backdrop-filter:blur(4px)}
+  .plate .tc.live{background:var(--live)}
+  .plate .play{position:absolute;inset:0;z-index:1;display:grid;place-items:center}
+  .plate .play b{display:inline-flex;align-items:center;gap:9px;padding:9px 14px 9px 11px;border-radius:999px;background:rgba(10,10,10,.5);backdrop-filter:blur(8px);font:600 11px/1 var(--f-ui);letter-spacing:.12em;text-transform:uppercase}
+  .plate .play b::before{content:"";border-left:9px solid #fff;border-top:6px solid transparent;border-bottom:6px solid transparent}
+  .plate.on .play b::before{border:0;width:9px;height:11px;border-left:3px solid #fff;border-right:3px solid #fff}
+  .plate .eq{display:none;position:absolute;right:12px;top:12px;z-index:1;gap:2px;align-items:flex-end;height:14px}
+  .plate.on .eq{display:flex} .plate .eq i{width:3px;background:#fff;border-radius:1px;animation:eq .8s ease-in-out infinite alternate} .plate .eq i:nth-child(2){animation-delay:.2s}.plate .eq i:nth-child(3){animation-delay:.35s}
+  @keyframes eq{from{height:4px}to{height:14px}}
+  .plate.mono{display:grid;place-items:center;background:linear-gradient(160deg,#F3EBDD,#D9C6A6)} .plate.mono b{position:relative;z-index:1;font-family:var(--f-prose);font-style:italic;font-size:64px;color:#6B4E3D;letter-spacing:.06em}
+
+  /* ══ MOTION — everything moves a little, nothing waits to be seen ══ */
+  .dial .bin{transform-origin:bottom;animation:grow .9s cubic-bezier(.2,.7,.2,1) both}
+  @keyframes grow{from{transform:scaleY(0)}}
+  .dial .needle{transition:transform .35s ease}
+  /* THE PAGE IS LEGIBLE AT REST (review finding: entries sat at opacity .65 until an observer
+     fired — dim in a screenshot, dim with JS off, muted text down to 2.5:1). Nothing fades in;
+     only a small rise, and only when JS is running and motion is welcome. */
+  .js .entry{transform:translateY(14px);transition:transform .8s cubic-bezier(.2,.7,.2,1)} .js .entry.in{transform:none}
+  @media (prefers-reduced-motion:reduce){ .js .entry{transform:none} }
+  .media .plate,.films .plate,.renders .plate{animation:kb 26s ease-in-out infinite alternate;will-change:transform}
+  @keyframes kb{from{transform:scale(1)}to{transform:scale(1.035)}}
+  .plate::after{animation:grain 9s steps(6) infinite}
+  @keyframes grain{to{background-position:140px 140px}}
+  .names h1{animation:rise 1s cubic-bezier(.2,.7,.2,1) both} @keyframes rise{from{transform:translateY(.18em);opacity:.5}}
+  .brandrow .b .mg{position:relative} .brandrow .b .mg::before{content:"";position:absolute;inset:-4px;border-radius:50%;border:1.5px solid transparent;border-top-color:var(--candle);animation:spin 7s linear infinite} @keyframes spin{to{transform:rotate(360deg)}}
+  .relive .plate.sw{animation:fadein .5s ease} @keyframes fadein{from{opacity:.2;transform:scale(1.02)}}
+  .tcl{display:inline-block;animation:tick .5s ease}
+  @keyframes tick{from{transform:translateY(-.15em);opacity:.4}}
+
+  /* ══ VENDOR TIERS ══ */
+  .v.feat{border-color:var(--candle);box-shadow:inset 3px 0 0 var(--candle)}
+  .v .tier{display:inline-block;font:700 9px var(--f-ui);letter-spacing:.14em;text-transform:uppercase;padding:2px 6px;border-radius:3px;background:var(--bg2);color:var(--mute);margin-left:6px;vertical-align:middle}
+  .v.feat .tier{background:var(--candle);color:#1B1A17}
+  .v .note{margin-top:10px;padding:10px 12px;border-left:2px solid var(--candle);font-family:var(--f-prose);font-size:15.5px;line-height:1.4;font-style:italic}
+  .v .note small{display:block;font:600 10px var(--f-ui);letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-style:normal;margin-top:4px}
+  .v .reel{margin-top:10px;display:flex;gap:6px} .v .reel .plate{flex:1;aspect-ratio:16/10;border-radius:5px} .v .reel .plate .tc{font-size:10px;padding:2px 5px;top:6px;left:6px}
+  .v .acts span.fol{border-color:var(--candle);color:var(--candle-ink)}
+  .v .free{margin-top:8px;font-size:12px;color:var(--mute)}
+  .tierlegend{margin-top:14px;display:grid;gap:8px} @media(min-width:640px){.tierlegend{grid-template-columns:1fr 1fr}}
+  .tierlegend .card{padding:12px 14px;font-size:13px} .tierlegend .card b{display:block;font:800 16px var(--f-time);letter-spacing:.03em;margin-bottom:4px}
+
+  /* ══ COVER ══ */
+  .cover{padding:22px 0 0}
+  .brandrow{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .brandrow .b{font:700 12px var(--f-ui);letter-spacing:.24em;display:flex;align-items:center;gap:12px}
+  .brandrow .b .mg{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--candle);display:grid;place-items:center;font:italic 500 12px var(--f-prose);letter-spacing:.04em;color:var(--fg)}
+  .brandrow .b small{display:block;font-weight:500;letter-spacing:.14em;font-size:9.5px;color:var(--mute);margin-top:2px}
+  .brandrow .acts{display:flex;gap:6px;flex-wrap:wrap}
+  .brandrow .acts button{font:600 11.5px var(--f-ui);letter-spacing:.06em;padding:8px 12px;border:1px solid var(--line2);border-radius:999px;color:var(--fg)}
+  .brandrow .acts button.pri{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+  .brandrow .acts button[aria-pressed="true"]{background:var(--candle);color:#1B1A17;border-color:var(--candle)}
+  .state{margin-top:22px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .badge{display:inline-flex;align-items:center;gap:7px;font:700 11px var(--f-ui);letter-spacing:.14em;text-transform:uppercase;padding:6px 10px;border-radius:999px;border:1px solid var(--line2)}
+  .badge.live{background:var(--live);color:#fff;border-color:var(--live)} .badge.live::before{content:"";width:7px;height:7px;border-radius:50%;background:#fff;animation:blink 1.2s infinite}
+  @keyframes blink{50%{opacity:.25}}
+  .asof{display:inline-flex;border:1px solid var(--line2);border-radius:999px;overflow:hidden}
+  .asof button{font:600 11px var(--f-ui);letter-spacing:.06em;padding:6px 11px;color:var(--mute)}
+  .asof button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+  .names{margin-top:22px;display:grid;gap:10px}
+  .names .ui{color:var(--taal)}
+  .names h1{font-family:var(--f-time);font-weight:900;font-size:clamp(64px,17vw,190px);line-height:.86;letter-spacing:-.02em;text-transform:uppercase}
+  .names h1 em{font-style:normal;font-weight:500;color:var(--mute)}
+  .deck{display:grid;gap:18px;margin-top:22px} @media(min-width:900px){.deck{grid-template-columns:1.15fr .85fr;align-items:end}}
+  .deck .prose{font-size:clamp(20px,2.6vw,26px);font-variation-settings:"opsz" 24;font-weight:300;max-width:30ch;line-height:1.35} .deck .prose b{font-weight:500}
+  .facts{display:grid;grid-template-columns:repeat(4,auto);gap:14px 22px;justify-content:start}
+  .facts div b{display:block;font:800 30px/1 var(--f-time);font-variant-numeric:tabular-nums} .facts div span{display:block;margin-top:4px;font:600 9.5px var(--f-ui);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+
+  /* ══ DIAL ══ */
+  .dialwrap{position:sticky;top:0;z-index:20;margin-top:26px;background:var(--bg);transition:background .6s linear;border-bottom:1px solid var(--line)}
+  .dial{padding:10px 0 8px}
+  .dial .top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .dial .now{display:flex;align-items:baseline;gap:10px;min-width:0}
+  .dial .now b{font:900 34px/1 var(--f-time);font-variant-numeric:tabular-nums;letter-spacing:-.01em;white-space:nowrap}
+  .dial .now b small{font-size:13px;font-weight:700;letter-spacing:.08em;margin-left:3px;color:var(--mute)}
+  .dial .now span{font:500 13.5px var(--f-ui);color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dial .legend{display:none;gap:14px;flex:none} @media(min-width:760px){.dial .legend{display:flex}}
+  .dial .legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:middle}
+  /* The bars live in a stretched 1000-unit space; the LABELS do not — they were being
+     squashed to ~35% width on a phone by preserveAspectRatio="none" (review finding).
+     They are HTML now, positioned in percent over the same axis. */
+  .dialbox{position:relative;margin-top:6px}
+  .dial svg{display:block;width:100%;height:58px;overflow:visible;touch-action:manipulation}
+  .dial svg:focus-visible{outline:2px solid var(--candle);outline-offset:2px}
+  .dlabels{position:absolute;left:0;right:0;top:0;height:100%;pointer-events:none}
+  .dlabels span{position:absolute;transform:translateX(-50%);white-space:nowrap;font:500 9px var(--f-ui);letter-spacing:.08em;color:var(--mute)}
+  .dlabels span.lab{font:700 10px var(--f-time);letter-spacing:.06em}
+  .dlabels span.lab.on{color:var(--fg)}
+  .dlabels span.seg{font:700 9px var(--f-ui);letter-spacing:.16em;transform:none}
+  .dlabels span.seg.r{transform:translateX(-100%)}
+  .dialhint{margin-top:2px;font:500 10.5px var(--f-ui);color:var(--mute);text-align:center}
+  .dial .bin{fill:var(--line2);transition:fill .3s,opacity .3s;cursor:pointer} .dial .bin:hover{fill:var(--candle)} .dial .bin.pv{fill:var(--taal)} .dial .bin.past{fill:var(--mute);opacity:.55} .dial .bin.future{fill:none;stroke:var(--line2);stroke-dasharray:2 2}
+  .dial .needle{stroke:var(--candle);stroke-width:2}
+  .dial .lab{font:700 10px var(--f-time);letter-spacing:.06em;fill:var(--mute)} .dial .lab.on{fill:var(--fg)}
+  .dial .seg{font:700 9px var(--f-ui);fill:var(--mute);letter-spacing:.16em}
+  .dial .hr{font:500 9px var(--f-ui);fill:var(--mute);letter-spacing:.08em}
+  .dial .sep{stroke:var(--fg);stroke-width:1}
+
+  /* ══ ENTRIES ══ */
+  .day{padding-top:28px}
+  .stage{display:grid;grid-template-columns:1fr;gap:26px;padding:20px 0 10px} @media(min-width:900px){.stage{grid-template-columns:minmax(0,1fr) 340px;gap:44px}}
+  .part-h{display:flex;align-items:baseline;gap:12px;margin:38px 0 6px;border-bottom:2px solid var(--fg);padding-bottom:8px}
+  .part-h h2{font:900 clamp(30px,6vw,52px)/.9 var(--f-time);text-transform:uppercase;letter-spacing:-.01em} .part-h .ui{padding-bottom:4px}
+  .entry{scroll-margin-top:124px;padding-top:30px}
+  .entry.hidden{display:none}
+  .entry .stamp{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+  .entry .stamp .t{font:900 clamp(56px,13vw,112px)/.82 var(--f-time);letter-spacing:-.03em;font-variant-numeric:tabular-nums;text-transform:uppercase}
+  .entry .stamp .t small{font-size:.28em;font-weight:700;letter-spacing:.1em;margin-left:6px;color:var(--mute)}
+  .entry.road .stamp .t{font-size:clamp(40px,9vw,72px)}
+  .entry .stamp .meta{padding-bottom:6px}
+  .entry h3{font:800 clamp(28px,6vw,48px)/.95 var(--f-time);text-transform:uppercase;letter-spacing:-.01em;margin-top:8px}
+  .entry .media{margin-top:16px;display:grid;gap:8px;grid-template-columns:1fr} .entry .media.two{grid-template-columns:1.5fr 1fr} .entry .media.three{grid-template-columns:1fr 1fr 1fr}
+  .entry .media .plate{aspect-ratio:4/5} .entry .media.two .plate:first-child{aspect-ratio:auto} .entry .media.two .plate:last-child{aspect-ratio:3/4} .entry .media.three .plate{aspect-ratio:3/4}
+  @media(min-width:640px){.entry .media .plate{aspect-ratio:16/10}.entry .media.two .plate:last-child{aspect-ratio:auto}.entry .media.three .plate{aspect-ratio:1}}
+  .entry .prose{margin-top:16px;max-width:62ch}
+  .entry .prose.dc::first-letter{font-family:var(--f-time);font-weight:900;font-size:3.2em;float:left;line-height:.78;padding:5px 9px 0 0;color:var(--taal)}
+  .layers{margin-top:18px;border-top:1px solid var(--line)}
+  .layer{display:grid;grid-template-columns:92px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)} .layer>.ui{padding-top:3px}
+  .voice{font-family:var(--f-prose);font-style:italic;font-size:18px;line-height:1.35} .voice+.voice{margin-top:10px}
+  .voice small{display:block;font:600 10px var(--f-ui);letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-style:normal;margin-top:3px} .voice small b{color:var(--candle-ink)}
+  .voice.more{display:none} .layer.open .voice.more{display:block}
+  .morebtn{margin-top:8px;font:600 11.5px var(--f-ui);letter-spacing:.06em;color:var(--taal);border-bottom:1px solid currentColor} .layer.open .morebtn{display:none}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{display:inline-flex;align-items:center;gap:7px;padding:5px 10px 5px 5px;border:1px solid var(--line2);border-radius:999px;text-decoration:none;font:600 12.5px var(--f-ui);background:var(--card);color:var(--card-ink)}
+  .chip i{width:20px;height:20px;border-radius:50%;background:var(--bg2);display:grid;place-items:center;font:700 9px var(--f-ui);font-style:normal;color:var(--mute)} .chip small{font-weight:500;color:var(--mute);font-size:11px} .chip:hover{border-color:var(--taal)}
+  .chip.sn i{background:var(--taal);color:#fff}
+  .filmat{display:inline-flex;align-items:center;gap:8px;font:600 12.5px var(--f-ui);text-decoration:none}
+  .filmat b{font:800 14px var(--f-time);letter-spacing:.04em;padding:2px 6px;background:var(--fg);color:var(--bg);border-radius:3px}
+  .asked{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px} .asked::-webkit-scrollbar{display:none}
+  .asked .qq{flex:none;width:150px;font-family:var(--f-prose);font-size:15px;line-height:1.3;padding-right:8px;align-self:center} .asked .qq::before{content:"Q.";display:block;font:800 11px var(--f-time);letter-spacing:.1em;color:var(--candle-ink)}
+  .asked .plate{flex:none;width:96px;aspect-ratio:9/14;border-radius:8px} .asked .plate .cap{left:7px;bottom:7px;right:7px;font-size:9px;text-transform:none;letter-spacing:0;font-family:var(--f-ui);font-weight:600}
+  .gap{display:flex;align-items:center;gap:12px;padding:8px 0;color:var(--mute)} .gap::before,.gap::after{content:"";flex:1;height:1px;background:var(--line)}
+  .gap span{font:600 11px var(--f-ui);letter-spacing:.12em;text-transform:uppercase;text-align:center} .gap span b{font:800 15px var(--f-time);color:var(--fg);letter-spacing:.04em;margin-right:8px}
+  .gap.hidden{display:none}
+  .inroom{display:grid;grid-template-columns:92px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)} @media(min-width:900px){.inroom{display:none}}
+  .inroom .mini{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px} .inroom .mini b{font:800 13px var(--f-time);padding:3px 7px;border-radius:3px;background:var(--candle);color:#1B1A17;letter-spacing:.04em}
+  .tocome{margin-top:30px;padding:22px;border:2px dashed var(--line2);border-radius:14px;display:none}
+  .tocome.on{display:block}
+  .tocome h3{font:900 clamp(28px,6vw,44px)/.9 var(--f-time);text-transform:uppercase}
+  .tocome p{margin-top:8px;color:var(--mute);max-width:56ch} .tocome .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .tocome .row span{font:800 13px var(--f-time);letter-spacing:.04em;padding:5px 9px;border:1px solid var(--line2);border-radius:6px;color:var(--mute)}
+  .tocome .cta{display:inline-flex;gap:8px;margin-top:14px;font:600 12.5px var(--f-ui);padding:9px 13px;border-radius:8px;background:var(--fg);color:var(--bg)}
+  /* host gates */
+  .gate{display:none;align-items:center;gap:10px;margin-top:10px;padding:8px 12px;border:1px dashed var(--line2);border-radius:8px;font:500 12.5px var(--f-ui);color:var(--mute)}
+  .host .gate{display:flex} .gate b{color:var(--fg);font-weight:600}
+  .sw{margin-left:auto;position:relative;width:34px;height:20px;border-radius:12px;background:var(--line2);flex:none;transition:background .2s}
+  .sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--bg);box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform .2s}
+  .sw[aria-checked="true"]{background:var(--candle)} .sw[aria-checked="true"]::after{transform:translateX(14px)}
+  .entry.off > :not(.gate){opacity:.3}
+
+  /* lens */
+  .lens{display:none} @media(min-width:900px){.lens{display:block;position:sticky;top:124px;align-self:start}}
+  .card{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card);color:var(--card-ink)}
+  .card .hd{display:flex;justify-content:space-between;align-items:baseline;padding:10px 12px;border-bottom:1px solid var(--line)} .card .hd b{font:800 16px var(--f-time);letter-spacing:.02em}
+  .card .ft{padding:10px 12px;font-size:12.5px;color:var(--mute);border-top:1px solid var(--line)} .card .ft b{color:var(--card-ink)}
+  .lens .stack{margin-top:10px;display:grid;gap:8px}
+  .kv{display:grid;grid-template-columns:1fr auto;gap:8px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--card-ink);font-size:13px} .kv b{font:800 15px var(--f-time);letter-spacing:.03em}
+  .room svg{display:block;width:100%;height:auto} .lawn{fill:rgba(140,154,128,.16)}
+  .tbl circle,.tbl rect{fill:var(--bg);stroke:var(--line2);stroke-width:1.1;transition:fill .3s,stroke .3s} .tbl text{font:700 8.5px var(--f-time);fill:var(--mute);text-anchor:middle;letter-spacing:.04em}
+  .tbl.hot circle,.tbl.hot rect{fill:var(--candle);stroke:var(--candle-ink)} .tbl.hot text{fill:#1B1A17}
+  .tbl.warm circle,.tbl.warm rect{fill:color-mix(in srgb,var(--candle) 45%,var(--bg))}
+  .tbl.me circle,.tbl.me rect{fill:var(--taal);stroke:var(--taal)} .tbl.me text{fill:#fff}
+  .rlab{font:600 8px var(--f-ui);fill:var(--mute);letter-spacing:.12em;text-transform:uppercase}
+  /* The seating plan exists only while the RECEPTION venue is in use (owner, 2026-09-07):
+     before 5:30 PM the plan is not shown at all — the lawn is bare (road) or in ceremony rows. */
+  .room .rows,.room .tbl,.room .dance{display:none}
+  .room.cer .rows{display:block}
+  .room.rec .tbl,.room.rec .dance{display:block}
+  .room .rows rect{fill:var(--bg);stroke:var(--line2);stroke-width:1}
+  .room .closed{display:block} .room.rec .closed,.room.cer .closed,.room.novenue .closed{display:none}
+  .room .novenue-note{display:none} .room.novenue .novenue-note{display:block} .room.novenue svg{opacity:.25}
+  .closed text{font:600 9px var(--f-ui);fill:var(--mute);letter-spacing:.14em;text-transform:uppercase}
+
+  /* ══ FIND IN THIS DAY · one search over every layer the viewer may see ══ */
+  .dial .top .findbtn{flex:none;font:600 11.5px var(--f-ui);letter-spacing:.06em;padding:6px 10px;border:1px solid var(--line2);border-radius:999px;color:var(--fg)}
+  .dial .top .findbtn[aria-expanded="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+  .findrow{display:none;gap:8px;margin-top:8px} .findrow.on{display:flex}
+  .findrow input{flex:1;min-width:0;border:1px solid var(--line2);background:var(--bg);color:var(--fg);border-radius:8px;padding:9px 12px;font:inherit;font-size:14px}
+  .findrow button{font:600 12px var(--f-ui);padding:0 12px;border:1px solid var(--line2);border-radius:8px;color:var(--mute)}
+  .findres{position:absolute;left:0;right:0;top:100%;background:var(--bg);border-bottom:2px solid var(--fg);box-shadow:0 30px 60px -30px rgba(0,0,0,.45);max-height:55vh;overflow:auto;z-index:19;padding-bottom:10px}
+  .findres .grp{padding:12px 0 4px;font:700 10px var(--f-ui);letter-spacing:.16em;text-transform:uppercase;color:var(--mute)}
+  .findres .hit{display:grid;grid-template-columns:60px 1fr;gap:10px;padding:9px 0;border-top:1px solid var(--line);text-align:left;width:100%;align-items:start}
+  .findres .hit b{font:800 14px var(--f-time);letter-spacing:.04em;padding-top:2px} .findres .hit span{display:block;font-size:13.5px;line-height:1.35} .findres .hit small{display:block;font-size:12px;color:var(--mute);margin-top:2px;line-height:1.35}
+  .findres .hit:hover,.findres .hit:focus-visible{background:var(--card)}
+  .findres mark{background:var(--candle);color:#1B1A17;padding:0 2px;border-radius:2px}
+  .findres .none{padding:14px 0;font-family:var(--f-prose);font-style:italic;color:var(--mute)}
+  .q-dim{opacity:.25;filter:saturate(.5);transition:opacity .3s}
+
+  /* ══ A PAGE, SHOWN AS A PAGE · the save-the-date and the invitation, as guests saw them ══ */
+  .pageframe{display:grid;grid-template-columns:1fr;gap:10px;margin-top:16px} @media(min-width:640px){.pageframe{grid-template-columns:210px 1fr;align-items:stretch}}
+  .phone{width:210px;max-width:100%;aspect-ratio:9/17;border-radius:28px;border:6px solid var(--fg);position:relative;overflow:hidden;color:#1B1A17;justify-self:start;box-shadow:0 24px 50px -24px rgba(0,0,0,.5)}
+  .phone .scr{position:absolute;inset:0;padding:24px 14px 14px;display:flex;flex-direction:column;align-items:center;text-align:center;background:linear-gradient(180deg,rgba(255,255,255,.4),transparent 45%),linear-gradient(160deg,#F3EBDD,#E6D3B3)}
+  .phone .mg{width:34px;height:34px;border-radius:50%;border:1.5px solid #6B4E3D;display:grid;place-items:center;font:italic 500 11px var(--f-prose);color:#6B4E3D;letter-spacing:.04em}
+  .phone .nm{font:900 22px/.95 var(--f-time);text-transform:uppercase;margin-top:10px}
+  .phone .lab{font:700 8.5px var(--f-ui);letter-spacing:.2em;text-transform:uppercase;color:#7A5A16;margin-top:8px}
+  .phone .dt{font:800 15px var(--f-time);letter-spacing:.04em;margin-top:2px}
+  .phone .sub{font:500 9px var(--f-ui);color:#6A655C;margin-top:2px}
+  .phone .cd{margin-top:10px;display:flex;gap:5px} .phone .cd span{display:grid;justify-items:center;font:800 16px/1 var(--f-time);padding:6px 7px;border-radius:6px;background:rgba(255,255,255,.6)} .phone .cd span small{font:600 6.5px var(--f-ui);letter-spacing:.1em;text-transform:uppercase;color:#6A655C;margin-top:3px}
+  .phone .btn{margin-top:10px;font:600 9.5px var(--f-ui);padding:7px 11px;border-radius:999px;background:#1B1A17;color:#F7F3EC} .phone .btn.ghost{background:transparent;color:#1B1A17;border:1px solid rgba(0,0,0,.3);margin-top:6px}
+  .phone .film{margin-top:auto;width:100%;aspect-ratio:16/9;border-radius:8px;position:relative;background:linear-gradient(160deg,#6B4E3D,#D9A441);display:grid;place-items:center;color:#fff;font:600 8.5px var(--f-ui);letter-spacing:.12em;text-transform:uppercase}
+  .phone .film::before{content:"";border-left:8px solid #fff;border-top:5px solid transparent;border-bottom:5px solid transparent;margin-right:6px}
+  .phone .sched{margin-top:auto;width:100%;text-align:left;font:500 8.5px/1.7 var(--f-ui);color:#1B1A17;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.55)} .phone .sched b{font:800 10px var(--f-time);letter-spacing:.04em;margin-right:6px}
+  .pageframe .side{display:flex;flex-direction:column;gap:8px;justify-content:center;min-width:0}
+  .pageframe .side .plate{aspect-ratio:16/9}
+  .pageframe .side .open{font:600 12.5px var(--f-ui);text-decoration:none;color:var(--taal);align-self:flex-start;border-bottom:1px solid currentColor}
+
+  /* ══ THE BACK COVER · next in this chronicle (after the locked close, outside the edition) ══ */
+  .back{margin-top:-80px;padding:56px 0 120px;border-top:1px solid var(--line)}
+  .back .inner{display:grid;gap:22px} @media(min-width:900px){.back .inner{grid-template-columns:1.1fr .9fr;align-items:center}}
+  .back .no2{position:relative;padding:28px 26px 26px;border:2px solid var(--fg);border-radius:18px;overflow:hidden;background:var(--card);color:var(--card-ink)}
+  .back .no2 .ghost{position:absolute;right:-6px;top:-18px;font:900 150px/1 var(--f-time);letter-spacing:-.04em;color:var(--fg);opacity:.06;pointer-events:none}
+  .back .no2 .vol{font:700 10.5px var(--f-ui);letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+  .back .no2 h3{font:900 clamp(34px,7vw,56px)/.9 var(--f-time);text-transform:uppercase;letter-spacing:-.01em;margin-top:8px}
+  .back .no2 .when{margin-top:10px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap} .back .no2 .when b{font:800 22px var(--f-time);letter-spacing:.03em} .back .no2 .when span{font:600 11px var(--f-ui);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+  .back .no2 .prev{margin-top:18px;display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:var(--bg2);font:600 11.5px var(--f-ui);color:var(--mute)} .back .no2 .prev b{font:800 12px var(--f-time);letter-spacing:.06em;color:var(--card-ink)}
+  .back .copy .prose{font-size:clamp(19px,2.4vw,23px);font-weight:300;line-height:1.4;max-width:34ch} .back .copy .prose b{font-weight:500}
+  .back .ctas{margin-top:18px;display:flex;flex-wrap:wrap;gap:8px} .back .ctas a{font:600 13px var(--f-ui);padding:11px 15px;border-radius:9px;border:1px solid var(--line2);text-decoration:none;color:var(--fg)} .back .ctas a.pri{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+  .back .kinds{margin-top:14px;display:flex;flex-wrap:wrap;gap:6px;align-items:center} .back .kinds .ui{margin-right:4px} .back .kinds a{font:600 12px var(--f-ui);padding:6px 10px;border-radius:999px;border:1px solid var(--line2);text-decoration:none;color:var(--mute)} .back .kinds a:hover{border-color:var(--taal);color:var(--fg)}
+  .back .fine{margin-top:14px;font-size:12.5px;color:var(--mute);max-width:52ch}
+  .back .role{display:none} .as-couple .back .role.couple,.as-guest .back .role.guest,.as-stranger .back .role.stranger{display:block}
+
+  /* ══ VIEWING AS · the three readers of one URL ══ */
+  /* THE GUESTS' LAYER (review finding, blocker): everything a guest made — captures, wishes,
+     answers, letters, the wall, the seating plan, "were you there", Relive — is tagged
+     data-layer="guest" at load. A stranger before publish (body.gl-hide) never receives it;
+     the build does this server-side (storyAudienceAdmits: 'event' until 'published'). */
+  .gl-hide [data-layer="guest"]{display:none!important}
+  .gl-hide .bin.future{animation:none;transform:scaleY(.06)}
+  .gl-hide #last{display:none}
+  .stub{display:none;margin-top:12px;padding:12px 14px;border:1px dashed var(--line2);border-radius:10px;font-size:13.5px;color:var(--mute)} .stub b{color:var(--fg)}
+  .gl-hide .stub{display:block}
+  .only-guest,.only-stranger,.only-couple{display:none}
+  .as-guest .only-guest,.as-stranger .only-stranger,.as-couple .only-couple,.as-couple .only-guest{display:block}
+  #youAct{display:none} .as-guest #youAct,.as-couple #youAct{display:block}
+  #youGo{font:600 13px var(--f-ui);padding:10px 14px;border-radius:8px;background:var(--fg);color:var(--bg)}
+  .you .demo{display:block;margin-top:8px;font-size:11.5px;color:var(--mute)} .you .demo select{font:inherit;font-size:11.5px;border:1px solid var(--line2);border-radius:6px;background:var(--bg);color:var(--fg);padding:2px 6px}
+  .as-couple .cardside .only-couple{display:inline-block}
+  /* share + print menus */
+  .menuwrap{position:relative} .menu{position:absolute;right:0;top:calc(100% + 6px);z-index:40;min-width:240px;background:var(--bg);border:1px solid var(--line2);border-radius:12px;box-shadow:0 24px 50px -20px rgba(0,0,0,.45);padding:6px;text-align:left}
+  .menu button,.menu a{display:grid;grid-template-columns:24px 1fr;gap:10px;align-items:center;width:100%;padding:9px 10px;border-radius:8px;font:500 13px var(--f-ui);color:var(--fg);text-decoration:none;text-align:left}
+  .menu button:hover,.menu a:hover{background:var(--card)} .menu i{font-style:normal;font:800 11px var(--f-time);letter-spacing:.06em;color:var(--mute);text-align:center}
+  .menu .hd{padding:6px 10px 4px;font:700 10px var(--f-ui);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)} .menu small{display:block;font-size:11px;color:var(--mute)}
+
+  /* ══ THE GUEST'S SHARE CARD · 9:16, in the couple's palette ══ */
+  .cardwrap{display:grid;gap:14px;margin-top:16px} @media(min-width:640px){.cardwrap{grid-template-columns:auto 1fr;align-items:center}}
+  .card9{width:220px;aspect-ratio:9/16;border-radius:18px;padding:18px 16px;display:flex;flex-direction:column;justify-content:space-between;color:#fff;position:relative;overflow:hidden;box-shadow:0 20px 50px -20px rgba(0,0,0,.5);background:linear-gradient(160deg,var(--sw0,#E6D3B3),var(--sw3,#6B4E3D) 60%,var(--sw1,#7E8B72))}
+  .card9::after{content:"";position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;opacity:.7;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .2 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+  .card9 > *{position:relative;z-index:1}
+  .card9 .mg9{width:34px;height:34px;border-radius:50%;border:1.5px solid rgba(255,255,255,.8);display:grid;place-items:center;font:italic 500 11px var(--f-prose);letter-spacing:.04em}
+  .card9 .yw{font:900 30px/.9 var(--f-time);text-transform:uppercase;letter-spacing:-.01em;margin-top:14px}
+  .card9 .nm{font:800 22px/1 var(--f-time);letter-spacing:.01em;margin-top:6px;opacity:.95}
+  .card9 .mins{display:flex;flex-direction:column;gap:6px;margin-top:14px} .card9 .mins span{display:flex;gap:8px;align-items:baseline;font:500 11px var(--f-ui)} .card9 .mins b{font:800 15px var(--f-time);letter-spacing:.04em;min-width:44px}
+  .card9 .ft9{font:600 9px var(--f-ui);letter-spacing:.14em;text-transform:uppercase;opacity:.85;line-height:1.6}
+  .cardside p{font-size:14px;color:var(--mute);max-width:40ch} .cardside .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .cardside .acts button{font:600 13px var(--f-ui);padding:10px 14px;border-radius:8px;border:1px solid var(--line2)} .cardside .acts button.pri{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+  .cardside small{display:block;margin-top:10px;font-size:12px;color:var(--mute)}
+
+  /* ══ INDEX ══ */
+  .index{padding:56px 0 0}
+  .index .hd{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:18px}
+  .index .hd h2{font:900 clamp(34px,7vw,64px)/.9 var(--f-time);text-transform:uppercase;letter-spacing:-.01em} .index .hd .ui{padding-bottom:6px;text-align:right}
+  .tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px} .tabs::-webkit-scrollbar{display:none}
+  .tabs button{flex:none;padding:8px 13px;border-radius:999px;border:1px solid var(--line2);font:600 12.5px var(--f-ui);color:var(--fg)} .tabs button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+  .panel{display:none;margin-top:18px} .panel.on{display:block}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px} @media(min-width:640px){.grid{grid-template-columns:repeat(6,1fr)}}
+  .grid .plate{aspect-ratio:1;border-radius:4px} .grid .plate.w{grid-column:span 2;aspect-ratio:2/1} .grid .plate .cap{left:8px;bottom:6px;font-size:9px} .grid .plate .tc{top:6px;left:8px;font-size:11px;padding:2px 5px} .grid .plate.hide{display:none}
+  .hours{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:12px} .hours::-webkit-scrollbar{display:none}
+  .hours button{flex:none;font:800 13px var(--f-time);letter-spacing:.04em;padding:6px 10px;border:1px solid var(--line2);border-radius:6px;color:var(--fg)} .hours button[aria-pressed="true"]{background:var(--taal);color:#fff;border-color:var(--taal)}
+  .quotes{columns:1;column-gap:16px} @media(min-width:640px){.quotes{columns:2}} @media(min-width:900px){.quotes{columns:3}}
+  .q{break-inside:avoid;margin-bottom:16px;padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--card-ink)}
+  .q p{font-family:var(--f-prose);font-style:italic;font-size:19px;line-height:1.35} .q small{display:block;margin-top:10px;font:600 10px var(--f-ui);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)} .q small a{color:var(--taal);text-decoration:none;font-weight:700}
+  .q .stars{color:var(--candle);letter-spacing:.1em;font-size:13px;margin-bottom:6px}
+  .letter{padding:18px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--card-ink);margin-bottom:12px}
+  .letter h4{font:800 24px/1 var(--f-time);text-transform:uppercase;margin:0 0 8px} .letter .prose{font-size:17px} .letter small{display:block;margin-top:10px;font:600 10px var(--f-ui);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)} .letter small a{color:var(--taal);text-decoration:none}
+  .team{display:grid;gap:8px} @media(min-width:640px){.team{grid-template-columns:1fr 1fr}}
+  .v{display:grid;grid-template-columns:48px 1fr;gap:12px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--card-ink);text-decoration:none}
+  .v i{width:48px;height:48px;border-radius:10px;background:var(--bg2);display:grid;place-items:center;font:700 12px var(--f-ui);font-style:normal;color:var(--mute)}
+  .v b{font-size:15px} .v .cat{display:block;font-size:12.5px;color:var(--mute);margin-top:1px}
+  .v q{display:block;margin-top:8px;font-family:var(--f-prose);font-style:italic;font-size:16px;line-height:1.3} .v q::before{content:"“"} .v q::after{content:"”"}
+  .v .at{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px} .v .at span{font:800 12px var(--f-time);letter-spacing:.04em;padding:2px 6px;border-radius:3px;background:var(--bg2)}
+  .v .acts{display:flex;gap:8px;margin-top:10px} .v .acts span{font:600 12px var(--f-ui);padding:6px 10px;border-radius:6px;border:1px solid var(--line2)} .v .acts span.pri{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+  .m1{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:3px;background:var(--candle);color:#1B1A17;font:700 9.5px var(--f-ui);letter-spacing:.08em;vertical-align:middle}
+  .films{display:grid;gap:12px} @media(min-width:640px){.films{grid-template-columns:1fr 1fr}} @media(min-width:900px){.films{grid-template-columns:repeat(3,1fr)}}
+  .films .plate{aspect-ratio:16/9;border-radius:10px}
+  .markers{display:grid;gap:6px;margin-top:10px;grid-template-columns:1fr 1fr}
+  .markers a{display:grid;gap:2px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;text-decoration:none;background:var(--card);color:var(--card-ink)} .markers a b{font:800 15px var(--f-time);letter-spacing:.04em} .markers a span{font-size:12px;color:var(--mute)}
+  .look{display:grid;gap:12px} @media(min-width:640px){.look{grid-template-columns:1.1fr .9fr}}
+  .look .renders{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;gap:6px} .look .renders .plate:first-child{grid-row:span 2;min-height:240px} .look .renders .plate{aspect-ratio:1}
+  .look .theme{border:1px solid var(--line);border-radius:10px;padding:16px;background:var(--card);color:var(--card-ink)} .look .theme h3{font:800 30px/.95 var(--f-time);text-transform:uppercase;margin-top:6px}
+  .swat{display:flex;gap:6px;margin:14px 0 22px} .swat span{flex:1;height:36px;border-radius:5px;position:relative;border:1px solid rgba(0,0,0,.08)} .swat span::after{content:attr(data-n);position:absolute;top:100%;left:0;right:0;margin-top:4px;text-align:center;font:600 9px var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+  .prow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:9px 0;border-top:1px solid var(--line);font-size:13.5px} .prow span{display:block;color:var(--mute);font-size:12px} .prow a{font:600 12px var(--f-ui);text-decoration:none;color:var(--taal);border:1px solid var(--line2);padding:5px 9px;border-radius:6px;white-space:nowrap}
+  .bigroom{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card);color:var(--card-ink)}
+  .bigroom .find{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)} .bigroom input,.you input{flex:1;border:1px solid var(--line2);background:var(--bg);color:var(--fg);border-radius:8px;padding:10px 12px;font:inherit;font-size:14px}
+  .bigroom .out{padding:0 12px 12px;font-size:13px;color:var(--mute);min-height:20px} .bigroom .out b{color:var(--card-ink)}
+  .nums{display:grid;grid-template-columns:repeat(2,1fr);gap:8px} @media(min-width:640px){.nums{grid-template-columns:repeat(4,1fr)}}
+  .nums .card{padding:14px} .nums .card b{display:block;font:900 40px/1 var(--f-time);font-variant-numeric:tabular-nums} .nums .card span{display:block;margin-top:6px;font:600 10px var(--f-ui);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)} .nums .card em{display:block;margin-top:6px;font-size:12px;color:var(--mute);font-style:normal}
+  .made{display:grid;gap:8px} @media(min-width:640px){.made{grid-template-columns:1fr 1fr}}
+  .made .card{display:grid;grid-template-columns:1fr auto;gap:10px;padding:14px;align-items:start} .made .card b{font:800 20px/1 var(--f-time);text-transform:uppercase;letter-spacing:.02em} .made .card p{font-size:13px;color:var(--mute);margin-top:4px} .made .card .when{display:flex;flex-direction:column;gap:4px;align-items:flex-end} .made .card .when span{font:800 12px var(--f-time);letter-spacing:.04em;padding:2px 6px;border-radius:3px;background:var(--bg2);color:var(--card-ink)}
+  .wall{display:grid;grid-template-columns:repeat(4,1fr);gap:4px} @media(min-width:640px){.wall{grid-template-columns:repeat(8,1fr)}} .wall .plate{aspect-ratio:1;border-radius:3px} .wall .plate .tc{font-size:9px;padding:1px 4px;top:5px;left:5px}
+
+  /* you / last */
+  .you{margin-top:56px;padding:22px;border:2px solid var(--fg);border-radius:14px;display:grid;gap:12px} @media(min-width:640px){.you{grid-template-columns:1fr auto;align-items:center}}
+  .you h3{font:900 clamp(28px,5vw,44px)/.9 var(--f-time);text-transform:uppercase} .you p{font-size:14px;color:var(--mute);margin-top:6px;max-width:44ch}
+  .you form{display:flex;gap:8px;min-width:min(100%,380px)} .you button{font:600 13px var(--f-ui);padding:10px 14px;border-radius:8px;background:var(--fg);color:var(--bg)}
+  .youout{margin-top:12px;font-size:14px;display:none} .youout.on{display:block} .youout b{font:800 14px var(--f-time);letter-spacing:.04em;padding:2px 6px;background:var(--candle);color:#1B1A17;border-radius:3px;margin-right:4px}
+  .hl{outline:2px solid var(--candle);outline-offset:6px;border-radius:6px}
+  .last{margin-top:64px;padding:44px 0 120px;border-top:2px solid var(--fg);text-align:center}
+  .last .prose{font-size:clamp(24px,4.6vw,38px);font-weight:300;font-style:italic;max-width:26ch;margin:14px auto 0;line-height:1.25} .last .sig{margin-top:14px}
+  .song{margin:30px auto 0;max-width:440px;display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:center;text-align:left;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--card-ink)}
+  .song button{width:52px;height:52px;border-radius:50%;background:var(--fg);color:var(--bg);display:grid;place-items:center} .song button::before{content:"";border-left:13px solid currentColor;border-top:8px solid transparent;border-bottom:8px solid transparent;margin-left:3px}
+  .song.on button::before{border:0;width:12px;height:13px;border-left:4px solid currentColor;border-right:4px solid currentColor;margin:0}
+  .song b{font:800 22px/1 var(--f-time);letter-spacing:.02em;display:block} .song small{display:block;margin-top:4px;font:600 10px var(--f-ui);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+  .colophon{margin-top:34px;display:flex;justify-content:center;gap:14px;flex-wrap:wrap;font:600 10.5px var(--f-ui);letter-spacing:.16em;text-transform:uppercase;color:var(--mute)} .colophon a{color:var(--taal);text-decoration:none}
+  .cross{margin-top:22px;font-size:14px;color:var(--mute)} .cross a{color:var(--taal);font-weight:600;text-decoration:none}
+
+  /* ══ MINUTE SHEET ══ */
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:90;background:var(--bg);color:var(--fg);border-top:2px solid var(--fg);border-radius:16px 16px 0 0;padding:14px 18px 22px;transform:translateY(105%);transition:transform .3s ease;box-shadow:0 -20px 60px rgba(0,0,0,.25);max-height:70vh;overflow:auto}
+  .sheet.on{transform:none}
+  .sheet .hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px} .sheet .hd b{font:900 40px/1 var(--f-time);letter-spacing:-.01em} .sheet .hd b small{font-size:14px;letter-spacing:.08em;color:var(--mute);margin-left:3px}
+  .sheet .hd button{font:600 12px var(--f-ui);letter-spacing:.1em;text-transform:uppercase;padding:8px 10px;border:1px solid var(--line2);border-radius:999px}
+  .sheet .sub{margin-top:4px;font-size:13.5px;color:var(--mute)} .sheet .sub b{color:var(--fg)}
+  .sheet .grid{margin-top:12px;grid-template-columns:repeat(4,1fr)} @media(min-width:640px){.sheet .grid{grid-template-columns:repeat(8,1fr)}}
+  .sheet .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center;font-size:13px}
+  .sheet .row a{font:600 12.5px var(--f-ui);text-decoration:none;color:var(--taal);border:1px solid var(--line2);padding:6px 10px;border-radius:8px}
+  .sheet .empty{margin-top:12px;font-family:var(--f-prose);font-style:italic;font-size:18px;color:var(--mute)}
+  .scrim{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.25);display:none} .scrim.on{display:block}
+
+  /* ══ RELIVE ══ */
+  .relive{position:fixed;inset:0;z-index:100;background:#0E0D0C;color:#fff;display:none;flex-direction:column} .relive.on{display:flex}
+  .relive .prog{display:flex;gap:4px;padding:12px 14px 0} .relive .prog i{flex:1;height:3px;background:rgba(255,255,255,.25);border-radius:2px;position:relative;overflow:hidden} .relive .prog i::after{content:"";position:absolute;inset:0;width:0;background:#fff} .relive .prog i.done::after{width:100%} .relive .prog i.now::after{width:var(--p,0%)}
+  .relive .hd{display:flex;justify-content:space-between;align-items:center;padding:12px 14px} .relive .hd .clock{font:900 40px/1 var(--f-time);font-variant-numeric:tabular-nums;letter-spacing:-.01em} .relive .hd .clock small{font-size:14px;letter-spacing:.08em;margin-left:3px;opacity:.7}
+  .relive .hd button{font:600 12px var(--f-ui);letter-spacing:.1em;text-transform:uppercase;opacity:.85;padding:8px 10px;border:1px solid rgba(255,255,255,.35);border-radius:999px}
+  .relive .body{flex:1;display:grid;grid-template-rows:1fr auto;min-height:0;padding:0 14px 18px} .relive .plate{border-radius:12px;min-height:0;height:100%;color:#fff}
+  .relive .under{padding-top:14px;display:grid;gap:10px} .relive .under h3{font:800 clamp(28px,7vw,44px)/.9 var(--f-time);text-transform:uppercase}
+  .relive .under .voice{color:#fff;font-size:17px} .relive .under .voice small{color:rgba(255,255,255,.65)} .relive .under .voice small b{color:#F0C86E}
+  .relive .under .chips .chip{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.25)} .relive .under .chips .chip i{background:rgba(255,255,255,.15);color:#fff} .relive .under .chips .chip small{color:rgba(255,255,255,.6)}
+  .relive .tap{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr}
+  .relive .tap button{opacity:0;color:#fff;font:600 11px var(--f-ui);letter-spacing:.12em;text-transform:uppercase}
+  .relive .tap button:focus-visible{opacity:1;background:rgba(0,0,0,.45);outline-offset:-4px} /* invisible, but never invisible to the keyboard */
+  @media(min-width:900px){.relive .body{grid-template-columns:minmax(0,1fr) 380px;grid-template-rows:1fr;gap:20px;max-width:1100px;width:100%;margin:0 auto}.relive .under{padding-top:0;align-self:end}}
+  /* THE WORDS FOLLOW THE OCCASION, and the solemn register never renders the joyful machinery. */
+  body.solemn [data-joy]{display:none!important}
+  .occnote{margin-top:10px;padding:10px 13px;border-left:2px solid var(--candle);font-size:13px;line-height:1.5;color:var(--mute);max-width:70ch}
+  .occnote b{color:var(--fg)}
+  .sample{display:inline-flex;align-items:center;gap:6px;font:600 10px var(--f-ui);letter-spacing:.12em;text-transform:uppercase;color:var(--mute);border:1px solid var(--line2);border-radius:999px;padding:4px 9px}
+  /* 44px tap floor (platform rule — controls were 18–31px). Height comes from padding, so
+     nothing overlaps a neighbour and no invisible layer swallows a tap. */
+  .tabs button,.hours button,.asof button,.brandrow .acts button,.findbtn,.findrow button,
+  .v .acts button,.prow a,.menu button,.menu a,.back .kinds a,.back .ctas a,.mobar .tabs a,
+  .chip,.filmat,.morebtn,#youGo,.you form button,.cardside .acts button{min-height:44px;display:inline-flex;align-items:center}
+  .chip,.filmat{padding-top:9px;padding-bottom:9px}
+  .morebtn{padding:12px 0;align-self:flex-start;border-bottom:0;text-decoration:underline;text-underline-offset:4px}
+  .tabs button,.hours button,.asof button{padding-top:11px;padding-bottom:11px}
+  .sw{margin-top:12px;margin-bottom:12px}   /* 44px row height around the 20px switch; margin-left:auto is kept */
+  .findres .hit{min-height:44px}
+</style>
+
+<!-- ═══════════ COVER ═══════════ -->
+<header class="cover wrap">
+  <div class="brandrow">
+    <div class="b"><span class="mg">M&amp;J</span><span>SETNAYAN<small id="brandSub">Vol. I · No. 1 · a story, as it was made</small></span></div>
+    <div class="acts"><button class="pri" id="reliveBtn" data-joy>▶ Relive it</button>
+      <span class="menuwrap"><button id="shareBtn" aria-expanded="false" aria-controls="shareMenu">Share</button>
+        <div class="menu" id="shareMenu" hidden><div class="hd">Share this story</div><a href="#"><i>f</i>Facebook</a><a href="#"><i>m</i>Messenger</a><a href="#"><i>P</i>Pinterest</a><button type="button" id="copyLink"><i>⎘</i>Copy link</button><div class="hd">For Stories &amp; Reels</div><a href="#"><i>9:16</i><span>The story card<small>1080 × 1920 · their palette · the cover, the date, the QR</small></span></a></div></span>
+      <span class="menuwrap"><button id="printBtn" aria-expanded="false" aria-controls="printMenu">Print</button>
+        <div class="menu" id="printMenu" hidden><div class="hd">Print-ready</div><a href="#"><i>A3</i><span>The keepsake broadsheet<small>front + back · the QR on the back returns here</small></span></a><a href="#"><i>PDF</i><span>Save as PDF<small>the same A3, for the printer</small></span></a><a href="#"><i>A4</i><span>The minutes, one per page<small>each moment with its photo and its voices</small></span></a></div></span>
+      <button id="hostBtn" aria-pressed="false">Host view</button></div>
+  </div>
+  <div class="state">
+    <span class="sample" data-w="Sample story · not a real {host}">Sample story · not a real couple</span><span class="badge" id="badge">Complete · published Mar 1, 2026</span>
+    <span class="ui">See it as it looked</span>
+    <div class="asof" role="group" aria-label="See the story as of">
+      <button aria-pressed="false" data-asof="1">a week before</button><button aria-pressed="false" data-asof="2">on the day, 3:10 PM</button><button aria-pressed="true" data-asof="3">today</button>
+    </div>
+  </div>
+  <div class="state" style="margin-top:10px">
+    <span class="ui">The occasion</span>
+    <div class="asof" role="group" aria-label="The occasion" id="occCtl">
+      <button aria-pressed="true" data-occ="wedding">Wedding</button><button aria-pressed="false" data-occ="debut">Debut</button><button aria-pressed="false" data-occ="reunion">Reunion</button><button aria-pressed="false" data-occ="wake">Wake</button>
+    </div>
+  </div>
+  <p class="occnote" id="occNote" hidden></p>
+  <div class="state" style="margin-top:10px">
+    <span class="ui">Viewing as</span>
+    <div class="asof" role="group" aria-label="Viewing as" id="roleCtl">
+      <button aria-pressed="false" data-role="stranger">a stranger</button><button aria-pressed="true" data-role="guest">a guest with the QR</button><button aria-pressed="false" data-role="couple" data-w="{theHost}">the couple</button>
+    </div>
+  </div>
+  <div class="state" style="margin-top:10px">
+    <span class="ui">Colours from the mood board</span>
+    <div class="asof" role="group" aria-label="Colour the story from a saved theme" id="themeCtl">
+      <button aria-pressed="true" data-th="mj">Maria &amp; Juan’s</button><button aria-pressed="false" data-th="jj">Jack &amp; Jill’s</button><button aria-pressed="false" data-th="sr">Sofia’s</button><button aria-pressed="false" data-th="neutral">neutral</button>
+    </div>
+  </div>
+  <div class="names">
+    <span class="ui" id="coverKicker">Aug 3, 2025 → Feb 14, 2026 → still going · Tagaytay</span>
+    <h1>Maria <em>&amp;</em> Juan</h1>
+  </div>
+  <div class="deck">
+    <p class="prose">A story doesn’t start on the day. <b>This one started the afternoon they picked the date</b> — and it kept filling in: the theme they saved, the team they booked, the prenup shoot, the stream the week before, then ten hours on a lawn above Taal, then everything after. Every piece is filed under the moment it happened. Scroll, and the light moves with it.</p>
+    <div class="facts">
+      <div><b>492</b><span>captures</span></div>
+      <div><b>2</b><span>live films</span></div>
+      <div><b>11</b><span>voices</span></div>
+      <div><b>196</b><span>days told</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════ THE DIAL ═══════════ -->
+<div class="dialwrap"><div class="wrap dial">
+  <div class="top">
+    <div class="now"><b id="nowT">AUG<small>2025</small></b><span id="nowL">The road to the day</span></div>
+    <div class="legend ui"><span><i style="background:var(--taal)"></i>captures</span><span><i style="background:var(--candle)"></i>you are here</span><span><i style="border:1px dashed var(--line2)"></i>still to come</span></div>
+    <button class="findbtn" id="findBtn" aria-expanded="false" aria-controls="findrow">⌕ Find</button>
+  </div>
+  <div class="findrow" id="findrow"><input id="findQ" type="search" placeholder="A minute (7:12), a name, a vendor, a word…" aria-label="Find in this day" autocomplete="off"><button id="findX">Clear</button></div>
+  <div class="dialbox"><svg id="dialSvg" viewBox="0 0 1000 58" preserveAspectRatio="none" tabindex="0" role="application" aria-label="The story as captures over time. Left and right arrows move through it; Enter opens a moment."></svg><div class="dlabels" id="dlabels"></div></div>
+  <p class="dialhint">Tap anywhere on the line to open that moment</p>
+</div><div class="findres" id="findres" hidden></div></div>
+
+<main class="wrap day">
+  <div class="stage">
+    <div class="col" id="col">
+
+      <!-- ════ PART 1 · THE ROAD ════ -->
+      <div class="part-h"><h2>The road</h2><span class="ui">196 days · how the day was made</span></div>
+
+      <article class="entry road" id="r0" data-x="8" data-stage="0" data-stamp="2019" data-ap="→ 2024" data-label="How they got here" data-q="how we met despedida lugaw halo-halo proposal makati">
+        <div class="stamp"><span class="t time">2019<small>→ 2024</small></span><div class="meta"><span class="ui">Before the event · their own words</span></div></div>
+        <h3>How they got here</h3>
+        <div class="media three"><div class="plate" style="background:linear-gradient(160deg,#8C9A80,#3E4A5C)"><span class="tc">2019</span><span class="cap">A despedida in Quezon City</span></div><div class="plate" style="background:linear-gradient(160deg,#E9D6B4,#6B4E3D)"><span class="tc">2021</span><span class="cap">A tiny apartment in Makati</span></div><div class="plate" style="background:linear-gradient(160deg,#D9A441,#3E4A5C)"><span class="tc">2024</span><span class="cap">Tagaytay, over halo-halo</span></div></div>
+        <p class="prose">They ended up seatmates at a friend’s despedida in Quezon City and spent the whole night arguing about the best lugaw in the metro. Five years later Juan asked the question over halo-halo, at the same little turo-turo where they had their first real talk.</p>
+        <div class="gate"><span>On the public story · <b>Our story</b></span><button class="sw" role="switch" aria-checked="true" data-gate="r0"></button></div>
+      </article>
+
+      <article class="entry road" id="r1" data-x="30" data-stage="0" data-stamp="AUG 3" data-ap="2025" data-label="Set na ’yan — the date" data-q="set na yan date chosen setnayan ai plan event hub">
+        <div class="stamp"><span class="t time">AUG 3<small>2025</small></span><div class="meta"><span class="ui">195 days out · the date is set</span></div></div>
+        <h3>Set na ’yan</h3>
+        <p class="prose dc">February 14, a Saturday, a garden. They typed it in on a Sunday afternoon and the plan wrote itself back: a budget, a guest list of 120, six vendors to find, and a date that was suddenly real.</p>
+        <div class="layers">
+          <div class="layer"><span class="ui">Made with</span><div class="chips"><a class="chip sn" href="#p-made"><i>S</i>Setnayan AI <small>the first plan</small></a><a class="chip sn" href="#p-made"><i>S</i>Event Hub <small>their page goes up</small></a></div></div>
+        </div>
+        <div class="gate"><span>On the public story · <b>The planning</b></span><button class="sw" role="switch" aria-checked="true" data-gate="r1"></button></div>
+      </article>
+
+      <article class="entry road" id="r2" data-x="70" data-stage="0" data-stamp="SEP 21" data-ap="2025" data-label="The look, saved" data-q="mood board theme champagne sage saved look">
+        <div class="stamp"><span class="t time">SEP 21<small>2025</small></span><div class="meta"><span class="ui">146 days out · 1 theme saved · 2 vendors</span></div></div>
+        <h3>The look they chose</h3>
+        <div class="media two"><div class="plate" style="background:linear-gradient(160deg,#E9D6B4,#8C9A80)"><span class="tc">RENDER</span><span class="cap">Champagne &amp; sage · garden afternoon</span></div><div class="plate" style="background:linear-gradient(160deg,#EFE6D4,#6B4E3D)"><span class="cap">The arch</span></div></div>
+        <p class="prose">Champagne and sage, brass on linen, white blooms on a long path. They tried four boards and kept one. Everything the day would look like was decided here — five months before it existed.</p>
+        <div class="layers">
+          <div class="layer"><span class="ui">Made by</span><div class="chips"><a class="chip" href="#p-team"><i>BV</i>Bloom &amp; Vine <small>booked from this board</small></a><a class="chip" href="#p-look"><i>◐</i>See the theme <small>swatches · parts</small></a></div></div>
+        </div>
+        <div class="gate"><span>On the public story · <b>The look</b> — shown only because a theme was saved</span><button class="sw" role="switch" aria-checked="true" data-gate="r2"></button></div>
+      </article>
+
+      <article class="entry road" id="r3" data-x="110" data-stage="0" data-stamp="OCT" data-ap="2025" data-label="The team, booked" data-q="team booked vendors first pick match goldenhour long table dana">
+        <div class="stamp"><span class="t time">OCT<small>2025</small></span><div class="meta"><span class="ui">3 of 6 were their #1 match</span></div></div>
+        <h3>The team comes together</h3>
+        <p class="prose">Six categories, six shortlists. Three times, the vendor they booked was the one the planner had put first — Goldenhour on the 4th, Dana on the 19th, the florist on the 26th. The Long Table, on the 11th, came from a tita’s recommendation and went straight to the top of the list.</p>
+        <div class="layers">
+          <div class="layer"><span class="ui">Made by</span><div class="chips"><a class="chip" href="#p-team"><i>GH</i>Goldenhour <small>#1 match</small></a><a class="chip" href="#p-team"><i>LT</i>The Long Table <small>booked</small></a><a class="chip" href="#p-team"><i>DD</i>Day-of by Dana <small>#1 match</small></a><a class="chip" href="#p-team"><i>BV</i>Bloom &amp; Vine</a></div></div>
+          <div class="layer"><span class="ui">By the numbers</span><div><a class="filmat" href="#p-numbers"><b>≈44 h</b>of planning time saved, estimated →</a></div></div>
+        </div>
+        <div class="gate"><span>On the public story · <b>The team</b> — shown only because vendors were booked on Setnayan</span><button class="sw" role="switch" aria-checked="true" data-gate="r3"></button></div>
+      </article>
+
+      <article class="entry road" id="r4" data-x="160" data-stage="0" data-stamp="NOV 16" data-ap="2025" data-label="The prenup shoot" data-q="prenup shoot intramuros goldenhour papic pre-event">
+        <div class="stamp"><span class="t time">NOV 16<small>2025</small></span><div class="meta"><span class="ui">Intramuros · 64 captures · 1 vendor · Papic opens</span></div></div>
+        <h3>The prenup shoot</h3>
+        <div class="media two"><div class="plate js-play" style="background:linear-gradient(160deg,#6B4E3D,#D9A441)"><span class="tc">4:52 PM</span><div class="eq"><i></i><i></i><i></i></div><button class="play" aria-label="Play"><b>Tap for sound · 5s</b></button><span class="cap">Goldenhour · the walls at golden hour</span></div><div class="plate" style="background:linear-gradient(200deg,#E9D6B4,#3E4A5C)"><span class="tc">5:10 PM</span><span class="cap">Papic · Ate Celine’s phone</span></div></div>
+        <p class="prose">The first captures of the story weren’t from the wedding. Goldenhour walked them through Intramuros for an afternoon, and Ate Celine, tagging along, opened Papic for the first time and shot 22 of the 64.</p>
+        <div class="layers">
+          <div class="layer"><span class="ui">Made by</span><div class="chips"><a class="chip" href="#p-team"><i>GH</i>Goldenhour <small>42 frames</small></a><a class="chip" href="#p-captures" data-h="pre"><i>P</i>Papic <small>22 shots · 1 phone</small></a></div></div>
+        </div>
+        <div class="gate"><span>On the public story · <b>The prenup</b></span><button class="sw" role="switch" aria-checked="true" data-gate="r4"></button></div>
+      </article>
+
+      <article class="entry road" id="r5" data-x="205" data-stage="0" data-stamp="DEC 20" data-ap="2025" data-label="The save-the-date film" data-q="save the date film sent alaala">
+        <div class="stamp"><span class="t time">DEC 20<small>2025</small></span><div class="meta"><span class="ui">56 days out · the page’s first life · sent to 120</span></div></div>
+        <h3>The save-the-date</h3>
+        <!-- The shipped Save-the-Date view, as guests saw it: monogram + names, the date, a countdown, one-tap add-to-calendar, the film. It asked nothing of the guest. -->
+        <div class="pageframe">
+          <div class="phone" aria-label="The save-the-date page as guests saw it on Dec 20, 2025"><div class="scr"><div class="mg">M&amp;J</div><div class="nm">Maria &amp; Juan</div><div class="lab">Save the date</div><div class="dt">FEBRUARY 14, 2026</div><div class="sub">Tagaytay · a garden above Taal</div><div class="cd"><span>56<small>days</small></span><span>04<small>hrs</small></span><span>12<small>min</small></span></div><div class="btn">Add to calendar</div><div class="film">Play the film · 0:38</div></div></div>
+          <div class="side">
+            <p class="prose">The page’s first life. Before it was an invitation it was an announcement — their names, the date, a countdown, one tap to add it to a calendar, and the thirty-eight-second film cut from the prenup with their kundiman under it. It asked nothing of anyone yet. One hundred and twenty phones opened it in the first two days.</p>
+            <div class="plate js-play" style="background:linear-gradient(160deg,#E9D6B4,#8C9A80)"><span class="tc">0:38</span><div class="eq"><i></i><i></i><i></i></div><button class="play" aria-label="Play"><b>Play the film · 38s</b></button><span class="cap">Their kundiman under the Intramuros frames</span></div>
+            <a class="open" href="#">Open the save-the-date exactly as it was →</a>
+          </div>
+        </div>
+        <div class="layers">
+          <div class="layer"><span class="ui">Made with</span><div class="chips"><a class="chip sn" href="#p-made"><i>S</i>Save the Date page <small>the site’s first phase</small></a><a class="chip sn" href="#p-made"><i>S</i>Save the Date film <small>rendered from the prenup</small></a><a class="chip sn" href="#p-made"><i>S</i>Pakanta <small>the song, first heard here</small></a></div></div>
+        </div>
+        <div class="gate"><span>On the public story · <b>Save the date</b></span><button class="sw" role="switch" aria-checked="true" data-gate="r5"></button></div>
+      </article>
+
+      <article class="entry road" id="r5b" data-x="238" data-stage="0" data-stamp="JAN 5" data-ap="2026" data-label="The invitation" data-q="invitation rsvp replied schedule dress code map page second life">
+        <div class="stamp"><span class="t time">JAN 5<small>2026</small></span><div class="meta"><span class="ui">40 days out · the page’s second life · 116 of 120 replied</span></div></div>
+        <h3>The invitation</h3>
+        <div class="pageframe">
+          <div class="phone" aria-label="The invitation page as guests saw it on Jan 5, 2026"><div class="scr"><div class="mg">M&amp;J</div><div class="nm">Maria &amp; Juan</div><div class="lab">You’re invited</div><div class="dt">SAT · FEB 14 · 2:00 PM</div><div class="sub">Ceremony on the lawn · reception to follow</div><div class="btn">Yes, we’ll be there</div><div class="btn ghost">We can’t make it</div><div class="sched"><b>2:00</b>Ceremony<br><b>5:30</b>Reception<br><b>DRESS</b>Garden formal · sage &amp; champagne</div></div></div>
+          <div class="side">
+            <p class="prose">Forty days out, the same page changed its mind: an invitation now, with the RSVP, the schedule, the dress code and the map. Most replies came inside a week. Ninety-seven percent replied at all — the number that told Dana how many chairs to set.</p>
+            <a class="open" href="#">Open the invitation exactly as it was →</a>
+          </div>
+        </div>
+        <div class="layers">
+          <div class="layer"><span class="ui">Made with</span><div class="chips"><a class="chip sn" href="#p-made"><i>S</i>Event Hub <small>RSVP · schedule · map</small></a></div></div>
+          <div class="layer"><span class="ui">By the numbers</span><div><a class="filmat" href="#p-numbers"><b>97%</b>replied · 108 said yes →</a></div></div>
+        </div>
+        <div class="gate"><span>On the public story · <b>The invitation</b></span><button class="sw" role="switch" aria-checked="true" data-gate="r5b"></button></div>
+      </article>
+
+      <article class="entry road" id="r6" data-x="250" data-stage="0" data-stamp="JAN 12" data-ap="2026" data-label="The room, in 3D" data-q="room 3d plan tables rendered seating">
+        <div class="stamp"><span class="t time">JAN 12<small>2026</small></span><div class="meta"><span class="ui">33 days out · the room, built in 3D before the lawn existed</span></div></div>
+        <h3>The room, before it existed</h3>
+        <div class="media"><div class="plate" style="background:linear-gradient(160deg,#E9D6B4,#8C9A80)"><span class="tc">3D PLAN</span><span class="cap">The lawn, rendered · the arch, the long tables, the dance floor under the lights</span></div></div>
+        <p class="prose">They walked through the reception in 3D a month early: the arch against the view, the long tables under the string lights, the dance floor close to the band. Who sat where is a different thing — that only exists on the night, and appears here when the reception opens.</p>
+        <div class="layers"><div class="layer"><span class="ui">Made with</span><div class="chips"><a class="chip sn" href="#p-look"><i>S</i>3D Plan <small>the room, as designed</small></a></div></div></div>
+        <div class="gate"><span>On the public story · <b>The room</b> — the design only; seating shows from the reception</span><button class="sw" role="switch" aria-checked="true" data-gate="r6"></button></div>
+      </article>
+
+      <article class="entry road" id="r7" data-x="300" data-stage="0" data-stamp="FEB 7" data-ap="2026" data-label="Live: the week before" data-q="live studio week before stream kwento wishes challenge asked question">
+        <div class="stamp"><span class="t time">FEB 7<small>2026</small></span><div class="meta"><span class="ui">7 days out · Live Studio · 312 watching at peak · the first Kwento</span></div></div>
+        <h3>Live, the week before</h3>
+        <div class="media"><div class="plate js-play" style="background:linear-gradient(180deg,#1B2028,#3E4A5C)"><span class="tc live">LIVE · 41:20</span><div class="eq"><i></i><i></i><i></i></div><button class="play" aria-label="Play"><b>Play the stream</b></button><span class="cap">From the apartment · questions from the guest list</span></div></div>
+        <p class="prose">Forty-one minutes from the Makati apartment, answering the guest list live: what to wear on a lawn, whether the kids can come, why Tagaytay. The first Kwento wishes arrived while they were still on air.</p>
+        <div class="layers">
+          <div class="layer" data-joy><span class="ui">Asked</span><div class="asked"><span class="qq">Say one thing you know about them that we don’t.</span><div class="plate js-play"><div class="eq"><i></i><i></i><i></i></div><button class="play" aria-label="Play"><b>▶</b></button><span class="cap">Kuya Marco · 0:14 · asked to be named</span></div><div class="plate js-play" style="background:linear-gradient(180deg,#8C9A80,#3E4A5C)"><div class="eq"><i></i><i></i><i></i></div><button class="play" aria-label="Play"><b>▶</b></button><span class="cap">0:21</span></div></div></div>
+          <div class="layer"><span class="ui">Said</span><div><div class="voice">Kilala ko si Maria since college and I have never seen her this calm and this sure. Juan, you did that.<small><b>Andrea</b> · the first Kwento · on Kuya Marco’s answer · asked to be named</small></div></div></div>
+          <div class="layer"><span class="ui">Made with</span><div class="chips"><a class="chip sn" href="#p-films"><i>S</i>Live Studio <small>film 1 of 3</small></a><a class="chip sn" href="#p-voices"><i>S</i>Kwento <small>first wish</small></a><a class="chip sn" href="#p-asked"><i>S</i>Papic Challenge <small>question 1</small></a></div></div>
+        </div>
+        <div class="gate"><span>On the public story · <b>The week before</b></span><button class="sw" role="switch" aria-checked="true" data-gate="r7"></button></div>
+      </article>
+
+      <div class="part-h"><h2>Day 1</h2><span class="ui">Feb 13 · the despedida · at home</span></div>
+
+      <article class="entry moment" id="r8" data-day="0" data-t="1272" data-stage="0" data-stamp="9:12" data-ap="PM" data-label="The despedida" data-q="despedida dinner night before papic">
+        <div class="stamp"><span class="t time">9:12<small>PM</small></span><div class="meta"><span class="ui">Feb 13 · the night before · 38 captures · 9 phones</span></div></div>
+        <h3>The despedida</h3>
+        <p class="stub"><b>38 captures from 9 phones</b> — for the 108 people holding the QR, for now. They publish here with the edition.</p>
+        <div class="media three"><div class="plate" style="background:linear-gradient(160deg,#2A2233,#D9A441)"><span class="tc">9:12 PM</span><span class="cap">Papic · JR</span></div><div class="plate" style="background:linear-gradient(160deg,#6B4E3D,#2A2233)"><span class="tc">9:40 PM</span><span class="cap">Papic · Bea</span></div><div class="plate" style="background:linear-gradient(160deg,#D9A441,#3E4A5C)"><span class="tc">10:31 PM</span><span class="cap">Papic · Kuya Marco</span></div></div>
+        <div class="layers"><div class="layer"><span class="ui">Made by</span><div class="chips"><a class="chip" href="#p-captures" data-h="pre"><i>P</i>Papic <small>38 shots · 9 phones</small></a></div></div></div>
+        <div class="gate"><span>On the public story · <b>The despedida</b></span><button class="sw" role="switch" aria-checked="true" data-gate="r8"></button></div>
+      </article>
+
+      <!-- ════ PART 2 · THE DAY ════ -->
+      <div class="part-h" id="dayHead"><h2>Day 2</h2><span class="ui">Feb 14, 2026 · 10 h 27 m · by the minute</span></div>
+
+      <article class="entry moment" id="m1" data-day="1" data-stage="1" data-t="680" data-stamp="11:20" data-ap="AM" data-label="The Getting Ready" data-q="getting ready gardenias ninang suite bloom vine goldenhour lourdes">
+        <div class="stamp"><span class="t time">11:20<small>AM</small></span><div class="meta"><span class="ui">The suite · 2 photos · 1 voice · 1 vendor</span></div></div>
+        <h3>The Getting Ready</h3>
+        <div class="media two"><div class="plate"><span class="tc">11:20</span><span class="cap">The suite · Papic · Ate Celine's phone</span></div><div class="plate" style="background:linear-gradient(160deg,#E9D6B4,#6B4E3D)"><span class="tc">11:26</span><span class="cap">Goldenhour</span></div></div>
+        <p class="prose dc">The suite smelled of gardenias and hairspray. Maria sat still while her ninang pinned the last sprig into place, and for one quiet minute nobody said anything at all — the calm before a very loud, very happy afternoon.</p>
+        <div class="layers">
+          <div class="layer"><span class="ui">Said</span><div><div class="voice">Hindi siya gumalaw kahit isang beses. Sabi ko, “Anak, huminga ka.” Tumawa siya — doon ko nalaman na okay na siya.<small>A ninang · Kwento · chose not to be named</small></div></div></div>
+          <div class="layer"><span class="ui">Made by</span><div class="chips"><a class="chip" href="#p-team"><i>BV</i>Bloom &amp; Vine <small>the sprig</small></a><a class="chip" href="#p-captures" data-h="11"><i>P</i>Papic <small>2 shots</small></a></div></div>
+          <div class="inroom"><span class="ui">In the room</span><div class="mini"><span>Not yet — the lawn was still being set.</span></div></div>
+        </div>
+        <div class="gate"><span>On the public story · <b>11:20 · The Getting Ready</b></span><button class="sw" role="switch" aria-checked="true" data-gate="m1"></button></div>
+      </article>
+
+      <div class="gap" data-x="500"><span><b>3 h 18 m</b>the drive up · the guests arrive · the lake clears</span></div>
+
+      <article class="entry moment" id="m2" data-day="1" data-stage="2" data-t="878" data-stamp="2:38" data-ap="PM" data-label="The Garden March" data-q="garden march father aisle blooms tears ramon celine bing dana">
+        <div class="stamp"><span class="t time">2:38<small>PM</small></span><div class="meta"><span class="ui">The lawn · 41 captures · 3 voices · 3 vendors · live</span></div></div>
+        <h3>The Garden March</h3>
+        <div class="media"><div class="plate js-play"><span class="tc live">LIVE · 2:38</span><div class="eq"><i></i><i></i><i></i></div><button class="play" aria-label="Play the Garden March"><b>Tap for sound · 5s</b></button><span class="cap">A living moment · Papic · Kuya Marco's phone</span></div></div>
+        <p class="prose dc">The path was lined white with blooms and the whole lawn rose at once. She walked it slowly, on her father’s arm, past every face that had ever mattered — and by the time she reached Juan, neither of them was hiding the tears.</p>
+        <div class="layers">
+          <div class="layer" id="l2"><span class="ui">Said</span><div>
+            <div class="voice">Twenty-eight years I walked ahead of her. Today I walked beside her, and then I let go.<small><b>Papa Ramon</b> · father of the bride · letter · asked to be named</small></div>
+            <div class="voice more">When Maria walked in, the whole garden went quiet. Even the birds.<small><b>Ate Celine</b> · maid of honor · letter · asked to be named</small></div>
+            <div class="voice more">Nakita ko kung paano ka tumingin sa kanya sa altar. Iyon ang tingin na hinihintay ng bawat magulang.<small><b>Tita Bing</b> · Kwento · asked to be named</small></div>
+            <button class="morebtn" data-more="l2">+ 2 more voices on this minute</button></div></div>
+          <div class="layer"><span class="ui">Made by</span><div class="chips"><a class="chip" href="#p-team"><i>BV</i>Bloom &amp; Vine <small>the path</small></a><a class="chip" href="#p-team"><i>DD</i>Day-of by Dana <small>the cue</small></a><a class="chip" href="#p-team"><i>GH</i>Goldenhour <small>film</small></a><a class="chip" href="#p-captures" data-h="14"><i>P</i>Papic <small>41 shots · 14 phones</small></a></div></div>
+          <div class="layer"><span class="ui">In the film</span><div><a class="filmat" href="#p-films"><b>0:18:00</b>Watch this minute in the ceremony broadcast · live from 2:20 PM →</a></div></div>
+          <div class="inroom"><span class="ui">On the lawn</span><div class="mini"><span>Ceremony rows, facing the arch — no tables yet. Assigned seats begin when the reception opens, 5:30 PM.</span></div></div>
+        </div>
+        <div class="gate"><span>On the public story · <b>2:38 · The Garden March</b></span><button class="sw" role="switch" aria-checked="true" data-gate="m2"></button></div>
+      </article>
+
+      <div class="gap" data-x="545"><span><b>26 m</b>the readings · the rings</span></div>
+
+      <article class="entry moment" id="m3" data-day="1" data-stage="2" data-t="904" data-stamp="3:04" data-ap="PM" data-label="The Vows" data-q="vows whisper kiss taal light marco andrea goldenhour live studio">
+        <div class="stamp"><span class="t time">3:04<small>PM</small></span><div class="meta"><span class="ui">The arch · 27 captures · 2 voices · 2 vendors · live</span></div></div>
+        <h3>The Vows</h3>
+        <div class="media two"><div class="plate js-play" style="background:linear-gradient(160deg,#3E4A5C,#8C9A80)"><span class="tc live">LIVE · 3:04</span><div class="eq"><i></i><i></i><i></i></div><button class="play" aria-label="Play the Vows"><b>Tap for sound · 5s</b></button><span class="cap">A living moment · Papic</span></div><div class="plate" style="background:linear-gradient(200deg,#E9D6B4,#3E4A5C)"><span class="tc">3:05</span><span class="cap">Goldenhour</span></div></div>
+        <p class="prose dc">They traded promises in a near-whisper, foreheads almost touching. The front rows swore they could hear the kiss. Taal held the light behind them like a held breath, and then everyone was on their feet.</p>
+        <div class="layers">
+          <div class="layer" id="l3"><span class="ui">Said</span><div>
+            <div class="voice">From the despedida na pinagtalunan niyo ang pinakamasarap na lugaw, to this garden — sobrang saya kong nandito. Set na ’yan!<small><b>Kuya Marco</b> · best man · Kwento · asked to be named</small></div></div></div>
+          <div class="layer"><span class="ui">Made by</span><div class="chips"><a class="chip" href="#p-team"><i>GH</i>Goldenhour <small>photo + film</small></a><a class="chip" href="#p-captures" data-h="15"><i>P</i>Papic <small>27 shots · 11 phones</small></a></div></div>
+          <div class="layer"><span class="ui">In the film</span><div><a class="filmat" href="#p-films"><b>0:44:00</b>Watch the vows as they went out live · ceremony broadcast →</a></div></div>
+          <div class="inroom"><span class="ui">On the lawn</span><div class="mini"><span>Still the ceremony — front rows nearest the arch. The seating plan applies only while the reception venue is in use.</span></div></div>
+        </div>
+        <div class="gate"><span>On the public story · <b>3:04 · The Vows</b></span><button class="sw" role="switch" aria-checked="true" data-gate="m3"></button></div>
+      </article>
+
+      <div class="gap" data-x="700"><span><b>4 h 8 m</b>golden hour · 5:30 the reception opens — the tables, the seating plan, the Live Photo Wall · six courses · the toasts run long</span></div>
+
+      <article class="entry moment" id="m4" data-day="1" data-stage="3" data-t="1152" data-stamp="7:12" data-ap="PM" data-label="The First Dance" data-tables="1,2,8,9,10" data-hot="1" data-q="first dance kundiman lights cora long table pakanta photo wall">
+        <div class="stamp"><span class="t time">7:12<small>PM</small></span><div class="meta"><span class="ui">The dance floor · 63 captures · 1 voice · 2 vendors · live</span></div></div>
+        <h3>The First Dance</h3>
+        <div class="media"><div class="plate js-play" style="background:radial-gradient(80% 60% at 50% 100%,#E9D6B4,transparent 60%),linear-gradient(180deg,#26211E,#6B4E3D)"><span class="tc live">LIVE · 7:12</span><div class="eq"><i></i><i></i><i></i></div><button class="play" aria-label="Play the First Dance"><b>Tap for sound · 5s</b></button><span class="cap">A living moment · Papic · 9 phones at once</span></div></div>
+        <p class="prose dc">Under strings of warm light they danced to the kundiman that has followed them since a despedida in Quezon City. Slow, unhurried, foreheads together again — the same two people, a lifetime further in.</p>
+        <div class="layers">
+          <div class="layer"><span class="ui">Said</span><div><div class="voice">Iyon ang kantang pinapatugtog niya sa kotse noong bata pa siya. Hindi ko alam na tinandaan niya.<small><b>Juan</b>, on his mother’s words · the couple’s own</small></div></div></div>
+          <div class="layer"><span class="ui">Made by</span><div class="chips"><a class="chip" href="#p-team"><i>LT</i>The Long Table <small>dinner, just cleared</small></a><a class="chip sn" href="#last"><i>S</i>Pakanta <small>their kundiman</small></a><a class="chip sn" href="#p-wall"><i>S</i>Live Photo Wall <small>on the screen behind them</small></a><a class="chip" href="#p-captures" data-h="19"><i>P</i>Papic <small>63 shots · 22 phones</small></a></div></div>
+          <div class="layer"><span class="ui">In the film</span><div><a class="filmat" href="#p-films"><b>1:42:00</b>Watch the first dance · reception broadcast, live from 5:30 PM →</a></div></div>
+          <div class="inroom"><span class="ui">In the room</span><div class="mini"><span>Everyone up ·</span><b>T1</b><b>T2</b><b>T8</b><b>T9</b><b>T10</b></div></div>
+        </div>
+        <div class="gate"><span>On the public story · <b>7:12 · The First Dance</b></span><button class="sw" role="switch" aria-checked="true" data-gate="m4"></button></div>
+      </article>
+
+      <div class="gap" data-x="860"><span><b>2 h 35 m</b>cake · the band finds its speed</span></div>
+
+      <article class="entry moment" id="m5" data-day="1" data-stage="4" data-t="1307" data-stamp="9:47" data-ap="PM" data-label="The Money Dance" data-tables="3,7,11,4,8" data-hot="7" data-q="money dance pera titos titas lolo ben band jr dana show us your table">
+        <div class="stamp"><span class="t time">9:47<small>PM</small></span><div class="meta"><span class="ui">The lawn · 88 captures · 1 voice · 1 vendor · live</span></div></div>
+        <h3>The Money Dance</h3>
+        <div class="media two"><div class="plate js-play" style="background:linear-gradient(160deg,#2A2233,#D9A441)"><span class="tc live">LIVE · 9:47</span><div class="eq"><i></i><i></i><i></i></div><button class="play" aria-label="Play the Money Dance"><b>Tap for sound · 5s</b></button><span class="cap">A living moment · Papic · JR's phone</span></div><div class="plate" style="background:linear-gradient(200deg,#D9A441,#2A2233)"><span class="tc">9:51</span><span class="cap">Lolo Ben, 81 · Papic</span></div></div>
+        <p class="prose dc">Titos and titas pinned bills to the couple while the band played faster and faster. Somebody’s lolo out-danced everyone half his age. The lawn was pure noise and light, and nobody was in any hurry for the day to end.</p>
+        <div class="layers">
+          <div class="layer" data-joy><span class="ui">Asked</span><div class="asked"><span class="qq">Show us your table.</span><div class="plate js-play" style="background:linear-gradient(180deg,#2A2233,#D9A441)"><div class="eq"><i></i><i></i><i></i></div><button class="play" aria-label="Play"><b>▶</b></button><span class="cap">JR · 0:12 · asked to be named</span></div><div class="plate js-play" style="background:linear-gradient(180deg,#3E4A5C,#E9D6B4)"><div class="eq"><i></i><i></i><i></i></div><button class="play" aria-label="Play"><b>▶</b></button><span class="cap">0:09</span></div><div class="plate js-play" style="background:linear-gradient(180deg,#6B4E3D,#D9A441)"><div class="eq"><i></i><i></i><i></i></div><button class="play" aria-label="Play"><b>▶</b></button><span class="cap">0:15</span></div></div></div>
+          <div class="layer"><span class="ui">Said</span><div><div class="voice">Lolo Ben, 81, undefeated. May video ako.<small><b>JR</b> · cousin · Papic challenge · asked to be named</small></div></div></div>
+          <div class="layer"><span class="ui">Made by</span><div class="chips"><a class="chip" href="#p-team"><i>DD</i>Day-of by Dana <small>ran the floor</small></a><a class="chip" href="#p-captures" data-h="21"><i>P</i>Papic <small>88 shots · 31 phones</small></a></div></div>
+          <div class="layer"><span class="ui">In the film</span><div><a class="filmat" href="#p-films"><b>4:17:00</b>Watch the money dance · reception broadcast →</a></div></div>
+          <div class="inroom"><span class="ui">In the room</span><div class="mini"><span>Loudest table</span><b>T7</b><span>the college barkada · then</span><b>T3</b><b>T11</b></div></div>
+        </div>
+        <div class="gate"><span>On the public story · <b>9:47 · The Money Dance</b></span><button class="sw" role="switch" aria-checked="true" data-gate="m5"></button></div>
+      </article>
+
+      <!-- ════ PART 3 · AFTER ════ -->
+      <div class="part-h" id="afterHead"><h2>After</h2><span class="ui">the story keeps its date</span></div>
+
+      <article class="entry road" id="a1" data-x="952" data-stage="5" data-stamp="FEB 15" data-ap="2026" data-label="The morning after" data-q="morning after wall came down captures total">
+        <div class="stamp"><span class="t time">FEB 15<small>2026</small></span><div class="meta"><span class="ui">The wall comes down · 390 captures from the day</span></div></div>
+        <h3>The morning after</h3>
+        <p class="prose">By breakfast every phone had finished uploading. Three hundred and ninety captures from sixty-one guests, all of it filed by the minute — the couple woke up to their own wedding, told by everyone else.</p>
+        <div class="layers"><div class="layer"><span class="ui">Said</span><div><div class="voice">We planned the whole thing on Setnayan — and on the day, everything was just set.<small><b>Maria &amp; Juan</b> · ★★★★★ · review</small></div><div class="voice">The most organized wedding I have been to — everyone knew where to go and when.<small>A guest · ★★★★★ · review · reviews carry no name unless the guest asks</small></div></div></div></div>
+        <div class="gate"><span>On the public story · <b>What they said</b> (reviews)</span><button class="sw" role="switch" aria-checked="true" data-gate="a1"></button></div>
+      </article>
+
+      <article class="entry road" id="a2" data-x="975" data-stage="5" data-stamp="MAR 1" data-ap="2026" data-label="Published · Vol. I · No. 1" data-q="published edition keepsake print broadsheet vendors we loved letters">
+        <div class="stamp"><span class="t time">MAR 1<small>2026</small></span><div class="meta"><span class="ui" data-w="Published · Vol. I · No. 1 · with {hostPos} consent">Published · Vol. I · No. 1 · with the couple’s consent</span></div></div>
+        <h3>Their edition</h3>
+        <div class="media two"><div class="plate mono"><b>M &amp; J</b><span class="cap">The monogram · animated on the page, still on paper</span></div><div class="plate" style="background:linear-gradient(160deg,#F3EBDD,#B7A98C)"><span class="tc">A3</span><span class="cap">The keepsake broadsheet · QR back to this page</span></div></div>
+        <p class="prose"><span data-w="{TheHost} edited, wrote the last word, and approved it.">The couple edited, wrote the last word, and approved it.</span> Two guests wrote letters. The vendors they loved got their endorsement in print. Edition number one — theirs forever.</p>
+        <div class="layers">
+          <div class="layer"><span class="ui">Letters</span><div><a class="filmat" href="#p-letters"><b>2</b>Letters to the editor — Ate Celine and Papa Ramon →</a></div></div>
+          <div class="layer"><span class="ui">Loved</span><div class="chips"><a class="chip" href="#p-team"><i>GH</i>Goldenhour <small>“gave them back to us”</small></a><a class="chip" href="#p-team"><i>LT</i>The Long Table <small>“book them”</small></a></div></div>
+          <div class="layer"><span class="ui">Keepsake</span><div><a class="filmat" href="#"><b>PRINT</b>The A3 broadsheet, with a QR back to this living page →</a></div></div>
+        </div>
+        <div class="gate"><span>On the public story · <b>Letters · Vendors we loved · Print</b></span><button class="sw" role="switch" aria-checked="true" data-gate="a2"></button></div>
+      </article>
+
+      <article class="entry road" id="a3" data-joy data-x="995" data-stage="5" data-stamp="FEB 14" data-ap="2027" data-label="The first anniversary" data-q="anniversary next year same page">
+        <div class="stamp"><span class="t time">FEB 14<small>2027</small></span><div class="meta"><span class="ui">One year · the same page, one more entry</span></div></div>
+        <h3>The first anniversary</h3>
+        <p class="prose">They chose to keep going, so the page gains a day next February and the dial gains a bar. Plenty of stories end at the last word instead — that is a whole story too. <a href="#next" style="color:var(--taal);font-weight:500;text-decoration:none">See the back cover →</a></p>
+        <div class="gate"><span>On the public story · <b>Anniversaries</b></span><button class="sw" role="switch" aria-checked="true" data-gate="a3"></button></div>
+      </article>
+
+      <!-- still to come (time-travel) -->
+      <div class="tocome" id="tocome"><span class="ui" id="tcKick">Still to come</span><h3 id="tcTitle">The day · in 7 days</h3><p id="tcBody">This page fills in as the day is made. On February 14 the Live Studio stream starts here at 2:00 PM, and every Papic capture files itself under the minute it’s taken.</p><div class="row" id="tcRow"></div><a class="cta" href="#">🔔 Tell me when it’s live</a></div>
+    </div>
+
+    <!-- lens -->
+    <aside class="lens" aria-label="The room, at this minute">
+      <div class="card room">
+        <div class="hd"><b id="lensT">THE ROOM</b><span class="ui" id="lensL">not built yet</span></div>
+        <svg viewBox="0 0 340 236" role="img" aria-label="Top-down plan of the garden reception" id="lensRoom"></svg>
+        <div class="ft" id="lensFt">Tables light up by how many photos came from them at this minute. Gold = the loudest table.</div>
+        <div class="ft novenue-note">No seating plan for this day — the plan belongs to the reception venue, on the day it is used. A roaming event (a trip, a reunion across towns) never gets one at all.</div>
+      </div>
+      <div class="stack">
+        <div class="kv"><span>Captures so far</span><b id="kvCap">0</b></div>
+        <div class="kv"><span>Phones shooting</span><b id="kvPh">0</b></div>
+        <div class="kv"><span>In the film</span><b id="kvFilm">—</b></div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ═══════════ THE WHOLE STORY AT ONCE ═══════════ -->
+  <section class="index" id="all">
+    <div class="hd"><h2>The whole story,<br>at once</h2><span class="ui">Every layer, gathered ·<br>each one linked back to its minute</span></div>
+    <div class="tabs" role="tablist" id="tabs">
+      <button aria-pressed="true" data-p="captures">492 captures</button>
+      <button aria-pressed="false" data-p="voices">11 voices</button>
+      <button aria-pressed="false" data-p="asked" data-joy>Asked · 2</button>
+      <button aria-pressed="false" data-p="letters">Letters · 2</button>
+      <button aria-pressed="false" data-p="team">The team · 4</button>
+      <button aria-pressed="false" data-p="films">Films · 3</button>
+      <button aria-pressed="false" data-p="wall">Photo wall</button>
+      <button aria-pressed="false" data-p="room">The room</button>
+      <button aria-pressed="false" data-p="look">The look</button>
+      <button aria-pressed="false" data-p="made">Made with</button>
+      <button aria-pressed="false" data-p="numbers">By the numbers</button>
+    </div>
+
+    <div class="panel on" id="p-captures">
+      <div class="hours"><button aria-pressed="true" data-h="all">ALL</button><button aria-pressed="false" data-h="pre">BEFORE THE DAY</button><button aria-pressed="false" data-h="11">11 AM</button><button aria-pressed="false" data-h="14">2 PM</button><button aria-pressed="false" data-h="15">3 PM</button><button aria-pressed="false" data-h="19">7 PM</button><button aria-pressed="false" data-h="21">9 PM</button><button aria-pressed="false" data-h="v">FROM THE VENDORS</button></div>
+      <div class="grid" id="grid">
+        <div class="plate w" data-h="14"><span class="tc">2:38</span><span class="cap">The path · Tita Bing</span></div>
+        <div class="plate" data-h="pre" style="background:linear-gradient(160deg,#6B4E3D,#D9A441)"><span class="tc">NOV 16</span><span class="cap">Intramuros · Celine</span></div>
+        <div class="plate" data-h="11" style="background:linear-gradient(160deg,#E9D6B4,#6B4E3D)"><span class="tc">11:20</span><span class="cap">The suite</span></div>
+        <div class="plate" data-h="15" style="background:linear-gradient(200deg,#3E4A5C,#8C9A80)"><span class="tc">3:04</span><span class="cap">The vows</span></div>
+        <div class="plate" data-h="v" style="background:linear-gradient(160deg,#EFE6D4,#D9A441)"><span class="tc">GH ◆</span><span class="cap">The rings, in close</span></div>
+        <div class="plate" data-h="19" style="background:linear-gradient(180deg,#26211E,#6B4E3D)"><span class="tc">7:12</span><span class="cap">First dance</span></div>
+        <div class="plate w" data-h="21" style="background:linear-gradient(160deg,#2A2233,#D9A441)"><span class="tc">9:47</span><span class="cap">Money dance · JR</span></div>
+        <div class="plate" data-h="pre" style="background:linear-gradient(160deg,#2A2233,#6B4E3D)"><span class="tc">FEB 13</span><span class="cap">Despedida · Bea</span></div>
+        <div class="plate" data-h="v" style="background:linear-gradient(160deg,#8C9A80,#E9D6B4)"><span class="tc">GH</span><span class="cap">Caught laughing</span></div>
+        <div class="plate" data-h="14" style="background:linear-gradient(160deg,#6B4E3D,#3E4A5C)"><span class="tc">2:39</span><span class="cap">Papa Ramon</span></div>
+        <div class="plate" data-h="21" style="background:linear-gradient(200deg,#D9A441,#26211E)"><span class="tc">9:51</span><span class="cap">Lolo Ben, 81</span></div>
+        <div class="plate" data-h="19" style="background:linear-gradient(200deg,#6B4E3D,#2A2233)"><span class="tc">7:14</span><span class="cap">The lights</span></div>
+        <div class="plate" data-h="15" style="background:linear-gradient(160deg,#E9D6B4,#3E4A5C)"><span class="tc">3:06</span><span class="cap">The kiss</span></div>
+        <div class="plate" data-h="pre" style="background:linear-gradient(160deg,#E9D6B4,#8C9A80)"><span class="tc">NOV 16</span><span class="cap">Goldenhour · the walls</span></div>
+      </div>
+      <p style="margin-top:12px;font-size:12.5px;color:var(--mute)">A guest who asked not to be shown is not here, or appears blurred — and is never named as the one who shot a photo. Their choice beats <span data-w="{hostPos} curation">the couple’s curation</span>.</p>
+    </div>
+
+    <div class="panel" id="p-voices"><div class="quotes">
+      <div class="q"><p>“Twenty-eight years I walked ahead of her. Today I walked beside her, and then I let go.”</p><small>Papa Ramon · <a href="#m2">2:38 PM</a></small></div>
+      <div class="q"><p>“When Maria walked in, the whole garden went quiet. Even the birds.”</p><small>Ate Celine · maid of honor · <a href="#m2">2:38 PM</a></small></div>
+      <div class="q"><p>“Nakita ko kung paano ka tumingin sa kanya sa altar. Iyon ang tingin na hinihintay ng bawat magulang.”</p><small>Tita Bing · Kwento · <a href="#m2">2:38 PM</a></small></div>
+      <div class="q"><p>“From the despedida na pinagtalunan niyo ang pinakamasarap na lugaw, to this garden — set na ’yan!”</p><small>Kuya Marco · best man · <a href="#m3">3:04 PM</a></small></div>
+      <div class="q"><p>“I have never seen her this calm and this sure. Juan, you did that.”</p><small>Andrea · Kwento · <a href="#r7">Feb 7</a></small></div>
+      <div class="q"><p>“Hindi siya gumalaw kahit isang beses. Sabi ko, ‘Anak, huminga ka.’”</p><small>A ninang · Kwento · not named, by choice · <a href="#m1">11:20 AM</a></small></div>
+      <div class="q"><p>“Iyon ang kantang pinapatugtog niya sa kotse noong bata pa siya.”</p><small>Juan, on his mother’s words · <a href="#m4">7:12 PM</a></small></div>
+      <div class="q"><p>“Lolo Ben, 81, undefeated. May video ako.”</p><small>JR · Papic challenge · <a href="#m5">9:47 PM</a></small></div>
+      <div class="q"><div class="stars">★★★★★</div><p>“We planned the whole thing on Setnayan — and on the day, everything was just set.”</p><small>Maria &amp; Juan · review · <a href="#a1">Feb 15</a></small></div>
+      <div class="q"><div class="stars">★★★★★</div><p>“The most organized wedding I have been to — everyone knew where to go and when.”</p><small>A guest · review · <a href="#a1">Feb 15</a></small></div>
+      <div class="q"><p>“Thank you for being here with us today. Set na ’yan.”</p><small>Maria &amp; Juan · the last word · <a href="#last">10:31 PM</a></small></div>
+    </div></div>
+
+    <div class="panel" id="p-asked" data-joy>
+      <div class="letter"><h4>Q. Say one thing you know about them that we don’t.</h4><div class="asked"><div class="plate js-play"><div class="eq"><i></i><i></i><i></i></div><button class="play" aria-label="Play"><b>▶</b></button><span class="cap">Kuya Marco · 0:14 · asked to be named</span></div><div class="plate js-play" style="background:linear-gradient(180deg,#8C9A80,#3E4A5C)"><div class="eq"><i></i><i></i><i></i></div><button class="play" aria-label="Play"><b>▶</b></button><span class="cap">0:21</span></div><div class="plate js-play" style="background:linear-gradient(180deg,#E9D6B4,#6B4E3D)"><div class="eq"><i></i><i></i><i></i></div><button class="play" aria-label="Play"><b>▶</b></button><span class="cap">0:09</span></div></div><small>Asked on the stream · <a href="#r7">Feb 7</a> · 3 answers</small></div>
+      <div class="letter"><h4>Q. Show us your table.</h4><div class="asked"><div class="plate js-play" style="background:linear-gradient(180deg,#2A2233,#D9A441)"><div class="eq"><i></i><i></i><i></i></div><button class="play" aria-label="Play"><b>▶</b></button><span class="cap">JR · 0:12 · asked to be named</span></div><div class="plate js-play" style="background:linear-gradient(180deg,#3E4A5C,#E9D6B4)"><div class="eq"><i></i><i></i><i></i></div><button class="play" aria-label="Play"><b>▶</b></button><span class="cap">0:09</span></div><div class="plate js-play" style="background:linear-gradient(180deg,#6B4E3D,#D9A441)"><div class="eq"><i></i><i></i><i></i></div><button class="play" aria-label="Play"><b>▶</b></button><span class="cap">0:15</span></div></div><small>Asked at the reception · <a href="#m5">9:47 PM</a> · 3 answers</small></div>
+      <p style="font-size:12.5px;color:var(--mute)">Every answer here passed five separate yeses: share this answer · my captures may be public · screened clean · not opted out of photos · and a name only where the guest asked to be named. And the host switched the column on.</p>
+    </div>
+
+    <div class="panel" id="p-letters">
+      <div class="letter"><h4>The quiet minute</h4><p class="prose">Everyone remembers the march. I remember 11:19, the minute before the door opened, when she looked at me in the mirror and mouthed “set na ’yan” and we both nearly lost it. That’s the minute I’d keep.</p><small>Ate Celine · maid of honor · asked to be named</small></div>
+      <div class="letter"><h4>On letting go</h4><p class="prose">I have walked ahead of my daughter for twenty-eight years — to school, to the jeep, to the airport. On Saturday I walked beside her for forty metres. It was the longest walk of my life and I would do it every day.</p><small>Papa Ramon · father of the bride · asked to be named</small></div>
+      <p style="font-size:12.5px;color:var(--mute)">Letters carry a byline only if the writer agreed to be named. The role rides the same consent as the name.</p>
+    </div>
+
+    <div class="panel" id="p-team"><div class="team">
+      <article class="v feat"><i>GH</i><div><b>Goldenhour Photo + Film <span class="m1">#1 match</span><span class="tier">Featured</span></b><span class="cat">Photography &amp; video · Tagaytay · verified</span>
+        <div class="note">Maria, Juan — the light at 3:04 did half our work. Thank you for standing still in it. We’ll be at Table 12 next February, uninvited.<small data-w="A note from Goldenhour · to {theHost}, in their story">A note from Goldenhour · to the couple, in their story</small></div>
+        <div class="reel"><div class="plate" style="background:linear-gradient(160deg,#EFE6D4,#D9A441)"><span class="tc">2:38</span></div><div class="plate" style="background:linear-gradient(200deg,#E9D6B4,#3E4A5C)"><span class="tc">3:05</span></div><div class="plate" style="background:linear-gradient(160deg,#6B4E3D,#D9A441)"><span class="tc">NOV 16</span></div></div>
+        <q>They saw moments we missed and gave them back to us forever.</q>
+        <div class="at"><span>NOV 16</span><span>11:26</span><span>2:38</span><span>3:04</span><span>THE FILM</span></div>
+        <div class="acts"><button class="pri">Book on Setnayan</button><button class="fol">Follow</button><button>Their site ↗</button></div></div></article>
+      <article class="v feat"><i>LT</i><div><b>The Long Table <span class="tier">Featured</span></b><span class="cat">Catering · Cavite · verified</span>
+        <div class="note">Six courses for 120 on a lawn with one road up the hill. We’d do it again tomorrow. Congratulations, you two — the lechon was for Lolo Ben.<small>A note from The Long Table</small></div>
+        <q>Every guest is still talking about the food. Book them.</q>
+        <div class="at"><span>5:30 – 7:10</span><span>7:12</span></div>
+        <div class="acts"><button class="pri">Book on Setnayan</button><button class="fol">Follow</button><button>Menus ↗</button><button>Share this story</button></div></div></article>
+      <article class="v"><i>BV</i><div><b>Bloom &amp; Vine <span class="tier">Listed</span></b><span class="cat">Florals &amp; styling · Tagaytay · verified</span><div class="at"><span>SEP 21</span><span>11:20</span><span>2:38</span><span>THE LOOK</span></div><div class="acts"><button class="pri">Book on Setnayan</button></div><span class="free">This story is collected on their portfolio as <em>“As featured in Maria &amp; Juan”</em>.</span></div></article>
+      <article class="v"><i>DD</i><div><b>Day-of by Dana <span class="m1">#1 match</span><span class="tier">Listed</span></b><span class="cat">Coordination · Metro Manila · verified</span><div class="at"><span>EVERY CUE</span><span>2:38</span><span>9:47</span></div><div class="acts"><button class="pri">Book on Setnayan</button></div><span class="free">Collected on her portfolio as <em>“As featured in Maria &amp; Juan”</em>.</span></div></article>
+    </div>
+    <div class="tierlegend">
+      <div class="card"><b>LISTED · FREE</b>Named at every minute they made, with <span data-w="{hostPos} endorsement">the couple’s endorsement</span> if they gave one. Bookable on Setnayan. The story is collected on their portfolio automatically — nothing to do.</div>
+      <div class="card"><b>FEATURED · PAID</b>Everything above, plus their voice: <span data-w="a note to {theHost} inside the story">a note to the couple inside the story</span>, their own day-of clips, a Follow button for <span data-w="future {hosts}">future couples</span>, their outside links live, and the numbers — how many <span data-w="{hosts}">couples</span> reached them from this story.</div>
+    </div>
+    <p style="margin-top:12px;font-size:12.5px;color:var(--mute)">Paying never changes <em>whether</em> a vendor is credited — only how richly. A #1 match is a credit, not a tier: the note and the day-of clips come with Featured (Dana is a #1 match and Listed; The Long Table is Featured and wasn’t a match). The stamps are where each one appears in the story.</p></div>
+
+    <!-- One card per BROADCAST SESSION (review finding: a single 2h48 film cannot span 2:38–9:47 PM).
+         Each marker = the moment's clock time − that session's went-live time. -->
+    <div class="panel" id="p-films"><div class="films">
+      <div><div class="plate js-play" style="background:linear-gradient(180deg,#1B2028,#3E4A5C)"><span class="tc live">LIVE · 41:20</span><div class="eq"><i></i><i></i><i></i></div><button class="play" aria-label="Play"><b>The week before</b></button><span class="cap">Feb 7 · from the apartment · 312 watching at peak</span></div><div class="markers"><a href="#r7"><b>0:02:10</b><span>Why Tagaytay</span></a><a href="#r7"><b>0:18:44</b><span>What to wear on a lawn</span></a></div></div>
+      <div><div class="plate js-play" style="background:linear-gradient(180deg,#232A35,#8C9A80)"><span class="tc live">LIVE · 1:12:40</span><div class="eq"><i></i><i></i><i></i></div><button class="play" aria-label="Play"><b>The ceremony</b></button><span class="cap">Feb 14 · live from 2:20 PM · 1,140 watching at peak</span></div><div class="markers"><a href="#m2"><b>0:18:00</b><span>The Garden March</span></a><a href="#m3"><b>0:44:00</b><span>The Vows</span></a></div></div>
+      <div><div class="plate js-play" style="background:linear-gradient(180deg,#232A35,#6B4E3D)"><span class="tc live">LIVE · 5:01:10</span><div class="eq"><i></i><i></i><i></i></div><button class="play" aria-label="Play"><b>The reception</b></button><span class="cap">Feb 14 · live from 5:30 PM · 860 watching at peak</span></div><div class="markers"><a href="#m4"><b>1:42:00</b><span>The First Dance</span></a><a href="#m5"><b>4:17:00</b><span>The Money Dance</span></a></div></div>
+    </div><p style="margin-top:12px;font-size:12.5px;color:var(--mute)">Three broadcasts, one unlock. A minute’s timecode is its clock time minus the moment that session went live.</p></div>
+
+    <div class="panel" id="p-wall"><span class="ui">Live Photo Wall · on the screen from 5:30 PM · what the room saw as it happened</span><div class="wall" style="margin-top:12px" id="wall"></div><p style="margin-top:12px;font-size:12.5px;color:var(--mute)">The wall as the room saw it — the same feed the screen showed, minus anything a guest has un-posted since. It appears only once the edition is published, and never if the wall didn’t run.</p></div>
+
+    <div class="panel" id="p-room"><div class="bigroom"><svg viewBox="0 0 340 236" role="img" aria-label="Seating plan — table numbers and photo heat only" id="bigRoom"></svg><div class="out" id="seatOut" style="padding-top:12px">12 tables · 108 seats · reception only, 5:30 PM to close · tap a table for its captures · <a href="#r6" style="color:var(--taal);text-decoration:none;font-weight:600">see the room in 3D, Jan 12 →</a></div><div class="out only-guest" id="seatMine"></div></div>
+      <p style="margin-top:12px;font-size:12.5px;color:var(--mute)">No names on the plan. A guest sees their own table — and only their own — on their own account.</p></div>
+
+    <div class="panel" id="p-look"><div class="look">
+      <div class="renders"><div class="plate"><span class="tc">SEP 21</span><span class="cap">The room, rendered before the day</span></div><div class="plate" style="background:linear-gradient(160deg,#E9D6B4,#8C9A80)"><span class="cap">Table</span></div><div class="plate" style="background:linear-gradient(160deg,#EFE6D4,#6B4E3D)"><span class="cap">The arch</span></div></div>
+      <div class="theme"><span class="ui">Their saved theme · shown because they made and kept one</span><h3>Champagne &amp; sage,<br>garden afternoon</h3>
+        <div class="swat"><span style="background:#E6D3B3" data-n="Dominant"></span><span style="background:#7E8B72" data-n="Supporting"></span><span style="background:#FBFBFA" data-n="Accent"></span><span style="background:#6B4E3D" data-n="Neutral"></span><span style="background:#C5A059" data-n="Accent 2"></span></div>
+        <div class="prow"><div>The path &amp; arch<span>white blooms, eucalyptus · seen at 2:38</span></div><a href="#p-team">Bloom &amp; Vine</a></div>
+        <div class="prow"><div>Long tables<span>linen, brass, low greens · 5:30–7:10</span></div><a href="#p-team">The Long Table</a></div>
+        <div class="prow"><div>String lights<span>warm 2700K over the lawn · from 7:12</span></div><a href="#">Find a supplier</a></div>
+        <div class="prow"><div>The entourage<span>sage, champagne, cream</span></div><a href="#">Find a supplier</a></div>
+        <p style="margin-top:14px;font-size:12.5px;color:var(--mute)">Like this look? Save it as the start of your own board.</p></div>
+    </div></div>
+
+    <div class="panel" id="p-made"><div class="made">
+      <div class="card"><div><b>Setnayan AI</b><p>Wrote the first plan: budget, list of 120, six vendors to find.</p></div><div class="when"><span>AUG 3</span></div></div>
+      <div class="card"><div><b>Event Hub</b><p>One page, four lives: the save-the-date (Dec 20), the invitation with RSVP, schedule and map (Jan 5), the day itself, and this story. 97% replied.</p></div><div class="when"><span>AUG 3</span><span>DEC 20</span><span>JAN 5</span><span>FEB 14 →</span></div></div>
+      <div class="card"><div><b>Papic</b><p>492 captures from 61 phones, filed by the minute. Opened at the prenup.</p></div><div class="when"><span>NOV 16</span><span>FEB 13</span><span>FEB 14</span></div></div>
+      <div class="card"><div><b>Live Studio</b><p>Three broadcasts on one unlock — the week before, the ceremony, the reception. 1,140 watching at the peak.</p></div><div class="when"><span>FEB 7</span><span>2:20 PM</span><span>5:30 PM</span></div></div>
+      <div class="card"><div><b>Save the Date</b><p>The page as an announcement — a countdown, one tap to a calendar — and the 38-second film cut from the prenup.</p></div><div class="when"><span>DEC 20</span></div></div>
+      <div class="card"><div><b>Pakanta</b><p>Their kundiman — first heard on the save-the-date, danced to at 7:12, closes this page.</p></div><div class="when"><span>DEC 20</span><span>7:12</span></div></div>
+      <div class="card"><div><b>3D Plan · Mood Board</b><p>The room and the look, decided months before the lawn existed.</p></div><div class="when"><span>SEP 21</span><span>JAN 12</span></div></div>
+      <div class="card"><div><b>Kwento · Challenges</b><p>Guests’ wishes and on-camera answers, from the stream onward.</p></div><div class="when"><span>FEB 7 →</span></div></div>
+      <div class="card"><div><b>Monogram · Keepsake</b><p>M&amp;J, animated on the page; the A3 broadsheet with a QR back here.</p></div><div class="when"><span>MAR 1</span></div></div>
+    </div></div>
+
+    <div class="panel" id="p-numbers"><div class="nums">
+      <div class="card"><b>5</b><span>services planned with Setnayan</span></div>
+      <div class="card"><b>3/6</b><span>vendors that were their #1 match</span></div>
+      <div class="card"><b>≈44 h</b><span>planning time saved</span><em>estimated</em></div>
+      <div class="card"><b>120</b><span>guests · 108 attended</span></div>
+      <div class="card"><b>97%</b><span>replied</span></div>
+      <div class="card"><b>492</b><span>captures · 102 before the day</span></div>
+      <div class="card"><b>48</b><span>living moments</span></div>
+      <div class="card"><b>1,140</b><span>watching at the peak · ceremony broadcast</span></div>
+    </div></div>
+  </section>
+
+  <!-- OWNER RULING 2026-09-07: a person's day is exclusive to THEIR OWN ACCOUNT. There is no
+       name field, for anyone, ever — the identity is the signed-in guest (their Papic link).
+       Nobody can look anyone up from here. -->
+  <section class="you" id="you">
+    <div><h3>Were you there?</h3>
+      <p class="only-stranger">This part exists only for the people who were — and only on their own account. Open the page from your Papic link, or sign in, and your day is here. There is nothing to type, and nobody can look anyone up.</p>
+      <p class="only-guest">You’re here on your own account, from your Papic link. Nothing to type — your day is already yours: what you shot, what you said, where you sat, and a card to keep.</p>
+      <div class="youout" id="youOut"></div>
+      <p class="only-guest" style="margin-top:12px;font-size:13px;color:var(--mute)">Something of yours here you would rather not show? <a href="#" style="color:var(--taal);font-weight:600;text-decoration:none">Hide it, or ask to be unnamed</a> — it comes down everywhere, including the printed copies’ next run.</p>
+      <div class="cardwrap" id="cardwrap" hidden>
+        <div class="card9" id="card9"><div><div class="mg9">M&amp;J</div><div class="yw">You were<br>there.</div><div class="nm" id="c9name"></div><div class="mins" id="c9mins"></div></div><div class="ft9">Maria &amp; Juan · Feb 14, 2026 · Tagaytay<br>setnayan.com/maria-and-jose</div></div>
+        <div class="cardside"><p>Your card, in their colours. It carries your first name, the minutes you're in, and your table — nothing else. Post it, or keep it.</p><div class="acts"><button class="pri" id="c9save">Save the card</button><button>Share to Stories</button><button class="only-couple">Send everyone theirs</button></div><small>1080 × 1920 · <span data-w="{hostPos} palette">the couple's palette</span> · made once you publish, never before</small></div>
+      </div></div>
+    <div id="youAct"><button id="youGo">Find my day</button><small class="demo">Demo only — signed in as <select id="youWho" aria-label="Demo identity"><option value="bing">Tita Bing</option><option value="marco">Kuya Marco</option><option value="jr">JR</option><option value="celine">Ate Celine</option></select>. On the real page this is the account, never a field.</small></div>
+  </section>
+
+  <section class="last" id="last">
+    <span class="ui">10:31 PM · Feb 14 · the last word is theirs</span>
+    <p class="prose">“Thank you for being here with us today. Set na ’yan — and we could never have set it without every one of you.”</p>
+    <p class="ui sig" style="color:var(--fg)">— Maria &amp; Juan</p>
+    <div class="song" id="song"><button aria-label="Play their song"></button><div><b>THEIR KUNDIMAN</b><small>the song that follows them · Pakanta</small></div></div>
+    <p class="cross">Goldenhour tell this day in their own words → <a href="#">Watch their chapter</a><br><span style="font-size:12.5px">A chapter is written by the host or by a supplier who worked the day, and appears here only once <span data-w="{theHost} adds it">the couple adds it</span>.</span></p>
+    <p class="colophon"><span id="coloVol">Setnayan · Tagaytay · Vol. I · No. 1</span><a href="#">Print the keepsake</a><a href="#">Share</a><span class="sample">Sample story</span></p>
+  </section>
+
+  <!-- ═══════════ THE BACK COVER · like any book: what comes next in this chronicle ═══════════
+       Sits AFTER the locked close (the edition still ends with their words and their song).
+       The next event a person creates from here is LINKED to this story: No. 2 opens with
+       "Previously · No. 1", inherits the names and the colours, and this back cover turns
+       from a teaser into a live link the day it exists. -->
+  <section class="back" id="next" aria-label="Next in this chronicle">
+    <span class="ui">Back cover · next in the Maria &amp; Juan chronicle</span>
+    <div class="inner" style="margin-top:14px">
+      <div class="no2" data-joy><span class="ghost" aria-hidden="true">2</span>
+        <span class="vol">Vol. I · No. 2 · not yet written</span>
+        <h3 id="nextTitle">The first<br>anniversary</h3>
+        <div class="when"><b>FEB 14 · 2027</b><span>in 350 days · Tagaytay, or wherever they are</span></div>
+        <div class="prev">← Previously <b>NO. 1 · THE WEDDING</b></div>
+        <p class="fine">Same names, same colours, this page as its first chapter. The dial gets one more bar. Everyone who was here is told when it begins — those who asked to be.</p>
+        <p class="fine only-stranger only-guest" style="margin-top:6px">Not yet written — the family choose what comes next, and when.</p>
+      </div>
+      <div class="copy">
+        <p class="prose">A story can be <b>one edition of a longer chronicle</b> — if the people whose day it was want it to be. Maria &amp; Juan named theirs. Many don’t, and their story simply ends on their last word, which is a finished thing.</p>
+        <div class="role couple">
+          <div class="ctas"><a class="pri" href="#">Open the story maker</a></div>
+          <p class="fine">Naming a next edition is optional, and it is done in the maker with the rest of your event — not here. Whatever you start there links to this story: No. 2 opens with “Previously · No. 1”, inherits your names, your palette and your guest list, and this back cover becomes its door the moment it exists. Name nothing and this page stays as it is.</p>
+        </div>
+        <div class="role guest">
+          <div class="ctas"><a class="pri" href="#">Tell me when there’s more</a><a href="#">Start your own story · free</a></div>
+          <p class="fine">One message if they ever begin another — and nothing at all if they don’t. Your own story starts the same way theirs did: a date, a page, the light changing.</p>
+        </div>
+        <div class="role stranger">
+          <div class="ctas"><a class="pri" href="#">Start your story · free</a><a href="#">Follow this chronicle</a></div>
+          <p class="fine">Plan your day on Setnayan and your page becomes your story — published when you’re ready, with your photos, your team, and the day as it actually unfolded.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- minute sheet -->
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-label="A moment">
+  <div class="hd"><b id="shT">2:41<small>PM</small></b><button id="shClose">Close</button></div>
+  <p class="sub" id="shSub"></p>
+  <div class="grid" id="shGrid"></div>
+  <p class="empty" id="shEmpty"></p>
+  <div class="row" id="shRow"></div>
+</div>
+
+<!-- relive -->
+<div class="relive" id="relive" role="dialog" aria-modal="true" aria-label="Relive the day">
+  <div class="prog" id="rProg"></div>
+  <div class="hd"><div class="clock" id="rClock"></div><button id="rClose">Close</button></div>
+  <div class="body">
+    <div class="plate on" id="rPlate" style="position:relative"><span class="tc" id="rTc"></span><div class="eq"><i></i><i></i><i></i></div><span class="cap" id="rCap"></span><div class="tap"><button id="rPrev" aria-label="Previous moment">Previous</button><button id="rNext" aria-label="Next moment">Next</button></div></div>
+    <div class="under"><h3 id="rTitle"></h3><div class="voice" id="rVoice"></div><div class="chips" id="rChips"></div></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+  document.body.classList.add('js');
+  // Reduced motion is honoured by the SCRIPT too, not only the stylesheet (review finding:
+  // the clock count-up, Relive's autoplay and every smooth scroll ignored it).
+  const CALM = matchMedia('(prefers-reduced-motion: reduce)');
+  const calm = () => CALM.matches;
+  const goTo = (el,block='start') => el && el.scrollIntoView({block, behavior: calm()?'auto':'smooth'});
+  const W=1000; const ROAD=[0,300];
+  // ONE SEGMENT PER CALENDAR DAY the event covers (events.event_date → event_end_date; NULL = one
+  // day). Each day carries its own clock, so a day-2 capture can never be drawn on a day-1 bar —
+  // and a wedding IS multi-day-capable in the schema, as are travel, reunion and corporate.
+  const DAYS=[{head:'DAY 1 · FEB 13',t0:1140,t1:1380,x:[312,428],bins:22,venue:false,ticks:[1200,1320]},
+              {head:'DAY 2 · FEB 14',t0:660,t1:1350,x:[440,940],bins:104,venue:true,ticks:[720,900,1080,1260]}];
+  const AFTER=[950,1000];
+  const T0=660,T1=1350; // day minutes
+  const dx=(m,d=1)=>{const D=DAYS[d];return D.x[0]+(m-D.t0)/(D.t1-D.t0)*(D.x[1]-D.x[0]);};
+  const fmt=m=>{ let h=Math.floor(m/60), mm=String(m%60).padStart(2,'0'); const ap=h>=12?'PM':'AM'; h=h%12||12; return {t:`${h}:${mm}`,ap}; };
+  const entries=$$('.entry').map(el=>({el,x:(el.dataset.t&&el.dataset.day)?dx(+el.dataset.t,+el.dataset.day):+el.dataset.x,day:el.dataset.day?+el.dataset.day:null,stage:+el.dataset.stage,stamp:el.dataset.stamp,ap:el.dataset.ap,label:el.dataset.label,t:el.dataset.t?+el.dataset.t:null,tables:(el.dataset.tables||'').split(',').filter(Boolean).map(Number),hot:el.dataset.hot?+el.dataset.hot:null}));
+
+  // ── light of the day, coloured from the couple's SAVED MOOD BOARD.
+  // Six stages — road · morning · afternoon · dusk · night · after — derived from
+  // their five swatches, sorted by lightness; text colour is chosen per stage for
+  // contrast, never inherited. "neutral" is the fallback when no theme was saved.
+  // Source in the build: sanitizeRolePalette(events.role_palette).reception (3–5 swatches; "saved" =
+  // reception non-empty; date = events.mood_board_updated_at; heading = events.moodboard_theme_name).
+  // Slot labels are the shipped PALETTE_LIMITS.reception ones — never invented names.
+  const SLOTS=['Dominant','Supporting','Accent','Neutral','Accent 2'];
+  const PALETTES={ mj:{name:'Champagne & sage,<br>garden afternoon',sw:['#E6D3B3','#7E8B72','#FBFBFA','#6B4E3D','#C5A059']}, jj:{name:'Sea glass & coral,<br>Cebu at sundown',sw:['#F4E9D8','#1F3A5F','#E76F51','#9FC5D9','#2A9D8F']}, sr:{name:'Orchid & gold,<br>Makati at eighteen',sw:['#F8EAF0','#5B2A86','#D4AF37','#1C1B22','#C77DFF']} };
+  const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)), lum=c=>{const [r,g,b]=c.map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*r+.7152*g+.0722*b}, sat=c=>{const mx=Math.max(...c),mn=Math.min(...c);return mx===0?0:(mx-mn)/mx};
+  // WCAG ratio + a nudge-until-legible helper. Derived palettes were failing AA for muted
+  // text, the accent used as text, and the focus ring on every light stage (review finding);
+  // a colour taken from a couple's board is never trusted to be readable — it is corrected.
+  const ratio=(a,b)=>{const l1=lum(a),l2=lum(b);return (Math.max(l1,l2)+.05)/(Math.min(l1,l2)+.05)};
+  function legible(fg,bg,target){ const toward = lum(bg)>.4?[0,0,0]:[255,255,255]; let c=fg, f=0;
+    while(ratio(c,bg)<target && f<1){ f+=.04; c=lerp(fg,toward,f); } return c; }
+  function derive(sw){ const cs=sw.map(hex).sort((a,b)=>lum(b)-lum(a)); const light=cs[0],second=cs[1],mid=cs[2],dark=cs[cs.length-1]; const accent=[...cs].sort((a,b)=>sat(b)-sat(a))[0];
+    const bgs=[ lerp(light,[255,255,255],.45), lerp(light,[255,255,255],.2), lerp(second,light,.5), lerp(dark,mid,.3), lerp(dark,[0,0,0],.55), lerp(light,mid,.18) ];
+    return bgs.map(bg0=>{ let bg=bg0; let L=lum(bg); if(L>.28&&L<.5) { bg=lerp(bg,[0,0,0],.4); L=lum(bg); } const darkBg=L<.3;
+      const fg=legible(darkBg?lerp([247,240,228],light,.15):lerp([27,26,23],dark,.25), bg, 12);
+      const mute=legible(lerp(fg,bg,.5), bg, 4.6);                    // body-muted text: AA
+      const acc=legible(darkBg?lerp(accent,[255,255,255],.45):accent, bg, 4.5); // accent AS TEXT: AA
+      return [bg,lerp(bg,fg,.06),fg,mute,darkBg?'rgba(255,255,255,.22)':'rgba(0,0,0,.2)',darkBg?'rgba(255,255,255,.07)':'rgba(255,255,255,.55)',acc]; }); }
+  const NEUTRAL=[
+    [[239,235,228],[230,224,214],[27,26,23],[106,101,92],'rgba(27,26,23,.14)','rgba(255,255,255,.55)'],
+    [[247,243,236],[236,231,222],[27,26,23],[106,101,92],'rgba(27,26,23,.14)','rgba(255,255,255,.6)'],
+    [[244,236,222],[233,222,204],[31,28,22],[112,100,84],'rgba(31,28,22,.16)','rgba(255,255,255,.5)'],
+    [[64,52,54],[80,66,66],[247,240,228],[196,184,170],'rgba(247,240,228,.16)','rgba(255,255,255,.07)'],
+    [[26,22,32],[40,34,48],[247,240,228],[178,168,180],'rgba(247,240,228,.14)','rgba(255,255,255,.06)'],
+    [[236,238,236],[222,226,222],[27,26,23],[100,104,100],'rgba(27,26,23,.14)','rgba(255,255,255,.6)'],
+  ];
+  const lerp=(a,b,f)=>a.map((v,i)=>Math.round(v+(b[i]-v)*f)), rgb=a=>`rgb(${a[0]},${a[1]},${a[2]})`;
+  let S=derive(PALETTES.mj.sw), lastPaint=[0,0,0];
+  // 🔑 THE CROSSFADE NEVER PASSES THROUGH AN ILLEGIBLE MIDPOINT (review finding: light→dark
+  // lerped BOTH ground and ink, so at f≈0.5 they met at ~1.05:1 for a screen of scrolling —
+  // twice). The ground crossfades; the ink is CHOSEN, each frame, as whichever of the two
+  // stages' inks reads better on the ground that is actually there.
+  function paint(a,b,f){ lastPaint=[a,b,f]; const A=S[a],B=S[b]; const r=document.documentElement.style;
+    const bg=lerp(A[0],B[0],f);
+    const fg = ratio(A[2],bg) >= ratio(B[2],bg) ? A[2] : B[2];
+    const mute = legible(lerp(fg,bg,.5), bg, 4.6);
+    const dark=fg[0]>128;
+    const acc0 = ratio(A[6]||[47,111,106],bg) >= ratio(B[6]||A[6]||[47,111,106],bg) ? (A[6]||[47,111,106]) : (B[6]||A[6]||[47,111,106]);
+    r.setProperty('--bg',rgb(bg)); r.setProperty('--bg2',rgb(lerp(A[1],B[1],f))); r.setProperty('--fg',rgb(fg)); r.setProperty('--mute',rgb(mute));
+    r.setProperty('--line',f<.5?A[4]:B[4]); r.setProperty('--card',f<.5?A[5]:B[5]); r.setProperty('--card-ink',rgb(fg));
+    r.setProperty('--line2',dark?'rgba(247,240,228,.4)':'rgba(27,26,23,.34)');
+    r.setProperty('--candle-ink',rgb(legible(hex(dark?'#F0C86E':'#7A5A16'),bg,4.5)));
+    r.setProperty('--taal', rgb(legible(acc0,bg,4.5))); }
+  function setTheme(key){ $$('#themeCtl button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.th===key))); S = key==='neutral'? NEUTRAL : derive(PALETTES[key].sw); paint(...lastPaint);
+    if(key!=='neutral'){ const p=PALETTES[key]; $('.look .theme h3').innerHTML=p.name; $$('.swat span').forEach((s,i)=>{ s.style.background=p.sw[i]; s.dataset.n=SLOTS[i]; }); } }
+  $$('#themeCtl button').forEach(b=>b.addEventListener('click',()=>setTheme(b.dataset.th)));
+
+  // ── dial bins: road weekly · day 5-min · after
+  const bins=[]; // {x,w,v,label,kind,ref}
+  const roadPts=[{x:30,v:4,l:'Aug 3 · the date',ref:'r1'},{x:70,v:6,l:'Sep 21 · the look',ref:'r2'},{x:110,v:5,l:'Oct · the team',ref:'r3'},{x:160,v:64,l:'Nov 16 · the prenup',ref:'r4'},{x:205,v:8,l:'Dec 20 · save the date',ref:'r5'},{x:238,v:5,l:'Jan 5 · the invitation',ref:'r5b'},{x:250,v:7,l:'Jan 12 · the room',ref:'r6'},{x:288,v:24,l:'Feb 7 · live',ref:'r7'}];
+  for(let i=0;i<26;i++){ const x=ROAD[0]+i*(ROAD[1]/26); let v=1.5; let best=null; roadPts.forEach(p=>{ const d=Math.abs(p.x-(x+6)); if(d<7){ v=Math.max(v,p.v); best=p; } }); bins.push({x,w:ROAD[1]/26-1.5,v:Math.min(56,v*0.85),label:best?best.l:`Week ${i+1} of the road`,kind:'road',ref:best?best.ref:null,cap:best?best.v:Math.round(v)}); }
+  const M=entries.filter(e=>e.t!=null);
+  const AMP={r8:38,m1:2,m2:41,m3:27,m4:63,m5:88};
+  DAYS.forEach((D,di)=>{ const Ms=entries.filter(e=>e.t!=null&&e.day===di);
+    for(let i=0;i<D.bins;i++){ const m=D.t0+i*((D.t1-D.t0)/D.bins); let v=.8;
+      Ms.forEach(e=>{ const d=Math.abs(m-e.t); v+=(AMP[e.el.id]||20)*.62*Math.exp(-(d*d)/(2*20*20)); });
+      if(di===1){ if(m>990&&m<1140) v+=9+6*Math.sin(i/2); if(m>1150&&m<1300) v+=12+8*Math.sin(i/1.7); }
+      const f=fmt(Math.round(m/5)*5);
+      bins.push({x:dx(m,di),w:(D.x[1]-D.x[0])/D.bins-1.2,v:Math.min(56,v),label:`${D.head.split(' · ')[0]} · ${f.t} ${f.ap}`,kind:'day',day:di,m:Math.round(m/5)*5,cap:Math.max(0,Math.round(v*1.6))}); } });
+  [{x:952,v:6,l:'Feb 15 · the morning after',ref:'a1'},{x:975,v:4,l:'Mar 1 · published',ref:'a2'},{x:995,v:2,l:'Feb 14, 2027 · anniversary',ref:'a3'}].forEach(p=>bins.push({x:p.x-3,w:7,v:p.v*3,label:p.l,kind:'after',ref:p.ref,cap:p.v}));
+
+  const svg=$('#dialSvg'); let s='';
+  bins.forEach((b,i)=>{ s+=`<rect class="bin" data-i="${i}" style="animation-delay:${(i*5)}ms" x="${b.x.toFixed(1)}" y="${(50-b.v).toFixed(1)}" width="${b.w.toFixed(1)}" height="${b.v.toFixed(1)}" rx="1"/>`; });
+  s+=`<line class="sep" x1="${DAYS[0].x[0]-6}" x2="${DAYS[0].x[0]-6}" y1="0" y2="52"/><line class="sep" x1="${DAYS[1].x[0]-6}" x2="${DAYS[1].x[0]-6}" y1="0" y2="52" stroke-dasharray="2 3"/><line class="sep" x1="${AFTER[0]-5}" x2="${AFTER[0]-5}" y1="0" y2="52"/>`;
+  s+=`<line id="needle" class="needle" x1="0" x2="0" y1="0" y2="52" style="display:none"/>`;
+  // ONE FULL-WIDTH HIT AREA: a 1.3px bar is not a tap target on a phone (review finding).
+  // Tapping anywhere on the line opens the nearest moment; the keyboard walks the same axis.
+  s+=`<rect id="dialHit" x="0" y="0" width="${W}" height="58" fill="transparent"/>`;
+  svg.innerHTML=s;
+  // Labels as HTML, in percent — never squashed by the stretched viewBox.
+  const pc=x=>(x/W*100).toFixed(2)+'%'; let ls='';
+  ls+=`<span class="seg" style="left:0;bottom:0">THE ROAD · 195 DAYS</span><span class="seg r" style="left:100%;bottom:0">AFTER</span>`;
+  DAYS.forEach((D,di)=>{ ls+=`<span class="seg" style="left:${pc(D.x[0])};bottom:0">${D.head}</span>`;
+    D.ticks.forEach(m=>{ const f=fmt(m); ls+=`<span style="left:${pc(dx(m,di))};top:0">${f.t}</span>`; }); });
+  entries.forEach((e,k)=>{ if(e.t) return; ls+=`<span class="lab" data-k="${k}" style="left:${pc(e.x)};top:0">${e.stamp}</span>`; });
+  $('#dlabels').innerHTML=ls;
+
+  // ── minute sheet (every bar opens)
+  const sheet=$('#sheet'), scrim=$('#scrim');
+  function openSheet(b){ const f=b.kind==='day'?fmt(b.m):null; $('#shT').innerHTML=f?`${f.t}<small>${f.ap}</small>`:`<small style="font-size:18px">${b.label}</small>`;
+    if(document.body.classList.contains('gl-hide')){ // a stranger before publish: the minute exists, its captures are the guests' for now
+      $('#shSub').innerHTML='<b>Guests only, for now.</b>'; $('#shGrid').innerHTML=''; $('#shEmpty').textContent='What was shot at this minute is filling in for the people holding the QR. It publishes here, as an edition, when the couple approves it.'; $('#shRow').innerHTML=''; sheetReturn=document.activeElement; sheet.classList.add('on'); scrim.classList.add('on'); $('#shClose').focus(); return; }
+    const near=b.kind==='day'? M.reduce((p,c)=>Math.abs(c.t-b.m)<Math.abs(p.t-b.m)?c:p) : (b.ref?entries.find(e=>e.el.id===b.ref):null);
+    const n=b.cap, ph=Math.max(1,Math.round(n/3.1));
+    $('#shSub').innerHTML= n>0?`<b>${n} capture${n>1?'s':''}</b> from <b>${ph} phone${ph>1?'s':''}</b>${b.kind==='day'&&b.day===1&&blockAt(b.m)?` · ${blockAt(b.m).place}`:b.kind==='day'&&b.day===0?' · the despedida, at home':''}`:`Nothing was shot at this moment.`;
+    const g=$('#shGrid'); g.innerHTML=''; const pal=['#8C9A80,#3E4A5C','#E9D6B4,#6B4E3D','#2A2233,#D9A441','#3E4A5C,#8C9A80','#6B4E3D,#D9A441','#D9A441,#26211E','#E9D6B4,#3E4A5C','#6B4E3D,#2A2233'];
+    for(let i=0;i<Math.min(8,n);i++){ const d=document.createElement('div'); d.className='plate'; d.style.background=`linear-gradient(${140+i*17}deg,${pal[i%8]})`; d.innerHTML=`<span class="tc">${f?fmt(b.m+ (i%3)).t:''}</span>`; g.appendChild(d); }
+    $('#shEmpty').textContent = near && b.kind==='day' && Math.abs(near.t-b.m)>12 ? 'Nobody wrote this minute up. The photos are still here — filed by the minute they were taken.' : (n===0?'A quiet minute. They happen.':'');
+    $('#shRow').innerHTML = near?`<span>Nearest written moment:</span><a href="#${near.el.id}">${near.label} →</a>`:'';
+    $$('#shRow a').forEach(a=>a.addEventListener('click',closeSheet));
+    sheetReturn=document.activeElement; sheet.classList.add('on'); scrim.classList.add('on'); $('#shClose').focus(); }
+  // Focus moves into the sheet and comes back where it started (review finding: both
+  // overlays opened without moving focus, leaving the keyboard behind the scrim).
+  let sheetReturn=null;
+  function closeSheet(){ if(!sheet.classList.contains('on')) return; sheet.classList.remove('on'); scrim.classList.remove('on'); if(sheetReturn&&sheetReturn.focus) sheetReturn.focus(); sheetReturn=null; }
+  const binAtClientX=cx=>{ const r=svg.getBoundingClientRect(); const x=(cx-r.left)/r.width*W; return bins.reduce((p,c)=>Math.abs((c.x+c.w/2)-x)<Math.abs((p.x+p.w/2)-x)?c:p); };
+  svg.addEventListener('click',e=>{ openSheet(binAtClientX(e.clientX)); });
+  let cursor=bins.findIndex(b=>b.kind==='day');
+  svg.addEventListener('keydown',e=>{ if(e.key==='ArrowRight'||e.key==='ArrowLeft'){ e.preventDefault(); cursor=Math.max(0,Math.min(bins.length-1,cursor+(e.key==='ArrowRight'?1:-1))); const b=bins[cursor]; $$('.bin').forEach((r,i)=>r.classList.toggle('pv',i===cursor)); svg.setAttribute('aria-label',`${b.label} — Enter to open`); }
+    else if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openSheet(bins[cursor]); } });
+  $('#shClose').addEventListener('click',closeSheet); scrim.addEventListener('click',closeSheet);
+
+  // ── rooms (lens + big)
+  const ROOM=`<rect x="6" y="6" width="328" height="224" rx="12" class="lawn"/><text x="170" y="22" class="rlab" text-anchor="middle">Taal · the view</text><rect x="112" y="30" width="116" height="14" rx="3" fill="#E9D6B4" stroke="rgba(0,0,0,.2)"/><text x="170" y="40" class="rlab" text-anchor="middle" style="fill:#1B1A17">Maria &amp; Juan</text><g class="dance"><rect x="132" y="104" width="76" height="32" rx="4" fill="none" stroke="var(--line2)" stroke-dasharray="3 3"/><text x="170" y="123" class="rlab" text-anchor="middle">dance floor</text></g><g class="closed"><text x="170" y="120" text-anchor="middle">the seating plan</text><text x="170" y="134" text-anchor="middle">opens with the reception · 5:30 PM</text></g>`+
+   // The PUBLIC plan carries table numbers and photo-heat only — never a guest's name
+   // (review finding, blocker: shipped code has no public seating surface; the only
+   // shipped lookup is a guest finding THEIR OWN table). Tablemates live in TABLEMATES
+   // below and are shown only to the signed-in guest, for their own table.
+   [[1,66,66],[2,274,66],[3,46,122],[4,94,106],[5,246,106],[6,294,122],[7,66,172],[8,122,162],[9,170,180],[10,218,162],[11,274,172]].map(t=>`<g class="tbl" data-n="${t[0]}"><circle cx="${t[1]}" cy="${t[2]}" r="15"/><text x="${t[1]}" y="${t[2]+3}">${t[0]}</text></g>`).join('')+
+   `<g class="tbl" data-n="12"><rect x="142" y="204" width="56" height="16" rx="4"/><text x="170" y="215">crew</text></g>`+
+   `<g class="rows">`+[0,1,2,3,4,5,6].map(r=>`<rect x="52" y="${58+r*18}" width="104" height="7" rx="3.5"/><rect x="184" y="${58+r*18}" width="104" height="7" rx="3.5"/>`).join('')+`<text x="170" y="196" class="rlab" text-anchor="middle">the aisle · ceremony rows</text></g>`;
+  $('#lensRoom').innerHTML=ROOM; $('#bigRoom').innerHTML=ROOM; $('.bigroom').classList.add('room','rec'); // the index's plan is the edition's: reception, after the fact
+  const lensTbls=$$('#lensRoom .tbl'), big=$$('#bigRoom .tbl'), out=$('#seatOut');
+  // Per-table photo counts (public, aggregate): which minutes the table was loudest.
+  const TABLE_HEAT={1:'63 at 7:12 · 21 at 9:47',2:'40 at 7:12 · 18 at 9:47',3:'44 at 9:47',4:'12 at 9:47',5:'9 at 7:12',6:'7 at 7:12',7:'88 at 9:47 · the loudest table of the night',8:'15 at 7:12 · 10 at 9:47',9:'11 at 7:12',10:'14 at 7:12',11:'22 at 9:47',12:'the crew — 41 frames, Goldenhour'};
+  big.forEach(t=>t.addEventListener('click',()=>{ big.forEach(x=>x.classList.toggle('hot',x===t)); out.innerHTML=`<b>Table ${t.dataset.n}</b> · captures from this table: ${TABLE_HEAT[t.dataset.n]||'—'}`; }));
+  // The signed-in guest's own table — and only theirs (tablemates are theirs to see, nobody else's).
+  const TABLEMATES={1:'Papa Ramon, Mama Lita, Mama Cora, Papa Ben, Ninang Lourdes, Ninong Ferdie, Lolo Ben, Lola Nena',2:'Ate Celine, Kuya Marco, Andrea, JR, Bea, Paolo, Nica, Migs',3:'Tita Bing, Tito Jun, Tita Marge, Tito Nonoy, Aldrin, Joy, Ruel, Sarah'};
+  let myTable=null;
+  function seatOwn(){ const mine=$('#seatMine'); if(!myTable){ mine.textContent=''; return; } big.forEach(x=>x.classList.toggle('me',+x.dataset.n===myTable)); lensTbls.forEach(x=>x.classList.toggle('me',+x.dataset.n===myTable)); mine.innerHTML=`<b>You were at Table ${myTable}</b>, with ${TABLEMATES[myTable]||'your table'}. Only you see this line.`; }
+  // photo wall
+  const wall=$('#wall'); const wp=['#8C9A80,#3E4A5C','#E9D6B4,#6B4E3D','#2A2233,#D9A441','#3E4A5C,#8C9A80','#6B4E3D,#D9A441','#D9A441,#26211E','#E9D6B4,#3E4A5C','#6B4E3D,#2A2233'];
+  for(let i=0;i<24;i++){ const d=document.createElement('div'); d.className='plate'; d.style.background=`linear-gradient(${130+i*13}deg,${wp[i%8]})`; const m=1050+i*13; d.innerHTML=`<span class="tc">${fmt(m).t}</span>`; wall.appendChild(d); }
+
+  // ── scroll → now
+  // The clock ticks only when the MINUTE actually changes — it was being rewritten every
+  // scroll frame, restarting the animation and forcing a layout each time (review finding).
+  let lastClock='';
+  function tickClock(html){ if(html===lastClock) return; lastClock=html; nowT.innerHTML=html; if(calm()) return; nowT.classList.remove('tcl'); void nowT.offsetWidth; nowT.classList.add('tcl'); }
+  const nowT=$('#nowT'), nowL=$('#nowL'), needle=$('#needle'), lensT=$('#lensT'), lensL=$('#lensL'), lensFt=$('#lensFt'), kvCap=$('#kvCap'), kvPh=$('#kvPh'), kvFilm=$('#kvFilm');
+  const capsBefore={r0:0,r1:0,r2:0,r3:0,r4:64,r5:64,r5b:64,r6:64,r7:64,r8:102,m1:104,m2:145,m3:172,m4:235,m5:323,a1:492,a2:492,a3:492}, phones={m1:2,m2:14,m3:11,m4:22,m5:31,r4:1,r8:9}, film={m2:'0:18:00 · ceremony',m3:'0:44:00 · ceremony',m4:'1:42:00 · reception',m5:'4:17:00 · reception',r7:'FILM 1 · 41:20'};
+  // The day as the venue was used — mirrors event_schedule_blocks {label,type,start,end,place,seated}.
+  // Assigned seats exist only in a seated block (owner lock 6); the room is drawn from this, not from a clock threshold.
+  const BLOCKS=[{label:'Getting ready',type:'pre',start:660,end:750,place:'the suite',seated:false},{label:'The drive up · arrivals',type:'pre',start:750,end:840,place:'the road up the hill',seated:false},{label:'Ceremony',type:'ceremony',start:840,end:930,place:'on the lawn, in rows',seated:false},{label:'Golden hour · cocktails',type:'cocktails',start:930,end:1050,place:'golden hour, on the lawn',seated:false},{label:'Reception',type:'reception',start:1050,end:1350,place:'at the long tables',seated:true}];
+  const blockAt=m=>BLOCKS.find(b=>m>=b.start&&m<b.end)||null;
+  let raf=0;
+  function tick(){ raf=0; const read=innerHeight*.38; const vis=entries.filter(e=>!e.el.classList.contains('hidden')); let i=-1,f=0;
+    vis.forEach((e,k)=>{ const r=e.el.getBoundingClientRect(); if(r.top<=read){ i=k; f=Math.min(1,Math.max(0,(read-r.top)/Math.max(1,r.height+140))); } });
+    if($('#all').getBoundingClientRect().top<=read){ paint(5,5,0); needle.style.display='none'; nowT.innerHTML='ALL<small>at once</small>'; nowL.textContent='The whole story, gathered'; $$('.bin').forEach(b=>{b.classList.add('past');b.classList.remove('pv');}); $$('#dlabels .lab').forEach(l=>l.classList.remove('on')); lensT.textContent='THE ROOM'; lensL.textContent='after'; lensTbls.forEach(t=>t.classList.remove('hot','warm')); kvCap.textContent='492'; kvPh.textContent='61'; kvFilm.textContent='3 films'; return; }
+    if(i<0){ paint(0,0,0); needle.style.display='none'; nowT.innerHTML='AUG<small>2025</small>'; nowL.textContent='The road to the day'; $$('.bin').forEach(b=>b.classList.remove('past','pv')); $$('#dlabels .lab').forEach(l=>l.classList.remove('on')); lensT.textContent='THE ROOM'; lensL.textContent='not built yet'; lensTbls.forEach(t=>t.classList.remove('hot','warm')); kvCap.textContent='0'; kvPh.textContent='0'; kvFilm.textContent='—'; return; }
+    const cur=vis[i], nxt=vis[i+1]; const x=nxt?cur.x+(nxt.x-cur.x)*f:cur.x+(W-cur.x)*f*.5;
+    paint(cur.stage, nxt?nxt.stage:cur.stage, nxt&&nxt.stage!==cur.stage?f:0);
+    tickClock(`${cur.stamp}<small>${cur.ap}</small>`); nowL.textContent=cur.label;
+    needle.style.display=''; needle.style.transform=`translateX(${x.toFixed(1)}px)`;
+    $$('.bin').forEach(b=>{ const bx=+b.getAttribute('x'); b.classList.toggle('past',bx<x-4); b.classList.toggle('pv',Math.abs(bx-cur.x)<=(cur.t?9:7)); });
+    $$('#dlabels .lab').forEach(l=>l.classList.toggle('on',entries[+l.dataset.k]===cur));
+    const id=cur.el.id; kvCap.textContent=capsBefore[id]??'—'; kvPh.textContent=phones[id]??'—'; kvFilm.textContent=film[id]??'—';
+    const lensRoom=$('.lens .room');
+    if(cur.t){ const fm=fmt(cur.t); lensT.textContent=fm.t+' '+fm.ap; lensL.textContent=cur.label.toLowerCase();
+      // Assigned seats exist only while the RECEPTION venue is in use (from 5:30 PM). Before that the same lawn is in ceremony rows — no table to attribute a photo to.
+      const blk=blockAt(cur.t); const reception = !!(blk&&blk.seated) && cur.hot!=null;
+      lensRoom.classList.toggle('cer', !!(blk&&blk.type==='ceremony')); lensRoom.classList.toggle('rec', reception);
+      lensTbls.forEach(tb=>{ const n=+tb.dataset.n; tb.classList.toggle('hot',reception&&n===cur.hot); tb.classList.toggle('warm',reception&&cur.tables.includes(n)&&n!==cur.hot); });
+      if(id==='m1') lensFt.innerHTML='Not yet — the lawn was still being set.';
+      else if(!reception) lensFt.innerHTML='The ceremony — the lawn is in rows facing the arch. <b>Assigned seats begin at the reception, 5:30 PM</b>; until then a photo belongs to a person, not a table.';
+      else { lensFt.innerHTML=`Most photos of this minute came from <b>Table ${cur.hot}</b>. ${cur.tables.length-1} other tables were shooting too.`; } }
+    else { lensRoom.classList.remove('cer'); lensRoom.classList.toggle('rec', id.startsWith('a')); lensT.textContent=cur.stamp+' '+cur.ap; lensL.textContent=cur.label.toLowerCase(); lensTbls.forEach(t=>t.classList.remove('hot','warm')); lensFt.innerHTML = id==='r6'?'The room was designed today in 3D — the seating plan is a different thing, and appears only when the reception opens.': id.startsWith('a')?'The room, as it was on the night. Tap a table under “The room” to see who sat there.':'The seating plan appears when the reception opens on the day.'; } }
+  addEventListener('scroll',()=>{ if(!raf) raf=requestAnimationFrame(tick); },{passive:true}); addEventListener('resize',tick);
+
+  // ── the guests' layer, tagged once at load (see the CSS note). Everything untagged
+  //    is the couple's own layer and is public as it happens.
+  (function tagGuestLayer(){ const G='guest';
+    $$('.layer').forEach(l=>{ const k=($('.ui',l)?.textContent||'').trim(); if(k==='Said'||k==='Asked'||k==='Letters') l.dataset.layer=G; });
+    $$('.chip').forEach(c=>{ if(/^\s*Papic\b/.test(c.textContent)) c.dataset.layer=G; });
+    $$('.entry .media .plate').forEach(p=>{ if(/Papic/i.test($('.cap',p)?.textContent||'')) p.dataset.layer=G; });
+    $$('.entry .media').forEach(m=>{ const ps=$$('.plate',m); if(ps.length&&ps.every(p=>p.dataset.layer===G)) m.dataset.layer=G; });
+    ['captures','voices','asked','letters','wall','room'].forEach(id=>{ const p=$('#p-'+id); if(p) p.dataset.layer=G; const t=$(`#tabs button[data-p="${id}"]`); if(t) t.dataset.layer=G; });
+    ['you','reliveBtn'].forEach(id=>{ const e=$('#'+id); if(e) e.dataset.layer=G; });
+    // the road's guest items ride the same tag: r4's Papic plate/chip, r7's Said/Asked, r8's captures
+  })();
+
+  // ── THE WORDS FOLLOW THE OCCASION (shipped: event_type_profiles.terminology — organizer_noun,
+  //    person_a/person_b, seat_word, event_word, register). The SOLEMN register never renders the
+  //    celebratory machinery: no Relive, no challenges, no anniversary, no "tell me when it's live".
+  const OCC={
+    wedding:{host:'couple',theHost:'the couple',TheHost:'The couple',hostPos:'the couple\u2019s',hosts:'couples',register:'celebratory',note:''},
+    debut:{host:'celebrant',theHost:'the celebrant',TheHost:'The celebrant',hostPos:'the celebrant\u2019s',hosts:'celebrants',register:'celebratory',
+      note:'<b>Debut.</b> One celebrant, not two \u2014 the masthead carries a single name, and every \u201Ccouple\u201D in the page chrome becomes \u201Cthe celebrant\u201D. Everything else is unchanged.'},
+    reunion:{host:'family',theHost:'the family',TheHost:'The family',hostPos:'the family\u2019s',hosts:'families',register:'celebratory',
+      note:'<b>Reunion.</b> The host is a family, not a person, and the event is multi-day by default \u2014 the dial already carries one segment per calendar day.'},
+    wake:{host:'family',theHost:'the family',TheHost:'The family',hostPos:'the family\u2019s',hosts:'families',register:'solemn',
+      note:'<b>Wake \u00B7 the solemn register.</b> What just disappeared is the point: no \u201CRelive it\u201D, no Papic challenges, no anniversary edition, no \u201Ctell me when it\u2019s live\u201D. The chrome now says <em>the family</em>. Shipped code already refuses the joyful recap and the anniversary mail for this register.<br>The sample\u2019s own words below are still a wedding\u2019s \u2014 this switch shows the template\u2019s behaviour, not a second sample.'},
+  };
+  function setOccasion(k){ const w=OCC[k]; $$('#occCtl button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.occ===k)));
+    document.body.classList.toggle('solemn', w.register==='solemn');
+    $$('[data-w]').forEach(el=>{ el.innerHTML = el.dataset.w.replace(/\{(\w+)\}/g,(m,key)=>w[key]!==undefined?w[key]:m); });
+    const note=$('#occNote'); note.innerHTML=w.note; note.hidden=!w.note;
+    const cta=$('#tocome .cta'); if(cta) cta.textContent = w.register==='solemn' ? 'The vigil schedule' : '\uD83D\uDD14 Tell me when it\u2019s live';
+    const bt=$('.back .ui'); if(bt) bt.textContent = w.register==='solemn' ? 'Back cover \u00B7 what the family keeps' : 'Back cover \u00B7 next in the Maria & Juan chronicle';
+    const nt=$('#nextTitle'); if(nt) nt.innerHTML = w.register==='solemn' ? 'The fortieth<br>day' : 'The first<br>anniversary';
+  }
+  $$('#occCtl button').forEach(b=>b.addEventListener('click',()=>setOccasion(b.dataset.occ)));
+
+  // ── viewing as: one URL, three readers (owner lock 1, 2026-09-07)
+  let role='guest', asofN=3;
+  function setRole(r){ role=r; $$('#roleCtl button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.role===r))); document.body.classList.remove('as-stranger','as-guest','as-couple'); document.body.classList.add('as-'+r); if(r==='stranger'){ myTable=null; big.forEach(x=>x.classList.remove('me')); lensTbls.forEach(x=>x.classList.remove('me')); $('#cardwrap').hidden=true; $('#youOut').classList.remove('on'); } seatOwn(); asof(asofN); }
+  $$('#roleCtl button').forEach(b=>b.addEventListener('click',()=>setRole(b.dataset.role))); setOccasion('wedding');
+
+  // ── as-of (the story as it was being made)
+  const badge=$('#badge'), tocome=$('#tocome');
+  function asof(n){ asofN=n; $$('.asof button[data-asof]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.asof===n)));
+    // 1 · a week before: the road is public, the day is still to come.
+    // 2 · on the day at 3:10 PM: the road + the live stream are public to everyone;
+    //     the minutes (the guests' layer) show only to QR holders and the couple,
+    //     and publish for everyone when the couple does.
+    // 3 · today: the edition — everyone sees the same page.
+    // (time × audience): TIME decides which entries exist yet; the AUDIENCE decides which
+    // layers of them are readable (gl-hide). A written minute does not exist until the couple
+    // writes it, so nobody — guest or stranger — sees day 2's chapters at 3:10 PM.
+    const cut = n===1?305 : n===2?440 : 2000;
+    // (time × audience): a stranger before publish never receives the guests' layer
+    const glHide = role==='stranger' && n<3; document.body.classList.toggle('gl-hide',glHide);
+    if(glHide && $('.panel.on')?.dataset.layer==='guest') openPanel('team');
+    // the seating plan is a reception-only, after-the-fact layer: no tab before the edition
+    const roomTab=$('#tabs button[data-p="room"]'); if(roomTab) roomTab.style.display = n===3?'':'none'; if(n!==3 && $('#p-room').classList.contains('on')) openPanel('captures');
+    // the edition number arrives WITH publish — before that the masthead carries only the volume
+    $('#brandSub').textContent = n===3?'Vol. I · No. 1 · a story, as it was made':'Vol. I · a story, as it is being made';
+    $('#coloVol').textContent = n===3?'Setnayan · Tagaytay · Vol. I · No. 1':'Setnayan · Tagaytay · Vol. I';
+    // the cover facts count only what this viewer can see
+    const facts=$$('.facts div b'); if(facts.length===4){ facts[0].textContent = glHide?'—':(n===1?'102':n===2?'274':'492'); facts[1].textContent = n===1?'1':'3'; facts[2].textContent = glHide?'—':(n===1?'3':n===2?'8':'11'); facts[3].textContent = n===1?'188':n===2?'195':'196'; }
+    entries.forEach(e=>e.el.classList.toggle('hidden',e.x>cut)); $$('.gap').forEach(g=>g.classList.toggle('hidden',+g.dataset.x>cut));
+    $('#dayHead').style.display = cut<352?'none':''; $('#afterHead').style.display = cut<950?'none':'';
+    $$('.bin').forEach((b,i)=>b.classList.toggle('future',bins[i].x>cut));
+    if(n===1){ badge.className='badge'; badge.textContent='In 7 days · Feb 14, 2:00 PM'; $('#coverKicker').textContent='Aug 3, 2025 → Feb 14, 2026 · 7 days to go · Tagaytay'; tocome.classList.add('on'); $('#tcKick').textContent='Still to come'; $('#tcTitle').textContent='The day · in 7 days'; $('#tcBody').textContent='This page fills in as the day is made. On February 14 the Live Studio stream starts here at 2:00 PM, and every Papic capture files itself under the minute it’s taken.'; $('#tcRow').innerHTML='<span>FEB 13 · DESPEDIDA</span><span>FEB 14 · 2:00 PM LIVE</span><span>THE EDITION</span>'; }
+    else if(n===2){ badge.className='badge live'; badge.textContent='Live · 3:10 PM · 1,140 watching'; $('#coverKicker').textContent='Feb 14, 2026 · happening now · Tagaytay'; tocome.classList.add('on');
+      if(role==='stranger'){ $('#tcKick').textContent='Happening now · you are seeing this as a stranger'; $('#tcTitle').textContent='3:10 PM · live from the lawn'; $('#tcBody').textContent='The stream is public — watch it here. 172 captures so far from 26 phones are filling in by the minute for the 108 people holding the QR. The minutes publish here, as an edition, when the couple approves them.'; $('#tcRow').innerHTML='<span>2:38 · 41 CAPTURES</span><span>3:04 · 27 CAPTURES</span><span>GUESTS ONLY, FOR NOW</span>'; }
+      else { $('#tcKick').textContent=role==='couple'?'Happening now · your view':'Happening now · your guest view'; $('#tcTitle').textContent='3:10 PM · the recessional'; $('#tcBody').textContent=(role==='couple'?'Nothing here is public yet except the stream and the road. ':'You can see this because you hold the QR. ')+'172 captures so far from 26 phones, filed by the minute as they land. Golden hour and the reception are still ahead.'; $('#tcRow').innerHTML='<span>5:30 · RECEPTION OPENS</span><span>7:12 · FIRST DANCE</span><span>9:47 · MONEY DANCE</span>'; }
+      $('#tocome .cta').textContent='▶ Watch live'; }
+    else { badge.className='badge'; badge.textContent='Complete · published Mar 1, 2026'; $('#coverKicker').textContent='Aug 3, 2025 → Feb 14, 2026 → still going · Tagaytay'; tocome.classList.remove('on'); }
+    if(n!==2) $('#tocome .cta').textContent='🔔 Tell me when it’s live';
+    tick(); }
+  $$('.asof button[data-asof]').forEach(b=>b.addEventListener('click',()=>asof(+b.dataset.asof))); setRole('guest');
+
+  // ── host view
+  $('#hostBtn').addEventListener('click',()=>{ const on=!document.body.classList.contains('host'); document.body.classList.toggle('host',on); $('#hostBtn').setAttribute('aria-pressed',String(on)); });
+  $$('.sw[data-gate]').forEach(sw=>sw.addEventListener('click',()=>{ const on=sw.getAttribute('aria-checked')!=='true'; sw.setAttribute('aria-checked',String(on)); $('#'+sw.dataset.gate).classList.toggle('off',!on); }));
+
+  // ── entries rise in as they arrive; a minute's clock ticks up to its time
+  const seen=new WeakSet();
+  const io=new IntersectionObserver(es=>es.forEach(e=>{ if(!e.isIntersecting) return; const el=e.target; el.classList.add('in'); if(seen.has(el)||!el.dataset.t||calm()) return; seen.add(el);
+    const node=$('.stamp .t',el).firstChild, target=+el.dataset.t, from=target-38, t0=performance.now();
+    (function step(now){ const p=Math.min(1,(now-t0)/900), ease=1-Math.pow(1-p,3);
+      // the count-up never shows a WRONG time: it lands exactly, and the last frame is the truth
+      node.textContent = p>=1 ? fmt(target).t : fmt(Math.round(from+(target-from)*ease)).t;
+      if(p<1) requestAnimationFrame(step); })(t0); }),{rootMargin:'0px 0px -12% 0px'});
+  entries.forEach(e=>io.observe(e.el));
+
+  // ── plates, voices, tabs, hours
+  $$('.js-play').forEach(p=>p.addEventListener('click',e=>{ if(e.target.closest('a')) return; p.classList.toggle('on'); const b=$('.play b',p); if(b){ b.dataset.t=b.dataset.t||b.textContent; b.textContent=p.classList.contains('on')?'Playing · tap to pause':b.dataset.t; } }));
+  $('#song').addEventListener('click',()=>$('#song').classList.toggle('on'));
+  $$('.morebtn').forEach(b=>b.addEventListener('click',()=>$('#'+b.dataset.more).classList.add('open')));
+  function openPanel(id){ const b=$(`#tabs button[data-p="${id}"]`); if(!b) return; $$('#tabs button').forEach(x=>x.setAttribute('aria-pressed','false')); b.setAttribute('aria-pressed','true'); $$('.panel').forEach(p=>p.classList.toggle('on',p.id==='p-'+id)); }
+  $$('#tabs button').forEach(b=>b.addEventListener('click',()=>openPanel(b.dataset.p)));
+  function hour(h){ $$('.hours button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.h===h))); $$('#grid .plate').forEach(p=>p.classList.toggle('hide',h!=='all'&&p.dataset.h!==h)); }
+  $$('.hours button').forEach(b=>b.addEventListener('click',()=>hour(b.dataset.h)));
+  $$('a[href^="#p-"]').forEach(a=>a.addEventListener('click',e=>{ e.preventDefault(); openPanel(a.getAttribute('href').slice(3)); if(a.dataset.h) hour(a.dataset.h); goTo($('#all')); }));
+
+  // ── were you there
+  const people={'bing':{table:3,mins:[['m2','you were quoted, and 6 of the 41 photos are yours'],['m5','your table was the third loudest'],['a1','your review']]},'marco':{table:2,mins:[['r7','you answered the first question on the stream'],['m2','the living moment is from your phone'],['m3','you were quoted at the vows']]},'andrea':{table:2,mins:[['r7','the first Kwento wish was yours']]},'ramon':{table:1,mins:[['m2','you walked her in, and you were quoted'],['a2','your letter to the editor']]},'celine':{table:2,mins:[['r4','22 of the prenup shots are yours'],['m1','the suite photos are from your phone'],['m2','you were quoted'],['a2','your letter to the editor']]},'jr':{table:2,mins:[['r8','your despedida shots'],['m5','your video of Lolo Ben, and your challenge answer']]},'cora':{table:1,mins:[['m4','you were quoted at the first dance']]},'lourdes':{table:1,mins:[['m1','you pinned the sprig, and you were quoted']]},'jun':{table:3,mins:[['r7','you answered on the stream']]}};
+  // OWNER RULING 2026-09-07: the identity is the signed-in guest's own account (their Papic
+  // link). Nothing is typed; the demo select stands in for the session only.
+  $('#youGo').addEventListener('click',()=>{ const sel=$('#youWho'); const key=sel.value; const yo=$('#youOut'), cw=$('#cardwrap'); $$('.hl').forEach(x=>x.classList.remove('hl')); const p=people[key]; const nice=sel.options[sel.selectedIndex].text;
+    yo.innerHTML=`You sat at <b>T${p.table}</b>. You’re in ${p.mins.length} moment${p.mins.length>1?'s':''}: `+p.mins.map(m=>{ const e=entries.find(x=>x.el.id===m[0]); return `<a href="#${m[0]}"><b>${e.stamp}</b></a> ${m[1]}`; }).join(' · '); yo.classList.add('on');
+    // the card: first name · the minutes · the table (reception only) · the couple · the palette. Nothing else.
+    $('#c9name').textContent=nice; $('#c9mins').innerHTML=p.mins.map(m=>{ const e=entries.find(x=>x.el.id===m[0]); return `<span><b>${e.stamp}</b>${e.label}</span>`; }).join('')+`<span><b>T${p.table}</b>your table, at the reception</span>`;
+    const sw=(PALETTES[$('#themeCtl button[aria-pressed="true"]').dataset.th]||PALETTES.mj).sw; ['--sw0','--sw1','--sw2','--sw3','--sw4'].forEach((v,i)=>$('#card9').style.setProperty(v,sw[i])); cw.hidden=false;
+    p.mins.forEach(m=>$('#'+m[0]).classList.add('hl')); myTable=p.table; big.forEach(x=>x.classList.toggle('me',+x.dataset.n===p.table)); lensTbls.forEach(x=>x.classList.toggle('me',+x.dataset.n===p.table)); seatOwn(); asof(3); goTo($('#'+p.mins[0][0])); });
+  $('#c9save').addEventListener('click',()=>{ const b=$('#c9save'); b.textContent='Saved · 1080×1920'; setTimeout(()=>b.textContent='Save the card',1800); });
+
+  // ── find in this day: one search over every layer the CURRENT viewer can see.
+  // The index is rebuilt from the DOM on each keystroke, so hidden entries (the
+  // as-of state) and role-gated blocks never enter it — a stranger cannot search
+  // what a stranger cannot read. Names of guests appear only where they already
+  // appear on the page (consented bylines); the share-card lookup is not indexed.
+  const findBtn=$('#findBtn'), findRow=$('#findrow'), findQ=$('#findQ'), findRes=$('#findres'); let hitMap={};
+  const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const rx=t=>new RegExp('('+t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','ig');
+  const mark=(s,toks)=>toks.reduce((acc,t)=>acc.replace(rx(t),'<mark>$1</mark>'),s);
+  const snip=(s,toks)=>{ s=s.replace(/\s+/g,' ').trim(); const i=Math.min(...toks.map(t=>{ const k=s.toLowerCase().indexOf(t); return k<0?1e9:k; })); if(i===1e9||i<40) return s.slice(0,120)+(s.length>120?'…':''); return '…'+s.slice(i-40,i+80)+'…'; };
+  function parseTime(q){ const m=q.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm|umaga|hapon|gabi)?$/i); if(!m) return null; let h=+m[1], mm=m[2]?+m[2]:0; const ap=(m[3]||'').toLowerCase(); if(h>12||mm>59) return null; if(ap==='pm'||ap==='hapon'||ap==='gabi'){ if(h<12) h+=12; } else if(ap==='am'||ap==='umaga'){ if(h===12) h=0; } else if(h>=1&&h<=9) h+=12; return h*60+mm; }
+  function buildIndex(){ const items=[]; const txt=el=>el?el.textContent.replace(/\s+/g,' ').trim():'';
+    entries.forEach(e=>{ if(e.el.classList.contains('hidden')) return; const stamp=e.stamp+(e.ap&&e.t?' '+e.ap:'');
+      items.push({type:'Minutes',stamp,label:e.label,text:(e.el.dataset.q||'')+' '+txt($('.prose',e.el)),el:e.el,entry:e.el});
+      $$('.voice',e.el).forEach(v=>items.push({type:'Voices',stamp,label:txt($('small',v)),text:v.firstChild?v.firstChild.textContent:txt(v),el:v,entry:e.el,open:v.closest('.layer')}));
+      $$('.chip',e.el).forEach(c=>items.push({type:'Vendors & services',stamp,label:txt(c),text:'',el:c,entry:e.el}));
+      $$('.asked .qq',e.el).forEach(q=>items.push({type:'Questions',stamp,label:txt(q),text:'',el:q,entry:e.el})); });
+    if(asofN===3){ $$('#grid .plate').forEach(p=>items.push({type:'Captures',stamp:txt($('.tc',p)),label:txt($('.cap',p)),text:'',el:p,panel:'captures',hour:p.dataset.h}));
+      $$('#p-letters .letter').forEach(l=>items.push({type:'Letters',stamp:txt($('small a',l)),label:txt($('h4',l)),text:txt($('.prose',l)),el:l,panel:'letters'}));
+      $$('#p-team .v').forEach(v=>items.push({type:'Vendors & services',stamp:'TEAM',label:txt($('b',v)),text:txt($('.cat',v))+' '+txt($('q',v))+' '+txt($('.note',v)),el:v,panel:'team'})); }
+    return items; }
+  function clearFind(){ findQ.value=''; findRes.hidden=true; findRes.innerHTML=''; hitMap={}; $$('.q-dim').forEach(x=>x.classList.remove('q-dim')); }
+  function runFind(){ const q=findQ.value.trim().toLowerCase(); $$('.q-dim').forEach(x=>x.classList.remove('q-dim')); hitMap={}; if(q.length<2){ findRes.hidden=true; findRes.innerHTML=''; return; }
+    const toks=q.split(/\s+/).filter(Boolean); const items=buildIndex();
+    const hits=items.filter(it=>{ const hay=(it.label+' '+it.text+' '+it.stamp).toLowerCase(); return toks.every(t=>hay.includes(t)); });
+    let html='<div class="wrap">', n=0; const t=parseTime(q);
+    if(t!=null&&t>=T0&&t<=T1){ const near=M.reduce((p,c)=>Math.abs(c.t-t)<Math.abs(p.t-t)?c:p); const f=fmt(t); html+=`<div class="grp">Jump to</div><button class="hit" data-time="${t}"><b>${f.t}</b><span>${f.t} ${f.ap} — open that minute</span><small>nearest written moment: ${esc(near.label)} at ${near.stamp} ${near.ap}</small></button>`; n++; }
+    ['Minutes','Voices','Captures','Vendors & services','Letters','Questions'].forEach(g=>{ const hs=hits.filter(h=>h.type===g); if(!hs.length) return; html+=`<div class="grp">${g} · ${hs.length}</div>`;
+      hs.slice(0,8).forEach(h=>{ n++; const id='h'+n; hitMap[id]=h; html+=`<button class="hit" data-hit="${id}"><b>${esc(h.stamp)}</b><span>${mark(esc(h.label),toks)}${h.text?`<small>${mark(esc(snip(h.text,toks)),toks)}</small>`:''}</span></button>`; });
+      if(hs.length>8) html+=`<div class="none">+${hs.length-8} more in ${g.toLowerCase()} — add a word to narrow it</div>`; });
+    if(!n) html+=`<div class="none">Nothing in this day says “${esc(q)}”. Try a time (7:12), a first name from the page, or a vendor.</div>`;
+    findRes.innerHTML=html+'</div>'; findRes.hidden=false;
+    const hitEntries=new Set(hits.map(h=>h.entry).filter(Boolean)); if(hits.length) entries.forEach(e=>{ if(!e.el.classList.contains('hidden')) e.el.classList.toggle('q-dim',!hitEntries.has(e.el)); }); }
+  findBtn.addEventListener('click',()=>{ const on=!findRow.classList.contains('on'); findRow.classList.toggle('on',on); findBtn.setAttribute('aria-expanded',String(on)); if(on) findQ.focus(); else clearFind(); });
+  $('#findX').addEventListener('click',()=>{ clearFind(); findQ.focus(); });
+  findQ.addEventListener('input',runFind);
+  findQ.addEventListener('keydown',e=>{ if(e.key==='Escape'){ clearFind(); findRow.classList.remove('on'); findBtn.setAttribute('aria-expanded','false'); } });
+  findRes.addEventListener('click',e=>{ const b=e.target.closest('.hit'); if(!b) return;
+    if(b.dataset.time){ const t=+b.dataset.time; const bin=bins.filter(x=>x.kind==='day').reduce((p,c)=>Math.abs(c.m-t)<Math.abs(p.m-t)?c:p); openSheet(bin); return; }
+    const h=hitMap[b.dataset.hit]; if(!h) return; if(h.panel){ openPanel(h.panel); if(h.hour) hour(h.hour); } if(h.open) h.open.classList.add('open');
+    goTo(h.entry||h.el); $$('.hl').forEach(x=>x.classList.remove('hl')); h.el.classList.add('hl'); setTimeout(()=>h.el.classList.remove('hl'),3500); });
+  $$('#roleCtl button,.asof button[data-asof]').forEach(b=>b.addEventListener('click',()=>{ if(findQ.value) runFind(); }));
+
+  // ── relive (the day, then the road's two live stops)
+  const R={el:$('#relive'),prog:$('#rProg'),clock:$('#rClock'),tc:$('#rTc'),cap:$('#rCap'),title:$('#rTitle'),voice:$('#rVoice'),chips:$('#rChips'),plate:$('#rPlate')};
+  const slides=['r4','r7','m1','m2','m3','m4','m5'].map(id=>{ const e=entries.find(x=>x.el.id===id); const plate=$('.media .plate',e.el)||$('.plate',e.el); const v=$('.layer .voice',e.el); return {stamp:e.stamp,ap:e.ap,title:e.label,cap:$('.cap',plate)?.textContent||'',bg:plate.getAttribute('style')||'',voice:v?v.innerHTML:'',chips:$('.chips',e.el)?.innerHTML||''}; });
+  R.prog.innerHTML=slides.map(()=>'<i></i>').join(''); const segs=$$('#rProg i');
+  let cur=0,timer=0,start=0,DUR=6000;
+  function show(k){ cur=(k+slides.length)%slides.length; const s=slides[cur]; R.plate.classList.remove('sw'); void R.plate.offsetWidth; R.plate.classList.add('sw'); R.clock.innerHTML=`${s.stamp}<small>${s.ap}</small>`; R.tc.textContent=s.stamp; R.cap.textContent=s.cap; R.title.textContent=s.title; R.voice.innerHTML=s.voice; R.chips.innerHTML=s.chips; R.plate.setAttribute('style','position:relative;'+s.bg); segs.forEach((p,i)=>{ p.classList.toggle('done',i<cur); p.classList.toggle('now',i===cur); p.style.setProperty('--p','0%'); }); start=performance.now(); }
+  function loop(now){ if(!R.el.classList.contains('on')) return; const p=Math.min(1,(now-start)/DUR); segs[cur].style.setProperty('--p',(p*100)+'%'); if(p>=1){ if(cur===slides.length-1){ close(); return; } show(cur+1); } timer=requestAnimationFrame(loop); }
+  let reliveReturn=null;
+  function open(){ reliveReturn=document.activeElement; R.el.classList.add('on'); document.body.style.overflow='hidden'; document.body.style.position='fixed'; document.body.style.width='100%'; show(0); $('#rClose').focus(); if(!calm()) timer=requestAnimationFrame(loop); }
+  function close(){ if(!R.el.classList.contains('on')) return; R.el.classList.remove('on'); document.body.style.overflow=''; document.body.style.position=''; document.body.style.width=''; cancelAnimationFrame(timer); if(reliveReturn&&reliveReturn.focus) reliveReturn.focus(); reliveReturn=null; }
+  $('#reliveBtn').addEventListener('click',open); $('#rClose').addEventListener('click',close); $('#rNext').addEventListener('click',()=>show(cur+1)); $('#rPrev').addEventListener('click',()=>show(cur-1));
+  addEventListener('keydown',e=>{ if(e.key==='Escape'){ close(); closeSheet(); } if(!R.el.classList.contains('on')) return; if(e.key==='ArrowRight') show(cur+1); if(e.key==='ArrowLeft') show(cur-1); });
+  // share + print menus (the shipped pieces behind them: share-buttons.tsx, /api/og/…?format=story, /[slug]/print A3)
+  [['shareBtn','shareMenu'],['printBtn','printMenu']].forEach(([b,m])=>{ const btn=$('#'+b), menu=$('#'+m); btn.addEventListener('click',e=>{ e.stopPropagation(); const on=menu.hidden; $$('.menu').forEach(x=>x.hidden=true); $$('.menuwrap button[aria-expanded]').forEach(x=>x.setAttribute('aria-expanded','false')); menu.hidden=!on; btn.setAttribute('aria-expanded',String(on)); }); });
+  document.addEventListener('click',()=>{ $$('.menu').forEach(x=>x.hidden=true); $$('.menuwrap button[aria-expanded]').forEach(x=>x.setAttribute('aria-expanded','false')); });
+  $$('.menu').forEach(m=>m.addEventListener('click',e=>{ if(e.target.closest('a')) e.preventDefault(); e.stopPropagation(); }));
+  $('#copyLink').addEventListener('click',()=>{ const b=$('#copyLink'); b.innerHTML='<i>✓</i>Link copied'; setTimeout(()=>b.innerHTML='<i>⎘</i>Copy link',1600); });
+})();
+</script>

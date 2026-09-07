@@ -1,0 +1,796 @@
+<title>The Story Maker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300;1,6..72,400&family=Archivo:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --paper:#F7F6F3; --card:#FFFFFF; --ink:#1B1A17; --mute:#6A655C; --faint:#9B968D;
+    --line:rgba(27,26,23,.13); --line2:rgba(27,26,23,.26); --sunk:#EFEDE7;
+    --gold:#C5A059; --gold-ink:#7A5A16; --gold-soft:#F5EBD6;
+    --sage:#4F7A5A; --sage-soft:#E4EFE6; --red:#B2452F; --red-soft:#F7E7E2; --blue:#3B4E67;
+    --f-time:'Big Shoulders Display','Arial Narrow',Impact,sans-serif;
+    --f-prose:'Newsreader',Georgia,serif;
+    --f-ui:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+    --paper:#17181A; --card:#1F2124; --ink:#F3F1EC; --mute:#A9A49B; --faint:#7B766D;
+    --line:rgba(243,241,236,.14); --line2:rgba(243,241,236,.28); --sunk:#141517;
+    --gold:#E0CCA0; --gold-ink:#E8D5AA; --gold-soft:#3A3426;
+    --sage:#8FC49C; --sage-soft:#243026; --red:#E08B76; --red-soft:#33211C; --blue:#A9BAD3;
+    color-scheme:dark;}}
+  :root[data-theme="dark"]{
+    --paper:#17181A; --card:#1F2124; --ink:#F3F1EC; --mute:#A9A49B; --faint:#7B766D;
+    --line:rgba(243,241,236,.14); --line2:rgba(243,241,236,.28); --sunk:#141517;
+    --gold:#E0CCA0; --gold-ink:#E8D5AA; --gold-soft:#3A3426;
+    --sage:#8FC49C; --sage-soft:#243026; --red:#E08B76; --red-soft:#33211C; --blue:#A9BAD3;
+    color-scheme:dark;}
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font:14.5px/1.5 var(--f-ui);-webkit-font-smoothing:antialiased}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+  button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+  a{color:var(--blue)}
+  :focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
+  h1,h2,h3,h4{margin:0;text-wrap:balance} p{margin:0}
+  .ui{font:600 10.5px var(--f-ui);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .num{font-family:var(--f-time);font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+
+  /* ══ SHELL ══ */
+  .top{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--paper) 94%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topin{max-width:1240px;margin:0 auto;padding:11px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:10px;min-width:0}
+  .brand .mg{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--gold);display:grid;place-items:center;font:italic 400 11px var(--f-prose);flex:none}
+  .brand b{display:block;font:800 17px/1 var(--f-time);letter-spacing:.02em;text-transform:uppercase}
+  .brand small{display:block;font-size:11.5px;color:var(--mute);margin-top:2px}
+  .top .spacer{flex:1}
+  .state{display:inline-flex;align-items:center;gap:7px;font:600 11px var(--f-ui);letter-spacing:.1em;text-transform:uppercase;padding:6px 10px;border-radius:999px;border:1px solid var(--line2);color:var(--mute);white-space:nowrap}
+  .state i{width:7px;height:7px;border-radius:50%;background:var(--faint);font-style:normal}
+  .state.draft i{background:var(--gold)} .state.guests i{background:var(--blue)} .state.live i{background:var(--sage)}
+  .btn{min-height:40px;display:inline-flex;align-items:center;gap:7px;padding:0 14px;border-radius:9px;border:1px solid var(--line2);font:600 13px var(--f-ui);white-space:nowrap}
+  .btn.pri{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .btn.ghost{border-color:transparent;color:var(--mute)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+
+  .wrap{max-width:1240px;margin:0 auto;padding:0 16px 120px;display:grid;grid-template-columns:1fr;gap:20px}
+  @media(min-width:1000px){.wrap{grid-template-columns:214px minmax(0,1fr);gap:28px;align-items:start}}
+
+  /* rail */
+  .rail{display:none}
+  @media(min-width:1000px){.rail{display:block;position:sticky;top:76px;padding-top:22px}}
+  .rail nav{display:flex;flex-direction:column;gap:2px}
+  .rail nav button{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;padding:10px 11px;border-radius:8px;font:600 13.5px var(--f-ui);color:var(--mute);text-align:left;border-left:2px solid transparent;min-height:44px}
+  .rail nav button .c{font:800 12px var(--f-time);letter-spacing:.04em;padding:2px 7px;border-radius:999px;background:var(--sunk);color:var(--mute)}
+  .rail nav button.on{background:var(--card);color:var(--ink);border-left-color:var(--gold);box-shadow:0 1px 2px rgba(0,0,0,.04)}
+  .rail nav button .c.hot{background:var(--gold);color:#1B1A17}
+  .rail .done{margin-top:18px;padding:12px;border:1px dashed var(--line2);border-radius:10px;font-size:12.5px;color:var(--mute)}
+  .rail .done b{display:block;color:var(--ink);font:800 26px/1 var(--f-time);margin-bottom:4px}
+  .bar{height:5px;border-radius:3px;background:var(--sunk);overflow:hidden;margin-top:8px}
+  .bar i{display:block;height:100%;background:var(--gold);width:0;transition:width .4s}
+
+  /* mobile tabs */
+  .mtabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:12px 0 2px;position:sticky;top:56px;z-index:20;background:var(--paper)}
+  .mtabs::-webkit-scrollbar{display:none}
+  @media(min-width:1000px){.mtabs{display:none}}
+  .mtabs button{flex:none;min-height:40px;padding:0 12px;border-radius:999px;border:1px solid var(--line2);font:600 12.5px var(--f-ui);color:var(--mute)}
+  .mtabs button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+  /* ══ PANELS ══ */
+  .panel{display:none;padding-top:22px} .panel.on{display:block}
+  .phead{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px}
+  .phead h2{font:800 clamp(26px,4.4vw,38px)/.95 var(--f-time);text-transform:uppercase;letter-spacing:-.01em}
+  .phead p{font-size:13.5px;color:var(--mute);margin-top:5px;max-width:62ch}
+
+  /* ══ THE DESK — one queue for three sources ══ */
+  .filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+  .filters button{min-height:40px;padding:0 12px;border-radius:999px;border:1px solid var(--line2);font:600 12.5px var(--f-ui);color:var(--mute);display:inline-flex;align-items:center;gap:7px}
+  .filters button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .filters button .c{font:800 11px var(--f-time);opacity:.75}
+  .items{display:grid;gap:10px}
+  .item{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;grid-template-columns:1fr;gap:12px}
+  @media(min-width:640px){.item{grid-template-columns:96px 1fr auto}}
+  .item.gone{display:none}
+  .item .thumb{width:96px;height:96px;border-radius:9px;position:relative;overflow:hidden;background:linear-gradient(160deg,#8C9A80,#3E4A5C);color:#fff;display:none}
+  @media(min-width:640px){.item .thumb{display:block}}
+  .item .thumb.p2{background:linear-gradient(160deg,#E9D6B4,#6B4E3D)} .item .thumb.p3{background:linear-gradient(160deg,#2A2233,#D9A441)}
+  .item .thumb.p4{background:linear-gradient(160deg,#3E4A5C,#8C9A80)} .item .thumb.p5{background:linear-gradient(160deg,#EFE6D4,#C5A059)}
+  .item .thumb.txt{background:var(--sunk);color:var(--faint);display:grid;place-items:center;font:800 26px var(--f-time)}
+  .item .thumb span{position:absolute;left:6px;bottom:5px;font:700 9px var(--f-ui);letter-spacing:.1em;text-transform:uppercase;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+  .item .body{min-width:0}
+  .srcline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+  .src{display:inline-flex;align-items:center;gap:5px;font:700 9.5px var(--f-ui);letter-spacing:.12em;text-transform:uppercase;padding:3px 7px;border-radius:4px}
+  .src.made{background:var(--gold-soft);color:var(--gold-ink)}
+  .src.guest{background:var(--sage-soft);color:var(--sage)}
+  .src.vendor{background:rgba(59,78,103,.12);color:var(--blue)}
+  .srcline .who{font-size:12.5px;color:var(--mute)}
+  .srcline .lands{font:600 10.5px var(--f-ui);letter-spacing:.06em;color:var(--faint);text-transform:uppercase}
+  .item h4{font:800 17px/1.15 var(--f-time);text-transform:uppercase;letter-spacing:.01em}
+  .item .q{font-family:var(--f-prose);font-size:16.5px;line-height:1.4;margin-top:5px;color:color-mix(in srgb,var(--ink) 88%,transparent)}
+  .item .q.it{font-style:italic}
+  .item textarea{display:none;width:100%;margin-top:8px;min-height:88px;border:1px solid var(--line2);border-radius:8px;background:var(--paper);color:var(--ink);padding:9px 11px;font:inherit;font-family:var(--f-prose);font-size:16px;line-height:1.45;resize:vertical}
+  .item.editing textarea{display:block} .item.editing .q{display:none}
+  .flag{margin-top:8px;display:inline-flex;align-items:flex-start;gap:7px;font-size:12.5px;color:var(--mute);background:var(--sunk);border-radius:8px;padding:8px 10px}
+  .flag b{color:var(--ink)}
+  .acts{display:flex;gap:6px;align-items:flex-start;flex-wrap:wrap}
+  @media(min-width:640px){.acts{flex-direction:column;width:118px}}
+  .acts button{width:100%;min-height:40px;justify-content:center;border-radius:8px;border:1px solid var(--line2);font:600 12.5px var(--f-ui);display:inline-flex;align-items:center;gap:6px;padding:0 10px;flex:1}
+  @media(min-width:640px){.acts button{flex:none}}
+  .acts .ok{background:var(--sage);color:#fff;border-color:var(--sage)}
+  .acts .no{color:var(--red);border-color:color-mix(in srgb,var(--red) 40%,transparent)}
+  .verdict{display:none;align-items:center;gap:7px;font:600 12px var(--f-ui);padding:9px 11px;border-radius:8px}
+  .item.acc .verdict.a,.item.rej .verdict.r{display:inline-flex}
+  .item.acc .acts .ok,.item.acc .acts .no,.item.acc .acts .ed,.item.rej .acts .ok,.item.rej .acts .no,.item.rej .acts .ed{display:none}
+  .verdict.a{background:var(--sage-soft);color:var(--sage)} .verdict.r{background:var(--red-soft);color:var(--red)}
+  .verdict button{width:auto;min-height:0;border:0;padding:0;text-decoration:underline;font:inherit;opacity:.8}
+  .item.acc{border-color:color-mix(in srgb,var(--sage) 45%,transparent)}
+  .item.rej{opacity:.55}
+  .empty{padding:28px 16px;text-align:center;font-family:var(--f-prose);font-style:italic;font-size:18px;color:var(--mute);border:1px dashed var(--line2);border-radius:12px}
+
+  /* ══ THE STORY — sections ══ */
+  .secs{display:grid;gap:8px}
+  .sec{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:12px 14px;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
+  .sec .grip{color:var(--faint);cursor:grab;font-size:15px;line-height:1;letter-spacing:-2px}
+  .sec b{font:800 16px/1 var(--f-time);text-transform:uppercase;letter-spacing:.02em}
+  .sec small{display:block;font-size:12.5px;color:var(--mute);margin-top:3px}
+  .sec .cnt{font:600 11px var(--f-ui);color:var(--faint)}
+  .sec.off{opacity:.5} .sec.locked{background:var(--sunk)}
+  .sec .lock{font:600 10px var(--f-ui);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .sw{position:relative;width:38px;height:22px;border-radius:12px;background:var(--line2);flex:none;transition:background .2s;margin:11px 0}
+  .sw::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.28);transition:transform .2s}
+  .sw[aria-checked="true"]{background:var(--sage)} .sw[aria-checked="true"]::after{transform:translateX(16px)}
+
+  /* ══ THEME ══ */
+  .modes{display:grid;gap:10px;margin-bottom:18px} @media(min-width:760px){.modes{grid-template-columns:repeat(3,1fr)}}
+  .mode{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:left;display:block;min-height:0}
+  .mode.on{border-color:var(--gold);box-shadow:inset 3px 0 0 var(--gold)}
+  .mode b{display:block;font:800 17px/1 var(--f-time);text-transform:uppercase;letter-spacing:.02em}
+  .mode small{display:block;margin-top:5px;font-size:12.5px;color:var(--mute);line-height:1.45}
+  /* ONE SWATCH, THE SAME EVERYWHERE — the shipped mood-board grammar
+     (swatch-popover.tsx): tap the chip, get a native colour input, a hex field,
+     the colour's name, and search-by-name. Not a second picker. */
+  .swatches{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:flex-start}
+  .sw5{width:84px;position:relative}
+  .sw5 .chip{display:block;width:100%;height:60px;border-radius:9px;border:1px solid rgba(0,0,0,.12);padding:0;cursor:default}
+  .own .sw5 .chip{cursor:pointer}
+  .own .sw5 .chip:hover{box-shadow:0 0 0 3px var(--gold-soft)}
+  .sw5[data-open="1"] .chip{box-shadow:0 0 0 3px var(--gold)}
+  .sw5 label{display:block;margin-top:6px;font:600 9px var(--f-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--faint);text-align:center}
+  .sw5 .nm{display:block;margin-top:2px;font:500 10.5px var(--f-ui);color:var(--mute);text-align:center;line-height:1.25;min-height:26px}
+  .pop{display:none;position:absolute;left:0;top:calc(100% + 6px);z-index:25;width:268px;background:var(--card);border:1px solid var(--line2);border-radius:12px;box-shadow:0 18px 40px -14px rgba(0,0,0,.35);padding:12px;text-align:left}
+  .sw5[data-open="1"] .pop{display:block}
+  @media(max-width:520px){.pop{left:auto;right:0}}
+  .pop .row{display:flex;align-items:center;gap:8px}
+  .pop input[type=color]{width:38px;height:38px;flex:none;padding:2px;border:1px solid var(--line2);border-radius:8px;background:var(--paper);cursor:pointer}
+  .pop input[type=text]{flex:1;min-width:0;height:38px;border:1px solid var(--line2);border-radius:8px;background:var(--paper);color:var(--ink);padding:0 9px;font:500 12px var(--f-ui);text-transform:uppercase}
+  .pop .cname{margin-top:8px;font-size:12.5px;color:var(--mute)}
+  .pop .lbl{display:block;margin:12px 0 5px;font:600 9.5px var(--f-ui);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .pop .q{width:100%;height:36px;border:1px solid var(--line2);border-radius:8px;background:var(--paper);color:var(--ink);padding:0 9px;font:400 12.5px var(--f-ui)}
+  .pop .res{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;max-height:104px;overflow:auto}
+  .pop .res button{display:inline-flex;align-items:center;gap:6px;padding:5px 8px;border:1px solid var(--line);border-radius:999px;font-size:11.5px;color:var(--ink);min-height:32px}
+  .pop .res button i{width:13px;height:13px;border-radius:50%;border:1px solid rgba(0,0,0,.15);flex:none}
+  .pop .board{display:flex;gap:6px;margin-top:7px}
+  .pop .board button{width:30px;height:30px;border-radius:7px;border:1px solid rgba(0,0,0,.15);padding:0}
+  .pop .close{position:absolute;right:9px;top:9px;width:30px;height:30px;border-radius:7px;color:var(--faint);display:grid;place-items:center;font-size:15px;line-height:1}
+  .pop .none{margin-top:8px;font-size:12px;color:var(--faint);font-style:italic}
+  .lockmsg{margin-top:10px;font-size:12.5px;color:var(--mute)}
+  .lockmsg button{text-decoration:underline;color:var(--blue);font-weight:600}
+  .own .lockmsg{display:none}
+  .stages{display:flex;gap:0;border-radius:10px;overflow:hidden;margin-top:16px;border:1px solid var(--line)}
+  .stages div{flex:1;padding:16px 8px;text-align:center;font:700 9.5px var(--f-ui);letter-spacing:.1em;text-transform:uppercase;min-width:0}
+  .themenote{margin-top:14px;font-size:12.5px;color:var(--mute);max-width:66ch;line-height:1.55}
+
+  /* ══ COVER ══ */
+  .covers{display:grid;grid-template-columns:repeat(2,1fr);gap:9px} @media(min-width:700px){.covers{grid-template-columns:repeat(4,1fr)}}
+  .cov{position:relative;aspect-ratio:4/3;border-radius:10px;overflow:hidden;border:2px solid transparent;padding:0;color:#fff}
+  .cov.on{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft)}
+  .cov .lb{position:absolute;left:8px;bottom:7px;right:8px;font:700 9.5px var(--f-ui);letter-spacing:.1em;text-transform:uppercase;text-align:left;text-shadow:0 1px 8px rgba(0,0,0,.7)}
+  .cov .src2{position:absolute;right:7px;top:7px;font:700 8.5px var(--f-ui);letter-spacing:.08em;text-transform:uppercase;background:rgba(0,0,0,.5);padding:2px 6px;border-radius:4px;backdrop-filter:blur(3px)}
+  .cov.up{background:var(--sunk);color:var(--mute);display:grid;place-items:center;border:2px dashed var(--line2)}
+  .cov.up span{font:600 12px var(--f-ui)}
+  .previews{display:grid;gap:14px;margin-top:20px} @media(min-width:860px){.previews{grid-template-columns:1.15fr .85fr}}
+  .pv{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px}
+  .pv .ui{margin-bottom:9px}
+  .mast{border-radius:9px;overflow:hidden;position:relative;aspect-ratio:16/9;display:flex;flex-direction:column;justify-content:flex-end;color:#fff}
+  .mast .g{position:absolute;inset:0;background:linear-gradient(to top,rgba(15,12,9,.82),rgba(15,12,9,.15) 62%,transparent)}
+  .mast .t{position:relative;padding:14px}
+  .mast .t .k{font:700 9px var(--f-ui);letter-spacing:.16em;text-transform:uppercase;opacity:.9}
+  .mast .t h3{font:900 clamp(22px,3.6vw,34px)/.9 var(--f-time);text-transform:uppercase;margin-top:5px}
+  .mast .t p{font:600 10px var(--f-ui);letter-spacing:.1em;text-transform:uppercase;opacity:.85;margin-top:6px}
+  .shelf{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .shelfcard{border-radius:9px;overflow:hidden;position:relative;aspect-ratio:3/4;color:#fff}
+  .shelfcard.dim{background:var(--sunk)}
+  .shelfcard .g{position:absolute;inset:0;background:linear-gradient(to top,rgba(15,12,9,.8),transparent 60%)}
+  .shelfcard .t{position:absolute;left:9px;right:9px;bottom:8px}
+  .shelfcard .t b{font:400 italic 15px/1.1 var(--f-prose);display:block}
+  .shelfcard .t small{display:block;margin-top:4px;font:600 8.5px var(--f-ui);letter-spacing:.13em;text-transform:uppercase;opacity:.8}
+  .shelfcard .tag{position:absolute;left:8px;top:8px;font:700 8px var(--f-ui);letter-spacing:.1em;text-transform:uppercase;background:rgba(255,255,255,.9);color:#1B1A17;padding:2px 6px;border-radius:99px}
+  .og{border-radius:9px;overflow:hidden;position:relative;aspect-ratio:1200/630;color:#fff;display:flex;align-items:flex-end}
+  .og .g{position:absolute;inset:0;background:linear-gradient(105deg,rgba(15,12,9,.85),transparent 70%)}
+  .og .t{position:relative;padding:13px}
+  .og .t b{display:block;font:900 22px/.9 var(--f-time);text-transform:uppercase}
+  .og .t small{display:block;margin-top:5px;font:600 9px var(--f-ui);letter-spacing:.12em;text-transform:uppercase;opacity:.85}
+
+  /* ══ WHAT'S NEXT ══ */
+  .nx{display:grid;gap:10px} @media(min-width:800px){.nx{grid-template-columns:1fr 1fr}}
+  .cand{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px;text-align:left;display:block;position:relative}
+  .cand.on{border-color:var(--gold);box-shadow:inset 3px 0 0 var(--gold)}
+  .cand .ui{margin-bottom:7px}
+  .cand b{display:block;font:800 21px/1 var(--f-time);text-transform:uppercase;letter-spacing:.02em}
+  .cand .when{display:block;margin-top:7px;font:800 13px var(--f-time);letter-spacing:.05em;color:var(--gold-ink)}
+  .cand p{font-size:12.5px;color:var(--mute);margin-top:8px;line-height:1.5}
+  .cand .derived{display:inline-flex;align-items:center;gap:5px;margin-top:10px;font:600 9.5px var(--f-ui);letter-spacing:.1em;text-transform:uppercase;color:var(--faint);background:var(--sunk);padding:3px 7px;border-radius:4px}
+  .kindrow{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+  .kindrow button{min-height:44px;padding:0 13px;border-radius:999px;border:1px solid var(--line2);font:600 12.5px var(--f-ui);color:var(--mute)}
+  .kindrow button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .needs{margin-top:10px;font-size:12.5px;color:var(--mute);min-height:34px;line-height:1.5}
+  .carry{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px}
+  .carry ul{margin:9px 0 0;padding-left:18px;font-size:13px;color:var(--mute);line-height:1.75}
+  .carry ul b{color:var(--ink)}
+  .bcpv{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px}
+  .bc{position:relative;margin-top:10px;padding:20px 18px;border:2px solid var(--ink);border-radius:14px;overflow:hidden}
+  .bc .ghost{position:absolute;right:-4px;top:-24px;font:900 120px/1 var(--f-time);opacity:.06;pointer-events:none}
+  .bc .v{font:700 10px var(--f-ui);letter-spacing:.18em;text-transform:uppercase;color:var(--mute)}
+  .bc h3{font:900 clamp(26px,4.6vw,40px)/.9 var(--f-time);text-transform:uppercase;margin-top:7px}
+  .bc .w{margin-top:9px;font:800 17px var(--f-time);letter-spacing:.04em}
+  .bc .w small{font:600 10px var(--f-ui);letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin-left:8px}
+  .bc .prev{display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:7px 11px;border-radius:8px;background:var(--sunk);font:600 11px var(--f-ui);color:var(--mute)}
+  .bc .prev b{font:800 12px var(--f-time);letter-spacing:.06em;color:var(--ink)}
+  .bc.quiet{border-style:dashed;border-color:var(--line2)}
+  .bc.quiet h3{color:var(--mute)}
+  .nxacts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+
+  /* ══ PUBLISH ══ */
+  .steps{display:grid;gap:10px} @media(min-width:820px){.steps{grid-template-columns:repeat(3,1fr)}}
+  .step{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px;text-align:left;display:block}
+  .step.on{border-color:var(--ink);box-shadow:inset 3px 0 0 var(--ink)}
+  .step .ui{margin-bottom:7px}
+  .step b{display:block;font:800 19px/1 var(--f-time);text-transform:uppercase;letter-spacing:.02em}
+  .step p{font-size:12.5px;color:var(--mute);margin-top:7px;line-height:1.5}
+  .step .who2{margin-top:10px;font:600 11px var(--f-ui);color:var(--ink)}
+  .consent{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px}
+  .consent label{display:grid;grid-template-columns:auto 1fr;gap:11px;align-items:start;font-size:13.5px;line-height:1.5;cursor:pointer}
+  .consent input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--sage)}
+  .consent .fine{margin-top:11px;font-size:12px;color:var(--mute);line-height:1.55;padding-left:31px}
+  .lastword{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px}
+  .lastword textarea{width:100%;margin-top:9px;min-height:76px;border:1px solid var(--line2);border-radius:8px;background:var(--paper);color:var(--ink);padding:10px 12px;font-family:var(--f-prose);font-size:16.5px;line-height:1.45;resize:vertical}
+
+  /* ══ FOOT ══ */
+  .foot{position:fixed;left:0;right:0;bottom:0;z-index:40;background:color-mix(in srgb,var(--paper) 95%,transparent);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom))}
+  .footin{max-width:1240px;margin:0 auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .footin .s{font-size:12.5px;color:var(--mute);flex:1;min-width:180px}
+  .footin .s b{color:var(--ink)}
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:78px;z-index:50;background:var(--ink);color:var(--paper);font:600 12.5px var(--f-ui);padding:9px 14px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .25s}
+  .toast.on{opacity:1}
+</style>
+
+<header class="top">
+  <div class="topin">
+    <div class="brand"><span class="mg">M&amp;J</span><span><b>Story Maker</b><small>Maria &amp; Juan · Feb 14, 2026</small></span></div>
+    <span class="spacer"></span>
+    <span class="state draft" id="stateChip"><i></i>Draft</span>
+    <button class="btn" id="previewBtn">Preview the story</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <aside class="rail">
+    <nav id="rail">
+      <button class="on" data-p="desk">The desk <span class="c hot" id="cDesk">9</span></button>
+      <button data-p="story">The story <span class="c" id="cStory">9/12</span></button>
+      <button data-p="theme">Theme <span class="c">Auto</span></button>
+      <button data-p="cover">Cover <span class="c" id="cCover">1</span></button>
+      <button data-p="next">What’s next <span class="c" id="cNext">Optional</span></button>
+      <button data-p="publish">Publish <span class="c">Draft</span></button>
+    </nav>
+    <div class="done"><b id="pctN">0%</b>of the desk decided<div class="bar"><i id="pctBar"></i></div>
+      <p style="margin-top:9px">Nothing goes into the story until you say so.</p></div>
+  </aside>
+
+  <main>
+    <div class="mtabs" id="mtabs">
+      <button class="on" data-p="desk">The desk <span id="cDeskM">9</span></button>
+      <button data-p="story">The story</button><button data-p="theme">Theme</button>
+      <button data-p="cover">Cover</button><button data-p="next">What’s next</button><button data-p="publish">Publish</button>
+    </div>
+
+    <!-- ═══════════ THE DESK ═══════════ -->
+    <section class="panel on" id="p-desk">
+      <div class="phead"><div>
+        <h2>The desk</h2>
+        <p>Everything anyone made for your day, in one place — what <b>we</b> wrote from your event, what your <b>guests</b> sent, what your <b>suppliers</b> sent. Accept it, change the words, or turn it down. It was four different screens; it is one queue.</p>
+      </div></div>
+
+      <div class="filters" id="filters">
+        <button class="on" data-f="all">Everything <span class="c" id="fAll">9</span></button>
+        <button data-f="made"><span class="src made">We made</span><span class="c" id="fMade">3</span></button>
+        <button data-f="guest"><span class="src guest">Guests</span><span class="c" id="fGuest">4</span></button>
+        <button data-f="vendor"><span class="src vendor">Suppliers</span><span class="c" id="fVendor">2</span></button>
+        <button data-f="open">Still waiting on you <span class="c" id="fOpen">9</span></button>
+      </div>
+
+      <div class="items" id="items">
+        <!-- ── WE MADE ── -->
+        <article class="item" data-src="made" data-lands="The lead">
+          <div class="thumb txt">¶</div>
+          <div class="body">
+            <div class="srcline"><span class="src made">We made</span><span class="who">from your schedule, your photos and your guest list</span><span class="lands">→ The lead</span></div>
+            <h4>The opening paragraphs</h4>
+            <p class="q">Under a sky that cleared just in time, Maria and Juan were married on a garden lawn high above Taal. One hundred and twenty guests rose as she came down a path lined with white blooms; by the time she reached him, neither was bothering to hide the tears.</p>
+            <textarea aria-label="Edit the opening paragraphs">Under a sky that cleared just in time, Maria and Juan were married on a garden lawn high above Taal. One hundred and twenty guests rose as she came down a path lined with white blooms; by the time she reached him, neither was bothering to hide the tears.</textarea>
+            <div class="flag">✎ <span><b>Written for you, not by you.</b> Change any word — it is your story. Rejecting it leaves the day to speak through the moments instead.</span></div>
+          </div>
+          <div class="acts"><button class="ok">✓ Accept</button><button class="ed">✎ Edit</button><button class="no">✕ Reject</button>
+            <span class="verdict a">✓ In the story <button class="undo">undo</button></span><span class="verdict r">✕ Left out <button class="undo">undo</button></span></div>
+        </article>
+
+        <article class="item" data-src="made" data-lands="2:38 PM">
+          <div class="thumb"><span>Papic · 2:38</span></div>
+          <div class="body">
+            <div class="srcline"><span class="src made">We made</span><span class="who">41 captures clustered here · Dana tapped this moment</span><span class="lands">→ 2:38 PM</span></div>
+            <h4>The Garden March</h4>
+            <p class="q">The path was lined white with blooms and the whole lawn rose at once. She walked it slowly, on her father’s arm, past every face that had ever mattered.</p>
+            <textarea aria-label="Edit The Garden March">The path was lined white with blooms and the whole lawn rose at once. She walked it slowly, on her father’s arm, past every face that had ever mattered.</textarea>
+            <div class="flag">🕑 <span>We found this minute because <b>41 phones fired within four minutes</b> of your coordinator tapping “processional”. The title and the write-up are ours; the minute is yours.</span></div>
+          </div>
+          <div class="acts"><button class="ok">✓ Accept</button><button class="ed">✎ Edit</button><button class="no">✕ Reject</button>
+            <span class="verdict a">✓ In the story <button class="undo">undo</button></span><span class="verdict r">✕ Left out <button class="undo">undo</button></span></div>
+        </article>
+
+        <article class="item" data-src="made" data-lands="By the numbers">
+          <div class="thumb txt">44</div>
+          <div class="body">
+            <div class="srcline"><span class="src made">We made</span><span class="who">counted from your plan</span><span class="lands">→ By the numbers</span></div>
+            <h4>≈ 44 hours of planning saved</h4>
+            <p class="q">Estimated — six vendors booked through Setnayan, plus the base. Shown with the word “estimated” beside it, always.</p>
+            <div class="flag">⚠ <span>This one is a <b>calculation, not a measurement</b>. If it feels wrong to you, turn it down — nothing else changes.</span></div>
+          </div>
+          <div class="acts"><button class="ok">✓ Accept</button><button class="no">✕ Reject</button>
+            <span class="verdict a">✓ In the story <button class="undo">undo</button></span><span class="verdict r">✕ Left out <button class="undo">undo</button></span></div>
+        </article>
+
+        <!-- ── GUESTS ── -->
+        <article class="item" data-src="guest" data-lands="2:38 PM · Said">
+          <div class="thumb p2"><span>Kwento</span></div>
+          <div class="body">
+            <div class="srcline"><span class="src guest">Guest</span><span class="who">Tita Bing · on a photo of the path · 2:41 PM</span><span class="lands">→ 2:38 PM</span></div>
+            <h4>A wish</h4>
+            <p class="q it">“Nakita ko kung paano ka tumingin sa kanya sa altar. Iyon ang tingin na hinihintay ng bawat magulang. Ingatan niyo iyon.”</p>
+            <div class="flag">✓ <span><b>She asked to be named.</b> Screened clean · her captures may be public · she has not opted out of photos. Accepting shows her name; you can accept it unnamed instead.</span></div>
+          </div>
+          <div class="acts"><button class="ok">✓ Accept</button><button class="ed">✎ Edit</button><button class="no">✕ Reject</button>
+            <span class="verdict a">✓ In the story <button class="undo">undo</button></span><span class="verdict r">✕ Left out <button class="undo">undo</button></span></div>
+        </article>
+
+        <article class="item" data-src="guest" data-lands="What we asked">
+          <div class="thumb p3"><span>0:14 · challenge</span></div>
+          <div class="body">
+            <div class="srcline"><span class="src guest">Guest</span><span class="who">Kuya Marco · answering “say one thing you know about them that we don’t”</span><span class="lands">→ What we asked</span></div>
+            <h4>A challenge answer · 14 seconds</h4>
+            <p class="q it">“From the despedida na pinagtalunan niyo ang pinakamasarap na lugaw, to this garden — sobrang saya kong nandito. Set na ’yan!”</p>
+            <div class="flag">✓ <span>Five yeses passed: share this answer · captures may be public · screened clean · not opted out of photos · <b>asked to be named</b>.</span></div>
+          </div>
+          <div class="acts"><button class="ok">✓ Accept</button><button class="ed">✎ Edit</button><button class="no">✕ Reject</button>
+            <span class="verdict a">✓ In the story <button class="undo">undo</button></span><span class="verdict r">✕ Left out <button class="undo">undo</button></span></div>
+        </article>
+
+        <article class="item" data-src="guest" data-lands="Letters">
+          <div class="thumb txt">✉</div>
+          <div class="body">
+            <div class="srcline"><span class="src guest">Guest</span><span class="who">Ate Celine · maid of honor · wrote 220 words</span><span class="lands">→ Letters</span></div>
+            <h4>The quiet minute</h4>
+            <p class="q">Everyone remembers the march. I remember 11:19, the minute before the door opened, when she looked at me in the mirror and mouthed “set na ’yan” and we both nearly lost it. That’s the minute I’d keep.</p>
+            <textarea aria-label="Edit the letter">Everyone remembers the march. I remember 11:19, the minute before the door opened, when she looked at me in the mirror and mouthed “set na ’yan” and we both nearly lost it. That’s the minute I’d keep.</textarea>
+            <div class="flag">✎ <span><b>Editing someone else’s words is a bigger thing.</b> Trim for length freely; if you change what she meant, we ask her before it publishes.</span></div>
+          </div>
+          <div class="acts"><button class="ok">✓ Accept</button><button class="ed">✎ Edit</button><button class="no">✕ Reject</button>
+            <span class="verdict a">✓ In the story <button class="undo">undo</button></span><span class="verdict r">✕ Left out <button class="undo">undo</button></span></div>
+        </article>
+
+        <article class="item" data-src="guest" data-lands="From the day">
+          <div class="thumb p4"><span>Papic · 9:51</span></div>
+          <div class="body">
+            <div class="srcline"><span class="src guest">Guest</span><span class="who">JR · 12 photos from the money dance</span><span class="lands">→ From the day</span></div>
+            <h4>Lolo Ben, 81, undefeated</h4>
+            <p class="q">Twelve captures between 9:47 and 9:58 PM. Accepting adds all twelve; open the set to keep some and drop others.</p>
+            <div class="flag">⚠ <span><b>One of the twelve shows a guest who opted out of photos.</b> That one is already held back — you cannot accept it, and it is not counted above.</span></div>
+          </div>
+          <div class="acts"><button class="ok">✓ Accept 12</button><button class="ed">Open the set</button><button class="no">✕ Reject</button>
+            <span class="verdict a">✓ In the story <button class="undo">undo</button></span><span class="verdict r">✕ Left out <button class="undo">undo</button></span></div>
+        </article>
+
+        <!-- ── VENDORS ── -->
+        <article class="item" data-src="vendor" data-lands="From your suppliers">
+          <div class="thumb p5"><span>Goldenhour · loop</span></div>
+          <div class="body">
+            <div class="srcline"><span class="src vendor">Supplier</span><span class="who">Goldenhour Photo + Film · sent 3 frames + 1 loop</span><span class="lands">→ From your suppliers</span></div>
+            <h4>The rings, in close</h4>
+            <p class="q">Their own pick of the day — sent to you, not published. Nothing a supplier sends appears until you accept it.</p>
+            <div class="flag">◆ <span>Featured supplier. Accepting also lets this story be collected on <b>their portfolio</b> as “featured in Maria &amp; Juan” — free for every supplier, at any tier.</span></div>
+          </div>
+          <div class="acts"><button class="ok">✓ Accept 4</button><button class="ed">Open the set</button><button class="no">✕ Reject</button>
+            <span class="verdict a">✓ In the story <button class="undo">undo</button></span><span class="verdict r">✕ Left out <button class="undo">undo</button></span></div>
+        </article>
+
+        <article class="item" data-src="vendor" data-lands="The team">
+          <div class="thumb txt">“</div>
+          <div class="body">
+            <div class="srcline"><span class="src vendor">Supplier</span><span class="who">The Long Table · a note to you</span><span class="lands">→ The team</span></div>
+            <h4>A note to you</h4>
+            <p class="q it">“Six courses for 120 on a lawn with one road up the hill. We’d do it again tomorrow. Congratulations, you two — the lechon was for Lolo Ben.”</p>
+            <div class="flag">✎ <span>You can turn a supplier’s note down without turning the supplier down — <b>their credit on your day is free and stays either way</b>.</span></div>
+          </div>
+          <div class="acts"><button class="ok">✓ Accept</button><button class="no">✕ Reject</button>
+            <span class="verdict a">✓ In the story <button class="undo">undo</button></span><span class="verdict r">✕ Left out <button class="undo">undo</button></span></div>
+        </article>
+      </div>
+      <p class="empty" id="deskEmpty" style="display:none">Nothing left on the desk. Everything that arrives later lands here — the story keeps growing until you publish it.</p>
+    </section>
+
+    <!-- ═══════════ THE STORY ═══════════ -->
+    <section class="panel" id="p-story">
+      <div class="phead"><div><h2>The story</h2>
+        <p>What the page shows, and in what order. A section with nothing accepted in it does not render at all — no empty headings, ever.</p></div></div>
+      <div class="secs" id="secs">
+        <div class="sec locked"><span class="grip">⋮⋮</span><div><b>The masthead &amp; the lead</b><small>Names, date, the opening paragraphs</small></div><span class="lock">Always</span></div>
+        <div class="sec"><span class="grip">⋮⋮</span><div><b>As the day unfolded</b><small>Your written minutes</small><span class="cnt">5 minutes · 1 accepted</span></div><button class="sw" role="switch" aria-checked="true" aria-label="As the day unfolded"></button></div>
+        <div class="sec"><span class="grip">⋮⋮</span><div><b>What they whispered</b><small>Kwento wishes from your guests</small><span class="cnt">3 waiting · 1 accepted</span></div><button class="sw" role="switch" aria-checked="true" aria-label="What they whispered"></button></div>
+        <div class="sec"><span class="grip">⋮⋮</span><div><b>What we asked</b><small>Papic challenge answers</small><span class="cnt">6 waiting · 1 accepted</span></div><button class="sw" role="switch" aria-checked="true" aria-label="What we asked"></button></div>
+        <div class="sec"><span class="grip">⋮⋮</span><div><b>Letters</b><small>Columns your guests wrote</small><span class="cnt">2 waiting</span></div><button class="sw" role="switch" aria-checked="true" aria-label="Letters"></button></div>
+        <div class="sec"><span class="grip">⋮⋮</span><div><b>From the day</b><small>The shared photo gallery</small><span class="cnt">390 captures</span></div><button class="sw" role="switch" aria-checked="true" aria-label="From the day"></button></div>
+        <div class="sec"><span class="grip">⋮⋮</span><div><b>From your suppliers</b><small>What your team sent</small><span class="cnt">4 waiting</span></div><button class="sw" role="switch" aria-checked="true" aria-label="From your suppliers"></button></div>
+        <div class="sec"><span class="grip">⋮⋮</span><div><b>Watch the films</b><small>Your Live Studio broadcasts</small><span class="cnt">3 broadcasts</span></div><button class="sw" role="switch" aria-checked="true" aria-label="Watch the films"></button></div>
+        <div class="sec"><span class="grip">⋮⋮</span><div><b>Where everyone sat</b><small>Reception only · table numbers, never names</small><span class="cnt">12 tables</span></div><button class="sw" role="switch" aria-checked="true" aria-label="Where everyone sat"></button></div>
+        <div class="sec"><span class="grip">⋮⋮</span><div><b>The look you chose</b><small>Shows only because you saved a theme</small><span class="cnt">1 theme</span></div><button class="sw" role="switch" aria-checked="true" aria-label="The look you chose"></button></div>
+        <div class="sec"><span class="grip">⋮⋮</span><div><b>The team</b><small>Your suppliers, and the ones you loved</small><span class="cnt">4 suppliers</span></div><button class="sw" role="switch" aria-checked="true" aria-label="The team"></button></div>
+        <div class="sec"><span class="grip">⋮⋮</span><div><b>By the numbers</b><small>Guests, replies, captures, time saved</small><span class="cnt">8 figures</span></div><button class="sw" role="switch" aria-checked="true" aria-label="By the numbers"></button></div>
+        <div class="sec locked"><span class="grip">⋮⋮</span><div><b>Your last word, then your song</b><small>The close never moves and never turns off</small></div><span class="lock">Locked</span></div>
+      </div>
+    </section>
+
+    <!-- ═══════════ THEME ═══════════ -->
+    <section class="panel" id="p-theme">
+      <div class="phead"><div><h2>Theme</h2>
+        <p>The story takes its colours from your day. It runs them as light: morning at the top of the page, night at the bottom.</p></div></div>
+      <div class="modes" id="modes">
+        <button class="mode on" data-m="auto"><b>Follow my mood board</b><small>Your saved theme — <em>Champagne &amp; sage, garden afternoon</em>, saved 21 Sep. Change the board and the story follows.</small></button>
+        <button class="mode" data-m="own"><b>Make my own</b><small>Start from the board and change any colour. The story stops following the board from then on.</small></button>
+        <button class="mode" data-m="neutral"><b>Neutral</b><small>Warm paper and ink. What every story gets when no theme was saved.</small></button>
+      </div>
+      <div class="swatches" id="swatches"></div>
+      <p class="lockmsg" id="lockMsg">These are your mood board’s colours. <button type="button" id="toOwn">Make my own</button> to change any of them here — the board stays as it is.</p>
+      <div class="stages" id="stages"></div>
+      <p class="themenote">Every colour is checked for contrast before it is used, and corrected if it would be hard to read — a colour off a mood board is never trusted to be legible on its own. <span id="themeWhy">You are following the board, so nothing here to decide.</span></p>
+    </section>
+
+    <!-- ═══════════ COVER ═══════════ -->
+    <section class="panel" id="p-cover">
+      <div class="phead"><div><h2>The cover</h2>
+        <p>One picture does three jobs: the top of your story, the card on setnayan.com, and the thumbnail when anyone shares the link. Pick it once — you can see all three below.</p></div></div>
+      <div class="covers" id="covers">
+        <button class="cov on" data-c="0" style="background:radial-gradient(120% 90% at 15% 95%,#3F2E28,transparent 55%),linear-gradient(160deg,#8C9A80,#3E4A5C)"><span class="src2">Living hero</span><span class="lb">The one on your site now</span></button>
+        <button class="cov" data-c="1" style="background:linear-gradient(160deg,#E9D6B4,#6B4E3D)"><span class="src2">2:38 · Papic</span><span class="lb">The garden march</span></button>
+        <button class="cov" data-c="2" style="background:linear-gradient(160deg,#3E4A5C,#8C9A80)"><span class="src2">3:04 · Goldenhour</span><span class="lb">The vows</span></button>
+        <button class="cov" data-c="3" style="background:linear-gradient(180deg,#26211E,#6B4E3D)"><span class="src2">7:12 · Papic</span><span class="lb">The first dance</span></button>
+        <button class="cov" data-c="4" style="background:linear-gradient(160deg,#2A2233,#D9A441)"><span class="src2">9:47 · JR</span><span class="lb">The money dance</span></button>
+        <button class="cov" data-c="5" style="background:linear-gradient(160deg,#F3EBDD,#D9C6A6);color:#6B4E3D"><span class="src2" style="background:rgba(255,255,255,.7);color:#6B4E3D">Monogram</span><span class="lb" style="text-shadow:none">M &amp; J, animated</span></button>
+        <button class="cov up" data-c="6"><span>+ Upload another</span></button>
+      </div>
+      <div class="previews">
+        <div class="pv"><span class="ui">On your story</span>
+          <div class="mast" id="pvMast"><span class="g"></span><div class="t"><span class="k">Feb 14, 2026 · Tagaytay</span><h3>Maria &amp; Juan</h3><p>492 captures · 3 films · 11 voices</p></div></div>
+        </div>
+        <div class="pv"><span class="ui">On setnayan.com/realstories</span>
+          <div class="shelf">
+            <div class="shelfcard" id="pvShelf"><span class="g"></span><span class="tag">Wedding</span><div class="t"><b>The Maria &amp; Juan Chronicle</b><small>Vol. I · No. 1 · Tagaytay</small></div></div>
+            <div class="shelfcard dim"></div>
+          </div>
+          <span class="ui" style="display:block;margin:13px 0 8px">When someone shares the link</span>
+          <div class="og" id="pvOg"><span class="g"></span><div class="t"><b>Maria &amp; Juan</b><small>A garden wedding in Tagaytay · Setnayan</small></div></div>
+        </div>
+      </div>
+      <p class="themenote" style="margin-top:16px">A capture can only be your cover if it passed the same checks as everything else — screened, and nobody in it opted out. <b id="coverNow">Living hero</b> is your cover now.</p>
+    </section>
+
+    <!-- ═══════════ WHAT'S NEXT ═══════════ -->
+    <section class="panel" id="p-next">
+      <div class="phead"><div><h2>What’s next <span style="font:600 11px var(--f-ui);letter-spacing:.14em;text-transform:uppercase;color:var(--faint);vertical-align:middle;margin-left:8px">Optional</span></h2>
+        <p><b>A story is finished on its own.</b> Most end here, and that is a whole story — the close is your words and your song, and nothing after it is required. If you <em>do</em> want another day to follow this one, this is where you say so, with the rest of your event. Nothing is announced and nothing is created unless you choose it.</p></div></div>
+
+      <div class="nx" id="cands">
+        <button class="cand on" data-k="none" data-title="Nothing yet" data-when="" data-sub="">
+          <span class="ui">Where you are now</span><b>Nothing yet</b>
+          <span class="when">THE STORY ENDS ON YOUR WORDS</span>
+          <p>The back cover stays quiet. No next edition, nothing promised, nobody told anything. You can name one years later and this page simply gains a door — or never, which is also a finished chronicle.</p>
+          <span class="derived">— Nothing announced</span></button>
+
+        <button class="cand" data-k="anniversary" data-title="The first anniversary" data-when="FEB 14 · 2027" data-sub="in 350 days">
+          <span class="ui">If you want one — derived from this day</span><b>The first anniversary</b>
+          <span class="when">FEB 14 · 2027 · in 350 days</span>
+          <p>An anniversary takes its date from the day you just had — so we already know when it is, and every one after it.</p>
+          <span class="derived">⟳ Derived, not created</span></button>
+
+        <button class="cand" data-k="christening" data-title="A christening" data-when="WHEN THERE IS SOMEONE" data-sub="no date yet">
+          <span class="ui">Needs a date we don’t have</span><b>A christening</b>
+          <span class="when">WHEN THERE IS SOMEONE TO CHRISTEN</span>
+          <p>Its date comes from a birthdate. We will not ask you for one, and we will not guess — pick this and the back cover simply says the chronicle continues.</p>
+          <span class="derived">◇ Waiting on a date</span></button>
+
+        <button class="cand" data-k="reunion" data-title="A reunion" data-when="PICK A DAY" data-sub="you choose">
+          <span class="ui">A day you choose</span><b>A reunion</b>
+          <span class="when">PICK A DAY</span>
+          <p>Some days have no anchor — you simply choose them. Multi-day by default, so the story carries one segment per day.</p>
+          <span class="derived">✎ You set the date</span></button>
+
+      </div>
+
+      <div class="kindrow" id="kinds"><span class="ui" style="align-self:center;margin-right:4px">Or another kind:</span></div>
+      <p class="needs" id="needs"></p>
+
+      <div class="carry" id="carryBox" hidden><span class="ui">What No. 2 inherits from this story</span>
+        <ul>
+          <li><b>Your names and your monogram</b> — the masthead carries over</li>
+          <li><b>Your colours</b> — the same theme, unless you change it there</li>
+          <li><b>Your guest list</b> — as a starting point, not a commitment</li>
+          <li><b>“Previously · No. 1”</b> — and this story gains its back-cover door</li>
+        </ul>
+        <p style="margin-top:11px;font-size:12.5px;color:var(--mute)">Everyone who was at this day is told once, when No. 2 begins — and only if they asked to be.</p>
+      </div>
+
+      <div class="bcpv"><span class="ui">How the back cover of this story will read</span>
+        <div class="bc" id="bcPv"><span class="ghost">2</span>
+          <span class="v" id="bcV">Vol. I · No. 2 · not yet written</span>
+          <h3 id="bcT">The first<br>anniversary</h3>
+          <span class="w" id="bcW">FEB 14 · 2027<small>in 350 days</small></span>
+          <span class="prev">← Previously <b>NO. 1 · THE WEDDING</b></span>
+        </div>
+        <div class="nxacts" id="nxActs" hidden><button class="btn pri" id="startNext">Start it now</button><button class="btn" id="announce">Announce it only</button></div>
+        <p style="margin-top:11px;font-size:12.5px;color:var(--mute)" id="nxFine">Leaving it here is a complete answer — publish whenever you like.</p>
+      </div>
+    </section>
+
+    <!-- ═══════════ PUBLISH ═══════════ -->
+    <section class="panel" id="p-publish">
+      <div class="phead"><div><h2>Publish</h2>
+        <p>Your story grows in private and publishes once. Until you publish, only the people holding your Papic QR can see what your guests sent.</p></div></div>
+      <div class="steps" id="steps">
+        <button class="step on" data-s="draft"><span class="ui">Now</span><b>Draft</b><p>Only you. The desk fills as photos, wishes and answers arrive — before, during and after the day.</p><span class="who2">Who can see it: you</span></button>
+        <button class="step" data-s="guests"><span class="ui">Next</span><b>Guests only</b><p>Everyone holding your Papic QR can read it and find their own day. Not searchable, not shareable outside the day.</p><span class="who2">Who can see it: your 120 guests</span></button>
+        <button class="step" data-s="live"><span class="ui">Last</span><b>Published</b><p>Your story becomes public at your own address, and can appear on setnayan.com. It gets its edition number the moment you publish.</p><span class="who2">Who can see it: anyone with the link</span></button>
+      </div>
+      <div class="lastword"><span class="ui">Your last word</span>
+        <p style="font-size:12.5px;color:var(--mute);margin-top:5px">The story always ends with your words, then your song. Nobody writes this for you.</p>
+        <textarea aria-label="Your last word">Thank you for being here with us today. Set na ’yan — and we could never have set it without every one of you.</textarea>
+      </div>
+      <div class="consent"><label><input type="checkbox" id="consentBox"><span>I want this story to be public, and I understand it will carry our names, our photos, and the words our guests agreed to share.</span></label>
+        <p class="fine">Guests keep their own say either way: anyone can hide their photo or ask to be unnamed at any time, and it comes down everywhere — including the next print run. You can take the story back to guests-only whenever you like.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="foot"><div class="footin">
+  <span class="s" id="footMsg"><b>9</b> things are waiting for you on the desk.</span>
+  <button class="btn ghost" id="saveBtn">Save draft</button>
+  <button class="btn pri" id="publishBtn" disabled>Publish the story</button>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+  const toast=(t)=>{ const e=$('#toast'); e.textContent=t; e.classList.add('on'); clearTimeout(e._t); e._t=setTimeout(()=>e.classList.remove('on'),1900); };
+
+  // ── panels ────────────────────────────────────────────────────────────────
+  function show(p){ $$('.panel').forEach(x=>x.classList.toggle('on',x.id==='p-'+p));
+    $$('#rail button,#mtabs button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
+    window.scrollTo({top:0,behavior:'auto'}); }
+  $$('#rail button,#mtabs button').forEach(b=>b.addEventListener('click',()=>show(b.dataset.p)));
+  $('#previewBtn').addEventListener('click',()=>toast('Opens your story exactly as it stands'));
+  $('#saveBtn').addEventListener('click',()=>toast('Draft saved'));
+
+  // ── the desk: accept · edit · reject, for all three sources ───────────────
+  const items=$$('.item');
+  function counts(){
+    const open=items.filter(i=>!i.classList.contains('acc')&&!i.classList.contains('rej'));
+    const by=s=>items.filter(i=>i.dataset.src===s&&!i.classList.contains('acc')&&!i.classList.contains('rej')).length;
+    $('#fAll').textContent=items.length; $('#fOpen').textContent=open.length;
+    $('#fMade').textContent=by('made'); $('#fGuest').textContent=by('guest'); $('#fVendor').textContent=by('vendor');
+    $('#cDesk').textContent=open.length; $('#cDeskM').textContent=open.length;
+    $('#cDesk').classList.toggle('hot',open.length>0);
+    const pct=Math.round((items.length-open.length)/items.length*100);
+    $('#pctN').textContent=pct+'%'; $('#pctBar').style.width=pct+'%';
+    const acc=items.filter(i=>i.classList.contains('acc')).length;
+    $('#footMsg').innerHTML = open.length
+      ? `<b>${open.length}</b> thing${open.length>1?'s are':' is'} waiting for you on the desk.`
+      : `Everything decided — <b>${acc}</b> in the story. Ready when you are.`;
+    $('#publishBtn').disabled = !(open.length===0 && $('#consentBox').checked && state==='live');
+    filter();
+  }
+  let f='all';
+  function filter(){ items.forEach(i=>{ const open=!i.classList.contains('acc')&&!i.classList.contains('rej');
+      const ok = f==='all' ? true : f==='open' ? open : i.dataset.src===f;
+      i.classList.toggle('gone',!ok); });
+    const vis=items.filter(i=>!i.classList.contains('gone')).length;
+    $('#deskEmpty').style.display=vis?'none':'block'; }
+  $$('#filters button').forEach(b=>b.addEventListener('click',()=>{ f=b.dataset.f; $$('#filters button').forEach(x=>x.classList.toggle('on',x===b)); filter(); }));
+
+  items.forEach(it=>{
+    const ta=$('textarea',it);
+    $('.ok',it)?.addEventListener('click',()=>{ if(it.classList.contains('editing')&&ta){ $('.q',it).textContent=ta.value; it.classList.remove('editing'); }
+      it.classList.add('acc'); it.classList.remove('rej'); counts(); toast('Added to '+it.dataset.lands); });
+    $('.no',it)?.addEventListener('click',()=>{ it.classList.add('rej'); it.classList.remove('acc','editing'); counts(); toast('Left out — nobody is told'); });
+    $('.ed',it)?.addEventListener('click',()=>{ if(!ta){ toast('Opens the set — keep some, drop others'); return; } it.classList.add('editing'); ta.focus(); });
+    $$('.undo',it).forEach(u=>u.addEventListener('click',()=>{ it.classList.remove('acc','rej'); counts(); }));
+  });
+
+  // ── theme: auto · your own · neutral ──────────────────────────────────────
+  const BOARD=['#E6D3B3','#7E8B72','#FBFBFA','#6B4E3D','#C5A059'];
+  // Stands in for lib/color-names + lib/color-search — the shipped picker names the
+  // colour and lets you search by name; a swatch that only says #7E8B72 is not the
+  // same control. Sixty here; the real one carries the full list.
+  const NAMED=[['Alabaster','#FBFBFA'],['Ivory','#F6F1E4'],['Champagne','#E6D3B3'],['Sand','#E3D5B8'],['Bone','#EFE7D8'],
+   ['Blush','#F2D9D6'],['Dusty rose','#D8A7A0'],['Terracotta','#C24E25'],['Rust','#A8442A'],['Burgundy','#6C2233'],
+   ['Wine','#7B2D3B'],['Coral','#E76F51'],['Peach','#F2C6A0'],['Marigold','#E3A13A'],['Gold','#C5A059'],
+   ['Brass','#B08D57'],['Mustard','#C9A227'],['Butter','#F0DFA0'],['Olive','#6E7245'],['Moss green','#7E8B72'],
+   ['Sage','#9CAF88'],['Eucalyptus','#84A98C'],['Fern','#4F7A5A'],['Forest','#2F4A34'],['Emerald','#1F6F54'],
+   ['Sea glass','#9FC5D9'],['Teal','#2A9D8F'],['Deep teal','#1F5F5B'],['Sky','#A8C8E1'],['Powder blue','#C6D9E8'],
+   ['Slate','#3B4E67'],['Navy','#1F3A5F'],['Midnight','#151D2E'],['Periwinkle','#B7BFE8'],['Lilac','#C9B6DE'],
+   ['Lavender','#D8CDE8'],['Orchid','#5B2A86'],['Plum','#4A2B4D'],['Mauve','#A98BA0'],['Taupe','#B0A395'],
+   ['Mushroom','#9C9186'],['Stone','#C4BDB2'],['Greige','#D6CFC4'],['Walnut','#6B4E3D'],['Chocolate','#4B342A'],
+   ['Espresso','#33241C'],['Charcoal','#3A3733'],['Ink','#1B1A17'],['Graphite','#5A5A57'],['Silver','#C9C9C6'],
+   ['Pearl','#EDE9E3'],['Cream','#FBF7EF'],['Linen','#EFE9DD'],['Clay','#B98A6B'],['Caramel','#B5793F'],
+   ['Copper','#B06A3B'],['Saffron','#E9A13B'],['Chartreuse','#B7C36B'],['Mint','#BFE3D0'],['Cloud','#E4E7E9']];
+  const rgbOf=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+  function nameOf(h){ const c=rgbOf(h); let best=NAMED[0], d=1e9;
+    NAMED.forEach(([n,x])=>{ const y=rgbOf(x); const dd=(c[0]-y[0])**2+(c[1]-y[1])**2+(c[2]-y[2])**2; if(dd<d){d=dd;best=[n,x];} });
+    return d===0?best[0]:(d<900?best[0]:best[0]); }
+  const SLOTS=['Dominant','Supporting','Accent','Neutral','Accent 2'];
+  const NEUTRAL=['#EFEBE4','#D8D2C6','#FBFBFA','#3A3733','#B9AE99'];
+  const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+  const lum=c=>{const [r,g,b]=c.map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*r+.7152*g+.0722*b};
+  const lerp=(a,b,f)=>a.map((v,i)=>Math.round(v+(b[i]-v)*f)), rgb=a=>`rgb(${a[0]},${a[1]},${a[2]})`;
+  function stages(sw){ const cs=sw.map(hex).sort((a,b)=>lum(b)-lum(a));
+    const light=cs[0],second=cs[1],mid=cs[2],dark=cs[cs.length-1];
+    return [ lerp(light,[255,255,255],.45), lerp(light,[255,255,255],.2), lerp(second,light,.5),
+             lerp(dark,mid,.3), lerp(dark,[0,0,0],.55), lerp(light,mid,.18) ]; }
+  const STAGE_NAMES=['Before','Morning','Afternoon','Dusk','Night','After'];
+  function paintStages(){ const sw=current(); const box=$('#stages'); box.innerHTML='';
+    stages(sw).forEach((bg,i)=>{ const d=document.createElement('div'); d.style.background=rgb(bg);
+      d.style.color = lum(bg)>.42 ? '#1B1A17' : '#F7F3EC'; d.textContent=STAGE_NAMES[i]; box.appendChild(d); }); }
+  let mode='auto';
+  let own=[...BOARD];                                   // "make my own" starts FROM the board
+  const current=()=> mode==='neutral' ? NEUTRAL : mode==='own' ? own : BOARD;
+
+  // ── the swatch + its popover ───────────────────────────────────────────────
+  function buildSwatches(){
+    const sw=current(); const box=$('#swatches'); box.innerHTML='';
+    sw.forEach((hex,i)=>{
+      const d=document.createElement('div'); d.className='sw5'; d.dataset.i=i;
+      d.innerHTML=`<button class="chip" style="background:${hex}" aria-haspopup="dialog" aria-expanded="false"
+            aria-label="${SLOTS[i]} — ${nameOf(hex)}, ${hex.toUpperCase()}. Change colour."></button>
+        <label>${SLOTS[i]}</label><span class="nm">${nameOf(hex)}</span>
+        <div class="pop" role="dialog" aria-label="Choose a colour for ${SLOTS[i]}">
+          <button class="close" aria-label="Close">✕</button>
+          <div class="row"><input type="color" value="${hex}" aria-label="Pick a colour for ${SLOTS[i]}">
+            <input type="text" value="${hex.toUpperCase()}" maxlength="7" spellcheck="false" aria-label="Hex colour code"></div>
+          <p class="cname">${nameOf(hex)}</p>
+          <span class="lbl">Search by colour name</span>
+          <input class="q" type="text" placeholder="e.g. moss green, burgundy…" aria-label="Search colour names">
+          <div class="res"></div>
+          <span class="lbl">From your mood board</span>
+          <div class="board">${BOARD.map(b=>`<button style="background:${b}" aria-label="Use ${nameOf(b)}" data-b="${b}"></button>`).join('')}</div>
+        </div>`;
+      box.appendChild(d);
+      if(mode!=='own') return;                          // only your own colours are editable
+      const chip=$('.chip',d), pop=$('.pop',d), col=$('input[type=color]',d), tx=$('input[type=text]',d),
+            q=$('.q',d), res=$('.res',d), nm=$('.nm',d), cn=$('.cname',d);
+      const set=(v)=>{ if(!/^#[0-9A-Fa-f]{6}$/.test(v)) return; own[i]=v.toUpperCase();
+        chip.style.background=v; col.value=v; tx.value=v.toUpperCase(); nm.textContent=nameOf(v); cn.textContent=nameOf(v);
+        chip.setAttribute('aria-label',`${SLOTS[i]} — ${nameOf(v)}, ${v.toUpperCase()}. Change colour.`);
+        paintStages(); };
+      chip.addEventListener('click',e=>{ e.stopPropagation(); const open=d.dataset.open!=='1';
+        $$('.sw5').forEach(x=>{x.dataset.open='0'; $('.chip',x)?.setAttribute('aria-expanded','false');});
+        d.dataset.open=open?'1':'0'; chip.setAttribute('aria-expanded',String(open)); if(open) col.focus(); });
+      $('.close',d).addEventListener('click',()=>{ d.dataset.open='0'; chip.setAttribute('aria-expanded','false'); chip.focus(); });
+      pop.addEventListener('click',e=>e.stopPropagation());
+      col.addEventListener('input',()=>set(col.value));
+      tx.addEventListener('input',()=>set(tx.value.trim()));
+      q.addEventListener('input',()=>{ const t=q.value.trim().toLowerCase(); res.innerHTML='';
+        if(!t){ return; }
+        const hits=NAMED.filter(([n])=>n.toLowerCase().includes(t)).slice(0,12);
+        if(!hits.length){ res.innerHTML='<p class="none">No colour by that name.</p>'; return; }
+        hits.forEach(([n,x])=>{ const b=document.createElement('button');
+          b.innerHTML=`<i style="background:${x}"></i>${n}`; b.addEventListener('click',()=>{ set(x); q.value=''; res.innerHTML=''; });
+          res.appendChild(b); }); });
+      $$('.board button',d).forEach(b=>b.addEventListener('click',()=>set(b.dataset.b)));
+    });
+  }
+  document.addEventListener('click',()=>$$('.sw5').forEach(x=>{ x.dataset.open='0'; $('.chip',x)?.setAttribute('aria-expanded','false'); }));
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') $$('.sw5').forEach(x=>x.dataset.open='0'); });
+  function setMode(m){ mode=m; $$('#modes .mode').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
+    $('#swatches').classList.toggle('own',m==='own');
+    $('#themeWhy').textContent = m==='auto' ? 'You are following the board, so nothing here to decide.'
+      : m==='own' ? 'You are on your own colours — the mood board can change without touching the story.'
+      : 'Neutral is a real choice, not a fallback. Nothing about your day is guessed at.';
+    if(m==='neutral') $('#lockMsg').textContent='Neutral is the same for every story — nothing to pick.';
+    else if(m==='auto') $('#lockMsg').innerHTML='These are your mood board’s colours. <button type="button" id="toOwn">Make my own</button> to change any of them here — the board stays as it is.';
+    buildSwatches(); paintStages(); wireToOwn();
+    $('#rail button[data-p="theme"] .c').textContent = m==='auto'?'Auto':m==='own'?'Yours':'Neutral'; }
+  function wireToOwn(){ const b=$('#toOwn'); if(b) b.addEventListener('click',()=>setMode('own')); }
+  $$('#modes .mode').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.m)));
+  buildSwatches(); paintStages(); wireToOwn();
+
+  // ── cover: one pick, three previews ───────────────────────────────────────
+  const covers=$$('.cov:not(.up)');
+  const NAMES=['Living hero','2:38 · the garden march','3:04 · the vows','7:12 · the first dance','9:47 · the money dance','The animated monogram'];
+  function setCover(b){ covers.forEach(c=>c.classList.toggle('on',c===b));
+    const bg=b.style.background;
+    ['#pvMast','#pvShelf','#pvOg'].forEach(sel=>{ $(sel).style.background=bg; });
+    $('#coverNow').textContent=NAMES[+b.dataset.c]; $('#cCover').textContent='1';
+    toast('Cover set — story, shelf and share card'); }
+  covers.forEach(b=>b.addEventListener('click',()=>setCover(b)));
+  $('.cov.up').addEventListener('click',()=>toast('Opens your photos and your files'));
+  setCover(covers[0]);
+
+  // ── sections ──────────────────────────────────────────────────────────────
+  function secCount(){ const sws=$$('#secs .sw'); const on=sws.filter(s=>s.getAttribute('aria-checked')==='true').length;
+    $('#cStory').textContent=`${on}/${sws.length}`; }
+  $$('#secs .sw').forEach(s=>s.addEventListener('click',()=>{ const on=s.getAttribute('aria-checked')!=='true';
+    s.setAttribute('aria-checked',String(on)); s.closest('.sec').classList.toggle('off',!on); secCount(); }));
+  secCount();
+
+  // ── what's next ───────────────────────────────────────────────────────────
+  // The candidates are DERIVED, never stored: lib/event-anchor.ts already turns a
+  // one-off day into a recurring family (union_date → the anniversary and every one
+  // after it; person_birthdate → a christening, a birthday, the 18th debut). Its own
+  // rule is the one that shapes this screen — "an event exists only on the user's
+  // go-signal tap" — so nothing here creates anything.
+  const MORE=[['birthday','A birthday','takes its date from a birthdate — derived once we have one'],
+              ['house_blessing','A house blessing','a day you choose; no anchor of its own'],
+              ['debut','A debut','the 18th birthday — derived from a birthdate'],
+              ['travel','A trip','the days you choose; roaming, so it has no seating plan'],
+              ['corporate','A company day','a day you choose; multi-day by default']];
+  const kr=$('#kinds');
+  MORE.forEach(([k,label,why])=>{ const b=document.createElement('button'); b.textContent=label;
+    b.dataset.k=k; b.dataset.title=label; b.dataset.when='PICK A DAY'; b.dataset.sub=''; b.dataset.why=why;
+    kr.appendChild(b); });
+  let nextPick='none';
+  function paintNext(el){
+    $$('#cands .cand').forEach(c=>c.classList.toggle('on',c===el));
+    $$('#kinds button').forEach(b=>b.classList.toggle('on',b===el));
+    nextPick=el.dataset.k;
+    const none = nextPick==='none';
+    const bc=$('#bcPv');
+    bc.classList.toggle('quiet',none);
+    $('#bcV').textContent = none ? 'No next edition announced' : 'Vol. I · No. 2 · not yet written';
+    $('#bcT').innerHTML = none ? 'The chronicle<br>stays open' : el.dataset.title.replace(/^(\S+)\s/,'$1<br>');
+    $('#bcW').innerHTML = none ? '<small>Name one whenever you like</small>'
+      : `${el.dataset.when}${el.dataset.sub?`<small>${el.dataset.sub}</small>`:''}`;
+    $('#needs').textContent = el.dataset.why || '';
+    $('#cNext').textContent = none ? '—' : el.dataset.title.replace('The first ','');
+    $('#carryBox').hidden = none; $('#nxActs').hidden = none;
+    $('#nxFine').innerHTML = none
+      ? 'Leaving it here is a complete answer — publish whenever you like.'
+      : '<b>Announce it only</b> puts it on the back cover and creates nothing. <b>Start it now</b> opens a new event with the day, the names and the colours already filled — and links it to this story.';
+    if(!first) toast(none ? 'Back cover stays quiet' : 'On the back cover of this story'); first=false; }
+  let first=false;
+  $$('#cands .cand').forEach(c=>c.addEventListener('click',()=>paintNext(c)));
+  $$('#kinds button').forEach(b=>b.addEventListener('click',()=>paintNext(b)));
+  $('#startNext').addEventListener('click',()=>toast('Opens a new event, linked to this story'));
+  $('#announce').addEventListener('click',()=>toast('Announced — nothing created'));
+  first=true; paintNext($('#cands .cand'));   // resting state: nothing chosen, back cover quiet
+  $('#cNext').textContent='Optional';
+
+  // ── publish state ─────────────────────────────────────────────────────────
+  let state='draft';
+  const CHIP={draft:['draft','Draft'],guests:['guests','Guests only'],live:['live','Published']};
+  $$('#steps .step').forEach(b=>b.addEventListener('click',()=>{ state=b.dataset.s;
+    $$('#steps .step').forEach(x=>x.classList.toggle('on',x===b));
+    const [cls,label]=CHIP[state]; const chip=$('#stateChip');
+    chip.className='state '+cls; chip.innerHTML='<i></i>'+label;
+    $('#rail button[data-p="publish"] .c').textContent=label;
+    counts(); }));
+  $('#consentBox').addEventListener('change',counts);
+
+  counts();
+})();
+</script>
