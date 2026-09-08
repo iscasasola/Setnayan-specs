@@ -38,7 +38,7 @@ the room lit by the minute + colours from the host's own saved board.
 | `04_Consent_And_Privacy.md` | RA 10173, surface by surface — read before any of the rest |
 | `05_Occasions_Registers_MultiDay.md` | Words follow the occasion; the solemn register; days |
 | `06_Supplier_Tiers.md` | Listed vs Featured, and the rule that never bends |
-| `07_Open_Questions.md` | Eight decisions that are the owner's, not engineering's |
+| `07_Open_Questions.md` | Eight decisions that are the owner's — ✅ **five RULED 2026-09-09**, three still open and blocking nothing |
 | `08_Build_Order.md` | The sequence, with acceptance criteria per step |
 | `09_SESSIONS_AND_PROMPTS_2026-09-09.md` | **The sessions** — ready-to-paste prompt, model, effort and order for each of the fifteen |
 

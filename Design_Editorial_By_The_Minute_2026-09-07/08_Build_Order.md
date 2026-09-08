@@ -12,9 +12,9 @@ fragment with a `SPEC IMPACT` line, `gh pr create`, then `gh pr merge <PR#> --au
 |---|---|---|
 | **0.1** | **Shutter time.** `p_captured_at` on `papic_record_guest_capture`; carry `capturedAtMs` through `papic-sink.ts` and the offline queue; validate server-side. | A capture uploaded an hour late lands on the minute it was taken. A test proves a late upload does not move a bar. |
 | **0.2** | **Bound the timeline read.** `captured_at` within the event's own days; a count-by-time-bucket aggregate for bar heights; presign only the opened bin. | With 100 pre-day captures seeded, the day's buckets still contain day-of photos. |
-| **0.3** | **Per-layer visibility.** Guest layer → the `event` audience until `published`; exclusion server-side on the shipped viewer classes. | A stranger before publish receives no guest-layer node, no counts, no bar heights, no sheet contents. A test asserts the payload, not the CSS. |
+| **0.3** | **Per-layer visibility.** Guest layer → the `event` audience until `published`; exclusion server-side on the shipped viewer classes. ✅ **Q1 RULED 2026-09-09: no counts, no bar heights, to a stranger before publish.** | A stranger before publish receives no guest-layer node, no counts, no bar heights, no sheet contents. A test asserts the payload, not the CSS. |
 | **0.4** | **Multi-day.** Select `event_end_date`; one segment per Manila calendar day. | A capture on day 2 never renders on a day-1 bar. |
-| **0.5** | `events.story_cover_kind` + `story_cover_ref`; `events.previous_event_id`; `panood_broadcasts.peak_concurrent_viewers`. | Migrations applied; Ugat map updated (two required db-tests will tell you). |
+| **0.5** | `events.story_cover_kind` + `story_cover_ref`; `events.previous_event_id`; `panood_broadcasts.peak_concurrent_viewers`; ✅ **and the `photo_messages` naming column** (`NOT NULL DEFAULT FALSE`) — Q2 ruled 2026-09-09. | Migrations applied; a signed-in read of `events` still returns rows (per-column grant allowlist); Ugat map updated (two required db-tests will tell you). |
 
 ## Phase 1 · The Story Maker  *(the host must be able to decide before anything publishes)*
 
@@ -45,14 +45,14 @@ fragment with a `SPEC IMPACT` line, `gh pr create`, then `gh pr merge <PR#> --au
 | # | Work | Done when |
 |---|---|---|
 | **3.1** | Words from `event_type_profiles.terminology`; single-name masthead when `person_b` is null. | No hard-coded "couple" survives a source scan. |
-| **3.2** | The solemn arm (or the refusal — `07` Q3). | A wake renders no Relive, no challenges, no anniversary. |
+| **3.2** | ✅ **The solemn arm — RULED 2026-09-09, build it.** Not the refusal. | A wake renders a story with no Relive, no challenges, no anniversary, no countdown. ⚠ The shipped refusal of the *joyful auto-composed recap* for a wake is untouched. |
 | **3.3** | Zero-supplier and no-venue empty states. | A hangout with no bookings shows no team tab and no #1-match tile. |
 
 ## Phase 4 · After publish
 
 | # | Work | Done when |
 |---|---|---|
-| **4.1** | **Taken back**, the revalidation set, the version stamp (`07` Q6). | A guest's withdrawal reaches the story, the recap, the print route and the OG card. |
+| **4.1** | ✅ **Taken back, the revalidation set, the version stamp — ALL RULED 2026-09-09, build all three.** | A guest's withdrawal reaches the story, the recap, the print route and the OG card. ⚠ A copy printed before this ships carries no stamp and can never know — never imply otherwise. |
 | **4.2** | Supplier reach: `?src=editorial&utm=story%3A{public_id}`; "how many reached them". | No copy anywhere promises identity. |
 | **4.3** | Anniversaries — No. 2 opens with "Previously · No. 1". | The back cover becomes a live door. |
 

@@ -60,7 +60,8 @@ plainly that it is **a calculation, not a measurement**.
 **② Guests** — Kwento wishes · challenge answers · letters · capture sets. Every card carries its
 consent state (`04`):
 * *"She asked to be named."* / *"Not named, by choice."*
-* the five yeses on a challenge answer
+* the five yeses on a challenge answer — ✅ and the fifth (**named only if they asked**) now covers
+  photo messages too, owner/DPO ruling 2026-09-09
 * **held-back items are shown as held back**: *"One of the twelve shows a guest who opted out of
   photos. That one is already held back — you cannot accept it, and it is not counted above."*
 
@@ -179,7 +180,7 @@ Three states, each naming **who can see it**:
 | **Draft** | the host. The desk fills before, during and after the day. |
 | **Guests only** | everyone holding the Papic QR. Not searchable, not shareable outside the day. |
 | **Published** | anyone with the link; may appear on setnayan.com. **The edition number is stamped here.** |
-| **Taken back** ⚠ | *see `07` — this state has no implementation today* |
+| **Taken back** ✅ | ✅ **RULED 2026-09-09 — BUILD IT** (`07` Q6), together with the full revalidation set and a version stamp on the printed edition. It has no implementation today; **S14** is the session. |
 
 Plus:
 * **Your last word** — always the host's own words; nobody writes it for them.
@@ -215,4 +216,7 @@ Plus:
 
 PRO today: **naming/writing the moments · section order · placing your own columns · featuring
 guest wishes.** The prototype shows them ungated; that was an omission, not a decision.
-**See `07` open question 8.**
+
+> ✅ **RULED 2026-09-09 — THE GATE STAYS EXACTLY AS SHIPPED. DO NOT RE-ASK.** Port the SCREENS
+> from the prototype and the GATE from the shipped editor. A prototype drawn without a gate is not
+> a decision to remove one, and shipping four paid abilities as free is a repricing nobody chose.

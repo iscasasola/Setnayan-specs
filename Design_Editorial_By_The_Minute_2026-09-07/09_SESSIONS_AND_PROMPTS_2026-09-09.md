@@ -22,24 +22,36 @@
 
 ## THE SHORT VERSION
 
-**Fifteen sessions in five waves.** Three are blocked on an owner answer and are marked ⛔.
+**Fifteen sessions in five waves.**
+
+> ✅ **2026-09-09 — ALL FIVE OWNER GATES ARE CLOSED. NOTHING IS BLOCKED. Do not re-ask any of
+> them.** Owner, shown all five defaults with what each costs: **_"follow your recommendations"_**.
+> Rulings, in full, with the Q6 correction: `07_Open_Questions.md`. **Every ⛔ below is struck.**
+>
+> | | Ruled |
+> |---|---|
+> | **Q1** | **No counts and no bar heights to a stranger before publish.** Flat baseline. |
+> | **Q2** | **The naming opt-in extends to photo messages** — unnamed unless the guest asked. The owner is the DPO, so this is the ruling itself. |
+> | **Q3** | **A wake gets the quiet arm** — a story with the joy taken out, not a refusal. |
+> | **Q6** | **Build "Taken back" AND stamp the printed edition.** ⚠ The row he was shown described today's defect rather than a recommendation — see `07` Q6 for the correction. |
+> | **PRO** | **Keep the gate as shipped.** The prototype's ungated screens were an omission, not a repricing. |
 
 | | What a person gets | Model | Effort | Runs after | Gate |
 |---|---|---|---|---|---|
 | **S1** | A photo lands on the minute it was **taken**, not the minute it uploaded | **Opus 5** | **high** | — | |
 | **S2** | The day's own photos fill the day — a hundred prenup shots stop eating it | **Opus 5** | **high** | S1 | |
-| **S3** | Guests' photos stay guests-only until the host publishes — **counts and all** | **Opus 5** | **high** | — | ⛔ Q1 |
+| **S3** | Guests' photos stay guests-only until the host publishes — **counts and all** | **Opus 5** | **high** | — | ✅ Q1 |
 | **S4** | The five things we do not store yet (columns only, nothing reads them) | **Sonnet 5** | medium | — | |
-| **S5** | One desk where the host decides everything, instead of four screens | **Opus 5** | **high** | S4 | ⛔ Q2 |
-| **S6** | Nothing the shipped editor can do is lost, plus the theme | **Opus 5** | medium | S5 | ⛔ PRO |
+| **S5** | One desk where the host decides everything, instead of four screens | **Opus 5** | **high** | S4 | ✅ Q2 |
+| **S6** | Nothing the shipped editor can do is lost, plus the theme | **Opus 5** | medium | S5 | ✅ PRO |
 | **S7** | A cover picture, and naming the next celebration (or naming none) | **Opus 5** | medium | S4 · S5 | |
 | **S8** | Publish — three states, the consent tick, the edition number stamped once | **Opus 5** | **high** | S5 · S6 | |
 | **S9** | The story becomes a clock: cover, dial, minutes, gaps | **Opus 5** | **high** | S1 · S2 · S3 | |
 | **S10** | The page's light moves morning → night, and the room lights up | **Opus 5** | **high** | S9 | |
 | **S11** | Everything at once: the index, search, Relive, "were you there?" | **Opus 5** | **high** | S9 | |
 | **S12** | The last word, the back cover, print and share | **Sonnet 5** | medium | S9 · S7 | |
-| **S13** | Every celebration that is not a wedding, including a wake | **Opus 5** | medium | S9 | ⛔ Q3 |
-| **S14** | A guest changes their mind **after** publish and it actually comes down | **Opus 5** | **high** | S8 | ⛔ Q6 |
+| **S13** | Every celebration that is not a wedding, including a wake | **Opus 5** | medium | S9 | ✅ Q3 |
+| **S14** | A guest changes their mind **after** publish and it actually comes down | **Opus 5** | **high** | S8 | ✅ Q6 |
 | **S15** | A supplier sees how many people reached them; No. 2 opens on No. 1 | **Sonnet 5** | medium | S7 · S12 | |
 
 ### Sequence
@@ -97,20 +109,30 @@ depends on, gets Opus at high effort.** Mechanical work with a written-down trap
 
 ---
 
-## THE THREE THINGS THE OWNER MUST ANSWER FIRST
+## ✅ THE FIVE OWNER GATES — ALL CLOSED 2026-09-09. DO NOT RE-ASK.
 
-Each blocks one session and nothing else. Defaults are in `07`; a session may not choose.
+Owner, shown all five with what each costs: **_"follow your recommendations"_**. Full text and
+reasoning: `07_Open_Questions.md`.
 
-| | Question | Blocks | Default if he says nothing |
-|---|---|---|---|
-| **Q1** | Before publish, may a stranger see the *shape* of the day — the bar heights, "492 captures", "26 phones" — without seeing one photo? | **S3** | **No.** Flat baseline, no counts. |
-| **Q2** | The DPO ruled a letter carries a name only if the writer asked. Does that also cover photo messages (Kwento)? | **S5** (and one column in S4) | **Yes** — unnamed unless asked. |
-| **Q3** | Does a wake get a story at all — the quiet arm, or does it keep its ordinary page as today? | **S13** | The **quiet arm** is built and demonstrable. |
-| **Q6** | Is there a "taken back" state, and does a printed copy carry an edition stamp so an out-of-date one can say so? | **S14** | Nothing today; the withdrawal lands on the next read and a print never knows. |
-| **PRO** | The prototype shows today's PRO-gated abilities ungated (naming moments, section order, own columns, featured wishes). Keep the gate, or move the tier line? | **S6** | Keep the gate as shipped. |
+| | Ruled | Which session now builds it |
+|---|---|---|
+| **Q1** | **No.** Before publish, a stranger sees flat baseline ticks — no counts, no bar heights. A count is still the guests' data. | **S3** |
+| **Q2** | **Yes, it extends.** A photo message carries a name only if the guest asked. New column, `NOT NULL DEFAULT FALSE`. ⚖ The owner **is** the registered DPO — this is the ruling itself, and must never be written up as outside counsel. | **S4** (column) · **S5** (the copy) |
+| **Q3** | **The quiet arm.** A wake gets a story: no Relive, no challenges, no anniversary, no countdown, the family's words. ⚠ Does **not** reverse the shipped refusal of the *joyful auto-composed recap* for a wake — different thing, stays refused. | **S13** |
+| **Q6** | **Build both** — the fourth state ("Taken back"), the full revalidation set, and the version stamp on print. | **S14** |
+| **PRO** | **Keep the gate exactly as shipped.** Naming/writing moments, section order, own columns, featuring wishes stay PRO. The prototype's ungated screens were an omission. | **S6** |
 
-**S1 · S2 · S4 · S7 · S8 · S9 · S10 · S11 · S12 · S15 need nothing from him.** That is ten of
-fifteen — start there.
+> ⚠ **THE Q6 ROW HE WAS SHOWN WAS WRONG-SHAPED, AND THIS IS THE CORRECTION.** Its "default" column
+> read *"nothing today; the withdrawal lands on the next read and a print never knows"* — **a
+> description of today's defect, not a recommendation.** *"Follow your recommendations"* cannot
+> mean *leave it broken*, so what is recorded is the recommendation actually made: a guest who
+> withdraws has it come down everywhere, and a printed copy can say which edition it is.
+> 🔑 **And say what the stamp cannot do:** a copy printed before S14 ships carries no stamp and can
+> never know. Paper cannot be recalled.
+
+⏭ **Still open, blocking nothing:** what the edition number counts for a non-wedding (**Q5**) ·
+whether "Featured" needs a different word (**Q7**) · whether a live outside link leaks a
+Setnayan-sourced lead (**Q8**) · **the Featured price.**
 
 ---
 
@@ -218,7 +240,7 @@ DONE WHEN: with 100 pre-day captures seeded the day's buckets still contain day-
 capture never renders on a day-1 bar; and the bar heights come from a count, not from the rows.
 ```
 
-## S3 · The guests' layer is invisible until publish — **Opus 5 · high** · ⛔ needs Q1
+## S3 · The guests' layer is invisible until publish — **Opus 5 · high** · ✅ Q1 RULED
 
 ```
 GOAL: before the host publishes, a stranger sees the invitation and the broadcast — and NOTHING
@@ -237,8 +259,9 @@ BUILD (01 §2, 04 rule 8, 08 step 0.3):
 - future bins (after "now", before publish) are a baseline tick with NO height. A bar's height is
   data about a minute that has not happened yet.
 
-OWNER GATE Q1 — do not decide this yourself: are aggregate counts and bar heights public before
-publish? DEFAULT, if he has not answered: NO. Flat baseline, no counts.
+✅ OWNER RULED 2026-09-09 — Q1 IS ANSWERED, DO NOT RE-ASK: NO. Aggregate counts and bar heights
+are NOT public before publish. A stranger gets flat baseline ticks and no counts. A count is still
+the guests' data. Build exactly that; do not offer him the other arm again.
 
 DONE WHEN: a test asserts THE PAYLOAD — not the CSS — contains no guest-layer node, no counts and
 no bar heights for a stranger before publish. A test that checks a class name proves nothing here.
@@ -280,7 +303,7 @@ returns rows; nothing reads the new columns yet.
 
 # WAVE B — THE STORY MAKER
 
-## S5 · One desk — **Opus 5 · high** · after S4 · ⛔ needs Q2
+## S5 · One desk — **Opus 5 · high** · after S4 · ✅ Q2 RULED
 
 ```
 GOAL: the host decides everything about their own story in ONE place. Today they must visit four
@@ -308,14 +331,18 @@ BUILD (02 §1–2, 08 steps 1.1 + 1.2):
   is monotone by construction — it can only ever show less). An unresolved veto withholds
   everything.
 
-OWNER GATE Q2: does a photo message carry a name only if the guest asked, as a letter does? The
-DPO ruled for letters; this was never put to them. DEFAULT: yes, unnamed unless asked.
+✅ OWNER RULED 2026-09-09 — Q2 IS ANSWERED, DO NOT RE-ASK: YES, the naming opt-in extends. A
+photo message carries a name only if the guest asked; otherwise it runs unnamed, exactly as a
+letter does. The role rides the same consent as the name — there is one maid of honour.
+⚖ The owner IS the registered DPO (NPC, 2026-07-07), so this is the DPO ruling extending its own
+earlier one. NEVER write it up as outside counsel or as "counsel cleared".
+The column S4 adds is NOT NULL DEFAULT FALSE, so a row that predates it publishes unnamed.
 
 DONE WHEN: a host decides every item without leaving the page; a rejected item is silent; a
 held-back capture cannot be accepted by any route including a hand-made request.
 ```
 
-## S6 · Nothing the shipped editor can do is lost — **Opus 5 · medium** · after S5 · ⛔ PRO
+## S6 · Nothing the shipped editor can do is lost — **Opus 5 · medium** · after S5 · ✅ PRO RULED
 
 ```
 GOAL: the host who already knows the editor loses nothing, and picks the story's colours from the
@@ -343,9 +370,12 @@ failure). The picker is the MOOD BOARD'S OWN swatch-popover.tsx — colour name,
 name, and a "from your mood board" row. Do not write a second picker. The six light stages repaint
 live underneath as colours change.
 
-OWNER GATE (PRO): the prototype shows today's PRO-gated abilities ungated — naming/writing the
-moments, section order, own columns, featuring wishes. That was an omission, not a decision.
-DEFAULT: keep the gate exactly as shipped.
+✅ OWNER RULED 2026-09-09 — THE PRO CHIPS GO BACK, DO NOT RE-ASK. Naming and writing the moments,
+section order, placing your own columns and featuring guest wishes stay PRO exactly as they ship
+today. The prototype drew them ungated; that was an omission, not a repricing. Port the SCREENS
+from the prototype and the GATE from the shipped editor — a prototype drawn without a gate is not
+a decision to remove one, and quietly shipping four paid abilities as free is a repricing nobody
+chose.
 
 DONE WHEN: a written checklist of every shipped editor capability is in the PR body, each ticked
 against the new page. Nothing is "probably still there".
@@ -538,7 +568,7 @@ the A3's QR resolves to the living page.
 
 # WAVE D — EVERY CELEBRATION THAT IS NOT A WEDDING
 
-## S13 · Sixteen kinds, and the quiet one — **Opus 5 · medium** · ⛔ needs Q3
+## S13 · Sixteen kinds, and the quiet one — **Opus 5 · medium** · ✅ Q3 RULED
 
 ```
 GOAL: the story holds for all sixteen live event kinds. The owner already ruled, 2026-08-15:
@@ -552,12 +582,13 @@ BUILD (05, 08 steps 3.1–3.3):
 - zero-supplier and no-venue empty states: a hangout with no bookings shows no team tab and no
   #1-match tile.
 
-⛔ THE SOLEMN ARM IS THE OWNER'S CALL (Q3), NOT YOURS. Shipped code already REFUSES the joyful
-recap for a wake outright, and the anniversary mail selector excludes the solemn register. Two
-arms: (a) refuse — a wake keeps its ordinary page, as today; (b) the quiet arm — the story runs
-with no Relive, no challenges, no anniversary, no countdown, and the family's words. (b) is built
-in the prototype and demonstrable, and Filipino wake culture is genuinely served by a page that
-records five nights, the mass, and who came from abroad. ASK, DO NOT CHOOSE.
+✅ OWNER RULED 2026-09-09 — BUILD ARM (b), THE QUIET ARM. DO NOT RE-ASK. A wake GETS a story:
+no Relive, no challenges, no anniversary, no countdown, and the family's words. Filipino wake
+culture is served by a page that records five nights, the mass, and who came from abroad.
+⚠ THIS DOES NOT REVERSE THE SHIPPED REFUSAL OF THE JOYFUL AUTO-COMPOSED RECAP FOR A WAKE — that
+stays refused, and the anniversary mail selector still excludes the solemn register. Two different
+things: the recap composes itself in a joyful voice with nobody's hand on it; the story is written
+by the family. Do not "simplify" them into one gate.
 
 ⚠ Key the solemn gate on the REGISTER, not on a surface flag — the funeral build already learned
 this and its test freezes every celebratory type byte-identical.
@@ -570,7 +601,7 @@ exactly the arm the owner chose.
 
 # WAVE E — AFTER PUBLISH
 
-## S14 · Taken back — **Opus 5 · high** · after S8 · ⛔ needs Q6
+## S14 · Taken back — **Opus 5 · high** · after S8 · ✅ Q6 RULED
 
 ```
 GOAL: a guest changes their mind after publish and it actually comes down — everywhere.
@@ -586,8 +617,15 @@ BUILD (08 step 4.1): every consent write revalidates the story, the recap, the p
 busts the OG card; the fourth publish state, "Taken back", with its cache invalidation named; and
 a version stamp so a printed copy can say which edition it is.
 
-⛔ OWNER GATE Q6: is there a "taken back" state at all, and does a printed edition carry a version
-stamp? Both are his.
+✅ OWNER RULED 2026-09-09 — BUILD BOTH, DO NOT RE-ASK. The fourth state ("Taken back") and the
+version stamp on the printed edition.
+⚠ THE ROW HE ANSWERED WAS WRONG-SHAPED AND THIS IS THE CORRECTION: the register printed Q6's
+"default" as "nothing today; the withdrawal lands on the next read and a print never knows" —
+that is a DESCRIPTION OF TODAY'S DEFECT, not a recommendation. "Follow your recommendations"
+cannot mean "leave it broken", so what is recorded is the recommendation actually made.
+🔑 SAY WHAT THE STAMP CANNOT DO, in the copy and in the PR: a copy printed BEFORE this ships
+carries no stamp and can never know. Paper cannot be recalled — the stamp lets a reader CHECK.
+Never write copy that implies a printed page can be reached.
 
 🔑 ENUMERATE THE READERS. A fix applied to one of them is not a fix — that lesson has been paid
 for five times in this repo. Grep every reader of the preserved fact before declaring this done.

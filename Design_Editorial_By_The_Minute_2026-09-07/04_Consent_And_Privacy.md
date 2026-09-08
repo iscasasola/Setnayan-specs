@@ -19,12 +19,19 @@ Three of the review's blockers were here. These are not guidelines.
 | **9** | **A guest can act on their own consent from the story.** "Hide it, or ask to be unnamed" — and it comes down everywhere, including the next print run. | Before this the host had every switch and the guest had none. |
 | **10** | **The blur is all faces, not one.** A table of ten with one opt-out renders as ten blurred faces. Owner chose this knowingly 2026-08-18. Do not "improve" it into a partial blur without re-asking. | |
 
-## 2 · Two open DPO questions — do not decide in code
+## 2 · Two DPO questions — ✅ BOTH RULED 2026-09-09. Do not re-ask, do not re-decide in code.
 
-* **Does the naming opt-in extend to Kwento?** The DPO ruled on guest columns. `DECISION_LOG`
-  records: *"Whether the ruling extends to photo messages was never put to the DPO and is NOT
-  decided."* The design **assumes yes** and shows unnamed-by-default. See `07` Q2.
-* **Are aggregate counts and bar heights public before publish?** Defaulted to **QR-only**. `07` Q1.
+* **Does the naming opt-in extend to Kwento? — YES.** A photo message carries a name only if the
+  guest asked to be named; otherwise it runs unnamed, exactly as a letter does. ⚖ **The owner is
+  the registered DPO** (NPC DPO system, 2026-07-07), so this IS the DPO ruling extending its own
+  earlier one — not a proxy for it, and **not outside counsel**. It supersedes `DECISION_LOG`'s
+  *"never put to the DPO and is NOT decided."*
+  **Needs:** a column on `photo_messages` modelled on `guest_columns.author_named_publicly` —
+  `BOOLEAN NOT NULL DEFAULT FALSE`, so the safe value is what a pre-existing row publishes as.
+  🔑 **The role rides the same consent as the name.** There is one maid of honour; a role is
+  exactly as identifying.
+* **Are aggregate counts and bar heights public before publish? — NO.** A count is still the
+  guests' data. A stranger sees flat baseline ticks, no counts, no heights, before publish.
 
 ## 3 · Withdrawal after publish ⛔ unhandled today
 
@@ -36,9 +43,13 @@ Meanwhile `/[slug]/recap` and `/[slug]/print` are `revalidate = 300` and the OG 
 
 **So a withdrawal today comes down on the next read and not before, and a printed copy never knows.**
 
-**Fix:** every consent write revalidates the story, the recap, the print route and busts the OG
-card; the story carries a version stamp so a printed copy can say which edition it is; and the
-Story Maker gains a fourth state — **Taken back** — with the cache invalidation named. See `07` Q6.
+**Fix — ✅ RULED 2026-09-09, BUILD IT (`07` Q6):** every consent write revalidates the story, the
+recap, the print route and busts the OG card; the story carries a version stamp so a printed copy
+can say which edition it is; and the Story Maker gains a fourth state — **Taken back** — with the
+cache invalidation named.
+🔑 **Say what the stamp cannot do:** a copy printed before this ships carries no stamp and can
+never know. Paper cannot be recalled — the stamp lets a reader CHECK, it does not reach a printed
+page. Never let copy imply otherwise.
 
 ## 4 · Copy that is already correct — keep it verbatim
 
