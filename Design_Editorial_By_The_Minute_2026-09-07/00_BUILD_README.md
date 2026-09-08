@@ -40,6 +40,7 @@ the room lit by the minute + colours from the host's own saved board.
 | `06_Supplier_Tiers.md` | Listed vs Featured, and the rule that never bends |
 | `07_Open_Questions.md` | Eight decisions that are the owner's, not engineering's |
 | `08_Build_Order.md` | The sequence, with acceptance criteria per step |
+| `09_SESSIONS_AND_PROMPTS_2026-09-09.md` | **The sessions** — ready-to-paste prompt, model, effort and order for each of the fifteen |
 
 ## Rename — decision, 2026-09-07
 

@@ -6,6 +6,10 @@
 > travel to a new account — the files here are the durable copy.)
 >
 > **Full build documentation:** `00_BUILD_README.md` → `08_Build_Order.md` in this folder.
+> **The build plan:** `09_SESSIONS_AND_PROMPTS_2026-09-09.md` — fifteen sessions, each with its
+> ready-to-paste prompt, its model and effort, what it runs after, and the three owner answers
+> that block three of them. **Nothing in this folder is built yet** (measured against
+> `origin/main` `df0d78d16`, 2026-09-09).
 > **Supersedes** the newspaper front-page layout of `02_Specifications/Editorial_Experience_Spec_2026-06-18.md`
 > **for the public story surface only.** Everything that spec locks about CONTENT — the three
 > voices, the locked close, the A3 keepsake, the edition number, "What We Made Together" — stands.
