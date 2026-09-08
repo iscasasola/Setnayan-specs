@@ -94,6 +94,12 @@ lands_in}`.
 
 ## 3 · Volume — the read that starves ⛔
 
+✅ **RESOLVED (data layer) 2026-09-09 · PR #5329.** Both timeline reads now bound to
+`events.event_date`..`events.event_end_date` (Manila days), via new `lib/story-day-window.ts`; a
+new `story_dial_bucket_counts` RPC serves zero-filled per-bucket COUNTs for future bar heights.
+⚠ Still open: presigning only the reader's opened bin (no per-bin API route exists — needs the
+Phase 2 dial UI, S9) and the RA 10173 consent veto on the RPC's counts (08 step 0.3 / S3).
+
 `data.ts` reads the day timeline as
 `.from('papic_photos').order('captured_at', {ascending:true}).limit(EDITORIAL_TIMELINE_PHOTO_CAP)`
 with the cap at **48** and **no `captured_at >= event_date` bound**. With ~100 pre-day captures
