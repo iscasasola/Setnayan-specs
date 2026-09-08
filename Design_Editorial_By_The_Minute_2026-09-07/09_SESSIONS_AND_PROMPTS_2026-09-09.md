@@ -58,21 +58,47 @@
 
 ```
 WAVE A (data)      S1 → S2        ‖   S4        ‖   S3
-WAVE B (the desk)  S5 → S6 → S8   ‖   S7
+WAVE B (the desk)  S5 → S6 → S8 → S7            ← ONE LANE. S7 lives inside S5's route.
 WAVE C (the page)  S9 → S10       ‖   S11
 WAVE D (the rest)  S12  ‖  S13
 WAVE E (after)     S14  ‖  S15
 ```
+
+**The desk lane (B) and the page lane (C) are the two that genuinely run side by side** — the
+host's desk and the public page share no files. That is the pair to run when you want two at once.
+
+### ▶ STATE, 2026-09-09 — measured, not read
+
+| | | |
+|---|---|---|
+| **S1** | ✅ **MERGED + SERVED** — PR [#5332](https://github.com/iscasasola/setnayan-platform/pull/5332). Verified IN PROD BY THE OBJECT: `papic_record_guest_capture` now takes `p_captured_at`. |
+| **S3** | ✅ **MERGED** — PR [#5331](https://github.com/iscasasola/setnayan-platform/pull/5331), built with the Q1 ruling. |
+| **S4** | ✅ **MERGED + SERVED** — PR [#5330](https://github.com/iscasasola/setnayan-platform/pull/5330). All five columns verified in prod, and `photo_messages.author_named_publicly` is `NOT NULL DEFAULT FALSE` — the Q2 ruling is in the database. |
+| **S2** | 🔶 **BUILT, PR [#5329](https://github.com/iscasasola/setnayan-platform/pull/5329) OPEN, auto-merge armed.** Failed `typecheck + lint` once on an unrelated guard (*native encoder tests*) that `main` passes; branch updated 2026-09-09, CI re-running. **Verify its state before trusting this row.** |
+| **S5** | ▶ **RUNNING** (owner launched it 2026-09-09). Do not start S6 or S7 alongside it. |
+| **S9** | ⏭ **THE ONE TO RUN NEXT TO S5** — unblocked the moment S2 merges (it needs S1 ✅ · S3 ✅ · S2 🔶). |
+
+⚠ **Verify every row above with `gh pr view <n> --json state,mergedAt`** before acting on it. A
+checkmark in a register is not evidence; this corpus has been wrong about a PR's state five times,
+and one of these rows was already ticked as DONE while its PR sat open and red.
 
 **Never more than two at once.** Ten parallel builds once shipped 44 defects, and this machine
 has killed a typecheck twice under four concurrent sessions — `tsc` exits **134 / 143 / 144**
 while printing `errors=0`, so a session under contention can read its own typecheck as a pass.
 **Print `TSC_EXIT` beside `ERROR_LINES`; either one alone is a lie.**
 
-**Safe pairs:** S1+S3 · S1+S4 · S2+S4 · S5+S7 · S9+S11 (different files) · S13 with anything ·
-S12+S15.
+**Safe pairs:** S1+S3 · S1+S4 · S2+S4 · **S5+S9** (one is the host's desk, the other is the public
+page — different trees entirely) · S9+S11 · S13 with anything · S12+S15.
+
 ⛔ **Never together:** S1+S2 (one capture path) · **S2+S3** (both rewrite the story's server read)
-· S5+S6 (one desk page) · **S9+S10** (one render tree) · S8 with S5 or S6.
+· S5+S6 (one desk page) · **S5+S7 and S6+S7** · **S9+S10** (one render tree) · S8 with S5 or S6.
+
+> 🔴 **CORRECTED 2026-09-09 — THIS FILE CONTRADICTED ITSELF ON S5+S7 AND THE PAIR LIST WAS THE
+> WRONG HALF.** It listed S5+S7 as a *safe pair* while the table above says S7 **runs after S5**,
+> and both are true only if you never read the second one. **They are not parallel: S7 builds two
+> STEPS INSIDE the route S5 creates**, so running them together is two sessions editing one page.
+> The dependency column was right; the pair list was wrong. *A register that says a thing twice
+> will be read from whichever half is convenient.*
 
 ---
 
