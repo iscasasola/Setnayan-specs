@@ -586,7 +586,23 @@ sample palettes; a ceremony minute shows rows; a roaming event shows no plan; an
 in the seating markup at all.
 ```
 
-## S11 · Everything at once — **Opus 5 · high** · after S9
+## S11 · Everything at once — **Opus 5 · high** · ✅ S9 AND S10 ARE MERGED AND SERVED
+
+> ▶ **REFRESHED 2026-09-09 for launch.** S9 (PR #5342) and S10 (PR #5349) are merged and
+> **served** — production self-reported their commits, and the clock was read back out of the live
+> page. **You are extending shipped code, not writing beside a prototype.** ⛔ **S12 must not run
+> while you hold this** — same render tree.
+>
+> 🔴 **TWO THINGS FOUND ON THE LIVE PAGE THAT ARE YOURS:**
+> 1. **Two counts of one thing, on one page.** The new cover says **14 captures**; the older *By
+>    the Numbers* block lower down says **15 Photos & …**. The database holds 13 photos + 1 clip =
+>    **14**, so the cover matches and the older block does not — **but they may be counting
+>    different populations under one word, which is worse than a wrong number.** Establish what
+>    each counts BEFORE changing either; do not make one match the other.
+> 2. **The only published story in prod has an empty day.** All 14 of its captures fall outside its
+>    own event day, so the dial's day is flat and the index will be nearly bare. That is the data,
+>    not the build — **seed a day-of capture before judging your own work**, and never "fix" an
+>    empty index by widening a read S2 deliberately bounded.
 
 ```
 GOAL: a reader can find anything in the day, and a guest can find themselves in it.
