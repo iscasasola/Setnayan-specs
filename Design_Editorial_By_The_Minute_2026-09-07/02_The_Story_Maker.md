@@ -173,6 +173,27 @@ event pre-filled and linked).
 
 ## 8 · PUBLISH
 
+🔶 **BUILT 2026-09-09 (S8 · 08 step 1.6) — verify the PR's state before trusting this line.**
+
+⚠ **ONE DEPARTURE FROM THE PROTOTYPE, AND IT IS NOT A PORT DEFECT.** The prototype selects a state
+and then presses a separate **"Publish the story"** button in a footer bar. What shipped makes **the
+rung the press** — it saves the whole story AND sets who may read it — because that is the shipped
+editor's own decision and its reason is stronger than the prototype's layout: *"Save draft /
+Publish"* made privacy a side effect of which button you reached for, and left a host able to
+believe they had saved when they had only changed who reads. A separate publish button re-opens
+exactly that gap. **"Publish is disabled" therefore means the Published RUNG is disabled**, which is
+what this section asks for.
+
+⚠ **AND THE PROTOTYPE'S MIDDLE RUNG READS "your 120 guests".** That is a filled mock-up, not a
+template — this screen holds no headcount, and a wrong number printed under the words *who can see
+it* is worse than none. The shipped rung says WHO (*the people holding your Papic QR*); how many is
+a different question and nobody is guessing at it.
+
+🔑 **ONLY THE WAY UP IS GATED.** Draft and guests-only are always available. That is load-bearing
+rather than a kindness: the consent tick's own last sentence promises the host they can go back to
+guests-only whenever, so a gate on the way DOWN would break a promise printed directly above it and
+strand a host at published the moment one new thing landed on their desk.
+
 Three states, each naming **who can see it**:
 
 | State | Who |
@@ -180,7 +201,7 @@ Three states, each naming **who can see it**:
 | **Draft** | the host. The desk fills before, during and after the day. |
 | **Guests only** | everyone holding the Papic QR. Not searchable, not shareable outside the day. |
 | **Published** | anyone with the link; may appear on setnayan.com. **The edition number is stamped here.** |
-| **Taken back** ✅ | ✅ **RULED 2026-09-09 — BUILD IT** (`07` Q6), together with the full revalidation set and a version stamp on the printed edition. It has no implementation today; **S14** is the session. |
+| **Taken back** ✅ | ✅ **BUILT 2026-09-09 — S14, PR [#5371](https://github.com/iscasasola/setnayan-platform/pull/5371)** (verify its state before trusting this line). The host only, after it had been everyone's. ⚠ **OFFERED ONLY TO A STORY THAT HAS ACTUALLY BEEN PUBLISHED** — asked of the stamped `edition_no`, the one fact the database refuses to move; a story that never left the desk has nothing to take back, and pressing it would record that it had once been public. 🔑 It READS exactly like Draft, and that equality is the safety argument: every shipped reader asking `status = 'published'` refuses it unedited. The round trip keeps the edition number. |
 
 Plus:
 * **Your last word** — always the host's own words; nobody writes it for them.

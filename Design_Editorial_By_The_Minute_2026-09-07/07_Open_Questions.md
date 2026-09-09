@@ -24,6 +24,13 @@ purpose.
 so his answer is the extension of the guest-columns ruling, not a proxy for one. It is **not**
 outside counsel and must never be written up as "counsel cleared".
 
+✅ **TWO MORE RULED 2026-09-09, both direct to the session that asked (S10). Do not re-ask.**
+
+| | Ruled | Where it lives |
+|---|---|---|
+| **The loudest table's colour** | **GOLD** — *"gold is fine"*. Fixed, exactly as the prototype draws it; **not** derived from the couple's board. S10 had shipped it in their own accent, reasoning from owner lock 2, and flagged the departure; he was shown both and chose the gold. 🔑 **The loudest table is candlelight, not a swatch** — lock 2 governs the story's paper and its ink, not every mark on the page. ⚠ Its RIM is still corrected per light-stage, because the fixed gold measures only ~1.9:1 against the daylight grounds and would otherwise vanish as an edge. | `CANDLE` in `lib/story-light.ts` |
+| **Small counts** | **WITHHELD** — *"yes that's the ruling"*, confirming the ruling S6 relayed. A table with one or two photographs shows a reader nothing. 🔑 **His reason was not the one he was asked** (it was put as privacy): *"this will subconsciously tell them they did not create enough memories for the story"* — so it is the rule that **the story never passes judgement on the day it is telling**, and it is HOUSE STYLE for any small number anywhere in the story, not a seating special case. | `SMALL_COUNTS_ARE_A_VERDICT` in `lib/story-room.ts` |
+
 ⏭ **STILL OPEN AND NOT RULED: Q5 · Q7 · Q8, and the Featured price.** None of them blocks a
 session.
 
@@ -123,9 +130,38 @@ the story surface; §3 still governs the schedule tapper and the print keepsake.
 **Today:** unchanged and left filtering weddings, with the reason recorded in
 `WEDDING_ONLY_BY_DESIGN` — *a filter not to flip quietly.*
 
+⚠ **THE FILTER MOVED HOUSE 2026-09-09 (S8), AND ITS `WEDDING_ONLY_BY_DESIGN` ENTRY MOVED WITH IT.**
+The number used to be recomputed on every render inside
+`app/[slug]/_components/editorial/data.ts`; it is now **stamped once at publish** by
+`lib/story-edition.ts`, which is where the `.eq('event_type','wedding')` — and the exemption naming
+this question — now lives. That file no longer counts anything. **Nothing about the answer changed;
+only the address did.**
+
+🔑 **AND FLIPPING IT IS NOW A DECISION WITH A BEFORE AND AN AFTER, NOT A TIDY-UP.** Because the
+number is frozen at publish and the database refuses to move it, changing what the No. counts would
+give future stories a different population from the ones already stamped, and no way to reconcile
+them. That is an argument for ruling it, not against — but it is worth knowing before it is ruled.
+
 ---
 
-### Q6 · Unpublish, and withdrawal after publish
+### Q6 · Unpublish, and withdrawal after publish — ✅ **RULED AND BUILT 2026-09-09**
+
+> ✅ **BUILT — PR [#5371](https://github.com/iscasasola/setnayan-platform/pull/5371) (S14).**
+> Verify with `gh pr view 5371 --json state,mergedAt` before trusting this line; a ✅ in a
+> register is not evidence.
+> · Nine consent writes now call ONE list, `lib/a-withdrawal-reaches-every-copy.ts`.
+> · The share card is busted by **moving its URL** (`?v={story_version_at}`), because
+> `revalidatePath` cannot reach a `Cache-Control` header — calling it there would have looked
+> like a fix and done nothing.
+> · The fourth rung ships, offered only to a story that has actually been published.
+> · The printed keepsake carries the moment it was true, in the celebration's own zone.
+>
+> 🔑 **AND THE ANSWER TO "how many writers are there" WAS WRONG IN THIS DOCUMENT.** Deriving the
+> population from the source instead of listing it found **four more**: the account-level RA
+> 10173 opt-out (which reached one host screen), the RSVP selfie and the day-of face enrolment
+> (both LIFT a veto), and soft-deleting a guest (which un-vetoes every capture that tagged them).
+> ⚖ That last one is a **widening hidden inside a delete** and whether it is the right rule is an
+> OWNER question — S14 changed only the caches, never the rule.
 
 > ✅ **RULED 2026-09-09 — BUILD BOTH.** The fourth publish state (**Taken back**), the full
 > revalidation set on every consent write, and a version stamp on the printed edition.

@@ -34,7 +34,7 @@ Three of the review's blockers were here. These are not guidelines.
 * **Are aggregate counts and bar heights public before publish? — NO.** A count is still the
   guests' data. A stranger sees flat baseline ticks, no counts, no heights, before publish.
 
-## 3 · Withdrawal after publish ⛔ unhandled today
+## 3 · Withdrawal after publish ✅ BUILT — S14, 2026-09-09
 
 The only `photo_consent = false` write is the host's guest form; its revalidations are
 `/dashboard/${eventId}/guests` and `backTo` — **never** `/${slug}`, `/${slug}/recap` or
@@ -42,12 +42,103 @@ The only `photo_consent = false` write is the host's guest form; its revalidatio
 Meanwhile `/[slug]/recap` and `/[slug]/print` are `revalidate = 300` and the OG card is
 `max-age=3600, stale-while-revalidate=86400`.
 
-**So a withdrawal today comes down on the next read and not before, and a printed copy never knows.**
+**So a withdrawal used to come down on the next read and not before, and a printed copy never knew.**
 
-**Fix — ✅ RULED 2026-09-09, BUILD IT (`07` Q6):** every consent write revalidates the story, the
-recap, the print route and busts the OG card; the story carries a version stamp so a printed copy
-can say which edition it is; and the Story Maker gains a fourth state — **Taken back** — with the
-cache invalidation named.
+> ✅ **SHIPPED 2026-09-09 — S14.** Every consent write now calls ONE list
+> (`lib/a-withdrawal-reaches-every-copy.ts` · `everyCopyIsNowStale`), which stamps
+> `event_editorial.story_version_at` and then throws away the story, the recap, the keepsake and
+> the nested account URL. **The share card is busted by MOVING ITS URL** — `og:image` carries
+> `?v={story_version_at}` — because `revalidatePath` cannot reach a `Cache-Control` header, and
+> calling it on that route would have looked like a fix and done nothing.
+>
+> 🔑 **FOUR WRITERS NOBODY HAD COUNTED WERE FOUND BY DERIVING THE POPULATION RATHER THAN LISTING
+> IT**, and they are the reason this section understated the problem:
+> · the **account-level RA 10173 opt-out** (`optOutOfEventStory` — *"remove me from this event's
+> story entirely"*) reached only `/dashboard/people`, the person's own account page;
+> · the **RSVP selfie** and the **day-of face enrolment** both write `photo_consent = TRUE`, so
+> they LIFT a veto — photographs the story was withholding become showable, and a change in that
+> direction publishes exactly as urgently as one in the other;
+> · **soft-deleting a guest un-vetoes every capture that tagged them**, because the veto reads
+> opted-out guests `AND deleted_at IS NULL`. A widening hidden inside a delete. ⚖ Whether that is
+> the right RULE is an owner question and was NOT changed — only the caches now find out.
+>
+> ⛔ **AND THE FOURTH STATE SHIPPED WITH IT** — `event_editorial.status` accepts `taken_back`; the
+> ladder offers it only to a story that has actually been published.
+
+> 🔴 **AND ONE CLAIM THIS CORPUS MADE ABOUT THE RECAP IS FALSE. THE NUMBER WAS RIGHT AND THE
+> SENTENCE IT BECAME WAS NOT.** S8 recorded, in a merged PR and in two code comments, that
+> `/[slug]/recap` *"does not read `event_editorial` at all — measured, 0 references in
+> `recap/page.tsx` and `lib/auto-recap.ts`."* Re-measured on `origin/main` after S7 refused to
+> restate it:
+>
+> ⚠ **RE-MEASURE; DO NOT QUOTE THE NUMBERS** (repo `CLAUDE.md` rule 7 — *an anchor is a string,
+> never a number*). **The commands ARE the citation.** What they returned on 2026-09-09 is a dated
+> observation, not a fact to carry forward — and this table is written this way BECAUSE the false
+> sentence it corrects was itself a number quoted as a fact.
+>
+> | command | 2026-09-09 |
+> |---|---|
+> | `grep -c event_editorial apps/web/app/[slug]/recap/page.tsx` | 0 |
+> | `grep -c event_editorial apps/web/lib/auto-recap.ts` | 0 |
+> | `grep -n loadEditorialData apps/web/lib/auto-recap.ts` | the import · `assembleRecapModel` · `loadRecapCardData` · `heroUrl: editorial.heroPhotoUrl ?? …` |
+> | `grep -n 'heroPhotoUrl: card.heroUrl' apps/web/app/api/og/recap/[slug]/route.ts` | present — **the chain reaches the SHARE CARD** |
+> | `grep -c audience apps/web/lib/auto-recap.ts` | 0 |
+>
+> ⇒ **The recap reads the story's row ONE HOP AWAY, where a grep for a table name cannot see it.**
+> Correct fact, invented consequence — the same shape as the migration-prefix belief this project
+> has killed twice.
+> ⚖ **What survives is the conclusion that was actually needed:** narrowing the story's audience
+> does not hide the recap, because it has its own switch. That had to be measured on the word
+> **`audience`**, not on the name of a table — a grep for the wrong noun gave the right answer for
+> the wrong reason, and the wrong reason is what got written down.
+> 🔑 **What does not survive is the half S14 turns on:** a withdrawal is FULLY binding on the
+> recap. `loadEditorialData` applies the consent veto to the very hero the recap leads with, and
+> that site deliberately keeps the DROP rather than the 2026-08-17 blur.
+> ⚖ **AND THE RECAP INHERITS THAT DROP** (S7, 2026-09-09): its hero IS `editorial.heroPhotoUrl` —
+> the very rung carrying the exemption — so the story and the recap refuse the same photograph
+> today.
+>
+> 🔑 **THE DROP BELONGS TO THE ROLE — "lead image" — NOT TO A FILE.** Stated as *"do not change
+> `data.ts`'s hero rung"*, the next person adds a FIFTH lead-image surface somewhere else and
+> softens there in perfectly good faith, and nothing fails. Stated as a role, the rule travels
+> with the job. S7 acted on it the right way round: the drop now lives inside `resolveStoryCover`
+> itself (`if (veto.failed || veto.ids.has(photoId)) return null;` **before** the softener), so
+> there is no second path for a lead image to soften through — **four surfaces, one answer, one
+> place.**
+>
+> ⚠ **THE DEFECT THIS PREVENTED WAS LIVE, NOT HYPOTHETICAL** (fixed in PR #5370 before merge):
+> a vetoed capture chosen as the cover would have been DROPPED at the top of the story and
+> **published with every face blurred** on the `/realstories` shelf card and the 1200×630 share
+> card. Three surfaces disagreeing about one photograph, and the two that disagreed were the
+> published ones. ⚖ **The blur is not "safer than nothing" for a LEAD image** — owner ruling
+> 2026-08-17 softened the gallery precisely so a group shot is not deleted, and the lead image is
+> the one place that ruling deliberately does not reach.
+> ⚠ **The false sentence had reached THREE copies** — and two of them were written by the session
+> "correcting" it. Corrected in all three.
+>
+> 🔑 **AND IT WAS WRONG WHEN WRITTEN, NOT DRIFTED — the question was asked and then MEASURED
+> rather than left open.** Re-run it yourself; the command is the anchor, never the count:
+> `git log -S loadEditorialData -- apps/web/lib/auto-recap.ts` returns **exactly one commit**, and
+> it is the file's own first — the day the Auto-Recap shipped, nearly three months before S8. The
+> call was present both at S8's merge commit AND **at its parent**
+> (`git show <merge>^1:apps/web/lib/auto-recap.ts | grep -c loadEditorialData`).
+> **There is no version of this repository in which that sentence was true.** Not drift — it was
+> never checked in the direction it was used, and it was published carrying the word *"measured"*,
+> which is precisely what made two later sessions trust it without re-running anything.
+>
+> ⚖ **It cost a second session a defect it had not shipped yet.** S7 was about to close a
+> cover-image gap by teaching `loadEditorialData`'s hero ladder to prefer the host's chosen cover
+> — which, on this chain, would have silently propagated the story's cover onto the Auto-Recap and
+> its share card, a fourth surface `02` §6 does not name, with its own switch and its own
+> audience. It changed shape to a separate field on `EditorialData` that only the story's masthead
+> reads. **A false line in a document is not inert; it is a design input.**
+
+**⚠ VERIFY BEFORE TRUSTING THIS BLOCK:** `gh pr view 5371 --json state,mergedAt`.
+
+**Fix — ✅ RULED 2026-09-09 AND BUILT THE SAME DAY (`07` Q6):** every consent write revalidates the
+story, the recap, the print route and busts the OG card; the story carries a version stamp so a
+printed copy can say which edition it is; and the Story Maker gains a fourth state — **Taken
+back** — with the cache invalidation named.
 🔑 **Say what the stamp cannot do:** a copy printed before this ships carries no stamp and can
 never know. Paper cannot be recalled — the stamp lets a reader CHECK, it does not reach a printed
 page. Never let copy imply otherwise.
