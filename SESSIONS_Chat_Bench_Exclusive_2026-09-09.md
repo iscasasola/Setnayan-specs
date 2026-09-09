@@ -31,9 +31,9 @@ drawing or product judgement; it is not a coding tier.
 
 | # | session | model · effort | depends on | why that tier |
 |---|---|---|---|---|
-| ~~**S1**~~ | 🛑 **CLOSED — DO NOT BUILD.** The change card is not missing; it was **built and deleted on purpose** (commit `d3350b8e2`, 2026-07-24, council verdict *"as simple as possible"* — the bundled **Deal** is a superset, so couples see ONE money card). Its producing chip went with it, and both writers of `chat_messages.change_order_id` have **zero importers**, so **nothing can put that marker on a message**. **Decisions therefore cannot omit a change — it is a THREE-marker filter** (`proposal_id · appointment_id · amendment_id`) + the payment and guest-count cards. Held by `lib/the-change-marker-is-retired.test.ts`. ⏭ Reversing that verdict is an **owner decision**, not a session. 🔴 **AND A BIGGER ONE SURFACED — corrected twice, third reading measured.** Accepting is an AGREEMENT by design; the money lands at **LOCK** (`total_cost_php`, an absolute write) and the couple is prompted with the exact figure, so the not-yet-booked path is fine. **The defect is the ALREADY-BOOKED path:** a `contracted` supplier is deliberately never repriced, yet the couple is still told *"Deal locked — price frozen"* while the budget keeps the old number. 🛑 **The obvious fix corrupts the budget** — a delta line on a headline-billed supplier returns **−₱15,000**, not ₱85,000 (pinned in `lib/a-settled-delta-must-not-erase-the-headline.test.ts`; `accept_change_order` already carries it). **Two owner decisions, neither taken.** | — | — | ⚠ Prod could not have answered this: **3 chat messages total, zero rows on ALL FOUR markers**, including the two that work — emptiness cannot tell *unreachable* from *unused*. The import count can. |
+| ~~**S1**~~ | 🛑 **CLOSED — DO NOT BUILD.** The change card is not missing; it was **built and deleted on purpose** (commit `d3350b8e2`, 2026-07-24, council verdict *"as simple as possible"* — the bundled **Deal** is a superset, so couples see ONE money card). Its producing chip went with it, and both writers of `chat_messages.change_order_id` have **zero importers**, so **nothing can put that marker on a message**. **Decisions therefore cannot omit a change — it is a THREE-marker filter** (`proposal_id · appointment_id · amendment_id`) + the payment and guest-count cards. Held by `lib/the-change-marker-is-retired.test.ts`. ⏭ Reversing that verdict is an **owner decision**, not a session. 🔴 **AND A BIGGER ONE SURFACED — corrected twice, third reading measured.** Accepting is an AGREEMENT by design; the money lands at **LOCK** (`total_cost_php`, an absolute write) and the couple is prompted with the exact figure, so the not-yet-booked path is fine. **The defect is the ALREADY-BOOKED path:** a `contracted` supplier is deliberately never repriced, yet the couple is still told *"Deal locked — price frozen"* while the budget keeps the old number. 🛑 **The obvious fix corrupts the budget** — a delta line on a headline-billed supplier returns **−₱15,000**, not ₱85,000 (pinned in `lib/a-settled-delta-must-not-erase-the-headline.test.ts`; `accept_change_order` already carries it). ✅ **CLOSED — owner chose the reprice.** The already-booked branch writes `total_cost_php` (price only), every price write now reports whether the row MATCHED, and `lockDeal` refuses to stamp when it did not. Held by `lib/a-locked-deal-reaches-the-budget.test.ts`. ⏭ Still open: making a delta line safe on a headline-billed supplier (would also repair `accept_change_order`). | — | — | ⚠ Prod could not have answered this: **3 chat messages total, zero rows on ALL FOUR markers**, including the two that work — emptiness cannot tell *unreachable* from *unused*. The import count can. |
 | **S2** | **Decisions** — the All · Decisions · Files switch, every card's **NOW** line, the standing sentence. **THREE markers, not four** (see S1). | opus · **xhigh** | — (S1 closed) | Three sources merge into one timeline (messages, the guest-count card, the payment card), and only the five ladder words may wear a pill. The most conceptually loaded piece left. |
-| **S3** | **The conversation column** — the list beside the thread, its filter chips, the batched row builder. A branch is PARKED at `claude/parked-conversation-column`; reconcile with v4 first. | opus · **high** | — | Batched reads and a stage per row; easy to get quietly wrong. |
+| ~~**S3**~~ | ✅ **BUILT — BOTH SIDES.** The list beside the thread, its chips, the batched row builder. PR [#5347](https://github.com/iscasasola/setnayan-platform/pull/5347). The parked branch was found and reconciled, not restarted. See § S3 below. | opus · **high** | — | Batched reads and a stage per row; easy to get quietly wrong. |
 | **S4** | **Short previews** — fact-first generated lines; the element that could not ellipsis; the tag shown only when it varies. | sonnet · **medium** | S3 | Mechanical once the column exists. ⚠ The supplier's `/vendor-dashboard/bookings` inbox ALREADY renders a preview and already fetches the "You:" sender and throws it away — fix that one too. |
 | ~~**S5**~~ | ✅ **BUILT** — a service offered in chat arrives as the supplier's CARD. PR [#5350](https://github.com/iscasasola/setnayan-platform/pull/5350). See § S5 below for three corrections this session measured. | opus · **high** | — | Touches the offer write path and the couple's render; the media is the pitch. |
 | **S6** | **The bench standing sentence** + **"2 suppliers replied"** + the **Open conversation** relabel. | opus · **high** | S2 | Must reuse the ONE derivation (`resolveThreadStage` + `rowReadsCompleted`); a second one is the failure this repo keeps producing. |
@@ -49,9 +49,9 @@ drawing or product judgement; it is not a coding tier.
 ## SEQUENCE
 
 ```
-NOW, nothing blocking:      S2 · S3 · S7 · S9        (S1 CLOSED · S5 CLOSED — do not build)
+NOW, nothing blocking:      S2 · S4 · S7 · S9   (S1 · S3 · S5 CLOSED — do not build)
 after S2:                   S6
-after S3:                   S4
+                            S4 is UNBLOCKED — S3 shipped the column it needed
 after S7:                   S8
 behind owner gates:         S10 → S11 → S12
 ```
@@ -65,7 +65,7 @@ They edit the same file and one will silently revert the other.
 | never together | shared file |
 |---|---|
 | **S6 · S7 · S8** | `shortlist-categories.tsx` — run them in that order, one at a time |
-| **S2 · S3** | the vendor thread page |
+| ~~S2 · S3~~ | the vendor thread page — **S3 is merged, so this pair is spent.** S2 must still rebase: S3 wrapped BOTH thread pages in a two-column flex and added a data block above each `return`. |
 | **S10 · S11** | the service card + the publish gate |
 
 ⚠ **S5 (#5350) edited `service-card-face.tsx`** — it added an optional `footer`
@@ -74,7 +74,7 @@ chip. **S10 and S11 both touch that file.** Rebase on `main` before starting
 either, and keep the `footer === undefined` distinction: an omitted footer means
 "draw the preview chip", `null` means "draw nothing".
 
-Safe to run in parallel: **S2 + S7** · **S9 + anything**. (S5 is CLOSED — PR #5350.)
+Safe to run in parallel: **S2 + S7** · **S9 + anything** · **S4 + S7**. (S3 and S5 are CLOSED — PRs #5347, #5350.)
 
 🔑 **Never more than two at once.** Ten parallel builds once shipped 44 defects
 (`REDESIGN_SESSIONS_2026-08-12.md`).
@@ -112,6 +112,63 @@ will be edited (bench)."*
 3. `lib/the-bench-is-legible.test.ts` computes contrast in both themes. **Add a row when
    you add a tinted label** — it cannot know about a pairing nobody told it about.
 
+
+---
+
+## § S3 — BUILT (PR #5347). What S4 inherits, and one claim of mine that was false.
+
+**Shipped both sides.** One component, `app/_components/chat/conversation-column.tsx`,
+renders the supplier's column and the couple's; the row builders are
+`lib/conversation-list.ts` (`buildVendorConversationRows` · `buildCoupleConversationRows`).
+Both rank through `resolveThreadStage` + `rowReadsCompleted`. No fourth ordering.
+
+**Chips.** Supplier: All · Unanswered · Quoted · Booked · Completed · Cancelled.
+Couple: All · Has a quote · Booked · Waiting · Closed — *Closed* folds **completed +
+cancelled**, because to a couple both mean *done with*. The mapping is declared as data
+(`COUPLE_CONVERSATION_FILTERS[].stages`), and a guard asserts every rung of the ladder is
+reachable from some chip.
+
+### What S4 must know before touching previews
+
+- **`previewFor(last, selfRole)` already takes the reader's role.** "You:" is resolved per
+  side; do NOT hard-code `'vendor'`. A guard pins both directions.
+- ⚠ **THE `previewFor` EMPTY-BODY BRANCH RETURNS "Sent an attachment", AND ITS SAFETY IS
+  NOT WHAT S5 SAID IT WAS.** S5 checked this and called it sound because
+  `sendChatMessageCore` refuses a message with neither body nor attachment. True of that
+  writer — but **the offer path never goes through it**: `lib/offer-service-core.ts` does a
+  DIRECT `chat_messages` insert. It is still safe, by a different mechanism: that insert
+  hard-codes `body: \`Offered: ${offeredName}\``, whose last fallback is the literal
+  `'a service'`, so the body is never empty. 🔑 **The invariant is "every writer sets a
+  body", not "one function refuses". A future marker writer that omits a body would make
+  the column tell a supplier a file was sent when none was.** Re-check with
+  `git grep -n "from('chat_messages').insert" apps/web`.
+- **The fifth marker is real** (S5: `offered_service_id`). Today it previews as its own
+  body — *Offered: Live Band* — which is legible and true, so nothing is broken; it is the
+  fifth type needing a fact-first line.
+- **The preview element is a `block`, not an inline span** — the v3 defect where `truncate`
+  could not ellipsis is already fixed and guarded.
+- 🔴 **THE SUPPLIER'S `/vendor-dashboard/bookings` PREVIEW IS STILL UNFIXED.** S3 did not
+  touch it. That remains S4's, as the register says.
+
+### A claim in my own PR #5347 that was false, corrected in #5359
+
+I wrote that the supplier overview's dates "depend on the machine drawing them", citing a
+docblock in `lib/plan3d-control.ts` — *"the CI runner says 28 Nov, this Mac says Nov 28"* —
+which the parked branch had copied into `lib/format-date.ts` and which I repeated as a
+finding. **It is not reproducible.** Measured on Node 22 / ICU 77.1: `en-PH` resolves to
+real `en-PH` data (not a fallback) and yields "Dec 18", identical to `en-US` and `en`
+across 4,800 comparisons. 🔑 **A docblock is not a measurement, and this one had been
+inherited three times before anybody ran it.** Both docblocks are corrected in #5359.
+
+⚠ **The real defect on that page was a different one**: the lapsed-lock date was a
+TIMESTAMP rendered in the runtime's zone. Vercel runs UTC, Manila is UTC+8, so anything
+lapsing before 08:00 Manila named the **previous day**. Fixed in #5359.
+
+⏭ **Open, and NOT mine to decide:** G7 (which of the supplier's two lists the column
+retires — neither was touched); whether the couple's column should ever say *they owe you
+a reply* (the mirror of "Unanswered" — a real idea nobody designed, deliberately not
+invented); and the **search box on the couple's side**, which the prototype does not draw
+and #5347 added anyway.
 
 ---
 
