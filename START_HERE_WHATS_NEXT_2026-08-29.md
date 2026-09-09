@@ -47,9 +47,9 @@ that register's own header warns this corpus has been wrong about a PR's state f
 | S10 | The light moves morning → night, the room lights up | ✅ MERGED #5349 |
 | **S8** | **Publish — three states, consent, the number stamped once** | 🔶 **OPEN #5364 — in review** |
 | S7 | A cover picture, and naming the next celebration | ⏳ waits on S8 |
-| **S11** | **The index, search, Relive, "were you there?"** | **← START HERE — unblocked** |
+| **S11** | The index, search, Relive, "were you there?" | 🔨 **IN PROGRESS 2026-09-09** — branch `claude/s11-find-anything-in-the-day`. **Do not start; the page lane is held.** |
 | S12 | The last word, the back cover, print and share | ⏳ waits on S7 |
-| **S13** | **Every celebration that is not a wedding, incl. a wake** | **unblocked** |
+| S13 | Every celebration that is not a wedding, incl. a wake | ⛔ unblocked by dependency, but **the page lane is held by S11** — wait, or take Stream B |
 | S14 | A guest changes their mind after publish | ⏳ waits on S8 |
 | S15 | Supplier reach; No. 2 opens on No. 1 | ⏳ waits on S7 · S12 |
 
@@ -79,6 +79,9 @@ It assumes no memory files exist, inlines every house rule, and pre-answers RULE
 | 5 | Challenges hang on the ceremony sequence | small | open |
 | 6 | The guest chooses per audience | small | open |
 | 7 | The year — one pot across a linked group of celebrations | project | open |
+
+⇒ **AS OF 2026-09-09, BOTH STREAM A LANES ARE HELD** — the page by S11, the desk by S8 (#5364).
+Stream B is therefore the free pick right now.
 
 🔑 **Stream B touches none of Stream A's files**, so it is the safe pick when both story lanes are
 held — which, on 2026-09-09, they usually were.
