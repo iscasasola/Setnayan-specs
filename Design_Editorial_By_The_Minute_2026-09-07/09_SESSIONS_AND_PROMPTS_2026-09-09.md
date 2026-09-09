@@ -76,7 +76,28 @@ host's desk and the public page share no files. That is the pair to run when you
 | **S4** | ✅ **MERGED + SERVED** — PR [#5330](https://github.com/iscasasola/setnayan-platform/pull/5330). All five columns verified in prod, and `photo_messages.author_named_publicly` is `NOT NULL DEFAULT FALSE` — the Q2 ruling is in the database. |
 | **S2** | ✅ **MERGED** — PR [#5329](https://github.com/iscasasola/setnayan-platform/pull/5329), merge `fc3ced6`, verified an ancestor of `origin/main`. 🚨 **AND THE FIRST DIAGNOSIS OF WHY IT WAS RED WAS WRONG — the correction is worth more than the fix.** It was reported as failing on an *unrelated* guard (`native encoder tests`) that `main` passes. **False.** That step is SKIPPED once an earlier one fails and the aggregator counts *skipped* as FAIL, so it is the loudest line in the log and it is a SYMPTOM. The real failure sat above it in **both** runs: `THE FREEZE — the exposure surface has widened`, because `story_dial_bucket_counts` is a new capability reachable by `authenticated`. 🔑 **A LOG SEARCH FOR THE WORD "FAIL" FINDS THE LAST FAILURE, NOT THE FIRST — grep `not ok` too, and read upward.** Accepted deliberately after measuring prod: the function is `LANGUAGE sql STABLE`, **not** `SECURITY DEFINER`, so it runs under the caller's RLS, and `papic_photos` admits `authenticated` on three narrow arms only (the seat's claimer · the couple or an admin · a moderator holding the `photos` area) — no "any signed-in person reads a public event" policy exists, so a signed-in stranger gets **zeros** and the Q1 ruling is not crossed. Baseline regenerated in the same PR; the diff is **one added line plus its two counters** (6587→6588, func 254→255) and nothing else widened — which is the check that matters, because regenerating can otherwise record a real mistake as intended. |
 | **S5** | ✅ **DONE + SERVED.** Step 1.1 (route move to `/dashboard/[eventId]/story`) PR [#5337](https://github.com/iscasasola/setnayan-platform/pull/5337) · step 1.2 (the desk) PR [#5338](https://github.com/iscasasola/setnayan-platform/pull/5338), merged 2026-09-09, merge `6e2d361` — **verified an ancestor of `origin/main` AND the exact commit production self-reports.** ⇒ **S6 AND S7 ARE UNBLOCKED.** ⛔ But they are ONE LANE with each other: **S6 → S8 → S7**, never two at once, and never while another session holds that page. |
-| **S9** | ✅ **MERGED** — PR [#5342](https://github.com/iscasasola/setnayan-platform/pull/5342), merge `c8debfe`, verified an ancestor of `origin/main`. 3,664 lines: the spine, the clock, the minute media and their guards. ⚠ **Production had NOT caught up when this row was written** (`/api/health` still reported an earlier commit) — **confirm it is SERVED before telling anyone the page changed.** ⇒ **S10 AND S11 ARE UNBLOCKED.** ⛔ Both edit the story render tree — run **ONE at a time** on the page lane, whatever the wave diagram suggests. |
+| **S9** | ✅ **MERGED** — PR [#5342](https://github.com/iscasasola/setnayan-platform/pull/5342), merge `c8debfe`, verified an ancestor of `origin/main`. 3,664 lines: the spine, the clock, the minute media and their guards. ✅ **AND IT IS NOW SERVED — the confirmation this row asked for, 2026-09-08T23:46Z.** Production's `/api/health` reports `c8debfe`, and it is verified **BY THE OBJECT, the served HTML**, not by the deploy log: the live `/realstories/maria-and-juan-…` page carries the dial (61 rects, one of them the full-width hit area, plus the day divider and the needle), **five placed minutes**, the drop caps, the *Sample story* pill **on the cover**, and the old invented masthead title is gone (2 → 0 occurrences, measured against a snapshot taken before the merge). ⚠ **The road is absent on that page ON PURPOSE** — a fixture has no dated road facts and no filler row is ever drawn; do not read its absence as the road being unbuilt. ⇒ **S10 AND S11 ARE UNBLOCKED.** ⛔ Both edit the story render tree — run **ONE at a time** on the page lane, whatever the wave diagram suggests. |
+
+> ✅ **AND IT IS SERVED — OBSERVED ON THE LIVE SITE 2026-09-09, not inferred from the merge.**
+> `/api/health` reports `c8debfe`, PR #5342's own merge commit, and fetching the one published
+> story (`/movie-night`) anonymously returns the clock in the HTML: the masthead *Vol. I · No. 1*,
+> the four facts (*14 captures · 0 live films · 0 voices · 19 days told*), **THE ROAD** with its
+> date marks, the dial's hour labels, *"Tap anywhere on the line to open that moment"*, and the
+> day reading *"No minute of this day has been written up yet."*
+>
+> 🔑 **S2's BOUND IS VISIBLY WORKING ON REAL DATA.** That event's 14 captures (13 photos + 1 clip)
+> ALL fall outside its own day, and the page files them on the road as *"13 before the day · The
+> camera opens"* rather than letting them fill the wedding day. **That is exactly the defect S2
+> existed to fix, visible on the live site.** ⚠ It also means **the only published story in prod
+> has an empty dial for its day** — nobody can see a busy clock on real data yet, and that is the
+> data's fault, not the build's. Seed a day-of capture before judging the dial.
+>
+> 🔴 **FLAGGED, NOT FIXED — TWO COUNTS OF ONE THING ON ONE PAGE.** The new cover says **14
+> captures**; the older *By the Numbers* block lower down the same page says **15 Photos & …**.
+> The database holds 13 photos + 1 clip = **14**, so the cover matches and the older block does
+> not — but the two may simply be counting different populations under the same word, which is
+> the more dangerous version. **Whoever takes S11 or S12 owns this**; do not "fix" it by matching
+> one number to the other before establishing which population each is counting.
 
 > ✅ **FIXED IN S9's PR #5342 — kept below because the REASONING generalises.**
 > 🔴 **S9 INHERITED A NAMED DEFECT — IT WAS DELIBERATELY NOT PATCHED IN S2's PR.**
