@@ -97,6 +97,21 @@ extends to photo messages was never put to the DPO and is NOT decided."*
 > that stays refused. Two different things: the recap composes itself in a joyful voice with
 > nobody's hand on it; the story is written by the family. Key the gate on the **register**, never
 > on a surface flag.
+>
+> ✅ **BUILT 2026-09-09 — S13, `08` step 3.2. Q3 is CLOSED.**
+> 🔴 **The two things were already ONE gate, which is why the story was missing.**
+> `solemnAdjustedPhase` demoted BOTH `save_the_date` and `editorial` to `rsvp`, and the story lives
+> in the editorial phase — so the gate that withheld the recap withheld the story with it, and a
+> wake got no story at all. It now demotes `save_the_date` only.
+> 📏 **The recap's refusal was MEASURED before the phase was granted**, rather than trusted:
+> `composeCopy`'s joyful output is not rendered on the story page at all (S9's spine *"replaced the
+> masthead and the lead"*), and the only field the story still takes from the composer is
+> `pullQuote` — the host's own `special_message`. The body reads `data.draft.leadParagraphs`
+> falling back to the host's own prose. Every sentence a wake's story can print was typed by the
+> family, so granting the phase resurrected nothing. The composer's joyful voice reaches a reader
+> only through `/[slug]/recap` (host-published) and the print sheet.
+> 🔑 **Relive is gated on the REGISTER, never on `slides.length`** — a wake HAS minutes, so an
+> emptiness gate is green on the empty story and wrong on the real one.
 
 Shipped code refuses the joyful recap for a wake outright. Two arms:
 **(a) refuse** — a wake keeps its ordinary page, as today;

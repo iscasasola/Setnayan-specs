@@ -44,9 +44,9 @@ fragment with a `SPEC IMPACT` line, `gh pr create`, then `gh pr merge <PR#> --au
 
 | # | Work | Done when |
 |---|---|---|
-| **3.1** | Words from `event_type_profiles.terminology`; single-name masthead when `person_b` is null. | No hard-coded "couple" survives a source scan. |
-| **3.2** | ✅ **The solemn arm — RULED 2026-09-09, build it.** Not the refusal. | A wake renders a story with no Relive, no challenges, no anniversary, no countdown. ⚠ The shipped refusal of the *joyful auto-composed recap* for a wake is untouched. |
-| **3.3** | Zero-supplier and no-venue empty states. | A hangout with no bookings shows no team tab and no #1-match tile. |
+| **3.1** | ✅ **BUILT 2026-09-09 — S13.** Words from `event_type_profiles.terminology`; single-name masthead when `person_b` is null (`EventWords.twoPeople`). | ✅ No hard-coded "couple" survives a source scan — `s13-is-finished.test.ts` walks the guest tree with a comment stripper and every wedding word left in the story tree is inside a comment. ⚠ The masthead defect was NOT a word: `splitCoupleNames` string-sniffed " & ", so **"Ayala & Partners Year-End" rendered as a couple**. A scan could never have found it. |
+| **3.2** | ✅ **BUILT 2026-09-09 — S13.** The solemn arm, not the refusal. | ✅ A wake renders a story with no Relive, no challenges, no anniversary, no countdown. `solemnAdjustedPhase` demotes `save_the_date` only — it used to demote `editorial` too, which withheld the STORY along with the recap. ⚠ The refusal of the *joyful auto-composed recap* is untouched and was **measured** before the phase was granted (see `05` §2). |
+| **3.3** | ✅ **BUILT 2026-09-09 — S13** (already shipped inside S11; now PINNED). Zero-supplier and no-venue empty states. | ✅ A hangout with no bookings shows no team tab and no #1-match tile. 🔑 No second emptiness rule was written: `buildStoryIndex` already omits every host-layer tab at zero, which takes the team tab, the #1-match tile (an entry note) and the tier legend (the tab note) together. Guarded with the paired booked-event case so it cannot pass by absence. |
 
 ## Phase 4 · After publish
 

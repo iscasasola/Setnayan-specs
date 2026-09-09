@@ -12,7 +12,7 @@ greppable symbol, never a line number.
 | A capture and its time | `papic_photos` · `papic_guest_captures` · `vendor_papic_captures` · `pabati_clips` — all carry `captured_at TIMESTAMPTZ` ⚠ *but see §2.1* |
 | Guest → table | 🔴 **CORRECTED 2026-09-09 (S10) — THIS ROW NAMED THE ONE PATH WITH NO ROWS IN IT.** It said `papic_guest_captures.guest_id` → `event_seat_assignments` → `event_tables`. Measured against production: **`papic_guest_captures` holds 0 rows.** Every capture in the database is a `papic_photos` row — which is also the only table `story_dial_bucket_counts` counts, so building the lens on the documented path would have produced a heat counted from a *different population than the bars above it* (two counts of one thing on one page) **and** a plan that can never light. The links that exist on `papic_photos` are `paparazzi_seat_id` → `paparazzi_seats.guest_id` (a roll camera belongs to one guest) and `captured_by_person_id` → `guests.person_id`; either then reaches `event_seat_assignments(event_id, guest_id UNIQUE)` → `event_tables.table_label / x_pos / y_pos`. ⚠ **Neither resolves to a table in prod today**: 14 photographs, 14 with a person, **0** whose person is a guest of that event, **0** seats carrying a guest — the one published story is a `date` with no guest list. Built and guarded in S10; nothing real to light yet. |
 | Supplier → the moment they made | `event_schedule_blocks.responsible_vendor_ids UUID[]` → `event_vendors.vendor_id`; `actual_start_at` / `actual_end_at` / `run_state` are the tapper's real instants; `lib/moments-from-the-schedule.ts` labels captures by block window |
-| The saved theme | `events.role_palette` (JSONB; `reception` = five majors) · `moodboard_theme_name` · `moodboard_theme_description` · `mood_board_updated_at`; per-pillar snapshots in `event_moodboard_saves.palette_snapshot` |
+| The saved theme | `events.role_palette` (JSONB; `reception` = five majors) · `moodboard_theme_name` · `moodboard_theme_description` · `mood_board_updated_at`; 🔴 **CORRECTED 2026-09-09 (S10) — THIS ROW CITED A TABLE THAT DOES NOT EXIST.** It said *per-pillar snapshots in `event_moodboard_saves.palette_snapshot`*. Checked against production, not the document: **there is no `event_moodboard_saves` table.** The real snapshot precedents — and they matter, because the story's room and palette both need freezing at publish — are `moodboard_part_finalizations.design_snapshot` and `event_renders.design_snapshot`, both verified present. Raised by S6, verified here |
 | Road dates | theme: `mood_board_updated_at` · vendor booked: `event_vendors.contract_signed_at` / `status` / `updated_at` · pre-event captures: `captured_at < event_date` · save-the-date + invitation: the site lifecycle |
 | Supplier follows | `vendor_follows(follower_user_id, vendor_profile_id, followed_at)` |
 | "As featured in" on the portfolio | `/v/[slug]` → `loadVendorFeaturedStories` ✅ **fixed 2026-09-07, PR #5290** — was wedding-only |
@@ -59,13 +59,35 @@ reached them"**, never "who tapped them": the analytics model forbids identity a
 min-N floor.
 
 ### 2.4 · The edition number is recomputed at render
-`editionNo` counts weddings in the awards cycle **on every render** — so "No. 1, theirs forever"
-is not guaranteed, and for a non-wedding it counts the wrong population.
-**Fix:** stamp `edition_volume` and `edition_no` once, on the **first** transition of
-`event_editorial.status` to `'published'` (not on `published_at`, which stamps at the first
-guests-only share). ⚠ **What the No. counts for a non-wedding story is an owner question** —
-see `07` Q5. Deliberately left filtering weddings, with that reason recorded in
-`WEDDING_ONLY_BY_DESIGN`.
+✅ **RESOLVED 2026-09-09 · S8 / 08 step 1.6 — verify the PR's state before trusting this line.**
+
+`editionNo` counted weddings in the awards cycle **on every render**, so "No. 1, theirs forever"
+was not guaranteed: the number printed under those words MOVED whenever somebody else's wedding
+landed in the same cycle with an earlier date, and a keepsake printed on either day disagreed with
+the page.
+
+`event_editorial.edition_volume` + `edition_no` are now stamped ONCE, on the **first** transition of
+`status` to `'published'` — **not** on `published_at`, which stamps at the first guests-only share,
+so a story sitting at guests-only for a month carries no number and its masthead reads "Vol. I"
+alone. The counting lives in `lib/story-edition.ts`; `data.ts` only reads it.
+
+🔒 **AND THE APP BEING RIGHT IS NOT THE SAME AS THE NUMBER BEING SAFE.** `authenticated` holds
+TABLE-level UPDATE on `event_editorial` (measured, all three roles table-level — which is also why
+the four new columns needed no grants of their own) and `event_editorial_couple_rw` admits the host,
+so a host could PATCH their own edition number straight through PostgREST. **The refusal is a
+database trigger** (`event_editorial_edition_stamped_once`) and it refuses everybody, service_role
+included. There is no legitimate caller.
+
+🔑 **A REFUSED COUNT STAMPS NOTHING.** A rejected query is an ABSENCE — it arrives as `error` set
+and `count` null, which reads exactly like "no weddings" — so the two are told apart. A story with
+no number reads "Vol. I" and is honest; a story stamped "No. 1" because a grant went missing would
+be a permanent lie the trigger then refuses to correct. The one already-published row
+(`movie-night`) was backfilled with exactly the number the page renders today, so nothing anybody
+can see changed; it simply stopped moving.
+
+⚠ **What the No. counts for a non-wedding story is STILL owner question Q5** (`07`), and it is still
+filtering weddings. The reason moved with the filter: the `WEDDING_ONLY_BY_DESIGN` entry is now on
+`lib/story-edition.ts`, and `app/[slug]/_components/editorial/data.ts` no longer counts anything.
 
 ### 2.5 · No per-layer visibility
 ✅ **RESOLVED 2026-09-09 · PR #5331 (S3 / 08 step 0.3) — and it needed NO COLUMN.**
@@ -109,6 +131,67 @@ No `parent_event_id`, `series_id`, `previous_event_id` or chronicle column exist
 `supabase/migrations`. "Previously · No. 1" and the back cover's door both need one.
 **Fix:** `events.previous_event_id UUID REFERENCES events(event_id)` (nullable, `ON DELETE SET
 NULL` — an actor leaving keeps the record). Written only on the host's go-signal tap.
+
+### 2.8 · The room is read live, and it is a working document ⛔ a published story can redraw itself
+
+✅ **RESOLVED 2026-09-09 · S8 / 08 step 1.6 — the publish ladder's own PR, exactly where this
+section said it belonged. Verify the PR's state before trusting this line.**
+
+**Found 2026-09-09 (S6, verified against production by S10).** The story's floor plan read
+`event_tables` / `event_seat_assignments` live. Neither carries a soft-delete column — measured, **0**
+of `deleted_at` / `archived_at` / `soft_deleted_at` on either — so every table removal is a HARD delete,
+and the arranger wipes and re-solves assignments on every run.
+
+⇒ A host who tidied up after the wedding, re-ran the seating, or reused the room for the next event
+**silently redrew or emptied the floor plan of a story that was already published.** Nobody was told.
+
+**What shipped:** `event_editorial.room_snapshot` (`{v:1, room:{…}}`) is written at the first
+transition to `published`, and `loadStoryRoom` prefers it over the live plan from then on — one
+function, so the shape that is frozen and the shape that is read cannot disagree. It is the house
+pattern already (`moodboard_part_finalizations.design_snapshot`, `event_renders.design_snapshot`).
+
+🔒 **THE SNAPSHOT CANNOT CARRY A PERSON, and not because it is filtered.** It stores a `StoryRoom`,
+whose entire field list is a label, two percentages and a shape. There is nowhere in that shape to
+put a name — so a future writer that reached for `guests` could not leak one through it.
+
+🔴 **AND THE GEOMETRY WAS ONLY HALF OF IT — raised by S10 against the first cut and
+verified in `loadTableHeat` before it was believed.** The heat resolves a photograph to a table
+through `event_seat_assignments`, **live** — the same table the arranger wipes and re-solves on
+every run. Freeze the plan and not the attribution and they disagree: a guest re-seated at a
+different table the frozen plan still draws lights the **wrong** table on an otherwise-true record,
+and one re-seated at a table created after the freeze is dropped by `known.has(table)`, so **the
+night reads quieter than it was** — the nerve `04` rule 11 exists for.
+
+⚠ **A HALF-FREEZE IS WORSE THAN NO FREEZE**, which is why it shipped in the same PR rather than
+after it: before the freeze, geometry and attribution moved TOGETHER — the plan could be wrong, but
+it was wrong consistently. So `room_snapshot` also carries **`seats`** (`guest_id` →
+`event_tables.public_id`), and when a freeze exists it is the **only** source — no live fallback for
+a guest it does not name, because a guest seated after publish was not seated on the night.
+**Geometry frozen · attribution frozen · consent live.**
+
+🔒 **`seats` IS A SIBLING OF `room`, NEVER A FIELD ON IT.** It carries guest ids and `StoryRoom` goes
+straight to the components that draw the plan, whose field list is the privacy boundary (`04` rule
+2). `readRoomSnapshot` cannot return it; only `readFrozenSeats` can, and only the heat loader calls
+that.
+
+⛔ **THE PER-TABLE HEAT IS DELIBERATELY NOT FROZEN.** How many photographs came from each table is
+drawn from captures and rides the RA 10173 consent veto; a guest who withdraws AFTER publish must
+still come off the plan. Freezing the heat would freeze a withdrawal out. Geometry is a record of
+the night; the heat is live data about people.
+
+⛔ **AN UNREADABLE OR EMPTY SNAPSHOT COSTS THE FREEZE, NEVER THE ROOM.** `readRoomSnapshot` returns
+`null` for anything it cannot parse, which falls back to the live read — what every story does
+today. A reader that returned an empty room on junk would blank a floor plan that exists,
+permanently, on the one press meant to preserve it.
+
+⏭ **STILL LIVE, SAID OUT LOUD: the guests-only window.** A story sitting at `event` is already being
+read by everyone holding the QR, and its room is still the live plan. This section ties the freeze
+to PUBLISH and S8 built exactly that; widening it to the first guests-only share is a real decision
+and was not made quietly in a session that was not asked for one.
+
+🔑 **The exposure was zero when it was closed.** Measured 2026-09-09: the one published story owned
+no room at all, and production held 13 tables across 2 events, both drafts. Nothing had silently
+redrawn yet, and now nothing can.
 
 ### Bonus · one inbox over four tables
 The desk needs a single read across `photo_messages`, `guest_columns`,

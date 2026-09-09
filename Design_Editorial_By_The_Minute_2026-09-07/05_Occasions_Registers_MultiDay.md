@@ -48,8 +48,32 @@ anniversary mail selector excludes it
 | **"🔔 Tell me when it's live"** | *"The vigil schedule"* |
 | the celebratory gap copy | plain |
 
-⚠ **`07` Q3 is open:** does by-the-minute **refuse** the solemn register outright, as the shipped
-recap does — or ship this quiet arm?
+✅ **`07` Q3 is CLOSED — owner ruled 2026-09-09: SHIP THE QUIET ARM (b).** Verbatim: *"A wake GETS
+a story: no Relive, no challenges, no anniversary, no countdown, and the family's words. Filipino
+wake culture is served by a page that records five nights, the mass, and who came from abroad."*
+**Built the same day (S13, `08` step 3.2).**
+
+⚠ **This does NOT reverse the shipped refusal of the joyful auto-composed recap for a wake** — and
+the two are different things: the recap composes itself in a joyful voice with nobody's hand on it;
+the story is written by the family. The anniversary mail selector still excludes the solemn
+register. **They must not be simplified into one gate**, which is exactly what they had become:
+`solemnAdjustedPhase` demoted BOTH `save_the_date` and `editorial`, and since the story lives in
+the editorial phase, the gate that withheld the recap withheld the story with it. It now demotes
+`save_the_date` only.
+
+📏 **And the recap's refusal was MEASURED, not assumed, before the phase was granted.**
+`composeCopy`'s joyful output — the `<Names> Are Married` headline, the archetype deck, the woven
+lede — is not rendered on the story page at all: S9's spine *"replaced the masthead and the lead, it
+did not sit on top of them"*, and the only field the story still takes from the composer is
+`pullQuote`, which is the host's own `special_message`. The article body under the spine reads
+`data.draft.leadParagraphs` falling back to the host's own prose. So every sentence a wake's story
+can print was typed by the family, and granting the phase resurrects nothing. The composer's joyful
+voice reaches a reader only through `/[slug]/recap` (which a host must deliberately publish) and the
+print sheet.
+
+🔑 **Relive is gated on the REGISTER, never on `slides.length`.** A wake HAS minutes — five nights
+and the mass are exactly what the family files — so an emptiness gate is green on the empty story
+and wrong on the real one.
 
 ## 3 · Multi-day
 
