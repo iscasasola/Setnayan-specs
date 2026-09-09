@@ -631,7 +631,33 @@ DONE WHEN: search provably cannot surface what the viewer may not see, and a gre
 markup finds no name input anywhere on the page.
 ```
 
-## S12 · The close, print and share — **Sonnet 5 · medium** · after S9 and S7
+## S12 · The close, print and share — **Sonnet 5 · medium** · after S9 · S7 ✅ · S13 · S14
+
+> ### 🔑 RULE 0 RUN 2026-09-09 AGAINST `origin/main` — **MOST OF THIS SESSION ALREADY SHIPS.**
+> Measured by reading the objects, not the plan. **Do not rebuild any of the following:**
+>
+> | Already ships | Where |
+> |---|---|
+> | **The locked close** — the host's last word, then their song, pinned AFTER the reorderable run | `editorial-content.tsx`; the keys are `EDITORIAL_LOCKED_CLOSE_KEYS = ['fromTheCouple','song']` and the editor never offers them, `saveEditorial` drops them defensively |
+> | **The colophon**, and the cross-phase links it aims at | same file; the link target is DERIVED once so the anchor and the colophon cannot drift |
+> | **The A3 broadsheet keepsake** — edition volume, roman numerals, nameplate, and the front/back threshold | `print/keepsake-layout.ts` + `keepsake.css.ts` + `print-sheet.tsx` + `print-toolbar.tsx` |
+> | **The 9:16 share card** at 1080×1920 with save-to-device | `recap/_components/save-story-card-button.tsx` → `/api/og/…?format=story` |
+> | **Every metadata claim in `01` §10** — canonical, `og:type`, `og:locale=en_PH`, `twitter:summary_large_image` | `app/[slug]/page.tsx` |
+> | **Relive** | `story-spine.tsx` renders it whenever there are slides — it is absent on `/movie-night` only because that celebration has no minute carrying media. *An absent control is not an unbuilt one.* |
+>
+> ⇒ **THE REAL DELTA IS THREE THINGS:**
+> 1. **The back cover** — genuinely new. After the colophon, only when the host named a next
+>    celebration (S7's step, merged as PR #5370, wrote `previous_event_id`). Three doors by viewer.
+> 2. **The social share set** — Facebook · Messenger · Pinterest · copy link. **The 9:16 card is
+>    NOT one of these; it already ships — reuse it.** The only "Pinterest" on the story today is a
+>    CSS-columns comment, not a share target.
+> 3. **A4 one-minute-per-page.** `keepsake.css.ts`'s A4 is a **screen-preview width that scales to
+>    A3 in print** — there is no per-minute page.
+>
+> ⛔ **AND IT MUST WAIT FOR TWO OPEN PRs, not one.** S14 (#5371) is editing
+> `print/page.tsx`, `print-sheet.tsx`, `keepsake.css.ts` and the recap — S12's exact files — and is
+> adding **a version stamp the keepsake must carry through**. S13 (#5374) holds the story tree.
+> Starting before both land is building on something about to move.
 
 ```
 GOAL: the story ends properly, and can be held in the hand or sent to anyone.
