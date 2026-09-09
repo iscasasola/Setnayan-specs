@@ -133,8 +133,11 @@ so rather than claiming otherwise.
 
 ⏭ **B7 · drag to rearrange** (S8) is the other half of the same ruling and depends on this:
 long-press, pins beat sort, *"Your order"* + Reset, keyboard move-left/right, stored on the
-CELEBRATION so every host sees one order. **Still open there:** per CATEGORY or across the
-whole bench — build per category unless the owner says otherwise.
+CELEBRATION so every host sees one order. ✅ **PER CATEGORY — owner 2026-09-09, closed.** Keyed
+`(celebration, tile)`; one Reset clears that category only. ⚠ Do **not** reuse
+`event_category_build_state.pinned_vendor_id` — same word, different fact (the Build solver's
+Locked pick). Its own store, one row per pin, `ON DELETE CASCADE` off `event_vendors` so removing
+a supplier drops its pin. See the S8 row in the sessions register for the full RULE 0 finding.
 
 ---
 
