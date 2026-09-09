@@ -1,6 +1,6 @@
 # WHAT NEEDS THE OWNER — 2026-09-09
-**Everything else is being built without him. This is the residue: nine items, each one a
-decision, a price or a ruling — no engineering left on any of them.**
+**Everything else is being built without him. This is the residue: ten decisions, plus one
+engineering item recorded here only because it touches a ruling he already made.**
 
 > Compiled at the owner's instruction (*"finish all that you need to automate and then we handle
 > the ones that need my intervention"*). Every item below was **measured today**, not carried
@@ -101,6 +101,40 @@ consent wording beside it should say. **RA 10173 territory, and you are the regi
 
 Flagged when that page shipped and never resolved. A visitor who has bought nothing is told a
 balance. **Copy, one line — but it is a claim about money.**
+
+---
+
+## 10 · Does next year's celebration inherit this year's guest list
+
+**Two of your own documents disagree, and S7 could not settle it — so it followed the lock.**
+
+* The story design (`02` §7) promises No. 2 inherits *"your guest list — as a starting point"*.
+* Your **2026-07-12 recurrence lock** scopes a carry-forward to *"Details, not the guest list"*,
+  and the shipped clone already keeps to that.
+
+S7 built to the **lock**, and the screen now promises no list it will not bring — the safe
+direction, and reversible either way. **Which of the two is the rule is yours.**
+
+---
+
+## 11 · A wake can still be handed the JOYFUL recap — and it is one line of engineering, not a decision
+
+⚠ **Listed here only because it touches your Q3 ruling; it needs no answer from you and I am
+recording it as work.** S13 measured it and flagged rather than fixed, correctly — it sits in a
+file another session was changing.
+
+**What is true:** the solemn refusal you were told about lives in the PHASE a guest receives, which
+governs `/{slug}`. The recap has its **own address**, and that address checks only whether the
+event has a website and whether the host published — **there is no solemn gate on it at all**, and
+the auto-composer contains no notion of a solemn register anywhere.
+
+⇒ A grieving family that publishes their recap gets the cheerful auto-written one. **Nobody has hit
+this** (a wake must be created and its recap published, and no wake exists), and your Q3 ruling —
+a wake gets the quiet STORY, not the joyful RECAP — is exactly what the fix implements.
+
+🔑 **The lesson is mine, not S13's: I recorded your Q3 ruling with the words *"this does not
+reverse the shipped refusal of the joyful recap, which stays refused."* That refusal was narrower
+than I said.** A sentence in a code comment is not a gate on every route.
 
 ---
 
