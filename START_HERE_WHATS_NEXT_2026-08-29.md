@@ -11,43 +11,95 @@ ACTIVE is the real one.
 
 ---
 
-## § 1 · THE ANSWER: there is ONE open stream
+## § 1 · THE ANSWER: there are TWO open streams — the story is the live one
 
-### ▶ Papic, items 3–7
+> 🔴 **CORRECTED 2026-09-09.** This section said *"there is ONE open stream"* and named Papic 3–7.
+> That was true the day it was written (2026-08-29) and is **false now.** A fifteen-session build of
+> **the story and the Story Maker** began 2026-09-07 and has been the whole machine's work since —
+> eight of its fifteen sessions merged and served on 2026-09-09 alone. A session following the old
+> answer today would be sent to the wrong stream: **the exact failure this file exists to prevent,
+> one iteration later.**
+>
+> 🔑 **The lesson § 2 teaches about `CLAUDE.md`, turned on this file.** A front door holding
+> yesterday's answer is worse than no front door, for the same reason a stale `ACTIVE` label is:
+> both send a fresh session somewhere confidently wrong. **Whoever starts a stream adds it here in
+> the same commit; whoever finishes one strikes it here in the same commit.**
 
-**Your handoff, and it is self-contained:
-[`WHATS_NEXT_Papic_Items_3_7_HANDOFF_2026-08-29.md`](WHATS_NEXT_Papic_Items_3_7_HANDOFF_2026-08-29.md)**
+### ▶ Stream A — THE STORY & THE STORY MAKER · **the live one**
 
-It assumes **no memory files exist** (476 notes do not travel between accounts), inlines every
-house rule, pre-answers RULE 0 for each item with real file paths, and carries the owner decisions
-already made. Read it, then
-[`WHATS_NEXT_Papic_Build_Order_2026-08-29.md`](WHATS_NEXT_Papic_Build_Order_2026-08-29.md) for the
-ordering and why.
+Folder: [`Design_Editorial_By_The_Minute_2026-09-07/`](Design_Editorial_By_The_Minute_2026-09-07/).
+Read `00_BUILD_README.md`, then **`09_SESSIONS_AND_PROMPTS_2026-09-09.md`** — the fifteen sessions
+with their ready-to-paste prompts, dependencies and lanes. `08_Build_Order.md` carries the
+acceptance criteria per step.
 
-| # | What | Size | State |
+**Every state below was verified with `gh pr view` on 2026-09-09, not copied from a register** —
+that register's own header warns this corpus has been wrong about a PR's state five separate times.
+
+| # | What a person gets | State (verified 2026-09-09) |
+|---|---|---|
+| S1 | A photo lands on the minute it was **taken**, not uploaded | ✅ MERGED #5332 |
+| S2 | The day's own photos fill the day | ✅ MERGED #5329 |
+| S3 | Guests' photos stay guests-only until the host publishes | ✅ MERGED #5331 |
+| S4 | The five things not stored yet (columns only) | ✅ MERGED #5330 |
+| S5 | One desk instead of four screens | ✅ MERGED #5337 · #5338 |
+| S6 | Nothing the shipped editor can do is lost, plus the theme | ✅ MERGED #5346 |
+| S9 | The story becomes a clock | ✅ MERGED #5342 |
+| S10 | The light moves morning → night, the room lights up | ✅ MERGED #5349 |
+| **S8** | **Publish — three states, consent, the number stamped once** | 🔶 **OPEN #5364 — in review** |
+| S7 | A cover picture, and naming the next celebration | ⏳ waits on S8 |
+| **S11** | **The index, search, Relive, "were you there?"** | **← START HERE — unblocked** |
+| S12 | The last word, the back cover, print and share | ⏳ waits on S7 |
+| **S13** | **Every celebration that is not a wedding, incl. a wake** | **unblocked** |
+| S14 | A guest changes their mind after publish | ⏳ waits on S8 |
+| S15 | Supplier reach; No. 2 opens on No. 1 | ⏳ waits on S7 · S12 |
+
+⛔ **LANES — AND THIS IS NOT ADVICE, IT COST AN HOUR ON 2026-09-09.** Two sessions independently
+wrote the same six-stage light derivation into the same file path; they merged thirteen minutes
+apart, `main` went red on the tripwire one of them had left, and **three other sessions' merges
+failed** on it before it was collapsed (#5353). Two lanes, one session each:
+
+* **the host's desk** — S6 → S8 → S7 → (S14)
+* **the public page** — S9 → S10 → S11 / S13 → S12
+
+Before starting either, run `gh pr list --state open` and check nobody is holding that lane.
+
+### ▶ Stream B — PAPIC, items 3–7 · open, and nobody is on it
+
+**Handoff, self-contained:
+[`WHATS_NEXT_Papic_Items_3_7_HANDOFF_2026-08-29.md`](WHATS_NEXT_Papic_Items_3_7_HANDOFF_2026-08-29.md)**,
+then [`WHATS_NEXT_Papic_Build_Order_2026-08-29.md`](WHATS_NEXT_Papic_Build_Order_2026-08-29.md).
+It assumes no memory files exist, inlines every house rule, and pre-answers RULE 0 per item.
+
+| # | What | Size | State (items 1–2 verified 2026-09-09) |
 |---|---|---|---|
-| 1 | The browser stops enforcing a limit that does not exist | days | ✅ **DONE** (PR #5002) |
-| 2 | Say what is already true, on the promotion page | days | ✅ **DONE** (PRs #5003, #5007) |
-| **3** | **Shots per guest** (+ sponsors default to a bigger share) | several sessions | **← START HERE** |
-| **4** | **Timed challenges reach the wall** | 1 session | open |
-| **5** | **Challenges hang on the ceremony sequence** | small | open |
-| **6** | **The guest chooses per audience** | small | open |
-| **7** | **The year** — one pot across a linked group of celebrations | project | open |
+| 1 | The browser stops enforcing a limit that does not exist | days | ✅ MERGED #5002 |
+| 2 | Say what is already true, on the promotion page | days | ✅ MERGED #5003 · #5007 |
+| **3** | **Shots per guest** (+ sponsors default to a bigger share) | several sessions | open |
+| 4 | Timed challenges reach the wall | 1 session | open |
+| 5 | Challenges hang on the ceremony sequence | small | open |
+| 6 | The guest chooses per audience | small | open |
+| 7 | The year — one pot across a linked group of celebrations | project | open |
 
-⚠ **Verify 1 and 2 before trusting this table** — `gh pr view 5002 5003 5007 --json number,state,mergedAt`.
-**This corpus has been wrong about a PR's state five separate times.**
+🔑 **Stream B touches none of Stream A's files**, so it is the safe pick when both story lanes are
+held — which, on 2026-09-09, they usually were.
 
 ---
 
-## § 2 · 🛑 THE SIX "ACTIVE" BLOCKS — ONLY ONE IS OPEN WORK
+## § 2 · 🛑 THE SIX "ACTIVE" BLOCKS IN `CLAUDE.md` — ONLY ONE IS OPEN WORK
 
 The auto-loaded corpus `CLAUDE.md` carries six blocks headed `▶ ACTIVE`. **Five are finished
 streams or standing rules that never had the label removed.** Triaged 2026-08-29 by reading each
-block's own claims:
+block's own claims.
+
+⚠ **THIS TRIAGE IS OF `CLAUDE.md`'S SIX BLOCKS ONLY — AND IT IS NOW INCOMPLETE IN THE OTHER
+DIRECTION.** The story build (§ 1, Stream A) has **no block there at all**, so the auto-loaded
+context does not mention the work that has occupied every session since 2026-09-07. A stale label
+sends a session to finished work; a *missing* one hides live work. Both are how a session starts
+without the plan.
 
 | Block in `CLAUDE.md` | Really? |
 |---|---|
-| **Papic: the build order** (2026-08-29, line ~68) | ✅ **THE ONE OPEN STREAM.** Items 3–7. |
+| **Papic: the build order** (2026-08-29, line ~68) | ✅ **OPEN WORK — this is Stream B.** Items 3–7. ⚠ It was the *only* open stream when triaged on 2026-08-29; Stream A began 2026-09-07 — see § 1. |
 | **The supplier's room** (2026-08-27, ~117) | **FINISHED.** S1–S5 built; the Answers Desk shipped as PR #4917, merged and served. Its own remaining item (the weak-signal venue, § H) it calls *"its own project"*. |
 | **Papic is the event's one media library** (2026-08-26, ~466) | **SUBSTANTIALLY FINISHED** — nine PRs shipped. Anything left is in its contract § 3c, not in this block. |
 | **A rejected query is not a thrown error** (2026-08-07, ~1586) | **NOT A WORK STREAM — a lesson.** Its own second line: *"6 PRs merged, 1 closed as superseded."* Keep reading it; do not treat it as a queue. |
@@ -161,9 +213,11 @@ one of his own locks.
 **Start with these, in this order:**
 
 1. **this file**
-2. [`WHATS_NEXT_Papic_Items_3_7_HANDOFF_2026-08-29.md`](WHATS_NEXT_Papic_Items_3_7_HANDOFF_2026-08-29.md) — the open stream, self-contained
-3. [`WHATS_NEXT_Papic_Build_Order_2026-08-29.md`](WHATS_NEXT_Papic_Build_Order_2026-08-29.md) — the ordering and the reasoning
-4. [`WHATS_NEXT_Shots_Per_Guest_2026-08-28.md`](WHATS_NEXT_Shots_Per_Guest_2026-08-28.md) + [`…_SESSIONS_…`](WHATS_NEXT_Shots_Per_Guest_SESSIONS_2026-08-28.md) — item 3 in full
+2. **Stream A** — [`Design_Editorial_By_The_Minute_2026-09-07/00_BUILD_README.md`](Design_Editorial_By_The_Minute_2026-09-07/00_BUILD_README.md)
+   then [`…/09_SESSIONS_AND_PROMPTS_2026-09-09.md`](Design_Editorial_By_The_Minute_2026-09-07/09_SESSIONS_AND_PROMPTS_2026-09-09.md)
+3. **Stream B** — [`WHATS_NEXT_Papic_Items_3_7_HANDOFF_2026-08-29.md`](WHATS_NEXT_Papic_Items_3_7_HANDOFF_2026-08-29.md) — the open stream, self-contained
+4. [`WHATS_NEXT_Papic_Build_Order_2026-08-29.md`](WHATS_NEXT_Papic_Build_Order_2026-08-29.md) — the ordering and the reasoning
+5. [`WHATS_NEXT_Shots_Per_Guest_2026-08-28.md`](WHATS_NEXT_Shots_Per_Guest_2026-08-28.md) + [`…_SESSIONS_…`](WHATS_NEXT_Shots_Per_Guest_SESSIONS_2026-08-28.md) — item 3 in full
 
 **Reference, when you need it:**
 
@@ -184,5 +238,7 @@ one of his own locks.
 
 ## § 9 · THE ONE-LINE VERSION
 
-**Read the Papic items 3–7 handoff and start on item 3. Ignore the five stale ACTIVE labels.
-Verify everything against production, not against a document — including this one.**
+**Two streams. The story build (Stream A) is the live one — take S11 or S13 if its lane is free;
+Papic item 3 (Stream B) if it is not. Ignore the five stale ACTIVE labels. Check the lane with
+`gh pr list --state open` before you start. Verify everything against production, not against a
+document — INCLUDING THIS ONE, which was itself eleven days out of date on 2026-09-09.**
