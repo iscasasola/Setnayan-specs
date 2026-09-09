@@ -463,12 +463,34 @@ Ship a plain consent receipt with it — what was collected, why, for how long, 
 > 🔑 **ABSENCE FROM `vercel env ls` IS DECISIVE WHENEVER THE DEFAULT IS KNOWN** — and it points in
 > OPPOSITE directions for these two flags. Do not repeat "server-side env is unreadable" as if it
 > settled the question; read the default in code, then check whether anything overrides it.
+>
+> ⛔ **AND THEN DO NOT WRITE THE ANSWER DOWN AS A FACT. The owner set
+> `NEXT_PUBLIC_BUDGET_TRUTH_ENABLED="true"` and redeployed the SAME EVENING (2026-09-02 ~18:20), so
+> the paragraph above was stale within the hour — and so was a docblock 7d had just shipped to
+> `main` saying the flag was "NOT SET … and therefore OFF".** A flag's value is the fastest-decaying
+> fact in this project. **Record the METHOD, never the value** — the same rule as the six migration
+> headers `CLAUDE.md` says are still wrong today. Re-run `vercel env ls`; believe nothing here.
 > 🚨 **FOUR STATES, BECAUSE ₱0 IS A CLAIM:** `set` · `none` · `withheld` · `unknown`. The total is
 > **null whenever nothing contributed**, and a partial one says "Across 2 of 4 celebrations".
 > 🔒 `events_host` admits an accepted MODERATOR (the `budget-visibility.ts` leak: a live planner,
 > `checkout: false`, on a ₱930,000 event), so the rollup re-asks COUPLE membership on EVERY read —
 > 7a checks both halves at LINK time only, and a cluster outlives the access that justified it.
 > ⛔ **The pot guard runs unmodified and green.** 8 sabotages, every one red.
+>
+> **7d+ · the year also shows what is COMMITTED** (same day, after the owner switched budget-truth
+> on). Committed comes from `resolveEventMoney`'s core via a new `resolveEventMoneyMeasured()`, gated
+> on the flag with **NO fallback** — flag off ⇒ no committed column, because inventing a legacy
+> formula here would be the sixth definition of "the budget". The year and each celebration's own
+> `/budget` therefore cannot disagree.
+> 🛑 **THE RESOLVER HAD TO LEARN TO SAY WHEN IT DID NOT READ.** It degrades every read with `?? []`,
+> which is right for one event's page and WRONG inside a sum: the degraded value is a confident
+> **₱0 committed**, so Σ over a refused read is not degraded, it is incorrect — and it looks
+> perfect. `resolveEventMoney()` is now a thin wrapper and is byte-identical for its two callers.
+> 🔒 Committed is asked ONLY for celebrations you host (the gate is the target read), so the rollup
+> cannot count a stranger's spending — and it costs nothing when the flag is off.
+> 🔑 **THE SABOTAGE RUN THAT CAUGHT ONLY THREE OF SIX IS THE LESSON.** The two that escaped were the
+> two that mattered, because the existing tests built `{ measured: false }` **by hand** and never
+> drove the code that decides it. **A guard for a value must drive the thing that computes it.**
 
 
 > ⚠ **RE-MEASURED 2026-08-31 — THE NAME YOU WILL REACH FOR IS ALREADY TAKEN.** "Nothing links two

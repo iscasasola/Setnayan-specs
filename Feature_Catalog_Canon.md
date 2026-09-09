@@ -18,6 +18,23 @@
 - **Shared stems allowed only for true tiers** — the Papic family (Crew / Guests). Everywhere else, distinct names.
 - Already-plain features take **no parentheses** (the name *is* the generic).
 
+**`/features` IS A BRAND SURFACE — our name leads (owner ruling, 2026-09-06).** The two bullets
+above were the whole of item 8 in `WHAT_IS_LEFT_2026-08-17.md` § 6, *"the features page is frozen
+because two documents you approved describe it as two different shapes"*: `/features` is genuinely
+both a brand surface **and** a first-touch/SEO page, and nothing said which rule won. It is now
+settled — **brand-first**, e.g. `Patiktok (Reel Booth)`. The page previously used a third shape
+neither bullet describes (bare brand name with the generic demoted to a separate tagline line).
+
+⚠ **AND THE CANON HAS TWO GAPS THIS RULING EXPOSED — still open, not resolved here.** A page can
+only lead with a generic the canon actually supplies:
+- **`Papic`** — § 2 gives generics per TIER only (*Papic Crew → Paparazzi Crew* · *Papic Guests →
+  Guest Cameras*). There is none for the bare family, which is what `/features` shows.
+- **`Pakulay`** — has no row in § 2 at all.
+
+Both are left with no parenthetical on the live page rather than given an invented one. **Inventing
+a generic here would create a second, competing source of truth for a product's name — which is the
+condition that froze the page in the first place.**
+
 ---
 
 ## 2. The catalog

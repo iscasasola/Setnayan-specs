@@ -176,6 +176,45 @@ mirroring `event_schedule_blocks` — `{label, type, start, end, place, seated}`
 threshold. Before the reception: no plan at all, and the copy says when it opens.
 **The public plan carries table numbers and photo-heat. Never names.** **[review, blocker]**
 
+### What the floor plan KEEPS — owner ruling 2026-09-09
+
+The seating chart is a **working document built to be destroyed**: tables are hard-deleted (there
+is no removed-marker anywhere on `event_tables`) and seat assignments are wiped and re-solved by
+the arranger on every run. A story that reads it live is therefore **a mirror, not a memory** — the
+host tidies up after the day, re-runs the seating, or reuses the room for the next celebration, and
+the published plan silently redraws itself or empties.
+
+| | |
+|---|---|
+| **Keep** | the room's **shape** — labels, positions, shapes, dance floor, stage — and **where the photographs came from** (per-table heat, loudest table). The heat is the only part of a seating plan that is about the *day* rather than about the logistics of it. |
+| **Never** | **who sat where.** The roster's job ends the moment people sit down, and it is the only part that carries names. |
+| **Exception** | a guest's **own** seat, on their **own account** only — consistent with *a person's day is exclusive to their own account* (`04` rule 1). |
+| **Freeze** | **at publish.** Write the labels, positions, shapes and per-table counts into the story when it is told, and stop reading the live plan from then on. |
+
+🔒 **Owner lock 6 is extended from WHERE to WHEN.** Assigned seats exist only while the reception
+venue is in use — *and are not preserved afterwards either.*
+
+🔑 **Freezing a design at the moment it is agreed is already the house pattern**, in 14 places
+including `moodboard_part_finalizations.design_snapshot` and `event_renders.design_snapshot`.
+⚠ `03`'s citation of `event_moodboard_saves.palette_snapshot` as that precedent is **FALSE — the
+table does not exist.** Measured against production 2026-09-09, not read from a document.
+Cheap now: production holds **13 tables across 2 events**.
+
+### A small count is never shown — owner ruling 2026-09-09
+
+**A table with only one or two photographs shows no count at all.**
+
+🔴 **THE REASON IS NOT PRIVACY, AND WRITING IT UP AS PRIVACY LOSES IT.** It was *put* to the owner
+as a privacy question — a low count plus what a guest already knows can point at one person, the
+same shape as rule 7. He ruled on something else:
+
+> *"this will subconsciously tell them they did not create enough memories for the story."*
+
+So the rule is that **the story never passes judgement on the day it is telling.** A small number,
+rendered plainly, reads to the host as a verdict on their own wedding. This is the house style for
+**any** small count in the story, not a seating special case — and it is why the rule must never be
+"fixed" by adding a privacy exemption that lets the number through once nobody can be identified.
+
 ## 6 · Films
 
 **One card per broadcast session**, not one film. A single 2h48 file cannot span 2:38 → 9:47 PM.

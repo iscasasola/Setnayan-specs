@@ -1,0 +1,1168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chat, Two Sides</title>
+<style>
+  /* ── Palette · locked 2026-08 (terracotta). Dark tokens borrowed from the
+     house prototypes (shop_in_four_tabs_2026-08-28.html), not invented. ── */
+  :root{
+    --ground:#FFFFFF; --paper:#F4F2EC; --ink:#2C2A29; --ink-soft:#4F535B; --faint:#66696F;
+    --cta:#C24E25; --on-cta:#FFFFFF; --cta-soft:#FBEDE6;
+    --gold:#A9834B; --gold-text:#8A6B39; --gold-soft:#F5EEE1;
+    --link:#3B4E67; --line:#E4E0DA; --line-strong:#CFC9C0;
+    --ok:#2F6B4A; --ok-soft:#EDF4EF; --warn:#8C5A0E; --warn-soft:#FBF3E4;
+    --shadow:0 1px 3px rgba(0,0,0,.06), 0 12px 32px rgba(0,0,0,.08);
+    --body:"Hanken Grotesk",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:"Space Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --ground:#191817; --paper:#211F1E; --ink:#EFEBE4; --ink-soft:#B5B0A8; --faint:#948E86;
+    --cta:#E8703F; --on-cta:#191817; --cta-soft:#3A2820;
+    --gold:#C2A06A; --gold-text:#D6B87F; --gold-soft:#332B1E;
+    --link:#A9BEDA; --line:#332F2C; --line-strong:#4A443F;
+    --ok:#7FBF97; --ok-soft:#1B2A21; --warn:#D9A648; --warn-soft:#2C2415;
+    --shadow:0 1px 3px rgba(0,0,0,.4), 0 12px 32px rgba(0,0,0,.5);
+  }}
+  :root[data-theme="dark"]{
+    --ground:#191817; --paper:#211F1E; --ink:#EFEBE4; --ink-soft:#B5B0A8; --faint:#948E86;
+    --cta:#E8703F; --on-cta:#191817; --cta-soft:#3A2820;
+    --gold:#C2A06A; --gold-text:#D6B87F; --gold-soft:#332B1E;
+    --link:#A9BEDA; --line:#332F2C; --line-strong:#4A443F;
+    --ok:#7FBF97; --ok-soft:#1B2A21; --warn:#D9A648; --warn-soft:#2C2415;
+    --shadow:0 1px 3px rgba(0,0,0,.4), 0 12px 32px rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--ground);color:var(--ink);font-family:var(--body);line-height:1.5;-webkit-font-smoothing:antialiased;font-size:15px}
+  button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+  button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--cta);outline-offset:2px}
+  a{color:var(--link)}
+  svg{display:block}
+  [hidden]{display:none!important}
+
+  .wrap{max-width:78rem;margin:0 auto;padding:2.5rem 1.25rem 5rem}
+  .eyebrow{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:0 0 .6rem}
+  h1{font-size:clamp(1.7rem,4vw,2.4rem);line-height:1.14;margin:0;font-weight:700;letter-spacing:-.02em}
+  .lede{color:var(--ink-soft);margin:.8rem 0 0;max-width:44rem}
+  h2{font-size:1.35rem;margin:0 0 .25rem;font-weight:700;letter-spacing:-.01em}
+  .sub{color:var(--ink-soft);margin:0 0 1rem;max-width:46rem;font-size:.95rem}
+  section.block{border-top:1px solid var(--line);padding-top:1.75rem;margin-top:2.25rem}
+
+  /* page chrome */
+  .topbar{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin:1.4rem 0 1rem}
+  .tabs{display:flex;gap:.35rem;flex-wrap:wrap}
+  .tab{min-height:44px;padding:.5rem .95rem;border-radius:999px;border:1px solid var(--line);color:var(--ink-soft);font-weight:600;font-size:.85rem}
+  .tab[aria-selected="true"]{background:var(--cta);color:var(--on-cta);border-color:var(--cta)}
+  .theme{margin-left:auto;min-height:44px;padding:.5rem .9rem;border:1px solid var(--line);border-radius:8px;font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+  .frame-note{display:flex;gap:1rem;flex-wrap:wrap;align-items:center;margin:0 0 .9rem;font-size:.85rem;color:var(--ink-soft)}
+  .state{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .state button{min-height:44px;padding:.4rem .8rem;font-size:.8rem;font-weight:600;color:var(--ink-soft)}
+  .state button[aria-pressed="true"]{background:var(--paper);color:var(--ink)}
+  .scroller{overflow-x:auto;padding-bottom:.5rem}
+
+  /* ── shared chat primitives ─────────────────────────────────────────── */
+  .frame{position:relative}
+  .desk{display:grid;grid-template-columns:17rem minmax(0,1fr) 19rem;height:56rem;min-width:66rem;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--ground)}
+  .col{display:flex;flex-direction:column;min-height:0}
+  .col.left{border-right:1px solid var(--line)}
+  .col.right{border-left:1px solid var(--line);overflow-y:auto}
+  .col.mid{position:relative;min-width:0}
+
+  .mono{font-family:var(--mono)}
+  .eye{font-family:var(--mono);font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin:0}
+  .eye.gold{color:var(--gold-text)}
+
+  .av{width:34px;height:34px;border-radius:50%;background:var(--paper);border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--ink-soft);flex:none}
+  .av.lg{width:52px;height:52px;font-size:.9rem}
+
+  .pill{display:inline-flex;align-items:center;gap:.3rem;border-radius:999px;padding:.12rem .55rem;font-size:.68rem;font-weight:600;line-height:1.5;border:1px solid transparent;white-space:nowrap}
+  .pill.inquiry{background:var(--paper);color:var(--ink-soft);border-color:var(--line)}
+  .pill.quoted{background:var(--warn-soft);color:var(--warn)}
+  .pill.booked{background:var(--cta);color:var(--on-cta)}
+  .pill.completed{background:var(--ok-soft);color:var(--ok)}
+  .pill.cancelled{background:var(--paper);color:var(--faint);border-color:var(--line)}
+  .pill.unanswered{background:var(--ground);color:var(--cta);border-color:var(--cta)}
+  .pill.tag{background:var(--paper);color:var(--faint);font-weight:500;border-color:var(--line)}
+  .pill.src{font-family:var(--mono);font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;font-weight:400;background:var(--paper);color:var(--ink-soft)}
+
+  .ib{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;color:var(--ink-soft)}
+  .ib:hover{background:var(--paper);color:var(--ink)}
+  .ib svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+  .ib.gold svg{stroke:var(--gold)}
+  .ib[aria-expanded="true"]{background:var(--cta-soft);color:var(--cta)}
+  .ib[disabled]{opacity:.35;cursor:not-allowed}
+
+  /* list column */
+  .search{margin:.75rem;display:flex;align-items:center;gap:.5rem;border:1px solid var(--line);border-radius:10px;background:var(--ground);padding:0 .7rem;min-height:40px}
+  .search svg{width:16px;height:16px;stroke:var(--faint);fill:none;stroke-width:2;stroke-linecap:round}
+  .search input{border:0;background:none;flex:1;min-width:0;font:inherit;font-size:.85rem;color:var(--ink);outline:none}
+  .search input::placeholder{color:var(--faint)}
+  .chips{display:flex;gap:.3rem;overflow-x:auto;padding:0 .75rem .6rem;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .hit{position:relative}.hit::after{content:"";position:absolute;inset:-4px;min-height:44px}
+  .chip{flex:none;min-height:36px;position:relative;padding:.15rem .7rem;border-radius:999px;border:1px solid var(--line);font-size:.74rem;font-weight:500;color:var(--ink-soft);background:var(--ground)}
+  .chip::after{content:"";position:absolute;left:0;right:0;top:-4px;bottom:-4px}
+  .chip[aria-pressed="true"]{background:var(--cta);color:var(--on-cta);border-color:var(--cta);font-weight:600}
+  .rows{overflow-y:auto;flex:1;min-height:0;border-top:1px solid var(--line)}
+  .row{display:flex;gap:.6rem;padding:.65rem .75rem;border-bottom:1px solid var(--line);width:100%;text-align:left;align-items:flex-start;min-height:44px}
+  .row:hover{background:var(--paper)}
+  .row[aria-current="true"]{background:var(--cta-soft);box-shadow:inset 3px 0 0 var(--cta)}
+  .row[aria-current="true"] .t{color:var(--ink-soft)}
+  .row .who{display:flex;justify-content:space-between;gap:.5rem;align-items:baseline}
+  .row .who b{font-size:.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row .who .t{font-family:var(--mono);font-size:.6rem;color:var(--faint);flex:none}
+  .row .prev{font-size:.76rem;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:.05rem 0 .3rem}
+  .row.unread .prev{color:var(--ink);font-weight:600}
+  .row .tags{display:flex;gap:.25rem;flex-wrap:wrap}
+  .row .body{min-width:0;flex:1}
+  .row .dot{width:8px;height:8px;border-radius:50%;background:var(--cta);flex:none;margin-top:.5rem}
+  .empty{padding:1.5rem .9rem;text-align:center;font-size:.8rem;color:var(--faint)}
+
+  /* conversation header */
+  .chead{display:flex;align-items:center;gap:.6rem;padding:.55rem .75rem;border-bottom:1px solid var(--line);min-height:56px}
+  .chead .name{min-width:0;flex:1}
+  .chead .name b{display:block;font-size:.95rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .chead .name span.meta{display:block;font-size:.72rem;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .chead .meta-chips{display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.15rem}
+  .chead .acts{display:flex;align-items:center;gap:.1rem;flex:none}
+  .back{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);min-height:44px;display:inline-flex;align-items:center;padding:0 .3rem}
+
+  /* the safety line — one row, every word one tap away */
+  .safe{display:flex;align-items:flex-start;gap:.5rem;padding:.35rem .75rem;border-bottom:1px solid var(--line);background:var(--paper);font-size:.72rem;color:var(--ink-soft);line-height:1.45}
+  .safe svg{width:14px;height:14px;stroke:var(--gold);fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none;margin-top:.2rem}
+  .safe .l{flex:1;min-width:0}
+  .safe .short{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .safe .short b{color:var(--ink);font-weight:600}
+  .safe .full{margin:.25rem 0 .15rem}
+  .safe .full ul{margin:.25rem 0 0;padding-left:1rem}
+  .safe .full li{margin:.1rem 0}
+  .safe .why{flex:none;font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--link);min-height:36px;min-width:44px;margin:-6px 0;padding:0 .3rem;position:relative;text-decoration:underline;text-underline-offset:2px}
+  .safe .why::after{content:"";position:absolute;left:0;right:0;top:-4px;bottom:-4px}
+  .safe[data-open="true"] .short{white-space:normal}
+
+  /* stream */
+  .stream{flex:1;min-height:0;overflow-y:auto;padding:.9rem .9rem .5rem;display:flex;flex-direction:column;gap:.55rem}
+  .day{align-self:center;font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:.2rem 0}
+  .msg{max-width:74%;display:flex;flex-direction:column;gap:.15rem}
+  .msg .b{padding:.55rem .8rem;border-radius:16px;font-size:.86rem;line-height:1.45;background:var(--paper);color:var(--ink);border-bottom-left-radius:5px}
+  .msg.me{align-self:flex-end;align-items:flex-end}
+  .msg.me .b{background:var(--cta-soft);border-bottom-left-radius:16px;border-bottom-right-radius:5px}
+  .msg .t{font-family:var(--mono);font-size:.56rem;color:var(--faint);padding:0 .3rem}
+  .sys{align-self:center;font-size:.72rem;color:var(--faint);background:var(--paper);border-radius:999px;padding:.15rem .7rem}
+  .card{max-width:78%;border:1px solid var(--line);border-radius:12px;background:var(--ground);padding:.65rem .8rem;font-size:.82rem;scroll-margin-top:1rem}
+  .card.me{align-self:flex-end}
+  .card .k{font-family:var(--mono);font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-text);margin:0 0 .25rem;display:flex;align-items:center;gap:.35rem}
+  .card .k svg{width:13px;height:13px;stroke:var(--gold);fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+  .card b.ti{display:block;font-size:.9rem}
+  .card .amt{font-family:var(--mono);font-weight:700;font-size:.95rem}
+  .card p{margin:.2rem 0 0;color:var(--ink-soft)}
+  .card .acts{display:flex;gap:.4rem;margin-top:.55rem;flex-wrap:wrap}
+  .card.attn{border-color:var(--cta);background:var(--ground)}
+  .card.flash{animation:flash 1.2s ease}
+  @keyframes flash{0%{box-shadow:0 0 0 4px var(--cta-soft)}100%{box-shadow:0 0 0 0 transparent}}
+  .btn{min-height:44px;padding:.35rem .9rem;border-radius:8px;font-size:.8rem;font-weight:600;border:1px solid var(--line);color:var(--ink);background:var(--ground);display:inline-flex;align-items:center;justify-content:center;gap:.35rem}
+  .btn.go{background:var(--cta);color:var(--on-cta);border-color:var(--cta)}
+  .btn.quiet{border-color:transparent;color:var(--ink-soft)}
+  .btn.sm{min-height:36px;font-size:.74rem;padding:.2rem .7rem;position:relative}.btn.sm::after{content:"";position:absolute;left:0;right:0;top:-4px;bottom:-4px}
+  .btn.dark{background:var(--ink);color:var(--ground);border-color:var(--ink)}
+  .btn.w{width:100%}
+  .btn.link{color:var(--link);border:0;padding:0;min-height:44px;text-decoration:underline;text-underline-offset:2px;font-weight:500}
+
+  /* AI strip — rendered only when there is something to suggest */
+  .ai{display:flex;align-items:center;gap:.4rem;padding:.35rem .75rem 0;overflow:hidden}
+  .ai .lab{font-family:var(--mono);font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-text);flex:none;display:inline-flex;align-items:center;gap:.25rem}
+  .ai .lab svg{width:12px;height:12px;stroke:var(--gold);fill:none;stroke-width:1.75;stroke-linejoin:round}
+  .ai .s{display:flex;gap:.3rem;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
+  .ai .s::-webkit-scrollbar{display:none}
+  .ai .s button{flex:none;min-height:36px;position:relative;max-width:17rem;padding:.15rem .7rem;border-radius:999px;border:1px solid var(--line-strong);font-size:.74rem;color:var(--ink);background:var(--ground);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ai .s button::after{content:"";position:absolute;left:0;right:0;top:-4px;bottom:-4px}
+  .ai .s button:hover{border-color:var(--cta)}
+
+  /* composer */
+  .comp{padding:.45rem .6rem .6rem;border-top:1px solid var(--line);background:var(--ground)}
+  .comp .box{display:flex;align-items:flex-end;gap:.15rem;border:1px solid var(--line-strong);border-radius:22px;padding:.15rem .25rem .15rem .35rem;background:var(--ground)}
+  .comp textarea{flex:1;min-width:0;border:0;background:none;resize:none;font:inherit;font-size:.88rem;color:var(--ink);padding:.55rem .35rem;min-height:44px;max-height:7rem;outline:none;line-height:1.4}
+  .comp textarea::placeholder{color:var(--faint)}
+  .comp .ib{min-width:44px;min-height:44px;width:44px;height:44px}
+  .comp .send{background:var(--cta);color:var(--on-cta);width:44px;height:44px;min-width:44px;min-height:44px}
+  .comp .send:hover{background:var(--cta);opacity:.92;color:var(--on-cta)}
+  .comp .send svg{stroke:var(--on-cta)}
+  .comp .icons{display:flex;align-items:center;flex:none}
+  .comp .hint{font-family:var(--mono);font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:.35rem .6rem 0;display:flex;gap:.9rem;flex-wrap:wrap}
+  .comp .hint span{white-space:nowrap}
+
+  /* the pending-inquiry box: takes the composer's place */
+  .pend{margin:.6rem;border:1px solid var(--cta);border-radius:14px;padding:.8rem .9rem;background:var(--ground)}
+  .pend p{margin:0 0 .5rem;font-size:.85rem}
+  .pend .facts{display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:.6rem}
+  .pend .facts .pill{background:var(--cta-soft);color:var(--ink);border-color:transparent;font-weight:500}
+  .pend .acts{display:flex;gap:.5rem;flex-wrap:wrap}
+  .pend .note{font-size:.74rem;color:var(--ink-soft);margin:.5rem 0 0}
+  .frame[data-state="pending"] .card,.frame[data-state="pending"] .msg.me,.frame[data-state="pending"] .sys{display:none}
+
+  /* the tool — ONE mount, rises from the composer, zero space when closed */
+  .chead,.safe{order:0}.stream{order:1}.tool{order:2}.ai{order:3}.comp,.pend{order:4}
+  .tool{flex:none;max-height:62%;display:flex;flex-direction:column;background:var(--ground);border-top:1px solid var(--line-strong);box-shadow:0 -6px 18px rgba(0,0,0,.07);border-radius:14px 14px 0 0;z-index:5;margin:0 .35rem}
+  .tool .th{display:flex;align-items:center;gap:.6rem;padding:.4rem .5rem .4rem .9rem;border-bottom:1px solid var(--line)}
+  .tool .th b{font-size:.9rem}
+  .tool .th span{font-size:.74rem;color:var(--faint);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tool .th .ib{color:var(--ink-soft)}
+  .tool-body{overflow-y:auto;padding:.8rem .9rem 1rem;font-size:.84rem;display:flex;flex-direction:column;gap:.6rem}
+  .tool .f{display:flex;flex-direction:column;gap:.25rem}
+  .tool label{font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+  .tool input,.tool select,.tool textarea{font:inherit;font-size:.84rem;color:var(--ink);background:var(--ground);border:1px solid var(--line-strong);border-radius:8px;padding:.45rem .6rem;min-height:40px;width:100%}
+  .tool .two{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+  .tool table{width:100%;border-collapse:collapse;font-size:.8rem}
+  .tool td{padding:.3rem 0;border-bottom:1px solid var(--line)}
+  .tool td.n{text-align:right;font-family:var(--mono);white-space:nowrap}
+  .tool td.free{color:var(--ok);font-weight:600}
+  .tool tr.tot td{border:0;font-weight:700;padding-top:.5rem}
+  .tool .acts{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:.2rem}
+  .tool .opt{display:flex;align-items:center;justify-content:space-between;gap:.6rem;border:1px solid var(--line);border-radius:10px;padding:.5rem .7rem}
+  .tool .opt b{display:block;font-size:.84rem}
+  .tool .opt span{font-size:.74rem;color:var(--ink-soft)}
+  .tool .radio{display:flex;gap:.4rem;flex-wrap:wrap}
+  .tool .radio label{font-family:var(--body);font-size:.82rem;letter-spacing:0;text-transform:none;color:var(--ink);display:inline-flex;align-items:center;gap:.35rem;border:1px solid var(--line);border-radius:999px;padding:.3rem .75rem;min-height:44px}
+  .tool .radio input{width:auto;min-height:0}
+  .tool .fine{font-size:.74rem;color:var(--ink-soft);margin:0}
+  .tool .fine b{color:var(--ink)}
+
+  /* right rail */
+  .rail .hd{padding:.7rem .9rem;border-bottom:1px solid var(--line)}
+  .rail .id{display:flex;flex-direction:row;align-items:center;gap:.7rem;padding:.75rem .9rem;border-bottom:1px solid var(--line);text-align:left}.rail .id b{flex:1;min-width:0}
+  .rail .id b{font-size:.95rem}
+  .rail .sum{padding:.7rem .9rem;border-bottom:1px solid var(--line);font-size:.8rem;color:var(--ink-soft);line-height:1.5}
+  .rail dl{margin:0;padding:.6rem .9rem;border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:.55rem .8rem}
+  .rail dt{font-family:var(--mono);font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+  .rail dd{margin:0;font-size:.82rem;font-weight:600}
+  .rail .sec{padding:.6rem .9rem;border-bottom:1px solid var(--line)}
+  .rail .sec .eye{margin-bottom:.4rem}
+  .rail .lock{display:flex;gap:.25rem;flex-wrap:wrap}
+  .rail .tools{display:flex;flex-direction:column;gap:.1rem;padding:.3rem .6rem .4rem}
+  .tl{display:flex;align-items:center;gap:.6rem;min-height:44px;padding:.25rem .6rem;border-radius:9px;text-align:left;width:100%;font-size:.84rem;font-weight:600;color:var(--ink)}
+  .tl:hover{background:var(--paper)}
+  .tl[aria-expanded="true"]{background:var(--cta-soft)}
+  .tl svg{width:18px;height:18px;stroke:var(--ink-soft);fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .tl.primary{border:1px solid var(--cta)}
+  .tl.primary svg{stroke:var(--cta)}
+  .tl .out{margin-left:auto;font-family:var(--mono);font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:400}
+  .tl .badge{margin-left:auto;background:var(--cta);color:var(--on-cta);font-family:var(--mono);font-size:.58rem;padding:0 .4rem;border-radius:999px;font-weight:700}
+  .rail .foot{padding:.5rem .9rem 1rem}
+  .rail .stage-note{font-size:.7rem;color:var(--faint);padding:.4rem .9rem;line-height:1.4;border-bottom:1px solid var(--line)}
+  .quote{border:1px solid var(--line);border-radius:10px;padding:.6rem .7rem;margin-top:.4rem}
+  .quote b.ti{display:block;font-size:.84rem}
+  .quote .amt{font-family:var(--mono);font-weight:700}
+  .quote ul{margin:.3rem 0 0;padding:0;list-style:none;font-size:.74rem;color:var(--ink-soft)}
+  .quote li{display:flex;justify-content:space-between;gap:.5rem}
+  .quote .fine{font-size:.68rem;color:var(--faint);margin:.35rem 0 0}
+  .quote details summary{cursor:pointer;font-family:var(--mono);font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-top:.5rem;min-height:44px;display:flex;align-items:center}
+
+  /* phone */
+  .phones{display:flex;gap:1.5rem;flex-wrap:wrap;align-items:flex-start}
+  .phone{width:23.5rem;height:47rem;border:1px solid var(--line);border-radius:28px;overflow:hidden;background:var(--ground);box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;flex-direction:column;position:relative;flex:none}
+  .phone .status{display:flex;justify-content:space-between;padding:.6rem 1.1rem .2rem;font-family:var(--mono);font-size:.6rem;color:var(--faint)}
+  .phone .screen{flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
+  .phone .chead{padding:.35rem .5rem}
+  .phone .tool{max-height:72%;margin:0}
+  .caption{font-family:var(--mono);font-size:.62rem;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);text-align:center;margin:.55rem 0 0;max-width:23.5rem}
+  .home{height:5px;width:36%;background:var(--line-strong);border-radius:3px;margin:.35rem auto .5rem}
+
+  /* bottom sheet (phone) */
+  .scrim{position:absolute;inset:0;background:rgba(20,16,12,.45);z-index:8}
+  .sheet{position:absolute;left:0;right:0;bottom:0;max-height:84%;background:var(--ground);border-radius:18px 18px 0 0;z-index:9;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+  .sheet .grab{width:38px;height:4px;border-radius:2px;background:var(--line-strong);margin:.5rem auto .2rem}
+  .sheet .sh{display:flex;align-items:center;justify-content:space-between;padding:.2rem .5rem .3rem .9rem;border-bottom:1px solid var(--line)}
+  .sheet .sh b{font-size:.9rem}
+  .sheet .sb{overflow-y:auto;min-height:0}
+  .sheet .id{flex-direction:row;text-align:left;padding:.7rem .9rem;gap:.7rem}.sheet .id b{flex:1;min-width:0}
+
+  /* explanatory */
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:1.2rem 2rem}
+  .note h3{font-size:.98rem;margin:0 0 .3rem}
+  .note p{margin:0 0 .6rem;color:var(--ink-soft);font-size:.92rem}
+  .map{width:100%;border-collapse:collapse;font-size:.86rem}
+  .map th{text-align:left;font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);padding:.4rem .5rem;border-bottom:1px solid var(--line)}
+  .map td{padding:.45rem .5rem;border-bottom:1px solid var(--line);vertical-align:top}
+  .map td.w{color:var(--ink-soft)}
+  .tagk{display:inline-block;font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;padding:.15rem .45rem;border-radius:3px;background:var(--paper);color:var(--ink-soft);white-space:nowrap}
+  .tagk.c{background:var(--cta-soft);color:var(--ink)}
+  .tagk.h{background:var(--gold-soft);color:var(--ink)}
+  .tagk.r{background:var(--ok-soft);color:var(--ok)}
+  footer{border-top:1px solid var(--line);margin-top:2.5rem;padding-top:1.2rem;color:var(--faint);font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Setnayan · chat · both sides of one conversation · 9 September 2026</p>
+  <h1>List · conversation · context — as clean as a Facebook Page inbox, with every Setnayan function still there</h1>
+  <p class="lede">The conversation gets the whole middle. Everything a supplier can do sits in one of three small places: the icons beside the text box (things you do mid-sentence), the quiet list on the right (things you do once, on purpose, usually involving money), and the phone and camera in the header. A tool appears only when you open it, one at a time, and takes no space when it is closed. Every function that ships today is still reachable — the map at the bottom says exactly where each one went.</p>
+</header>
+
+<div class="topbar">
+  <div class="tabs" role="tablist" aria-label="Frames">
+    <button class="tab" role="tab" aria-selected="true" data-tab="sd">Supplier · desktop</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="sm">Supplier · phone</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="cd">Couple · desktop</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="cm">Couple · phone</button>
+  </div>
+  <button class="theme" id="theme" aria-pressed="false">Dark</button>
+</div>
+
+<!-- ═══════════════════════ SUPPLIER · DESKTOP ═══════════════════════ -->
+<div id="p-sd" role="tabpanel">
+  <div class="frame-note">
+    <span>State:</span>
+    <div class="state" role="group" aria-label="Thread state">
+      <button data-state="accepted" aria-pressed="true">Accepted — talking</button>
+      <button data-state="pending" aria-pressed="false">New inquiry — not yet accepted</button>
+    </div>
+    <span>Try: click a tool on the right · click a suggested reply · filter the list · press Esc to close a tool.</span>
+  </div>
+
+  <div class="scroller">
+  <div class="frame desk" data-state="accepted" id="f-sd">
+
+    <!-- LEFT · LIST -->
+    <aside class="col left" aria-label="Conversations">
+      <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" placeholder="Search conversations" aria-label="Search conversations"></div>
+      <div class="chips" role="group" aria-label="Filter">
+        <button class="chip" data-filter="all" aria-pressed="true">All</button>
+        <button class="chip" data-filter="unanswered" aria-pressed="false">Unanswered</button>
+        <button class="chip" data-filter="quoted" aria-pressed="false">Quoted</button>
+        <button class="chip" data-filter="booked" aria-pressed="false">Booked</button>
+        <button class="chip" data-filter="completed" aria-pressed="false">Completed</button>
+        <button class="chip" data-filter="cancelled" aria-pressed="false">Cancelled</button>
+      </div>
+      <div class="rows">
+        <button class="row" aria-current="true" data-stage="quoted" data-unanswered="1">
+          <span class="av">CI</span>
+          <span class="body">
+            <span class="who"><b>Cale &amp; Ice</b><span class="t">11:20</span></span>
+            <span class="prev">Can we do a tasting first? And our count might…</span>
+            <span class="tags"><span class="pill unanswered">Unanswered</span><span class="pill tag">Catering</span><span class="pill tag">18 Dec</span></span>
+          </span>
+        </button>
+        <button class="row unread" data-stage="inquiry" data-unanswered="1">
+          <span class="av">MR</span>
+          <span class="body">
+            <span class="who"><b>Mara &amp; Rui</b><span class="t">09:04</span></span>
+            <span class="prev">Hello! Are you free on 14 Feb for 80 guests?</span>
+            <span class="tags"><span class="pill unanswered">Unanswered</span><span class="pill tag">Catering</span><span class="pill tag">14 Feb</span></span>
+          </span>
+          <span class="dot" aria-label="Unread"></span>
+        </button>
+        <button class="row" data-stage="booked">
+          <span class="av">JP</span>
+          <span class="body">
+            <span class="who"><b>Jen &amp; Paolo</b><span class="t">Yesterday</span></span>
+            <span class="prev">You: Deposit received — see you on the 3rd!</span>
+            <span class="tags"><span class="pill booked">Booked</span><span class="pill tag">Catering</span><span class="pill tag">3 Oct</span></span>
+          </span>
+        </button>
+        <button class="row" data-stage="quoted">
+          <span class="av">AB</span>
+          <span class="body">
+            <span class="who"><b>Ana &amp; Ben</b><span class="t">Mon</span></span>
+            <span class="prev">You: Sent the Intimate 50 quote — valid until the 20th.</span>
+            <span class="tags"><span class="pill quoted">Quoted</span><span class="pill tag">Dessert bar</span><span class="pill tag">21 Nov</span></span>
+          </span>
+        </button>
+        <button class="row" data-stage="completed">
+          <span class="av">LT</span>
+          <span class="body">
+            <span class="who"><b>Liza &amp; Tomas</b><span class="t">28 Aug</span></span>
+            <span class="prev">Thank you so much, everyone loved the lechon!</span>
+            <span class="tags"><span class="pill completed">Completed</span><span class="pill tag">Catering</span><span class="pill tag">22 Aug</span></span>
+          </span>
+        </button>
+        <button class="row" data-stage="cancelled">
+          <span class="av">KD</span>
+          <span class="body">
+            <span class="who"><b>Kim &amp; Dan</b><span class="t">12 Aug</span></span>
+            <span class="prev">You: No problem at all — best wishes for the day.</span>
+            <span class="tags"><span class="pill cancelled">Cancelled</span><span class="pill tag">Catering</span><span class="pill tag">5 Sep</span></span>
+          </span>
+        </button>
+        <p class="empty" hidden data-empty>No conversations in this filter.</p>
+      </div>
+    </aside>
+
+    <!-- MIDDLE · CONVERSATION -->
+    <section class="col mid" aria-label="Conversation with Cale &amp; Ice">
+      <header class="chead">
+        <span class="av">CI</span>
+        <div class="name">
+          <b>Cale &amp; Ice</b>
+          <span class="meta">Wedding · December 18, 2026 · planning for ~170 guests</span>
+          <div class="meta-chips">
+            <span class="pill quoted" data-stage-pill>Quoted</span>
+            <span class="pill src">Website inquiry</span>
+            <span class="pill tag">Asking about: Catering · Dessert table</span>
+          </div>
+        </div>
+        <div class="acts">
+          <button class="ib gold" data-open="thread-call" data-focus="voice" aria-label="Voice call — opens the call panel" title="Voice call" data-needs-accept><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg></button>
+          <button class="ib gold" data-open="thread-call" data-focus="video" aria-label="Video call — opens the call panel" title="Video call" data-needs-accept><svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3"/></svg></button>
+          <button class="ib" aria-label="More" title="More: mute · block · report"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></button>
+        </div>
+      </header>
+
+      <div class="safe" data-open="false" role="note" aria-label="Chat privacy notice">
+        <svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/></svg>
+        <div class="l">
+          <div class="short"><b>Don’t share private info in chat</b> — government IDs · card numbers · full addresses · OTPs · passwords.</div>
+          <div class="full" hidden><b>All your event info is already in Setnayan</b> — your vendor sees what they need from your profile. Please don’t share private info in chat: government IDs · card numbers · full addresses · OTPs · passwords. If a vendor asks for these, report it via Help.</div>
+        </div>
+        <button class="why" data-safe-toggle aria-expanded="false">Why</button>
+      </div>
+
+      <div class="stream" data-stream>
+        <span class="day">Tuesday 8 September</span>
+        <div class="msg"><div class="b">Hi! We’re looking at catering for around 150 guests on Dec 18 at a garden venue in Tagaytay. Do you have a package that includes a dessert table?</div><span class="t">10:42</span></div>
+        <span class="sys">You accepted this inquiry · 10:49</span>
+        <div class="msg me"><div class="b">Hi Ice! Yes — our Garden Buffet covers 150 and we can add a dessert table. Sending the details now.</div><span class="t">10:51 · Seen</span></div>
+        <div class="card me">
+          <p class="k"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h6M9 16h6"/></svg>Proposal</p>
+          <b class="ti">Garden Buffet · 150 guests</b>
+          <span class="amt">₱187,500</span> <span class="pill quoted">Sent</span>
+          <p>Buffet for 150 · dessert table · coffee station included · valid until 30 Sep</p>
+          <div class="acts"><button class="btn sm">View</button></div>
+        </div>
+        <div class="msg"><div class="b">That looks great. Can we do a tasting first? And our count might go up to 170.</div><span class="t">11:20</span></div>
+        <div class="card">
+          <p class="k"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Meeting request</p>
+          <b class="ti">Tasting at your kitchen</b>
+          <p>Saturday 26 September · 2:00 PM</p>
+          <div class="acts"><button class="btn sm go">Accept</button><button class="btn sm">Suggest another time</button></div>
+        </div>
+        <div class="card attn" id="sd-pax">
+          <p class="k"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 11a3 3 0 1 0 0-6M21 20a6 6 0 0 0-6-6"/></svg>Guest count changed</p>
+          <b class="ti">Garden Buffet — now planning for 170 (you quoted 150)</b>
+          <p>At ₱1,250 per guest your total would increase by <b>+₱25,000</b>. Nothing changes until you decide.</p>
+          <div class="acts"><button class="btn sm go">Apply +₱25,000</button><button class="btn sm">Hold price</button></div>
+        </div>
+        <div class="card attn" id="sd-pay">
+          <p class="k"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h3"/></svg>Payment logged by the couple</p>
+          <b class="ti">₱50,000 · GCash · reservation fee</b>
+          <p>Ice says this was sent on 8 Sep. Confirm only if it reached your account.</p>
+          <div class="acts"><button class="btn sm go">Confirm received</button><button class="btn sm">Not received</button></div>
+        </div>
+      </div>
+
+      <!-- AI strip: present only when there is a suggestion; otherwise not rendered -->
+      <div class="ai" data-needs-accept>
+        <span class="lab"><svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/></svg>AI</span>
+        <div class="s">
+          <button data-fill="Yes — tastings are every Saturday. Want me to hold the 26th at 2 PM for you?">Yes — tastings are every Saturday. Want me to hold the 26th at 2 PM?</button>
+          <button data-fill="Happy to hold the price at 150 until you confirm the final count.">Happy to hold the price at 150 until you confirm.</button>
+          <button data-fill="I’ll send the updated quote for 170 now — same package, dessert table included.">Sending the updated quote for 170 now.</button>
+        </div>
+      </div>
+
+      <!-- composer -->
+      <div class="comp" data-needs-accept>
+        <div class="box">
+          <div class="icons">
+            <button class="ib" aria-label="Attach a file" title="Attach a file"><svg viewBox="0 0 24 24"><path d="m21 11-8.5 8.5a5 5 0 0 1-7-7L14 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L15 7"/></svg></button>
+            <button class="ib" aria-label="Photo" title="Photo"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-8 8"/></svg></button>
+            <button class="ib" data-open="deal-or-meeting" aria-label="Deal or meeting" title="Deal or meeting"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/></svg></button>
+            <button class="ib" data-open="offer-service" aria-label="Offer another service" title="Offer another service"><svg viewBox="0 0 24 24"><path d="M3 12V5h7l9 9-7 7z"/><circle cx="7.5" cy="9.5" r="1.2"/></svg></button>
+          </div>
+          <textarea rows="1" placeholder="Write to Cale &amp; Ice…" aria-label="Message" data-composer></textarea>
+          <button class="ib send" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M4 12 20 4l-4 16-4-6z"/><path d="m12 14 8-10"/></svg></button>
+        </div>
+      </div>
+
+      <!-- pending inquiry: this replaces the composer (and hides the tools) -->
+      <div class="pend" data-pending-only hidden>
+        <p><b>New inquiry.</b> Accept to reply, or decline if you’re not free on this date.</p>
+        <div class="facts">
+          <span class="pill">December 18, 2026</span><span class="pill">150 pax</span><span class="pill">Wedding</span><span class="pill">Tagaytay</span><span class="pill">Setnayan AI · Active</span>
+        </div>
+        <div class="acts"><button class="btn go">Accept inquiry</button><button class="btn">Decline</button></div>
+        <p class="note">You have 1 other date held near 18 Dec. Accepting costs nothing and does not book the date.</p>
+      </div>
+
+      <!-- ═ THE TOOL · mounted once, one open at a time, zero space when closed ═ -->
+      <div class="tool" data-tool="build-quote" hidden>
+        <div class="th"><b>Build a quote</b><span>Line items, freebies, crew and transport</span><button class="ib" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        <div class="tool-body">
+          <div class="two">
+            <div class="f"><label>Package</label><select><option>Garden Buffet</option><option>Intimate 50</option><option>Corporate Lunch</option></select></div>
+            <div class="f"><label>Guests</label><input value="170"></div>
+          </div>
+          <table>
+            <tr><td>Garden Buffet · 170 × ₱1,250</td><td class="n">₱212,500</td></tr>
+            <tr><td>Dessert table</td><td class="n">₱18,000</td></tr>
+            <tr><td>Coffee station <span class="pill tag">freebie</span></td><td class="n free">₱0</td></tr>
+            <tr><td>Crew meals · 12 × ₱350</td><td class="n">₱4,200</td></tr>
+            <tr><td>Transport · Tagaytay</td><td class="n">₱6,500</td></tr>
+            <tr class="tot"><td>Total</td><td class="n">₱241,200</td></tr>
+          </table>
+          <button class="btn link">+ Add a line</button>
+          <div class="two">
+            <div class="f"><label>Valid until</label><input value="30 Sep 2026"></div>
+            <div class="f"><label>How they pay you</label><select><option>GCash · 0917 ··· 42</option><option>BDO · ···· 8810</option></select></div>
+          </div>
+          <div class="acts"><button class="btn go">Send quote</button><button class="btn">Save draft</button><span class="fine">Lands in the chat as a card. Your stage moves to <b>Quoted</b> by itself.</span></div>
+        </div>
+      </div>
+
+      <div class="tool" data-tool="send-proposal" hidden>
+        <div class="th"><b>Send proposal</b><span>From a saved template</span><button class="ib" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        <div class="tool-body">
+          <div class="f"><label>Template</label><select><option>Garden Buffet — standard</option><option>Intimate 50</option><option>Corporate Lunch</option></select></div>
+          <div class="f"><label>Package</label><select><option>Garden Buffet</option><option>Intimate 50</option></select></div>
+          <p class="fine">Sends the template exactly as saved, as a proposal card. Need to change prices for this couple? Use <b>Build a quote</b> instead.</p>
+          <div class="acts"><button class="btn go">Send proposal</button><button class="btn link">Manage templates →</button></div>
+        </div>
+      </div>
+
+      <div class="tool" data-tool="offer-service" hidden>
+        <div class="th"><b>Offer another service</b><span>Your other cards, not yet on this conversation</span><button class="ib" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        <div class="tool-body">
+          <div class="opt"><div><b>Dessert bar</b><span>from ₱18,000 · 8 photos</span></div><button class="btn sm">Offer</button></div>
+          <div class="opt"><div><b>Mobile coffee cart</b><span>from ₱9,500 · 5 photos</span></div><button class="btn sm">Offer</button></div>
+          <div class="opt"><div><b>Lechon station</b><span>from ₱14,000 · 12 photos</span></div><button class="btn sm">Offer</button></div>
+          <p class="fine">Posts the card into the chat so they can ask about it. Nothing is charged.</p>
+        </div>
+      </div>
+
+      <div class="tool" data-tool="thread-call" hidden>
+        <div class="th"><b>Call Cale &amp; Ice</b><span>Free · one to one · rings their phone or browser</span><button class="ib" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        <div class="tool-body">
+          <p class="fine">Nothing has dialled yet. Pick one to start — they’ll see who is calling and can pick up in the app.</p>
+          <div class="acts"><button class="btn go" data-callbtn="voice">Start voice call</button><button class="btn" data-callbtn="video">Start video call</button></div>
+          <p class="fine">Calls are not recorded. Anything agreed on a call — put it in the chat as a deal so both of you have it in writing.</p>
+        </div>
+      </div>
+
+      <div class="tool" data-tool="deal-or-meeting" hidden>
+        <div class="th"><b>Deal or meeting</b><span>Propose a schedule or a handshake</span><button class="ib" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        <div class="tool-body">
+          <div class="opt"><div><b>Propose a deal</b><span>A price and terms they can accept with one tap</span></div><button class="btn sm">Write it</button></div>
+          <div class="opt"><div><b>Request a meeting</b><span>Tasting, ocular, or a call at a set time</span></div><button class="btn sm">Pick a time</button></div>
+          <p class="fine">Both land as cards in the chat with Accept / Suggest another on their side.</p>
+        </div>
+      </div>
+
+      <div class="tool" data-tool="log-outcome" hidden>
+        <div class="th"><b>Log the outcome</b><span>Won, lost or no response — private to you</span><button class="ib" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        <div class="tool-body">
+          <div class="radio"><label><input type="radio" name="sd-out">Won</label><label><input type="radio" name="sd-out">Lost</label><label><input type="radio" name="sd-out">No response</label></div>
+          <div class="f"><label>Reason</label><select><option>Pick one…</option><option>Price</option><option>Date not free</option><option>Chose someone else</option><option>Event cancelled</option></select></div>
+          <div class="f"><label>Note (optional)</label><textarea rows="2"></textarea></div>
+          <div class="acts"><button class="btn go">Save</button><span class="fine">The couple never sees this. It only shapes your own reports.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT · CONTEXT -->
+    <aside class="col right rail" aria-label="Customer">
+      <div class="hd"><p class="eye gold">Customer</p></div>
+      <div class="id">
+        <span class="av lg">CI</span>
+        <b>Cale &amp; Ice</b>
+        <span class="pill quoted" data-stage-pill>Quoted</span>
+      </div>
+      <p class="stage-note">Moves on its own — send a quote, it says Quoted; hold the date, it says Booked. Never picked from a menu.</p>
+      <p class="sum">Ice Casasola created a wedding called “Cale &amp; Ice” on June 19, 2026.</p>
+      <dl>
+        <div><dt>Target date</dt><dd>Dec 18, 2026</dd></div>
+        <div><dt>Guests</dt><dd>~170</dd></div>
+        <div><dt>Location</dt><dd>Tagaytay</dd></div>
+        <div><dt>Locked suppliers</dt><dd>3 of 9</dd></div>
+        <div><dt>Service</dt><dd>Catering</dd></div>
+        <div><dt>Since</dt><dd>8 Sep 2026</dd></div>
+      </dl>
+      <div class="sec">
+        <p class="eye">Already locked</p>
+        <div class="lock"><span class="pill tag">Venue</span><span class="pill tag">Photo &amp; video</span><span class="pill tag">Gown</span></div>
+      </div>
+      <div class="sec" style="border-bottom:0;padding-bottom:0" data-needs-accept>
+        <p class="eye">Tools</p>
+      </div>
+      <div class="tools" data-needs-accept>
+        <button class="tl primary" data-open="build-quote" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>Build a quote</button>
+        <button class="tl" data-open="send-proposal" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h6M9 16h6"/></svg>Send proposal</button>
+        <button class="tl" data-scroll="sd-pay"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h3"/></svg>Log payment<span class="badge">1</span></button>
+        <button class="tl"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Propose schedule<span class="out">opens brief ↗</span></button>
+        <button class="tl" data-open="offer-service" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M3 12V5h7l9 9-7 7z"/><circle cx="7.5" cy="9.5" r="1.2"/></svg>Offer another service</button>
+        <button class="tl" data-open="thread-call" data-focus="voice" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg>Voice call</button>
+        <button class="tl" data-open="thread-call" data-focus="video" aria-expanded="false"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3"/></svg>Video call</button>
+        <button class="tl" data-open="deal-or-meeting" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M3 11l4-4 5 5 2-2 3 3 4-4"/><path d="M3 11v6l4 4h4l6-6"/></svg>Deal or meeting</button>
+        <button class="tl" data-open="log-outcome" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 6h4l2 2H4zM10 6h10M4 12h4l2 2H4zM10 12h10M4 18h4l2 2H4zM10 18h10"/></svg>Log the outcome</button>
+      </div>
+      <div class="foot"><button class="btn dark w">Full customer profile →</button></div>
+    </aside>
+  </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SUPPLIER · PHONE ═══════════════════════ -->
+<div id="p-sm" role="tabpanel" hidden>
+  <div class="frame-note"><span>Same tools, same context, reached differently: ⓘ opens the customer and the tool list as a sheet; a tool rises from the bottom, one at a time. Try ⓘ, then “Build a quote”.</span></div>
+  <div class="scroller">
+  <div class="phones">
+
+    <!-- phone A: the list -->
+    <div>
+      <div class="phone">
+        <div class="status"><span>9:41</span><span>●●● ᯤ ▮</span></div>
+        <div class="screen frame" id="f-sm-list">
+          <header class="chead" style="padding-left:.9rem"><div class="name"><b>Messages</b><span class="meta">2 unanswered · 6 conversations</span></div><div class="acts"><button class="ib" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button></div></header>
+          <div class="chips" role="group" aria-label="Filter" style="padding-top:.5rem">
+            <button class="chip" data-filter="all" aria-pressed="true">All</button>
+            <button class="chip" data-filter="unanswered" aria-pressed="false">Unanswered</button>
+            <button class="chip" data-filter="quoted" aria-pressed="false">Quoted</button>
+            <button class="chip" data-filter="booked" aria-pressed="false">Booked</button>
+            <button class="chip" data-filter="completed" aria-pressed="false">Completed</button>
+            <button class="chip" data-filter="cancelled" aria-pressed="false">Cancelled</button>
+          </div>
+          <div class="rows">
+            <button class="row" data-stage="quoted" data-unanswered="1"><span class="av">CI</span><span class="body"><span class="who"><b>Cale &amp; Ice</b><span class="t">11:20</span></span><span class="prev">Can we do a tasting first? And our count…</span><span class="tags"><span class="pill unanswered">Unanswered</span><span class="pill tag">Catering</span><span class="pill tag">18 Dec</span></span></span></button>
+            <button class="row unread" data-stage="inquiry" data-unanswered="1"><span class="av">MR</span><span class="body"><span class="who"><b>Mara &amp; Rui</b><span class="t">09:04</span></span><span class="prev">Hello! Are you free on 14 Feb for 80 guests?</span><span class="tags"><span class="pill unanswered">Unanswered</span><span class="pill tag">Catering</span><span class="pill tag">14 Feb</span></span></span><span class="dot"></span></button>
+            <button class="row" data-stage="booked"><span class="av">JP</span><span class="body"><span class="who"><b>Jen &amp; Paolo</b><span class="t">Yesterday</span></span><span class="prev">You: Deposit received — see you on the 3rd!</span><span class="tags"><span class="pill booked">Booked</span><span class="pill tag">Catering</span><span class="pill tag">3 Oct</span></span></span></button>
+            <button class="row" data-stage="quoted"><span class="av">AB</span><span class="body"><span class="who"><b>Ana &amp; Ben</b><span class="t">Mon</span></span><span class="prev">You: Sent the Intimate 50 quote — valid until…</span><span class="tags"><span class="pill quoted">Quoted</span><span class="pill tag">Dessert bar</span><span class="pill tag">21 Nov</span></span></span></button>
+            <button class="row" data-stage="completed"><span class="av">LT</span><span class="body"><span class="who"><b>Liza &amp; Tomas</b><span class="t">28 Aug</span></span><span class="prev">Thank you so much, everyone loved the lechon!</span><span class="tags"><span class="pill completed">Completed</span><span class="pill tag">Catering</span><span class="pill tag">22 Aug</span></span></span></button>
+            <button class="row" data-stage="cancelled"><span class="av">KD</span><span class="body"><span class="who"><b>Kim &amp; Dan</b><span class="t">12 Aug</span></span><span class="prev">You: No problem at all — best wishes for the day.</span><span class="tags"><span class="pill cancelled">Cancelled</span><span class="pill tag">Catering</span><span class="pill tag">5 Sep</span></span></span></button>
+            <p class="empty" hidden data-empty>No conversations in this filter.</p>
+          </div>
+        </div>
+        <div class="home"></div>
+      </div>
+      <p class="caption">1 · the list is its own screen</p>
+    </div>
+
+    <!-- phone B: the conversation, accepted -->
+    <div>
+      <div class="phone">
+        <div class="status"><span>9:41</span><span>●●● ᯤ ▮</span></div>
+        <div class="screen frame" id="f-sm">
+          <header class="chead">
+            <button class="back" aria-label="Back to Messages">‹</button>
+            <span class="av">CI</span>
+            <div class="name"><b>Cale &amp; Ice</b><span class="meta">Dec 18 · ~170 guests · <span class="pill quoted" data-stage-pill style="vertical-align:middle">Quoted</span></span></div>
+            <div class="acts">
+              <button class="ib gold" data-open="thread-call" data-focus="voice" aria-label="Voice call"><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg></button>
+              <button class="ib" data-sheet="sm-rail" aria-label="Customer details and tools"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button>
+            </div>
+          </header>
+          <div class="safe" data-open="false" role="note" aria-label="Chat privacy notice">
+            <svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/></svg>
+            <div class="l"><div class="short"><b>Don’t share private info</b> — IDs · cards · full addresses · OTPs · passwords.</div><div class="full" hidden><b>All your event info is already in Setnayan</b> — your vendor sees what they need from your profile. Please don’t share private info in chat: government IDs · card numbers · full addresses · OTPs · passwords. If a vendor asks for these, report it via Help.</div></div>
+            <button class="why" data-safe-toggle aria-expanded="false">Why</button>
+          </div>
+          <div class="stream" data-stream>
+            <span class="day">Tue 8 Sep</span>
+            <div class="msg" style="max-width:84%"><div class="b">Hi! We’re looking at catering for around 150 guests on Dec 18 at a garden venue in Tagaytay. Do you have a package that includes a dessert table?</div><span class="t">10:42</span></div>
+            <div class="msg me" style="max-width:84%"><div class="b">Hi Ice! Yes — our Garden Buffet covers 150 and we can add a dessert table. Sending the details now.</div><span class="t">10:51 · Seen</span></div>
+            <div class="card me" style="max-width:88%"><p class="k"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h6M9 16h6"/></svg>Proposal</p><b class="ti">Garden Buffet · 150 guests</b><span class="amt">₱187,500</span> <span class="pill quoted">Sent</span><div class="acts"><button class="btn sm">View</button></div></div>
+            <div class="msg" style="max-width:84%"><div class="b">That looks great. Can we do a tasting first? And our count might go up to 170.</div><span class="t">11:20</span></div>
+            <div class="card attn" style="max-width:92%" id="sm-pay"><p class="k"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h3"/></svg>Payment logged by the couple</p><b class="ti">₱50,000 · GCash · reservation fee</b><p>Confirm only if it reached your account.</p><div class="acts"><button class="btn sm go">Confirm received</button><button class="btn sm">Not received</button></div></div>
+          </div>
+          <div class="ai">
+            <span class="lab"><svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/></svg>AI</span>
+            <div class="s"><button data-fill="Yes — tastings are every Saturday. Want me to hold the 26th at 2 PM for you?">Tastings are every Saturday — hold the 26th?</button><button data-fill="Happy to hold the price at 150 until you confirm the final count.">Happy to hold the price at 150.</button></div>
+          </div>
+          <div class="comp">
+            <div class="box">
+              <div class="icons">
+                <button class="ib" aria-label="Attach"><svg viewBox="0 0 24 24"><path d="m21 11-8.5 8.5a5 5 0 0 1-7-7L14 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L15 7"/></svg></button>
+                <button class="ib" data-open="deal-or-meeting" aria-label="Deal or meeting"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/></svg></button>
+              </div>
+              <textarea rows="1" placeholder="Write to Cale &amp; Ice…" aria-label="Message" data-composer></textarea>
+              <button class="ib send" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M4 12 20 4l-4 16-4-6z"/><path d="m12 14 8-10"/></svg></button>
+            </div>
+          </div>
+
+          <!-- the ⓘ sheet: customer + tools (launchers only) -->
+          <div class="scrim" data-sheet-close hidden data-sheet-id="sm-rail-scrim"></div>
+          <div class="sheet rail" id="sm-rail" hidden role="dialog" aria-label="Customer">
+            <div class="grab"></div>
+            <div class="sh"><b>Customer</b><button class="ib" data-sheet-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+            <div class="sb">
+              <div class="id"><span class="av lg">CI</span><b>Cale &amp; Ice</b><span class="pill quoted">Quoted</span></div>
+              <p class="sum">Ice Casasola created a wedding called “Cale &amp; Ice” on June 19, 2026.</p>
+              <dl><div><dt>Target date</dt><dd>Dec 18, 2026</dd></div><div><dt>Guests</dt><dd>~170</dd></div><div><dt>Location</dt><dd>Tagaytay</dd></div><div><dt>Locked suppliers</dt><dd>3 of 9</dd></div><div><dt>Service</dt><dd>Catering</dd></div><div><dt>Since</dt><dd>8 Sep 2026</dd></div></dl>
+              <div class="sec"><p class="eye">Already locked</p><div class="lock"><span class="pill tag">Venue</span><span class="pill tag">Photo &amp; video</span><span class="pill tag">Gown</span></div></div>
+              <div class="sec" style="border-bottom:0;padding-bottom:0"><p class="eye">Tools</p></div>
+              <div class="tools">
+                <button class="tl primary" data-open="build-quote" data-sheet-close><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>Build a quote</button>
+                <button class="tl" data-open="send-proposal" data-sheet-close><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h6M9 16h6"/></svg>Send proposal</button>
+                <button class="tl" data-scroll="sm-pay" data-sheet-close><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h3"/></svg>Log payment<span class="badge">1</span></button>
+                <button class="tl"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Propose schedule<span class="out">opens brief ↗</span></button>
+                <button class="tl" data-open="offer-service" data-sheet-close><svg viewBox="0 0 24 24"><path d="M3 12V5h7l9 9-7 7z"/><circle cx="7.5" cy="9.5" r="1.2"/></svg>Offer another service</button>
+                <button class="tl" data-open="thread-call" data-focus="voice" data-sheet-close><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg>Voice call</button>
+                <button class="tl" data-open="thread-call" data-focus="video" data-sheet-close><svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3"/></svg>Video call</button>
+                <button class="tl" data-open="deal-or-meeting" data-sheet-close><svg viewBox="0 0 24 24"><path d="M3 11l4-4 5 5 2-2 3 3 4-4"/><path d="M3 11v6l4 4h4l6-6"/></svg>Deal or meeting</button>
+                <button class="tl" data-open="log-outcome" data-sheet-close><svg viewBox="0 0 24 24"><path d="M4 6h4l2 2H4zM10 6h10M4 12h4l2 2H4zM10 12h10M4 18h4l2 2H4zM10 18h10"/></svg>Log the outcome</button>
+              </div>
+              <div class="foot"><button class="btn dark w">Full customer profile →</button><button class="btn quiet w" style="margin-top:.3rem">Mute · Block · Report</button></div>
+            </div>
+          </div>
+
+          <!-- tools (same six as desktop, mounted once, one open) -->
+          <div class="tool" data-tool="build-quote" hidden>
+            <div class="th"><b>Build a quote</b><span>Line items, freebies, crew, transport</span><button class="ib" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+            <div class="tool-body">
+              <div class="two"><div class="f"><label>Package</label><select><option>Garden Buffet</option></select></div><div class="f"><label>Guests</label><input value="170"></div></div>
+              <table><tr><td>Garden Buffet · 170 × ₱1,250</td><td class="n">₱212,500</td></tr><tr><td>Dessert table</td><td class="n">₱18,000</td></tr><tr><td>Coffee station <span class="pill tag">freebie</span></td><td class="n free">₱0</td></tr><tr><td>Crew meals · 12</td><td class="n">₱4,200</td></tr><tr><td>Transport</td><td class="n">₱6,500</td></tr><tr class="tot"><td>Total</td><td class="n">₱241,200</td></tr></table>
+              <button class="btn link">+ Add a line</button>
+              <div class="acts"><button class="btn go">Send quote</button><button class="btn">Save draft</button></div>
+            </div>
+          </div>
+          <div class="tool" data-tool="send-proposal" hidden>
+            <div class="th"><b>Send proposal</b><span>From a saved template</span><button class="ib" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+            <div class="tool-body"><div class="f"><label>Template</label><select><option>Garden Buffet — standard</option><option>Intimate 50</option></select></div><div class="acts"><button class="btn go">Send proposal</button><button class="btn link">Manage templates →</button></div></div>
+          </div>
+          <div class="tool" data-tool="offer-service" hidden>
+            <div class="th"><b>Offer another service</b><span>Your other cards</span><button class="ib" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+            <div class="tool-body"><div class="opt"><div><b>Dessert bar</b><span>from ₱18,000</span></div><button class="btn sm">Offer</button></div><div class="opt"><div><b>Mobile coffee cart</b><span>from ₱9,500</span></div><button class="btn sm">Offer</button></div><div class="opt"><div><b>Lechon station</b><span>from ₱14,000</span></div><button class="btn sm">Offer</button></div></div>
+          </div>
+          <div class="tool" data-tool="thread-call" hidden>
+            <div class="th"><b>Call Cale &amp; Ice</b><span>Free · one to one</span><button class="ib" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+            <div class="tool-body"><p class="fine">Nothing has dialled yet. Pick one to start.</p><div class="acts"><button class="btn go" data-callbtn="voice">Start voice call</button><button class="btn" data-callbtn="video">Start video call</button></div></div>
+          </div>
+          <div class="tool" data-tool="deal-or-meeting" hidden>
+            <div class="th"><b>Deal or meeting</b><span>Propose a schedule or a handshake</span><button class="ib" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+            <div class="tool-body"><div class="opt"><div><b>Propose a deal</b><span>A price and terms, one tap to accept</span></div><button class="btn sm">Write it</button></div><div class="opt"><div><b>Request a meeting</b><span>Tasting, ocular or a call</span></div><button class="btn sm">Pick a time</button></div></div>
+          </div>
+          <div class="tool" data-tool="log-outcome" hidden>
+            <div class="th"><b>Log the outcome</b><span>Private to you</span><button class="ib" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+            <div class="tool-body"><div class="radio"><label><input type="radio" name="sm-out">Won</label><label><input type="radio" name="sm-out">Lost</label><label><input type="radio" name="sm-out">No response</label></div><div class="f"><label>Reason</label><select><option>Pick one…</option><option>Price</option><option>Date not free</option></select></div><div class="acts"><button class="btn go">Save</button></div></div>
+          </div>
+        </div>
+        <div class="home"></div>
+      </div>
+      <p class="caption">2 · the conversation · ⓘ = customer + tools</p>
+    </div>
+
+    <!-- phone C: pending inquiry -->
+    <div>
+      <div class="phone">
+        <div class="status"><span>9:41</span><span>●●● ᯤ ▮</span></div>
+        <div class="screen frame">
+          <header class="chead">
+            <button class="back" aria-label="Back to Messages">‹</button>
+            <span class="av">MR</span>
+            <div class="name"><b>Mara &amp; Rui</b><span class="meta">Feb 14 · 80 guests · <span class="pill inquiry" style="vertical-align:middle">Inquiry</span></span></div>
+            <div class="acts"><button class="ib" aria-label="Customer details"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></div>
+          </header>
+          <div class="safe" data-open="false"><svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/></svg><div class="l"><div class="short"><b>Don’t share private info</b> — IDs · cards · full addresses · OTPs · passwords.</div><div class="full" hidden><b>All your event info is already in Setnayan</b> — your vendor sees what they need from your profile. Please don’t share private info in chat: government IDs · card numbers · full addresses · OTPs · passwords. If a vendor asks for these, report it via Help.</div></div><button class="why" data-safe-toggle aria-expanded="false">Why</button></div>
+          <div class="stream">
+            <span class="day">Today</span>
+            <div class="msg" style="max-width:86%"><div class="b">Hello! Are you free on 14 Feb for 80 guests? We’re in Quezon City, a garden ceremony then dinner. Would love to see a sample menu.</div><span class="t">09:04</span></div>
+            <span class="sys">Asking about: Catering</span>
+          </div>
+          <div class="pend">
+            <p><b>New inquiry.</b> Accept to reply, or decline if you’re not free on this date.</p>
+            <div class="facts"><span class="pill">February 14, 2027</span><span class="pill">80 pax</span><span class="pill">Wedding</span><span class="pill">Quezon City</span></div>
+            <div class="acts"><button class="btn go">Accept inquiry</button><button class="btn">Decline</button></div>
+            <p class="note">Accepting costs nothing and does not book the date. Until you accept, the text box and the tools stay closed.</p>
+          </div>
+        </div>
+        <div class="home"></div>
+      </div>
+      <p class="caption">3 · a new inquiry: the box you write in is the decision</p>
+    </div>
+  </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ COUPLE · DESKTOP ═══════════════════════ -->
+<div id="p-cd" role="tabpanel" hidden>
+  <div class="frame-note"><span>The couple talks to several suppliers at once, so their list carries the category and the money state. The right side is the supplier and their quotes; the couple’s two tools live beside the text box and in the header.</span></div>
+  <div class="scroller">
+  <div class="frame desk" id="f-cd">
+
+    <aside class="col left" aria-label="Your suppliers">
+      <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" placeholder="Search suppliers" aria-label="Search suppliers"></div>
+      <div class="chips" role="group" aria-label="Filter">
+        <button class="chip" data-filter="all" aria-pressed="true">All</button>
+        <button class="chip" data-filter="quoted" aria-pressed="false">Has a quote</button>
+        <button class="chip" data-filter="booked" aria-pressed="false">Booked</button>
+        <button class="chip" data-filter="waiting" aria-pressed="false">Waiting</button>
+        <button class="chip" data-filter="closed" aria-pressed="false">Closed</button>
+      </div>
+      <div class="rows">
+        <button class="row" aria-current="true" data-stage="quoted"><span class="av">HC</span><span class="body"><span class="who"><b>Hiraya Catering</b><span class="t">11:20</span></span><span class="prev">You: Can we do a tasting first? And our count…</span><span class="tags"><span class="pill quoted">Quote ₱187,500</span><span class="pill tag">Catering</span></span></span></button>
+        <button class="row unread" data-stage="quoted"><span class="av">LS</span><span class="body"><span class="who"><b>Lumen Studios</b><span class="t">10:05</span></span><span class="prev">Here’s the full-day package with the SDE film.</span><span class="tags"><span class="pill quoted">Quote ₱95,000</span><span class="pill tag">Photo &amp; video</span></span></span><span class="dot"></span></button>
+        <button class="row" data-stage="booked"><span class="av">CV</span><span class="body"><span class="who"><b>Casa Verde Tagaytay</b><span class="t">Yesterday</span></span><span class="prev">Reservation confirmed — welcome to Casa Verde!</span><span class="tags"><span class="pill booked">Booked</span><span class="pill tag">Venue</span></span></span></button>
+        <button class="row" data-stage="waiting"><span class="av">DR</span><span class="body"><span class="who"><b>DJ Rafa</b><span class="t">Mon</span></span><span class="prev">You: Hi! Are you free on Dec 18 for a reception…</span><span class="tags"><span class="pill inquiry">Waiting to accept</span><span class="pill tag">Music</span></span></span></button>
+        <button class="row" data-stage="closed"><span class="av">ST</span><span class="body"><span class="who"><b>Sweet Tooth PH</b><span class="t">2 Sep</span></span><span class="prev">Sweet Tooth PH isn’t available for your date.</span><span class="tags"><span class="pill cancelled">Declined</span><span class="pill tag">Cake</span></span></span></button>
+        <p class="empty" hidden data-empty>Nothing in this filter.</p>
+      </div>
+    </aside>
+
+    <section class="col mid" aria-label="Conversation with Hiraya Catering">
+      <header class="chead">
+        <span class="av">HC</span>
+        <div class="name"><b>Hiraya Catering</b><span class="meta">Garden buffets since 2012 · Tagaytay · replies in about an hour</span>
+          <div class="meta-chips"><span class="pill tag">You asked about: Catering · Dessert table</span></div></div>
+        <div class="acts">
+          <button class="ib gold" data-open="thread-call" data-focus="voice" aria-label="Voice call — opens the call panel"><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg></button>
+          <button class="ib gold" data-open="thread-call" data-focus="video" aria-label="Video call — opens the call panel"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3"/></svg></button>
+          <button class="ib" aria-label="More" title="More: withdraw inquiry · block · report"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></button>
+        </div>
+      </header>
+
+      <div class="safe" data-open="false" role="note" aria-label="Staying safe while you plan">
+        <svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+        <div class="l">
+          <div class="short"><b>Plan with peace of mind</b> — keep chats and payments inside Setnayan; never share IDs, card numbers or OTPs.</div>
+          <div class="full" hidden><b>Plan with peace of mind</b><ul><li>Keep your chats and payments inside Setnayan.</li><li>Approve only what you asked for — and pay only the amount you agreed on.</li><li>Never share IDs, card numbers, or OTPs in chat.</li><li>A vendor rushing you to pay off Setnayan is a red flag — tell us via Help.</li></ul></div>
+        </div>
+        <button class="why" data-safe-toggle aria-expanded="false">Tips</button>
+      </div>
+
+      <div class="stream" data-stream>
+        <span class="day">Tuesday 8 September</span>
+        <div class="msg me"><div class="b">Hi! We’re looking at catering for around 150 guests on Dec 18 at a garden venue in Tagaytay. Do you have a package that includes a dessert table?</div><span class="t">10:42</span></div>
+        <span class="sys">Hiraya Catering accepted your inquiry · 10:49</span>
+        <div class="msg"><div class="b">Hi Ice! Yes — our Garden Buffet covers 150 and we can add a dessert table. Sending the details now.</div><span class="t">10:51</span></div>
+        <div class="card">
+          <p class="k"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h6M9 16h6"/></svg>Quote from Hiraya Catering</p>
+          <b class="ti">Garden Buffet · 150 guests</b>
+          <span class="amt">₱187,500</span> <span class="pill tag">valid until 30 Sep</span>
+          <p>Buffet for 150 · dessert table · coffee station included</p>
+          <div class="acts"><button class="btn sm go">Review quote</button><button class="btn sm">Ask a question</button></div>
+        </div>
+        <div class="msg me"><div class="b">That looks great. Can we do a tasting first? And our count might go up to 170.</div><span class="t">11:20 · Seen</span></div>
+        <div class="card me">
+          <p class="k"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Your meeting request</p>
+          <b class="ti">Tasting at their kitchen</b>
+          <p>Saturday 26 September · 2:00 PM · <span class="pill tag">waiting for their reply</span></p>
+        </div>
+      </div>
+
+      <div class="comp">
+        <div class="box">
+          <div class="icons">
+            <button class="ib" aria-label="Attach a file" title="Attach a file"><svg viewBox="0 0 24 24"><path d="m21 11-8.5 8.5a5 5 0 0 1-7-7L14 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L15 7"/></svg></button>
+            <button class="ib" aria-label="Photo" title="Photo"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-8 8"/></svg></button>
+            <button class="ib" data-open="deal-or-meeting" aria-label="Deal or meeting" title="Deal or meeting"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/></svg></button>
+          </div>
+          <textarea rows="1" placeholder="Write to Hiraya Catering…" aria-label="Message" data-composer></textarea>
+          <button class="ib send" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M4 12 20 4l-4 16-4-6z"/><path d="m12 14 8-10"/></svg></button>
+        </div>
+      </div>
+
+      <div class="tool" data-tool="thread-call" hidden>
+        <div class="th"><b>Call Hiraya Catering</b><span>Free · one to one · rings their phone or browser</span><button class="ib" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        <div class="tool-body"><p class="fine">Nothing has dialled yet. Pick one to start.</p><div class="acts"><button class="btn go" data-callbtn="voice">Start voice call</button><button class="btn" data-callbtn="video">Start video call</button></div><p class="fine">Anything you agree on a call — ask them to put it in the chat as a deal so you both have it in writing.</p></div>
+      </div>
+      <div class="tool" data-tool="deal-or-meeting" hidden>
+        <div class="th"><b>Deal or meeting</b><span>Propose a price, or ask for a time</span><button class="ib" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        <div class="tool-body"><div class="opt"><div><b>Propose a deal</b><span>Offer a price and terms they can accept with one tap</span></div><button class="btn sm">Write it</button></div><div class="opt"><div><b>Request a meeting</b><span>Tasting, ocular or a call — between today and the day before the wedding</span></div><button class="btn sm">Pick a time</button></div></div>
+      </div>
+    </section>
+
+    <aside class="col right rail" aria-label="Supplier">
+      <div class="hd"><p class="eye gold">Supplier</p></div>
+      <div class="id"><span class="av lg">HC</span><b>Hiraya Catering</b><span class="pill quoted">Quote received</span></div>
+      <dl>
+        <div><dt>Category</dt><dd>Catering</dd></div>
+        <div><dt>Based in</dt><dd>Tagaytay</dd></div>
+        <div><dt>Replies</dt><dd>~1 hour</dd></div>
+        <div><dt>Weddings done</dt><dd>48 · this shop</dd></div>
+      </dl>
+      <div class="sec">
+        <p class="eye">Quotations</p>
+        <div class="quote">
+          <b class="ti">Garden Buffet · 150 guests</b>
+          <span class="amt">₱187,500</span> <span class="pill quoted">Sent</span>
+          <ul><li><span>Buffet for 150</span><span>₱187,500</span></li><li><span>Dessert table</span><span>included</span></li><li><span>Coffee station</span><span>free</span></li></ul>
+          <p class="fine">Valid until 30 Sep · you pay Hiraya directly; Setnayan never holds the money.</p>
+          <div style="margin-top:.5rem"><button class="btn go w">Review quote</button></div>
+          <details><summary>1 earlier quote</summary><ul><li><span>Garden Buffet · 120 (draft)</span><span>₱150,000</span></li></ul></details>
+        </div>
+      </div>
+      <div class="sec"><p class="eye">You asked about</p><div class="lock"><span class="pill tag">Catering</span><span class="pill tag">Dessert table</span><button class="pill tag" style="cursor:pointer;min-height:36px;position:relative">+ add</button></div></div>
+      <div class="sec" style="border-bottom:0;padding-bottom:0"><p class="eye">Tools</p></div>
+      <div class="tools">
+        <button class="tl" data-open="thread-call" data-focus="voice" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg>Voice call</button>
+        <button class="tl" data-open="thread-call" data-focus="video" aria-expanded="false"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3"/></svg>Video call</button>
+        <button class="tl" data-open="deal-or-meeting" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M3 11l4-4 5 5 2-2 3 3 4-4"/><path d="M3 11v6l4 4h4l6-6"/></svg>Deal or meeting</button>
+        <button class="tl"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>See similar suppliers<span class="out">↗</span></button>
+      </div>
+      <div class="foot"><button class="btn dark w">Open their shop →</button><button class="btn quiet w" style="margin-top:.3rem">Withdraw inquiry</button></div>
+    </aside>
+  </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ COUPLE · PHONE ═══════════════════════ -->
+<div id="p-cm" role="tabpanel" hidden>
+  <div class="frame-note"><span>On a phone the couple comes from their event dashboard into the list, then into one supplier. ⓘ opens the supplier and their quotes. Try ⓘ on the second phone.</span></div>
+  <div class="scroller">
+  <div class="phones">
+    <div>
+      <div class="phone">
+        <div class="status"><span>9:41</span><span>●●● ᯤ ▮</span></div>
+        <div class="screen frame">
+          <header class="chead" style="padding-left:.9rem"><div class="name"><b>Messages</b><span class="meta">Cale &amp; Ice · 5 suppliers · 1 new</span></div><div class="acts"><button class="ib" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button></div></header>
+          <div class="chips" style="padding-top:.5rem"><button class="chip" data-filter="all" aria-pressed="true">All</button><button class="chip" data-filter="quoted" aria-pressed="false">Has a quote</button><button class="chip" data-filter="booked" aria-pressed="false">Booked</button><button class="chip" data-filter="waiting" aria-pressed="false">Waiting</button><button class="chip" data-filter="closed" aria-pressed="false">Closed</button></div>
+          <div class="rows">
+            <button class="row unread" data-stage="quoted"><span class="av">LS</span><span class="body"><span class="who"><b>Lumen Studios</b><span class="t">10:05</span></span><span class="prev">Here’s the full-day package with the SDE film.</span><span class="tags"><span class="pill quoted">Quote ₱95,000</span><span class="pill tag">Photo &amp; video</span></span></span><span class="dot"></span></button>
+            <button class="row" data-stage="quoted"><span class="av">HC</span><span class="body"><span class="who"><b>Hiraya Catering</b><span class="t">11:20</span></span><span class="prev">You: Can we do a tasting first?</span><span class="tags"><span class="pill quoted">Quote ₱187,500</span><span class="pill tag">Catering</span></span></span></button>
+            <button class="row" data-stage="booked"><span class="av">CV</span><span class="body"><span class="who"><b>Casa Verde Tagaytay</b><span class="t">Yesterday</span></span><span class="prev">Reservation confirmed — welcome to Casa Verde!</span><span class="tags"><span class="pill booked">Booked</span><span class="pill tag">Venue</span></span></span></button>
+            <button class="row" data-stage="waiting"><span class="av">DR</span><span class="body"><span class="who"><b>DJ Rafa</b><span class="t">Mon</span></span><span class="prev">You: Hi! Are you free on Dec 18…</span><span class="tags"><span class="pill inquiry">Waiting to accept</span><span class="pill tag">Music</span></span></span></button>
+            <button class="row" data-stage="closed"><span class="av">ST</span><span class="body"><span class="who"><b>Sweet Tooth PH</b><span class="t">2 Sep</span></span><span class="prev">Sweet Tooth PH isn’t available for your date.</span><span class="tags"><span class="pill cancelled">Declined</span><span class="pill tag">Cake</span></span></span></button>
+            <p class="empty" hidden data-empty>Nothing in this filter.</p>
+          </div>
+          <div class="comp" style="border-top:1px solid var(--line)"><button class="btn go w">+ Message a supplier</button></div>
+        </div>
+        <div class="home"></div>
+      </div>
+      <p class="caption">1 · every supplier, with the money state on the row</p>
+    </div>
+
+    <div>
+      <div class="phone">
+        <div class="status"><span>9:41</span><span>●●● ᯤ ▮</span></div>
+        <div class="screen frame" id="f-cm">
+          <header class="chead">
+            <button class="back" aria-label="Back">‹</button>
+            <span class="av">HC</span>
+            <div class="name"><b>Hiraya Catering</b><span class="meta">Catering · Tagaytay · <span class="pill quoted" style="vertical-align:middle">Quote ₱187,500</span></span></div>
+            <div class="acts">
+              <button class="ib gold" data-open="thread-call" data-focus="voice" aria-label="Voice call"><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg></button>
+              <button class="ib" data-sheet="cm-rail" aria-label="Supplier and quotes"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button>
+            </div>
+          </header>
+          <div class="safe" data-open="false"><svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg><div class="l"><div class="short"><b>Plan with peace of mind</b> — keep chats and payments inside Setnayan.</div><div class="full" hidden><b>Plan with peace of mind</b><ul><li>Keep your chats and payments inside Setnayan.</li><li>Approve only what you asked for — and pay only the amount you agreed on.</li><li>Never share IDs, card numbers, or OTPs in chat.</li><li>A vendor rushing you to pay off Setnayan is a red flag — tell us via Help.</li></ul></div></div><button class="why" data-safe-toggle aria-expanded="false">Tips</button></div>
+          <div class="stream" data-stream>
+            <span class="day">Tue 8 Sep</span>
+            <div class="msg me" style="max-width:84%"><div class="b">Hi! We’re looking at catering for around 150 guests on Dec 18 at a garden venue in Tagaytay. Do you have a package with a dessert table?</div><span class="t">10:42</span></div>
+            <span class="sys">Accepted your inquiry · 10:49</span>
+            <div class="msg" style="max-width:84%"><div class="b">Hi Ice! Yes — our Garden Buffet covers 150 and we can add a dessert table. Sending the details now.</div><span class="t">10:51</span></div>
+            <div class="card" style="max-width:90%"><p class="k"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h6M9 16h6"/></svg>Quote</p><b class="ti">Garden Buffet · 150 guests</b><span class="amt">₱187,500</span><p>valid until 30 Sep</p><div class="acts"><button class="btn sm go">Review quote</button></div></div>
+            <div class="msg me" style="max-width:84%"><div class="b">That looks great. Can we do a tasting first? And our count might go up to 170.</div><span class="t">11:20 · Seen</span></div>
+          </div>
+          <div class="comp">
+            <div class="box">
+              <div class="icons"><button class="ib" aria-label="Attach"><svg viewBox="0 0 24 24"><path d="m21 11-8.5 8.5a5 5 0 0 1-7-7L14 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L15 7"/></svg></button><button class="ib" data-open="deal-or-meeting" aria-label="Deal or meeting"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/></svg></button></div>
+              <textarea rows="1" placeholder="Write to Hiraya…" aria-label="Message" data-composer></textarea>
+              <button class="ib send" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M4 12 20 4l-4 16-4-6z"/><path d="m12 14 8-10"/></svg></button>
+            </div>
+          </div>
+
+          <div class="scrim" data-sheet-close hidden></div>
+          <div class="sheet rail" id="cm-rail" hidden role="dialog" aria-label="Supplier">
+            <div class="grab"></div>
+            <div class="sh"><b>Supplier</b><button class="ib" data-sheet-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+            <div class="sb">
+              <div class="id"><span class="av lg">HC</span><b>Hiraya Catering</b><span class="pill quoted">Quote received</span></div>
+              <dl><div><dt>Category</dt><dd>Catering</dd></div><div><dt>Based in</dt><dd>Tagaytay</dd></div><div><dt>Replies</dt><dd>~1 hour</dd></div><div><dt>Weddings done</dt><dd>48</dd></div></dl>
+              <div class="sec"><p class="eye">Quotations</p><div class="quote"><b class="ti">Garden Buffet · 150 guests</b><span class="amt">₱187,500</span> <span class="pill quoted">Sent</span><ul><li><span>Buffet for 150</span><span>₱187,500</span></li><li><span>Dessert table</span><span>included</span></li><li><span>Coffee station</span><span>free</span></li></ul><p class="fine">Valid until 30 Sep · you pay Hiraya directly.</p><div style="margin-top:.5rem"><button class="btn go w">Review quote</button></div><details><summary>1 earlier quote</summary><ul><li><span>Garden Buffet · 120 (draft)</span><span>₱150,000</span></li></ul></details></div></div>
+              <div class="sec"><p class="eye">You asked about</p><div class="lock"><span class="pill tag">Catering</span><span class="pill tag">Dessert table</span></div></div>
+              <div class="sec" style="border-bottom:0;padding-bottom:0"><p class="eye">Tools</p></div>
+              <div class="tools">
+                <button class="tl" data-open="thread-call" data-focus="voice" data-sheet-close><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg>Voice call</button>
+                <button class="tl" data-open="thread-call" data-focus="video" data-sheet-close><svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3"/></svg>Video call</button>
+                <button class="tl" data-open="deal-or-meeting" data-sheet-close><svg viewBox="0 0 24 24"><path d="M3 11l4-4 5 5 2-2 3 3 4-4"/><path d="M3 11v6l4 4h4l6-6"/></svg>Deal or meeting</button>
+                <button class="tl"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>See similar suppliers<span class="out">↗</span></button>
+              </div>
+              <div class="foot"><button class="btn dark w">Open their shop →</button><button class="btn quiet w" style="margin-top:.3rem">Withdraw · Block · Report</button></div>
+            </div>
+          </div>
+
+          <div class="tool" data-tool="thread-call" hidden>
+            <div class="th"><b>Call Hiraya Catering</b><span>Free · one to one</span><button class="ib" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+            <div class="tool-body"><p class="fine">Nothing has dialled yet. Pick one to start.</p><div class="acts"><button class="btn go" data-callbtn="voice">Start voice call</button><button class="btn" data-callbtn="video">Start video call</button></div></div>
+          </div>
+          <div class="tool" data-tool="deal-or-meeting" hidden>
+            <div class="th"><b>Deal or meeting</b><span>Propose a price, or ask for a time</span><button class="ib" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+            <div class="tool-body"><div class="opt"><div><b>Propose a deal</b><span>A price and terms</span></div><button class="btn sm">Write it</button></div><div class="opt"><div><b>Request a meeting</b><span>Tasting, ocular or a call</span></div><button class="btn sm">Pick a time</button></div></div>
+          </div>
+        </div>
+        <div class="home"></div>
+      </div>
+      <p class="caption">2 · one supplier · ⓘ = who they are + their quotes</p>
+    </div>
+  </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ THE DECISIONS ═══════════════════════ -->
+<section class="block">
+  <h2>Where every function went</h2>
+  <p class="sub">Nothing was dropped. Three homes, chosen by one rule: if you reach for it mid-sentence, several times in one conversation, it is an icon beside the text box; if you do it once, on purpose, and money or a record moves, it is a line in the quiet list on the right; if it is how Facebook already trained everyone, it is in the header.</p>
+  <div class="scroller">
+  <table class="map">
+    <tr><th>Function (supplier)</th><th>Where</th><th>Why there</th></tr>
+    <tr><td>Message + attachments + photo</td><td><span class="tagk c">composer</span></td><td class="w">The box itself. Paperclip and photo, exactly as today.</td></tr>
+    <tr><td>Deal or meeting</td><td><span class="tagk c">composer</span> <span class="tagk">also in rail</span></td><td class="w">Used mid-negotiation, often more than once. It writes a card, not money.</td></tr>
+    <tr><td>Offer another service</td><td><span class="tagk c">composer</span> <span class="tagk">also in rail</span></td><td class="w">A conversational cross-sell (“we also do dessert bars”). Posts a card; charges nothing.</td></tr>
+    <tr><td>Voice call · Video call</td><td><span class="tagk h">header</span> <span class="tagk">also in rail</span></td><td class="w">Where Facebook put them, so nobody hunts. Both open the call panel; <b>neither dials</b> — Start is inside the panel.</td></tr>
+    <tr><td>Build a quote</td><td><span class="tagk r">rail · first, outlined</span></td><td class="w">Money, done once, deliberately. The one a supplier is most likely here to do, so it is first.</td></tr>
+    <tr><td>Send proposal (template)</td><td><span class="tagk r">rail</span></td><td class="w">Money. Sends a saved price sheet as-is.</td></tr>
+    <tr><td>Log payment</td><td><span class="tagk r">rail · with a count</span></td><td class="w">Scrolls to the couple’s logged-payment card in the chat; the badge says how many are waiting. Confirm lives on the card, never in the list.</td></tr>
+    <tr><td>Propose schedule</td><td><span class="tagk r">rail · marked “opens brief ↗”</span></td><td class="w">Leaves for the customer’s brief; the arrow says so before you tap.</td></tr>
+    <tr><td>Log the outcome</td><td><span class="tagk r">rail · last</span></td><td class="w">Private bookkeeping, done once, at the end. Bottom of the list on purpose.</td></tr>
+    <tr><td>Full customer profile</td><td><span class="tagk r">rail · dark button</span></td><td class="w">The way out to everything else about this couple.</td></tr>
+    <tr><td>Accept / Decline an inquiry</td><td><span class="tagk c">in the composer’s place</span></td><td class="w">The box you would write in becomes the decision. Tools, the AI strip and the call icons stay off until you accept.</td></tr>
+    <tr><td>Guest-count-changed · pending payment</td><td><span class="tagk">cards in the chat</span></td><td class="w">They are events in the conversation, outlined in terracotta so they read as “needs you”.</td></tr>
+    <tr><td>Stage pill (Inquiry → Quoted → Booked → Completed / Cancelled)</td><td><span class="tagk h">header</span> <span class="tagk r">rail</span> <span class="tagk">list rows</span></td><td class="w">Read-only everywhere. One quiet sentence under it explains it moves by itself.</td></tr>
+    <tr><td>Privacy notice</td><td><span class="tagk">one line under the header</span></td><td class="w">Every word is still there — behind “Why”. The line shows the five things never to share.</td></tr>
+    <tr><td>Asking about (service chips)</td><td><span class="tagk h">header</span> <span class="tagk r">rail · Service row</span></td><td class="w">One small chip, not a row of its own.</td></tr>
+    <tr><td>List: filters · search · previews · tags</td><td><span class="tagk">left column</span></td><td class="w">Unchanged in content; tighter rows, filters scroll instead of wrapping.</td></tr>
+    <tr><th>Function (couple)</th><th>Where</th><th>Why there</th></tr>
+    <tr><td>Message + attachments</td><td><span class="tagk c">composer</span></td><td class="w">Same box as the supplier’s, two icons fewer.</td></tr>
+    <tr><td>Deal or meeting</td><td><span class="tagk c">composer</span> <span class="tagk">also in rail</span></td><td class="w">Same tool, same panel.</td></tr>
+    <tr><td>Voice · Video</td><td><span class="tagk h">header</span> <span class="tagk">also in rail</span></td><td class="w">Only after the supplier accepts, as today.</td></tr>
+    <tr><td>Quotations card</td><td><span class="tagk r">rail · top</span></td><td class="w">The money this supplier has put in front of you, with Review. On a phone it is the first thing behind ⓘ.</td></tr>
+    <tr><td>Withdraw · block · report</td><td><span class="tagk h">⋯ menu</span> <span class="tagk r">rail foot</span></td><td class="w">Quiet, never coloured.</td></tr>
+    <tr><td>Safety tips (4 points)</td><td><span class="tagk">one line under the header</span></td><td class="w">All four points behind “Tips”. Dismissal remembered, as today.</td></tr>
+  </table>
+  </div>
+</section>
+
+<section class="block">
+  <h2>The three things that were hardest to settle</h2>
+  <div class="grid2">
+    <div class="note"><h3>1 · “The right-most can be the tools” vs Facebook’s icon row</h3><p>Both are true and they do not fight. The rail is the complete list — every tool, in words, so nothing is a guess. The composer row carries only the three you use mid-sentence (attach, deal-or-meeting, offer a service), as small icons with a name on hover. Money tools get no icon: an unlabelled glyph is the wrong way to start a ₱241,200 quote.</p></div>
+    <div class="note"><h3>2 · Where an opened tool appears</h3><p>It rises from the text box, sits above it, and the messages stay visible above that. Not an overlay over the chat (you are quoting from those messages), not a takeover of the right column (that column is built twice — desktop and phone — so a heavy tool cannot live in it). One panel, one mount, one open at a time, Close and Esc always there, zero space when closed. On a phone the same panel rises from the bottom, taller.</p></div>
+    <div class="note"><h3>3 · The AI strip</h3><p>Suggestions sit on one line directly above the text box and only exist when there is something to suggest — no suggestion, no strip, the box takes the room. Tapping one fills the box; it never sends. Note: what ships today is a bot that <em>posts replies by itself</em> (off by default, paid add-on). A “suggest, don’t send” strip is new work, and the honest one for a supplier who wants to keep their own voice.</p></div>
+  </div>
+</section>
+
+<footer>Drawn against the shipped supplier thread, its rail and list column, the tool list, the five-rung stage, and the couple’s thread. Fonts shown are system fallbacks; the app renders Hanken Grotesk and Space Mono. Companion note: <span class="mono">chat_interface_2026-09-09.md</span>.</footer>
+</div>
+
+<script>
+(function(){
+  // frames
+  const tabs=document.querySelectorAll('.tab');
+  tabs.forEach(t=>t.addEventListener('click',()=>{
+    tabs.forEach(x=>x.setAttribute('aria-selected',x===t));
+    document.querySelectorAll('[role=tabpanel]').forEach(p=>p.hidden=(p.id!=='p-'+t.dataset.tab));
+  }));
+
+  // theme
+  const th=document.getElementById('theme');
+  th.addEventListener('click',()=>{
+    const dark=document.documentElement.getAttribute('data-theme')!=='dark';
+    document.documentElement.setAttribute('data-theme',dark?'dark':'light');
+    th.textContent=dark?'Light':'Dark'; th.setAttribute('aria-pressed',dark);
+  });
+
+  const frameOf=el=>el.closest('.frame');
+
+  function closeTools(frame){
+    if(!frame)return;
+    frame.querySelectorAll('.tool').forEach(t=>t.hidden=true);
+    frame.querySelectorAll('[data-open]').forEach(b=>b.setAttribute('aria-expanded','false'));
+  }
+  function openTool(frame,id,focus){
+    if(!frame)return;
+    closeTools(frame);
+    const t=frame.querySelector('.tool[data-tool="'+id+'"]');
+    if(!t)return;
+    t.hidden=false;
+    frame.querySelectorAll('[data-open="'+id+'"]').forEach(b=>b.setAttribute('aria-expanded','true'));
+    const target=(focus&&t.querySelector('[data-callbtn="'+focus+'"]'))||t.querySelector('.tool-body input,.tool-body select')||t.querySelector('.tool-body button.go')||t.querySelector('[data-close]');
+    if(target)setTimeout(()=>target.focus({preventScroll:true}),30);
+  }
+  function closeSheets(frame){
+    if(!frame)return;
+    frame.querySelectorAll('.sheet,.scrim').forEach(s=>s.hidden=true);
+  }
+
+  document.addEventListener('click',e=>{
+    const b=e.target.closest('button,[data-sheet-close]');
+    if(!b)return;
+    const frame=frameOf(b);
+
+    if(b.hasAttribute('data-sheet-close')){ closeSheets(frame); }
+    if(b.dataset.sheet){
+      closeTools(frame);
+      const s=frame.querySelector('#'+b.dataset.sheet);
+      const scrim=frame.querySelector('.scrim');
+      if(s){s.hidden=false;} if(scrim){scrim.hidden=false;}
+      return;
+    }
+    if(b.dataset.open){
+      // from a sheet: close it first so the tool is not under it
+      const fromSheet=b.closest('.sheet');
+      if(fromSheet){closeSheets(frame);setTimeout(()=>openTool(frame,b.dataset.open,b.dataset.focus),20);}
+      else openTool(frame,b.dataset.open,b.dataset.focus);
+      return;
+    }
+    if(b.hasAttribute('data-close')){ closeTools(frame); return; }
+    if(b.dataset.scroll){
+      closeTools(frame);
+      const card=document.getElementById(b.dataset.scroll);
+      if(card){card.scrollIntoView({block:'center',behavior:'smooth'});card.classList.remove('flash');void card.offsetWidth;card.classList.add('flash');}
+      return;
+    }
+    if(b.dataset.fill!==undefined){
+      const ta=frame.querySelector('[data-composer]');
+      if(ta){ta.value=b.dataset.fill;ta.focus();}
+      return;
+    }
+    if(b.hasAttribute('data-safe-toggle')){
+      const safe=b.closest('.safe'); const open=safe.dataset.open!=='true';
+      safe.dataset.open=open; b.setAttribute('aria-expanded',open);
+      safe.querySelector('.full').hidden=!open; safe.querySelector('.short').hidden=open;
+      b.textContent=open?'Less':(b.textContent==='Less'?(safe.querySelector('.full ul')?'Tips':'Why'):b.textContent);
+      return;
+    }
+    if(b.dataset.filter){
+      const chips=b.closest('.chips'); chips.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c===b));
+      const rows=chips.parentElement.querySelector('.rows'); let n=0;
+      rows.querySelectorAll('.row').forEach(r=>{
+        const f=b.dataset.filter;
+        const show=f==='all'||(f==='unanswered'?r.dataset.unanswered==='1':r.dataset.stage===f);
+        r.hidden=!show; if(show)n++;
+      });
+      const em=rows.querySelector('[data-empty]'); if(em)em.hidden=n>0;
+      return;
+    }
+    if(b.dataset.state){
+      const wrap=b.closest('[role=tabpanel]'); const f=wrap.querySelector('.frame');
+      wrap.querySelectorAll('[data-state]').forEach(x=>x.setAttribute('aria-pressed',x===b));
+      const pending=b.dataset.state==='pending';
+      f.dataset.state=b.dataset.state; closeTools(f);
+      f.querySelectorAll('[data-needs-accept]').forEach(el=>{
+        if(el.classList.contains('ib')) el.disabled=pending; else el.hidden=pending;
+      });
+      f.querySelectorAll('[data-pending-only]').forEach(el=>el.hidden=!pending);
+      f.querySelectorAll('[data-stage-pill]').forEach(p=>{p.textContent=pending?'Inquiry':'Quoted';p.className='pill '+(pending?'inquiry':'quoted');});
+      const row=f.querySelector('.row[aria-current]');
+      if(row){const t=row.querySelector('.tags');t.innerHTML=pending?'<span class="pill unanswered">Unanswered</span><span class="pill tag">Catering</span><span class="pill tag">18 Dec</span>':'<span class="pill unanswered">Unanswered</span><span class="pill tag">Catering</span><span class="pill tag">18 Dec</span>';}
+      return;
+    }
+  });
+
+  // rows: clicking a row in the list makes it current (visual only)
+  document.querySelectorAll('.rows').forEach(list=>list.addEventListener('click',e=>{
+    const r=e.target.closest('.row'); if(!r)return;
+    list.querySelectorAll('.row').forEach(x=>x.removeAttribute('aria-current')); r.setAttribute('aria-current','true');
+  }));
+
+  document.addEventListener('keydown',e=>{
+    if(e.key!=='Escape')return;
+    document.querySelectorAll('.frame').forEach(f=>{closeTools(f);closeSheets(f);});
+  });
+
+  document.querySelectorAll('.stream').forEach(s=>{s.scrollTop=s.scrollHeight;});
+
+  // deep links: ?tab=sd|sm|cd|cm  ?theme=dark  ?state=pending  ?open=<tool>  ?sheet=1
+  const q=new URLSearchParams(location.search);
+  if(q.get('theme')==='dark')th.click();
+  if(q.get('tab')){const t=document.querySelector('.tab[data-tab="'+q.get('tab')+'"]');if(t)t.click();}
+  if(q.get('state')==='pending'){const b=document.querySelector('[data-state="pending"]');if(b)b.click();}
+  const panel=document.querySelector('[role=tabpanel]:not([hidden])');
+  if(q.get('open')&&panel){const f=panel.querySelector('.frame .tool')?.closest('.frame');openTool(f,q.get('open'),q.get('focus'));}
+  if(q.get('sheet')&&panel){const b=panel.querySelector('[data-sheet]');if(b)b.click();}
+})();
+</script>
+</body>
+</html>

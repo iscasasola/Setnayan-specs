@@ -1,5 +1,32 @@
 # The front door and the seam — finalized 2026-08-12
 
+> ## ⚠ SUPERSEDED 2026-09-03 — rev 2's "grid replaces the hero" premise no longer ships
+>
+> This doc's rev 2 (below) rebuilt the front door against YouTube's real desktop view and made a
+> uniform grid replace the hero entirely — no lead story, no feature block. That premise was ALREADY
+> reversed once, in a later session, when the owner looked at the shipped bare grid and asked
+> *"doesn't it feel like just a youtube rip off?"* — the front door grew a full narrative hero
+> (headline + lede + a two-part group-chat illustration) to answer that.
+>
+> On 2026-09-03 the page changed a third time, this time researched rather than argued from
+> instinct: YouTube's own home feed is a personalization engine built on months of a RETURNING
+> viewer's watch history, not a cold-start tool — and Setnayan's `/` traffic is nearly all
+> first-time, signed-out strangers with no history to personalize against, so copying the feed
+> MECHANISM (not just its visual density) was solving the wrong problem twice. The resolution is a
+> third position, not a return to either prior one: a short category-anchor strip (one claim, one
+> CTA — not the full hero, not a bare grid) for signed-out visitors only, then three always-shown
+> sections in claim-then-proof order — Shops (promoted near the top; supply liquidity matters more
+> than content at this stage, per the same research pass), New uploads, and a new Trending section
+> ranked by real chapter view counts. Full reasoning and file list: `DECISION_LOG.md` 2026-09-03,
+> the row beginning "THE FRONT DOOR DROPS ITS NARRATIVE HERO AND CHIP BAR".
+>
+> **What in THIS document still holds:** the seam mechanics (rail never leaves, sign-in swaps in
+> place, the four-press round trip), the shared-shell architecture, and the marketplace/category
+> rail rules. **What no longer holds:** rev 2's "the grid replaces the hero" framing below, and any
+> reference to the chip row (`All`/`Your people`/`Stories`/`Articles`) as live — the chips are
+> retired. Read this doc for the seam; read the DECISION_LOG row above for what the front door's own
+> body looks like today.
+
 > ## rev 3 — IT IS NOW WALKABLE (owner: *"make it interactive"*, 2026-08-12)
 >
 > The prototype is no longer a drawing. **Search really searches, the categories and chips really

@@ -1,0 +1,712 @@
+<meta charset="utf-8">
+<title>Setnayan Shell States</title>
+<!--
+  shell_states_2026-09-03.html — REFERENCE PROTOTYPE, not production code.
+  The shared shell (top bar + left rail) reproduced faithfully across five real
+  account states, so the rail's "one shell" rule can be seen instead of read:
+  My Home and Studio are furniture that never move; each context (event / shop /
+  admin console) is PUSHED IN as an additional group, never a replacement.
+  Light mode only, matching the shipped front door's own lock.
+-->
+<style>
+  :root{
+    --cream:#ffffff; --ink:#2c2a29; --gold:#8c6932; --hi:#a9834b;
+    --link:#3b4e67; --m1:#6e6a62; --m2:#8a857b; --m3:#a09a8e;
+    --line:#e1dcd1; --wash:#f3ecdf; --hover:#f4eee3;
+    --gold300:#CBA766; --success:#5E7C52;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sys:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --r-xs:6px; --r-sm:10px; --r-md:14px; --r-full:999px;
+    --shadow:0 10px 44px rgba(96,78,48,.13), 0 2px 8px rgba(96,78,48,.07);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:#ece5d6; color:var(--ink);
+    font-family:var(--sys); font-size:14px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
+  a{color:inherit}
+  button{font:inherit}
+  :focus-visible{outline:2px solid var(--gold); outline-offset:2px; border-radius:4px}
+  @media (prefers-reduced-motion:reduce){ *{transition:none!important; animation:none!important} }
+
+  /* ═══ deck chrome — the review harness, not the product ═══ */
+  .deck-bar{
+    position:sticky; top:0; z-index:60; background:var(--ink); color:#f5f1e8;
+    display:flex; align-items:center; gap:16px; flex-wrap:wrap; padding:10px 18px;
+  }
+  .deck-title{font-weight:800; letter-spacing:.14em; font-size:12px; text-transform:uppercase; color:var(--gold300); white-space:nowrap}
+  .deck-title small{display:block; letter-spacing:.02em; text-transform:none; font-weight:500; color:#b7b0a4; font-size:11px}
+  .tabs{display:flex; gap:6px; flex-wrap:wrap}
+  .tab{
+    border:1px solid rgba(245,241,232,.28); background:none; color:#f5f1e8;
+    border-radius:var(--r-full); padding:5px 13px; font-size:12.5px; cursor:pointer; white-space:nowrap;
+  }
+  .tab:hover{border-color:rgba(245,241,232,.6)}
+  .tab[aria-pressed="true"]{background:var(--gold); border-color:var(--gold); font-weight:650}
+  .deck-opts{margin-left:auto; display:flex; align-items:center; gap:8px; font-size:12px; color:#cfc9bd}
+  .deck-opts input{accent-color:var(--gold)}
+  .deck-note{
+    margin:0; padding:9px 18px; font-size:12.5px; color:var(--m1);
+    background:var(--wash); border-bottom:1px solid var(--line);
+  }
+  .deck-note b{color:var(--ink); font-weight:650}
+  .scrollx{overflow-x:auto}
+
+  /* ═══ the artboard ═══ */
+  .board{padding:26px 26px 60px}
+  .mock{
+    min-width:1140px; max-width:1480px; margin:0 auto; background:var(--cream);
+    border:1px solid #ddd6c7; border-radius:var(--r-md); overflow:hidden; box-shadow:var(--shadow);
+  }
+  /* top bar — shipped grammar: 1fr / minmax(0,640px) / 1fr */
+  .topbar{
+    display:grid; grid-template-columns:1fr minmax(0,640px) 1fr; align-items:center;
+    gap:16px; padding:10px 16px; background:var(--cream);
+  }
+  .topleft{display:flex; align-items:center; gap:8px}
+  .iconbtn{
+    width:40px; height:40px; border:0; background:none; border-radius:var(--r-full);
+    display:grid; place-items:center; color:var(--ink); cursor:pointer; position:relative;
+  }
+  .iconbtn:hover{background:var(--hover)}
+  .iconbtn svg{width:20px; height:20px}
+  .iconbtn .dot{
+    position:absolute; top:8px; right:9px; width:8px; height:8px; border-radius:50%;
+    background:var(--gold); border:2px solid var(--cream);
+  }
+  .iconbtn .nbadge{
+    position:absolute; top:4px; right:2px; min-width:16px; height:16px; padding:0 4px;
+    border-radius:var(--r-full); background:var(--gold); color:#fff;
+    font-size:10px; font-family:var(--mono); display:grid; place-items:center;
+  }
+  .wordmark{
+    font-weight:800; letter-spacing:.15em; font-size:15px; color:var(--ink);
+    text-decoration:none; padding:0 4px; text-transform:uppercase;
+  }
+  .searchbox{
+    display:flex; align-items:center; border:1px solid var(--line); border-radius:var(--r-full);
+    background:var(--cream); height:40px; min-width:0;
+  }
+  .searchbox input{
+    flex:1; min-width:0; border:0; outline:none; background:none; font:inherit;
+    font-size:14px; color:var(--ink); padding:0 16px; align-self:stretch;
+  }
+  .searchbox input::placeholder{color:var(--m2)}
+  .kbd{
+    flex:0 0 auto; margin-right:8px; border:1px solid var(--line); border-radius:5px;
+    padding:1px 6px; font-size:10.5px; font-family:var(--mono); color:var(--m2); background:#faf7f0;
+  }
+  .searchgo{
+    width:58px; align-self:stretch; display:grid; place-items:center; background:#f6f1e7;
+    border:0; border-left:1px solid var(--line); color:var(--m1); cursor:pointer;
+    border-radius:0 var(--r-full) var(--r-full) 0;
+  }
+  .searchgo:hover{background:var(--wash)}
+  .searchgo svg{width:18px; height:18px}
+  .topright{display:flex; justify-content:flex-end; align-items:center; gap:8px}
+  .pill-gold{
+    white-space:nowrap; min-height:36px; padding:0 15px; border-radius:var(--r-full);
+    background:var(--gold); color:#fff; border:0; font-size:13.5px; font-weight:650;
+    cursor:pointer; display:inline-flex; align-items:center; gap:6px; text-decoration:none;
+  }
+  .pill-gold:hover{background:#7b5c2c}
+  .avatar{
+    width:34px; height:34px; border-radius:50%; background:var(--wash);
+    border:1px solid var(--line); display:grid; place-items:center; font-size:11px;
+    font-weight:700; color:var(--gold); font-family:var(--mono); cursor:pointer;
+  }
+
+  /* ═══ body grid — rail + main ═══ */
+  .mockbody{display:grid; grid-template-columns:var(--railw,240px) 1fr; min-height:640px}
+  .mock[data-rail="compact"]{--railw:72px}
+
+  .rail{padding:10px 8px 24px}
+  .row{
+    position:relative; display:flex; align-items:center; gap:12px; width:100%;
+    min-height:44px; padding:0 12px; border-radius:var(--r-xs); border:0; background:none;
+    font-size:14px; color:var(--ink); text-align:left; cursor:pointer; text-decoration:none;
+  }
+  .row:hover{background:var(--hover)}
+  .row[data-on="true"]{background:var(--wash); font-weight:650}
+  .row[data-on="true"]::before{
+    content:''; position:absolute; left:0; top:9px; bottom:9px; width:3px;
+    border-radius:0 3px 3px 0; background:var(--gold);
+  }
+  .gi{width:20px; flex:0 0 20px; display:flex; align-items:center; justify-content:center; color:var(--m1)}
+  .gi svg{width:19px; height:19px}
+  .lbl{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .cnt{font-family:var(--mono); font-size:11.5px; color:var(--m2); flex:0 0 auto}
+  .ct-word{font-family:var(--sys); font-size:11px; color:var(--m3); flex:0 0 auto}
+  .ubadge{
+    flex:0 0 auto; min-width:18px; height:18px; padding:0 5px; border-radius:var(--r-full);
+    background:var(--gold); color:#fff; font-size:10.5px; font-family:var(--mono);
+    display:grid; place-items:center;
+  }
+  .cap{display:none}
+  .row2{min-height:56px; align-items:flex-start; padding-top:8px; padding-bottom:8px}
+  .row2 .gi{margin-top:2px}
+  .row2 .lbl{white-space:normal}
+  .tool-name{display:block; font-size:14px; line-height:1.35}
+  .tool-line{
+    display:block; font-size:11.5px; line-height:1.4; color:var(--m2); margin-top:1px;
+    overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical;
+  }
+  .tryit{
+    flex:0 0 auto; align-self:flex-start; margin-top:3px;
+    font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:700;
+    color:var(--gold); border:1px solid var(--gold300); border-radius:var(--r-xs);
+    padding:1px 5px; background:#fdf8ec;
+  }
+  .rdiv{height:1px; background:var(--line); margin:12px}
+  .rlabel{
+    padding:10px 12px 3px; font-size:11px; font-weight:700; letter-spacing:.09em;
+    text-transform:uppercase; color:var(--m2);
+  }
+  .rlabel small{font-weight:500; text-transform:none; letter-spacing:.01em; color:var(--m3); font-size:11px; margin-left:4px}
+  .rctx{padding:8px 12px 4px}
+  .rctx .cname{font-size:12.5px; font-weight:700; letter-spacing:.02em}
+  .rctx .csub{font-size:11px; color:var(--m3)}
+  .smallprint{padding:16px 12px 8px; display:flex; flex-wrap:wrap; gap:4px 10px}
+  .smallprint a{font-size:12px; color:var(--m2); text-decoration:none}
+  .smallprint a:hover{color:var(--gold); text-decoration:underline}
+
+  /* ── the free-tools card grids: Planner / Builder / Together ──
+     Card presentation distinguishes "free tools you already have" from the
+     paid Studio products, which keep their flat text rows below. */
+  .tgrid{display:grid; grid-template-columns:1fr 1fr; gap:6px; padding:2px 8px 6px}
+  .tcard{
+    position:relative; border:1px solid var(--line); border-radius:var(--r-sm);
+    background:#fbf8f1; padding:9px 9px 8px; display:flex; flex-direction:column;
+    gap:3px; text-decoration:none; color:inherit;
+  }
+  .tcard:hover{background:var(--hover)}
+  .tcard .gi{width:auto; flex:none; justify-content:flex-start; margin-bottom:1px}
+  .tcard .tname{font-size:12px; font-weight:650; line-height:1.25}
+  .tcard .tline{
+    font-size:10.5px; line-height:1.35; color:var(--m2);
+    overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical;
+  }
+  .tnew{
+    position:absolute; top:6px; right:6px; font-size:8.5px; letter-spacing:.08em;
+    text-transform:uppercase; font-weight:700; color:var(--m2);
+    border:1px solid var(--line); border-radius:4px; padding:0 4px; background:#f4f0e6;
+  }
+
+  /* ── state 6's main area: the signed-in homepage feed, no anchor ── */
+  .fs-head{display:flex; align-items:baseline; gap:10px; margin:16px 0 10px}
+  .fs-head h2{margin:0; font-size:15.5px; font-weight:700; letter-spacing:-.01em}
+  .fs-cap{font-size:11.5px; color:var(--m2)}
+  .shopband{background:#f8f4ea; border:1px solid var(--line); border-radius:var(--r-md); padding:2px 18px 16px; margin-bottom:6px}
+  .shoprow{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+  .shop{
+    display:flex; align-items:center; gap:11px; padding:11px 13px; background:var(--cream);
+    border:1px solid var(--line); border-radius:var(--r-sm); text-decoration:none; color:inherit;
+  }
+  .shop:hover{background:var(--hover)}
+  .shoplogo{
+    width:40px; height:40px; flex:0 0 40px; border-radius:var(--r-xs); background:var(--wash);
+    border:1px solid var(--line); display:grid; place-items:center; font-size:11.5px;
+    font-weight:700; color:var(--gold); font-family:var(--mono);
+  }
+  .shopname{display:flex; align-items:center; gap:5px; font-size:13px; font-weight:600; line-height:1.3}
+  .shopname svg{width:13px; height:13px; color:var(--success); flex:0 0 13px}
+  .shopcap{font-size:11.5px; color:var(--m2)}
+  .shop-recruit{border-style:dashed; border-color:var(--gold300); background:#fdfaf2}
+  .shop-recruit .shoplogo{background:#fff; border-style:dashed; border-color:var(--gold300)}
+  .fgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:18px 14px; margin-bottom:4px}
+  .fcard{min-width:0; display:block; text-decoration:none; color:inherit}
+  .thumb{
+    aspect-ratio:16/9; border-radius:var(--r-sm); position:relative; overflow:hidden;
+    display:grid; place-items:center;
+  }
+  .fcard:hover .thumb{filter:brightness(.97)}
+  .thumb svg{width:38px; height:38px; color:#b0a48a; opacity:.8}
+  .th-plan{background:linear-gradient(135deg,#eae1cf,#d6c9ae)}
+  .th-cult{background:linear-gradient(135deg,#e9d9c6,#d5bd9d)}
+  .th-vend{background:linear-gradient(135deg,#e2ddd2,#c9c2b0)}
+  .dur{
+    position:absolute; right:6px; bottom:6px; background:rgba(30,28,26,.85); color:#f5f1e8;
+    border-radius:var(--r-xs); padding:1px 6px; font-size:11px; font-family:var(--mono);
+  }
+  .cmeta{display:flex; gap:10px; padding-top:10px}
+  .fava{
+    width:32px; height:32px; border-radius:50%; flex:0 0 32px; background:var(--wash);
+    border:1px solid var(--line); display:grid; place-items:center; font-size:10.5px;
+    font-weight:700; color:var(--gold); font-family:var(--mono);
+  }
+  .fttl{
+    font-size:13.5px; font-weight:500; line-height:1.4; margin:0 0 3px;
+    display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .fby{font-size:11.5px; color:var(--m1); line-height:1.5; margin:0; min-width:0}
+  .fby + .fby{color:var(--m2)}
+  .ktag{
+    display:inline-block; font-size:9px; letter-spacing:.1em; text-transform:uppercase;
+    font-weight:700; border:1px solid var(--line); border-radius:var(--r-xs);
+    padding:1px 5px; margin-right:4px; color:var(--m1); background:#f7f3ea;
+  }
+  .trendnote{
+    border:1px solid #ece4d3; background:#faf6ec; border-radius:var(--r-sm);
+    padding:16px 18px; font-size:12.5px; color:var(--m1);
+  }
+  .trendnote b{display:block; color:var(--ink); font-size:14px; margin-bottom:2px}
+
+  /* the review overlay: rows that APPEARED vs the previous state */
+  .is-new{background:#fcf6e8; box-shadow:inset 0 0 0 1px #ecd9b4}
+  .is-new:hover{background:#f8f0dd}
+  body[data-hl="off"] .is-new{background:none; box-shadow:none}
+  body[data-hl="off"] .is-new:hover{background:var(--hover)}
+
+  /* compact 72px icon strip — shipped behaviour mirrored, every state */
+  .mock[data-rail="compact"] .rail{padding:10px 4px 24px}
+  .mock[data-rail="compact"] .lbl,
+  .mock[data-rail="compact"] .cnt,
+  .mock[data-rail="compact"] .ct-word,
+  .mock[data-rail="compact"] .rlabel,
+  .mock[data-rail="compact"] .rctx,
+  .mock[data-rail="compact"] .tryit,
+  .mock[data-rail="compact"] .smallprint,
+  .mock[data-rail="compact"] .tool-line{display:none}
+  .mock[data-rail="compact"] .row{
+    flex-direction:column; gap:4px; padding:8px 2px; font-size:10px;
+    min-height:60px; justify-content:center; text-align:center;
+  }
+  .mock[data-rail="compact"] .row2{min-height:60px; align-items:center; padding-top:8px; padding-bottom:8px}
+  .mock[data-rail="compact"] .row2 .gi{margin-top:0}
+  .mock[data-rail="compact"] .cap{
+    display:block; font-size:10px; line-height:1.2; color:var(--m1);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%;
+  }
+  .mock[data-rail="compact"] .ubadge{position:absolute; top:6px; right:8px}
+  .mock[data-rail="compact"] .rdiv{margin:10px 6px}
+  /* the free-tools card grids collapse to icon-only, like every other row */
+  .mock[data-rail="compact"] .tgrid{grid-template-columns:1fr; gap:2px; padding:2px 4px}
+  .mock[data-rail="compact"] .tcard{
+    align-items:center; text-align:center; padding:8px 2px; gap:4px;
+    background:none; border:0;
+  }
+  .mock[data-rail="compact"] .tcard:hover{background:var(--hover)}
+  .mock[data-rail="compact"] .tcard .gi{margin:0; justify-content:center}
+  .mock[data-rail="compact"] .tcard .tname,
+  .mock[data-rail="compact"] .tcard .tline,
+  .mock[data-rail="compact"] .tnew{display:none}
+  .mock[data-rail="compact"] .tcard .cap{
+    display:block; font-size:10px; line-height:1.2; color:var(--m1);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%;
+  }
+
+  /* the reveal panel behind "Show more" */
+  .reveal{overflow:hidden}
+  .reveal[data-open="false"]{display:none}
+  .showmore .gi svg{transition:transform .15s ease}
+  .showmore[data-open="true"] .gi svg{transform:rotate(180deg)}
+
+  /* ═══ main content placeholders ═══ */
+  .main{padding:22px 28px; background:var(--cream)}
+  .ph{
+    height:100%; min-height:560px; border:1px dashed #d8d0bd; border-radius:var(--r-md);
+    background:#fbf8f1; display:grid; place-items:center; text-align:center; padding:40px;
+  }
+  .ph .pt{font-size:19px; font-weight:700; letter-spacing:-.01em; margin:0 0 6px}
+  .ph .ps{font-size:13px; color:var(--m2); margin:0; max-width:44ch}
+  .ph .pk{
+    display:inline-block; margin-bottom:14px; font-size:10px; font-weight:700;
+    letter-spacing:.1em; text-transform:uppercase; color:var(--m2);
+    border:1px solid var(--line); border-radius:var(--r-xs); padding:2px 7px; background:#f7f3ea;
+  }
+</style>
+
+<!-- icon sprite — minimal strokes, currentColor -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="i-menu"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></g>
+    <g id="i-search"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M16.3 16.3 21 21" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></g>
+    <g id="i-home"><path d="M4 11.2 12 4l8 7.2M6.3 9.8V20h11.4V9.8M10 20v-5h4v5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round" stroke-linecap="round"/></g>
+    <g id="i-compass"><circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M15.2 8.8l-1.8 4.6-4.6 1.8 1.8-4.6Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></g>
+    <g id="i-arrowl"><path d="M19 12H5M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g id="i-grid"><rect x="4" y="4" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="4" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="4" y="13" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="13" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/></g>
+    <g id="i-spark"><path d="M12 3.5 13.9 9.6 20 11.5 13.9 13.4 12 19.5 10.1 13.4 4 11.5 10.1 9.6Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="18.6" cy="5" r="1.1" fill="currentColor"/></g>
+    <g id="i-users"><circle cx="9" cy="8.5" r="3.4" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M3.5 19.5a5.5 5.5 0 0 1 11 0" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><circle cx="16.8" cy="9.5" r="2.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M15.6 14.6a4.6 4.6 0 0 1 5 4.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></g>
+    <g id="i-bell"><path d="M12 4a5.4 5.4 0 0 1 5.4 5.4c0 4 1.4 5.2 1.9 5.7H4.7c.5-.5 1.9-1.7 1.9-5.7A5.4 5.4 0 0 1 12 4Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M10 18.4a2.1 2.1 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></g>
+    <g id="i-msg"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4H6.5A2.5 2.5 0 0 1 4 13.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></g>
+    <g id="i-ai"><rect x="5" y="8.5" width="14" height="10.5" rx="3" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M12 8.5V5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><circle cx="12" cy="4" r="1.2" fill="currentColor"/><circle cx="9.5" cy="13.5" r="1.1" fill="currentColor"/><circle cx="14.5" cy="13.5" r="1.1" fill="currentColor"/></g>
+    <g id="i-hub"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M4 12h16M12 4c-2.8 4.6-2.8 11.4 0 16M12 4c2.8 4.6 2.8 11.4 0 16" fill="none" stroke="currentColor" stroke-width="1.5"/></g>
+    <g id="i-cam"><rect x="3" y="7" width="18" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M8.5 7 10 4.5h4L15.5 7" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><circle cx="12" cy="13.2" r="3.6" fill="none" stroke="currentColor" stroke-width="1.75"/></g>
+    <g id="i-live"><circle cx="12" cy="12" r="2.4" fill="currentColor"/><path d="M8.2 15.8a5.4 5.4 0 0 1 0-7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.6 18.4a9 9 0 0 1 0-12.8M18.4 5.6a9 9 0 0 1 0 12.8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></g>
+    <g id="i-reel"><rect x="3.5" y="5" width="17" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M10.2 9.4v5.2l4.4-2.6Z" fill="currentColor"/></g>
+    <g id="i-cube"><path d="M12 3.4 19.6 7.7v8.6L12 20.6 4.4 16.3V7.7Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 12 19.6 7.7M12 12 4.4 7.7M12 12v8.6" fill="none" stroke="currentColor" stroke-width="1.4"/></g>
+    <g id="i-music"><path d="M9.5 17.5V6.8l9-2v10.4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><circle cx="7.2" cy="17.6" r="2.3" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="16.2" cy="15.4" r="2.3" fill="none" stroke="currentColor" stroke-width="1.6"/></g>
+    <g id="i-pen"><path d="m12.4 18.6 6.8-6.8-4-4-6.8 6.8L7 20Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="m14 6.6 3.4 3.4" stroke="currentColor" stroke-width="1.6"/></g>
+    <g id="i-venue"><path d="M6.4 20v-8.4a5.6 5.6 0 0 1 11.2 0V20M3.5 20h17" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M12 3.2v2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></g>
+    <g id="i-plate"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.75"/><circle cx="12" cy="12" r="3.6" fill="none" stroke="currentColor" stroke-width="1.5"/></g>
+    <g id="i-flower"><circle cx="12" cy="12" r="2.2" fill="currentColor"/><path d="M12 9.5c-2.6 0-2.6-5 0-5s2.6 5 0 5ZM12 14.5c-2.6 0-2.6 5 0 5s2.6-5 0-5ZM9.5 12c0-2.6-5-2.6-5 0s5 2.6 5 0ZM14.5 12c0-2.6 5-2.6 5 0s-5 2.6-5 0Z" fill="none" stroke="currentColor" stroke-width="1.4"/></g>
+    <g id="i-plan"><rect x="5" y="4.5" width="14" height="16" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M9 9.5h6M9 13h6M9 16.5h3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></g>
+    <g id="i-attire"><path d="m8 4.5 4 2 4-2 3.4 3.6-2.6 2.1V20H7.2v-9.8L4.6 8.1Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></g>
+    <g id="i-mail"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="m4.5 7.5 7.5 5.6 7.5-5.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></g>
+    <g id="i-store"><path d="M4.5 9 6 4.5h12L19.5 9M4.5 9v10.5h15V9M4.5 9h15M10 19.5v-5h4v5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></g>
+    <g id="i-shield"><path d="M12 3.5 19 6v5.5c0 4.6-3 7.7-7 9-4-1.3-7-4.4-7-9V6Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m9 11.8 2.2 2.2 4-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g id="i-cal"><rect x="4" y="6" width="16" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M4 10.5h16M8.5 4v4M15.5 4v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></g>
+    <g id="i-file"><path d="M6.5 3.5h7L18.5 8.5v12h-12Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M13.5 3.5v5h5M9 12.5h6M9 16h6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></g>
+    <g id="i-coins"><circle cx="9.5" cy="9.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M15.8 8.2a5.5 5.5 0 1 1-7.6 7.6" fill="none" stroke="currentColor" stroke-width="1.7"/></g>
+    <g id="i-chart"><path d="M4 20h16" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><rect x="6" y="11" width="3.2" height="6.5" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="11" y="6.5" width="3.2" height="11" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="16" y="9" width="3.2" height="8.5" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/></g>
+    <g id="i-tag"><path d="M4 4h7l9 9-7 7-9-9Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="8.5" cy="8.5" r="1.4" fill="currentColor"/></g>
+    <g id="i-scale"><path d="M12 4v16M6 20h12M12 6.5 6 8m6-1.5L18 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3.5 13.5a2.5 2.5 0 0 0 5 0L6 8ZM15.5 13.5a2.5 2.5 0 0 0 5 0L18 8Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></g>
+    <g id="i-card"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M3.5 10h17M7 14.5h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></g>
+    <g id="i-brief"><rect x="4" y="8" width="16" height="11.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M9.5 8V6a1.5 1.5 0 0 1 1.5-1.5h2A1.5 1.5 0 0 1 14.5 6v2M4 12.5h16" fill="none" stroke="currentColor" stroke-width="1.6"/></g>
+    <g id="i-palette"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.4 0 2-.9 2-1.8 0-1.4-1.2-1.7-1.2-2.7 0-.9.8-1.5 2-1.5h1.7a4 4 0 0 0 4-4c0-4-3.8-7-8.5-7Z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="10" r="1.1" fill="currentColor"/><circle cx="12" cy="7.5" r="1.1" fill="currentColor"/><circle cx="16" cy="10" r="1.1" fill="currentColor"/></g>
+    <g id="i-seat"><path d="M7 4.5h10v7H7ZM5 11.5h14v4H5ZM6.5 15.5v4M17.5 15.5v4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+    <g id="i-car"><path d="M5 13.5 6.8 8a2 2 0 0 1 1.9-1.4h6.6A2 2 0 0 1 17.2 8L19 13.5M4 13.5h16v4.5h-2M4 13.5V18h2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="7.8" cy="17.4" r="1.7" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="16.2" cy="17.4" r="1.7" fill="none" stroke="currentColor" stroke-width="1.5"/></g>
+    <g id="i-chev"><path d="m6.5 9.5 5.5 5.5 5.5-5.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g id="i-compare"><rect x="4" y="5" width="7" height="14" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="5" width="7" height="14" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6.5 9h2M15.5 9h2M6.5 12h2M15.5 12h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></g>
+    <g id="i-story"><circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="4 3"/><path d="M10.4 9.2v5.6l4.6-2.8Z" fill="currentColor"/></g>
+  </defs>
+</svg>
+
+<!-- ═══ deck bar ═══ -->
+<header class="deck-bar">
+  <div class="deck-title">Setnayan · Shell states<small>one shell, six states — rev 2 · 2026-09-03</small></div>
+  <nav class="tabs" aria-label="Shell states">
+    <button class="tab" data-i="0" aria-pressed="true">1 · Signed out</button>
+    <button class="tab" data-i="1" aria-pressed="false">2 · Signed in (/)</button>
+    <button class="tab" data-i="2" aria-pressed="false">3 · Inside an event</button>
+    <button class="tab" data-i="3" aria-pressed="false">4 · Vendor shop</button>
+    <button class="tab" data-i="4" aria-pressed="false">5 · Admin HQ</button>
+    <button class="tab" data-i="5" aria-pressed="false">6 · Back on /</button>
+  </nav>
+  <label class="deck-opts"><input type="checkbox" id="hl" checked> highlight what appeared vs the previous state</label>
+</header>
+<p class="deck-note" id="decknote"></p>
+
+<div class="scrollx">
+  <div class="board">
+    <div class="mock" id="mock" data-rail="expanded">
+      <div class="topbar" id="topbar"></div>
+      <div class="mockbody">
+        <nav class="rail" id="rail" aria-label="Sections"></nav>
+        <main class="main" id="main"></main>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ─── shared furniture (verified against the shipped shell + studio-apps) ── */
+  const ICON = (id)=>`<span class="gi" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#${id}"/></svg></span>`;
+
+  const STUDIO = [
+    ['ai','i-ai','Setnayan AI','Watches your vendors and flags a deposit, a price change or a clash before it costs you.',false,'AI'],
+    ['hub','i-hub','Event Hub','One link for your save-the-date, RSVP, details and love story.',false,'Hub'],
+    ['papic','i-cam','Papic','Turns your guests into your photo crew.',true,'Papic'],
+    ['live','i-live','Live Studio','Brings the people who can’t be in the room into your day — live.',true,'Live'],
+    ['patiktok','i-reel','Patiktok','Turns your moments into short, vertical highlight reels.',false,'Reels'],
+    ['pa3d','i-cube','3D Plan','Stand in your reception before it’s built.',true,'3D'],
+    ['pakanta','i-music','Pakanta','An original song from your love story — and the music behind your videos.',false,'Song'],
+    ['palogo','i-pen','Logo Maker','One monogram of your own, carried across your whole day.',false,'Logo'],
+  ];
+  const CATS_VISIBLE = [
+    ['i-venue','Venues & churches',41,'Venues'],
+    ['i-plan','Coordinators & planners',19,'Planners'],
+    ['i-plate','Catering & cake',27,'Catering'],
+    ['i-flower','Styling, flowers & lights',24,'Styling'],
+    ['i-cam','Photo & video',38,'Photo'],
+  ];
+  const CATS_MORE = [
+    ['i-music','Hosts, music & program',17,'Music'],
+    ['i-attire','Attire, hair & make-up',15,'Attire'],
+    ['i-store','Booths, carts & bars',9,'Booths'],
+    ['i-mail','Invites, prints & souvenirs',12,'Prints'],
+    ['i-car','Cars & transport',8,'Cars'],
+    ['i-spark','Guest experiences',7,'Extras'],
+    ['i-plate','Dining extras',5,'Dining'],
+    ['i-car','Logistics & safety',4,'Logistics'],
+    ['i-shield','Insurance & protection',3,'Insurance'],
+  ];
+  const EVENT_SECTIONS = [
+    ['i-users','Guests'],['i-seat','Seating'],['i-coins','Budget'],['i-palette','Mood board'],
+    ['i-cal','Schedule'],['i-hub','Website'],['i-file','Documents'],['i-store','Vendors'],
+    ['i-msg','Messages','3'],
+  ];
+  const SHOP_SECTIONS = [
+    ['i-tag','Services'],['i-msg','Messages','2'],['i-coins','Payouts'],
+    ['i-chart','Performance'],['i-users','Team'],['i-card','Subscription'],
+  ];
+  const ADMIN_SECTIONS = [
+    ['i-shield','Verification'],['i-scale','Disputes'],['i-tag','Pricing'],
+    ['i-users','Users'],['i-brief','Operations & Hiring'],
+  ];
+
+  /* ─── row builders — one grammar for every row ─── */
+  function row({key,icon,label,cap,cnt,ctWord,badge,on,cls}){
+    return `<a class="row${cls?' '+cls:''}" data-key="${key}" ${on?'data-on="true"':''} href="#">
+      ${ICON(icon)}<span class="lbl">${label}</span><span class="cap">${cap||label}</span>
+      ${cnt!==undefined?`<span class="cnt">${cnt}</span>`:''}
+      ${ctWord?`<span class="ct-word">${ctWord}</span>`:''}
+      ${badge?`<span class="ubadge">${badge}</span>`:''}</a>`;
+  }
+  function toolRow([key,icon,name,line,demo,cap], signedIn){
+    return `<a class="row row2" data-key="studio-${key}" href="#">
+      ${ICON(icon)}<span class="lbl"><span class="tool-name">${name}</span>${!signedIn?`<span class="tool-line">${line}</span>`:''}</span>
+      <span class="cap">${cap}</span>${(!signedIn&&demo)?'<span class="tryit">try it</span>':''}</a>`;
+  }
+  const rdiv = ()=>`<div class="rdiv"></div>`;
+  const rlabel = (t,small)=>`<div class="rlabel">${t}${small?`<small>${small}</small>`:''}</div>`;
+  const rctx = (name,sub)=>`<div class="rctx"><div class="cname">${name}</div><div class="csub">${sub}</div></div>`;
+  const smallprint = ()=>`<div class="smallprint" data-key="smallprint">
+    <a href="#">About</a><a href="#">Pricing</a><a href="#">Help</a><a href="#">Open your shop</a></div>`;
+  const catRow = ([icon,label,count,cap])=>row({key:'cat-'+cap,icon,label,cap,cnt:count});
+  const sectionRows = (prefix,list)=>list.map(([icon,label,badge])=>
+    row({key:prefix+'-'+label,icon,label,badge})).join('');
+
+  function studioGroup(signedIn){
+    return rdiv() + rlabel('Studio','the things you make') +
+      STUDIO.map(t=>toolRow(t,signedIn)).join('');
+  }
+  function myHome(inApp,onKey){
+    return rlabel('My Home') +
+      row({key:'events',icon:inApp?'i-grid':'i-arrowl',label:inApp?'Your events':'Back to your events',cap:'Events',cnt:'1',on:onKey==='events'}) +
+      /* Memories deliberately carries NO count — shipped rail-data.ts passes
+         alaalaCount: undefined ("a number we have not measured is worse than
+         no number"), so the row renders as just the word. */
+      row({key:'alaala',icon:'i-spark',label:'Memories',cap:'Memories'}) +
+      row({key:'people',icon:'i-users',label:'People',cap:'People'});
+  }
+  /* ── the free-tools card grids: Planner / Builder / Together ──
+     Rail furniture in every signed-in state, sitting between the context
+     group and Studio. Cards (not rows) so "free tools you already have"
+     reads differently from the paid Studio products below.
+     ⚠ Together items have NO public explainer page yet — a real gap, so each
+     card wears a muted "new" tag rather than pretending equal footing. */
+  const TOOLBOX = [
+    ['Planner','things you plan with',[
+      ['i-users','Guest List','Every name, RSVP and plus-one in one list.'],
+      ['i-seat','Seat Plan','Drag your tables until every seat works.'],
+      ['i-palette','Mood Board','Pin the look of your day.'],
+      ['i-cal','Schedule','The day, hour by hour.'],
+      ['i-coins','Budget','Every peso, promised and paid.'],
+    ]],
+    ['Builder','things you book & pay with',[
+      ['i-compass','Marketplace','Every verified supplier, one place.'],
+      ['i-compare','Compare','Shortlist suppliers side by side.'],
+      ['i-card','Vendor ledger','Who’s booked, what’s owed, what’s paid.'],
+      ['i-file','Contracts','Every signed thing, kept.'],
+    ]],
+    ['Together','things you do with people',[
+      ['i-users','Samahan groups','Your barkada, ninongs, family — organized.',true],
+      ['i-story','Samahan Stories','Clips that live for 24 hours, inside your group.',true],
+      ['i-store','Vendor chat','Talk to your booked suppliers here.',true],
+      ['i-msg','Event chat','One thread for the whole entourage.',true],
+    ]],
+  ];
+  function tcard([icon,name,line,isNew],groupKey){
+    return `<a class="tcard" data-key="tb-${groupKey}-${name}" href="#">
+      ${ICON(icon)}<span class="tname">${name}</span><span class="cap">${name}</span>
+      <span class="tline">${line}</span>${isNew?'<span class="tnew">new</span>':''}</a>`;
+  }
+  function toolboxGroups(){
+    return rdiv() + TOOLBOX.map(([g,sub,items])=>
+      rlabel(g,sub) + `<div class="tgrid">${items.map(it=>tcard(it,g)).join('')}</div>`
+    ).join('');
+  }
+  function categoryGroup(){
+    return rdiv() + rlabel('Browse by category') +
+      CATS_VISIBLE.map(catRow).join('') +
+      `<div class="reveal" id="reveal" data-open="false">${CATS_MORE.map(catRow).join('')}</div>` +
+      `<button class="row showmore" data-key="showmore" id="showmore" data-open="false" aria-expanded="false">
+        ${ICON('i-chev')}<span class="lbl" id="showmore-lbl">Show more — ${CATS_MORE.length} more</span><span class="cap">More</span></button>`;
+  }
+
+  /* ─── top bar builders ─── */
+  function searchPublic(){
+    return `<div class="searchbox"><input type="search" placeholder="Search suppliers, stories and guides" aria-label="Search Setnayan">
+      <button class="searchgo" aria-label="Search"><svg viewBox="0 0 24 24"><use href="#i-search"/></svg></button></div>`;
+  }
+  function searchPalette(){
+    return `<div class="searchbox"><input type="search" placeholder="Jump to your guests, budget, tools…" aria-label="Search your Setnayan">
+      <span class="kbd">⌘K</span>
+      <button class="searchgo" aria-label="Search"><svg viewBox="0 0 24 24"><use href="#i-search"/></svg></button></div>`;
+  }
+  const railBtn = `<button class="iconbtn" id="railtoggle" title="Collapse the rail — auto at 1024–1279px; manual control incoming" aria-label="Collapse sidebar">
+      <svg viewBox="0 0 24 24"><use href="#i-menu"/></svg></button>`;
+  const wordmark = `<a class="wordmark" href="#">Setnayan</a>`;
+  function bell(dot){ return `<button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><use href="#i-bell"/></svg>${dot?'<span class="dot"></span>':''}</button>`; }
+  function msgs(n){ return `<button class="iconbtn" aria-label="Messages, ${n} unread"><svg viewBox="0 0 24 24"><use href="#i-msg"/></svg><span class="nbadge">${n}</span></button>`; }
+  const create = `<a class="pill-gold" href="#">+ Create event</a>`;
+  /* verified against shipped vendor-dashboard/layout.tsx — the shop's bar
+     creates a SERVICE CARD, not an event */
+  const createShop = `<a class="pill-gold" href="#">+ Create service card</a>`;
+  const avatar = (init)=>`<button class="avatar" aria-label="Account menu">${init}</button>`;
+
+  /* ── state 6's main area: the signed-in homepage, anchor removed ── */
+  const FEED_ARTICLES = [
+    ['Planning a December wedding in the Philippines','plan','i-cal','Planning','6 min','today'],
+    ['The holiday booking crunch: securing vendors in Q4','vend','i-cam','Vendors','5 min','1 d ago'],
+    ['Christmas-themed wedding ideas for Filipino couples','cult','i-venue','Culture','4 min','2 d ago'],
+    ['How to trim your guest list politely','plan','i-cal','Planning','5 min','3 d ago'],
+    ['The hidden wedding costs couples always forget','plan','i-cal','Planning','6 min','4 d ago'],
+    ['Who pays for what in a Filipino wedding?','cult','i-venue','Culture','7 min','5 d ago'],
+  ];
+  function feedMain(){
+    const cards = FEED_ARTICLES.map(([t,cat,motif,catName,mins,when])=>`<a class="fcard" href="#">
+      <div class="thumb th-${cat}"><svg viewBox="0 0 24 24"><use href="#${motif}"/></svg><span class="dur">${mins}</span></div>
+      <div class="cmeta"><span class="fava" aria-hidden="true">SN</span><div style="min-width:0">
+        <p class="fttl">${t}</p>
+        <p class="fby"><span class="ktag">Article</span> Setnayan</p>
+        <p class="fby">${catName} · <span class="mono">${mins} read</span> · <span class="mono">${when}</span></p>
+      </div></div></a>`).join('');
+    const shop = (init,name,cap)=>`<a class="shop" href="#"><span class="shoplogo">${init}</span>
+      <span><span class="shopname">${name} <svg viewBox="0 0 24 24" aria-label="Verified"><use href="#i-check"/></svg></span>
+      <span class="shopcap">${cap}</span></span></a>`;
+    return `
+      <div class="shopband">
+        <div class="fs-head"><h2>Shops</h2><span class="fs-cap">verified suppliers · 0% commission on bookings</span></div>
+        <div class="shoprow">
+          ${shop('VC','Villa Consuelo Gardens','Venues & churches · Tagaytay')}
+          ${shop('SF','Silaw Films','Photo & video · Quezon City')}
+          <a class="shop shop-recruit" href="#"><span class="shoplogo">+</span>
+            <span><span class="shopname">Your shop belongs here</span>
+            <span class="shopcap">List free · 0% of every booking</span></span></a>
+        </div>
+      </div>
+      <div class="fs-head"><h2>New uploads</h2><span class="fs-cap">newest first</span></div>
+      <div class="fgrid">${cards}</div>
+      <div class="fs-head"><h2>Trending</h2><span class="fs-cap">earned, never sold</span></div>
+      <div class="trendnote"><b>No story has earned a spot yet.</b>
+        Trending ranks stories by real views from real readers — never seeded, padded, or sold.
+        The first story to earn its place will appear here on its own.</div>`;
+  }
+
+  /* ─── the five states ─── */
+  const STATES = [
+    { name:'Signed out on /',
+      top: ()=>`<div class="topleft">${railBtn}${wordmark}</div>${searchPublic()}
+        <div class="topright"><a class="pill-gold" href="#">Sign in</a></div>`,
+      rail: ()=> row({key:'home',icon:'i-home',label:'Home',on:true}) + rdiv() +
+        /* the deliberate gap: the sign-in prompt panel and the "What is
+           Alaala?" row were removed by a prior edit — nothing renders here */
+        studioGroup(false) + smallprint(),
+      main:{k:'/',t:'Home',s:'The public feed — see the homepage prototype for this surface.'},
+      note:'<b>Signed out on /.</b> Marketplace search and a Sign-in pill. Rail: Home, then a <b>deliberate gap</b> (the sign-in prompt panel and “What is Alaala?” were just removed — not missing content), then Studio selling with one-liners and three “try it” markers, then the small print.'},
+
+    { name:'Signed in on /',
+      top: ()=>`<div class="topleft">${railBtn}${wordmark}</div>${searchPalette()}
+        <div class="topright">${create}${bell(false)}${avatar('BM')}</div>`,
+      rail: ()=> row({key:'home',icon:'i-home',label:'Home',on:true}) +
+        /* Marketplace row deliberately HIDDEN here — it appears only inside an event */
+        rdiv() + myHome(false) + toolboxGroups() + studioGroup(true) + smallprint(),
+      main:{k:'/',t:'Home',s:'Same public feed — you came out to read. “Back to your events” is the way back in.'},
+      note:'<b>Signed in, still on /.</b> The search becomes a command palette; + Create event, bell and avatar join the bar. Marketplace row stays hidden right after login (owner ruling). “My Home” appears, and so do the three <b>free-tool card grids — Planner / Builder / Together</b> — new rail furniture in every signed-in state, drawn as cards so free tools read differently from the paid Studio rows below (which stay exactly as they were, lines gone — signed in, silence beats selling). Together’s items wear a muted “new” tag: <b>none has a public explainer page yet</b>, a real gap.'},
+
+    { name:'Inside an event',
+      top: ()=>`<div class="topleft">${railBtn}${wordmark}</div>${searchPalette()}
+        <div class="topright">${create}${bell(true)}${msgs(3)}${avatar('BM')}</div>`,
+      rail: ()=> row({key:'home',icon:'i-home',label:'Home'}) +
+        row({key:'find',icon:'i-compass',label:'Marketplace',cap:'Market'}) +
+        rdiv() + myHome(true) +
+        rdiv() + rctx('Bea & Marco’s Wedding','June 2027 · Tagaytay') +
+        sectionRows('ev',EVENT_SECTIONS) +
+        categoryGroup() + toolboxGroups() + studioGroup(true) + smallprint(),
+      main:{k:'/dashboard/[eventId]',t:'Event Home — Bea & Marco’s Wedding',s:'Placeholder — this artifact is about the rail changing, not this page.'},
+      note:'<b>Inside an event.</b> The Marketplace row <b>appears — the only state it does</b>. The event’s own menu is <b>pushed in under My Home</b> (nothing above it moved), then Browse by category with its Show more toggle, then the same Studio — now scoped to open THIS event’s tools. The account cluster is the event’s own: its bell, its unread messages.'},
+
+    { name:'Vendor shop',
+      top: ()=>`<div class="topleft">${railBtn}${wordmark}</div>${searchPalette()}
+        <div class="topright">${createShop}${bell(false)}${avatar('SC')}</div>`,
+      rail: ()=> row({key:'home',icon:'i-home',label:'Home'}) +
+        /* Marketplace hidden again — being a vendor is not "inside an event" */
+        rdiv() + myHome(true) +
+        rdiv() + rlabel('What you run') +
+        row({key:'run-shop',icon:'i-store',label:'Silaw Films',cap:'Shop',ctWord:'your shop',on:true}) +
+        rctx('Silaw Films','your shop’s desk') +
+        sectionRows('shop',SHOP_SECTIONS) +
+        toolboxGroups() + studioGroup(true) + smallprint(),
+      main:{k:'/vendor-dashboard',t:'Shop Dashboard — Silaw Films',s:'Placeholder — the rail is the subject here.'},
+      note:'<b>A vendor’s own shop.</b> Marketplace hidden again (a shop is not “inside an event”). The create pill becomes “<b>+ Create service card</b>” — the shop’s real primary action, per the shipped vendor-dashboard layout. “<b>What you run</b>” gains one row — the shop’s own name — and the shop’s menu is pushed in beneath it. My Home, the free-tool grids and Studio are untouched: the furniture never moves.'},
+
+    { name:'Admin HQ',
+      /* verified: the shipped admin bar passes createSlot={null} on purpose —
+         no create pill; the admin's primary action is a different pill already
+         in that bar */
+      top: ()=>`<div class="topleft">${railBtn}${wordmark}</div>${searchPalette()}
+        <div class="topright">${bell(true)}${avatar('IC')}</div>`,
+      rail: ()=> row({key:'home',icon:'i-home',label:'Home'}) +
+        rdiv() + myHome(true) +
+        rdiv() + rlabel('What you run') +
+        row({key:'run-hq',icon:'i-shield',label:'Setnayan HQ',cap:'HQ',ctWord:'admin',on:true}) +
+        rctx('Setnayan HQ','console · illustrative set') +
+        sectionRows('hq',ADMIN_SECTIONS) +
+        toolboxGroups() + studioGroup(true) + smallprint(),
+      main:{k:'/admin',t:'Admin Console — Setnayan HQ',s:'Placeholder — console categories shown in the rail are a representative, illustrative handful.'},
+      note:'<b>The admin console.</b> No create pill — the shipped admin bar passes <b>createSlot={null}</b> deliberately. “What you run” holds <b>Setnayan HQ</b>; the console’s menu (illustrative handful) is pushed in beneath it. Everything else — My Home, the free-tool grids, Studio, small print — is identical to every other signed-in state.'},
+
+    { name:'Back on /',
+      /* owner-confirmed: a signed-in visitor landing back on / (logo click,
+         bookmark) knows what Setnayan is — NO category-anchor strip; the
+         content area goes straight to Shops → New uploads → Trending. */
+      top: ()=>`<div class="topleft">${railBtn}${wordmark}</div>${searchPalette()}
+        <div class="topright">${create}${bell(false)}${avatar('BM')}</div>`,
+      rail: ()=> row({key:'home',icon:'i-home',label:'Home',on:true}) +
+        rdiv() + myHome(false) + toolboxGroups() + studioGroup(true) + smallprint(),
+      mainHtml: feedMain,
+      note:'<b>Signed in, back on /.</b> Owner-confirmed: no anchor strip for someone who already knows what Setnayan is — the content area skips straight to <b>Shops → New uploads → Trending</b> (the honest sparse state, from the Home Feed prototype). Top bar and rail are state 2’s exactly.'},
+  ];
+
+  /* ─── render + diff highlight ─── */
+  const topbarEl = document.getElementById('topbar');
+  const railEl   = document.getElementById('rail');
+  const mainEl   = document.getElementById('main');
+  const noteEl   = document.getElementById('decknote');
+  const mock     = document.getElementById('mock');
+  const tabs     = [...document.querySelectorAll('.tab')];
+
+  function keysOf(html){
+    const ks=[]; const re=/data-key="([^"]+)"/g; let m;
+    while((m=re.exec(html))) ks.push(m[1]); return ks;
+  }
+  function render(i){
+    const s = STATES[i];
+    topbarEl.innerHTML = s.top();
+    railEl.innerHTML   = s.rail();
+    mainEl.innerHTML   = s.mainHtml ? s.mainHtml()
+      : `<div class="ph"><div><span class="pk mono">${s.main.k}</span>
+      <p class="pt">${s.main.t}</p><p class="ps">${s.main.s}</p></div></div>`;
+    noteEl.innerHTML   = s.note;
+    tabs.forEach((t,j)=>t.setAttribute('aria-pressed', String(i===j)));
+
+    /* highlight rows that did not exist in the PREVIOUS state */
+    const prev = i>0 ? new Set(keysOf(STATES[i-1].rail())) : new Set(keysOf(s.rail()));
+    railEl.querySelectorAll('[data-key]').forEach(el=>{
+      if(!prev.has(el.dataset.key)) el.classList.add('is-new');
+    });
+
+    /* re-wire the per-render controls */
+    const sm = document.getElementById('showmore');
+    if(sm){
+      sm.addEventListener('click',(e)=>{
+        e.preventDefault();
+        const open = sm.dataset.open==='true' ? 'false' : 'true';
+        sm.dataset.open = open; sm.setAttribute('aria-expanded', open);
+        document.getElementById('reveal').dataset.open = open;
+        document.getElementById('showmore-lbl').textContent =
+          open==='true' ? 'Show less' : `Show more — ${CATS_MORE.length} more`;
+      });
+    }
+    const rt = document.getElementById('railtoggle');
+    if(rt) rt.addEventListener('click',()=>{
+      mock.dataset.rail = mock.dataset.rail==='compact' ? 'expanded' : 'compact';
+    });
+  }
+
+  tabs.forEach((t)=>t.addEventListener('click',()=>{ render(Number(t.dataset.i)); window.scrollTo({top:0}); }));
+  document.getElementById('hl').addEventListener('change',(e)=>{
+    document.body.dataset.hl = e.target.checked ? 'on' : 'off';
+  });
+  document.body.dataset.hl='on';
+  render(0);
+
+  /* prototype links go nowhere */
+  document.addEventListener('click',e=>{
+    const a = e.target.closest('a[href="#"]'); if(a) e.preventDefault();
+  });
+</script>

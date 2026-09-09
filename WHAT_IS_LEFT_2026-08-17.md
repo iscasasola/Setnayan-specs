@@ -195,7 +195,7 @@ rows still quote the retired 90-day rule).
 3. **How much of the couple's private plan may a booked supplier see?** Today: counts only, never guest names. **This blocks the last Event Hub step.**
 4. **May a coordinator who was booked but never promoted announce things to guests?**
 5. **Should the day-of extras be free during launch?** No real supplier can reach them today.
-6. **Should couples be able to invite off-platform suppliers onto Setnayan?**
+6. ~~**Should couples be able to invite off-platform suppliers onto Setnayan?**~~ ✅ **RULED + BUILT 2026-09-08.** Owner: *"we allow this. so promote it."* The invite mechanism was already correct (`createManualVendorInvite`/`ensureAutoShareInvite`); what shipped is the missing second surface — a badge on the couple's own booked-vendor cards (`needs_setnayan_invite`, `plan-budget-accordion.tsx`), not just the one-time after-save card. See DECISION_LOG.md 2026-09-08 (both the ruling row and the follow-up "BUILT" row), PR #5303.
 7. **Do wedding recordings stay on a channel forever, or get wiped when it is reused?** Your own specs say both. Nothing is deleted while you decide.
 8. **The features page is frozen** because two documents you approved describe it as two different shapes.
 

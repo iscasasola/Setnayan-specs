@@ -1,0 +1,1141 @@
+<meta charset="utf-8">
+<title>Setnayan Home Feed</title>
+<!--
+  home_feed_youtube_2026-09-03.html — DESIGN PROTOTYPE, not production code.
+  The homepage content area redrawn as a YouTube-Home-style feed of cards:
+  two content sections (New uploads · Trending) + a separate Shops room.
+  Chrome (top bar, rail, compact rail) reproduces the shipped front-door
+  grammar; tokens are the locked fd-* palette. Light mode only, on purpose —
+  the shipped front door's own lock ("LIGHT MODE ONLY, ON PURPOSE").
+-->
+<style>
+  :root{
+    --cream:#ffffff; --ink:#2c2a29; --gold:#8c6932; --hi:#a9834b;
+    --link:#3b4e67; --m1:#6e6a62; --m2:#8a857b; --m3:#a09a8e;
+    --line:#e1dcd1; --wash:#f3ecdf; --hover:#f4eee3;
+    --gold100:#F3ECDF; --gold300:#CBA766; --gold500:#A9834B;
+    --success:#5E7C52; --warning:#B77E2E; --danger:#A6483B; --info:#4E6C82;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sys:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --r-xs:6px; --r-sm:10px; --r-md:14px; --r-lg:18px; --r-full:999px;
+    --shadow:0 10px 44px rgba(96,78,48,.13), 0 2px 8px rgba(96,78,48,.07);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:#ece5d6; color:var(--ink);
+    font-family:var(--sys); font-size:14px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
+  a{color:inherit}
+  button{font:inherit}
+  :focus-visible{outline:2px solid var(--gold); outline-offset:2px; border-radius:4px}
+  @media (prefers-reduced-motion:reduce){ *{transition:none!important; animation:none!important} }
+
+  /* ═══ DECK CHROME — the review harness, deliberately NOT the product ═══ */
+  .deck-bar{
+    position:sticky; top:0; z-index:60; background:var(--ink); color:#f5f1e8;
+    display:flex; align-items:center; gap:16px; flex-wrap:wrap; padding:10px 18px;
+  }
+  .deck-title{font-weight:800; letter-spacing:.14em; font-size:12px; text-transform:uppercase; color:var(--gold300); white-space:nowrap}
+  .deck-title small{display:block; letter-spacing:.02em; text-transform:none; font-weight:500; color:#b7b0a4; font-size:11px}
+  .tabs{display:flex; gap:6px; flex-wrap:wrap}
+  .tab{
+    border:1px solid rgba(245,241,232,.28); background:none; color:#f5f1e8;
+    border-radius:var(--r-full); padding:5px 13px; font-size:12.5px; cursor:pointer; white-space:nowrap;
+  }
+  .tab:hover{border-color:rgba(245,241,232,.6)}
+  .tab[aria-pressed="true"]{background:var(--gold); border-color:var(--gold); font-weight:650}
+  .deck-note{
+    margin:0; padding:9px 18px; font-size:12.5px; color:var(--m1);
+    background:var(--wash); border-bottom:1px solid var(--line);
+  }
+  .deck-note b{color:var(--ink); font-weight:650}
+  .stage{display:none}
+  .stage.on{display:block}
+  .scrollx{overflow-x:auto}
+
+  /* ═══ THE DESKTOP MOCK — an artboard of the real page ═══ */
+  .board{padding:26px 26px 60px}
+  .mock{
+    min-width:1180px; max-width:1520px; margin:0 auto; background:var(--cream);
+    border:1px solid #ddd6c7; border-radius:var(--r-md); overflow:hidden; box-shadow:var(--shadow);
+  }
+  /* top bar — shipped grammar: 1fr / minmax(0,640px) / 1fr */
+  .topbar{
+    display:grid; grid-template-columns:1fr minmax(0,640px) 1fr; align-items:center;
+    gap:16px; padding:10px 16px; background:var(--cream);
+  }
+  .topleft{display:flex; align-items:center; gap:8px}
+  .iconbtn{
+    width:40px; height:40px; border:0; background:none; border-radius:var(--r-full);
+    display:grid; place-items:center; color:var(--ink); cursor:pointer;
+  }
+  .iconbtn:hover{background:var(--hover)}
+  .wordmark{
+    font-weight:800; letter-spacing:.15em; font-size:15px; color:var(--ink);
+    text-decoration:none; padding:0 4px; text-transform:uppercase;
+  }
+  .searchbox{
+    display:flex; align-items:center; border:1px solid var(--line); border-radius:var(--r-full);
+    background:var(--cream); height:40px; min-width:0;
+  }
+  .searchbox input{
+    flex:1; min-width:0; border:0; outline:none; background:none; font:inherit;
+    font-size:14px; color:var(--ink); padding:0 16px; align-self:stretch;
+  }
+  .searchbox input::placeholder{color:var(--m2)}
+  .searchgo{
+    width:58px; align-self:stretch; display:grid; place-items:center; background:#f6f1e7;
+    border:0; border-left:1px solid var(--line); color:var(--m1); cursor:pointer;
+    border-radius:0 var(--r-full) var(--r-full) 0;
+  }
+  .searchgo:hover{background:var(--wash)}
+  .topright{display:flex; justify-content:flex-end; align-items:center; gap:10px}
+  .pill-gold{
+    white-space:nowrap; min-height:36px; padding:0 15px; border-radius:var(--r-full);
+    background:var(--gold); color:#fff; border:0; font-size:13.5px; font-weight:650;
+    cursor:pointer; display:inline-flex; align-items:center; gap:6px; text-decoration:none;
+  }
+  .pill-gold:hover{background:#7b5c2c}
+
+  /* body grid — rail + feed */
+  .mockbody{display:grid; grid-template-columns:var(--railw,240px) 1fr}
+  .mock[data-rail="compact"]{--railw:72px}
+
+  /* ── the rail, shipped grammar ── */
+  .rail{padding:10px 8px 44px}
+  .row{
+    position:relative; display:flex; align-items:center; gap:12px; width:100%;
+    min-height:44px; padding:0 12px; border-radius:var(--r-xs); border:0; background:none;
+    font-size:14px; color:var(--ink); text-align:left; cursor:pointer; text-decoration:none;
+  }
+  .row:hover{background:var(--hover)}
+  .row[data-on="true"]{background:var(--wash); font-weight:650}
+  .row[data-on="true"]::before{
+    content:''; position:absolute; left:0; top:9px; bottom:9px; width:3px;
+    border-radius:0 3px 3px 0; background:var(--gold);
+  }
+  .gi{width:20px; flex:0 0 20px; display:flex; align-items:center; justify-content:center; color:var(--m1)}
+  .gi svg{width:19px; height:19px}
+  .lbl{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .cnt{font-family:var(--mono); font-size:11.5px; color:var(--m2)}
+  .cap{display:none}
+  .row2{min-height:56px; align-items:flex-start; padding-top:8px; padding-bottom:8px}
+  .row2 .gi{margin-top:2px}
+  .row2 .lbl{white-space:normal}
+  .tool-name{display:block; font-size:14px; line-height:1.35}
+  .tool-line{
+    display:block; font-size:11.5px; line-height:1.4; color:var(--m2); margin-top:1px;
+    overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical;
+  }
+  .rdiv{height:1px; background:var(--line); margin:12px}
+  .rlabel{
+    padding:10px 12px 3px; font-size:11px; font-weight:700; letter-spacing:.09em;
+    text-transform:uppercase; color:var(--m2);
+  }
+  .rlabel small{font-weight:500; text-transform:none; letter-spacing:.01em; color:var(--m3); font-size:11px; margin-left:4px}
+  .signin{padding:4px 12px 8px}
+  .signin p{margin:0 0 10px; font-size:13px; line-height:1.5; color:var(--m1)}
+
+  /* ── ported from shell_states_2026-09-03.html for the new "Signed in" stage:
+       top-bar bell/avatar/palette-search chrome, and the free-tools card
+       grids (Planner/Builder/Together) that sit above Studio when signed in ── */
+  .iconbtn{
+    width:40px; height:40px; border:0; background:none; border-radius:var(--r-full);
+    display:grid; place-items:center; color:var(--ink); cursor:pointer; position:relative;
+  }
+  .iconbtn:hover{background:var(--hover)}
+  .iconbtn .dot{
+    position:absolute; top:8px; right:9px; width:8px; height:8px; border-radius:50%;
+    background:var(--gold); border:2px solid var(--cream);
+  }
+  .kbd{
+    flex:0 0 auto; margin-right:8px; border:1px solid var(--line); border-radius:5px;
+    padding:1px 6px; font-size:10.5px; font-family:var(--mono); color:var(--m2); background:#faf7f0;
+  }
+  .avatar{
+    width:34px; height:34px; border-radius:50%; background:var(--wash);
+    border:1px solid var(--line); display:grid; place-items:center; font-size:11px;
+    font-weight:700; color:var(--gold); font-family:var(--mono); cursor:pointer; border:0;
+  }
+  .smallprint{padding:16px 12px 8px; display:flex; flex-wrap:wrap; gap:4px 10px}
+  .smallprint a{font-size:12px; color:var(--m2); text-decoration:none}
+  .smallprint a:hover{color:var(--gold); text-decoration:underline}
+  .tgrid{display:grid; grid-template-columns:1fr 1fr; gap:6px; padding:2px 8px 6px}
+  .tcard{
+    position:relative; border:1px solid var(--line); border-radius:var(--r-sm);
+    background:#fbf8f1; padding:9px 9px 8px; display:flex; flex-direction:column;
+    gap:3px; text-decoration:none; color:inherit;
+  }
+  .tcard:hover{background:var(--hover)}
+  .tcard .gi{width:auto; flex:none; justify-content:flex-start; margin-bottom:1px}
+  .tcard .tname{font-size:12px; font-weight:650; line-height:1.25}
+  .tcard .tline{
+    font-size:10.5px; line-height:1.35; color:var(--m2);
+    overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical;
+  }
+  .tnew{
+    position:absolute; top:6px; right:6px; font-size:8.5px; letter-spacing:.08em;
+    text-transform:uppercase; font-weight:700; color:var(--m2);
+    border:1px solid var(--line); border-radius:4px; padding:0 4px; background:#f4f0e6;
+  }
+  .mock[data-rail="compact"] .kbd,
+  .mock[data-rail="compact"] .smallprint{display:none}
+  .mock[data-rail="compact"] .tgrid{grid-template-columns:1fr; gap:2px; padding:2px 4px}
+  .mock[data-rail="compact"] .tcard{align-items:center; text-align:center; padding:8px 2px}
+  .mock[data-rail="compact"] .tcard .tname,
+  .mock[data-rail="compact"] .tcard .tline,
+  .mock[data-rail="compact"] .tnew{display:none}
+
+  /* compact 72px icon strip — shipped behaviour mirrored */
+  .mock[data-rail="compact"] .rail{padding:10px 4px 44px}
+  .mock[data-rail="compact"] .lbl,
+  .mock[data-rail="compact"] .cnt,
+  .mock[data-rail="compact"] .rlabel,
+  .mock[data-rail="compact"] .signin p,
+  .mock[data-rail="compact"] .tool-line{display:none}
+  .mock[data-rail="compact"] .row{
+    flex-direction:column; gap:4px; padding:8px 2px; font-size:10px;
+    min-height:60px; justify-content:center; text-align:center;
+  }
+  .mock[data-rail="compact"] .row2{min-height:60px; align-items:center; padding-top:8px; padding-bottom:8px}
+  .mock[data-rail="compact"] .row2 .gi{margin-top:0}
+  .mock[data-rail="compact"] .cap{
+    display:block; font-size:10px; line-height:1.2; color:var(--m1);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%;
+  }
+  .mock[data-rail="compact"] .rdiv{margin:10px 6px}
+  .mock[data-rail="compact"] .signin{padding:4px 2px 8px; display:grid; place-items:center}
+  .mock[data-rail="compact"] .signin .pill-gold{min-height:32px; padding:0 9px; font-size:10.5px}
+
+  /* ── the feed column ── */
+  .feedcol{min-width:0; padding:4px 28px 0; }
+  .feedinner{max-width:1112px; margin:0 auto}
+  .sechead{display:flex; align-items:baseline; gap:12px; margin:20px 0 14px}
+  .sechead h2{margin:0; font-size:17px; font-weight:700; letter-spacing:-.01em}
+  .sechead .push{margin-left:auto; font-size:12.5px}
+  .seccap{font-size:12px; color:var(--m2)}
+
+  /* ── load more — the shipped Papic pool pattern (cursor + button, appends
+       in place, never a page reload), reused here rather than a new pattern ── */
+  .loadmore{
+    display:flex; width:100%; align-items:center; justify-content:center; gap:8px;
+    margin:4px 0 28px; padding:11px 20px; border-radius:var(--r-sm); border:0;
+    background:var(--wash); color:var(--m1); font-size:13.5px; font-weight:600; cursor:pointer;
+  }
+  .loadmore:hover{background:var(--hover); color:var(--ink)}
+
+  /* ── the category anchor — what this is, in five seconds ── */
+  .anchor{
+    margin-top:18px; display:flex; align-items:center; gap:32px;
+    border:1px solid #e8e0cf; border-radius:var(--r-md);
+    background:linear-gradient(120deg,#fbf7ee 0%,#f3ecdf 100%);
+    padding:22px 28px;
+  }
+  .anchor-copy{min-width:0}
+  .anchor h1{margin:0 0 10px; font-size:22px; line-height:1.25; font-weight:750; letter-spacing:-.015em; text-wrap:balance}
+  .anchor-claims{list-style:none; margin:0; padding:0; display:flex; gap:8px 22px; flex-wrap:wrap}
+  .anchor-claims li{display:flex; align-items:center; gap:7px; font-size:13px; color:var(--m1); white-space:nowrap}
+  .anchor-claims svg{width:16px; height:16px; color:var(--gold); flex:0 0 16px}
+  .anchor-cta{margin-left:auto; display:grid; gap:9px; justify-items:center; flex:0 0 auto}
+  .anchor-cta .pill-gold{min-height:44px; padding:0 22px; font-size:14px}
+  .seccap .mono{font-size:11.5px}
+  .grid{display:grid; grid-template-columns:repeat(4,1fr); gap:22px 16px; margin-bottom:8px}
+
+  /* ── the card — shipped fd-item grammar ── */
+  .card{min-width:0; display:block; text-decoration:none; color:inherit; position:relative}
+  .thumb{
+    aspect-ratio:16/9; border-radius:var(--r-sm); position:relative; overflow:hidden;
+    background:linear-gradient(135deg,#e7decd,#d8cdb9); display:grid; place-items:center;
+  }
+  .card:hover .thumb{filter:brightness(.97)}
+  .thumb svg.motif{width:44px; height:44px; color:#b0a48a; opacity:.8}
+  /* article cover tints by category */
+  .th-plan{background:linear-gradient(135deg,#eae1cf,#d6c9ae)}
+  .th-cult{background:linear-gradient(135deg,#e9d9c6,#d5bd9d)}
+  .th-vend{background:linear-gradient(135deg,#e2ddd2,#c9c2b0)}
+  /* chapter video poster — a dark warm still */
+  .th-vid{background:
+    radial-gradient(120% 90% at 20% 10%, #7b7060 0%, transparent 55%),
+    linear-gradient(135deg,#544c41,#7d7261)}
+  .th-vid .playdot{
+    width:44px; height:44px; border-radius:50%; background:rgba(20,18,16,.55);
+    border:1px solid rgba(245,241,232,.5); display:grid; place-items:center; color:#f5f1e8;
+  }
+  .playdot svg{width:16px; height:16px; margin-left:2px}
+  /* editorial hero */
+  .th-edit{background:
+    radial-gradient(110% 100% at 80% 0%, #ecd9c9 0%, transparent 60%),
+    linear-gradient(135deg,#e6d3c3,#cfb49e)}
+  /* written-only chapter — the opening line IS the card art */
+  .th-read{background:var(--wash); display:block}
+  .th-read blockquote{
+    position:absolute; inset:auto 0 0 0; margin:0; padding:12px 14px 26px;
+    font-style:italic; font-size:13px; line-height:1.5; color:var(--m1);
+    overflow:hidden; display:-webkit-box; -webkit-line-clamp:3; line-clamp:3; -webkit-box-orient:vertical;
+  }
+  .th-read::before{
+    content:'\201C'; position:absolute; top:2px; left:10px; font-size:44px; line-height:1;
+    color:var(--gold300); font-family:Georgia,serif;
+  }
+  .dur{
+    position:absolute; right:6px; bottom:6px; background:rgba(30,28,26,.85); color:#f5f1e8;
+    border-radius:var(--r-xs); padding:1px 6px; font-size:11.5px; font-family:var(--mono);
+  }
+  .hasvid{
+    position:absolute; left:6px; bottom:6px; background:rgba(30,28,26,.85); color:#f5f1e8;
+    border-radius:var(--r-xs); padding:1px 6px; font-size:11px;
+  }
+  .rank{
+    position:absolute; left:6px; top:6px; background:rgba(30,28,26,.85); color:#f5f1e8;
+    border-radius:var(--r-xs); padding:1px 7px; font-size:11.5px; font-family:var(--mono);
+  }
+  .cmeta{display:flex; gap:12px; padding-top:11px}
+  .ava{
+    width:36px; height:36px; border-radius:50%; flex:0 0 36px; background:var(--wash);
+    border:1px solid var(--line); display:grid; place-items:center; font-size:11px;
+    font-weight:700; color:var(--gold); font-family:var(--mono);
+  }
+  .ctxt{flex:1; min-width:0}
+  .ttl{
+    font-size:14px; font-weight:500; line-height:1.4; margin:0 0 4px;
+    display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .by{font-size:12px; color:var(--m1); line-height:1.5; margin:0}
+  .by .mono{font-size:11.5px}
+  .by + .by{color:var(--m2)}
+  .chan{color:var(--m1); text-decoration:none; position:relative; z-index:2}
+  .chan:hover{text-decoration:underline; color:var(--gold)}
+  .ktag{
+    display:inline-block; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
+    font-weight:700; border:1px solid var(--line); border-radius:var(--r-xs);
+    padding:1px 5px; margin-right:5px; color:var(--m1); background:#f7f3ea;
+  }
+  .ktag-story{color:#7a4a2e; border-color:#e6cdbc; background:#fbf0e9}
+  .ktag-wed{color:var(--link); border-color:#cdd6e0; background:#eef1f5}
+
+  /* ── Trending, sparse — the state most visitors will actually see ── */
+  .trend-empty{
+    display:grid; grid-template-columns:minmax(0,1fr) auto; gap:24px 56px; align-items:start;
+    border:1px solid #ece4d3; background:#faf6ec; border-radius:var(--r-md);
+    padding:26px 30px 28px; margin-bottom:8px;
+  }
+  .trend-empty .big{margin:0 0 6px; font-size:16.5px; font-weight:650; letter-spacing:-.01em; text-wrap:balance}
+  .trend-empty .sub{margin:0; max-width:52ch; font-size:13.5px; color:var(--m1)}
+  .trend-doors{margin-top:14px; display:flex; gap:18px; flex-wrap:wrap}
+  .quietlink{font-size:13px; font-weight:600; color:var(--gold); text-decoration:none}
+  .quietlink:hover{text-decoration:underline}
+  .how{list-style:none; margin:2px 0 0; padding:0; display:grid; gap:12px}
+  .how li{display:flex; gap:12px; align-items:center; font-size:13px; color:var(--m1); white-space:nowrap}
+  .how .n{
+    width:24px; height:24px; flex:0 0 24px; border:1px solid var(--gold300); color:var(--gold);
+    border-radius:50%; display:grid; place-items:center; font-size:11px; font-family:var(--mono);
+  }
+  .how b{color:var(--ink); font-weight:600}
+
+  /* ── the Shops room — co-equal with the feed, its own distinct band ──
+       Rev 2: promoted from the page's tail to directly beneath the anchor,
+       so the 0%-commission claim is substantiated one scroll-line later.
+       Still a separate room (the rejected merge stays rejected); tiles stay
+       more compact than content cards — weight comes from position + band. */
+  .shopband{
+    margin:22px -28px 26px; padding:2px 28px 26px; background:#f8f4ea;
+    border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+  }
+  .shopband .feedinner{max-width:1112px; margin:0 auto}
+  .shopgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
+  .shop{
+    display:flex; align-items:center; gap:12px; padding:12px 14px; background:var(--cream);
+    border:1px solid var(--line); border-radius:var(--r-sm); text-decoration:none; color:inherit;
+    transition:background .15s ease, border-color .15s ease;
+  }
+  .shop:hover{background:var(--hover); border-color:#d5cdba}
+  /* the open seat — supply recruiting while liquidity is the constraint */
+  .shop-recruit{
+    display:flex; align-items:center; gap:12px; padding:12px 14px;
+    border:1px dashed var(--gold300); border-radius:var(--r-sm); background:#fdfaf2;
+    text-decoration:none; color:inherit; transition:background .15s ease;
+  }
+  .shop-recruit:hover{background:#fbf5e7}
+  .shop-recruit .shoplogo{background:#fff; border:1px dashed var(--gold300); color:var(--gold)}
+  .shop-recruit .shopcap{white-space:normal}
+  .shoplogo{
+    width:44px; height:44px; flex:0 0 44px; border-radius:var(--r-xs); background:var(--wash);
+    border:1px solid var(--line); display:grid; place-items:center; font-size:12px;
+    font-weight:700; color:var(--gold); font-family:var(--mono);
+  }
+  .shoptxt{min-width:0}
+  .shopname{display:flex; align-items:center; gap:5px; font-size:13.5px; font-weight:600; line-height:1.3}
+  .shopname svg{width:14px; height:14px; color:var(--success); flex:0 0 14px}
+  .shopcap{font-size:12px; color:var(--m2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .mockfoot{height:26px}
+
+  /* feed variants — one mock serves the sparse and grown-in tabs */
+  .mock[data-state="sparse"] .only-full{display:none}
+  .mock[data-state="full"] .only-sparse{display:none}
+
+  /* ═══ MOBILE ═══ */
+  .phonewrap{padding:30px 16px 60px; display:grid; place-items:center}
+  .phone{
+    width:393px; max-width:100%; background:var(--cream); border:1px solid #d8d2c3;
+    border-radius:30px; overflow:hidden; box-shadow:var(--shadow);
+  }
+  .p-top{display:flex; align-items:center; gap:6px; padding:10px 12px 4px}
+  .p-top .wordmark{font-size:14px; margin-right:auto}
+  .p-search{padding:6px 12px 10px}
+  .p-feed{padding:0 12px 8px}
+  .p-feed .grid{grid-template-columns:1fr; gap:24px}
+  .p-feed .sechead{margin:16px 2px 12px}
+  .hscroll{display:flex; gap:12px; overflow-x:auto; padding:2px 2px 10px; scrollbar-width:none}
+  .hscroll::-webkit-scrollbar{display:none}
+  .hscroll .card{flex:0 0 236px}
+  .hscroll .shop{flex:0 0 228px}
+  .p-shopband{margin:12px -12px 4px; padding:2px 12px 16px; background:#f8f4ea; border-top:1px solid var(--line); border-bottom:1px solid var(--line)}
+  .p-anchor{
+    margin:4px 12px 6px; border:1px solid #e8e0cf; border-radius:var(--r-md);
+    background:linear-gradient(120deg,#fbf7ee,#f3ecdf); padding:16px 16px 16px;
+  }
+  .p-anchor h1{margin:0 0 8px; font-size:17px; line-height:1.3; font-weight:750; letter-spacing:-.01em; text-wrap:balance}
+  .p-anchor .anchor-claims{display:grid; gap:6px; margin-bottom:12px}
+  .p-anchor .anchor-claims li{font-size:12px; white-space:normal}
+  .p-anchor .pill-gold{width:100%; justify-content:center; min-height:42px}
+  .p-home{display:grid; place-items:center; padding:8px 0 10px}
+  .p-home i{display:block; width:120px; height:5px; border-radius:3px; background:#d9d2c2}
+  .p-trend-note{
+    border:1px solid #ece4d3; background:#faf6ec; border-radius:var(--r-sm);
+    padding:14px 16px; font-size:12.5px; color:var(--m1); margin-bottom:4px;
+  }
+  .p-trend-note b{display:block; color:var(--ink); font-size:13.5px; margin-bottom:2px}
+
+  /* ═══ CARD ANATOMY ═══ */
+  .anat{max-width:1220px; margin:0 auto; padding:30px 24px 30px; display:grid; grid-template-columns:repeat(3,1fr); gap:20px}
+  .apanel{background:var(--cream); border:1px solid #ddd6c7; border-radius:var(--r-md); padding:20px 20px 22px; box-shadow:var(--shadow)}
+  .apanel h3{margin:0 0 4px; font-size:15px; font-weight:700}
+  .apanel .alede{margin:0 0 16px; font-size:12.5px; color:var(--m1)}
+  .apanel .card{pointer-events:none; margin-bottom:6px}
+  .avariant{margin:14px 0 6px; padding-top:14px; border-top:1px dashed var(--line)}
+  .avariant .vcap{margin:0 0 8px; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--m2)}
+  .spec{display:grid; grid-template-columns:86px 1fr; gap:10px; padding:8px 0; border-top:1px solid #efe9dc; font-size:12.5px}
+  .specs{margin-top:14px}
+  .sk{font-size:10px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--m2); padding-top:2px}
+  .sv{color:var(--m1)}
+  .sv b{color:var(--ink); font-weight:600}
+  .engnotes{max-width:1220px; margin:0 auto; padding:0 24px 60px}
+  .engnotes .panel{background:var(--cream); border:1px solid #ddd6c7; border-radius:var(--r-md); padding:18px 22px 20px; box-shadow:var(--shadow)}
+  .engnotes h3{margin:0 0 10px; font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--m1)}
+  .engnotes ul{margin:0; padding-left:18px; font-size:13px; color:var(--m1); display:grid; gap:8px}
+  .engnotes b{color:var(--ink); font-weight:600}
+</style>
+
+<!-- icon sprite: minimal strokes, currentColor -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="i-menu"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></g>
+    <g id="i-search"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M16.3 16.3 21 21" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></g>
+    <g id="i-home"><path d="M4 11.2 12 4l8 7.2M6.3 9.8V20h11.4V9.8M10 20v-5h4v5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round" stroke-linecap="round"/></g>
+    <g id="i-spark"><path d="M12 3.5 13.9 9.6 20 11.5 13.9 13.4 12 19.5 10.1 13.4 4 11.5 10.1 9.6Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="18.6" cy="5" r="1.1" fill="currentColor"/></g>
+    <g id="i-ai"><rect x="5" y="8.5" width="14" height="10.5" rx="3" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M12 8.5V5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><circle cx="12" cy="4" r="1.2" fill="currentColor"/><circle cx="9.5" cy="13.5" r="1.1" fill="currentColor"/><circle cx="14.5" cy="13.5" r="1.1" fill="currentColor"/></g>
+    <g id="i-hub"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M4 12h16M12 4c-2.8 4.6-2.8 11.4 0 16M12 4c2.8 4.6 2.8 11.4 0 16" fill="none" stroke="currentColor" stroke-width="1.5"/></g>
+    <g id="i-cam"><rect x="3" y="7" width="18" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M8.5 7 10 4.5h4L15.5 7" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><circle cx="12" cy="13.2" r="3.6" fill="none" stroke="currentColor" stroke-width="1.75"/></g>
+    <g id="i-live"><circle cx="12" cy="12" r="2.4" fill="currentColor"/><path d="M8.2 15.8a5.4 5.4 0 0 1 0-7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.6 18.4a9 9 0 0 1 0-12.8M18.4 5.6a9 9 0 0 1 0 12.8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></g>
+    <g id="i-reel"><rect x="3.5" y="5" width="17" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M10.2 9.4v5.2l4.4-2.6Z" fill="currentColor"/></g>
+    <g id="i-cube"><path d="M12 3.4 19.6 7.7v8.6L12 20.6 4.4 16.3V7.7Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 12 19.6 7.7M12 12 4.4 7.7M12 12v8.6" fill="none" stroke="currentColor" stroke-width="1.4"/></g>
+    <g id="i-pen"><path d="m12.4 18.6 6.8-6.8-4-4-6.8 6.8L7 20Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="m14 6.6 3.4 3.4" stroke="currentColor" stroke-width="1.6"/></g>
+    <g id="i-play"><path d="M8 5.5v13l11-6.5Z" fill="currentColor"/></g>
+    <g id="i-check"><path d="m5 13 4.2 4L19 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g id="i-venue"><path d="M6.4 20v-8.4a5.6 5.6 0 0 1 11.2 0V20M3.5 20h17" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M12 3.2v2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></g>
+    <g id="i-plate"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.75"/><circle cx="12" cy="12" r="3.6" fill="none" stroke="currentColor" stroke-width="1.5"/></g>
+    <g id="i-flower"><circle cx="12" cy="12" r="2.2" fill="currentColor"/><path d="M12 9.5c-2.6 0-2.6-5 0-5s2.6 5 0 5ZM12 14.5c-2.6 0-2.6 5 0 5s2.6-5 0-5ZM9.5 12c0-2.6-5-2.6-5 0s5 2.6 5 0ZM14.5 12c0-2.6 5-2.6 5 0s-5 2.6-5 0Z" fill="none" stroke="currentColor" stroke-width="1.4"/></g>
+    <g id="i-music"><path d="M9.5 17.5V6.8l9-2v10.4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><circle cx="7.2" cy="17.6" r="2.3" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="16.2" cy="15.4" r="2.3" fill="none" stroke="currentColor" stroke-width="1.6"/></g>
+    <g id="i-plan"><rect x="5" y="4.5" width="14" height="16" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M9 9.5h6M9 13h6M9 16.5h3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></g>
+    <g id="i-attire"><path d="m8 4.5 4 2 4-2 3.4 3.6-2.6 2.1V20H7.2v-9.8L4.6 8.1Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></g>
+    <g id="i-mail"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="m4.5 7.5 7.5 5.6 7.5-5.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></g>
+    <g id="i-rings"><circle cx="9.4" cy="13" r="5.2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="14.6" cy="11" r="5.2" fill="none" stroke="currentColor" stroke-width="1.6"/></g>
+    <g id="i-cal"><rect x="4" y="6" width="16" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M4 10.5h16M8.5 4v4M15.5 4v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></g>
+    <!-- ported from shell_states_2026-09-03.html — the "Signed in" stage's My
+         Home + Planner/Builder/Together rows need these; same sprite, one copy -->
+    <g id="i-compass"><circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M15.2 8.8l-1.8 4.6-4.6 1.8 1.8-4.6Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></g>
+    <g id="i-arrowl"><path d="M19 12H5M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g id="i-users"><circle cx="9" cy="8.5" r="3.4" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M3.5 19.5a5.5 5.5 0 0 1 11 0" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><circle cx="16.8" cy="9.5" r="2.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M15.6 14.6a4.6 4.6 0 0 1 5 4.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></g>
+    <g id="i-bell"><path d="M12 4a5.4 5.4 0 0 1 5.4 5.4c0 4 1.4 5.2 1.9 5.7H4.7c.5-.5 1.9-1.7 1.9-5.7A5.4 5.4 0 0 1 12 4Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M10 18.4a2.1 2.1 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></g>
+    <g id="i-store"><path d="M4.5 9 6 4.5h12L19.5 9M4.5 9v10.5h15V9M4.5 9h15M10 19.5v-5h4v5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></g>
+    <g id="i-file"><path d="M6.5 3.5h7L18.5 8.5v12h-12Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M13.5 3.5v5h5M9 12.5h6M9 16h6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></g>
+    <g id="i-coins"><circle cx="9.5" cy="9.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M15.8 8.2a5.5 5.5 0 1 1-7.6 7.6" fill="none" stroke="currentColor" stroke-width="1.7"/></g>
+    <g id="i-card"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M3.5 10h17M7 14.5h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></g>
+    <g id="i-palette"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.4 0 2-.9 2-1.8 0-1.4-1.2-1.7-1.2-2.7 0-.9.8-1.5 2-1.5h1.7a4 4 0 0 0 4-4c0-4-3.8-7-8.5-7Z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="10" r="1.1" fill="currentColor"/><circle cx="12" cy="7.5" r="1.1" fill="currentColor"/><circle cx="16" cy="10" r="1.1" fill="currentColor"/></g>
+    <g id="i-seat"><path d="M7 4.5h10v7H7ZM5 11.5h14v4H5ZM6.5 15.5v4M17.5 15.5v4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+    <g id="i-compare"><rect x="4" y="5" width="7" height="14" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="5" width="7" height="14" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6.5 9h2M15.5 9h2M6.5 12h2M15.5 12h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></g>
+    <g id="i-story"><circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="4 3"/><path d="M10.4 9.2v5.6l4.6-2.8Z" fill="currentColor"/></g>
+  </defs>
+</svg>
+
+<!-- ═══ DECK BAR ═══ -->
+<header class="deck-bar">
+  <div class="deck-title">Setnayan · Home feed<small>rev 2 — anchor + shops-forward · 2026-09-03</small></div>
+  <nav class="tabs" aria-label="Prototype views">
+    <button class="tab" data-view="0" aria-pressed="true">1 · Today (sparse)</button>
+    <button class="tab" data-view="1" aria-pressed="false">2 · Grown-in</button>
+    <button class="tab" data-view="2" aria-pressed="false">3 · Compact rail</button>
+    <button class="tab" data-view="3" aria-pressed="false">4 · Mobile</button>
+    <button class="tab" data-view="4" aria-pressed="false">5 · Card anatomy</button>
+    <button class="tab" data-view="5" aria-pressed="false">6 · Signed in</button>
+  </nav>
+</header>
+<p class="deck-note" id="decknote"></p>
+
+<!-- ═══ STAGE 1-3 · DESKTOP (one mock, attribute-switched) ═══ -->
+<section class="stage scrollx on" id="stage-desktop">
+  <div class="board">
+    <div class="mock" id="desktopmock" data-state="sparse" data-rail="expanded">
+
+      <!-- top bar — preserved chrome -->
+      <div class="topbar">
+        <div class="topleft">
+          <button class="iconbtn" id="railtoggle" title="Collapse the rail (the incoming manual control beside the wordmark)" aria-label="Collapse sidebar">
+            <svg viewBox="0 0 24 24" width="20" height="20"><use href="#i-menu"/></svg>
+          </button>
+          <a class="wordmark" href="#">Setnayan</a>
+        </div>
+        <div class="searchbox">
+          <input type="search" placeholder="Search suppliers, stories and guides" aria-label="Search Setnayan">
+          <button class="searchgo" aria-label="Search"><svg viewBox="0 0 24 24" width="18" height="18"><use href="#i-search"/></svg></button>
+        </div>
+        <div class="topright">
+          <a class="pill-gold" href="#">Sign in</a>
+        </div>
+      </div>
+
+      <div class="mockbody">
+        <!-- ── rail — preserved chrome, expanded + compact via data-rail ── -->
+        <nav class="rail" aria-label="Sections">
+          <a class="row" data-on="true" href="#">
+            <span class="gi"><svg viewBox="0 0 24 24"><use href="#i-home"/></svg></span>
+            <span class="lbl">Home</span><span class="cap">Home</span>
+          </a>
+          <div class="rdiv"></div>
+          <!-- the deliberate gap: the sign-in prompt panel and "What is Alaala?"
+               row were removed by a prior edit — matches Shell States tab 1 -->
+          <div class="rlabel">Studio</div>
+          <a class="row row2" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-ai"/></svg></span>
+            <span class="lbl"><span class="tool-name">Setnayan AI</span><span class="tool-line">Watches your vendors and flags a deposit, a price change or a clash before it costs you.</span></span>
+            <span class="cap">AI</span></a>
+          <a class="row row2" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-hub"/></svg></span>
+            <span class="lbl"><span class="tool-name">Event Hub</span><span class="tool-line">One link for your save-the-date, RSVP, details and love story.</span></span>
+            <span class="cap">Hub</span></a>
+          <a class="row row2" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-cam"/></svg></span>
+            <span class="lbl"><span class="tool-name">Papic</span><span class="tool-line">Turns your guests into your photo crew.</span></span>
+            <span class="cap">Papic</span></a>
+          <a class="row row2" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-live"/></svg></span>
+            <span class="lbl"><span class="tool-name">Live Studio</span><span class="tool-line">Brings the people who can’t be in the room into your day — live.</span></span>
+            <span class="cap">Live</span></a>
+          <a class="row row2" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-reel"/></svg></span>
+            <span class="lbl"><span class="tool-name">Patiktok</span><span class="tool-line">Turns your moments into short, vertical highlight reels.</span></span>
+            <span class="cap">Reels</span></a>
+          <a class="row row2" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-cube"/></svg></span>
+            <span class="lbl"><span class="tool-name">3D Plan</span><span class="tool-line">Stand in your reception before it’s built.</span></span>
+            <span class="cap">3D</span></a>
+          <a class="row row2" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-pen"/></svg></span>
+            <span class="lbl"><span class="tool-name">Logo Maker</span><span class="tool-line">One monogram of your own, carried across your whole day.</span></span>
+            <span class="cap">Logo</span></a>
+          <!-- Marketplace/category-browse block removed — none of this prototype's
+               states are "inside an event", and the rail rule (verified against
+               shipped front-door-shell.tsx) is that Marketplace + Browse by
+               category render ONLY there, never on the homepage, signed in or out. -->
+        </nav>
+
+        <!-- ── the feed column — the redesigned content area ── -->
+        <main class="feedcol">
+          <div class="feedinner">
+
+            <!-- ═ THE ANCHOR — what this is, in five seconds. One claim, one door.
+                 NOT the retired narrative hero: no essay, no group-chat mockup. ═ -->
+            <div class="anchor">
+              <div class="anchor-copy">
+                <h1>Plan your Filipino event free — and never lose a photo.</h1>
+                <ul class="anchor-claims">
+                  <li><svg viewBox="0 0 24 24"><use href="#i-cal"/></svg> Every celebration, planned in one place</li>
+                  <li><svg viewBox="0 0 24 24"><use href="#i-cam"/></svg> Every guest’s photo, kept in one album</li>
+                  <li><svg viewBox="0 0 24 24"><use href="#i-check"/></svg> Verified suppliers · 0% commission</li>
+                </ul>
+              </div>
+              <div class="anchor-cta">
+                <a class="pill-gold" href="#">Start your celebration — free</a>
+                <a class="quietlink" href="#">How it works →</a>
+              </div>
+            </div>
+
+            <!-- ═ THE SHOPS ROOM — co-equal with the feed, directly under the
+                 claim it substantiates. Separate room, compact tiles. ═ -->
+            <div class="shopband">
+              <div class="feedinner">
+                <div class="sechead">
+                  <h2>Shops</h2>
+                  <span class="seccap">verified suppliers · 0% commission on bookings</span>
+                  <a class="quietlink push" href="#">Browse the marketplace →</a>
+                </div>
+                <!-- sparse: the real shops plus an open seat — the room recruits
+                     supply instead of pretending fullness -->
+                <div class="shopgrid only-sparse" id="shopgrid-sparse"></div>
+                <div class="shopgrid only-full" id="shopgrid-full"></div>
+              </div>
+            </div>
+
+            <!-- ═ SECTION 1 · NEW UPLOADS ═ -->
+            <div class="sechead">
+              <h2>New uploads</h2>
+              <span class="seccap">newest first</span>
+            </div>
+
+            <!-- sparse variant: today's reality — the Journal carries the page -->
+            <div class="only-sparse">
+              <div class="grid" id="grid-sparse"></div>
+              <button type="button" class="loadmore" id="loadmore-sparse">Load more</button>
+            </div>
+
+            <!-- grown-in variant: articles + chapters + editorials interleaved -->
+            <div class="only-full">
+              <div class="grid" id="grid-full"></div>
+              <button type="button" class="loadmore" id="loadmore-full">Load more</button>
+            </div>
+
+            <!-- ═ SECTION 2 · TRENDING ═ -->
+            <div class="sechead">
+              <h2>Trending</h2>
+              <span class="seccap only-sparse">earned, never sold</span>
+              <span class="seccap only-full">ranked by real views · nothing here is paid placement</span>
+            </div>
+
+            <!-- sparse: the honest state, composed on purpose -->
+            <div class="only-sparse">
+              <div class="trend-empty">
+                <div>
+                  <p class="big">No story has earned a spot yet.</p>
+                  <p class="sub">Trending ranks stories by real views from real readers — it is never
+                    seeded, padded, or sold. The first story to earn its place will appear here on its
+                    own; until then, this room stays honest.</p>
+                  <div class="trend-doors">
+                    <a class="quietlink" href="#">Browse all stories →</a>
+                    <a class="quietlink" href="#">Write yours →</a>
+                  </div>
+                </div>
+                <ol class="how" aria-label="How a story gets here">
+                  <li><span class="n">1</span><span><b>Someone publishes</b> — a storyteller or a couple</span></li>
+                  <li><span class="n">2</span><span><b>Real readers find it</b> — shared, searched, passed around</span></li>
+                  <li><span class="n">3</span><span><b>Views alone rank it</b> — no boosts, no purchases</span></li>
+                </ol>
+              </div>
+            </div>
+
+            <!-- grown-in: real ranking, chapters only (editorials never carry views) -->
+            <div class="only-full">
+              <div class="grid" id="grid-trend"></div>
+              <button type="button" class="loadmore" id="loadmore-trend">Load more</button>
+            </div>
+
+            <div class="mockfoot"></div>
+
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ STAGE 3b · SIGNED IN, BACK ON / ═══
+     Ported faithfully from shell_states_2026-09-03.html tab 6 ("Back on /"),
+     kept in the SAME file as the logged-out states now rather than a second
+     artifact, so the two can't drift apart the way they already had once
+     (that file's rail still had the retired sign-in prompt after this one
+     had already dropped it). Rail furniture — My Home, Planner/Builder/
+     Together, Studio — matches that file exactly; only the main content
+     differs, and it differs on purpose: no anchor strip (owner-confirmed,
+     a signed-in visitor already knows what Setnayan is), straight into the
+     same Shops → New uploads → Trending order. -->
+<section class="stage" id="stage-signedin">
+  <div class="board">
+    <div class="mock" id="signedinmock" data-rail="expanded">
+
+      <div class="topbar">
+        <div class="topleft">
+          <button class="iconbtn" id="railtoggle-signedin" title="Collapse the rail" aria-label="Collapse sidebar">
+            <svg viewBox="0 0 24 24" width="20" height="20"><use href="#i-menu"/></svg>
+          </button>
+          <a class="wordmark" href="#">Setnayan</a>
+        </div>
+        <div class="searchbox">
+          <input type="search" placeholder="Jump to your guests, budget, tools…" aria-label="Search your Setnayan">
+          <span class="kbd">⌘K</span>
+          <button class="searchgo" aria-label="Search"><svg viewBox="0 0 24 24" width="18" height="18"><use href="#i-search"/></svg></button>
+        </div>
+        <div class="topright">
+          <a class="pill-gold" href="#">+ Create event</a>
+          <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><use href="#i-bell"/></svg></button>
+          <button class="avatar" aria-label="Account menu">BM</button>
+        </div>
+      </div>
+
+      <div class="mockbody">
+        <nav class="rail" aria-label="Sections">
+          <a class="row" data-on="true" href="#">
+            <span class="gi"><svg viewBox="0 0 24 24"><use href="#i-home"/></svg></span>
+            <span class="lbl">Home</span><span class="cap">Home</span>
+          </a>
+          <div class="rdiv"></div>
+          <!-- Marketplace deliberately absent — owner ruling: it shows only
+               inside a specific event, never right after logging in -->
+          <div class="rlabel">My Home</div>
+          <a class="row" href="#">
+            <span class="gi"><svg viewBox="0 0 24 24"><use href="#i-arrowl"/></svg></span>
+            <span class="lbl">Back to your events</span><span class="cap">Events</span><span class="cnt">1</span>
+          </a>
+          <a class="row" href="#">
+            <span class="gi"><svg viewBox="0 0 24 24"><use href="#i-spark"/></svg></span>
+            <!-- NO count here — shipped rail-data.ts passes alaalaCount: undefined
+                 on purpose ("a number we have not measured is worse than none") -->
+            <span class="lbl">Memories</span><span class="cap">Memories</span>
+          </a>
+          <a class="row" href="#">
+            <span class="gi"><svg viewBox="0 0 24 24"><use href="#i-users"/></svg></span>
+            <span class="lbl">People</span><span class="cap">People</span>
+          </a>
+
+          <div class="rdiv"></div>
+          <div class="rlabel">Planner<small>things you plan with</small></div>
+          <div class="tgrid">
+            <a class="tcard" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-users"/></svg></span><span class="tname">Guest List</span><span class="cap">Guest List</span><span class="tline">Every name, RSVP and plus-one in one list.</span></a>
+            <a class="tcard" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-seat"/></svg></span><span class="tname">Seat Plan</span><span class="cap">Seat Plan</span><span class="tline">Drag your tables until every seat works.</span></a>
+            <a class="tcard" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-palette"/></svg></span><span class="tname">Mood Board</span><span class="cap">Mood Board</span><span class="tline">Pin the look of your day.</span></a>
+            <a class="tcard" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-cal"/></svg></span><span class="tname">Schedule</span><span class="cap">Schedule</span><span class="tline">The day, hour by hour.</span></a>
+            <a class="tcard" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-coins"/></svg></span><span class="tname">Budget</span><span class="cap">Budget</span><span class="tline">Every peso, promised and paid.</span></a>
+          </div>
+
+          <div class="rlabel">Builder<small>things you book &amp; pay with</small></div>
+          <div class="tgrid">
+            <a class="tcard" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-compass"/></svg></span><span class="tname">Marketplace</span><span class="cap">Marketplace</span><span class="tline">Every verified supplier, one place.</span></a>
+            <a class="tcard" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-compare"/></svg></span><span class="tname">Compare</span><span class="cap">Compare</span><span class="tline">Shortlist suppliers side by side.</span></a>
+            <a class="tcard" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-card"/></svg></span><span class="tname">Vendor ledger</span><span class="cap">Ledger</span><span class="tline">Who’s booked, what’s owed, what’s paid.</span></a>
+            <a class="tcard" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-file"/></svg></span><span class="tname">Contracts</span><span class="cap">Contracts</span><span class="tline">Every signed thing, kept.</span></a>
+          </div>
+
+          <div class="rlabel">Together<small>things you do with people</small></div>
+          <div class="tgrid">
+            <a class="tcard" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-users"/></svg></span><span class="tname">Samahan groups</span><span class="cap">Samahan</span><span class="tline">Your barkada, ninongs, family — organized.</span><span class="tnew">new</span></a>
+            <a class="tcard" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-story"/></svg></span><span class="tname">Samahan Stories</span><span class="cap">Stories</span><span class="tline">Clips that live for 24 hours, inside your group.</span><span class="tnew">new</span></a>
+            <a class="tcard" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-store"/></svg></span><span class="tname">Vendor chat</span><span class="cap">Vendor chat</span><span class="tline">Talk to your booked suppliers here.</span><span class="tnew">new</span></a>
+            <a class="tcard" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-msg"/></svg></span><span class="tname">Event chat</span><span class="cap">Event chat</span><span class="tline">One thread for the whole entourage.</span><span class="tnew">new</span></a>
+          </div>
+
+          <div class="rdiv"></div>
+          <div class="rlabel">Studio</div>
+          <!-- signed in: names only, no selling line, no "try it" — the
+               rows open the person's OWN tools, they don't pitch a stranger -->
+          <a class="row row2" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-ai"/></svg></span><span class="lbl"><span class="tool-name">Setnayan AI</span></span><span class="cap">AI</span></a>
+          <a class="row row2" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-hub"/></svg></span><span class="lbl"><span class="tool-name">Event Hub</span></span><span class="cap">Hub</span></a>
+          <a class="row row2" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-cam"/></svg></span><span class="lbl"><span class="tool-name">Papic</span></span><span class="cap">Papic</span></a>
+          <a class="row row2" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-live"/></svg></span><span class="lbl"><span class="tool-name">Live Studio</span></span><span class="cap">Live</span></a>
+          <a class="row row2" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-reel"/></svg></span><span class="lbl"><span class="tool-name">Patiktok</span></span><span class="cap">Reels</span></a>
+          <a class="row row2" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-cube"/></svg></span><span class="lbl"><span class="tool-name">3D Plan</span></span><span class="cap">3D</span></a>
+          <a class="row row2" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-music"/></svg></span><span class="lbl"><span class="tool-name">Pakanta</span></span><span class="cap">Song</span></a>
+          <a class="row row2" href="#"><span class="gi"><svg viewBox="0 0 24 24"><use href="#i-pen"/></svg></span><span class="lbl"><span class="tool-name">Logo Maker</span></span><span class="cap">Logo</span></a>
+
+          <div class="smallprint"><a href="#">About</a><a href="#">Pricing</a><a href="#">Help</a><a href="#">Open your shop</a></div>
+        </nav>
+
+        <main class="feedcol">
+          <div class="feedinner">
+
+            <!-- NO anchor strip here, on purpose — see the file header -->
+
+            <div class="shopband">
+              <div class="feedinner">
+                <div class="sechead">
+                  <h2>Shops</h2>
+                  <span class="seccap">verified suppliers · 0% commission on bookings</span>
+                  <a class="quietlink push" href="#">Browse the marketplace →</a>
+                </div>
+                <div class="shopgrid" id="shopgrid-signedin"></div>
+              </div>
+            </div>
+
+            <div class="sechead">
+              <h2>New uploads</h2>
+              <span class="seccap">newest first</span>
+            </div>
+            <div class="grid" id="grid-signedin"></div>
+            <button type="button" class="loadmore" id="loadmore-signedin">Load more</button>
+
+            <div class="sechead">
+              <h2>Trending</h2>
+              <span class="seccap">earned, never sold</span>
+            </div>
+            <div class="trend-empty">
+              <div>
+                <p class="big">No story has earned a spot yet.</p>
+                <p class="sub">Trending ranks stories by real views from real readers — it is never
+                  seeded, padded, or sold. The first story to earn its place will appear here on its
+                  own; until then, this room stays honest.</p>
+                <div class="trend-doors">
+                  <a class="quietlink" href="#">Browse all stories →</a>
+                  <a class="quietlink" href="#">Write yours →</a>
+                </div>
+              </div>
+              <ol class="how" aria-label="How a story gets here">
+                <li><span class="n">1</span><span><b>Someone publishes</b> — a storyteller or a couple</span></li>
+                <li><span class="n">2</span><span><b>Real readers find it</b> — shared, searched, passed around</span></li>
+                <li><span class="n">3</span><span><b>Views alone rank it</b> — no boosts, no purchases</span></li>
+              </ol>
+            </div>
+
+            <div class="mockfoot"></div>
+
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ STAGE 4 · MOBILE ═══ -->
+<section class="stage" id="stage-mobile">
+  <div class="phonewrap">
+    <div class="phone">
+      <div class="p-top">
+        <button class="iconbtn" aria-label="Menu"><svg viewBox="0 0 24 24" width="20" height="20"><use href="#i-menu"/></svg></button>
+        <a class="wordmark" href="#">Setnayan</a>
+        <a class="pill-gold" href="#">Sign in</a>
+      </div>
+      <div class="p-search">
+        <div class="searchbox">
+          <input type="search" placeholder="Search suppliers, stories and guides" aria-label="Search Setnayan">
+          <button class="searchgo" aria-label="Search"><svg viewBox="0 0 24 24" width="18" height="18"><use href="#i-search"/></svg></button>
+        </div>
+      </div>
+      <div class="p-anchor">
+        <h1>Plan your Filipino event free — and never lose a photo.</h1>
+        <ul class="anchor-claims">
+          <li><svg viewBox="0 0 24 24"><use href="#i-cal"/></svg> Every celebration, planned in one place</li>
+          <li><svg viewBox="0 0 24 24"><use href="#i-cam"/></svg> Every guest’s photo, kept in one album</li>
+          <li><svg viewBox="0 0 24 24"><use href="#i-check"/></svg> Verified suppliers · 0% commission</li>
+        </ul>
+        <a class="pill-gold" href="#">Start your celebration — free</a>
+      </div>
+      <div class="p-feed">
+        <div class="p-shopband">
+          <div class="sechead"><h2>Shops</h2><span class="seccap">verified · 0% commission</span></div>
+          <div class="hscroll" id="shops-mobile"></div>
+        </div>
+
+        <div class="sechead"><h2>New uploads</h2><span class="seccap">newest first</span></div>
+        <div class="grid" id="grid-mobile"></div>
+
+        <div class="sechead"><h2>Trending</h2><span class="seccap">earned, never sold</span></div>
+        <div class="hscroll" id="trend-mobile"></div>
+      </div>
+      <div class="p-home"><i></i></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ STAGE 5 · CARD ANATOMY ═══ -->
+<section class="stage" id="stage-anatomy">
+  <div class="anat">
+
+    <div class="apanel">
+      <h3>Article</h3>
+      <p class="alede">Setnayan-authored guides — the Journal. Today’s backlog (~33 published) is what fills the sparse feed.</p>
+      <div id="anat-article"></div>
+      <div class="specs">
+        <div class="spec"><span class="sk">Kind tag</span><span class="sv">Neutral hairline chip, <b>“Article”</b> — the quietest of the three.</span></div>
+        <div class="spec"><span class="sk">Byline</span><span class="sv">Always <b>Setnayan</b>, house “SN” avatar. Never a personal profile.</span></div>
+        <div class="spec"><span class="sk">Numbers</span><span class="sv"><b>Reading time only</b>, in mono — articles never show a view count on the card.</span></div>
+        <div class="spec"><span class="sk">Cover</span><span class="sv">Always present; tinted by category (Planning · Culture · Vendors).</span></div>
+      </div>
+    </div>
+
+    <div class="apanel">
+      <h3>Chapter</h3>
+      <p class="alede">A real storyteller’s own published piece — written, or written with embedded video.</p>
+      <div id="anat-chapter"></div>
+      <div class="avariant">
+        <p class="vcap">Written-only variant — the opening line is the card art</p>
+        <div id="anat-chapter-read"></div>
+      </div>
+      <div class="specs">
+        <div class="spec"><span class="sk">Kind tag</span><span class="sv">Warm chip, <b>“Their story”</b> — the shipped storyteller tint.</span></div>
+        <div class="spec"><span class="sk">Byline</span><span class="sv"><b>A door</b> — the name opens the storyteller’s public profile. A second tap target layered over the card, never nested.</span></div>
+        <div class="spec"><span class="sk">Numbers</span><span class="sv"><b>Real view count</b> + reading minutes, both mono. The only kind that shows views — and the only kind Trending may rank.</span></div>
+        <div class="spec"><span class="sk">Video</span><span class="sv">“▶ with video” marks an embedded YouTube / IG / TikTok. The read still leads.</span></div>
+        <div class="spec"><span class="sk">No poster?</span><span class="sv">Written-only chapters render the opening line as a typographic hero — the kind is the floor, never an empty box.</span></div>
+      </div>
+    </div>
+
+    <div class="apanel">
+      <h3>Editorial</h3>
+      <p class="alede">A real couple’s own published write-up of their day.</p>
+      <div id="anat-editorial"></div>
+      <div class="specs">
+        <div class="spec"><span class="sk">Kind tag</span><span class="sv">Blue-grey chip, <b>“Real wedding”</b> — reads as testimony, not content.</span></div>
+        <div class="spec"><span class="sk">Byline</span><span class="sv">The couple’s names. Links <b>only if they chose a public profile</b> — otherwise plain text (as here), never a fake door.</span></div>
+        <div class="spec"><span class="sk">Numbers</span><span class="sv"><b>No view count, ever</b> — a deliberate privacy line for couples’ own pages. Place and date only.</span></div>
+        <div class="spec"><span class="sk">Hero</span><span class="sv">Usually the couple’s own photo; the placeholder carries the interlocked-rings motif.</span></div>
+      </div>
+    </div>
+
+  </div>
+  <div class="engnotes">
+    <div class="panel" style="margin-bottom:16px; border-color:var(--gold300)">
+      <h3>Rev 2 — what changed, and why</h3>
+      <ul>
+        <li><b>Added the category anchor</b> above the feed: one headline (the live HOME_TITLE claim), three micro-claims, one primary CTA. A pure YouTube feed assumes a returning viewer with watch history; nearly every visitor to <span class="mono">/</span> is a first-time stranger with none — they get the five-second answer first. This is <b>not</b> the retired narrative hero: no essay, no group-chat mockup, no “couldn’t fly home” section.</li>
+        <li><b>Shops promoted to co-equal:</b> moved from the page’s tail to directly beneath the anchor, substantiating the 0%-commission claim it sits under. Marketplace research: supply liquidity is the survival predictor at this stage, and a content-only first screen reads as “empty site”. Still its own room — the twice-rejected feed-merge stays rejected; tiles stay compact, the weight comes from position and the full-bleed band.</li>
+        <li><b>The sparse Shops room recruits supply:</b> the real shops render plus one dashed “Your shop belongs here” seat (list free · 0% of every booking) — honest about today’s two-shop reality while working the liquidity problem, instead of faking a full row.</li>
+        <li><b>Unchanged, deliberately:</b> the card language, kind tags, mono meta, New uploads, the honest sparse-Trending band, all chrome (top bar, rail structure, compact toggle). Feed order below the anchor is now Shops → New uploads → Trending.</li>
+        <li><b>Rev 2.1 —</b> the anchor question is settled: owner confirmed it renders for <b>signed-out visitors only</b>. The signed-in return visit (no anchor, feed straight away) is mocked as tab 6 of the “Setnayan Shell States” artifact, alongside the new Planner / Builder / Together rail groups.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Notes for engineering</h3>
+      <ul>
+        <li><b>Trending needs one boolean per piece, not a score UI.</b> The design assumes each chapter is either earned or not (real-view threshold is engineering/owner’s to define); the section renders only the earned list, and the sparse band needs no data beyond “earned count = 0”. Editorials never enter — they carry no view counts by rule.</li>
+        <li><b>The chip row (All / Your people / Stories / Articles) is dropped</b> per “drop everything” — the two named sections replace it. Confirm the top-bar search (<span class="mono">?q=</span>) still answers on this page, beneath the feed.</li>
+        <li><b>The manual rail-collapse control</b> is mocked as the hamburger beside the wordmark (try it on tabs 1–3). Shipped CSS already auto-collapses at 1024–1279px; the manual control needs a which-wins rule — user choice should probably persist.</li>
+        <li><b>Marketplace folder counts in the rail are illustrative.</b> The shipped rail reads FOLDER_SERVICE_COUNT; production today would show single digits.</li>
+        <li><b>Anchor CTA destination</b> — mocked as “Start your celebration — free”; wire to the real signup/create flow. “How it works →” assumes the shipped explainer page. <b>Answered (owner-confirmed):</b> the anchor is <b>signed-out only</b> — a signed-in visitor landing back on <span class="mono">/</span> skips straight to Shops → New uploads → Trending, with no anchor strip at all. That state is mocked as tab 6 of the companion “Setnayan Shell States” artifact.</li>
+        <li><b>The recruit seat’s destination</b> should be the existing vendor-grow page — an open seat that opens marketing copy is fine; one that 404s is a fake door.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<script>
+  /* ── card data — real Journal titles; storyteller/editorial content is
+       illustrative for the grown-in state ─────────────────────────────── */
+  const ARTICLES_SPARSE = [
+    ['Planning a December wedding in the Philippines','plan','Planning','6 min','today'],
+    ['The holiday booking crunch: securing vendors in Q4','vend','Vendors','5 min','1 d ago'],
+    ['Christmas-themed wedding ideas for Filipino couples','cult','Culture','4 min','2 d ago'],
+    ['How to trim your guest list politely','plan','Planning','5 min','3 d ago'],
+    ['The hidden wedding costs couples always forget','plan','Planning','6 min','4 d ago'],
+    ['Who pays for what in a Filipino wedding?','cult','Culture','7 min','5 d ago'],
+    ['Wedding invitation wording and etiquette, Filipino-style','cult','Culture','6 min','6 d ago'],
+    ['How to choose a wedding photographer in the Philippines','vend','Vendors','8 min','1 w ago'],
+    ['15 questions to ask your wedding photographer before booking','vend','Vendors','6 min','1 w ago'],
+    ['The average cost of a wedding in the Philippines (2026)','plan','Planning','9 min','2 w ago'],
+    ['Digital invitations and online RSVP: a modern guide','plan','Planning','5 min','2 w ago'],
+    ['Filipino wedding traditions, explained','cult','Culture','8 min','2 w ago'],
+  ];
+  const MOTIF = {plan:'i-cal', cult:'i-venue', vend:'i-cam'};
+
+  function articleCard([title,cat,catName,mins,when]){
+    return `<a class="card" href="#">
+      <div class="thumb th-${cat}"><svg class="motif" viewBox="0 0 24 24"><use href="#${MOTIF[cat]}"/></svg><span class="dur">${mins}</span></div>
+      <div class="cmeta"><span class="ava" aria-hidden="true">SN</span><div class="ctxt">
+        <p class="ttl">${title}</p>
+        <p class="by"><span class="ktag">Article</span> Setnayan</p>
+        <p class="by">${catName} · <span class="mono">${mins} read</span> · <span class="mono">${when}</span></p>
+      </div></div></a>`;
+  }
+  function chapterCard({title,owner,init,views,mins,when,video,open,rank}){
+    const thumb = open
+      ? `<div class="thumb th-read"><blockquote>${open}</blockquote><span class="dur">${mins}</span>${rank?`<span class="rank">${rank}</span>`:''}</div>`
+      : `<div class="thumb th-vid"><span class="playdot"><svg viewBox="0 0 24 24"><use href="#i-play"/></svg></span><span class="dur">${mins}</span>${video?'<span class="hasvid">▶ with video</span>':''}${rank?`<span class="rank">${rank}</span>`:''}</div>`;
+    return `<a class="card" href="#">${thumb}
+      <div class="cmeta"><span class="ava" aria-hidden="true">${init}</span><div class="ctxt">
+        <p class="ttl">${title}</p>
+        <p class="by"><span class="ktag ktag-story">Their story</span> <span class="chan">${owner}</span></p>
+        <p class="by"><span class="mono">${views} views</span> · <span class="mono">${when}</span></p>
+      </div></div></a>`;
+  }
+  function editorialCard({title,owner,init,place,when,linked}){
+    const name = linked ? `<span class="chan">${owner}</span>` : owner;
+    return `<a class="card" href="#">
+      <div class="thumb th-edit"><svg class="motif" viewBox="0 0 24 24"><use href="#i-rings"/></svg></div>
+      <div class="cmeta"><span class="ava" aria-hidden="true">${init}</span><div class="ctxt">
+        <p class="ttl">${title}</p>
+        <p class="by"><span class="ktag ktag-wed">Real wedding</span> ${name}</p>
+        <p class="by">${place} · <span class="mono">${when}</span></p>
+      </div></div></a>`;
+  }
+  function shopCard([init,name,cat,city]){
+    return `<a class="shop" href="#">
+      <span class="shoplogo">${init}</span>
+      <span class="shoptxt">
+        <span class="shopname">${name} <svg viewBox="0 0 24 24" aria-label="Verified"><use href="#i-check"/></svg></span>
+        <span class="shopcap">${cat} · ${city}</span>
+      </span></a>`;
+  }
+
+  /* grown-in mix — reverse-chronological interleave */
+  const FULL_FEED = [
+    chapterCard({title:'Kung paano kami umabot sa “Oo”', owner:'Lia Mercado', init:'LM', views:'1,847', mins:'9 min', when:'2 d ago', video:true}),
+    articleCard(['How to make your wedding guest list (without the drama)','plan','Planning','7 min','2 d ago']),
+    editorialCard({title:'Our Tagaytay wedding, and the rain we stopped fearing', owner:'Bea & Marco Villanueva', init:'BM', place:'Tagaytay', when:'3 d ago', linked:true}),
+    articleCard(['Deposits and payment schedules, explained','plan','Planning','6 min','4 d ago']),
+    chapterCard({title:'The debut I almost didn’t give my daughter', owner:'Carmela Diaz', init:'CD', views:'312', mins:'6 min', when:'5 d ago', open:'The gown was borrowed, the ballroom was our street, and none of it mattered by the second dance.'}),
+    articleCard(['Drone coverage for weddings in the Philippines: what to know','vend','Vendors','5 min','5 d ago']),
+    articleCard(['How to ask someone to be your ninong or ninang','cult','Culture','4 min','6 d ago']),
+    chapterCard({title:'Three cameras, one christening', owner:'Paolo Reyes', init:'PR', views:'968', mins:'7 min', when:'1 w ago', video:true}),
+    articleCard(['Buffet, plated, or family-style: which reception meal is right?','vend','Vendors','6 min','1 w ago']),
+    editorialCard({title:'Twenty-five years, renewed — our silver vows in Iloilo', owner:'Nita & Ramon Salcedo', init:'NR', place:'Iloilo', when:'1 w ago', linked:false}),
+    articleCard(['Save-the-dates: when to send them and what to include','plan','Planning','5 min','2 w ago']),
+    articleCard(['Simbang Gabi and getting married in December','cult','Culture','6 min','2 w ago']),
+  ];
+  const TREND = [
+    chapterCard({title:'The wedding our barangay threw with us', owner:'Marites Apolinario', init:'MA', views:'2,413', mins:'8 min', when:'3 w ago', video:true, rank:'1'}),
+    chapterCard({title:'Three cameras, one christening', owner:'Paolo Reyes', init:'PR', views:'968', mins:'7 min', when:'1 w ago', video:true, rank:'2'}),
+    chapterCard({title:'A debut on a teacher’s budget', owner:'Carmela Diaz', init:'CD', views:'731', mins:'6 min', when:'2 w ago', rank:'3', open:'We had ₱38,000, one gymnasium, and eighteen cousins who could cook.'}),
+    chapterCard({title:'Lolo’s 90th, filmed by his apos', owner:'Migs Fontanilla', init:'MF', views:'522', mins:'5 min', when:'2 w ago', video:true, rank:'4'}),
+  ];
+  /* the next batches — what "Load more" appends, per click, illustrating a
+     real cursor (each click asks for the next page; the button only goes
+     away when a batch genuinely comes back empty — same shape as Papic's
+     `if (!cursor) return`) without building a real paginated API for a
+     static mockup. Several batches here, not one, so clicking repeatedly
+     is demonstrated rather than a single append pretending to be paging. */
+  const MORE_ARTICLES_BATCHES = [
+    [
+      ['Church requirements for a Catholic wedding in the Philippines','plan','Planning','7 min','3 w ago'],
+      ['How much to tip your wedding vendors, and when','vend','Vendors','4 min','3 w ago'],
+      ['Rainy-season weddings: a real backup-plan checklist','plan','Planning','6 min','4 w ago'],
+      ['The barong and filipiniana, modernized','cult','Culture','5 min','4 w ago'],
+    ],
+    [
+      ['Beach weddings in the Philippines: tides, permits, and backup tents','plan','Planning','6 min','5 w ago'],
+      ['How to write your own wedding vows, Filipino-style','cult','Culture','5 min','5 w ago'],
+      ['Corkage, service charge, and other reception fees explained','vend','Vendors','4 min','6 w ago'],
+      ['Planning a destination wedding your lolas can still attend','plan','Planning','7 min','6 w ago'],
+    ],
+  ].map(batch => batch.map(articleCard));
+  const MORE_FULL_BATCHES = [
+    [
+      articleCard(['Second marriages and blended-family weddings, planned with care','plan','Planning','7 min','3 w ago']),
+      chapterCard({title:'A garden wedding we built ourselves', owner:'Ella Ramos', init:'ER', views:'204', mins:'5 min', when:'3 w ago', open:'Every centerpiece came from Tita Baby’s backyard.'}),
+      articleCard(['Choosing between a resort wedding and a church-and-reception split','vend','Vendors','6 min','4 w ago']),
+      editorialCard({title:'A backyard reception, twelve tables, no regrets', owner:'Joy & Iñigo Santos', init:'JS', place:'Batangas', when:'4 w ago', linked:true}),
+    ],
+    [
+      articleCard(['Choir, string quartet, or DJ: matching music to your ceremony','vend','Vendors','5 min','5 w ago']),
+      chapterCard({title:'The proposal that almost didn’t happen', owner:'Josh Aquino', init:'JA', views:'156', mins:'4 min', when:'5 w ago', video:true}),
+      articleCard(['A month-by-month Filipino wedding planning timeline','plan','Planning','8 min','6 w ago']),
+    ],
+  ];
+  const MORE_TREND_BATCHES = [
+    [
+      chapterCard({title:'The reception my Lola planned in a week', owner:'Ana Villareal', init:'AV', views:'318', mins:'6 min', when:'3 w ago', rank:'5'}),
+      chapterCard({title:'What our videographer caught that we missed', owner:'Ella Ramos', init:'ER', views:'276', mins:'5 min', when:'4 w ago', video:true, rank:'6'}),
+    ],
+    [
+      chapterCard({title:'Our whole barangay showed up uninvited, and we let them', owner:'Ana Villareal', init:'AV', views:'201', mins:'5 min', when:'5 w ago', rank:'7'}),
+    ],
+  ];
+  const SHOPS = [
+    ['VC','Villa Consuelo Gardens','Venues & churches','Tagaytay'],
+    ['SF','Silaw Films','Photo & video','Quezon City'],
+    ['MR','Mesa ni Aling Rosa','Catering & cake','Pampanga'],
+    ['HB','Hiraya Blooms','Styling, flowers & lights','Cebu'],
+    ['TC','Tugtog Collective','Hosts, music & program','Makati'],
+    ['PE','Plana Events Co.','Coordinators & planners','Iloilo'],
+  ];
+
+  /* the open seat — the sparse Shops room recruits supply honestly */
+  const RECRUIT = `<a class="shop-recruit" href="#">
+    <span class="shoplogo">+</span>
+    <span class="shoptxt">
+      <span class="shopname">Your shop belongs here</span>
+      <span class="shopcap">List free · Setnayan takes 0% of every booking</span>
+    </span></a>`;
+
+  document.getElementById('grid-sparse').innerHTML = ARTICLES_SPARSE.map(articleCard).join('');
+  document.getElementById('grid-full').innerHTML   = FULL_FEED.join('');
+  document.getElementById('grid-trend').innerHTML  = TREND.join('');
+  document.getElementById('shopgrid-sparse').innerHTML = SHOPS.slice(0,2).map(shopCard).join('') + RECRUIT;
+  document.getElementById('shopgrid-full').innerHTML   = SHOPS.map(shopCard).join('');
+
+  /* load more — appends in place, no reload, matching the shipped Papic pool
+     "Load more" button (cursor + button, not a page nav). Keeps working across
+     REPEATED clicks — each press consumes the next batch off a queue, same
+     shape as a real cursor being asked for the next page each time. The
+     button only disappears once the queue is genuinely empty, mirroring
+     Papic's own `if (!cursor) return` — a real feed keeps paging until the
+     server says there is nothing left, not after exactly one press. */
+  function wireLoadMore(btnId, gridId, batches){
+    const btn = document.getElementById(btnId);
+    const grid = document.getElementById(gridId);
+    if (!btn || !grid) return;
+    const queue = batches.slice();
+    btn.addEventListener('click', () => {
+      const next = queue.shift();
+      if (!next) { btn.remove(); return; }
+      grid.insertAdjacentHTML('beforeend', next.join(''));
+      if (queue.length === 0) btn.remove(); /* genuinely out of illustrative data */
+    });
+  }
+  wireLoadMore('loadmore-sparse', 'grid-sparse', MORE_ARTICLES_BATCHES);
+  wireLoadMore('loadmore-full',   'grid-full',   MORE_FULL_BATCHES);
+  wireLoadMore('loadmore-trend',  'grid-trend',  MORE_TREND_BATCHES);
+
+  /* stage 3b — signed in: same real article data as "Today (sparse)", same
+     Shops data, just different chrome around it (no anchor, signed-in rail) */
+  document.getElementById('grid-signedin').innerHTML     = ARTICLES_SPARSE.map(articleCard).join('');
+  document.getElementById('shopgrid-signedin').innerHTML = SHOPS.slice(0,2).map(shopCard).join('') + RECRUIT;
+  wireLoadMore('loadmore-signedin', 'grid-signedin', MORE_ARTICLES_BATCHES);
+
+  /* mobile: fuller mix, trimmed */
+  document.getElementById('grid-mobile').innerHTML = FULL_FEED.slice(0,4).join('');
+  document.getElementById('trend-mobile').innerHTML =
+    `<div class="p-trend-note" style="flex:0 0 236px"><b>No story has earned a spot yet.</b>
+      Trending is ranked by real views — never seeded or sold.</div>` + TREND.slice(0,3).join('');
+  document.getElementById('shops-mobile').innerHTML = SHOPS.slice(0,4).map(shopCard).join('') + RECRUIT.replace('class="shop-recruit"','class="shop-recruit" style="flex:0 0 228px"');
+
+  /* anatomy close-ups */
+  document.getElementById('anat-article').innerHTML  = articleCard(['How to set a wedding budget you can actually keep','plan','Planning','6 min','2 d ago']);
+  document.getElementById('anat-chapter').innerHTML  = chapterCard({title:'Kung paano kami umabot sa “Oo”', owner:'Lia Mercado', init:'LM', views:'1,847', mins:'9 min', when:'5 d ago', video:true});
+  document.getElementById('anat-chapter-read').innerHTML = chapterCard({title:'The debut I almost didn’t give my daughter', owner:'Carmela Diaz', init:'CD', views:'312', mins:'6 min', when:'1 w ago', open:'The gown was borrowed, the ballroom was our street, and none of it mattered by the second dance.'});
+  document.getElementById('anat-editorial').innerHTML = editorialCard({title:'Twenty-five years, renewed — our silver vows in Iloilo', owner:'Nita & Ramon Salcedo', init:'NR', place:'Iloilo', when:'1 w ago', linked:false});
+
+  /* ── tabs ── */
+  const VIEWS = [
+    {stage:'stage-desktop', state:'sparse', rail:'expanded',
+     note:'<b>Rev 2 · Today’s production reality.</b> A stranger gets the claim in five seconds (the anchor), the proof one line later (Shops — the real shops plus an open seat for the next supplier), then the Journal-fed New uploads; Trending still states its rule instead of faking a ranking.'},
+    {stage:'stage-desktop', state:'full', rail:'expanded',
+     note:'<b>Rev 2 · The same page, grown in.</b> Same order — anchor, a fuller Shops room, then chapters and real weddings interleaved with articles; Trending fills only with chapters that earned real views, ranked by the mono numbers.'},
+    {stage:'stage-desktop', state:'full', rail:'compact',
+     note:'<b>Compact rail (72px icon strip).</b> The incoming manual control beside the wordmark collapses the rail; icons keep their small captions, the anchor, Shops band and feed all widen. Toggle it live with the ☰ button.'},
+    {stage:'stage-mobile', state:null, rail:null,
+     note:'<b>Mobile.</b> Anchor condensed to one card with a full-width CTA; Shops is the first strip under it; then the one-column feed. The Trending strip leads with the honest note when nothing has earned a spot.'},
+    {stage:'stage-anatomy', state:null, rail:null,
+     note:'<b>The three kinds at close range</b> — one tag, one byline rule, one numbers rule per kind — plus the rev-2 changelog and engineering notes below.'},
+    {stage:'stage-signedin', state:null, rail:null,
+     note:'<b>Signed in, back on /.</b> Owner-confirmed: no anchor for someone who already knows what Setnayan is — straight into Shops → New uploads → Trending. Rail carries My Home, then the free-tool card groups (Planner / Builder / Together — Together’s cards marked “new”, since none of those have a public page yet), then Studio unchanged, just opening the person’s own tools instead of selling. Toggle the compact rail with the ☰ button here too.'},
+  ];
+  const tabs = [...document.querySelectorAll('.tab')];
+  const note = document.getElementById('decknote');
+  const mock = document.getElementById('desktopmock');
+  function go(i){
+    tabs.forEach((t,j)=>t.setAttribute('aria-pressed', String(i===j)));
+    document.querySelectorAll('.stage').forEach(s=>s.classList.remove('on'));
+    document.getElementById(VIEWS[i].stage).classList.add('on');
+    if(VIEWS[i].state) mock.dataset.state = VIEWS[i].state;
+    if(VIEWS[i].rail)  mock.dataset.rail  = VIEWS[i].rail;
+    note.innerHTML = VIEWS[i].note;
+    window.scrollTo({top:0});
+  }
+  tabs.forEach((t,i)=>t.addEventListener('click',()=>go(i)));
+  go(0);
+
+  /* the incoming manual rail control — live toggle on the desktop mock */
+  document.getElementById('railtoggle').addEventListener('click',()=>{
+    mock.dataset.rail = mock.dataset.rail==='compact' ? 'expanded' : 'compact';
+  });
+  /* same toggle, wired separately — the signed-in stage has its own mock element */
+  const signedinMock = document.getElementById('signedinmock');
+  document.getElementById('railtoggle-signedin').addEventListener('click',()=>{
+    signedinMock.dataset.rail = signedinMock.dataset.rail==='compact' ? 'expanded' : 'compact';
+  });
+
+  /* prototype links go nowhere */
+  document.addEventListener('click',e=>{
+    const a = e.target.closest('a[href="#"]'); if(a) e.preventDefault();
+  });
+</script>

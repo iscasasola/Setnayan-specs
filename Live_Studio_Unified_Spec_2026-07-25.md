@@ -6,10 +6,24 @@
 > decision record makes it false in the other direction. These four corrections override it.
 >
 > **1. THE PRICE. `₱2,999 / event` APPEARS 20 TIMES BELOW AND IS WRONG IN BOTH HALVES.**
-> Live is **₱1,500 per EVENT-DAY** (`LIVE_STUDIO`), plus an optional **₱1,500** hosted-channel
-> add-on (`LIVE_STUDIO_HOSTED_CHANNEL`) taking it to ₱3,000 — owner-ruled 2026-09-02, migrations
+> ~~Live is ₱1,500 per EVENT-DAY (`LIVE_STUDIO`), plus an optional ₱1,500 hosted-channel add-on
+> (`LIVE_STUDIO_HOSTED_CHANNEL`) taking it to ₱3,000 — owner-ruled 2026-09-02, migrations
 > `20271192082215` and `20271192528988`. Not "per event": days fold from the first go-live and
-> extra days can be bought.
+> extra days can be bought.~~
+>
+> **1b. SUPERSEDED THE SAME DAY (LS6) — THE EVENT-DAY MODEL ITSELF IS RETIRED.** Owner, later the
+> same 2026-09-02 session, after the ₱1,500/day reprice above: *"live studio is 2500 per event"*,
+> *"unlock once per event, unlimited streams, unlimited video link upload"*, *"i want the mixer
+> and the integration to be one in price."* `LIVE_STUDIO` is now **₱2,500, `billing_period =
+> 'one_time'`** (migration `20271194920190`) — ONE unlock, for the life of the event, no clock,
+> no day-fold, no "add another day." Ownership alone is the entire entitlement test now
+> (`lib/live-studio-window.ts`'s `decideBroadcastWindow`); the never-interrupt rule, the
+> founder/comp/internal/promo metering split, and the anchor-on-first-go-live reasoning this
+> whole document (and § 4f ②/④a) describes are all retired with the clock they protected — there
+> is nothing left to expire or interrupt. `LIVE_STUDIO_HOSTED_CHANNEL` is **deactivated, not
+> repriced** — it was priced to sum with `LIVE_STUDIO` into "₱3,000 total for the hosted option,"
+> that pairing broke, and the owner has not given a replacement figure. **Ownership question left
+> OPEN:** reprice it, fold it into `LIVE_STUDIO`, or retire it outright — none decided.
 > 🔑 **NEVER QUOTE A PRICE FROM THIS DOCUMENT OR ANY OTHER.** `platform_retail_catalog_v2` is
 > admin-managed and is the only number a customer is charged:
 > `select service_code, retail_price_php, billing_period from platform_retail_catalog_v2;`

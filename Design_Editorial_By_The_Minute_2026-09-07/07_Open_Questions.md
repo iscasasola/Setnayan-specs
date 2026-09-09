@@ -44,6 +44,23 @@ a count still the guests' data?
 **If public:** the live day becomes far more compelling to a stranger, at the cost of telling
 them how busy someone else's wedding is.
 
+🔴 **CORRECTED 2026-09-09 (S10) — THIS PARAGRAPH SAID "STILL UNANSWERED" THREE INCHES UNDER THE
+RULING THAT ANSWERED IT.** Q1 **is** ruled — NO — at the top of this file and in `09`'s gate table.
+The stale sentence is the same failure `03` § 2.5 already records happening to *this exact
+question* once before: the VALUE was right everywhere, the sentence beside it was not, "which is
+exactly how a settled owner question gets asked a second time". **Do not re-ask it.**
+S3 shipped (PR #5331) built to that ruling. The answer is a single named constant,
+`COUNTS_ARE_THE_GUESTS_LAYER` in
+`lib/the-guests-layer-is-theirs-until-you-publish.ts`: `true` today (counts and bar heights are the
+guests'), `false` makes them the host's layer and public as the day happens, while the captures
+themselves stay behind the gate either way. **Flipping it is one line and needs no other edit.**
+
+✅ **S10 PUT THE FLOOR PLAN'S HEAT BEHIND THE SAME CONSTANT (2026-09-09).** How many photographs
+came from each table is the same fact the dial draws, asked per seat instead of per minute — so it
+rides this ruling through `drawnHeat()` in the same module. Gating the dial and forgetting the room
+would have published the day's shape on the surface where it is easiest to read: a stranger could
+not see the bars, and could see which table was loudest.
+
 ---
 
 ### Q2 · Does the Kwento naming opt-in match the letters'?

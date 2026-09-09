@@ -20,50 +20,6 @@ without re-verification; treat their status as unknown until re-checked, not as 
 physical rehearsal has actually run once on real hardware. Nothing else on this list blocks
 opening the doors.
 
-> 🚨 **RE-VERIFIED AGAIN 2026-09-08 — PRODUCTION HAS BEEN STUCK ON `main`'s 2026-09-06 06:39
-> commit for over 24 hours, 430+ commits behind, and every deploy attempt since has failed.**
-> This is now the single highest-priority item on this file — nothing merged in the last day is
-> actually live, including the ENCRYPTION_KEY / R2_PUBLIC_URL fixes below. See §0.
-
----
-
-## 🚨 §0 — Production deploy pipeline is broken (new top priority, found 2026-09-08)
-
-**Not caused by anything on this checklist — this started with PR #5287, before any of the R2/
-encryption work below.** Two separate, stacked failures:
-
-1. **A hard Vercel limit, not a bug in the code:** the mood-board Vercel Function grew past
-   Vercel's 250MB uncompressed function-size ceiling (`250.63mb` measured on PR #5287's build).
-   **Fix applied:** `VERCEL_SUPPORT_LARGE_FUNCTIONS` env var set and a redeploy triggered — by
-   the "Production deployment OOM kills" session, not this one.
-2. **A separate, flaky OOM during the build step itself** (V8 heap abort, exit 137) — confirmed
-   non-deterministic: the identical commit built successfully once and OOM'd three other times.
-   [PR #5299](https://github.com/iscasasola/setnayan-platform/pull/5299) raises the build heap
-   7168MB → 12288MB to fix this, but **is still open** (stuck on a slow `typecheck + lint` run,
-   auto-merge armed).
-
-**Both fixes are needed together** — re-verified 2026-09-08: a redeploy with only the
-large-functions flag set (not yet benefiting from #5299's heap raise) OOM'd during the build step
-before it ever reached the function-size check, exit 137, same signature as before.
-
-**Status as of this check:** `setnayan.com` / `www.setnayan.com` are correctly serving the last
-known-good deployment (PR #5288, verified via the Vercel API directly, not just CLI output) — the
-site is *stable*, just *stale*. Every commit merged since 2026-09-06 06:39, including the
-`ENCRYPTION_KEY` and `R2_PUBLIC_URL` fixes below, is sitting on `main` waiting for a deploy that
-actually completes.
-
-**What closes this:** #5299 merges, then one production build needs to actually go green — given
-the flakiness, that may take more than one attempt even after the heap fix lands.
-
-⚠ **Also found, not blocking but worth a look:** two sessions independently ran destructive git
-commands in the *shared* `setnayan-platform` checkout while investigating this (a `vercel --prod`
-from a dirty side-branch that briefly went live in production, and a `git checkout origin/main --
-.` staging 1180 files). Both were caught and reverted with no confirmed lasting damage, but that
-checkout has had two near-misses in two days. Treat it as read-only; do any write/deploy work from
-an isolated worktree.
-
----
-
 > ⚠ **RE-VERIFIED ~2 hours after this file was first written, on the owner's own instinct that
 > some of it was already retired — and he was right.** Eight sessions merged in that window,
 > including the fix for the one item this file called RED. **The lesson is the file itself:**
@@ -79,8 +35,8 @@ an isolated worktree.
 
 | # | Item | Status | What closes it |
 |---|---|---|---|
-| 1 | `ENCRYPTION_KEY` (Vercel prod env) | ✅ **SET 2026-09-07, confirmed by the owner directly in the Vercel dashboard** (a real value, not empty). Generated via `openssl rand -base64 32`, exactly what `apps/web/lib/encryption-core.ts`'s own error message asks for. | Nothing — closed. Takes effect on the next successful deploy (it's read server-side at runtime, no rebuild needed for this one — unlike R2_PUBLIC_URL below). |
-| 2 | `R2_PUBLIC_URL` (Vercel prod env) | ✅ **SET 2026-09-07** to `https://pub-37d64fe618584c2981a88610a55dd439.r2.dev` (R2's built-in public dev URL — deliberately not a custom domain, since `setnayan.com` isn't a Cloudflare zone and binding one would mean migrating DNS for one feature). ⚠ **NOT LIVE YET — blocked by §0.** This value feeds `next.config.ts`'s image allowlist, which is baked in at *build* time, so the fix cannot take effect until a production build actually completes. | Nothing further to configure — just needs §0 resolved, then re-check the homepage shop-logo images actually render. |
+| 1 | `ENCRYPTION_KEY` (Vercel prod env) | 🔴 **Set but EMPTY** — verified via `vercel env pull` today | Paste a real generated key into Vercel → Production. OAuth token decrypt + cron endpoints depend on it. **~5 min.** |
+| 2 | `R2_PUBLIC_URL` (Vercel prod env) | 🔴 **Set but EMPTY — and confirmed BROKEN LIVE.** The homepage's own "SetnaProd" shop card renders a blank box where its logo should be; the `<img>` never loads even though the underlying signed R2 URL itself returns 200. Screenshotted 2026-09-06. | Set to the media bucket's `r2.dev` subdomain or `media.setnayan.com` custom domain in Vercel → Production, then reload the homepage and confirm shop logos actually render (not just that the env var is non-empty). **~15 min + redeploy.** |
 | 3 | Business identity + payment accounts | ✅ **DONE — verified directly in prod DB today.** `business_tin` = `300-003-455-000` (not the old placeholder), BDO + GCash both `enabled = true` with real account numbers and QR codes on file. | Nothing — closed. Retire this line from `OWNER_ACTIONS.md`, it's stale there. |
 | 4 | `dpo@setnayan.com` inbox routing | ⚠️ **Could not verify from here** — this is Cloudflare Email Routing, no API access from this session. | Send a test email to `dpo@setnayan.com` and confirm it lands somewhere a person reads. RA 10173 requires this reachable before collecting PII. |
 | ~~5~~ | ~~Apple Developer Program License Agreement~~ | ✅ **CLOSED — re-verified same day, ~2hrs after this file first said "still unaccepted."** `build-desktop` run [34016548173](https://github.com/iscasasola/setnayan-platform/actions/runs/34016548173) (2026-09-06T06:27:52Z, commit `c2a63956`, after S11) shows real notarization succeeding: `codesign`/`spctl` report `accepted` / `source=Notarized Developer ID`. The S13-PREFLIGHT report (merged 06:48:10Z) said this was still broken — it was already stale by the time it merged. | Nothing — closed. ⚠ One residual gap: the `.dmg` itself reports "does not have a ticket stapled to it" (stapling step didn't run/failed) — Gatekeeper still passes online via ticket lookup, but an offline install would fail. Worth a small fix, not a launch blocker. |
@@ -91,20 +47,18 @@ an isolated worktree.
 ### The 13 carried owner rulings — re-checked against `DECISION_LOG.md` today, 3 already closed
 
 1. ~~Turn on the supplier handshake~~ — ✅ **CLOSED.** Ruled 2026-08-18 ("the supplier must agree for the user's request before it is locked") AND actually flipped: `NEXT_PUBLIC_LOCK_HANDSHAKE_ENABLED="true"` confirmed in prod today.
-2. ~~How much of a couple's private plan may a booked supplier see?~~ — ✅ **RULED 2026-09-07, NOT YET BUILT.** Owner: add the vendor roster (who else is locked, which category) + a finalized/not-finalized flag on the pax count. Guest names, per-guest RSVP/dietary, the seating chart, and the exact budget figure all stay hidden — no change there. Needs a `get_vendor_event_brief` migration; nothing ships from the ruling alone. See `DECISION_LOG.md` 2026-09-07.
-3. ~~May a coordinator who was booked but never promoted announce things to guests?~~ — ✅ **CLOSED 2026-09-07, no code change.** Walked through the actual mechanism (locked → auto-invited on downpayment → must still accept before broadcast access) and asked directly. Owner: **keep the accept-click.** Matches the 2026-08-24 ruling exactly; today's entry just makes the locked-vs-accepted distinction explicit.
-4. ~~Should day-of extras be free during launch?~~ — ✅ **RULED 2026-09-07: yes, free during launch, NOT YET BUILT.** Song desk / script & cues / run-the-floor unlock for every real booked vendor regardless of subscription tier. Needs a launch-window flag or an explicit end date — owner hasn't specified which; ask before building.
+2. How much of a couple's private plan may a booked supplier see? (Blocks the last Event Hub step.) — still open.
+3. May a coordinator who was booked but never promoted announce things to guests? — ⚠ **LIKELY CLOSED, worth one owner confirm.** `DECISION_LOG.md` 2026-08-24 records the owner saying broadcasts are shipped and settled ("yes on the event hub they have an announcement they can type on") — but that entry doesn't speak to the specific "never promoted" edge case this line names. Confirm rather than assume.
+4. Should day-of extras be free during launch? — still open.
 5. Should couples be able to invite off-platform suppliers onto Setnayan? (The invite mechanism already ships — `createManualVendorInvite` — so this may really be "should we promote it," not "should we build it.") — still open.
-6. Do wedding recordings stay on a channel forever, or get wiped when it's reused? — ✅ **Already ruled 2026-08-31 (never wiped) — re-confirmed by the owner 2026-09-07**, no new action. `WHAT_IS_LEFT_2026-08-17.md`'s framing was simply stale; the register never picked up the 08-31 entry. Separately still open, not part of this register: whether to push couples toward their own YouTube channel vs. Setnayan's pool (§4k).
-7. ~~The features page is frozen — two approved documents describe it as two different shapes.~~ — ✅ **RESOLVED 2026-09-07 (layout), NOT YET BUILT.** `Design_Gap_Pass_2026-08-01.md`'s "Comparison" assignment had zero stated rationale; `CLAUDE_DESIGN_05`'s "Editorial" assignment matches the page's actual content and groups it with `/papic`/`/panood`/`/why-setnayan`. Owner followed the recommendation: **editorial**. The naming half was already resolved 2026-09-06 (brand-first). What's left is purely engineering: redesign the still-pre-redesign live page to the current Atelier-Glass editorial pattern.
-8. ~~Guest photo-taking is live while two required privacy sign-offs have never been signed.~~ — ✅ **RULED 2026-09-07: proceed — NOT YET DONE.** Owner authorized closing both gate 0d (file the missing ROPA entry for guest-phone-captured media) and gate 0e (review + confirm the RSVP consent text names guest-phone capture and face-sorted delivery). The ruling authorizes the work; the ROPA row and the consent-copy review still need to actually be produced and confirmed.
+6. Do wedding recordings stay on a channel forever, or get wiped when it's reused? (Specs currently say both.) — still open; no `DECISION_LOG.md` entry found.
+7. The features page is frozen — two approved documents describe it as two different shapes. — still open.
+8. Guest photo-taking is live while two required privacy sign-offs have never been signed. — still open. Related but distinct: 2026-08-18 also ruled camera-seat photo consent (owner/account holder decides), which unblocked the gate the 14 production photos sit behind — worth checking whether that ruling covers this line too before treating it as separately open.
 9. ~~The anti-fraud scoring that can hide a supplier has nobody's name against it.~~ — ✅ **CLOSED 2026-08-18.** Approved and recorded (approver + timestamp written the same day).
 10. The corrected lawyer's brief on keeping a dead relative's memories — no record it was ever sent. — still open.
 11. The photo service has no "what this would otherwise cost you" figure — needs your honest number. — still open.
 12. Should suppliers still see the ~450-cell tier grid, now that each plan states what it adds? — still open.
-13. ~~The public category words (Look, Feast, Documentary, Booths) are internal jargon.~~ — ✅ **Already resolved 2026-08-12** — the register itself was just stale by 5 days when it listed this as open. All fifteen category names were renamed with owner approval (Documentary→Photo & video, Look→Attire hair & make-up, Booths→Booths carts & bars, etc.), live in `lib/taxonomy.ts` today, guarded by a test that keeps the code/DB/wizard copies in sync. Nothing to decide.
-
-**Of the original 13: 5 closed outright, nothing left to build (1, 3, 6, 9, 13) · 4 ruled today but not yet built (2, 4, 7, 8) · 4 still genuinely open (5, 10, 11, 12).**
+13. The public category words (*Look, Feast, Documentary, Booths*) are internal jargon — nobody types those. Rename or keep? — still open.
 
 ---
 
@@ -120,7 +74,6 @@ an isolated worktree.
 | Encoder | ~~`build-desktop` clean run~~ | ✅ **SUCCEEDED** — see the Apple-agreement row above. One more dispatch on the current head (post-S12) as a final confirmation before scheduling S13 would be cheap and worthwhile, since this success predates the S12 merge by ~30 min. |
 | Desktop | Windows `.msi` | Still open — built, but never run on an actual Windows machine. Needs one verification pass before calling it "working" the way macOS now is. |
 | iOS | App Store submission | Still open. Build is ready and already carries the June rejection's fixes. Needs ~1hr of your input in App Store Connect (App Privacy answers, demo account, deletion recording), then submit → 24–48h review. Nothing engineering-side is left. |
-| Security | OAuth refresh tokens stored in plaintext | **Found 2026-09-07, nobody assigned yet.** The YouTube, Google Drive, and Photo Delivery OAuth callback routes (`apps/web/app/api/oauth/{youtube,drive,photo-delivery}/callback/route.ts`) all write `refresh_token` to `oauth_grants` with no `encryptToken()` call — unlike the three sites `apps/web/lib/secrets/reencrypt.ts` documents as the actual encrypted set. 2 YouTube + 3 pooled-channel grants in prod currently hold live plaintext refresh tokens. `ENCRYPTION_KEY` being empty was never actually the risk here. |
 
 ---
 

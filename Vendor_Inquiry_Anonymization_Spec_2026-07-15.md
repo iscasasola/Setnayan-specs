@@ -1,5 +1,35 @@
 # Vendor Inquiry Anonymization — until Accept · 2026-07-15
 
+> # ⛔ SUPERSEDED 2026-09-08 — THIS SPEC IS RETIRED, ITS CODE IS DELETED
+>
+> **Owner ruling 2026-09-08, verbatim: *"we do not need to hide anything, since
+> no more tokens."*** A supplier now sees the customer on any thread their org
+> owns, before and after Accept. `lib/inquiry-mask.ts`, `maskVendorThreadEvent`,
+> the customer rail's `masked` branch and the placeholder on six surfaces are
+> **deleted from the tree**, not disabled. See the 2026-09-08 row in
+> `DECISION_LOG.md`.
+>
+> 🔑 **WHY EVERY ARGUMENT BELOW EXPIRED AT ONCE.** Read the "Why it fits the
+> locks" section: each bullet is anchored to the token wallet — *"the token
+> gates the doorway"*, *"Flat 1-token burn on Accept … unchanged"*, *"identity
+> is what the 1-token unlock buys"*. **The wallet was RETIRED on 2026-05-11,
+> two months BEFORE this spec was written.** It shipped reasoning from a
+> mechanism that no longer existed, and nothing in the review caught it, because
+> every individual sentence was internally consistent.
+>
+> ⚠ **THE RA-10173 CLAIM INVERTED TOO.** This spec called itself a "positive
+> privacy delta". The disclosure it prevented was to a supplier the couple had
+> **already chosen to write to** — a `chat_threads` row exists for no other
+> reason — so it was withholding a name from the one party the couple had
+> deliberately contacted.
+>
+> 🪤 **AND THE MASK WAS NOT THE BUG THE OWNER HIT.** On accepting the platform's
+> first real inquiry he still saw "Couple" / "Not set yet". A vendor holds no
+> `events` RLS — measured on the ACCEPTED thread in prod — so every surface's
+> *revealed* branch read a null `display_name` and rendered the fallback anyway.
+> **Deleting this spec's code changed nothing on screen by itself.** Kept for
+> that lesson.
+
 > **Author:** Fable (design lead) · **Owner directive (2026-07-15):** "anonymize-inquiries-until-accept on vendor surfaces" (part of the glass-rollout instruction). Functional change — NOT skin. Implementer: Opus, its own PR (Glass PR-6b), separate from the vendor reskin.
 
 ## The model (one sentence)

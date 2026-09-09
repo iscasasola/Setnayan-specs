@@ -142,6 +142,48 @@ Live path `/dashboard/[eventId]/vendors` (BUDGET_BUILD ON in prod): single-scrol
    the bench refilters to that team's window; clear candidates → the window reopens to
    locked-only. One team, one lens.
 
+### 8a · A lock ANNOUNCES what it closes (owner 2026-09-06) — SHIPPED
+
+> *"of course adjustments on the saved build will change when a vendor is locked, and announce that
+> the following builds are no longer possible for you, and these services are no longer possible
+> once you lock this vendor."* Asked which locks should warn, the owner chose **every lock that
+> kills something.** Silent when a lock costs nothing.
+
+Both consequences were already real and already computed by the machinery above — they were simply
+never said before the couple committed:
+
+* §8.2 Load already drops picks in a locked category (`planPicksToApply`), so `isPlanLoadable` goes
+  false once every pick a saved plan holds sits in a locked group. The Load button greyed out and
+  named no cause.
+* §6's shared-date window already sinks bench vendors behind *"Doesn't fit your build"*, and a lock
+  narrows that window — so a lock could sink a vendor the couple was actively considering, one
+  screen away from the press.
+
+`finalizeVendor` now returns the cost **with its gate result**, before any write: the existing
+`date_will_lock` carries the lists (a lock that sets the date *and* closes options states both in
+one dialog), and a new `lock_will_cost` fires for a lock that closes options without setting the
+date. The couple sees the **same** pre-lock confirm — extended, never a second modal.
+
+Rules, each one a decision:
+
+* **Silent when it costs nothing.** `computeLockImpact().isEmpty` is the gate. A confirm that always
+  fires is clicked through unread, and then the one that mattered is too.
+* **Never invents a casualty.** The services half is the DIFF of two verdict sets computed with §6's
+  own `resolveBuildDateWindow` + `classifyAgainstBuildWindow` — before, and with the candidate
+  folded in as locked. It cannot disagree with the bench, and it inherits §6's silences (nothing for
+  an anchored/open window, nothing for a vendor with no calendar signal, nothing at all when the
+  build's own window is already empty — that conflict is the couple's, not a vendor's).
+* **A plan already dead before this lock is not its casualty.**
+* **A handshake ask announces nothing.** §7's request writes `lock_request_state='pending'`, not a
+  locked status — nothing is settled yet, so warning at request time would be the same error §6.1
+  keeps out of the date gate.
+* **Copy bans, both already tested:** never that a day is *held* or *reserved* (§6 rule 3 — a lock
+  sets the EVENT's date, it reserves nothing until a vendor accepts payment), and never that a saved
+  plan is *deleted* (a lock makes it un-loadable; the row survives and returns if the lock does).
+
+Gated on `isExploreReplanEnabled()` as a **correctness** gate: with the flag off, Load ignores locks
+entirely and §6 never runs, so a lock genuinely costs nothing to announce.
+
 ## 9 · Add-manually (owner spotted it missing from the prototype — it's SHIPPED; keep it)
 Every rail keeps its **"✎ Add manually"** card beside Find/Add-another (and in the empty state) —
 the shipped `NewManualVendorModal` (two-step submit auto-creates the **claim-QR invite** the
@@ -1093,13 +1135,38 @@ Budget currently has **no sidebar doorway** (removed 2026-07-10 as "redundant" o
 ### 18.5 · Honesty rules (binding on every slice in this section)
 
 1. **No invented figures.** Every peso traces to a row a human entered or a vendor published. The only derived numbers permitted are: benchmark medians from real `vendor_services` prices, the paperwork ladder, and the pax scale — all three carry a source.
-2. **Estimates are marked, always.** Any figure not from `amount_php`, `event_vendor_payments`, or a paid `order` renders with the estimate mark and the words "estimate" or "typical" in the same line. Never bold, never in a headline total.
-3. **Estimates never enter Committed or Still owed.** They live in a separate `Projected` figure. A couple must never be told they owe money nobody has agreed.
+2. **Estimates are marked, always.** Any figure not from `amount_php`, `event_vendor_payments`, or a paid `order` renders with the estimate mark and the words "estimate" or "typical" in the same line. Never bold, never in a headline total. *(Read with rule 3's 2026-09-02 narrowing: the rule governs estimates that are rendered — on `/budget` none is, so the obligation is vacuous there rather than waived.)*
+3. **Estimates never enter Committed or Still owed.** They live in a separate `Projected` figure. A couple must never be told they owe money nobody has agreed. ⚠ **NARROWED 2026-09-02 (owner ruling, BA2) — `/dashboard/[eventId]/budget` no longer renders an estimate at all.** Owner, verbatim: *"no quotes here. we only add the finalized budgets. on the marketplace, this is where they can add and subtract the other vendors to help them find the better option for them."* This rule's *premise* was that un-booked vendors are LISTED on that page: ₱0 committed beside an ₱80,000 vendor in the couple's own list is a contradiction, so the ₱80,000 had to be named (which is what BUD-2's *"₱X more is still an estimate"* hint did). BA2 removes the vendor from that page — `vendorsToItemize` is `contracted`+ only again, and `BudgetStripMoney` has no estimate field — so the contradiction dissolves and there is nothing left to mark. **The rule still binds everywhere an estimate IS rendered** (the Merkado and its lens, the checklist), and `resolveEventMoney` still computes `estimated` / `MoneyBucket.estimatedPhp` unchanged. Guard: `apps/web/lib/no-quotes-on-the-budget-page.test.ts`.
 4. **"Over budget" is said once, in one place, with one meaning:** *what you have actually agreed to exceeds your target.* Only the resolver may say it. Shortlist ranges, slider deviations and benchmark projections may say "this build would run over" or "typically more than you set aside" — never "over budget".
-5. **Unknown is printed as unknown.** A category with no benchmark and no vendor median shows "no typical price yet", not ₱0. **Thirteen of 27** active leaves are unseeded — including Ceremony Venue, a Tier-2 category — and they currently cost ₱0 in the buffer, silently. *(Re-counted against prod 2026-07-27 during BUD-1: `budget_leaf_benchmarks WHERE is_active` = 27 rows, 14 with a `benchmark_php`. The earlier "12 of 26" is superseded; the Ceremony Venue claim is confirmed.)*
+5. **Unknown is printed as unknown.** A category with no benchmark and no vendor median shows "no typical price yet", not ₱0. ⚠ **ENFORCED STRUCTURALLY 2026-09-03 (BA3), not remembered.** `apps/web/lib/budget-ledger.ts`'s `plannedFrom()` folds a 0 — from either plan source — to `null`, so **a ₱0 Planned figure is not representable** on the per-category ledger; the row renders "—" and says "no typical price yet". Re-measured against prod the same day: still 13 of 27 active leaves unseeded, and money HAS landed in three of them on event `947e7bab…` (Cake ₱30,000 · Cocktail Booths ₱45,000 · Photobooth ₱22,000), so this is a live case, not a hypothetical. Guard: `apps/web/app/dashboard/[eventId]/budget/the-plan-meets-the-ledger.test.ts`. **Thirteen of 27** active leaves are unseeded — including Ceremony Venue, a Tier-2 category — and they currently cost ₱0 in the buffer, silently. *(Re-counted against prod 2026-07-27 during BUD-1: `budget_leaf_benchmarks WHERE is_active` = 27 rows, 14 with a `benchmark_php`. The earlier "12 of 26" is superseded; the Ceremony Venue claim is confirmed.)*
 6. **The totals must reconcile on screen.** `Committed + Overpaid = Paid + Still owed` — equivalently `Committed = Paid + Still owed − Overpaid`. If a vendor is overpaid, name it; never let three headline figures quietly stop adding up. ⚠ *Sign corrected 2026-07-27 (BUD-1). This rule originally read `Committed = Paid + Still owed + Overpaid`, which cannot hold: committed ₱100,000 against ₱120,000 paid would claim 100 = 120 + 0 + 20. Same three figures, same intent; the form above is the one that reconciles for every sign of every input, and is what `checkMoneyInvariant()` asserts.*
 7. **"Live" means live.** The badge only appears when the subscription covers every table feeding the number under it.
 8. **Nothing is deleted silently.** Removing a vendor must not vaporize their payment history without telling the couple what it is about to erase.
+
+
+#### 18.5a · The four column names (owner-locked) + where "Planned" comes from — SHIPPED 2026-09-03 (BA3)
+
+The per-category ledger on `/dashboard/[eventId]/budget` prints exactly four columns, in this order, unabbreviated. The owner misread the earlier labels; that is why they read this way.
+
+| Column | Means |
+|---|---|
+| **Planned** | What you budgeted |
+| **Agreed** | What you signed for |
+| **Paid** | Handed over so far |
+| **Owed** | Agreed minus paid |
+
+Spelled ONCE, in `BUDGET_LEDGER_COLUMNS` (`apps/web/lib/budget-ledger.ts`); the table reads them from there and spells none of its own. A guard fails CI if any is abbreviated or the order changes.
+
+**"Planned" has two sources, in order, and the row says which.**
+
+1. `'saved'` — the couple's own latest `budget_allocation_decisions` snapshot (`final_amount_php`). Always wins: it is literally what they budgeted. BA3 is the **first read-back** of that table from the couple's side; it had been write-only since it shipped.
+2. `'suggested'` — `computeBudgetAllocation` with no pins, i.e. the same number the "Suggested budget split" prints higher up the page. One function called twice, not two mechanisms.
+
+⚠ **Naming the source is mandatory, not cosmetic.** `budget_allocation_decisions` had **0 rows in production** on 2026-09-03 — nobody has ever saved a plan — so today *every* Planned figure is source 2, and printing a suggestion under a column headed "what you budgeted" without saying so puts a number in the couple's mouth. Same obligation as `AllocationInputs.budgetSource` (`'stated' | 'band' | null`).
+
+**Headroom that is banked vs headroom that is merely unspent.** BA3 feeds `MoneyBucket.committedPhp` to `computeBudgetOverspend` as `actualPhp` (replacing the couple's slider), which changes what "headroom" means: a category the couple has finished booking under its plan has **banked** that money, while a category they have not booked at all shows its **whole plan** as headroom — which is not savings and mostly disappears on booking. Both are `planned − agreed`; only one is safe to spend. The absorption disclosure names the unbanked sources rather than promising cover that does not exist.
+
+**Not changed by BA3:** the allocation planner's own "over the suggested split" banner. It compares the couple's pins to the recommendation — a statement about the plan being drafted, not about signed money — and its copy already names its own subject, so it is not a second voice on rule 4's "over budget".
 
 ---
 

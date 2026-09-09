@@ -10,7 +10,7 @@ greppable symbol, never a line number.
 | The story needs | It reads |
 |---|---|
 | A capture and its time | `papic_photos` · `papic_guest_captures` · `vendor_papic_captures` · `pabati_clips` — all carry `captured_at TIMESTAMPTZ` ⚠ *but see §2.1* |
-| Guest → table | `papic_guest_captures.guest_id` → `event_seat_assignments(event_id, guest_id UNIQUE)` → `event_tables.table_label / x_pos / y_pos` |
+| Guest → table | 🔴 **CORRECTED 2026-09-09 (S10) — THIS ROW NAMED THE ONE PATH WITH NO ROWS IN IT.** It said `papic_guest_captures.guest_id` → `event_seat_assignments` → `event_tables`. Measured against production: **`papic_guest_captures` holds 0 rows.** Every capture in the database is a `papic_photos` row — which is also the only table `story_dial_bucket_counts` counts, so building the lens on the documented path would have produced a heat counted from a *different population than the bars above it* (two counts of one thing on one page) **and** a plan that can never light. The links that exist on `papic_photos` are `paparazzi_seat_id` → `paparazzi_seats.guest_id` (a roll camera belongs to one guest) and `captured_by_person_id` → `guests.person_id`; either then reaches `event_seat_assignments(event_id, guest_id UNIQUE)` → `event_tables.table_label / x_pos / y_pos`. ⚠ **Neither resolves to a table in prod today**: 14 photographs, 14 with a person, **0** whose person is a guest of that event, **0** seats carrying a guest — the one published story is a `date` with no guest list. Built and guarded in S10; nothing real to light yet. |
 | Supplier → the moment they made | `event_schedule_blocks.responsible_vendor_ids UUID[]` → `event_vendors.vendor_id`; `actual_start_at` / `actual_end_at` / `run_state` are the tapper's real instants; `lib/moments-from-the-schedule.ts` labels captures by block window |
 | The saved theme | `events.role_palette` (JSONB; `reception` = five majors) · `moodboard_theme_name` · `moodboard_theme_description` · `mood_board_updated_at`; per-pillar snapshots in `event_moodboard_saves.palette_snapshot` |
 | Road dates | theme: `mood_board_updated_at` · vendor booked: `event_vendors.contract_signed_at` / `status` / `updated_at` · pre-event captures: `captured_at < event_date` · save-the-date + invitation: the site lifecycle |
@@ -68,9 +68,35 @@ see `07` Q5. Deliberately left filtering weddings, with that reason recorded in
 `WEDDING_ONLY_BY_DESIGN`.
 
 ### 2.5 · No per-layer visibility
-`event_editorial.status` is **one audience for the whole story**. The three-layer model needs the
-guest layer gated separately. **Fix:** a per-layer flag; guest layer maps to the `event` audience
-until `published`. Exclusion server-side, on the viewer classes `/[slug]` already resolves.
+✅ **RESOLVED 2026-09-09 · PR #5331 (S3 / 08 step 0.3) — and it needed NO COLUMN.**
+🛑 **S4: DO NOT ADD A PER-LAYER FLAG. There is nothing left to add here.**
+
+`lib/the-guests-layer-is-theirs-until-you-publish.ts` gates the three layers server-side:
+`storyLayerAdmits(layer, status, viewer)`, with the guests' layer mapped to the `event` audience
+until `published` and the edition left on `status`. The mapping is **derived, not stored** — it is
+total, nobody has asked for a story whose guest layer opens earlier or later than the rule, and a
+column would only add a second opinion that can disagree with `status`, plus a backfill. (RULE 0:
+a flag/filter flip beats new schema.)
+
+`redactStoryLayers(data, viewer)` takes the withheld layers **out of the payload** — captures,
+Kwento, answers, letters, the wall, the day chapters, the cover's counts and the locked close —
+before any component is handed them; monotone by construction, like `consent-veto.ts`. Wired into
+all three public readers (`EditorialContent`, `/[slug]/print`, and the gallery-anchor probe in
+`site-body.tsx`). `drawnBins()` is the only source of bar heights, and a bin after "now" has no
+height **for everyone, the host included**.
+
+🔴 **A live leak was found and closed on the way:** the gallery-anchor probe counted photo blocks
+~120 lines before the story rendered, and that count decided whether a **Gallery tab appeared in
+the menu** — so a stranger before publish was told the guests had been shooting.
+
+✅ **Q1 IS RULED — NO, and 09's gate table has said so since 2026-09-09. DO NOT RE-ASK IT.**
+Built to that ruling (no counts, flat baseline) behind one named constant,
+`COUNTS_ARE_THE_GUESTS_LAYER` — flipping it would be that one line.
+🔴 **This paragraph said "Q1 is NOT answered" until 2026-09-09 (S9), and so did the constant's
+own docblock in the shipped file.** The VALUE was right in both places; the sentence beside it
+was stale — which is exactly how a settled owner question gets asked a second time.
+And `galleryPhotos`/`essayPhotos` merge the couple's own uploads with Papic captures before the
+redaction sees them, so both are taken; separating them needs provenance carried at load.
 
 ### 2.6 · No story cover
 The `/realstories` card inherits the living hero (`landing_page_hero_image_url` / `hero_video_r2_key`).
@@ -86,9 +112,38 @@ NULL` — an actor leaving keeps the record). Written only on the host's go-sign
 
 ### Bonus · one inbox over four tables
 The desk needs a single read across `photo_messages`, `guest_columns`,
-`papic_mission_completions` and `editorial_vendor_media`, each with its own status column. **Nothing
-new to store** — a view or a loader that unions them with `{source, id, status, arrived_at,
-lands_in}`.
+`papic_mission_completions` and `editorial_vendor_media`, unioned as
+`{source, id, status, arrived_at, lands_in}`.
+
+> 🔴 **CORRECTED 2026-09-09 (S5, PR #5338) — "each with its own status column" and "nothing new to
+> store" WERE BOTH FALSE, and false in the dangerous direction.** Measured against production, only
+> **two** of the four carried a host decision:
+>
+> | Source | Host decision | What was actually there |
+> |---|---|---|
+> | `photo_messages` | ✅ `status` | `pending·approved·rejected·user_deleted` |
+> | `guest_columns` | ✅ `status` | the same four |
+> | `papic_mission_completions` | ❌ **none** | no status, no `moderation_state`, no hidden flag |
+> | `editorial_vendor_media` | ❌ **none** | only `hidden_by_couple`, `DEFAULT FALSE` |
+>
+> So two of the four things the desk exists to decide had **nowhere to record a decision**, and they
+> failed in OPPOSITE directions: a **challenge answer went public the moment the GUEST consented,
+> with the host never asked at all**, and a **supplier's frame published itself unless hidden** —
+> opt-OUT, the inverse of the desk's own promise (*"nothing a supplier sends appears until you
+> accept it"*). ⚠ `hidden_by_couple` was additionally a **gate with no handle**: three readers, zero
+> writers, already recorded in `gates-have-handles.baseline.txt`. The couple's "hide this from my
+> story" control had never existed.
+>
+> **S5 therefore SHIPPED A MIGRATION** (`20271214724787`) adding `status TEXT NOT NULL DEFAULT
+> 'pending'` to both, with the host's decision required by the public readers. Both are born
+> pending, so both sources moved from *published unless stopped* to *published only if chosen* —
+> monotone, it can only ever show less. Safe by arithmetic: all four tables held **0 rows**.
+>
+> 🪤 **And a table-level grant audit lied on the way.** `role_table_grants` reports `authenticated`
+> holding **no UPDATE** on `editorial_vendor_media`; the grant is held **per column, on all 14**, so
+> the table reads as closed while it is open (the same shape as the Papic INSERT hole where
+> `has_table_privilege` answered FALSE over 39 column grants). **Read `column_privileges`, never
+> `role_table_grants`, when the claim is about what a caller may write.**
 
 ---
 
@@ -98,7 +153,14 @@ lands_in}`.
 `events.event_date`..`events.event_end_date` (Manila days), via new `lib/story-day-window.ts`; a
 new `story_dial_bucket_counts` RPC serves zero-filled per-bucket COUNTs for future bar heights.
 ⚠ Still open: presigning only the reader's opened bin (no per-bin API route exists — needs the
-Phase 2 dial UI, S9) and the RA 10173 consent veto on the RPC's counts (08 step 0.3 / S3).
+Phase 2 dial UI, S9). 🔴 **CORRECTED 2026-09-09 (S9, PR #5342) — THE CONSENT VETO DID *NOT* LAND IN PR #5331, AND
+THIS LINE SENT A READER PAST THE DEFECT.** `drawnBins()` applies the LAYER and the
+has-it-happened-yet check; it has no veto in it, and the register's own S9 row says so.
+Route the per-bucket counts through `drawnBins()` — that part is right — but the veto is a
+SEPARATE subtraction, and it is exact rather than blanket: a vetoed capture with a baked
+blurred stand-in IS on the page and keeps its height; only the ones `publicKeyForCapture`
+resolves to null come off, and an unresolvable veto flattens every bar. ✅ Built in
+`spine-data.ts` + `subtractWithheldFromBins` (PR #5342).
 
 `data.ts` reads the day timeline as
 `.from('papic_photos').order('captured_at', {ascending:true}).limit(EDITORIAL_TIMELINE_PHOTO_CAP)`

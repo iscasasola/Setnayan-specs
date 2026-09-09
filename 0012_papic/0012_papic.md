@@ -19,6 +19,7 @@
 > ```
 >
 > ### Newer material still live in this folder
+> - [Vendor_Portfolio_Credits_2026-09-05.md](Vendor_Portfolio_Credits_2026-09-05.md) — a supplier's own Papic credits: 5% of the booking fee (cap 1,000, no floor) + the ₱500 pack (100 credits since 2026-09-06), landed on approval; replaces the 2026-08-26 ₱5/point allowance
 > - [0012_Camera_Move_Integration_Handoff_2026-06-29.md](0012_Camera_Move_Integration_Handoff_2026-06-29.md)
 > - [0012_papic_compatible_cameras.md](0012_papic_compatible_cameras.md)
 > - [0012_papic_offline_note.md](0012_papic_offline_note.md)

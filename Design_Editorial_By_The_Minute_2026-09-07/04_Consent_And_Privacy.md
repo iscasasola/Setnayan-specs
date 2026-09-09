@@ -18,6 +18,7 @@ Three of the review's blockers were here. These are not guidelines.
 | **8** | **The guests' layer is invisible to a stranger before publish** — including counts, bar heights, the minute sheet and the index. | **[review, blocker]** |
 | **9** | **A guest can act on their own consent from the story.** "Hide it, or ask to be unnamed" — and it comes down everywhere, including the next print run. | Before this the host had every switch and the guest had none. |
 | **10** | **The blur is all faces, not one.** A table of ten with one opt-out renders as ten blurred faces. Owner chose this knowingly 2026-08-18. Do not "improve" it into a partial blur without re-asking. | |
+| **11** | **A count small enough to be a verdict is withheld** — a table with one or two photographs shows no count at all. ⚠ Its reason is **not** privacy (see `01` §5): the owner ruled it because *"this will subconsciously tell them they did not create enough memories for the story."* Recorded here because it *looks* like a privacy floor and will be mistaken for one — it must never be relaxed on the grounds that nobody can be identified. | Owner ruling 2026-09-09. |
 
 ## 2 · Two DPO questions — ✅ BOTH RULED 2026-09-09. Do not re-ask, do not re-decide in code.
 

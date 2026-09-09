@@ -52,5 +52,17 @@ The recommended first move after accept is **quote-first**: land on the brief wi
 
 ## Open decisions (owner)
 
-- **Privacy default** for the vendor brief that precedes this (mood board + locked vendors: booked-only vs. visible at inquiry). Recommendation: booked-only for mood board + locked vendors; AI-status + request basics visible at inquiry.
+- ~~**Privacy default** for the vendor brief that precedes this (mood board + locked vendors: booked-only vs. visible at inquiry). Recommendation: booked-only for mood board + locked vendors; AI-status + request basics visible at inquiry.~~
+  ✅ **RESOLVED 2026-09-08 — SPLIT, AND THE LOCKED-VENDOR HALF WENT AGAINST THIS RECOMMENDATION.**
+  Owner, verbatim: *"if they have lock specific vendors as well for that event, we can share what
+  categories is already locked."* An inquiring supplier now sees **which categories are locked**,
+  which this line recommended holding to booked-only.
+  🔑 **The grant is the CATEGORY half only.** Vendor NAMES stay booked-only — that is
+  `vendor_roster` in `get_vendor_event_brief` (owner ruling 2026-09-07 item ①, *"all locked vendors
+  and category"*, BOOKED STAGE ONLY). "Venue and Catering are taken" says the couple is committing
+  real money and which slots are open; "Venue is taken by <rival>" names a competitor to a supplier
+  who has not committed to anything and can still walk away.
+  ⚠ **The MOOD BOARD half of this line is untouched and remains booked-only** — it was never
+  raised, so the recommendation still stands for it. Same for venue address, timeline, seat plan
+  and dietary, which rest on *"only an agreement earns those"*.
 - Whether installments store as **fixed peso** (as the prototype defaults) or **percent** (`amount_kind`) — both are supported; peso is more intuitive for the pay-to-zero model.
