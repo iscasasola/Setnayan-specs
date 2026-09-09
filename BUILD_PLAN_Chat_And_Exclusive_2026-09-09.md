@@ -116,6 +116,26 @@ Gold-on-gold below the floor in two shipped places (`● N locked` ≈ 4.25, *In
 ### B5 · "Check inquiry" → "Open conversation" *(relabel only, after B2)*
 Only once the row above says what is waiting; the label alone is not the improvement.
 
+### B6 · The sort reaches row 2 — bottom tier only ✅ **SHIPPED** [#5351](https://github.com/iscasasola/setnayan-platform/pull/5351)
+The **Sort by** bar sat above TWO rows and governed ONE. Owner ruling 2026-09-09:
+*"bottom tier only."* The couple's lens now orders the **tail** of the owner-locked ladder,
+joining the smart-sort price re-rank already confined there. **Nothing paid moves by
+algorithm** — what Setnayan sells is the default position.
+
+🔑 **Enforced by construction:** `orderInlineMoreRow` writes the ordered tail back into the
+SAME indices it took it from, so a protected row cannot move. ⚠ The tail is **not a
+contiguous suffix** — the service-date down-rank parks busy vendors at the very end across
+tier boundaries, so "sort the last N" would drag a paid card around.
+
+✍ **And the row says what it is ordered by**, built from the tiers actually present and
+from whether the sort could discriminate at all — so a row whose sort changed nothing says
+so rather than claiming otherwise.
+
+⏭ **B7 · drag to rearrange** (S8) is the other half of the same ruling and depends on this:
+long-press, pins beat sort, *"Your order"* + Reset, keyboard move-left/right, stored on the
+CELEBRATION so every host sees one order. **Still open there:** per CATEGORY or across the
+whole bench — build per category unless the owner says otherwise.
+
 ---
 
 ## STREAM C · THE SETNAYAN EXCLUSIVE
@@ -166,7 +186,7 @@ off the platform.
 | G3 | Measured cost of the **Mood Board pack** and **Live Studio** — the only two on the shelf that cost per unit, and neither has a figure | C1 |
 | G4 | A **supplier price** for Event Hub Pro · Live Studio · Mood Board pack | C4 |
 | G5 | Is **Live Studio** once-per-event or per event-day? | C2 |
-| G6 | `NEXT_PUBLIC_EXPLORE_REPLAN_ENABLED` — the whole bench sits behind it and its value is not readable from a session | B1–B5 |
+| ~~G6~~ | ✅ **ANSWERED — it is `true` in production**, re-measured independently 2026-09-09 during B6 (`vercel env pull` into the scratchpad, grepped, deleted). `NEXT_PUBLIC_SMART_SORT_ENABLED` is **`true`** as well, so the shipped tail price re-rank is live too. 🔑 **The value WAS readable from a session all along** — `vercel env pull` returns `NEXT_PUBLIC_*` in plaintext; `vercel env ls` shows only "Encrypted", which is what made it look unreadable. B1–B6 unblocked. | — |
 
 ⚠ **The Exclusive cannot be PROVEN until the booking fee charges anybody.** It is
 flag-dark and prod holds zero real shop bookings. Build it; test it with the fee's own
@@ -177,7 +197,7 @@ first live round.
 ## ORDER
 
 **Now, unblocked:** A5 · A6 · B0 · B1 · B4
-**Then:** A7 → A8 · B2 → B3 → B5 · A9 · A10
+**Then:** A7 → A8 · B2 → B3 → B5 · A9 · A10 · B6 ✅ → B7
 **Behind gates:** C1–C5
 
 🔑 **B0 before any other bench session.** The guard that stops a feature being lost is
