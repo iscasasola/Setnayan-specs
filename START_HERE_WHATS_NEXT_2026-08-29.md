@@ -70,18 +70,27 @@ Before starting either, run `gh pr list --state open` and check nobody is holdin
 then [`WHATS_NEXT_Papic_Build_Order_2026-08-29.md`](WHATS_NEXT_Papic_Build_Order_2026-08-29.md).
 It assumes no memory files exist, inlines every house rule, and pre-answers RULE 0 per item.
 
-| # | What | Size | State (items 1–2 verified 2026-09-09) |
-|---|---|---|---|
-| 1 | The browser stops enforcing a limit that does not exist | days | ✅ MERGED #5002 |
-| 2 | Say what is already true, on the promotion page | days | ✅ MERGED #5003 · #5007 |
-| **3** | **Shots per guest** (+ sponsors default to a bigger share) | several sessions | open |
-| 4 | Timed challenges reach the wall | 1 session | open |
-| 5 | Challenges hang on the ceremony sequence | small | open |
-| 6 | The guest chooses per audience | small | open |
-| 7 | The year — one pot across a linked group of celebrations | project | open |
+> 🔴 **CORRECTED AGAIN, 2026-09-09, LATER THE SAME DAY — AND THE MISTAKE IS WORTH MORE THAN THE
+> TABLE.** When this section was rewritten a few hours earlier, the rows marked ✅ were verified
+> with `gh pr view` and the rows marked **open were copied forward untouched.** That is exactly
+> backwards: a "done" claim that is wrong costs a re-read, a **"still open" claim that is wrong
+> costs a session rebuilding shipped work** — the failure this whole file exists to prevent.
+> Measured against the LIVE DATABASE and `origin/main`, **items 3, 4 and 5 had all shipped.**
+>
+> 🔑 **VERIFY THE ROWS THAT SAY "OPEN" HARDEST.** They are the ones that send somebody to work.
 
-⇒ **AS OF 2026-09-09, BOTH STREAM A LANES ARE HELD** — the page by S11, the desk by S8 (#5364).
-Stream B is therefore the free pick right now.
+| # | What | State — measured 2026-09-09 against the live DB and `origin/main` |
+|---|---|---|
+| 1 | The browser stops enforcing a limit that does not exist | ✅ MERGED #5002 |
+| 2 | Say what is already true, on the promotion page | ✅ MERGED #5003 · #5007 |
+| **3** | **Shots per guest** (+ sponsors default to a bigger share) | ✅ **SHIPPED — all three tiers live.** `papic_guest_spend_ceiling()` in production implements tier 1 (named guests, `papic_guest_spend_ceilings`), tier 2 (the couple's figure *or* a derived equal share), tier 3 (the release button **and** the automatic late release, derived not scheduled). `papic_record_guest_capture` meters `SUM(points_cost)`, yields the pool gate only when no ceiling is set, and carries an owner ruling dated **2026-08-31** — *after* this handoff was written. The couple's control ships (`guest-allotment-picker.tsx`, `guest-allotments-choice.tsx`), the guest's low state and honest refusal ship (`capReason === 'guest_spend_ceiling'`), and the sponsor default ships (`AllotmentRole`). |
+| **4** | Timed challenges reach the wall | ✅ **SHIPPED.** `lib/papic-challenge-clock.ts` + `papic_challenge_is_open()` in the database, on an owner ruling dated **2026-09-01**: the window is RELATIVE, opens when armed, and **expiry closes the prompt, never the shutter.** |
+| **5** | Challenges hang on the ceremony sequence | ✅ **SHIPPED.** `lib/papic-ceremony-sequence.ts` (+ its test) joins the prompt library to `KWENTO_MOMENTS`, with a run-of-show screen. |
+| **6** | **The guest chooses per audience** | ⚠ **UNVERIFIED — CHECK BEFORE STARTING.** Face-choice work exists (`lib/couple-face-choice.ts`, `face-choice-readable.test.ts`) but that is the COUPLE's choice; whether the GUEST can choose per audience was not established. **Measure it before writing anything.** |
+| **7** | The year — one pot across a linked group | 🔶 **PRIMITIVE ONLY (7a).** `20271189765490_event_cluster_primitive.sql` adds `event_clusters` + `event_cluster_members`. **No screen, no shared pot.** The project is open. |
+
+⇒ **The real open work in Stream B is item 7 (a project), and item 6 once somebody measures it.**
+Items 3–5 are done; do not start them.
 
 🔑 **Stream B touches none of Stream A's files**, so it is the safe pick when both story lanes are
 held — which, on 2026-09-09, they usually were.
@@ -242,6 +251,6 @@ one of his own locks.
 ## § 9 · THE ONE-LINE VERSION
 
 **Two streams. The story build (Stream A) is the live one — take S11 or S13 if its lane is free;
-Papic item 3 (Stream B) if it is not. Ignore the five stale ACTIVE labels. Check the lane with
+Stream B's item 7 (or item 6, once measured) if it is not — items 3-5 have SHIPPED. Ignore the five stale ACTIVE labels. Check the lane with
 `gh pr list --state open` before you start. Verify everything against production, not against a
 document — INCLUDING THIS ONE, which was itself eleven days out of date on 2026-09-09.**
