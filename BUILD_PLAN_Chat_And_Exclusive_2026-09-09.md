@@ -143,16 +143,29 @@ a supplier drops its pin. See the S8 row in the sessions register for the full R
 
 ## STREAM C · THE SETNAYAN EXCLUSIVE
 
-**Model, settled:** no booking fee → no gift · the gift is **added** to the lock bill,
-never deducted · **no cap**, sized as a share of the **fee** (proposed **40%**) · granted
-when the **money clears** · **mandatory** (an optional gift is a race to the bottom).
+> ⚠ **THIS SECTION WAS WRITTEN BEFORE THE OWNER RULED, AND FOUR OF ITS CLAIMS ARE NOW
+> OVERTURNED — all on 2026-09-09, all in `DECISION_LOG.md`, none of them re-askable.**
+> Read the log rows, not this plan, for C1–C4.
+>
+> | this plan says | the ruling |
+> |---|---|
+> | **mandatory** | **OPTIONAL** — *"exclusive setnayan gift then should be optional."* Compulsory was a RATE, not a feature: the gift is 40% on TOP of the fee, taking 5% to 7% of the first ₱100,000. |
+> | a **pick from five** | **ONE thing: Papic credits** — *"ok then only offer papic credits. so it is simple and useful."* Setnayan AI, Live Studio, Event Hub Pro and the Mood Board pack are OFF the gift shelf and stay ordinary products. |
+> | **no cap** | **capped at the 50,000-credit rung** — *"wait. but max up to the 50000 papic credits. only."* |
+> | a supplier **picks** | **a pure YES/NO** — *"no. just max to 40%. nothing more."* No amount, no picker, no slider, no top-up. The count is computed from what the supplier pays and appears on the QUOTE, never on the card. |
+>
+> **C1 shipped as a boolean** in PR
+> [#5375](https://github.com/iscasasola/setnayan-platform/pull/5375):
+> `vendor_services.includes_setnayan_gift`, with `exclusive_perk_text` retired as the
+> control and KEPT as data, because two live cards still promise through it.
+> C2 (the shelf/fallback) is largely moot with a one-item shelf. C3/C4 are EX-2.
 
-### C1 · The shelf, and the publish gate
-The Exclusive stops being free text and becomes a **pick from five**: Papic credits ·
-Setnayan AI · Event Hub Pro · Live Studio · Mood Board Render Pack. The gate today holds
-only **price** and **exclusive**; add **cover photo** (its own comment already calls it
-required and nothing enforces it), **title** (both live cards have none, so they render as
-their category) and **what's included**.
+### C1 · The shelf, and the publish gate — ✅ **SHIPPED, in the corrected shape**
+~~The Exclusive stops being free text and becomes a **pick from five**~~ — the shelf is
+ONE item and the control is a yes/no; see the table above. The gate today holds only
+**price** (the Exclusive left it on 2026-09-09); still worth adding **cover photo** (its
+own comment already calls it required and nothing enforces it), **title** (both live cards
+have none, so they render as their category) and **what's included**.
 
 ### C2 · Availability + fallback
 🔒 **Show what is GIFTABLE, never what the couple OWNS** — the shelf omits what is taken;
