@@ -58,12 +58,47 @@ decide whether S13 absorbs it before starting S13.
 
 ---
 
-## The single biggest thing nobody is working on
+## 🛑 CORRECTED 2026-09-09 — THE SENTENCE THAT USED TO BE HERE WAS FALSE
 
-**The privacy filing.** The document that lets us legally collect Filipino guests' faces and
-photographs has never been completed. It is not engineering — it is DPO/owner document work —
-and it is **the only remaining item that legally gates opening the doors.** Everything else on
-this page is a feature; this one is permission to trade.
+**It said: "the privacy filing is the single biggest thing nobody is working on, and the only
+remaining item that legally gates opening the doors."** Re-measured against the corpus's own
+record: **that is wrong, and it re-asked a question the owner had already answered twice.**
+
+- He is **already registered as the data protection officer** (NPC, 2026-07-07). That half is done.
+- He **scheduled the filing for January 2027, in writing, twice.** It is not a launch gate; it is
+  a dated errand with a window that has not opened.
+- **Every privacy capability the product runs is signed off and dated** — the approval board is
+  discharged.
+- **Outside lawyers are not a gate either** — he ruled that a sole trader who is his own DPO may
+  adopt and file without one.
+
+🔑 **This is the failure this corpus records more often than any other, committed by the session
+whose job was to catch it: a settled decision re-surfaced as open work, and told to the owner as
+the most urgent thing on his list.** Grep `DECISION_LOG.md` for the noun before calling anything
+a blocker.
+
+## The real biggest things nobody is working on
+
+1. **A host cannot take back a coordinator's access — and is told it worked.** Five real helper
+   records exist in production. The screen is built and reachable; the database refuses every
+   write it makes. Granting throws a raw database sentence at the host; revoking changes nothing
+   and says *done*, so a host who takes the guest list back keeps handing it over.
+2. **A guest who asks to be blurred is blurred on the big screen and the public page — and every
+   other guest still sees the unblurred face in their own album, and can download it.** Six
+   guest-facing surfaces plus the download route never ask the blur question. Latent only because
+   nobody has withdrawn yet.
+3. **Anyone whose celebration is not a wedding can publish a story and is never shown the switch
+   that makes it visible** — and if they find it, we refuse them with *"Stories features weddings
+   only."* **Two of the seven live celebrations are affected, including the one the owner
+   published himself.** The fix is written, tested and green in draft PR #5012, untouched for
+   eleven days.
+4. **Our live Google keys are stored as readable text** — five of them, including the Setnayan
+   YouTube channel and the owner's own Drive. The encryption helper already ships and is used
+   elsewhere; the key is set in production. Mitigated at the public-API layer, so this is a
+   backup/service-role exposure, not an open door.
+5. **When a couple saves their own wedding story, the words go to a company in Germany and one in
+   the US that we never told them about.** That one IS an RA 10173 item, it is small, and it can
+   be done without the owner.
 
 ---
 
