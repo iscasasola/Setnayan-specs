@@ -4,6 +4,31 @@ No memory note is referenced, because none will exist. -->
 
 # Papic items 3–7 — HANDOFF TO A NEW ACCOUNT (2026-08-29)
 
+> # 🛑 STOP — RE-MEASURED 2026-09-09. **FOUR OF THESE FIVE ITEMS ARE BUILT AND MERGED.**
+> # **ONLY ITEM 3 IS OPEN.** Everything below about items 4 · 5 · 6 · 7 is HISTORY.
+>
+> Verified with `gh pr view`, not read: **items 4 and 5 merged 2026-09-01; item 6 merged
+> 2026-09-02 (PRs #5081 · #5086); item 7 — ALL of 7a–7d — merged 2026-09-02 (PRs #5082 · #5087 ·
+> #5090)**, including #5090, which the build order warned was *"still OPEN and red"*.
+> **Item 3 (shots per guest + sponsors default to a bigger share) is genuinely unbuilt**, measured
+> against production's own capture function: it contains neither `allot` nor `sponsor`.
+>
+> 🚨 **AND ONE RESTATEMENT OF ITEM 7 IS THE REVERSE OF THE OWNER'S RULING — DO NOT BUILD IT.**
+> A plan describing item 7 as *"one shared pot across linked celebrations"* is **forbidden work.**
+> Owner, 2026-09-02: the year is the full planning platform, but **every celebration keeps its own
+> pot — a cluster is presentation and planning, NEVER accounting.** The pot is per-celebration by
+> construction (`papic_event_pool_usage` is keyed `event_id PRIMARY KEY`; every reserve and release
+> door takes `p_event_id`), and `apps/web/tests/db/a-pot-belongs-to-one-celebration.db.test.ts`
+> ships three mutation-proved guards that go RED the moment a cluster is given accounting meaning.
+> Its own docblock states the reason: rolling the pot up to a cluster **"is not a feature, it is a
+> silent repricing of celebrations that are already sold."**
+> 🔑 *"The year has 30,000 shots" reads beautifully on a screen, which is exactly why the guard
+> exists.*
+>
+> ⚠ **This file, the build order's summary table and the auto-loaded `CLAUDE.md` all said "items
+> 3–7 are the open stream" for a week after four of them merged.** Each item's own section already
+> said DONE. **The summaries are what get read.**
+
 ## § 0 · READ THIS FIRST
 
 **You are on a new Claude Code account.** Assume:
