@@ -21,15 +21,35 @@ awaiting a decision. Registered in WHATS_NEXT_INDEX.md and in the corpus CLAUDE.
 |---|---|---|---|
 | **1** | The browser stops enforcing a limit that does not exist | days | ✅ **DONE** — PR [#5002](https://github.com/iscasasola/setnayan-platform/pull/5002) |
 | **2** | Say what is already true, on the promotion page | days | ✅ **DONE** — page shipped 2026-08-29, guard PR [#5003](https://github.com/iscasasola/setnayan-platform/pull/5003) MERGED |
-| **3** | Shots per guest (+ sponsors default to a bigger share) | several sessions | ruled, spec written |
-| **4** | Timed challenges reach the wall | 1 session | ruled |
-| **5** | Challenges hang on the ceremony sequence | small | — |
-| **6** | The guest chooses per audience | small | — |
-| **7** | The year | project | ruled in July, unbuilt |
+| **3** | Shots per guest (+ sponsors default to a bigger share) | several sessions | 🔴 **THE ONLY ITEM LEFT** — ruled, spec written, **NOT BUILT** (re-measured 2026-09-09) |
+| **4** | Timed challenges reach the wall | 1 session | ✅ **DONE 2026-09-01** — both halves; see § 4 |
+| **5** | Challenges hang on the ceremony sequence | small | ✅ **DONE 2026-09-01** — see § 5 |
+| **6** | The guest chooses per audience | small | ✅ **DONE 2026-09-02** — PRs #5081 · #5086, both verified MERGED |
+| **7** | The year | project | ✅ **DONE 2026-09-02** — 7a–7d, PRs #5082 · #5087 · #5090 all verified MERGED |
 
 ⏭ **Deliberately NOT started, and why:** Messenger/Viber (ask for push first — § 8) · Tagalog and
 Bisaya · civil weddings · the coordinator partner offer (**owner territory, not engineering** —
 § 9).
+
+
+> ### ✅ RE-MEASURED AGAINST THE CODE 2026-09-09 — SIX OF SEVEN ARE DONE. **ONLY ITEM 3 IS LEFT.**
+>
+> Every PR this file names was checked with `gh pr view` — **#5002 · #5003 · #5007 · #5081 · #5086
+> · #5082 · #5087 · #5090 are ALL MERGED**, including #5090, which this file warned was *"still
+> OPEN and red"* when 7d began.
+>
+> **Item 3 is genuinely unbuilt**, measured by the object rather than by this file: `origin/main`
+> has **zero** occurrences of a per-guest allotment in any spelling, and production's live
+> `papic_record_guest_capture` **knows nothing of an allotment or of sponsors** (`allot` and
+> `sponsor` both absent from its body). ⚠ **`papic_event_pool_config.points_per_guest` EXISTS with
+> a default of 150 and is NOT this item** — it sizes the POOL (150 × guests), which the spec's own
+> § 5 warns about by name; a session that greps that column and stops will report item 3 as built.
+> `lib/event-sponsors.ts` is imported by its own dashboard and one guard test, and by **nothing in
+> Papic**.
+>
+> 🔑 **This file said items 3–7 were the one open stream for eleven days after four of them
+> merged**, and the auto-loaded `CLAUDE.md` said the same thing — which is exactly how a session
+> gets sent to rebuild finished work.
 
 ---
 

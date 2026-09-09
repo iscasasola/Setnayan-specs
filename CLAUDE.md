@@ -69,7 +69,10 @@ committed docs on purpose.
 ## 🚦 ACTIVE WORK — READ THIS BEFORE ANYTHING ELSE (updated 2026-08-01)
 
 > # 🧭 COLD START? READ **[`START_HERE_WHATS_NEXT_2026-08-29.md`](START_HERE_WHATS_NEXT_2026-08-29.md)** FIRST.
-> **SIX blocks below are headed `▶ ACTIVE`. Only ONE is open work** — Papic items 3–7. The other
+> **SIX blocks below are headed `▶ ACTIVE`. Only ONE is open work** — Papic **item 3 ONLY**
+> (⚠ **CORRECTED 2026-09-09: items 4 · 5 · 6 · 7 ARE BUILT AND MERGED** — every PR verified with
+> `gh pr view`; item 3 re-measured as genuinely unbuilt against production's own capture function).
+> The other
 > five are finished streams or standing rules that never had the label struck: the supplier's room
 > (its Answers Desk shipped as PR #4917), the Papic media library (nine PRs shipped), and three
 > that were never work streams at all but LESSONS — *a rejected query is not a thrown error*
@@ -83,7 +86,7 @@ committed docs on purpose.
 > **[`WHATS_NEXT_Papic_Build_Order_2026-08-29.md`](WHATS_NEXT_Papic_Build_Order_2026-08-29.md)** —
 > seven items, ordered, **nothing on it awaiting an owner decision.** Prompts for items 1–2:
 > [`WHATS_NEXT_Papic_Items_1_2_PROMPTS_2026-08-29.md`](WHATS_NEXT_Papic_Items_1_2_PROMPTS_2026-08-29.md).
-> 🆕 **ITEMS 3–7 RUN ON A DIFFERENT CLAUDE ACCOUNT. Their handoff is SELF-CONTAINED and assumes
+> 🆕 **ITEM 3 (only — 4·5·6·7 are DONE, corrected 2026-09-09) RUNS ON A DIFFERENT CLAUDE ACCOUNT. Its handoff is SELF-CONTAINED and assumes
 > `~/.claude/.../memory/` DOES NOT EXIST (476 notes do not travel):
 > [`WHATS_NEXT_Papic_Items_3_7_HANDOFF_2026-08-29.md`](WHATS_NEXT_Papic_Items_3_7_HANDOFF_2026-08-29.md).**
 > 🔑 **PAPIC DOES NOT HAVE A FEATURE PROBLEM — items 2–6 are WIRING AND SENTENCES.** Five times in
