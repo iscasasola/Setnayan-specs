@@ -31,7 +31,7 @@ Every remaining row was re-measured against `origin/main` `0d3a1e0` (= productio
 | **2** | **B2** (+ N2 item 2) | after a lock a price change shows both numbers · "Ask them for pricing" opens the conversation | Opus · high | **your look** before merge |
 | **3** | **HONEST SHOP** = C2 → D2 → E1 | marketplace cards show their photo and "Host / MC" · songs only for musicians, no "0 yrs", a lapsed plan loses its paid look · a shop's link preview never breaks | Sonnet · medium | nothing |
 | **4** | **CLEANUPS** = D3 → E2 → N2 item 1 (+ H5 if your question 10 is answered by then) | "Get verified" lands on the one papers screen · no phone/email typed into a shop's own About · no coordinator email on the couple's Hosts page | Sonnet · medium | nothing |
-| — | **TEST ROUND 1** | your first live two-sided test | — | B1 + B2 live, **your prep** |
+| — | **TEST ROUND 1** | your first live two-sided test — ✅ UNBLOCKED 2026-09-11 (B1 + B2 live) | — | **your prep** only |
 | **5** | **GIFT & CARD GATE** = C1 → H2 | the gift reaches the couple as free photos · a card also needs a cover photo and what's included | Opus · xhigh (C1 money) · high (H2) | B2 merged |
 | **6** | **NEW SHOP PAGE** = D1 → F1 → F2 | "Want to add them to your event?" · then the new shop page, top then body | Opus · high | **your look** at the shop-page drawing (D1) and at P2 (F1); bundle 3 merged |
 | — | **TEST ROUND 2** | a couple with two events | — | D1 live |
@@ -222,7 +222,8 @@ work; **Fable** only for drawings.
 | CLEANUPS · D3 old verify page → papers | ✅ SERVED | #5424 · 171e65e |
 | CLEANUPS · E2 contact filter on About/tagline | ✅ SERVED | #5426 · baa88bf |
 | CLEANUPS · N2-1 Hosts page coordinator email | ✅ SERVED | #5427 · d1d5a29 (a Setnayan coordinator gets "Message them"; the DB copy is kept — coordinator-broadcasts reads it) |
-| running now | 🔨 HONEST SHOP (D2→E1) · N4 (4 parts) · L3 badge deadlines · S2 H6 | B2 #5390 auto-merging; next: SMALL RULINGS (L2 after HONEST SHOP's E1), GIFT & CARD GATE, H4, LOCK-PATH CAPACITY |
+| B2 both numbers after a lock (+ total now everywhere, fee follows every change) | ✅ SERVED | #5390 · e2a07f6; live: is_change_delta column, 7 functions carry change lines, recorder not exposed, 2 triggers, both migrations recorded (orchestrator read prod) |
+| running now | 🔨 HONEST SHOP (D2→E1) · N4 (4 parts) · L3 badge deadlines · S2 H6 | next: SMALL RULINGS (L2 after HONEST SHOP's E1), GIFT & CARD GATE, H4, LOCK-PATH CAPACITY |
 | H5 Lock after "not free" + unavailable not planned | ✅ SERVED (S2) | #5425 · c913c6e in prod (S2 + orchestrator ancestry) |
 | H6 bench search hides a card with no bookings left on the date | 🔨 BUILDING (S2) · DO NOT LAUNCH A SECOND | hides on blocked day + full time slots (the two paths that really refuse); per-card daily limit waits for LOCK-PATH CAPACITY (tripwire test pins it); month = full every day |
 | LOCK-PATH CAPACITY (Opus · high) — was "H6 follow-up" | ⬜ after B2 + N4 land | BUG (measured by S2 in prod `pg_policies`, 2026-09-11): the couple-side per-card daily-limit gate (`vendors/actions.ts` #2, `soft_hold_limit_reached`) counts other couples' bookings under the couple's OWN session, and RLS lets a couple see only their own events → it always counts 0 and never refuses: a supplier's per-card daily limit does not stop double-booking. Fix: ONE `SECURITY DEFINER` count function used by the #2 gate AND by H6's helper (remove H6's tripwire in the same PR); make both day-precision-only (a month-precision event stored on the 1st must not count as a booking on the 1st). Time slots and calendar blocks are already enforced by definer functions. Prod today: 0 cards with a daily limit, 0 confirmed bookings with a service — nothing broken yet. |
