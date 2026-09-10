@@ -915,3 +915,88 @@ Running round 1 requires A1, A2, A4, A5, B1, B2 and #5404 served — check by an
 PROVE IT: round 1 run; each step has a production row that matches the screen, or a named defect filed
 as a new session in the register.
 ```
+
+---
+
+## N0 — Review and land the cleanup-delete pin (the file-deletion pattern)
+
+```
+(Paste after the SHARED HEADER.)
+
+GOAL: no cleanup job can ever permanently delete a file that does not belong to the record it is cleaning.
+A non-admin could point a record they own at someone else's file (a government ID, a permit, a couple's photo),
+and our own service-role sweeps — the Papic full-res drop, the vendor identity sweeps — would delete it.
+
+WHAT EXISTS: branch `claude/every-cleanup-delete-is-pinned` (six+ commits, some marked "wip"): one choke point
+every sweep/erasure delete passes through (bucket AND tenant prefix), write-side restrictive policies so a
+browser cannot choose a stored file key, behavioural guards, a derived scan of delete callers, a regenerated
+exposure baseline. It may already be a DRAFT PR — check `gh pr list --head claude/every-cleanup-delete-is-pinned`.
+
+YOUR JOB: review it as a skeptic, then land it.
+· Read every commit. Treat "wip" commits as an unreviewed colleague's draft.
+· Re-run every guard's mutation yourself, print needle counts before -> after; both `inScope = [...present]`
+  and `true || verificationRefIsInScope(...)` must go RED.
+· Prove, as a genuine `authenticated` non-superuser session in the replay, that a foreign-tenant key is refused
+  on write, AND that every legitimate upload still works: Papic guest capture, seat capture, vendor capture,
+  verification upload, shop logo.
+· Read the exposure-baseline diff and COUNT it: only narrowings and the new restrictive policies, no widening.
+· Full db suite + affected unit suites + tsc, sequential, non-zero test counts.
+· It changes grants and policies on live upload tables: it stays a DRAFT until the orchestrator reads your review.
+DONE MEANS: a written review in the PR, every guard proven RED under mutation, CI green, PR left DRAFT with a
+one-line "ready to release" or a named blocker.
+```
+
+## N1 — The chat cannot be used to leave the app
+
+```
+(Paste after the SHARED HEADER.)
+
+GOAL, owner verbatim: "our goal is to let them integrate their event with the vendor they find. not to let them
+communicate outside the app."
+
+MEASURED 2026-09-10 (post-merge review of #5404, executed in the replay, read in prod):
+1 · A couple or a shop can POST straight to /rest/v1/chat_messages from their own session with any text and any
+    `attachment_url`. INSERT on the message text and the legacy `attachment_url` column is granted to every
+    signed-in user; no trigger screens either.
+2 · The contact screen `lib/chat-contact-filter.ts` runs only in app code and only when
+    NEXT_PUBLIC_CHAT_CONTACT_FILTER_ENABLED is on (defaults OFF; its prod value is unknown — the OWNER must say).
+3 · `app/api/chat/attachment/[messageId]/route.ts` (~66-73) treats any non-`r2://` attachment_url as a legacy URL
+    and 302-REDIRECTS to it — so `https://wa.me/…`, `viber://…` or `m.me/…` shows as a file card on setnayan.com
+    and opens WhatsApp/Viber. That is a door out AND an open redirect.
+
+WHAT TO SHIP:
+A · The attachment route redirects ONLY to our own storage. A non-r2 value is refused (or shown as plain text,
+    never a link). Check whether any legitimate legacy URL rows exist in prod first (read-only SELECT) and say so.
+B · The database, not the app, stops a browser writing an arbitrary `attachment_url`: revoke the column from
+    authenticated if no client legitimately writes it, else a trigger that accepts only an r2 ref under the
+    thread's own prefix. Read the legitimate writers first.
+C · Contact screening of message TEXT enforced where a direct PostgREST insert cannot skip it (a BEFORE INSERT
+    trigger calling the same rules, or moving the insert behind a SECURITY DEFINER function). Decide which, and say
+    why. ⚠ Screening text is a product decision about false positives (a price like "0917" vs a phone number):
+    reuse the shipped filter's rules exactly; do not invent new ones.
+D · Guards that fail if a door reopens; mutation-test each.
+Security grants + trigger on a live table ⇒ DRAFT PR. Name in the body that the prod BEGIN…ROLLBACK rehearsal
+needs the owner's go-ahead.
+DONE MEANS: the three doors proven closed in the replay as a real `authenticated` session; CI green; DRAFT.
+```
+
+## N2 — The last two couple-facing email leaks
+
+```
+(Paste after the SHARED HEADER.)
+
+GOAL: same principle as N1. Two leftovers found by the post-merge review of #5404:
+1 · The couple's Hosts page "Promote your coordinator" row prints the booking row's email in plain text
+    (`app/dashboard/[eventId]/hosts/page.tsx` ~436, plus a hidden input ~444). A package lock COPIES a Setnayan
+    shop's own email into that row (`vendors/packages/actions.ts` ~495), and the gate checks only the category and a
+    booked status — never whether the supplier is off-platform. Gate it with the same `isOffPlatformSupplier(ev)`
+    #5404 used, and route a Setnayan coordinator into the in-app delegate path instead. Also stop the package lock
+    COPYING a Setnayan shop's contact into the couple's row at all, if nothing legitimate reads the copy (grep the
+    readers first).
+2 · The budget card's "Ask them for pricing" link now can never prefill or open the thread (its branch renders only
+    for Setnayan shops and #5404 nulls the address for them). Point it at the existing thread opener instead of the
+    bare Messages list.
+Extend #5404's guard (`lib/no-door-out-of-the-app.test.ts`) bill so the Hosts line's gate is proven, and
+mutation-test it. Not money, not grants — ordinary PR with auto-merge.
+DONE MEANS: merged and served; guard green; a Setnayan coordinator's email appears nowhere a couple can see it.
+```
