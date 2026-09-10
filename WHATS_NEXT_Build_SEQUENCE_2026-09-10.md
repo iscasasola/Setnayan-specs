@@ -68,7 +68,7 @@ access you can take back.
 
 **Moving by itself now:** the next step after accepting a quote (#5412) · the test watcher (#5413).
 
-**What goes first — in this order:**
+**What goes first — in this order:** ⚠ SUPERSEDED by the bundle table at the top of this file — do not launch from this table or the "safe trios" below; launch bundles.
 
 | # | Session | What a person gets | Model · effort | Waits on |
 |---|---|---|---|---|
@@ -84,7 +84,7 @@ access you can take back.
 | **8** | **D2** | The shop page tells the truth (songs only for musicians) | Sonnet · medium | nothing |
 | **9** | **F0** | Correct the six-door My Shop drawing | Fable · medium | nothing |
 | **10** | **H2** | A card also needs a cover photo and what's included | Opus · high | C1 |
-| **11** | **H3** | Drag your suppliers into your own order | Opus · xhigh | nothing |
+| ~~**11**~~ | ~~**H3**~~ | ~~Drag your suppliers into your own order~~ — **ALREADY LIVE (#5367), DO NOT LAUNCH** | — | — |
 | **12** | **D1** | Fold 5: "Want to add them to your event?" | Opus · medium | **your look** at the shop-page drawing |
 | **13** | **D3** | The old verify page leads to the new papers section | Sonnet · medium | nothing |
 | **14** | **D4** | Every film of your day (#5140) | Sonnet · medium | B2 |
@@ -98,7 +98,7 @@ access you can take back.
 | **20** | **F1 → F2** | The new shop page, top then body | Opus · high | E1, your look at the drawing **and at P2** |
 | **21** | **G1 → G2 → G3** | Six-door My Shop, in three parts | Opus · high (G3 Sonnet · medium) | your look at F0 |
 | **22** | **H4** | A supplier can say a payment never arrived | Opus · xhigh | **your question 9**, B2 |
-| **23** | **H5** | "Lock this" stops showing for a supplier who declined | Sonnet · medium | **your question 10**, H3 |
+| **23** | **H5** | "Lock this" stops showing for a supplier who declined | Sonnet · medium | **your question 10** |
 
 **What only you can do, in the order it unblocks things:**
 1. ~~Chat contact filter~~ — ✅ confirmed ON in Vercel, 2026-09-10.
@@ -149,17 +149,17 @@ work; **Fable** only for drawings.
   if your drawing look comes first).
 - **Chat lock card / booking:** B2 → C1.
 - **Service-card files:** B1 → C1 → H2.
-- **The couple's supplier list (bench):** H3 → H5.
+- **The couple's supplier list (bench):** H5 only (H3 is already live).
 - **Admin verification area:** C3 → E3.
 - **My Shop page file:** D3 → E2 → G1 → G2 → G3.
 - **Security baseline** (a generated file): whoever merges second regenerates it — N0, N1, B2, D4, C1,
   E4 all touch it. Regenerate from the merged tree, never pick a side, then check header = body.
 
-**Safe trios to run together** (no shared files):
+**Safe trios to run together** (no shared files): ⚠ SUPERSEDED 2026-09-11 by the bundles at the top — kept for the record; the chains above still hold.
 - Round A: **N0 · B1 · C3**
 - Round A2: **N3** alongside Round A if a slot frees (touches mood-board files only)
 - Round B: **N1 · B2 · C2**
-- Round C: **C1 · D2 · H3** (+ F0, a drawing, alongside anything)
+- Round C: **C1 · D2** (+ F0, a drawing, alongside anything) — H3 already live
 - Round D: **H2 · D3 · E4**
 - Round E: **D1 · N2 · E3**
 - Round F: **E1 · E2 · D4**
