@@ -68,6 +68,8 @@ committed docs on purpose.
 
 ## 🚦 ACTIVE WORK — READ THIS BEFORE ANYTHING ELSE (updated 2026-08-01)
 
+> 🆕 **2026-09-10 — THE LIVE TWO-SIDED TEST IS THE CURRENT ACTIVE STREAM.** Register: [`WHATS_NEXT_Build_Plan_2026-09-10.md`](WHATS_NEXT_Build_Plan_2026-09-10.md), session prompts in [`WHATS_NEXT_Build_Plan_PROMPTS_2026-09-10.md`](WHATS_NEXT_Build_Plan_PROMPTS_2026-09-10.md). Read its own top-of-file CORRECTION block before touching anything about a stock photo — it is an OPEN owner question, not settled.
+
 > # 🧭 COLD START? READ **[`START_HERE_WHATS_NEXT_2026-08-29.md`](START_HERE_WHATS_NEXT_2026-08-29.md)** FIRST.
 > **SIX blocks below are headed `▶ ACTIVE`. Only ONE is open work** — Papic **item 3 ONLY**
 > (⚠ **CORRECTED 2026-09-09: items 4 · 5 · 6 · 7 ARE BUILT AND MERGED** — every PR verified with
