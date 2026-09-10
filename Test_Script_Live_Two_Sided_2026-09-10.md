@@ -107,10 +107,17 @@ obvious without reading SQL.
    first five bookings are free, and the fee isn't switched on yet, so don't expect a bill.
 10. **[Couple] Look at your suppliers list.** ★ The locked shop sits first in its category, not
     sorted alphabetically or by date. *(Proves A5.)*
-11. **[Couple] Change the agreed price by some amount, then look at the budget.** ★ **Expected:
-    you see the original agreed total AND the change as its own line — never one number that
-    silently replaced the other, and never a negative bill from a price cut.** *(Proves B2 — you
-    will have already looked at this before it merged, so this step should hold no surprises.)*
+11. **[Both] Change the agreed price after the lock — in chat, strike a NEW deal on the quote
+    (say a ₱15,000 discount), the supplier accepts it, and you (the couple) press Lock on it.
+    Then open your Budget and tap that supplier's row open.** ★ **Expected, with ₱100,000
+    agreed at the lock: the row's Budget reads ₱85,000, and under "Changes you both agreed" you
+    see three lines — "Agreed price before changes ₱100,000", "New deal agreed in chat (price
+    lowered) −₱15,000", "Agreed total now ₱85,000". Never one number that silently replaced the
+    other, never a negative bill, and no delete button on the change.** The watcher's line 6
+    should say the same three numbers. *(Proves B2 — you will have already looked at this before
+    it merged, so this step should hold no surprises.)* ⚠ Known, not a new defect: your
+    suppliers list and the event home still show the ₱100,000 agreed at the lock — only the
+    budget and that supplier's own page under your suppliers show both numbers.
 
 ---
 
