@@ -1,4 +1,9 @@
-# 10 · WHAT IS LEFT — the series of builds, in order (rev 2, 2026-09-10)
+# 10 · WHAT IS LEFT — the series of builds, in order (rev 3, 2026-09-10)
+
+> ⛔ **STICKERS ARE OFF FOR NOW — owner 2026-09-10: _"remove the stickers for now for both phone and
+> computer."_** Deferred, not retired. Removed from the prototype and from every step below. The
+> Kwento decorator's own stickers are untouched. Do not build a sticker in the Story Maker until he
+> says so.
 
 > Supersedes the "LEFT" row of `09_SESSIONS_AND_PROMPTS_2026-09-09.md` and rev 1 of this file.
 > **S1–S15 of the Story plan are ALL MERGED** (#5329–#5389; S15 = commit `5f7d8f04`). Papic item 3's
@@ -19,7 +24,7 @@
 | **3** | Story · where the arrangement is kept | "Make it yours" saves for every celebration | Opus 5 | high | after **0** | 1, 2 |
 | **4** | Story · the editor, part 1 — photos | Tray, tap-to-add, ×, Automatic / I choose, Put all back, Undo, autosave | Opus 5 | high | after **3** | 5 |
 | **5** | Story · guests see the arranged pages | The public story shows each moment as laid out | Opus 5 | medium | after **3** | 4, 6 |
-| **6** | Story · the editor, part 2 — words, stickers, moments | Words + looks, stickers, the phone toolbar, naming, sets, reorder | Opus 5 | high | after **4** | 5 |
+| **6** | Story · the editor, part 2 — words and moments | Words + looks, the phone toolbar, naming, sets, reorder | Opus 5 | **medium** | after **4** | 5 |
 | **7** | Story · the prints carry the arrangement | A3 and A4 print each moment as laid out | Sonnet 5 | medium | after **2** and **5** | 6 |
 | **8** | Story · the whole thing, driven end to end | Proof it works for a real host on a real phone | Opus 5 | high | after **6** and **7** | — |
 
@@ -35,7 +40,9 @@ Try the prototype on a phone and a computer, then confirm or change:
 2. The page is a **fixed sheet scaled to fit** — what you arrange on a laptop is what a phone shows, smaller.
 3. **No animated text effects** (they cannot print).
 4. **No pop-ups** — every removal is instant, with Undo.
-5. **On a phone**, words and stickers get a toolbar (A− A+ ↺ ↻ Remove) instead of handles on the object.
+5. **On a phone**, words get a toolbar (A− A+ ↺ ↻ Remove) instead of handles on the object.
+
+(Stickers: ruled OFF for now, 2026-09-10 — not a design call any more.)
 
 Record the answer as a `DECISION_LOG.md` row before step 3 starts. Also still open, not blocking:
 the 10 items in `NEEDS_THE_OWNER_2026-09-09.md`. Housekeeping: close PR #5012 (older open copy of
@@ -105,8 +112,7 @@ RULE 0, pre-answered: the Story Maker saves into event_editorial.draft_json thro
 app/dashboard/[eventId]/story/actions.ts (saveEditorial). The arrangement very likely belongs there
 as one key — decide from the code; prefer that over a new table.
 STORE per moment: mode (automatic | by hand), the host's order and names, host-added moments; for
-by-hand pages every object — photo/snippet ref, words (text, colour, backing, size, turn), sticker
-(which, size, turn) — with x, y in SHEET UNITS (660-wide sheet); named photo sets. AUTOMATIC IS
+by-hand pages every object — photo/snippet ref, words (text, colour, backing, size, turn) — with x, y in SHEET UNITS (660-wide sheet); named photo sets. AUTOMATIC IS
 DERIVED, NOT STORED: compute it from the run of show and Papic's capture minutes on every read, and
 restore any run-of-show moment the host removed by hand when they return to Automatic.
 SAVE MODEL: the prototype autosaves every change and Undo restores a snapshot — design the action
@@ -125,13 +131,13 @@ saved page; tests fail when the one-photo-one-moment check or the visibility fil
 GOAL: step "The story" of the six-step Story Maker (#5389) becomes "Make it yours" — the photo half.
 PORT from prototypes/story_make_it_yours_2026-09-10.html (never redraw): the moments rail beside
 the page; the desk and the fixed 660 sheet scaled to fit; the tray of UNPLACED Papic photos AND
-snippets; a tap is the add (first free slot, never over words/stickers); the × on every photo,
+snippets; a tap is the add (first free slot, never over words); the × on every photo,
 always showing, counter-scaled, no invisible halo; drag with a 4px/10px threshold, bring to front,
 the sheet grows downward; Automatic vs I choose (Automatic read-only, every refusal says why, on a
 TAP not a swipe); Put all back; Undo for every removal (the undo belongs to the ACTION — a later
 change retires it, a message never does); autosave through step 3's action; keyboard (Tab, Enter,
 arrows move, Delete, Cmd/Ctrl+Z); aria-disabled never disabled; no prompt/confirm anywhere.
-NOT IN THIS STEP: words, stickers, looks, the phone toolbar, naming, sets, moment reorder — step 6.
+NOT IN THIS STEP: words, looks, the phone toolbar, naming, sets, moment reorder — step 6. NO STICKERS AT ALL (owner, for now).
 THE TEST PLAN: every photo-related item in 10a (rounds 1 and 3) — double presses, held keys, a page
 wider than a phone, a × covered by a neighbour, resize never moving anything, a press still landing
 after something above it changes size.
@@ -146,17 +152,17 @@ and no horizontal scroll.
 GOAL: the public story (/[slug]) shows each moment the way the host arranged it.
 WHERE: each run-of-show moment is already a part of the minute spine (S9). A moment arranged by
 hand renders its sheet there, scaled to the reader's width (same composition on every screen); an
-Automatic moment renders exactly as today. Stickers and word looks render as the host set them;
+Automatic moment renders exactly as today. Word looks render as the host set them;
 nothing editable, no ×, no handles.
 TRAPS: the /[slug] read is service-role, outside every RLS rule — use step 3's read helper so the
 guests-only (S3) and taken-back (S14) rules apply; a test fetches the page ANONYMOUSLY and asserts a
 taken-back photo is absent from the HTML and the OG card. Solemn events keep the quiet register
-(S13): no joyful stickers on a wake unless the host placed them.
+(S13).
 DONE WHEN: a by-hand moment looks the same at 1280 and 390; nothing taken back appears in the HTML,
 the OG card or the recap.
 ```
 
-## 6 · Story — the editor, part 2: words, stickers, moments · **Opus 5 · high** · after step 4
+## 6 · Story — the editor, part 2: words and moments · **Opus 5 · medium** · after step 4
 
 ```
 GOAL: the rest of "Make it yours" inside the Story Maker.
@@ -164,18 +170,17 @@ PORT from the prototype: + Words (an EMPTY box with a placeholder, placed below 
 it empty removes it quietly; clearing words that had text is a removal WITH Undo; plain-text paste;
 Escape stops typing and deselects; a press on the grip is a drag even when a phone retargets it to
 the text); word looks (Ink · Terracotta · Blue · Gold + Backing — the row keeps the caret);
-stickers = the Kwento decorator's own 24 (reuse app/papic/decorate/_components/kwento-decorator.tsx's
-list and transform model — never a second copy); the round handle on desktop (resize + turn, snap
+⛔ NO STICKERS (owner, for now — keep the object model open to more kinds, build none); the round handle on desktop (resize + turn, snap
 straight within 5°, kept inside the sheet by its TURNED box); ON A PHONE the handle and the
-words/sticker × give way to the toolbar A− A+ ↺ ↻ Remove (also the keyboard route); moments: + New
+words × give way to the toolbar A− A+ ↺ ↻ Remove (also the keyboard route); moments: + New
 and ✎ as an inline field in the header (empty or Escape cancels a new moment; the press that ends
 the typing still lands), row × with Undo, grip reorder with mouse AND touch (pointer events, capture
 on the LIST), Alt+Arrow reorder; named sets (inline field, one chip per name, chip × with Undo,
 chip shows what is still free to place).
-THE TEST PLAN: every remaining item in 10a. Known OPEN in the prototype — do them properly here: the
+THE TEST PLAN: every remaining item in 10a, skipping the sticker items. Known OPEN in the prototype — do them properly here: the
 moment row must not be role=button with a nested button; words need a keyboard way to MOVE; Tab out
 of a still-empty new box.
-DONE WHEN: the step-4 Playwright script extended to words, stickers, looks, the phone toolbar,
+DONE WHEN: the step-4 Playwright script extended to words, looks, the phone toolbar,
 naming and reorder passes at 1280 and 390 touch with zero dialogs and zero errors.
 ```
 
@@ -185,8 +190,7 @@ naming and reorder passes at 1280 and 390 touch with zero dialogs and zero error
 GOAL: the A3 keepsake and the A4 booklet print each hand-arranged moment exactly as the host laid it
 out; Automatic moments print as today.
 REUSE step 5's sheet render (never a second renderer) and step 2's A4 seam. The edition stamp, the
-QR and S14's taken-back rules apply unchanged. Stickers print as emoji glyphs — check they render
-in the print path's fonts, and fall back cleanly if one does not.
+QR and S14's taken-back rules apply unchanged.
 DONE WHEN: print-to-PDF of a celebration with one hand-arranged moment matches the on-screen sheet,
 and a test fails if a taken-back photo reaches a printed page.
 ```
@@ -197,7 +201,7 @@ and a test fails if a taken-back photo reaches a printed page.
 GOAL: prove a real host can build, publish and share an arranged story on a phone and a computer,
 and a guest sees it right — on the preview deploy, with Playwright, on testnayan accounts.
 SCRIPT: create a celebration with a run of show and Papic captures → open the Story Maker → The
-story → Automatic → I choose → arrange a moment (photos, words with a look, a sticker) → Undo →
+story → Automatic → I choose → arrange a moment (photos, words with a look) → Undo →
 reload → publish (S8) → open /[slug] signed out, as a guest, as the host → a guest takes a photo
 back (S14) → it leaves the page, the OG card and both prints → A4 and A3 print.
 Re-drive the whole of 10a against the app. Fix what you find in small PRs; anything that is the

@@ -2,6 +2,8 @@
 
 Round 1 drove the prototype in headless Chrome at 1280 and 390 (touch). Each line is a defect that was REAL in the first version and is fixed in `prototypes/story_make_it_yours_2026-09-10.html`. **Session 4 (the port) must re-drive every one against the app.**
 
+> ⛔ **Stickers are OFF for now (owner 2026-09-10).** Every item below that is only about stickers is out of scope until he turns them back on; keep the list for that day.
+
 ## Round 1 — 61 failures
 - [place-remove/R2-phone-x-offscreen-when-tray-has-5-plus] With 5+ photos in the tray the stage is wider than the phone; a photo dragged to its right edge has its × off-screen
 - [place-remove/R2-desktop-covered-corner-x-vanishes] A photo whose top-right corner is overlapped by another photo: reach its × by pointing

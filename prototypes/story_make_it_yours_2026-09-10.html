@@ -216,7 +216,7 @@
 <div class="page">
   <p class="eyebrow">Story Maker › The story</p>
   <h1>Make it yours</h1>
-  <p class="lede"><b>Prototype.</b> Automatic sorts photos by your run of show. In <b>I choose</b>, tap a photo to put it on the page and <b>×</b> to take it off. Drag the round handle to resize or turn words and stickers.<br><span style="color:var(--mute)">The pictures are stand-ins, drawn in code. · <button type="button" class="linkbtn" id="reset">Start over</button></span></p>
+  <p class="lede"><b>Prototype.</b> Automatic sorts photos by your run of show. In <b>I choose</b>, tap a photo to put it on the page and <b>×</b> to take it off. Drag the round handle to resize or turn words.<br><span style="color:var(--mute)">The pictures are stand-ins, drawn in code. · <button type="button" class="linkbtn" id="reset">Start over</button></span></p>
 
   <div class="cols">
     <div class="box">
@@ -240,14 +240,12 @@
       </div>
       <div class="bar">
         <button class="btn" id="addWords" type="button">+ Words</button>
-        <button class="btn" id="addSticker" type="button" aria-expanded="false" aria-controls="stickers">+ Sticker</button>
         <button class="btn" id="nameSet" type="button" disabled>Name these photos</button>
         <button class="btn pri" id="save" type="button">Save</button>
         <span class="saved" id="saved" hidden>Saved</span>
       </div>
       <div class="setname" id="setName" hidden><input class="nameInput" id="setInput" maxlength="60" aria-label="A name for these photos" placeholder="A name, like The entourage"><button class="btn pri" id="setSave" type="button">Name them</button><button class="btn" id="setCancel" type="button">Cancel</button></div>
-      <div class="stk" id="stickers" hidden aria-label="Stickers"></div>
-      <div class="sty" id="objTools" hidden><span class="lbl" id="toolLbl">Sticker</span><button class="tog" type="button" data-t="smaller" aria-label="Smaller">A−</button><button class="tog" type="button" data-t="bigger" aria-label="Bigger">A+</button><button class="tog" type="button" data-t="left" aria-label="Turn left">↺</button><button class="tog" type="button" data-t="right" aria-label="Turn right">↻</button><span id="wordStyle" hidden style="display:contents"><span id="dots"></span><button class="tog" id="pillTog" type="button" aria-pressed="false">Backing</button></span><button class="tog" type="button" data-t="remove">Remove</button></div>
+      <div class="sty" id="objTools" hidden><span class="lbl" id="toolLbl">Words</span><button class="tog" type="button" data-t="smaller" aria-label="Smaller">A−</button><button class="tog" type="button" data-t="bigger" aria-label="Bigger">A+</button><button class="tog" type="button" data-t="left" aria-label="Turn left">↺</button><button class="tog" type="button" data-t="right" aria-label="Turn right">↻</button><span id="wordStyle" hidden style="display:contents"><span id="dots"></span><button class="tog" id="pillTog" type="button" aria-pressed="false">Backing</button></span><button class="tog" type="button" data-t="remove">Remove</button></div>
       <div class="tray">
         <div class="tt"><span>Not placed yet</span><span class="n" id="pickInfo">tap to add</span></div>
         <div class="films" id="films" tabindex="-1"></div>
@@ -442,8 +440,6 @@
     $('#rename').hidden=mode==='auto';
     $('#putBack').hidden=mode==='auto'||!c||!c.objs.some(isPh);
     setOff($('#addWords'),mode==='auto');
-    setOff($('#addSticker'),mode==='auto');
-    if(mode==='auto'){ $('#stickers').hidden=true; $('#addSticker').setAttribute('aria-expanded','false') }
     markSel();
     setOff($('#nameSet'),mode==='auto'||picked().length<2);
   }
@@ -763,24 +759,9 @@
     var el=objEl(id), ed=el&&el.querySelector('.ed');
     if(ed){ ed.focus({preventScroll:true}); el.scrollIntoView({block:'nearest'}) }
   };
-  /* + Sticker opens the set; a sticker lands on the photo you have selected (a sticker is usually
-     FOR a photo), otherwise in the next free spot, and it arrives selected so the handle shows. */
-  $('#stickers').innerHTML=STICKERS.map(function(e){ return '<button type="button" data-e="'+e+'" aria-label="Add '+e+'">'+e+'</button>' }).join('');
-  $('#addSticker').onclick=function(ev){
-    if(isOff(this)){ hint('Tap “I choose” to add stickers.'); return }
-    var st=$('#stickers'), open=st.hidden; st.hidden=!open; this.setAttribute('aria-expanded',open);
-    if(open&&ev.detail===0){ var f=st.querySelector('button'); if(f) f.focus() }
-  };
-  $$('#stickers button').forEach(function(b){
-    b.onclick=function(ev){
-      if(mode==='auto'){ hint('Tap “I choose” to add stickers.'); return }
-      var c=cur(), so=selData(), id='s'+(++seq), x, y;
-      if(so&&isPh(so)){ x=so.x+so.w-46; y=so.y+so.h-46 } else { var p=freeSlot(c); x=p.x+PW/2-34; y=p.y+PH/2-34 }
-      c.objs.push({id:id,k:'st',txt:b.dataset.e,x:x,y:y,size:56,rot:0,fresh:true});
-      trayQuietUntil=performance.now()+450; selObj=id; $('#stickers').hidden=true; $('#addSticker').setAttribute('aria-expanded','false'); touched(); render();
-      if(ev.detail===0){ var el=objEl(id); if(el) el.focus() }
-    };
-  });
+  /* ⛔ STICKERS ARE OFF FOR NOW — owner 2026-09-10: "remove the stickers for now for both phone and
+     computer". Deferred, not retired: the object type, its handle and the phone toolbar still carry
+     words, and the Kwento decorator keeps its own stickers. */
   /* The words look row keeps the caret: its buttons never take focus from the words on a press. */
   $('#dots').innerHTML=WORD_COLORS.map(function(w){ return '<button type="button" class="dot" data-c="'+w[0]+'" style="--c:var(--'+w[0]+')" aria-label="'+w[1]+'" aria-pressed="false"></button>' }).join(' ');
   function keepCaret(e){ e.preventDefault() }
@@ -850,7 +831,7 @@
       var d=e.shiftKey?1:8;
       if(e.key==='ArrowLeft') o.x-=d; if(e.key==='ArrowRight') o.x+=d; if(e.key==='ArrowUp') o.y-=d; if(e.key==='ArrowDown') o.y+=d;
       clampObj(o,el); place(el,o); keepInside(o,el); fitStage(); if(isPh(o)) handTouched=true; touched();
-    } else if(e.key==='Escape'){ if(!$('#stickers').hidden){ $('#stickers').hidden=true; $('#addSticker').setAttribute('aria-expanded','false'); $('#addSticker').focus() } else if(selObj){ selObj=null; markSel() } }
+    } else if(e.key==='Escape'){ if(selObj){ selObj=null; markSel() } }
   });
   /* A resize only changes how big the page is drawn. Nothing is moved, nothing is re-dealt, and a
      caption being typed keeps its caret. */
@@ -859,6 +840,7 @@
   try{ var raw=localStorage.getItem(KEY), o=raw&&JSON.parse(raw);
     if(o&&o.chaps&&o.chaps.length){ chaps=o.chaps; groups=o.groups||[]; (o.g||[]).forEach(function(g,i){ if(photos[i]) photos[i].g=g });
       if(o.sched) HAS_SCHEDULE=true;
+      chaps.forEach(function(c){ c.objs=c.objs.filter(function(z){return z.k!=='st'}) });   // stickers are off for now
       mode=(o.mode==='auto'&&HAS_SCHEDULE)?'auto':'hand'; sel=o.sel; if(!cur()) sel=chaps[0].id;
       /* Round 3: without this, Automatic re-sorted restored hand work with no Undo. */
       handTouched=(o.handTouched!==undefined)?!!o.handTouched:(mode==='hand');
