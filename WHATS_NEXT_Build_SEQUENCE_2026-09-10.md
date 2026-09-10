@@ -39,6 +39,8 @@ Every remaining row was re-measured against `origin/main` `0d3a1e0` (= productio
 | **8** | **H4** | a supplier can say a payment never arrived — ✅ Q9 RULED 2026-09-11: one path for every payment | Opus · xhigh (DRAFT) | B2 merged |
 | **9** | **H5** | "Lock this" hidden (with the reason) for a supplier who said "not free on your date"; an unavailable supplier is not shown as planned — ✅ Q10 RULED 2026-09-11 | Opus · high | a free slot (H3 is live; reuse the shipped availability data) |
 | **N4** | **N4** = chat_threads fields + E4 (see overrides) | a couple can't move a conversation, accept their own inquiry or stamp a lock; a shop's email/phone can't be pulled from the database | Opus · high (DRAFT) | a free slot; B2's files untouched |
+| **L2+L4** | **SMALL RULINGS** (Sonnet · medium): L2 = no website/social link on a shop's public page (owner Q3 "never show links"; keep saved values, keep embedded videos) → then L4 = the free day-of tools get a dated end in ONE config value and shops see "free until …" (owner Q7) | a couple can't tap out of a shop page; shops know when free tools end | Sonnet · medium | L2 after HONEST SHOP's E1 merges (same file) |
+| **L3** | **BADGE DEADLINES** (Opus · high): the two early shops keep Verified for 6 months while papers come in (Q4); a permit reminder 60 days ahead, badge off at expiry, shop stays bookable (Q5). RULE 0: reuse `next_renewal_due_at` and the vouch's 182-day deadline machinery; never unpublish a shop | badges tell the truth over time | Opus · high | a free slot |
 
 **Running now (not bundles):** N0-finish · N1 (then E4) · N3 — code, Opus · P2 · F0 — drawings, Fable.
 **Slot order as each security session finishes:** LAND → B2 → HONEST SHOP → CLEANUPS; then 5, 6, 7, 8
@@ -132,6 +134,7 @@ access you can take back.
 5. **Look at the corrected six-door drawing** once F0 finishes (unblocks 21).
 5b. **Look at the Free-vs-Solo drawing** once P2 finishes — approve or strike each line (unblocks 20).
 6. ✅ Questions 9 and 10 RULED 2026-09-11 (H4, H5 unblocked).
+8. ✅ Register Q2–Q8 RULED 2026-09-11 (DECISION_LOG): Approve warns now, refuses before the first outside shop · never show shop website/social links · early badges 6 months · permit: remind 60 days, badge off · keep both message lists · free day-of tools get a dated end · keep the "where you stand" wording.
 7. ✅ Mood-board credits RULED 2026-09-11: only the couple (and admins) — N4 part 4.
 
 ---
