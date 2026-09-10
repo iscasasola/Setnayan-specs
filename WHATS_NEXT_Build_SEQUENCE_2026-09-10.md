@@ -69,6 +69,10 @@ bundle overrides in WHATS_NEXT_Build_SEQUENCE_2026-09-10.md.`
   (`chat-lock-booking.server.ts`, `chat-amendment-card.tsx`, `negotiation-actions.ts`), wait for B2 to merge — never
   edit B2's files in parallel. Then the E4 section (shop contact_email/phone columns), its own DRAFT PR.
   Takes the next free slot after B2 is up for the owner's look; runs beside HONEST SHOP / CLEANUPS (no shared file).
+  PART 3 (found by N3, #5415): the generic signer `displayUrlForStoredAsset` signs a file in ANY bucket for any caller,
+  and three browser-writable columns reach it — `event_editorial.draft_json`, `guests.photo_url`,
+  `vendor_profiles.logo_url`. Make the generic signer public-bucket-only (private reads keep their own dedicated,
+  scoped signers); list every caller first and prove none legitimately signs a private bucket through it.
 
 ---
 
@@ -123,6 +127,7 @@ access you can take back.
 5. **Look at the corrected six-door drawing** once F0 finishes (unblocks 21).
 5b. **Look at the Free-vs-Solo drawing** once P2 finishes — approve or strike each line (unblocks 20).
 6. Questions 9 and 10 in the register (unblock 22 and 23) — both can wait.
+7. **(new, from #5415 — can wait)** May a guest or a booked supplier start a mood-board render with the couple's credits, or agree to share the couple's renders into the public pool? Today any event member can. Recommendation: only the couple (and admins).
 
 ---
 
@@ -196,10 +201,10 @@ work; **Fable** only for drawings.
 | T1 watcher | ✅ SERVED | #5413 · e4e55e0 ancestor of prod ba93a8f — also fixed two phantom vendor_services columns (b39d82c) |
 | N0 cleanup-delete pin | ✅ SERVED | #5414 · ba93a8f in prod; read-only prod: 5 RESTRICTIVE policies live, authenticated UPDATE on papic key columns gone, migration 20271219262486 recorded |
 | N1 chat door | ⏳ releasing | #5417 — reviewed by orchestrator; merged main 24eafad (baseline regenerated: unchanged, 6622); 74/74 chat+erasure+pin db tests on the merged tree; prod rehearsal NOT run (Supabase connector invalidated) — prod is PG 17.6 (DECISION_LOG 2026-07-24), replay is PG17; verify live objects after deploy |
-| N3 render keys | 🔨 building (Opus) | launched 2026-09-10 ~15:48Z |
+| N3 render keys | ⏳ auto-merge | #5415 — reviewed by orchestrator (all 5 website-media writers write setnayan-media or http(s)); prod rolled-back rehearsal passed (session); merged main 7ab1418, baseline = main |
 | P2 Free-vs-Solo drawing | ✅ DRAWN — waits on the owner's look | `4facf58` · prototypes/shop_page_free_vs_solo_2026-09-10.html · 2 proposals (plain strip on Free; shop-only Solo preview), stock photo drawn both ways |
 | F0 six-door drawing | ✅ CORRECTED — waits on the owner's look | prototypes/shop_page_2026-09-10.html · 91-row "every shipped control → its door" table (`data-shipped`) for G1's guard; moodboard-library and permit-renewal claims corrected |
 | H3 drag your own order | ✅ ALREADY LIVE — dropped | `ad2787fda5` (2026-09-09) on main = prod `0d3a1e0`; table `event_bench_arrangement`, long-press, "Your order" |
-| bundles 1–8 | ⬜ not started | re-planned 2026-09-11 (top of file); LAND → B2 → HONEST SHOP → CLEANUPS take the next free slots |
+| bundles 1–8 | 🔨 LAND · B2 · HONEST SHOP running | LAND launched ~01:00, B2 ~01:40, HONEST SHOP ~02:10 Manila 2026-09-11; CLEANUPS then N4 next |
 
 **Rescue copies** of every unsaved workspace from today: `/Users/icecasasola/Documents/Claude/Projects/setnayan-rescue-2026-09-10/` (restore guide inside).
