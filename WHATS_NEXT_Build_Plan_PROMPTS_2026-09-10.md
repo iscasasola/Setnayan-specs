@@ -967,7 +967,8 @@ MEASURED 2026-09-10 (post-merge review of #5404, executed in the replay, read in
     `attachment_url`. INSERT on the message text and the legacy `attachment_url` column is granted to every
     signed-in user; no trigger screens either.
 2 · The contact screen `lib/chat-contact-filter.ts` runs only in app code and only when
-    NEXT_PUBLIC_CHAT_CONTACT_FILTER_ENABLED is on (defaults OFF; its prod value is unknown — the OWNER must say).
+    NEXT_PUBLIC_CHAT_CONTACT_FILTER_ENABLED is on. ✅ OWNER CONFIRMED 2026-09-10: it IS `true` in production, so the
+    app-side screen is live. The gap is that a DIRECT PostgREST insert skips it — that is what C must close.
 3 · `app/api/chat/attachment/[messageId]/route.ts` (~66-73) treats any non-`r2://` attachment_url as a legacy URL
     and 302-REDIRECTS to it — so `https://wa.me/…`, `viber://…` or `m.me/…` shows as a file card on setnayan.com
     and opens WhatsApp/Viber. That is a door out AND an open redirect.

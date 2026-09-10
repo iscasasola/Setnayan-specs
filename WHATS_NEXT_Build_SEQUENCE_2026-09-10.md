@@ -22,7 +22,7 @@ access you can take back.
 | # | Session | What a person gets | Model · effort | Waits on |
 |---|---|---|---|---|
 | **1** | **N0** | Our cleanup jobs can never delete someone else's file | Opus · high | its build finishing (running now) |
-| **2** | **N1** | The chat can't be used to swap numbers, open WhatsApp, or post into someone else's conversation | Opus · high | **you:** is the chat contact filter on in Vercel? |
+| **2** | **N1** | The chat can't be used to swap numbers, open WhatsApp, or post into someone else's conversation | Opus · high | nothing (owner confirmed the filter is ON) |
 | **2b** | **N3** | A mood-board render can't be used to read a stranger's payment receipt | Opus · high | nothing |
 | **3** | **B1** | No service card goes live without a name | Opus · high | nothing |
 | **4** | **B2** | After a lock, a price change shows both numbers | Opus · high | **your look** before merge |
@@ -49,7 +49,7 @@ access you can take back.
 | **23** | **H5** | "Lock this" stops showing for a supplier who declined | Sonnet · medium | **your question 10**, H3 |
 
 **What only you can do, in the order it unblocks things:**
-1. Tell me whether **NEXT_PUBLIC_CHAT_CONTACT_FILTER_ENABLED** is on in Vercel (unblocks 2).
+1. ~~Chat contact filter~~ — ✅ confirmed ON in Vercel, 2026-09-10.
 2. **Look at "both numbers after a lock"** when B2 is ready (unblocks 4, then the test).
 3. **Prep the test:** rename the "(FIXTURE)" band shop, real titles + cover photos on its two cards,
    a GCash QR, leave the gift at "no", play the couple on **testnayan4** (give its event a date).
