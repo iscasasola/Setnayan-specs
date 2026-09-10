@@ -36,7 +36,8 @@ Every remaining row was re-measured against `origin/main` `0d3a1e0` (= productio
 | **6** | **NEW SHOP PAGE** = D1 → F1 → F2 | "Want to add them to your event?" · then the new shop page, top then body | Opus · high | **your look** at the shop-page drawing (D1) and at P2 (F1); bundle 3 merged |
 | — | **TEST ROUND 2** | a couple with two events | — | D1 live |
 | **7** | **SIX-DOOR MY SHOP** = G1 → G2 → G3 | My Shop in six doors, nothing lost | Opus · high | **your look** at F0; bundle 4 merged |
-| **8** | **H4** | a supplier can say a payment never arrived | Opus · xhigh | **your question 9**, B2 |
+| **8** | **H4** | a supplier can say a payment never arrived — ✅ Q9 RULED 2026-09-11: one path for every payment | Opus · xhigh (DRAFT) | B2 merged |
+| **9** | **H5** | "Lock this" hidden (with the reason) for a supplier who said "not free on your date"; an unavailable supplier is not shown as planned — ✅ Q10 RULED 2026-09-11 | Opus · high | a free slot (H3 is live; reuse the shipped availability data) |
 | **N4** | **N4** = chat_threads fields + E4 (see overrides) | a couple can't move a conversation, accept their own inquiry or stamp a lock; a shop's email/phone can't be pulled from the database | Opus · high (DRAFT) | a free slot; B2's files untouched |
 
 **Running now (not bundles):** N0-finish · N1 (then E4) · N3 — code, Opus · P2 · F0 — drawings, Fable.
@@ -74,6 +75,9 @@ bundle overrides in WHATS_NEXT_Build_SEQUENCE_2026-09-10.md.`
   and three browser-writable columns reach it — `event_editorial.draft_json`, `guests.photo_url`,
   `vendor_profiles.logo_url`. Make the generic signer public-bucket-only (private reads keep their own dedicated,
   scoped signers); list every caller first and prove none legitimately signs a private bucket through it.
+  PART 4 (owner ruling 2026-09-11): only the couple (and admins) may start a mood-board render on the couple's credits
+  or give share consent — narrow `moodboard_render_caller_may_act` and the consent path; keep every other member's
+  read access as it is.
 
 ---
 
@@ -123,12 +127,12 @@ access you can take back.
 2. **Look at "both numbers after a lock"** when B2 is ready (unblocks 4, then the test).
 3. **Prep the test:** ⚠ ORDER MATTERS (B1 is live): rename the shop and type the two card titles BEFORE saving any card with a blank title — a blank card saved first is auto-named "… by Saysay … (FIXTURE)" and a later rename does not change it. Rename the "(FIXTURE)" band shop, real titles + cover photos on its two cards,
    a GCash QR, leave the gift at "no", play the couple on **testnayan4** (give its event a date).
-4. **Look at the corrected shop-page drawing** (unblocks 12 and 20) — and rule on the **stock photo**
+4. ✅ **Stock photo RULED 2026-09-11: the clean card design, no stock photo** (F1 builds it). **Look at the corrected shop-page drawing** (unblocks 12 and 20) —
    while you are there: keep it (your 4 June order) or replace it?
 5. **Look at the corrected six-door drawing** once F0 finishes (unblocks 21).
 5b. **Look at the Free-vs-Solo drawing** once P2 finishes — approve or strike each line (unblocks 20).
-6. Questions 9 and 10 in the register (unblock 22 and 23) — both can wait.
-7. **(new, from #5415 — can wait)** May a guest or a booked supplier start a mood-board render with the couple's credits, or agree to share the couple's renders into the public pool? Today any event member can. Recommendation: only the couple (and admins).
+6. ✅ Questions 9 and 10 RULED 2026-09-11 (H4, H5 unblocked).
+7. ✅ Mood-board credits RULED 2026-09-11: only the couple (and admins) — N4 part 4.
 
 ---
 
