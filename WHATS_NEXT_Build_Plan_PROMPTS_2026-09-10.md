@@ -771,12 +771,13 @@ This prompt was written on 2026-09-10 from a search of PR titles and branches, n
 here to extend the arrangement, start from #5367's code, never from this section.
 ```
 
-## H4 — A supplier can say a logged payment never arrived (after owner question 9)
+## H4 — A supplier can say a logged payment never arrived (question 9 RULED 2026-09-11)
 
 ```
 (Paste after the SHARED HEADER — or read it from the top of this file.)
 
-DO NOT START until the owner has answered question 9 in the build plan's § 5. Build what he chose.
+RULED 2026-09-11 — DECISION_LOG "NOT RECEIVED USES ONE PATH FOR EVERY PAYMENT": the owner chose the
+recommended answer below, verbatim "Same path for every payment". Build exactly that; do not re-ask.
 
 GOAL: a supplier who did not receive what the couple logged can say so, with a reason, from the Decisions
 view and from the payment section; the couple sees it; a deposit goes to Setnayan to referee.
@@ -791,13 +792,13 @@ WHAT EXISTS — MEASURED 2026-09-10:
 - INSTALMENTS HAVE NO REFUSAL. The v4 design drew "Not received"; the product has none.
 - Decisions' payment reply today is "Confirm received" only (PR #5402, lib/thread-decisions.ts).
 
-DELTA (the recommended answer — confirm it matches the owner's): the deposit's ledger row routes to the
+DELTA (the RULED answer): the deposit's ledger row routes to the
 EXISTING reject_vendor_deposit, never a second refusal path for the same money; instalments get a mirror
 of the deposit's columns and SECURITY DEFINER function on event_vendor_payments, and a second section on
 /admin/disputes; confirming the deposit's row also acknowledges the deposit. Add the reply to
 DecisionReply and keep `reply ⇔ needsYou` true — its test sweeps every kind.
 
-START AFTER question 9, #5411 AND B2 HAVE MERGED. GATE: owner. MODEL: opus · xhigh. OPEN AS DRAFT (money).
+START AFTER B2 HAS MERGED (#5411 is served; question 9 is ruled). GATE: none. MODEL: opus · xhigh. OPEN AS DRAFT (money).
 MAY TOUCH: one new migration, app/admin/disputes, app/vendor-dashboard/messages/[threadId]/pay-confirm-
 actions.ts and page.tsx, app/_components/chat-thread-views.tsx, lib/thread-decisions.ts, and the
 field-parity guard lib/a-decision-reply-posts-what-the-action-reads.test.ts (add the new reply's case).
@@ -805,12 +806,14 @@ PROVE IT: merged + served; a refused instalment appears on /admin/disputes; the 
 reads the supplier's reason; a refused deposit takes the existing path.
 ```
 
-## H5 — "Lock this" stops being offered on a supplier who said they aren't free (after owner question 10)
+## H5 — "Lock this" stops for a supplier who said they aren't free; an unavailable date is not "planned" (RULED 2026-09-11 · S2 owns it)
 
 ```
 (Paste after the SHARED HEADER — or read it from the top of this file.)
 
-DO NOT START until the owner has answered question 10 in the build plan's § 5.
+RULED 2026-09-11 — DECISION_LOG "A SUPPLIER WHO SAID 'NOT FREE ON YOUR DATE' LOSES LOCK, AND SHOULD NOT SIT
+AMONG THE PLANNED". Owner, verbatim: "hide lock, say why. but technically, they shouldn't even be shown as
+planned based on their schedule availability." S2 is building this — check the SEQUENCE Status table first.
 
 GOAL: a couple is not invited to lock a supplier who already declined their date.
 
@@ -818,11 +821,15 @@ WHAT EXISTS: prototypes/chat_interface_v4_2026-09-09.md § 4 point 6 — the ben
 INQUIRY decline because resolveBenchCardActions does not read the thread. That is correct after a
 LOCK-REQUEST decline (they may be asked again).
 
-DELTA (recommended): after an inquiry decline, withhold Lock and say why; keep it after a lock-request
-decline. Adds a line; removes no control from any other card.
+DELTA (RULED): (1) after an inquiry answered "not free on your date", withhold Lock and say why; keep it
+after a declined LOCK REQUEST. (2) a supplier whose own schedule shows the date unavailable is not presented
+as a planned pick — shown as not available, NEVER deleted. RULE 0 FIRST: find and reuse the shipped
+availability data (daily capacity, per-date holds, schedule pools) and the bench's existing not-available
+treatments (the "Booked that day" fit badge, the dimmed "Doesn't fit your build" row) before adding any.
+Surface — do not guess — any product choice the ruling does not make (e.g. where such a card sits).
 
 START AFTER question 10. (H3 is already live as #5367 — it edited the same bench file; read its arrangement
-code before touching the card's actions.) GATE: owner. MODEL: sonnet · medium.
+code before touching the card's actions.) GATE: none. MODEL: Opus · high (re-tiered 2026-09-11).
 MAY TOUCH: app/dashboard/[eventId]/vendors/_components/bench-vendor-actions.tsx, shortlist-categories.tsx.
 lint-port-no-lost-controls stays green with its baseline UNTOUCHED.
 PROVE IT: merged + served; a declined supplier's card shows the reason, not Lock.

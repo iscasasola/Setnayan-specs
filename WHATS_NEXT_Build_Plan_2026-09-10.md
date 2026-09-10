@@ -155,9 +155,9 @@ government-ID delete guard) · **E4** (close the database door to shop email/pho
 - **H2** (publish gate: cover photo + what's included) — after **C1**, on the service-card chain below.
   Not before test round 1: it would stop the owner's own test cards saving until his prep is done.
 - ~~**H3**~~ (drag to rearrange, S8) — **ALREADY LIVE, DO NOT BUILD:** **#5367** (merged 2026-09-09, served — prod `0d3a1e0`). See § 4 H3.
-- **H4** ("Not received" for a payment) — after owner question **9**, after **#5411** and after **B2**
+- **H4** ("Not received" for a payment) — ✅ question **9 RULED 2026-09-11** ("same path for every payment"); #5411 served; waits on **B2**
   (money on the same booking rows). DRAFT, like every money PR here.
-- **H5** ("Lock this" on a supplier who declined) — after owner question **10** only (H3 already shipped
+- **H5** ("Lock this" on a supplier who declined + not shown as planned when the date is unavailable) — ✅ question **10 RULED 2026-09-11**; **taken by S2**, Opus · high (H3 already shipped
   as #5367, in the same bench file). Small.
 
 **Serialised chains — respect them exactly:**
@@ -710,7 +710,7 @@ parallel-safe with · must not run with · done means. Session IDs are stable �
   grep for the store and the UI, not a search for a PR.** Caught by the build orchestrator, 2026-09-11.
 - H5 no longer waits on it.
 
-### H4 · A supplier can say a logged payment never arrived — **after owner question 9**
+### H4 · A supplier can say a logged payment never arrived — ✅ **question 9 RULED 2026-09-11**, waits on B2
 - **A person gets:** a supplier who did not receive what the couple logged can say so, with a reason,
   from Decisions and from the payment section; the couple sees it; a deposit goes to Setnayan to referee,
   as it does today.
@@ -720,25 +720,32 @@ parallel-safe with · must not run with · done means. Session IDs are stable �
   `confirm_vendor_payment` stamps only that row — never `deposit_acknowledged_at` — so one sum can already
   carry two independent supplier answers, linked by a notes substring. **Installments have no refusal
   at all.** The design drew "Not received"; the product has none.
-- **Delta:** as question 9 decides. Recommended: the deposit's row routes to the existing
+- **Delta — RULED 2026-09-11 (DECISION_LOG "NOT RECEIVED USES ONE PATH FOR EVERY PAYMENT"; the owner chose the recommendation):** the deposit's row routes to the existing
   `reject_vendor_deposit` (never a second refusal path for the same money); installments get a mirror of
   the deposit's columns and function on `event_vendor_payments` and a second section on the disputes
   page; and confirming the deposit's row also acknowledges the deposit, so the two answers stop drifting.
-- **Depends on:** question 9; #5411 and B2 merged. **Gate:** owner. **Model/effort:** opus · xhigh. DRAFT.
+- **Depends on:** B2 merged (#5411 is served; question 9 is ruled). **Gate:** none left. **Model/effort:** opus · xhigh. DRAFT.
 - **Touches:** a migration (columns + SECURITY DEFINER function + trigger guard), `app/admin/disputes`,
   `pay-confirm-actions.ts`, the supplier thread page, `chat-thread-views.tsx`, `lib/thread-decisions.ts`.
 - **Must not run with:** B2, C1 (money on the same booking), anything on the Decisions files.
 - **Done means:** merged and served; a refused installment appears on `/admin/disputes`; the couple's
   Decisions line reads the supplier's reason; a refused deposit takes the existing path, not a new one.
 
-### H5 · "Lock this" stops being offered on a supplier who said they aren't free — **after owner question 10**
+### H5 · "Lock this" stops being offered on a supplier who said they aren't free — and one whose schedule shows the date taken is not presented as planned — ✅ **question 10 RULED 2026-09-11 · taken by S2**
 - **A person gets:** a couple is not invited to lock a supplier who already declined their date.
 - **Already exists:** v4's own note (§ 4, point 6): the bench keeps **Lock this** after a supplier
   declines the inquiry, because `resolveBenchCardActions` does not read the thread. Correct after a
   *lock-request* decline (they may ask again); odd after an *inquiry* decline.
-- **Delta:** after an inquiry decline, withhold Lock and say why; keep it after a lock-request decline.
-  Adds a line, removes no control from any other card.
-- **Depends on:** question 10. **Gate:** owner. **Model/effort:** sonnet · medium. (#5367 already edits the same bench file — read its arrangement code first.)
+- **Delta — RULED 2026-09-11** (owner, verbatim: *"hide lock, say why. but technically, they shouldn't
+  even be shown as planned based on their schedule availability."*):
+  (1) after an inquiry answered "not free on your date", hide Lock and say why; keep Lock after a
+  declined *lock request*. (2) **NEW:** a supplier whose own schedule shows the date unavailable is not
+  presented as a planned pick on that event — **shown as not available, never deleted.** RULE 0 first:
+  find and reuse the shipped availability data (daily capacity, per-date holds, schedule pools) and the
+  bench's existing not-available treatments (the *Booked that day* fit badge, the dimmed
+  *Doesn't fit your build* row). Any product choice beyond the ruling (where such a card sits) is
+  surfaced, not guessed. Adds lines; removes no control from any card.
+- **Depends on:** nothing (question 10 ruled; #5367 already edits the same bench file — read its arrangement code first). **Gate:** none. **Model/effort:** **Opus · high** (re-tiered 2026-09-11 for the availability half). **Owner of the build:** S2.
 - **Touches:** `bench-vendor-actions.tsx` / `resolveBenchCardActions`, `shortlist-categories.tsx`.
 - **Done means:** merged and served; a declined supplier's card shows the reason, not Lock.
 
@@ -828,11 +835,11 @@ parallel-safe with · must not run with · done means. Session IDs are stable �
 8. **[CAN WAIT — ships as proposed]** The supplier's own "where you stand" line (#5411) reads *"Quoted
    ₱187,500 · waiting on them"* and *"They replied yesterday"*. Keep, or reword? My recommendation: keep —
    it is the couple's sentence turned round, and a rewording is one line in one file.
-9. **[CAN WAIT — blocks H4 only]** "Not received" for a payment the couple logged. The deposit already
+9. ✅ **RULED 2026-09-11 — "same path for every payment" (the recommendation below).** "Not received" for a payment the couple logged. The deposit already
    has one (Setnayan referees it); ordinary instalments have none. My recommendation: the deposit keeps its
    existing path; instalments get the same one, refereed on the same disputes page; and confirming a
    deposit in the chat also confirms it on the booking, so the two can never disagree.
-10. **[CAN WAIT — blocks H5 only]** The bench still offers "Lock this" on a supplier who has said they are
+10. ✅ **RULED 2026-09-11 — the recommendation, plus: *"they shouldn't even be shown as planned based on their schedule availability."*** The bench still offers "Lock this" on a supplier who has said they are
    not free on your date. My recommendation: after that kind of no, hide Lock and say why; after a no to a
    *lock request*, keep it — they may be asked again.
 
