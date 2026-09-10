@@ -135,6 +135,7 @@ access you can take back.
 5b. **Look at the Free-vs-Solo drawing** once P2 finishes — approve or strike each line (unblocks 20).
 6. ✅ Questions 9 and 10 RULED 2026-09-11 (H4, H5 unblocked).
 8. ✅ Register Q2–Q8 RULED 2026-09-11 (DECISION_LOG): Approve warns now, refuses before the first outside shop · never show shop website/social links · early badges 6 months · permit: remind 60 days, badge off · keep both message lists · free day-of tools get a dated end · keep the "where you stand" wording.
+9. **(can wait)** PR-G2's other half, "Beyond reach" — once a venue is locked, suppliers too far from it. Outside the Q10 ruling (that was about schedule); noted by S2 in the Explore Replan spec and the register's H5 card. Not a session yet.
 7. ✅ Mood-board credits RULED 2026-09-11: only the couple (and admins) — N4 part 4.
 
 ---
@@ -218,6 +219,6 @@ work; **Fable** only for drawings.
 | LAND · E3 ID-delete guard | ✅ MERGED | #5420 · reviewed by orchestrator (behaviour-preserving; 100/100; 9 sabotages RED) |
 | LAND · D4 every film | ✅ SERVED | #5140 · 8947934; `event_films` live, RLS on, anon no SELECT (orchestrator read prod); #5012 CLOSED |
 | bundles 2–8 | 🔨 B2 · HONEST SHOP · CLEANUPS running | N4 next free slot |
-| H5 Lock after "not free" + unavailable not planned | 🔨 OWNED BY S2 (local_3e75b0b1…) — DO NOT LAUNCH A SECOND | Q10 ruled 2026-09-11; Opus · high; normal PR; S2 surfaces any product choice in the availability half |
+| H5 Lock after "not free" + unavailable not planned | ⏳ PR OPEN (S2) — auto-merge | #5425 · built to the owner-locked Explore Replan PR-G2 spec (dim + booking-disabled + sink behind "Not available", never removed; one predicate for card, rail and Picks); also fixed the soft-tier build note that never rendered. S2 confirms served. |
 
 **Rescue copies** of every unsaved workspace from today: `/Users/icecasasola/Documents/Claude/Projects/setnayan-rescue-2026-09-10/` (restore guide inside).
