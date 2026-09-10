@@ -124,6 +124,15 @@ excess = (P − A) − share × (G − n)      -- tier 3, open to all
 ceiling(guest) = allotment(guest)  OR  share
 ```
 
+🔴 **ADDED 2026-09-11 — A NUMBER THE COUPLE TYPES FOR "EVERYONE ELSE" IS AN *AT MOST*:
+`ceiling = LEAST(typed, share)`** (× a sponsor's weight). Until code PR #5422 the couple's sheet
+showed a typed number capped at the share while the database enforced it raw — a couple who typed
+500 on a pot dividing to 14 was shown 14 while every guest could spend 500. A raw typed number
+breaks both "capping everyone is the guarantee" and 7c (named guests' shots protected all night),
+so the database was brought to the sheet's rule. Where no share exists (no pot, nobody left to
+divide among) the typed number stands alone. A top-up lifts every guest toward the typed number
+and never past it. See the 2026-09-11 DECISION_LOG row.
+
 ✅ **`papic_event_pool_status` already computes `total_points`, `used_points`,
 `remaining_points` and `soft_stop_at` in one call** (`20271131476413_papic_host_hands_out_shots_to_a_camera.sql`).
 
