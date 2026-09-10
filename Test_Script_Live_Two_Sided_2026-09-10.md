@@ -72,6 +72,15 @@ Do these in order. After each starred tap, whoever is watching production will t
 plain words whether the database agrees with what the screen showed — say so before you move
 to the next tap.
 
+**The tool for that watching** (code repo, read-only, never run on its own):
+`apps/web/scripts/prove-the-flow-watch.ts` — `SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… npx tsx
+scripts/prove-the-flow-watch.ts --vendor-slug=<shop slug> --event-id=<couple's event UUID>`. Run
+it again by hand after each tap; add `--save=/tmp/t1.json --diff-against=/tmp/t1.json` from the
+second run on to catch a price silently replaced instead of shown beside the old one (B2's
+exact failure shape). It prints six lines — card, inquiry, chat Deal, quote, lock, price change
+since lock — each in the same plain words this page uses, so a mismatch against the screen is
+obvious without reading SQL.
+
 1. **[Supplier] Publish a card with a price and the gift left at "no".** ★ The card publishes.
    Nobody demands a gift value. *(Proves A1.)*
 2. **[Couple] Find the shop in the marketplace and open its page.** The card shows its new
