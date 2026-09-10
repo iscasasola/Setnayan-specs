@@ -1,5 +1,9 @@
 # S2 · S4 · S8 — the last three of the chat/bench plan
 
+> ✅ **ALL THREE ARE BUILT — DO NOT RELAUNCH ANY PROMPT IN THIS FILE** (checked against `origin/main`,
+> 2026-09-11). **S2** Decisions → #5372 · #5402 · #5411. **S4** short previews → #5369. **S8** arrange
+> your own shortlist → #5367. Live register: `WHATS_NEXT_Build_Plan_2026-09-10.md`.
+
 > Paste the **shared header** from `SESSION_PROMPTS_2026-09-09.md` first, then ONE block.
 >
 > ⛔ **S4 and S8 must NOT run together with each other or with S2 until S6 (#5360) has

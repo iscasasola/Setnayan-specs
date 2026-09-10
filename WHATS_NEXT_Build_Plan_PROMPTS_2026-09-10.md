@@ -761,36 +761,14 @@ PROVE IT: merged + served; read-only prod — the publish trigger's body refuses
 owner's prepped test cards still save.
 ```
 
-## H3 — Drag your suppliers into your own order (S8), per category
+## ~~H3 — Drag your suppliers into your own order (S8)~~ — ✅ ALREADY LIVE · DO NOT LAUNCH
 
 ```
-(Paste after the SHARED HEADER — or read it from the top of this file.)
-
-GOAL: long-press a supplier card and drag it; the row says "Your order" with a Reset that clears THAT
-CATEGORY ONLY; keyboard move-left/right; every host of the celebration sees one order; pins beat sort; a
-card they placed stays put when new suppliers arrive.
-
-ALREADY RULED — DO NOT ASK: PER CATEGORY (owner 2026-09-09, "per category"). Keyed (celebration, tile).
-
-BEFORE STARTING: check the register's H3 row for an owner or a branch. As of 2026-09-10 the orchestrator confirmed no one has S8: no branch, no worktree.
-
-WHAT EXISTS: S7 (#5351) — orderInlineMoreRow orders the tail by writing back into the SAME indices, so a
-protected row cannot move. Nothing stores an arrangement.
-⛔ DO NOT reuse event_category_build_state.pinned_vendor_id — same word, different fact (the Build
-solver's Locked pick, dark behind BUILD_3STATE_ENABLED, and a single pin where you need an ordered set).
-
-DELTA: its own table, ONE ROW PER PIN, keyed (event_id, tile, vendor_id), ON DELETE CASCADE off
-event_vendors — removing a supplier is a real DELETE (vendors/actions.ts: releaseSchedulePools then
-.delete()), and manual suppliers are event_vendors rows too (20260604080000), so one FK covers every card.
-RLS at CREATE TABLE time (canonical patterns only). The bench reads it.
-
-START AFTER A5 HAS MERGED (same file). GATE: none. MODEL: opus · xhigh. MAY TOUCH:
-app/dashboard/[eventId]/vendors/_components/shortlist-categories.tsx, one new migration + RLS,
-supabase/security/exposure-surface.baseline.txt (regenerate AFTER merging main, read every added line),
-apps/web/lib/ugat/graph.ts (CLAUDE.md rule 4). lint-port-no-lost-controls stays green with its baseline
-UNTOUCHED — if it fires, put the control back.
-PROVE IT: merged + served; two hosts of one celebration see the same order after a drag; removing a
-dragged supplier leaves no pin row (read-only prod).
+DO NOT BUILD. This shipped as PR #5367 ("a couple can arrange their own shortlist — per category",
+merged 2026-09-09, commit ad2787fda5) and production serves it (0d3a1e0): table event_bench_arrangement,
+_actions/bench-arrangement.ts, long-press drag and "Your order" in shortlist-categories.tsx, no flag.
+This prompt was written on 2026-09-10 from a search of PR titles and branches, not the code. If you are
+here to extend the arrangement, start from #5367's code, never from this section.
 ```
 
 ## H4 — A supplier can say a logged payment never arrived (after owner question 9)
@@ -843,7 +821,8 @@ LOCK-REQUEST decline (they may be asked again).
 DELTA (recommended): after an inquiry decline, withhold Lock and say why; keep it after a lock-request
 decline. Adds a line; removes no control from any other card.
 
-START AFTER question 10 AND H3 HAVE MERGED (same bench file). GATE: owner. MODEL: sonnet · medium.
+START AFTER question 10. (H3 is already live as #5367 — it edited the same bench file; read its arrangement
+code before touching the card's actions.) GATE: owner. MODEL: sonnet · medium.
 MAY TOUCH: app/dashboard/[eventId]/vendors/_components/bench-vendor-actions.tsx, shortlist-categories.tsx.
 lint-port-no-lost-controls stays green with its baseline UNTOUCHED.
 PROVE IT: merged + served; a declined supplier's card shows the reason, not Lock.

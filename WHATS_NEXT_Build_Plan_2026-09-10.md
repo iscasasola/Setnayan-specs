@@ -13,6 +13,7 @@
 > items left over from `BUILD_PLAN_Chat_And_Exclusive_2026-09-09.md` that this plan did not carry.
 > Four are off the test's critical path; one is #5411, which lands by itself. Placement in § 3, owner
 > questions 8–10 in § 5, launch prompts in the PROMPTS file. Nothing else in this plan was changed.
+> ✂ **2026-09-11: H3 STRUCK — it was already live (#5367, 9 Sept).** H1 is served (#5411). See § 4 H3.
 
 > **Register. The one open stream for the supplier ↔ couple path.** Prompts to launch each session:
 > [`WHATS_NEXT_Build_Plan_PROMPTS_2026-09-10.md`](WHATS_NEXT_Build_Plan_PROMPTS_2026-09-10.md).
@@ -70,8 +71,8 @@ once.** Your test will be the first time.
   honest shop page (songs only for music acts, no "0 yrs", a lapsed plan loses its paid look).
 - **Alongside, off the test path (H stream):** answering a meeting with a new time from the Decisions
   view, and the supplier's own "where you stand" line, land by themselves (#5411) · a card can't go
-  live without a cover photo and what's included · drag your suppliers into your own order · and two
-  small questions for you before the last two (below, 9 and 10).
+  live without a cover photo and what's included · and two small questions for you before the last
+  two (below, 9 and 10). (Dragging your suppliers into your own order is **already live** — since 9 Sept.)
 - **After you have seen the drawing:** the add-to-your-event section · the old verify page points to
   the new one · a share preview that never breaks · then the new shop page and the six-door My Shop.
 
@@ -153,24 +154,23 @@ government-ID delete guard) · **E4** (close the database door to shop email/pho
 **H STREAM — off the critical path; each takes the first free code slot once its dependency lands:**
 - **H2** (publish gate: cover photo + what's included) — after **C1**, on the service-card chain below.
   Not before test round 1: it would stop the owner's own test cards saving until his prep is done.
-- **H3** (drag to rearrange, S8) — after **A5** (same bench file). Its own table ⇒ joins the
-  exposure-baseline chain last.
+- ~~**H3**~~ (drag to rearrange, S8) — **ALREADY LIVE, DO NOT BUILD:** **#5367** (merged 2026-09-09, served — prod `0d3a1e0`). See § 4 H3.
 - **H4** ("Not received" for a payment) — after owner question **9**, after **#5411** and after **B2**
   (money on the same booking rows). DRAFT, like every money PR here.
-- **H5** ("Lock this" on a supplier who declined) — after owner question **10**, and after **H3** (same
-  file). Small.
+- **H5** ("Lock this" on a supplier who declined) — after owner question **10** only (H3 already shipped
+  as #5367, in the same bench file). Small.
 
 **Serialised chains — respect them exactly:**
 - **Public shop page file** (`app/v/[slug]/page.tsx`): #5404 → D1 → D2 → E1 → F1 → F2. If D1's
   viewing has not happened when D2 is ready, D2 goes first. Never two at once.
 - **Exposure-baseline header** (`supabase/security/exposure-surface.baseline.txt`): #5377 (lands
-  itself) → A1 (regenerates again) → B2 → D4/#5140 → C1 if it adds grants → E4 → H3 → H4.
+  itself) → A1 (regenerates again) → B2 → D4/#5140 → C1 if it adds grants → E4 → H4.
 - **Port-control baseline** (`apps/web/scripts/port-control-baseline.json`, generated): whoever
   merges second regenerates it from the merged tree — A1 · #5404 · D1 · D3 · G1–G3 all touch it.
 - **Chat lock card** (`chat-amendment-card.tsx`): #5402 → A2 → B2.
 - **Chat lock booking** (`lib/chat-lock-booking.server.ts`): B2 → C1.
 - **Service-card files**: A1 → B1 → C1 → H2.
-- **Bench card file** (`shortlist-categories.tsx`): A5 → H3 → H5. `lint-port-no-lost-controls` stays
+- **Bench card file** (`shortlist-categories.tsx`): A5 → H5 (#5367 already added the arrangement code there). `lint-port-no-lost-controls` stays
   green with its baseline UNTOUCHED on every one of them.
 - **Decisions files** (`chat-thread-views.tsx`, `lib/thread-decisions.ts`, both thread pages): #5411 → H4.
 - **Couple's supplier card** (`vendor-itemization-card.tsx`): #5404 → B2.
@@ -697,24 +697,18 @@ parallel-safe with · must not run with · done means. Session IDs are stable �
 - **Done means:** merged and served; read-only prod: the publish trigger refuses a card with no cover;
   the owner's prepped test cards still save.
 
-### H3 · Drag your suppliers into your own order (S8), per category
-- **A person gets:** long-press a supplier card and drag it; the row says *"Your order"* with a Reset that
-  clears **that category only**; keyboard move-left/right; every host of the celebration sees one order;
-  a card they placed stays put when new suppliers arrive.
-- **Already exists:** the owner ruled **per category** (2026-09-09, closed). S7's `orderInlineMoreRow`
-  orders the tail; nothing stores an arrangement. ⛔ `event_category_build_state.pinned_vendor_id` exists
-  and must NOT be reused — it is the Build solver's Locked pick, a different fact.
-- **Delta:** its own table, **one row per pin**, keyed `(event_id, tile, vendor_id)`, `ON DELETE CASCADE`
-  off `event_vendors` (removing a supplier is a real DELETE, and manual suppliers are `event_vendors`
-  rows too, so one foreign key covers every card); the bench reads it; pins beat the sort.
-- **Depends on:** A5 merged. **Gate:** none. **Model/effort:** opus · xhigh (gesture vs a snap carousel,
-  accessibility, new shared state).
-- **Touches:** `shortlist-categories.tsx`, a new migration + RLS, the exposure baseline (last on its
-  chain), `apps/web/lib/ugat/graph.ts` (CLAUDE.md rule 4).
-- **Parallel-safe with:** C1, C3, E-stream. **Must not run with:** A5, H5, anything in the bench file.
-- ⚠ Before starting: check the register's H3 row for an owner or a branch. As of 2026-09-10 the orchestrator confirmed no one has S8: no branch, no worktree.
-- **Done means:** merged and served; two hosts of one celebration see the same order after a drag;
-  removing a dragged supplier leaves no pin row behind (read-only prod).
+### ~~H3 · Drag your suppliers into your own order (S8)~~ — ✅ ALREADY LIVE · DO NOT BUILD
+- **It shipped as #5367** ("a couple can arrange their own shortlist — per category", merged
+  2026-09-09, commit `ad2787fda5`), served by production (`0d3a1e0`, ancestry checked 2026-09-11):
+  table `event_bench_arrangement` (one row per pin, `ON DELETE CASCADE` off `event_vendors`) from
+  migration `20271215752252`, `_actions/bench-arrangement.ts` + `lib/bench-arrangement.ts` with tests,
+  long-press drag and the "Your order" row in `shortlist-categories.tsx`. No flag.
+- 🔑 **Why this row existed at all — a Rule 0 miss, recorded so it is not repeated.** S2 added H3 on
+  2026-09-10 after checking PR TITLES ("drag", "rearrange" — the PR says "arrange") and REMOTE BRANCHES
+  (deleted on merge), never the CODE; the previous orchestrator then "confirmed no one has S8" the same
+  way. Three documents called it unstarted a day after it shipped. **An absence claim needs a code
+  grep for the store and the UI, not a search for a PR.** Caught by the build orchestrator, 2026-09-11.
+- H5 no longer waits on it.
 
 ### H4 · A supplier can say a logged payment never arrived — **after owner question 9**
 - **A person gets:** a supplier who did not receive what the couple logged can say so, with a reason,
@@ -744,7 +738,7 @@ parallel-safe with · must not run with · done means. Session IDs are stable �
   *lock-request* decline (they may ask again); odd after an *inquiry* decline.
 - **Delta:** after an inquiry decline, withhold Lock and say why; keep it after a lock-request decline.
   Adds a line, removes no control from any other card.
-- **Depends on:** question 10; H3 merged (same file). **Gate:** owner. **Model/effort:** sonnet · medium.
+- **Depends on:** question 10. **Gate:** owner. **Model/effort:** sonnet · medium. (#5367 already edits the same bench file — read its arrangement code first.)
 - **Touches:** `bench-vendor-actions.tsx` / `resolveBenchCardActions`, `shortlist-categories.tsx`.
 - **Done means:** merged and served; a declined supplier's card shows the reason, not Lock.
 

@@ -14,7 +14,8 @@
 >   Cover photo + inclusions → **H2**.
 > - **G1's "no cap" is SUPERSEDED** — DECISION_LOG 2026-09-09 caps the gift at the **50,000-credit rung**
 >   (min(40% of fee, the rung's price); the charge caps with it). S12 is now **EX-2 / C1** there.
-> - **S8 (drag) → H3** · **S1's open delta-line fix → B2** there · **G7 → question 6** there.
+> - **S8 (drag) is BUILT — #5367** (2026-09-09; this file and, briefly, H3 wrongly called it unstarted) ·
+>   **S1's open delta-line fix → B2** there · **G7 → question 6** there.
 > Kept for its history and its § S3 / § S5 notes. Do not sequence from it.
 
 
