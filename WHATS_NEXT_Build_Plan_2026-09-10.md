@@ -606,8 +606,8 @@ parallel-safe with · must not run with · done means. Session IDs are stable �
   video-call line only when a call was recorded; replace the BIR-year claim with "no year printed until
   one is recorded" (and name recording it as unbuilt); keep the two-column desktop layout Pro-and-up and
   About Solo-and-up (the 2026-07-03 ladder); note fold 5 reuses the shipped add-to-event picker; one
-  line for the viewing: row 3838's "never a stock photo" supersedes the 2026-06-04 stock-photo
-  directive. Put a "superseded — see the universal drawing" banner on the by-tier file (or correct it).
+  line for the viewing: the stock photo is an OPEN owner question (he ordered it 2026-06-04; "never a
+  stock photo" in row 3838 is the orchestrator's reading, not his words — see the correction at the top). Put a "superseded — see the universal drawing" banner on the by-tier file (or correct it).
 - **Model/effort:** Fable · medium. **Touches:** those two prototypes only. **Parallel-safe with:** everything.
 - **Done means:** no "₱8,000", no "government record", no "read off their BIR" in the file; the
   orchestrator commits; the owner is told it is ready to view.
@@ -620,7 +620,8 @@ parallel-safe with · must not run with · done means. Session IDs are stable �
   archetype `prototypes/archetype_content_editorial_gallery_detail_2026-08-01.html` (owner-approved
   2026-08-04, names `/[vendor-slug]` as its subject); the P1-corrected universal drawing.
 - **Delta:** port the drawing onto the existing renderer with existing data: hero identity, fact row,
-  receipt from real check results, no stock photo and no empty chart (row 3838), the years/registration
+  receipt from real check results, the stock photo AS THE OWNER RULES (open question — keep it until he does),
+  the years/registration
   line only when a recorded value exists. Plan gates stay as shipped (About Solo+, two-column Pro+).
 - **Depends on:** P1 viewed by the owner; #5404, D1, D2, E1 merged. **Gate:** owner ACTION — viewed.
 - **Model/effort:** default · high. **Touches:** `app/v/[slug]/page.tsx` (top), new components under
@@ -867,8 +868,9 @@ before it merges · view the corrected six-door drawing (F0) before G1 starts.
   2026-07-27 card text; both filters ON). E2 applies it.
 - Different looks per plan: About Solo+, two-column desktop Pro+ (2026-07-03 ladder; row 3838; the
   owner's "different looks for free, solo, pro and enterprise").
-- A Free/any page never shows a stock photo, a zero or an empty chart (row 3838, 2026-09-10) —
-  superseding the 2026-06-04 stock-photo directive; built in D2/F1/F2, mentioned in one line at the
+- ⚠ NOT DECIDED — moved back to the owner: whether a Free/any page shows a stock photo, a zero or an empty
+  chart. Row 3838 carries this only as the orchestrator's reading; the owner ORDERED the stock photo on
+  2026-06-04. Nothing removes it until he rules; built in D2/F1/F2, mentioned in one line at the
   viewing, not asked.
 - "Songs they play" is for music performers only (2026-09-10) — built in D2.
 - Reviews never depend on plan (2026-08-09) · plain-word category names (2026-08-12) · post-lock changes
