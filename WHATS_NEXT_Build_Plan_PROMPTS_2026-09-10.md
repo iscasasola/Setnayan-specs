@@ -323,6 +323,15 @@ booking, and the quote shows the number. All five owner gates are closed: 40% of
 ceiling · fee derived from lib/booking-fee.ts · credits interpolated along the live Papic ladder · capped
 at the 50,000-credit rung · the count on the quote, never the card.
 
+THE CAP — ALREADY RULED, DO NOT ASK (DECISION_LOG 2026-09-09, "THE GIFT IS CAPPED AT 50,000 PAPIC CREDITS"):
+grant = min(40% of the booking fee, the price of the 50,000-credit rung). The supplier is charged for the gift, so
+THE CHARGE CAPS WITH IT: above the cap they pay fee + that rung's price, not fee + 40%. It binds at about a
+₱3,350,000 booking (fee ₱37,500). ⚠ Implement the cap on CREDITS, then price it: read the 50,000 rung from
+platform_retail_catalog_v2 at its REGULAR price. Never hard-code ₱15,000, or the cap becomes a different number of
+photos the day that rung is repriced. The 100,000 rung stays on sale to couples; it only comes off the gift ladder.
+⛔ The old register's G1 "no cap" (SESSIONS_Chat_Bench_Exclusive_2026-09-09.md) is SUPERSEDED.
+
+
 BRIEF: use session EX-2 in /Users/icecasasola/Documents/Claude/Projects/Setnayan/SESSION_PROMPTS_2026-09-09_WAVE2.md
 as the specification. Do not re-plan it. RULE 0 still applies — re-measure against today's main.
 
@@ -763,8 +772,7 @@ card they placed stays put when new suppliers arrive.
 
 ALREADY RULED — DO NOT ASK: PER CATEGORY (owner 2026-09-09, "per category"). Keyed (celebration, tile).
 
-BEFORE STARTING: no branch or PR for this exists on origin, but the Vendor Proofing Master session has
-been discussing its behaviour. Confirm nobody is mid-build before you create a worktree.
+BEFORE STARTING: check the register's H3 row for an owner or a branch. As of 2026-09-10 the orchestrator confirmed no one has S8: no branch, no worktree.
 
 WHAT EXISTS: S7 (#5351) — orderInlineMoreRow orders the tail by writing back into the SAME indices, so a
 protected row cannot move. Nothing stores an arrangement.

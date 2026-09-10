@@ -712,8 +712,7 @@ parallel-safe with · must not run with · done means. Session IDs are stable �
 - **Touches:** `shortlist-categories.tsx`, a new migration + RLS, the exposure baseline (last on its
   chain), `apps/web/lib/ugat/graph.ts` (CLAUDE.md rule 4).
 - **Parallel-safe with:** C1, C3, E-stream. **Must not run with:** A5, H5, anything in the bench file.
-- ⚠ **Before starting:** no branch or PR exists on `origin`, but the Vendor Proofing Master has been
-  discussing S8's behaviour — confirm nobody is mid-build.
+- ⚠ Before starting: check the register's H3 row for an owner or a branch. As of 2026-09-10 the orchestrator confirmed no one has S8: no branch, no worktree.
 - **Done means:** merged and served; two hosts of one celebration see the same order after a drag;
   removing a dragged supplier leaves no pin row behind (read-only prod).
 
