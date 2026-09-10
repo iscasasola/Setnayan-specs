@@ -18,10 +18,10 @@
 
 | Step | Build | What a person gets | Model | Effort | Starts when | May run beside |
 |---|---|---|---|---|---|---|
-| **0** | **Owner gate** — try the prototype, sign off 5 design calls | — | — | — | now | — |
+| **0** | ✅ **Owner gate — PASSED 2026-09-10** (*"this is fine"*), with one change: the words toolbar | — | — | — | done | — |
 | **1** | Papic · sponsors get a bigger share | A sponsor's guests start with more shots | Opus 5 | high | **now** | 2 |
 | **2** | Story · A4, one minute per page | The story prints as a booklet | Sonnet 5 | medium | **now** | 1 |
-| **3** | Story · where the arrangement is kept | "Make it yours" saves for every celebration | Opus 5 | high | after **0** | 1, 2 |
+| **3** | Story · where the arrangement is kept | "Make it yours" saves for every celebration | Opus 5 | high | **now** (gate passed) | 1, 2 |
 | **4** | Story · the editor, part 1 — photos | Tray, tap-to-add, ×, Automatic / I choose, Put all back, Undo, autosave | Opus 5 | high | after **3** | 5 |
 | **5** | Story · guests see the arranged pages | The public story shows each moment as laid out | Opus 5 | medium | after **3** | 4, 6 |
 | **6** | Story · the editor, part 2 — words and moments | Words + looks, the phone toolbar, naming, sets, reorder | Opus 5 | **medium** | after **4** | 5 |
@@ -30,17 +30,16 @@
 
 ⛔ **Never together:** 3 with 4/5/6/7 (all build on 3's data shape) · **4 with 6** (same editor files)
 · 5 with 7 only if 7 waits for 5's render to merge (7 reuses it).
-🔑 **Critical path:** 0 → 3 → 4 → 6 → 8. Everything else fits beside it. Steps 1 and 2 are
-independent of the gate and can start today.
+🔑 **Critical path:** 3 → 4 → 6 → 8. Everything else fits beside it. Steps 1, 2 and 3 can all start now.
 
-## Step 0 — the owner's five design calls (not a session)
+## Step 0 — the owner's five design calls — ✅ PASSED 2026-09-10
 
-Try the prototype on a phone and a computer, then confirm or change:
+Owner, on the prototype: *"this is fine. but the text toolbar needs to be cleaner and more familiar. it feels like multiple different ideas taken together and programmed one by one."* Read as approval of the five calls below; the toolbar was redesigned the same day (see step 6). Recorded in `DECISION_LOG.md` 2026-09-10.
 1. A photo is in **one** moment only.
 2. The page is a **fixed sheet scaled to fit** — what you arrange on a laptop is what a phone shows, smaller.
 3. **No animated text effects** (they cannot print).
 4. **No pop-ups** — every removal is instant, with Undo.
-5. **On a phone**, words get a toolbar (A− A+ ↺ ↻ Remove) instead of handles on the object.
+5. **On a phone**, words get the toolbar instead of handles on the object.
 
 (Stickers: ruled OFF for now, 2026-09-10 — not a design call any more.)
 
@@ -169,10 +168,14 @@ GOAL: the rest of "Make it yours" inside the Story Maker.
 PORT from the prototype: + Words (an EMPTY box with a placeholder, placed below everything; leaving
 it empty removes it quietly; clearing words that had text is a removal WITH Undo; plain-text paste;
 Escape stops typing and deselects; a press on the grip is a drag even when a phone retargets it to
-the text); word looks (Ink · Terracotta · Blue · Gold + Backing — the row keeps the caret);
+the text); THE WORDS TOOLBAR, exactly as the prototype draws it (owner 2026-09-10: "cleaner and more familiar"):
+one floating bar just above the selected words (below when there is no room), same square icon
+buttons, groups split by hairlines — [ − size + ] | [ A text colour ▾ (a menu of Ink · Terracotta ·
+Blue · Gold, opening away from the words) ] [ A background ] | [ turn left · turn right ] | [ remove ];
+nothing on it takes the caret out of the words; it follows the words when they move;
 ⛔ NO STICKERS (owner, for now — keep the object model open to more kinds, build none); the round handle on desktop (resize + turn, snap
 straight within 5°, kept inside the sheet by its TURNED box); ON A PHONE the handle and the
-words × give way to the toolbar A− A+ ↺ ↻ Remove (also the keyboard route); moments: + New
+words × give way to that same toolbar (also the keyboard route); moments: + New
 and ✎ as an inline field in the header (empty or Escape cancels a new moment; the press that ends
 the typing still lands), row × with Undo, grip reorder with mouse AND touch (pointer events, capture
 on the LIST), Alt+Arrow reorder; named sets (inline field, one chip per name, chip × with Undo,
