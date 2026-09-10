@@ -22,7 +22,7 @@
 | **1** | Papic · sponsors get a bigger share | A sponsor's guests start with more shots | Opus 5 | high | ✅ **done** (PR #5418) | 2 |
 | **2** | Story · A4, one minute per page | The story prints as a booklet | Sonnet 5 | medium | ✅ **done** (PR #5416) | 1 |
 | **3** | Story · where the arrangement is kept | "Make it yours" saves for every celebration | Opus 5 | high | ✅ **done** (PR #5419, merged + verified in prod 2026-09-11) | 1, 2 |
-| **4** | Story · the editor, part 1 — photos | Tray, tap-to-add, ×, Automatic / I choose, Put all back, Undo, autosave | Opus 5 | high | after **3** | 5 |
+| **4** | Story · the editor, part 1 — photos | Tray, tap-to-add, ×, Automatic / I choose, Put all back, Undo, autosave | Opus 5 | high | ✅ **done** (PR #5430, merged + verified in prod 2026-09-11) | 5 |
 | **5** | Story · guests see the arranged pages | The public story shows each moment as laid out | Opus 5 | medium | ✅ **done** (PR #5428, merged + verified in prod 2026-09-11) | 4, 6 |
 | **6** | Story · the editor, part 2 — words and moments | Words + looks, the phone toolbar, naming, sets, reorder | Opus 5 | **medium** | after **4** | 5 |
 | **7** | Story · the prints carry the arrangement | A3 and A4 print each moment as laid out | Sonnet 5 | medium | after **2** and **5** | 6 |
@@ -186,7 +186,29 @@ DONE WHEN: save → reload returns the arrangement exactly; a taken-back photo d
 saved page; tests fail when the one-photo-one-moment check or the visibility filter is removed.
 ```
 
-## 4 · Story — the editor, part 1: photos · **Opus 5 · high** · after step 3
+## 4 · Story — the editor, part 1: photos · **Opus 5 · high** · ✅ DONE 2026-09-11 (PR #5430)
+
+**Verify with the object, not this line:** `gh pr view 5430 --json state,mergedAt` (merged
+2026-09-10T23:05:36Z, `13b8ae7`); `https://setnayan-platform-web.vercel.app/api/health` reported
+`"version":"13b8ae7"` after the deploy. No migration — it saves through step 3's
+`save_story_arrangement` (still service-role only; `authenticated` cannot execute it).
+
+**What step 6 builds on** (see the 2026-09-11 DECISION_LOG row):
+- The editor is `app/dashboard/[eventId]/story/_components/make-it-yours.tsx` (+ `.module.css`, the
+  prototype's CSS ported, corners on `--m-r-*`). Every move is a pure function in
+  `apps/web/lib/make-it-yours.ts` that ends in the server's own `resolveArrangement` — add words'
+  moves there, never a second rule set in the component.
+- It is fed by `_lib/load-make-it-yours.ts` (`makeItYoursInputFrom`) from step 3's one read;
+  `LoadedArrangement.runOfShow` now comes back with it.
+- **Extend the real-browser drive, don't start a new one:** `step4_make_it_yours_drive/` (README
+  says how). On the shipped code it passed 124 checks at 1280 mouse and 112 at 390 touch on a
+  production build — zero dialogs, zero console errors, zero CSP reports.
+- ⚠ It drives the real component + step 3's real read/save over an in-memory stand-in for the
+  database: this machine cannot hold the production service role (sensitive in Vercel), has no
+  Docker, and signing in to the live site would mean typing a password. Step 8 drives the live
+  path. Ten stand-in captures are seeded on testnayan1's "Song Desk Test Night" for it.
+- `make-it-yours-keeps-what-the-browser-found.test.ts` pins the ten lines the browser proved matter.
+
 
 ```
 GOAL: step "The story" of the six-step Story Maker (#5389) becomes "Make it yours" — the photo half.
