@@ -55,6 +55,9 @@ bundle overrides in WHATS_NEXT_Build_SEQUENCE_2026-09-10.md.`
   `/Users/icecasasola/Documents/Claude/Projects/setnayan-rescue-2026-09-10/` (and worktree
   `/private/tmp/wt-s1d`) first — reuse, do not re-invent.
 - CLEANUPS: N2 item 1 only (the Hosts page coordinator email + the package-lock copy); item 2 is B2's.
+  ALSO (from #5414's release): the two app-side verification-upload gates (`app/vendor-dashboard/verify/actions.ts`,
+  `app/vendor-dashboard/shop/inline-docs-actions.ts`) still pass an `R2://` / padded value that the database now refuses
+  with a raw RLS error — normalise it the way the #5414 policy does, and show a plain refusal. Do it inside D3 (same chain).
 - N1 part 2 = the E4 section, as its own DRAFT PR, after N1's PR is up.
 
 ---
@@ -181,7 +184,7 @@ work; **Fable** only for drawings.
 | H1 meeting from Decisions | ✅ SERVED | #5411 · 55e2d4d |
 | L1 · P1 · T1-script | ✅ done | corpus; P1 drawing re-checked: stock photo drawn as the owner's open question |
 | T1 watcher | ✅ MERGED | #5413 · e4e55e0 — also fixed two phantom vendor_services columns (b39d82c); confirm served |
-| N0 cleanup-delete pin | 🔨 finishing the two ALSO-FIX items | #5414 DRAFT · baseline counted by orchestrator: 5 narrowings + 5 RESTRICTIVE, 6617→6622 = body, no widening |
+| N0 cleanup-delete pin | ✅ MERGED 2026-09-11 — confirm served | #5414 · prod BEGIN…ROLLBACK rehearsal passed (orchestrator); 2492 db + 14742 unit tests green; 11 mutations RED |
 | N1 chat door | 🔨 building (Opus) | launched 2026-09-10 ~15:48Z; does not touch lib/erasure/** (N0's) |
 | N3 render keys | 🔨 building (Opus) | launched 2026-09-10 ~15:48Z |
 | P2 Free-vs-Solo drawing | ✅ DRAWN — waits on the owner's look | `4facf58` · prototypes/shop_page_free_vs_solo_2026-09-10.html · 2 proposals (plain strip on Free; shop-only Solo preview), stock photo drawn both ways |
