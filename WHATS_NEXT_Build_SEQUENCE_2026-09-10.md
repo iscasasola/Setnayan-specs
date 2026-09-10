@@ -122,14 +122,17 @@ work; **Fable** only for drawings.
 | Session | State | Proof |
 |---|---|---|
 | A1 gift optional | ✅ SERVED | #5373 · a2cc050 in prod |
-| A2 lock needs a price | ✅ MERGED 2026-09-10 | #5408 — confirm served |
+| A2 lock needs a price | ✅ SERVED | #5408 · f302cd5 ancestor of prod 0d3a1e0 (15:42Z) |
 | A3 no door out | ✅ SERVED | #5404 |
-| A4 next step after accepting | ⏳ auto-merge | #5412 |
+| A4 next step after accepting | ⏳ auto-merge | #5412 — was stuck on a TS2345 in its own test; fixed ff03764 (orchestrator, 15:50Z), CI re-running |
 | A5 locked shop leads | ✅ SERVED | #5406 |
 | B3 deploy headroom + security | ✅ SERVED | #5407, #5397 |
 | H1 meeting from Decisions | ✅ SERVED | #5411 · 55e2d4d |
-| L1 · P1 · T1-script | ✅ done | corpus; T1 watcher #5413 auto-merge |
-| N0 cleanup-delete pin | 🔨 building | branch `claude/every-cleanup-delete-is-pinned` |
-| everything from B1 down | ⬜ not started | — |
+| L1 · P1 · T1-script | ✅ done | corpus; P1 drawing re-checked: stock photo drawn as the owner's open question |
+| T1 watcher | ⏳ auto-merge | #5413 — was stuck on TS5097 ('.ts' import suffix); fixed fbf503f (orchestrator), CI re-running |
+| N0 cleanup-delete pin | 🔨 finishing the two ALSO-FIX items | #5414 DRAFT · baseline counted by orchestrator: 5 narrowings + 5 RESTRICTIVE, 6617→6622 = body, no widening |
+| N1 chat door | 🔨 building (Opus) | launched 2026-09-10 ~15:48Z; does not touch lib/erasure/** (N0's) |
+| N3 render keys | 🔨 building (Opus) | launched 2026-09-10 ~15:48Z |
+| everything from B1 down | ⬜ not started | B1 → B2 → C3 take the next free slots |
 
 **Rescue copies** of every unsaved workspace from today: `/Users/icecasasola/Documents/Claude/Projects/setnayan-rescue-2026-09-10/` (restore guide inside).
