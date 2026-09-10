@@ -224,6 +224,7 @@ work; **Fable** only for drawings.
 | CLEANUPS · N2-1 Hosts page coordinator email | ✅ SERVED | #5427 · d1d5a29 (a Setnayan coordinator gets "Message them"; the DB copy is kept — coordinator-broadcasts reads it) |
 | B2 both numbers after a lock (+ total now everywhere, fee follows every change) | ✅ SERVED | #5390 · e2a07f6; live: is_change_delta column, 7 functions carry change lines, recorder not exposed, 2 triggers, both migrations recorded (orchestrator read prod) |
 | H6 bench search hides full cards | ✅ SERVED (S2) — fcc2bc3; live: definer, service_role only (orchestrator read prod) | #5434 · server-only definer function (service_role), baseline unchanged; per-card daily limit joins via LOCK-PATH CAPACITY |
+| H4 payment never arrived | 🔨 OWNED BY S2 — DO NOT LAUNCH A SECOND | Q9 ruled 2026-09-11 (one path for every payment); Opus · xhigh; DRAFT for orchestrator review; no edits to vendors/actions.ts, booking-fee, Papic grant, service-card files, chat-lock-booking |
 | L3 badge deadlines | ✅ MERGED | #5433 · guard fn +2 lines vs live (orchestrator line-hash diff) |
 | N4 part 1 conversation record | ✅ MERGED | #5435 · orchestrator prod rehearsal passed |
 | N4 part 3 generic signer public-only | ✅ MERGED | #5432 |
