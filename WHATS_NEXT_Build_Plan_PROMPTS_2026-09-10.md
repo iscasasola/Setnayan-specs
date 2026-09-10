@@ -1039,3 +1039,27 @@ site music, our_photos) and guest_face_enrollments.asset_url, which stay browser
 fix what is reachable. Guards as a real authenticated non-superuser role; mutation-test. SECURITY ⇒ DRAFT PR.
 DONE MEANS: forged keys refused on write AND on serve, proven in the replay; CI green; DRAFT for the orchestrator.
 ```
+
+## P2 — Draw the minimal Free look, so a shop wants Solo (corpus only)
+
+```
+(Paste after the SHARED HEADER.) MODEL: fable · medium. Corpus only — no code.
+
+GOAL, owner verbatim 2026-09-10: "we want a different look for free and solo. We want minimum website function for
+free. so they would want to go solo."
+
+WHAT EXISTS: the universal shop-page drawing (prototypes/vendor_public_page_universal_2026-09-10.html, corrected by P1)
+draws the plan gates EXACTLY AS THEY SHIP (About Solo+, two-column Pro+). It does NOT yet draw a deliberately MINIMAL
+Free page. DECISION_LOG row 3838 records how the ruling is applied: ₱0 = Free AND Verified (they share one website
+gate); minimal is NOT broken (keeps the Setnayan-checked line, what they offer, prices, the in-app Inquire, fold 5);
+the upgrade pull is shown to the SHOP (its editor and self-preview), NEVER to couples — no padlocks on the public page.
+
+DRAW: the same shop on Free/Verified and on Solo, side by side, phone and desktop — exactly what Free omits (voice:
+About; presentation: a chosen photo, accent, choosing what shows, anything else you judge is presentation not truth)
+and what it keeps. Plus the shop's own view of its Free page with a calm "what Solo adds" preview. Plain English on the
+page. ⚠ The stock photo is an OPEN owner question — draw both options, decide nothing. Do not move any feature between
+PAID tiers (prices are locked); this only defines what ₱0 shows. Add a plain panel listing every difference so the owner
+can approve or strike each line.
+DONE MEANS: a new file prototypes/shop_page_free_vs_solo_2026-09-10.html, committed by the orchestrator; owner's look
+is the gate for F1.
+```

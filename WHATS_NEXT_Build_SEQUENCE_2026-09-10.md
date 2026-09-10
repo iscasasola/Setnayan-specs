@@ -43,7 +43,8 @@ access you can take back.
 | **17** | **E3** | Verify the government-ID delete guard | Opus · high | C3 |
 | **18** | **E4** | Close the database door to shop email and phone | Opus · high | nothing |
 | **19** | **N2** | The last two email leaks on couple screens | Sonnet · medium | nothing |
-| **20** | **F1 → F2** | The new shop page, top then body | Opus · high | E1, your look at the drawing |
+| **19b** | **P2** | Draw the minimal Free look, so a shop wants Solo | Fable · medium | nothing — can run any time |
+| **20** | **F1 → F2** | The new shop page, top then body | Opus · high | E1, your look at the drawing **and at P2** |
 | **21** | **G1 → G2 → G3** | Six-door My Shop, in three parts | Opus · high (G3 Sonnet · medium) | your look at F0 |
 | **22** | **H4** | A supplier can say a payment never arrived | Opus · xhigh | **your question 9**, B2 |
 | **23** | **H5** | "Lock this" stops showing for a supplier who declined | Sonnet · medium | **your question 10**, H3 |
@@ -56,6 +57,7 @@ access you can take back.
 4. **Look at the corrected shop-page drawing** (unblocks 12 and 20) — and rule on the **stock photo**
    while you are there: keep it (your 4 June order) or replace it?
 5. **Look at the corrected six-door drawing** once F0 finishes (unblocks 21).
+5b. **Look at the Free-vs-Solo drawing** once P2 finishes — approve or strike each line (unblocks 20).
 6. Questions 9 and 10 in the register (unblock 22 and 23) — both can wait.
 
 ---
