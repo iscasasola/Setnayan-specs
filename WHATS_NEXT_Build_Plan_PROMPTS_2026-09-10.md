@@ -711,6 +711,136 @@ without the add-on must never be told it is on.
 PROVE IT: merged + served; guard green; nothing lost.
 ```
 
+## H1-WATCH — a new meeting time from Decisions + the supplier's standing line (PR #5411) — no build
+
+```
+(Paste after the SHARED HEADER — or read it from the top of this file.)
+
+WATCH ONLY. PR #5411 has auto-merge armed; it shares no file with #5408, #5387 or #5390 (checked).
+PROVE IT: merged + served by ancestry. On a thread where the SUPPLIER proposed a meeting time, the
+couple's Decisions view offers Confirm · New time · Decline, and the supplier's thread page shows
+"Where you stand with <couple> · … · waiting on them" — never "waiting on you".
+If CI goes red: read the failing step, fix on the branch, never regenerate a baseline to quiet a guard.
+```
+
+## H2 — No service card goes live without a cover photo and what's included
+
+```
+(Paste after the SHARED HEADER — or read it from the top of this file.)
+
+GOAL: a couple never meets a card that is only a price and a category word. A supplier who tries to
+publish without a cover or without "what's included" is told which one is missing.
+
+ALREADY RULED — DO NOT ASK: DECISION_LOG 2026-09-09 ("THE SETNAYAN EXCLUSIVE IS OPTIONAL"): "the
+cover-photo · title · inclusions requirements stay". B1 (#5387) already covers the title.
+
+WHAT EXISTS: after A1, PUBLISH_REQUIREMENTS = ['price'] (lib/service-publish-gate.ts ~64). The cover is a
+hard blocker in lib/card-health.ts but NOT in the shared gate. Three layers enforce publishing — the app
+gate, the publish trigger and save_vendor_service — and #5373 proved that moving only the TypeScript
+leaves the database answering differently ("app says yes, database says no").
+
+DELTA: add cover + inclusions to the shared gate AND to all three layers, in one change. A card that is
+ALREADY LIVE and missing one is flagged in card health — never silently unpublished.
+⚠ service-card-face.tsx carries S5's `footer` prop: `undefined` = draw the preview chip, `null` = draw
+nothing. Keep that distinction.
+
+START AFTER A1, B1 AND C1 HAVE MERGED (service-card chain: A1 → B1 → C1 → H2). NOT BEFORE TEST ROUND 1.
+GATE: none. MODEL: opus · high. MAY TOUCH: lib/service-publish-gate.ts, app/vendor-dashboard/services/
+actions.ts, lib/card-health.ts, one new migration (pnpm migration:new) re-signing the publish trigger and
+save_vendor_service. MAY NOT TOUCH: anything else on the service-card chain while it is open.
+PROVE IT: merged + served; read-only prod — the publish trigger's body refuses a card with no cover; the
+owner's prepped test cards still save.
+```
+
+## H3 — Drag your suppliers into your own order (S8), per category
+
+```
+(Paste after the SHARED HEADER — or read it from the top of this file.)
+
+GOAL: long-press a supplier card and drag it; the row says "Your order" with a Reset that clears THAT
+CATEGORY ONLY; keyboard move-left/right; every host of the celebration sees one order; pins beat sort; a
+card they placed stays put when new suppliers arrive.
+
+ALREADY RULED — DO NOT ASK: PER CATEGORY (owner 2026-09-09, "per category"). Keyed (celebration, tile).
+
+BEFORE STARTING: no branch or PR for this exists on origin, but the Vendor Proofing Master session has
+been discussing its behaviour. Confirm nobody is mid-build before you create a worktree.
+
+WHAT EXISTS: S7 (#5351) — orderInlineMoreRow orders the tail by writing back into the SAME indices, so a
+protected row cannot move. Nothing stores an arrangement.
+⛔ DO NOT reuse event_category_build_state.pinned_vendor_id — same word, different fact (the Build
+solver's Locked pick, dark behind BUILD_3STATE_ENABLED, and a single pin where you need an ordered set).
+
+DELTA: its own table, ONE ROW PER PIN, keyed (event_id, tile, vendor_id), ON DELETE CASCADE off
+event_vendors — removing a supplier is a real DELETE (vendors/actions.ts: releaseSchedulePools then
+.delete()), and manual suppliers are event_vendors rows too (20260604080000), so one FK covers every card.
+RLS at CREATE TABLE time (canonical patterns only). The bench reads it.
+
+START AFTER A5 HAS MERGED (same file). GATE: none. MODEL: opus · xhigh. MAY TOUCH:
+app/dashboard/[eventId]/vendors/_components/shortlist-categories.tsx, one new migration + RLS,
+supabase/security/exposure-surface.baseline.txt (regenerate AFTER merging main, read every added line),
+apps/web/lib/ugat/graph.ts (CLAUDE.md rule 4). lint-port-no-lost-controls stays green with its baseline
+UNTOUCHED — if it fires, put the control back.
+PROVE IT: merged + served; two hosts of one celebration see the same order after a drag; removing a
+dragged supplier leaves no pin row (read-only prod).
+```
+
+## H4 — A supplier can say a logged payment never arrived (after owner question 9)
+
+```
+(Paste after the SHARED HEADER — or read it from the top of this file.)
+
+DO NOT START until the owner has answered question 9 in the build plan's § 5. Build what he chose.
+
+GOAL: a supplier who did not receive what the couple logged can say so, with a reason, from the Decisions
+view and from the payment section; the couple sees it; a deposit goes to Setnayan to referee.
+
+WHAT EXISTS — MEASURED 2026-09-10:
+- The DEPOSIT has the whole path: reject_vendor_deposit → /admin/disputes → settle_vendor_deposit_dispute
+  → the couple sees the note; fenced by the trigger guard_event_vendor_deposit_ack (migration
+  20271177105435_a_dispute_is_not_an_eraser.sql holds the current bodies).
+- The deposit is ALSO an event_vendor_payments row. confirm_vendor_payment (20270202160006) stamps ONLY
+  that row's vendor_confirmed_at — never deposit_acknowledged_at. One sum can already carry two
+  independent supplier answers, linked only by a substring in `notes`.
+- INSTALMENTS HAVE NO REFUSAL. The v4 design drew "Not received"; the product has none.
+- Decisions' payment reply today is "Confirm received" only (PR #5402, lib/thread-decisions.ts).
+
+DELTA (the recommended answer — confirm it matches the owner's): the deposit's ledger row routes to the
+EXISTING reject_vendor_deposit, never a second refusal path for the same money; instalments get a mirror
+of the deposit's columns and SECURITY DEFINER function on event_vendor_payments, and a second section on
+/admin/disputes; confirming the deposit's row also acknowledges the deposit. Add the reply to
+DecisionReply and keep `reply ⇔ needsYou` true — its test sweeps every kind.
+
+START AFTER question 9, #5411 AND B2 HAVE MERGED. GATE: owner. MODEL: opus · xhigh. OPEN AS DRAFT (money).
+MAY TOUCH: one new migration, app/admin/disputes, app/vendor-dashboard/messages/[threadId]/pay-confirm-
+actions.ts and page.tsx, app/_components/chat-thread-views.tsx, lib/thread-decisions.ts, and the
+field-parity guard lib/a-decision-reply-posts-what-the-action-reads.test.ts (add the new reply's case).
+PROVE IT: merged + served; a refused instalment appears on /admin/disputes; the couple's Decisions line
+reads the supplier's reason; a refused deposit takes the existing path.
+```
+
+## H5 — "Lock this" stops being offered on a supplier who said they aren't free (after owner question 10)
+
+```
+(Paste after the SHARED HEADER — or read it from the top of this file.)
+
+DO NOT START until the owner has answered question 10 in the build plan's § 5.
+
+GOAL: a couple is not invited to lock a supplier who already declined their date.
+
+WHAT EXISTS: prototypes/chat_interface_v4_2026-09-09.md § 4 point 6 — the bench keeps "Lock this" after an
+INQUIRY decline because resolveBenchCardActions does not read the thread. That is correct after a
+LOCK-REQUEST decline (they may be asked again).
+
+DELTA (recommended): after an inquiry decline, withhold Lock and say why; keep it after a lock-request
+decline. Adds a line; removes no control from any other card.
+
+START AFTER question 10 AND H3 HAVE MERGED (same bench file). GATE: owner. MODEL: sonnet · medium.
+MAY TOUCH: app/dashboard/[eventId]/vendors/_components/bench-vendor-actions.tsx, shortlist-categories.tsx.
+lint-port-no-lost-controls stays green with its baseline UNTOUCHED.
+PROVE IT: merged + served; a declined supplier's card shows the reason, not Lock.
+```
+
 ## L1 — Today's rulings and corrections into the decision log (corpus only)
 
 ```

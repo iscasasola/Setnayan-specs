@@ -1,5 +1,23 @@
 # SESSIONS — what is left, in the order to run it
 
+> 🛑 **SUPERSEDED FOR SEQUENCING — 2026-09-10, by S2.** The live register is
+> [`WHATS_NEXT_Build_Plan_2026-09-10.md`](WHATS_NEXT_Build_Plan_2026-09-10.md) (prompts in its
+> `_PROMPTS` file). What was left of THIS register is carried there as the **H stream** (H1–H5).
+> Measured against `gh pr view` at ~22:00 on 2026-09-10 — this file is out of date in these places:
+> - **#5339 and #5344 are MERGED** (2026-09-09), not open.
+> - **S2 is BUILT:** #5372 (Decisions) · #5402 (each side answers the other's request) · #5411 (new meeting
+>   time from Decisions + the supplier's standing line; auto-merging).
+> - **S6 is BUILT, all three parts:** #5360 (standing sentence + roll-up); the relabel ships as
+>   `CARD_CHECK_INQUIRY = 'Open conversation'` (`lib/explore-info-copy.ts`).
+> - **S9 is BUILT:** #5358. **S4 is BUILT:** #5369.
+> - **S10 is PART-BUILT:** the gift is a yes/no (#5375) and optional (#5373); names are #5387 (open).
+>   Cover photo + inclusions → **H2**.
+> - **G1's "no cap" is SUPERSEDED** — DECISION_LOG 2026-09-09 caps the gift at the **50,000-credit rung**
+>   (min(40% of fee, the rung's price); the charge caps with it). S12 is now **EX-2 / C1** there.
+> - **S8 (drag) → H3** · **S1's open delta-line fix → B2** there · **G7 → question 6** there.
+> Kept for its history and its § S3 / § S5 notes. Do not sequence from it.
+
+
 > Written 2026-09-09. Design is **BINDING**:
 > [`prototypes/chat_interface_v4_2026-09-09.html`](prototypes/chat_interface_v4_2026-09-09.html).
 > Economics: [`Setnayan_Exclusive_Study_2026-09-09.md`](Setnayan_Exclusive_Study_2026-09-09.md).

@@ -9,6 +9,11 @@
 > well"* — i.e. he ORDERED it. ⇒ **The stock photo is an OPEN OWNER QUESTION, not settled.** No session removes it
 > until he rules. "No zero" and "no empty chart" are likewise the orchestrator's reading and ride with the same question.
 
+> ➕ **AMENDED 2026-09-10 ~22:15 by S2 (Decisions)** — added the **H stream** (§ 4, H1–H5): the five
+> items left over from `BUILD_PLAN_Chat_And_Exclusive_2026-09-09.md` that this plan did not carry.
+> Four are off the test's critical path; one is #5411, which lands by itself. Placement in § 3, owner
+> questions 8–10 in § 5, launch prompts in the PROMPTS file. Nothing else in this plan was changed.
+
 > **Register. The one open stream for the supplier ↔ couple path.** Prompts to launch each session:
 > [`WHATS_NEXT_Build_Plan_PROMPTS_2026-09-10.md`](WHATS_NEXT_Build_Plan_PROMPTS_2026-09-10.md).
 >
@@ -63,6 +68,10 @@ once.** Your test will be the first time.
   what each tap actually did.
 - **Then:** the gift actually reaching couples · photos and proper names on marketplace cards · an
   honest shop page (songs only for music acts, no "0 yrs", a lapsed plan loses its paid look).
+- **Alongside, off the test path (H stream):** answering a meeting with a new time from the Decisions
+  view, and the supplier's own "where you stand" line, land by themselves (#5411) · a card can't go
+  live without a cover photo and what's included · drag your suppliers into your own order · and two
+  small questions for you before the last two (below, 9 and 10).
 - **After you have seen the drawing:** the add-to-your-event section · the old verify page points to
   the new one · a share preview that never breaks · then the new shop page and the six-door My Shop.
 
@@ -108,6 +117,9 @@ commit **by ancestry**.
 - **#5404** (no door out of the app — five exits closed) — auto-merge armed. This **is** session A3.
 - **#5377** (a host can take back a coordinator's guest-list access) — MERGEABLE, auto-merge armed.
 - **#5403** (the invite link is an arrival) — another stream; shares no file with this plan.
+- **#5411** (a meeting can get a new time from Decisions; the supplier sees "where you stand") —
+  auto-merge armed, full gates green locally. **This is session H1.** Shares no file with A2, B1 or B2
+  (checked file-by-file against #5408, #5387, #5390).
 
 **WAVE 1 — start now (three code slots):**
 - Slot 1: **A1** (watch/land #5373) → then **A4** (after-accept next step).
@@ -138,16 +150,29 @@ government-ID delete guard) · **E4** (close the database door to shop email/pho
 **WAVE 6:** **F1 → F2** (universal shop page port, strictly in order) in parallel with
 **G1 → G2 → G3** (six-door My Shop port, strictly in order, after the owner has viewed F0).
 
+**H STREAM — off the critical path; each takes the first free code slot once its dependency lands:**
+- **H2** (publish gate: cover photo + what's included) — after **C1**, on the service-card chain below.
+  Not before test round 1: it would stop the owner's own test cards saving until his prep is done.
+- **H3** (drag to rearrange, S8) — after **A5** (same bench file). Its own table ⇒ joins the
+  exposure-baseline chain last.
+- **H4** ("Not received" for a payment) — after owner question **9**, after **#5411** and after **B2**
+  (money on the same booking rows). DRAFT, like every money PR here.
+- **H5** ("Lock this" on a supplier who declined) — after owner question **10**, and after **H3** (same
+  file). Small.
+
 **Serialised chains — respect them exactly:**
 - **Public shop page file** (`app/v/[slug]/page.tsx`): #5404 → D1 → D2 → E1 → F1 → F2. If D1's
   viewing has not happened when D2 is ready, D2 goes first. Never two at once.
 - **Exposure-baseline header** (`supabase/security/exposure-surface.baseline.txt`): #5377 (lands
-  itself) → A1 (regenerates again) → B2 → D4/#5140 → C1 if it adds grants → E4.
+  itself) → A1 (regenerates again) → B2 → D4/#5140 → C1 if it adds grants → E4 → H3 → H4.
 - **Port-control baseline** (`apps/web/scripts/port-control-baseline.json`, generated): whoever
   merges second regenerates it from the merged tree — A1 · #5404 · D1 · D3 · G1–G3 all touch it.
 - **Chat lock card** (`chat-amendment-card.tsx`): #5402 → A2 → B2.
 - **Chat lock booking** (`lib/chat-lock-booking.server.ts`): B2 → C1.
-- **Service-card files**: A1 → B1 → C1.
+- **Service-card files**: A1 → B1 → C1 → H2.
+- **Bench card file** (`shortlist-categories.tsx`): A5 → H3 → H5. `lint-port-no-lost-controls` stays
+  green with its baseline UNTOUCHED on every one of them.
+- **Decisions files** (`chat-thread-views.tsx`, `lib/thread-decisions.ts`, both thread pages): #5411 → H4.
 - **Couple's supplier card** (`vendor-itemization-card.tsx`): #5404 → B2.
 - **Admin verification area + generated admin-map inventories**: C3 → E3.
 - **My Shop page file**: D3 → E2 → G1 → G2 → G3.
@@ -639,6 +664,90 @@ parallel-safe with · must not run with · done means. Session IDs are stable �
   the switch — a shop without the add-on is never told it is on. **Depends on:** G2 merged.
 - **Model/effort:** default · medium. **Done means:** merged and served; guard green; nothing lost.
 
+### H1 · A meeting can get a new time from the Decisions view, and the supplier sees where they stand — **WATCH ONLY, PR #5411**
+- **A person gets:** on a conversation's Decisions view, a meeting waiting on you offers **Confirm · New
+  time · Decline** — the same three the chat card offers. The supplier's thread page gains the "Where you
+  stand" line in their own voice: *"Quoted ₱187,500 · waiting on them"*, *"They replied yesterday"*.
+- **Already exists:** PR #5411 (auto-merge armed). Built on #5372 (Decisions) and #5402 (each side
+  answers the other's request), both merged. One new-time form now serves both doors
+  (`propose-new-time-form.tsx`); the standing sentence gained a `viewer` inside the ONE derivation —
+  S6's own suite passes untouched.
+- **Delta:** none. Watch it land. The supplier copy is proposed, not signed off — owner question **8**.
+- **Done means:** merged and served; on a thread where the supplier proposed a time, the couple's
+  Decisions shows three buttons and the supplier's shows *"waiting on them"*.
+
+### H2 · No service card goes live without a cover photo and what's included (the rest of S10's publish gate)
+- **A person gets:** a couple never meets a card that is only a price and a category word. A supplier who
+  tries to publish without a cover or without "what's included" is told which one is missing.
+- **Already exists:** after A1, `PUBLISH_REQUIREMENTS = ['price']` (`lib/service-publish-gate.ts` ~64).
+  The cover is already a hard blocker in `lib/card-health.ts` but not in the shared gate. **Already
+  ruled** (DECISION_LOG 2026-09-09, "the Exclusive is optional"): *"the cover-photo · title · inclusions
+  requirements stay"*. B1 covers the title.
+- **Delta:** add cover and inclusions to the shared gate **and to the same three layers A1 had to move**
+  — app gate, publish trigger, `save_vendor_service` (#5373 proved that moving only the TypeScript leaves
+  the database answering differently). A card already live and missing one is **flagged in card health,
+  never silently unpublished**.
+- **Depends on:** A1, B1, C1 merged. **Gate:** none. **Model/effort:** opus · high (a migration re-signs
+  a SECURITY DEFINER function).
+- **Touches:** `lib/service-publish-gate.ts`, `app/vendor-dashboard/services/actions.ts`, a migration
+  re-signing the publish trigger and `save_vendor_service`, `lib/card-health.ts`. ⚠ S5 added a `footer`
+  prop to `service-card-face.tsx` — keep `footer === undefined` (preview chip) distinct from `null`.
+- **Parallel-safe with:** C2, C3, D-stream. **Must not run with:** anything on the service-card chain.
+- **Done means:** merged and served; read-only prod: the publish trigger refuses a card with no cover;
+  the owner's prepped test cards still save.
+
+### H3 · Drag your suppliers into your own order (S8), per category
+- **A person gets:** long-press a supplier card and drag it; the row says *"Your order"* with a Reset that
+  clears **that category only**; keyboard move-left/right; every host of the celebration sees one order;
+  a card they placed stays put when new suppliers arrive.
+- **Already exists:** the owner ruled **per category** (2026-09-09, closed). S7's `orderInlineMoreRow`
+  orders the tail; nothing stores an arrangement. ⛔ `event_category_build_state.pinned_vendor_id` exists
+  and must NOT be reused — it is the Build solver's Locked pick, a different fact.
+- **Delta:** its own table, **one row per pin**, keyed `(event_id, tile, vendor_id)`, `ON DELETE CASCADE`
+  off `event_vendors` (removing a supplier is a real DELETE, and manual suppliers are `event_vendors`
+  rows too, so one foreign key covers every card); the bench reads it; pins beat the sort.
+- **Depends on:** A5 merged. **Gate:** none. **Model/effort:** opus · xhigh (gesture vs a snap carousel,
+  accessibility, new shared state).
+- **Touches:** `shortlist-categories.tsx`, a new migration + RLS, the exposure baseline (last on its
+  chain), `apps/web/lib/ugat/graph.ts` (CLAUDE.md rule 4).
+- **Parallel-safe with:** C1, C3, E-stream. **Must not run with:** A5, H5, anything in the bench file.
+- ⚠ **Before starting:** no branch or PR exists on `origin`, but the Vendor Proofing Master has been
+  discussing S8's behaviour — confirm nobody is mid-build.
+- **Done means:** merged and served; two hosts of one celebration see the same order after a drag;
+  removing a dragged supplier leaves no pin row behind (read-only prod).
+
+### H4 · A supplier can say a logged payment never arrived — **after owner question 9**
+- **A person gets:** a supplier who did not receive what the couple logged can say so, with a reason,
+  from Decisions and from the payment section; the couple sees it; a deposit goes to Setnayan to referee,
+  as it does today.
+- **Already exists — measured:** the **deposit** has the whole path: `reject_vendor_deposit` →
+  `/admin/disputes` → `settle_vendor_deposit_dispute` → the couple sees the note, fenced by
+  `guard_event_vendor_deposit_ack`. The deposit is **also** an `event_vendor_payments` row, and
+  `confirm_vendor_payment` stamps only that row — never `deposit_acknowledged_at` — so one sum can already
+  carry two independent supplier answers, linked by a notes substring. **Installments have no refusal
+  at all.** The design drew "Not received"; the product has none.
+- **Delta:** as question 9 decides. Recommended: the deposit's row routes to the existing
+  `reject_vendor_deposit` (never a second refusal path for the same money); installments get a mirror of
+  the deposit's columns and function on `event_vendor_payments` and a second section on the disputes
+  page; and confirming the deposit's row also acknowledges the deposit, so the two answers stop drifting.
+- **Depends on:** question 9; #5411 and B2 merged. **Gate:** owner. **Model/effort:** opus · xhigh. DRAFT.
+- **Touches:** a migration (columns + SECURITY DEFINER function + trigger guard), `app/admin/disputes`,
+  `pay-confirm-actions.ts`, the supplier thread page, `chat-thread-views.tsx`, `lib/thread-decisions.ts`.
+- **Must not run with:** B2, C1 (money on the same booking), anything on the Decisions files.
+- **Done means:** merged and served; a refused installment appears on `/admin/disputes`; the couple's
+  Decisions line reads the supplier's reason; a refused deposit takes the existing path, not a new one.
+
+### H5 · "Lock this" stops being offered on a supplier who said they aren't free — **after owner question 10**
+- **A person gets:** a couple is not invited to lock a supplier who already declined their date.
+- **Already exists:** v4's own note (§ 4, point 6): the bench keeps **Lock this** after a supplier
+  declines the inquiry, because `resolveBenchCardActions` does not read the thread. Correct after a
+  *lock-request* decline (they may ask again); odd after an *inquiry* decline.
+- **Delta:** after an inquiry decline, withhold Lock and say why; keep it after a lock-request decline.
+  Adds a line, removes no control from any other card.
+- **Depends on:** question 10; H3 merged (same file). **Gate:** owner. **Model/effort:** sonnet · medium.
+- **Touches:** `bench-vendor-actions.tsx` / `resolveBenchCardActions`, `shortlist-categories.tsx`.
+- **Done means:** merged and served; a declined supplier's card shows the reason, not Lock.
+
 ### L1 · Write today's rulings and corrections into the decision log (corpus only)
 - **Delta:** pull the corpus first (other sessions committed at 17:48, 18:03 and 18:15). Append —
   never overwrite; stage by explicit path; never `git add -A`; never `git stash`. Rows:
@@ -722,6 +831,17 @@ parallel-safe with · must not run with · done means. Session IDs are stable �
    end date now? My recommendation: a dated end — e.g. three months after public launch — shown to shops
    as "free until …".
 
+8. **[CAN WAIT — ships as proposed]** The supplier's own "where you stand" line (#5411) reads *"Quoted
+   ₱187,500 · waiting on them"* and *"They replied yesterday"*. Keep, or reword? My recommendation: keep —
+   it is the couple's sentence turned round, and a rewording is one line in one file.
+9. **[CAN WAIT — blocks H4 only]** "Not received" for a payment the couple logged. The deposit already
+   has one (Setnayan referees it); ordinary instalments have none. My recommendation: the deposit keeps its
+   existing path; instalments get the same one, refereed on the same disputes page; and confirming a
+   deposit in the chat also confirms it on the booking, so the two can never disagree.
+10. **[CAN WAIT — blocks H5 only]** The bench still offers "Lock this" on a supplier who has said they are
+   not free on your date. My recommendation: after that kind of no, hide Lock and say why; after a no to a
+   *lock request*, keep it — they may be asked again.
+
 **Owner ACTIONS, not questions:** view the corrected universal shop-page drawing when P1 says it is
 ready (it settles fold 5 and the share card together) · look at "both numbers after a lock" (B2)
 before it merges · view the corrected six-door drawing (F0) before G1 starts.
@@ -775,7 +895,7 @@ before it merges · view the corrected six-door drawing (F0) before G1 starts.
 - **Stranded commit `1ca4989f8c`** (Papic credit estimate defers to owner config) on
   `claude/plan-name-overwrites` — off this path; listed so it is not lost.
 - **The weak-signal venue, encoder go-live, non-wedding stories, Live Studio page copy** — other streams.
-- **#5402, #5404, #5377, #5403** — no session; they merge themselves.
+- **#5402, #5404, #5377, #5403, #5411** — no session; they merge themselves (#5402 has since merged).
 - **`claude/encoder-actually-runs`** (docs-only) — superseded by #5400.
 - **`VERCEL_SUPPORT_LARGE_FUNCTIONS`** — only if B3's slimming fails.
 
