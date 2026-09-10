@@ -22,7 +22,8 @@ access you can take back.
 | # | Session | What a person gets | Model · effort | Waits on |
 |---|---|---|---|---|
 | **1** | **N0** | Our cleanup jobs can never delete someone else's file | Opus · high | its build finishing (running now) |
-| **2** | **N1** | The chat can't be used to swap numbers or open WhatsApp | Opus · high | **you:** is the chat contact filter on in Vercel? |
+| **2** | **N1** | The chat can't be used to swap numbers, open WhatsApp, or post into someone else's conversation | Opus · high | **you:** is the chat contact filter on in Vercel? |
+| **2b** | **N3** | A mood-board render can't be used to read a stranger's payment receipt | Opus · high | nothing |
 | **3** | **B1** | No service card goes live without a name | Opus · high | nothing |
 | **4** | **B2** | After a lock, a price change shows both numbers | Opus · high | **your look** before merge |
 | **5** | **C3** | The admin verification desk | Sonnet · medium | nothing |
@@ -103,6 +104,7 @@ work; **Fable** only for drawings.
 
 **Safe trios to run together** (no shared files):
 - Round A: **N0 · B1 · C3**
+- Round A2: **N3** alongside Round A if a slot frees (touches mood-board files only)
 - Round B: **N1 · B2 · C2**
 - Round C: **C1 · D2 · H3** (+ F0, a drawing, alongside anything)
 - Round D: **H2 · D3 · E4**

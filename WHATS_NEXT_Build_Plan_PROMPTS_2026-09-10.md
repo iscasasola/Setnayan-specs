@@ -942,6 +942,14 @@ YOUR JOB: review it as a skeptic, then land it.
 · Read the exposure-baseline diff and COUNT it: only narrowings and the new restrictive policies, no widening.
 · Full db suite + affected unit suites + tsc, sequential, non-zero test counts.
 · It changes grants and policies on live upload tables: it stays a DRAFT until the orchestrator reads your review.
+ALSO FIX BEFORE RELEASE (post-build review of PR #5414, executed):
+· The new doc_uploads RESTRICTIVE policy is a deny-list on starts_with(node,'r2://'): a foreign ref with a LEADING
+  space/tab/newline/NBSP/BOM, or `R2://`, is ACCEPTED on write. Every reader trims, so normalise (trim + lower the
+  scheme) BEFORE the prefix test, or make it an allow-list. Prove the variants refused as a real authenticated role.
+· Erasure can delete the OTHER party's chat file: chat attachments are pinned to the THREAD, not the sender, and
+  chat_messages.attachment_r2_key is writable on insert. Either pin erasure's chat refs to the sender's own folder, or
+  leave it to N1 (which binds thread_id and pins the key) and say so in the PR — do not leave it unstated.
+· The secret-scan failure was a false positive (a test filename); already ignored in .gitleaksignore at a80fa24d5a.
 DONE MEANS: a written review in the PR, every guard proven RED under mutation, CI green, PR left DRAFT with a
 one-line "ready to release" or a named blocker.
 ```
@@ -974,7 +982,11 @@ C · Contact screening of message TEXT enforced where a direct PostgREST insert 
     trigger calling the same rules, or moving the insert behind a SECURITY DEFINER function). Decide which, and say
     why. ⚠ Screening text is a product decision about false positives (a price like "0917" vs a phone number):
     reuse the shipped filter's rules exactly; do not invent new ones.
-D · Guards that fail if a door reopens; mutation-test each.
+D · ALSO (found by #5414's review, proven in the replay): chat_messages_member_insert never binds thread_id to the
+    sender's own event + supplier pair — a couple inserted into a STRANGER'S thread using their own event_id, and it
+    rendered in the victim's conversation as a couple's message. Bind it, and pin attachment_r2_key to the thread's
+    own chat/<thread>/ folder (ideally per sender). This also closes the erasure cross-party delete.
+E · Guards that fail if a door reopens; mutation-test each.
 Security grants + trigger on a live table ⇒ DRAFT PR. Name in the body that the prod BEGIN…ROLLBACK rehearsal
 needs the owner's go-ahead.
 DONE MEANS: the three doors proven closed in the replay as a real `authenticated` session; CI green; DRAFT.
@@ -999,4 +1011,30 @@ GOAL: same principle as N1. Two leftovers found by the post-merge review of #540
 Extend #5404's guard (`lib/no-door-out-of-the-app.test.ts`) bill so the Hosts line's gate is proven, and
 mutation-test it. Not money, not grants — ordinary PR with auto-merge.
 DONE MEANS: merged and served; guard green; a Setnayan coordinator's email appears nowhere a couple can see it.
+```
+
+## N3 — A mood-board render cannot be used to read someone else's private file
+
+```
+(Paste after the SHARED HEADER.)
+
+GOAL: no event member can use a render row to read or publish a file that isn't theirs.
+
+MEASURED (post-build review of PR #5414, executed): event_renders.image_key and gallery_image_key are written by two
+SECURITY DEFINER RPCs, moodboard_finish_render(render_id, p_image_key) and moodboard_attach_gallery_copy(render_id,
+p_gallery_image_key), both GRANT EXECUTE TO authenticated, and NEITHER checks the key is under the event's own
+renders/<event_id>/ prefix. Any event member — including a zero-credit GUEST, via moodboard_begin_render(..., 0) and
+the gate moodboard_render_caller_may_act, which checks membership with no member_type filter — can stamp any key.
+Those keys are then SERVED: studio/mood-board/page.tsx ~538 and admin/moodboard-renders/page.tsx ~71 call r2SignedGet
+on the PRIVATE setnayan-thread-files bucket, which also holds PAYMENT-PROOF SCREENSHOTS. So a guest can be handed a
+presigned link to a stranger's payment receipt. applyRenderPick also COPIES the object into a public bucket, and
+moodboard_set_render_featured can promote a forged render into public showcase surfaces.
+
+WHAT TO SHIP: both RPCs refuse a key outside the render's own event prefix (the database, not the app); every serve
+path (r2SignedGet) and copy path (applyRenderPick, the showcase) re-checks the prefix before touching storage; decide
+whether a guest may start a render at all (a product question — if unclear, keep the current rule and only pin the
+keys, and name it). Then audit the SAME serve/copy question for the events site-media columns (hero image and film,
+site music, our_photos) and guest_face_enrollments.asset_url, which stay browser-writable after #5414 — report each,
+fix what is reachable. Guards as a real authenticated non-superuser role; mutation-test. SECURITY ⇒ DRAFT PR.
+DONE MEANS: forged keys refused on write AND on serve, proven in the replay; CI green; DRAFT for the orchestrator.
 ```
