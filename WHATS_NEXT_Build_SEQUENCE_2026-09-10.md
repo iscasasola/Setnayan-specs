@@ -215,5 +215,6 @@ work; **Fable** only for drawings.
 | LAND · E3 ID-delete guard | ✅ MERGED | #5420 · reviewed by orchestrator (behaviour-preserving; 100/100; 9 sabotages RED) |
 | LAND · D4 every film | ✅ SERVED | #5140 · 8947934; `event_films` live, RLS on, anon no SELECT (orchestrator read prod); #5012 CLOSED |
 | bundles 2–8 | 🔨 B2 · HONEST SHOP · CLEANUPS running | N4 next free slot |
+| H5 Lock after "not free" + unavailable not planned | 🔨 OWNED BY S2 (local_3e75b0b1…) — DO NOT LAUNCH A SECOND | Q10 ruled 2026-09-11; Opus · high; normal PR; S2 surfaces any product choice in the availability half |
 
 **Rescue copies** of every unsaved workspace from today: `/Users/icecasasola/Documents/Claude/Projects/setnayan-rescue-2026-09-10/` (restore guide inside).
