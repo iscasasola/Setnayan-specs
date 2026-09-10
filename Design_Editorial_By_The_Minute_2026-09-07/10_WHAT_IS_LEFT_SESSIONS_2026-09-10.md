@@ -23,7 +23,7 @@
 | **2** | Story · A4, one minute per page | The story prints as a booklet | Sonnet 5 | medium | ✅ **done** (PR #5416) | 1 |
 | **3** | Story · where the arrangement is kept | "Make it yours" saves for every celebration | Opus 5 | high | ✅ **done** (PR #5419, merged + verified in prod 2026-09-11) | 1, 2 |
 | **4** | Story · the editor, part 1 — photos | Tray, tap-to-add, ×, Automatic / I choose, Put all back, Undo, autosave | Opus 5 | high | after **3** | 5 |
-| **5** | Story · guests see the arranged pages | The public story shows each moment as laid out | Opus 5 | medium | after **3** | 4, 6 |
+| **5** | Story · guests see the arranged pages | The public story shows each moment as laid out | Opus 5 | medium | ✅ **done** (PR #5428, merged + verified in prod 2026-09-11) | 4, 6 |
 | **6** | Story · the editor, part 2 — words and moments | Words + looks, the phone toolbar, naming, sets, reorder | Opus 5 | **medium** | after **4** | 5 |
 | **7** | Story · the prints carry the arrangement | A3 and A4 print each moment as laid out | Sonnet 5 | medium | after **2** and **5** | 6 |
 | **8** | Story · the whole thing, driven end to end | Proof it works for a real host on a real phone | Opus 5 | high | after **6** and **7** | — |
@@ -207,7 +207,27 @@ with zero dialogs, zero console errors, (photos on pages + tray) always equal to
 and no horizontal scroll.
 ```
 
-## 5 · Story — guests see the arranged pages · **Opus 5 · medium** · after step 3
+## 5 · Story — guests see the arranged pages · **Opus 5 · medium** · ✅ DONE 2026-09-11 (PR #5428)
+
+**Verify with the object, not this line:** `gh pr view 5428 --json state,mergedAt`, then
+`curl -s https://setnayan-platform-web.vercel.app/api/health` → `version` at or after `d295b3e`.
+Read 2026-09-11 after the deploy: prod served `d295b3e` (the merge commit); CI's full check green
+(unit + DB replay); `/movie-night`, `/cale-ice`, `/ana-miguel` and the Maria & Juan sample all 200,
+the sample still drawing its 5 minutes. ⚠ No story in prod has a hand arrangement yet (the only
+event with captures is the owner's), so a real arranged page on the live site is step 8's to drive.
+
+**What step 7 builds on** (see the 2026-09-11 DECISION_LOG row for the two flagged calls):
+- RENDER with `ArrangedSheet` (`apps/web/app/[slug]/_components/story/arranged-sheet.tsx`) — pass
+  `stills` on paper (a snippet prints as its still with ▶). Never a second renderer. Every length is
+  in sheet units (`--sn-u` = 1/660 of the sheet's container), so it scales to any page width as is.
+- READ with `loadStoryPages(admin, eventId, viewer, sign)` (`apps/web/lib/story-pages.ts`) — it goes
+  through step 3's `loadStoryArrangement`, so S3 + S14 hold. `sheetsOf` / `placeSheetsOnDays` /
+  `withoutPlacedMedia` (`apps/web/lib/story-sheet.ts`) decide which moments draw, where they go, and
+  which minute media to leave out.
+- A guard (`lib/the-public-story-reads-the-arrangement-once.test.ts`) fails if a route under
+  `app/[slug]`, `app/api` or `app/realstories` reads the arrangement any other way — the print route
+  is under `app/[slug]`, so step 7 must use `loadStoryPages` too.
+
 
 ```
 GOAL: the public story (/[slug]) shows each moment the way the host arranged it.
