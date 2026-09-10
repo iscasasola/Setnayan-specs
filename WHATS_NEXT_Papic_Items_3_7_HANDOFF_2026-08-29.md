@@ -10,6 +10,8 @@ No memory note is referenced, because none will exist. -->
 > Verified with `gh pr view`, not read: **items 4 and 5 merged 2026-09-01; item 6 merged
 > 2026-09-02 (PRs #5081 · #5086); item 7 — ALL of 7a–7d — merged 2026-09-02 (PRs #5082 · #5087 ·
 > #5090)**, including #5090, which the build order warned was *"still OPEN and red"*.
+> ✅ **BUILT 2026-09-11 — PR #5418 (merged, verified in prod by the object): sponsors now default to a bigger share** (principal 3 shares · cord/veil/coin/candle 2 · everyone else 1, weighted into the division so the ceilings still add up to the pot; sponsors read off the guest list). See the 2026-09-11 DECISION_LOG row. **Papic item 3 is now fully done.**
+>
 > ✅ **CORRECTED 2026-09-10 — ITEM 3'S CORE IS BUILT AND LIVE; ONLY "SPONSORS DEFAULT TO A BIGGER SHARE" IS LEFT.** Read out of production BY THE OBJECT: `papic_record_guest_capture` asks `papic_guest_spend_ceiling(p_guest_id)` FIRST and refuses with `reason:'guest_spend_ceiling'`; that function carries the named-guest, equal-share and release arms; a guest's own purchase is exempt via `papic_guest_ceiling_spend`. PRs #5014 (couple sets the numbers) · #5017 (the limit binds) · #5019 (the guest sees it) · #5024 (promotion page) · #5028 + #5034 (keep or give) · #5052 (150 is raisable) — all MERGED. 🔑 **The 2026-09-09 "genuinely unbuilt" measurement searched for `allot` and `sponsor`; the shipped code says `ceiling`. A SEARCH THAT CANNOT MATCH IS NOT A NEGATIVE RESULT.** What IS absent: no Papic function or file mentions sponsors, so the 2026-08-29 addition (sponsors default to a bigger share) is the one open piece.
 >
 > ~~**Item 3 (shots per guest + sponsors default to a bigger share) is genuinely unbuilt**~~ (FALSE), measured
@@ -261,6 +263,8 @@ is admitted above the ceiling.** The pot still binds — that is the money gate,
 - **The promotion page**: only after the other two ship.
 
 ### ➕ One addition made 2026-08-29: sponsors default to a bigger share
+
+> ✅ **BUILT 2026-09-11 — PR #5418 (merged, verified in prod by the object): sponsors now default to a bigger share** (principal 3 shares · cord/veil/coin/candle 2 · everyone else 1, weighted into the division so the ceilings still add up to the pot; sponsors read off the guest list). See the 2026-09-11 DECISION_LOG row. **Papic item 3 is now fully done.**
 
 `apps/web/lib/event-sponsors.ts` already models **principal sponsors** (one enum value; `side`
 distinguishes **ninong** from **ninang**; `pair_index` couples each pair) plus **cord · veil · coin ·

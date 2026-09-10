@@ -7,7 +7,7 @@
 
 > Supersedes the "LEFT" row of `09_SESSIONS_AND_PROMPTS_2026-09-09.md` and rev 1 of this file.
 > **S1–S15 of the Story plan are ALL MERGED** (#5329–#5389; S15 = commit `5f7d8f04`). Papic item 3's
-> core is built and live (corrected 2026-09-10) — only its sponsor share is left.
+> core is built and live (corrected 2026-09-10) — and its sponsor share is now built too (PR #5418, 2026-09-11).
 > ⚠ Verify any PR state with `gh pr view <n> --json state,mergedAt` before trusting it.
 >
 > **The design being built:** `prototypes/story_make_it_yours_2026-09-10.html` (three rounds of
@@ -19,7 +19,7 @@
 | Step | Build | What a person gets | Model | Effort | Starts when | May run beside |
 |---|---|---|---|---|---|---|
 | **0** | ✅ **Owner gate — PASSED 2026-09-10** (*"this is fine"*), with one change: the words toolbar | — | — | — | done | — |
-| **1** | Papic · sponsors get a bigger share | A sponsor's guests start with more shots | Opus 5 | high | **now** | 2 |
+| **1** | Papic · sponsors get a bigger share | A sponsor's guests start with more shots | Opus 5 | high | ✅ **done** (PR #5418) | 2 |
 | **2** | Story · A4, one minute per page | The story prints as a booklet | Sonnet 5 | medium | ✅ **done** (PR #5416) | 1 |
 | **3** | Story · where the arrangement is kept | "Make it yours" saves for every celebration | Opus 5 | high | **now** (gate passed) | 1, 2 |
 | **4** | Story · the editor, part 1 — photos | Tray, tap-to-add, ×, Automatic / I choose, Put all back, Undo, autosave | Opus 5 | high | after **3** | 5 |
@@ -66,7 +66,24 @@ English). For steps 3–8 also paste:
 
 ---
 
-## 1 · Papic — sponsors get a bigger share · **Opus 5 · high** · now
+## 1 · Papic — sponsors get a bigger share · **Opus 5 · high** · ✅ DONE, MERGED, VERIFIED LIVE 2026-09-11 (code PR #5418, merge `1c11d4055`)
+
+**Verify with the object, not this line:** `gh pr view 5418 --json state,mergedAt`, and in prod
+`pg_get_functiondef('public.papic_guest_spend_ceiling(uuid)'::regprocedure) LIKE '%(v_heads + v_extra)%'`
+plus `SELECT public.papic_share_weight('principal_sponsor','{}')` → 3. Read 2026-09-11 after the
+deploy: one overload · sponsor division + multiply present · named and release arms kept · weights
+3/2/2/1 · anon cannot execute · 8 live sponsors recognised · 0 guests with a ceiling (no celebration
+has the switch on, so nobody's number moved on merge). Migration `20271220526938`.
+
+**What shipped, and two calls made here (see the 2026-09-11 DECISION_LOG row):**
+- **Weighted, not multiplied on top** — a sponsor counts as 3 (or 2) heads in the division, so every
+  ceiling still adds up to the pot.
+- **Who is a sponsor = the guest list** (`guests.role` + `extra_roles`), not the sponsors page's link
+  — prod had 8 sponsor-role guests and 0 sponsors-page rows, so the couple's sheet recognised none.
+- A couple's typed "everyone else" number is one ordinary share; a sponsor gets her multiple of it.
+- ⚠ **Found, not fixed (separate task):** the sheet caps a typed "everyone else" number at the fair
+  share, but the database enforces the typed number raw. Pre-existing; flagged for its own session.
+
 
 ```
 GOAL: on a celebration with sponsors, a sponsor's guests start with a bigger share of shots by

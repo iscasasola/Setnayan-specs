@@ -21,7 +21,7 @@ awaiting a decision. Registered in WHATS_NEXT_INDEX.md and in the corpus CLAUDE.
 |---|---|---|---|
 | **1** | The browser stops enforcing a limit that does not exist | days | ✅ **DONE** — PR [#5002](https://github.com/iscasasola/setnayan-platform/pull/5002) |
 | **2** | Say what is already true, on the promotion page | days | ✅ **DONE** — page shipped 2026-08-29, guard PR [#5003](https://github.com/iscasasola/setnayan-platform/pull/5003) MERGED |
-| **3** | Shots per guest (+ sponsors default to a bigger share) | several sessions | ✅ **CORE BUILT + LIVE** (corrected 2026-09-10) — only *sponsors default to a bigger share* is left |
+| **3** | Shots per guest (+ sponsors default to a bigger share) | several sessions | ✅ **DONE** — core live (corrected 2026-09-10); sponsor share built 2026-09-11 (PR #5418) |
 | **4** | Timed challenges reach the wall | 1 session | ✅ **DONE 2026-09-01** — both halves; see § 4 |
 | **5** | Challenges hang on the ceremony sequence | small | ✅ **DONE 2026-09-01** — see § 5 |
 | **6** | The guest chooses per audience | small | ✅ **DONE 2026-09-02** — PRs #5081 · #5086, both verified MERGED |
@@ -172,6 +172,8 @@ of them.**
 
 Named guests get a specific number · everyone else splits the remainder equally · the leftover is
 anyone's · a button and an automatic release late in the night.
+
+> ✅ **BUILT 2026-09-11 — PR #5418 (merged, verified in prod by the object): sponsors now default to a bigger share** (principal 3 shares · cord/veil/coin/candle 2 · everyone else 1, weighted into the division so the ceilings still add up to the pot; sponsors read off the guest list). See the 2026-09-11 DECISION_LOG row. **Papic item 3 is now fully done.**
 
 ➕ **ONE ADDITION, made here:** **sponsors default to a bigger share.** `lib/event-sponsors.ts`
 already models principal sponsors (ninong/ninang by side, paired), plus cord, veil, coin and

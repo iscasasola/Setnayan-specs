@@ -73,7 +73,7 @@ committed docs on purpose.
 > # 🧭 COLD START? READ **[`START_HERE_WHATS_NEXT_2026-08-29.md`](START_HERE_WHATS_NEXT_2026-08-29.md)** FIRST.
 > **SIX blocks below are headed `▶ ACTIVE`. Only ONE is open work** — Papic **item 3 ONLY**
 > (⚠ **CORRECTED 2026-09-09: items 4 · 5 · 6 · 7 ARE BUILT AND MERGED** — every PR verified with
-> `gh pr view`. ⚠ **CORRECTED AGAIN 2026-09-10: item 3's CORE is BUILT and LIVE** — prod's `papic_record_guest_capture` enforces `papic_guest_spend_ceiling` (named · equal share · release); the 09-09 "unbuilt" search looked for `allot`/`sponsor` and the code says `ceiling`. **Only *sponsors default to a bigger share* is left.**)
+> `gh pr view`. ⚠ **CORRECTED AGAIN 2026-09-10: item 3's CORE is BUILT and LIVE** — prod's `papic_record_guest_capture` enforces `papic_guest_spend_ceiling` (named · equal share · release); the 09-09 "unbuilt" search looked for `allot`/`sponsor` and the code says `ceiling`. ~~Only *sponsors default to a bigger share* is left.~~ ✅ **That too is built — PR #5418, 2026-09-11. Item 3 is DONE.**)
 > The other
 > five are finished streams or standing rules that never had the label struck: the supplier's room
 > (its Answers Desk shipped as PR #4917), the Papic media library (nine PRs shipped), and three
