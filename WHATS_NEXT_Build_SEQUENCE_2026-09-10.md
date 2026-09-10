@@ -184,7 +184,7 @@ work; **Fable** only for drawings.
 | N0 cleanup-delete pin | 🔨 finishing the two ALSO-FIX items | #5414 DRAFT · baseline counted by orchestrator: 5 narrowings + 5 RESTRICTIVE, 6617→6622 = body, no widening |
 | N1 chat door | 🔨 building (Opus) | launched 2026-09-10 ~15:48Z; does not touch lib/erasure/** (N0's) |
 | N3 render keys | 🔨 building (Opus) | launched 2026-09-10 ~15:48Z |
-| P2 Free-vs-Solo drawing | 🎨 drawing (Fable) | launched 2026-09-11 ~00:05 Manila; orchestrator commits |
+| P2 Free-vs-Solo drawing | ✅ DRAWN — waits on the owner's look | `4facf58` · prototypes/shop_page_free_vs_solo_2026-09-10.html · 2 proposals (plain strip on Free; shop-only Solo preview), stock photo drawn both ways |
 | F0 six-door drawing | 🎨 drawing (Fable) | launched 2026-09-11 ~00:05 Manila; orchestrator commits |
 | H3 drag your own order | ✅ ALREADY LIVE — dropped | `ad2787fda5` (2026-09-09) on main = prod `0d3a1e0`; table `event_bench_arrangement`, long-press, "Your order" |
 | bundles 1–8 | ⬜ not started | re-planned 2026-09-11 (top of file); LAND → B2 → HONEST SHOP → CLEANUPS take the next free slots |
