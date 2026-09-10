@@ -55,6 +55,7 @@ bundle overrides in WHATS_NEXT_Build_SEQUENCE_2026-09-10.md.`
   Read the never-committed migration `an_adjustment_never_erases_the_price` in
   `/Users/icecasasola/Documents/Claude/Projects/setnayan-rescue-2026-09-10/` (and worktree
   `/private/tmp/wt-s1d`) first — reuse, do not re-invent.
+- GIFT & CARD GATE · H2: also give `host_mc` a proper database label so a blank host card auto-names "Host / MC by …", not "Host Mc by …" (B1's trigger reads the database label; C2 fixes only the app's label). Data/migration, same service-card area.
 - CLEANUPS: N2 item 1 only (the Hosts page coordinator email + the package-lock copy); item 2 is B2's.
   ALSO (from #5414's release): the two app-side verification-upload gates (`app/vendor-dashboard/verify/actions.ts`,
   `app/vendor-dashboard/shop/inline-docs-actions.ts`) still pass an `R2://` / padded value that the database now refuses
@@ -120,7 +121,7 @@ access you can take back.
 **What only you can do, in the order it unblocks things:**
 1. ~~Chat contact filter~~ — ✅ confirmed ON in Vercel, 2026-09-10.
 2. **Look at "both numbers after a lock"** when B2 is ready (unblocks 4, then the test).
-3. **Prep the test:** rename the "(FIXTURE)" band shop, real titles + cover photos on its two cards,
+3. **Prep the test:** ⚠ ORDER MATTERS (B1 is live): rename the shop and type the two card titles BEFORE saving any card with a blank title — a blank card saved first is auto-named "… by Saysay … (FIXTURE)" and a later rename does not change it. Rename the "(FIXTURE)" band shop, real titles + cover photos on its two cards,
    a GCash QR, leave the gift at "no", play the couple on **testnayan4** (give its event a date).
 4. **Look at the corrected shop-page drawing** (unblocks 12 and 20) — and rule on the **stock photo**
    while you are there: keep it (your 4 June order) or replace it?
@@ -205,6 +206,10 @@ work; **Fable** only for drawings.
 | P2 Free-vs-Solo drawing | ✅ DRAWN — waits on the owner's look | `4facf58` · prototypes/shop_page_free_vs_solo_2026-09-10.html · 2 proposals (plain strip on Free; shop-only Solo preview), stock photo drawn both ways |
 | F0 six-door drawing | ✅ CORRECTED — waits on the owner's look | prototypes/shop_page_2026-09-10.html · 91-row "every shipped control → its door" table (`data-shipped`) for G1's guard; moodboard-library and permit-renewal claims corrected |
 | H3 drag your own order | ✅ ALREADY LIVE — dropped | `ad2787fda5` (2026-09-09) on main = prod `0d3a1e0`; table `event_bench_arrangement`, long-press, "Your order" |
-| bundles 1–8 | 🔨 LAND · B2 · HONEST SHOP running | LAND launched ~01:00, B2 ~01:40, HONEST SHOP ~02:10 Manila 2026-09-11; CLEANUPS then N4 next |
+| LAND · B1 card names | ✅ SERVED | #5387 · a3996d5; trigger `trg_before_enforce_fill_service_card_title` live (orchestrator read prod) |
+| LAND · C3 verification desk | ✅ SERVED | #5394 · c902d5f; Approve still WARNS |
+| LAND · E3 ID-delete guard | ✅ MERGED | #5420 · reviewed by orchestrator (behaviour-preserving; 100/100; 9 sabotages RED) |
+| LAND · D4 every film | ✅ SERVED | #5140 · 8947934; `event_films` live, RLS on, anon no SELECT (orchestrator read prod); #5012 CLOSED |
+| bundles 2–8 | 🔨 B2 · HONEST SHOP · CLEANUPS running | N4 next free slot |
 
 **Rescue copies** of every unsaved workspace from today: `/Users/icecasasola/Documents/Claude/Projects/setnayan-rescue-2026-09-10/` (restore guide inside).
