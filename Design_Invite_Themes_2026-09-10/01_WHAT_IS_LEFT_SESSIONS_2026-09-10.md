@@ -83,6 +83,13 @@ RULES THAT OVERRIDE YOUR DEFAULTS:
   returns nothing there).
 - Print TSC_EXIT beside the error lines. Run the FULL `pnpm test:unit` and the ROOT `pnpm lint`
   before pushing; run them one after another, never at the same time.
+- THEN RUN CI'S 36 SEPARATE GUARD SCRIPTS — root lint runs none of them. Walk the steps of
+  .github/workflows/ci.yml and run every `run:` that calls a scripts/ file, from that step's
+  working-directory. (2026-09-10: #5409 and #5410 each failed CI twice on guards root lint
+  never ran — the one-comment-stripper and the exposure baseline.)
+- CI checks your branch MERGED INTO MAIN. If you touched supabase/security/
+  exposure-surface.baseline.txt, merge origin/main first and recount the header from the body —
+  a clean git merge keeps one side's count.
 - Downloading any file needs the owner's yes in chat (or a logged Q1 answer).
 - Reply to the owner in plain English: what a PERSON sees. No file paths, function names, table
   names or SQL in the answer to the owner.
