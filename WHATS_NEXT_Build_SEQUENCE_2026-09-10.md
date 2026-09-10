@@ -183,8 +183,8 @@ work; **Fable** only for drawings.
 | B3 deploy headroom + security | ✅ SERVED | #5407, #5397 |
 | H1 meeting from Decisions | ✅ SERVED | #5411 · 55e2d4d |
 | L1 · P1 · T1-script | ✅ done | corpus; P1 drawing re-checked: stock photo drawn as the owner's open question |
-| T1 watcher | ✅ MERGED | #5413 · e4e55e0 — also fixed two phantom vendor_services columns (b39d82c); confirm served |
-| N0 cleanup-delete pin | ✅ MERGED 2026-09-11 — confirm served | #5414 · prod BEGIN…ROLLBACK rehearsal passed (orchestrator); 2492 db + 14742 unit tests green; 11 mutations RED |
+| T1 watcher | ✅ SERVED | #5413 · e4e55e0 ancestor of prod ba93a8f — also fixed two phantom vendor_services columns (b39d82c) |
+| N0 cleanup-delete pin | ✅ SERVED | #5414 · ba93a8f in prod; read-only prod: 5 RESTRICTIVE policies live, authenticated UPDATE on papic key columns gone, migration 20271219262486 recorded |
 | N1 chat door | 🔨 building (Opus) | launched 2026-09-10 ~15:48Z; does not touch lib/erasure/** (N0's) |
 | N3 render keys | 🔨 building (Opus) | launched 2026-09-10 ~15:48Z |
 | P2 Free-vs-Solo drawing | ✅ DRAWN — waits on the owner's look | `4facf58` · prototypes/shop_page_free_vs_solo_2026-09-10.html · 2 proposals (plain strip on Free; shop-only Solo preview), stock photo drawn both ways |
