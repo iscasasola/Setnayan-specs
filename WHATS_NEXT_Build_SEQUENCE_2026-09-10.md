@@ -220,7 +220,9 @@ work; **Fable** only for drawings.
 | LAND · D4 every film | ✅ SERVED | #5140 · 8947934; `event_films` live, RLS on, anon no SELECT (orchestrator read prod); #5012 CLOSED |
 | HONEST · C2 marketplace photo + names | ✅ SERVED | #5421 · 5df29f4 |
 | CLEANUPS · D3 old verify page → papers | ✅ SERVED | #5424 · 171e65e |
-| bundles 2–8 | 🔨 B2 · HONEST SHOP · CLEANUPS running | N4 next free slot |
+| CLEANUPS · E2 contact filter on About/tagline | ✅ SERVED | #5426 · baa88bf |
+| CLEANUPS · N2-1 Hosts page coordinator email | ✅ SERVED | #5427 · d1d5a29 (a Setnayan coordinator gets "Message them"; the DB copy is kept — coordinator-broadcasts reads it) |
+| running now | 🔨 HONEST SHOP (D2→E1) · N4 (4 parts) · L3 badge deadlines · S2 H6 | B2 #5390 auto-merging; next: SMALL RULINGS (L2 after HONEST SHOP's E1), GIFT & CARD GATE, H4, LOCK-PATH CAPACITY |
 | H5 Lock after "not free" + unavailable not planned | ✅ SERVED (S2) | #5425 · c913c6e in prod (S2 + orchestrator ancestry) |
 | H6 bench search hides a card with no bookings left on the date | 🔨 BUILDING (S2) · DO NOT LAUNCH A SECOND | hides on blocked day + full time slots (the two paths that really refuse); per-card daily limit waits for LOCK-PATH CAPACITY (tripwire test pins it); month = full every day |
 | LOCK-PATH CAPACITY (Opus · high) — was "H6 follow-up" | ⬜ after B2 + N4 land | BUG (measured by S2 in prod `pg_policies`, 2026-09-11): the couple-side per-card daily-limit gate (`vendors/actions.ts` #2, `soft_hold_limit_reached`) counts other couples' bookings under the couple's OWN session, and RLS lets a couple see only their own events → it always counts 0 and never refuses: a supplier's per-card daily limit does not stop double-booking. Fix: ONE `SECURITY DEFINER` count function used by the #2 gate AND by H6's helper (remove H6's tripwire in the same PR); make both day-precision-only (a month-precision event stored on the 1st must not count as a booking on the 1st). Time slots and calendar blocks are already enforced by definer functions. Prod today: 0 cards with a daily limit, 0 confirmed bookings with a service — nothing broken yet. |
