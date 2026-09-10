@@ -20,7 +20,7 @@
 |---|---|---|---|---|---|---|
 | **0** | ✅ **Owner gate — PASSED 2026-09-10** (*"this is fine"*), with one change: the words toolbar | — | — | — | done | — |
 | **1** | Papic · sponsors get a bigger share | A sponsor's guests start with more shots | Opus 5 | high | **now** | 2 |
-| **2** | Story · A4, one minute per page | The story prints as a booklet | Sonnet 5 | medium | **now** | 1 |
+| **2** | Story · A4, one minute per page | The story prints as a booklet | Sonnet 5 | medium | ✅ **done** (PR #5416) | 1 |
 | **3** | Story · where the arrangement is kept | "Make it yours" saves for every celebration | Opus 5 | high | **now** (gate passed) | 1, 2 |
 | **4** | Story · the editor, part 1 — photos | Tray, tap-to-add, ×, Automatic / I choose, Put all back, Undo, autosave | Opus 5 | high | after **3** | 5 |
 | **5** | Story · guests see the arranged pages | The public story shows each moment as laid out | Opus 5 | medium | after **3** | 4, 6 |
@@ -86,9 +86,35 @@ DONE WHEN: a sponsor guest's ceiling beats a plain guest's on the same event, pr
 that fails when the sponsor arm is removed; migration verified in prod by the object.
 ```
 
-## 2 · Story — A4, one minute per page · **Sonnet 5 · medium** · now
+## 2 · Story — A4, one minute per page · **Sonnet 5 · medium** · ✅ DONE, MERGED, VERIFIED LIVE 2026-09-11 (code PR #5416, merge `44bd36e3d`)
 
-```
+**Verify with the object, not this line:** `gh pr view 5416 --json state,mergedAt` and load
+`https://www.setnayan.com/<a real published slug>/print?format=a4`.
+
+⚠ **Solemn-quiet print suppression shipped as a FLAGGED JUDGMENT CALL, not an owner ruling —
+see the 2026-09-11 DECISION_LOG.md row for the interpretation (festive colour suppressed, content
+never suppressed) and surface any objection there.**
+
+🔎 **PROD VERIFICATION — CONFIRMED LIVE 2026-09-11.** `origin/main` merge commit
+`44bd36e3d8bb6164d0246b489d9e62c26c970ad4` (PR #5416, itself preceded by a same-day follow-up
+push `0a60c4ae5` that fixed a CI typecheck/lint failure — `pair[0]` under
+`noUncheckedIndexedAccess` and a hand-rolled comment-stripper duplicating
+`lib/strip-comments.ts` — both caught by CI before merge, not after). Deployment
+`dpl_3YRAwP5hfXupawJqSbU6gWxMpc7k` (target `production`) was `BUILDING` immediately after merge
+(an ordinary in-flight build in a fast-moving queue — four more PRs, #5417–#5420, landed on
+`main` within the same few minutes) and reached `READY` shortly after: **`GET
+https://setnayan-platform-web.vercel.app/api/health` now reports `"version":"44bd36e"`**, i.e.
+prod is serving the exact merged object, verified by the object per this repo's own rule — not
+by a migration comment or `schema_migrations`. ⚠ **What was NOT directly observed:** the only
+known live slug at hand (`cale-ice`) 307-redirects `/cale-ice/print?format=a4` to `/cale-ice`
+both before and after this deploy — its story is not in the published/QR-visible audience state,
+which is the SAME pre-existing publish gate every print format has always had, not a defect from
+this PR. No credentials for a published couple account were available this session, so the
+actual rendered A4 booklet was not screenshotted end-to-end; the shipped tests
+(`a4-pagination.test.ts`, `a4-inherits-the-withdrawal.test.ts`,
+`the-keepsake-stays-quiet-at-a-wake.test.ts`) all ran and passed in CI's "Unit tests" step against
+this exact commit before merge. A future session with a real published slug + host login should
+still open `/print?format=a4` and eyeball it once.
 GOAL: the story prints as an A4 booklet, one minute of the day per page — the last unbuilt part of S12.
 ALREADY SHIPS — DO NOT REBUILD: the A3 keepsake with its QR back to the living page
 (app/[slug]/print/*), the S14 edition stamp, the 9:16 card, the share sheet (#5380). The "A4" in
