@@ -81,10 +81,13 @@ to the next tap.
    *(Proves #5404.)*
 4. **[Supplier] Accept the inquiry, then reply in the thread.** This has never happened in
    production before — the first supplier reply, ever.
-5. **[Both] Strike a price in chat before the supplier sends a formal quote, then press
-   "🔒 Lock this deal".** ★ **Expected: no Lock button appears, or pressing it tells you to ask
-   the shop for a quote first — it must NOT say "Deal locked."** *(Proves A2. If it says
-   "locked," that session's fix hasn't landed — stop and say so.)*
+5. **[Both] Strike a deal in chat (a discount, an add-on, a freebie) BEFORE the supplier sends
+   a formal quote, and have the other side accept it.** ★ **Expected: no Lock button appears.
+   You (the couple) read "This deal has no quoted price yet, so it can't be locked. Ask the shop
+   to send their quote first"; the supplier reads "…Send your proposal first". Nothing anywhere
+   may say "Deal locked" or "frozen".** *(Proves A2. If a Lock button appears on that deal, or
+   anything says "locked," that session's fix hasn't landed — stop and say so. Once the quote is
+   in, a NEW deal agreed on top of it is the one that shows Lock, with its price on the button.)*
 6. **[Supplier] Send a real proposal / quote with a price.**
 7. **[Couple] Accept the quote.** ★ **Expected: the page tells you plainly that accepting isn't
    booking — it points you to press Lock to actually book the shop.** *(Proves A4. If it just
