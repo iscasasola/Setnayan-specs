@@ -37,6 +37,7 @@ Every remaining row was re-measured against `origin/main` `0d3a1e0` (= productio
 | — | **TEST ROUND 2** | a couple with two events | — | D1 live |
 | **7** | **SIX-DOOR MY SHOP** = G1 → G2 → G3 | My Shop in six doors, nothing lost | Opus · high | **your look** at F0; bundle 4 merged |
 | **8** | **H4** | a supplier can say a payment never arrived | Opus · xhigh | **your question 9**, B2 |
+| **N4** | **N4** = chat_threads fields + E4 (see overrides) | a couple can't move a conversation, accept their own inquiry or stamp a lock; a shop's email/phone can't be pulled from the database | Opus · high (DRAFT) | a free slot; B2's files untouched |
 
 **Running now (not bundles):** N0-finish · N1 (then E4) · N3 — code, Opus · P2 · F0 — drawings, Fable.
 **Slot order as each security session finishes:** LAND → B2 → HONEST SHOP → CLEANUPS; then 5, 6, 7, 8
@@ -58,7 +59,16 @@ bundle overrides in WHATS_NEXT_Build_SEQUENCE_2026-09-10.md.`
   ALSO (from #5414's release): the two app-side verification-upload gates (`app/vendor-dashboard/verify/actions.ts`,
   `app/vendor-dashboard/shop/inline-docs-actions.ts`) still pass an `R2://` / padded value that the database now refuses
   with a raw RLS error — normalise it the way the #5414 policy does, and show a plain refusal. Do it inside D3 (same chain).
-- N1 part 2 = the E4 section, as its own DRAFT PR, after N1's PR is up.
+- ~~N1 part 2 = E4~~ → replaced 2026-09-11 by **N4** below (the N1 session ended before part 2; E4 rides with N4).
+- **N4 (NEW, Opus · high, DRAFT) = "a couple cannot rewrite their own conversation" + E4.** Found by N1 (measured in the
+  replay as a real `authenticated` couple, 1 row each): a couple can UPDATE their own `chat_threads` row's
+  `vendor_profile_id` (move the thread into any supplier's inbox), `inquiry_status`/`accepted_at` (accept their own
+  inquiry) and `locked_at`/`agreed_price_centavos` (stamp a lock at a price). Delta: find every LEGITIMATE user-session
+  writer of those columns first; move each to the server (service role scoped by a session-proved id, or a SECURITY
+  DEFINER function) and revoke the columns / add a guard trigger. ⚠ If a legitimate writer lives in a file B2 owns
+  (`chat-lock-booking.server.ts`, `chat-amendment-card.tsx`, `negotiation-actions.ts`), wait for B2 to merge — never
+  edit B2's files in parallel. Then the E4 section (shop contact_email/phone columns), its own DRAFT PR.
+  Takes the next free slot after B2 is up for the owner's look; runs beside HONEST SHOP / CLEANUPS (no shared file).
 
 ---
 
@@ -185,7 +195,7 @@ work; **Fable** only for drawings.
 | L1 · P1 · T1-script | ✅ done | corpus; P1 drawing re-checked: stock photo drawn as the owner's open question |
 | T1 watcher | ✅ SERVED | #5413 · e4e55e0 ancestor of prod ba93a8f — also fixed two phantom vendor_services columns (b39d82c) |
 | N0 cleanup-delete pin | ✅ SERVED | #5414 · ba93a8f in prod; read-only prod: 5 RESTRICTIVE policies live, authenticated UPDATE on papic key columns gone, migration 20271219262486 recorded |
-| N1 chat door | 🔨 building (Opus) | launched 2026-09-10 ~15:48Z; does not touch lib/erasure/** (N0's) |
+| N1 chat door | ⏳ releasing | #5417 — reviewed by orchestrator; merged main 24eafad (baseline regenerated: unchanged, 6622); 74/74 chat+erasure+pin db tests on the merged tree; prod rehearsal NOT run (Supabase connector invalidated) — prod is PG 17.6 (DECISION_LOG 2026-07-24), replay is PG17; verify live objects after deploy |
 | N3 render keys | 🔨 building (Opus) | launched 2026-09-10 ~15:48Z |
 | P2 Free-vs-Solo drawing | ✅ DRAWN — waits on the owner's look | `4facf58` · prototypes/shop_page_free_vs_solo_2026-09-10.html · 2 proposals (plain strip on Free; shop-only Solo preview), stock photo drawn both ways |
 | F0 six-door drawing | ✅ CORRECTED — waits on the owner's look | prototypes/shop_page_2026-09-10.html · 91-row "every shipped control → its door" table (`data-shipped`) for G1's guard; moodboard-library and permit-renewal claims corrected |
