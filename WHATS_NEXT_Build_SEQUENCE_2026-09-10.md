@@ -221,5 +221,6 @@ work; **Fable** only for drawings.
 | bundles 2–8 | 🔨 B2 · HONEST SHOP · CLEANUPS running | N4 next free slot |
 | H5 Lock after "not free" + unavailable not planned | ⏳ PR OPEN (S2) — auto-merge | #5425 · built to the owner-locked Explore Replan PR-G2 spec (dim + booking-disabled + sink behind "Not available", never removed; one predicate for card, rail and Picks); also fixed the soft-tier build note that never rendered. S2 confirms served. |
 | H6 bench search hides a card with no bookings left on the date | 🔨 OWNED BY S2 — after #5425 served · DO NOT LAUNCH A SECOND | owner ruling + correction rows 2026-09-11; "full" = the booking path's own `slot_full` verdict (per card AND per pool); month date: hidden only if full every day |
+| H6 follow-up (small, lock path) | ⬜ after B2 + N4 land | the couple-side capacity gate (`vendors/actions.ts` #2, `soft_hold_limit_reached`) counts a MONTH-precision event stored on the 1st as a booking on the 1st, while the slot path requires day precision — make both day-precision-only, then update H6's parity guard in the same PR. Found by S2, 2026-09-11. |
 
 **Rescue copies** of every unsaved workspace from today: `/Users/icecasasola/Documents/Claude/Projects/setnayan-rescue-2026-09-10/` (restore guide inside).
