@@ -21,7 +21,7 @@
 | **0** | ✅ **Owner gate — PASSED 2026-09-10** (*"this is fine"*), with one change: the words toolbar | — | — | — | done | — |
 | **1** | Papic · sponsors get a bigger share | A sponsor's guests start with more shots | Opus 5 | high | ✅ **done** (PR #5418) | 2 |
 | **2** | Story · A4, one minute per page | The story prints as a booklet | Sonnet 5 | medium | ✅ **done** (PR #5416) | 1 |
-| **3** | Story · where the arrangement is kept | "Make it yours" saves for every celebration | Opus 5 | high | **now** (gate passed) | 1, 2 |
+| **3** | Story · where the arrangement is kept | "Make it yours" saves for every celebration | Opus 5 | high | ✅ **done** (PR #5419, merged + verified in prod 2026-09-11) | 1, 2 |
 | **4** | Story · the editor, part 1 — photos | Tray, tap-to-add, ×, Automatic / I choose, Put all back, Undo, autosave | Opus 5 | high | after **3** | 5 |
 | **5** | Story · guests see the arranged pages | The public story shows each moment as laid out | Opus 5 | medium | after **3** | 4, 6 |
 | **6** | Story · the editor, part 2 — words and moments | Words + looks, the phone toolbar, naming, sets, reorder | Opus 5 | **medium** | after **4** | 5 |
@@ -144,7 +144,26 @@ DONE WHEN: print-to-PDF gives one page per minute with content, every page stamp
 back appears, and a test fails if a minute is split across pages.
 ```
 
-## 3 · Story — where the arrangement is kept · **Opus 5 · high** · after step 0
+## 3 · Story — where the arrangement is kept · **Opus 5 · high** · ✅ DONE 2026-09-11 (PR #5419)
+
+**Verify with the object, not this line:** `gh pr view 5419 --json state,mergedAt`, then in prod
+`event_editorial.arrangement` / `arrangement_version` exist, `save_story_arrangement` is executable by
+`service_role` only, and trigger `event_editorial_arrangement_has_one_door` is enabled. Verified
+2026-09-11 in a rolled-back transaction on a testnayan event: first save `saved:1` · stale tab
+`conflict:1` (nothing written) · same save again `unchanged:1` · reloaded tab `saved:2` · a host
+PATCHing the column directly refused `story:arrangement_has_one_door`, while the same host still
+reaches their own row.
+
+**What steps 4 · 5 · 7 build on** (see the 2026-09-11 DECISION_LOG row for the two flagged calls):
+- READ through `loadStoryArrangement(admin, eventId, viewer)` (`apps/web/lib/story-arrangement-store.ts`)
+  — never read the column yourself; that function applies S3 and S14. The host's editor uses
+  `app/dashboard/[eventId]/story/_lib/load-arrangement.ts`.
+- SAVE with `saveArrangement(eventId, storedFromResolved(view), version)` — the editor saves what it
+  SHOWS. On `conflict`, say `ARRANGEMENT_CONFLICT_MESSAGE` and reload. **Never save while
+  `unreadable` is non-empty.** New ids from `newArrangementId`, never a counter.
+- The sheet geometry (660 wide, photo 146×100, the 4-column grid, `freeSlot`, `sheetHeight`) is
+  exported from `apps/web/lib/story-arrangement.ts` — steps 5 and 7 render from it, never a copy.
+- The mode is ONE switch for the story; every resolved moment still carries `mode`.
 
 ```
 GOAL: what a host arranges in "Make it yours" is saved for their celebration and read back.
