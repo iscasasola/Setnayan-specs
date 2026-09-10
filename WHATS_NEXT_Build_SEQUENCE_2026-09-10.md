@@ -201,8 +201,8 @@ work; **Fable** only for drawings.
 | L1 · P1 · T1-script | ✅ done | corpus; P1 drawing re-checked: stock photo drawn as the owner's open question |
 | T1 watcher | ✅ SERVED | #5413 · e4e55e0 ancestor of prod ba93a8f — also fixed two phantom vendor_services columns (b39d82c) |
 | N0 cleanup-delete pin | ✅ SERVED | #5414 · ba93a8f in prod; read-only prod: 5 RESTRICTIVE policies live, authenticated UPDATE on papic key columns gone, migration 20271219262486 recorded |
-| N1 chat door | ⏳ releasing | #5417 — reviewed by orchestrator; merged main 24eafad (baseline regenerated: unchanged, 6622); 74/74 chat+erasure+pin db tests on the merged tree; prod rehearsal NOT run (Supabase connector invalidated) — prod is PG 17.6 (DECISION_LOG 2026-07-24), replay is PG17; verify live objects after deploy |
-| N3 render keys | ⏳ auto-merge | #5415 — reviewed by orchestrator (all 5 website-media writers write setnayan-media or http(s)); prod rolled-back rehearsal passed (session); merged main 7ab1418, baseline = main |
+| N1 chat door | ✅ SERVED | #5417 · prod bcd621f; orchestrator prod rehearsal passed; live: guard trigger on, attachment_url INSERT revoked, rules fn not exposed |
+| N3 render keys | ✅ SERVED | #5415 · prod bcd621f; live: events site-media CHECK validated, render CHECKs present |
 | P2 Free-vs-Solo drawing | ✅ DRAWN — waits on the owner's look | `4facf58` · prototypes/shop_page_free_vs_solo_2026-09-10.html · 2 proposals (plain strip on Free; shop-only Solo preview), stock photo drawn both ways |
 | F0 six-door drawing | ✅ CORRECTED — waits on the owner's look | prototypes/shop_page_2026-09-10.html · 91-row "every shipped control → its door" table (`data-shipped`) for G1's guard; moodboard-library and permit-renewal claims corrected |
 | H3 drag your own order | ✅ ALREADY LIVE — dropped | `ad2787fda5` (2026-09-09) on main = prod `0d3a1e0`; table `event_bench_arrangement`, long-press, "Your order" |
