@@ -220,5 +220,6 @@ work; **Fable** only for drawings.
 | LAND · D4 every film | ✅ SERVED | #5140 · 8947934; `event_films` live, RLS on, anon no SELECT (orchestrator read prod); #5012 CLOSED |
 | bundles 2–8 | 🔨 B2 · HONEST SHOP · CLEANUPS running | N4 next free slot |
 | H5 Lock after "not free" + unavailable not planned | ⏳ PR OPEN (S2) — auto-merge | #5425 · built to the owner-locked Explore Replan PR-G2 spec (dim + booking-disabled + sink behind "Not available", never removed; one predicate for card, rail and Picks); also fixed the soft-tier build note that never rendered. S2 confirms served. |
+| H6 bench search hides a card with no bookings left on the date | 🔨 OWNED BY S2 — after #5425 served · DO NOT LAUNCH A SECOND | owner ruling + correction rows 2026-09-11; "full" = the booking path's own `slot_full` verdict (per card AND per pool); month date: hidden only if full every day |
 
 **Rescue copies** of every unsaved workspace from today: `/Users/icecasasola/Documents/Claude/Projects/setnayan-rescue-2026-09-10/` (restore guide inside).
