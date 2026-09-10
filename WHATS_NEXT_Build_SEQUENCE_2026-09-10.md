@@ -216,11 +216,13 @@ work; **Fable** only for drawings.
 | H3 drag your own order | ✅ ALREADY LIVE — dropped | `ad2787fda5` (2026-09-09) on main = prod `0d3a1e0`; table `event_bench_arrangement`, long-press, "Your order" |
 | LAND · B1 card names | ✅ SERVED | #5387 · a3996d5; trigger `trg_before_enforce_fill_service_card_title` live (orchestrator read prod) |
 | LAND · C3 verification desk | ✅ SERVED | #5394 · c902d5f; Approve still WARNS |
-| LAND · E3 ID-delete guard | ✅ MERGED | #5420 · reviewed by orchestrator (behaviour-preserving; 100/100; 9 sabotages RED) |
+| LAND · E3 ID-delete guard | ✅ SERVED | #5420 · reviewed by orchestrator (behaviour-preserving; 100/100; 9 sabotages RED) |
 | LAND · D4 every film | ✅ SERVED | #5140 · 8947934; `event_films` live, RLS on, anon no SELECT (orchestrator read prod); #5012 CLOSED |
+| HONEST · C2 marketplace photo + names | ✅ SERVED | #5421 · 5df29f4 |
+| CLEANUPS · D3 old verify page → papers | ✅ SERVED | #5424 · 171e65e |
 | bundles 2–8 | 🔨 B2 · HONEST SHOP · CLEANUPS running | N4 next free slot |
-| H5 Lock after "not free" + unavailable not planned | ⏳ PR OPEN (S2) — auto-merge | #5425 · built to the owner-locked Explore Replan PR-G2 spec (dim + booking-disabled + sink behind "Not available", never removed; one predicate for card, rail and Picks); also fixed the soft-tier build note that never rendered. S2 confirms served. |
-| H6 bench search hides a card with no bookings left on the date | 🔨 OWNED BY S2 — after #5425 served · DO NOT LAUNCH A SECOND | owner ruling + correction rows 2026-09-11; "full" = the booking path's own `slot_full` verdict (per card AND per pool); month date: hidden only if full every day |
+| H5 Lock after "not free" + unavailable not planned | ✅ SERVED (S2) | #5425 · c913c6e in prod (S2 + orchestrator ancestry) |
+| H6 bench search hides a card with no bookings left on the date | 🔨 BUILDING (S2) · DO NOT LAUNCH A SECOND | parity-guarded to the #2 gate + slot RPC + calendar blocks; stays out of vendors/actions.ts |
 | H6 follow-up (small, lock path) | ⬜ after B2 + N4 land | the couple-side capacity gate (`vendors/actions.ts` #2, `soft_hold_limit_reached`) counts a MONTH-precision event stored on the 1st as a booking on the 1st, while the slot path requires day precision — make both day-precision-only, then update H6's parity guard in the same PR. Found by S2, 2026-09-11. |
 
 **Rescue copies** of every unsaved workspace from today: `/Users/icecasasola/Documents/Claude/Projects/setnayan-rescue-2026-09-10/` (restore guide inside).
