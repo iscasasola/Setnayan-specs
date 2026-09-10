@@ -31,13 +31,13 @@ access you can take back.
 | **7** | **C2** | Marketplace cards show their photo and a proper name | Sonnet · medium | nothing |
 | **8** | **D2** | The shop page tells the truth (songs only for musicians) | Sonnet · medium | nothing |
 | **9** | **F0** | Correct the six-door My Shop drawing | Fable · medium | nothing |
-| **10** | **H2** | A card also needs a cover photo and what's included | Sonnet · medium | C1 |
-| **11** | **H3** | Drag your suppliers into your own order | Sonnet · medium | nothing |
-| **12** | **D1** | Fold 5: "Want to add them to your event?" | Opus · high | **your look** at the shop-page drawing |
+| **10** | **H2** | A card also needs a cover photo and what's included | Opus · high | C1 |
+| **11** | **H3** | Drag your suppliers into your own order | Opus · xhigh | nothing |
+| **12** | **D1** | Fold 5: "Want to add them to your event?" | Opus · medium | **your look** at the shop-page drawing |
 | **13** | **D3** | The old verify page leads to the new papers section | Sonnet · medium | nothing |
 | **14** | **D4** | Every film of your day (#5140) | Sonnet · medium | B2 |
 | — | **TEST ROUND 2** | Test with a couple who has two events | — | D1 live |
-| **15** | **E1** | A shop's link preview never breaks | Sonnet · high | D2 |
+| **15** | **E1** | A shop's link preview never breaks | Sonnet · medium | D2 |
 | **16** | **E2** | No phone or email in a shop's own About | Sonnet · medium | nothing |
 | **17** | **E3** | Verify the government-ID delete guard | Opus · high | C3 |
 | **18** | **E4** | Close the database door to shop email and phone | Opus · high | nothing |
@@ -81,7 +81,7 @@ You are a build session for the Setnayan platform.
    When done, mark your row in WHATS_NEXT_Build_SEQUENCE_2026-09-10.md.
 ```
 
-Set the model and effort from the table above. **Opus** for anything touching money, the lock,
+Set the model and effort from the table above. **If a prompt section carries its own `MODEL:` line, it agrees with this table** — checked 2026-09-10 (H2 re-signs the SECURITY DEFINER save function where two silent defects were found; H3 is the hardest UI piece left, with a new RLS table). **Opus** for anything touching money, the lock,
 database grants, migrations or deletion; **Sonnet** for screens, copy, wiring and landing finished
 work; **Fable** only for drawings.
 
