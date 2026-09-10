@@ -86,3 +86,83 @@ Round 1 drove the prototype in headless Chrome at 1280 and 390 (touch). Each lin
 - [critic-18] (NOT_RUN) On a phone in Automatic, every photo and words box has touch-action:none (line 75). A swipe that starts on a photo does not scroll the page; it fires the hint instead. A tall moment (The long table, 5 photos in one column) is half photos.
 - [critic-19] (NOT_RUN) The tray is rebuilt with innerHTML on every placement (line 418), so its sideways scroll position snaps back to the start each time.
 - [critic-20] (NOT_RUN) The hint's aria-live region is given the same text again on repeated refusals (line 281). Screen readers may not announce it the second time. With reduced motion, the 'I choose' nudge loses its shake and leaves only a 1.1s ring (lines 71 and 150).
+
+## Round 3 — on the version with Undo, stickers and Save (all FIXED in the prototype unless marked OPEN)
+Round 3 confirmed 80 of the 83 earlier items fixed. It then found these in the new features. Each was fixed in the prototype and the four stuck ones re-driven in a real browser (phone sticker drag, phone words grip drag, Undo surviving a refusal, Automatic after reload). **New design calls from this round:** on a phone the round handle and the ×'s on words/stickers give way to a toolbar (A− A+ ↺ ↻ Remove) — also the keyboard route to resize and turn; every change autosaves; Start over is undoable; a later change retires a pending Undo.
+
+- [r3/place-reach/R1-held-enter] (wrong) A held Enter on a tray photo must not add more than one photo
+- [r3/place-reach/R1-empty-new-moment-field-swallows-tray-tap] (wrong) Press '+ New', then tap a tray photo without typing a name
+- [r3/place-reach/R2-neighbour-x-stolen-by-selected-photo] (wrong) Drag a photo so it half-overlaps a neighbour near its corner; press the neighbour's clearly visible ×
+- [r3/place-reach/R2-handle-swallows-x] (wrong) A selected caption's or sticker's round handle (z-index 6 plus a 10px hidden area) sits above every × at phone size
+- [r3/place-reach/R2-phone-tap-near-x-removes-photo] (wrong) On a phone, a tap on a photo's own body near its × (elementFromPoint says the photo) must not take the photo off
+- [r3/place-reach/R2-turned-x-reads-plus] (cosmetic) The × of a turned sticker or caption should still read as ×
+- [r3/place-reach/R11-turned-words-cut-off] (wrong) Turning a caption near the top edge with its handle must keep it on the visible desk
+- [r3/place-reach/R11-turned-sticker-outline-cut] (cosmetic) A large turned sticker in the top-right corner stays inside the desk
+- [r3/place-reach/R11-long-name-toast-offscreen] (cosmetic) The removal toast for a moment with a long one-word name stays on screen
+- [r3/place-reach/R13-dark-accent-fill-text] (wrong) Dark mode: white text on the terracotta fill
+- [r3/place-reach/R13-dark-placeholders] (wrong) Dark mode: placeholder text in the name fields
+- [r3/place-reach/R13-selected-words-on-tint] (cosmetic) Word colours while the words are selected, on the selection tint
+- [r3/place-reach/R13-start-over-and-mini-hover] (cosmetic) 'Start over' link on the page background; terracotta mini buttons (+ New, ✎, Put all back) while hovered
+- [r3/place-reach/R6-phone-words-grip-press-goes-to-text] (wrong) Found while testing R2 corners: on a phone, dragging a caption by its ⋮⋮ grip moves it
+- [r3/words-drag-looks/R6-phone-words-grip-press-becomes-caret] (stuck) On a phone the words can be dragged by their ⋮⋮ grip
+- [r3/words-drag-looks/R6-phone-new-sticker-cannot-be-dragged] (stuck) On a phone a just-added sticker (it arrives selected) can be dragged to a new place
+- [r3/words-drag-looks/R6-phone-tap-photo-removes-it] (wrong) A plain tap on a photo's picture on a phone selects it and never takes it off
+- [r3/words-drag-looks/R6-arrows-just-added-sticker] (wrong) Arrow keys move a sticker that was just added with the mouse (it shows as selected)
+- [r3/words-drag-looks/R6-keyboard-only-words] (wrong) With the keyboard alone a host can move words, as they can move photos and stickers
+- [r3/words-drag-looks/R6-fonts-arrive-mid-drag] (wrong) A drag, a handle resize or keyboard focus survives the page's redraw when the web fonts finish loading (slow network)
+- [r3/words-drag-looks/R7-phone-tap-short-caption-removes-it] (wrong) On a phone, tapping into a short existing caption places the caret
+- [r3/words-drag-looks/R7-lowest-empty-box-swallows-press] (wrong) The press still does its job when the empty box was the lowest thing on the page
+- [r3/words-drag-looks/R7-tab-from-empty-box] (wrong) Tab from the new, still-empty box moves focus to the next control
+- [r3/words-drag-looks/R14-empty-box-own-grip-handle-x-throws] (wrong) No uncaught exceptions: grabbing the new, empty box by its own grip or handle (to place it before typing), or tapping its × on a phone
+- [r3/words-drag-looks/R16-stale-look-row] (cosmetic) When the empty box leaves, the Words look row goes with it
+- [r3/words-drag-looks/R16-keyboard-reach-looks] (wrong) A keyboard user can reach the colour dots and Backing for a caption
+- [r3/words-drag-looks/R11-turned-objects-leave-sheet] (cosmetic) Words or a sticker turned with the round handle stay inside the visible sheet and desk
+- [r3/modes-moments/R5-undo-eaten-by-refusal] (stuck) Right after Back to Automatic (or a moment ×), any refusal hint inside the 7s Undo window replaces the Undo toast and disables Cmd/Ctrl+Z, so the hand arrangement or the removed moment's words are lost for good
+- [r3/modes-moments/R5-reload-forgets-hand-changes] (stuck) After Save + reload, the restored hand arrangement is no longer known to be hand-made: Back to Automatic re-sorts it with NO Undo
+- [r3/modes-moments/R17-undo-discards-later-work] (wrong) A removal's Undo restores a whole-page snapshot, silently erasing anything done since the removal (typed words, renames)
+- [r3/modes-moments/R8-new-empty-swallows-tap] (wrong) + New with the name field left empty, then ONE press on something the cancel redraws: the empty moment is cancelled but the press is lost
+- [r3/modes-moments/R8-new-moment-id-collision-after-reload] (wrong) After Save + reload, + New reuses a saved host moment's id: the typed name overwrites the old moment and the two rows act as one
+- [r3/modes-moments/R9-backspace-after-naming-removes-photo] (wrong) Saving a set name (Enter or Name them) drops focus to the page body while a photo is still selected, so the next Backspace/Delete removes that photo
+- [r3/modes-moments/R9-name-field-outlives-its-context] (cosmetic) The set-name field is not closed by a mode switch, by + New, or by the photo count dropping below 2, so it names photos in read-only Automatic and makes sets of 1 or 0
+- [r3/modes-moments/R18-saved-stays-after-add-schedule] (cosmetic) ?noschedule: after Save, 'Add your schedule' adds three moments but 'Saved' stays, and a reload shows they were never kept
+- [r3/modes-moments/R3-delete-hint-wording-sticker] (cosmetic) Automatic: Delete on a focused sticker shows a hint, but it talks about photos
+- [r3/stickers-undo/F1] (wrong) Undo of ONE removal puts the whole page back to that moment, wiping everything done in the next 7 s
+- [r3/stickers-undo/F2] (wrong) After Save + reload, 'Automatic' re-sorts the saved hand work with NO Undo
+- [r3/stickers-undo/F3] (wrong) Holding Backspace/Delete (key auto-repeat) removes every photo and sticker on the page; only the last can be undone
+- [r3/stickers-undo/F4] (wrong) Any other message replaces the Undo toast at once, so the ~7 s window can collapse to under a second
+- [r3/stickers-undo/F5] (cosmetic) Undo while 'Name these photos' is open can leave one photo on the page, and the still-open field saves a one-photo set
+- [r3/stickers-undo/F6] (wrong) PHONE: a new sticker cannot be moved by its middle — the finger resizes and turns it instead
+- [r3/stickers-undo/F7] (wrong) PHONE: a small selected sticker's visible × sits under its own handle's invisible target
+- [r3/stickers-undo/F8] (wrong) A selected sticker's invisible handle/× targets swallow a neighbouring photo's visible × — including on the page's own 'sticker on the selected photo's corner' path
+- [r3/stickers-undo/F13] (wrong) A photo's time stamp and a snippet's '▶ 0:06' badge paint ON TOP of any sticker over them, and pressing the sticker there drags the photo
+- [r3/stickers-undo/F10] (wrong) A double tap on a sticker in the grid's 2nd row also puts a tray photo on the page
+- [r3/stickers-undo/F11] (wrong) After Save + reload, the next '+ New' reuses the newest saved moment's id: naming it renames the saved moment; Escape deletes it
+- [r3/stickers-undo/F9] (cosmetic) A big sticker turned near the top edge sticks out of the sheet and its × leaves the desk
+- [r3/stickers-undo/F12] (cosmetic) In Automatic, Delete on a focused STICKER explains itself with the photo sentence
+- [r3/stickers-undo/F14] (cosmetic) Each drop of a newly added sticker/photo replays its landing animation from invisible — it blinks where it is put
+- [r3/chaos/chaos-r3-01] (wrong) Strict monkey runs, 500 real actions each, drawn from every control: tray taps, double taps and keys; ×; drags; handles; word looks; stickers; grip and keyboard reorders; inline names (Enter, Escape, blur, Backspace); Undo button and Cmd+Z; Save and reload; Start over; resizes and rotations; scrolling. After every action the harness checks R10, R11, R14, dialogs and × reachability; every 25 actions it also audits every moment.
+- [r3/chaos/chaos-r3-02] (wrong) After Save and a reload, tapping Automatic replaces the saved hand arrangement at once, with no Undo toast and no Cmd+Z. Cause: 'handTouched' is not saved.
+- [r3/chaos/chaos-r3-03] (wrong) After a reload, '+ New' can reuse the id of a moment the host already made. The new moment's name field then edits the OLD moment. Escape deletes the old moment, with its words and stickers, and offers no Undo. A grip reorder then lists one moment twice, so pills + tray = 9.
+- [r3/chaos/chaos-r3-04] (cosmetic) Uncaught exception: after '+ Words', pressing the new, still-empty box's own ⋮⋮ grip or round handle (for example, to move or size it before typing) makes the box vanish and throws.
+- [r3/chaos/chaos-r3-05] (wrong) When a moved photo ends with its × about 13 to 21px from another photo's × on screen, it is selected and its × has a larger invisible tap area (::after inset -8px). Pressing the other photo's × at its visible centre takes the MOVED photo off.
+- [r3/chaos/chaos-r3-06] (stuck) On the phone a selected one-line caption's own round handle, which has a larger invisible area and sits above the ×, covers its ×. Pressing × does nothing. A phone has no Delete key.
+- [r3/chaos/chaos-r3-07] (wrong) Select the first photo on The long table and add a sticker. It lands, selected, on that photo's corner, and its handle's invisible area covers the × of the photo below. Pressing that × does nothing.
+- [r3/chaos/chaos-r3-08] (wrong) Turning words with their own handle can push them outside the desk. Clamping uses the box before it is turned, so a caption turned near an edge is cut off by the desk, and its × and handle land outside it. The same happens to a turned sticker's × at the right edge.
+- [r3/chaos/chaos-r3-09] (wrong) An unturned object's × always sits above every photo. Once words are turned, even by 20°, their × drops UNDER any photo placed or moved after them (the transform creates a stacking context). A photo laid over that corner hides the × and takes the press.
+- [r3/chaos/chaos-r3-10] (wrong) Pressing Cmd/Ctrl+Z (or any key that redraws the page) while still holding a moment row's ⋮⋮ grip re-inserts the stale dragged row on release. One moment is then listed twice and counted twice.
+- [r3/chaos/chaos-r3-11] (wrong) Undo restores the whole page as it was at the removal, so edits made in the seconds after it are silently thrown away (a typed caption, a photo move). There is no redo.
+- [r3/chaos/chaos-r3-12] (wrong) Any later message, even a refusal, cancels a pending Undo well before ~7s. Words on a removed moment then cannot be brought back.
+- [r3/chaos/chaos-r3-14] (cosmetic) Removing a moment named with one long word (60 characters): the toast text runs past the toast's edge and off the phone screen.
+- [r3/critic] CRITIC TEST 1 — 'Start over' destroys all work, saved and unsaved, in one tap, with no confirm and no Undo. The link sits inside the intro text and is 58×19.5px. This control has no way back.
+- [r3/critic] CRITIC TEST 2 — Work that was never saved is lost silently on a reload, a closed tab or a navigation. Nothing saves automatically and there is no beforeunload guard.
+- [r3/critic] CRITIC TEST 3 — Clearing an existing caption's text and then pressing anything else deletes the whole words box: its text, colour, Backing, size, turn and position. No 'Words removed · Undo' toast appears, and neither Cmd/Ctrl+Z nor an Undo already on screen c
+- [r3/critic] CRITIC TEST 4 — On a phone, the Undo toast takes the whole press for 7 seconds (.hint.act has pointer-events:auto) and sits over the tray and the bar. A tap aimed at a tray photo under the toast either does nothing or presses Undo, which reverses the host's la
+- [r3/critic] CRITIC TEST 5 — Words and stickers cannot be resized or turned without a pointer. The round handle is role='slider' with tabindex='-1', has no key handling and no aria-valuenow, min or max. On a phone the sheet is drawn at 0.442 scale, so the words the host is
+- [r3/critic] CRITIC TEST 6 — In Automatic, a moment the host added shows 'No photo from the day falls in this moment yet.' Automatic never puts a photo in a host moment, because it has no time. Its row × is hidden in Automatic, so there is also no way to remove it from the
+- [r3/critic] NOT RUN — Switching away from the window (app switch, another tab, the phone's lock screen) fires blur on a focused field. An emptied caption is then dropped silently (same mechanism as test 3), and a '+ New' moment whose name field is still empty is cancelled
+- [r3/critic] NOT RUN — A ?noschedule page where 'Add your schedule' was pressed and the page saved, then reloaded with ?noschedule still in the URL. HAS_SCHEDULE resets to false, the saved moments carry times, mode is forced to 'hand', and the note again says 'Automatic ne
+- [r3/critic] NOT RUN — Set-name messages built from the name ('Named “…”', 'Every photo in “…” is already on a page.', 'Name “…” removed') use the same fixed toast. That toast has no overflow-wrap, and the r3 chaos tester measured it overflowing off-screen for a long one-w
+- [r3/critic] NOT RUN — A named-set chip reads 'Name · N', where N counts all the set's photos (g.ids.length), not the photos free to place. Round-1 critic-15 flagged this and the r3 modes tester checked only where the chip places photos.
+- [r3/critic — OPEN] NOT RUN — Accessibility structure. Each moment row is role='button' with a real <button> (.cx) nested inside it. The handle is announced as a slider that has no value.
+
+**OPEN in the prototype (the port must do these properly):** the moment row is role=button with a nested ×; words cannot be MOVED by keyboard alone (the toolbar resizes/turns them); Tab out of a still-empty new box.
