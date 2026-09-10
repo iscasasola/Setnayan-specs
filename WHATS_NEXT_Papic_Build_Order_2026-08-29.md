@@ -21,7 +21,7 @@ awaiting a decision. Registered in WHATS_NEXT_INDEX.md and in the corpus CLAUDE.
 |---|---|---|---|
 | **1** | The browser stops enforcing a limit that does not exist | days | ✅ **DONE** — PR [#5002](https://github.com/iscasasola/setnayan-platform/pull/5002) |
 | **2** | Say what is already true, on the promotion page | days | ✅ **DONE** — page shipped 2026-08-29, guard PR [#5003](https://github.com/iscasasola/setnayan-platform/pull/5003) MERGED |
-| **3** | Shots per guest (+ sponsors default to a bigger share) | several sessions | 🔴 **THE ONLY ITEM LEFT** — ruled, spec written, **NOT BUILT** (re-measured 2026-09-09) |
+| **3** | Shots per guest (+ sponsors default to a bigger share) | several sessions | ✅ **CORE BUILT + LIVE** (corrected 2026-09-10) — only *sponsors default to a bigger share* is left |
 | **4** | Timed challenges reach the wall | 1 session | ✅ **DONE 2026-09-01** — both halves; see § 4 |
 | **5** | Challenges hang on the ceremony sequence | small | ✅ **DONE 2026-09-01** — see § 5 |
 | **6** | The guest chooses per audience | small | ✅ **DONE 2026-09-02** — PRs #5081 · #5086, both verified MERGED |
@@ -38,7 +38,9 @@ Bisaya · civil weddings · the coordinator partner offer (**owner territory, no
 > · #5082 · #5087 · #5090 are ALL MERGED**, including #5090, which this file warned was *"still
 > OPEN and red"* when 7d began.
 >
-> **Item 3 is genuinely unbuilt**, measured by the object rather than by this file: `origin/main`
+> ✅ **CORRECTED 2026-09-10 — ITEM 3'S CORE IS BUILT AND LIVE; ONLY "SPONSORS DEFAULT TO A BIGGER SHARE" IS LEFT.** Read out of production BY THE OBJECT: `papic_record_guest_capture` asks `papic_guest_spend_ceiling(p_guest_id)` FIRST and refuses with `reason:'guest_spend_ceiling'`; that function carries the named-guest, equal-share and release arms; a guest's own purchase is exempt via `papic_guest_ceiling_spend`. PRs #5014 (couple sets the numbers) · #5017 (the limit binds) · #5019 (the guest sees it) · #5024 (promotion page) · #5028 + #5034 (keep or give) · #5052 (150 is raisable) — all MERGED. 🔑 **The 2026-09-09 "genuinely unbuilt" measurement searched for `allot` and `sponsor`; the shipped code says `ceiling`. A SEARCH THAT CANNOT MATCH IS NOT A NEGATIVE RESULT.** What IS absent: no Papic function or file mentions sponsors, so the 2026-08-29 addition (sponsors default to a bigger share) is the one open piece.
+>
+> ~~**Item 3 is genuinely unbuilt**~~ (FALSE — kept for the lesson), measured by the object rather than by this file: `origin/main`
 > has **zero** occurrences of a per-guest allotment in any spelling, and production's live
 > `papic_record_guest_capture` **knows nothing of an allotment or of sponsors** (`allot` and
 > `sponsor` both absent from its body). ⚠ **`papic_event_pool_config.points_per_guest` EXISTS with
