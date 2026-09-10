@@ -731,7 +731,12 @@ parallel-safe with · must not run with · done means. Session IDs are stable �
 - **Done means:** merged and served; a refused installment appears on `/admin/disputes`; the couple's
   Decisions line reads the supplier's reason; a refused deposit takes the existing path, not a new one.
 
-### H5 · "Lock this" stops being offered on a supplier who said they aren't free — and one whose schedule shows the date taken is not presented as planned — ✅ **question 10 RULED 2026-09-11 · taken by S2**
+### H5 · "Lock this" stops being offered on a supplier who said they aren't free — and one whose schedule shows the date taken is not presented as planned — ✅ **question 10 RULED 2026-09-11 · BUILT by S2 — PR [#5425](https://github.com/iscasasola/setnayan-platform/pull/5425) (auto-merge armed; not yet served)**
+- 🔑 **Rule 0 found the availability half already specced:** it is Explore Replan **PR-G2** (unblocked
+  2026-07-27, never built), whose spec had already decided the placement — so no product question was
+  needed. Its "Beyond reach" half is NOT built (outside the ruling).
+- 🔴 **Found and fixed on the way:** the soft tier's "Doesn't fit your build · Remove X…" note had
+  never rendered — the card gated its build slot on the lock id, which a clash nulls.
 - **A person gets:** a couple is not invited to lock a supplier who already declined their date.
 - **Already exists:** v4's own note (§ 4, point 6): the bench keeps **Lock this** after a supplier
   declines the inquiry, because `resolveBenchCardActions` does not read the thread. Correct after a

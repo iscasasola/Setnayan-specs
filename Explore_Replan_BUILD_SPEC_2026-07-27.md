@@ -121,6 +121,15 @@ Live path `/dashboard/[eventId]/vendors` (BUDGET_BUILD ON in prod): single-scrol
 - **PR-H — the vendor-agrees step + request-state UI (M/L):** `lock_requested_at` / `lock_agreed_at` columns (or a `vendor_lock_requests` table mirroring `vendor_lock_proposals`), vendor Overview "Lock request — agree?" card BEFORE payment, customer-side "⏳ waiting for vendor" states on card/team/strip, expiry for stale requests (recommend ~7 days), Undo = cancel request. Hard-single conflict gate counts pending requests.
 - **PR-I — fee + pool at acknowledge (S/M):** move `collectBookingFeeAtLock` call to `vendorAcknowledgeDeposit`'s transition; fire `acquireSchedulePools` there too (supersedes deposit_paid as the acquire point for handshake bookings); keep both flag-gated (`BOOKING_FEE_RAIL_LIVE` two-key unchanged).
 - **PR-G2 — now UNBLOCKED** (gate resolved above); hard tier keys off acknowledged bookings.
+  ✅ **DATE HALF BUILT 2026-09-11 — PR [#5425](https://github.com/iscasasola/setnayan-platform/pull/5425)**
+  (register H5, on the owner's *"they shouldn't even be shown as planned based on their schedule
+  availability"*). Built to §2 item 3 exactly: DIM + booking-disabled + SINK behind a red **"Not
+  available on your date"** divider (after the soft "Doesn't fit your build" one), never removed,
+  conversation kept; an in-build pick keeps Remove. Signal = the shipped `dateFit` (the supplier's
+  calendar on the committed day, whose blocks are written at `deposit_paid` — i.e. by acknowledged,
+  pool-consuming bookings, as this line requires). One predicate, `isUnavailableOnDate`, shared by the
+  card, the rail sink and the Picks column. ⏭ **The REACH half ("Beyond reach" after a venue lock) is
+  NOT built** — outside the 2026-09-11 ruling; it needs its own decision.
 - The prototype's Your-team "handshake tracker" (4-step stepper) is the reference UI.
 
 **Also verified for the record (owner asked):** "bench filters as you add to build" was never shipped — but the *reverse* direction ALREADY EXISTS and the owner remembered it correctly: `getAvailableDaysForVendorSet` ("a saved build's picks — possibly not yet booked") powers the Compare availability footer ("No single date works — swap one"), and `candidate-dates.ts` is the "dates shrink as you lock" engine on `/date-selection`. §6's PR-G1 completes the loop (team → window → filter the bench), reusing exactly those engines.
