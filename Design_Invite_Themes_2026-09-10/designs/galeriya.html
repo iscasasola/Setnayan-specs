@@ -1,0 +1,715 @@
+<meta charset="utf-8">
+<title>Galeriya</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Schibsted+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!--
+  GALERIYA · the SOPHISTICATED theme · 00 Reveal · 01 Name · 02 Reply
+
+  The gallery. One hairline rule runs the full height of the board and
+  everything hangs from it: the wordmark, the work, the wall label (eyebrow /
+  title / date), the rail, the card. The couple's colour is a single 3px tab
+  on that rule, beside their name, and nowhere else. The card is the family's
+  plate, untouched: paper, 22px, the 3px action edge, one action control.
+
+  THE WORK. The couple's reveal background is not the wall — it is the work
+  hung ON the wall: a print, ranged on the gutter like everything else, held
+  by a hairline and a soft shadow, cropped by the theme's own margins rather
+  than bled edge to edge. Every word stays on the flat wall or on the paper
+  card; nothing is ever set on the photo, so the head's legibility is exactly
+  what it was. With no photo the work is removed and the wall is as it was.
+
+  THE REVEAL. The shipped sheer bridal veil: a tulle draped over the hung
+  work, folded over the frame's top edge and rolled at the hem. The veil is
+  the control — "Lift the veil ↑" — and when it lifts, nothing else moves:
+  the wordmark, the rule, the work, the label and the tab stay put and the
+  rail and the card arrive beneath. No seal, no button, no bar.
+
+  Per-couple inputs land as custom properties on .tpl-sophisticated:
+    --reveal-bg     events.std_background — consumed here, never declared
+    --accent        events.monogram_color, else the boldest role_palette
+    --wall          the wall colour (Event Hub Pro · adjustable)
+    --action        the family's control colour (token-ready, defaulted)
+    --couple-name   events.display_name
+    --event-date    joinDoorMeta(event)
+    --monogram      resolveMonogram().text      (exposed; this theme sets no seal)
+-->
+
+<style>
+/* page chrome only — outside the markers, scoped, disposable.
+   The wrapper supplies --reveal-bg the way the host page will (events.std_background);
+   the theme only ever consumes it. */
+.so-page { --reveal-bg: url("reveal-bg-sample.jpg"); margin: 0; padding: 40px 32px 64px; background: #D3D5D9; font-family: 'DM Mono', ui-monospace, Menlo, monospace; color: #141519; }
+.so-page-head { margin: 0 0 28px; font-size: 11px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; }
+.so-page-head span { color: #595D64; font-weight: 400; margin-left: 14px; }
+.so-page-row { display: flex; gap: 40px; align-items: flex-start; flex-wrap: wrap; }
+.so-page-row > .tpl-sophisticated { flex: none; outline: 1px solid rgba(20,21,25,.12); }
+</style>
+
+<!-- THEME-STYLE-START -->
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   .tpl-sophisticated · GALERIYA
+   Every rule is scoped under .tpl-sophisticated. Class names are so-* only.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.tpl-sophisticated {
+  /* ── ADJUSTABLE COLOUR — the only tokens a couple may change (Event Hub Pro) ──
+     --accent  their colour: the one 3px tab on the rule, beside their name.
+               Ornament only — never a word, never the button.
+     --wall    the gallery wall — the ground every label is set on. Keep it a
+               light wall: the eyebrow, date and rail are set in --so-ink-2 on
+               it and need a relative luminance of about .66 or more to hold
+               4.5:1 (the default holds 5.4:1; the 64px name holds 13:1).
+     --action  the family's one control per door and the card's 3px top edge.
+               Token-ready, defaulted: "Button color" on the invite is not yet
+               ruled, so nothing else in this file names this hex.           */
+  --accent: #C97B4B;
+  --wall:   #E9EAEC;
+  --action: #C24E25;
+
+  /* ── per-couple inputs (bound by the host) ─────────────────────────────── */
+  --couple-name: "Cale & Ice";
+  --event-date:  "Friday, December 18, 2026";
+  --monogram:    "C & I";                 /* exposed; this theme sets no seal */
+
+  /* ── the work — the couple's reveal background, consumed, never declared.
+        The host sets --reveal-bg (events.std_background) on an ancestor. A
+        photo or a scene is a url(); a plain colour may come as a colour or a
+        flat gradient — either hangs. Unset, --so-bg resolves to `none` and the
+        @container rule below removes the work: the wall exactly as it was. ── */
+  --so-bg:      var(--reveal-bg, none);
+  --so-print-h: 186px;                    /* the hung print's height — 16:9 at the card's width; door 01's one control still sits above the 812 fold */
+
+  /* ── theme constants ────────────────────────────────────────────────────── */
+  --so-card:    #FBFBFA;                  /* the family's paper plate */
+  --so-ink:     #141519;                  /* 15.6:1 on card · 13.1:1 on the default wall */
+  --so-ink-2:   #595D64;                  /* 6.5:1 on card · 5.4:1 on the default wall — secondary text */
+  --so-ink-3:   #6A6E75;                  /* 5.0:1 on card — placeholders, card only */
+  --so-rule:    #BDC0C5;                  /* the one structural rule, on the wall; the print's hairline */
+  --so-line:    #C4C6CB;                  /* field underlines, hairline buttons */
+  --so-line-2:  #D4D6DA;                  /* softer hairlines inside the card */
+  --so-rule-x:  16px;                     /* where the rule stands */
+  --so-gutter:  28px;                     /* where everything ranges from */
+  --so-sans:    'Schibsted Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --so-mono:    'DM Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  position: relative;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 56px 16px 40px var(--so-gutter);
+  background: var(--wall);
+  color: var(--so-ink);
+  font-family: var(--so-sans);
+  font-size: 16px;
+  line-height: 1.4;
+  text-align: left;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+.tpl-sophisticated *,
+.tpl-sophisticated *::before,
+.tpl-sophisticated *::after { box-sizing: border-box; }
+
+/* ── the rule: one hairline, full height, everything hangs from it ─────── */
+.tpl-sophisticated::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--so-rule-x);
+  width: 1px;
+  background: var(--so-rule);
+  pointer-events: none;
+}
+
+/* ── the way out: wordmark above everything, on the wall — the only navigation */
+.tpl-sophisticated .so-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 36px;
+  color: var(--so-ink);
+  text-decoration: none;
+  line-height: 1;
+}
+.tpl-sophisticated .so-brand:focus-visible { outline: 2px solid var(--so-ink); outline-offset: 4px; }
+.tpl-sophisticated .so-brand-mark { display: block; width: 16px; height: 16px; flex: none; }
+.tpl-sophisticated .so-brand-word {
+  font-family: var(--so-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+}
+
+/* ── the work: the couple's photo, hung on the wall ─────────────────────────
+   Ranged on the gutter, the card's width, a hairline round it and a soft
+   shadow beneath so it sits proud of the wall. The crop favours the upper
+   middle (50% 38%) so a portrait keeps its faces and a scene keeps its sky.
+   No word is ever set on it: the label hangs beneath, on the flat wall.    */
+.tpl-sophisticated .so-work { position: relative; margin: 0 0 24px; }
+.tpl-sophisticated .so-print {
+  display: block;
+  height: var(--so-print-h);
+  background: var(--so-bg) 50% 38% / cover no-repeat;
+  box-shadow:
+    0 0 0 1px var(--so-rule),
+    0 18px 30px -22px rgba(20,21,25,.5);
+}
+/* no photo → no work: the wall exactly as it was */
+@container style(--so-bg: none) {
+  .tpl-sophisticated .so-work { display: none; }
+}
+
+/* ── the wall label: eyebrow · title · datum, ranged on the rule ───────── */
+.tpl-sophisticated .so-head { position: relative; margin: 0 0 26px; }
+/* the couple's colour: one 3px tab on the rule, beside their name, nowhere else */
+.tpl-sophisticated .so-head::before {
+  content: "";
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  left: calc((var(--so-rule-x) - var(--so-gutter)) - 1px);
+  width: 3px;
+  background: var(--accent);
+  pointer-events: none;
+}
+.tpl-sophisticated .so-eyebrow {
+  margin: 0 0 14px;
+  font-family: var(--so-mono);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--so-ink-2);
+}
+.tpl-sophisticated .so-title {
+  margin: 0 0 16px;
+  font-family: var(--so-sans);
+  font-size: 64px;
+  font-weight: 600;
+  line-height: .94;
+  letter-spacing: -.04em;
+  color: var(--so-ink);
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+.tpl-sophisticated .so-meta {
+  margin: 0;
+  font-family: var(--so-mono);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: .02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--so-ink-2);
+}
+
+/* ── the rail: three beads with decision names; never controls ─────────── */
+.tpl-sophisticated .so-rail { margin: 0 0 28px; }
+.tpl-sophisticated .so-rail-list {
+  display: flex;
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tpl-sophisticated .so-rail-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--so-mono);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--so-ink-2);
+  white-space: nowrap;
+}
+.tpl-sophisticated .so-rail-bead {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--so-ink-2);
+  background: transparent;
+}
+.tpl-sophisticated .so-rail-step.is-done .so-rail-bead { background: var(--so-ink-2); }
+.tpl-sophisticated .so-rail-step.is-current { color: var(--so-ink); font-weight: 500; }
+.tpl-sophisticated .so-rail-step.is-current .so-rail-bead { background: var(--so-ink); border-color: var(--so-ink); }
+.tpl-sophisticated .so-sr {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── the card: the family's plate — paper, 22px, 3px edge — untouched ──── */
+.tpl-sophisticated .so-card {
+  position: relative;
+  margin: 0;
+  padding: 31px 20px 24px;               /* 3px edge + 28 */
+  background: var(--so-card);
+  border-radius: 22px;
+  box-shadow: inset 0 3px 0 0 var(--action);
+}
+
+/* ── copy ──────────────────────────────────────────────────────────────── */
+.tpl-sophisticated .so-intro {
+  margin: 0 0 24px;
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--so-ink);
+}
+.tpl-sophisticated .so-intro b { font-weight: 500; }
+.tpl-sophisticated .so-help {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--so-ink-2);
+}
+
+/* ── fields: a ruled list — label above, one hairline below ────────────── */
+.tpl-sophisticated .so-field { display: block; margin: 0 0 22px; min-width: 0; }
+.tpl-sophisticated .so-label,
+.tpl-sophisticated .so-legend {
+  display: block;
+  margin: 0 0 4px;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--so-ink);
+}
+.tpl-sophisticated .so-label-opt { font-weight: 400; color: var(--so-ink-2); }
+.tpl-sophisticated .so-input {
+  display: block;
+  width: 100%;
+  min-height: 46px;
+  margin: 0;
+  padding: 12px 0;
+  border: 0;
+  border-bottom: 1px solid var(--so-line);
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--so-sans);
+  font-size: 16px;                        /* 16 so iOS does not zoom */
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--so-ink);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.tpl-sophisticated .so-input::placeholder { color: var(--so-ink-3); opacity: 1; }
+.tpl-sophisticated .so-input:focus {
+  border-bottom-color: var(--so-ink);
+  box-shadow: 0 1px 0 0 var(--so-ink);   /* the hairline becomes 2px of ink */
+}
+.tpl-sophisticated .so-textarea { min-height: 96px; line-height: 1.45; resize: none; }
+
+/* select: same underline, a drawn chevron — an affordance, not an ornament */
+.tpl-sophisticated .so-select-wrap { position: relative; }
+.tpl-sophisticated .so-select { padding-right: 28px; cursor: pointer; }
+.tpl-sophisticated .so-select-wrap::after {
+  content: "";
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin-top: -7px;
+  border-right: 1px solid var(--so-ink);
+  border-bottom: 1px solid var(--so-ink);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+/* two names side by side */
+.tpl-sophisticated .so-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+
+/* ── choices: three tall rows, ruled, a square mark ranged right ───────── */
+.tpl-sophisticated .so-fieldset { margin: 0 0 26px; padding: 0; border: 0; min-width: 0; }
+.tpl-sophisticated .so-choices { border-top: 1px solid var(--so-line-2); margin-top: 8px; }
+.tpl-sophisticated .so-choice {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 56px;
+  padding: 0;
+  border-bottom: 1px solid var(--so-line-2);
+  font-size: 16px;
+  line-height: 1.3;
+  color: var(--so-ink);
+  cursor: pointer;
+}
+.tpl-sophisticated .so-choice-input {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: 0; padding: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.tpl-sophisticated .so-choice-box {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--so-line);
+  background: transparent;
+}
+.tpl-sophisticated .so-choice-input:checked ~ .so-choice-text { font-weight: 500; }
+.tpl-sophisticated .so-choice-input:checked ~ .so-choice-box {
+  border-color: var(--so-ink);
+  background: var(--so-ink);
+  box-shadow: inset 0 0 0 3px var(--so-card);
+}
+.tpl-sophisticated .so-choice-input:focus-visible ~ .so-choice-box { outline: 2px solid var(--so-ink); outline-offset: 3px; }
+
+/* ── sections that open on "Joyfully accepts" — live via :has() ────────── */
+.tpl-sophisticated .so-section { margin: 32px 0 26px; padding: 0; }   /* space, not a second rule */
+.tpl-sophisticated .so-kicker {
+  margin: 0 0 8px;
+  font-family: var(--so-mono);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--so-ink-2);
+}
+.tpl-sophisticated .so-lede { margin: 0 0 14px; font-size: 14px; line-height: 1.45; color: var(--so-ink); }
+.tpl-sophisticated .so-reveal { display: none; }
+.tpl-sophisticated .so-form:has(#so-attend-yes:checked) .so-reveal { display: block; }
+
+/* ── identity: brand chrome, neither is the action colour ──────────────── */
+.tpl-sophisticated .so-identity { margin: 0 0 24px; }
+.tpl-sophisticated .so-identity-lede { margin: 0 0 14px; font-size: 15px; line-height: 1.45; color: var(--so-ink); }
+.tpl-sophisticated .so-identity .so-btn + .so-btn { margin-top: 10px; }
+
+.tpl-sophisticated .so-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 26px;
+  font-family: var(--so-mono);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--so-ink-2);
+  white-space: nowrap;
+}
+.tpl-sophisticated .so-divider::after { content: ""; flex: 1 1 auto; height: 1px; background: var(--so-line-2); }
+
+/* ── buttons: full-width bars, text ranged left, no radius ─────────────── */
+.tpl-sophisticated .so-btn {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 52px;                       /* ≥44 tap target */
+  margin: 0;
+  padding: 0 18px;
+  border: 1px solid transparent;
+  border-radius: 0;
+  font-family: var(--so-sans);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -.005em;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.tpl-sophisticated .so-btn:focus-visible { outline: 2px solid var(--so-ink); outline-offset: 3px; }
+.tpl-sophisticated .so-btn:active { transform: translateY(1px); }
+.tpl-sophisticated .so-btn-primary   { background: var(--action); border-color: var(--action); color: #FFFFFF; }
+.tpl-sophisticated .so-btn-secondary { background: transparent; border-color: var(--so-ink); color: var(--so-ink); }
+.tpl-sophisticated .so-btn-google    { background: #FFFFFF; border-color: var(--so-line); color: var(--so-ink); }
+.tpl-sophisticated .so-btn-apple     { background: #000000; border-color: #000000; color: #FFFFFF; }
+.tpl-sophisticated .so-actions { margin: 4px 0 0; }
+.tpl-sophisticated .so-section .so-btn-secondary + .so-help { margin-top: 10px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   00 · REVEAL — the shipped SHEER BRIDAL VEIL, closed.
+   The work hangs exactly where it hangs on door 01. Over it, a sheer tulle —
+   the paper's white, a fine net, a few soft folds — draped 8px past the frame,
+   folded over the frame's top edge and rolled at a hem that falls 14px below it. The
+   veil IS the control: the guest lifts it ("Lift the veil ↑", the shipped
+   words, 16px, ink) and the work is unveiled; the wordmark, the rule, the
+   label and the couple's tab do not move, and the rail and the card arrive
+   beneath. No wax, no button, no bar, no rail — the rail begins on door 01.
+   Legibility: the cue is the only word on the veil. It sits over the veiled
+   print and holds ≥4.5:1 over the darkest patch a photo can offer, because
+   the sheer alone lifts a black pixel to a relative luminance of about .47.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.tpl-sophisticated .so-veil {
+  position: absolute;
+  inset: -8px -8px -14px;                 /* 8px past the frame; the hem falls 14px below it */
+  z-index: 1;
+  display: block;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  text-align: left;
+  font-family: var(--so-sans);
+  color: var(--so-ink);
+  background-color: rgb(251 251 250 / .5);
+  background-image:
+    /* the rolled hem: double thickness at the foot */
+    linear-gradient(0deg, rgb(251 251 250 / .62) 0 14px, rgb(251 251 250 / 0) 14px),
+    /* the fold over the frame's top edge */
+    linear-gradient(180deg, rgb(251 251 250 / .58) 0 7px, rgb(251 251 250 / 0) 7px),
+    /* the drape: soft vertical folds, lit from the left */
+    linear-gradient(90deg,
+      rgb(255 255 255 / 0) 0%, rgb(255 255 255 / .34) 12%, rgb(20 21 25 / .05) 22%,
+      rgb(255 255 255 / 0) 34%, rgb(255 255 255 / .28) 56%, rgb(20 21 25 / .045) 68%,
+      rgb(255 255 255 / 0) 82%, rgb(255 255 255 / .22) 100%),
+    /* the tulle: white threads two ways, 5px apart — a fine net of holes, not dots */
+    repeating-linear-gradient(60deg,  rgb(255 255 255 / .2) 0 .6px, rgb(255 255 255 / 0) 1.4px 5px),
+    repeating-linear-gradient(-60deg, rgb(255 255 255 / .2) 0 .6px, rgb(255 255 255 / 0) 1.4px 5px);
+  background-size: auto, auto, auto, auto, auto;
+  background-position: 0 0, 0 0, 0 0, 0 0, 0 0;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat, repeat;
+  -webkit-backdrop-filter: blur(3px) saturate(.9);
+          backdrop-filter: blur(3px) saturate(.9);
+  box-shadow:
+    inset 0 0 0 1px rgb(251 251 250 / .6),
+    0 1px 0 rgb(20 21 25 / .06),
+    0 26px 34px -26px rgb(20 21 25 / .6);
+  cursor: grab;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.tpl-sophisticated .so-veil:active { cursor: grabbing; }
+.tpl-sophisticated .so-veil:focus-visible { outline: 2px solid var(--so-ink); outline-offset: 4px; }
+/* the shipped cue, verbatim, at the shipped size — ranged on the gutter like every other word */
+.tpl-sophisticated .so-veil-cue {
+  position: absolute;
+  left: 8px;
+  bottom: 14px;                           /* the cue ends where the frame ends; the hem hangs below it */
+  margin: 0;
+  padding: 12px 0 13px;                   /* its own ≥44 band inside the veil */
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -.005em;
+  color: var(--so-ink);
+  white-space: nowrap;
+  pointer-events: none;
+}
+</style>
+<!-- THEME-STYLE-END -->
+
+<div class="so-page">
+  <p class="so-page-head">Galeriya <span>Sophisticated · 00 Reveal · 01 Name · 02 Reply · 375 × 812 · on the couple's reveal background</span></p>
+  <div class="so-page-row">
+<!-- THEME-BOARDS-START -->
+<div class="tpl-sophisticated" style="width:375px;min-height:812px">
+  <a class="so-brand" href="#" aria-label="Setnayan home">
+    <svg class="so-brand-mark" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="16.5" fill="none" stroke="currentColor" stroke-width="3.6"/><path d="M20 3.5C9 9 9 17 20 20s11 11 0 16.5" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/></svg>
+    <span class="so-brand-word">Setnayan</span>
+  </a>
+
+  <!-- 00 · Reveal — the shipped sheer bridal veil, closed: the work hangs veiled
+       where it will hang on door 01; the veil is the control. Lift it and only
+       the veil moves — the rail and the card arrive beneath the label. -->
+  <div class="so-work">
+    <div class="so-print" role="img" aria-label="A photograph from Cale &amp; Ice"></div>
+    <button class="so-veil" id="so-veil" type="button">
+      <span class="so-veil-cue">Lift the veil ↑</span>
+      <span class="so-sr">Lift the veil to open the invitation from Cale &amp; Ice</span>
+    </button>
+  </div>
+
+  <header class="so-head">
+    <p class="so-eyebrow">The wedding of</p>
+    <h1 class="so-title">Cale &amp; Ice</h1>
+    <p class="so-meta">Friday, December 18, 2026</p>
+  </header>
+</div>
+
+<div class="tpl-sophisticated" style="width:375px;min-height:812px">
+  <a class="so-brand" href="#" aria-label="Setnayan home">
+    <svg class="so-brand-mark" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="16.5" fill="none" stroke="currentColor" stroke-width="3.6"/><path d="M20 3.5C9 9 9 17 20 20s11 11 0 16.5" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/></svg>
+    <span class="so-brand-word">Setnayan</span>
+  </a>
+
+  <div class="so-work">
+    <div class="so-print" role="img" aria-label="A photograph from Cale &amp; Ice"></div>
+  </div>
+
+  <header class="so-head">
+    <p class="so-eyebrow">You're invited</p>
+    <h1 class="so-title">Cale &amp; Ice</h1>
+    <p class="so-meta">Friday, December 18, 2026</p>
+  </header>
+
+  <div class="so-rail">
+    <p class="so-sr">Step 1 of 3 · Name</p>
+    <ol class="so-rail-list" aria-hidden="true">
+      <li class="so-rail-step is-current"><span class="so-rail-bead"></span><span class="so-rail-name">Name</span></li>
+      <li class="so-rail-step"><span class="so-rail-bead"></span><span class="so-rail-name">Reply</span></li>
+      <li class="so-rail-step"><span class="so-rail-bead"></span><span class="so-rail-name">Enter</span></li>
+    </ol>
+  </div>
+
+  <section class="so-card" aria-label="Your name">
+    <p class="so-intro">Tell us your name so the couple can find you on their guest list — no account needed.</p>
+    <form class="so-form" action="#" onsubmit="return false">
+      <div class="so-field">
+        <label class="so-label" for="so-name">Your full name</label>
+        <input class="so-input" id="so-name" name="name" type="text" required placeholder="e.g. Maria Santos" autocomplete="name" autocapitalize="words">
+        <p class="so-help">Use the name the couple would have on their list.</p>
+      </div>
+      <div class="so-actions">
+        <button class="so-btn so-btn-primary" type="submit">Continue</button>
+      </div>
+    </form>
+  </section>
+</div>
+
+<div class="tpl-sophisticated" style="width:375px;min-height:812px">
+  <a class="so-brand" href="#" aria-label="Setnayan home">
+    <svg class="so-brand-mark" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="16.5" fill="none" stroke="currentColor" stroke-width="3.6"/><path d="M20 3.5C9 9 9 17 20 20s11 11 0 16.5" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/></svg>
+    <span class="so-brand-word">Setnayan</span>
+  </a>
+
+  <div class="so-work">
+    <div class="so-print" role="img" aria-label="A photograph from Cale &amp; Ice"></div>
+  </div>
+
+  <header class="so-head">
+    <p class="so-eyebrow">Your reply</p>
+    <h1 class="so-title">Maria Santos</h1>
+    <p class="so-meta">Friday, December 18, 2026</p>
+  </header>
+
+  <div class="so-rail">
+    <p class="so-sr">Step 2 of 3 · Reply</p>
+    <ol class="so-rail-list" aria-hidden="true">
+      <li class="so-rail-step is-done"><span class="so-rail-bead"></span><span class="so-rail-name">Name</span></li>
+      <li class="so-rail-step is-current"><span class="so-rail-bead"></span><span class="so-rail-name">Reply</span></li>
+      <li class="so-rail-step"><span class="so-rail-bead"></span><span class="so-rail-name">Enter</span></li>
+    </ol>
+  </div>
+
+  <section class="so-card" aria-label="Your reply">
+    <div class="so-identity">
+      <p class="so-identity-lede">Fills this in for you, and becomes how you sign in later.</p>
+      <button class="so-btn so-btn-google" type="button">Continue with Google</button>
+      <button class="so-btn so-btn-apple" type="button">Continue with Apple</button>
+    </div>
+
+    <p class="so-divider"><span>or fill it in yourself</span></p>
+
+    <form class="so-form" action="#" onsubmit="return false">
+      <fieldset class="so-fieldset">
+        <legend class="so-legend">Will you be there?</legend>
+        <div class="so-choices">
+          <label class="so-choice">
+            <!-- "Joyfully accepts" is pre-checked on this artboard only, so the plus-one
+                 and selfie sections render for review; the shipped default is no selection. -->
+            <input class="so-choice-input" type="radio" name="so-attend" id="so-attend-yes" value="yes" checked>
+            <span class="so-choice-text">Joyfully accepts</span>
+            <span class="so-choice-box" aria-hidden="true"></span>
+          </label>
+          <label class="so-choice">
+            <input class="so-choice-input" type="radio" name="so-attend" id="so-attend-maybe" value="maybe">
+            <span class="so-choice-text">Undecided, for now</span>
+            <span class="so-choice-box" aria-hidden="true"></span>
+          </label>
+          <label class="so-choice">
+            <input class="so-choice-input" type="radio" name="so-attend" id="so-attend-no" value="no">
+            <span class="so-choice-text">Regretfully declines</span>
+            <span class="so-choice-box" aria-hidden="true"></span>
+          </label>
+        </div>
+      </fieldset>
+
+      <div class="so-field">
+        <label class="so-label" for="so-email">Email</label>
+        <input class="so-input" id="so-email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" required>
+        <p class="so-help">This is how the couple reaches you — and how you sign in later, with no password.</p>
+      </div>
+
+      <div class="so-field">
+        <label class="so-label" for="so-mobile">Mobile</label>
+        <input class="so-input" id="so-mobile" name="mobile" type="tel" inputmode="tel" autocomplete="tel">
+      </div>
+
+      <div class="so-field">
+        <label class="so-label" for="so-nick">What should we call you? <span class="so-label-opt">(optional)</span></label>
+        <input class="so-input" id="so-nick" name="nickname" type="text" autocomplete="nickname" autocapitalize="words">
+      </div>
+
+      <div class="so-field">
+        <label class="so-label" for="so-meal">Meal preference</label>
+        <div class="so-select-wrap">
+          <select class="so-input so-select" id="so-meal" name="meal">
+            <option value="">No preference</option>
+            <option value="beef">Beef</option>
+            <option value="chicken">Chicken</option>
+            <option value="fish">Fish</option>
+            <option value="vegetarian">Vegetarian</option>
+            <option value="vegan">Vegan</option>
+            <option value="kids">Kids</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="so-field">
+        <label class="so-label" for="so-diet">Dietary notes</label>
+        <input class="so-input" id="so-diet" name="dietary" type="text" placeholder="halal · nut allergy · …">
+      </div>
+
+      <div class="so-section so-reveal">
+        <p class="so-kicker">Your plus-one</p>
+        <p class="so-lede">The couple has a seat for one guest of yours.</p>
+        <div class="so-cols">
+          <div class="so-field">
+            <label class="so-label" for="so-po-first">Their first name</label>
+            <input class="so-input" id="so-po-first" name="plus_one_first" type="text" autocomplete="off" autocapitalize="words">
+          </div>
+          <div class="so-field">
+            <label class="so-label" for="so-po-last">Their last name</label>
+            <input class="so-input" id="so-po-last" name="plus_one_last" type="text" autocomplete="off" autocapitalize="words">
+          </div>
+        </div>
+      </div>
+
+      <div class="so-field">
+        <label class="so-label" for="so-note">A note to the couple <span class="so-label-opt">(optional)</span></label>
+        <textarea class="so-input so-textarea" id="so-note" name="note" rows="3"></textarea>
+      </div>
+
+      <div class="so-section so-reveal">
+        <p class="so-kicker">A selfie <span class="so-label-opt">(optional)</span></p>
+        <button class="so-btn so-btn-secondary" type="button">Take a selfie</button>
+        <p class="so-help">Only to find you in photos taken at this event. You can do this later, inside.</p>
+      </div>
+
+      <div class="so-actions">
+        <button class="so-btn so-btn-primary" type="submit">Save RSVP</button>
+      </div>
+    </form>
+  </section>
+</div>
+<!-- THEME-BOARDS-END -->
+  </div>
+</div>

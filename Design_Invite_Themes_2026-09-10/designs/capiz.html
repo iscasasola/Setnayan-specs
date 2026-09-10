@@ -1,0 +1,542 @@
+<meta charset="utf-8">
+<title>Setnayan · Capiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=DM+Mono:wght@400;500&family=Hanken+Grotesk:wght@400;500;600;800&display=swap" rel="stylesheet">
+
+<!-- THEME-STYLE-START -->
+<style>
+/* ==========================================================================
+   SETNAYAN · theme "Capiz" (Elegant) · v3
+   A capiz-shell window, and the couple's photo is the light coming through
+   it. The ground is `--reveal-bg` — the same background their save-the-date
+   reveal opens onto — seen through milk-white shell and a wooden lattice.
+   The card is paper on that window; the seal straddles its top edge; the
+   gold hairline-with-diamond is the hinge between invitation and door.
+
+   Every rule is scoped under .tpl-capiz; every class is prefixed cz-.
+   Display: Cormorant Garamond (500 / 600) · Utility: Hanken Grotesk ·
+   Data: DM Mono.
+
+   `--reveal-bg` is CONSUMED here, never declared: the host page provides a
+   CSS url() (events.std_background). When it resolves to `none` the door
+   falls back to the lattice on pearl paper.
+   ========================================================================== */
+
+.tpl-capiz{
+  /* ---- the couple's colours (Event Hub Pro · adjustable) ---- */
+  --accent:#C97B4B;                 /* their colour · light through the panes, the seal ring and letters · ORNAMENT ONLY, never text, never the button */
+  --tulle:#F3ECE1;                  /* the bridal veil's tulle (std_reveal_effects.veilColor) · a light hue — the door's ground stays milk */
+  --action:#C24E25;                 /* the 3px edge, the eyebrow, reached beads and the ONE control per door · "Button color" is Pro; not yet ruled for the invite, so token-ready, defaulted */
+
+  /* ---- the couple's inputs (bound by the host) ---- */
+  --monogram:"C & I";
+  --monogram-font:var(--cz-serif);
+
+  /* ---- family spine ---- */
+  --cz-paper:#FFFFFF;
+  --cz-ink:#2C2A29;
+  --cz-ink-70:rgba(44,42,41,.70);   /* 5.4:1 on paper — secondary text, bead labels */
+  --cz-ink-45:rgba(44,42,41,.45);   /* placeholders only */
+  --cz-hairline:rgba(44,42,41,.20);
+  --cz-hairline-soft:rgba(44,42,41,.10);
+  --cz-wash:rgba(44,42,41,.03);
+  --cz-link:#3B4E67;                /* 8.2:1 */
+  --cz-gold:#C5A059;                /* 3.37:1 · the rule, the seal's outer ring, the wordmark's mark · NEVER a word */
+  --cz-serif:"Cormorant Garamond",Cormorant,"Iowan Old Style","Times New Roman",Georgia,serif;
+  --cz-sans:"Hanken Grotesk","Helvetica Neue",Helvetica,Arial,system-ui,sans-serif;
+  --cz-mono:"DM Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --cz-radius-card:22px;
+  --cz-radius-control:8px;
+
+  /* ---- the window ---- */
+  --cz-ground:#F4F1EB;              /* pearl paper — what the lattice sits on when there is no photo */
+  --cz-milk:250 247 240;            /* the shell's milk · the shipped `lighten` wash colour, so the reveal and the door veil alike */
+  --cz-mullion:rgba(44,42,41,.12);
+  --cz-frame:rgba(44,42,41,.20);
+  --cz-light-y:166px;               /* where the light pools: the seal */
+  /* accent-derived tints · neutral pearl fallbacks, overridden by color-mix below */
+  --cz-pane-a:rgba(120,110,100,.04);
+  --cz-pane-b:rgba(120,110,100,.07);
+  --cz-pane-c:rgba(120,110,100,.03);
+  --cz-light:rgba(120,110,100,.18);
+  --cz-etch:rgba(120,110,100,.12);
+  --cz-tulle-body:rgba(243,236,225,.15);
+  --cz-tulle-hem:rgba(243,236,225,.72);
+
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  box-sizing:border-box;
+  padding:20px 16px 40px;
+  background:var(--cz-ground);
+  color:var(--cz-ink);
+  font-family:var(--cz-sans);
+  font-size:16px;
+  line-height:1.5;
+  text-align:left;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+@supports (color:color-mix(in srgb,red,blue)){
+  .tpl-capiz{
+    --cz-pane-a:color-mix(in srgb,var(--accent) 6%,transparent);
+    --cz-pane-b:color-mix(in srgb,var(--accent) 11%,transparent);
+    --cz-pane-c:color-mix(in srgb,var(--accent) 4%,transparent);
+    --cz-light:color-mix(in srgb,var(--accent) 30%,transparent);
+    --cz-etch:color-mix(in srgb,var(--accent) 14%,transparent);
+    --cz-tulle-body:color-mix(in srgb,var(--tulle) 15%,transparent);
+    --cz-tulle-hem:color-mix(in srgb,var(--tulle) 72%,transparent);
+  }
+}
+
+/* ---- the ground: their photo, seen through capiz ---- */
+.tpl-capiz .cz-ground{position:absolute;inset:0;z-index:0;pointer-events:none}
+/* the photo — full-bleed, the reveal's own background, a touch desaturated as light through shell is */
+.tpl-capiz .cz-ground::before{
+  content:"";position:absolute;inset:0;
+  background-image:var(--reveal-bg,none);
+  background-size:cover;background-position:center;background-repeat:no-repeat;
+  filter:saturate(.85);
+}
+/* the shell and the frame, on top of the photo — first layer listed is topmost:
+   the pool of the couple's light around the seal · a 2px frame every four
+   panes · 1px mullions every 27px · pane tints in two checkers so the shell
+   shimmers · a pearl highlight · then the MILK, heaviest at the crown where
+   the wordmark sits, thinnest around the seal, denser again at the hem —
+   a 66% milk at the crown holds ink at ≥4.5:1 over a black photo, through
+   the frame lines */
+.tpl-capiz .cz-ground::after{
+  content:"";position:absolute;inset:0;
+  background-image:
+    radial-gradient(circle at 50% var(--cz-light-y),var(--cz-light) 0,transparent 42%),
+    repeating-linear-gradient(90deg,var(--cz-frame) 0 2px,transparent 2px 108px),
+    repeating-linear-gradient(0deg,var(--cz-frame) 0 2px,transparent 2px 108px),
+    repeating-linear-gradient(90deg,var(--cz-mullion) 0 1px,transparent 1px 27px),
+    repeating-linear-gradient(0deg,var(--cz-mullion) 0 1px,transparent 1px 27px),
+    radial-gradient(ellipse at 42% 30%,rgba(255,255,255,.55) 0,rgba(255,255,255,.18) 50%,rgba(255,255,255,0) 78%),
+    repeating-conic-gradient(var(--cz-pane-b) 0 25%,transparent 0 50%),
+    repeating-conic-gradient(var(--cz-pane-c) 0 25%,transparent 0 50%),
+    linear-gradient(var(--cz-pane-a),var(--cz-pane-a)),
+    linear-gradient(180deg,
+      rgb(var(--cz-milk) / .70) 0,
+      rgb(var(--cz-milk) / .66) 84px,
+      rgb(var(--cz-milk) / .40) 200px,
+      rgb(var(--cz-milk) / .40) 520px,
+      rgb(var(--cz-milk) / .58) 100%);
+  background-size:auto,auto,auto,auto,auto,auto,54px 54px,108px 108px,auto,auto;
+  background-position:0 0,0 0,0 0,0 0,0 0,0 0,0 0,27px 27px,0 0,0 0;
+}
+
+/* ---- the way out: the wordmark above the card, outside it, the only navigation ---- */
+.tpl-capiz .cz-side{position:relative}
+.tpl-capiz .cz-wordmark-row{position:relative;z-index:3;margin:0 0 118px}   /* 118 = the window, and room for the seal's top half */
+.tpl-capiz .cz-wordmark{
+  display:inline-flex;align-items:center;gap:10px;
+  min-height:44px;padding:0 4px 0 0;box-sizing:border-box;
+  color:var(--cz-ink);text-decoration:none;line-height:1;border-radius:2px;
+}
+.tpl-capiz .cz-wordmark:focus-visible{outline:2px solid var(--cz-ink);outline-offset:3px}
+.tpl-capiz .cz-wordmark-mark{display:block;width:30px;height:30px;flex:none}
+.tpl-capiz .cz-wordmark-word{font-family:var(--cz-sans);font-size:23px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+
+/* ---- the card: paper, 22px, the 3px threshold edge ---- */
+.tpl-capiz .cz-card{
+  position:relative;z-index:1;
+  box-sizing:border-box;
+  background:var(--cz-paper);
+  border:1px solid var(--cz-hairline-soft);
+  border-top:3px solid var(--action);
+  border-radius:var(--cz-radius-card);
+  box-shadow:0 1px 2px rgba(0,0,0,.06),0 26px 48px -26px rgba(44,42,41,.55);
+  padding:48px 24px 24px;               /* the top clears the seal */
+}
+.tpl-capiz .cz-card-cover{padding-bottom:26px}   /* the reveal shows the invitation only — above the hinge */
+
+/* ---- the seal: the couple's mark, set on the threshold ---- */
+.tpl-capiz .cz-seal{
+  position:absolute;top:-35px;left:50%;translate:-50% 0;
+  width:66px;height:66px;border-radius:50%;
+  background:var(--cz-paper);
+  box-shadow:0 0 0 1px var(--accent),0 0 0 4px var(--cz-paper),0 0 0 5px var(--cz-gold),0 10px 22px -12px rgba(44,42,41,.45);
+  display:grid;place-items:center;
+  color:var(--accent);
+  font-family:var(--monogram-font);font-weight:600;font-size:22px;line-height:1;letter-spacing:.02em;white-space:nowrap;
+}
+.tpl-capiz .cz-seal::before{content:var(--monogram)}
+
+/* ---- the invitation head: centred, as a printed invite is ---- */
+.tpl-capiz .cz-head{text-align:center}
+.tpl-capiz .cz-eyebrow{
+  margin:0;display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--cz-mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--action);
+}
+.tpl-capiz .cz-title{
+  margin:8px 0 0;
+  font-family:var(--cz-serif);font-weight:600;font-size:34px;line-height:1.05;letter-spacing:-.01em;
+  color:var(--cz-ink);text-wrap:balance;
+}
+.tpl-capiz .cz-meta{
+  margin:10px 0 0;
+  font-family:var(--cz-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--cz-ink-70);
+}
+/* the one gold ornament: a hairline with a diamond — the hinge */
+.tpl-capiz .cz-rule{position:relative;width:44px;height:1px;margin:16px auto 0;background:var(--cz-gold)}
+.tpl-capiz .cz-rule::after{
+  content:"";position:absolute;left:50%;top:50%;width:5px;height:5px;
+  translate:-50% -50%;rotate:45deg;
+  background:var(--cz-paper);border:1px solid var(--cz-gold);
+}
+
+/* ---- the rail: three beads with decision names, exactly one current — never controls ---- */
+.tpl-capiz .cz-rail{margin:18px 0 0}
+.tpl-capiz .cz-rail-list{display:flex;gap:8px;margin:0;padding:0;list-style:none}
+.tpl-capiz .cz-rail-step{flex:1 1 0;display:flex;flex-direction:column;gap:6px;min-width:0}
+.tpl-capiz .cz-bar{height:3px;border-radius:999px;background:var(--cz-hairline-soft)}
+.tpl-capiz .cz-is-done .cz-bar,.tpl-capiz .cz-is-current .cz-bar{background:var(--action)}
+.tpl-capiz .cz-bead{font-family:var(--cz-mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--cz-ink-70);white-space:nowrap}
+.tpl-capiz .cz-is-current .cz-bead{color:var(--action);font-weight:500}
+.tpl-capiz .cz-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* ---- the shipped form vocabulary ---- */
+.tpl-capiz .cz-intro{margin:18px 0 0;font-size:16px;line-height:1.5;color:var(--cz-ink-70)}
+.tpl-capiz .cz-form{margin-top:20px}
+.tpl-capiz .cz-field + .cz-field,.tpl-capiz .cz-field + .cz-button,.tpl-capiz .cz-choice + .cz-field,
+.tpl-capiz .cz-reveal + .cz-field,.tpl-capiz .cz-field + .cz-reveal,.tpl-capiz .cz-reveal + .cz-button{margin-top:16px}
+.tpl-capiz .cz-label,.tpl-capiz .cz-legend{display:block;font-size:14px;font-weight:500;color:var(--cz-ink);margin-bottom:6px;padding:0}
+.tpl-capiz .cz-opt{font-weight:400;color:var(--cz-ink-70)}
+.tpl-capiz .cz-input,.tpl-capiz .cz-select,.tpl-capiz .cz-textarea{
+  box-sizing:border-box;width:100%;height:44px;padding:0 12px;
+  font:inherit;font-size:16px;                  /* no iOS zoom-on-focus */
+  color:var(--cz-ink);background:var(--cz-paper);
+  border:1px solid var(--cz-hairline);border-radius:var(--cz-radius-control);
+  transition:border-color 120ms,box-shadow 120ms;
+}
+.tpl-capiz .cz-textarea{height:auto;min-height:88px;padding:10px 12px;resize:vertical;line-height:1.45}
+.tpl-capiz .cz-input::placeholder,.tpl-capiz .cz-textarea::placeholder{color:var(--cz-ink-45)}
+.tpl-capiz .cz-input:focus,.tpl-capiz .cz-select:focus,.tpl-capiz .cz-textarea:focus{
+  outline:none;border-color:var(--cz-ink);box-shadow:0 0 0 1px var(--cz-ink);
+}
+.tpl-capiz .cz-help{margin:6px 0 0;font-size:14px;line-height:1.5;color:var(--cz-ink-70)}
+
+/* the one action, and the secondary that may stand beside it */
+.tpl-capiz .cz-button,.tpl-capiz .cz-button-secondary{
+  display:block;box-sizing:border-box;width:100%;height:44px;margin-top:16px;padding:0 16px;
+  font:inherit;font-size:14px;font-weight:500;text-align:center;text-decoration:none;line-height:42px;
+  border-radius:var(--cz-radius-control);cursor:pointer;
+  transition:filter 120ms,border-color 120ms;
+}
+.tpl-capiz .cz-button{color:#FFFFFF;background:var(--action);border:0;line-height:44px}
+.tpl-capiz .cz-button:hover{filter:brightness(.93)}
+.tpl-capiz .cz-button:focus-visible{outline:2px solid var(--cz-ink);outline-offset:2px}
+.tpl-capiz .cz-button-secondary{color:var(--cz-ink);background:var(--cz-paper);border:1px solid var(--cz-hairline)}
+.tpl-capiz .cz-button-secondary:hover{border-color:var(--cz-ink)}
+.tpl-capiz .cz-button-secondary:focus-visible{outline:2px solid var(--cz-ink);outline-offset:2px}
+.tpl-capiz .cz-button-small{width:auto;display:inline-block;margin-top:0;padding:0 14px}
+
+/* the Reply door's identity row — brand chrome, neither takes the action colour */
+.tpl-capiz .cz-idnote{margin:18px 0 0;font-size:14px;line-height:1.5;color:var(--cz-ink-70)}
+.tpl-capiz .cz-idbtn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  box-sizing:border-box;width:100%;height:44px;margin-top:10px;
+  font:inherit;font-size:15px;font-weight:500;border-radius:var(--cz-radius-control);cursor:pointer;
+}
+.tpl-capiz .cz-idbtn-ico{width:18px;height:18px;flex:none}
+.tpl-capiz .cz-idbtn-google{background:#FFFFFF;color:var(--cz-ink);border:1px solid var(--cz-hairline)}
+.tpl-capiz .cz-idbtn-apple{background:#000000;color:#FFFFFF;border:1px solid #000000}
+.tpl-capiz .cz-idbtn:focus-visible{outline:2px solid var(--cz-ink);outline-offset:2px}
+.tpl-capiz .cz-or{
+  display:flex;align-items:center;gap:12px;margin:20px 0 0;
+  font-family:var(--cz-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--cz-ink-70);
+}
+.tpl-capiz .cz-or::before,.tpl-capiz .cz-or::after{content:"";flex:1;height:1px;background:var(--cz-hairline-soft)}
+
+/* the reply: three tall rows an elder can hit, then the reveals */
+.tpl-capiz .cz-choice{margin:0;padding:0;border:0;min-width:0}
+.tpl-capiz .cz-opt-row{
+  display:flex;align-items:center;gap:12px;
+  box-sizing:border-box;min-height:48px;padding:0 14px;margin-top:8px;
+  font-size:16px;color:var(--cz-ink);background:var(--cz-paper);
+  border:1px solid var(--cz-hairline);border-radius:var(--cz-radius-control);cursor:pointer;
+}
+.tpl-capiz .cz-opt-input{width:18px;height:18px;margin:0;flex:none;accent-color:var(--cz-ink)}   /* the radio checks in ink — the one action stays the button */
+.tpl-capiz .cz-opt-row:has(.cz-opt-input:checked){border-color:var(--cz-ink);box-shadow:0 0 0 1px var(--cz-ink)}
+.tpl-capiz .cz-opt-row:has(.cz-opt-input:focus-visible){outline:2px solid var(--cz-ink);outline-offset:2px}
+/* the shipped widget reveals the plus-one and the selfie on the attending answer */
+.tpl-capiz .cz-form-reply .cz-reveal{display:none}
+.tpl-capiz .cz-form-reply:has(.cz-opt-input[value="attending"]:checked) .cz-reveal{display:block}
+.tpl-capiz .cz-selfie{display:flex;align-items:center;gap:14px;padding:12px 14px;border:1px dashed var(--cz-hairline);border-radius:var(--cz-radius-control)}
+.tpl-capiz .cz-selfie-ring{
+  flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--cz-hairline);
+  background:radial-gradient(circle at 50% 38%,var(--cz-hairline) 0 7px,transparent 8px),radial-gradient(ellipse at 50% 92%,var(--cz-hairline) 0 14px,transparent 15px);
+}
+.tpl-capiz .cz-selfie .cz-help{margin-top:8px}
+.tpl-capiz .cz-grid2{display:grid;grid-template-columns:1fr;gap:16px;margin-top:8px}
+.tpl-capiz .cz-grid2 .cz-field + .cz-field{margin-top:0}
+
+/* ---- 00 · the reveal: the shipped sheer bridal veil, closed, dressed in Capiz ----
+   Drawn from the locked look (reveal-config-pure · DEFAULT_VEIL_LOOK): ivory
+   tulle at ~14% on the flat, a 12px weave, ONE sparse Setnayan mark per 125px
+   tile, 16 folds blooming to a hem that reaches ~10% up from the bottom.
+   Pinned at the crown; the card beneath is the invitation above the hinge.
+   The couple's mark is etched in the glass of the lower window. */
+.tpl-capiz .cz-etch{
+  position:absolute;left:0;right:0;top:352px;height:300px;z-index:0;
+  display:grid;place-items:center;pointer-events:none;user-select:none;
+  font-family:var(--monogram-font);font-weight:600;font-size:190px;line-height:1;letter-spacing:-.02em;
+  color:var(--cz-etch);
+}
+.tpl-capiz .cz-etch::before{content:var(--monogram)}
+.tpl-capiz .cz-tulle{
+  position:absolute;left:0;right:0;top:0;height:calc(87% - 12px);z-index:2;pointer-events:none;
+  background-color:var(--cz-tulle-body);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='125' height='125' viewBox='0 0 125 125'%3E%3Cg transform='translate(56.875 56.875) scale(0.28125)' fill='none' stroke='%23ffffff' stroke-opacity='.29' stroke-width='3.2' stroke-linecap='round'%3E%3Ccircle cx='20' cy='20' r='16.5'/%3E%3Cpath d='M20 3.5C9 9 9 17 20 20s11 11 0 16.5'/%3E%3C/g%3E%3C/svg%3E"),
+    repeating-linear-gradient(45deg,rgba(255,255,255,.10) 0 1px,transparent 1px 12px),
+    repeating-linear-gradient(-45deg,rgba(255,255,255,.10) 0 1px,transparent 1px 12px);
+  background-size:125px 125px,auto,auto;
+  background-position:12px 30px,0 0,0 0;
+}
+/* the folds: sixteen across, whiter where the fabric turns, blooming toward the hem */
+.tpl-capiz .cz-tulle::before{
+  content:"";position:absolute;inset:0;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,0) 0,rgba(255,255,255,.58) 8px,rgba(255,255,255,.58) 11px,rgba(255,255,255,.14) 16px,rgba(255,255,255,0) 23.4375px);
+  -webkit-mask-image:linear-gradient(to bottom,transparent 44%,rgba(0,0,0,.45) 72%,#000 100%);
+          mask-image:linear-gradient(to bottom,transparent 44%,rgba(0,0,0,.45) 72%,#000 100%);
+}
+/* the hem: sixteen gathered lobes, the doubled fabric denser, a hairline of shade at the edge */
+.tpl-capiz .cz-tulle::after{
+  content:"";position:absolute;left:0;right:0;top:100%;height:12px;
+  background:radial-gradient(11.6px 12px at 50% 0,rgba(255,255,255,.62) 0 8.8px,var(--cz-tulle-hem) 8.8px 10.6px,rgba(44,42,41,.16) 10.6px 11.4px,transparent 12px) 0 0 / 23.4375px 12px repeat-x;
+}
+/* the instruction — the shipped words, verbatim; on Capiz's paper plate so an elder reads it over any photo
+   (the shipped black/35 pill leaves cream text near 2.4:1 over a milk ground — here ink on paper, 13:1) */
+.tpl-capiz .cz-lift{
+  position:absolute;left:50%;bottom:44px;z-index:3;translate:-50% 0;
+  width:max-content;max-width:calc(100% - 48px);margin:0;padding:10px 24px 12px;box-sizing:border-box;
+  text-align:center;pointer-events:none;
+  background:rgba(255,255,255,.94);
+  border:1px solid var(--cz-hairline-soft);border-radius:999px;
+  box-shadow:0 12px 26px -16px rgba(44,42,41,.5);
+}
+.tpl-capiz .cz-lift-line{margin:0;font-family:var(--cz-serif);font-weight:600;font-size:24px;line-height:1.2;color:var(--cz-ink)}
+.tpl-capiz .cz-lift-sub{margin:2px 0 0;font-family:var(--cz-sans);font-size:14px;line-height:1.35;color:var(--cz-ink-70);text-wrap:balance}
+
+@media (prefers-reduced-motion:reduce){
+  .tpl-capiz .cz-button,.tpl-capiz .cz-input,.tpl-capiz .cz-select,.tpl-capiz .cz-textarea{transition:none}
+}
+</style>
+<!-- THEME-STYLE-END -->
+
+<style>
+/* page chrome for standalone viewing only — outside the theme markers */
+.cz-page{min-height:100vh;margin:0;padding:40px 32px 64px;box-sizing:border-box;background:#DCD9D2;color:#2C2A29;font-family:"Hanken Grotesk","Helvetica Neue",Arial,sans-serif}
+.cz-page-head{max-width:800px;margin:0 auto 28px;text-align:center}
+.cz-page-title{margin:0 0 6px;font:600 34px/1.1 "Cormorant Garamond",Georgia,serif;color:#2C2A29}
+.cz-page-sub{margin:0;font-family:"DM Mono",ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#56524C}
+/* the host provides the couple's reveal background; the theme only consumes it */
+.cz-page-boards{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;gap:36px;--reveal-bg:url("reveal-bg-sample.jpg")}
+.cz-page-boards > .tpl-capiz{flex:none;box-shadow:0 0 0 1px rgba(44,42,41,.16),0 24px 50px -30px rgba(44,42,41,.5)}
+</style>
+
+<div class="cz-page">
+  <header class="cz-page-head">
+    <p class="cz-page-title">Capiz</p>
+    <p class="cz-page-sub">Setnayan · 00 Reveal · 01 Name · 02 Reply · 375 × 812 · on the couple's reveal background</p>
+  </header>
+  <div class="cz-page-boards">
+<!-- THEME-BOARDS-START -->
+<!-- 00 · Reveal — the shipped sheer bridal veil (veil-sheer), closed, as the guest first meets it -->
+<div class="tpl-capiz" style="width:375px;min-height:812px">
+  <div class="cz-ground" aria-hidden="true"></div>
+  <div class="cz-etch" aria-hidden="true"></div>
+  <div class="cz-side">
+    <div class="cz-wordmark-row">
+      <a class="cz-wordmark" href="#" aria-label="Setnayan home">
+        <svg class="cz-wordmark-mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><circle cx="20" cy="20" r="16.5" fill="none" stroke="#C5A059" stroke-width="3.2"/><path d="M20 3.5C9 9 9 17 20 20s11 11 0 16.5" fill="none" stroke="#C5A059" stroke-width="3.2" stroke-linecap="round"/></svg>
+        <span class="cz-wordmark-word">Setnayan</span>
+      </a>
+    </div>
+    <section class="cz-card cz-card-cover" aria-labelledby="cz-d0-title">
+      <div class="cz-seal" aria-hidden="true"></div>
+      <header class="cz-head">
+        <p class="cz-eyebrow">You're invited</p>
+        <h1 class="cz-title" id="cz-d0-title">Cale &amp; Ice</h1>
+        <p class="cz-meta">Friday, December 18, 2026</p>
+        <div class="cz-rule" aria-hidden="true"></div>
+      </header>
+    </section>
+  </div>
+  <div class="cz-tulle" aria-hidden="true"></div>
+  <div class="cz-lift" role="note">
+    <p class="cz-lift-line">Lift the veil ↑</p>
+    <p class="cz-lift-sub">or double-tap to lift it for you</p>
+  </div>
+</div>
+
+<!-- 01 · Name -->
+<div class="tpl-capiz" style="width:375px;min-height:812px">
+  <div class="cz-ground" aria-hidden="true"></div>
+  <div class="cz-side">
+    <div class="cz-wordmark-row">
+      <a class="cz-wordmark" href="#" aria-label="Setnayan home">
+        <svg class="cz-wordmark-mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><circle cx="20" cy="20" r="16.5" fill="none" stroke="#C5A059" stroke-width="3.2"/><path d="M20 3.5C9 9 9 17 20 20s11 11 0 16.5" fill="none" stroke="#C5A059" stroke-width="3.2" stroke-linecap="round"/></svg>
+        <span class="cz-wordmark-word">Setnayan</span>
+      </a>
+    </div>
+    <section class="cz-card" aria-labelledby="cz-d1-title">
+      <div class="cz-seal" aria-hidden="true"></div>
+      <header class="cz-head">
+        <p class="cz-eyebrow">You're invited</p>
+        <h1 class="cz-title" id="cz-d1-title">Cale &amp; Ice</h1>
+        <p class="cz-meta">Friday, December 18, 2026</p>
+        <div class="cz-rule" aria-hidden="true"></div>
+      </header>
+
+      <div class="cz-rail">
+        <p class="cz-sr-only">Step 1 of 3 · Name</p>
+        <ol class="cz-rail-list" aria-hidden="true">
+          <li class="cz-rail-step cz-is-current"><span class="cz-bar"></span><span class="cz-bead">Name</span></li>
+          <li class="cz-rail-step"><span class="cz-bar"></span><span class="cz-bead">Reply</span></li>
+          <li class="cz-rail-step"><span class="cz-bar"></span><span class="cz-bead">Enter</span></li>
+        </ol>
+      </div>
+
+      <p class="cz-intro">Tell us your name so the couple can find you on their guest list — no account needed.</p>
+
+      <form class="cz-form" action="#" onsubmit="return false">
+        <div class="cz-field">
+          <label class="cz-label" for="cz-name">Your full name</label>
+          <input class="cz-input" id="cz-name" name="name" type="text" required placeholder="e.g. Maria Santos" autocomplete="name">
+          <p class="cz-help">Use the name the couple would have on their list.</p>
+        </div>
+        <button class="cz-button" type="submit">Continue</button>
+      </form>
+    </section>
+  </div>
+</div>
+
+<!-- 02 · Reply — "Joyfully accepts" is pre-checked so the plus-one and selfie reveals show for review -->
+<div class="tpl-capiz" style="width:375px;min-height:812px">
+  <div class="cz-ground" aria-hidden="true"></div>
+  <div class="cz-side">
+    <div class="cz-wordmark-row">
+      <a class="cz-wordmark" href="#" aria-label="Setnayan home">
+        <svg class="cz-wordmark-mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><circle cx="20" cy="20" r="16.5" fill="none" stroke="#C5A059" stroke-width="3.2"/><path d="M20 3.5C9 9 9 17 20 20s11 11 0 16.5" fill="none" stroke="#C5A059" stroke-width="3.2" stroke-linecap="round"/></svg>
+        <span class="cz-wordmark-word">Setnayan</span>
+      </a>
+    </div>
+    <section class="cz-card" aria-labelledby="cz-d2-title">
+      <div class="cz-seal" aria-hidden="true"></div>
+      <header class="cz-head">
+        <p class="cz-eyebrow">Your reply</p>
+        <h1 class="cz-title" id="cz-d2-title">Maria Santos</h1>
+        <p class="cz-meta">Friday, December 18, 2026</p>
+        <div class="cz-rule" aria-hidden="true"></div>
+      </header>
+
+      <div class="cz-rail">
+        <p class="cz-sr-only">Step 2 of 3 · Reply</p>
+        <ol class="cz-rail-list" aria-hidden="true">
+          <li class="cz-rail-step cz-is-done"><span class="cz-bar"></span><span class="cz-bead">Name</span></li>
+          <li class="cz-rail-step cz-is-current"><span class="cz-bar"></span><span class="cz-bead">Reply</span></li>
+          <li class="cz-rail-step"><span class="cz-bar"></span><span class="cz-bead">Enter</span></li>
+        </ol>
+      </div>
+
+      <p class="cz-idnote">Fills this in for you, and becomes how you sign in later.</p>
+      <button class="cz-idbtn cz-idbtn-google" type="button">
+        <svg class="cz-idbtn-ico" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.980-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.150 1.45-4.920 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Continue with Google
+      </button>
+      <button class="cz-idbtn cz-idbtn-apple" type="button">
+        <svg class="cz-idbtn-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
+        Continue with Apple
+      </button>
+      <p class="cz-or">or fill it in yourself</p>
+
+      <form class="cz-form cz-form-reply" action="#" onsubmit="return false">
+        <fieldset class="cz-choice">
+          <legend class="cz-legend">Will you be there?</legend>
+          <label class="cz-opt-row"><input class="cz-opt-input" type="radio" name="cz_rsvp_status" id="cz-rsvp-yes" value="attending" checked><span>Joyfully accepts</span></label>
+          <label class="cz-opt-row"><input class="cz-opt-input" type="radio" name="cz_rsvp_status" id="cz-rsvp-maybe" value="maybe"><span>Undecided, for now</span></label>
+          <label class="cz-opt-row"><input class="cz-opt-input" type="radio" name="cz_rsvp_status" id="cz-rsvp-no" value="declined"><span>Regretfully declines</span></label>
+        </fieldset>
+
+        <div class="cz-field">
+          <label class="cz-label" for="cz-email">Email</label>
+          <input class="cz-input" id="cz-email" name="email" type="email" placeholder="you@email.com" autocomplete="email">
+          <p class="cz-help">This is how the couple reaches you — and how you sign in later, with no password.</p>
+        </div>
+        <div class="cz-field">
+          <label class="cz-label" for="cz-mobile">Mobile</label>
+          <input class="cz-input" id="cz-mobile" name="mobile" type="tel" placeholder="+63 …" autocomplete="tel">
+        </div>
+        <div class="cz-field">
+          <label class="cz-label" for="cz-call">What should we call you? <span class="cz-opt">(optional)</span></label>
+          <input class="cz-input" id="cz-call" name="display_name" type="text" placeholder="Maria">
+        </div>
+        <div class="cz-field">
+          <label class="cz-label" for="cz-meal">Meal preference</label>
+          <select class="cz-select" id="cz-meal" name="meal_preference">
+            <option value="no_preference" selected>No preference</option>
+            <option value="beef">Beef</option>
+            <option value="chicken">Chicken</option>
+            <option value="fish">Fish</option>
+            <option value="vegetarian">Vegetarian</option>
+            <option value="vegan">Vegan</option>
+            <option value="kids">Kids</option>
+          </select>
+        </div>
+        <div class="cz-field">
+          <label class="cz-label" for="cz-diet">Dietary notes</label>
+          <input class="cz-input" id="cz-diet" name="dietary_restrictions" type="text" placeholder="halal · nut allergy · …">
+        </div>
+
+        <!-- revealed by the answer, and only if the host allowed one -->
+        <div class="cz-reveal">
+          <div class="cz-field">
+            <span class="cz-label">Your plus-one</span>
+            <p class="cz-help">The couple has a seat for one guest of yours.</p>
+            <div class="cz-grid2">
+              <div class="cz-field">
+                <label class="cz-label" for="cz-p1f">Their first name</label>
+                <input class="cz-input" id="cz-p1f" name="plus_one_first_name" type="text" placeholder="First name">
+              </div>
+              <div class="cz-field">
+                <label class="cz-label" for="cz-p1l">Their last name</label>
+                <input class="cz-input" id="cz-p1l" name="plus_one_last_name" type="text" placeholder="Last name">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cz-field">
+          <label class="cz-label" for="cz-note">A note to the couple <span class="cz-opt">(optional)</span></label>
+          <textarea class="cz-textarea" id="cz-note" name="guest_note" placeholder="Anything you'd like the couple to know."></textarea>
+        </div>
+
+        <!-- revealed by the answer; last, because it is the one step that opens a camera -->
+        <div class="cz-reveal">
+          <div class="cz-field">
+            <span class="cz-label">A selfie <span class="cz-opt">(optional)</span></span>
+            <div class="cz-selfie">
+              <span class="cz-selfie-ring" aria-hidden="true"></span>
+              <div>
+                <button type="button" class="cz-button-secondary cz-button-small">Take a selfie</button>
+                <p class="cz-help">Only to find you in photos taken at this event. You can do this later, inside.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="cz-button" type="submit">Save RSVP</button>
+      </form>
+    </section>
+  </div>
+</div>
+<!-- THEME-BOARDS-END -->
+  </div>
+</div>
