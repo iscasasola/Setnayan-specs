@@ -224,13 +224,13 @@ work; **Fable** only for drawings.
 | CLEANUPS · N2-1 Hosts page coordinator email | ✅ SERVED | #5427 · d1d5a29 (a Setnayan coordinator gets "Message them"; the DB copy is kept — coordinator-broadcasts reads it) |
 | B2 both numbers after a lock (+ total now everywhere, fee follows every change) | ✅ SERVED | #5390 · e2a07f6; live: is_change_delta column, 7 functions carry change lines, recorder not exposed, 2 triggers, both migrations recorded (orchestrator read prod) |
 | H6 bench search hides full cards | ✅ SERVED (S2) — fcc2bc3; live: definer, service_role only (orchestrator read prod) | #5434 · server-only definer function (service_role), baseline unchanged; per-card daily limit joins via LOCK-PATH CAPACITY |
-| H4 payment never arrived | 🔨 OWNED BY S2 — DO NOT LAUNCH A SECOND | Q9 ruled 2026-09-11 (one path for every payment); Opus · xhigh; DRAFT for orchestrator review; no edits to vendors/actions.ts, booking-fee, Papic grant, service-card files, chat-lock-booking |
+| H4 payment never arrived | 🔁 DRAFT #5443 sent back to S2 | orchestrator review: the payment guard let a session CLEAR a supplier's refusal / Setnayan's settlement (only SET was refused) — S2 closing it; then prod rehearsal + release |
 | FOLLOW-UP · data export gap | ⬜ small, unowned | Found by S2 (H4): the couple's payment ledger (event_vendor_payments) is event-tier and NOT included in the personal data export (RA 10173 right of access) — predates H4. Check what the export's roster says and add it, or record why not. |
 | L3 badge deadlines | ✅ MERGED | #5433 · guard fn +2 lines vs live (orchestrator line-hash diff) |
 | N4 part 1 conversation record | ✅ SERVED (ce858a1; guard trigger live, INVOKER as designed) | #5435 · orchestrator prod rehearsal passed |
 | N4 part 3 generic signer public-only | ✅ SERVED (ce858a1) | #5432 |
 | N4 part 4 render credits couple-only | ✅ SERVED (ce858a1; view fn live) | #5431 |
-| N4 part 2 (E4) shop contact closed at the DB | ⏳ auto-merge | #5429 · orchestrator applied the package-lock patch (CLEANUPS file, released) |
+| N4 part 2 (E4) shop contact closed at the DB | ✅ SERVED | #5429 · 368859b; live: anon/authenticated cannot SELECT contact_email/contact_phone (orchestrator read prod) |
 | running now | 🔨 HONEST SHOP (D2→E1) · GIFT & CARD GATE (C1→H2) · N5 + LOCK-PATH CAPACITY | next: SMALL RULINGS (after HONEST SHOP's E1), H4 |
 | H5 Lock after "not free" + unavailable not planned | ✅ SERVED (S2) | #5425 · c913c6e in prod (S2 + orchestrator ancestry) |
 | H6 bench search hides a card with no bookings left on the date | 🔨 BUILDING (S2) · DO NOT LAUNCH A SECOND | hides on blocked day + full time slots (the two paths that really refuse); per-card daily limit waits for LOCK-PATH CAPACITY (tripwire test pins it); month = full every day |
