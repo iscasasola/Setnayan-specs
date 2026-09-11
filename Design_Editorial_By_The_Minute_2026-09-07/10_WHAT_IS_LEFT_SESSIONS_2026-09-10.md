@@ -24,7 +24,7 @@
 | **3** | Story · where the arrangement is kept | "Make it yours" saves for every celebration | Opus 5 | high | ✅ **done** (PR #5419, merged + verified in prod 2026-09-11) | 1, 2 |
 | **4** | Story · the editor, part 1 — photos | Tray, tap-to-add, ×, Automatic / I choose, Put all back, Undo, autosave | Opus 5 | high | ✅ **done** (PR #5430, merged + verified in prod 2026-09-11) | 5 |
 | **5** | Story · guests see the arranged pages | The public story shows each moment as laid out | Opus 5 | medium | ✅ **done** (PR #5428, merged + verified in prod 2026-09-11) | 4, 6 |
-| **6** | Story · the editor, part 2 — words and moments | Words + looks, the phone toolbar, naming, sets, reorder | Opus 5 | **medium** | after **4** | 5 |
+| **6** | Story · the editor, part 2 — words and moments | Words + looks, the phone toolbar, naming, sets, reorder | Opus 5 | **medium** | ✅ **done** (PR #5451, merged + verified in prod 2026-09-11) | 5 |
 | **7** | Story · the prints carry the arrangement | A3 and A4 print each moment as laid out | Sonnet 5 | medium | ✅ **done** (PR [#5448](https://github.com/iscasasola/setnayan-platform/pull/5448), merged + verified in prod 2026-09-11) | 6 |
 | **8** | Story · the whole thing, driven end to end | Proof it works for a real host on a real phone | Opus 5 | high | after **6** and **7** | — |
 
@@ -265,7 +265,28 @@ DONE WHEN: a by-hand moment looks the same at 1280 and 390; nothing taken back a
 the OG card or the recap.
 ```
 
-## 6 · Story — the editor, part 2: words and moments · **Opus 5 · medium** · after step 4
+## 6 · Story — the editor, part 2: words and moments · **Opus 5 · medium** · ✅ DONE 2026-09-11 (PR #5451)
+
+**Verify with the object, not this line:** `gh pr view 5451 --json state,mergedAt` (merged
+2026-09-11T05:59:15Z, `6407ebd`); `https://setnayan-platform-web.vercel.app/api/health` reported
+`"version":"6407ebd"` after the deploy, and the Story Maker route answers (signed out → sign-in). No
+migration — it saves through step 3's `save_story_arrangement`.
+
+**What step 8 builds on** (see the 2026-09-11 DECISION_LOG row for the five flagged calls):
+- Word, moment and set moves are pure functions in `apps/web/lib/make-it-yours.ts` (tested by
+  `lib/make-it-yours-words-and-moments.test.ts`, a 3,000-move monkey among them). The older
+  editor's sections sit under ONE closed "More settings" fold (`editorial-editor.tsx`,
+  `data-more-settings`), held by `story/more-settings-keeps-every-control.test.ts`.
+- **The drive is extended, not new:** `step4_make_it_yours_drive/mky-step6.cjs`, run by
+  `mky-drive.cjs` (env `MKY_WT`, `MKY_BASE`). On a production build: **1280 mouse 254/254 · 390
+  touch 228/228**, 0 dialogs, 0 console errors. Still over the in-memory stand-in for the database —
+  step 8 drives the live path on testnayan accounts.
+- ⚠ Four defects only the browser showed are fixed and pinned in
+  `make-it-yours-keeps-what-the-browser-found.test.ts` (typing wiped on every keystroke; the toolbar
+  over a photo's ×; a caption's kept size going stale after Undo; the × drawn as an oval).
+- A full unit run in a worktree that still holds the local test page (`app/mky-harness`) shows 2
+  red in `lib/reserved-slugs.test.ts` — the page's folder, not the code. Move it aside first.
+
 
 ```
 GOAL: the rest of "Make it yours" inside the Story Maker.

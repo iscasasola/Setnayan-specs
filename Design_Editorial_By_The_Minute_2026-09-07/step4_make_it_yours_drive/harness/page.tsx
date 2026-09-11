@@ -31,6 +31,8 @@ export default async function Harness({
       <p data-harness-version={store().row.arrangement_version} className="mb-4 text-xs text-ink/60">
         local test page · version {store().row.arrangement_version}
       </p>
+      {/* what the stand-in store holds, for the drive to compare with what is drawn */}
+      <pre hidden data-harness-doc={JSON.stringify(store().row.arrangement)} />
       {/* the Story Maker's own column: the rail takes 214px + a 28px gap at ≥1000px */}
       <div className="min-[1000px]:grid min-[1000px]:grid-cols-[214px_minmax(0,1fr)] min-[1000px]:gap-7">
         <aside className="hidden min-[1000px]:block" />

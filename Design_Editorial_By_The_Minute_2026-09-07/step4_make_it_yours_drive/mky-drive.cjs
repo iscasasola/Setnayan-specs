@@ -1,4 +1,5 @@
-// "Make it yours" — the photo half, driven in a real browser (Chromium) at 1280 mouse and 390 touch.
+// "Make it yours" — driven in a real browser (Chromium) at 1280 mouse and 390 touch: the photo half
+// (step 4) and, from `mky-step6.cjs`, words, their toolbar, moments, naming, sets and reorder (step 6).
 // Every check prints PASS/FAIL; the run exits non-zero on any FAIL, any dialog, any console error.
 const { chromium, BASE, openContext } = require('./mky-lib.cjs');
 const OUT = __dirname;
@@ -20,7 +21,8 @@ async function facts(page) {
     const pills = [...root.querySelectorAll('[data-moment]')].map((b) => +b.querySelector('span:last-child').textContent);
     const films = root.querySelectorAll('[data-film]').length;
     const cur = root.querySelector('[data-moment][aria-current="true"]');
-    const onPage = root.querySelectorAll('[data-obj]').length;
+    // Photos only: since step 6 a page also holds words, and the pill counts photographs.
+    const onPage = root.querySelectorAll('[data-obj][data-kind="photo"]').length;
     const objs = [...root.querySelectorAll('[data-obj]')].map((e) => ({ id: e.dataset.obj, l: e.style.left, t: e.style.top }));
     const hint = document.querySelector('[role="status"][aria-live="polite"]');
     return {
@@ -502,6 +504,9 @@ async function run(phone) {
   check(`[${tag}] pressing it says why`, /run of show first/.test(f.hint || ''), f.hint);
   check(`[${tag}] the note links to the schedule`, (await root.getByRole('link', { name: 'Add your schedule' }).getAttribute('href')).endsWith('/schedule'));
   await page.screenshot({ path: `${OUT}/drive-${phone ? 'phone' : 'desk'}-noschedule.png` });
+
+  // ── STEP 6: WORDS, THE TOOLBAR, MOMENTS, NAMING, SETS, REORDER ─────────────────────────
+  await require('./mky-step6.cjs').step6({ page, ctx, phone, tag, check, facts, whole, waitSaved, open, touchDrag, mouseDrag, center, ROOT, TOTAL, OUT });
 
   // ── NOTHING ELSE WENT WRONG ────────────────────────────────────────────────────────────
   const errors = log.errors.filter((e) => !envNoise(e));

@@ -4,9 +4,11 @@ const { createRequire } = require('node:module');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const WT = '/Users/icecasasola/Documents/Claude/Projects/wt-make-it-yours/apps/web';
+// The worktree and the port are the running session's: MKY_WT=<worktree> MKY_BASE=http://localhost:<port>.
+const ROOT_WT = process.env.MKY_WT || '/Users/icecasasola/Documents/Claude/Projects/wt-make-it-yours';
+const WT = path.join(ROOT_WT, 'apps/web');
 const req = createRequire(path.join(WT, 'package.json'));
-const { chromium, devices } = require('/Users/icecasasola/Documents/Claude/Projects/wt-make-it-yours/node_modules/.pnpm/playwright@1.60.0/node_modules/playwright');
+const { chromium, devices } = require(path.join(ROOT_WT, 'node_modules/.pnpm/playwright@1.60.0/node_modules/playwright'));
 
 function env() {
   const out = {};
@@ -17,7 +19,7 @@ function env() {
   return out;
 }
 
-const BASE = 'http://localhost:3000';
+const BASE = process.env.MKY_BASE || 'http://localhost:3000';
 
 const COLORS = ['#8FB3D9', '#E7BE7A', '#D69B72', '#7E9BA9', '#A9C0D2', '#DEC08A', '#93A9BE', '#D9BB98', '#6E8B63', '#B08A5A'];
 function stillSvg(n) {
