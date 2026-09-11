@@ -127,7 +127,7 @@ access you can take back.
 **What only you can do, in the order it unblocks things:**
 1. ~~Chat contact filter~~ — ✅ confirmed ON in Vercel, 2026-09-10.
 2. **Look at "both numbers after a lock"** when B2 is ready (unblocks 4, then the test).
-3. **Prep the test:** ⚠ ORDER MATTERS (B1 is live): rename the shop and type the two card titles BEFORE saving any card with a blank title — a blank card saved first is auto-named "… by Saysay … (FIXTURE)" and a later rename does not change it. Rename the "(FIXTURE)" band shop, real titles + cover photos on its two cards,
+3. **Prep the test:** ⚠ ORDER MATTERS (B1 is live) · ⚠ NEW (H2 live): a card can only GO LIVE with a cover photo AND at least one "what's included" line — the two cards already live stay live and still save, but add both anyway so couples see them: rename the shop and type the two card titles BEFORE saving any card with a blank title — a blank card saved first is auto-named "… by Saysay … (FIXTURE)" and a later rename does not change it. Rename the "(FIXTURE)" band shop, real titles + cover photos on its two cards,
    a GCash QR, leave the gift at "no", play the couple on **testnayan4** (give its event a date).
 4. ✅ **Stock photo RULED 2026-09-11: the clean card design, no stock photo** (F1 builds it). **Look at the corrected shop-page drawing** (unblocks 12 and 20) —
    while you are there: keep it (your 4 June order) or replace it?
@@ -238,7 +238,10 @@ work; **Fable** only for drawings.
 | N5-D grants hygiene (TRUNCATE, next_renewal_due_at) | ✅ MERGED | #5440 |
 | N5-E LOCK-PATH CAPACITY | ✅ MERGED | #5441 · the per-card daily limit really refuses; bench search mirrors it; tripwire removed |
 | LOCK-PATH 2 | 🔨 building (Opus) | the supplier's agree step checks the daily limit; the per-plan couples-per-date cap really refuses (both blind today; found by N5) |
-| running now | 🔨 HONEST SHOP · GIFT & CARD GATE · LOCK-PATH 2 · S2 on H4 (#5443, fixing the clear-the-refusal gap) | next: SMALL RULINGS (after HONEST SHOP's E1), the data-export gap |
+| H2 card needs cover + what's included (+ host_mc label) | ✅ MERGED | #5442 · 27373ab; prod line-diff: save_vendor_service + fill_blank_service_card_title keep every live line; publish gate keeps the price rule |
+| C1 the Setnayan gift reaches the couple | ⏳ auto-merge | #5436 · bill = fee + gift, capped; photo counts match EX-2; B2's fee base untouched; gift columns SELECT-only for sessions |
+| FOLLOW-UP · gift snapshot at lock | ⬜ small | C1's two bounded gaps: a supplier could switch the gift off between the couple's lock and accepting payment; the booking's card sits on a couple-editable row — both close with a lock-time snapshot of the card + gift answer |
+| running now | 🔨 HONEST SHOP · LOCK-PATH 2 · S2 on H4 (#5443) | next: SMALL RULINGS (after HONEST SHOP's E1), the export gap, the deposit re-send history, the gift snapshot |
 | H5 Lock after "not free" + unavailable not planned | ✅ SERVED (S2) | #5425 · c913c6e in prod (S2 + orchestrator ancestry) |
 | H6 bench search hides a card with no bookings left on the date | 🔨 BUILDING (S2) · DO NOT LAUNCH A SECOND | hides on blocked day + full time slots (the two paths that really refuse); per-card daily limit waits for LOCK-PATH CAPACITY (tripwire test pins it); month = full every day |
 | LOCK-PATH CAPACITY | ✅ MERGED as N5-E #5441 | see N5-E row |
