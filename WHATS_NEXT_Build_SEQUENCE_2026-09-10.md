@@ -225,7 +225,7 @@ work; **Fable** only for drawings.
 | B2 both numbers after a lock (+ total now everywhere, fee follows every change) | ✅ SERVED | #5390 · e2a07f6; live: is_change_delta column, 7 functions carry change lines, recorder not exposed, 2 triggers, both migrations recorded (orchestrator read prod) |
 | H6 bench search hides full cards | ✅ SERVED (S2) — fcc2bc3; live: definer, service_role only (orchestrator read prod) | #5434 · server-only definer function (service_role), baseline unchanged; per-card daily limit joins via LOCK-PATH CAPACITY |
 | H4 payment never arrived | ✅ SERVED (S2) | #5443 · 21ffe0a; orchestrator prod rehearsal + live check (migration recorded, anon cannot refuse) |
-| FOLLOW-UP · data export gap | ⏳ auto-merge (S2) #5459 | Found by S2 (H4): the couple's payment ledger (event_vendor_payments) is event-tier and NOT included in the personal data export (RA 10173 right of access) — predates H4. Check what the export's roster says and add it, or record why not. |
+| FOLLOW-UP · data export gap | ✅ SERVED (S2) #5459 · b622db1 | Found by S2 (H4): the couple's payment ledger (event_vendor_payments) is event-tier and NOT included in the personal data export (RA 10173 right of access) — predates H4. Check what the export's roster says and add it, or record why not. |
 | FOLLOW-UP · a re-sent deposit erases its refusal | ✅ SERVED (S2) #5453 · 324e071 | Found by S2 (H4): `guard_event_vendor_deposit_ack` lets a session clear deposit_declined_* / deposit_dispute_*, and `recordDeposit` (vendors/actions.ts ~4491) does so when a couple re-records — so a refused deposit leaves the admin queue with no trace. Existing, deliberate re-send design; the fix is to keep the earlier refusal as history (audit row) while still allowing the re-send. Installments can't do this (a re-send is a new row). |
 | L3 badge deadlines | ✅ MERGED | #5433 · guard fn +2 lines vs live (orchestrator line-hash diff) |
 | N4 part 1 conversation record | ✅ SERVED (ce858a1; guard trigger live, INVOKER as designed) | #5435 · orchestrator prod rehearsal passed |
@@ -247,7 +247,10 @@ work; **Fable** only for drawings.
 | OWNER BUG · "New to Setnayan" + letters-only monograms | ✅ SERVED | #5449 · 2556b9b |
 | HONEST SHOP · D2 honest shop page | ✅ SERVED | #5423 (orchestrator curl: no '0 yrs', no songs block on a non-music shop, no 'Wedding'-only headings) |
 | FOLLOW-UP · generic onboarding entrance check | ✅ SERVED #5455 · 2b800d2 (entrance notice for debut/christening/birthday/graduation/gender-reveal; tiles deliberately NOT greyed — the cap depends on who it's for, asked later) | GREY-OUT deferred it (same files as #5446, now merged): birthdays/debuts etc. should be greyed at the entrance like weddings |
-| running now | 🔨 HONEST SHOP E1 (share card) · S2 FOLLOW-UPS A (#5452 auto-merge; deposit history next) | TEST ROUND 1 unblocked again — owner's bugs are live |
+| HONEST SHOP · E1 share card (+ logo fix) | ✅ SERVED | #5450 + #5458; orchestrator: /api/og/v/setnaprod 200 image/png, no redirect, no X-Amz |
+| SMALL RULINGS · L4 free-tools dated end | ✅ MERGED | #5454 (one config value; unset = unchanged) |
+| SMALL RULINGS · badge spots → hasVerifiedBadge | ✅ MERGED | #5456 |
+| running now | ⏳ SMALL RULINGS L2 (#5457 hide shop website/social links) last check | everything else not owner-gated is DONE; TEST ROUND 1 waits on owner prep; D1→F1→F2 and G1→G3 wait on the owner's looks |
 | H5 Lock after "not free" + unavailable not planned | ✅ SERVED (S2) | #5425 · c913c6e in prod (S2 + orchestrator ancestry) |
 | H6 bench search hides a card with no bookings left on the date | 🔨 BUILDING (S2) · DO NOT LAUNCH A SECOND | hides on blocked day + full time slots (the two paths that really refuse); per-card daily limit waits for LOCK-PATH CAPACITY (tripwire test pins it); month = full every day |
 | LOCK-PATH CAPACITY | ✅ MERGED as N5-E #5441 | see N5-E row |
