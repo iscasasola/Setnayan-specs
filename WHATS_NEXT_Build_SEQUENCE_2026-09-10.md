@@ -232,15 +232,16 @@ work; **Fable** only for drawings.
 | N4 part 3 generic signer public-only | ✅ SERVED (ce858a1) | #5432 |
 | N4 part 4 render credits couple-only | ✅ SERVED (ce858a1; view fn live) | #5431 |
 | N4 part 2 (E4) shop contact closed at the DB | ✅ SERVED | #5429 · 368859b; live: anon/authenticated cannot SELECT contact_email/contact_phone (orchestrator read prod) |
-| N5-A deposit receipts private | ⏳ auto-merge | #5437 (merged main after #5441) |
+| N5-A deposit receipts private | ✅ SERVED | #5437 · 6848bfe |
 | N5-B receipt reader pinned | ✅ MERGED | #5438 |
 | N5-C supplier can't open a thread on any event | ✅ MERGED | #5439 · prod rehearsal by the session |
 | N5-D grants hygiene (TRUNCATE, next_renewal_due_at) | ✅ MERGED | #5440 |
 | N5-E LOCK-PATH CAPACITY | ✅ MERGED | #5441 · the per-card daily limit really refuses; bench search mirrors it; tripwire removed |
-| LOCK-PATH 2 | 🔨 building (Opus) | the supplier's agree step checks the daily limit; the per-plan couples-per-date cap really refuses (both blind today; found by N5) |
+| LOCK-PATH 2 | ⏳ released #5444 | the supplier's Agree obeys the card's daily limit; the shop hold limit (3 unpaid couples/date, owner Rule 3 2026-05-24) really refuses; per-plan cap was already enforced (my brief misread it) |
 | H2 card needs cover + what's included (+ host_mc label) | ✅ MERGED | #5442 · 27373ab; prod line-diff: save_vendor_service + fill_blank_service_card_title keep every live line; publish gate keeps the price rule |
 | C1 the Setnayan gift reaches the couple | ⏳ auto-merge | #5436 · bill = fee + gift, capped; photo counts match EX-2; B2's fee base untouched; gift columns SELECT-only for sessions |
 | FOLLOW-UP · gift snapshot at lock | ⬜ small | C1's two bounded gaps: a supplier could switch the gift off between the couple's lock and accepting payment; the booking's card sits on a couple-editable row — both close with a lock-time snapshot of the card + gift answer |
+| FOLLOW-UP · plan cap counts month-only dates | ⬜ small | Found by LP2: `enforce_vendor_whitelist_per_date`'s own count ignores date precision — a month-only couple being chased made a Free shop refuse a real 1-March couple (replay). Latent in prod (1 chased couple, day-precise). Make it day-precision-only like the other counts. |
 | running now | 🔨 HONEST SHOP · LOCK-PATH 2 · S2 on H4 (#5443) | next: SMALL RULINGS (after HONEST SHOP's E1), the export gap, the deposit re-send history, the gift snapshot |
 | H5 Lock after "not free" + unavailable not planned | ✅ SERVED (S2) | #5425 · c913c6e in prod (S2 + orchestrator ancestry) |
 | H6 bench search hides a card with no bookings left on the date | 🔨 BUILDING (S2) · DO NOT LAUNCH A SECOND | hides on blocked day + full time slots (the two paths that really refuse); per-card daily limit waits for LOCK-PATH CAPACITY (tripwire test pins it); month = full every day |
