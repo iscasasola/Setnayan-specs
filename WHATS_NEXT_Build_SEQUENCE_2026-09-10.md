@@ -239,7 +239,7 @@ work; **Fable** only for drawings.
 | N5-E LOCK-PATH CAPACITY | ✅ MERGED | #5441 · the per-card daily limit really refuses; bench search mirrors it; tripwire removed |
 | LOCK-PATH 2 | ✅ MERGED | #5444 · 9b65f47 |
 | H2 card needs cover + what's included (+ host_mc label) | ✅ MERGED | #5442 · 27373ab; prod line-diff: save_vendor_service + fill_blank_service_card_title keep every live line; publish gate keeps the price rule |
-| C1 the Setnayan gift reaches the couple | ⏳ auto-merge | #5436 · bill = fee + gift, capped; photo counts match EX-2; B2's fee base untouched; gift columns SELECT-only for sessions |
+| C1 the Setnayan gift reaches the couple | ✅ SERVED | #5436 · 920c231; live: 3 gift columns, sizing trigger, 3 gift functions, migration recorded; booking_fee_charges has no write policy |
 | FOLLOW-UP · gift snapshot at lock | ⬜ small | C1's two bounded gaps: a supplier could switch the gift off between the couple's lock and accepting payment; the booking's card sits on a couple-editable row — both close with a lock-time snapshot of the card + gift answer |
 | FOLLOW-UP · plan cap counts month-only dates | 🔨 OWNED BY S2 (FOLLOW-UPS A) | Found by LP2: `enforce_vendor_whitelist_per_date`'s own count ignores date precision — a month-only couple being chased made a Free shop refuse a real 1-March couple (replay). Latent in prod (1 chased couple, day-precise). Make it day-precision-only like the other counts. |
 | OWNER BUG · stuck "Go to my dashboard" | ✅ SERVED | #5446 · 2b680ab (wedding + generic onboarding) |
@@ -247,7 +247,7 @@ work; **Fable** only for drawings.
 | OWNER BUG · "New to Setnayan" + letters-only monograms | ✅ SERVED | #5449 · 2556b9b |
 | HONEST SHOP · D2 honest shop page | ✅ SERVED | #5423 (orchestrator curl: no '0 yrs', no songs block on a non-music shop, no 'Wedding'-only headings) |
 | FOLLOW-UP · generic onboarding entrance check | ⬜ small | GREY-OUT deferred it (same files as #5446, now merged): birthdays/debuts etc. should be greyed at the entrance like weddings |
-| running now | 🔨 C1 #5436 last check · HONEST SHOP E1 (share card) · S2 FOLLOW-UPS A (#5452 auto-merge; deposit history next) | TEST ROUND 1 unblocked again — owner's bugs are live |
+| running now | 🔨 HONEST SHOP E1 (share card) · S2 FOLLOW-UPS A (#5452 auto-merge; deposit history next) | TEST ROUND 1 unblocked again — owner's bugs are live |
 | H5 Lock after "not free" + unavailable not planned | ✅ SERVED (S2) | #5425 · c913c6e in prod (S2 + orchestrator ancestry) |
 | H6 bench search hides a card with no bookings left on the date | 🔨 BUILDING (S2) · DO NOT LAUNCH A SECOND | hides on blocked day + full time slots (the two paths that really refuse); per-card daily limit waits for LOCK-PATH CAPACITY (tripwire test pins it); month = full every day |
 | LOCK-PATH CAPACITY | ✅ MERGED as N5-E #5441 | see N5-E row |
