@@ -250,7 +250,8 @@ work; **Fable** only for drawings.
 | HONEST SHOP · E1 share card (+ logo fix) | ✅ SERVED | #5450 + #5458; orchestrator: /api/og/v/setnaprod 200 image/png, no redirect, no X-Amz |
 | SMALL RULINGS · L4 free-tools dated end | ✅ MERGED | #5454 (one config value; unset = unchanged) |
 | SMALL RULINGS · badge spots → hasVerifiedBadge | ✅ MERGED | #5456 |
-| running now | ⏳ SMALL RULINGS L2 (#5457 hide shop website/social links) last check | everything else not owner-gated is DONE; TEST ROUND 1 waits on owner prep; D1→F1→F2 and G1→G3 wait on the owner's looks |
+| SMALL RULINGS · L2 no shop website/social links | ✅ SERVED | #5457 · 7710557; orchestrator curl of /setnaprod: no social/mailto/tel hrefs |
+| running now | — nothing in flight | ALL non-gated work DONE (2026-09-11 ~08:00Z). Waiting on the owner: TEST ROUND 1 prep · look at the shop-page + Free-vs-Solo drawings (unblocks D1→F1→F2) · look at F0 (unblocks G1→G3). Small follow-ups: gift snapshot at lock; vendor-date-demand precision (product call). |
 | H5 Lock after "not free" + unavailable not planned | ✅ SERVED (S2) | #5425 · c913c6e in prod (S2 + orchestrator ancestry) |
 | H6 bench search hides a card with no bookings left on the date | 🔨 BUILDING (S2) · DO NOT LAUNCH A SECOND | hides on blocked day + full time slots (the two paths that really refuse); per-card daily limit waits for LOCK-PATH CAPACITY (tripwire test pins it); month = full every day |
 | LOCK-PATH CAPACITY | ✅ MERGED as N5-E #5441 | see N5-E row |
