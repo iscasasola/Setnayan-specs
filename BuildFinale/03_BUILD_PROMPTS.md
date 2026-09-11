@@ -248,6 +248,9 @@ Wording ruled by the orchestrator: "🎁 A perk for Setnayan couples · Live Ban
 "🎁 Perk: Live Band". Never call the supplier's own perk "the Setnayan gift" (that name is the Papic-photo
 gift on the quote, ruled 2026-09-09). Old stored messages are cleaned AT RENDER; stored text untouched.
 
+STATE AT PAUSE (S2, 2026-09-11): head f48aef9 · main merged in after #5464–#5467 (0 behind, clean) · 51/51 related
+tests + #5467 5/5 · tsc + root lint clean · CI 14 pass, "typecheck + lint" was STILL PENDING — check it first.
+Worktree kept: /Users/icecasasola/Documents/Claude/Projects/wt-bench-round1 (remove after merge).
 STEPS: gh pr view 5463 → merge origin/main into it (it shares
 app/vendor-dashboard/messages/[threadId]/page.tsx with #5467 — different lines) → rerun its 10 tests +
 tsc + the neighbouring suites → `gh pr ready 5463` → `gh pr merge 5463 --auto --merge` → prove served by
