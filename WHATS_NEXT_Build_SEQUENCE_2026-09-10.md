@@ -246,7 +246,7 @@ work; **Fable** only for drawings.
 | OWNER BUG · greyed-out Wedding choice | ✅ SERVED | #5447 · 2394b5d (picker tile + /onboarding/wedding entrance); generic-onboarding entrance = small follow-up |
 | OWNER BUG · "New to Setnayan" + letters-only monograms | ✅ SERVED | #5449 · 2556b9b |
 | HONEST SHOP · D2 honest shop page | ✅ SERVED | #5423 (orchestrator curl: no '0 yrs', no songs block on a non-music shop, no 'Wedding'-only headings) |
-| FOLLOW-UP · generic onboarding entrance check | 🔨 building (Sonnet, orchestrator) | GREY-OUT deferred it (same files as #5446, now merged): birthdays/debuts etc. should be greyed at the entrance like weddings |
+| FOLLOW-UP · generic onboarding entrance check | ✅ SERVED #5455 · 2b800d2 (entrance notice for debut/christening/birthday/graduation/gender-reveal; tiles deliberately NOT greyed — the cap depends on who it's for, asked later) | GREY-OUT deferred it (same files as #5446, now merged): birthdays/debuts etc. should be greyed at the entrance like weddings |
 | running now | 🔨 HONEST SHOP E1 (share card) · S2 FOLLOW-UPS A (#5452 auto-merge; deposit history next) | TEST ROUND 1 unblocked again — owner's bugs are live |
 | H5 Lock after "not free" + unavailable not planned | ✅ SERVED (S2) | #5425 · c913c6e in prod (S2 + orchestrator ancestry) |
 | H6 bench search hides a card with no bookings left on the date | 🔨 BUILDING (S2) · DO NOT LAUNCH A SECOND | hides on blocked day + full time slots (the two paths that really refuse); per-card daily limit waits for LOCK-PATH CAPACITY (tripwire test pins it); month = full every day |
