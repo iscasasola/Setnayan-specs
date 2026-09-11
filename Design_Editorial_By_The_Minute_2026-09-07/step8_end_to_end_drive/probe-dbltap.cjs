@@ -1,0 +1,32 @@
+// What is under the finger when the phone drive double-taps the first tray photo?
+const { hostContext, BASE, OUT } = require('./e2e-lib.cjs');
+const EV = '0ccc7aa3-3a81-43ee-b170-afb194e0b259';
+const ROOT = 'section[aria-labelledby="make-it-yours-title"]';
+(async () => {
+  const { ctx, log } = await hostContext({ phone: true });
+  const page = ctx.pages()[0] || (await ctx.newPage());
+  page.on('framenavigated', (f) => { if (f === page.mainFrame()) console.log('NAV →', f.url()); });
+  await page.goto(`${BASE}/dashboard/${EV}/story`, { waitUntil: 'networkidle' });
+  const ck = page.getByRole('button', { name: 'Essential only' }); if (await ck.count()) await ck.first().click();
+  await page.locator('[role=tab]').filter({ hasText: 'The story', visible: true }).first().tap();
+  await page.waitForSelector(ROOT);
+  const root = page.locator(ROOT);
+  await root.getByRole('button', { name: /I choose/ }).tap();
+  await page.waitForTimeout(300);
+  await root.locator('[data-moment]', { hasText: 'Dinner' }).tap();
+  await root.getByRole('button', { name: 'Put all back' }).tap();
+  await page.waitForTimeout(300);
+  const film0 = root.locator('[data-film]').first();
+  await film0.scrollIntoViewIfNeeded();
+  const b = await film0.boundingBox();
+  const c = { x: b.x + b.width / 2, y: b.y + b.height / 2 };
+  const under = await page.evaluate(({ x, y }) => { const e = document.elementFromPoint(x, y); return e ? `${e.tagName} ${e.getAttribute('aria-label') || ''} ${(e.textContent || '').trim().slice(0, 40)} · in film: ${!!e.closest('[data-film]')} · link: ${e.closest('a')?.getAttribute('href') || '-'}` : 'null'; }, c);
+  console.log('film box', JSON.stringify(b), 'vh', page.viewportSize().height, '· under the finger:', under);
+  await page.screenshot({ path: `${OUT}/probe-dbltap-before.png` });
+  await page.touchscreen.tap(c.x, c.y);
+  await page.touchscreen.tap(c.x, c.y);
+  await page.waitForTimeout(1500);
+  console.log('after: url', new URL(page.url()).pathname, 'root?', await page.locator(ROOT).count(), 'errors', JSON.stringify(log.errors.slice(0, 5)));
+  await page.screenshot({ path: `${OUT}/probe-dbltap-after.png` });
+  await ctx.close();
+})();

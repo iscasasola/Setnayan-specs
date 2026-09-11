@@ -1,0 +1,1385 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SETNAYAN · Service Control Centres — one pattern, 2026-08-28</title>
+<!--
+  SERVICE CONTROL CENTRES — ONE PATTERN. Design prototype, 2026-08-28.
+
+  The owner's brief (2026-08-27/28), verbatim:
+    "can we improve the UI better. use the concept available in the market so we
+     can generate the best approach for our papic control center. with this in
+     mind, we will also fix the other in app service control centers."
+  And on the rebuilt Papic page:
+    "the papic control center looks a bit better than before. but it doesn't look
+     like a photo app control center. it still feels like it is a business page.
+     with not much imagery and app feel UI."
+
+  WHAT THIS IS: a photo-app SKIN over the approved 2026-08-25 Papic structure
+  (four facts · one next step · four ways in · library · credits · set-once ·
+  offers last — see prototypes/papic_control_center_2026-08-25.html, built and
+  merged 2026-08-27), generalised into one shared pattern for all 18 in-app
+  service surfaces. The archetypes approved 2026-08-04 are PORTED, not redrawn —
+  the Gallery archetype's obsidian panel is what the new "stage" slot is made of.
+
+  THE ONE ARGUED STRUCTURAL CHANGE (everything else keeps the 08-25 order):
+  the library panel — which the 08-25 drawing shows only AFTER the day — becomes
+  a persistent STAGE at the top of the page in all three states, with the four
+  facts fused into its lower edge. The argument is the owner's own complaint plus
+  the market evidence: every media product that feels like a media product opens
+  on its content (Google Photos, Apple Photos, Frame.io, every disposable-camera
+  rival including Kuha), and the strong pre-event pattern in the rival category is
+  anticipation-shaped emptiness — an empty film roll and a countdown, never a
+  form. "Four facts first, always" survives: the facts are the stage's caption
+  bar, still the first text on the page. Flagged as OWNER DECISION 1, not slipped in.
+
+  Self-contained: inline CSS + inline SVG, no external assets, no CDN, no emoji.
+  Contrast receipts (both grounds) + the port contract at the bottom.
+-->
+<style>
+/* ══════════════════════════════════════════════════════════════════
+   Locked tokens — identical to the archetype sheets and the 08-25 file
+   ══════════════════════════════════════════════════════════════════ */
+:root{
+  --cream:#FFFFFF;
+  --ink:#2C2A29;
+  --ink-soft:#4F535B;
+  --cta:#C24E25; --cta-hover:#B04722; --cta-active:#9D3F1E;
+  --gold:#A9834B; --gold-text:#8A6B39;
+  --link:#3B4E67; --link-hover:#304055;
+  --pos:#4F6B4A; --neg:#B65A3A;
+  --obsidian:#17160F;
+  /* dark-surface variants — light-ground colours fail on obsidian, so the dark
+     panel gets its own pair, both measured in the receipts: */
+  --pos-dark:#46A46C;     /* live/ready marks on obsidian · 5.3:1 */
+  --accent-dark:#E5794E;  /* attention text on obsidian · 5.7:1  */
+  --border:rgba(44,42,41,0.12);
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --dur:180ms;
+  --sans:'Hanken Grotesk',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'Space Mono',ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--cream);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;font-weight:400;-webkit-font-smoothing:antialiased}
+b,strong{font-weight:700}
+a{color:var(--link)} a:hover{color:var(--link-hover)}
+.mono{font-family:var(--mono)}
+.kicker{font-family:var(--mono);text-transform:uppercase;letter-spacing:.14em;font-size:11px;font-weight:700;color:var(--gold-text)}
+.krule{display:inline-block;width:28px;height:2px;background:var(--gold);vertical-align:middle;margin-right:10px}
+
+svg.ic{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-2px}
+svg.ic.s{width:12px;height:12px}
+.livedot{display:inline-block;width:6px;height:6px;border-radius:99px;background:var(--pos-dark);margin-right:4px;vertical-align:1px}
+.livedot.lt{background:var(--pos)}
+
+/* ── motion — one-shot, ease-out, off under reduced motion ── */
+@keyframes rise{from{opacity:0;transform:translateY(8px)}}
+@keyframes tilein{from{opacity:0;transform:scale(.9)}}
+@keyframes meterfill{from{width:0}}
+.fact{animation:rise 220ms var(--ease) both}
+.fact:nth-child(2){animation-delay:50ms}
+.fact:nth-child(3){animation-delay:100ms}
+.fact:nth-child(4){animation-delay:150ms}
+.next{animation:rise 220ms var(--ease) 200ms both}
+.mtile.newin{animation:tilein 260ms var(--ease) 300ms both}
+.meter .bar i{animation:meterfill 260ms var(--ease) 250ms both}
+.row svg.chev{transition:transform 150ms var(--ease)}
+.row:hover svg.chev{transform:translateX(2px)}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-delay:0ms!important}
+  html{scroll-behavior:auto}
+  .fact,.next,.mtile.newin,.meter .bar i{animation:none}
+  .row:hover svg.chev{transform:none}
+}
+
+/* page chrome (prototype scaffolding) */
+.anav{position:sticky;top:0;z-index:60;display:flex;gap:2px;align-items:center;padding:10px 28px;background:rgba(255,255,255,.96);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.anav .brand{font-weight:700;letter-spacing:.24em;font-size:12px;margin-right:20px}
+.anav a{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;color:var(--ink-soft);padding:7px 12px;border-radius:8px;transition:background var(--dur) var(--ease)}
+.anav a:hover{background:rgba(169,131,75,.10);color:var(--ink)}
+.wrap{max-width:1380px;margin:0 auto;padding:0 28px}
+.masthead{padding:52px 0 8px}
+.masthead h1{font-size:34px;font-weight:700;letter-spacing:.02em;margin:10px 0 4px}
+.masthead h1 span{font-weight:400;color:var(--ink-soft)}
+.mast-sub{max-width:860px;color:var(--ink-soft);font-size:16px}
+.mast-sub b{color:var(--ink)}
+.mast-meta{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-top:14px;font-family:var(--mono)}
+
+.band{margin:36px 0 8px;border:1px solid var(--border);border-radius:16px;background:var(--cream);padding:22px 24px}
+.band-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}
+@media(max-width:960px){.band-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.band-grid{grid-template-columns:1fr}}
+.beat{border:1px solid var(--border);border-radius:12px;padding:14px 14px 12px}
+.beat .bn{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--gold-text)}
+.beat h4{font-size:14px;font-weight:700;margin:6px 0 4px}
+.beat p{font-size:12.5px;color:var(--ink-soft)}
+.beat p b{color:var(--ink)}
+
+section.arch{padding:56px 0 18px;border-top:1px solid var(--border);margin-top:48px}
+.arch-head h2{font-size:26px;font-weight:700;margin:10px 0 8px}
+.arch-head .lede{max-width:880px;color:var(--ink-soft);margin-top:10px}
+.arch-head .lede b{color:var(--ink)}
+.frames{display:flex;gap:36px;align-items:flex-start;flex-wrap:wrap;margin-top:32px}
+.frame figcaption{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:12px}
+.frame figcaption i{font-style:normal;color:var(--gold-text)}
+.frame-note{font-size:12.5px;color:var(--ink-soft);max-width:392px;margin-top:12px}
+.frame-note b{color:var(--ink)}
+.frame-scroll{overflow-x:auto;max-width:100%;padding-bottom:10px}
+
+/* device frames */
+.phone{width:392px;border:1px solid var(--border);border-radius:30px;background:var(--cream);overflow:hidden;position:relative;flex:none}
+.phone .screen{height:760px;overflow-y:auto;position:relative;scrollbar-width:thin}
+.desk{width:1080px;max-width:100%;border:1px solid var(--border);border-radius:16px;background:var(--cream);overflow:hidden;flex:none}
+.appbar{display:flex;align-items:center;gap:10px;padding:11px 16px 9px;position:sticky;top:0;background:rgba(255,255,255,.97);z-index:8;border-bottom:1px solid rgba(44,42,41,.07)}
+.appbar .backlnk{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink-soft);background:rgba(44,42,41,.05);border-radius:8px;padding:5px 10px;text-decoration:none}
+.appbar .ev{margin-left:auto;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
+.bottomnav{position:sticky;bottom:0;display:flex;background:rgba(255,255,255,.98);border-top:1px solid var(--border);z-index:8}
+.bottomnav span{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:9.5px;color:var(--ink-soft);padding:8px 0 10px}
+.bottomnav span.on{color:var(--cta)}
+.bottomnav svg.ic{width:18px;height:18px}
+.pagepad{padding:14px 16px 26px}
+.deskpad{display:grid;grid-template-columns:220px 1fr;min-height:640px}
+.rail{border-right:1px solid var(--border);padding:16px 12px;background:rgba(44,42,41,.02)}
+.rail .wordmark{font-weight:700;letter-spacing:.24em;font-size:10.5px;color:var(--ink);padding:2px 10px 14px}
+.rail .rk{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-text);padding:0 10px 10px}
+.rail a{display:block;font-size:13.5px;color:var(--ink-soft);text-decoration:none;padding:8px 10px;border-radius:8px;margin-bottom:2px}
+.rail a:hover{background:rgba(44,42,41,.05)}
+.rail a.on{background:rgba(194,78,37,.09);color:var(--cta-active);font-weight:700}
+.deskmain{padding:20px 28px 32px;max-width:880px}
+
+/* hero — one line; the stage is the real opening */
+.hero{margin:8px 0 0;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.hero h1{font-size:20px;font-weight:700;letter-spacing:.01em}
+.hero .freepill{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--pos);border:1px solid rgba(79,107,74,.35);border-radius:999px;padding:3px 9px}
+
+/* ══════════════════════════════════════════════════════════════════
+   THE STAGE — the Gallery archetype's obsidian panel, promoted to the
+   top of the page, with the four facts fused into its lower edge.
+   ══════════════════════════════════════════════════════════════════ */
+.stage{border-radius:16px;background:var(--obsidian);margin-top:10px;color:#F5F2EA;overflow:hidden}
+.stage .spad{padding:13px 13px 0}
+.stage .ghead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.stage .gk{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.stage h2.gt{font-size:16px;font-weight:700;color:#fff;margin-top:3px}
+.stage .gsub{font-size:11.5px;color:rgba(255,255,255,.72);margin-top:2px}
+.stage .countchip{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;color:#F5F2EA;border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:4px 10px;white-space:nowrap;flex:none}
+.stage .countchip .liveword{color:var(--pos-dark)}
+.stage .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.stage .chips span{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:3px 9px}
+.stage .chips span.on{background:rgba(255,255,255,.12);color:#fff}
+/* the mosaic — tiles are PHOTO STAND-INS: the gradient is the content, the same
+   exception the approved film-look swatches earned */
+.mosaic{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:10px}
+.mtile{aspect-ratio:1;border-radius:8px;position:relative;overflow:hidden;display:grid;place-items:center}
+.mtile svg.ph{width:20px;height:20px;fill:none;stroke:rgba(255,255,255,.4);stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.mtile .credit{position:absolute;left:5px;bottom:5px;display:inline-flex;align-items:center;gap:3px;font-family:var(--mono);font-size:8px;letter-spacing:.04em;color:rgba(255,255,255,.95);background:rgba(23,22,15,.62);border-radius:99px;padding:2px 6px}
+.mtile .credit svg.ic{width:9px;height:9px;stroke:rgba(255,255,255,.95)}
+.mtile.more{background:rgba(255,255,255,.08);font-family:var(--mono);font-size:12px;color:rgba(255,255,255,.9)}
+/* photo stand-ins */
+.p1{background:linear-gradient(160deg,#8a6a4e,#4a3b30 70%)}
+.p2{background:linear-gradient(200deg,#6d5a78,#3a3048 75%)}
+.p3{background:linear-gradient(150deg,#57707f,#2e3a44 70%)}
+.p4{background:linear-gradient(170deg,#7d7350,#413c2b 75%)}
+.p5{background:linear-gradient(140deg,#7f5140,#3f2a23 70%)}
+.p6{background:linear-gradient(185deg,#5f7a63,#2f3d31 75%)}
+/* the "arriving" tile — screened before anyone sees it, drawn honestly:
+   an obscured frame, the darkroom idea */
+.mtile.arriving{background:repeating-linear-gradient(45deg,rgba(255,255,255,.06) 0 6px,rgba(255,255,255,.02) 6px 12px)}
+.mtile.arriving .devnote{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.65);text-align:center;line-height:1.5}
+/* THE EMPTY FILM ROLL — anticipation-shaped emptiness */
+.mtile.slot{border:1.5px dashed rgba(255,255,255,.22);background:transparent}
+.mtile.slot svg.ph{stroke:rgba(255,255,255,.22)}
+.mtile.act{border:1.5px dashed rgba(229,121,78,.7);background:rgba(229,121,78,.07);cursor:pointer;text-align:center}
+.mtile.act .actlbl{font-size:10px;font-weight:700;color:var(--accent-dark);line-height:1.35;padding:0 6px}
+.mtile.act svg.ic{width:16px;height:16px;color:var(--accent-dark);margin-bottom:3px}
+.stage .rollnote{display:flex;gap:7px;align-items:flex-start;font-size:11px;color:rgba(255,255,255,.72);margin-top:9px}
+.stage .rollnote svg.ic{width:12px;height:12px;stroke:rgba(255,255,255,.72);margin-top:2px}
+.stage .rollnote b{color:#fff}
+.stage .gact{display:flex;gap:8px;margin-top:11px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:10px;font:700 13px var(--sans);padding:10px 17px;cursor:pointer;border:1px solid transparent;text-decoration:none;transition:background var(--dur) var(--ease)}
+.btn-cta{background:var(--cta);color:#fff}
+.btn-cta:hover{background:var(--cta-hover);color:#fff}
+.btn-sec{background:transparent;border-color:var(--border);color:var(--link)}
+.btn-dark{background:transparent;border:1px solid rgba(255,255,255,.3);color:#fff}
+.btn-block{width:100%;margin-top:11px}
+/* the facts, fused into the stage's lower edge — same four cells, dark ground */
+.facts{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid rgba(255,255,255,.12);margin-top:12px}
+.facts.f4{grid-template-columns:repeat(4,1fr)}
+.fact{padding:10px 13px 11px;border-right:1px solid rgba(255,255,255,.12);border-bottom:1px solid rgba(255,255,255,.12);cursor:pointer}
+.facts:not(.f4) .fact:nth-child(2n){border-right:0}
+.facts:not(.f4) .fact:nth-child(n+3){border-bottom:0}
+.facts.f4 .fact{border-bottom:0}
+.facts.f4 .fact:last-child{border-right:0}
+.fact .fk{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.66)}
+.fact .fv{font-family:var(--mono);font-size:12px;color:#F5F2EA;margin-top:3px;line-height:1.35}
+.fact .fv b{font-size:15px;color:#fff}
+.fact.hot .fk{color:var(--accent-dark)}
+.fact.hot .fv{color:var(--accent-dark);font-weight:700}
+.fact .fv .ok{color:var(--pos-dark)}
+
+/* the next-step card — unchanged from 08-25: paper, 3px terracotta top edge */
+.next{border:1px solid var(--border);border-top:3px solid var(--cta);border-radius:14px;background:var(--cream);padding:15px;margin-top:11px}
+.next .nk{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-text)}
+.next h3{font-size:17px;font-weight:700;margin:6px 0 3px}
+.next p{font-size:12.5px;color:var(--ink-soft)}
+.next .fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:11px}
+.next .fld{display:flex;flex-direction:column;gap:4px}
+.next .fld label{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
+.next .fld .in{border:1px solid var(--border);border-radius:9px;padding:8px 11px;font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--cream)}
+.next .endnote{font-size:11.5px;color:var(--ink-soft);margin-top:8px}
+.next .endnote b{color:var(--ink)}
+.next .alt{display:block;text-align:center;font-size:12px;margin-top:9px;color:var(--link)}
+.next .tact{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+
+/* rows — quieter than the stage and the step; unchanged from 08-25,
+   except rows may now carry a THUMB CLUSTER (state lives on the media) */
+.grp{margin-top:16px}
+.grp .gk2{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:7px}
+.rows{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--cream)}
+.row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background var(--dur) var(--ease);text-decoration:none;color:inherit}
+.row:last-child{border-bottom:0}
+.row:hover{background:rgba(44,42,41,.03)}
+.row > svg.ic{color:var(--ink-soft)}
+.row .rl{font-size:13px;color:var(--ink);min-width:0}
+.row .rl small{display:block;font-size:11px;color:var(--ink-soft)}
+.row .rv{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-soft);text-align:right;flex:none;max-width:40%}
+.row .rv.set{color:var(--pos)}
+.row .rv.hot{color:var(--cta-active);font-weight:700}
+.row .rv .bdg{display:inline-block;background:rgba(194,78,37,.1);color:var(--cta-active);border-radius:999px;padding:2px 8px;font-weight:700}
+.row svg.chev{color:var(--ink-soft)}
+/* thumb cluster — three overlapping mini-frames on a source row */
+.thumbs{display:flex;flex:none}
+.thumbs i{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--cream);margin-left:-7px;display:block}
+.thumbs i:first-child{margin-left:0}
+.thumbs i.empty{background:transparent;border:1.5px dashed rgba(44,42,41,.28)}
+
+/* tiles, meter, ladder, banner, boundary — unchanged from 08-25 */
+.tile{border:1px solid var(--border);border-radius:12px;background:var(--cream);padding:12px;margin-top:11px}
+.tile h4{font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px}
+.tile h4 svg.ic{color:var(--ink-soft)}
+.tile p{font-size:12px;color:var(--ink-soft);margin-top:3px}
+.tile .tact{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.tile.hotline{border-color:rgba(194,78,37,.35)}
+.tile.quiet h4{font-weight:400;color:var(--ink)}
+.exc{border:1px dashed rgba(169,131,75,.5);border-radius:12px;padding:10px 13px;margin-top:14px;background:var(--cream)}
+.exc .ek{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-text)}
+.exc p{font-size:11.5px;color:var(--ink-soft);margin-top:3px}
+.exc p b{color:var(--ink)}
+.meter{margin-top:10px}
+.meter .mrow{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--ink-soft)}
+.meter .mrow b{color:var(--ink);font-size:13px}
+.meter .bar{height:7px;border-radius:99px;background:rgba(44,42,41,.08);margin-top:6px;overflow:hidden}
+.meter .bar i{display:block;height:100%;border-radius:99px;background:var(--pos)}
+.ladder{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.rung{border:1px solid var(--border);border-radius:10px;padding:8px 11px;cursor:pointer}
+.rung:hover{border-color:rgba(194,78,37,.45)}
+.rung .rn{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--ink)}
+.rung .rp{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);margin-top:1px}
+.banner{display:flex;gap:8px;align-items:flex-start;border:1px solid rgba(79,107,74,.35);color:#3D5439;border-radius:12px;padding:9px 12px;font-size:12px;margin-top:11px}
+.banner b{font-weight:700}
+.banner svg.ic{color:#3D5439;margin-top:1px}
+
+/* ── the LIVE STUDIO stage: the program monitor as the hero ── */
+.monitor{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:16/9;background:#000;border:2px solid rgba(255,255,255,.14);margin-top:10px;display:grid;place-items:center}
+.monitor .dim{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);text-align:center;line-height:1.8}
+.monitor .camname{position:absolute;left:8px;bottom:8px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;color:#FBFAF7;background:rgba(0,0,0,.55);padding:3px 8px;border-radius:6px}
+.camstrip{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.camslot{aspect-ratio:16/10;border-radius:7px;display:grid;place-items:center;position:relative;overflow:hidden}
+.camslot.filled{background:linear-gradient(160deg,#3a4652,#232b33 75%)}
+.camslot .cn{position:absolute;left:4px;bottom:4px;font-family:var(--mono);font-size:7.5px;letter-spacing:.04em;color:rgba(255,255,255,.9);background:rgba(23,22,15,.62);border-radius:99px;padding:1px 5px}
+.camslot.open{border:1.5px dashed rgba(255,255,255,.25)}
+.camslot.open svg.ic{width:13px;height:13px;color:rgba(255,255,255,.55)}
+
+/* ── the EVENT HUB stage: the couple's own page, miniature and live ── */
+.minipage{border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.18);margin-top:10px;background:var(--cream);color:var(--ink)}
+.minipage .mp-hero{height:96px;background:linear-gradient(165deg,#8a6a4e,#4a3b30 80%);position:relative;display:grid;place-items:center}
+.minipage .mp-hero .names{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.2em;color:#fff;text-transform:uppercase}
+.minipage .mp-hero .stagechip{position:absolute;right:6px;top:6px;font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#F5F2EA;background:rgba(23,22,15,.62);border-radius:99px;padding:2px 7px}
+.minipage .mp-body{padding:9px 11px 11px;font-size:11px;color:var(--ink-soft)}
+.minipage .mp-body b{color:var(--ink)}
+.minipage .mp-cta{display:inline-block;background:var(--cta);color:#fff;border-radius:7px;font-size:10.5px;font-weight:700;padding:5px 10px;margin-top:7px}
+
+/* pattern diagram */
+.slotmap{display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap;margin-top:28px}
+.slotcol{flex:1;min-width:300px;max-width:560px}
+.slot{border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start}
+.slot .sn{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--gold-text);flex:none;padding-top:2px}
+.slot h4{font-size:14px;font-weight:700}
+.slot p{font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+.slot p b{color:var(--ink)}
+.slot.dark{background:var(--obsidian);border-color:var(--obsidian)}
+.slot.dark h4{color:#fff}
+.slot.dark p{color:rgba(255,255,255,.72)}
+.slot.dark p b{color:#fff}
+.slot.dark .sn{color:var(--gold)}
+.slot.edge{border-top:3px solid var(--cta)}
+
+/* tables */
+.tbl{width:100%;border-collapse:collapse;margin-top:18px;font-size:13px}
+.tbl th{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);text-align:left;padding:8px 12px;border-bottom:2px solid var(--border)}
+.tbl td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top;color:var(--ink)}
+.tbl td small{color:var(--ink-soft)}
+.tbl .tag{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:999px;padding:2.5px 9px;white-space:nowrap}
+.tag.mv{background:rgba(59,78,103,.1);color:var(--link)}
+.tag.kp{background:rgba(79,107,74,.1);color:var(--pos)}
+.tag.dm{background:rgba(169,131,75,.14);color:var(--gold-text)}
+.tag.ad{background:rgba(194,78,37,.1);color:var(--cta-active)}
+.tag.dl{background:rgba(182,90,58,.12);color:var(--neg)}
+.tblwrap{overflow-x:auto}
+footer{padding:44px 0 60px;color:var(--ink-soft);font-size:12.5px}
+</style>
+</head>
+<body>
+
+<svg style="display:none" aria-hidden="true"><defs>
+<symbol id="i-camera" viewBox="0 0 24 24"><path d="M14.5 4h-5L7.5 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3.5z"/><circle cx="12" cy="13" r="3"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></symbol>
+<symbol id="i-video" viewBox="0 0 24 24"><path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="6" width="14" height="12" rx="2"/></symbol>
+<symbol id="i-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="5" rx="1"/><rect x="16" y="3" width="5" height="5" rx="1"/><rect x="3" y="16" width="5" height="5" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/></symbol>
+<symbol id="i-cloud" viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></symbol>
+<symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M12 3l1.9 5.6a2 2 0 0 0 1.3 1.3L20.8 12l-5.6 1.9a2 2 0 0 0-1.3 1.3L12 20.8l-1.9-5.6a2 2 0 0 0-1.3-1.3L3.2 12l5.6-1.9a2 2 0 0 0 1.3-1.3z"/><path d="M19 3v2"/><path d="M20 4h-2"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+<symbol id="i-chevr" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+<symbol id="i-arrowl" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+<symbol id="i-scanface" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.7 8.9a1 1 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 0 1 1.6 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/></symbol>
+<symbol id="i-coins" viewBox="0 0 24 24"><circle cx="8" cy="8" r="6"/><path d="M18.1 10.4A6 6 0 1 1 10.3 18"/><path d="M7 6h1v4"/><path d="m16.7 13.9.7.7-2.8 2.8"/></symbol>
+<symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></symbol>
+<symbol id="i-monitor" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></symbol>
+<symbol id="i-clapper" viewBox="0 0 24 24"><path d="M20.2 6 3 11l-.9-2.4a2 2 0 0 1 1.3-2.5l13.5-4a2 2 0 0 1 2.5 1.3z"/><path d="m6.2 5.3 3.1 3.9"/><path d="m12.4 3.4 3.1 4"/><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></symbol>
+<symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 3 14h7l-1 8 10-12h-7z"/></symbol>
+<symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+<symbol id="i-chefhat" viewBox="0 0 24 24"><path d="M17 21a1 1 0 0 0 1-1v-5.3c0-.5.3-.9.7-1a4 4 0 0 0-2.1-7.6 5 5 0 0 0-9.2 0 4 4 0 0 0-2.1 7.6c.4.1.7.5.7 1V20a1 1 0 0 0 1 1z"/><path d="M6 17h12"/></symbol>
+<symbol id="i-sliders" viewBox="0 0 24 24"><path d="M21 4h-7"/><path d="M10 4H3"/><path d="M21 12h-9"/><path d="M8 12H3"/><path d="M21 20h-5"/><path d="M12 20H3"/><path d="M14 2v4"/><path d="M8 10v4"/><path d="M16 18v4"/></symbol>
+<symbol id="i-hdd" viewBox="0 0 24 24"><path d="M22 12H2"/><path d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1z"/><path d="M6 16h.01"/><path d="M10 16h.01"/></symbol>
+<symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></symbol>
+<symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 9h18"/></symbol>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></symbol>
+<symbol id="i-tv" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="15" rx="2"/><path d="m17 2-5 5-5-5"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20z"/><path d="M2 12h20"/></symbol>
+</defs></svg>
+
+<nav class="anav">
+  <span class="brand">SETNAYAN</span>
+  <a href="#market">What the market does</a>
+  <a href="#pattern">The pattern</a>
+  <a href="#before">Papic · before</a>
+  <a href="#during">On the day</a>
+  <a href="#after">After</a>
+  <a href="#livestudio">Live Studio</a>
+  <a href="#hub">Event Hub</a>
+  <a href="#inventory">Nothing is lost</a>
+  <a href="#receipts">Receipts</a>
+</nav>
+
+<div class="wrap">
+
+<header class="masthead">
+  <div class="kicker"><span class="krule"></span>Prototype · 2026-08-28 · a photo-app skin on the approved 08-25 structure · one pattern for all 18 services</div>
+  <h1>Service Control Centres <span>— the content is the page</span></h1>
+  <p class="mast-sub">
+    The owner, on the rebuilt Papic page: <b>"it doesn't look like a photo app control center. it
+    still feels like it is a business page. with not much imagery and app feel UI."</b> The
+    structure shipped two days ago is right and stays — four facts, one next step, four ways in,
+    the library, credits, set-once rows, offers last. What changes is <b>what the page opens
+    on</b>: every service now leads with its own content — the library, the broadcast stage, the
+    couple's own live page — the way every photo product in the market does. When the content
+    doesn't exist yet, the page shows the space it will fill, honestly: an empty film roll and a
+    countdown, never a blank.
+  </p>
+  <p class="mast-meta">2026-08-28 · ports the Gallery + Detail + Sheet + Wizard archetypes (approved 2026-08-04) · phone first · one argued structural change, flagged</p>
+</header>
+
+<!-- ═══════════════ THE MARKET ═══════════════ -->
+<div class="band" id="market">
+  <div class="kicker"><span class="krule"></span>What the market does — the owner asked for this half explicitly. Full citations in the design doc.</div>
+  <div class="band-grid">
+    <div class="beat">
+      <div class="bn">01 · THE GRID IS THE HOME</div>
+      <h4>Google Photos · Apple Photos</h4>
+      <p>Both open <b>directly on the photo grid</b> — no dashboard, no settings card first.
+      Apple's 2024 redesign deleted the tabs entirely: the grid on top, photo-filled rows below,
+      utilities last. Google demoted albums, printing and settings behind one tab and made the
+      grid tiles bigger. <b>If the first screen is a form, it reads as a business page.</b></p>
+    </div>
+    <div class="beat">
+      <div class="bn">02 · ANTICIPATION-SHAPED EMPTINESS</div>
+      <h4>Dispo · Lapse · POV · Kuha</h4>
+      <p>The disposable-camera rivals never show a blank pre-event page. Dispo draws the back of a
+      real camera with a develop countdown; Lapse shows a <b>darkroom of obscured frames</b> you
+      hold to reveal; Kuha's pre-event page is a designed countdown. <b>The empty state is a roll
+      waiting to be filled, not an apology.</b></p>
+    </div>
+    <div class="beat">
+      <div class="bn">03 · NUMBERS AS FILLING METERS</div>
+      <h4>Eventbrite · Luma · Kuha</h4>
+      <p>Consoles that feel alive show <b>fractions filling toward a visible capacity</b> —
+      "128 of 200 tickets", uploads counting over a photo carousel — never raw stat rows.
+      Luma anchors the host's manage view with <b>the same cover image the guests see</b>: you
+      manage from inside the guest-facing page.</p>
+    </div>
+    <div class="beat">
+      <div class="bn">04 · STATE LIVES ON THE MEDIA</div>
+      <h4>Frame.io · Dropbox</h4>
+      <p>Status badges, version counts and approvals render <b>in the corner of the thumbnail</b>,
+      never in a list beside it. Hovering a tile scrubs the video. Moderation attaches to the
+      photo, configuration to the camera — the object, not a settings page.</p>
+    </div>
+    <div class="beat">
+      <div class="bn">05 · ONE DOOR FOR SETTINGS</div>
+      <h4>StreamYard · Riverside · Restream</h4>
+      <p>The centre of a control room is always <b>the output the audience sees</b>; people
+      waiting sit in a strip below it; global settings hide behind one icon. Pre-live and live are
+      <b>the same screen with a colour flip</b> — the pre-event state is a preview of the show,
+      never a form.</p>
+    </div>
+    <div class="beat">
+      <div class="bn">06 · WHAT THIS PAGE TAKES FROM IT</div>
+      <h4>Five moves, no invention</h4>
+      <p><b>(1)</b> the stage — the service's own content — opens the page; <b>(2)</b> the empty
+      state is a film roll with a countdown; <b>(3)</b> the facts fuse onto the stage as its
+      caption bar; <b>(4)</b> credits and per-source counts render as filling meters and on-tile
+      chips; <b>(5)</b> settings stay in quiet rows below the fold, one sheet each — which the
+      08-25 structure already does.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ THE PATTERN ═══════════════ -->
+<section class="arch" id="pattern">
+  <div class="arch-head">
+    <div class="kicker"><span class="krule"></span>One pattern · eighteen services · two lives</div>
+    <h2>The shared pattern — seven slots, and a rule for every state</h2>
+    <p class="lede">
+      Measured on 2026-08-28: the 18 service surfaces share <b>no pattern</b> — sizes run from a
+      redirect stub to 2,283 lines, half wear the App-Store buy layout and half wear nothing.
+      But two shared things already ship and are kept: <b>the App-Store detail layout</b> is the
+      right shape for a service the couple hasn't started (the shop window), and <b>the 08-25
+      Papic structure</b> is the right shape for one they have (the control room). This pattern
+      names the control room's slots so all 18 fill them the same way. A service uses the slots it
+      has content for — a small service is three slots long and that is correct, not unfinished.
+    </p>
+  </div>
+
+  <div class="slotmap">
+    <div class="slotcol">
+      <div class="slot dark"><span class="sn">S1</span><div>
+        <h4>The stage — the service's own content, first</h4>
+        <p>The obsidian Gallery-archetype panel. Papic: the library mosaic. Live Studio: the
+        broadcast monitor. Event Hub: the couple's own page, miniature and live. Save-the-date:
+        the film's opening frame. Pakanta: the song. <b>Empty rule:</b> the stage never
+        disappears — it shows the frames the content will fill, a countdown to when filling
+        starts, and the one act that starts it.</p>
+      </div></div>
+      <div class="slot dark"><span class="sn">S2</span><div>
+        <h4>The four facts — fused onto the stage's lower edge</h4>
+        <p>The same four cells the 08-25 drawing locked, now the stage's caption bar: what's in
+        it · ways in · still coming · the money fact. Still the first text on the page.</p>
+      </div></div>
+      <div class="slot edge"><span class="sn">S3</span><div>
+        <h4>One next step</h4>
+        <p>The door-register card, unchanged: paper, 3px terracotta top edge, ONE terracotta
+        action. The page always knows the single thing to do now.</p>
+      </div></div>
+      <div class="slot"><span class="sn">S4</span><div>
+        <h4>The parts — rows with their state on them</h4>
+        <p>The service's moving parts as rows (Papic: four sources · Live Studio: cameras ·
+        Hub: the four stages). Source rows carry a <b>thumb cluster</b> — three mini-frames
+        showing what that source has contributed; empty frames before it has.</p>
+      </div></div>
+    </div>
+    <div class="slotcol">
+      <div class="slot"><span class="sn">S5</span><div>
+        <h4>Set once, change any time</h4>
+        <p>Quiet rows, one sheet each — the look, the switches, the connections. Never above
+        the stage, never more prominent than the parts.</p>
+      </div></div>
+      <div class="slot"><span class="sn">S6</span><div>
+        <h4>The money card — a filling meter, bought in place</h4>
+        <p>Credits or plan, drawn as a meter you watch move, with the ladder beside it.
+        Only for services that have one.</p>
+      </div></div>
+      <div class="slot"><span class="sn">S7</span><div>
+        <h4>Offers last · the boundary note</h4>
+        <p>Upsells are quiet tiles at the bottom — an offer never outranks the day. The dashed
+        boundary note names what deliberately lives elsewhere, so nobody hunts for it.</p>
+      </div></div>
+      <div class="slot"><span class="sn">·</span><div>
+        <h4>The two lives, and the three states</h4>
+        <p><b>Not started:</b> the shipped App-Store shop window, kept as is — with its stage
+        showing the promise. <b>Started:</b> this pattern, in three states: <b>before</b> (stage
+        shows the waiting roll + countdown), <b>during</b> (stage fills live, counts up),
+        <b>after</b> (stage is the headline; controls demoted below it). Same page, same order —
+        only the stage's contents and the next step change. <b>Small-service rule:</b> S1–S3
+        only is a complete page.</p>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ PAPIC · BEFORE ═══════════════ -->
+<section class="arch" id="before">
+  <div class="arch-head">
+    <div class="kicker"><span class="krule"></span>Worked example 1 of 3 · Papic · state 1 — the state every live event is in today</div>
+    <h2>Before the day — an empty roll is a promise, not a blank</h2>
+    <p class="lede">
+      The library is genuinely empty, and the page doesn't pretend otherwise. It opens on the
+      stage anyway: a film roll of waiting frames, a countdown to the day the cameras open, and
+      one lit frame — <b>add the first memory</b> — because uploads are already open. This is the
+      rival category's strongest move (Lapse's darkroom, Dispo's develop clock), done with our
+      own approved Gallery panel.
+    </p>
+  </div>
+
+  <div class="frames">
+    <!-- PHONE · BEFORE -->
+    <figure class="frame">
+      <figcaption>Phone · 392 — <i>first visit, camera dates not set</i></figcaption>
+      <div class="phone"><div class="screen">
+        <div class="appbar">
+          <a class="backlnk" href="#before"><svg class="ic s" aria-hidden="true"><use href="#i-arrowl"/></svg>Add-ons</a>
+          <span class="ev">Maria &amp; Jomar · 12 Dec</span>
+        </div>
+        <div class="pagepad">
+
+          <div class="hero">
+            <h1>Papic</h1>
+            <span class="freepill"><svg class="ic s" aria-hidden="true"><use href="#i-check"/></svg>Free to start — 50 credits on us</span>
+          </div>
+
+          <!-- THE STAGE · EMPTY -->
+          <div class="stage">
+            <div class="spad">
+              <div class="ghead">
+                <div>
+                  <div class="gk">Your library</div>
+                  <h2 class="gt">Every photo of your day lands here</h2>
+                  <p class="gsub">From your crew, your guests, your suppliers, and you.</p>
+                </div>
+                <span class="countchip">Opens in 14 days</span>
+              </div>
+              <div class="mosaic">
+                <div class="mtile act"><div><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg><div class="actlbl">Add the first memory</div></div></div>
+                <div class="mtile slot"><svg class="ph" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-image"/></svg></div>
+                <div class="mtile slot"><svg class="ph" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-image"/></svg></div>
+                <div class="mtile slot"><svg class="ph" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-image"/></svg></div>
+                <div class="mtile slot"><svg class="ph" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-image"/></svg></div>
+                <div class="mtile slot"><svg class="ph" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-image"/></svg></div>
+              </div>
+              <p class="rollnote"><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg><span>These frames start filling when your cameras open — <b>set the dates below</b> and
+              they can start up to 6 months early. Older memories are welcome right now.</span></p>
+            </div>
+            <div class="facts">
+              <div class="fact"><div class="fk">In your library</div><div class="fv">Empty — yours to start</div></div>
+              <div class="fact"><div class="fk">Ways in</div><div class="fv">Uploads <span class="ok">open now</span></div></div>
+              <div class="fact hot"><div class="fk">Still coming</div><div class="fv">Cameras — set the dates</div></div>
+              <div class="fact"><div class="fk">Credits</div><div class="fv"><b>50</b> free</div></div>
+            </div>
+          </div>
+
+          <div class="next">
+            <div class="nk">Do this first · then the roll fills itself</div>
+            <h3>When can your cameras shoot?</h3>
+            <p>They open on your start day and close after your event day. Start up to
+            6&nbsp;months early to catch the prep — fittings, the pamamanhikan, the despedida.</p>
+            <div class="fields">
+              <div class="fld"><label>Start day</label><span class="in">2026-12-11</span></div>
+              <div class="fld"><label>Start time</label><span class="in">2:00 PM</span></div>
+            </div>
+            <p class="endnote">Ends: <b>your event day, 12 Dec</b> — guests shoot on the day itself
+            unless you open it earlier.</p>
+            <span class="btn btn-cta btn-block">Save — my cameras are set</span>
+            <span class="alt">Prefer step-by-step? Set Papic up in 3 quick questions ›</span>
+          </div>
+
+          <div class="grp">
+            <div class="gk2">Four ways into your library</div>
+            <div class="rows">
+              <span class="row"><span class="thumbs"><i class="empty"></i><i class="empty"></i><i class="empty"></i></span><span class="rl">Crew cameras<small>Friends with a QR — free, add any number</small></span><span class="rv hot">Waiting for dates</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><span class="thumbs"><i class="empty"></i><i class="empty"></i><i class="empty"></i></span><span class="rl">Guest cameras<small>Every invited guest, on the day</small></span><span class="rv">Your event day</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><span class="thumbs"><i class="p1"></i><i class="empty"></i><i class="empty"></i></span><span class="rl">Your uploads<small>Older memories from your phone or laptop</small></span><span class="rv set">Open now</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><span class="thumbs"><i class="empty"></i><i class="empty"></i><i class="empty"></i></span><span class="rl">Suppliers<small>Your photographer's finished work, straight in</small></span><span class="rv">Not open yet</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+            </div>
+            <p style="font-size:11px;color:var(--ink-soft);margin-top:6px">Each row shows what it
+            has brought in. Everything is screened before anyone sees it.</p>
+          </div>
+
+          <div class="grp">
+            <div class="gk2">Set once, change any time</div>
+            <div class="rows">
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-sparkles"/></svg><span class="rl">Your Papic look<small>Every camera shoots it — guests can't change it</small></span><span class="rv">Orig</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-scanface"/></svg><span class="rl">Finding people in photos<small>Guests choose, with a selfie</small></span><span class="rv set">On</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg><span class="rl">When guests can shoot</span><span class="rv">Event day only</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+            </div>
+          </div>
+
+          <div class="grp">
+            <div class="gk2">Yours to keep</div>
+            <div class="rows">
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-cloud"/></svg><span class="rl">Send a copy to your Google Drive<small>Every photo lands in your own Drive too, as it arrives</small></span><span class="rv">Connect</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+            </div>
+          </div>
+
+          <div class="grp">
+            <div class="gk2">Extras for the day</div>
+            <div class="rows">
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-target"/></svg><span class="rl">Papic Challenges<small>Little photo missions for your guests</small></span><span class="rv">3 chosen</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-chefhat"/></svg><span class="rl">Vendor challenges</span><span class="rv"><span class="bdg">2 waiting for your okay</span></span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-monitor"/></svg><span class="rl">Live Photo Wall<small>Your photos on the venue screen</small></span><span class="rv">Not on</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-sliders"/></svg><span class="rl">DSLR pairing, the shutter &amp; capture defaults</span><span class="rv"></span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+            </div>
+          </div>
+
+          <div class="exc">
+            <div class="ek">Outside the library, on purpose</div>
+            <p><b>Your save-the-date film</b> and <b>your event film</b> are the only two things that
+            don't live here. They are made <b>for</b> your day; this library collects what was
+            captured <b>of</b> it.</p>
+          </div>
+
+        </div>
+        <div class="bottomnav">
+          <span><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg>Overview</span>
+          <span><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg>Guests</span>
+          <span><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg>Schedule</span>
+          <span class="on"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg>Services</span>
+        </div>
+      </div></div>
+      <p class="frame-note"><b>What changed against the shipped page:</b> nothing is removed and
+      nothing is reordered below the next step. The obsidian library panel — which today appears
+      only after the wedding — opens the page in every state, and the four facts ride on its lower
+      edge instead of standing alone on white. The first paint is a photo product: a roll of
+      frames, one of them lit. The "Add the first memory" frame opens the exact upload sheet the
+      shipped page already has.</p>
+    </figure>
+
+    <!-- DESKTOP · BEFORE -->
+    <figure class="frame" style="max-width:100%">
+      <figcaption>Desktop · 1080 — <i>same page in the shipped shell · stage spans, work splits under it</i></figcaption>
+      <div class="frame-scroll">
+      <div class="desk"><div class="deskpad">
+        <div class="rail">
+          <div class="wordmark">SETNAYAN</div>
+          <div class="rk">Maria &amp; Jomar</div>
+          <a href="#before">Overview</a><a href="#before">Guests</a><a href="#before">Vendors</a>
+          <a href="#before">Schedule</a><a href="#before">Budget</a>
+          <div class="rk" style="padding-top:16px">Studio</div>
+          <a href="#before" class="on">Papic</a><a href="#before">Live Studio</a><a href="#before">Save the date</a>
+        </div>
+        <div class="deskmain">
+          <div class="hero" style="margin-top:0">
+            <h1>Papic</h1>
+            <span class="freepill"><svg class="ic s" aria-hidden="true"><use href="#i-check"/></svg>Free to start — 50 credits on us</span>
+          </div>
+          <div class="stage">
+            <div class="spad">
+              <div class="ghead">
+                <div>
+                  <div class="gk">Your library</div>
+                  <h2 class="gt">Every photo of your day lands here</h2>
+                  <p class="gsub">From your crew, your guests, your suppliers, and you.</p>
+                </div>
+                <span class="countchip">Opens in 14 days</span>
+              </div>
+              <div class="mosaic" style="grid-template-columns:repeat(6,1fr)">
+                <div class="mtile act"><div><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg><div class="actlbl">Add the first memory</div></div></div>
+                <div class="mtile slot"><svg class="ph" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-image"/></svg></div>
+                <div class="mtile slot"><svg class="ph" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-image"/></svg></div>
+                <div class="mtile slot"><svg class="ph" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-image"/></svg></div>
+                <div class="mtile slot"><svg class="ph" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-image"/></svg></div>
+                <div class="mtile slot"><svg class="ph" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-image"/></svg></div>
+              </div>
+            </div>
+            <div class="facts f4">
+              <div class="fact"><div class="fk">In your library</div><div class="fv">Empty — yours to start</div></div>
+              <div class="fact"><div class="fk">Ways in</div><div class="fv">Uploads <span class="ok">open now</span></div></div>
+              <div class="fact hot"><div class="fk">Still coming</div><div class="fv">Cameras — set the dates</div></div>
+              <div class="fact"><div class="fk">Credits</div><div class="fv"><b>50</b> free</div></div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:18px;align-items:start;margin-top:4px">
+            <div>
+              <div class="next">
+                <div class="nk">Do this first · then the roll fills itself</div>
+                <h3>When can your cameras shoot?</h3>
+                <p>They open on your start day and close after your event day. Start up to 6 months
+                early to catch the prep.</p>
+                <div class="fields">
+                  <div class="fld"><label>Start day</label><span class="in">2026-12-11</span></div>
+                  <div class="fld"><label>Start time</label><span class="in">2:00 PM</span></div>
+                </div>
+                <p class="endnote">Ends: <b>your event day, 12 Dec</b>.</p>
+                <span class="btn btn-cta btn-block">Save — my cameras are set</span>
+                <span class="alt">Prefer step-by-step? 3 quick questions ›</span>
+              </div>
+              <div class="grp">
+                <div class="gk2">Four ways into your library</div>
+                <div class="rows">
+                  <span class="row"><span class="thumbs"><i class="empty"></i><i class="empty"></i><i class="empty"></i></span><span class="rl">Crew cameras</span><span class="rv hot">Waiting for dates</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+                  <span class="row"><span class="thumbs"><i class="empty"></i><i class="empty"></i><i class="empty"></i></span><span class="rl">Guest cameras</span><span class="rv">Your event day</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+                  <span class="row"><span class="thumbs"><i class="p1"></i><i class="empty"></i><i class="empty"></i></span><span class="rl">Your uploads</span><span class="rv set">Open now</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+                  <span class="row"><span class="thumbs"><i class="empty"></i><i class="empty"></i><i class="empty"></i></span><span class="rl">Suppliers</span><span class="rv">Not open yet</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="grp" style="margin-top:0">
+                <div class="gk2">Set once, change any time</div>
+                <div class="rows">
+                  <span class="row"><span class="rl">Your Papic look</span><span class="rv">Orig</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+                  <span class="row"><span class="rl">Finding people in photos</span><span class="rv set">On</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+                  <span class="row"><span class="rl">When guests can shoot</span><span class="rv">Event day</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+                </div>
+              </div>
+              <div class="grp">
+                <div class="gk2">Yours to keep</div>
+                <div class="rows">
+                  <span class="row"><span class="rl">Send a copy to your Google Drive</span><span class="rv">Connect</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+                </div>
+              </div>
+              <div class="grp">
+                <div class="gk2">Extras for the day</div>
+                <div class="rows">
+                  <span class="row"><span class="rl">Papic Challenges</span><span class="rv">3 chosen</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+                  <span class="row"><span class="rl">Vendor challenges</span><span class="rv"><span class="bdg">2 waiting</span></span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+                  <span class="row"><span class="rl">Live Photo Wall</span><span class="rv">Not on</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+                  <span class="row"><span class="rl">DSLR, shutter &amp; defaults</span><span class="rv"></span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+                </div>
+              </div>
+              <div class="exc">
+                <div class="ek">Outside the library, on purpose</div>
+                <p><b>Your save-the-date film</b> and <b>your event film</b> — made for your day,
+                not collected from it.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div></div>
+      </div>
+      <p class="frame-note" style="max-width:760px"><b>Desktop keeps the same order:</b> the stage
+      spans the full content width; the ask and the sources sit left, quiet choices right — the
+      same two-column split the 08-25 drawing locked. Rows still open side drawers.</p>
+    </figure>
+  </div>
+</section>
+
+<!-- ═══════════════ PAPIC · DURING ═══════════════ -->
+<section class="arch" id="during">
+  <div class="arch-head">
+    <div class="kicker"><span class="krule"></span>Papic · state 2 of 3</div>
+    <h2>On the day — the roll fills, live, while you watch</h2>
+    <p class="lede">
+      Same page, same order. The stage now does what a photo product does at a party: new tiles
+      settle in as they arrive, one frame shows a photo still being screened — drawn honestly as
+      an obscured frame, the darkroom idea — and the caption bar counts up. The next step knows
+      the moment: <b>"4 QRs are still in your pocket."</b>
+    </p>
+  </div>
+
+  <div class="frames">
+    <figure class="frame">
+      <figcaption>Phone · 392 — <i>cameras live, the library counting up</i></figcaption>
+      <div class="phone"><div class="screen">
+        <div class="appbar">
+          <a class="backlnk" href="#during"><svg class="ic s" aria-hidden="true"><use href="#i-arrowl"/></svg>Add-ons</a>
+          <span class="ev">Today · 12 Dec</span>
+        </div>
+        <div class="pagepad">
+
+          <div class="hero"><h1>Papic</h1></div>
+
+          <!-- THE STAGE · FILLING -->
+          <div class="stage">
+            <div class="spad">
+              <div class="ghead">
+                <div>
+                  <div class="gk">Your library · filling now</div>
+                  <h2 class="gt">118 and counting</h2>
+                  <p class="gsub">Newest first — everything is screened before it shows.</p>
+                </div>
+                <span class="countchip"><span class="liveword"><i class="livedot"></i>23 cameras live</span></span>
+              </div>
+              <div class="mosaic">
+                <div class="mtile p5 newin"><span class="credit"><svg class="ic" aria-hidden="true"><use href="#i-camera"/></svg>Tita Baby</span></div>
+                <div class="mtile arriving"><div class="devnote">Arriving —<br>being checked</div></div>
+                <div class="mtile p2"><span class="credit"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg>0:07</span></div>
+                <div class="mtile p3"><span class="credit"><svg class="ic" aria-hidden="true"><use href="#i-camera"/></svg>Ninong cam</span></div>
+                <div class="mtile p4"><span class="credit"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg>Guest</span></div>
+                <div class="mtile more">+113</div>
+              </div>
+              <div class="gact">
+                <span class="btn btn-cta" style="flex:1"><svg class="ic s" aria-hidden="true"><use href="#i-image"/></svg>Peek at the library</span>
+                <span class="btn btn-dark">On the venue wall</span>
+              </div>
+            </div>
+            <div class="facts">
+              <div class="fact"><div class="fk">In your library</div><div class="fv"><b>118</b> and counting</div></div>
+              <div class="fact"><div class="fk">Ways in</div><div class="fv"><span class="ok"><i class="livedot"></i>23 cameras live</span></div></div>
+              <div class="fact hot"><div class="fk">Still coming</div><div class="fv">4 QRs unclaimed</div></div>
+              <div class="fact"><div class="fk">Credits</div><div class="fv"><b>1,462</b> left</div></div>
+            </div>
+          </div>
+
+          <div class="next">
+            <div class="nk">Right now</div>
+            <h3>4 camera QRs are still in your pocket</h3>
+            <p>Show them at the door — each one is a camera. They scan, they shoot,
+            it all lands in your library.</p>
+            <div class="tact">
+              <span class="btn btn-cta" style="flex:1"><svg class="ic s" aria-hidden="true"><use href="#i-qr"/></svg>Show the QR poster</span>
+              <span class="btn btn-sec">Print cards</span>
+            </div>
+          </div>
+
+          <div class="grp">
+            <div class="gk2">Your sources, live</div>
+            <div class="rows">
+              <span class="row"><span class="thumbs"><i class="p5"></i><i class="p3"></i><i class="p1"></i></span><span class="rl">Crew cameras<small>QRs, print cards, add an off-list camera</small></span><span class="rv set"><i class="livedot lt"></i>23 shooting</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><span class="thumbs"><i class="p4"></i><i class="p2"></i><i class="empty"></i></span><span class="rl">Guest cameras<small>Every guest who hasn't declined</small></span><span class="rv set"><i class="livedot lt"></i>Live to midnight</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><span class="thumbs"><i class="p1"></i><i class="empty"></i><i class="empty"></i></span><span class="rl">Your uploads</span><span class="rv">Add any time</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><span class="thumbs"><i class="empty"></i><i class="empty"></i><i class="empty"></i></span><span class="rl">Suppliers</span><span class="rv">After the day</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+            </div>
+          </div>
+
+          <div class="tile hotline">
+            <h4><svg class="ic" aria-hidden="true"><use href="#i-coins"/></svg>Credits</h4>
+            <p>One shared pot for the whole event. A photo is 1 credit; a clip is 2–8 by length —
+            shot or uploaded, same pot.</p>
+            <div class="meter">
+              <div class="mrow"><span><b>1,462</b> of 3,050 left</span><span>never expire</span></div>
+              <div class="bar"><i style="width:48%"></i></div>
+            </div>
+            <div class="ladder">
+              <div class="rung"><div class="rn">+100</div><div class="rp">₱50</div></div>
+              <div class="rung"><div class="rn">+3,000</div><div class="rp">₱1,000</div></div>
+              <div class="rung"><div class="rn">+10,000</div><div class="rp">₱3,200</div></div>
+              <div class="rung"><div class="rn">+20,000</div><div class="rp">₱5,000</div></div>
+            </div>
+            <p style="margin-top:8px;font-size:10.5px">Add any time — even mid-party. Pay by GCash or
+            BDO; credits land once we confirm.</p>
+            <div class="rows" style="margin-top:9px">
+              <span class="row"><span class="rl">Give one camera its own credits<small>Set some aside for one QR — take them back any time</small></span><span class="rv">Ninong cam · 200</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+            </div>
+          </div>
+
+          <div class="banner"><svg class="ic" aria-hidden="true"><use href="#i-gift"/></svg><span><b>Tita Baby chipped in 3,000 credits.</b> They're in your pot — nothing for you to do.</span></div>
+
+          <div class="grp">
+            <div class="gk2">During the party</div>
+            <div class="rows">
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-monitor"/></svg><span class="rl">Live Photo Wall</span><span class="rv set">On the venue screen</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg><span class="rl">Review what's coming in<small>Hide, report, or block a camera</small></span><span class="rv"></span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+            </div>
+          </div>
+
+          <div class="tile quiet">
+            <h4><svg class="ic" aria-hidden="true"><use href="#i-sparkles"/></svg>Everything Papic, one price</h4>
+            <p>Unlimited cameras for the whole day plus every add-on. See what's inside ›</p>
+          </div>
+
+        </div>
+        <div class="bottomnav">
+          <span><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg>Overview</span>
+          <span><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg>Guests</span>
+          <span><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg>Schedule</span>
+          <span class="on"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg>Services</span>
+        </div>
+      </div></div>
+      <p class="frame-note"><b>State on the media, not beside it:</b> who took a photo is a chip on
+      its tile; a clip carries its length; a photo still being screened is an obscured frame that
+      says so — the screening rule the product already enforces, made visible instead of silent.
+      The "Peek at the library" row from the shipped page becomes the stage's own button. Nothing
+      else moves: the credits card, the chip-in banner, moderation and the one-price offer keep
+      their 08-25 places.</p>
+    </figure>
+  </div>
+</section>
+
+<!-- ═══════════════ PAPIC · AFTER ═══════════════ -->
+<section class="arch" id="after">
+  <div class="arch-head">
+    <div class="kicker"><span class="krule"></span>Papic · state 3 of 3 · the page they come back to for years</div>
+    <h2>After — the library is the headline, with its makers credited</h2>
+    <p class="lede">
+      The stage is now simply the 08-25 "after" drawing in its promoted position: the full mosaic
+      with chapter chips and per-tile credits, the Recap in the next-step slot, the sources as the
+      roll call of who filled it. This state needed the least change — it was already the one
+      state the approved drawing gave imagery to.
+    </p>
+  </div>
+
+  <div class="frames">
+    <figure class="frame">
+      <figcaption>Phone · 392 — <i>the week after</i></figcaption>
+      <div class="phone"><div class="screen">
+        <div class="appbar">
+          <a class="backlnk" href="#after"><svg class="ic s" aria-hidden="true"><use href="#i-arrowl"/></svg>Add-ons</a>
+          <span class="ev">Maria &amp; Jomar · 12 Dec</span>
+        </div>
+        <div class="pagepad">
+
+          <div class="hero"><h1>Papic</h1></div>
+
+          <!-- THE STAGE · FULL -->
+          <div class="stage">
+            <div class="spad">
+              <div class="ghead">
+                <div>
+                  <div class="gk">Your library · by the moments of the day</div>
+                  <h2 class="gt">Everything your people saw</h2>
+                  <p class="gsub">412 photos · 63 clips · kept free, for life.</p>
+                </div>
+                <span class="countchip">M·J</span>
+              </div>
+              <div class="chips"><span class="on">All</span><span>Getting ready</span><span>Ceremony</span><span>Reception</span><span>Added by you</span></div>
+              <div class="mosaic">
+                <div class="mtile p1"><span class="credit"><svg class="ic" aria-hidden="true"><use href="#i-camera"/></svg>Tita Baby</span></div>
+                <div class="mtile p2"></div>
+                <div class="mtile p3"><span class="credit"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg>0:07</span></div>
+                <div class="mtile p4"><span class="credit"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg>You</span></div>
+                <div class="mtile p6"></div>
+                <div class="mtile more">+457</div>
+              </div>
+              <div class="gact">
+                <span class="btn btn-cta">Open your library</span>
+                <span class="btn btn-dark">Download all</span>
+              </div>
+            </div>
+            <div class="facts">
+              <div class="fact"><div class="fk">In your library</div><div class="fv"><b>412</b> photos · <b>63</b> clips</div></div>
+              <div class="fact"><div class="fk">From</div><div class="fv"><b>27</b> cameras · you</div></div>
+              <div class="fact hot"><div class="fk">Still coming</div><div class="fv">Your photographer's picks</div></div>
+              <div class="fact"><div class="fk">Kept</div><div class="fv"><span class="ok">Free, for life</span></div></div>
+            </div>
+          </div>
+
+          <div class="next">
+            <div class="nk">Ready for you</div>
+            <h3>Your Recap is ready — the film of your day</h3>
+            <p>Cut from everyone's cameras, set to your music.</p>
+            <div class="tact">
+              <span class="btn btn-cta" style="flex:1"><svg class="ic s" aria-hidden="true"><use href="#i-play"/></svg>Watch your Recap</span>
+            </div>
+          </div>
+
+          <div class="grp">
+            <div class="gk2">Who filled it</div>
+            <div class="rows">
+              <span class="row"><span class="thumbs"><i class="p1"></i><i class="p5"></i><i class="p3"></i></span><span class="rl">Crew cameras</span><span class="rv">9 people · 187</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><span class="thumbs"><i class="p4"></i><i class="p2"></i><i class="p6"></i></span><span class="rl">Guest cameras</span><span class="rv">18 people · 214</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><span class="thumbs"><i class="p3"></i><i class="p1"></i><i class="empty"></i></span><span class="rl">Your uploads</span><span class="rv">11 added</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><span class="thumbs"><i class="empty"></i><i class="empty"></i><i class="empty"></i></span><span class="rl">Suppliers<small>Ask your photographer to add their picks</small></span><span class="rv hot">Invite them</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+            </div>
+          </div>
+
+          <div class="grp">
+            <div class="gk2">Made from your library</div>
+            <div class="rows">
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-clapper"/></svg><span class="rl">Your Recap</span><span class="rv set">Ready</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-book"/></svg><span class="rl">Kwento Magazine<small>Your day as a beautiful magazine</small></span><span class="rv">Make it</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-zap"/></svg><span class="rl">Life-Flash<small>The film of this one day</small></span><span class="rv"></span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+            </div>
+          </div>
+
+          <div class="exc">
+            <div class="ek">Outside the library, on purpose</div>
+            <p><b>Your save-the-date film</b> and <b>your event film</b> live with your event's
+            pages, not here — made for your day, not collected from it.</p>
+          </div>
+
+          <div class="grp">
+            <div class="gk2">Your photos, your say</div>
+            <div class="rows">
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg><span class="rl">Review guest photos<small>Hide, report, or block a camera</small></span><span class="rv"></span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-camera"/></svg><span class="rl">Your vendors' photos</span><span class="rv set">Showing</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg><span class="rl">Shared pool gallery<small>What guests can browse together</small></span><span class="rv set">Open</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+            </div>
+          </div>
+
+          <div class="grp">
+            <div class="gk2">Yours to keep</div>
+            <div class="rows">
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-cloud"/></svg><span class="rl">Google Drive copy</span><span class="rv set">Arriving · maria@…</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+            </div>
+          </div>
+
+          <div class="tile quiet">
+            <h4><svg class="ic" aria-hidden="true"><use href="#i-hdd"/></svg>Keep every original at full size</h4>
+            <p>Your library is free, for life. After 6 months each photo becomes a beautiful smaller
+            copy here, and the full-size originals live in your own Google Drive. Want us to keep
+            every pristine original too? — yearly plan ›</p>
+          </div>
+
+        </div>
+        <div class="bottomnav">
+          <span><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg>Overview</span>
+          <span><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg>Guests</span>
+          <span><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg>Schedule</span>
+          <span class="on"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg>Services</span>
+        </div>
+      </div></div>
+      <p class="frame-note"><b>Unchanged from the approved after-state</b> except position: the
+      library already led this state in the 08-25 drawing; now it leads every state, so coming
+      back years later and coming back the morning after are the same experience. The small M·J
+      monogram stays drawn as an option — still the owner's call, carried over.</p>
+    </figure>
+  </div>
+</section>
+
+<!-- ═══════════════ LIVE STUDIO ═══════════════ -->
+<section class="arch" id="livestudio">
+  <div class="arch-head">
+    <div class="kicker"><span class="krule"></span>Worked example 2 of 3 · proving the pattern generalises · brief on purpose</div>
+    <h2>Live Studio — the stage is the broadcast monitor</h2>
+    <p class="lede">
+      The market's control rooms (StreamYard, Riverside, Restream) centre the output the audience
+      sees, keep waiting cameras in a strip below it, and make pre-live the same screen as live
+      with a colour flip. Setnayan already owns that idiom — the approved day-of controller
+      drawing is exactly it. The control centre borrows the controller's monitor as its stage:
+      <b>before the day the stage is dark and says so</b>, the cameras are the strip, and the one
+      terracotta action opens the controller. The buy state keeps the shipped App-Store window.
+    </p>
+  </div>
+
+  <div class="frames">
+    <figure class="frame">
+      <figcaption>Phone · 392 — <i>owned, before the day</i></figcaption>
+      <div class="phone"><div class="screen">
+        <div class="appbar">
+          <a class="backlnk" href="#livestudio"><svg class="ic s" aria-hidden="true"><use href="#i-arrowl"/></svg>Add-ons</a>
+          <span class="ev">Maria &amp; Jomar · 12 Dec</span>
+        </div>
+        <div class="pagepad">
+
+          <div class="hero"><h1>Live Studio</h1></div>
+
+          <div class="stage">
+            <div class="spad">
+              <div class="ghead">
+                <div>
+                  <div class="gk">Your stage</div>
+                  <h2 class="gt">Dark until you go live</h2>
+                  <p class="gsub">What every remote guest will watch — cut between your cameras with a tap.</p>
+                </div>
+                <span class="countchip">12 Dec · 2:00 PM</span>
+              </div>
+              <div class="monitor">
+                <div class="dim">Main stage<br>goes live on your day</div>
+                <span class="camname">Default · Altar cam</span>
+              </div>
+              <div class="camstrip">
+                <div class="camslot filled"><span class="cn">Altar</span></div>
+                <div class="camslot filled"><span class="cn">Aisle</span></div>
+                <div class="camslot filled"><span class="cn">Reception</span></div>
+                <div class="camslot open"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg></div>
+              </div>
+              <p class="rollnote"><svg class="ic" aria-hidden="true"><use href="#i-camera"/></svg><span><b>3 cameras named.</b> Each is a phone a friend claims with the event QR —
+              no install, no per-camera fee.</span></p>
+              <div class="gact">
+                <span class="btn btn-cta" style="flex:1"><svg class="ic s" aria-hidden="true"><use href="#i-monitor"/></svg>Open the controller</span>
+              </div>
+            </div>
+            <div class="facts">
+              <div class="fact"><div class="fk">Cameras</div><div class="fv"><b>3</b> named</div></div>
+              <div class="fact"><div class="fk">Channel</div><div class="fv">Setnayan's <span class="ok">ready</span></div></div>
+              <div class="fact hot"><div class="fk">Still coming</div><div class="fv">Your day — 14 days</div></div>
+              <div class="fact"><div class="fk">Plan</div><div class="fv">Live Studio · owned</div></div>
+            </div>
+          </div>
+
+          <div class="next">
+            <div class="nk">Do this before the day</div>
+            <h3>Hand your cameras to their people</h3>
+            <p>Each named camera becomes real when a friend scans the event QR and claims it.
+            Do it at the rehearsal — the day itself is too busy.</p>
+            <div class="tact">
+              <span class="btn btn-cta" style="flex:1"><svg class="ic s" aria-hidden="true"><use href="#i-qr"/></svg>Show the camera QRs</span>
+            </div>
+          </div>
+
+          <div class="grp">
+            <div class="gk2">Your cameras</div>
+            <div class="rows">
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-video"/></svg><span class="rl">Altar cam<small>Default view</small></span><span class="rv set">Claimed · Kuya Dan</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-video"/></svg><span class="rl">Aisle cam</span><span class="rv hot">Unclaimed</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-video"/></svg><span class="rl">Reception cam</span><span class="rv hot">Unclaimed</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg><span class="rl">Add a camera</span><span class="rv"></span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+            </div>
+          </div>
+
+          <div class="grp">
+            <div class="gk2">Set once, change any time</div>
+            <div class="rows">
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-tv"/></svg><span class="rl">Your YouTube channel<small>Broadcast on your own channel — or ours</small></span><span class="rv">Setnayan's</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg><span class="rl">Guests pick their own view</span><span class="rv set">On</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+            </div>
+          </div>
+
+          <div class="exc">
+            <div class="ek">Outside this page, on purpose</div>
+            <p><b>The controller</b> — the screen that cuts cameras on the day — is its own
+            fullscreen room. This page readies it; the controller runs it.</p>
+          </div>
+
+        </div>
+        <div class="bottomnav">
+          <span><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg>Overview</span>
+          <span><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg>Guests</span>
+          <span><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg>Schedule</span>
+          <span class="on"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg>Services</span>
+        </div>
+      </div></div>
+      <p class="frame-note"><b>The pattern, second service:</b> stage (the monitor + camera strip)
+      · four facts on its edge · one next step (claim the cameras) · the parts (cameras as rows,
+      state on each) · set once (the channel — the connect/disconnect control the shipped page
+      exists to keep, moved into a row + sheet, all four of its states preserved) · the boundary
+      note pointing at the controller. On the day, the monitor border and the facts flip to the
+      live colour — pre-live and live are the same screen. The free single-camera path keeps its
+      "open the controller free" door in the shop window, unchanged.</p>
+    </figure>
+  </div>
+</section>
+
+<!-- ═══════════════ EVENT HUB ═══════════════ -->
+<section class="arch" id="hub">
+  <div class="arch-head">
+    <div class="kicker"><span class="krule"></span>Worked example 3 of 3 · brief on purpose</div>
+    <h2>The event page — the stage is the page itself, live</h2>
+    <p class="lede">
+      Luma's insight, ported: <b>the manage view is anchored by the thing the guests see.</b> The
+      couple's controls for their public page are ~15 sub-pages today, reached from a list. The
+      pattern gathers them under a stage that is a living miniature of the page itself, in
+      whichever of its four stages it is in right now — save the date, invitation, the day, the
+      album. Vocabulary note: "Event Hub" is the guests' public address (owner-locked 2026-08-16);
+      this is the couple's control centre FOR it, inside the dashboard.
+    </p>
+  </div>
+
+  <div class="frames">
+    <figure class="frame">
+      <figcaption>Phone · 392 — <i>invitation stage, RSVPs coming in</i></figcaption>
+      <div class="phone"><div class="screen">
+        <div class="appbar">
+          <a class="backlnk" href="#hub"><svg class="ic s" aria-hidden="true"><use href="#i-arrowl"/></svg>Dashboard</a>
+          <span class="ev">Maria &amp; Jomar · 12 Dec</span>
+        </div>
+        <div class="pagepad">
+
+          <div class="hero"><h1>Your event page</h1></div>
+
+          <div class="stage">
+            <div class="spad">
+              <div class="ghead">
+                <div>
+                  <div class="gk">As your guests see it · right now</div>
+                  <h2 class="gt">setnayan.com/maria-and-jomar</h2>
+                  <p class="gsub">One link for the whole life of your event — it changes with the day.</p>
+                </div>
+                <span class="countchip">Stage 2 of 4</span>
+              </div>
+              <div class="minipage">
+                <div class="mp-hero">
+                  <span class="names">Maria &amp; Jomar</span>
+                  <span class="stagechip">Invitation</span>
+                </div>
+                <div class="mp-body">
+                  <b>Saturday, 12 December · Tagaytay</b><br>
+                  Will you come? · Details · Your table
+                  <br><span class="mp-cta">Reply — will you come?</span>
+                </div>
+              </div>
+              <div class="gact">
+                <span class="btn btn-dark" style="flex:1">Open as a guest</span>
+                <span class="btn btn-cta" style="flex:1">Edit the page</span>
+              </div>
+            </div>
+            <div class="facts">
+              <div class="fact"><div class="fk">Stage</div><div class="fv">Invitation <span class="ok">live</span></div></div>
+              <div class="fact"><div class="fk">Replies</div><div class="fv"><b>61</b> of 90 in</div></div>
+              <div class="fact hot"><div class="fk">Still coming</div><div class="fv">29 haven't replied</div></div>
+              <div class="fact"><div class="fk">The day</div><div class="fv">In <b>14</b> days</div></div>
+            </div>
+          </div>
+
+          <div class="next">
+            <div class="nk">Right now</div>
+            <h3>29 guests haven't replied yet</h3>
+            <p>A gentle nudge goes a long way — send the reminder to everyone still quiet.</p>
+            <div class="tact">
+              <span class="btn btn-cta" style="flex:1">Send the reminder</span>
+              <span class="btn btn-sec">See who</span>
+            </div>
+          </div>
+
+          <div class="grp">
+            <div class="gk2">The four stages of your one link</div>
+            <div class="rows">
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg><span class="rl">Save the date</span><span class="rv set">Sent · Oct</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-qr"/></svg><span class="rl">Invitation &amp; replies</span><span class="rv set"><i class="livedot lt"></i>Live now</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-zap"/></svg><span class="rl">The day itself<small>Photos, the wall, your table — opens by itself</small></span><span class="rv">Automatic</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-book"/></svg><span class="rl">The story after<small>The album and your story, for the years</small></span><span class="rv">After the day</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+            </div>
+          </div>
+
+          <div class="grp">
+            <div class="gk2">What's on the page</div>
+            <div class="rows">
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg><span class="rl">Hero photo &amp; colors</span><span class="rv set">Set</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-book"/></svg><span class="rl">Our story</span><span class="rv">Draft</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-sliders"/></svg><span class="rl">Dress code · what to bring · widgets</span><span class="rv"></span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+            </div>
+          </div>
+
+          <div class="grp">
+            <div class="gk2">Set once, change any time</div>
+            <div class="rows">
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg><span class="rl">Who can see it<small>Private — guests enter with their QR</small></span><span class="rv">Private</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+              <span class="row"><svg class="ic" aria-hidden="true"><use href="#i-globe"/></svg><span class="rl">Your address</span><span class="rv">maria-and-jomar</span><svg class="ic s chev" aria-hidden="true"><use href="#i-chevr"/></svg></span>
+            </div>
+          </div>
+
+        </div>
+        <div class="bottomnav">
+          <span><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg>Overview</span>
+          <span><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg>Guests</span>
+          <span><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg>Schedule</span>
+          <span class="on"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg>Services</span>
+        </div>
+      </div></div>
+      <p class="frame-note"><b>The pattern, third service — and the proof it isn't a photo-only
+      trick:</b> the stage here is a living miniature of the couple's own page (with "open as a
+      guest" beside "edit"), the facts are the reply meter and the countdown, the parts are the
+      four stages of the one link, and every existing editor sub-page keeps its own screen —
+      the rows here are doors to them, not replacements. <b>Nothing moves; this page gathers.</b>
+      Whether this gathered page should be built, and where it lives, is an owner decision — the
+      controls exist today, spread across the dashboard.</p>
+    </figure>
+  </div>
+</section>
+
+<!-- ═══════════════ INVENTORY ═══════════════ -->
+<section class="arch" id="inventory">
+  <div class="arch-head">
+    <div class="kicker"><span class="krule"></span>The port contract</div>
+    <h2>Nothing is lost — every control, accounted for</h2>
+    <p class="lede">
+      Losing a control in a redesign is the failure this project pays for most. Three tables:
+      Papic against the page that shipped 2026-08-27, Live Studio against its shipped page, and
+      the rule for the other fifteen. <b>Deletions proposed: zero.</b>
+    </p>
+  </div>
+
+  <h3 style="margin-top:28px;font-size:17px;font-weight:700">Papic — against the shipped 2026-08-27 page</h3>
+  <div class="tblwrap">
+  <table class="tbl">
+    <tr><th>What ships today</th><th>Verdict</th><th>Where it lives in this skin</th></tr>
+    <tr><td>The four-facts strip ("where you stand")</td><td><span class="tag mv">Moved</span></td><td>Fused onto the stage's lower edge — same four cells, same copy, dark ground. Still the first text on the page. <b>This is the one structural change, argued in the doc and flagged as Owner decision 1.</b></td></tr>
+    <tr><td>The obsidian library panel (after-state only today)</td><td><span class="tag mv">Promoted</span></td><td>Becomes the stage — present in all three states, at the top. Empty state: the waiting film roll + countdown + "Add the first memory". Filling state: live tiles + screening frame. After: unchanged from the approved drawing.</td></tr>
+    <tr><td>The one next step · the 3-question wizard · the upload sheet</td><td><span class="tag kp">Kept</span></td><td>Unchanged, in their 08-25 places. The "Add the first memory" stage frame opens the same upload sheet.</td></tr>
+    <tr><td>Four source rows (crew · guests · uploads · suppliers)</td><td><span class="tag kp">Kept + dressed</span></td><td>Same rows, same states — each now carries a three-frame thumb cluster showing what it brought in (empty frames before it has).</td></tr>
+    <tr><td>"Peek at the library" row (during)</td><td><span class="tag mv">Moved</span></td><td>Becomes the stage's own primary button — the peek is the stage.</td></tr>
+    <tr><td>Set-once rows (look · face matching · guest window) · Drive offer · extras (Challenges · vendor approvals · Live Wall · DSLR fold) · credits card, ladder, meter, per-camera credits, chip-in banner · moderation rows · vendors' photos · pool gallery · Recap / Kwento / Life-Flash · both offers · the boundary note · all plain-English confirms</td><td><span class="tag kp">Kept</span></td><td>All in their 08-25 positions, untouched. The offers stay last.</td></tr>
+    <tr><td>Photo screening (silent today)</td><td><span class="tag ad">Made visible</span></td><td>An arriving photo is an obscured tile that says "being checked" — the rule the product already enforces, shown instead of hidden. No behaviour change.</td></tr>
+    <tr><td>Removed</td><td><span class="tag kp">—</span></td><td><b>Nothing.</b></td></tr>
+  </table>
+  </div>
+
+  <h3 style="margin-top:32px;font-size:17px;font-weight:700">Live Studio — against the shipped page</h3>
+  <div class="tblwrap">
+  <table class="tbl">
+    <tr><th>What ships today</th><th>Verdict</th><th>Where it lives in this skin</th></tr>
+    <tr><td>The App-Store buy surface (hero, plan drawer, price from the live catalog, lead-time notice, footnote, stats tiles, highlights, description, not-included list)</td><td><span class="tag kp">Kept</span></td><td>The shop window — unchanged for a couple who hasn't bought. The stage pattern is the OWNED state only.</td></tr>
+    <tr><td>"Open the controller — go live free with one camera"</td><td><span class="tag kp">Kept</span></td><td>Stays beside the buy CTA in the shop window; in the owned state the stage's terracotta button opens the controller.</td></tr>
+    <tr><td>Your YouTube channel panel — all four states (Setnayan-supplies-the-channel · not available yet · connected + <b>Disconnect</b> · Connect), including the disconnect this page exists to keep alive</td><td><span class="tag mv">Into a row + sheet</span></td><td>"Your YouTube channel" row under Set once; its sheet holds all four states verbatim, disconnect included. The row's value names the current state so nothing is hidden behind the chevron.</td></tr>
+    <tr><td>The connect/disconnect/error status banners</td><td><span class="tag kp">Kept</span></td><td>Same banners, above the stage, on return from Google.</td></tr>
+    <tr><td>Camera naming / claiming (lives in the controller today)</td><td><span class="tag ad">Surfaced</span></td><td>The camera strip on the stage + camera rows read the same data; editing still happens where it happens today. Doors, not a second editor.</td></tr>
+    <tr><td>Removed</td><td><span class="tag kp">—</span></td><td><b>Nothing.</b></td></tr>
+  </table>
+  </div>
+
+  <h3 style="margin-top:32px;font-size:17px;font-weight:700">The other fifteen services — the rule</h3>
+  <div class="tblwrap">
+  <table class="tbl" style="max-width:980px">
+    <tr><th>Case</th><th>Rule</th></tr>
+    <tr><td>Not started / not bought</td><td>The shipped App-Store shop window, unchanged. No service loses its buy surface.</td></tr>
+    <tr><td>Started / owned</td><td>The seven slots, filled with that service's own content: Save-the-date → the film's opening frame plays as the stage · Patiktok → the reel wall · Pakanta → the song with its player · Mood board → the palette wall · Photo delivery → the handover shelf · Playlist → the queue. A service with no content slot (e.g. a pure setting) is S1–S3 long: a stage that states its promise, four facts, one next step.</td></tr>
+    <tr><td>Every existing control on every one of the 18</td><td>Ports into a row + sheet under S4–S7 in its current wording. Each service's port is its own table like the two above, written when that service is drawn — <b>none is licensed to delete anything by this pattern.</b></td></tr>
+  </table>
+  </div>
+</section>
+
+<!-- ═══════════════ RECEIPTS ═══════════════ -->
+<section class="arch" id="receipts">
+  <div class="arch-head">
+    <div class="kicker"><span class="krule"></span>Receipts</div>
+    <h2>Colour receipts — every text pairing, measured, both grounds</h2>
+    <p class="lede">
+      This page commits to one deliberate look (like the 08-25 file): a white page carrying an
+      obsidian stage. So "light and dark" here means <b>both grounds a reader actually meets</b> —
+      every pairing on the white page and every pairing on the obsidian panel, measured. Gold has
+      no headroom on light tints; on obsidian it is safe — that is the one place gold text
+      appears. Light-ground colours are never reused on the dark panel: the panel has its own
+      measured pair.
+    </p>
+  </div>
+
+  <div class="tblwrap">
+  <table class="tbl" style="max-width:860px">
+    <tr><th>Pairing</th><th>Ratio</th><th>Used for</th></tr>
+    <tr><td colspan="3"><b>On the white page (#FFFFFF)</b></td></tr>
+    <tr><td>Ink #2C2A29 on white</td><td class="mono">13.4 : 1</td><td>Body text</td></tr>
+    <tr><td>Slate #4F535B on white</td><td class="mono">7.7 : 1</td><td>Secondary text, row values, line icons (icons need 3:1)</td></tr>
+    <tr><td>White on terracotta #C24E25</td><td class="mono">4.6 : 1</td><td>The one action button</td></tr>
+    <tr><td>Terracotta-deep #9D3F1E on white</td><td class="mono">6.3 : 1</td><td>Waiting badges, "invite them", hot row values</td></tr>
+    <tr><td>Link #3B4E67 on white</td><td class="mono">8.2 : 1</td><td>Links, quiet buttons</td></tr>
+    <tr><td>Text-gold #8A6B39 on pure white only</td><td class="mono">4.9 : 1</td><td>Eyebrow kickers — never on tinted cards, where gold has no headroom</td></tr>
+    <tr><td>Green #4F6B4A on white</td><td class="mono">5.9 : 1</td><td>Saved / live / free marks on light ground</td></tr>
+    <tr><td colspan="3"><b>On the obsidian stage (#17160F)</b></td></tr>
+    <tr><td>White #FFFFFF on obsidian</td><td class="mono">18.1 : 1</td><td>Stage headlines, fact values</td></tr>
+    <tr><td>Soft white (72% white over obsidian ≈ #BEBEBC)</td><td class="mono">≈ 9.7 : 1</td><td>Stage subtitles, roll notes</td></tr>
+    <tr><td>Fact labels (66% white over obsidian ≈ #B0AFAC)</td><td class="mono">≈ 8.2 : 1</td><td>Fused facts strip labels</td></tr>
+    <tr><td>Gold #A9834B on obsidian</td><td class="mono">5.2 : 1</td><td>Stage kicker — the one place gold text belongs</td></tr>
+    <tr><td>Dark-live green #46A46C on obsidian</td><td class="mono">5.3 : 1</td><td>Live marks on the stage — the light green #4F6B4A measures 2.7:1 here and is never used on dark</td></tr>
+    <tr><td>Dark accent #E5794E on obsidian</td><td class="mono">5.7 : 1</td><td>Hot facts and the "Add the first memory" frame — terracotta #C24E25 measures 3.5:1 on obsidian and is used there only as button FILL (white text on it, 4.6:1), never as text</td></tr>
+    <tr><td>White on tile credit chips (60% obsidian scrim over a photo)</td><td class="mono">≥ 4.8 : 1</td><td>Per-tile credits — worst case measured against a pure-white photograph behind the scrim</td></tr>
+  </table>
+  </div>
+
+  <h3 style="margin-top:32px;font-size:18px;font-weight:700">Motion receipts <span style="font-weight:400;color:var(--ink-soft)">— everything that moves, once, and how long</span></h3>
+  <div class="tblwrap">
+  <table class="tbl" style="max-width:760px">
+    <tr><th>What moves</th><th>How</th><th>Duration</th></tr>
+    <tr><td>The four facts</td><td>Rise 8px + fade on load, staggered 50ms</td><td class="mono">220ms</td></tr>
+    <tr><td>The next-step card</td><td>Same rise, after the facts</td><td class="mono">220ms + 200ms delay</td></tr>
+    <tr><td>A newly arrived tile (during)</td><td>Scales in from 90%, once per arrival</td><td class="mono">260ms</td></tr>
+    <tr><td>The credits meter</td><td>Fills from zero, once</td><td class="mono">260ms + 250ms delay</td></tr>
+    <tr><td>Row chevrons</td><td>Nudge 2px right on hover</td><td class="mono">150ms</td></tr>
+    <tr><td colspan="3"><small>All ease-out, nothing loops, and every one is disabled under the
+    reader's reduced-motion setting. The photo stand-in gradients on tiles are content
+    (photographs), the same exception the approved film-look swatches earned — the page chrome
+    itself stays flat, hairline, shadow-free.</small></td></tr>
+  </table>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="padding:0">
+    SETNAYAN · Service Control Centres — one pattern · 2026-08-28. A photo-app skin over the
+    approved and shipped 2026-08-25 Papic structure, generalised to all 18 in-app services. Ports
+    the owner-approved Gallery, Detail, Sheet and Wizard archetypes (2026-08-04); one structural
+    change (the stage) argued openly and left to the owner. Prices shown are the owner-locked
+    credit ladder; live figures always come from the price list, never from a drawing.
+  </div>
+</footer>
+
+</div>
+</body>
+</html>

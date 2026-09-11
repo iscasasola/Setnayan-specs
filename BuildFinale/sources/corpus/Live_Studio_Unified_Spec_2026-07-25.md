@@ -1,0 +1,314 @@
+# Live Studio — Unified Spec (2026-07-25)
+
+> ## ⛔ SUPERSEDED IN FOUR PLACES — read this before quoting anything below (added 2026-09-02)
+>
+> The body of this document is left as written. It was true on 2026-07-25 and rewriting a dated
+> decision record makes it false in the other direction. These four corrections override it.
+>
+> **1. THE PRICE. `₱2,999 / event` APPEARS 20 TIMES BELOW AND IS WRONG IN BOTH HALVES.**
+> ~~Live is ₱1,500 per EVENT-DAY (`LIVE_STUDIO`), plus an optional ₱1,500 hosted-channel add-on
+> (`LIVE_STUDIO_HOSTED_CHANNEL`) taking it to ₱3,000 — owner-ruled 2026-09-02, migrations
+> `20271192082215` and `20271192528988`. Not "per event": days fold from the first go-live and
+> extra days can be bought.~~
+>
+> **1b. SUPERSEDED THE SAME DAY (LS6) — THE EVENT-DAY MODEL ITSELF IS RETIRED.** Owner, later the
+> same 2026-09-02 session, after the ₱1,500/day reprice above: *"live studio is 2500 per event"*,
+> *"unlock once per event, unlimited streams, unlimited video link upload"*, *"i want the mixer
+> and the integration to be one in price."* `LIVE_STUDIO` is now **₱2,500, `billing_period =
+> 'one_time'`** (migration `20271194920190`) — ONE unlock, for the life of the event, no clock,
+> no day-fold, no "add another day." Ownership alone is the entire entitlement test now
+> (`lib/live-studio-window.ts`'s `decideBroadcastWindow`); the never-interrupt rule, the
+> founder/comp/internal/promo metering split, and the anchor-on-first-go-live reasoning this
+> whole document (and § 4f ②/④a) describes are all retired with the clock they protected — there
+> is nothing left to expire or interrupt. `LIVE_STUDIO_HOSTED_CHANNEL` is **deactivated, not
+> repriced** — it was priced to sum with `LIVE_STUDIO` into "₱3,000 total for the hosted option,"
+> that pairing broke, and the owner has not given a replacement figure. **Ownership question left
+> OPEN:** reprice it, fold it into `LIVE_STUDIO`, or retire it outright — none decided.
+> 🔑 **NEVER QUOTE A PRICE FROM THIS DOCUMENT OR ANY OTHER.** `platform_retail_catalog_v2` is
+> admin-managed and is the only number a customer is charged:
+> `select service_code, retail_price_php, billing_period from platform_retail_catalog_v2;`
+>
+> **2. EVERY EVENT NO LONGER RIDES A SETNAYAN CHANNEL (§ 4h).** The DEFAULT is now the couple's
+> OWN YouTube: they create the broadcast, paste the watch link, and Setnayan embeds it. Riding a
+> Setnayan pool channel is the OPTIONAL paid add-on above. § 4h's pool reasoning still describes
+> the add-on correctly; it no longer describes the common case.
+>
+> **3. "§ 4c SCOPED A NATIVE CAPTURE APP" — IT DOES NOT.** § 4c is *"WAVE 1 + 2 SHIPPED —
+> corrections the build forced"* and scopes no capture app. The real scope is **B4** in
+> `Live_Studio_Cast_and_Roam_2026-07-23.md`. Four files in the repo carried this wrong citation.
+> ⚠ **AND B4 IS NOT THE DESKTOP ENCODER.** B4 is a PHONE app: it captures a kit phone's own
+> camera and pushes one RTMP stream per camera for **Roam**. The desktop encoder scoped in
+> `Live_Studio_Encoder_Scope_2026-09-03.md` captures the COMPOSITED PROGRAM OUTPUT and pushes
+> ONE stream for **Cast**. Different input, different topology, different product — **building
+> the desktop encoder does not deliver B4, and Roam still has no capture path afterwards.**
+>
+> **4. "A RELAY BREAKS THE ₱0 LOCK" IS TOO STRONG AS STATED.** The corpus rules relays out
+> categorically, but it was reasoning about a COMPOSITING relay, which re-encodes server-side —
+> that is what the transcode minute buys. A client that ships an already-composited, already-H.264
+> stream needs only a **remux** to FLV, which is far cheaper. The accurate claim is *"a
+> **transcoding** relay is unaffordable."* This does not change the recommendation (once the
+> client composites and encodes, the desktop path is strictly better — same client work, minus a
+> server, minus a runtime dependency on an unrepeatable day), but it must not rule out remuxing
+> on false grounds.
+>
+> Full reasoning and costs: `Live_Studio_Encoder_Scope_2026-09-03.md` (in the platform repo).
+
+
+**Owner decision (2026-07-25):** merge **Cast/Broadcast (Panood)** + **Roam** into ONE customer-facing **"Live Studio"** SKU — **₱2,999 / event**, **switching-based** controller. No compositing in V1 (phase-2 Pro). No monthly. No vendor plan. Streaming stays customer-facing (the person having the event streams it).
+
+## 1. Model
+- ONE product: a directed **Main Stage** + **switchable guest cameras**.
+- **Channel 1 = Main Stage** = the directed/controlled channel. It carries **the controller**, is part of the ₱2,999, and is run by the couple / a friend / a coordinator (not a paid crew). Can be activated / deactivated.
+- **Added cameras = channels.** Each joins via the **event QR (no install)** and serves double duty: (a) a source the controller can **one-tap cut onto the Main Stage** (the Broadcast/Cast behavior), and (b) an independently **guest-watchable** channel (the Roam guest-pick behavior).
+- **Free tier unchanged:** single-camera livestream stays free. Live Studio is the paid multi-cam unlock.
+- **⭐ CAMERA CEILING — 12 PER EVENT, FREE AND PAID ALIKE** (`MAX_ROAM_ZONES = 12`, `apps/web/lib/live-studio-roam-zones.ts:28`, enforced in `addRoamZone`; shown as "Camera channels · N of 12"). Adding a camera is free and ungated — **what the ₱2,999 buys is PUBLISHING more than one of them** (`FREE_PUBLISHED_CHANNEL_LIMIT = 1`), never the count. **There is no device limit:** phone vs laptop chooses a LAYOUT only (`lib/panood-console-layout.ts`). The retired 1-free / 8-desktop / 3-mobile ladder belonged to the two dead Cast SKUs and applies to nothing.
+- **Two numbers that are NOT camera limits:** `GUEST_PICK_MAX_VIEWERS_PER_CAMERA = 3` (guests peer-watching ONE side camera) and a pool channel's `concurrent_cap` (**DEFAULT 4** — YouTube broadcasts per Setnayan pool channel per event; inert while the pool is empty, live under the 2026-07-26 pool lock).
+
+## 2. Controller — Switcher-parity on the SWITCHING half (keeps ₱0 economics)
+**Match Switcher:** multi-camera monitor, **one-tap cut** the Main Stage between cameras, add cameras via QR, mark the **default/featured view**, **guest-pick** toggle, stream to YouTube (720/1080p), live status.
+**Beat Switcher:** QR-no-install join · **guest-pick (unique to us)** · **₱2,999 one-time** vs $65/mo · integrated in the couple's platform · unlimited viewers at ₱0.
+**COMPOSITING — "add what we can" (owner 2026-07-25, reversing the momentary strike-out):**
+- **Overlays (monogram bug, lower-thirds) — IN, fast-follow.** Feasible at ₱0: composited **client-side on the phone that's already encoding** (no second feed, no server). Ships inside the ₱2,999 unlock, built right after the switching core. Shown on the controller as the Ⓜ toggle.
+- **Split-screen / PiP — IN THE PLAN, phase-2.** Requires a mixing point (director-phone compositing à la Switcher = ₱0 but heavy client build, or a server mixer = real per-minute cost). That fork hangs on the final streaming transport, which is itself gated on the owner's YouTube orchestration — decide then, not now. Shown on the controller design tagged P2.
+- **Chroma-key / green screen — OUT** (no wedding need; hardest technically). Revisit only on owner ask.
+- **Lower third — IN, fast-follow (owner 2026-07-25):** a news-style info bar on the broadcast ("Dinner is served — Grand Ballroom · 7:00 PM"). Client-side composited like the monogram → ₱0, part of the ₱2,999 unlock. Host-editable text + quick presets.
+- **Monogram is REPOSITIONABLE** (owner): tap/drag to place it — corners/top-center; not fixed.
+- **Highlights — split honestly (owner asked "and highlights?"):** ① **Highlight MOMENTS — IN, ₱0:** a ⚡ button while live saves a timestamp (pure metadata) → post-event highlight list / YouTube VOD chapters / feeds the recap-reel. ② **Live REPLAY inserted into the stream — P2** (compositing-class, needs the mixer). Confirm ① matches the owner's intent.
+- **Layout-change ANIMATION (owner):** Full→Split→PiP transitions must animate (windows slide/morph, no hard jump). Note: since Split/PiP output is P2, the animation requirement attaches to the P2 mixer work; the controller previews it now.
+- **Channel names are the HOST'S OWN** (owner): every channel is named to their liking (name + venue = the text under each tile; ✎ rename). Already how `live_studio_roam_zones.label/venue_label` works — keep it.
+- **Event-QR overlay — IN (owner 2026-07-25):** show the event's scan-to-join QR right on the broadcast (client-side composite, ₱0). Default corner placement. ⚠ OPEN: paid-only (with the unlock, as prototyped) vs FREE (a QR that pulls guests into the event grows Setnayan too) — owner to pick.
+- **FREE-TIER WATERMARK (owner 2026-07-25): "POWERED BY SETNAYAN" as a permanent lower third on every free stream** — the growth loop (every free wedding stream advertises the platform). The ₱2,999 unlock replaces it with the couple's own lower third. Truthful-copy note: free-tier marketing must disclose the branded bar.
+
+**CHANNEL VOCABULARY (owner 2026-07-25, prototype-approved direction):** **Channel 1 = the controlled screen** (the program/broadcast itself; carries the controller). **Every camera = its own numbered channel (CH 2 "Main Stage", CH 3 "Garden Aisle", …)**; tapping a camera channel puts it on Channel 1. "Main Stage" is a camera NAME, not the program. Free tier = Channel 1 + one camera channel; ₱2,999 unlocks the rest.
+
+## 3. SKU / pricing
+- New/renamed **`LIVE_STUDIO`** SKU · **₱2,999 / event** · customer-facing · **per-event, not monthly**.
+- **RETIRE** `PANOOD_SYSTEM` (Cast ₱2,500, *live in prod*) + `LIVE_STUDIO_ROAM` (₱3,500, just shipped #3666). Their capabilities fold into `LIVE_STUDIO`.
+- Free single-cam livestream unchanged.
+- Ships flag-gated; owner flip + **YouTube channel/OAuth** for actual streaming (unchanged gate — configuring + buying needs none of it).
+
+## 4. Build (additive on the Roam foundation from #3666)
+Roam #3666 already provides the substrate: channel/zone setup, QR camera join, the guest-pick viewer, the `live_studio_roam_*` schema. Build **on top of it**, don't fork:
+1. **Controller:** extend the Roam setup controller with **Main Stage directing** — a live monitor + one-tap "cut to this camera on Main Stage." Merge Panood's directed-broadcast into this one controller.
+2. **Viewer:** the guest sees the **directed Main Stage output** + can switch to any camera (guest-pick) — one unified viewer.
+3. **SKU:** create `LIVE_STUDIO` at ₱2,999; retire the two old SKUs (redirect their studio tiles / catalog rows into the unified one).
+4. **Coordinate:** Live Studio was recently touched by a parallel session (#3579–#3592 + #3666). Build **additively**, DRAFT PRs, don't clobber their work.
+
+## 4b. LAYOUT BUILD PLAN (owner approved the prototype 2026-07-25 — "build it")
+Design reference = the interactive prototype (artifact `live-studio-control.html`, session scratchpad). Structural base = PR #3683 (merged: rename → `live-studio-control`, shared free/paid controller, server-side entitlement backstop).
+- **Wave 1 — the single-screen controller layout** (per prototype, phone-first + one desktop breakpoint): CH 1 monitor with tally discipline (red = on air, red edge + ON AIR chip; `CH 1 · CONTROLLED SCREEN` label) · camera-channel grid (CH 2+, host-named ✎, ★ default, one-tap = put on Channel 1, red tally on the live tile) · transport (GO LIVE/END + guest-pick toggle) · lock-in-place for free users + inline Unlock ₱2,999 · desktop = monitor left / grid right, same components. **Dark behind the existing flag.**
+- **Wave 2 — the ₱0 broadcast-extras wave:** Ⓜ monogram overlay (repositionable, default upper-right) · lower third (host text + presets) · **event-QR overlay = FREE (owner-locked 2026-07-25)** — available on the free tier too, because a scan-to-join code pulls guests into the event and grows Setnayan · ⚡ highlight moments (timestamps → post-event list/chapters) · **"POWERED BY SETNAYAN" permanent lower third on FREE streams** (replaced by the couple's own on unlock). Composited client-side at the encoding point — no server mixing.
+- **Wave 2 also: GUEST-PICK IS A REAL OPTIONAL TOGGLE (owner-locked 2026-07-25 "make it optional").** Wave 1 shipped it as read-only state because nothing persisted it. Wave 2 adds the persistence (one column on the event/roam config) + the public viewer honoring it: ON = guests may leave CH 1 for any camera channel; OFF = everyone watches the host's cut. Host-controlled, default ON once multi-cam is unlocked.
+- **Buy-page copy: keep "Main Stage" as the MARKETING phrase (owner 2026-07-25).** The controller speaks channels (CH 1 = controlled screen); the sales page may keep "directed Main Stage" as the customer-facing pitch. No rewrite needed.
+- **⚠ NO-FAKE-DOOR RULE for the shipped app:** the prototype shows Split/PiP chips tagged P2 for design intent, but the REAL controller must NOT render controls for features that don't exist yet (PayMongo-card precedent: hide, don't tease). Split/PiP chips appear only when P2 ships.
+- Phase 2 (unchanged): Split/PiP + live replay (the mixer fork) + the animated layout morphs that ride on it.
+
+### 4d. ⭐ PAYWALL MOVED — "REHEARSE FREE, PAY TO BROADCAST" (owner-locked 2026-07-25; SUPERSEDES the Wave 1/2 gating)
+**The problem it fixes:** under Waves 1–2 the paywall sat on the *mechanic* (`requireLiveStudioOwned` on the cut actions), so a free host saw padlocked tiles and was asked for ₱2,999 for an experience they had never felt — for a day that cannot be redone.
+
+**The model (mirrors the owner's own locked 3D Plan pattern — "build it free, pay when your guests walk it"):**
+- **FREE — private rehearsal, unlimited:** add cameras by QR, name channels, tap-cut between them on CH 1, place the monogram / lower third, set guest-pick. Their own phones, their own venue, at their actual rehearsal. **Nothing is published; no guests can watch.**
+- **FREE — broadcasting ONE camera** (unchanged; the live `/pricing` page already promises "Single-camera livestream" free — do not break that claim).
+- **PAID ₱2,999 — broadcasting MULTI-CAM:** live cutting between channels + guest-pick + the paid overlays, published to guests.
+- **Event QR stays free** everywhere; **"Powered by SETNAYAN"** stays forced on free broadcasts.
+
+**🔧 THE GATE MOVES:** from `requireLiveStudioOwned` on the **cut/config actions** → to a gate at **go-live / publish** time (publishing more than one channel, or live-switching a published stream, requires the unlock). Rehearsal + configuration become entitlement-free; **publication is the paywall.** Cannot be gamed into a free wedding — no publication means no viewers, hence no wedding.
+**Also:** locked tiles show the camera's REAL thumbnail once a phone has joined instead of a padlock over nothing; a labelled zero-setup **demo event** (reuse the `is_sample`/demo-fixture precedent) serves someone browsing before they have phones to hand.
+
+**🔤 FREE-TIER DIRECTOR-SCREEN UX (owner-locked 2026-07-25, three refinements):**
+1. **Copy = "Unlock to Broadcast"** — owner-approved exact string. ⚠ NOT "Unlock to Use": under rehearse-free the host genuinely *can* use those cameras, so "to Use" would be false while they're using them. The string names the real boundary — **broadcasting**, not using.
+2. **The nudge is CONTEXTUAL, not a padlock at rest.** It surfaces as the host actually engages the **2nd and succeeding** camera channels on the director screen (owner: "a (Unlock to Use) will also show"), so the price lands at the moment of felt value. It is a **nudge, never a block** — the cut still succeeds. Entitled hosts never see it.
+3. **🚫 NO DIMMING — the extra cameras stay FULLY VISIBLE** (owner: "but they can still see it"). This **reverses the Wave 1/2 treatment**, where non-free tiles rendered grayscale/≈40%-brightness under a 🔒 badge. Full brightness, real previews, normal on CH 1 during rehearsal. **Rationale: seeing the cameras work IS the conversion mechanism** — dimming them recreates the exact defect §4d exists to fix (charging ₱2,999 for an unfelt experience).
+
+### 4c. WAVE 1 + 2 SHIPPED — corrections the build forced (2026-07-25)
+**Wave 1 = PR #3690 (merged).** Wave 2 = PR #3698 (merged, dark). Both behind `NEXT_PUBLIC_LIVE_STUDIO_ROAM_ENABLED`.
+
+**🔧 CORRECTION — the encoding point is NOT the capture phone.** This spec assumed overlays composite on the capture phone (§4b "client-side at the encoding point"). **That path does not exist:** `panood-camera-publish.tsx` renders no overlay and the phone never encodes to RTMP. The REAL encode surface today is **`/panood/program/[eventId]`** — the chrome-less pop-out the couple's encoder (OBS etc.) window-captures. Overlays (monogram · lower third · event QR · Powered-by) are wired there as DOM layers, which genuinely reaches air (same mechanism as the existing paywall overlay). ₱0, no server mixer. ⚠ They do NOT composite onto the unified controller's CH 1 monitor (no video pipeline there) — the controller shows a labelled **placement rehearsal** sharing the same corner map.
+
+**Reality per feature:** ⚡ highlight moments = REAL + working (replaced a `markHighlight` stub that returned `{ok:true}`/"no persistence yet") · guest-pick = REAL persistence + REAL server-side viewer enforcement (enforced by omission — the loader ships only the on-air channel), but **not yet observable** because nothing writes `live_studio_roam_streams`; it bites the moment stream provisioning ships · overlays = REAL on the program surface.
+
+**Free-tier branding is unstrippable by construction:** the Setnayan bar is **derived from the entitlement, never stored** — there is no setting for a free host to flip and no request to replay.
+
+**🚨 OPEN OWNER DECISION — two contradictory owner locks, both now rendering on the same surface:**
+- `lib/panood-watermark.ts` (**owner-locked 2026-07-21, LIVE**): the free tier is a **FULL-SCREEN** SETNAYAN overlay, deliberately "useless as an actual broadcast" (a paywall).
+- This spec (**owner 2026-07-25**): the free stream is genuinely usable and merely carries a **"POWERED BY SETNAYAN" lower third** (a growth loop).
+Wave 2 implemented the newer model and left the older watermark untouched, so **both draw today**. ⚠ **MUST be resolved BEFORE the Live Studio flag flips** — otherwise a free stream shows a full-screen paywall *and* a lower third. Owner picks which survives.
+
+### 4e. ONE CONTROLLER — the new one REPLACES the legacy Cast room (owner-locked 2026-07-25)
+Owner: *"we want to remove the old controller and set this as our main controller … when we finish our new controller, this will be used to replace the old controller."*
+- **Legacy room** `/dashboard/[eventId]/studio/panood/broadcast` is LIVE + selling (`PANOOD_SYSTEM`), and is the **sole installer of `panood-program-bridge`** (today's only path to air). Reachable from **6+ doorways** (galleries · launch · panood hub · panood/setup · panood/cameras).
+- **Replacement is FLAG-AWARE (Wave 6):** flag OFF → legacy behaves exactly as today (no regression to a selling product); flag ON → the legacy route **redirects** to `/studio/live-studio-control/setup` and every doorway repoints, via one `liveStudioControllerHref()` helper. The switchover is therefore **atomic with the flag flip**, not a manual scramble.
+- **🚨 SEQUENCE — do not reorder:** Wave 5 (path to air) merges → **verify the new controller actually reaches YouTube** → then flip the flag (which activates the Wave 6 redirect) → retire `PANOOD_SYSTEM` → later, delete the legacy code. Retiring the legacy room before Wave 5 is proven would leave the product with **no route to air at all**; the SKU retirement is deliberately NOT in the Wave 6 PR (its migration would auto-apply on merge and kill live Cast sales while the new product is dark).
+- **⚠ OPEN — Cast-owner continuity:** hosts who already bought `PANOOD_SYSTEM` (₱2,500) must still reach a working controller after the flip. Either honor `PANOOD_SYSTEM` as equivalent to `LIVE_STUDIO`, or grant/migrate existing buyers. Wave 6 is investigating; **must not silently strand paying customers.**
+
+### 4e. ⭐ WAVE 5 SHIPPED — PATH TO AIR + the program output is now the THIRD paywall point (2026-07-25 · PR #3709, DRAFT, flag-dark)
+
+**§ 4c's "the unified controller has no path to air" is RESOLVED.** The pop-out at `/panood/program/[eventId]` reads frames from its opener over `panood-program-bridge`, and that bridge had exactly **one installer — the legacy Cast control room**. The unified controller now installs the **same** bridge (no fork), opens the same route, and subscribes to Wave 4's **shared** WebRTC viewer (one-publisher → one-viewer per slot; a second viewer would steal the phones from the host's own monitor mid-ceremony). End to end: **QR camera-join → shared viewer → controller publishes the permitted slot → "Open program output" → the pop-out paints it with the § 4c overlays → OBS Window Capture → the couple's own YouTube.**
+
+**🚨 THE PATH OPENS A BYPASS, and closing it is the load-bearing half.** Wave 3's gates stand on surfaces Setnayan **owns** (the `live_studio_roam_manifest` write + read gates). The program output is a publication path we do **not** own — the host's own OBS, the host's own YouTube. Under rehearse-free a host may legitimately cut between eight cameras; if those cuts reached the encoder, **rehearse-free would have meant broadcast-free via OBS.**
+
+**THE MODEL — reduce the SOURCE, exactly as the manifest is reduced:**
+
+| | program output |
+|---|---|
+| **Un-entitled** | exactly ONE camera — the host's ★ default channel, **cut-blind** |
+| **Entitled** | unrestricted (no path can block a paid broadcast) |
+| **Free single-cam** | unchanged, never withheld; `panood_watch_url` untouched |
+| **Nothing cut** | nothing on air, free tier included |
+
+⚠ **The pin deliberately IGNORES the cut** — unlike `limitPublishedManifest`, which uses the cut-aware `selectMainStageZone` because that path re-mirrors a manifest per provisioning cycle. Here the frame updates in real time, so honouring the cut would hand a free host **a live vision mixer**, which *is* the paid product. The host still chooses *which* camera, with the free ★ control. **Rehearsal is not walked back:** the controller monitor still follows every cut, for every host, at full brightness (§ 4d).
+
+**Enforced server-side twice, from one helper** (`decideProgramAir` / `programSourceAllowed`, beside `decidePublish` which they reuse for the count): the controller only ever publishes a permitted slot, and the **pop-out independently re-resolves the decision on its own render and refuses to paint any other source** — the bridge is a plain `window` property in the host's browser, so trusting what arrives over it would make the paywall a suggestion. It survives a direct PostgREST PATCH: zone UPDATE RLS *is* row-level and the anon key *is* public, so a host can rewrite `is_featured` / `is_main_stage` / `status` — and may, because those only choose *which* channel the pin lands on; the **count** comes from `orders`, which `orders_insert/update_status_guard` makes unforgeable.
+
+**Nothing faked:** a refused source shows a named "Unlock to broadcast all your cameras" card, never a black frame; a permitted-but-not-the-cut frame names the channel actually on air, and the controller says the same in plain words.
+
+**⚠ TWO LIMITS, stated not hidden.** (1) Rehearse-free means every camera's media reaches the host's own browser **by design** — a host who rewrites their own browser's JavaScript can composite their own feeds. What is guaranteed is that **no shipped Setnayan code path** produces a multi-cam program frame for an un-entitled event. (2) A host could window-capture the **controller** and crop to the CH 1 monitor, which follows every cut by owner lock (§ 4d "no dimming") — yielding a chrome-cropped, low-res and **silent** feed (controller monitors are `muted` by construction; the pop-out is the only surface that carries audio). Blanking it would reverse the owner lock and recreate the exact defect § 4d exists to fix.
+
+**🚨 § 4c's OPEN OWNER DECISION IS UNCHANGED AND STILL BLOCKS THE FLAG FLIP.** The unified path deliberately does **not** publish the legacy full-screen SETNAYAN overlay: its 24-hour window is anchored on `panood_control_state.first_live_at`, which the unified go-live path never writes, so feeding it would put a full-screen watermark over a host who **paid ₱2,999**. Free-tier branding on this surface stays the Wave 2 forced "POWERED BY SETNAYAN" bar. The legacy control room's watermark is untouched — so with the flag on, the unified path is the § 4d model and the legacy path is the 2026-07-21 model. **Owner still picks one.**
+
+**🚨 NEW OPEN OWNER DECISION — retired-SKU grandfathering.** An event holding `PANOOD_SYSTEM` / `PANOOD_SYSTEM_MOBILE` (Cast ₱2,500) but not `LIVE_STUDIO` is treated as **un-entitled** by this gate. § 3 says those SKUs "fold into LIVE_STUDIO", which argues for grandfathering — but widening `canPublishMultiCam` also widens Wave 3's guest-side paywall, so it was left as a money decision rather than taken in the build.
+
+### 4f. BROADCAST WINDOW + FREE-TIER BRANDING — RESOLVED (owner-locked 2026-07-25)
+**① The full-screen watermark is RETIRED.** Owner: *"yes we have a free single camera."* A free host really does broadcast one camera, so a full-screen SETNAYAN mark over it would make the live `/pricing` "Single-camera livestream — free" promise hollow. **The "POWERED BY SETNAYAN" lower third is the free-tier branding**; `lib/panood-watermark.ts` (locked 2026-07-21) is superseded and its full-screen overlay must stop rendering. ⚠ Build note: retire it only AFTER Waves 5/6 land — Wave 5 owns the overlay/program surface and a third agent in those files risks a three-way conflict in money code.
+
+> **✅ BUILT — verified on `origin/main` 2026-07-26.** Wave 7 shipped this as an opt-in `retired?: boolean` on `WatermarkInput`, defaulting to `false` so the 2026-07-21 behaviour survives untouched, and `decideWatermark` checks it in its **FIRST branch** — ahead of `paid`, the window and the anchor — so once retired nothing can bring the overlay back. There is exactly **ONE** call site (`studio/panood/broadcast/page.tsx`), and it passes `liveStudioRoamEnabled()`; every video surface (control-room monitor, thumbnails, the OBS-captured program pop-out) reads that single decision, so the flag flip retires it everywhere at once. **Flag OFF the legacy Cast room keeps its paywall** — deliberate: retiring it unconditionally would have handed every free host an unwatermarked multi-cam broadcast weeks before Wave 5's replacement (program-source reduction) was reachable. **⚠ So §4c/§4e's "this OPEN OWNER DECISION still blocks the flag flip" is SPENT** — the owner decided here on 2026-07-25 and the code implements it. Do not re-open it as an outstanding item.
+- Owner's framing: *"the rest of the controller is paid."* Interpreted (and confirmed by the un-dimming + "Unlock to Broadcast" locks) as **the rest of what it can BROADCAST is paid** — rehearsing with every camera stays free per §4d. NOT a reversal of rehearse-free.
+
+**② WINDOW MODEL = one event-day, extendable, never interrupted (owner-locked):**
+- **₱2,999 buys ONE EVENT-DAY of broadcasting.** (Restores the per-day shape Cast ₱2,500/day + Roam ₱3,500/day always had; supersedes the "no timer at all" that §4d shipped by omission, which was more generous than intended.)
+- **🔒 NEVER CUT OFF MID-BROADCAST** — if the window lapses while a stream is running, it keeps running. Enforce at the NEXT go-live, never mid-air. (Carried forward from the 2026-07-21 model — its single best rule: "a wedding cannot be re-run.")
+- **At ~1 hour remaining: warn + offer "add another day"** — an in-context purchase at the moment of need. Extension = another ₱2,999 (one price, per the owner's "I just want 1 price" lock — no discount ladder).
+- Anchor the window on **first go-live** (not calendar day) — no timezone ambiguity, and buying early costs the couple nothing.
+
+**③ ⚠ THE REAL THIRD-PARTY LIMIT IS THE ARCHIVE, NOT THE STREAM (verified 2026-07-25).** YouTube caps **stream duration: NOT AT ALL** (24/7 is allowed) — but **archives only the first 12 hours**; a longer stream may produce **no replay at all**. For an unrepeatable wedding feeding the Alaala handover that is the sharp edge, not being cut off. **Encode: keep each broadcast under 12h, warn the host as they approach it, and make a multi-day celebration SEPARATE broadcasts rather than one continuous stream.** (Owner's recalled "6 hours" is not the limit — corrected.) Sources: YouTube Help live-streaming restrictions + 2026 platform-limit surveys.
+
+### 4g. WAVE 8 — CHROME-LESS, SCROLL-FREE CONTROLLER (owner-locked 2026-07-25)
+Owner: *"we will achieve the exact look on our design prototype. scroll free controller. nothing under and above it."*
+- **The controller is a FULL-VIEWPORT surface**: no masthead above, no bottom nav below, **no page scroll ever**. It must match the approved prototype (`live-studio-control.html`) exactly — the operating loop fits one screen, phone-first, with the desktop breakpoint (monitor left / grid right).
+- **Only the camera-channel grid may scroll internally**; the page body never does. Everything else (status strip · CH 1 monitor · transport · icon row · unlock bar) is fixed in the viewport.
+- **Use `100dvh`, not `100vh`** — mobile browser chrome resizes the viewport mid-session and `vh` will clip the transport row exactly when the operator needs it.
+- **Honor safe-area insets** (notch / home indicator) so the tally and Go-live are never under system UI.
+- ⚠ **The repo's lint guards ENFORCE chrome:** `apps/web/scripts/lint-page-masthead.mjs` and `lint-bottom-nav.mjs` will fail a chrome-less page. There is an **allowlist** mechanism (Wave 6 noted it) — register the route properly rather than weakening the guards.
+- ✅ **Precedent exists:** `/panood/program/[eventId]` is already a chrome-less route — follow how it escapes the dashboard shell instead of inventing a new pattern.
+- **Rationale:** an operator running a live ceremony one-handed cannot hunt for a control that scrolled off, and app chrome steals vertical space from the monitor. This is the "single screen" half of the Switcher-parity promise (§2).
+
+#### ⭐ WAVE 8 SHIPPED — 2026-07-26 (DRAFT PR, flag-dark, no migration)
+
+**① THE ESCAPE — the controller MOVED to `/panood/control/[eventId]`.** An App Router page cannot opt out of an ancestor layout, and `dashboard/[eventId]/layout.tsx` *is* the chrome (SidebarShell top bar · CustomerBottomNav · nav FAB · section sub-nav). Covering it from inside is a **documented dead end**: `/panood/program/[eventId]`'s own header records that its earlier `fixed inset-0` layer under `/dashboard` rendered **nothing**, because the shell's `<main>` carries `.sn-vt-page` (`view-transition-name`) → containment → it becomes the containing block for fixed descendants, so `inset-0` resolved against a zero-height box. Wave 8 therefore reuses **the same escape the pop-out already uses** — a top-level route inheriting only the root layout. `panood` is already a RESERVED top-level slug and already the namespace for `/panood/cam/[token]` + `/panood/program/[eventId]`, so no new namespace and no slug-shadowing risk. **Authorization is unchanged and still stricter than the layout's** (`isLiveStudioSetupHost`). The old URL is a flag-gated **redirect stub**; every reference resolves through `liveStudioControlPath()`, and Wave 6's `liveStudioControllerHref()` router is untouched so the six doorways still flip atomically with the flag.
+
+**② ❌ CORRECTION — the lint guards do NOT enforce chrome, and no allowlist entry was needed.** The bullet above (written before the build) is **wrong on the facts**. `lint-page-masthead.mjs` fails only on a NEW `.sn-eye` **inside a `<header>`** — its own docstring states it is "NOT a 'every page must have an h1' rule" and explicitly names deliberately headerless surfaces *including the Live Studio control room (PR #3451)*; its `ALLOWED`/`ROOTS` cover `app/dashboard`, `app/vendor-dashboard`, `app/admin` only, so it never reaches `app/panood`. `lint-bottom-nav.mjs` checks (a) files *named* `*bottom-nav*.tsx` delegate to the canonical primitive and (b) the primitive keeps its locked markers — a page with no bottom nav passes trivially. **Both pass unmodified; nothing was weakened, skipped or allowlisted.**
+
+**③ NO PAGE SCROLL** — `fixed inset-0` at `100dvh` with `env(safe-area-inset-*)` on all four sides (0 on desktop, verified). Every row `shrink-0`; the camera grid is the one internal scroller (`flex-1 min-h-0 overflow-y-auto`). A `ViewportLock` client component locks `html`/`body` overflow + `overscroll-behavior` while mounted and restores on unmount.
+
+**④ SETUP MOVED INTO A SHEET.** Connect · encoder · manage channels + join QRs · overlay text/corners · moments · watch link were ~700px stacked under the loop — that stack *was* the scroll. Same markup, same gating, now children of `<SetupSheet>` (the shared `<Sheet>` primitive → `role=dialog` · `aria-modal` · ESC · focus trap · focus restore). **Hash-driven**, so the pre-existing `#connect` / `#add-camera` anchors — dead links once the page stopped scrolling — now open the sheet. ⚠ `ProgramBridgeHost` deliberately stayed OUTSIDE the sheet: it installs the program bridge in an effect and disposes on unmount, so closing a sheet would kill a host's live output mid-ceremony.
+
+**⑤ MEASURED, and the browser caught two things the arithmetic missed.** (a) The unlock bar was **193px at 360×640** (wrapping CTA + 3-line title), leaving the grid **52px** — about a third of one tile; now 74px, headline+price and a non-wrapping CTA on phone, elaboration at `sm+`. (b) **Both Wave 7 warnings up at once dropped the grid to 27px**; the CH 1 monitor now yields while a warning shows (`:has()` rule in `globals.css`; degrades safely), recovering the grid to 115px. Final: **360×640 → 175px grid (115px worst) · 390×780 → 316px (219px worst) · 1280×800 → 629px, real two-column 756/488 · 320×568 worst → 36px** — no page scroll and no clipping at any of them.
+
+**⑥ Also:** transport is **two-up at every width** (prototype parity — it used to stack below `sm:`, costing 112px for two 52px controls); status banners float with a 6s timeout instead of pushing layout; the status strip's back control is a labelled **"Exit"** target, because removing the chrome removed every other route back to the dashboard. Two additive, default-false props: `<Sheet wide>` and `<BroadcastWindowStrip compact>` (a *visual* clamp — the sentence stays in the DOM and for AT; headline + "Add another day" never clamped).
+
+**Waves 1–7 verified intact:** tally discipline · one-tap cut · un-dimmed tiles (no `grayscale`, no "Unlock to use") · the contextual "Unlock to broadcast" nudge · window strip · archive warning · guest-pick · ⚡ highlights · free single-cam. 29 new tests; 3442/3442 unit green; typecheck + lint + production build pass.
+
+⚠ **Found in passing, NOT fixed here (separate task):** the site-wide cookie-consent banner has **no route gating at all** (`app/_components/cookie-consent-banner.tsx`), so it renders over `/panood/program/[eventId]` — the surface a couple's OBS **window-captures into their live broadcast**. Pre-existing, not a Wave 8 regression, and out of scope because the fix touches every route.
+
+### 4h. WAVE 9 — SETNAYAN-OWNED CHANNEL (owner-confirmed 2026-07-26 "go")
+
+> 🚨 **PARTIALLY SUPERSEDED 2026-09-02 (`DECISION_LOG.md` same date, LS5) — READ BEFORE ACTING ON THE BULLET BELOW.** The line *"Every wedding streams on a Setnayan channel; the couple never connects a Google account"* is now FALSE AS A DEFAULT. Owner ruling: the couple's own YouTube link is the default again; the Setnayan-owned pool built in this section is now an OPTIONAL, separately-priced add-on (`LIVE_STUDIO_HOSTED_CHANNEL`, ₱1,500/day, stacks on `LIVE_STUDIO`'s own ₱1,500/day for the owner's stated "₱3,000 total for the hosted option"). **The INFRASTRUCTURE below (channel grants, `provisionRoamBroadcasts`, `/admin/live-studio-channels`, `NEXT_PUBLIC_LIVE_STUDIO_POOL_ONLY`) is KEPT, unchanged and still correct** — it is the plumbing behind the add-on now, not the sole path, and pool-only stays ON for both tiers (it closes the BYO OAuth door, which is a compliance boundary independent of who pays for the channel). What changed is only the DEFAULT a non-add-on couple is told: paste their own already-running watch link (or start one from OBS/the YouTube app), not "there is nothing for you to connect." The pool-side file-handoff open question two paragraphs below is UNCHANGED by this ruling — still open, now scoped to add-on buyers specifically.
+
+Owner asked *"so we connect to our setnayan youtube account?"* → **YES, confirmed.** Reaffirms the 2026-07-23 channel-pool lock and rejects couple-BYO.
+- **ONE Setnayan YouTube account, connected once by the owner.** Every wedding streams on a Setnayan channel; **the couple never connects a Google account.** ⚠ **AS OF 2026-09-02 THIS IS THE HOSTED-ADD-ON PATH, NOT EVERY WEDDING'S PATH** — see the superseding note above.
+- **🔑 THE DECISIVE REASON:** only Setnayan's own account authorizes → the consent screen can be **Internal** → **Google app verification is NOT required at all.** The scope/brand-verification wall hit 2026-07-25 evaporates. Couple-BYO would force External+verification (weeks) **and** impose YouTube's ~24-hour first-stream wait on *every couple* — a couple buying the day before the wedding could not stream.
+- **Costs accepted:** other couples' ceremonies live on Setnayan channels (a music copyright strike lands on us — mitigated by one-channel-per-event so the blast radius is a single wedding) · Setnayan must hand the recording back (resolved watch link on the dashboard — **no wipe**, retired 2026-08-31; the couple's own FILE comes from OBS "Start Recording", not a VOD pull) · YouTube Data API quota ceiling ≈ **12–15 weddings/day** (file for an increase early).
+- **⚠⚠ HONEST LIMIT — this does NOT make it fully turnkey.** Browsers cannot push RTMP, and the native capture app was scoped but never built (§4c). So even with the Setnayan channel connected, **something must still encode the program output to YouTube — today that is the couple's own OBS window-capture.** Wave 9 removes the requirement that the couple own/authorize a *YouTube account*; it does NOT remove the encoder. True zero-to-do needs one of: a native RTMP capture app, or a WebRTC→RTMP server relay (**breaks the ₱0 marginal-cost lock** — real per-minute compute). **Decide that separately; do not assume Wave 9 delivers it.**
+- **Build:** make the OAuth grant **channel-keyed / platform-level** (today `oauth_grants` is per-event/BYO) · wire `provisionRoamBroadcasts` (scaffolded in `lib/live-studio-roam-provision.ts`) to create real broadcasts on a pool channel · admin surface to connect/manage pool channels · couple-facing **"Ready to broadcast"** readiness state on the controller. Owner still performs G1 (create+verify the channel, enable live streaming — **the 24h wait applies to Setnayan, once**) and G4 (quota increase).
+
+#### ⭐ WAVE 9 SHIPPED — PR #3720 (DRAFT, flag-dark, 1 migration · 2026-07-26)
+
+> 🚨 **This REVERSES the `DECISION_LOG.md` 2026-07-25 row** ("channel model LOCKED — the broadcast goes on the COUPLE'S OWN channel; the Setnayan-owned pool is RETIRED as the default"). The pool is back, on the reason that row did not weigh: **Internal consent ⇒ no Google verification at all.** That row's objections are now **accepted costs**, not refutations.
+
+- **① The platform grant is a NEW table, not a widened `oauth_grants`.** `live_studio_channel_grants`, keyed on `channel_pool_id` — one grant per CHANNEL, many events over its life. `oauth_grants` could not host it for three reasons, and the third is the sharp one: its `event_member_reads_oauth_grants` policy grants `SELECT` on the **whole row** — RLS is row-level, not column-level — to any authenticated member of the event, and the row carries `refresh_token` in plaintext. Fine for a BYO grant (the couple's own account); a **platform-credential leak** for a channel other couples' weddings stream on. The new table has **RLS enabled and NO POLICY AT ALL** — service-role only, the `live_studio_roam_streams` posture. **The BYO path is untouched.** Sibling `live_studio_channel_oauth_state` exists because `oauth_state.event_id` is also `NOT NULL`. Refresh reuses `/api/cron/oauth-refresh`; the connect flow reuses the **same redirect URI** (disambiguated on the state token), so no second Google registration.
+- **② `provisionRoamBroadcasts` is wired — and is `mirrorRoamManifest`'s FIRST caller.** Pool checkout → that channel's token → N × `liveBroadcasts.insert`/`liveStreams.insert`/`bind` → `live_studio_roam_streams` → the mirror. **No second paywall**, per the scaffold's own instruction: an un-entitled event gets N broadcasts *created* (Setnayan's cost, not a guest-visible act) and **exactly ONE published**. This closes § 4c's "guest-pick is real but not yet observable because nothing writes `live_studio_roam_streams`". Broadcasts are **unlisted**. Idempotent at three layers (checkout · per-zone skip · the `one_active_per_zone` index, with `23505` counted as *reused*).
+- **⭐ The pool HARDENS § 4d.** Under BYO an un-entitled host *owned the channel* and could read all N video ids from their own YouTube Studio, defeating omission-based manifest reduction. On a Setnayan channel they cannot — enforcement-by-omission actually holds now.
+- **③ `goLivePanood` prefers a pool channel, BYO as fallback.** Without this the couple still had to connect Google for the **single directed broadcast** (the one the program output feeds), so the headline promise would have been false. 🚫 **End deliberately does NOT release the channel** — § 4h hands the recording back before reuse. **The wipe was retired 2026-08-31** (owner ruling — § 6's indefinite retention wins), so release destroys nothing; it stays an explicit act because a channel still carrying a live event must not be reclaimed under it. Release is an explicit admin act, with the checkout age on screen.
+- **④ `/admin/live-studio-channels`** — connect · verify (a human attestation: Setnayan cannot see whether YouTube enabled live streaming) · rename · cap · release · disconnect · who holds what and for how long. Nav row **conditional on the flag**, so a dark build has no row pointing at a 404.
+- **⚠⚠ THE HONEST LIMIT IS UNCHANGED AND MUST NOT BE FORGOTTEN.** Browsers cannot push RTMP; the native capture app was never built. **The couple's own OBS still window-captures the program output.** Wave 9 removes the *YouTube-account* requirement, **not the encoder** — so `ready` never means "you are on air". The green headline is **"Ready to broadcast — start your encoder"** and the encoder notice renders on *every* branch, tested. True zero-to-do still needs a native RTMP app or a WebRTC→RTMP relay (**which breaks the ₱0 marginal-cost lock**).
+- **Still owner-gated:** **G1** (create + verify the Setnayan channel, enable live streaming — the 24h wait, once) and **G3** (`YOUTUBE_OAUTH_*`). Readiness names each missing piece and never fakes one. **G4** (quota, ceiling ≈12–15 weddings/day) remains open.
+
+### 4i. CUTOVER CORRECTIONS — SHIPPED (owner-directed 2026-07-26, PR #3716 merged)
+**Prod fact that simplified everything (verified by SQL):** `orders` holds **ZERO rows for every Live Studio SKU** — Cast, Roam and Live Studio have **never been bought by anyone**. So retiring Cast strands no customer.
+- **① `PANOOD_SYSTEM` RETIRED** (migration `20271005180040`, row preserved + reversible). **The ₱500 arbitrage is closed** — with Wave 6's alias live, a ₱2,500 Cast purchase would have conferred the ₱2,999 controller. Verified the only reachable purchase path rejects at `resolveServiceSellability` **before** both charge resolvers (index-ordering test pins it). Wave 6's alias still resolves historical orders + comp grants (ownership reads `orders`/`comp_grants`, never the catalog — design-pinned).
+  - Caught in passing: `formatV2Sku` does **not** filter `is_active`, and `home/pricing-data.ts` had a **hardcoded ₱2,500 fallback** that would have kept advertising Cast after retirement. Both handled. The buy CTA is hidden but the **launch** CTA is not (same control — gating both would strand an existing buyer).
+- **② GRANT METERING CORRECTED — owner: "founder yes. internal no."** Wave 7 wrongly made comp/founder/internal/promo *all* unmetered. Now an **allowlist, fail-closed**: `founder` (`founder_seats`) → **unmetered** · `comp` (`comp_grants`) → **unmetered** · **`internal` (`is_internal`) → METERED** · `promo` → metered · **anything unrecognized or errored → metered**. Precedence `founder → comp → internal → promo → unknown` lives in a pure `classifyGrant()`; the internal∧founder overlap is tested both ways (the owner's own account is likely both).
+  - **Founder = a row in `founder_seats`** — the admin page where "whoever is there permanently has all services free". Live in prod, **cap 10, 1 seat used, 9 open**.
+- **⚠ CONSEQUENCE while the flag is OFF:** with Cast retired and `LIVE_STUDIO` name-excluded from the customer catalog, **no paid live-broadcast SKU is listed or purchasable anywhere** until launch. Free single-cam is untouched; the paid row returns automatically at the flag flip.
+- **⚠ ONE PRE-EXISTING HOLE LEFT OPEN:** the legacy Cast room `/studio/panood/broadcast` applies **no broadcast-window metering to anyone**, and an internal host still reaches it (`resolvePanoodTier` → `eventSkuActive('PANOOD_SYSTEM')` is true for any internal event). Not introduced by these fixes, and it closes at the flag flip when Wave 6 redirects that room into the unified controller.
+- **✅ STALE ELSEWHERE — RECONCILED 2026-07-26.** `Pricing.md § 00` is fixed: the two per-day Cast rows are replaced by one **retired** row (naming migration `20271005180040` + the ₱500 alias arbitrage it closed) plus the canonical **`LIVE_STUDIO` ₱2,999/event** row, and the § 00 summary sentence with it. The `CLAUDE.md` SKU table and `Pricing.md § 0` were **deliberately left alone** — both sit under emphatic "SUPERSEDED / kept for lineage only" banners, and editing prices inside a lineage table is how stale numbers get re-legitimised (the same failure the 2026-07-02 stub-gutting exists to prevent). **❌ And this note's third claim was WRONG:** §4f ② is the WINDOW model and says nothing about grant metering — there was no uniformly-unmetered sentence there to correct. The unmetered behaviour was in Wave 7's *code*, which ② above fixed; the doc pointer misfired.
+
+### 4j-2. ⭐⭐ SUPERSEDED SAME DAY — GUEST-PICK IS **CAPPED PEER-TO-PEER**, NOT HLS/R2 (owner-decided 2026-07-26, REVERSES 4j below)
+
+**Owner's reasoning:** guest-pick over plain WebRTC is *the same technology as the already-shipped 1:1 chat video call*, which is free — it just doesn't fan out, because the camera phone must upload one copy per viewer. So: **no R2, no HLS, no MediaRecorder, no segments, no presigns.** The § 4j architecture below is retained for lineage only.
+
+- **Side cameras serve guests over plain WebRTC**, reusing the existing publish path and the same Cloudflare TURN config the chat calls use. **The codec/Safari problem disappears with it** (see "what the HLS probe found" below).
+- **HARD CAP — `GUEST_PICK_MAX_VIEWERS_PER_CAMERA = 3`.** The binding constraint is the phone's uplink: it already spends ~1.5 Mbps publishing 1080p30 to the host, and each guest adds ~0.6 Mbps (capped at 600 kbps / 540p via `RTCRtpSender.setParameters`). 3 viewers ≈ 3.3 Mbps; 5 ≈ 4.5 Mbps, optimistic on PH mobile data. **The cap exists to protect the DIRECTOR'S CUT, not the guests** — if the uplink saturates, WebRTC congestion control degrades *every* sender on that phone, including the host feed.
+- **Graceful refusal when full** → "This camera is full — watching the main stream." The director's cut is on YouTube and **unlimited**, so nobody is ever locked out of the wedding itself.
+- **Occupancy = Supabase Realtime presence**, not a counter (a counter leaks when a guest closes a tab or loses signal). Presence reclaims on socket close · 45 s staleness window re-beaten every 15 s · `g-bye` for instant release · the phone drops a failed peer · the phone re-decides authoritatively.
+- **⚠ A SEPARATE SIGNALING TOPIC IS MANDATORY.** Guests use `panood-guest:{eventId}`, never `panood-rtc:{eventId}`. The host transport is one-publisher → one-viewer per slot, so a guest answering there would **take** the camera and black out the couple's controller mid-ceremony — the exact hole migration `20270829134804` closed. New predicate `live_studio_guest_rtc_can_access` (migration `20271006520000`); the host policies are untouched.
+- **⚠ ₱0 ONLY WHEN CONNECTIONS ARE DIRECT.** Cloudflare TURN is billed per GB; a relayed viewer-hour at 600 kbps ≈ 0.27 GB. A fully-relayed 4-h event, 3 cameras at cap ≈ 9.7 GB ≈ **₱28–56**; the typical case is a few pesos. Expect a **higher relay share here than on the host path** — both ends are phones on mobile data behind CGNAT. Tagged `panood-guest` in WebRTC telemetry so the share is measured, not guessed.
+- **⚠ PRIVACY (RA 10173) — NEW EXPOSURE.** P2P means the two peers learn each other's **IP address**: a guest watching a side camera exposes theirs to the operator's phone and vice versa. TURN masks it; a direct connection does not. Guests previously only ever talked to YouTube. Also new: tapping a side camera mints a **native-anon Supabase session** (lazily, on tap only) because a private Realtime topic needs a real `auth.uid()`.
+- **Paywall unchanged:** reuses `canPublishMultiCam` (§ 4d) — one rule, enforced by omission (un-entitled ⇒ empty roster ⇒ the browser is never told a side camera exists), plus a server-side re-ask before the session/TURN mint.
+- **Known boundary, not a leak:** any signed-in session can join the guest topic of any event with guest-pick on + a live camera. The event page is public, so that is the correct audience; what it permits is consuming a slot (bounded at 3) and seeing that event's SDP/ICE.
+- **SHIPPED:** PR **#3725** (DRAFT, flag-dark, 1 migration · 2026-07-26). 32 unit + 14 DB tests · full suite 3768 pass · build passes.
+
+**🔬 WHAT THE HLS PROBE FOUND BEFORE THE PIVOT (measured in Chrome 148, worth keeping).** The § 4j codec risk was **real and worse than stated** — two independent blockers, either of which would have shipped a broken pipeline:
+1. **Chrome ignores the timeslice for MP4.** `recorder.start(6000)` on `video/mp4` delivered **nothing** during recording — both chunks arrived at `stop()`, the second carrying `moof+mdat+mfra` (a finalized file). A rolling live playlist is impossible that way; it would have needed WebCodecs + a hand-written fMP4 muxer.
+2. **Bare `video/mp4` silently resolves to VP9.** `isTypeSupported('video/mp4')` returns true, but after `start()` the recorder reported `video/mp4;codecs=vp9,opus` — **VP9 + Opus in an MP4 container, unplayable as HLS on iOS.** Any future MediaRecorder work must request `avc1`+`mp4a.40.2` explicitly and **verify the resolved `recorder.mimeType`**, never trust `isTypeSupported`.
+
+### 4j. GUEST-PICK AT ₱0 — HLS VIA R2 (owner-decided 2026-07-26 "R2" · **SUPERSEDED the same day by § 4j-2 above — lineage only**)
+**The owner's insight that unlocked it:** *only the director's cut needs to be SAVED.* Side cameras are live-viewing only — no archive, no YouTube broadcast each, therefore **no relay, no N stream keys, no N OBS instances, no OAuth.** That deleted the entire cost centre.
+- **Director's cut (CH 1)** → OBS → **YouTube**: permanent archive, unlimited viewers, ₱0. Unchanged.
+- **Side cameras** → each phone writes **HLS segments straight to R2** via presigned PUT → guests play from the **public R2 domain**. **R2 egress is FREE**, so 5 viewers or 500 cost the same: nothing.
+- **Cost: ~$0.10 (≈₱6) per event** — R2 bills *writes*, not reads. 2-sec segments × 4 h × 3 cameras ≈ 21,600 PUTs. Storage trivial, deleted after.
+- **Rejected alternatives:** N YouTube broadcasts (needs a WebRTC→RTMP relay: ~₱300/event self-hosted or ~₱1,650 on Cloudflare simulcast) · WebRTC/SFU fan-out (₱250–1,000/event, scales with viewers) · pure P2P (₱0 but caps at ~5 viewers/camera). **Owner: "no way to make the guest pick cam to be free? no 250/1000?" → R2 it is.**
+
+**⚠ THE CONSTRAINT THAT SHAPES THE DESIGN — double upload.** Every camera needs BOTH: **WebRTC to the host** (sub-second, so the host can cut it onto CH 1) **and** HLS to R2 (so guests can watch it). That's two uploads from one phone. Mitigate by making the **HLS copy low-bitrate** (~500–700 kbps / 480p — it's a peek view, not the broadcast); total ≈ 2 Mbps rather than 3. Must be measured on real PH mobile data before promising it.
+
+**Other design facts:**
+- **Latency ~10–20 s** — acceptable because the YouTube director's cut already runs 15–30 s behind, so side cameras feel *no worse* than the main stream.
+- **⚠ Codec is the main technical risk:** `MediaRecorder` emits WebM (VP8/9) on Chrome/Firefox but Safari needs **fMP4/H.264** to play HLS. Verify `video/mp4;codecs=avc1` support per platform and have a fallback plan; a WebM-only pipeline is unplayable for iPhone guests.
+- **Serve from the PUBLIC R2 domain, never presigned** (presigned URLs expire mid-event — the same rule already locked for booth logos/banners).
+- **⚠ Presign security:** SEC-1 already records that `lib/uploads.ts` signs *any* key with no tenant check. Do **not** widen it — scope upload presigns tightly to (event, camera, segment prefix), short TTL.
+- **Cleanup:** delete segments after the event (R2 lifecycle rule preferred over app logic). Retention follows the event's normal policy.
+- **✅ Bonus:** the segments are already in R2, so **post-event multi-angle replay** becomes nearly free to add later.
+
+### 4k. ⭐ THE RECORDING HANDOFF — SHIPPED 2026-07-26 (flag-dark, NO migration)
+
+§ 4h left one item unbuilt and named it twice: *"Setnayan must hand the recording back (VOD pull → dashboard/Alaala, then wipe+reuse)"* and *"End deliberately does NOT release the channel … that pull is **unbuilt**"*. Built now, against the spec that actually defines it: **`02_Specifications/09_Panood_Feature_Specification.md` § 6, "Recording Archive (YouTube auto-archive only in V1)"** — every broadcast is auto-archived by YouTube as an **unlisted** video at **indefinite retention**, free, and *"couples download from their Setnayan dashboard via a link that resolves the YouTube watch URL through the Data API."* § 6 also **removed** the parallel Cloudflare R2 archive from V1, "to avoid paying for storage of content that's already free on YouTube" — so nothing shipped here moves bytes or writes to R2.
+
+**① IT WAS A LIVE DEFECT, not merely a missing feature.** Nothing in the codebase had ever written a **status update** to `live_studio_roam_streams` — only the provisioning INSERT. `endPanoodBroadcast` closed `panood_broadcasts` and left every camera channel `'ready'` forever. Two consequences, both armed the moment the flag flips:
+- **`releasePoolChannelIfIdle` could never succeed for any event.** It refuses while any stream is un-complete, so no path consulting it could ever free a pool channel.
+- **The guest picker never tore down.** `events.live_studio_roam_manifest` had no writer after provisioning, so all N cameras stayed advertised after the wedding — and as the **only** watch block, because End *does* clear `panood_watch_url`.
+
+`completeRoamBroadcasts` (new `lib/live-studio-recordings.ts`) completes the rows, completes them on YouTube best-effort, then re-mirrors — so the picker tears itself down **through the § 4d publish gate, not around it** (no second rule that can disagree with the first). Side fix: a host who ends and restarts now gets **fresh** broadcasts, where before the run reused rows YouTube had already auto-completed and could never go live again.
+
+**🔒 THE LOCAL ROW IS THE SOURCE OF TRUTH** — the precedent CAST set in this same action ("close it in the DB so the couple can always stop even if YouTube errors"). The DB write runs even when the YouTube half fails wholesale (quota, revoked token, network). The residual failure points the safe way: a YouTube broadcast may linger while our picker stops advertising it; the reverse — a dead camera advertised to guests forever — is what shipped before this.
+
+**② DELIVERY.** `fetchYoutubeVideoArchives` (videos.list — **1 quota unit for up to 50 ids**, against 50 units for a single liveBroadcasts write) resolves the archives; a **"Your recordings"** card on the Live Studio setup page lists the program feed plus every camera channel with its date and duration. `archived` is **tri-state, and the null is load-bearing**: `true` = YouTube confirmed an archive · `false` = YouTube was asked and has none (never carried video, or the broadcast ran past the 12-hour ceiling of § 4f ③) · `null` = we could not ask. A couple must never read "no recording" because our token expired.
+
+**⚠ THE COPY SAYS "WATCH", NOT "DOWNLOAD" — and § 6's wording is the reason to flag it.** § 6 says *download*, but the mechanism it prescribes (a resolved watch URL) delivers *watching*. YouTube offers a file download only to the channel's **OWNER**, via Studio — true for a BYO broadcast, **false for a Wave 9 pool broadcast on a Setnayan channel**, which is precisely the case § 4h created. The card states the condition rather than assuming it ("if your broadcast went out on your own YouTube channel, you can also download the file from YouTube Studio"). **⏭ OPEN — the pool-side FILE handoff is unbuilt.** Options, none taken: an admin-side Studio download + hand-off, or `videos.insert` re-upload to a channel the couple connects (§ 4 of Cast_and_Roam already floats "optionally re-published to a channel they connect"). Owner picks.
+
+**⚠ DELETES NOTHING, DELIBERATELY.** `liveBroadcasts.delete` is absent from the new code *and* from `panood-youtube.ts`, pinned by a test. Nothing in the schema records whether a given broadcast carried video (`went_live_at` still has no writer), so no code here can distinguish an empty container from a ceremony — and under that uncertainty the only safe operation is to keep it. **Release behaviour is unchanged**: still the explicit admin act Wave 9 made it.
+
+**🚨 OPEN OWNER DECISION — TWO DOCS DISAGREE AND THE DIFFERENCE IS DESTRUCTIVE.** `Live_Studio_Cast_and_Roam_2026-07-23.md` § 4 ("the channel is then wiped + returned to the pool") and § 4h ("then wipe+reuse") both end the handoff with a **wipe**. § 6 promises the archive **indefinite retention** — which is also the only thing that makes a resolved watch link a durable deliverable instead of a link that rots. **Wiping would delete a wedding, so it is not built.** ✅ **SETTLED 2026-08-31 — § 6 WINS, THE WIPE IS RETIRED.** No session may build one; release never destroys video. The file half is answered separately and for ₱0: **OBS "Start Recording"** writes the couple a full-quality local copy from the encoder already running, now stated on all three encoder-facing surfaces. See `DECISION_LOG.md` 2026-08-31.
+
+Verified: 11 new tests (with an anti-vacuity control — the same fixtures are asserted to publish 2 channels *before* the teardown, so the post-teardown 0 is the code's doing and not the stub's) · **4132/4132 unit green with the flag OFF and ON** · typecheck + lint + production build pass · no migration. **PR #3770, merged.**
+
+#### 4k-2 · THE RECORDINGS MUST SURVIVE THE FLAG FLIP (PR #3774)
+
+#3770 put the card on the **legacy** `/studio/panood/setup` page only. There are **TWO** couple-facing Live Studio setup surfaces and which one a couple uses depends on a flag they cannot see — flag OFF the legacy page, flag ON the Wave 8 controller's `<SetupSheet>` — so a recording present on only one of them is a recording the couple **loses at the flip**, which is exactly when Live Studio starts being used. The card is now a shared component (`app/_components/live-studio-recordings-card.tsx`) rendered by **both**, so the copy and the tri-state `archived` notes cannot drift; the controller renders it `compact` (text scale only) because Wave 8 made vertical space the scarce resource in that sheet, placed after "On the day" so the sheet reads in event order. The test pins the property rather than the markup: both surfaces must mount the card **and** call `fetchEventRecordings` — a surface that renders it but fetches nothing always shows zero recordings. Same rule, same reason as `FACEBOOK_REPLAY_WARNING` rendering on both surfaces. 4154/4154 unit green flag OFF and ON.
+
+**🚨 FOUND, NOT FIXED — A DUPLICATE TILE AT LAUNCH (belongs to the owner-sequenced cutover).** With the flag **ON**, `ADD_ONS` carries **both** the legacy `panood` tile — label **"Live Studio Cast"**, `serviceKey: PANOOD_SYSTEM`, the SKU #3716 RETIRED — **and** the unified `LIVE_STUDIO` tile. § 3/§ 4 say the old rows fold into the unified one, so this is a real launch-day defect: two doorways, one of them named after a variant that no longer exists and pointing at a dead SKU. **Deleting the Cast tile now is the wrong fix** — it is also the doorway to `/studio/panood/setup`, which is the free single-cam relay *and*, flag-off, the only home of the recordings card. Removing it would strand both. This is § 4e's *"later, delete the legacy code"* step, which § 4e sequences **after** the flip and after the controller is verified to reach YouTube. Handle it in that cutover, not before.
+
+## 5. Non-goals for V1 (explicit)
+Compositing/PiP/graphics (phase-2 Pro) · a monthly plan · any vendor-side Live Studio plan · recording deliverables beyond what exists.
+
+## 6. Competitive frame (for copy)
+Positioned against **a switcher subscription + per-phone installs** (Switcher $65/mo) and **a crewed producer service** (LoveStream ₱18–35k). We are the only one that is **QR-no-install + guest-pick + per-event ₱2,999 + integrated**. Sources: Switcher pricing/features pages; PH videography market scan (2026-07-25 research).

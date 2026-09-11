@@ -1,0 +1,1257 @@
+# Explore Replan — BUILD SPEC
+**Date:** 2026-07-27 · **Status:** BUILD-READY · **Execute in:** a fresh session (this spec is the cold-start contract)
+**Design:** [`Explore_IA_Replan_2026-07-27.md`](Explore_IA_Replan_2026-07-27.md) (+ §5 owner additions) · **Behavioral spec = the playable prototype:** [`Design_Explore_Replan_2026-07-27/explore_replan_playable_2026-07-27.html`](Design_Explore_Replan_2026-07-27/explore_replan_playable_2026-07-27.html) (artifact fb168bd2 mirrors it). When prose and prototype disagree, the prototype wins — the owner iterated on it five rounds.
+
+## 0 · Read first (in order)
+1. This file, fully. 2. The playable prototype (open it, click through one lock loop). 3. `Explore_IA_Replan_2026-07-27.md` §0–§5. 4. DECISION_LOG 2026-07-27 rows: multi-pick floor · IA replan · §5 additions · SERVICE-CARD RECONCILIATION · stateful-inquiry amendment. 5. Repo rules: worktree off `origin/main` per PR · changelog fragment in ROOT `changelog.d/` · `gh pr merge --auto --merge` · verify BEFORE arming auto-merge · prune worktree after merge · `pnpm install --frozen-lockfile --prefer-offline` in fresh worktrees.
+
+## 1 · The target surface (all of it already exists — this wave EXTENDS)
+Live path `/dashboard/[eventId]/vendors` (BUDGET_BUILD ON in prod): single-scroll `ServicesTakeover` — bench (`shortlist-categories.tsx`, folder accordion + carousel rails) · Build (`Build3StateControl`+`BuildLocked`) · Budget (`MerkadoBudgetLens`) · Compare (`build-compare.tsx`). ⚠ `PlanBudgetAccordion` is the legacy kill-switch path — do NOT build on it (PR #3789's UI affordances live there; carry them here, PR-D/PR-A).
+
+## 2 · Decisions in force
+| # | Decision | Source |
+|---|---|---|
+| 1 | Multi-lock everywhere except `HARD_SINGLE_PICK_GROUPS` (6); "at least 1 is the floor" | #3789 + log row |
+| 2 | Post-lock in multi-pick: toast asks "done with this service, or add another?" → `'complete'` / stay open. Hard-single auto-completes | design §1.3 |
+| 3 | Incompatible-after-anchors cards: DIM + booking-DISABLED + SINK behind "Not available" divider, never removed; **"Ask anyway"** keeps the thread path (dimmed-but-viewable, per prototype — owner played it 5 rounds without objection) | design §1.2 |
+| 4 | "I'm done" collapse = one-line "✓ Covered — reopen" row (per prototype) | design §1.3 |
+| 5 | Coverage Strip = ICON tiles (Lucide in production, NOT emoji) + state ring/badge + NEXT flag + progress ring; urgency-ordered; in-plan categories only | §5 + prototype |
+| 6 | Adaptive category set: in-plan vs "＋ Add to your plan" pool per folder; "Not needed? Remove"; a category with a locked vendor is NOT removable | §5.2 |
+| 7 | ⓘ per tile → plan-group `hint` via the tile→group bridge; finer tiles need copy (Taxonomy Studio later; ship group hint as fallback) | §5.1 |
+| 8 | Lock summaries: collapsed rows show locked vendor names; folder heads show "● N locked · N to decide · ＋N more"; Your team gets "Still needs your decision" | §5.3 |
+| 9 | **Three-action card:** "＋ Add to build" (primary, `event_build_picks` ◕) · **Inquire / 💬 Check inquiry (STATEFUL on thread existence)** · "Lock now — it's final" (quiet secondary). Hard-single build holds ONE candidate (add swaps). Locking removes the pick from build | reconciliation rows |
+| 10 | Plans (Compare renamed): locked picks PINNED identical in every column; columns vary build candidates; "Save current as a plan" from Your team | design §2.4 + prototype |
+| 11 | Your team: locked + candidates ("ready to lock" per-row Lock ✓) + anchors + Locked/In-build/Budget/**Buffer** tiles | prototype |
+
+**⛔ One hard owner gate (blocks PR-G only):** lock-reserves-nothing (DECISION_LOG 2026-07-26) — greying options on a lock that holds no date isn't credible. Owner must pick (a) pool-acquire at `contracted` + ~7-day unpaid expiry (recommended) or (b) "Lock is a claim" labeling. **Also prereq for G:** the `/find-date` dead vendor pool (42703, two non-existent columns) must be fixed.
+
+## 3 · PR slices (each = one worktree · one PR · flag-dark; build in order, A→F are unblocked TODAY)
+**Flag:** everything user-visible behind `NEXT_PUBLIC_EXPLORE_REPLAN_ENABLED` (new, default OFF; helper `lib/explore-replan-flag.ts` mirroring `payment-gated-lock.ts`). Never flip in prod — owner flips after preview.
+
+### PR-A — 'complete' decision + done-or-add-more toast (S)
+- Migration: extend `event_category_decisions` CHECK to `('excluded','deferred','complete')` (drop + re-add constraint; RLS/ACL untouched). Ledger rule: dispatch + verify the OBJECT (constraint), not just the ledger.
+- `lib/checklist-state.ts`: type + resolution for `'complete'` (reversible).
+- Post-lock toast: `_components/lock-milestone.tsx:122` (`LockMilestoneToast`) + `accordion-lock.tsx:271-299` — multi-pick lock adds the two-button question ("✓ I'm done" writes `complete` via a new server action next to `flagCategory`; "＋ Add another" no-op keeps rail). Hard-single: auto-write `complete` in `finalizeVendor` (`vendors/actions.ts:650` family) after the existing milestone block. Undo (`revertVendorToConsidering`) must clear `complete`.
+- Bench: "✓ Covered — reopen" row state in `shortlist-categories.tsx` tile body.
+
+### PR-B — Coverage Strip v2 + folder summaries (M)
+- Upgrade the plan-strip (`shortlist-categories.tsx:628-648`, `openPlan` machinery stays) → icon tiles: Lucide icon per tile (add an `ICON` map beside `WEDDING_TILE_LABEL` in `lib/taxonomy.ts`), state derived empty/explore/picked(build)/locked/done, count badges, NEXT flag, "Covered X of Y" + SVG progress ring.
+- Urgency order: `timelineStatusOf` (`lib/vendors-plan-budget.ts:470`) via the tile→group bridge (`catalogTile` on plan groups / `canonicalServicesForTile` in `lib/vendor-counts.ts`); done sink right.
+- Folder heads: "● N locked · N to decide · ＋N more" pills.
+
+### PR-C — Adaptive category set + ⓘ (M)
+- Schema: nullable `tile text` column + partial UNIQUE `(event_id, tile)` on `event_category_decisions` (tile-level exclude; plan-group rows keep working). REVOKE-check per default-ACL rule if any new object.
+- In-plan set = onboarding-planned tiles (`ShortlistTile.planned`) ∪ tiles with picks/locks − tile-excluded. Folder bottom: "＋ Add to your plan" chips (clears exclusion / adds); per-tile "Not needed? Remove" (writes exclusion; GUARD: refuse if any locked vendor in the tile's categories — toast "unlock first").
+- ⓘ on tile rows → group `hint` (`wedding-plan-groups.ts` hints; bridge as PR-B).
+
+### PR-D — Three-action card + lock-on-bench (L)
+- Bench `VendorCard` (`shortlist-categories.tsx:810-853` rails): "＋ Add to build" → `setBuildPick` (`build-pick-actions.ts`; multi already supported; hard-single swap = existing `replacesSiblingsOnPin` rules in `lib/build-pick-rules.ts`) · stateful Inquire/"💬 Check inquiry" (thread-existence probe — the `InquiryComposer` existing-thread guard's query, surfaced onto the card; fresh → composer, exists → open thread) · "Lock now — it's final" → reuse `AccordionLockButton` (`accordion-lock.tsx:135`) so conflict gate/date-modal/milestone/undo all carry.
+- Collapsed tile rows: locked-vendor-names line; rail-end card: "＋ Add another {tile}" when locked && !hard-single (carries #3789's affordance to the live bench).
+- ⚠ SERIALIZE with the Booking session — it owns Card→Details→Inquiry and `v/[slug]` surfaces; `vendors/page.tsx` + card components are HOT. Check `gh pr list` + message that session before starting D.
+
+### PR-E — "Your team" merge (M)
+- Right rail: extend `BuildLocked` (`build-locked.tsx`) → locked rows + "In your build — ready to lock" candidate rows (per-row Lock ✓ = `AccordionLockButton`; ✕ = `removeBuildPick`) + "Still needs your decision" list (urgency-ordered `openPlan` doorways) + tiles Date/Location/Locked/In-build/Budget/**Buffer** (buffer = estimated − locked − candidates; estimate from `events.estimated_budget_centavos`).
+
+### PR-F — Plans (M)
+- `build-compare.tsx`: rename section "Plans" (`TAB_META` in `lib/budget-build.ts` — label only, key stays `compare`); pinned locked rows identical per column (build on `PlanBuildSnapshot`; `applyBuildToWorking` must not touch locked rows); columns render build candidates; "Save current as a plan" button on Your team (calls `savePlanBuildNamed`). `clearBuildPicks` (currently caller-less — flagged in PR #3790) becomes the "reset candidates" action; if unused after F, delete it then.
+
+### PR-G — Compatibility DIM+DISABLE+SINK (M · ⛔ GATED, see §2)
+- Reuse `FitBadges` verdicts (`dateFit==='booked'` ∨ `reachesVenue===false`); stable pre-partition compatible-first (pattern: `category-search.ts:1099`); divider + dim + disable Add-to-build/Lock; "Ask anyway" = the thread path. Budget-over stays soft. Fail-open stance preserved.
+
+## 4 · Verification (every PR) + definition of done
+`tsc --noEmit` clean · `next lint` no new warnings · `pnpm run test:unit` (apps/web) green · add/extend unit tests beside the pure libs touched (`checklist-state`, sort partition, in-plan resolution). Runtime: preview link + `testnayan1..5@test.com`/`12345` — **NEVER the owner account** (is_internal comps everything → false-green paywalls). Done = A–F merged flag-dark, owner previews on a flipped preview env, THEN owner flips prod flag; G ships only after the §2 gate.
+
+## 5 · Coordination + hygiene
+- Booking session (`local_46eb5ee5…`, "Booking") owns the service Details/Inquiry screens + the `package_item_id→service_id` blocker — already synced via 2 session messages + log rows. Serialize any shared-file work.
+- Corpus after each PR: changelog fragment (root `changelog.d/`), DECISION_LOG row on landings worth recording; update `[[project_setnayan_explore_ia_replan]]` memory status as slices land.
+
+## 6 · Amendment (owner, same day): BUILD-CANDIDATE SCHEDULE CONVERGENCE
+> Owner: "when they add someone to the build, the options on the bench change — some become
+> incompatible to the schedules of the service chosen. the goal is to bring everything down to
+> one choice." Confirmed NOT previously in effect; now specced + in the prototype.
+
+**Decision #12 — compatibility has TWO tiers:**
+- **SOFT (build tier, reversible):** the build's **shared-date window** = intersection of every
+  locked + candidate vendor's calendar (`getCommonAvailableDays` — the exact engine behind the
+  Compare availability footer and `VendorAvailabilityIntersection`). A bench vendor with no free
+  day inside the window gets an **amber** "No shared date with {candidate}" badge, disabled
+  Add-to-build/Lock, and sinks behind a **"Doesn't fit your build"** divider (before the red
+  "Not available" one). Removing the clashing candidate restores it instantly.
+- **HARD (anchor tier):** unchanged §1.2 — locked date/venue → red, "Booked on your date" /
+  "Beyond reach".
+- **The convergence banner** (between strip and bench + mirrored in Your team): open → hidden ·
+  narrowing → "📅 Your build's shared dates: Sep 12 · Sep 26" · one left → "🎯 Only {day} works
+  for everyone — lock the venue to make it official" · empty → "⚠ No single date fits — swap a
+  candidate" (the shipped Compare conflict copy). Cards grow a tiny "Free: {days}" mono line.
+
+**Build-order impact — PR-G SPLITS:**
+- **PR-G1 (soft tier + banner + card date-line) — UNBLOCKED:** no reservation promise is made
+  (it reasons over vendor-declared calendars, display-only), so it does NOT wait on the
+  lock-reserves-date gate. Needs the availability read path healthy — fix the `/find-date` 42703
+  dead pool first (same query family). Feeds off `getBatchVendorAvailableDays` (already batched
+  on the bench, `page.tsx:894-926`) extended from the single event-date probe to the window set.
+- **PR-G2 (hard anchor grey-out) — stays ⛔ GATED** on the 2026-07-26 lock-reserves-date owner
+  decision.
+
+## 7 · Amendment (owner, same day): THE LOCK HANDSHAKE — mostly ALREADY BUILT; one missing step
+> Owner: "locking will only apply once vendor receives handshakes… when a customer locks, it is
+> still not yet locked until vendor agrees. vendor sends payment request, customer receives it —
+> still not locked. once customer settles the payment and sends the screenshot, vendor will be
+> billed for the syncing fee alongside accepting it. when vendor accepts the payment, the
+> schedule is now locked." Owner then (correctly) flagged this was "already done or partially
+> done — check our documents." **Verified: substantially TRUE.** The canonical lifecycle was
+> specced 2026-06-20 (DECISION_LOG:1362 — "Lock → vendor sends payment info → couple pays +
+> proof → vendor accepts transaction") and most steps are code:
+
+| Step (owner's words) | Exists? | Where |
+|---|---|---|
+| 1 Customer locks → not yet locked | ⚠ shipped lock is UNILATERAL (`contracted` immediately) — becomes a REQUEST state | `finalizeVendor` |
+| 2 **Vendor agrees to the lock** | 🚫 **MISSING — the ONLY unbuilt step** (recorded absent: DECISION_LOG:2494 + :2681 "no vendor acknowledgement in between") | new |
+| 3 Vendor sends payment request | ✅ Proposal Maker + published payment methods + payment-plan snapshot | `proposal-send.ts`, methods tables |
+| 4 Customer pays + screenshot | ✅ SHIPPED FLAG-DARK — `NEXT_PUBLIC_PAYMENT_GATED_LOCK_ENABLED` (PR #3090): required screenshot, methods-validated, atomic with the lock write, ledger row "awaiting vendor confirmation" | `vendors/actions.ts:1008-1087, 2052-2122` |
+| 5 Vendor accepts payment → LOCKED | ✅ SHIPPED LIVE — the vendor "Lock request" card → `vendorAcknowledgeDeposit` / `vendorRejectDeposit`; couple notified "Your date is locked in" | `vendor-dashboard/clients/[eventId]/actions.ts:105/167` |
+| Schedule actually reserved | ✅ pool-acquire exists — fires at `deposit_paid`; **wire it to the acknowledge step** | `acquireSchedulePools` |
+
+**Rulings this encodes (DECISION_LOG 2026-07-27 handshake row):**
+- **RESOLVES the open 2026-07-26 "does Lock reserve the date?" decision (line 2681):** neither (a) nor (b) — Lock is a REQUEST; the reservation lands at vendor payment-acceptance (step 5). PR-G2's gate is therefore **RESOLVED**: the hard grey-out tier keys off schedule-locked bookings (acknowledged + pool-consuming), and all customer-facing lock UI must say "requested / in progress" until step 5. The card label drops "— it's final".
+- **Syncing-fee trigger moves: couple-lock-time → vendor-payment-acceptance** ("billed alongside accepting"). Rate/base/sourced-only/free-5-per-event all UNCHANGED (5%→1% taper on `total_cost_php`, PR #3755 schedule). ⚠ SURFACED, not silent: this supersedes the 2026-07-24 "trigger = finalizeVendor lock" placement — 5th fee-trigger ruling in the lineage; `collectBookingFeeAtLock`'s call moves from the lock write to the acknowledge transition.
+- The vendor-side accept/reject machinery for step 2 should MIRROR the shipped step-5 pattern (single-winner RPC + Overview card + notification), and the request states live in NEW columns/rows — **never repurpose `event_vendors.status`** (the code's own rule, `actions.ts:3578`).
+
+**New slices:**
+- **PR-H — the vendor-agrees step + request-state UI (M/L):** `lock_requested_at` / `lock_agreed_at` columns (or a `vendor_lock_requests` table mirroring `vendor_lock_proposals`), vendor Overview "Lock request — agree?" card BEFORE payment, customer-side "⏳ waiting for vendor" states on card/team/strip, expiry for stale requests (recommend ~7 days), Undo = cancel request. Hard-single conflict gate counts pending requests.
+- **PR-I — fee + pool at acknowledge (S/M):** move `collectBookingFeeAtLock` call to `vendorAcknowledgeDeposit`'s transition; fire `acquireSchedulePools` there too (supersedes deposit_paid as the acquire point for handshake bookings); keep both flag-gated (`BOOKING_FEE_RAIL_LIVE` two-key unchanged).
+- **PR-G2 — now UNBLOCKED** (gate resolved above); hard tier keys off acknowledged bookings.
+  ✅ **DATE HALF BUILT 2026-09-11 — PR [#5425](https://github.com/iscasasola/setnayan-platform/pull/5425)**
+  (register H5, on the owner's *"they shouldn't even be shown as planned based on their schedule
+  availability"*). Built to §2 item 3 exactly: DIM + booking-disabled + SINK behind a red **"Not
+  available on your date"** divider (after the soft "Doesn't fit your build" one), never removed,
+  conversation kept; an in-build pick keeps Remove. Signal = the shipped `dateFit` (the supplier's
+  calendar on the committed day, whose blocks are written at `deposit_paid` — i.e. by acknowledged,
+  pool-consuming bookings, as this line requires). One predicate, `isUnavailableOnDate`, shared by the
+  card, the rail sink and the Picks column. ⏭ **The REACH half ("Beyond reach" after a venue lock) is
+  NOT built** — outside the 2026-09-11 ruling; it needs its own decision.
+- The prototype's Your-team "handshake tracker" (4-step stepper) is the reference UI.
+
+**Also verified for the record (owner asked):** "bench filters as you add to build" was never shipped — but the *reverse* direction ALREADY EXISTS and the owner remembered it correctly: `getAvailableDaysForVendorSet` ("a saved build's picks — possibly not yet booked") powers the Compare availability footer ("No single date works — swap one"), and `candidate-dates.ts` is the "dates shrink as you lock" engine on `/date-selection`. §6's PR-G1 completes the loop (team → window → filter the bench), reusing exactly those engines.
+
+## 8 · Plan lifecycle Q&A (owner, same day) — all four map to shipped machinery
+1. **Saving = they NAME it.** "Save current as a plan" opens a name dialog (≤60 chars — the shipped
+   `MAX_BUILD_TITLE_LEN` in `lib/named-builds.ts`; `savePlanBuildNamed` + `planSaveAs`
+   create/overwrite already handle names + untitled fallbacks "Plan A/Build N").
+2. **Loading = the Compare column's "Modify" action, promoted.** `applyBuildToWorking`
+   (`build-pick-actions.ts:88`) already loads a saved plan's picks into the working build
+   (clears current candidates, re-inserts the snapshot's; vendors that left the shortlist
+   FK-skip). Surface it as a **Load** button on each plan row in the Plans panel — locked
+   vendors are untouched (they're pinned in every plan by §2 #10).
+3. **Clearing the team = `clearBuildPicks`** (`build-pick-actions.ts` — flagged caller-less in
+   PR #3790; this is its job). "Clear candidates" in Your team empties the BUILD only: locked
+   vendors stay (they're contracts) and in-progress handshakes stay (cancel those individually).
+4. **Yes — the TEAM is the filtering basis (ruled).** The §6 shared-date window derives from
+   **locked + pending-handshake + build candidates** — everything in "Your team". Load a plan →
+   the bench refilters to that team's window; clear candidates → the window reopens to
+   locked-only. One team, one lens.
+
+### 8a · A lock ANNOUNCES what it closes (owner 2026-09-06) — SHIPPED
+
+> *"of course adjustments on the saved build will change when a vendor is locked, and announce that
+> the following builds are no longer possible for you, and these services are no longer possible
+> once you lock this vendor."* Asked which locks should warn, the owner chose **every lock that
+> kills something.** Silent when a lock costs nothing.
+
+Both consequences were already real and already computed by the machinery above — they were simply
+never said before the couple committed:
+
+* §8.2 Load already drops picks in a locked category (`planPicksToApply`), so `isPlanLoadable` goes
+  false once every pick a saved plan holds sits in a locked group. The Load button greyed out and
+  named no cause.
+* §6's shared-date window already sinks bench vendors behind *"Doesn't fit your build"*, and a lock
+  narrows that window — so a lock could sink a vendor the couple was actively considering, one
+  screen away from the press.
+
+`finalizeVendor` now returns the cost **with its gate result**, before any write: the existing
+`date_will_lock` carries the lists (a lock that sets the date *and* closes options states both in
+one dialog), and a new `lock_will_cost` fires for a lock that closes options without setting the
+date. The couple sees the **same** pre-lock confirm — extended, never a second modal.
+
+Rules, each one a decision:
+
+* **Silent when it costs nothing.** `computeLockImpact().isEmpty` is the gate. A confirm that always
+  fires is clicked through unread, and then the one that mattered is too.
+* **Never invents a casualty.** The services half is the DIFF of two verdict sets computed with §6's
+  own `resolveBuildDateWindow` + `classifyAgainstBuildWindow` — before, and with the candidate
+  folded in as locked. It cannot disagree with the bench, and it inherits §6's silences (nothing for
+  an anchored/open window, nothing for a vendor with no calendar signal, nothing at all when the
+  build's own window is already empty — that conflict is the couple's, not a vendor's).
+* **A plan already dead before this lock is not its casualty.**
+* **A handshake ask announces nothing.** §7's request writes `lock_request_state='pending'`, not a
+  locked status — nothing is settled yet, so warning at request time would be the same error §6.1
+  keeps out of the date gate.
+* **Copy bans, both already tested:** never that a day is *held* or *reserved* (§6 rule 3 — a lock
+  sets the EVENT's date, it reserves nothing until a vendor accepts payment), and never that a saved
+  plan is *deleted* (a lock makes it un-loadable; the row survives and returns if the lock does).
+
+Gated on `isExploreReplanEnabled()` as a **correctness** gate: with the flag off, Load ignores locks
+entirely and §6 never runs, so a lock genuinely costs nothing to announce.
+
+## 9 · Add-manually (owner spotted it missing from the prototype — it's SHIPPED; keep it)
+Every rail keeps its **"✎ Add manually"** card beside Find/Add-another (and in the empty state) —
+the shipped `NewManualVendorModal` (two-step submit auto-creates the **claim-QR invite** the
+vendor scans to sync). Rules the demo + build must honor: a manual vendor is **off-platform** →
+no inquiry thread (no Check-inquiry button), **calendar unknown → NEVER greys out** (fail-open,
+"syncs when they claim"), and **skips the lock handshake** (no dashboard to accept from — the
+shipped payment-gated gate already exempts vendors without `marketplace_vendor_id`; they lock
+directly via the Lock-Free `recordDeposit` path). Slice: part of PR-D (card variants).
+
+## 10 · "Found-you" attribution on manual imports (owner, same day) — NEW slice PR-J
+> Owner: a couple who finds a business here, contacts them outside the app, and manually imports
+> them is NOT a free own-client import. **Threshold: "found" = the couple OPENED the vendor's card
+> or clicked through to their website/profile.** "If they were just part of the searches and the
+> card was not opened… they are still not found by the couple."
+
+- **Found-record:** minimal per-(event, vendor_profile) row — `first_found_at` + source
+  (`card_open` | `website_click`). Impressions/search results NEVER write it. ⚠ Behavioral data →
+  most-protected class: couple-scoped RLS, no cross-event reuse, retention per DPO policy.
+- **Manual-add match check (extends the shipped `NewManualVendorModal`):** name-match against
+  marketplace vendors. If matched AND found → (a) couple sees the **link-instead nudge** ("real
+  calendar · chat · handshake") with clear disclosure that the vendor is notified; (b) the vendor
+  gets the **found-you lead alert**: "You were found on Setnayan on {date · time} by {couple
+  display name} for their {event-type, event-date} event — added off-platform"; (c) attribution =
+  **setnayan_sourced** — extends `booking_fee_attribution_for`; the fee (at handshake acceptance,
+  §7) applies. If matched but NEVER found → genuine own-client import: **free**, **no
+  notification** (the existing "unknown ⇒ import ⇒ free" fail-safe stands).
+- **Privacy (standing default: document-not-block, disclose-then-enable):** notification payload
+  is data-minimal (couple display name + event type + event date — no contact details); the
+  couple-side modal discloses the notification BEFORE they proceed; flag the notification content
+  + found-record retention for DPO review on `/admin/data-privacy`. Aligns with the 2026-07-22
+  leakage strategy (dissolve with self-interest — the lead alert makes routing through Setnayan
+  the vendor's own preference) and the chat off-platform-contact filter (#3606).
+- Prototype: the manual-add match modal + both toasts are the reference copy.
+- **Timing (owner clarification):** yes — for as long as the card was never opened and the website
+  never clicked, the vendor is NOT found: import free, no notification, indefinitely. The
+  found-record stamps on the FIRST open/click (per event). Attribution is judged **at import
+  time** — `first_found_at` must PRECEDE the manual add; a later card-open never retroactively
+  converts an already-free import (they demonstrably knew the vendor before finding them here).
+- **What IS and ISN'T recorded (owner: "this means we record their searches and views?"):**
+  Recorded: **ONE row per (event × vendor)** — the FIRST card-open or website click-through,
+  timestamp + source. That's the entire record: no search queries, no impressions, no view
+  counts, no repeat-view trail, no dwell time, no browsing history. It is the receipt that makes
+  the found rule enforceable, nothing more. NOT recorded: searches (never), rail impressions
+  (never), subsequent views (no-op — the row already exists). Backing out of the match modal
+  ("Cancel — don't add, don't notify") imports nothing and notifies no one; the found-record
+  itself stays private to the couple unless/until they import that vendor manually. Retention:
+  recommend auto-purge at event completion + the standard export/delete rights; DPO review
+  covers payload + retention. Alternative if the owner prefers ZERO view-recording: judge
+  "found" by thread-existence only (inquired = found) — weaker (card-viewed-but-never-inquired
+  imports leak free) but recording-free; owner's call at DPO review.
+- **AMENDED (owner): record a VIEW COUNTER, not just the first open.** The found-record becomes
+  ONE row per (event × vendor): `view_count` (card opens + website click-throughs, incremented
+  until the vendor is added to the event — locked, imported, or shortlisted; frozen after) +
+  `first_found_at` + `last_viewed_at` + sources. Still NOT a browsing trail: no per-view event
+  log, no dwell time, no searches, no impressions. **Purpose = import adjudication:** a "free
+  import" attempt of a vendor with view history is identified on the spot — the couple-side
+  match modal and the vendor lead alert both cite the receipts ("viewed your card and website
+  5 times between {first} and {last}"), and the same row is the evidence if a vendor disputes
+  fee attribution. Zero-view match → still a clean free import. DPO review now covers the
+  counter's retention alongside the payload.
+- **Dispute ladder (owner):** vendors CAN dispute a found-you / syncing-fee attribution.
+  **First dispute (per vendor, lifetime): AUTO-ACCEPTED** — fee waived instantly, no admin
+  touch — paired with the positioning reminder: *"This one's on us. A note though: this couple
+  found you on Setnayan — they viewed your card and website {N} times before booking. That's
+  the power and reach of a Setnayan presence: couples find you easier and faster here. Future
+  disputes are reviewed by our team."* **Second and later disputes: ADMIN REVIEW** (reuse the
+  shipped disputes rails — the admin console disputes queue + the event `disputes` route);
+  admin sees the view-count receipts row as evidence; verdicts upheld/rejected. State:
+  `attribution_disputes` (vendor_profile_id, booking ref, status auto_accepted → under_review →
+  upheld/rejected, created_at); the auto-accept check is a simple per-vendor count. Part of
+  PR-J.
+- **CLAIM-SYNC is the AUTHORITATIVE attribution checkpoint (owner).** Two outcomes when the
+  claim QR is scanned:
+  1. **Vendor has NO Setnayan account → sync is FREE, always.** They onboard through the claim
+     (acquisition funnel) — genuinely the couple's own vendor brought INTO the app; the
+     "unknown ⇒ import ⇒ free" fail-safe made flesh.
+  2. **Vendor claims with an ACTIVE EXISTING account whose profile the couple had already
+     viewed** (found-record: `view_count > 0`, `first_found_at` before the manual add — the §10
+     timing guard applies unchanged) → **they have been found**: attribution flips to
+     setnayan_sourced at claim time, the lead alert + receipts fire, the syncing fee applies at
+     handshake acceptance, and the dispute ladder is available.
+  This makes the add-time NAME match the early *nudge* (best-effort) and the claim-time ACCOUNT
+  match the *authoritative* check — a couple renaming "Casa Amara" to "CA Catering" to dodge the
+  nudge changes nothing: the moment the real account claims, identity is exact and the
+  found-record is consulted. No found-record on the claiming account → the sync stays free.
+
+## 11 · The ⓘ pattern — documentation contract (owner: "make sure (i) is well documented")
+The replan leans on ⓘ toggles to keep surfaces clean ("We want this out, but Explore can be kept
+with an (i) to hide the other information"). Rules for the build:
+1. **Page-level ⓘ** beside the Explore title replaces ALL explanatory chrome. Its panel must
+   cover: what this page does (browse folders → categories → vendor carousels) · the state-glyph
+   legend (○ not started · ◔ exploring · ◕ in build/pending · ● locked · ✓ covered · – skipped) ·
+   the 4-step lock handshake in one line · what the Coverage Strip and convergence banner mean.
+2. **Per-category ⓘ** → the plan-group `hint` (bridge per §5.1); tile-level overrides are
+   authored in the Taxonomy Studio, which becomes the single editing home for that copy.
+3. **Every ⓘ copy string lives in ONE module** (`lib/explore-info-copy.ts`), not scattered in
+   JSX — so copy edits are one-file PRs and the corpus can mirror it. The module header links
+   back to this spec section.
+4. **Corpus mirror:** the shipped ⓘ texts get a dated reference doc in
+   `Design_Explore_Replan_2026-07-27/` on first landing (and on any copy change), so the
+   documented copy and the live copy can't silently diverge.
+5. Accessibility: each ⓘ is a real button (aria-label, focus ring); the panel is dismissible;
+   state is not persisted (always starts closed — it's help, not a setting).
+
+## 11a · ⛔ Content-gate + blank-name rules (contract §7a/§7b — binding on ALL slices)
+1. **A blank name NEVER blocks a save — auto-name it** (owner: "saving builds blank will make
+   us autocreate a name for the build"). Applies to the couple's saved **plan/build** name
+   (slice F) and the **manual-vendor name** (slice D): reuse the shipped `autoBuildTitle`
+   (`lib/named-builds.ts`) / an equivalent group+position namer, show the auto-name as the
+   field PLACEHOLDER before save, and confirm after ("we named it {X} — tap to change").
+   No required-field errors, no disabled Save.
+2. **NEVER call the #3606 contact detector RAW on non-chat text.** Measured by the Booking
+   session's 27-agent review (7 findings confirmed by executing the shipped `evaluateMessage`):
+   the chat rules refuse honest text — a date range reads as a phone number, "Coverage
+   @Tagaytay" as an @handle, "Instagram teaser reel" as an app name, and "Message me on
+   Setnayan…" as off-platform solicitation. The detector must be called through a **PROFILE**
+   (`chat` = today's rules; `card` = Booking is specifying it) in ONE module — never a second
+   detector, never a fork.
+   - **This wave's verdict:** plan names + manual-vendor names are **couple-private text →
+     NO content gate** (trim + length cap only). The found-you notification payload is
+     system-authored → no gate, but it must NOT interpolate raw vendor/plan free-text.
+     Anything that later renders couple-authored text TO A VENDOR must wait for the profile.
+3. Do not flip `NEXT_PUBLIC_EXPLORE_REPLAN_ENABLED` while the Booking session's publish-gate
+   blockers stand (package editor discards `res.problems`; publish/activate never re-runs the
+   gate) — ours is a separate flag but the surfaces meet.
+## 12 · Integration seams (Booking × Explore) — code-verified 2026-07-27
+
+> Every claim below was re-read against `origin/main` on 2026-07-27. Where the Integration Contract (`Integration_Contract_Booking_x_Explore_2026-07-27.md`) is wrong about shipped code, the ⚠ line says so — **fix the contract in the same commit as the slice, and log the DECISION_LOG row first** (contract §6/§7 self-rule).
+>
+> **⚠ Branch from `origin/main` @ `2ce0f7cb2` (#3794).** The local checkout at `/Users/icecasasola/Documents/Claude/Projects/setnayan-platform` is on `claude/retire-pilot-mode-dead-pricing` @ `1a12bab00` and is stale on **every** file §12.2 touches.
+
+### Fail-safe invariants — verbatim, non-negotiable, all four seams
+
+1. **Any resolution error or unknown state bills NOTHING** (fail-safe to import / free). A vendor must never be charged by a bug.
+2. **Covered rows carry no money, no fee, no request state.** The RPC refusal `covered_row_no_fee` is the **backstop, not the design** — resolve the anchor before calling.
+3. **The button contract (what it's called, when it renders, what it opens) never changes with Booking's flag — only the sheet's content does.**
+4. **A blank never blocks — auto-name it** (§7a). Nothing in this wave may refuse a save on empty text.
+
+---
+
+### 12.1 · Inquiry-button seam — **OWNER: slice D (Explore)**
+
+⚠ **Contract §2 says** the stateful Inquire button is "resolved by the shipped `InquiryComposer` existing-thread guard — that guard is the SINGLE source of truth." **Code says** `apps/web/app/v/[slug]/_components/inquiry-composer.tsx` contains **no guard at all** — it is a pure prop consumer (`existingThreadId`/`existingThreadHref`, :126/:131, branch at :546). The real guard lives in the server component at `apps/web/app/v/[slug]/page.tsx:1108-1123` and is scoped to `coupleEventId = events[0]` (:1106) — the couple's **primary** event, which the event-scoped bench cannot reuse as-is. There are four divergent "does a thread exist" implementations in the repo today.
+
+⚠ **Contract §2 line 28 ("Manual-added vendors with no thread keep 'Inquire' even on the bench") is WRONG** — `contactShortlistVendor` returns `{status:'not_marketplace'}` for a null `marketplace_vendor_id` (`_actions/contact-shortlist-vendor.ts:61-64`) and the client renders the dead end "This vendor can't be messaged here." (`_components/contact-shortlist-vendor-button.tsx:44-46`). Delete that line.
+
+**Build it exactly like this.**
+
+1. **Do NOT mount `InquiryComposer` on a bench card.** It needs `vendorProfileId` + `initialServiceId` + `linked` + `alsoOptions` + `requirementsFields` + `savedRequirements` + `aiActive` + `inquiryPax` — none of which the bench loads. Contract §1 also forbids a second composer.
+2. **Reuse the shipped primitive:** `ContactShortlistVendorButton` — `apps/web/app/dashboard/[eventId]/vendors/_components/contact-shortlist-vendor-button.tsx:20-74`, props `{ eventId: string; vendorId: string }`. `vendorId` **is** `ShortlistVendor.vendorId` (= `event_vendors.vendor_id`). Server: `contactShortlistVendor({eventId, vendorId})` (`_actions/contact-shortlist-vendor.ts:33-104`) → `startServiceInquiry(..., inquirySource:'shortlist')`. Result union: `'ok'{threadId,eventId,isExisting} | 'not_signed_in' | 'not_secured' | 'no_event' | 'not_marketplace' | 'error'`. It is currently rendered from exactly one place — the legacy kill-switch surface `plan-budget-accordion.tsx:1717` — so slice D is a **port**, not new code.
+3. **One column, zero new queries.** Extend the existing batched select at `apps/web/app/dashboard/[eventId]/vendors/page.tsx:304` to `'thread_id, vendor_profile_id, inquiry_status, created_at'` and build `threadIdByProfile` in the same loop as `inquiryByProfile` (:339-352). **No per-card `.maybeSingle()` probe** — a rail holds dozens of cards.
+4. **Thread it through the pipe that already exists:** add `thread_id?: string | null` to `VendorEnrichment` (`apps/web/lib/vendors-plan-budget.ts:244-276`) → populate at `page.tsx:464-481` beside the existing `inquiry_status` (:479) → read as `ext` in `buildShortlistFolders` (`apps/web/lib/shortlist-taxonomy.ts:313`) → project onto `ShortlistVendor` (:152-191 / :335-366):
+   ```ts
+   marketplaceVendorId: string | null;   // = v.marketplace_vendor_id ?? null  (wedding-plan-groups.ts:956, set at page.tsx:522)
+   threadId: string | null;              // = ext?.thread_id ?? null
+   inquiryStatus: 'pending' | 'accepted' | 'declined' | null;
+   ```
+5. **THE canonical predicate** — export from `lib/shortlist-taxonomy.ts`, and **refactor `/v/[slug]/page.tsx:1120` to call it** so the two surfaces are provably identical:
+   ```ts
+   export function hasLiveInquiry(v: Pick<ShortlistVendor,'threadId'|'inquiryStatus'>): boolean {
+     return v.threadId != null && v.inquiryStatus !== 'declined';
+   }
+   ```
+   ⚠ The bench's existing map at `page.tsx:302-306` does **not** exclude `declined`; `/v/[slug]` does. Ship the predicate or the same vendor reads "💬 Check inquiry" on the bench and "Inquire" on their profile.
+6. **Card render rule** (`shortlist-categories.tsx:259-305`, today a bare `<InspectorTrigger inspectId={\`v:${v.vendorId}\`} href={v.href}>` at :260):
+   - `marketplaceVendorId != null && !hasLiveInquiry(v)` → **"Inquire"** → `<ContactShortlistVendorButton eventId vendorId={v.vendorId} />`
+   - `marketplaceVendorId != null && hasLiveInquiry(v)` → **"💬 Check inquiry"** → `<Link href={\`/dashboard/${eventId}/messages/${v.threadId}\`} prefetch={false}>`. No server call, no transition. If `threadId` is null while `inquiryStatus` is set, **fall back to "Inquire"** — never link to the bare `/messages` list.
+   - `marketplaceVendorId == null` → **no inquiry button.** Fall through to `v.href` (the workspace, where the couple's own `contact_email`/`contact_phone` already render — `workspace/page.tsx:1018-1024`).
+   - **Gate on `marketplaceVendorId != null`, never on a manual/source heuristic** — `NewManualVendorModal`'s LINKED mode writes a real `marketplace_vendor_id` (`new-manual-vendor-modal.tsx:385-395`), so a linked manual add IS bookable.
+7. **Lock leg on the same card:** resolve `groupId = planGroupForCategory(categoryForTile(tile))` (`wedding-plan-groups.ts:712-719` + `shortlist-taxonomy.ts:147`). It returns `null` for unbucketable categories — **hide Lock, never pass null** into `AccordionLockButton` (`accordion-lock.tsx:135-151`) or `setBuildPick({eventId, planGroupId, vendorId})` (`build-pick-actions.ts:28-32`). That is the #3466 class of bug.
+8. **Flag:** `apps/web/lib/explore-replan-flag.ts` + `NEXT_PUBLIC_EXPLORE_REPLAN_ENABLED` **do not exist** — Explore creates them, mirroring `lib/payment-gated-lock.ts`. Flag OFF ⇒ the card renders byte-identically to today.
+9. **Do not touch** `inquiry-composer.tsx` or `inquiry-actions.ts` (Booking owns them) beyond the one-line predicate refactor in step 5 — ping Booking first.
+10. **Test:** unit test asserting `declined` ⇒ false, `pending`/`accepted` ⇒ true. Manual pass on `testnayan1..5@test.com` / `12345` — **never the owner account** (internal grants every SKU). Verify degradation: Explore-flag ON + Booking-flag OFF ⇒ Inquire lands on the thread exactly as `plan-budget-accordion.tsx:1717` does today.
+
+**Booking-side promises this relies on:** `startServiceInquiry` keeps its upsert `onConflict:'event_id,vendor_profile_id'` (`inquiry-actions.ts:276` — the real dedupe, backed by `UNIQUE(event_id, vendor_profile_id)` on `chat_threads`, migration `20260513130000:58`); the composer's existing-thread branch stays prop-driven; any change to declined/archived semantics updates `hasLiveInquiry` in ONE place plus a ping.
+
+---
+
+### 12.2 · Lock / fee / pool seam — **OWNER: PR-I (Explore)** — the one real hazard
+
+⚠ **Contract §4 says** the fee call sits behind a "two-key `BOOKING_FEE_RAIL_LIVE` gate." **Code says** `collectBookingFeeAtLock` gates on `isBookingFeeEnabled()` **alone** — `apps/web/lib/booking-fee-lock.server.ts:55-57`, with the comment "the manual QR rail is always live, so — unlike the PayMongo send-gate — it needs no RAIL_LIVE." `isBookingFeeEnforced()` gates the dormant proposal-send path only. **Do not add a second key.** One flag flip mints real vendor-payer `orders` + `payments` rows (`booking-fee-lock.server.ts:129-160`).
+
+⚠ **Contract §4 cites "BUILD_SPEC §4"** for the one-anchor-N-covered model. Correct citation: **`Vendor_Package_Credit_BUILD_SPEC_2026-07-26.md § 0`** (which is what the migration headers themselves cite).
+
+⚠ **Contract §4 says** "If an acknowledge path ever holds a covered row…" — it **does, today**. `fetchLockRequests` (`apps/web/lib/vendor-overview.ts:469-499`) queries with the **service-role** client, filtered only on `marketplace_vendor_id` + `deposit_recorded_at NOT NULL` + `deposit_acknowledged_at NULL` — **no `package_role` filter, no `archived_at` filter** — and `LockBody` posts that raw id into `vendorAcknowledgeDeposit` (`overview-sections.tsx:631`). `package_role` is read **nowhere** in `apps/web` outside `lockPackage` itself.
+
+**Facts to build against.**
+- Discriminator: `event_vendors.package_role TEXT` ∈ `NULL | 'anchor' | 'covered'` (`supabase/migrations/20271009160000_package_anchor_role_and_cascade_indexes.sql:49-60`). Anchor uniqueness: `event_vendors_one_anchor_per_booking_uniq` (:70-72) — makes a single-row anchor lookup safe. Role/price immutability is trigger-enforced (:179-237).
+- The no-money CHECK (`:64-67`) constrains **only** `total_cost_php` and `deposit_paid_php` — **not** `deposit_recorded_at` / `deposit_acknowledged_at`. Nothing at the DB layer stops a covered row entering the lock-request state.
+- `booking_fee_open_lock_charge`'s covered refusal: `20271009180000_booking_fee_refuses_covered_rows.sql:62-65` → `{'skipped':'covered_row_no_fee'}`. Asserted at `apps/web/tests/db/first-user-journey.db.test.ts:293-302`.
+- **Attribution freezes on first ledger insert** — the upsert's `ON CONFLICT (vendor_profile_id, event_id) DO UPDATE` never rewrites `attribution` (`20271009180000:83-89`). Ordering is load-bearing.
+- `event_vendor_packages` RLS is **couple-only** (`20260604110000_vendor_packages.sql:280-292`) — a vendor session cannot read it. All resolution runs on the service-role client.
+
+**Build it exactly like this.**
+
+1. **New helper**, in `apps/web/lib/booking-fee-lock.server.ts` beside the collector:
+   ```ts
+   /** Anchor for a covered row; the row itself for anchor/ordinary; NULL = BILL NOTHING. */
+   export async function resolveFeeAnchorRowId(admin: SupabaseClient, eventVendorId: string): Promise<string|null> {
+     const { data: row } = await admin.from('event_vendors')
+       .select('vendor_id, package_role, event_vendor_package_id').eq('vendor_id', eventVendorId).maybeSingle();
+     if (!row) return null;                                   // row vanished → bill nothing
+     if (row.package_role !== 'covered') return row.vendor_id; // NULL (ordinary) or 'anchor' → it IS the money row
+     if (!row.event_vendor_package_id) return null;            // orphaned (FK is ON DELETE SET NULL) → bill nothing
+     const { data: anchor } = await admin.from('event_vendors').select('vendor_id')
+       .eq('event_vendor_package_id', row.event_vendor_package_id)
+       .eq('package_role', 'anchor').is('archived_at', null).maybeSingle();
+     return anchor?.vendor_id ?? null;                         // anchor gone → bill nothing
+   }
+   ```
+   **Never** fall back to the covered row's own id. Skipping the fee is correct; billing the wrong row is not. Do **not** resolve via `event_vendor_packages.primary_event_vendor_id` — it is `ON DELETE SET NULL` (`20260604110000:241-242`) and couple-RLS'd. Second query is index-served by `event_vendors_package_idx` (:305-307).
+2. **Call site:** inside the existing `if (!error && env.status === 'ok')` branch of `vendorAcknowledgeDeposit` — `apps/web/app/vendor-dashboard/clients/[eventId]/actions.ts:122-150`. That is the single-winner edge (`acknowledge_vendor_deposit` returns `status:'already'` on re-call, `20270320429117:100-117`), so idempotency is free. Use `createAdminClient()` (already imported, :6) — the RPC is GRANTed to `service_role` only (`20271009180000:182-183`). Wrap in try/catch + `console.error`; the acknowledge already committed and must never roll back or throw before the `redirect` at :154.
+3. **⛔ HARD BLOCKER — ship a migration or the pool acquire is a guaranteed silent no-op.** `public.acquire_schedule_pools` opens with `IF p_event_id NOT IN (SELECT public.current_couple_event_ids()) THEN RETURN 'not_authorized'` (`20270403356945_vendor_calendar_day_states_6_state_taxonomy.sql:214-216`). The caller here is the **vendor**; service-role has no `auth.uid()` either — both resolve to the empty set, and both existing callers swallow `not_authorized` as degrade-open (`vendors/actions.ts:323-325`, `:3778-3780`). `CREATE OR REPLACE` the function in full, widening the refusal to `AND p_event_vendor_id NOT IN (SELECT public.current_vendor_event_vendor_ids()) AND NOT public.is_admin()`, re-issue `REVOKE ALL … FROM PUBLIC` + `GRANT EXECUTE … TO authenticated` (:318-319), then **verify the function body in prod** after dispatching `supabase-migrations.yml` (schema_migrations lies).
+4. **Do NOT delete the existing acquires** — `updateVendorStatus` (`vendors/actions.ts:277-327`, acquire at :301) and `recordDeposit` (`:3744-3782`, acquire at :3753). ⚠ The BUILD_SPEC §7 table's "pool-acquire fires at deposit_paid" is **incomplete**: `recordDeposit` already acquires one step *before* acknowledge.
+5. **Prevent the double-consume.** Occupancy counts every `pb.event_vendor_id <> p_event_vendor_id` (`20270403356945:288-292`), so an anchor-scoped acquire + an earlier covered-row acquire = **two live `vendor_schedule_pool_bookings` for one package** → the vendor's daily capacity is eaten twice and a real second couple gets "fully booked". Fix: **route ALL pool acquires through `resolveFeeAnchorRowId`** (change `recordDeposit:3753` and `updateVendorStatus:301` to acquire on the resolved anchor id). Re-acquiring the *same* row id is idempotent (`ON CONFLICT (pool_id, event_vendor_id) WHERE released_at IS NULL DO NOTHING`, :305-311).
+6. **Resolve pool ids from the ANCHOR row:** `resolvePoolIdsForService(admin, anchor.marketplace_vendor_id, anchor.service_id)` when `service_id` is set, else `resolvePoolIdsForCategory(admin, anchor.marketplace_vendor_id, anchor.category)` (`lib/schedule-pools.ts:142-151`). Package cascade rows carry a `category` and **no** `service_id`, so the category branch is the one that fires.
+7. **Close the `not_contracted` money leak.** `recordDeposit` has **no** status precondition (`vendors/actions.ts:3652-3807`), and the RPC skips any row not in `('contracted','deposit_paid','delivered','complete')` (`20271009180000:70-72`). A deposit recorded on a `considering` row ⇒ acknowledge ⇒ fee silently skipped ⇒ **that booking is free forever** (the ordinal is computed once and never recovers). Either add a status precondition to the acknowledge wrapper, or `console.error` loudly on `{status:'skipped', reason:'not_contracted'}`. Today's call site cannot hit this (`finalizeVendor:2184` fires one line after writing `contracted`).
+8. **Fix the row-picker or the slice is dead on the clients page.** `apps/web/app/vendor-dashboard/clients/[eventId]/page.tsx:455-460` uses `.maybeSingle()` on `.eq('event_id').eq('marketplace_vendor_id')` — a package is N>1 such rows ⇒ error ⇒ `eventVendorId` null (:528) ⇒ the acknowledge form at :2101-2103 **never renders**. Prefer `package_role IS NULL OR 'anchor'`, `.is('archived_at', null)`, `.limit(1)`. Same latent pattern at `clients/[eventId]/actions.ts:54-59`, `:500-506`, `:640-646` — fix the acknowledge path, spawn the rest.
+9. **Filter the lock-request feed:** add `.neq('package_role','covered')` (or `.or('package_role.is.null,package_role.eq.anchor')`) **and** `.is('archived_at', null)` to `fetchLockRequests` (`lib/vendor-overview.ts:473-481`).
+10. **Stop covered rows entering the state at source:** resolve to the anchor inside `recordDeposit` (read `:3706-3713`, write `:3788-3798`) and suppress `<DepositReservation>` on the couple workspace for covered rows (`workspace/page.tsx:1245-1252`). Consider extending the CHECK at `20271009160000:64-67` with `deposit_recorded_at IS NULL AND deposit_acknowledged_at IS NULL` in the same migration as step 3.
+11. **Tests** (extend `apps/web/tests/db/first-user-journey.db.test.ts`): (i) acknowledge on a covered row ⇒ fee lands on the **anchor**, `count(*)` of `booking_fee_charges` for the booking is still exactly **1**; (ii) acquire-then-acknowledge on one package ⇒ exactly **one** live `vendor_schedule_pool_bookings`; (iii) `acquire_schedule_pools` called as the booked vendor returns `'ok'`, not `not_authorized` — **this test fails on `origin/main` today and is the proof step 3 is required.**
+
+---
+
+### 12.3 · FOUND-YOU × fee attribution — **OWNER: PR-J (Explore)**
+
+⚠ **Contract §5 says** attribution "is read AT acknowledge time" and the resolver merely consumes found-state. **True as far as it goes — but there is NO fee call at claim time anywhere in the repo.** `applyClaimAutoLink` (`apps/web/lib/vendor-invite-actions.ts:281-458`) writes `marketplace_vendor_id` (:329-332, cascade :350-355) and never calls `collectBookingFeeAtLock`. A manual vendor's first lock returned `skipped:'not_verified_vendor'` (`20271009180000:67-69`), so **no ledger and no charge row exist**, and the only automatic re-entry — trigger `event_vendors_booking_fee_rederive` (`20270930120000:412-417`) — requires a pre-existing primary charge. **Without an explicit fee call at claim, PR-J ships and bills ₱0 forever.**
+
+**Facts.** Resolver: `public.booking_fee_attribution_for(p_vendor_profile_id UUID, p_event_id UUID) RETURNS TEXT` — `supabase/migrations/20271009140000_booking_fee_sourced_only_at_lock.sql:65-84`, `service_role` only (:265-269). Sourced surfaces: `booking_fee_is_sourced_surface` (:42-53). Fail-safe tail, verbatim: `) THEN 'sourced'` / `ELSE 'import'` / `END;` (:81-83), post-condition-asserted at :291-295. **Zero TypeScript call sites** — the only live path is `collectBookingFeeAtLock` → `.rpc('booking_fee_open_lock_charge')` (`booking-fee-lock.server.ts:59`), called from `vendors/actions.ts:2156`, `vendors/packages/actions.ts:396`, `lib/chat-lock-booking.server.ts:121`.
+
+**Build it exactly like this.**
+
+1. **Extend the SAME function, keep the SAME 2-arg signature.** A third parameter forces each caller to compute found-state — which is exactly the re-derivation §5 forbids.
+   ```sql
+   SELECT CASE
+     WHEN EXISTS (SELECT 1 FROM public.chat_threads t
+                  WHERE t.event_id = p_event_id AND t.vendor_profile_id = p_vendor_profile_id
+                    AND public.booking_fee_is_sourced_surface(t.inquiry_source))
+       THEN 'sourced'                                    -- UNCHANGED, still FIRST
+     WHEN EXISTS (SELECT 1 FROM public.vendor_found_records f
+                  WHERE f.event_id = p_event_id AND f.vendor_profile_id = p_vendor_profile_id
+                    AND f.adjudicated_attribution = 'sourced')
+       THEN 'sourced'                                    -- NEW, strict fallback
+     ELSE 'import'                                       -- UNCHANGED fail-safe
+   END;
+   ```
+   Both arms are `EXISTS(...)` (false on absence, missing row, NULL) and the `ELSE` is untouched, so **"any resolution error or unknown state bills NOTHING"** survives structurally, not by care. The found branch may only ever **widen** to sourced; it can never turn a sourced thread into an import.
+2. **The judgment lives in the WRITE path, not the resolver.** All §10 logic (`view_count > 0`, `first_found_at` precedes the manual add, claim-time identity match) runs at write time and is frozen into `adjudicated_attribution` + `adjudicated_at`. Never let the resolver evaluate live counts — a retention purge, a backfill, or a post-import card-open would flip a settled free import into a billable one at the next lock.
+3. **New table PR-J owns**, RLS at `CREATE TABLE`, `REVOKE ALL … FROM PUBLIC, anon, authenticated` (copy `20271009140000:262-269`), **no** INSERT/UPDATE policy for `authenticated` (copy `20270323312048:86-90`), writes service-role only. A forgeable found-record is a forgeable **invoice**.
+   `public.vendor_found_records(found_id UUID PK, event_id UUID NOT NULL REFERENCES events, vendor_profile_id UUID NOT NULL REFERENCES vendor_profiles, view_count INT NOT NULL DEFAULT 0, first_found_at TIMESTAMPTZ NOT NULL, last_viewed_at TIMESTAMPTZ, found_sources TEXT[] CHECK (found_sources <@ ARRAY['card_open','website_click']), adjudicated_attribution TEXT CHECK (adjudicated_attribution IN ('sourced')), adjudicated_at TIMESTAMPTZ, frozen_at TIMESTAMPTZ, UNIQUE(event_id, vendor_profile_id))`
+4. **Claim-sync order is load-bearing** — in `applyClaimAutoLink` (`vendor-invite-actions.ts:281`), between the id write (:329-355) and the thread upsert (:423-431): **(1)** link → **(2)** adjudicate the found-record for (`parent.event_id`, `args.claimedVendorProfileId`) → **(3)** *then* `collectBookingFeeAtLock`. Reversing (2) and (3) freezes `import` permanently (`20271009180000:83-89`, UNIQUE per (vendor,event) at `20270916909942:56`). No found-record ⇒ write nothing ⇒ second arm false ⇒ import ⇒ **free**, with zero new code.
+5. **Add the missing fee call at claim** (step 4.3). Gate on `event_vendors.marketplace_vendor_id IS NOT NULL` and on the row not being `package_role='covered'`.
+6. **⛔ Do NOT use `vendor_profile_views` as the resolver's input.** It exists (`20270323312048_vendor_profile_views_funnel.sql:34-55`, written by `lib/record-vendor-view.ts:45-107` from `/v/[slug]` at `page.tsx:1512-1534`) but its `event_id` is `events[0]` — the user's **first** event, not the event in context (:1106, :1526). Write found-records from the Explore route's own `[eventId]` segment, and **refuse to write when no unambiguous event is in scope.** Ship a DB test: a found-record on event A must never make event B `sourced`.
+7. **Suppress self-inflicted records:** skip when the viewer owns the vendor (`current_vendor_profile_ids()`) or the event is internal — precedents at `lib/inquiry-attribution.ts` ("guard 1") and the demo-vendor skip at `v/[slug]/page.tsx:1512`.
+8. **Own flag, default off, independent of `NEXT_PUBLIC_BOOKING_FEE_ENABLED`** — so found-records can be written and verdicts observed before a single peso can move.
+9. **Do not touch the ledger upsert's ON CONFLICT** to "refresh" attribution. Re-adjudication belongs in the dispute ladder, acting on the **ledger** after the fact (§5).
+10. **Tests** beside `apps/web/tests/db/booking-fee-lock.db.test.ts:305-347`: (a) `first_found_at` at/after `event_vendors.created_at` ⇒ NOT sourced; (b) found-record on a different event ⇒ no bill; (c) table empty ⇒ still `import`; (d) a couple-forged INSERT is denied to `authenticated`.
+11. **⚠ Known hole to design around:** `applyClaimAutoLink` upserts a `chat_threads` row with **no** `inquiry_source` (:423-431), and `startServiceInquiry` only stamps `if (!isExisting)` (`inquiry-actions.ts:302`). A couple who claims a manual vendor and *later* discovers them via Explore stays `import` forever. It fails **safe** (under-bills) — do not "fix" it by loosening the stamp guard; just never assume thread-existence implies un-stamped.
+12. **Correct BUILD_SPEC §10's privacy paragraph before DPO review** — it claims "no per-view event log", but `vendor_profile_views` logs one row per `/v/[slug]` view today.
+
+---
+
+### 12.4 · Publish-integrity / contact-detector seam — **OWNER: slice C (and D / F / PR-J: explicit no-op)**
+
+⚠ **The pointer "§4 line about no-blanks" is WRONG** — the rule is **§7** (lines 89-95, amended by **§7a** and **§7b**); §4 is the lock/fee seam and says nothing about text.
+⚠ **§7's original line "Booking enforces it in the service/package save actions" describes code that does not exist.** `apps/web/app/vendor-dashboard/services/actions.ts` has only length/blank-row validation (`:169`, `:205`, `:215`, `:249`) — no `evaluateMessage` import anywhere under `vendor-dashboard/services/`. It is a **to-BUILD obligation on Booking**, not prod. Reword to future tense.
+⚠ **§7b already retires the raw-detector rule** — this audit independently confirms it: `containsPhone` (`lib/chat-contact-filter.ts:106-132`) blocks exactly what the manual-add form's **required** `contact_number` field is for (`new-manual-vendor-modal.tsx:509-520`).
+
+**Verdict for this wave: the Explore slices carry ZERO detector obligation.** Every new write is enum-valued or couple-private:
+
+| Slice | New text? | Verdict |
+|---|---|---|
+| **C** — plan chips / "Not needed? Remove" | none — `tile` from the closed `WeddingTile` union (`lib/taxonomy.ts:143`), `decision` a CHECK enum (`20270110320013:5`) | detector **does not apply** |
+| **F** — plan names | `budget_builds.title`, couple-authored and **couple-private on all four verbs** (`20260929000000_budget_builds_rls_couple_only.sql:17-54`); no vendor/export/API reader | detector **does not apply** — gating it would false-block the couple's own notes |
+| **D** — manual-vendor name | SHIPPED, couple-authored, not new (`new-manual-vendor-modal.tsx:454-471` → `vendors/actions.ts:2520` → `event_vendors.vendor_name:2759`) | seam wording ("new **vendor-authored** field") **does not bind** |
+| **J** — found-you payload | Setnayan-authored template + `couple_display_name` (already on 4 vendor surfaces) + event type + date | detector **does not apply** |
+
+**Instructions.**
+
+1. **Do NOT add any `evaluateMessage()` call in PR-C, PR-D, PR-F or PR-J.**
+2. **PR-C:** keep the chips driven by the closed `WeddingTile` union — **never** add an "Other / type your own category" free-text input. That single addition is the first thing in this wave that could trip the seam.
+3. **PR-F:** leave plan names at `normalizeBuildTitle()` + `MAX_BUILD_TITLE_LEN = 60` (`lib/named-builds.ts:14/:36-42`). Per §7a, a blank **auto-names** (`Item N` / `Choice N` / …) shown as the placeholder before saving — it never refuses.
+4. **PR-D:** reuse `NewManualVendorModal` untouched. Do not gate its fields — `contact_number` and `contact_person` are required by design.
+5. **PR-J:** keep the payload to §10's fixed set. No free-text note, couple message, or vendor-composed field in the alert or the dispute record.
+6. **If any Explore field ever DOES need the gate**, call it through a **profile** (§7b), never raw, and add the profile beside `card` in **one** module — never a second detector. Precedent for unconditional wiring (published/served text): `lib/vendor-voice-profile.ts:106`. Precedent for flag-gated wiring (human chat): `lib/chat-send.ts:236-269`.
+7. **Hygiene, in PR-A/PR-C's path anyway:** `supabase/migrations/20270110320013_event_category_decisions.sql` shipped with **no** `REVOKE ALL … FROM anon, authenticated` — it relies on RLS alone. Add `REVOKE ALL ON public.event_category_decisions FROM anon, authenticated;` when altering the table (§6, default-ACL trap).
+8. **Tripwire (not a defect today):** couple-typed `business_name` already reaches a stranger vendor's screen with only `maxLength=128` (`vendor/claim/[token]/page.tsx:124`, `:331`). If a future PR adds a couple-authored **note** to the manual-add card, or surfaces plan names in a proposal/inquiry/export, that PR owns wiring the right profile and logs a DECISION_LOG row first.
+
+---
+
+### 12.5 · Cross-session obligations (Explore → Booking)
+
+| When | Ping / notify Booking about |
+|---|---|
+| **Before slice D opens a branch** | Card/inquiry entry point (contract §6 ping protocol) — and specifically the one-line refactor of `apps/web/app/v/[slug]/page.tsx:1120` to call the exported `hasLiveInquiry`. Booking owns that file. |
+| **With slice D's PR** | The contract corrections in §12.1: §2's "InquiryComposer guard is the single source of truth" → `hasLiveInquiry` in `lib/shortlist-taxonomy.ts`; delete §2 line 28 (manual vendors do **not** keep "Inquire"). Booking must not re-add either claim. |
+| **With slice D's PR** | Confirmation that the button contract is flag-stable: Explore-ON + Booking-OFF opens today's shipped composer; Booking-ON opens the extended sheet; name/visibility/target unchanged. Booking must not change the meaning of `existingThreadId` / `existingThreadHref` when its flag lands. |
+| **Before PR-I merges** | The §4 corrections: single-key `NEXT_PUBLIC_BOOKING_FEE_ENABLED` (not two-key), citation → `Vendor_Package_Credit_BUILD_SPEC_2026-07-26.md § 0`, and the **new fourth bullet** recording the `acquire_schedule_pools` couple-only auth blocker. Both sessions need that fact. |
+| **Before PR-I merges** | PR-I touches `lockPackage`-adjacent money machinery only at the **call site**; it also ships a `CREATE OR REPLACE` of `acquire_schedule_pools` and (optionally) an extended `event_vendors_covered_rows_carry_no_money` CHECK. Booking must know a migration lands on shared package tables — whoever merges second **rebases**, never hand-picks a stale-tree merge (#3668). |
+| **After PR-H lands** | Booking adopts request-state wording in `LockPackageModal` / `chat-lock` (contract §1). |
+| **Before PR-J's resolver migration** | Booking's fee attribution **consumes** found-state and never re-derives it — the resolver keeps its 2-arg signature and its `ELSE 'import'` tail. Notify that a second `EXISTS` arm lands and that PR-J adds the previously-missing fee call inside `applyClaimAutoLink`. |
+| **Whenever "existing thread" semantics change** (declined, archived, re-open) | Either session updates `hasLiveInquiry` in ONE place and pings the other the same day. |
+| **Explore does NOT ping about** | `vendor-dashboard/services/actions.ts` — Explore has no branch there this wave (§12.4). Booking pings Explore before touching it. |
+### 12.6 · Ownership + verification conditions agreed with the Booking session (2026-07-27)
+1. **The `/v/[slug]` declined-predicate edit is OURS to make** (one predicate, one author) under two
+   binding conditions from the surface's owner:
+   - **Share the PREDICATE, never the SCOPING.** The shared thing is exactly "a thread exists AND
+     `inquiry_status != 'declined'`". `/v/[slug]` MUST keep resolving the couple's PRIMARY event
+     (`events[0]`, `page.tsx:1106`); the bench keeps its CURRENT event. A refactor that unifies
+     event resolution would silently change which event the public profile page speaks about —
+     do not do it.
+   - **Ping the Booking session with the diff** for review of the `/v/[slug]` side (review, not a
+     merge gate).
+2. **Assert POSITIVE post-conditions, not "no error" — for both 8b and 8c.** These bugs return
+   success while doing nothing, so a test that checks "the call didn't throw" proves nothing:
+   - PR-I: assert **a schedule-pool row EXISTS for the event/vendor after acknowledge**, not that
+     `acquireSchedulePools` returned.
+   - PR-J: assert **a ledger/charge row exists with the expected attribution after claim-sync**,
+     not that the resolver returned a value.
+   Same rule for any future call whose failure mode is a silent non-fatal return.
+
+### 12.7 · PR-J hard requirements from the money-path verification (Booking session, agreed)
+1. **Adjudicate BEFORE the first ledger write — and pin the negative with a test.** Attribution
+   freezes on the first ledger insert (`20271009180000:83-89` sets only
+   `highest_declared_centavos, source, updated_at` — never `attribution`). So found-you is
+   strictly-before-first-write or never. **Required test (Booking's explicit ask):** insert a
+   ledger row as `import` → run the found-you path → assert attribution is **STILL `import`**.
+   The point is that a future refactor which "helpfully" updates attribution `ON CONFLICT` must
+   fail loudly rather than silently repricing history.
+2. **Assert POSITIVE post-conditions** (§12.6.2): a ledger/charge row EXISTS with the expected
+   attribution after claim-sync — never merely that a call returned without error. Both 8b and
+   8c are bugs that succeed while doing nothing.
+3. **KNOWN GAP — the un-billable-forever hole (logged so it is not rediscovered as a bug).**
+   `applyClaimAutoLink` (`lib/vendor-invite-actions.ts:423-431`) upserts a `chat_threads` row for
+   (event, claimed vendor) with **NULL `inquiry_source`**, and `startServiceInquiry` stamps
+   provenance only `if (!isExisting)` (`inquiry-actions.ts:302`). Plain terms: **a couple who adds
+   their own vendor manually and LATER genuinely discovers them through Explore is permanently
+   un-billable.** Fails safe (under-bills), not urgent — but it is a revenue hole, not a data wart.
+   **Fix shape (either):** stamp provenance on the claim-created row at claim time, OR allow a
+   one-time stamp when the existing row's `inquiry_source IS NULL`. PR-J may close it or leave it;
+   it must not silently depend on it.
+
+### 12.8 · Exemption-scope audit of PR-J (applying the Booking session's rule to ourselves)
+> Their rule, earned the hard way: **"an exemption must be scoped to the thing that earns it — a
+> whole-body test for a phrase-level fact is a laundering vector."** Their first Setnayan-
+> solicitation exemption tested the WHOLE body, so *"Message me on Viber, not on Setnayan"* saved
+> cleanly with all 48 tests green; it was found by probing the exemption adversarially, not by
+> running the suite. PR-J has four exemptions. Audited below — **three are mis-scoped.**
+
+| # | Exemption | What EARNS it | What we'd actually TEST | Verdict |
+|---|---|---|---|---|
+| 1 | free import when no found-record | *this couple never discovered this vendor on Setnayan* | no found-record **for this event** | ⚠ **MIS-SCOPED (too narrow)** |
+| 2 | later view never converts an earlier import | *they knew the vendor before we showed them* | `first_found_at > imported_at` | ✅ correctly scoped |
+| 3 | claim-sync free when the vendor has no account | *this business was genuinely not on Setnayan* | *the claiming ACCOUNT is new* | ⚠ **MIS-SCOPED (wrong subject)** |
+| 4 | first dispute auto-accepted | *first-time grace, per business* | per `vendor_profile_id`, lifetime | ✅ correctly scoped |
+
+**⚠ 1 — event-hop laundering.** Found-records are per (event × vendor) for privacy. But the fact
+that earns the free import is about the COUPLE, not the event: view vendor X while planning event
+A, then import X into event B → no record for B → free. **Fix:** adjudicate the found-check across
+the couple's own events (same user/couple, any event) while keeping the STORED record per-event —
+i.e. widen the *query*, not the *storage*. Do not widen it beyond the couple (no cross-account
+inference, ever).
+
+**⚠ 3 — new-account laundering (the exact inverse of their bug: exemption too NARROW / wrong
+subject).** "Vendor has no Setnayan account → free forever" tests the claiming ACCOUNT, but the
+thing that earns it is whether the BUSINESS was on Setnayan. A vendor who already has a viewed
+profile can claim with a **fresh account** and convert a sourced booking into a free one. **Fix:**
+at claim time, if a found-record exists for a profile that plausibly matches the claimed business,
+do NOT auto-free — route to adjudication (the dispute ladder already exists and is grace-first, so
+the honest case still resolves in the vendor's favour on first contact). Never auto-charge on a
+fuzzy match; the fail-safe direction stays FREE, but the decision stops being automatic.
+
+**⚠ 1b — the impressions blind spot, stated honestly.** Because search impressions are deliberately
+not recorded (owner rule), a couple can read vendor NAMES off a rail without opening a card and
+import them all free. This is accepted, not fixed: a name alone is not a booking, and recording
+impressions to close it would cost more privacy than the leak is worth. **Documented so it is a
+decision, not an oversight.**
+
+**Test requirement:** each of the four exemptions gets an adversarial test that tries to LAUNDER it
+(event-hop · new-account claim · import-then-browse · second dispute), not merely a happy-path test.
+
+#### 12.8a · ✅ RULED BY OWNER 2026-07-27: **NO — found-state stays PER EVENT.** (was owner-gated)
+> Owner's answer to *"if a couple saw a vendor on Setnayan while planning their wedding, and a
+> year later adds that vendor to their kid's christening from their own contacts — do we
+> charge?"* → **No. Keep it per event.**
+>
+> **BUILD INSTRUCTION: found-records stay scoped per (event × vendor). Do NOT widen the query
+> across the couple's events. No recency window is needed — the question it answered is closed.**
+> A vendor is "found on Setnayan" only for the event where the couple actually browsed them.
+> Rationale (owner's option): simplest to explain to a vendor, and it never charges for stale
+> history. The event-hop vector is therefore an **ACCEPTED TRADE, documented — not an oversight**
+> (same class as the impressions trade in §12.8): a couple could browse under one event and
+> import free under another. The resolver keeps ONE scope; the two-scope asymmetry warning below
+> is now moot and retained only as history.
+>
+> _Original gating note, kept for lineage:_
+The Booking session (fee-machinery owner) flagged this before it was built, correctly:
+**widening the found-check to the couple's other events converts bookings that are FREE today
+into billable ones.** It is a redefinition of "sourced", and it runs against the direction of the
+last two owner rulings (sourced-only lock 2026-07-25; `website` closed to import 2026-07-26 —
+both NARROWED what we charge for).
+
+- **DO NOT BUILD IT on engineering judgement.** PR-J ships with found-records scoped per
+  (event × vendor) — today's behaviour — until the owner rules.
+- **Owner question, plain terms:** *"If a couple saw a vendor on Setnayan while planning their
+  wedding, and a year later adds that same vendor to their kid's christening from their own
+  contacts — do we charge a fee?"*
+- **If the answer is yes, ask for a RECENCY WINDOW.** Unbounded, an 18-month-old view on an
+  unrelated event makes today's manual import billable — precisely the booking a vendor would
+  dispute, and they'd be right. (The grace-first ladder makes a wrong call recoverable, which
+  lowers the risk — but recoverable-after-a-dispute is worse than never-wrong.)
+- **If built, the resolver ends up with TWO scopes** — thread branch event-scoped, found branch
+  couple-scoped. That asymmetry is legitimate but is exactly what a future reader flattens "for
+  consistency", silently repricing history. Required if built: state the asymmetry in the
+  function's COMMENT **and** pin it with a test that FAILS if the thread branch is ever widened
+  to match.
+
+**The new-account fix (§12.8 ⚠3) is NOT gated** — routing a fuzzy business match to adjudication
+instead of auto-freeing charges nobody automatically; fail-safe stays FREE. Build it.
+
+## 13 · Sort by distance + sort persistence (owner asked 2026-07-27) — READY, not yet built
+**Q: "can we also add sort by distance? and is this settable?"** Grounded answers:
+
+### 13.1 · Distance sort — YES, and the data is already on the page (zero new queries)
+`haversineKm(venueLat, venueLng, vendor.hq_latitude, vendor.hq_longitude)` is ALREADY computed on
+the vendors page (`page.tsx:438-443`) and stored in the enrichment map as `distance_km` (`:469`).
+It is simply **never projected onto the bench card** — `ShortlistVendor` carries `serviceRadiusKm`
++ `reachesVenue` (boolean) but not the km. Identical shape to the `thread_id` gap in §12.1.
+**Build:** ① project `distanceKm: ext?.distance_km ?? null` onto `ShortlistVendor`
+(`shortlist-taxonomy.ts` ~:356, beside `serviceRadiusKm`); ② add `'distance'` to `BenchSort` +
+`BENCH_SORTS` (`lib/bench-sort.ts:15-21`) with label **"Nearest"**; ③ comparator
+`(a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity)` and a reason pill ("3.2 km from your
+venue"); ④ extend `fitScore`? **No** — leave the fit lens alone (reach is already a fit input;
+adding raw km would double-count).
+
+### 13.2 · ⚠ The anchor caveat — distance from WHAT
+Origin is `events.venue_latitude/longitude` (migration `20260525010000`), populated at event
+creation from onboarding capture, by `saveVendorToPicks` when the couple saves a `category='venue'`
+vendor with coordinates, or by admin override. **If it is NULL, every distance is NULL and the lens
+is meaningless.** Required: **hide (or disable with an honest reason) the "Nearest" chip when there
+is no anchor** — never show a sort that silently no-ops. Copy when disabled: *"Add your venue to
+sort by distance."*
+
+### 13.3 · "Settable?" — three different questions, three honest answers
+| Sense | Today | Recommendation |
+|---|---|---|
+| Can the couple change the sort? | **Yes** — segmented control (`shortlist-categories.tsx:659`) | unchanged |
+| Is their choice REMEMBERED? | **No** — `useState<BenchSort>('fit')` (`:426`), component state only. Tab away or reload → snaps back to "Best fit" | **Fix in the same PR** — persist per event (URL `?sort=` or localStorage keyed by event). Arguably a bigger daily annoyance than the missing lens. |
+| Is the sort LIST admin-configurable? | No — hardcoded `BENCH_SORTS` | **Leave hardcoded.** Four lenses is a considered set, not a catalog; a configurable sort list is a maintenance liability with no user demand. |
+| Is the distance ORIGIN settable (venue vs the couple's home)? | No — always the venue anchor | **Defer.** "From our home" needs a couple home address we don't collect; revisit only if asked. |
+
+**Slice:** small, self-contained, no schema — fold into PR-B's follow-up or ship standalone as
+**PR-K**. Unit-test the comparator (null km sorts last, never first) + the anchor-absent hide rule.
+
+### 13.4 · Is "Best fit" already optimal? — audited; it is GOOD but has one real DEFECT
+`fitScore` (`lib/bench-sort.ts:31-37`) = `reach(1) + budgetFit(1) + dateFit(1)`, tie-broken
+rating → price. Honest, explainable, and a better default than most marketplaces. Three findings:
+
+**⚠ 1 · LIVE DEFECT — the badge fails OPEN, the sort fails CLOSED.** `withinRadius` is `null`
+whenever distance is unknown **or the radius is not finite/positive** (`page.tsx:451-455`), and the
+code deliberately hides the badge then ("never a false 'out of range'"). But `fitScore` scores
+`reachesVenue === true ? 1 : 0` — so that same `null` **loses a point**. Consequences, all silent:
+- **FREE tier has `serviceRadiusKm: 0`** (`vendor-tier-caps.ts:185`) ⇒ `hasFiniteRadius` false ⇒
+  `null` ⇒ **every free-tier vendor is ranked down on every bench, forever, no matter how close.**
+- Any vendor without geocoded coordinates is ranked down identically.
+The UI refuses to *say* they are far; the ranking *assumes* they are. **Fix: treat `null` reach as
+neutral, not a penalty** — either score `null` as the mid value or normalise the score by the
+number of KNOWN signals. Matches the badge's own fail-open rule. Hits hardest exactly the
+free-tier vendors a thin launch marketplace needs most.
+
+**⚠ 2 · The threshold is the VENDOR's tier, not the couple's need.** Radii: free 0 · verified 20 ·
+solo 20 · pro 50 · enterprise/custom 100. So a **Pro vendor 45 km away scores the reach point while
+a Verified vendor 25 km away does not** — the more distant vendor ranks higher because their tier
+is bigger. That is tier buying rank under a label that says "fit". Defensible as "they declared
+they travel that far", but it should be a *conscious* product position, not an accident. Owner call.
+
+**3 · Distance is binarised — 2 km and 19 km score identically.** Distance is the one axis where
+"how much" matters continuously (travel fees, crew meals, call times, day-of risk).
+**Cheapest high-value fix: use actual `distance_km` as a TIE-BREAK within equal fit scores**
+(before or after rating) — most of the benefit of a distance lens, no new chip, no new data.
+
+**Recommended order:** (1) fix the null-reach penalty [correctness] → (2) distance as fit
+tie-break [cheap, invisible, better results] → (3) the standalone "Nearest" lens + sort
+persistence [§13.1/§13.3, genuinely useful but the smallest win of the three].
+
+## 14 · Combination sorting (owner: *"I don't want it linear only — a combination of sorting"*)
+**RULE-0 RESULT: the combination scorer ALREADY EXISTS and is production-grade —
+`apps/web/lib/compat-score.ts`. The bench simply does not use it.**
+
+### 14.1 · What exists
+`computeCompatScore()` (`compat-score.ts:154`) — a **7-dimension weighted composite**, weights
+summing to 1 (`COMPAT_WEIGHTS`, `:31-53`), built to
+`Customer_Vendor_Marketplace_Architecture_2026-06-04.md §2` ("GATE + SCORE" — the gate decides who
+is eligible and never hides; the score only ranks + displays):
+
+| Dimension | Weight | Notes |
+|---|---|---|
+| refinement (style/preference/song overlap) | 0.22 | strongest "is this what I want" signal |
+| budgetFit | 0.20 | continuous ratio, not a yes/no |
+| distance | 0.18 | **continuous decay, scaled by the vendor's own travel radius** so wide-coverage vendors aren't punished; `DEFAULT_RADIUS_KM = 25` when absent |
+| reviews | 0.18 | **Bayesian-adjusted** — one 5★ review ≠ fifty |
+| dateHeadroom | 0.08 | free on more candidate dates = lower risk |
+| faithFit | 0.07 | lift for declared specialists, never a penalty for generalists |
+| trust | 0.07 | verified / boosted / profile completeness |
+
+**`NEUTRAL = 0.6` for any missing input (`:57`) — "never 0".** That is *exactly* the admit-unknown
+rule `fitScore` violates (§13.4 defect). The architecture already mandates it; the bench just
+doesn't follow it.
+
+### 14.2 · Who uses it — and who doesn't
+USES: `_actions/category-search.ts:925-939` (the category-search overlay, which sits on the LEGACY
+`plan-budget-accordion` path), `build-3state-actions.ts`, `build-3state-fallback-actions.ts`,
+`app/tour/vendors/page.tsx`.
+**DOES NOT USE IT: the live bench** (`shortlist-categories.tsx` → `lib/bench-sort.ts`), which ranks
+on `fitScore` — **3 binary flags, so only 4 possible scores (0–3)**. In a 6-vendor category most
+cards tie, and the real order is decided by the tie-breaks — i.e. "Best fit" degenerates into
+"sort by rating" much of the time.
+
+### 14.3 · ⚠ The inputs are ALREADY computed on the bench page
+`vendors/page.tsx` already resolves, per candidate, for the compat dims — its own comments say so:
+budget-fit ratio (`:357` *"for the per-candidate compat %"*), faith fit (`:383-391`), haversine
+distance (`:438-443`), rating + review_count + verified + is_setnayan_service (`:464-470`).
+**Everything `computeCompatScore` needs is in scope; the call is simply never made.**
+
+### 14.4 · Recommended shape (build order)
+1. **Call the existing scorer on the bench** — replace `fitScore` as the "Best fit" lens with
+   `computeCompatScore`. Do NOT write a second scorer. This single change delivers the combination
+   ranking, fixes the §13.4 null-reach defect (NEUTRAL 0.6), makes distance continuous (§13.1), and
+   de-binarises budget — all at once.
+2. **Keep the linear lenses** — "Lowest price" and "Top rated" are jobs ("just show me the
+   cheapest"), not defaults. Composite is the default; linear lenses stay as explicit overrides.
+3. **Explainability is mandatory.** A weighted score is a black box unless each card says why —
+   keep the shipped reason pill, driven by the **top-contributing dimension** ("Closest to your
+   venue" · "Best value here" · "Most reviewed"). Never show a bare %.
+4. **Per-category weights (owner's call).** One global weight vector is wrong: distance dominates
+   for catering / crew meals / booths / transport (they physically travel with equipment) and
+   barely matters for a gown designer or a monogram. Recommend a small per-plan-group weight
+   override on top of `COMPAT_WEIGHTS`, defaulting to the global vector.
+5. **Admin-tunable weights** — already named as intended in the module header ("§2 calls for these
+   to be admin-tunable; that admin surface is a later PR"). Sequence it AFTER (1)–(3); tuning a
+   scorer nobody has used yet is premature.
+6. ⚠ **Watch the `trust`/`boosted` dims** — `boosted` and `is_setnayan_service` feed rank. That is
+   defensible but it is paid placement inside a "best fit" default; it must be a conscious owner
+   position (same class as §13.4's tier-radius finding) and arguably disclosed.
+
+## 16 · Booking-wave handover absorbed (`SYNC_TO_EXPLORE_Booking_Wave_2026-07-27.md`)
+### 16.1 · ⚠ PR-I IS NOW LIVE MONEY — billing was ARMED in prod 2026-07-27
+The owner set `NEXT_PUBLIC_BOOKING_FEE_ENABLED`. Per contract §4's CORRECTION, that path is gated
+by **ONE flag, not two** — there is no second key. PR-I is therefore a live-money change, not a
+dark-flag rehearsal.
+
+**Blast radius VERIFIED by direct prod query (2026-07-27, read-only):**
+`booking_fee_charges = 0` · `booking_fee_ledger = 0` · fee `orders` = 0 · fee `payments` = 0 ·
+`chat_threads = 0` · `event_vendors` with a `marketplace_vendor_id` = **0** · verified vendors =
+**0** · events = 2 · locked `event_vendors` = 12 (**all manual/off-platform**).
+⇒ **Nothing can bill today.** `collectBookingFeeAtLock` is pre-gated on
+`targetVendor.marketplace_vendor_id` (`vendors/actions.ts:2155`) and there are no marketplace-linked
+rows; and with zero threads, `booking_fee_attribution_for` resolves every case to `import` = FREE.
+The 12 existing locks cannot bill retroactively (the re-derive trigger requires a pre-existing
+primary charge — there are none).
+⇒ **BUT the safety rails are consequently UNTESTED in prod.** The first real marketplace vendor +
+first real inquiry will be the first live exercise of the fee path. Treat that moment, not the
+flag flip, as go-live. **Required before it: assert POSITIVE post-conditions** (§12.6.2) — a
+ledger row EXISTS, a pool row EXISTS — never "the call returned without error".
+
+### 16.2 · Three Booking items RIDE WITH SLICE D (they land on card rails we own)
+1. **Service Details screen** — the per-service proof screen a card opens on tap (that service's
+   own photos + showcase clip + recent completed events + the vendor's other services + Inquire).
+   ⛔ Known blocker: `vendor_completed_events` (`20270321252758:160`) has **no `service_id`**, so
+   "events for THIS service" cannot be filtered, and the package cascade never stamps one.
+   **Decision: ship Details vendor-level with the limitation stated in the UI** (Booking's stated
+   preference) rather than blocking D. Do not silently present vendor-level events as
+   service-level.
+2. **Booked count** on the card.
+3. **Adaptive card** (pax/date/distance-aware pricing + hide already-locked categories).
+
+### 16.3 · Our grey-out rule and Booking's adaptive-card rule are ONE feature
+Build it once, in our slice; Booking adopts rather than writing a second. Do not ship two
+implementations of "this card doesn't fit your event".
+
+### 16.4 · Files Booking owns alone — stay off
+`service-wizard.tsx` · `services-manager.tsx` · `packages/actions.ts` · `package-editor.tsx` ·
+`lib/package-authoring.ts` · `lib/service-text-integrity.ts` · `lib/chat-contact-filter.ts`
+(+ their option-schema migration: `parent_option_id`, `pick_min`/`pick_max`, `max_extra_hours`).
+**Ordering:** their B-1 → B-2 must land before card-facing Details work is worth building (a
+"choose 3 of 5" line cannot render until the maker can author it). No race with slice D.
+
+### 16.5 · Available to import now
+`evaluateMessage(body, 'card')` (#3800 + #3802, merged; default `'chat'` unchanged). Never fork it,
+never add a profile member — ask Booking and it lands beside `'card'` in the one module. This wave
+still adds NO content gate (§11a).
+## 15 · Ranking lenses — code-verified 2026-07-27
+
+**RULE-0 result: there is exactly one scorer and it already ships — `apps/web/lib/compat-score.ts`. §15 adds NO second scorer and NO bespoke comparator. A "lens" is a NAMED WEIGHT VECTOR passed to `computeCompatScore`.** The live bench's `fitScore` (`lib/bench-sort.ts:31-37`, 3 binary flags → 4 possible scores) is DELETED by L0 below, not extended.
+
+### 15.0 · The mechanism (build this first, it is the whole section)
+
+```ts
+// lib/compat-score.ts — CHANGE THE SIGNATURE, NOT THE MATH
+export type CompatWeights = Record<
+  'refinement'|'budgetFit'|'distance'|'reviews'|'dateHeadroom'|'faithFit'|'trust'|'freshness', number
+>;
+export function computeCompatScore(input: CompatInputs, weights: CompatWeights = COMPAT_WEIGHTS)
+```
+- `COMPAT_WEIGHTS` (`compat-score.ts:31-53`) gains `freshness: 0` and is otherwise **byte-for-byte unchanged** — every existing caller (`category-search.ts:925-939`, `build-3state-actions.ts`, `build-3state-fallback-actions.ts`, `app/tour/vendors/page.tsx`) keeps its current output.
+- New input `freshnessRatio?: number | null` → `freshness` dim; `null` → `NEUTRAL` 0.6, same admit-unknown rule as every other dim (`:57`).
+- `assertSumsToOne(weights)` in a unit test for **every** vector in the registry. A vector that doesn't sum to 1 fails CI.
+- `lib/ranking-lenses.ts` (new) exports `LENSES: Record<LensKey, {label, weights, requires, hideWhen}>`. `bench-sort.ts` keeps only the two **plain sorts** (below); it stops computing any score.
+
+**Lenses vs plain sorts.** The five lenses are recommendations — same scorer, different weights, each card carries a reason pill. `Lowest price` and `Top rated` stay in the segmented control as **plain sorts**, visually separated, no % and no reason pill, because they are a user job ("just show me the cheapest"), not a recommendation. Do not model them as weight vectors — `priceFitScore` returns a flat 1.0 for every vendor within budget (`smart-sort.ts:148`) so a "cheapest" vector is arithmetically impossible.
+
+### 15.1 · The lens set
+
+| Lens (what the bride reads) | The job it does | Status |
+|---|---|---|
+| **Best matches** (default) | "Given everything you told us — style, budget, venue, date, faith — these fit you best." | ✅ BUILDABLE TODAY |
+| **Nearest to your venue** | "Least travel, least logistics cost, lowest day-of risk." | ✅ BUILDABLE TODAY (data already on the page) |
+| **Fits your budget** | "These will not blow the budget you set for this category." | ⚠ BUILDABLE, DATA-DARK (hide until priced supply exists) |
+| **New here** | "Recently joined Setnayan and matches your brief — worth a look before they book up." | ⚠ BUILDABLE with one owner decision (anchor column) |
+| **In demand right now** | "Others are competing for your date — decide soon." | ⛔ **BLOCKED. Do not ship.** See §15.3 |
+
+**Weight vectors** (each row sums to 1.000; `freshness` is 0 everywhere except **New here**):
+
+| Lens | refinement | budgetFit | distance | reviews | dateHeadroom | faithFit | trust | freshness |
+|---|---|---|---|---|---|---|---|---|
+| Best matches *(= `COMPAT_WEIGHTS`)* | 0.22 | 0.20 | 0.18 | 0.18 | 0.08 | 0.07 | 0.07 | 0.00 |
+| Nearest to your venue | 0.15 | 0.13 | **0.45** | 0.10 | 0.06 | 0.05 | 0.06 | 0.00 |
+| Fits your budget | 0.18 | **0.40** | 0.13 | 0.12 | 0.05 | 0.06 | 0.06 | 0.00 |
+| New here | 0.22 | 0.16 | 0.14 | **0.06** | 0.05 | 0.06 | 0.06 | **0.25** |
+| *In demand (spec only, blocked)* | 0.20 | 0.15 | 0.13 | 0.12 | 0.06 | 0.06 | 0.06 | 0.00 + **demandPressure 0.22** |
+
+Notes on the non-obvious numbers:
+- **Nearest ≠ a raw km sort.** `distanceSub` (`compat-score.ts:120-127`) is a continuous half-life decay, so 2 km and 19 km differ — the §13.4 binarisation defect disappears. Keep the km on the pill ("3.2 km from your venue").
+- **New here deliberately drops `reviews` to 0.06.** At 0.18 a new vendor's Bayesian-prior 0.6 is out-ranked by every proven rival and the lens returns the same order as Best matches. Lowering reviews *is* the lens.
+- **`travelRadiusKm` must stay `undefined` at every bench call site.** Passing the tier-derived `serviceRadiusKm` (free 0 / verified 20 / pro 50 / enterprise 100, `vendor-tier-caps.ts:184,219`) makes a Pro vendor 45 km away out-rank a Verified vendor 25 km away — tier buying rank inside a lens labelled "nearest". `category-search.ts:925-937` already omits it, so `DEFAULT_RADIUS_KM = 25` applies to everyone. **Match it. Tier-blind distance is the rule.**
+
+**`freshnessRatio` definition (the only new dimension, and its data is proven):**
+```
+verifiedNewAt = the vendor's verification approval timestamp
+ageDays       = days since verifiedNewAt
+freshnessRatio = verifiedNewAt == null ? null            // → NEUTRAL 0.6, never 0
+               : ageDays > 90        ? null              // → NEUTRAL, no penalty for being established
+               : 1 - (ageDays / 90)                      // 1.0 on day 0, decaying to 0 at day 90
+```
+Anchor on **verification, not row creation** — the owner ruling (DECISION_LOG.md:414, 2026-06-01; `Vendor_Match_Personalization_2026-06-01.md` §7b.2) says "first ~30 days / first ~N leads **after verification**". `vendor_profiles.created_at` is row-insert time and for admin-seeded profiles (`20260528000000_admin_owned_unclaimed_vendor_profiles.sql:57`) it is the *admin's* date, not the vendor's. **Check `vendor_verifications.approved_at` (`20260516010000_v1_sku_lock_vendor_verifications.sql:59`) for population first** — if it is populated, use it and add no column. If not, that is the owner decision in §15.7. Never fall back to `created_at` silently; fall back to `null`.
+
+### 15.2 · Lens visibility gate (hard rule — a lens that cannot discriminate must not appear)
+
+Precedent already in this spec: §13.2 hides "Nearest" when `events.venue_latitude` is NULL. Generalise it.
+
+```
+show(lens) := candidates.length >= 3
+           && candidates.filter(c => drivingInputOf(lens, c) != null).length >= 2
+```
+- `drivingInput`: Nearest → `distanceKm`; Fits your budget → `budgetFitRatio`; New here → `freshnessRatio`; Best matches → always shown (it is the default and degrades to a defensible order at N=0 inputs).
+- Hidden ≠ removed: render the chip **disabled with an honest reason** where one exists — *"Add your venue to sort by distance."*
+- **This is not theoretical.** Prod measured 2026-07-27: 1 `vendor_profiles` row total, unverified, `coming_soon`; 0 pass the `/explore` verified gate; 0 `vendor_services`, 0 `vendor_packages`, 0 `vendor_reviews`, 0 `vendor_activity_stats`; all 44 `event_vendors` picks have `marketplace_vendor_id IS NULL`. **Today only "Best matches" would show.** That is correct behaviour, not a bug — build for it.
+
+### 15.3 · "In demand right now" — BLOCKED, and why
+
+The signal that exists (`eyeingByVendorId`, `vendors/page.tsx:588-624`) is real data measuring the **wrong act**, and shipping it as a lens breaks two locks:
+
+1. **It counts saves, not inquiries.** `explore/actions.ts:198` (`saveVendorToPicks`) and `onboarding/wedding/actions.ts:634` both write `status='considering'` with zero contact. `DECISION_LOG.md:470` + `Schedule_Matrix_and_Date_Finder_2026-06-02.md:141`: *"Starts at the inquiry (Stage 2), NEVER at search (Stage 1) … counting it as competition = manufactured scarcity (a fineable dark pattern)."* The 05-31 spec the code follows (`Vendors_Plan_Budget_Tab_Spec_2026-05-31.md:126`) was superseded two days later.
+2. **No small-N floor.** `plan-budget-accordion.tsx:1622` renders at n=1. 06-02 §8.3: *"Don't show a '1'."* n=1 on a solo vendor + an exact date in a small municipality is functionally re-identifying.
+3. **There is no capacity read.** `vendor_schedule_pools.daily_booking_capacity` is real and authoritative (`20261126000000_schedule_pools.sql:74`), but `vendor_schedule_pool_bookings` has **no cross-couple SELECT policy** (`:212-231`) — "N slots left on your date" is not client-buildable. And soft holds never consume capacity (`lib/schedule-pools.ts:11-17`), so "slots left" could only ever mean deposit-paid bookings.
+
+**What would make it honest — all four, in order:**
+1. Re-source the count to inquiry-backed rows only. `unlock-category.ts:187` is the clean pattern (inserts `considering` **and** fires an auto-inquiry) — join on thread existence to discriminate.
+2. Min-N floor. Ship at n ≥ 3; the 2026-07-02 MI split (`Setnayan_AI_Market_Intelligence_2026-07-02.md` §2/§4) puts couple-aggregates at **min-N = 25 + DPO gate** — owner call, §15.7.
+3. A `SECURITY DEFINER` RPC returning `remaining = capacity − live bookings on (vendor, date)`, feeding a new `demandPressure` dim. Note the cold-start trap: `daily_booking_capacity` DEFAULT 1 makes every brand-new vendor read "1 slot left" on every open date — manufactured scarcity by construction. Suppress the signal entirely for vendors who have never set capacity.
+4. Privacy transparency (§15.4).
+
+**Meanwhile:** the couple already gets the honest per-card version — the `dateFit === 'booked'` badge ("Booked that day", `shortlist-categories.tsx:344-357`). Keep it. Do not promote it to a lens.
+
+**Two related artifacts to put in front of the owner, not to fix silently:** `app/_components/app-store/studio-card-demo.tsx:839` renders a **hardcoded** "3 also eyeing your date" on public marketing (the exact pattern removed at DECISION_LOG.md:494 and :556), and `app/vendors/_components/vendor-grow-sections.tsx:230` **sells** the nudge to vendors — *"we tell your client that schedule is in demand — so they move"* — while the signal underneath is a save-count.
+
+### 15.4 · Honesty guardrails (hard rules — CI-checkable where possible)
+
+**What each lens MAY claim on a card**
+| Lens | May say | Must NEVER say |
+|---|---|---|
+| Best matches | "Best fit for what you told us" | "Best vendors", "top-rated", "recommended by Setnayan" |
+| Nearest | "3.2 km from your venue" (a measured number) | "Reaches your venue" as a *ranking* claim — the radius is a tier, not a promise |
+| Fits your budget | "Fits your {category} budget" · "Over budget (est.)" | **"Best value", "cheapest", "most for your money"** — `priceFitScore` ties every in-budget vendor at 1.0; the data cannot rank value |
+| New here | "New on Setnayan" · "Matches your brief" | any implication of vetting, quality, or endorsement |
+| *In demand* | — | "Only N left", "booking fast", "almost gone", "lock it in soon" — none is backed by a capacity counter that exists |
+
+**Always-on rules**
+1. **`est.` qualifier is mandatory** wherever the price is a `starts at` rather than a quote. `ShortlistVendor.budgetEstimated` (`shortlist-taxonomy.ts:179-182`) already does this — reuse it, don't reinvent.
+2. **Paid placement disclosure on EVERY ranked surface.** Today it exists on exactly one (`category-search-overlay.tsx:453-496`) and is absent from the bench, from `plan-budget-accordion`, and from `/explore` — which is the surface that actually pins commercial `vendor_partnerships` (`sponsored_included`=4 / `sponsored_discounted`=3, above `quality_score`, on **every** sort mode, `explore/page.tsx:2440-2462`, self-described in-code as "organic signals"). Copy the Journal pattern verbatim: `journal-partner-credit.tsx:75` ("Sponsored" chip) + `:105` ("Placements marked 'Sponsored' are paid partnerships."). **No lens ships on `/explore` until that pin is disclosed.**
+3. **Money must not move the number while boosts are retired.** Pass `boosted: false` at every bench call site and assert `ad_rank = 0` at the read layer. `vendor_active_ads` (`20260516220000_vendor_ad_subscriptions.sql:123`) filters only on `cancelled_at`/`expires_at` and **never joins `service_catalog.is_active`** — the 5 boost SKUs were retired 2026-06-29 but the read path never learned, so a single inserted row re-arms a top-pin *and* a +1.05-point `%` bump (`compat-score.ts:146`) against a dead SKU. Add the `is_active` join in L0.
+4. **The existing disclosure string is false as written** — "Paid placement … **Not an AI recommendation**" while `boosted` feeds `trustSub`. Either drop `boosted` from the score (recommended — let it be a labelled pin only) or change the copy. Owner call, §15.7.
+5. **`firstlook_boost_weight` must be visible.** It is an admin dial 0–0.5 (`firstlook.ts:29-34`, live default **0.10**, not 0) that at its ceiling outweighs `refinement` + `budgetFit` combined, is absent from `explainCompatScore`, and writes no audit row. Surface it in the why-panel and log changes to `admin_audit_log`.
+
+**Privacy — showing one couple's interest to another.** The aggregation is done right (count only, deduped, admin client, RA 10173 comment at `vendors/page.tsx:590-593`) but the **transparency leg is missing**: `/privacy` says nothing about shortlists, and its OAuth sections (`privacy/page.tsx:753,:843,:976`) promise data is "never shared with vendors, other couples, or third parties" — which a reasonable reader takes as a blanket denial that the eyeing chip contradicts. Before any lens or chip derived from another couple's planning behaviour ships: (a) a plain-English `/privacy` line stating that saving or inquiring about a vendor contributes to an **aggregate, de-identified** interest count visible to other couples planning the same date; (b) an opt-out; (c) the min-N floor; (d) DPO sign-off per the 2026-07-02 couple-aggregate gate. Vendor-side aggregates (calendar blocks, pool remaining) need only min-N-over-vendors and are cleared to ship sooner.
+
+### 15.5 · Cold-start fairness
+
+**Rule A — admit-unknown, everywhere.** `null` contributes `NEUTRAL` 0.6, never 0. This is already true inside `computeCompatScore` and is exactly what `bench-sort.ts:33` (`reachesVenue === true ? 1 : 0`) and `:53` (`rating ?? 0`) violate. L0 deletes both. Net effect of L0 alone: free-tier vendors (`serviceRadiusKm: 0` ⇒ `withinRadius` permanently `null`) stop losing a point on every bench forever, and unrated vendors stop sinking.
+
+**Rule B — reserved fresh-chance slot.** Owner-locked mechanism (c), DECISION_LOG.md:414. **One** slot per rail, per lens, holds a rotating fitting newcomer who did not make the merit cut. It is labelled "New here", is **never** pre-checked, **never** counted as a merit rank, and **never** eligible for a "top pick" treatment. Rotate per session seed so the same vendor does not always win it. Grep confirms zero implementation exists (`exposure_deficit|welcome_boost|fresh_chance` → 0 hits across `apps/web` + `supabase`); this is the minimum viable slice of the 7 locked fair-exposure mechanisms and it ships with the lenses.
+
+**Rule C — one tier-gating policy across all surfaces.** `reviewStarsCounted: false` for free tier (`vendor-tier-caps.ts:207`) zeroes a free vendor's genuine stars in `/explore` (`page.tsx:2477-2486`) but not on the bench or in category-search — two surfaces give different answers to "top rated" for the same vendor. Pick one and apply it in both. Owner decision, §15.7.
+
+**Per-lens cold-start outcome (state this in the PR description):**
+| Lens | Brand-new vendor | Free-tier vendor |
+|---|---|---|
+| Best matches | ~59–62/100, tier "fair"/"good"; out-ranked, never buried (`compat-score.test.ts:20-26,:46-49`) | Neutral after L0; was structurally −1 point before it |
+| Nearest | **Neutral-to-favourable** — distance is tier-blind by Rule B above | Neutral — no radius penalty |
+| Fits your budget | Neutral (no price → `null` → NEUTRAL) | Neutral |
+| New here | **The only lens that favours them.** Lead the empty-marketplace experience with it | Neutral (freshness anchors on verification, not tier) |
+| *In demand* | **Structurally buried** — a vendor nobody has inquired about can never show demand. Another reason it is blocked |
+
+### 15.6 · Explainability (mandatory — no card ships without it)
+
+- **Never render a bare score or %.** Every card in every lens carries one reason pill naming the **top contributing dimension**.
+- **Contribution formula** (do not use raw `weight × sub` — `refinement` would win almost always at 0.22 × 0.6):
+  ```
+  contribution_i = weights[i] * (sub_i - NEUTRAL)    // lift above the admit-unknown baseline
+  topDim = argmax_i contribution_i   where contribution_i > 0.01
+  ```
+  If no dimension clears the threshold, the pill reads **"Matches your basics"** — never invent a superlative.
+- `explainCompatScore` (`compat-score.ts:196-268`) already produces the honest ordered phrase list from the same inputs and the same neutral baselines. **Use it. Do not write reason copy inline.** Extend it with the `freshness` phrase ("New on Setnayan") and make it weight-aware so a lens's own driving dimension can surface.
+- A one-tap "Why this order?" panel per lens naming its inputs in plain English, including `firstlook_boost_weight` when it is non-zero.
+
+### 15.7 · Per-category weight overrides
+
+One global vector is wrong: distance dominates for anyone who physically travels with equipment and barely matters for a gown designer.
+
+**Mechanism** — additive override merged onto the lens vector, then **renormalised**, so the sum-to-1 invariant cannot be broken by an override author:
+```ts
+// lib/ranking-lenses.ts
+const PLAN_GROUP_WEIGHT_OVERRIDES: Partial<Record<PlanGroupId, Partial<CompatWeights>>> = { … };
+resolveWeights(lens, planGroupId) =
+  normalizeToOne({ ...LENSES[lens].weights, ...(PLAN_GROUP_WEIGHT_OVERRIDES[planGroupId] ?? {}) });
+```
+`normalizeToOne` divides every entry by the sum. Unit-test that every `(lens × planGroup)` product sums to 1.
+
+**Starting overrides** (owner-tunable later; these are recommendations, not locks):
+
+| Plan group | Override | Why |
+|---|---|---|
+| catering · crew meals · mobile bars / booths · transport · lights & sound · LED | `distance: 0.30` | equipment and crew physically travel; km is real money (travel fee, crew meals, call time, day-of risk) |
+| ceremony venue · reception venue | `distance: 0.02` | the venue **is** the anchor — ranking venues by distance from themselves is meaningless |
+| gown / suit designer · monogram · stationery · pakanta | `distance: 0.04`, `refinement: +` | remote-deliverable; style fit is the whole decision |
+| photo · video · coordination | *(no override — the global vector is right)* | genuinely balanced across all seven dims |
+
+Sequence this **after** the lenses ship (L5). Tuning a scorer nobody has used yet is premature, and the per-group data (`budget_leaf_benchmarks`: 27 rows, only 14 with a `benchmark_php`; the other 13 leaves are silently dropped by `budget-allocation-data.ts:283-286`) is not yet good enough to tune against.
+
+### 15.8 · Build order
+
+| # | Slice | Depends on | Notes |
+|---|---|---|---|
+| **L0** | **Adopt the scorer on the bench.** Delete `fitScore`; call `computeCompatScore` from `shortlist-categories.tsx`'s data path. Thread the inputs already resolved on `vendors/page.tsx` (budget-fit ratio `:357`, faith `:383-391`, haversine `:438-443`, rating/reviews/verified `:464-470`). Pass `boosted:false`; omit `travelRadiusKm`. Add the `service_catalog.is_active` join to `vendor_active_ads`. | — | **Prerequisite for everything.** Also fixes the §13.4 null-reach defect, de-binarises budget and distance, and un-buries free-tier + unrated vendors. Ship even if §15 stops here. |
+| **L1** | Lens registry + `weights` param + `freshness` dim (weight 0) + `normalizeToOne` + sum-to-1 tests + reason pill from `explainCompatScore`. | L0 | No user-visible lens yet beyond "Best matches". |
+| **L2** | **Nearest to your venue** + `distanceKm` on `ShortlistVendor` + anchor-absent hide (§13.2) + **sort persistence** (§13.3 — today `useState('fit')` at `shortlist-categories.tsx:426` forgets on every reload). | L1 | Smallest, highest daily value. Folds in PR-K. |
+| **L3** | **Fits your budget** + visibility gate (§15.2) + mandatory `est.` qualifier. | L1 | Will be hidden in prod until priced supply lands. Ship it anyway — it is correct and dormant. |
+| **L4** | `freshnessRatio` + **New here** + **reserved fresh-chance slot** (Rule B). | L1 + owner decision #1 | The only pro-newcomer mechanism; ship it with the lens, not after. |
+| **L5** | Per-category overrides (§15.7). | L1–L4 | |
+| **L6** | Admin weight-tuning surface + `admin_audit_log` rows + surfacing `firstlook_boost_weight`. | L5 | The module header already names this as intended. |
+| **L7** | ⛔ **In demand** — inquiry-sourced count + min-N + capacity RPC + DPO. | §15.3 all four | **Do not start without owner decisions #2 and #3.** |
+
+All slices behind `NEXT_PUBLIC_EXPLORE_REPLAN_ENABLED`, one worktree per PR, changelog fragment in ROOT `changelog.d/`, verify before arming auto-merge.
+
+### 15.9 · Owner decisions — an implementer MUST NOT choose these
+
+1. **Freshness anchor.** Is `vendor_verifications.approved_at` populated and usable, or do we add `vendor_profiles.verified_at`? The owner's own 2026-06-01 ruling anchors on verification, and `created_at` is the wrong column (row-insert time; the *admin's* date for seeded profiles). A new column contravenes the "flag-flip beats new schema" preference, so it needs sign-off. **Blocks L4.**
+2. **Scarcity min-N.** `Schedule_Matrix_and_Date_Finder_2026-06-02.md` §8.3 says "don't show a 1" (implies ≥2–3); `Setnayan_AI_Market_Intelligence_2026-07-02.md` §4 puts couple-aggregates at **min-N 25 + full DPO gate**. Which governs? **Blocks L7.**
+3. **The two live honesty exposures.** (a) `vendor-grow-sections.tsx:230` publicly sells the scarcity nudge to vendors while its basis is a save-count; (b) `studio-card-demo.tsx:839` renders a hardcoded "3 also eyeing your date" on public marketing. Re-source, rewrite, or remove — owner's call, but they should not stay as-is while §15 ships lenses next to them.
+4. **Does paid placement move the number?** Drop `boosted` from `trustSub` and let paid placement be a labelled pin only (recommended), or keep the +0.15 and rewrite the false "Not an AI recommendation" copy.
+5. **Tier-gated review stars.** Apply `reviewStarsCounted` on all surfaces or none. Two screens giving different "top rated" answers for the same vendor is indefensible under any lens copy.
+6. **Tier-derived travel radius.** §15.1 rules it out of distance scoring (tier buying rank inside "nearest"). Confirm — the alternative ("they declared they travel that far") is defensible but must be a conscious position, per §13.4 finding 2.
+7. **Scope note owed to the corpus.** §14 of this spec — the owner's own "combination sorting" brief — makes no mention of freshness or in-demand. §15 extends it; log the extension at the bottom of `DECISION_LOG.md` so the dated spec and the verbal brief reconcile.
+## 17 · INNER / OUTER SERVICE RADIUS (owner 2026-07-27) — new product model, not yet built
+> Owner: *"they have inner radius. this radius must comply to give free transportation fee if
+> within this radius. outer radius is the overall range."*
+
+### 17.1 · What exists today (verified) vs what the owner described
+| | Today | Owner's model |
+|---|---|---|
+| Reach | ONE number, **purely tier-derived** (`tierCaps().serviceRadiusKm`: free 0 · verified/solo 20 · pro 50 · ent/custom 100). **No vendor-declared radius column exists anywhere.** | **TWO** radii, vendor-declared: **inner** (free transport) + **outer** (overall range) |
+| Transport | **Distance-blind flags:** `vendor_services.transport_included` (bool) + `transport_flat_fee_php` (null ⇒ quote-by-distance); `vendor_package_items.transport_mode` ('included'\|'flat'\|'distance') + `transport_flat_centavos`; `event_vendors.transport_php` (the couple's recorded cost line) | Transport free **iff inside the inner radius**, chargeable between inner and outer |
+
+⇒ Today a vendor can only say "transport included" **always** or "flat fee" **always**. They cannot
+say *"free within 15 km, chargeable beyond"* — which is how PH suppliers actually price.
+
+### 17.2 · Why this is a materially better model
+1. **It makes "Service reach" honest.** The tier radius becomes the **CAP on the outer radius**, not
+   a claim about the vendor. The vendor declares within their entitlement (`inner ≤ outer ≤ tier
+   cap`), which fixes the §16-caveat that a Pro vendor serving only Metro Manila is currently
+   ranked as comfortable at 45 km with no way to say otherwise.
+2. **It turns distance into MONEY, which is what the couple actually feels.** A vendor 30 km out
+   with a ₱5,000 travel fee is genuinely more expensive than one 5 km out — today the bench treats
+   them as the same price.
+3. **It gives an honest three-state badge**, replacing today's binary: **"No travel fee"** (inside
+   inner) · **"Travel fee applies"** (inner→outer) · **"Outside their range"** (beyond outer).
+   All three are the vendor's own declaration — no inference, no tier proxy.
+
+### 17.3 · Build shape (when the owner greenlights)
+- **Schema:** `vendor_profiles` (or `vendor_services` if it varies per service — owner call)
+  gains `inner_radius_km` + `outer_radius_km`, both nullable, with a DB CHECK
+  `inner_radius_km <= outer_radius_km` and app-level enforcement of `outer_radius_km <= tier cap`
+  (re-checked on downgrade — a vendor dropping from Pro to Verified must not keep a 50 km outer).
+  RLS + explicit `REVOKE ALL` per the default-ACL rule.
+- **Vendor UI:** two fields where the service radius is presented today, with the free-transport
+  meaning stated in plain words.
+- **Ranking:** feed BOTH — `distance` dim uses the outer radius as the decay scale (replacing the
+  tier proxy), and the estimated travel fee feeds the **`budgetFit` dim** so distance shows up as
+  money, not only as proximity.
+- **Fallback:** vendors who declare neither keep today's behaviour (tier radius, neutral scoring) —
+  never a penalty for not having filled it in yet.
+- **⚠ Deliberate consequence:** once inner/outer exist, the "Nearest to your venue" lens (§15)
+  should rank on **"free-transport first"**, not raw km — that is the couple-meaningful ordering.
+## 18 · The budget planner — booked + manual, one truthful total
+
+> Owner: *"how can we make this the best budget planner for them with what they booked with us and what they manually purchased?"*
+
+**Rule 0 · what exists · what's missing · the delta.**
+**Exists:** a mature, LIVE ledger — `lib/budget.ts` (788 lines: snapshot, per-vendor itemization, `.ics`), `lib/budget-allocation.ts` + `-data.ts` (the median/cushion/pin engine), `lib/checklist-budget.ts` (3-tier health), `lib/budget-overspend.ts` (absorption planner), the `/dashboard/[eventId]/budget` page (649 lines), the Merkado lens, `event_vendor_line_items` + `event_vendor_payments` (add + delete + R2 receipt + Realtime).
+**Missing:** unification. **Seven** surfaces compute "the budget" with **five incompatible formulas**; the two halves the owner names are structurally split — Setnayan-booked spend (`orders`) lands in exactly ONE stat, and "manually purchased" can only be recorded by inventing a fake vendor.
+**Delta:** one resolver + one nullable FK + one page-level "Add a cost" form. **No new engine, no new page, no new planner.** The corpus already decided all of this on 2026-07-08 (`02_Specifications/Budget_Product_Definitive_Plan_2026-07-08.md` P1–P4) and none of it shipped.
+
+---
+
+### 18.1 · Reconciliation comes first (this is worth more than any feature)
+
+Today `/budget` prints two different totals eight inches apart on the same screen. Verified on prod event `044f7e64…`: **"Total to pay ₱80,000"** directly above **"Committed ₱0"** and the empty state *"You're still choosing vendors"* — and the ₱80,000 vendor's card is not rendered, so the couple cannot find, edit, or delete the number driving their own headline. Nothing else in this section matters until that stops.
+
+**Ship one resolver: `apps/web/lib/budget-truth.ts` → `resolveEventMoney(eventId)`.** Every surface imports it; no surface does its own arithmetic ever again. It returns:
+
+```
+{ estimated, committed, paid, stillOwed, byBucket[], lines[], sources[], warnings[] }
+```
+
+**Source of truth, per part of the total** (all columns already exist unless marked NEW):
+
+| Part of the money | Source of truth | Rule |
+|---|---|---|
+| Booked with Setnayan | `orders` · `confirmed_total_php ?? requested_total_php` | `paid`/`fulfilled` → committed **and** paid. **`awaiting_payment`** → committed, unpaid. Enters the ledger as **read-only rows**, not just a stat. ⚠ *Corrected 2026-07-27 (BUD-1, verified against prod): there is no `pending_payment` value — the `order_status` enum is `{draft, submitted, awaiting_payment, paid, fulfilled, cancelled, refunded, lapsed}`. `submitted` maps to **estimated**, not committed, per the SKU activation gate (activation is on ADMIN APPROVAL, never on submission); `draft`/`cancelled`/`refunded`/`lapsed` are not money.* |
+| Marketplace package booking | `event_vendors.total_cost_php` on the row where `package_role = 'anchor'` | **Never** re-sum `vendor_package_items`. Covered rows (`package_role='covered'`) contribute **₱0**. |
+| Marketplace service booking | `event_vendors.total_cost_php` once ≥ `contracted`; the listing's `starting_price_php` **as an estimate** before that | Estimate is labelled, never committed. |
+| Off-platform vendor | `event_vendor_line_items` if any exist, else `total_cost_php` | Branch test must be `manualItemized !== 0`, **not `> 0`**. |
+| Extras, add-ons, change-order credits | `event_vendor_line_items.amount_php` (signed) | Negative = credit. Already unconstrained since `20270323841750`. |
+| Transport + crew meals | `event_vendors.transport_php` + `food_allowance_php` | **Add both to `fetchBudgetSnapshot`'s SELECT** (`lib/budget.ts:568` names only `total_cost_php`). `crew_meal_covered=true` already nulls the allowance. |
+| Money already handed over | `event_vendor_payments.amount_php` (+ backfilled `deposit_paid_php`) | ₱111,500 of recorded deposits are currently counted by nothing. |
+| Bought outside, no vendor | `event_vendor_line_items` with **NEW** nullable `vendor_id` | §18.2. |
+| Paperwork | `estimatePaperworkCentavos()` (`lib/checklist-budget.ts:95-109`) | Estimate-only, never committed. §18.3. |
+| The target | `events.estimated_budget_centavos` | Unchanged. |
+
+**Counting law:** one peso, one row, one `costKey`. The resolver excludes `archived_at IS NOT NULL`, excludes `package_role='covered'`, and never mixes a vendor's headline with their line items.
+
+**The twelve defects the resolver must close** (all code-confirmed; ranks are the audit's):
+
+| # | Defect | Fix |
+|---|---|---|
+| R1 | Strip "Committed" and card "Total to pay" are different arithmetic over different row sets — **live in prod** | Both read the resolver. |
+| R2 | Checklist buffer **skips** committed vendors with empty `covers_plan_groups` and substitutes a market guess — **₱810,000 wrong today** (12 rows) | Drop the `if (groups.length === 0) continue;` skip (`checklist-budget.ts:186`); unmapped commitments fall into an "Other" bucket, counted. |
+| R3 | Package cascade counts the price **N+1 times** (anchor + every covered row) — latent, fires on the first lock | Read `package_role` (written since `20271009160000`, read by nothing). |
+| R4 | Package price summed from `replacement_value_centavos`, not the agreed `total_price_centavos`; optional/conditional items billed in | Use the anchor total. |
+| R5 | Transport + crew meals counted by Merkado + checklist, invisible to `/budget` | Add to the SELECT. |
+| R6 | `deposit_paid_php` counted as paid by nothing | Backfill into `event_vendor_payments` (BUD-4), then stop writing it. |
+| R7 | Setnayan SKU spend in 1 of 7 surfaces | Read-only ledger rows (BUD-7). |
+| R8 | Archived (rejected) vendors still spend the couple's money on 6 surfaces | Filter `archived_at`. |
+| R11 | `paid + stillOwed ≠ total` when any vendor is overpaid (per-vendor clamp, unclamped sums) | Resolver emits an explicit `overpaidPhp` and the UI names it. |
+| R12 | A credit-only manual line is silently discarded on package vendors; credits > charges reverts a vendor to its stale headline | `!== 0`. |
+| R13 | Payments attributed to catalogue items (`vc:` → `line_item_id = NULL`) can never retire a milestone | Give catalogue items a real line row on first payment, or match on the stashed label. |
+| R14 | The green "Live" dot watches only payments + line items — goes stale on any vendor/catalog edit | Subscribe to `event_vendors` too, or downgrade the badge's promise. |
+
+Delete or redirect afterwards: `snapshot.totals.upcomingDueAmount` (a fourth "upcoming" definition, rendered only by the marketing tour), and the bespoke `remainingPhp` math inside `BudgetSummaryStrip`.
+
+---
+
+### 18.2 · The manual half — a cost that belongs to no vendor
+
+**The blocker:** `event_vendor_line_items.vendor_id UUID NOT NULL` (migration `20260513110000`). Every peso must hang off an `event_vendors` row, that row must be promoted to `contracted` before the couple can even see the add-item form, and creating it lights up a Coverage Strip tile — so "church fee ₱10,000" makes Ceremony Venue read as *covered*.
+
+**Schema delta (one migration, BUD-4):**
+
+```sql
+ALTER TABLE public.event_vendor_line_items ALTER COLUMN vendor_id DROP NOT NULL;
+ALTER TABLE public.event_vendor_line_items
+  ADD COLUMN estimated_php  numeric,                        -- the guess
+  ADD COLUMN bucket         text,                           -- plan-group id, nullable
+  ADD COLUMN source         text NOT NULL DEFAULT 'manual', -- manual | setnayan_order | paperwork | vendor_catalog
+  ADD COLUMN external_ref   text;                           -- order id / paperwork id, for read-only rows
+-- same DROP NOT NULL on event_vendor_payments.vendor_id
+-- RLS + REVOKE ALL per the default-ACL rule; policies key on event_id, which both tables already carry.
+```
+
+`amount_php` becomes nullable **only** for `estimated_php IS NOT NULL` rows (CHECK: at least one of the two is present). Keep `label` (≤64), `due_date`, `sort_order`, `proof_r2_key`, the payments FK — all reused as-is.
+
+**Estimated vs committed — the distinction the owner asked for, carried by two columns, not a new state machine:**
+
+| State | How it's stored | How it behaves |
+|---|---|---|
+| **Estimated** — a licence fee you'll owe | `estimated_php` set, `amount_php` NULL | Counts toward *Projected*. **Never** toward Committed or Still owed. Always rendered with the estimate mark (§18.5). No payment reminder. |
+| **Committed** — the price is agreed | `amount_php` set | Counts toward Committed and Still owed. Due date arms the reminder. |
+| **Paid** — money handed over | `event_vendor_payments` row(s) against the line | Reduces Still owed. Receipt image optional, already supported. |
+
+Promotion is one tap: *"Confirm the amount"* moves the number from `estimated_php` to `amount_php` and keeps both, so the couple can see "you estimated ₱10,000 · you paid ₱12,500."
+
+**What the couple types** (new page-level *"Add a cost"* on `/budget` — today the only entry is buried inside a vendor card):
+
+1. **What was it?** — free text, ≤64 (`Marriage licence`, `Church fee`, `Tips`, `Permit`)
+2. **How much?** — ₱, with a two-way toggle: **"This is an estimate"** / **"This is the agreed price"**
+3. **When is it due?** — optional date (arms reminders + `.ics`)
+4. **What's it for?** — optional bucket picker (plan-group list, defaults to *Other*) so it lands in the same category rollup as vendor spend
+5. **Already paid?** — optional amount + date + method + receipt image (reuses `logPayment` exactly)
+6. **Attach to a vendor?** — optional; blank = vendor-less, which is the whole point
+
+Everything flows into the same `resolveEventMoney` totals through the same table. No fake vendor, no status promotion, no coverage-tile pollution.
+
+**Also fix while in here:** V1 is add + delete only, so a typo means delete-and-retype — which destroys the attached receipt. Add edit-in-place for `label`, amounts and `due_date` (the corpus P1 asks for it). And the line-item FK is `ON DELETE CASCADE` — deleting a vendor hard-deletes their entire payment history with no tombstone. **Owner decision, §18.7.**
+
+---
+
+### 18.3 · Paperwork and tradition costs
+
+**Becomes money (as ESTIMATES, promotable):** the paperwork pipeline. `event_paperwork` (`20260604050000`) tracks marriage licence, PSA/CENOMAR ×2, pre-Cana, baptismal/confirmation, banns, canonical interview — and has **no cost column at all**. Meanwhile `estimatePaperworkCentavos(ceremonyType)` already exists, already reduces the checklist buffer, and is **exported for a budget-page display that never shipped** (`checklist-budget.ts:301-305`) — no importer exists outside that file.
+
+The wiring, no new numbers invented: on the budget page, each incomplete `event_paperwork` row renders as an **estimated** cost line (`source='paperwork'`, `external_ref = paperwork_id`) using the shipped ladder — ₱1,230 base (licence ₱500 + CENOMAR ₱365×2), +₱13,000 church/religious (parish ₱10,000 + pre-Cana ₱3,000), +₱2,000 civil. Every one is labelled *"Estimated — confirm when you pay."* Paying it promotes the line to committed with the real figure, and the same figure stops being guessed on the checklist card. **Do not** add a cost column to `event_paperwork`; the money lives in the ledger, keyed by `external_ref`.
+⚠ The 2026-06-17 decision says paperwork is estimated from *ceremony_type **+ region***; the shipped function ignores region entirely. Ship region-blind, label it as a national estimate, and note the gap.
+
+**Stays informational — do not monetize:**
+- **Mahr** — deliberately non-billable. `budget/page.tsx:107-115` states it: it is hers alone and is not a Setnayan or vendor charge, so it never enters the budget math. `events.mahr_description` is free TEXT with no amount field, by design. Keep the emerald card; keep it out of every total. **Do not add an amount field.**
+- **Ang pao / lauriat** — the card already refuses to print a ₱ figure because per-table rates are admin-managed and out of scope; its only derived number is `ceil(pax / 10)` tables. Leave it. If the couple books a lauriat venue it enters the ledger as a normal vendor commitment, from that vendor's price — not from a guessed per-table rate.
+- **Cash gifts / e-gift** — `event_egift_methods` says it in its own header: no amount column, no ledger, nothing moves value. The budget stays **expense-only**. Two shipped checklist tasks (`who_pays`, `cash_envelopes`) already deep-link to `/budget` where no contributions feature exists — either build P4 or retarget those hrefs. **Owner decision, §18.7.**
+
+---
+
+### 18.4 · What the couple sees — one job per surface
+
+Budget currently has **no sidebar doorway** (removed 2026-07-10 as "redundant" once it lived inside Merkado). Three live entries remain: the Merkado Budget tab link, the checklist health card, and direct links. Per the wayfinding rule a page ships with its doorway — and the moment `/budget` becomes the single truth, "redundant" stops being true.
+
+| Surface | Its ONE job | The number it may show | What it must stop doing |
+|---|---|---|---|
+| **`/budget` — the ledger** | Every peso, editable, payable, exportable | `Committed ₱X · Paid ₱Y · **Still owed ₱Z**` + `Projected (estimates) ₱E` shown separately | Stop printing a second, different total in the strip |
+| **Merkado "Your team" tiles** (Locked · In-build · Budget · **Buffer**) | Forward-looking: *what this build would cost if you lock it* | Buffer, explicitly labelled **"if you lock these"** | Stop reading as money owed; stop turning red merely because an expensive option was shortlisted (`budgetStatus` keys off `rangeHi`, the priciest shortlist end) |
+| **Merkado Budget lens** | The next 3 payments + the doorway | `Still owed` from the resolver, and nothing else | Stop computing its own total (it is byte-identical to a formula that disagrees with the strip); stop rendering raw ISO dates |
+| **Checklist budget-health card** | One health sentence + the doorway | best/worst-case buffer from resolver committed + benchmark projection, both labelled | Stop dropping unmapped commitments; stop being the only place tiers are computed and never shown |
+| **Allocation planner ("Suggested budget split")** | The **plan** — targets per category | Target vs **actual** per leaf, from the resolver | Stop calling slider-vs-suggestion "over budget" (it cannot see a single booked vendor — `pinnedAmountPhp` is hardcoded `null`) |
+
+**Doorway:** restore a sidebar item **"Budget & payments"** pointing at `/budget`, keep the Merkado tab as the in-context lens. It's a one-line change in `lib/customer-menu.ts:317-321` — but it reverses a dated owner decision, so it is **owner-gated** (§18.7).
+
+**Feed the plan the booked money.** The allocation engine already implements `fixedPhp` (Setnayan-SKU carve-out) and `pinnedAmountPhp` — the resolver at `budget-allocation-data.ts:325-327` returns `null` for both with a "wired in a follow-on" comment. Feed `fixedPhp` from resolver committed per leaf and the 2026-06-05 "fixed-then-proportion" lock finally works, with no engine change. Also persist pins: they live in React state only, so the couple's split resets on every reload even though it was written to `budget_allocation_decisions` — and if they never press *Save plan*, the `share_budget_band` vendor toggle silently shares nothing.
+
+---
+
+### 18.5 · Honesty rules (binding on every slice in this section)
+
+1. **No invented figures.** Every peso traces to a row a human entered or a vendor published. The only derived numbers permitted are: benchmark medians from real `vendor_services` prices, the paperwork ladder, and the pax scale — all three carry a source.
+2. **Estimates are marked, always.** Any figure not from `amount_php`, `event_vendor_payments`, or a paid `order` renders with the estimate mark and the words "estimate" or "typical" in the same line. Never bold, never in a headline total. *(Read with rule 3's 2026-09-02 narrowing: the rule governs estimates that are rendered — on `/budget` none is, so the obligation is vacuous there rather than waived.)*
+3. **Estimates never enter Committed or Still owed.** They live in a separate `Projected` figure. A couple must never be told they owe money nobody has agreed. ⚠ **NARROWED 2026-09-02 (owner ruling, BA2) — `/dashboard/[eventId]/budget` no longer renders an estimate at all.** Owner, verbatim: *"no quotes here. we only add the finalized budgets. on the marketplace, this is where they can add and subtract the other vendors to help them find the better option for them."* This rule's *premise* was that un-booked vendors are LISTED on that page: ₱0 committed beside an ₱80,000 vendor in the couple's own list is a contradiction, so the ₱80,000 had to be named (which is what BUD-2's *"₱X more is still an estimate"* hint did). BA2 removes the vendor from that page — `vendorsToItemize` is `contracted`+ only again, and `BudgetStripMoney` has no estimate field — so the contradiction dissolves and there is nothing left to mark. **The rule still binds everywhere an estimate IS rendered** (the Merkado and its lens, the checklist), and `resolveEventMoney` still computes `estimated` / `MoneyBucket.estimatedPhp` unchanged. Guard: `apps/web/lib/no-quotes-on-the-budget-page.test.ts`.
+4. **"Over budget" is said once, in one place, with one meaning:** *what you have actually agreed to exceeds your target.* Only the resolver may say it. Shortlist ranges, slider deviations and benchmark projections may say "this build would run over" or "typically more than you set aside" — never "over budget".
+5. **Unknown is printed as unknown.** A category with no benchmark and no vendor median shows "no typical price yet", not ₱0. ⚠ **ENFORCED STRUCTURALLY 2026-09-03 (BA3), not remembered.** `apps/web/lib/budget-ledger.ts`'s `plannedFrom()` folds a 0 — from either plan source — to `null`, so **a ₱0 Planned figure is not representable** on the per-category ledger; the row renders "—" and says "no typical price yet". Re-measured against prod the same day: still 13 of 27 active leaves unseeded, and money HAS landed in three of them on event `947e7bab…` (Cake ₱30,000 · Cocktail Booths ₱45,000 · Photobooth ₱22,000), so this is a live case, not a hypothetical. Guard: `apps/web/app/dashboard/[eventId]/budget/the-plan-meets-the-ledger.test.ts`. **Thirteen of 27** active leaves are unseeded — including Ceremony Venue, a Tier-2 category — and they currently cost ₱0 in the buffer, silently. *(Re-counted against prod 2026-07-27 during BUD-1: `budget_leaf_benchmarks WHERE is_active` = 27 rows, 14 with a `benchmark_php`. The earlier "12 of 26" is superseded; the Ceremony Venue claim is confirmed.)*
+6. **The totals must reconcile on screen.** `Committed + Overpaid = Paid + Still owed` — equivalently `Committed = Paid + Still owed − Overpaid`. If a vendor is overpaid, name it; never let three headline figures quietly stop adding up. ⚠ *Sign corrected 2026-07-27 (BUD-1). This rule originally read `Committed = Paid + Still owed + Overpaid`, which cannot hold: committed ₱100,000 against ₱120,000 paid would claim 100 = 120 + 0 + 20. Same three figures, same intent; the form above is the one that reconciles for every sign of every input, and is what `checkMoneyInvariant()` asserts.*
+7. **"Live" means live.** The badge only appears when the subscription covers every table feeding the number under it.
+8. **Nothing is deleted silently.** Removing a vendor must not vaporize their payment history without telling the couple what it is about to erase.
+
+
+#### 18.5a · The four column names (owner-locked) + where "Planned" comes from — SHIPPED 2026-09-03 (BA3)
+
+The per-category ledger on `/dashboard/[eventId]/budget` prints exactly four columns, in this order, unabbreviated. The owner misread the earlier labels; that is why they read this way.
+
+| Column | Means |
+|---|---|
+| **Planned** | What you budgeted |
+| **Agreed** | What you signed for |
+| **Paid** | Handed over so far |
+| **Owed** | Agreed minus paid |
+
+Spelled ONCE, in `BUDGET_LEDGER_COLUMNS` (`apps/web/lib/budget-ledger.ts`); the table reads them from there and spells none of its own. A guard fails CI if any is abbreviated or the order changes.
+
+**"Planned" has two sources, in order, and the row says which.**
+
+1. `'saved'` — the couple's own latest `budget_allocation_decisions` snapshot (`final_amount_php`). Always wins: it is literally what they budgeted. BA3 is the **first read-back** of that table from the couple's side; it had been write-only since it shipped.
+2. `'suggested'` — `computeBudgetAllocation` with no pins, i.e. the same number the "Suggested budget split" prints higher up the page. One function called twice, not two mechanisms.
+
+⚠ **Naming the source is mandatory, not cosmetic.** `budget_allocation_decisions` had **0 rows in production** on 2026-09-03 — nobody has ever saved a plan — so today *every* Planned figure is source 2, and printing a suggestion under a column headed "what you budgeted" without saying so puts a number in the couple's mouth. Same obligation as `AllocationInputs.budgetSource` (`'stated' | 'band' | null`).
+
+**Headroom that is banked vs headroom that is merely unspent.** BA3 feeds `MoneyBucket.committedPhp` to `computeBudgetOverspend` as `actualPhp` (replacing the couple's slider), which changes what "headroom" means: a category the couple has finished booking under its plan has **banked** that money, while a category they have not booked at all shows its **whole plan** as headroom — which is not savings and mostly disappears on booking. Both are `planned − agreed`; only one is safe to spend. The absorption disclosure names the unbanked sources rather than promising cover that does not exist.
+
+**Not changed by BA3:** the allocation planner's own "over the suggested split" banner. It compares the couple's pins to the recommendation — a statement about the plan being drafted, not about signed money — and its copy already names its own subject, so it is not a second voice on rule 4's "over budget".
+
+---
+
+### 18.6 · Build order
+
+Each = one worktree, one PR, flag-dark behind `NEXT_PUBLIC_BUDGET_TRUTH_ENABLED` (new; mirror `explore-replan-flag.ts`). **BUD-1 is a hard prerequisite for everything below it.**
+
+| PR | Size | What | Depends on |
+|---|---|---|---|
+| **BUD-1 · The resolver** ✅ **SHIPPED 2026-07-27** | **M** | `apps/web/lib/budget-truth.ts` (`resolveEventMoney` + pure `computeEventMoney` + `checkMoneyInvariant`) + `lib/budget-truth.test.ts` (26 tests incl. a mutation test) + `scripts/budget-parity.ts` with a redacted prod capture. Read-only, no schema, nothing wired. Closes R3/R4/R5/R8/R11/R12 inside it. **Measured deltas:** checklist health ₱0 vs ₱810,000 and the planner's ₱0 vs ₱810,000 on `947e7bab…`; live card + Merkado lens ₱80,000 vs ₱0-committed/₱80,000-estimated on `044f7e64…`. | — |
+| **BUD-2 · `/budget` onto the resolver** | S | Strip + live card + per-vendor cards read one number. **Kills R1 (live prod defect).** Show all vendors with money, not just `contracted` ones. | BUD-1 |
+| **BUD-3 · Checklist health onto the resolver** | S | Remove the empty-`covers_plan_groups` skip. **Kills R2 (₱810k defect).** Surface the tiers that are already computed and thrown away. | BUD-1 |
+| **BUD-4 · Vendor-less costs (migration)** | M | Nullable `vendor_id` (line items + payments), `estimated_php`, `bucket`, `source`, `external_ref`, CHECK, RLS + `REVOKE ALL`. Backfill `deposit_paid_php` → payments (**R6**) — ⚠ **RECONCILE BEFORE BACKFILLING: on prod today all three deposits (₱67,500 / ₱24,000 / ₱20,000 = ₱111,500) already exist as identical payment rows on the same vendors, so a blind backfill DOUBLE-COUNTS the whole ₱111,500** (found 2026-07-27 in BUD-1; the resolver already treats the legacy field as a fallback, never additive, and flags any mismatch). **Verify the OBJECT, not `schema_migrations`.** | BUD-1 |
+| **BUD-5 · "Add a cost" + edit-in-place** | M | Page-level form (§18.2), estimate/agreed toggle, bucket picker, "Confirm the amount". | BUD-4 |
+| **BUD-6 · Paperwork as estimated lines** | S | Wire the already-exported `estimatePaperworkCentavos`; promote-on-pay via `external_ref`. | BUD-5 |
+| **BUD-7 · Setnayan orders as ledger rows** | S | `source='setnayan_order'`, read-only, in every total. **Kills R7** — the "booked with us" half. | BUD-4 |
+| **BUD-8 · Surface jobs** | M | Merkado lens → one number; Your team buffer relabelled "if you lock these"; planner gets plan-vs-actual + `fixedPhp` fed from committed + pin persistence; Realtime widened (**R14**); catalogue-payment milestones retire (**R13**). | BUD-2 |
+| **BUD-9 · Payment reminders** | S | Free transactional `payment_due` / `payment_overdue` types + day-before schedule. **⛔ owner-gated — reverses a shipped decision.** | BUD-4 |
+| **BUD-10 · Export** | S | CSV/print of the full ledger with the estimate column intact. Reuse the `.ics` route's row selection. | BUD-2 |
+
+**Owner decisions — implementer must not choose these:**
+
+1. **Is Committed = package + transport + crew meals?** Two shipped surfaces say yes, four say no. *(Recommend yes — it is what the couple will actually pay.)*
+2. **Payment-due reminders: free or AI-gated?** The corpus decided FREE transactional on 2026-07-08 ("the AI watch-guard adds the coaching — paid"). What shipped 2026-07-22 is the opposite: GRD-01 lives inside the paid AI sweep, gated *"No AI → no guard notifications, ever."* A couple without Setnayan AI gets **no payment reminder at all**. This is a revenue call.
+3. **Restore the Budget sidebar item?** Removed 2026-07-10 as redundant; the redesign makes it the single truth.
+4. **Contributions / who-pays / cash gifts — in or out?** Two shipped checklist tasks already point at a feature that does not exist. Either build P4 or retarget the links. Note the deliberate design lock: e-gift stores no amounts, so this is a real new model, not a wiring job.
+5. **Are the paperwork numbers publishable?** ₱500 licence · ₱365 CENOMAR · ₱10,000 parish · ₱3,000 pre-Cana are hardcoded with no cited source and no region axis. Bless them as national estimates, replace them, or show ranges.
+6. **Seed or hide.** 12 of 26 benchmark leaves are NULL and `wedding_season_factors` has shipped empty for seven weeks (reader live, factor always 1.0). Seed via `/admin/budget-planner`, or the split stays wedding-shaped and those categories stay invisible.
+7. **Vendor delete cascades away payment history.** Tombstone the ledger, or block deletion when payments exist?
+
+**Verification, every slice:** run the BUD-1 parity harness before and after; assert `Committed = Paid + Still owed + Overpaid` on every fixture; confirm the migration's **objects** exist in prod (`information_schema`), not just the ledger row; check `/budget`, the Merkado lens, the checklist card and the planner all print the same Committed figure on the same event.
+
+**Corpus grounding (dated, outranks handoffs):** `02_Specifications/Budget_Product_Definitive_Plan_2026-07-08.md` (P1–P4 — this section is P1 + the manual half) → `02_Specifications/Budget_Genericization_Design_2026-07-08.md` (per-event-type; only PR-B1 shipped, and `allocation-actions.ts:61` still hardcodes `event_type:'wedding'`) → `02_Specifications/Adaptive_Checklist_Design_2026-06-17.md` §5 (tiers · paperwork · buffer · the three over-budget options that were never built) → `03_Strategy/Budget_Planner_Allocation_Engine_2026-06-05.md` (median · cushion · fixed-then-proportion). `0007_budget_expenses/0007_budget_expenses.md` is an archive stub — do not re-expand it; its live sibling is `0007_Crew_Meal_Line_Discovery_2026-07-08.md`.
+### 18.x · OWNER AMENDMENT (2026-07-27, after the design was drafted)
+Owner, looking at the "Your team" money tiles: *"when they build their plans this also shows what the actual budget looks like with that plan. so maybe we can use budget planner somewhere here as well?"*
+
+**Adopt it — and sharpen it.** The two halves are already built and sitting on the wrong pages:
+- `lib/budget.ts` **TRACKS** what booked vendors actually cost.
+- `BudgetAllocationPlanner` / `lib/budget-allocation.ts` **RECOMMENDS** what each category *should* cost — "a ₱ target + shopping range per leaf, BEFORE the couple picks anyone" (its own header).
+
+The recommending half lives on the buried `/budget` page; the picking happens in the Marketplace. So at the moment of choosing a caterer the couple is told *"₱450,000 to spare"* but never *"catering should be about ₱180,000."* Worse: **that per-category target is ALREADY reaching the Marketplace** — it is what computes the "Fits budget" / "Over budget" badge on every vendor card (`vendor-budget-fit.ts` → `budget_fit_ratio`). The app does the maths, discards the number, and shows a tick.
+
+**Therefore:**
+1. **Re-job the Marketplace's Budget slot.** It is payments-only today (`merkado-budget-lens.tsx`), which duplicates `/budget` and is the least useful thing at the point of decision. It should hold the **allocation view**: per-category target vs what this build actually costs. Payments stay one click away.
+2. **Show the number where the choosing happens.** On the category row: "Catering · target ₱180,000". "Over budget" becomes "₱50,000 over your catering target".
+3. **The buffer becomes the roll-up** of those per-category targets rather than a bare subtraction.
+4. ⚠ **Keep the guide-never-a-rule stance** (the planner's own design doc §1): nothing blocks, clamps or disables a vendor for being over target; the couple's own number always wins. A budget tool that refuses choices is one couples stop telling the truth to.
+
+This does not change §18's build order — it is the same `resolveEventMoney` resolver feeding one more surface. It changes the FRAMING: the job is not "add a budget planner to the Marketplace", it is **"stop separating what things should cost from where you choose them."**
+
+### 18.y · OWNER-CONFIRMED: the budget planner has exactly THREE buckets (2026-07-27)
+Owner: *"budget planner shows the following: marketplace locked budgeting and their schedules, in-app services like Papic and Setnayan AI and other features of the app, and their manual costs aside from what we have here."*
+
+This is `byBucket[]` in `resolveEventMoney` (§18.1) made explicit. Sources verified against prod:
+
+| # | Bucket | Source of truth (verified) | State today |
+|---|---|---|---|
+| **1** | **Marketplace bookings + their schedules** | `event_vendors` (+ `event_vendor_line_items`, `event_vendor_payments`) — with the `buildVendorPricingLookup` precedence (package → service → manual → legacy headline) PRESERVED, not reinvented | LIVE and mature. Schedules = `event_vendor_payments` + milestones + the `.ics` export |
+| **2** | **In-app services** (Papic · Setnayan AI · other SKUs) | **`public.orders`** — `event_id`, `service_key`, `confirmed_total_php ?? requested_total_php`, `status`. There is NO separate `service_orders` table | EXISTS but lands in exactly ONE stat and is invisible everywhere else — this is the "booked with us" half the owner named |
+| **3** | **Manual costs** | — | **DOES NOT EXIST.** `event_vendor_line_items.vendor_id` is NOT NULL and the add-form is gated `priceSource === 'manual'`, so an outside cost can only be recorded by inventing a fake vendor |
+
+**⚠ BUCKET 2 CONTAMINATION HAZARD — filter by PAYER or the couple sees the vendor's bill.**
+`orders` carries **both** `user_id` (payer) **and** `vendor_profile_id`, and the **booking-fee charges live in this same table** as vendor-payer rows (`booking-fee-lock.server.ts:129-160` inserts an `orders` row + a `payments` row with a `vendor_` service key). A naive `orders WHERE event_id = …` therefore pulls the VENDOR's 5%→1% booking fee into the COUPLE's budget. This is not theoretical — PR #3659 ("hide vendor booking-fee orders from the couple's view") is open for exactly this class of leak on another surface.
+**Rule: bucket 2 selects couple-payer orders only** — filter explicitly (payer `user_id` = a couple member AND/OR `vendor_profile_id IS NULL` AND/OR the `service_key` is not a vendor SKU); pick the discriminator by reading how the fee rows are written, and **pin it with a test that a vendor-payer order never appears in a couple's total.**
+
+**Bucket 1's "schedules" are first-class**, per the owner's wording: each bucket-1 line carries its due date and paid state so the planner answers *when*, not only *how much* — the `.ics` export and the milestone machinery already exist and must feed the same resolver rather than a parallel path.
+
+**Bucket 2's doorway is SUITE** (owner 2026-07-27: *"in app purchases can be found on suite"*). Verified: the Suite surface is `/dashboard/[eventId]/suite`, flag-gated on `NEXT_PUBLIC_SUITE` (nav slot key stays `studio`; it replaced the "Studio" label, owner-locked 2026-07-19 — `customer-nav-config.ts:217`, `customer-menu.ts:254`). So the model is symmetric, and the budget planner should express it that way:
+
+| Bucket | Where the couple CHOOSES | Where the money LIVES | Doorway from the budget |
+|---|---|---|---|
+| 1 · Vendors | **Marketplace** | `event_vendors` + line items + payments | → the vendor's workspace |
+| 2 · In-app services | **Suite** | `orders` (couple-payer only — §18.y hazard) | → **Suite** |
+| 3 · Manual costs | nowhere — the couple types it | (to be built) | edit in place |
+
+Consequences for the build:
+- Every bucket-2 line links back to **Suite**, exactly as bucket-1 lines link back to the vendor. A cost the couple cannot navigate to is a cost they cannot manage.
+- Apply-then-pay means a bucket-2 order sits at `pending_payment` — **committed but unpaid**. That is the `committed` / `paid` / `stillOwed` split doing real work, not an edge case: it is the normal state between buying Papic and settling the transfer.
+- The couple's own SKU purchases and the vendor's booking fee live in the SAME table; only the payer distinguishes them (§18.y).

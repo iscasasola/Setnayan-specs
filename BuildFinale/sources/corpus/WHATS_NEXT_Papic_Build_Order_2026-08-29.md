@@ -1,0 +1,604 @@
+<!-- Owner, 2026-08-29, after a full position analysis against the running product and two volumes of
+competitor research: "what will be build then?" → this is the answer, ordered, with nothing in it
+awaiting a decision. Registered in WHATS_NEXT_INDEX.md and in the corpus CLAUDE.md ACTIVE block. -->
+
+# Papic — THE BUILD ORDER (2026-08-29)
+
+> **Nothing on this list needs an owner decision.** Every item is either already ruled, or a
+> straight repair of something measurably wrong. The order is by value per unit of engineering,
+> not by how impressive it looks.
+>
+> 🔑 **THE FINDING THAT SHAPES THE WHOLE LIST: Papic does not have a feature problem.** Five
+> separate times this week something the market calls *"nobody has this"* turned out to be already
+> built here and simply **not connected to anything, or never said out loud.** Items 2–5 are
+> mostly wiring and sentences. Only item 7 is construction.
+
+---
+
+## The order
+
+| # | What | Size | State |
+|---|---|---|---|
+| **1** | The browser stops enforcing a limit that does not exist | days | ✅ **DONE** — PR [#5002](https://github.com/iscasasola/setnayan-platform/pull/5002) |
+| **2** | Say what is already true, on the promotion page | days | ✅ **DONE** — page shipped 2026-08-29, guard PR [#5003](https://github.com/iscasasola/setnayan-platform/pull/5003) MERGED |
+| **3** | Shots per guest (+ sponsors default to a bigger share) | several sessions | ✅ **DONE** — core live (corrected 2026-09-10); sponsor share built 2026-09-11 (PR #5418) |
+| **4** | Timed challenges reach the wall | 1 session | ✅ **DONE 2026-09-01** — both halves; see § 4 |
+| **5** | Challenges hang on the ceremony sequence | small | ✅ **DONE 2026-09-01** — see § 5 |
+| **6** | The guest chooses per audience | small | ✅ **DONE 2026-09-02** — PRs #5081 · #5086, both verified MERGED |
+| **7** | The year | project | ✅ **DONE 2026-09-02** — 7a–7d, PRs #5082 · #5087 · #5090 all verified MERGED |
+
+⏭ **Deliberately NOT started, and why:** Messenger/Viber (ask for push first — § 8) · Tagalog and
+Bisaya · civil weddings · the coordinator partner offer (**owner territory, not engineering** —
+§ 9).
+
+
+> ### ✅ RE-MEASURED AGAINST THE CODE 2026-09-09 — SIX OF SEVEN ARE DONE. **ONLY ITEM 3 IS LEFT.**
+>
+> Every PR this file names was checked with `gh pr view` — **#5002 · #5003 · #5007 · #5081 · #5086
+> · #5082 · #5087 · #5090 are ALL MERGED**, including #5090, which this file warned was *"still
+> OPEN and red"* when 7d began.
+>
+> ✅ **CORRECTED 2026-09-10 — ITEM 3'S CORE IS BUILT AND LIVE; ONLY "SPONSORS DEFAULT TO A BIGGER SHARE" IS LEFT.** Read out of production BY THE OBJECT: `papic_record_guest_capture` asks `papic_guest_spend_ceiling(p_guest_id)` FIRST and refuses with `reason:'guest_spend_ceiling'`; that function carries the named-guest, equal-share and release arms; a guest's own purchase is exempt via `papic_guest_ceiling_spend`. PRs #5014 (couple sets the numbers) · #5017 (the limit binds) · #5019 (the guest sees it) · #5024 (promotion page) · #5028 + #5034 (keep or give) · #5052 (150 is raisable) — all MERGED. 🔑 **The 2026-09-09 "genuinely unbuilt" measurement searched for `allot` and `sponsor`; the shipped code says `ceiling`. A SEARCH THAT CANNOT MATCH IS NOT A NEGATIVE RESULT.** What IS absent: no Papic function or file mentions sponsors, so the 2026-08-29 addition (sponsors default to a bigger share) is the one open piece.
+>
+> ~~**Item 3 is genuinely unbuilt**~~ (FALSE — kept for the lesson), measured by the object rather than by this file: `origin/main`
+> has **zero** occurrences of a per-guest allotment in any spelling, and production's live
+> `papic_record_guest_capture` **knows nothing of an allotment or of sponsors** (`allot` and
+> `sponsor` both absent from its body). ⚠ **`papic_event_pool_config.points_per_guest` EXISTS with
+> a default of 150 and is NOT this item** — it sizes the POOL (150 × guests), which the spec's own
+> § 5 warns about by name; a session that greps that column and stops will report item 3 as built.
+> `lib/event-sponsors.ts` is imported by its own dashboard and one guard test, and by **nothing in
+> Papic**.
+>
+> 🔑 **This file said items 3–7 were the one open stream for eleven days after four of them
+> merged**, and the auto-loaded `CLAUDE.md` said the same thing — which is exactly how a session
+> gets sent to rebuild finished work.
+
+---
+
+## 1 · The browser stops enforcing a limit that does not exist — ✅ **BUILT 2026-08-29**
+
+> ✅ **DONE — PR [#5002](https://github.com/iscasasola/setnayan-platform/pull/5002). Do NOT rebuild
+> it.** ⚠ Verify with `gh pr view 5002 --json state,mergedAt` before trusting this line; this corpus
+> has been wrong about a PR's state five times. **No migration.** The rule now lives once, in
+> `lib/papic-guest-cap.ts`, with **one entry per write to `v_unlimited`** — and the guard
+> `lib/papic-guest-quota-mirrors-sql.test.ts` DERIVES the count from the migration (both
+> `v_unlimited :=` **and** `SELECT … INTO v_unlimited`) rather than restating it, so a third
+> condition added in SQL fails there until the TypeScript learns it too.
+> 🔑 **The pool refusal got its own sentence.** `res.status === 409 || json.status ===
+> 'quota_exhausted'` collapsed POOL-EMPTY into the per-guest congratulation in **both** handlers, so
+> a guest three photos in was congratulated for a shot that was thrown away while the buy panel
+> opened to sell shots that also could not be taken.
+> 🪤 **A SABOTAGE THAT APPENDS CANNOT BE MEASURED BY ITS OWN NEEDLE COUNT** — the third-SQL-write
+> mutation read 1 → 1 and proved nothing until it was re-measured on the string it actually adds
+> (`v_unlimited :=` 1 → 2). *An occurrence count only measures a sabotage that REPLACES.*
+> 🪤 **Two concurrent typechecks abort at `TSC_EXIT=144` with an EMPTY log, and a killed one reports
+> 143 while the harness announces the wrapper's exit as 0.** Both were hit in this session.
+> ⛔ `app/papic/decorate` looks like the same bug and is NOT — it keys on the refusal's STATUS rather
+> than the bare 409, which is the rule the camera broke. Left alone, deliberately.
+
+
+**Full spec: [`WHATS_NEXT_Shots_Per_Guest_2026-08-28.md`](WHATS_NEXT_Shots_Per_Guest_2026-08-28.md) § 1.
+Session detail: [`WHATS_NEXT_Shots_Per_Guest_SESSIONS_2026-08-28.md`](WHATS_NEXT_Shots_Per_Guest_SESSIONS_2026-08-28.md) S1.**
+
+A guest's camera counts down from a hardcoded 150 and, at zero, **hides its own shutter** and says
+*"That's all 150 photos!"* — on every celebration, where the database applies **no per-guest limit
+at all**. One rule written twice; only the SQL copy learned the one-pool model. **A guest at a
+large wedding is locked out of a celebration still holding thousands of shots, by a number nobody
+chose, and the couple never learns it happened.**
+
+⚠ **THIS WAS BUILT, PROVED AND LOST.** The worktree was in `/tmp` and went with the session; zero
+commits were ever made. It is a re-run of known work — the spec carries what it did and how it was
+proved. **Build beside the repo, and push the moment it typechecks.**
+
+**Why first:** it is the only item on this list that is actively harming somebody today.
+
+---
+
+## 2 · Say what is already true
+
+> ✅ **DONE 2026-08-29 — do NOT rebuild any of it, and do not re-run the item-2 prompt as written.**
+> 🔑 **THE PAGE HALF WAS ALREADY SHIPPED WHEN THIS ROW WAS WRITTEN.** This file said *"drawn,
+> waiting"* at 15:59; measured against `origin/main`, the whole page half had merged hours
+> earlier (`3fc9f54d9` → `b782d91e7`, last commit 15:13). **The sixteen-row price wall is
+> already a `+`/`−` dial showing ONE rung · the cost block already has a heading · "Two ways to
+> run it" already sits above it · and all nine facts below are already on the page**, including
+> the free floor in three places and the free live wall. *A planning doc written the same
+> afternoon is not evidence — grep the object.*
+> ✅ **WHAT WAS ACTUALLY MISSING WAS THE GUARD, AND IT IS BUILT:**
+> `apps/web/lib/papic-page-says-only-what-is-true.test.ts` — PR
+> [#5003](https://github.com/iscasasola/setnayan-platform/pull/5003), **MERGED 2026-08-29T12:41Z**
+> — merge `3966c5b76`, verified an ancestor of `origin/main` and the file verified present in that
+> tree, not inferred from the merge. ⚠ Verify
+> with `gh pr view 5003 --json state,mergedAt` before trusting this line. 13 assertions, 16
+> mutations, all
+> RED. Nine prohibitions from one list (a ninth is one line), each carrying the claim as
+> somebody actually wrote it, so **a pattern that rots fails instead of going quiet**, and each
+> carrying the true near-miss sentences it must NOT fire on. Plus the three structural repairs
+> pinned: the wall cannot come back, the cost heading stays, and the headline keeps no eyebrow
+> and no explaining line.
+> 🛑 **ONE PROHIBITION IN THE BRIEF WAS TOO WIDE AND IS CORRECTED: "chapters" SHIPS.**
+> `lib/papic-chapters.ts` derives a chapter from `captured_at`, stores nothing, and is rendered
+> by the guest gallery and the pool grid. **The year — linking two celebrations — is what is
+> unbuilt.** The chapters line is pinned as still-sayable so nobody deletes a true claim.
+> 📱 **THE PHONE LOOK HAPPENED 2026-08-29, AND IT FOUND THE REAL DEFECT — MEASURED, NOT
+> EYEBALLED.** At 375px the page ran **12,847px — 15.8 phone screens**, when the brief's own § 4
+> called the PREVIOUS version (5,514px) already too long and § 5 asked for *"shorter than today,
+> not longer"*. **It had grown 2.3× past the version that was already judged too long**, and ONE
+> block did it: *Everything it does* at **4,792px — 37% of the page, nearly six phone screens** —
+> sitting between the three steps and everything a buyer decides on.
+> ✅ **FIXED — owner ruled both halves (_"cut it down"_ · _"yes after the price"_): PR
+> [#5007](https://github.com/iscasasola/setnayan-platform/pull/5007), MERGED 2026-08-29T13:28Z,
+> merge `c216ac53d`, verified an ancestor of `origin/main`.** The six photographed spotlights are
+> untouched; the twenty short rows FOLD behind *"And everything else · N more"* (the `<details>`
+> pattern the FAQ on the same page already uses), and the section moved BELOW the cost block.
+> ⚠ **FOLDED, NOT DELETED** — several of those lines are the strongest material we have (the blur,
+> the screening, the moderation), and `<details>` keeps them **in the DOM**, so they stay indexed.
+> 🔑 **THE REMOUNT IS OUTSIDE THE COST BLOCK'S CONDITIONAL, DELIBERATELY.** That block renders only
+> when a price resolves and **fails quiet by design** — mounting the features inside it would make
+> **a third of the page vanish on a degraded price read**, with nothing on screen to say why. Pinned.
+> 🪤 **A PHONE LOOK IS A MEASUREMENT, NOT A GLANCE.** Every finding here came from reading the
+> rendered heights at 375px; none of it is visible in the source, and two prior reviews of this
+> page missed all of it.
+> ⏭ **STILL OWED, and it is the owner's:** the hero badge reads *"50 credits left"* — to a stranger
+> with no celebration, *left* implies a balance they already hold. Named, NOT changed.
+
+
+**Drawn and waiting: [`prototypes/papic_promotion_page_2026-08-28.html`](prototypes/papic_promotion_page_2026-08-28.html).**
+**Brief for whoever writes it: [`PAPIC_PAGE_BRIEF_FOR_CHAT_2026-08-29.md`](PAPIC_PAGE_BRIEF_FOR_CHAT_2026-08-29.md).**
+
+Two halves, both cheap:
+
+**The repairs, already drawn** — the sixteen-row price wall cut to three examples plus the link
+that is already there; that block finally given a heading (it is a fifth of the page and has none);
+and "Two ways to run it" moved above it so somebody knows what they would be buying before the
+cost.
+
+**The facts we have never said.** Every rival's cheapest way in is ₱499–₱999. **Ours is free** —
+50 shots on every celebration — **and the live wall is free too.** Any face can vanish and we blur
+the photograph itself. Face data is really deleted. Nothing unscreened is ever shown. Nothing is
+ever deleted.
+
+🔑 **Highest value on the entire list**, because everything else is worth nothing until somebody
+knows. ⛔ **Read § 3 of the brief before writing a word** — two previous drafts were made without
+seeing the product and both promised things we cannot do.
+
+---
+
+## 3 · Shots per guest
+
+**Full spec + session register: the two `WHATS_NEXT_Shots_Per_Guest_*` files.** All three owner
+decisions are made (the release, the buyer's choice, protected allotments) — **do not re-ask any
+of them.**
+
+Named guests get a specific number · everyone else splits the remainder equally · the leftover is
+anyone's · a button and an automatic release late in the night.
+
+> ✅ **BUILT 2026-09-11 — PR #5418 (merged, verified in prod by the object): sponsors now default to a bigger share** (principal 3 shares · cord/veil/coin/candle 2 · everyone else 1, weighted into the division so the ceilings still add up to the pot; sponsors read off the guest list). See the 2026-09-11 DECISION_LOG row. **Papic item 3 is now fully done.**
+
+➕ **ONE ADDITION, made here:** **sponsors default to a bigger share.** `lib/event-sponsors.ts`
+already models principal sponsors (ninong/ninang by side, paired), plus cord, veil, coin and
+candle.
+
+> ⚠ **CORRECTED 2026-08-30 — this row used to say “Nothing acts on it,” and that is FALSE.**
+> `lib/event-sponsors.ts` has **four non-test importers** and a **shipped sponsors dashboard**
+> (`app/dashboard/[eventId]/sponsors/` — `page.tsx`, `actions.ts`, `add-sponsor-modal.tsx`,
+> `pair-target-picker.tsx`). It exports `SponsorTier` (`principal|cord|veil|coin|candle`),
+> `SponsorSide`, `sponsorRoleHonorific()` and `PRINCIPAL_PAIR_DEFAULT = 4`. **The roles are real,
+> user-authored data.** What is true is only that *Papic’s allotment logic* does not read them yet.
+> 🔑 This matters because the wrong sentence sends a session to MODEL data that is already
+> authored — strictly more expensive, and it invents a second source of truth for the roles.
+> Measured on `origin/main` f8e58005f by two independent sessions (oversight + S3).
+
+Defaulting an allotment by role is a small addition **inside work
+already being paid for**, and it collects the "genuinely first, nobody has it" Filipino-roles win
+for free.
+
+---
+
+## 4 · Timed challenges reach the wall — ✅ **BUILT 2026-09-01 (4a AND 4b)**
+
+> ✅ **BOTH HALVES ARE DONE. DO NOT REBUILD EITHER.** The clock is
+> `20271188446868_papic_challenge_clock.sql` + `20271188710305_papic_timed_challenge_duration.sql`;
+> the wall reads it via `fetchWallArmedChallenge` (`apps/web/lib/live-wall.ts`).
+> Re-measure with `grep -n papic_challenge_ends_at supabase/migrations/*.sql`.
+>
+> ⏱ **A TIMED CHALLENGE LASTS 30 MINUTES, AN HOUR, OR TWO — the couple picks, 30 by default**
+> (owner 2026-09-01, superseding the same day's "no duration column, no default number"; the
+> reasoning behind that clause — *don't guess a number that governs something* — is intact, and it
+> stopped applying the moment the owner chose). `papic_challenge_ends_at()` is the ONE place an end
+> instant is computed, and takes the **earliest** of three terms: the challenge's own timer, the
+> next arming, and the capture window.
+>
+> ⛔ **"ONE CHALLENGE, BUT THE OTHER CHALLENGES MAY STILL BE THERE"** (owner, same day) — the
+> sentence most likely to be mis-implemented by anyone reading only the function names.
+> `papic_challenge_is_open()` means *"is this the TIMED one running"*, **never** *"may a guest do
+> this"*. Arming takes nothing off a guest's board, expiry takes nothing off it either, and an
+> expired prompt can still be answered. A db test arms a challenge, runs its clock out and asserts
+> the guest's board is identical throughout; filtering the board by the resolver turns it red.
+>
+> 🔐 **WHO SETS IT: THE HOST AND THE COORDINATOR, NOT THE GUESTS** (owner 2026-09-01) — measured as
+> ALREADY TRUE and pinned rather than built. `papic_missions_member_all` admits exactly
+> `member_type IN ('couple','coordinator')` + admin. ⚠ **"Host" IS `member_type = 'couple'` at every
+> event type** — there is no `'host'` member type; the enum is
+> `('couple','guest','vendor','coordinator')` and only the on-screen WORD varies. And a coordinator
+> passes TWO doors on TWO rows: the dashboard shell on an accepted `event_moderators` row, the
+> challenge policy on an `event_members` coordinator row minted by the `sync_delegate_membership`
+> trigger. A door that writes one and not the other yields somebody who can see a control that does
+> nothing.
+>
+> 🪤 **THE STAND-IN THAT WAS RETIRED, AND THE HALF-DAY IT WAS LIVE.** `fetchWallArmedChallenge`
+> originally called the board's **FIRST SLOT** the armed challenge — correct while no clock
+> existed, flagged the moment 4a landed, and genuinely live once both PRs merged: the wall could
+> project one challenge while the couple's screen named another, each passing its own tests. Its
+> guard test **inverted** with the fix — it used to require the ordering rule to be PRESENT in that
+> file, and now requires it to be ABSENT. 🔑 **Two mechanisms that disagree about one fact each
+> pass their own suite; only a test that forbids the second mechanism catches it.**
+
+
+> ✅ **4a IS DONE. DO NOT REBUILD IT.** Migration `20271188446868_papic_challenge_clock.sql`
+> (branch `claude/a-papic-challenge-has-a-clock`) adds `papic_missions.armed_at` / `.closed_at`,
+> the partial unique index `papic_missions_one_armed_per_event` that makes "one live at a time per
+> celebration" a constraint rather than a habit, and **the one resolver**:
+> `papic_challenge_is_open(mission_id)` — FALSE in four distinct ways (never armed · closed by a
+> later arming · hidden from guests · the capture window ended), with
+> `papic_armed_challenge(event_id)` defined in terms of it so the two cannot disagree.
+> `papic_arm_challenge(mission_id)` does close-then-open in ONE transaction, SECURITY INVOKER, so
+> authorisation is Pattern B and nothing else. Re-measure with
+> `grep -n papic_challenge_is_open supabase/migrations/*.sql`.
+>
+> 🔎 **HOW A CHALLENGE WAS ARMED BEFORE THIS — the RULE 0 answer, and it is not what the word
+> suggests.** The shipped "arm" was **per guest and never persisted**: `useState` in
+> `papic-challenge-panel.tsx` meaning *"the next shutter press on THIS phone attaches to THIS
+> mission"* (SELECT → COMMENCE → RETAKE, owner 2026-07-23). There was **no celebration-level
+> arming in any form** — `grep -rn armed supabase/migrations/*.sql` returns only credit-pool
+> language. So the ruling's ARM had to be created, and the guest-side one was left alone. **Two
+> different things now share the word; read which one a file means before touching it.**
+>
+
+
+> ⚠ **RE-MEASURED 2026-08-31 — THIS ITEM IS SMALLER THAN IT READS, AND HALF OF IT ALREADY SHIPPED.**
+> The completion board is NOT missing. `papic_mission_completions` exists
+> (`supabase/migrations/20271117738153_papic_challenge_library_and_board.sql`, MATERIALIZE-ONCE /
+> NEVER-DELETE), is written, and **already has a working reader** in
+> `apps/web/app/[slug]/_components/editorial/data.ts` — copy that read, do not design a new one.
+> What is genuinely absent is only the wall side: **0** matches for challenge/mission/prompt in
+> `apps/web/app/api/wall/[eventId]/feed/route.ts` and in `live-wall-block.tsx`. So item 4 =
+> **one clock + one new reader**, not a board build.
+>
+> 🔑 **DO NOT MISTAKE `papic_challenge_expires_at` FOR THE CLOCK.** It exists, and it looks exactly
+> like a challenge window — it is on **`vendor_profiles`** (migration
+> `20271181420277_the_challenge_is_a_subscription.sql`) and is the VENDOR'S SUBSCRIPTION EXPIRY.
+> Reading the column name without reading its table is how this item gets reported as already done.
+> Confirm with `grep -n -B6 papic_challenge_expires_at supabase/migrations/*.sql`.
+>
+> ✅ **THE CLOCK IS RULED — 2026-09-01, owner — AND BUILT THE SAME DAY (see the header above).** The window is **RELATIVE**: it opens when the
+> challenge is **ARMED**, never at a wall-clock time. ONE challenge live at a time per celebration —
+> arming the next closes the previous — and the last closes when `events.papic_window_end` passes.
+> **No duration column, no default duration number.** ⚠ Expiry closes the PROMPT, never the SHUTTER:
+> a capture is never refused for lateness. Full row in `DECISION_LOG.md`.
+
+
+Owner ruled 2026-08-28: *"we can add a timed challenge."*
+
+**Measured — more exists than expected.** A library of **500+ prompts** ships
+(`lib/papic-challenge-pool.ts`, `CHALLENGE_POOL_FLOOR = 500`), categorised and filtered by event
+type; a challenge can already be **armed on a guest's camera** — the viewfinder renders *"Next
+shot: {prompt}"* today.
+
+**Missing, and it is only these two:**
+1. **A challenge has no concept of time at all** — no window, no countdown, no expiry.
+2. **The wall renders no challenge** — measured: zero references in the projection component.
+
+⇒ Add a clock, and put it on the wall with a live count of who has answered.
+
+---
+
+## 5 · Challenges hang on the ceremony sequence — 🎼 **BUILT 2026-09-01**
+
+`lib/kwento-moments.ts` already carries the sequence in order — bridal march · vows · **veil &
+cord** · first kiss · leaving the church · cocktail hour · newlywed entrance · first dance · cake
+cutting · **money dance**. The challenge library exists. **Nothing joins them.**
+
+Joining them means a coordinator sets up in two minutes instead of writing prompts from scratch.
+
+> ✅ **BUILT 2026-09-01** — branch `claude/challenge-pool-joins-the-ceremony`, migration
+> `20271189223426`. The mapping is authored in `MOMENT_CHALLENGES`
+> (`apps/web/lib/papic-challenge-pool.ts`) **by slug**, regenerated through
+> `papic-challenge-sql.ts` into `papic_challenge_library.moment_keys` — never hand-written in SQL,
+> and no second table of prompts. The coordinator's screen is `/studio/papic/run-of-show`; it arms
+> through 4a's `papic_arm_challenge` and reads through `papic_armed_challenge` rather than
+> re-implementing either. An unmapped moment degrades to the general pool and **says it did**; a
+> wedding degrades nowhere, which is asserted so the fallback can never hide a hole. No duration,
+> no expiry — the sequence is the clock.
+>
+> 🚨 **THE WALL READ — FLAGGED, THEN FOUND ALREADY IN FLIGHT. DO NOT REBUILD IT.**
+> `fetchWallArmedChallenge` (`apps/web/lib/live-wall.ts`) picks the board's FIRST SLOT and does not
+> call `papic_armed_challenge`, so advancing the sequence moves the couple's screen and NOT the
+> wall. Item 5 deliberately did not fix it — and on re-checking work in flight (RULE 0.8) a
+> **parallel session is already replacing exactly that function**, uncommitted in the worktree
+> `~/Documents/Claude/Projects/wt-papic-clock` on branch
+> `claude/a-timed-challenge-lasts-thirty-minutes`, together with the honesty guard that pins its
+> shape. ⚠ **Uncommitted is not shipped** — before acting, re-measure on `origin/main`:
+> `grep -n papic_armed_challenge apps/web/lib/live-wall.ts`. If it is there, this is done; if that
+> branch was abandoned, it is a one-function change and still worth doing.
+
+> 🔴 **THE "NO DURATION COLUMN" RULING WAS SUPERSEDED THE SAME DAY — 2026-09-01 — AND ITEM 5 STILL
+> COMPOSES WITH IT.** The brief item 5 was built from said *"No duration column, no default duration
+> number. THE SEQUENCE IS THE CLOCK."* The owner then chose **30 · 60 · 120 minutes, defaulting to
+> 30**, and that is what the branch above is building
+> (`supabase/migrations/20271188710305_papic_timed_challenge_duration.sql`,
+> `papic_missions.armed_duration_minutes`, a new `papic_challenge_ends_at()` that
+> `papic_challenge_is_open()` then defers to). Item 5 added **no duration of its own**, so nothing
+> it shipped has to be undone: the run of show arms through `armChallengeAction`, which that branch
+> extends with `p_duration_minutes`, and a form that posts none gets the owner's default.
+> ⚠ **AND ONE OPEN CONSEQUENCE, NOT DECIDED BY EITHER SESSION:** the run of show therefore arms
+> **every moment for 30 minutes** with no way to say otherwise, while a first dance is four minutes
+> and a cocktail hour is sixty. Whether a moment should carry its own length — or simply rely on the
+> next arming closing the previous, which it already does — is an owner call.
+> ⚠ Expect a **merge conflict in `apps/web/app/dashboard/[eventId]/studio/papic/actions.ts`**:
+> both changes edit `armChallengeAction`.
+>
+> ⚠ **OWNER CALL, LEFT OPEN:** the ten moments are wedding-shaped, and this screen offers all ten at
+> every event type — matching the shipped `/alaala/assignments` behaviour rather than inventing a
+> new gate. Whether a birthday should be shown a ceremony sequence at all is undecided.
+
+---
+
+## 6 · The guest chooses per audience
+> ✅ **BUILT AND LIVE 2026-09-02 — BOTH HALVES. DO NOT REBUILD EITHER.**
+>
+> The owner's 2026-09-02 ruling replaced the four-audience consent matrix this section describes with
+> something simpler: **control is PER-PHOTO, not per-audience.** A guest controls the photos she SHOT
+> and the photos she is TAGGED in — both — and nobody else's.
+>
+> **6a · the un-post — PR #5081.** A guest takes her own photograph off the live wall.
+> `apps/web/lib/guest-wall-unpost.ts` carries a `WallScope = 'shot' | 'tagged'`; SHOT is her
+> `papic_guest_captures.guest_id` **plus** photos taken on her own `paparazzi_seats` roll, TAGGED is a
+> LIVE `photo_tags` row (`removed_at IS NULL`). It writes `wall_hidden_by_guest_id` beside the
+> pre-existing `wall_hidden_at` (*"transient wall-only kill switch (reversible)"*). 🔑 The decision is
+> made on the RETURNED ROW's own `event_id`/`guest_id`/`removed_at`, not on the `.eq()` chain — a
+> dropped chain link is not a compile error, a missing property is.
+> ⚠ **A guest "Not me" tag removal ALREADY EXISTED before this** (`photo_tags.removed_at` /
+> `removed_by='guest'`, migration `20270131081062`). It removes the ASSOCIATION and never the
+> photograph — which is exactly why the un-post was still needed. Do not confuse the two.
+>
+> **6b · the scan trail — PR #5086.** `guests.scan_tracking_opt_out` was ADOPTED, not retired (owner
+> chose the harder option). It went from **1 file — the migration alone — to 16**, and is now read on
+> every scan entry path: redeem, seat/claim, welcome, join, loaders. `apps/web/lib/scan-trail.ts` is
+> the one door; `apps/web/lib/every-scan-goes-through-one-door.test.ts` is what keeps it the only one.
+
+
+> ⚠ **RE-MEASURED 2026-08-31 — IT IS FOUR FLAGS, NOT TWO.** `guests.face_recognition_excluded`,
+> `guests.faceblock_enabled`, `guests.photo_consent`, and `guests.scan_tracking_opt_out`.
+>
+> 🔑 **THE FOURTH ONE IS THE WHOLE POINT OF RULE 0 HERE.** `guests.scan_tracking_opt_out` was added
+> citing **RA 10173** (`supabase/migrations/20260513050000_iteration_0002_invitation.sql`) and had
+> **ZERO application references** — no reader AND no writer. It was dormant, so nobody's consent was
+> being violated; the risk ran the other way: **this item would have added a FIFTH flag beside a
+> column already designed for exactly this choice.** The repo half-knew — it sat in
+> `apps/web/tests/db/gates-have-handles.baseline.txt` as `NOT INVESTIGATED`.
+>
+> ✅ **SETTLED 2026-09-02 — ADOPTED, NOT RETIRED, AND BUILT (session 6b).** The flag now has a
+> handle and a gate. **Item 6 must build ON it and must not add a fifth flag for scans.**
+>   · **The gate** — `apps/web/lib/scan-trail.ts` · `recordScan()` is the ONLY place in the tree
+>     that creates a `scan_events` row. All four doors route through it (`redeem` · `seat/claim` ·
+>     `welcome` · `join`), and it records only on a **positive `false`**: an unreadable flag, a
+>     missing guest row or a thrown client all write nothing.
+>   · **The guard** — `apps/web/lib/every-scan-goes-through-one-door.test.ts` fails if any other
+>     file pairs `from('scan_events')` with a row-creating verb, or mentions the table outside a
+>     named allowlist. A fifth door goes through `recordScan` or turns that test red.
+>   · **The handle** — `setGuestScanTracking` in `app/[slug]/actions.ts`, rendered for **every**
+>     recognised guest by `_components/scan-trail-notice.tsx` (deliberately NOT behind the
+>     `photo_source === 'selfie'` gate that hides `FaceDataNotice` from most guests).
+>   · The baseline line is **deleted**, which is the proof — that guard fails on a stale line the
+>     moment a column acquires a writer.
+>
+> 🔑 **TWO CALLS WERE MADE, NOT INHERITED — disagree here rather than in the code.**
+> **(a) GUEST-ONLY.** No host-side writer was added, unlike `faceblock_enabled` (owner ruling 3 of
+> 2026-08-17 lets either side move that one). A host un-setting a data subject's own RA 10173
+> objection is not defensible, and no host screen has ever shown this flag.
+> **(b) `guest_checkins` IS NOT COVERED.** It carries `method = 'qr_scan'` and so is literally a
+> scan write path; it is excluded because it is the host's own door desk marking a guest arrived,
+> it drives that guest's arrival greeting, and a guest declining to be *tracked* should not vanish
+> from the check-in desk at their friend's wedding.
+>
+> ⚠ **THE PRICE, STATED:** the trail's only reader is the first-arrival greeting in
+> `app/[slug]/_lib/loaders.ts`, so an opted-out guest is greeted "Hi again" every time, including
+> their first. The control says so in its OFF state.
+> Re-measure any of this with: `grep -rn scan_tracking_opt_out .`
+
+
+**The market's single clearest gap, and smaller than anyone assumes.** Nothing in the scanned
+competitive field lets a guest decline facial recognition; we already do. The finish is letting
+them choose **per audience** — *"keep me off the big screen but leave me in their album"* is a
+sentence real people say and no product can express.
+
+🔑 **The four audiences are ALREADY separate in our read paths**, each with its own gate: the live
+wall (with a baked blurred derivative, fail-closed), the shared gallery (its own control, which
+bakes the blur rule and the consent veto), the couple's archive (always delivered — the
+untagged-still-delivered guarantee), and personal delivery. **Two independent guest flags already
+exist and the wall filter reads both.**
+
+⇒ **We are not retrofitting consent into a single face collection.** The surfaces exist; only the
+guest's choice is missing. External advice calls this *"a schema migration, not a sprint"* — **for
+us that is not true**, and it is the single biggest correction in
+[`research/STRATEGY_DOC_CHECKED_AGAINST_THE_CODE_2026-08-29.md`](research/STRATEGY_DOC_CHECKED_AGAINST_THE_CODE_2026-08-29.md).
+
+Ship a plain consent receipt with it — what was collected, why, for how long, how to undo it.
+
+---
+
+## 7 · The year
+> ✅ **7a, 7b, 7c AND 7d ALL BUILT 2026-09-02. ITEM 7 IS COMPLETE.**
+>
+> ⚠ **"LIVE" WAS OPTIMISTIC WHEN THIS LINE FIRST SAID IT.** 7c is PR **#5090**, still OPEN and red on
+> `lint-one-comment-stripper` when 7d began; 7d is stacked on it. Re-measure with
+> `gh pr list --state open` before repeating "live" — a handoff decays fastest where it is read most.
+>
+> Owner ruled 2026-09-02: the year is the **full planning platform**, but **every celebration keeps
+> its own pot** — a cluster is presentation and planning, NEVER accounting.
+>
+> **7a · the cluster primitive — PR #5082.** `public.event_clusters` + `public.event_cluster_members`.
+> `UNIQUE (event_id)` = at most one cluster per celebration; a partial `UNIQUE INDEX WHERE is_anchor`
+> = at most one anchor. 🔑 **THE COLUMN IS `event_cluster_id`, NOT `cluster_id`** — the latter already
+> means an ANTI-FRAUD IDENTITY cluster (~20 hits, none a celebration). `events.cluster_id` was
+> rejected partly for **friction in the right direction**: it sits one word away from
+> `SUM(points) … WHERE cluster_id = $1`, the exact rollup the ruling forbids.
+> 🔒 Three structural guards in `apps/web/tests/db/a-pot-belongs-to-one-celebration.db.test.ts` fail
+> the moment anyone gives a cluster accounting meaning: no Papic table names a cluster, no Papic
+> function has learned the word, the cluster tables hold no value. **They are mutation-proved** — they
+> caught a real intrusion, not a drill. If your work makes them red, your work is wrong.
+>
+> **7b · one person, not three rows — PR #5087.** It added **NO new table**: it extended the EXISTING
+> person spine (`public.people`, `guests.person_id`, the unified resolver of migration
+> `20270514555975`).
+> 🔑 **THE DIAGNOSIS THAT MATTERS, so nobody "fixes" it again:** `guests.person_id` was NULL on all 40
+> guests, and **that was CORRECT, not broken.** The original resolver keys on EMAIL, and zero-account
+> guests are name-only, so no email ⇒ no link. The resolver was not broken, had not lost its caller,
+> and did not fail silently. 7b extended the signal rather than replacing the resolver.
+>
+> **7c · the cluster learns its own timeline — the planning surface.** `20271192016913` adds
+> `public.cluster_timeline()` (SECURITY INVOKER, inherits 7a's owner-or-couple RLS), the first cluster
+> SERVER ACTIONS — until then **no cluster row could ever exist in production**, because 7a shipped
+> both tables with no door — and the first cluster SCREEN, at `/dashboard/clusters`.
+> 🪤 **THE TRAP IT EXISTS TO AVOID: `events.event_date` IS NOT A DATE.** At `year`/`month` precision it
+> is a **first-of-range placeholder**, so `ORDER BY event_date` sorts *"Sometime in 2027"* as if the
+> host had said New Year's Day. **4 of 9 prod events are `year` precision holding a real-looking
+> date** — the common case. Each celebration therefore resolves to the range its precision claims and
+> sorts by that range's **MIDPOINT**; undated celebrations sort LAST.
+> ⚠ `sort_key` is a sort key and **never a label** — rendering it invents a day the host never chose.
+> ⛔ **Still nothing stored:** no `year`/`season`/`starts_on`/`ends_on`; the span is derived per read.
+> ⛔ **Still no money on the surface** — the pot guard runs unmodified and green.
+> 🔑 **FLAGGED FOR THE OWNER: the route is `/dashboard/clusters`, not `/dashboard/year`** — the latter is
+> taken and deliberately retired (2026-08-21) and meant the CALENDAR, not clusters.
+>
+> **7d · a year shows its budgets — the last phase.** `lib/cluster-budgets.ts` + a section appended to
+> 7c's timeline page. **NO MIGRATION: a rollup, not a schema.** Each celebration's budget TARGET, and a
+> total derived on every read and stored nowhere — 7a's guard already treats `budget` as a
+> value-bearing name, so a cluster money column fails the required check on arrival.
+> ⚖ **THE TARGET, NOT "COMMITTED", and it was measured rather than assumed.** The ruling above says a
+> cluster is *presentation and planning, NOT accounting*: a target is planning; committed/paid belongs
+> to `/budget`. 🔑 **`NEXT_PUBLIC_BUDGET_TRUTH_ENABLED` IS NOT SET IN VERCEL** (109 vars, no match), so
+> `resolveEventMoney()` — the ONE calculator — does not run in production; a committed figure here
+> would be blank, or would reproduce the page-local legacy formula and become the SIXTH definition of
+> "the budget" that `budget-truth.ts` exists to end.
+> ✅ **AND THE FLAG THIS DOCUMENT SAID WAS UNREADABLE IS READABLE.** `BUDGET_BUILD_ENABLED` is also
+> unset, and its code reads `!== 'false'` — so the Build feature is **ON** in production.
+> 🔑 **ABSENCE FROM `vercel env ls` IS DECISIVE WHENEVER THE DEFAULT IS KNOWN** — and it points in
+> OPPOSITE directions for these two flags. Do not repeat "server-side env is unreadable" as if it
+> settled the question; read the default in code, then check whether anything overrides it.
+>
+> ⛔ **AND THEN DO NOT WRITE THE ANSWER DOWN AS A FACT. The owner set
+> `NEXT_PUBLIC_BUDGET_TRUTH_ENABLED="true"` and redeployed the SAME EVENING (2026-09-02 ~18:20), so
+> the paragraph above was stale within the hour — and so was a docblock 7d had just shipped to
+> `main` saying the flag was "NOT SET … and therefore OFF".** A flag's value is the fastest-decaying
+> fact in this project. **Record the METHOD, never the value** — the same rule as the six migration
+> headers `CLAUDE.md` says are still wrong today. Re-run `vercel env ls`; believe nothing here.
+> 🚨 **FOUR STATES, BECAUSE ₱0 IS A CLAIM:** `set` · `none` · `withheld` · `unknown`. The total is
+> **null whenever nothing contributed**, and a partial one says "Across 2 of 4 celebrations".
+> 🔒 `events_host` admits an accepted MODERATOR (the `budget-visibility.ts` leak: a live planner,
+> `checkout: false`, on a ₱930,000 event), so the rollup re-asks COUPLE membership on EVERY read —
+> 7a checks both halves at LINK time only, and a cluster outlives the access that justified it.
+> ⛔ **The pot guard runs unmodified and green.** 8 sabotages, every one red.
+>
+> **7d+ · the year also shows what is COMMITTED** (same day, after the owner switched budget-truth
+> on). Committed comes from `resolveEventMoney`'s core via a new `resolveEventMoneyMeasured()`, gated
+> on the flag with **NO fallback** — flag off ⇒ no committed column, because inventing a legacy
+> formula here would be the sixth definition of "the budget". The year and each celebration's own
+> `/budget` therefore cannot disagree.
+> 🛑 **THE RESOLVER HAD TO LEARN TO SAY WHEN IT DID NOT READ.** It degrades every read with `?? []`,
+> which is right for one event's page and WRONG inside a sum: the degraded value is a confident
+> **₱0 committed**, so Σ over a refused read is not degraded, it is incorrect — and it looks
+> perfect. `resolveEventMoney()` is now a thin wrapper and is byte-identical for its two callers.
+> 🔒 Committed is asked ONLY for celebrations you host (the gate is the target read), so the rollup
+> cannot count a stranger's spending — and it costs nothing when the flag is off.
+> 🔑 **THE SABOTAGE RUN THAT CAUGHT ONLY THREE OF SIX IS THE LESSON.** The two that escaped were the
+> two that mattered, because the existing tests built `{ measured: false }` **by hand** and never
+> drove the code that decides it. **A guard for a value must drive the thing that computes it.**
+
+
+> ⚠ **RE-MEASURED 2026-08-31 — THE NAME YOU WILL REACH FOR IS ALREADY TAKEN.** "Nothing links two
+> celebrations" still holds for CELEBRATIONS, but `related_event_id` already exists with an unrelated
+> meaning in `20260703000000_v2_phase_a_per_voucher_granularity.sql` and
+> `20260704010000_v2_phase_e_telemetry_events.sql`. Whoever builds the year will grep that name, get
+> false hits, and may reuse a column that means something else. **Pick a distinct name.**
+>
+> ✅ **THE PROTECTION BELOW STILL HOLDS, re-checked after the 2026-08-31 ceiling merges:** there is
+> still NO stored share column anywhere in `supabase/migrations`. The share is derived at spend time.
+
+
+**Ruled 2026-07-15 and unbuilt.** A separate *occasion* becomes its own celebration shown as a
+**linked cluster**; a multi-day celebration stays ONE celebration with days; somewhere to sleep is
+never an event.
+
+**Measured 2026-08-29, HALF OF IT CORRECTED 2026-09-02:** ~~nothing links two celebrations in
+code — no parent, no cluster, no relation.~~ **Phase 7a shipped that link**
+(`20271189765490_event_cluster_primitive.sql`: `event_clusters` + `event_cluster_members`,
+`event_cluster_id` — *not* `related_event_id`, *not* `cluster_id`, both taken with unrelated
+meanings). It is the PRIMITIVE ONLY: no screen, no server action, no read path, both tables empty.
+✅ **The other half still holds and is now GUARDED, not merely true:** the shot pot is strictly
+per-celebration, which is the primitive people pay for, and
+`tests/db/a-pot-belongs-to-one-celebration.db.test.ts` fails the required check the moment a Papic
+table or function learns what a cluster is — 11 sabotages, every one red.
+
+⇒ **A project, not an adjustment.** It is also the only play on the board nobody can copy in a
+quarter, because it needs a planning platform underneath — a guest list and dates months ahead.
+
+✅ **AND WE ALREADY PROTECTED IT BY ACCIDENT.** Item 3's share is **derived at spend time, never
+stamped** — decided because the pot and the guest list both move. That is exactly what makes the
+year survivable later: a stamped share would have to be torn out; a derived one just asks a
+different question. **Do not "optimise" it into a stored value.**
+
+---
+
+## 8 · Why Messenger is NOT next
+
+External advice calls Messenger/Viber delivery the highest-return item available, on the grounds
+that email is where guest photo sets quietly die. **Probably right about the problem. Wrong about
+the first move.**
+
+🔑 **WEB PUSH IS BUILT, MOUNTED, WIRED TO 108 EMIT SITES — AND HAS NEVER HAD A SINGLE SUBSCRIBER
+IN PRODUCTION.**
+
+⇒ **Ask for push at the moment a guest scans the QR at the venue, before building anything with
+Meta.** That is the best permission moment this product will ever get — the guest is holding their
+phone, standing at the celebration, with the page already open — **and we never ask.** Zero policy
+risk, zero new integration, already built. It is also the honest test of whether the delivery
+problem is the CHANNEL or the ASKING.
+
+⚠ And note the product already holds a **defensive** stance toward these apps: `chat-contact-filter`
+**blocks** guests and vendors naming Viber/Messenger/WhatsApp in chat so the relationship does not
+walk off Setnayan. Different context, compatible — but make it a knowing decision.
+⏭ If Messenger is still wanted after push: **verify Meta's business-initiated messaging rules and
+the 24-hour window first.**
+
+---
+
+## 9 · The one thing that is not engineering
+
+**We have no partner offer for coordinators, and that is how the strongest local rival actually
+wins.** Kuha sells coordinators a business system — white-label page, client dashboard, booking
+funnel, resale margin, a monthly fee. A better album does not dislodge that.
+
+🔑 **The asymmetry we are not using:** Setnayan already runs vendor subscriptions and portfolio
+hosting. We are not offering a coordinator a subdomain on a photo app — we are offering presence
+on a planning platform where couples are already searching for vendors. **Kuha would have to build
+a marketplace from zero to answer it.**
+
+⇒ **OWNER TERRITORY.** It is a business decision about pricing and channel, not a build.
+
+---
+
+## The standing rules for every session on this list
+
+1. **Branch, then `git worktree add` beside the repo** (`~/Documents/Claude/Projects/wt-<name>`) —
+   **never `/tmp`**, and **push the moment it typechecks.** Item 1 was built, proved and lost
+   exactly this way.
+2. `pnpm install` in the worktree first — a run in an uninstalled worktree means nothing.
+3. Print `TSC_EXIT` beside the error count. An empty `tsc` log is not a clean one — it exits
+   **144** on abort, and two concurrent typechecks cause exactly that.
+4. Require `# tests` to be **non-zero** before believing any pass.
+5. Mutation-test every guard and print the occurrence count **before → after**.
+6. `git fetch` and read the new tip before building — `origin/main` moved three times during the
+   planning session alone, and other sessions work this repo concurrently.
+7. Changelog fragment in `changelog.d/`, never `CHANGELOG.md` or `STATUS.md` directly.

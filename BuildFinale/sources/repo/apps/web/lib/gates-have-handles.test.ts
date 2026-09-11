@@ -1,0 +1,529 @@
+/**
+ * gates-have-handles.test.ts — every switch the product depends on must have
+ * something that can flip it.
+ *
+ * 🔴 THE PATTERN, TWICE NOW.
+ *
+ * `events.papic_face_mode` shipped, was paid for, was activated on 2026-06-19
+ * with every flag green — and stored NOTHING for seven weeks, because the
+ * column had ZERO WRITERS anywhere in the codebase. All five production events
+ * sat in the mode that hard-nulls the face vector.
+ *
+ * `events.live_media_public` shipped on 2026-09-20 as "the couple's opt-in for
+ * anonymous live media", `NOT NULL DEFAULT FALSE`, read on every render of the
+ * guest site — and nothing ever wrote it either. The guest site computes
+ * `liveMediaVisible = viewer is a guest OR live_media_public`, so a visitor
+ * with no invitation never saw the livestream or the live photo wall on ANY
+ * event. That visitor is the relative overseas who opened the link someone
+ * forwarded on Messenger — precisely the person a wedding livestream is for.
+ * All five production events were FALSE, and no couple could have changed it.
+ *
+ * WHY NEITHER WAS CAUGHT: a read-only column is INVISIBLE to every ordinary
+ * check. It typechecks, it has RLS, it has a migration with a thoughtful
+ * comment, its readers have tests, and the feature "works" — it just always
+ * takes the false branch. Nothing errors. Nothing logs. Production looks calm.
+ *
+ * 🔑 TRACE TO THE WRITE, NOT THE FLAG. Grep the column name and ask whether
+ * every single hit is a READ. That question is what this test asks, on a list
+ * of the columns where the answer matters.
+ */
+
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import { loadSources, gateWritersOf, writesColumnInOneChain } from './gate-writers';
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const WEB = join(HERE, '..'); // apps/web
+const MIGRATIONS = join(WEB, '..', '..', 'supabase', 'migrations');
+
+/**
+ * Columns whose whole purpose is to be TURNED ON by somebody. Each needs a
+ * writer — a server action, a script, an admin path — that sets it.
+ *
+ * Add a column here when its false value silently disables a feature rather
+ * than erroring. Do NOT add columns that are stamped as a side effect (a
+ * timestamp, a counter); those have writers by construction.
+ */
+const SWITCHES: {
+  column: string;
+  /** The table it lives on — needed to pair a table-write with a field-name. */
+  table: string;
+  whoFlips: string;
+  whatBreaksWhenStuck: string;
+  /** Set when the ONLY writer is an RPC parameter — see rpcWritersOf. */
+  writtenViaRpcParam?: string;
+}[] = [
+  {
+    column: 'live_media_public',
+    table: 'events',
+    whoFlips: 'the couple, on the website privacy page',
+    whatBreaksWhenStuck:
+      'a visitor with no invitation never sees the livestream or the live photo ' +
+      'wall — on the day, while the broadcast is running',
+  },
+  {
+    column: 'papic_face_mode',
+    table: 'events',
+    whoFlips: 'an admin / the DPO, per event',
+    whatBreaksWhenStuck: 'face auto-tagging stores nothing, on a feature that was paid for',
+  },
+  {
+    // 🚨 REGISTERED AFTER SHIPPING IT BROKEN, 2026-08-06. The column was added
+    // with six readers and NO writer, in the same day three other instances of
+    // this shape were being fixed. The guard existed and never looked, because
+    // nobody registered the switch with it.
+    column: 'author_named_publicly',
+    table: 'guest_columns',
+    whoFlips: 'the guest, on the message form on the event page',
+    whatBreaksWhenStuck:
+      'a guest can never choose to be named beside their own published words — ' +
+      'the safe half of the ruling works and the half that gives them a say does not',
+    writtenViaRpcParam: 'p_name_me',
+  },
+  {
+    // 🚨 FOURTH INSTANCE, registered 2026-08-09 — and the longest-running one.
+    // `vendor_profiles.is_founder` shipped 2026-06-09 with a migration, a
+    // column comment and two live readers, and no code anywhere ever wrote it.
+    // The single row that carried it was set by a HARDCODED UUID inside the
+    // migration itself, so the perk was real, working, tested — and
+    // unreachable by any second business, forever. Note what a mere-mention
+    // check would have concluded: the column name appears in an admin export
+    // list, an anon-column-scope migration and a db test, so it looks
+    // thoroughly wired from every angle except the one that matters.
+    // Lives on `vendor_profiles`, not `events` — declared explicitly now that
+    // the detector is table-scoped. Before 2026-08-16 the check was table-blind,
+    // so this passed by accident rather than by aim.
+    column: 'is_founder',
+    table: 'vendor_profiles',
+    whoFlips: 'an admin, on the vendor plan page (/admin/vendors/[id]/plan)',
+    whatBreaksWhenStuck:
+      'no business can ever be made a founding supplier — the unlimited-category ' +
+      'and unlimited-services-per-category override works and nobody can receive it',
+  },
+  {
+    // 🚨 FIFTH INSTANCE, registered 2026-08-12 — and the first where the column
+    // had neither a writer NOR a reader. `events.live_photo_wall_visibility`
+    // shipped 2026-11-04 with a CHECK constraint, a column comment naming the
+    // exact surface it governs, and nothing at either end for nine months.
+    //
+    // What that cost: the SKU is titled "Live VENUE Photo Wall", and it
+    // also mirrored the wall onto every invited guest's phone for the whole
+    // celebration. The couple's only "off" was revoking the venue screen codes,
+    // which did nothing to the phones. So a couple who deliberately shut the
+    // wall down still had their wedding playing in a hundred hands.
+    //
+    // ⚠ AN APPLIED MIGRATION MISDESCRIBED IT as "(venue wall)" — the misreading
+    // that let it live. This guard does not read comments, which is the point.
+    column: 'live_photo_wall_visibility',
+    table: 'events',
+    whoFlips: 'the couple, on the Live Photo Wall card (Papic page / day-of console)',
+    whatBreaksWhenStuck:
+      'the photo wall plays on every invited guest’s phone for the whole ' +
+      'celebration and the couple cannot stop it — revoking every venue screen ' +
+      'code, the only “off” the product offers them, leaves it running',
+  },
+  {
+    // 🚨 SIXTH INSTANCE, registered 2026-08-16 — and the longest-lived. Unlike
+    // the five above, `events.archived` was never obscure: it shipped with the
+    // FIRST migration, a dozen screens read it, eleven database objects
+    // reference it, and the RLS policy plus the column grant have always let an
+    // organiser set it. Everything was in place except a way to press it.
+    //
+    // 🔑 THE TELL WAS NOT SILENCE — IT WAS FIVE SCREENS TELLING PEOPLE TO USE
+    // IT. "Finish or archive it first" is what a couple was told when they
+    // tried to plan a second wedding; the admin console's delete warning
+    // recommended "archiving instead if you might restore later". Every one of
+    // those sentences named a control that did not exist, for two years.
+    //
+    // The owner was personally behind that instruction: holding two upcoming
+    // weddings, a third was refused with nothing to press.
+    //
+    // ⚠ AND IT LOOKED HALF-BUILT, WHICH IS WORSE THAN LOOKING ABSENT. A reader
+    // checking "does archive exist?" finds a column, readers, a filter in the
+    // admin console and an `?archived=1` query param, and concludes yes.
+    column: 'archived',
+    // 🚨 REQUIRED, AND IT IS THE WHOLE POINT HERE. `archived` exists on BOTH
+    // `events` and `communities`, and `samahan/actions.ts` writes
+    // `communities.archived` — so a table-blind detector reported
+    // "events.archived has a writer" while events.archived had none, for two
+    // years. Table-scoping landed on main independently (`gateWritersOf`);
+    // this entry is the instance it was next asked to hold.
+    table: 'events',
+    whoFlips: 'a host, on the event’s Personalization page (“Put this away”)',
+    whatBreaksWhenStuck:
+      'no celebration can ever be put away, so a couple who has finished one ' +
+      'wedding can never start another — the refusal tells them to archive it ' +
+      'and there is nothing anywhere to press',
+  },
+];
+
+const SOURCES = loadSources(WEB);
+const FILES = SOURCES.map((s) => join(WEB, s.path));
+
+/**
+ * Does anything WRITE this column?
+ *
+ * ⚠ THE DETECTOR MOVED to `lib/gate-writers.ts` on 2026-08-17, and the pattern
+ * that used to live here was measurably too narrow. Against the real schema it
+ * missed FOUR spellings this codebase actually uses — ES6 shorthand
+ * (`{ faceblock_enabled }`, no colon), a write funnelled through a helper, an
+ * update object longer than its 600-character window, and a payload assembled
+ * into a variable first — and so called 16 working controls missing. A guard
+ * that cries wolf teaches you to skim past the one time it is right.
+ *
+ * The shared module is now used by BOTH this file and the schema-enumerating
+ * `tests/db/gates-have-handles.db.test.ts`, so the two cannot drift apart.
+ */
+function writersOf(column: string): string[] {
+  const sw = SWITCHES.find((s) => s.column === column);
+  // Columns named by the meta-tests below are not registered switches; fall back
+  // to scanning every table so those assertions still mean what they say.
+  const tables = sw ? [sw.table] : ['events', 'guests', 'users', 'vendor_profiles'];
+  for (const table of tables) {
+    const hits = gateWritersOf(SOURCES, table, column);
+    if (hits.length > 0) return hits;
+  }
+  return rpcWritersOf(column);
+}
+
+/**
+ * A write spelled as an RPC PARAMETER, which the pattern above cannot see.
+ *
+ * ⚠ THIS WAS A REAL BLIND SPOT, found 2026-08-06. A GUEST has no `auth.uid()`,
+ * so a guest can never write a row directly — EVERY guest-side write in this
+ * codebase goes through a `SECURITY DEFINER` RPC and arrives as a named
+ * parameter, never as an `.insert({...})` key. The detector was therefore blind
+ * to an entire class of writers, and would have reported "nothing writes this"
+ * about a column with a perfectly good control on it.
+ *
+ * The mapping cannot be derived from TypeScript — the parameter is named in the
+ * app (`p_name_me`) and the column in SQL (`author_named_publicly`) — so a
+ * switch written this way declares its own parameter, and we then require BOTH
+ * that some caller passes it AND that a migration assigns it to the column.
+ * Two halves: a caller alone proves nothing, and SQL alone is unreachable.
+ */
+function rpcWritersOf(column: string): string[] {
+  const sw = SWITCHES.find((s) => s.column === column);
+  const param = sw?.writtenViaRpcParam;
+  if (!param) return [];
+
+  const callers = FILES.filter((f) => {
+    const src = readFileSync(f, 'utf8');
+    return new RegExp(`\\.rpc\\(\\s*['"\`][^'"\`]+['"\`][\\s\\S]{0,900}?\\b${param}\\b\\s*:`).test(src);
+  }).map((f) => f.slice(WEB.length + 1));
+  if (callers.length === 0) return [];
+
+  // ⚠ COMMENTS STRIPPED. A `--` line has no statement terminator, so a pattern
+  // spanning `[^;]` runs straight through one — and the first cut of this check
+  // was satisfied by the migration's own PROSE about the column and the
+  // parameter, passing while the SQL assigned neither. Fourth time in one day a
+  // guard here matched a comment instead of code.
+  const sql = readdirSync(MIGRATIONS)
+    .filter((f) => f.endsWith('.sql'))
+    .map((f) => readFileSync(join(MIGRATIONS, f), 'utf8'))
+    .join('\n')
+    .split('\n')
+    .filter((l) => !l.trim().startsWith('--'))
+    .join('\n');
+  // Require a REAL assignment of the parameter into the column. The earlier
+  // fallback ("both names appear somewhere, and some INSERT exists") is exactly
+  // the mere-mention test this file was written to reject.
+  const assigns = new RegExp(`\\b${column}\\b\\s*=\\s*[^,;]*\\b${param}\\b`).test(sql);
+  return assigns ? callers : [];
+}
+
+for (const sw of SWITCHES) {
+  test(`${sw.column} has something that can turn it on`, () => {
+    const writers = writersOf(sw.column);
+    assert.ok(
+      writers.length > 0,
+      `NOTHING WRITES \`${sw.column}\`.\n\n` +
+        `It is meant to be flipped by ${sw.whoFlips}. While it is stuck at its ` +
+        `default, ${sw.whatBreaksWhenStuck}.\n\n` +
+        `This is not a hypothetical: this exact shape shipped twice — ` +
+        `papic_face_mode stored nothing for seven weeks with every flag green, ` +
+        `and live_media_public hid the broadcast from every visitor without an ` +
+        `invitation on every event in production.\n\n` +
+        `A read-only switch is invisible to every other check: it typechecks, it ` +
+        `has RLS, its readers have tests, and the feature simply always takes the ` +
+        `false branch. Nothing errors.\n\n` +
+        `Fix: ship the control that flips it, in the same change as the column.`,
+    );
+  });
+}
+
+test('the writer detector does not pass on a mere mention', () => {
+  // The guard above is only worth having if it can tell a READ from a WRITE.
+  // If this ever passes for a column that is only ever selected, both tests
+  // above become decoration.
+  const readOnly = writersOf('landing_page_hero_image_url__definitely_not_a_real_column');
+  assert.equal(readOnly.length, 0, 'a column nothing mentions must have no writers');
+
+  // And a column that IS written must be found — proving the pattern matches
+  // the way this codebase actually spells an update.
+  const known = writersOf('landing_page_visibility');
+  assert.ok(
+    known.length > 0,
+    'landing_page_visibility is written by the privacy action; if the detector ' +
+      'cannot see that write, it cannot see any write, and the assertions above ' +
+      'are meaningless.',
+  );
+});
+
+/**
+ * A writer nobody can reach is the same bug wearing a different hat.
+ *
+ * The tests above ask "does anything write this column?" — but a server action
+ * that only the codebase knows about is exactly as useless to an admin as no
+ * writer at all. `setVendorFoundingSupplier` therefore has to be wired to a
+ * form that actually renders, not merely exported. Checked on the RENDERED
+ * region: the JSX `action={...}` / `action={setVendorFoundingSupplier}` binding
+ * in the plan page, so a stray import or a comment mentioning the name cannot
+ * satisfy it.
+ */
+test('the founding-supplier writer is reachable from a rendered control', () => {
+  const page = join(
+    WEB,
+    'app/admin/vendors/[vendorProfileId]/plan/page.tsx',
+  );
+  const src = readFileSync(page, 'utf8')
+    // Strip line comments so the docblock explaining the control cannot BE the
+    // control — the failure mode that has bitten guards in this repo four times.
+    .split('\n')
+    .filter((l) => !/^\s*(\/\/|\*|\/\*)/.test(l))
+    .join('\n');
+
+  assert.match(
+    src,
+    /<form\s+action=\{setVendorFoundingSupplier\}/,
+    'The plan page no longer renders a <form action={setVendorFoundingSupplier}>. ' +
+      'The action can still be imported and still writes the column — and no admin ' +
+      'can reach it, which is the state `is_founder` sat in from 2026-06-09: a real, ' +
+      'working, tested perk that nobody could ever be given.',
+  );
+  assert.match(
+    src,
+    /name="is_founder"/,
+    'The form no longer posts an `is_founder` value, so setVendorFoundingSupplier ' +
+      'rejects every submission ("Invalid founding-supplier value") — a control that ' +
+      'renders and can never succeed.',
+  );
+});
+
+// ── The same disease one level up: a GATE FUNCTION nobody calls ─────────────
+//
+// 🔴 THIRD INSTANCE, found 2026-08-06. `lib/setnayan-ai-cockpit-flag.ts` exported
+// `cockpitEnabled()` whose own docblock read: "The cockpit renders ONLY when this
+// returns true. Default OFF, so prod today keeps the R3 status board
+// byte-for-byte." Every word false — the function had ZERO IMPORTERS, so it
+// neither held the surface back nor could take it down. The owner believed they
+// held a lever that was connected at neither end.
+//
+// 🔑 A column with no writer and a gate function with no caller are the SAME
+// BUG. The tests above trace the WRITE; this one traces the CALL. Both ask the
+// question an ordinary test cannot: not "is the logic right?" but "does anything
+// reach this at all?"
+//
+// ⚠ ALLOWLIST, NOT A BAN. Parking a flag ahead of its consumers is legitimate and
+// this repo does it deliberately. What is NOT legitimate is a parked flag that
+// CLAIMS to be gating something. Each entry below was read and is genuinely
+// pre-wired, with an accurate docblock. A NEW inert flag fails until it is either
+// wired or added here with a reason — which puts it in the diff, where a reviewer
+// can disagree.
+test('every feature-flag module has at least one non-test importer', () => {
+  const PARKED_ON_PURPOSE = new Map([
+    ['public-api-flag', 'V1 lock: "no public API endpoints" — 0033 plumbs the gateway only.'],
+    ['slot-seat-reservations-flag', 'Owner-parked 2026-08-01; docblock states it is not yet wired.'],
+    ['vendor-free-tier-booking-cap-flag', 'Built ahead of its consumer; docblock says so.'],
+    ['vendor-launch-free-window-flag', 'Built ahead of its consumer; docblock says so.'],
+  ]);
+
+  const dir = join(WEB, 'lib');
+  const flagFiles = readdirSync(dir).filter((f) => f.endsWith('-flag.ts'));
+  assert.ok(
+    flagFiles.length > 20,
+    `only ${flagFiles.length} *-flag.ts modules found — the glob is wrong, and a ` +
+      'guard that inspects nothing passes for the wrong reason.',
+  );
+
+  const inert: string[] = [];
+  for (const file of flagFiles) {
+    const base = file.replace(/\.ts$/, '');
+    let importers = 0;
+    const scan = (d: string) => {
+      for (const n of readdirSync(d)) {
+        if (n === 'node_modules' || n === '.next') continue;
+        const p = join(d, n);
+        if (statSync(p).isDirectory()) scan(p);
+        else if (/\.tsx?$/.test(n) && !/\.test\./.test(n) && !p.endsWith(file)) {
+          if (readFileSync(p, 'utf8').includes(`@/lib/${base}`)) importers++;
+        }
+      }
+    };
+    for (const root of ['app', 'lib', 'components']) {
+      try {
+        scan(join(WEB, root));
+      } catch {
+        /* dir may not exist */
+      }
+    }
+    if (importers === 0 && !PARKED_ON_PURPOSE.has(base)) inert.push(base);
+  }
+
+  assert.deepEqual(
+    inert,
+    [],
+    'These flag modules are imported by nothing, so they gate nothing — a switch ' +
+      'connected at neither end:\n  ' +
+      inert.join('\n  ') +
+      '\n\nWire it, delete it, or add it to PARKED_ON_PURPOSE with a reason.',
+  );
+});
+
+/*
+  A HOST CHECK WIDER THAN THE RLS POLICY MUST WRITE WITH THE ADMIN CLIENT.
+
+  This is not a style rule; it is the shape of a live defect this PR shipped and
+  had to correct. `setEventArchived` admits `event_members` couple OR
+  coordinator, plus an accepted `event_moderators` row. The only permissive
+  UPDATE policy on `public.events` is `couple_can_update_event`, whose
+  `current_couple_event_ids()` is `member_type = 'couple'` ONLY — read out of
+  production by the object. So on the user client every co-host's update was
+  RLS-filtered to zero rows WITH NO ERROR and answered "Only a host of this
+  celebration can put it away", immediately after deciding they were one.
+
+  🔑 The failure is silent by construction: an RLS refusal and a legitimate
+  no-op are the same value. Nothing can catch this at runtime, which is why it
+  is asserted here instead.
+
+  Asserted as a RULE, not a spelling: the update must be ROOTED at
+  `createAdminClient(`, and must not be rooted at the request-scoped client.
+  Reordering the chain, renaming the local, or adding columns all still pass.
+*/
+test('the put-away writer uses the admin client, because its host check is wider than RLS', () => {
+  const src = readFileSync(
+    join(WEB, 'app/dashboard/[eventId]/archive-actions.ts'),
+    'utf8',
+  );
+  const fn = /export async function setEventArchived\([\s\S]*?\n}/.exec(src);
+  assert.ok(fn, 'setEventArchived should exist in archive-actions.ts');
+  const body = fn[0];
+
+  assert.match(
+    body,
+    /createAdminClient\(\)[\s\S]{0,120}?\.from\(\s*['"`]events['"`]\s*\)[\s\S]{0,400}?\.update\(/,
+    'the events update must be rooted at createAdminClient() — the explicit ' +
+      'host check above is the authorization, matching setEventCeremonyType',
+  );
+
+  // The request-scoped client is still used for the host CHECK, and must be.
+  // What must never come back is a WRITE on it: that is the silent zero-row path.
+  const userClientWrite =
+    /\bsupabase\s*[\s\S]{0,40}?\.from\(\s*['"`]events['"`]\s*\)[\s\S]{0,400}?\.update\(/.test(
+      body,
+    );
+  assert.equal(
+    userClientWrite,
+    false,
+    'the events update must NOT run on the request-scoped client — RLS silently ' +
+      'filters every co-host to zero rows and the caller reports "not a host"',
+  );
+
+  /*
+    And the zero-row branch must not claim a permission problem. With the admin
+    client, zero rows can only mean the id does not exist.
+
+    🪤 THE FIRST CUT OF THIS ASSERTION WAS DECORATIVE AND THE MUTATION RUN PROVED
+    IT: `/data\.length === 0[\s\S]{0,200}?Only a host/`. The sabotage landed
+    (`not_found` 3 → 2) and the suite stayed GREEN, because the explanatory
+    comment I had written BETWEEN the two anchors is longer than the 200-char
+    window, so the pattern could never span them. A guard whose reach is set by
+    a character budget silently shrinks every time somebody documents the code.
+    Sliced by BRACE instead, so the branch is bounded by what it IS.
+  */
+  const branchStart = body.indexOf('if (!data || data.length === 0)');
+  assert.ok(branchStart > -1, 'the zero-row branch should still exist');
+  const branch = body.slice(branchStart, body.indexOf('return { ok: true', branchStart));
+  assert.match(
+    branch,
+    /code: 'not_found'/,
+    'with the admin client, a zero-row result is a missing event, not a refusal',
+  );
+  assert.doesNotMatch(
+    branch,
+    /code: 'unauthorized'|Only a host/,
+    'the zero-row branch must not tell somebody they lack a permission — that ' +
+      'is the exact lie the admin-client fix removed',
+  );
+});
+
+
+/*
+  ─── THE SAME STATEMENT, FOR EVERY REGISTERED SWITCH ────────────────────────
+
+  `gateWritersOf` answers two INDEPENDENT file-level questions joined by `&&`:
+  does this file write that table anywhere, and does it name that column as a
+  field anywhere. NEVER the same statement.
+
+  🔑 TWO CORRECT PREDICATES ANDED AT THE WRONG SCOPE ARE NOT A CORRECT
+  PREDICATE. Each half is carefully written and separately right; the join is
+  what makes them blind. Measured on main: deleting the only real write of
+  `events.archived` left this whole suite 10/10 GREEN, and the detector reported
+  THREE writers for it where exactly one exists — `chat-actions.ts` has a local
+  variable of that name writing a DIFFERENT table, and `events.ts` has it as a
+  type field and in a select list.
+
+  ⚠ AND THE LOOSE FORM STAYS LOOSE — that is deliberate, not laziness. It is
+  cast over 264 schema columns, where a false "no writer" teaches somebody to
+  baseline working code. It genuinely cannot see `...parsed.patch` or
+  `.insert(rows)` from a `.map()`, and both are real writers in this repo.
+  Tightening it was tried and measured: 14 columns newly reported no writer and
+  the two checked by hand were fine. PR #4535 reached this conclusion first.
+
+  So the strict question is asked HERE, of the registered switches only, where
+  the writer is named and a false alarm costs one file read.
+
+  ⛔ A switch reachable only through an RPC parameter or a helper module has no
+  single chain to find; those are skipped BY NAME, and the skip is asserted
+  non-empty so this cannot quietly become a loop over nothing.
+*/
+const NO_SINGLE_CHAIN: Record<string, string> = {
+  author_named_publicly:
+    'written as an RPC parameter (p_name_me) — a guest has no auth.uid(), so ' +
+    'every guest-side write goes through a SECURITY DEFINER function. Covered ' +
+    'by rpcWritersOf, which requires BOTH a caller and a SQL assignment.',
+};
+
+test('every registered switch has a writer that names it in ONE chain', () => {
+  const checked: string[] = [];
+  const missing: string[] = [];
+
+  for (const sw of SWITCHES) {
+    if (NO_SINGLE_CHAIN[sw.column]) continue;
+    checked.push(`${sw.table}.${sw.column}`);
+    const found = SOURCES.some((src) =>
+      writesColumnInOneChain(src.code, sw.table, sw.column),
+    );
+    if (!found) missing.push(`${sw.table}.${sw.column} — ${sw.whatBreaksWhenStuck}`);
+  }
+
+  // A loop that skips everything passes. Count what was examined.
+  assert.ok(
+    checked.length >= SWITCHES.length - Object.keys(NO_SINGLE_CHAIN).length,
+    `only ${checked.length} switches examined — the skip list has grown silently`,
+  );
+  assert.ok(checked.length > 0, 'no switch was examined at all');
+
+  assert.deepEqual(
+    missing,
+    [],
+    'Nothing writes these columns in a single `.from(table).update({ … column … })` ' +
+      'chain. The shared detector cannot see this, because it accepts a table ' +
+      'write and a column mention from unrelated statements in the same file:\n  ' +
+      missing.join('\n  '),
+  );
+});

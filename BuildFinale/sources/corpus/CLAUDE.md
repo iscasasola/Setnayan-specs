@@ -1,0 +1,2956 @@
+# CLAUDE.md — Setnayan Engineering Context
+
+> Project context for Claude Code working on the Setnayan platform. Keep this file under 200 lines — it's loaded into every Claude Code session as context, so brevity matters.
+
+## 🗣 HOW TO TALK TO THE OWNER — owner-locked 2026-08-02
+
+**Owner, verbatim:** *"the last part of your reviews are questions and
+recommendations of what to do next and always in simple english and simplest
+answers needed."*
+
+⚠ **AMENDED 2026-08-04 — the closing block is RETIRED.** Owner: *"can you keep
+going instead of telling me what you recommend doing next. can you do it. and
+decide"*. **Decide and act.** Ask only when proceeding either way would be unsafe
+or would waste real work. The plain-English rule below still stands in full.
+
+~~**Every substantive reply ENDS with a short closing block:**~~
+
+1. **What I recommend doing next** — one line. A call already made, not a menu.
+2. **Anything I need from the owner** — only when genuinely blocked. One question,
+   not two.
+
+Nothing after it. No summary, no caveats, no "let me know if…".
+
+**And the whole reply is in simple English, not just that block.** The owner
+steers product, pricing, scope and risk — they are *not reading the code*.
+
+- Say what a PERSON EXPERIENCES, not what the code does.
+  ✅ *"Your cousin scans the poster, shoots 20 photos, they reach you — but she
+  can't get photos of herself."*
+  ❌ *"The self-link is keyed on `guest_id`, so a seat-holder without a session
+  cookie can't reach the pool gallery."*
+- **No file paths, function names, table names, SQL or flag names** in the
+  answer. They belong in the PR body, not in the reply.
+- Shortest version that is still true.
+
+⚠ The owner said **"english"** three times in one session (2026-08-01/02), each
+time after a reply that was correct and unreadable. Every one cost a round-trip.
+**A correct answer the owner cannot act on is worth the same as a wrong one.**
+The failure is always the same shape: explaining the plumbing instead of the
+point, because the plumbing is where the last hour went.
+
+Make routine calls yourself and say so — pre-launch, reversible work needs no
+sign-off. Escalate only real owner territory: locked prices/SKUs, scope, risk
+trade-offs, or reversing an owner lock.
+
+## 🔑 TRIGGER — the owner types **"what's next"**
+
+When the owner says **"what's next"** (or *whats next* / *what next*), that is a standing
+instruction to **pick up all unfinished work**:
+
+1. 🧭 **Open [`START_HERE_WHATS_NEXT_2026-08-29.md`](START_HERE_WHATS_NEXT_2026-08-29.md) FIRST.**
+   It names **the one open stream** in its first screen, triages the six blocks that claim to be
+   ACTIVE (five are finished or are standing rules), and inlines the verification rules, the house
+   rules and the reply shape — written to work on an account with **no memory files**.
+2. Then the contract it points you at. (The older master register,
+   [`WHATS_NEXT_INDEX.md`](WHATS_NEXT_INDEX.md), is still there for history and for streams the
+   front door does not cover — read it when you need the background, not to decide what to do.)
+3. Obey the register's global safety rules: build up to a gate, stop at it, list it. Never
+   auto-flip a prod flag, never `db push` a counsel-gated migration, never make an
+   `OWNER_DECISION` yourself.
+
+⚠️ **THIS MAY BE A DIFFERENT MACHINE OR CLAUDE ACCOUNT.** Assume **no memory files exist** —
+`~/.claude/.../memory/` does NOT travel. Everything you need is committed in THIS repo
+(specs/corpus, remote `Setnayan-specs.git`) and in the code repo
+(`github.com/iscasasola/setnayan-platform`). If a doc references a memory note by `[[name]]`,
+treat it as a hint about a topic, not as a file you can open — the substance was copied into the
+committed docs on purpose.
+
+## 🚦 ACTIVE WORK — READ THIS BEFORE ANYTHING ELSE (updated 2026-08-01)
+
+> 🆕 **2026-09-10 — THE LIVE TWO-SIDED TEST IS THE CURRENT ACTIVE STREAM.** Register: [`WHATS_NEXT_Build_Plan_2026-09-10.md`](WHATS_NEXT_Build_Plan_2026-09-10.md), session prompts in [`WHATS_NEXT_Build_Plan_PROMPTS_2026-09-10.md`](WHATS_NEXT_Build_Plan_PROMPTS_2026-09-10.md). Read its own top-of-file CORRECTION block before touching anything about a stock photo — it is an OPEN owner question, not settled.
+
+> # 🧭 COLD START? READ **[`START_HERE_WHATS_NEXT_2026-08-29.md`](START_HERE_WHATS_NEXT_2026-08-29.md)** FIRST.
+> **SIX blocks below are headed `▶ ACTIVE`. Only ONE is open work** — Papic **item 3 ONLY**
+> (⚠ **CORRECTED 2026-09-09: items 4 · 5 · 6 · 7 ARE BUILT AND MERGED** — every PR verified with
+> `gh pr view`. ⚠ **CORRECTED AGAIN 2026-09-10: item 3's CORE is BUILT and LIVE** — prod's `papic_record_guest_capture` enforces `papic_guest_spend_ceiling` (named · equal share · release); the 09-09 "unbuilt" search looked for `allot`/`sponsor` and the code says `ceiling`. ~~Only *sponsors default to a bigger share* is left.~~ ✅ **That too is built — PR #5418, 2026-09-11. Item 3 is DONE.**)
+> The other
+> five are finished streams or standing rules that never had the label struck: the supplier's room
+> (its Answers Desk shipped as PR #4917), the Papic media library (nine PRs shipped), and three
+> that were never work streams at all but LESSONS — *a rejected query is not a thrown error*
+> (6 PRs merged), *Papic timing* (three locked numbers), and *TIME* (shipped in #4095 · #4098 ·
+> #4101 · #4105).
+> 🔑 **Six competing ACTIVE labels is exactly how a fresh session rebuilds something that already
+> ships — the owner's stated number-one complaint. If you finish a stream, strike its label in the
+> same commit.**
+
+> ### ▶ ACTIVE 2026-08-29 — PAPIC: THE BUILD ORDER. **REGISTER:**
+> **[`WHATS_NEXT_Papic_Build_Order_2026-08-29.md`](WHATS_NEXT_Papic_Build_Order_2026-08-29.md)** —
+> seven items, ordered, **nothing on it awaiting an owner decision.** Prompts for items 1–2:
+> [`WHATS_NEXT_Papic_Items_1_2_PROMPTS_2026-08-29.md`](WHATS_NEXT_Papic_Items_1_2_PROMPTS_2026-08-29.md).
+> 🆕 **ITEM 3 (only — 4·5·6·7 are DONE, corrected 2026-09-09) RUNS ON A DIFFERENT CLAUDE ACCOUNT. Its handoff is SELF-CONTAINED and assumes
+> `~/.claude/.../memory/` DOES NOT EXIST (476 notes do not travel):
+> [`WHATS_NEXT_Papic_Items_3_7_HANDOFF_2026-08-29.md`](WHATS_NEXT_Papic_Items_3_7_HANDOFF_2026-08-29.md).**
+> 🔑 **PAPIC DOES NOT HAVE A FEATURE PROBLEM — items 2–6 are WIRING AND SENTENCES.** Five times in
+> one week something the market calls *"nobody has this"* was already built here and merely
+> unconnected or unsaid: the ninong/ninang + cord/veil/coin/candle roles, the ceremony sequence
+> through to the money dance, offline capture, screening-before-display, and **the live wall being
+> FREE on every event**.
+> ✅ **ITEM 1 IS BUILT — PR [#5002](https://github.com/iscasasola/setnayan-platform/pull/5002).
+> Do NOT rebuild it.** ⚠ Verify with `gh pr view 5002 --json state,mergedAt` before trusting this
+> line. **No migration.** The camera counted down from a hardcoded **150** and **hid its own
+> shutter**, while the database applied **no per-guest limit at all**
+> (`v_unlimited := v_unlimited OR COALESCE(v_pool_applies, FALSE)` in `20270920602517`, mirrored in
+> `fetchGuestQuota` on the Unlock half ONLY). The route does **not** pre-check `remaining`, so
+> **the browser was the sole enforcer of a rule nobody chose.**
+> The rule now lives ONCE — `lib/papic-guest-cap.ts`, **one entry per write to `v_unlimited`** — and
+> the guard DERIVES the count from the migration (both `v_unlimited :=` **and**
+> `SELECT … INTO v_unlimited`), so a third condition added in SQL fails until the TypeScript learns
+> it. A personal countdown is drawn only where one is real; **"Unlimited" is retired, because a pot
+> is finite.**
+> 🔑 **AND THE POOL REFUSAL GOT ITS OWN SENTENCE.** `res.status === 409 || json.status ===
+> 'quota_exhausted'` collapsed POOL-EMPTY into the per-guest congratulation in **both** handlers —
+> a guest three photos in was congratulated for a shot that was thrown away while the buy panel
+> opened to sell shots that also could not be taken.
+> 🪤 **A SABOTAGE THAT APPENDS CANNOT BE MEASURED BY ITS OWN NEEDLE COUNT** — the third-SQL-write
+> mutation read **1 → 1** and proved nothing until it was re-measured on the string it actually adds
+> (**1 → 2**). *An occurrence count only measures a sabotage that REPLACES.*
+> 🪤 **`TSC_EXIT=144` WITH AN EMPTY LOG IS TWO CONCURRENT TYPECHECKS**, and a killed one reports
+> **143** while the harness announces the wrapper's exit as **0**. Both were hit in one session.
+> ⚠ It had been **built, proved and lost** once — the worktree was in `/tmp`, **zero commits ever
+> made**. 🔑 **BUILD BESIDE THE REPO, COMMIT BEFORE THE FIRST MUTATION.**
+> ⛔ **The three shots-per-guest decisions are RULED (2026-08-28) — do not re-ask:** the release
+> (a button **plus** an automatic one late in the night, which never opens a NAMED guest's
+> allotment) · the buyer's choice (**both** — keep them, or give them to the room) · a named
+> guest's shots stay hers.
+> ⛔ **DO NOT START MESSENGER.** Web push is **built, mounted, wired to 108 emit sites and has
+> never had a single subscriber.** Ask for it at the QR scan first — that is the best permission
+> moment this product will ever get, and we never ask.
+> ⛔ **DO NOT claim on any page:** a latency figure (nothing measures one) · per-guest limits
+> (unbuilt; and Lense has them — ours is limits **paired with a live wall**) · the year — one pot across several celebrations (⚠ chapters WITHIN one celebration SHIP and may be claimed — corrected 2026-08-29)
+> (unbuilt) · *"the live service closes after six months"* (**nothing closes** — six months is the
+> SHOOTING window). Full list: `PAPIC_PAGE_BRIEF_FOR_CHAT_2026-08-29.md` § 3.
+> ⚖ **The coordinator partner offer is OWNER territory** — and it is how the strongest local rival
+> actually wins.
+
+> ### ▶ ACTIVE 2026-08-27 — THE SUPPLIER'S ROOM IS BUILDING. **SESSION REGISTER:**
+> **[`WHATS_NEXT_Suppliers_Room_SESSIONS_2026-08-27.md`](WHATS_NEXT_Suppliers_Room_SESSIONS_2026-08-27.md)**
+> — six sessions with their model and effort, the safe pairs, and the two pairs that must never run
+> together. Owner lifted the plan-only hold: **_"start the other half"_**.
+> 🛑 **AND HE CORRECTED THE SHAPE TWICE BEFORE A LINE WAS WRITTEN — THERE IS NO NEW PAGE.**
+> *"we are redesigning not placing a new page"* · *"on the day. is the integration of the vendors to
+> the event's event hub. so we would still want to to be an event hub."* The plan had turned his own
+> 2026-08-16 wording (*"the same on the day for vendors PLUS their special features"*) into a second
+> product at a sub-route. **Piece 7 is a redesign of `app/[slug]/_components/vendor-doorway.tsx`,
+> which SHIPS** — its own docblock (*"A DOOR, NOT A ROOM"*, *"carries NOTHING about the event"*) is
+> the specification of exactly what changes.
+> ✅ **OWNER ANSWERED the § 7 gate: the private run-of-show notes DO show in the hub** — same notes,
+> new place. He turned down *schedule only* and *only during the event window*. **Do not re-ask.**
+> ⚠ **S0's ✅ WAS WRONG — it is NOT on `main`** (no file, no PR, no branch; measured 2026-08-27).
+> Its claim, kept in case it lands: a booked supplier waiting on a downpayment is no longer told
+> *"No event today"*, and its guard found a SECOND rendered copy of that same false sentence.
+> ✅ **S1 · S2 · S3 · S4 · S5 ARE ALL BUILT — do NOT rebuild any of them. ONLY S6 (the Answers
+> Desk) IS LEFT.** S1 PR
+> [#4912](https://github.com/iscasasola/setnayan-platform/pull/4912) (merged) — one honest answer to
+> *"is this shop booked?"*, three arms, because the Agree RPC and the Locked-QR claim both book
+> **without** touching the schedule pool every day-of screen was reading. S4 PR
+> [#4913](https://github.com/iscasasola/setnayan-platform/pull/4913) (merged + SERVED) — a Locked-QR
+> booking finally reserves its date. S2 PR
+> [#4914](https://github.com/iscasasola/setnayan-platform/pull/4914) (merged + SERVED, `df63d11`) —
+> **a booked supplier gets
+> through the door on a private celebration**: the page and the shared gate had drifted, so a
+> supplier who could open the couple's private page was bounced off all seven sub-pages of it, and
+> **every one of those refusals is byte-identical to a stranger's, so a gate wrong in that direction
+> is silent by design.**
+> 🚨 **S2 also closed a LIVE disclosure nobody had asked for:** *"is this viewer a booked supplier?"*
+> had **three** copies and **two asked only whether a LINK existed** — so a supplier the couple was
+> merely SHORTLISTED was told *"You are booked here"* and counted as one of "the people of this
+> celebration", which is the whole gate on a keepsake story kept to those people. *A rule written
+> three times had two copies laxer, and the lax ones were the two deciding a disclosure.*
+> 🚪 **S3 PR [#4919](https://github.com/iscasasola/setnayan-platform/pull/4919) (auto-merge armed) —
+> THE SUPPLIER'S DESK OPENS INSIDE THE EVENT HUB, IN PLACE, ON THE DAY.** No new page and no new
+> route, exactly as the owner corrected it twice: on the day the strip a booked supplier already
+> sees stops being a link out and carries the venue and its address, the running order live, **the
+> organiser's private lines shown and MARKED** (his own ruling the same day), the headcount and
+> their tools — through to **06:00 the morning after**, because a reception runs past midnight.
+> Nobody else ever sees a trace.
+> ⏳ **AND `hub2` GAVE IT THE OTHER 335 DAYS — PR
+> [#4932](https://github.com/iscasasola/setnayan-platform/pull/4932), **MERGED 2026-08-27T19:32Z AND
+> SERVED** — merge `b9f8f3c`, verified an ancestor of `origin/main` AND of the commit production's
+> `/api/health` self-reports. DO NOT REBUILD ANY OF IT.**
+> S3's room lived about **thirty hours** and the binding design's strongest sentence is against
+> exactly that (*"a day-only room recreates the midnight-door mistake"*). Four states now: the
+> **call sheet** before (date · *"43 days to go"* · the venue once set · the running order once
+> written · the headcount marked *not settled* · the console's own setup view · the conversation
+> they already have), **today** byte-for-byte as it shipped, **look back** for the week after, and
+> **one quiet line** long after — a supplier's past work is their portfolio.
+> 🔑 **NOTHING ABOUT THE READ WIDENED, and the reason generalises: the database was ALWAYS willing
+> to tell a booked supplier these facts.** Neither `get_vendor_event_brief` nor
+> `event_schedule_blocks_booked_vendor_read` has a date gate (read out of prod by the object).
+> **Only the surface was shut** — so "the data is not available yet" was never why, and nobody had
+> checked.
+> 🎬 **AND THE CALL SHEET WOULD HAVE BEEN INVISIBLE FOR ~9 MONTHS OF EVERY BOOKING.** More than 90
+> days out the page IS the Save-the-Date film (`fixed inset-0 z-[50]`, veil z-[60]) and the
+> supplier's strip renders in flow **underneath both**. A slim ribbon now sits above it, and both
+> halves were PORTED: the chrome is the host's own `owner-ribbon.tsx` (whose docblock had already
+> worked out that `sticky top-0 z-[90]` clears that stack) and the way out is the film's own
+> `STD_FILM_EXIT_EVENT`, which the veil also listens for — so *"Watch our film"* still brings back
+> a **paid** product.
+> 🚨 **`lint-port-no-lost-controls` CAUGHT MY OWN FIRST COMMIT AND WAS RIGHT TO:** one computed
+> `href` made the whole route read as having LOST the console, and the tempting fix — regenerating
+> the baseline — would have **recorded a removal that never happened**.
+> 🪤 **AND THREE OF EIGHTEEN MUTATIONS FIRST READ AS DECORATIVE GUARDS AND WERE MEASUREMENT
+> ERRORS**, one of them a sabotage that hit a **docblock's** `z-[90]` rather than the className's.
+> *An occurrence count proves a sabotage landed somewhere, not that it landed where you aimed.*
+> 🌉 **AND THE SAME-DAY BRIDGE IS BUILT TOO, IN THE SAME PR** (it was #4935, which auto-merged into
+> the hub2 BRANCH rather than main — the repo arms auto-merge on every PR and a topic branch has no
+> required checks, so **#4932 carries all three pieces**; the merged tip was checked file by file
+> and nothing was lost). On the day and no other day, the desk names the shop's OTHER celebrations
+> running today. 🔒 **A `SECURITY DEFINER` function, never a query in the page** — and the tempting
+> reuse, `fetchVendorRoomEvents`, **opens `createAdminClient()` internally.** ⛔ **It deliberately
+> does NOT union `vendor_team_members`, which `get_vendor_event_brief` does:** *"an agent granted
+> only the christening never learns the reception exists."* A db test asserts the teammate gets
+> nothing AND that the owner still gets their second booking.
+> 🪤 **AND `gates-have-handles` READ `o.is_sample = FALSE` IN A WHERE CLAUSE AS A WRITER** — its
+> scan is `\mcol\M\s*=[^=]` over every function body, which a comparison matches as well as an
+> assignment. Write `NOT col` on a NOT NULL column; the trap is recorded in that migration.
+> ✅ **THE MIGRATION IS VERIFIED APPLIED IN PROD BY THE OBJECT** (not by `schema_migrations`, not by
+> a migration comment): the live `get_vendor_same_day_bookings(p_event_id uuid, p_day date)` is
+> `SECURITY DEFINER`, its body contains **no** `vendor_team_members` — the load-bearing claim — it
+> carries the multi-day `COALESCE(event_end_date, event_date) >= p_day` span and the `NOT
+> o.is_sample` form, and EXECUTE is held by `authenticated` · `service_role` · `postgres` and
+> **not `anon`, not PUBLIC**.
+> ⏭ **STILL NOT BUILT, named:** the weak-signal venue (§ H) — the design calls it its own project.
+> **Everything else in `Vendor_Room_Design_2026-08-26.md` now ships.**
+> 🔒 **THE RULE THAT DECIDED IT, worth more than the feature:** *authorization may be answered with
+> the service role scoped by a session-proved id; **event content never is**.* `/{slug}` renders
+> with an admin client that sits in scope on the very line the desk is resolved — one import and
+> every rule keeping a supplier out of the guest list and the private cues stops applying, with
+> nothing looking wrong.
+> 🚨 **AND THE OBVIOUS READ WAS THE LEAKY ONE:** the brief's own `timeline` is one fewer round trip
+> and carries the **coordinator-only** lines the supplier's read policy excludes — that function is
+> `SECURITY DEFINER` and its select has no visibility filter at all. Read out of prod, not from a
+> migration.
+> 🔴 **AND IT FOUND THE REAL CULPRIT BEHIND THE TWO-COLUMN TRAP — after I first reported it wrong
+> and withdrew that the same day.** Three parts of the app answer *"is this shop booked here?"* off
+> **two different columns**. ⚠ I said the one production row apart was a real booking losing its
+> doorway; it is a **seeded `SONGDESK TEST` fixture** — nobody is affected. ✅ What IS true, read out
+> of prod by the function body: every real booking path stamps both columns **except
+> `vendor_claim_locked_qr` — the path where MONEY HAS ALREADY MOVED — which never mentions
+> `linked_vendor_profile_id` at all.** Same defect #4488 fixed in its twin, surviving in the clone;
+> inert today (zero locked-QR tokens ever) and **needing no owner decision**.
+> ✅ **THE granted TEAMMATE ARM IS RULED, BUILT AND MERGED 2026-08-28 — PR
+> [#4933](https://github.com/iscasasola/setnayan-platform/pull/4933). Do NOT rebuild it, and do NOT
+> re-ask the decision.** Owner: *"the staff who handles the event will handle the event fully but the
+> vendor owner also has access to oversight all their business"* + *"the ones they were given"* ⇒
+> **runs the shop** (owner or top team role) reaches **every** booking of that shop · **a live
+> per-event grant** reaches **that one** celebration · **`agent`/`viewer` with no grant is refused**.
+> ⛔ **The careful separation — staff work the day WITHOUT becoming one of its people — WAS OFFERED
+> AND DECLINED. Re-proposing it is re-asking a settled decision.**
+> 🔴 **AND RULE 0 PAID IN THE OPPOSITE DIRECTION TO THE ONE EXPECTED.** `loadVendorBooking` resolved
+> the caller's shops with ONE query — `vendor_profiles.user_id = <viewer>`, the registered owner and
+> nobody else — under a comment claiming *"owns **or administers**"*. Meanwhile the shop's own day-of
+> console and `get_vendor_event_brief` (read out of prod BY THE OBJECT: *profile owner UNION
+> `vendor_team_members`*) had admitted **every teammate, at any role, with no grant**, all along.
+> **The celebration page held the STRICTEST copy of a rule the rest of the app had long since
+> widened** — the mirror image of the two-lax-copies defect logged one paragraph up, and the reason
+> the "widening" is smaller than it reads. ⚠ Those two are **still wider than the desk**; named in
+> the PR, deliberately NOT narrowed (narrowing a live read is its own change and its own question).
+> 🗣 **THE WIDENING IS SAID OUT LOUD WHERE THE HOST DECIDES**, because it moves who reads something
+> private: the audience note under *"The people of this celebration"* ended *"and the suppliers who
+> worked it"* and now names **the shops you booked and the staff those shops send** — changed in
+> **BOTH** places that choice is offered and guarded against each other.
+> 🔢 **Safe by arithmetic at the merge, read out of prod:** 2 shops · **0 teammates who are not the
+> shop's own owner** · **0 grants EVER** · 45 `event_vendors` rows carrying **0
+> `linked_vendor_profile_id`** ⇒ nobody gains anything today. *One row you did not open is not a
+> finding.*
+> 🔴 **A LATENT ONE FIXED ON THE WAY: `events.event_end_date` and `cleared_at` were being READ
+> BEFORE THEY WERE SELECTED**, so the multi-day arm of the day-of lifecycle **has never once run**.
+> 🔑 *A cast is not a read.*
+> ⚠ **Verify every PR state above with `gh pr view <n> --json state,mergedAt`** — this file has been
+> wrong about a PR's state five times.
+> ⚖ **OWNER RULED ON SIX SUPPLIER QUESTIONS 2026-08-27 — do NOT re-ask any of them.**
+> · **_"no paid booking fee, no connect."_** and **_"yes this is free to use for as long as they pay
+>   the booking fee."_** ⇒ **the entitlement to be connected at all, and to every day-of tool free,
+>   is the SHOP'S BOOKING FEE TO US** — not the couple's deposit, not a subscription tier. That
+>   supersedes the old "are the day-of kits free during launch" item and re-answers "what is an
+>   unpaid supplier entitled to see" on a different axis.
+>   ✅ **RESOLVED 2026-08-27 AND IT WAS MOOT — _"as of today no one has booked because we are still
+>   building. but we will test it after all these builds are done and try if the booking fee process
+>   works."_** ⚠ **MY OWN "13 BOOKED SUPPLIERS" WAS A MISLEADING COUNT AND I USED IT THREE TIMES
+>   BEFORE HE CORRECTED IT.** Measured: of the 13 committed rows, **12 carry no shop account at all**
+>   (a name a couple typed into their own list) and **the 13th is the seeded `SONGDESK TEST`
+>   fixture** ⇒ **ZERO real shop bookings exist in production.** 🔑 *That column counts a LIST, not a
+>   MARKETPLACE* — reading it as "13 shops we would disconnect" turned a moot question into an owner
+>   decision and cost him a round trip. ⇒ **The gate needs no grandfather clause, blocks nobody, and
+>   ships with the booking-fee TEST ROUND — not now.** The fee flow has to work end to end first.
+>   ⚠ When it is built, a gate on money must **fail OPEN** on a read error, never closed.
+> · **_"no. their papic service is only for documentation of their products."_** ⇒ **a supplier's
+>   camera documents their OWN WORK, never the guests** — a narrowing of a lane LIVE since
+>   2026-07-16. 🔑 **It is a policy and no filter can enforce it**: a photograph of a cake or a
+>   dressed room has guests in it. Say it on the capture screen and to the couple, keep those frames
+>   out of guest face-matching — never promise a guest they will not appear.
+> · **_"the staff who handles the event will handle the event fully but the vendor owner also has
+>   access to oversight all their business."_** ⇒ **the granted teammate gets the same desk on that
+>   celebration; the owner gets it on all their bookings.** 🔒 That gate also feeds "one of the
+>   people of this celebration", which unlocks a keepsake story kept private — *"fully"* answers
+>   that yes, and it ships with the fact named, never as a silent widening.
+> · **_"no."_** ⇒ **a couple may NOT switch a supplier's desk off.** Struck, not deferred.
+> ✅ **ANSWERED 2026-08-27 — _"email. yes"_. THE NIGHT-BEFORE SUPPLIER EMAIL IS APPROVED; the S5
+> gate is CLOSED. Do not re-ask it.** ⚖ The answer is narrower than the question and the code was
+> already built that way: it uses the address on the **shop's OWN account**, the one they gave US at
+> signup — never the name a couple typed on their behalf. 🔢 **Safe by arithmetic at the flip: ZERO
+> bookings would receive it today**, so switching it on sends nothing to nobody and starts working on
+> the first real booking. 🔍 **Audited before the switch** (an email cannot be taken back): it is
+> mounted in the real traffic-driven daily runner, **not** the scheduled-launch branch that fires on
+> approximately no page loads; the idempotency claim is **insert-first, before the send**; and the
+> call time prints the venue's own wall-clock digits, so the 2 PM-emailed-as-10 PM trap is handled.
+> 🔑 **And the Locked-QR link fix (#4922) was load-bearing for it without either session knowing** —
+> this job filters on the same column, so a supplier booked by Locked QR would have been silently
+> skipped by the email too. ⏭ **THE FLIP IS THE OWNER'S:** set
+> `SUPPLIER_NIGHT_BEFORE_EMAIL_ENABLED=true` in Vercel, then redeploy. **Never auto-flip a
+> production flag.**
+>
+> ### ▶ SUPERSEDED 2026-08-26 — THE SUPPLIER'S ROOM IN THE EVENT HUB (PLANNED, NOT BUILT)
+> **Contract: [`WHATS_NEXT_Vendor_Hub_And_Answers_2026-08-26.md`](WHATS_NEXT_Vendor_Hub_And_Answers_2026-08-26.md)**
+> — **rewritten 2026-08-26 as ONE plan**, nine pieces, every correction folded into the piece it
+> affects, and it **opens with a one-page version** (the owner: *"we just want it to be easier to
+> understood and not overwhelming"*). **Drawn:**
+> [`prototypes/vendor_room_in_the_hub_2026-08-26.html`](prototypes/vendor_room_in_the_hub_2026-08-26.html)
+> · **design BINDING, port it:** [`Vendor_Room_Design_2026-08-26.md`](Vendor_Room_Design_2026-08-26.md).
+> Owner: *"event hub is the same on the day for vendors plus their special features. since
+> everything will be communicated there."* Then: **_"do not start building… just plan for now."_**
+> ⛔ **HONOUR THAT.** ⚖ Also ruled: **a teammate reaches ONLY the events they were given.**
+>
+> ✅ **PIECE 4 IS DONE — PR [#4890](https://github.com/iscasasola/setnayan-platform/pull/4890),
+> MERGED 2026-08-27T01:51Z (verified by `gh pr view`). Do NOT rebuild it.** Both halves shipped in
+> the one commit the paragraph below demanded: the host read now filters on the shared
+> `HOST_MEMBER_TYPES`, and the shared gate grew the seat-holder arm the narrowing would otherwise
+> have broken. ⚖ **Owner 2026-08-27 confirmed the model on the record:** *"they log in as guests or
+> vendors. the only hosts are the event owners which is their own email address."* **The diagnosis
+> is kept below because the LESSON generalises — a clone inherits the bug its twin fixed.**
+>
+> 🔴 **WHAT IT WAS.** `lib/slug-access.ts:170-195` selected `member_type` and **never compared it**, returning
+> `Boolean(memberRow)` — so **any signed-in event member, including a guest who merely scanned the
+> event QR, is treated as a HOST.** They walk into every private sub-page, and
+> `who-can-see-your-story.ts:110-113` returns true for a host **before** it tests the audience, so
+> **they can read the couple's unfinished keepsake story months before it is published.**
+> 🔑 **This is the exact bug its twin `app/[slug]/_lib/host-scope.ts` was written to kill — the twin
+> was fixed and pinned; this clone never inherited it.** *A clone inherits the bug its twin fixed,
+> third instance.* ⚠ **Narrowing it ALONE breaks people:** the shared gate has **no seat-holder arm
+> for `private`**, which the over-wide host check was masking — a seat-holder whose 60-day cookie
+> expired would start being bounced off all seven sub-pages. **Both halves ship in one commit.**
+>
+> ✅ **AND "THE COUPLE" ON PUBLIC PAGES IS DONE — PR
+> [#4891](https://github.com/iscasasola/setnayan-platform/pull/4891), MERGED 2026-08-27T02:02Z.
+> Do NOT rebuild it.** All twelve read the event's own terminology; a wedding is byte-identical and
+> a funeral's noun is `family`. The basename-matching guard is exact now, with zero new offenders.
+>
+> ⚖ **AND THE OWNER THEN RULED SOMETHING LARGER THE SAME DAY — a HOST and a CELEBRANT are two
+> different people.** *"each event can be set to a single host or multiple host … there can be
+> multiple hosts for every event, but the one celebratiing is the celebrant that can be single,
+> couple, or multiple people."* One noun was doing both jobs; there are two now, plus a per-event
+> celebrant shape, and the seven admin sentences that used to DROP the person name the host
+> instead. 🔑 **This SUPERSEDES the 2026-08-18 "keep one noun, drop the person" compromise — it does
+> not reverse it.** Hosts get **no column**: how many an event has is already stored, as who holds a
+> host's key to it. See `DECISION_LOG.md` 2026-08-27 and PR
+> [#4896](https://github.com/iscasasola/setnayan-platform/pull/4896).
+>
+> 🔴 **WHAT IT WAS** — twelve rendered strings in four files,
+> counted not estimated, incl. **nine in the join door and two of them in the SIGNED-OUT arm** a
+> QR-scanning guest actually lands in. **A funeral's gift page says *"help the family"* in one line
+> and *"the couple's account"* three lines below.** 🔒 **The funeral noun is `family`, never `host`.**
+> 🪤 **And the guard that should catch it matches its exemption list by BARE BASENAME**, so
+> `'page.tsx'` alone exempts 11 files: **36 of 127 files — 28% of that tree — are exempt, and a room
+> shipping a `page.tsx` would be born unguarded.** Making it exact produces **zero new offenders**.
+>
+> ✅ **SHIPPED, do NOT rebuild:** the shop-dashboard re-sort, PR
+> [#4863](https://github.com/iscasasola/setnayan-platform/pull/4863), **MERGED 2026-08-25T21:22Z**
+> (verified by `gh pr view`): Overview → **Today** · Customers ahead of Shop · Contracts + Proposals
+> into Customers · **services opens first** · 14 tools on three shelves · "(BEO)" out of the menu.
+>
+> 🔒 **THE RULE FOR THE ROOM, the most important line in the plan:** `/{slug}` reads with the
+> **service role**, so every RLS rule keeping a supplier out of the guest list and the private
+> schedule is **INERT there**. *Authorization* reads may use the service role scoped by an id
+> resolved from the session; **event content NEVER does.** ⚠ And the booked-supplier schedule policy
+> has **no public/private filter**, so the room would render private cues at a public address —
+> no-index, redirect, and a test that fetches it anonymously.
+> ⛔ **A bare team-membership union looks equivalent, is shorter, and silently retires per-event
+> grants — which the owner has now ruled against. Do not write one.**
+>
+> ✅ **THE ANSWERS DESK IS BUILT, MERGED AND SERVED — PR [#4917](https://github.com/iscasasola/setnayan-platform/pull/4917),
+> merged 2026-08-27T14:21Z; production's `/api/health` self-reports the merge commit `df74779`. Do
+> NOT rebuild it.** ⚠ Verify with `gh pr view 4917 --json state,mergedAt` before trusting this line.
+> 🔑 **RULE 0 paid again: it was never a new page** — the desk IS the "What's new" feed already
+> shipping on `/vendor-dashboard`. **A ONE-STAR review could not reach it** (the filter was
+> five-stars) **and the desk could not TAKE the answer either** — it named an unanswered review and
+> linked away. Every unanswered review joins now, at any rating, with the reply box on the row.
+> 🪤 **AND A LAPSED BOOKING ASK SAID "LAST DAY TO ANSWER" FOREVER:** expiry is **lazy** — flipped
+> only on the answer path, there is no sweeper — so a dead ask keeps `pending`, looks live to every
+> query, and answers `expired` when pressed. It is a grey closed line now, in the same place, with
+> no control at all. **A row that vanishes reads as one you answered.**
+> 🚨 **`--sn-warn` IS NOT A TOKEN AND NEVER WAS** — that card's amber accent bar drew nothing and
+> its eyebrow inherited the body ink. Rejected, not thrown; found by deriving the guard's token list
+> from the file instead of checking the one colour being edited. Same family as `--font-serif`.
+> ⛔ **Three answers still do NOT join, recorded once as data** (`ANSWERS_THAT_DO_NOT_JOIN`, read by
+> the guard): the waitlist pick **does nothing and reports success** · a crew shift **cannot be
+> posted, seen or accepted by a non-admin** · **nobody can ask for a song**.
+> 📋 **ALL THREE ARE NOW PLANNED, NOT BUILT — contract:
+> [`WHATS_NEXT_The_Three_Dead_Answers_2026-08-27.md`](WHATS_NEXT_The_Three_Dead_Answers_2026-08-27.md).**
+> Measured against prod by the object, and **it corrected the brief it was written from three
+> times.** ⚠ **NOTHING BLOCKS ANY OF THE THREE — no owner decision, all three empty in prod.**
+> 🚨 **THE FINDING WORTH MORE THAN THE PLAN: the crew shift is not four missing policies, it is a
+> SCHEMA DRIFT.** `manpower_gigs.vendor_profile_id` is **`NOT NULL` in production** while the repo's
+> own `CREATE TABLE` declares it **nullable** — a `CREATE TABLE IF NOT EXISTS` that no-op'd against
+> a pre-existing prod table of a different shape (the same drift `20271011120000` already had to
+> repair for `posted_by_user_id` on this very table; **both migrations are applied and prod still
+> disagrees with the repo on two columns**). The app's whole model is *"an open gig has a NULL
+> vendor"*, so **posting dies on a NOT-NULL violation even with a perfect INSERT policy.**
+> 🔴 **AND THE CONSEQUENCE IS BIGGER THAN THE FEATURE: the PGlite replay builds from the REPO file,
+> so it has the nullable column. A db test for this door would PASS IN THE REPLAY AND PROVE NOTHING
+> ABOUT PRODUCTION.** Not permissiveness — **a different table.** ⇒ dry-run in prod inside
+> `BEGIN…ROLLBACK` and put the transcript in the PR body. ✅ **THAT CATALOGUE DIFF IS DONE —
+> [`SCHEMA_DRIFT_AUDIT_2026-08-27.md`](SCHEMA_DRIFT_AUDIT_2026-08-27.md). THE ANSWER IS REASSURING:
+> 4,738 columns across 386 tables, four axes, ELEVEN differences, and `manpower_gigs` is the ONLY
+> live defect.** 5 latent (all one shape — **prod is STRICTER than the replay**, so an insert
+> omitting a column passes every test and is refused in prod) · 5 cosmetic (2 prod-only tables
+> already in `KNOWN_GAPS` · 2 pgvector types that are the replay's OWN documented shim · 3
+> `extensions.`-qualified defaults). **It is not a widespread rot.**
+> 🔑 **RULE 0 PAID FIRST: A DRIFT CHECK ALREADY SHIPS** — `apps/web/tests/db/schema-drift.db.test.ts`,
+> on every PR, no prod credentials, anti-vacuity guarded, plus `.github/workflows/migration-drift-monitor.yml`.
+> **Nothing was rebuilt.** And **its own HONEST LIMITS § 1 already said nullability, defaults, types,
+> constraints and indexes are NOT compared** — so this drift was **invisible by design, and the design
+> said so in writing.** Baseline measured before touching anything: that test is **GREEN (`# tests 6`,
+> exit 0)**, so column existence genuinely agrees and every finding sits in an axis it never checked.
+> 🚨 **THE FINDING NOBODY ASKED FOR: THE COMMITTED PROD SNAPSHOT IS 201 MIGRATIONS STALE** — it
+> records 1,025 migrations · 380 tables · 4,618 columns; prod holds **1,226 · 388 · 4,749**. Not
+> unsafe: **both of its halves come from the same stale moment, so it is self-consistent** — it is
+> simply not checking the last 201. ⇒ run `pnpm --filter @setnayan/web schema:snapshot`.
+> 🔑 **And it is why the audit read the ledger LIVE FROM PROD:** replaying the snapshot's ledger
+> against today's prod would have reported **8 tables and 131 columns as drift, every one a false
+> positive.** *A stale reference is how a clean method produces a confident wrong answer.*
+> 🧪 **PROVED, NOT ARGUED:** the app's exact gig insert was run against prod inside a
+> self-rolling-back transaction and came back **`23502 null value in column "vendor_profile_id"`**,
+> with the table verified at **0 rows afterwards**; a deliberate control (flipping one column's
+> nullability) moved the diff **4 → 5** and named the injected column; and the audit's
+> column-existence result (**0 diffs**) independently reproduces the shipped guard's green by a
+> different method. **Two methods agreeing is why the other axes are believable.**
+> ⛔ **NOT COVERED, stated rather than buried: CHECK / UNIQUE / FK constraints, indexes, triggers,
+> grants, policies, functions, views, and every schema but `public`.** Only base-table COLUMNS were
+> compared — **a CHECK that exists in prod and not in the replay would be invisible to this audit**,
+> and this table family is proven to drift. **That is the obvious next sweep and it was not done.**
+> 🔑 Also corrected: `accepted_at` does **not** have zero readers (the *picked N/cap* count reads it)
+> — what is true is that **no couple-facing reader and no gate reader exists**; and the gig post's
+> refusal is **not** silent (an INSERT denial throws, so the host sees a raw database sentence in a
+> banner). *A survey that finds "zero readers" and stops has not asked whether the readers it found
+> decide anything.*
+> ✅ **THE FOURTH IS BUILT, MERGED AND SERVED — "somebody says they paid you" can be answered NO**
+> (owner 2026-08-27: *"yes. they can declare it."*). PR
+> [#4923](https://github.com/iscasasola/setnayan-platform/pull/4923); production's `/api/health`
+> self-reports the merge commit `97cfe10`. ⚠ Verify with `gh pr view 4923`. 🔑 **AND THAT ROW'S PREMISE WAS FALSE: the refusal was
+> already shipped** (`vendorRejectDeposit` → `reject_vendor_deposit`, ownership-gated,
+> single-winner, reason reaches the couple) and wired to the supplier's customer card — **the DESK
+> had no no.** A 334-line duplicate migration was written and deleted on finding it; the guard now
+> fails if a second way to say no appears. 🧾 The receipt is shown at last — `proofUrl` had been
+> fetched into that card since it was written and **never rendered once.**
+> ✅ **AND THE WIPE IS FIXED — owner ruled the same day: _"yes they keep their record."_** PR
+> [#4927](https://github.com/iscasasola/setnayan-platform/pull/4927), **merged 2026-08-27T17:19Z AND
+> SERVED** (prod `/api/health` → `73cee68`); migration `20271175634994` **verified applied in prod
+> BY THE OBJECT** — the live `reject_vendor_deposit` carries **no** claim-erasure and **no** ledger
+> DELETE, `acknowledge_vendor_deposit` clears the refusal, and the guard covers the refusal while
+> still covering the acknowledgement. The
+> refusal is a MARK now, not a deletion: the couple keeps their amount, receipt, method AND ledger
+> row; their card quotes the supplier's words and offers **Send it again**; re-sending clears the
+> refusal, which is the only thing that puts the question back on the supplier's desk.
+> 🚨 **THE DOWNSTREAM EFFECT THAT WOULD HAVE BITTEN, and it is the reason to grep the readers before
+> keeping a fact alive:** `supplierWasPaid` counts a recorded deposit AND a ledger row as *paid*,
+> and a paid unreleased supplier **blocks the couple deleting their own celebration**. Keeping those
+> two facts would have made a celebration **permanently undeletable behind a supplier who says they
+> were never paid for it.** The refusal now suppresses exactly those two signals and nothing else —
+> byte-equivalent to what the old erasure left behind, asserted in the gate's own suite.
+> 🪤 **AND A COLUMN-LEVEL REVOKE ON `event_vendors` IS INERT** — its grants are TABLE-level, so
+> narrowing the three new columns needs the table-level revoke + a 73-column allowlist (the `events`
+> pattern). **Named as debt, not attempted.** The exposure diff was read and counted instead: three
+> lines, byte-identical in shape to `deposit_acknowledged_at` and `lock_answered_by_user_id`, and
+> **`anon` reaches zero rows of that table** (4 policies, none naming anon or PUBLIC).
+> 🔴 **NINE owner decisions in § 7** — loudest: *may a supplier read the couple's private
+> run-of-show notes at a **public** address?* and *may we email a supplier at an address they never
+> gave us?* ⛔ One was **retired before it reached him** — the photo route's own header already
+> settled whether the room closes at midnight.
+> 🪤 **Traps paid for:** a **generated file's merge conflict has no correct side** (regenerate from
+> the merged tree — this cost a CI run) · `npx tsc` **aborts at 134 while printing `errors=0`** ·
+> under `tsx --test` an `@/lib/…` import can return **empty named exports**, so a guard ran zero
+> checks and **reported a pass** · **another session moved `origin/main` three times in one hour.**
+
+> ### ▶ ACTIVE 2026-08-26 — PAPIC IS THE EVENT'S ONE MEDIA LIBRARY (purpose LOCKED)
+>
+> 🔢 **NINE PRs SHIPPED 2026-08-26 — do NOT rebuild any of it.** #4851 · #4854 · #4864 · #4861 ·
+> #4865 · #4867 · #4868 (all merged) · #4872 (open). ⚠ Verify with
+> `gh pr view <n> --json state,mergedAt` — this file has been wrong about a PR's state five times.
+> Full table + what is left: the contract file below, § 3c.
+>
+> 🔒 **TWO LIVE SECURITY HOLES WERE FOUND AND CLOSED**, both by an adversarial pass over the upload
+> DESIGN rather than over code: **(a)** `papic_photos_couple_full` was `FOR ALL`, so a signed-in
+> couple could POST a photo row through PostgREST with **no order, no payment, no approval, no
+> metering** (#4865); **(b)** `vendor_papic_captures_vendor_update` constrains **no column** and
+> `authenticated` holds UPDATE on all 23 — so a supplier could PATCH `hidden_at` to **reset their own
+> spent-points meter** and shoot the allowance again, and set `nsfw_checked = true` to push an
+> **unscreened file to the couple** (#4867). 🔑 **THE ROW IS YOURS, THE FIELD IS NOT** — the eighth
+> instance of that shape in this schema.
+>
+> 🪤 **AND MY OWN SECURITY FIX CONTAINED A WIDENING.** `CREATE POLICY` with no `TO` clause defaults
+> to **PUBLIC**, which includes `anon` — and `anon` holds SELECT on all 45 columns of `papic_photos`.
+> The exposure-freeze guard caught it; **regenerating the baseline would have RECORDED my mistake as
+> intended.** Never let "regenerate the baseline" be the reflex — read the diff first, and count it.
+>
+> ⛔ **THE UPLOAD SEAM: DO NOT WRITE A SECOND CAPTURE PATH, AND DO NOT MINT THE CAMERA FROM A SERVER
+> ACTION.** `provisionUploadsCameraAdmin` is a service-role write; an action taking a client-supplied
+> `eventId` lets a signed-in stranger mint a live seat on somebody else's wedding and claim it, after
+> which **every downstream gate passes them** (presign and record both check *claimer identity* and
+> nothing else). 🔑 **The rule is the CALL SITE, not the function.**
+> 🪤 The build plan said `seat_index = 110`; production already holds the free dedicated camera there
+> **on four events**, and the upsert ignores duplicates — it would have created NOTHING, reported
+> success, and left every couple with no camera and no error. Shipped at **150**.
+> 🪤 `claimPapicSeat` redirects to `/papic/seat/${token}` on success — posting the studio's claim
+> button at it navigates the couple **out of their own studio**.
+> 🚨 **AND A NEW COLUMN ON `events` IS NOT DONE WHEN IT EXISTS.** That table revokes table-level
+> SELECT and re-grants a **per-column allowlist**, so a column with no `GRANT SELECT (col)` makes
+> PostgREST refuse the **WHOLE query** — every user-session read of `events` goes silently empty —
+> and `events_host` has an explicit projection computed from those grants, while
+> `/dashboard/[eventId]/details` **THROWS** on a query error. `lint-events-column-grants` is the only
+> thing that catches it: **the db coverage tests structurally cannot**, because their `before()`
+> re-applies the lockdown and recomputes the allowlist over the new column.
+> 🪤 **AND THE UPLOADS SWITCH SHIPPED GOVERNING NOTHING, past six of my own guard's rules.** The page
+> read `papic_uploads_open` off its **main event select, which never named the column** — always
+> `undefined`, `?? true` reported OPEN, and the picker rendered for a couple who had switched it off.
+> The column existed, the control was mounted, the branch was wired, the save was confirmed. **I
+> guarded the branch and not the source.** ⚠ Its fix is its OWN round trip on purpose: naming an
+> unknown column in the main select makes PostgREST refuse that query, and the page answers an
+> unreadable event with `notFound()` — the one-line version turns a missing migration into **a live
+> celebration rendering as missing**.
+>
+> 🔒 **THE THIRD HOLE — AND IT WAS THE BIG ONE. `recordSeatCapture` REFUSES A CAPTURE EIGHT WAYS AND
+> ALL EIGHT WERE ADVISORY.** The burst limiter, the 10s clip cap, the capture window, the paid-order
+> gate, the put-away gate, the RA 10173 geo control and the credit reservation its own docblock calls
+> *"the AUTHORITATIVE, race-safe gate"* — the row went in through the CLAIMER'S OWN SESSION while
+> `authenticated` held INSERT, so the same person could POST to `/rest/v1/papic_photos` with the
+> public anon key and skip the lot: **no credits spent**, no length checked, outside the window, on an
+> unpaid camera, on a put-away celebration, carrying geolocation on an event that had switched geo
+> off. 🔑 **AND `has_table_privilege(…,'INSERT')` ANSWERS *FALSE* — the grant was held on all 39
+> COLUMNS, so a table-level audit reads the table as closed while it is open.** The samahan sweep
+> already paid for this: 25 tables reported, **9** measured, after it was taught to count column
+> grants. ⚖ Until this week a claimer was a friend handed a camera; #4872 made every host one.
+> **Revoked at TABLE level** (that is what drops column grants — column-by-column leaves the NEXT
+> column granted) and the claimer's `FOR ALL` split into SELECT/UPDATE/DELETE with the SAME
+> predicates. Dry-run against prod in `BEGIN…ROLLBACK`, because the PGlite replay runs as superuser.
+> ⛔ **RESERVE AND INSERT ARE STILL TWO STEPS, NOT ONE TRANSACTION** — a death in the gap leaks the
+> reserved credits, which errs against US, not the meter. **Do not read "service role" as "atomic".**
+> 🔑 **And the repair is not a new idea: `papic_record_guest_capture` ALREADY does gates + reserve +
+> insert in one `SECURITY DEFINER` function, which is why `anon` never needed an INSERT grant. The
+> seat path is the odd one out — copy the guest function's shape.**
+>
+> 🔴 **`captured_by_person_id` HAS NEVER HELD A VALUE IN PRODUCTION. NOT ONE ROW, EVER.** Measured,
+> not grepped: **14 photos · 14 carry a seat · 14 have a claimer whose person row resolves right
+> now · 0 carry the value.** Column, partial index and a reader that groups a person's own-event
+> frames by capturer all shipped in May; the one-time backfill matched nothing because every photo
+> postdates it. **The sixth gate with no handle**, and the read has been grouping an empty set for
+> three months while looking exactly like a feature nobody uses. Fixed with a trigger (the value is a
+> JOIN, not a decision — so it covers every capture path, not the ones somebody remembered) plus a
+> re-backfill. ⚠ **A BACKFILL IS A POINT-IN-TIME ACT** — never cite an old one as ongoing coverage.
+> **Contract: [`WHATS_NEXT_Papic_Uploads_Are_A_Way_In_2026-08-26.md`](WHATS_NEXT_Papic_Uploads_Are_A_Way_In_2026-08-26.md).**
+> Owner: *"papic is the source where they collect media files for that event. that will be our
+> purpose. so the only exceptions will be the save the date video, or event video."*
+> Design (BINDING, ported not redrawn):
+> [`prototypes/papic_control_center_2026-08-25.html`](prototypes/papic_control_center_2026-08-25.html).
+>
+> ✅ **FOUR PRs — do NOT rebuild any of it.** [#4851](https://github.com/iscasasola/setnayan-platform/pull/4851)
+> (the two questions deleted — photo quality and "where your photos go"; Drive becomes an offer to
+> sync) · [#4856](https://github.com/iscasasola/setnayan-platform/pull/4856) (the camera dates show
+> in WHICHEVER room the couple lands in) · [#4857](https://github.com/iscasasola/setnayan-platform/pull/4857)
+> (four facts above every room) · [#4854](https://github.com/iscasasola/setnayan-platform/pull/4854)
+> ("Papic Pool" / "Papic One" leave everything a customer reads).
+> ⚠ **#4856 and #4857 merged INTO #4851's branch, not `main`** — their auto-merge fired against the
+> stacked base, so #4851 carries all three. **Verify with `gh pr view <n> --json state,mergedAt`
+> before trusting this line; this file has been wrong about a PR's state four times.**
+>
+> 🚨 **THE STORAGE QUESTION WAS NEVER REAL.** `events.papic_storage_target` is read by exactly THREE
+> files — the card that drew it, the actions that wrote it, and the Drive disconnect route — and by
+> **no capture, upload or storage path**; the comment describing that branch is still a `TODO(0012)`.
+> *"Use my Google Drive only · CONNECTED"* never made anything Drive-only, on the owner's own event
+> included. It also broke a promise we make aloud: we keep the gallery **for life**, impossible for
+> photos we never held.
+>
+> ⛔ **DO NOT WRITE A SECOND CAPTURE PATH FOR UPLOADS.** *"Give this person a camera of their own"*
+> is already generalised — `lib/papic-guest-own-camera.ts`, **no new schema**
+> (`paparazzi_seats.guest_id` + a unique index already exist). `ensureGuestOwnCameraAdmin` mints,
+> `papic_reserve_capture_split` spends the camera's own credits first and the pot pays the
+> remainder, and `/api/upload` **already whitelists video**. 🔑 **Dedicated credits are a FLOOR,
+> never a ceiling** — do not reintroduce a two-call sequence; the first call mutates and the second
+> then cannot tell "spent its last credit" from "never had any". ⚠ The real risk is **the unwind**:
+> two reserve sites, one give-back. Getting it wrong charges a couple for a photo they do not have.
+> ⚖ **An uploaded photo costs ONE credit** (owner: *"it will take up the same spot as 1 papic
+> photo"*). Not for storage — a kept photo costs ~₱0.06 for **fifty years** — but because a free
+> upload lane is a free door around the whole product.
+>
+> 🔢 **CONSOLIDATING IS FREE TODAY: every alternate media home in prod is EMPTY** (couple's own
+> uploads 0 · invitation hero film 0 · photographer handover 0 · Patiktok 0 · supplier captures 0 ·
+> venue walkthrough 0). Only Papic has anything — **14 photos**. The moment somebody fills the wrong
+> pile that stops being true.
+>
+> ✅ **FACE TAGGING IS LIVE — do NOT scope a build for it.** A session read **0 enrolments** as
+> *not built*; zero means nobody has used it yet ([[feedback_empty_is_the_plan_not_a_finding]]).
+> Measured: the model + `face-api.js` serve **HTTP 200** from R2 right now, switched on
+> **2026-06-19** and verified with a real face. Registration already sits on the Event Hub (the RSVP
+> widget + a day-of card). 🔑 **The QR says who HOLDS the camera; the face says who is IN the
+> picture** — different axes, so one shared QR traps nobody. The real split is **registered vs
+> not**, never custom-QR vs generic-QR.
+>
+> 🛑 **CORRECTED 2026-08-27 — THE SUPPLIER CAPTURE LANE IS *ON* IN PRODUCTION, AND HAS BEEN SINCE
+> 16 JULY.** This block said for six weeks that it was *"built, switched off, route 403s"* and that
+> the DPO ruling was still pending. **Read out of prod by the object, not from a doc:**
+> `data_privacy_controls.vendor_papic_capture` is **`status='active'`, `approved_at`
+> 2026-07-16 04:51 UTC**, approved by the owner's own user id. The route's gate reads that control,
+> so it no longer 403s. ⇒ *"a photographer can only hand over a LINK"* is **FALSE**.
+> 🔑 **This was not a rogue flip — the owner approved it. The defect is that NO DOCUMENT CAUGHT UP**,
+> so six weeks of planning treated an open lane as closed, and a session summarising this file told
+> the owner it was DPO-gated on the day it was already live. **A privacy control's state lives in
+> the database; a doc describing it is a claim with an expiry date.** ⚠ The route's own docblock
+> (`app/api/vendor/papic-capture/route.ts`) still asserts the old default — applied code comments
+> are not edited, so read the control, never the comment.
+> ⏭ **STILL GENUINELY OWNER'S:** whether that lane *should* stay open now that it is (an RA 10173
+> question about a supplier collecting guests' images), and the retention/consent copy that ought to
+> accompany it.
+> ⏭ Also unbuilt and needed for per-person folders: `papic_photos.captured_by_person_id` has
+> **zero writers**, so *"each person's own folder"* is not reading something we already store.
+>
+> 🪤 **TRAPS PAID FOR — assume a sixth.** **Not everything in `scripts/` is a check:**
+> `swap-status-color-tokens.mjs` is a **CODEMOD** that exited 0, printed nothing, read as PASS and
+> **rewrote 60 files**; caught only by `git status`. **A zero exit code means "it ran", not "it
+> changed nothing".** · **A claim to mirror something is not a mirror**, twice in one change — three
+> different values for one tier title (seed `Papic Mini` · code `Papic One` · **prod `Dedicated
+> camera (legacy)`**). · **A comparison keyed on a field that does not exist always agrees with
+> you** (`components` vs the real `blocks`). · **"The sabotage landed" needs its own measurement** —
+> a mutation that moved a component *before* a room instead of *inside* one passed and meant
+> nothing. · 🎨 **`mulberry-700` is 3.05:1 in DARK** (5.86 light) — use `mulberry-600`.
+
+
+**The owner's #1 complaint about new sessions: they start without the plan, rebuild things that
+already ship, and produce errors.** The fix is this block. Keep it CURRENT — one active work
+stream, deleted or replaced when it finishes. If you finish a stream, update this block.
+
+> ### ✅ DONE 2026-08-26 — THE ADMIN HAS A MAP, AND IT IS SCANNED — do NOT rebuild it
+> **2 PRs, both merged:** [#4859](https://github.com/iscasasola/setnayan-platform/pull/4859)
+> (the route map) · [#4862](https://github.com/iscasasola/setnayan-platform/pull/4862) (the job
+> checklists). Full row: `DECISION_LOG.md` 2026-08-26. Prototype the owner approved the shape
+> from: `prototypes/admin_ask_2026-08-26.html`.
+>
+> 🔑 **RULE 0 PAID TWICE BEFORE A LINE WAS WRITTEN.** The ⌘K palette **already ships** and
+> already navigates the admin by name — it is keyboard-only and unlabelled, which is why the
+> owner had never met it. And **Claude is already wired into this app** (the vendor deep-search
+> dossier on `/admin/verify`, with a keyless fallback), so an admin assistant needs **no new
+> plumbing**. Nothing was rebuilt.
+>
+> 🚨 **THE PALETTE'S DOCBLOCK CLAIMED IT "indexes all 108 admin surfaces". IT INDEXED THE 78
+> MENU ITEMS.** Measured: **96 destinations** (55 pages + 41 redirect stubs) · **7 pages in no
+> menu at all** (*Money*, *Directory* among them) · **~40 pages that moved into tabs** were
+> unfindable under the address people still type. Each stub's old address is now a search word
+> on its target and lands on the **tab** (`/admin/songs` → `/admin/studio?tab=songs`).
+> **278 jobs, 180 form-driven**, each carrying the fields it reads, the ones it provably refuses
+> when empty, whether it is destructive, and the page you would actually open.
+>
+> 🪤 **Traps paid for, all found by guards rather than by reading:** a page that calls
+> `redirect()` is **not** a redirect stub (three real pages bounce a signed-out caller to
+> `/login`; reading them as stubs would have deleted three destinations) · nearly every stub ends
+> `…?${out}`, so testing for a bare `?` made **24 of 41 stubs lose their tab**, and the variable
+> is `out`, not `params` — **match the CALL, never a remembered variable name** · **five jobs
+> live in a folder with NO page** (two are the storyteller controls, whose screen moved into a
+> Studio tab while the actions stayed behind) · and **my own join ran in the wrong ORDER**, so
+> three jobs on the demo-vendor inquiries screen were dropped, silently unsearchable.
+>
+> ⚠ **The field is `refusedWhenEmpty`, NOT `required`.** Validation is written at least four ways
+> in this admin; a scan catching two of them would, under the name "required", assert that
+> everything else is optional (22 jobs → 46 once both shapes were read).
+> 🔒 **The map must not resurrect what a feature flag deliberately hides** — the scan records
+> whether the menu **source** mentions an address, which tells a deliberate hide from an omission.
+> 🛡 **18 assertions · 21 mutations, all RED — and TWO of my own guards were DECORATION**, both
+> caught only by measuring: one matched the bare word `buildDestinations`, so gutting the call
+> left the import standing and it reported a clean pass; and one "mutation" was a comment instead
+> of a real reorder — **a reordering mutation cannot be measured by counting a string.**
+>
+> ✅ **THAT NEXT GAP IS NOW CLOSED — 3 more PRs, all shipped:**
+> [#4866](https://github.com/iscasasola/setnayan-platform/pull/4866) the box answers a SENTENCE
+> (every one of the owner's phrasings returned NOTHING before; a guard runs all ~900 words the
+> admin knows through the old and new algorithms and fails if one re-orders) ·
+> [#4870](https://github.com/iscasasola/setnayan-platform/pull/4870) it lands on a price ROW ·
+> [#4873](https://github.com/iscasasola/setnayan-platform/pull/4873) it answers words nobody
+> listed, once, then free.
+> ⚖ **The 2026-08-03 "Admin AI is removed as a concept" lock is SUPERSEDED by the owner's own
+> 2026-08-26 request — recorded in `DECISION_LOG.md`, not assumed.** The old objection is
+> answered on its terms: this is not a new screen, it is the ⌘K box already on every admin page.
+> 🔴 **AND THE LAST MILE WAS MISSED ONCE — [#4876](https://github.com/iscasasola/setnayan-platform/pull/4876), merged and SERVED.**
+> Owner, on the finished feature: ***"i do not see the AI searchbar."*** He was right and nothing
+> was broken: **all of it opened with ⌘K and nothing else** — no button, no label, no shortcut on
+> a phone — while the only VISIBLE box on the admin bar belonged to the **shared** palette, which
+> searches the person's own events. The console had an assistant and the control on screen opened
+> something else. ***A fix nobody can reach is no fix*** — third time. The shell now takes an
+> optional `searchSlot`; the admin hands in its own field and ⌘K still opens the same panel.
+> 🔑 **It LOOKS like a field and IS a button** — a real input means two inputs for one search, and
+> the panel takes focus on open, so the first keystroke lands in a box about to be replaced.
+> ⚖ **Desktop only**, per the 2026-08-26 phone ruling (this box opens editing doors).
+>
+> 🔘 **AND THE CREATE BUTTON NOW FOLLOWS THE SURFACE — [#4880](https://github.com/iscasasola/setnayan-platform/pull/4880), merged and SERVED.**
+> Owner: *"this needs to change depending on where they are. Home - Create Event. Shop - Create
+> Service Card. HQ - Create what?"* Measured: **ONE hardcoded `+ Create event` on all six
+> signed-in trees**, so **a supplier in their own Shop was one press from a couple's wedding
+> wizard.** `createSlot` has THREE states and the middle one is the point: `undefined` keeps
+> today's button · a node replaces it · `null` means this surface makes nothing. A `??` fallback
+> would send HQ's `null` back to the wizard.
+> ⚖ **HQ MAKES NOTHING, FROM THE RECORD:** of **65** admin actions ever logged only **NINE**
+> created anything; **31 were price edits.** Its primary action is the overdue pill already there.
+> 🔒 The word **CREATE** stays (a rename reads as a deletion — owner 2026-08-15) and
+> `.fd-btn-gold` is never re-styled per surface. A guard pins that **exactly two** surfaces
+> override the slot.
+>
+> ✅ **CLOSED 2026-08-27 — `ANTHROPIC_API_KEY` IS SET AND THE ASSISTANT IS LIVE. Do NOT send the
+> owner to Vercel for it.** Proven BY THE OBJECT, not inferred: prod `admin_search_phrases` holds
+> the owner's own sentence *"add a new category on the taxonomy service"* → `createTaxonomyNode`,
+> stamped **`learned_from='ai'`** at 05:45:56Z. That value has exactly ONE writer, reached only
+> after a successful model call, which `aiConfigured()` gates on the key — and a local process
+> could not have written it (no `.env*` exists in the checkout). **This errand was live in FOUR
+> files including this one; a correction at one site is not a correction.**
+> 🚨 **AND IT FOUND A REPO-WIDE BLIND SPOT: `relrowsecurity` IS VACUOUS IN THE PGlite REPLAY** —
+> a brand-new table with no policy and no `ALTER` already reports row security ON. **15 db test
+> files assert that flag and in the replay none of them can fail.** Pinned with a live probe;
+> **named, not fixed.**
+>
+> ~~⏭ **NEXT, AND MEASURED AS THE REAL GAP: the box answers a WORD, never a SENTENCE.**~~ Verified
+> against merged code — *"take me to the pricing for papic services"*, *"show me the prices of
+> papic"* and even the two-word *"papic prices"* all return **NOTHING**; only a single word
+> prefixing a label works. That fix is **deterministic and free**. The AI is only for words
+> nobody listed, and what it learns is written back so a repeat costs ₱0.
+> ⚖ **OWNER SCOPE, do not widen it:** the brain remembers **how to navigate — where to go, what
+> to open, what a job asks for**. NOT product decisions or rulings (he ruled that out explicitly).
+> ⛔ **The assistant may prepare and may hold back; it may never be the thing that lets money, a
+> price, an approval or a publish through** (one-person admin plan, 2026-07-11).
+
+> ### ✅ DONE 2026-08-24 — W4-WORDS: THE FUNERAL, THE FIRST SOLEMN EVENT TYPE — do NOT rebuild it
+> **1 PR, merged and SERVED:** [#4793](https://github.com/iscasasola/setnayan-platform/pull/4793)
+> (`/api/health` → `2eb7b2d`), migration `20271163083797` **verified applied in prod BY THE
+> OBJECT**: the `funeral` vocab row (🕊️, enabled) · `register:'solemn'` in the profile's
+> terminology JSONB · the quiet onboarding intro · exactly seven scoped marketplace tiles. Full
+> row: `DECISION_LOG.md` 2026-08-24 🕊️.
+> 🔑 **HALF THE BRIEF WAS ALREADY SHIPPED.** Step 1 ("thread the 16 types, 69 guest-read
+> instances still say the couple") was STALE — S13 had already threaded the guest tree and
+> holds it with an exact-bill guard. A REAL comment-stripper (state machine, not line
+> prefixes — a prefix filter's survivors are mostly block-comment continuation lines) found
+> ONE rendered remainder, already on the S13 bill as deliberately unreachable.
+> 🔑 **THE TONE SWITCH IS DATA, NOT SCHEMA** — the terminology JSONB carries
+> `register`/`occasion_noun`; `EventWords` gained `occasion`+`solemn`; a hardcoded
+> `FUNERAL_PROFILE` keeps a wake solemn on a DB read error. **What solemn does:** no countdown
+> (widget + BOTH server mounts) · never enters the `save_the_date` OR the joyful auto-composed
+> `editorial` phase (previews included) · no marketing upsells · RSVP reads "Will be there /
+> Unable to come" · pabuya reads "A gift of sympathy" (abuloy — owner 2026-08-17: a wake MAY
+> accept money, gentler than "digital money dance") · its own short-runway checklist,
+> service-day run-of-show, helper roles (no "Maid of honor" at a wake) and a solemn sample
+> story. **Every celebratory type is pinned byte-identical** — the frozen literals in
+> `the-wake-never-celebrates.test.ts` are never edited to match a change.
+> ⚠ **The solemn no-STD gate is keyed on the REGISTER, deliberately NOT on
+> `surfaceEnabled('save_the_date')`** — the general wedding-parts-stay-home build is S15's
+> scope and the funeral must not ride along with it. Do not "simplify" the gate onto the flag.
+> 🪤 **SIX coverage guards fired on the new type — the design working.** Five in the unit
+> suite; the SIXTH (host role sets) fired ONLY IN CI because it lives in `test:db` and the
+> session had run just its own two db files. **Run the whole db suite for an event-type
+> change.** Papic is OFFERED at wakes per the standing 2026-08-01 "offer Papic everywhere"
+> ruling — one line in `PAPIC_ACCESS_PHASE_1_TYPES` to reverse. **Baptism deliberately NOT
+> added** (same 2026-08-17 ruling: christening covers it — do not add it as a new type).
+> 🪤 **A trap fixed in passing:** the admin profile editor REBUILT the terminology blob from
+> its six form fields, so any admin save silently stripped keys the form doesn't know
+> (`register` included). It now merges over the stored blob — keep that merge when adding
+> terminology keys.
+> ⏭ **OPEN OWNER DECISIONS, flagged not decided:** the funeral's AI-planner tier (today the
+> explicit ₱499 standard default — whether the planner should offer itself at a funeral at all
+> is his) · whether wakes stay in the Papic offer · a funeral-home taxonomy leaf (none exists;
+> the checklist def's anchor is null because of it).
+
+> ### ✅ DONE 2026-08-24 — W4-A: THE FOUR SCREENS A COUPLE LIVES IN — do NOT rebuild any of it
+> **FOUR PRs, all merged and LIVE:** [#4771](https://github.com/iscasasola/setnayan-platform/pull/4771) ·
+> [#4780](https://github.com/iscasasola/setnayan-platform/pull/4780) ·
+> [#4782](https://github.com/iscasasola/setnayan-platform/pull/4782) ·
+> [#4791](https://github.com/iscasasola/setnayan-platform/pull/4791). Production self-reports
+> `28bb8e1` — #4791's own merge commit — so all four are SERVED, not merely merged. Rows:
+> `DECISION_LOG.md` 2026-08-24 (three of them: the stream, my correction of it, and the coordinator finding).
+>
+> 🛑 **READ THIS FIRST — I REPORTED THIS STREAM DONE AT 3 PRs AND IT WAS ~2/3 FINISHED.** An
+> adversarial audit of my OWN merged work (11 agents, every finding re-verified by hand) caught it;
+> CI and review did not. **The building was sound — nothing was rebuilt that existed — the
+> MEASURING was wrong.** 🔑 **THE ROOT CAUSE, WORTH MORE THAN THE FIXES: I swept for one SPELLING
+> of a colour (a class name), found every instance of that spelling, and reported the colour delta
+> CLOSED. These screens also paint in RAW HEX and INLINE CSS VARS, both invisible to that sweep.
+> A search that can only match one spelling is not a survey.** The worst survivor was **2.03:1 —
+> worse than the 3.37:1 gold the stream existed to remove — in a file PR 3 edited the same day**,
+> on the one screen (`alaala`) where my new guard's real coverage was **ZERO**.
+>
+> ⚖ **WHAT IS TRUE ABOUT THE STRUCTURE, CORRECTED:** guests did NOT already match — the Roster
+> archetype specifies 5 columns and says the roster *"never grows a selection column"*; shipped had
+> 8, six fixed-width eating **78%** of the table so names truncated ("Maria Vil…"). Fixed columns
+> are now **56%** and **no column was removed** (which columns exist was never ruled on, only
+> rows-not-tiles, owner 2026-06-05). Budget did NOT already speak the Ledger register — its three
+> biggest numbers render in the BODY face while their own labels are mono. ✅ **CLOSED 2026-08-25 —
+> W5-E, **9 PRs, all merged and SERVED** (#4814 · #4815 · #4819 · #4820 · #4821 · #4822 · #4825 · #4827 · #4829).** The typeface delta is fixed, each supplier
+> card is now summary-first with its history on demand, and the guard that pins it censuses **every
+> rendered money figure** instead of matching one component SHAPE — which is how it found a
+> right-aligned money column ("Next payments") the first pass had walked straight past. ✅ Still true
+> and unchanged: the vendors LIST is claimed by NO archetype (only `vendors/[vendor]` → Detail) and
+> stays under its locked 2026-05-31 spec.
+>
+> 🛑 **AND THE GALLERY SENTENCE THAT USED TO SIT HERE WAS WRONG — CORRECTED 2026-08-25, measured.**
+> It said *"the Gallery archetype's dashboard subject is `galleries/`, untouched and unclaimed."*
+> **`alaala` is not the gallery — and neither is `galleries/`.** What ships at `galleries/` is a
+> **hub of three source rows** (Papic · Live Studio · your own photos), one link out each; the
+> archetype draws an obsidian photo **mosaic** with a lightbox and per-tile camera credit.
+> ⚠ **AND THE TEST I FIRST CLOSED IT WITH WAS ALSO WRONG:** I ruled the archetype out because its
+> route chip `/dashboard/[event-id]/`**`gallery`** (singular) names a route that does not exist.
+> Measured: **two of its four chips name routes that never existed** (that one and
+> `/alaala/[event-id]`), so **a chip in these prototypes is a LABEL, not an address** — deciding
+> what a design governs by whether one string resolves is the one-spelling test that has already
+> cost this project twice.
+> 🔑 **THE ARCHETYPE'S REAL, SHIPPED SUBJECTS ARE THREE, AND ALL THREE ARE UNPORTED** (measured on
+> `origin/main`: **zero** occurrences of the obsidian `#17160F`, **zero** per-tile camera credit in
+> any of them): the couple's **Papic gallery grid**
+> (`studio/papic/_components/papic-gallery-grid.tsx` — the only one with a lightbox, and it is
+> clips-only), the guest **"your photos"** widget on the invitation page
+> (`app/[slug]/_components/your-photos-widget.tsx`), and the **day-of live wall card**
+> (`app/[slug]/_components/live-wall-block.tsx`). **The gallery item is NOT done.** ⏭ Whether
+> `galleries/` — a hub of links — belongs to the Gallery archetype at all is a **design/owner call**;
+> the three screens above need no ruling at all.
+>
+> ⚠ **AND TWO THINGS THE BUDGET HALF DID NOT DO, stated because my own first write-up implied
+> otherwise.** The Ledger rule has two halves — Space Mono **and** right-aligned in a column — and
+> only the **face** shipped; each supplier's three amounts still sit in three tinted boxes across a
+> row. **Do not read this as "the Ledger port is done."** And the running total is still not pinned:
+> the reason I first recorded (*"the shell cannot carry a pinned bar"*) is **FALSE** — the budget
+> screen already ships a `sticky bottom-3` *Save plan* bar. The real constraint is that a second
+> pinned bar would **STACK** with it and with the phone's bottom nav, which is what
+> `lint-no-stacked-pinned-bars.mjs` exists to catch.
+>
+> 🎨 **What shipped:** 46+ gold-as-text sites → `terracotta-700`; a `-700-700` typo class that
+> styled NOTHING; **TWO** gold ERROR messages → `danger-700` (the second written as a hex, one file
+> from the first, found only by the audit); four search badges at 3.96–4.06:1 and two eyebrows at
+> 4.42:1 — 🔑 **gold has so little headroom it PASSES on paper and FAILS on its own tint, so the
+> repo's canonical text gold #8A6B39 is a FAIL on the #F4F2EC card**; the "coming soon" marker at
+> 3.67:1; and **a confirmation before deleting a saved plan** — a hard delete with no undo, while
+> CLEARING the rebuildable list beside it already confirmed. *The screen guarded the reversible
+> thing and not the irreversible one.*
+> 🔤 **THE VENDORS SEARCH OVERLAY'S SERIF HAD NEVER RENDERED** — `var(--font-serif,'Cormorant
+> Garamond',serif)` names a variable that exists nowhere and a family next/font never registers
+> (it hashes names), so every serif title computed the PHONE'S DEFAULT SERIF. Repointed at
+> `--font-editorial-display`. *Rejected-not-thrown, CSS edition — add "undefined CSS var" to that family.*
+> 📏 **THE INHERITED AP-2 TALLY IS ANSWERED: THE APP IS NOT FALLING BACK.** body `font-sans` →
+> `:root` → Hanken Grotesk, and `.app-surface` re-pins the whole dashboard tree; 823 font-utility
+> uses all resolve to Hanken/Space Mono; the only system stacks are 3 print-only pages. **No build
+> opened; the shared-chrome typeface question (ONE_SHELL_PLAN §5.3) stays an OPEN OWNER DECISION** —
+> the audit called that the single best judgement call in the stream. ⚠ **EVIDENCE GRADE: derived
+> from SOURCE, not from a computed style in a signed-in browser.** A real measurement would also
+> catch 2 components with private stylesheets and 6 overlays that portal OUTSIDE `.app-surface`.
+> **Do not upgrade this to "measured".**
+> 🛡 **Guard `app/dashboard/[eventId]/gold-is-not-text.test.ts` — REWRITTEN, because rev 1 was
+> decoration exactly where it mattered.** 4 rules now: the bare-gold bill (both directions), the
+> `-N-N` typo shape, **measured-below-AA values banned in ANY spelling (hex OR CSS var)**, and **an
+> inventory of alaala's literals with their ratios** — that tree has no colour classes, so a
+> banned-list only catches known failures while an inventory catches the NEXT one. 🔑 **Its file set
+> is RESOLVED FROM THE SCREENS' OWN IMPORTS, not hand-listed** (it picked up 3 shared components
+> that were invisible) — *a hand-enumerated list is a list of the files somebody thought of.*
+> ⚠ **THE ALAALA DENSITY LITERALS MUST STAY LITERALS** — the themed `terracotta-700` flips to
+> #A88340 in dark, where the white count reads **3.51:1, an AA fail**. "Just tokenize it" is the
+> obvious change and the wrong one.
+> 🪤 **THREE separate sabotages printed 0→0 — they never landed and reported CLEAN PASSES**, caught
+> only because the count is printed before → after. Plus a typecheck that printed a FALSE GREEN
+> through a pipe (`tsc: command not found` masked by `tail`) — **always print the exit code**.
+> 🔴 **OPEN OWNER DECISION, deliberately NOT built:** the desktop guest roster keeps its selection
+> column. A faithful "the avatar IS the checkbox" port LOSES what a native checkbox gives free
+> (announced state, Space to toggle, `indeterminate` on select-all, forced-colors), puts the target
+> at 36px against this repo's own 44px minimum, and silently reassigns a click that today opens the
+> guest. ⚠ **And "mobile already does it the approved way" is FALSE** — mobile SWAPS the checkbox
+> into the avatar's slot in select mode; it never makes the avatar the control, so the archetype's
+> note is implemented NOWHERE. **A design decision with an a11y cost, not a port.**
+> ⏭ **Deferred to whichever stream owns the six-state port, NOT oversights:** budget's total is not
+> pinned, its rows are not grouped by category, its cards never collapse. Individually small,
+> together a redesign of that screen.
+> ⏭ Reported, not churned: ~15 `bg-white/NN` alpha fills are visually inert on the #FFFFFF ground — debt, not defect.
+
+> ### ✅ DONE 2026-08-24 — A SAMAHAN BECAME A PLACE (6 PRs) + the bug that made it hollow
+> **Contract: [`WHATS_NEXT_Samahan_2026-08-24.md`](WHATS_NEXT_Samahan_2026-08-24.md).**
+> Owner asked for "the same setlog concept" and it grew from there. **Do NOT rebuild any of it.**
+> #4781 (24-hour hourly **stories**) · #4783 (the composer is a **3-second camera**, not an
+> upload) · #4784 (**anyone** can rename + a **group photo**) · #4790 (both edited **ON the
+> header** — tap the photo, tap the name) · #4786 (**Usapan**, the group chat) · #4795 (below).
+> ⚠ Verify each with `gh pr view <#> --json state,mergedAt` — this file has been wrong about a
+> PR's state four times.
+>
+> 🚨 **NOBODY COULD LEAVE A SAMAHAN. NOBODY, EVER — and the buttons looked fine.**
+> `community_members` shipped a DELETE **policy** with **no DELETE grant**; Postgres checks the
+> grant FIRST, so every leave was refused before RLS was consulted and the policy was never once
+> reached. Dead callers: *"Leave this samahan"* for every member, and an organizer removing
+> anybody. 🔑 **Where it came from is a RULE, not a mishap:** `20271023100000` revoked ALL and
+> granted back *"the three verbs the shipped paths actually use"* — a list written from
+> **REMEMBERED PATHS** while a DELETE policy sat in the same schema declaring DELETE is one.
+> **ENUMERATE THE VERBS FROM THE POLICIES.** Same family as the phantom column · enum value ·
+> RPC argument · blocked iframe: **refused, not thrown; the only symptom is a button that does
+> nothing.** 🛡 New guard asks it for every table — and it **must count COLUMN grants**, or it
+> reports `events` (deliberately revoked 2026-08-21) and cries wolf: **25 rows → 9 measured**.
+> The 7 survivors are each grepped to a service-role writer and recorded WITH A REASON.
+>
+> ⚖ **OWNER RULINGS — do not re-ask:**
+> · *"the only way to close a group/samahan is when all members leave … for as long as there is
+>   one, the group lives."* Closing is a **consequence**, never an act performed on other people.
+>   `archiveCommunity` is **deleted**; the DB refuses a close while any membership row remains.
+>   **The button is not the door** — `communities` is served over PostgREST to a public key.
+> · **Anyone may rename**; `archived` stays organizer-side. 🔑 **A POLICY IS ROW-LEVEL** — widening
+>   it alone would also have handed every member the close switch and the identity columns.
+> · **Group chat does NOT reuse `chat_threads`**, overturning the 2026-07-15 "reuse 0019 chat"
+>   lock: that table is a couple↔vendor **booking negotiation** (`event_id` + `vendor_profile_id`
+>   both NOT NULL, `agreed_price_centavos`, `locked_at`). **One query overturned a plan estimate.**
+> · **Stories:** one per member per clock hour · 24h by RLS · screened BEFORE the row exists, so
+>   no unscreened state can exist · take-down soft, never a rewrite.
+>
+> 🛑 **A FALSE CLAIM I MADE TWICE, CORRECTED HERE: "we have no push notifications."**
+> **PUSH IS BUILT AND MOUNTED** — `PushToggle` on the profile page · `emitNotification` is called from
+> dozens of files across the app (⚠ **NEVER re-type a count here — it moved from 108/61 to 186/55 in
+> five days (2026-08-25 → 2026-08-30) and moved again by 2026-08-30** [`grep -rln emitNotification
+> apps/web/lib apps/web/app | wc -l` for files, drop `-l` for call sites; both counts rise with every
+> new notification type, so treat any number in this doc as already stale]) · `/api/notify` sending via `web-push` + VAPID · `push_subscriptions` in prod with
+> **0 rows**. So the hourly bell is a **wiring** job plus confirming the VAPID keys in Vercel
+> (**not readable from a session** — the route merely warns and continues). **Do NOT scope a push
+> build.**
+>
+> ✅ **THREE OF THOSE SHIPPED 2026-08-25 — PRs
+> [#4841](https://github.com/iscasasola/setnayan-platform/pull/4841) ·
+> [#4842](https://github.com/iscasasola/setnayan-platform/pull/4842) ·
+> [#4843](https://github.com/iscasasola/setnayan-platform/pull/4843). Do NOT rebuild them.**
+> **THE BELL RINGS.** Measured first: 61 files · **108** `emitNotification` call sites · **zero**
+> in the samahan tree, so a 3-second story that dies in 24 hours was posted in silence. A story or
+> an Usapan message now reaches the other members, **collapsed to one unread notice per samahan per
+> person within an hour**. 🔑 The window is load-bearing: the tray's **Open** button marks nothing
+> read, so collapsing on *"holds any unread notice"* would have **muted a samahan permanently** for
+> anyone with one stale notice — bursts are minutes apart, a mute is forever. Both types are OFF
+> the email and push allowlists on purpose; quiet hours are still the owner's call.
+> 🚨 **AND IT FOUND THREE NOTIFICATION TYPES THE DATABASE HAS NEVER HAD** — `connection_request`
+> (2 sites) · `connection_confirmed` · `order_cancelled`, four live emit sites, **no migration
+> ever**. 70 labels in the migrations, the same 70 in prod, **72** in the union. Refused, not
+> thrown; `connection-notifications.test.ts` has 11 passing tests about two of them and could not
+> see it. So: somebody adding you to their people never reached you, and "your bill was cancelled
+> with the celebration you removed" never reached the buyer. Fixed, with a **floored guard that
+> derives both sides from the code**.
+> **THE DAY PLAYS THROUGH.** `loop` on the viewer's video is what made a day of 3-second clips
+> unwatchable — a looping clip has no end, so nothing could ever come next. Play the day now runs
+> oldest → newest, each clip once. ⛔ **Nothing is stitched and nothing is kept** — the stitched
+> FILE is still unbuilt and is gated on the owner decision below.
+> ⚖ **AND ONE PREMISE IN THIS BLOCK WAS HALF FALSE:** *"inviting a whole samahan… you retype every
+> name"*. The guest-list picker has offered samahan co-members (second degree too) **since
+> 2026-08-21** — nobody retyped anything; only the GROUP gesture was missing. Shipped as a chip per
+> samahan + "Choose all N shown". 🔑 **The group is a FILTER, not a stored link** —
+> `guest_groups.source_community_id` stays absent, so no guest list can change because somebody
+> left a group chat, **and the snapshot-vs-live question that deferred this since 2026-07-15 never
+> has to be answered.**
+> ⏭ **LEFT:** the **hourly nudge** (§ 3.2 owner decision AND this project is cron-free, so it needs
+> a trigger, not a schedule) · **a join announces itself to nobody** (verified: the join action
+> emits nothing — named, not built) · the day as **one stitched file that outlives the clips**
+> (gated below) · nesting · discovery · memories · chat attachments.
+>
+> 🔬 **THEN AN ADVERSARIAL AUDIT OF THOSE THREE PRs FOUND TEN THINGS — PRs
+> [#4844](https://github.com/iscasasola/setnayan-platform/pull/4844) ·
+> [#4845](https://github.com/iscasasola/setnayan-platform/pull/4845) ·
+> [#4846](https://github.com/iscasasola/setnayan-platform/pull/4846). Three would have been felt by
+> a person.**
+> 🛑 **AND THE AUDIT NEARLY READ AS A CLEAN RESULT: its five finders completed and ALL ELEVEN
+> skeptic/critic agents died on a session usage limit**, so it returned an empty survivor list —
+> the 2026-08-20 lesson repeating exactly. **The findings were in `journal.jsonl` the whole time.**
+> Every one was then re-verified BY HAND, because nothing had refuted them.
+> 🚨 **A SETNAYAN ADMIN COULD POST A CLIP INTO ANY PRIVATE SAMAHAN.** The story route gated on
+> whether the caller could READ the community row — a policy carrying `OR is_admin()`. **RLS IS A
+> FLOOR, NOT A SCOPE**, third time this shape has cost us. Usapan never had the hole (a message
+> goes through the caller's own session); a story is written with the service role, so the
+> app-side gate IS the whole fence. It now asks whether a membership row exists.
+> ◐ **"PLAY THE DAY" STOPPED PLAYING ITSELF ON A PHONE — and my first write-up of this was
+> OVERSTATED, corrected here by the refutation pass.** Every clip after the first is mounted from
+> an `ended` handler with **no user gesture**, and iOS refuses to autoplay audio without one, so
+> the film stopped advancing by itself. ⚠ **NOT "dead" and NOT "could never move again"**: the
+> viewer renders Back/Next, binds the arrow keys, and the video carries `controls`, so a person
+> can still advance — and the browser's own play button IS a gesture. The promise that breaks is
+> the AUTOMATIC one. A refused play now falls back to muted and keeps going, with the sound one
+> tap away. 🔑 **Unmuted-with-controls was not a mistake** — `papic-gallery-grid.tsx` ships the
+> same shape for a tapped-open clip; every muted `<video>` in the app is an ambient one.
+> 🚨 **"THE WHOLE BARKADA" LEFT REAL MEMBERS OUT AND COULD PICK STRANGERS** — the chip typed its
+> name into the search box, so it was a substring match over a label that is lossy twice
+> (`from: via[0]`, and dedup keeps the richest row). Now an exact membership test over every
+> samahan a person is in. Plus the 200-pick cap, which dropped the overflow **and reported
+> success** — not new, but made reachable in one tap by the bulk control shipped that morning.
+> 🪤 **FOUR OF MY OWN GUARDS WERE DECORATION**, every one found by mutation and none by review —
+> including a test asserting an output did not contain a string the function had no parameter to
+> receive, and an ordering guard that never tied the library to the screen.
+> ⚖ **THE SKEPTICS LATER REFUTED 3 OF THE 10 (7 SURVIVED), AND ONE REFUTATION IS WORTH KEEPING:**
+> "two reads in the fan-out go silent" is **not a live bug** — the docblock was scoped to the
+> collapse read all along, a roster read has no fail-toward-ringing version (you cannot notify a
+> list you do not have), and both use the service role, so there is no reachable refusal path. The
+> change survives as a **log line plus a correctly scoped comment**, not a repair.
+> ⏭ **AND THE COMPLETENESS PASS FOUND AN 8th, BUILT BY ME THAT MORNING — PR
+> [#4847](https://github.com/iscasasola/setnayan-platform/pull/4847):** choosing a whole barkada
+> could leave **Add dead with nothing on screen saying why**. A chosen one-word name holds Add shut,
+> but the box that fixes it renders only for rows **on screen** — so clearing the chip left three
+> picks off screen, blocking, unnamed, and the only escape discarded the whole selection. Samahan
+> rows are the population it bites (one display-name string; a group-chat handle is one word).
+> 🔑 **THE RULE: audit your own merged work — and when the auditor reports nothing, check whether
+> the auditor ran.** Its finders had completed; **11 of 16 agents had died on a usage limit.**
+> 🔴 **THE ONE BLOCKING OWNER DECISION: what a samahan KEEPS after 24 hours, and whether keeping
+> is what we sell.** The feed is the hook; Papic on a group event is the existing archive product.
+>
+> 🪤 **Traps paid for, beyond the grant one:** a branch whose base predates a merge **will revert
+> it** (twice; one push would have deleted the 3-second recorder) · a rebase conflict where both
+> sides **appended** functions offers mine-or-theirs and either choice deletes a feature · a
+> programmatic delete searching backwards for a docblock took **five** functions instead of one
+> (`tsc` caught it) · `npx tsx --test` on a `[communityId]` path prints **`# tests 0` and exits
+> GREEN** — 🛑 **AND THE ESCAPE THIS LINE USED TO RECOMMEND (`[[]communityId[]]`) DOES NOT WORK
+> EITHER.** Measured 2026-08-27 against a real existing file (`app/[slug]/_lib/announcement-live.test.ts`,
+> 6 tests): `--test "app/[[]slug[]]/…"` · `--test "app/[slug]/…"` · `--test "./app/[slug]/…"` ALL
+> print `# tests 0 … # fail 0` and exit **0**. What DOES run it: **`npx tsx <path>` with no
+> `--test` flag** · `npx tsx --test "app/**/<name>.test.ts"` · or `cd` into the directory and pass
+> the bare filename.
+> 🔑 **BUT DO NOT READ THIS AS "BRACKETED PATHS NEED ESCAPING" — THAT FRAMING STILL BURNS YOU.**
+> **ANY `--test` invocation that matches NOTHING behaves identically**: a renamed file, a typo'd
+> suite, a path that moved. The bracket case is merely the one where the path *looks* right.
+> ⇒ **THE DURABLE RULE IS THE NON-ZERO CHECK, NEVER THE ESCAPE: require `# tests ` to be non-zero
+> before believing any pass.** Zero-tests-zero-failures is byte-identical to success and exits 0 —
+> the runner's dialect of [[feedback_verify_the_sabotage_by_occurrence_count]].
+> 🦠 **AND THE TRAP DOCUMENTATION WAS ITSELF THE VECTOR.** This file taught that escape for weeks,
+> so a session doing everything right — reading the corpus, using the documented escape, seeing
+> green — verified **nothing** and had every reason to believe otherwise. An undocumented trap
+> leaves you suspicious; a documented broken one **rewards diligence with a lie**. *A DOCUMENTED
+> WORKAROUND IS NOT EVIDENCE THAT THE WORKAROUND WORKS* — one level up from *"a migration comment
+> is not evidence"*. **Anything this corpus teaches as a TECHNIQUE must carry the measurement that
+> proves it** (the command, the target, the observed non-zero count) or it rots into exactly this.
+> · `SECURITY DEFINER` **disarms** a `current_user` check ·
+> **a stale page is not a missing feature** (Usapan was reported "still coming soon" after it
+> merged — prod had it, the browser did not; check `/api/health` against the merge commit first).
+
+> ### ✅ DONE 2026-08-24 — W3-B: A SUPPLIER'S CARD EARNS ITS KEEP
+> **5 PRs — the fifth is an owner ruling he made mid-session, closing the item the other four left open.**
+> ** Do NOT rebuild any of it.** Row: `DECISION_LOG.md` 2026-08-24.
+> **ALL FIVE MERGED** — [#4741](https://github.com/iscasasola/setnayan-platform/pull/4741) (the
+> maker) · [#4742](https://github.com/iscasasola/setnayan-platform/pull/4742) (start-from-a-card) ·
+> [#4744](https://github.com/iscasasola/setnayan-platform/pull/4744) (the picks) ·
+> [#4745](https://github.com/iscasasola/setnayan-platform/pull/4745) (the reply-time floor) ·
+> [#4748](https://github.com/iscasasola/setnayan-platform/pull/4748) (the documented count).
+> ✅ **All three schema changes are VERIFIED APPLIED IN PROD BY THE OBJECT** — not by
+> `schema_migrations`, not by a migration comment: `vendor_packages.vendor_service_id` +
+> its ownership trigger body · `vendor_activity_stats.replied_thread_count` (default 0) · and the
+> live `service_card_records` carrying `option_mix`, `documented_events` AND
+> `vpc.nsfw_checked = TRUE` together — **that last check matters, because this function was
+> REPLACED TWICE in one day and the second replacement had to keep the first one's work.**
+> ⚠ **Confirm before trusting this line** — this file has been wrong about a PR's state three
+> separate times: `gh pr view 4741 4742 4744 4745 4748 -R iscasasola/setnayan-platform --json number,state,mergedAt`.
+> 🪤 And when you write that check, **derive the answer from a positive count, never from an empty
+> read** — a poll of these very PRs reported "ALL THREE MERGED" on its first tick because `gh`
+> failed silently (no repo in scope) and an empty result counted as zero-still-open.
+>
+> 🧾 **THE MAKER STOPPED TRADING YOUR CARD FOR A COVERAGE SAVE.** Pressing *Save who it's for*
+> mid-build navigated to Services and took every unposted field with it — title, price,
+> inclusions, the customization draft, the photos already uploaded. The sheet WARNED about it in
+> prose. 🔑 **A WARNING THAT PRECEDES LOSING SOMEBODY'S WORK IS NOT A FIX.** One write body, two
+> doors now; the Services page's own panel still uses the redirecting one because it is already
+> on the page it lands on. The clip pill says **0:24** instead of the word *clip* — the picker had
+> been measuring the file to enforce the 30-second cap and throwing the number away. **Floored,
+> never rounded** (the picker tolerates cap + 0.9s, so rounding prints 0:31 on a card that says
+> 30) and **never persisted** — the only pill in the product is on the screen holding the file,
+> and a stored value with no reader is the shape this repo keeps paying for.
+>
+> 📋 **A SUPPLIER CAN START A NEW CARD FROM ONE THEY ALREADY MADE** (owner asked 2026-07-28).
+> Copies what was AUTHORED; the original keeps everything it EARNED — **by construction, because
+> the maker posts no id and can only insert**. Media is REFERENCED, never duplicated ⇒ two cards
+> name one object now, so a future delete must look for other referents first.
+> ⛔ **The ★ Customization options cannot come across, and the maker SAYS SO on screen.** They sit
+> in a package with no link back to the card, and guessing by category would attach a DIFFERENT
+> card's options to this one. A copy that quietly loses a card's choices is a card published
+> missing what it sells.
+>
+> 🔢 **THE CARD COMPILES WHICH OF ITS OWN OPTIONS COUPLES CHOSE** — *"Album · 4 of the last 6"*.
+> 🔑 **THE BRIEF'S PREMISE WAS STALE BY ONE DAY.** It said picks are "NOT queryable" and
+> prescribed a new table written by `lockPackage`; the pricing freeze (#3862, merged the day
+> BEFORE that note) already persists every charged option into the lock snapshot. **So no new
+> table** — one would have needed a second writer in another session's tree and been a second copy
+> of a fact that already exists. What was missing was the LINK the code had already named twice:
+> `vendor_packages.vendor_service_id`. 🔒 **A NULLABLE FK IS NOT A PERMISSION** — a trigger refuses
+> another vendor's card, on INSERT **and** UPDATE of either column.
+> ⚖ **The floor applies TWICE, both times in SQL:** 3+ arm's-length locked bookings AND 3+ couples
+> per line. Below either, the line is ABSENT — not rounded, not "fewer than 3".
+> 🪤 **AND IT FOUND A GATE WITH NO HANDLE BEFORE SHIPPING ONE.** `booked_count` reads
+> `event_vendors.service_id`, and **a package lock cascades rows carrying none** — so FOUR places
+> each asking `bookedCount > 0` would have hidden exactly the cards this feature is for. One shared
+> predicate now. **That undercount is NAMED, NOT FIXED:** widening it moves a public trust number.
+>
+> ⏱ **"USUALLY RESPONDS IN Xm" NEEDED MORE THAN ONE REPLY.** Two live defects on the public
+> marketplace card, both from a median stored without its sample size: one reply earned the word
+> *usually*, and a shop that had **never answered anybody** was advertised as **"responds in 0m"**
+> — because 0 is the no-data sentinel, honoured by `isFirstLookEligible` and not by the card.
+> 🔑 **A SENTINEL HELD IN ONE CONSUMER'S HEAD IS NOT A RULE.** Floor = 3 replies, decided once,
+> the count now stored beside the median. **Fail closed** (DEFAULT 0, no backfill — re-deriving
+> "replied" in SQL would be the second definition the column exists to prevent).
+>
+> 📸 **THE OWNER RULED ON THE SKIPPED ITEM THE SAME DAY, AND IT IS BUILT** — PR
+> [#4748](https://github.com/iscasasola/setnayan-platform/pull/4748), 5th of the wave. *"we only
+> count events that they had photos with … no photo, no proof the event took place."*
+> **The unit is the CELEBRATION, never the photo**, and the photograph is the EVIDENCE — which
+> makes the count its own anti-padding rule. **UNFLOORED on purpose** (it counts the shop's OWN
+> work, like `booked_count`, and a floor would kill the nudge for exactly the first two
+> celebrations it exists to encourage), labelled **"· this shop"** because captures are keyed on
+> the profile, and it opens the record on the shop's own view but only rides along on a couple's.
+> 🚨 **A CHECK CONSTRAINT REJECTING A TEST FIXTURE TAUGHT ME A RULE READING HAD NOT:** the capture
+> table's own comment says **`nsfw_checked` must be TRUE to surface**, the route writes FALSE and
+> flips it after the screen, and **a posterless clip stays unscreened forever**. A naive count
+> pads a public number with media nothing has looked at.
+> 🛑 **AND ONE READING WAS REFUSED, DELIBERATELY.** *"Registered as a completed event"* could also
+> mean a photo marks the BOOKING complete. It does not: `completion_status` carries the owner's
+> OWN 2026-08-21 rule that **a supplier's claim is not a release**, and a capture is the
+> supplier's own act — so a photo certifying a finished job would move the booking fee, the review
+> window and the delete handshake with it. **A count, not a state**, pinned by a test.
+> 🔑 *An answer that fits the question you asked is not proof it was about the thing you asked.*
+> **If he meant that too, it is a separate change and needs saying out loud.**
+> ⏭ **STILL HIS, AND STILL OPEN:** the capture lane is flag-dark behind the unresolved DPO
+> question about a supplier collecting guest photos. **This ships the counting rule, not the
+> lane** — prod holds 0 captures, so every card reports 0.
+>
+> 🗜 **THEN HE RULED TWICE MORE ON THAT SAME FEATURE, AND BOTH ARE BUILT** — PRs
+> [#4765](https://github.com/iscasasola/setnayan-platform/pull/4765) (merged) +
+> [#4767](https://github.com/iscasasola/setnayan-platform/pull/4767). A supplier's photographs
+> were outside TWO of the rules every other photograph obeys, and both failures were silent.
+> **DELETE:** the rows cascade with the celebration, the FILES did not — so the couple was told
+> their photographs were gone while the objects sat in storage, unreachable because the rows that
+> named them were gone. **COMPRESS** (owner: *"compress it as well"*): they had no web copy at
+> all, so the retention sweep could not see them and their originals stayed full-size forever.
+> 🔑 **THE INVERSE HAD TO SHIP FIRST.** Nothing was copying a supplier's captures out to the
+> couple's Drive, and the sweep refuses to drop anything the couple has not received — so wiring
+> compression alone would have been **inert on Drive-connected celebrations and unsafe on
+> unconnected ones**. ⛔ A vendor CLIP keeps its video and **no column pretends otherwise**: the
+> couple-side copy is transcoded in the guest's own BROWSER, and a column with no writer is the
+> seventh gate with no handle. Its still compresses; a vendor clip is capped at 10s.
+> 🚨 **AND MUTATION-TESTING IT FOUND THE SAME SAFETY FILTER UNGUARDED ON THE COUPLE'S OWN
+> PHOTOGRAPHS** — removing `.not('display_r2_key','is',null)` from the guest-capture query passed
+> **all 9785 tests**. That line is all that stands between the sweep and deleting an original
+> with nothing to replace it. 🪤 My first guard for it was **decoration**: a file-level match on a
+> string THREE queries share, green at 3 → 2. It now DERIVES the query list from the code and is
+> FLOORED, and the later counts were measured **inside each query block** — because the first
+> honest count had sabotaged a different query than the one it aimed at.
+>
+> ⚠ **TWO THINGS I TOLD THE OWNER ABOUT THIS FEATURE WERE WRONG, both from reading the ORIGINAL
+> migration instead of the live object.** The clip cap is **10 seconds, not 5** (his own override
+> 2026-07-22; the DB CHECK was relaxed to match). And the allowance is **not 10 photos + 3
+> clips** — that model is dead; the live one is the points gift he set 2026-07-22 (50 pts scaling
+> to 200 with the booking fee, photo=1, clip=7) and **it IS enforced**, in the capture route.
+> The `photo_cap`/`clip_cap` columns nothing reads are leftovers. **Read the object.**
+>
+> ⛔ **Also deliberately untouched:** whether a minted package should publish with its service
+> instead of landing `is_active:false` (the OWNER_DECISION half of the same handoff note), and
+> `isFirstLookEligible`, which feeds RANKING rather than a claim.
+>
+> 🪤 **TWO OF MY OWN GUARDS WERE DECORATION, BOTH CAUGHT ONLY BY COUNTING.** One matched
+> `displayUrlForStoredAsset` anywhere in the file, so gutting the resolution left the IMPORT behind
+> and it stayed GREEN at 2 → 1. And I ran `tsc`, THEN added a test file, and never ran it again —
+> CI caught what that ordering hid. **38 mutations across the four PRs, every one printed
+> before → after, every one red.**
+
+> ### ✅ DONE 2026-08-23 — W1-B: PABATI RETIRED · THE BUY PAGES SELL · THE RAIL LIGHTS UP
+> **4 PRs. Do NOT rebuild any of it.** Rows: `DECISION_LOG.md` 2026-08-23.
+>
+> 🗑 **PABATI IS GONE FROM THE PRODUCT** — PR [#4724](https://github.com/iscasasola/setnayan-platform/pull/4724), merged, and its
+> migration `20271159146115` is **verified applied in prod BY THE OBJECT** (`pabati_clips` null · 0 pabati functions ·
+> `ensure_papic_board(p_event_id uuid)` · the greeting row reads `clip` · the CHECK no longer admits the kind · 0 bundle rows).
+> Owner 2026-08-21: *"we do not need pabati. retire it because it is part of papic."* ⚠ **It SUPERSEDES the free-ing made hours
+> earlier the same day.** 🔑 **The capability survives the product** — a guest is still asked for a video greeting; it is an
+> ordinary Papic clip challenge now. Safe by arithmetic: 0 greetings ever, 0 orders ever.
+> 🚨 **FREE AND RETIRED ARE THE SAME CATALOG ROW AND OPPOSITE PRODUCTS**, so a retirement takes BOTH halves too, in the mirror
+> direction: the row stays deactivated AND the `FREE_FOR_ALL_SKUS` entry comes out. ⛔ **The shot ladder, the Thank-You film and
+> the 50 clip greetings are untouched.** 🔒 The word `pabati` stays RESERVED — shop addresses are immutable and it is still a
+> taxonomy leaf `SetnaProd` advertises.
+>
+> 💰 **NINE BUY PAGES OPENED WITH NOTHING; SEVEN ACTUALLY SELL** — PR
+> [#4726](https://github.com/iscasasola/setnayan-platform/pull/4726). The owner's complaint (*"i tried unlocking setnayan AI …
+> it does not look appealing"*) was that a page taking ₱2,499 showed no name, no promise and no price.
+> 🔑 **THE WORDS WERE ALREADY WRITTEN AND WERE INVISIBLE** — passed to `PageMasthead`, which renders its title `sr-only`.
+> ⚖ **THE MASTHEAD IS NOT THE BUG and is untouched** — it is owner-locked and correct for the ~380 pages a person lives in.
+> 🪤 **The brief said nine; measured, SEVEN render a checkout.** `indoor-blueprint` is a RETIRED SKU whose orders are
+> hard-rejected and `supplies-marketplace` cannot take an order at all — a priced hero on either is a **fake door**.
+>
+> 💡 **THE STUDIO RAIL ROWS LIGHT UP** — PR [#4725](https://github.com/iscasasola/setnayan-platform/pull/4725), merged. That was
+> named debt since 2026-08-21: the rail resolved "which row is lit" TWICE, in two components that could not see each other, so
+> lighting the Studio rows double-lit. 🔑 **A winner resolved per COMPONENT is not a winner** — the same mistake as a boolean per
+> row, one level up. One list, one resolver, the answer published down. Measured overlap: exactly **three** URLs.
+>
+> 📰 **ARRANGING YOUR OWN STORY IS FREE** — PR [#4727](https://github.com/iscasasola/setnayan-platform/pull/4727). Owner:
+> *"keep it free if this costs us nothing."* ⚠ **The trap was already half-sprung** — the row was off sale with zero orders and
+> nothing had switched the feature on, so the perks were DARK for anyone without the ₱3,500 umbrella.
+> 🔒 **The umbrella is UNTOUCHED at ₱3,500** — the no-watermark gates on a DIFFERENT helper reading `COUPLE_WEBSITE_PRO`.
+> ⛔ **Do not collapse the two helpers**; that hands the watermark away with nothing thrown.
+> 🔴 **OPEN OWNER DECISION: what Event Hub PRO should now say it buys.** The SKU is not retired and no price is moved.
+>
+> 🎨 Same PR: the story page's gold eyebrows measured **3.48:1** and are deepened to the same gold one step down — **5.02:1**
+> light, **5.17:1** dark. ⚠ In this repo the slot named `terracotta` is the GOLD and the action colour lives in `mulberry`.
+>
+> 🪤 **FIVE GUARDS WERE DECORATION OR CRIED WOLF IN THIS ONE STREAM, AND EVERY ONE WAS CAUGHT BY MEASURING, NOT BY REVIEW:**
+> two mutations landed and stayed GREEN (a behaviour test that composed the rail itself could not see the shell stop composing
+> it); one sabotage **did not apply at all** and reported a pass; a two-h1 check asked only for a `?` between two elements and a
+> `{true ? (` walked through it; a contrast guard went red on **the comment explaining the fix**; and `lint-page-masthead` fired
+> on a comment that merely NAMED its two tokens in one paragraph. **Print the occurrence count before → after, strip comments
+> before matching, and assume the sixth.**
+
+> ### 🔴 NEWEST — A COUPLE CAN DELETE THEIR OWN EVENT (2026-08-20/21 · 9 PRs, ALL MERGED AND LIVE)
+> **Do NOT rebuild any of this.** Full row: `DECISION_LOG.md` 2026-08-20 and 2026-08-21.
+> PRs #4603 · #4609 · #4623 · #4626 · #4627 · #4632 · #4638 · #4641 · #4646.
+>
+> **WHAT SHIPS:** a `⋯` menu on every My Events card the person ORGANISES — **Put this away**
+> (reversible, pre-existing) and **Remove for good**. Deleting cancels unpaid bills, cancels
+> waitlist entries, releases our Live Studio channel, clears stranded supplier notifications and
+> chapter gallery pointers, **and deletes the photo files in R2**. The confirmation says so:
+> *"Your photos and everything about this celebration are deleted for good."*
+>
+> 🔑 **THE GATE IS IN THE DATABASE, NOT THE ACTION.** `sever_event_connections()` is a BEFORE
+> DELETE trigger because there were SIX app delete paths and a seventh with none — and
+> **`DELETE` on `events` is now REVOKED from `authenticated`/`anon`** (2026-08-21), because that
+> lane skipped the R2 sweep and the supplier gate. Every real path uses `service_role`.
+>
+> ⚖ **OWNER RULES, 2026-08-21 — do not re-ask:**
+> · A supplier the couple has **PAID** holds the delete until they **agree** — unless the event
+>   has passed AND the job is **confirmed** (`vendor_marked` is a claim, not a release; a
+>   `disputed` completion never releases).
+> · **Photos ARE deleted** when the couple deletes their own event. ⚠ **This EXTENDS the photo
+>   lock, it does not reverse it** — *"not delete, just compress"* / *"we keep it for life"*
+>   govern RETENTION and are untouched.
+> · **Chat attachments are KEPT.** · An **unconfirmed payment screenshot BLOCKS** the delete.
+> · **On a SHARED record, the vendor keeps it** — contracts, payments, completed bookings.
+>   ⚠ Scoped: it does NOT convert the couple's private planning (budget, shortlist, who they
+>   rejected) into vendor data. **The test is whether the supplier took part in it.**
+>
+> ✅ **BOTH OF THE "GENUINELY UNBUILT" ITEMS BELOW ARE NOW FALSE — re-measured 2026-08-27 against
+> prod and `origin/main` by the `papic2` session. They are kept, struck, because the LESSON in how
+> they were measured is the valuable part.**
+> 1. ~~🔴 **THE VENDOR CANNOT ANSWER.**~~ **STALE.** `vendorAgreeToDeletion` /
+>    `vendorDeclineDeletion` are exported AND passed into `app/vendor-dashboard/page.tsx:313`.
+>    **The supplier can answer. Do not rebuild it.**
+> 2. ~~🔴 **VENDOR DATA DOES NOT SURVIVE A DELETE**~~ — **STALE IN BOTH ITS NUMBERS AND ITS
+>    VERDICT.** `vendor_reviews.event_id` is **SET NULL** in prod, so a review already outlives its
+>    event. The FK split is **141 cascade · 22 survive** (not 152/10).
+>    🔑 **AND THE FK CENSUS IS THE WRONG INSTRUMENT — this is the durable lesson.** **Six
+>    `BEFORE DELETE` triggers rewrite the outcome before any FK rule fires**, so counting
+>    `ON DELETE` rules over- AND under-states survival at once: `event_vendors` reads CASCADE and
+>    **survives** (its `event_id` is nulled and `event_type_at_delete` / `event_date_at_delete`
+>    stamped), `vendor_reviews` reads SET NULL and a **self-dealt one is destroyed**, and
+>    `event_vendor_payments` carries its own CASCADE to `events` yet **survives** by following the
+>    preserved booking through an `ON UPDATE CASCADE`. **Measure a deletion by deleting, in a
+>    rolled-back transaction — never by reading the constraint catalogue.**
+>    ⚖ **MEASURED THAT WAY, THE OWNER'S RULE IS MET ON THE ROWS:** booking · contract · confirmed
+>    payment · review all survive (1 → 1 each). Line items, the supplier's own captures, the
+>    gallery handover and meetings go with the celebration.
+>    🚨 **BUT THE PUBLIC CARD WAS NOT READING THE ROW IT PRESERVED** — `service_card_records`
+>    inner-joined `events` in every CTE, so ONE couple's deletion took `booked_count` 3 → 2 and
+>    **emptied the type mix and the whole dated ledger** by dropping the card under the minimum-N
+>    floor. Fixed: PR [#4920](https://github.com/iscasasola/setnayan-platform/pull/4920), migration
+>    `20271174846565`. ⚠ Verify with `gh pr view 4920 --json state,mergedAt`.
+>    🔑 **THE FIFTH COSTUME OF "STORED DOES NOT MEAN SURVIVES": the three matviews were taught to
+>    tolerate an orphan and this function, written the same week, was not. ENUMERATE THE READERS OF
+>    A PRESERVED ROW — a fix applied to one of them is not a fix.**
+>    ⛔ **STILL FALLING, DELIBERATELY, AND ONE IS THE OWNER'S:** `documented_events` drops because
+>    captures cascade under his own **photos-are-deleted** ruling — *two of his 2026-08-21 rulings
+>    collide, and which wins is HIS call.* `option_mix` drops because `event_vendor_packages`
+>    cascades whole (a new preserve, not a read fix).
+>    ⚠ The 65-table classification in
+>    [`VENDOR_DATA_SURVIVES_DELETION_2026-08-21.md`](VENDOR_DATA_SURVIVES_DELETION_2026-08-21.md)
+>    still has an **INCOMPLETE** adversarial check (31 of 71 agents cut off; synthesis never ran) —
+>    treat every row as **mapped-but-unverified**.
+>    🚨 **And "stored" does not mean "survives"**: `vendor_activity_stats` is recomputed by
+>    unrelated events, so a saved snapshot silently drops to the smaller number.
+>
+> 🪤 **THE TRAP THIS WORK KEPT PRODUCING — assume a sixth.** Five separate guards passed while
+> protecting nothing: a `REVOKE UPDATE (cols)` that is **inert against a table-level grant**; a
+> forgery test that ran with **no `auth.uid()`**, so RLS refused an anonymous caller and it went
+> green for the wrong reason; a test whose **forgery attempt had been deleted by an edit**, so it
+> asserted an outcome nobody had tried to change; `assert.rejects` where **RLS returns zero rows
+> instead of throwing**; and an ordering check that is **untestable in an empty replay**. None
+> were caught by tests passing — only by breaking the guarded thing and measuring whether
+> anything complained. **Print the occurrence count before → after, and when a well-formed
+> sabotage reports GREEN, suspect the sabotage before the guard.**
+
+> ### ✅ DONE 2026-08-20 — THE CREATE FLOW ASKS WHAT IT ALREADY KNOWS. Do NOT rebuild any of it.
+> **Contract: [`WHATS_NEXT_Onboarding_Asks_What_It_Knows_2026-08-20.md`](WHATS_NEXT_Onboarding_Asks_What_It_Knows_2026-08-20.md).**
+> Five defects the owner found in ONE walk from *Your Year* → birthday.
+> 🛑 **THIS HEADER SAID "NOTHING BUILT · No branch, no PR" FOR SEVEN DAYS AFTER ALL FIVE SHIPPED.**
+> **ALL FIVE ARE MERGED:** PRs [#4604](https://github.com/iscasasola/setnayan-platform/pull/4604) ·
+> [#4606](https://github.com/iscasasola/setnayan-platform/pull/4606) ·
+> [#4608](https://github.com/iscasasola/setnayan-platform/pull/4608), all 2026-08-20, **re-verified
+> BY THE OBJECT on `origin/main` `b1fcccbb7` (2026-08-27)**, not by the PR list: the bill now
+> redirects to `/dashboard/{id}/orders/{orderId}?created=1` (the page that already renders the
+> total, the reference and the bank details) instead of the photo studio · the celebrant screen
+> branches on `knowsCelebrant` and folds the box into a Change chip · the day title keys on
+> `anchorDate || momentDayISO` · the age-band screen is **skipped in transit, never removed** · and
+> 186 option keys carry real words with a humanising fallback for the 187th. **48 guard tests, all
+> green.** ⚠ Verify with `gh pr view <n> --json state,mergedAt` before trusting this line.
+> 🔑 **The contract file has carried its own ✅ banner since the day it shipped. This file — the one
+> that is auto-loaded and therefore the one that gets read — went on saying the opposite.** Fourth
+> instance of *a correction that lands only in the detail doc has not landed*; the money paragraph
+> two blocks down records the third.
+> ✅ **AND THE LAST OPEN MEASUREMENT IS CLOSED (2026-08-27):** the contract's § 4 warned that an
+> admin row in `event_type_onboarding.questions` could override the birthday questions wholesale,
+> so the code defaults might not be what the live site renders. **Read out of prod: that table holds
+> exactly ONE row — `wake` — and its `questions` is NULL.** There is no birthday override; the code
+> defaults ARE what ships.
+> 🪤 **THE TRAP THE BUILD AVOIDED, worth keeping:** the age fix is deliberately **NOT** routed
+> through `deriveOnboardingPrefill`, because that seam is gated by a fail-closed flag that is OFF —
+> a fix written behind it would have shipped switched off and looked done. A test pins the
+> independence.
+>
+> 🔴 **THE MONEY ONE FIRST, AND THE OBVIOUS DIAGNOSIS IS WRONG.** Owner: *"i had a price to pay.
+> but i there was no payment. it just created."* The tempting read — the charge was refused, so
+> the flow fell through to the ordinary dashboard — is **FALSE**. Production holds the order:
+> **`S89O-GCR6BDC4Z6` · Setnayan AI ×1 · ₱499 · ref `SNEYGV00WY`**, minted
+> 0.7s after the event — `submitted` when that was measured, **`cancelled` since 2026-08-20**
+> (see the closure below). He WAS redirected — to the **Papic photo studio**, whose banner names
+> **no amount** (`papic_amount` is never set by the onboarding mint), gives **no bank details**,
+> and says *"your **cameras** activate"* to a man who bought the assisted planner. The services
+> step had promised, verbatim, *"We'll show you where to send it right after this."*
+> 🔑 **A CODE PATH THAT CAN FAIL SILENTLY IS NOT PROOF THAT IT DID.** The mint is non-fatal by
+> contract and returns `paymentPath: null` on every failure — a story that fits the symptom
+> perfectly and did not happen. **One query settled it. Query prod before writing a diagnosis
+> from a plausible code path.**
+> ✅ **THAT ORDER IS CANCELLED AND THIS ITEM IS CLOSED — DO NOT RE-ASK IT.** Read out of
+> production 2026-08-25: `S89O-GCR6BDC4Z6` is **`status='cancelled'`**, cancelled 2026-08-20 at
+> **the owner's own instruction**, 5h28m after it was minted, carrying an admin note explaining
+> that the celebration it was bought for was removed by its organiser, that it was never paid
+> (**0 payment rows, 0 receipts**), and that it predates the sever-connections trigger which
+> cancels such bills automatically from now on. **Prod holds exactly ONE order, ever, and it is
+> this one.** There is nothing in any admin queue and nothing for the owner to do.
+>
+> 🔑 **THIS LINE IS WHY THE CORRECTION IS HERE AND NOT ONLY IN THE CONTRACT.** It previously read
+> *"A REAL UNPAID ₱499 ORDER IS SITTING IN PROD — decide whether to cancel it"*. The contract file
+> had ALREADY closed it on 2026-08-23 and said, in terms, *"every 'decide whether to cancel the
+> unpaid ₱499 order' line in this register is stale"* — and nobody edited the copies. On
+> 2026-08-25 a session read THIS file, repeated the stale line to the owner as fact, and sent him
+> hunting through an admin screen for a bill he had personally cancelled five days earlier.
+> **A correction that lands only in the detail doc has not landed.** When a gate closes, edit
+> every row that asserts it is open, in the same commit — and the auto-loaded file first, because
+> it is the one that gets read.
+>
+> 🔑 **RULE 0 PAID AGAIN ON THE SECOND ONE — THE OWNER'S EXACT SENTENCE IS ALREADY CODED.** The
+> date screen already flips to *"When are you celebrating?"* with three day chips; it is gated on
+> a value only the **anniversary-only** anchor screen ever writes. **Widen the trigger, draw
+> nothing.** 🪤 And do NOT fix it by pouring the carried date into `anchorDate` — `anchorOrigin`
+> defaults to the literal `'wedding'`, so a birthday would render **"Our wedding falls on Wed 16
+> Dec 2026"**, naming a wedding that does not exist.
+>
+> 🔑 **THE OTHER THREE WERE A MISSING HANDOVER, NOT MISSING MACHINERY** — the question-drop filter
+> shipped and worked, and the answer already existed twice (the Year page computes "turning 40" and
+> threw it away). ⚠ Its seam is **inert by default**, so a fix written behind it ships switched
+> off — which is why the shipped fix goes around it. ⚠ The raw `1st_birthday` / `adult_regular`
+> chips were **unfixable at the renderer** (the option type has no label slot at all), so the fix is
+> a LOOKUP plus a humanising fallback, not a type change: the stored value IS the key, it is already
+> written into live rows, and a spec authored in the database could never be reached by a type.
+> ⚖ **AND IT WAS 187 OPTION VALUES ACROSS EVERY EVENT TYPE, not the two chips he saw** — `ninong`,
+> `pamamanhikan`, `cord_yugal`, `summa_cum_laude` all rendered raw. Fixing only the birthday two
+> would have been a correction at one site.
+> ⛔ **Do NOT drop a screen at runtime** — out of range is a render-time THROW, removal disarms
+> the "you already have one of these" walk-back for exactly the people it targets, and the file's
+> own comment justifying "nothing is removed" gives a reason that is **not true**.
+>
+> 🔑 **THE WORKFLOWS DIED OF THE USAGE LIMIT, NOT AN ERROR** — two returned `plan: null` and read
+> like empty results while ~80 verified claims sat in their `journal.jsonl` the whole time.
+> **Read the journal before concluding a workflow returned nothing.**
+
+> ### 📖 SETTLED VOCABULARY — "EVENT HUB" (owner-locked 2026-08-16). Do NOT reopen.
+> Three words, three things. They were argued out in full; the reasoning is below so a new
+> session does not re-litigate it.
+>
+> | Word | What it is |
+> |---|---|
+> | **Event Hub** | The event's ONE public address, **for the whole life of the event** — `/{slug}`. Four stages: save-the-date → invitation + RSVP → **the day itself** → the story and album after. |
+> | **Live hub** | A **fullscreen page INSIDE the Event Hub**, whose entry chip exists **only** while `dayOfPhase` is `live` or `post`. Not a second product, not a mode of the website — a separate route you open from it and close back out of. |
+> | **Event Hub Pro** | The paid upgrade (`COUPLE_WEBSITE_PRO`, ₱3,500) — premium touches on the Event Hub. |
+>
+> 🔑 **WHAT THE OWNER SAYS IT IS FOR, verbatim (2026-08-16):** *"where the event proper runs.
+> not the preparation. this is where we share information to the guests, vendors, etc. where we
+> collect photos, and use different services, this is where we have the papic and live studio."*
+> **Verified: 3 of those 4 are true today** — guests ✅ · photos/Papic ✅ · Live Studio ✅ ·
+> vendors ⚠. The vendor element on `/{slug}` is a "you are booked here" strip that links them
+> AWAY to their own dashboard, and it reads `linked_vendor_profile_id`, **empty on all 45 prod
+> rows — so it has never rendered for anybody.**
+>
+> 🛑 ~~That gap IS the build.~~ **RETRACTED 2026-08-17 BY THE OWNER: *"we already have an event
+> website before. that is the event hub. it was already built."* HE IS RIGHT.** The strip
+> **SHIPS** (`app/[slug]/_components/vendor-doorway.tsx`, last touched 2026-08-03) and the link it
+> reads is **stamped automatically by the lock payload** in
+> `app/dashboard/[eventId]/vendors/actions.ts` — whose own comment records that gap being closed
+> on **2026-06-19**. It has never rendered because **nobody has booked a marketplace supplier**:
+> 44 of 45 rows are names a couple typed into a list, and the 45th is a **test row seeded straight
+> into the DB** (`"(SONGDESK TEST)"`), never booked through the screen that stamps.
+> 🔑 **AN EMPTY COLUMN IS NOT A MISSING MECHANISM. Zero rows means nobody has done it yet — grep
+> for the WRITER before scoping a build around the absence.** I read the count, inherited a scope
+> doc's framing, and reported a shipped product as unbuilt **in the register whose entire job is
+> to stop that**. **RULE 0 applies hardest to the section you did not think needed it.**
+>
+> ✅ **THAT ONE ORDERING FIX IS DONE — PR
+> [#4483](https://github.com/iscasasola/setnayan-platform/pull/4483), 2026-08-17. Do NOT start it
+> again.** On a **private** event the page refused a booked supplier **before it ever checked
+> whether they were booked** — the lock screen admits a redeemed guest · a host · a seat-holder ·
+> an invited account, and a supplier is none of them; `resolveVendorCapability` ran ~200 lines
+> later and was never reached. **4 of 6 prod events are private.** Path E was ADDED alongside the
+> other four; `'invited_accounts'` was not folded into any `!== 'public'` test. Nothing was
+> redrawn.
+> 🔑 **A LINK IS NOT A BOOKING.** Grepping the COLUMN found **three** writers of
+> `linked_vendor_profile_id`, not one, and `lib/reusable-bookings.server.ts` mints a LINKED row at
+> **`'shortlisted'`** the couple has yet to lock — so the gate asks the row's STATUS, never the
+> link's presence, and unknown values fail closed. Same boundary PR-H draws refusing an ASKED
+> supplier the venue address.
+> ⚠ **Test-proved, NOT observed** — prod has no linked supplier, so this cannot be shown on the
+> live site. 9 unit + 5 db tests, 7 measured mutations. Do not upgrade that to "verified live".
+> ⏭ Also shipped there: the **host's own page** no longer serves the couple the stranger's body
+> telling them to scan an invitation link they are the ones who send (copy-only; read-only stays
+> read-only). Everything else in
+> [`WHATS_NEXT_Event_Hub_Multirole_2026-08-15.md`](WHATS_NEXT_Event_Hub_Multirole_2026-08-15.md)
+> is smaller than that doc claims — **read its corrected header first; slices 1 and 2 are struck.**
+> Current register: [`WHAT_IS_LEFT_2026-08-17.md`](WHAT_IS_LEFT_2026-08-17.md) § 4.
+>
+> ⛔ **THE READING THAT WAS CONSIDERED AND REJECTED: "Event Hub = only the day."** It matches the
+> owner's *"not the preparation"* instinct, but it was rejected because **the guest keeps ONE
+> link across all four stages** — it arrives on the save-the-date, takes their RSVP, opens at the
+> venue, and holds the photos afterwards. Renaming at the day turns one link into two products in
+> the guest's head and leaves save-the-date + RSVP with no name at all. **"Where the event proper
+> runs" is the Event Hub's most important STAGE, not a separate thing.**
+>
+> ⚠ **"Controller" is the wrong mental model TODAY and the right one for the FUTURE.** The Event
+> Hub is a PLACE people visit, not a control panel: the host gets a **read-only** ribbon on it and
+> every real control (guest list · seating · budget · schedule · vendors) lives in
+> `/dashboard/[eventId]`. It only becomes controller-shaped after the multi-role build.
+>
+> 🪤 **I OVERSTATED A COLLISION HERE AND NEARLY COST THE OWNER A DECISION HE DID NOT NEED.** I
+> flagged *"Event Hub means three things — you must rule on it"*; measured, the SKU was
+> unambiguous and `/{slug}/hub` said "Event Hub" only in a **fallback** state guests rarely meet,
+> while its visible chip had always said **"Live hub"**. Two strings + four aria-labels
+> (PR [#4480](https://github.com/iscasasola/setnayan-platform/pull/4480)).
+> **Measure a collision before escalating it.**
+
+> ### ⛔ FALSE BELIEF IN CIRCULATION — kill it on sight (corrected 2026-08-04)
+> **"A migration whose prefix sits below prod's applied head merges green and creates NOTHING."**
+> **THIS IS FALSE.** `deploy-prod.yml` and `supabase-migrations.yml` both run
+> `supabase db push --include-all --yes`, and `--include-all` exists precisely to apply
+> migrations dated before the remote head.
+>
+> **Measured 13 ways:** 12 migrations were historically added out of order and **all 12 are
+> applied in prod**; and the open-browse launch migration `20271102765509` applied on 2026-08-04
+> while sitting **two prefixes below the head**.
+>
+> 🦠 **It spreads, which is why it is in the auto-loaded file.** It began in one migration header,
+> was repeated in **six** migrations (`20271102603681` · `20271102765509` · `20271102810371` ·
+> `20271103100614` · `20271104090000` · `20271106090000`) — **two of them written by other
+> sessions AFTER the correction landed** — plus `DECISION_LOG.md` rows 2026-08-02/08-03 and
+> `PR_H_Lock_Request_Handshake_BUILD_SPEC_2026-08-04.md`. Those migrations are APPLIED, so they
+> are **not edited**; this block is the correction. Do not treat a migration comment as evidence.
+>
+> 🔑 **Where it came from:** a `count(*) WHERE version = <prefix>` on an **unmerged** PR returned
+> `0`, read as *"it will be skipped."* Zero was because the PR had not merged. Correct fact,
+> invented consequence.
+>
+> ✅ **What IS true:** the PGlite replay (`apps/web/tests/db/replay-migrations.ts`) applies in
+> **filename order**, so a low prefix that depends on a higher-prefixed, already-merged migration
+> fails every `*.db.test.ts` while prod is fine. Allocate forward with `pnpm migration:new` for
+> **that** reason and for the UNIQUE rule — never because "it won't apply."
+> `check-migration-timestamps.mjs` enforces UNIQUE + not-hand-typed-round. **It does not check
+> ordering and never did.**
+
+> ### 🔑 TRIGGER — the owner saying **"what's next"** activates ALL unfinished sessions
+> (Set 2026-07-29 for cross-account continuation — the prior account hit its usage limit; a
+> fresh account has NO conversation context, only these files.) On the trigger, open
+> [`WHATS_NEXT_INDEX.md`](WHATS_NEXT_INDEX.md) — the master register + its HUMAN-GATE rules —
+> and its newest entries:
+> - [`WHATS_NEXT_Card_Family_Handoff_2026-07-29.md`](WHATS_NEXT_Card_Family_Handoff_2026-07-29.md)
+>   — maker/card/details/customization-inquiry: 11 PRs DONE (anchored `origin/main`=`441779c1f`,
+>   verify before trusting), locked principles, the unfinished build list, the trap list.
+>   ⏭ One pending owner flip: `NEXT_PUBLIC_SERVICE_DETAILS_ENABLED`.
+> - The **Papic two-type model** (locked 2026-07-29, build NOT started): DECISION_LOG row
+>   2026-07-29 + memory `project-setnayan-onboarding-papic-ai-cards`.
+> - **Song Desk is DONE** (8 PRs, all merged 2026-07-30). Superseded by the INTERCONNECTION
+>   LAYER block below — read that instead.
+> - 🗄 **STORAGE HYGIENE — DONE 2026-08-02, do NOT rebuild.** `/admin/website-media` ships
+>   (PR #4050): lists what is actually in the media bucket, marks each file *In use* /
+>   *Left over* / *Not sure*, Download + single-file Delete, **no bulk delete**. The two
+>   upload paths now sweep what they replaced. Download forces a real save (#4052). The
+>   **sign-in hero is RETIRED** (#4055) — deleted, `/admin/hero-video` → 404 — it sliced
+>   every clip into 73–361 stills for a screen nothing rendered. See the newest section of
+>   [`WHATS_NEXT_INDEX.md`](WHATS_NEXT_INDEX.md) for the owner actions + 7 traps.
+>   🔑 **Prefixes come from the UPLOAD CALL SITES, never a module name** (rev 1's allowlist
+>   matched ZERO objects). 🔑 **Prose is not a safety mechanism** — a live audio file sat
+>   under "probably left over" with Delete ON. 🚨 **The main checkout was switched to `main`
+>   under this session 3×** — branch, then `git worktree add` immediately.
+> - 🎨 **[`WHATS_NEXT_Design_Programme_2026-08-01.md`](WHATS_NEXT_Design_Programme_2026-08-01.md)**
+>   — **the newest stream. Read it before ANY design/UI/page work.** Palette ✅ shipped on all
+>   401 routes (PR #3988, locked by a derived-contrast guard); 12 archetypes + 7 overlay types
+>   ✅ drafted to `prototypes/archetype_*_2026-08-01.html`.
+>   ✅ **THE OWNER GATE IS CLOSED — ALL 19 APPROVED 2026-08-04, no changes requested**
+>   (`DECISION_LOG.md` 2026-08-04 · commit `02d995c` · verdict-sheet artifact `36f20665` ·
+>   `PARALLEL_WORK_CLAIMS_2026-08-04.md` S8 flipped in the same commit). The prototypes are
+>   **BINDING** — port them, never redraw them; a delta between a ported screen and its
+>   archetype is a defect in the port, not a fresh design decision.
+>   ⚠ **This line said "owner has not seen the prototypes" for two days AFTER the approval**,
+>   and a session acting on it told the owner his top priority was to go look at something he
+>   had already signed off. The programme doc's own state table (line 37) and item #3 (line 234)
+>   carried the same stale claim while an approval banner sat at the top of the SAME file.
+>   🔑 **A doc that records a decision at the top and contradicts it in the middle will be read
+>   from the middle** — grep the file for the old state before declaring a gate closed.
+>   ⏭ `design#1` + `design#2` are DONE (#4064/#4065). The remaining ~40 port units are ALL
+>   unblocked.
+>   🔴 **`design#3` IS "PREMISE FALSIFIED — DO NOT BUILD THIS" (2026-08-02).** This line said
+>   *"`design#3` (the shell) is next and is the architectural one"* for six days while the
+>   programme doc's own entry for it (line 113) carried a red DO-NOT-BUILD banner. **The
+>   persistent app shell ALREADY SHIPS AND IS MOUNTED** — `SidebarShell` has 20 consumers and
+>   is mounted in both `admin/layout.tsx` and `dashboard/[eventId]/layout.tsx`; a
+>   `template.tsx` provides route transitions in **all four** dashboard trees; the mobile
+>   bottom navs are mounted in the same layouts. The "five primitives ship unused" claim is
+>   **wrong on all five** (`sheet.tsx` 5 imports · `bottom-nav.tsx` 32 refs · `sub-nav.tsx` 22
+>   · `nav-slide-controller.tsx` + `app-init-splash.tsx` both mounted by the ROOT layout).
+>   The doc calls rebuilding it *"the paid-twice mistake at its largest scale."*
+>   ⏭ **WHAT IS ACTUALLY NEXT: `design#4`** — RECONCILE the ~28 existing per-surface
+>   prototypes to the terracotta palette + the shipped shell. They are **still correct about
+>   composition** and carry only the old palette. **RECONCILE, NEVER REDRAW.**
+>   🔑 This is the exact failure the two lines above warn about, in the auto-loaded file
+>   itself: a decision recorded in one place and contradicted in another, with the contradiction
+>   sitting in the file every new session reads first.
+> - 📈 **SEO / GEO — code side DONE 2026-08-02, do NOT rebuild.** `llms.txt` is now GENERATED
+>   from the catalog (#3952), the SEO surface has a **"Re-run audit now"** button (#3960), and
+>   the audit stopped grading two sources nothing else read (#3973). Audit `fail 2 → 0`.
+>   ⏭ **2 owner actions:** paste `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` + `NEXT_PUBLIC_BING_…`
+>   into Vercel **then redeploy** (they inline at build time); the Search Console DATA pull is
+>   **BLOCKED** on the suspended Google Cloud account (appeal `73857927`) ⇒ `seo_metrics` = 0
+>   rows. ✅ **The `sameAs` nag was FALSE — the FB Page already ships. Do not create one.**
+>   ⏸ **The Filipino-USP hero/manifesto copy was owner-APPROVED but never entered code** —
+>   copy is §5 of `03_Strategy/Claude_Design_Brief_2026-07-31.md` (⚠ that brief's §1 palette is
+>   superseded by the terracotta lock; §5 copy is still valid), and it targets `/`, which the
+>   Design Programme **excludes** ⇒ `OWNER_DECISION` on whose scope it lands in.
+>   🔑 **A guard comparing two HAND-TYPED things is not a guard** — that is how `llms.txt`
+>   drifted for 3 weeks with green CI. See the newest `WHATS_NEXT_INDEX.md` section for 8 traps.
+> Execute per each contract's own rules; build flag-dark; stop at every HUMAN gate.
+
+> ### ✅ DONE 2026-08-12: THE ROW IS YOURS — THE FIELD IS NOT (8 fixes, all live)
+> **One defect shape, eight times, across five years of migrations by different
+> hands.** A policy that says *"this row is yours"* — PERMISSIVE `FOR ALL` on
+> `user_id = auth.uid()` or equivalent — **never had an opinion about what is IN
+> it**, so a field recording somebody ELSE'S decision stayed forgeable.
+> Every one was proven broken in the PGlite replay BEFORE the fix and refused
+> after, and every one is verified applied in prod **by the object**.
+>
+> | PR | what a person could do |
+> |---|---|
+> | #4353 | couple posts in their supplier's voice / Setnayan's / a coordinator's — and it unmasked the supplier's real name |
+> | #4358 | couple signs a guest announcement as the coordinator, and vice versa |
+> | #4361 | 🚨 **any signup could make themselves a Setnayan admin** |
+> | #4364 | supplier awards itself the public "Setnayan checked your years in business" badge |
+> | #4365 | supplier marks its own payout destination "checked", bypassing the review queue |
+> | #4366 | uploader pre-marks a photo `clean` → **the NSFW screen never runs on it** |
+> | #4367 | supplier creates a verification application already `approved`, with a decision naming an admin |
+> | #4368 | couple plants a `service_activated` ledger row → what they paid for silently never activates |
+>
+> 🔑 **THE APP LAYER IS NEVER THE CONTROL.** `lib/supabase/client.ts` ships a
+> browser client, the anon key is public by construction, PostgREST serves every
+> `public` table at `/rest/v1/<table>`. "Our server action always sets it
+> correctly" is not a defence. **The GRANT and the POLICY are the only controls.**
+>
+> 🚨 **A GUARD IS ONLY AS WIDE AS THE VERBS IT FIRES ON.** #4361 was a *correct*
+> guard attached `BEFORE UPDATE` only: updating yourself to admin was reverted,
+> **delete-your-own-row-then-re-insert-as-admin was accepted**, and `is_admin()`
+> — trusted by ~298 policies and the `/admin` gate — returned true. #4367 is the
+> same fault in RLS (UPDATE policy constrained the state machine, INSERT policy
+> did not). ⚠ A PERMISSIVE `FOR ALL` policy admits **INSERT and DELETE**, not
+> just UPDATE. And #4364 is the counter-example: the verbs were right, the
+> **deny-list** was stale — *a deny-list is a bill you have to keep paying.*
+>
+> 🪤 **READ THE COLUMN DEFAULT BEFORE YOU REVOKE.**
+> `vendor_payment_methods.moderation_status` defaulted to **`'approved'`**, so
+> the obvious revoke would have shipped **silent universal auto-approval** — every
+> payout destination in front of couples, never queued, no error. *Worse than the
+> bug.* Caught by the Fable planning pass, not by the sweep. Consequence for
+> tests: on such a table **"the forgery is refused" proves nothing** — assert that
+> an insert naming nothing reads back the SAFE value.
+>
+> 🔑 **PICK THE TOOL BY WHAT THE LEGITIMATE CODE MUST NAME.** Revoke the column
+> when no RLS client writes it (#4366). Trigger when the value must exist but the
+> browser must not choose it (#4353/#4358). Tighten the policy when the caller
+> legitimately names it with *some* legal values (#4367 `status`, #4368
+> `event_type` — a revoke would break checkout loudly). **Trigger and NOT revoke**
+> when the app names the column to write a specific safe value (#4364: the
+> vendor's year-change clears the badge to NULL through their own session, and
+> Postgres checks privileges against columns NAMED, not values).
+>
+> 🪤 **`auth.role()` CAN NEVER BE NULL IN THE PGlite REPLAY** — the shim returns
+> `'anon'` where prod returns NULL, so every `auth.role() IS NULL` privileged
+> branch is **dead code in every db test in this repo**. The first cut of #4361
+> relied on it and silently stripped the § 10a owner `is_internal` flag at signup,
+> green everywhere else. Derive from `current_user NOT IN ('authenticated','anon')`
+> — true in both. The shim is left alone (1000+ tests) but is now ASSERTED, so
+> whoever fixes it is told.
+>
+> 🪤 **THE SWEEP THAT FOUND THESE WAS BROKEN ON ITS FIRST RUN** and reported three
+> unverified claims as findings: its target list reached the workflow as a
+> JSON *string*, an `Array.isArray` guard degraded it to `[]`, and only the final
+> synthesis agent ran — which improvised its own audit with nothing checking it.
+> Re-run with the list embedded in the script and a hard throw on an empty list:
+> 36 targets, 33 agents, two adversarial lenses per claim, either able to kill it.
+> 🔑 **A fan-out that silently sweeps nothing looks exactly like a clean result.**
+>
+> ⏭ **OPEN, none of it security:** withdrawing a verification application is
+> **broken in prod today** (the UPDATE policy admits only draft/pending_review,
+> the action writes `'withdrawn'`) — deliberately not fixed, widening a policy is
+> a product call; a supplier can likely add editorial photos past the
+> recommended-pick gate and the 3+3 cap (**unverified**); and the replay shim above.
+
+> ### ▶ ACTIVE 2026-08-07: A REJECTED QUERY IS NOT A THROWN ERROR — and TWO operational warnings
+> **Full handoff: [`WHATS_NEXT_Session_Handoff_2026-08-07.md`](WHATS_NEXT_Session_Handoff_2026-08-07.md).**
+> 6 PRs merged, 1 closed as superseded.
+>
+> 🔴 **A LIVE USER-FACING BUG RAN FOR WEEKS WITH GREEN CI.** Every guest who wrote a
+> message on a Papic photo got `save_failed`. The route posted EIGHT named arguments to
+> `submit_photo_message`; prod's function took SEVEN. **PostgREST resolves an RPC by its
+> exact set of NAMED arguments** — one unknown name means NO candidate matches and the
+> call fails before the body runs. Nothing threw; CI never calls the live database.
+> 🔑 **THIS IS THE THIRD COSTUME OF ONE RULE.** A phantom **column** in a select, a
+> phantom **enum value** in a filter, and now a phantom **argument** in an `.rpc()` all
+> get the query **REJECTED, NOT THROWN**. Silence every time. Assume a fourth exists.
+>
+> 🔑 **WHY THE SCHEMA WAS MISSING — the orphan directory.** The feature's migration was
+> written into `apps/supabase/migrations/`; `supabase db push` reads
+> `<repoRoot>/supabase/migrations` ONLY. The app half shipped and went live, the schema
+> half went nowhere, and **both halves looked done**. Same shape as the orphan
+> `changelog.d` dirs that stranded 172 fragments.
+>
+> 🛡 **THREE NEW GUARDS, ALL MUTATION-TESTED — do not weaken or delete:**
+> `lint-server-only-boundary.mjs` · `lint-migrations-dir.mjs` ·
+> `rpc-argument-names.db.test.ts` (197 `.rpc()` sites checked, 8 skipped AND reported).
+> 🔑 **Wiring a guard into `ci.yml` takes THREE edits** — the step (`id:` +
+> `continue-on-error`), the **env binding**, and the `check '...' "$VAR"` line. Miss any
+> one and the guard runs but can never fail the job. It is decorative.
+>
+> 🚨 **A "VERIFIED" TASK BRIEF CAN STILL BE WRONG.** The orphan-dir brief said all three
+> findings were checked and said *delete both files*. **Finding 3 was false** — its check
+> matched `column_name ILIKE '%kwento%'`, which proves *some* column exists, not that
+> *this file's* objects do. Obeying it would have **destroyed the only remaining record
+> of schema a live feature needed.** Re-verify before running a brief's destructive step.
+>
+> ⚠️ **1 · ANOTHER SESSION WORKS THIS REPO CONCURRENTLY.** A force-push was rejected, and
+> that rejection is the ONLY reason I noticed it had pushed the same fix minutes earlier;
+> forcing would have silently erased its work. Before any force: the remote tip must
+> equal your own `ORIG_HEAD`. A naive "does the remote have commits I lack?" **cries wolf
+> after your own rebase.** And **verify the push landed** — a `&& echo "pushed"` chain
+> prints success after a failed push.
+>
+> ✅ **2 · THE 96 UNCOMMITTED FILES ARE SAFE — THAT OWNER DECISION IS CLOSED (2026-08-19).**
+> ~~🔴 OWNER DECISION: keep or discard that work.~~ Nothing was discarded and nothing was
+> stashed: that work was committed to `claude/cold-signin-returns-to-front-door` and merged
+> as PR [#4424](https://github.com/iscasasola/setnayan-platform/pull/4424) on 2026-08-13.
+> The branch was deleted after merge, which is why the checkout now reads clean and why the
+> branch cannot be found locally. **Do not go looking for it and do not re-ask this.**
+>
+> ⚠️ **BUT THE SHARED CHECKOUT AT `~` IS NOW 749 COMMITS BEHIND `origin/main`** (it sits on
+> the #4287 merge, last touched 2026-08-13). It holds **ZERO** commits `origin/main` lacks,
+> so it is a stale MIRROR, not unsaved work — there is nothing in it to rescue.
+> 🔑 **NEVER READ CODE FROM `~`, AND NEVER POINT A SUBAGENT SWEEP AT IT.** On 2026-08-19 a
+> four-angle avatar sweep was aimed at `${REPO}` = `/Users/icecasasola` and returned a
+> confidently-argued finding that a fix was redundant because a resolved value was "already
+> in scope at line 913". On real `origin/main` that code had been **deleted** — the only
+> surviving match is a COMMENT. The finding cited real line numbers from a file 749 commits
+> stale, which is exactly what a correct-looking wrong answer is made of.
+> ✅ Read current main with `git worktree add --detach /tmp/wt-read origin/main`, and give
+> subagents THAT path.
+>
+> ⚠️ **#4004 (CSAM known-hash hook) MERGED** despite `DECISION_LOG.md` 2026-08-04 saying
+> it must not. **Verified INERT** (`CSAM_HASH_MATCH_ENABLED`, default off) — merging
+> activated nothing. 🔑 **But the gate moved from a draft PR to an env var.** Condition
+> unchanged: enrol with a known-hash provider AND sign the NPC Circular 16-02 agreement
+> BEFORE setting it. Both are contracts, not code.
+>
+> ✅ `NEXT_PUBLIC_PLAN3D_SHARED_ROOM` is **ON** — read out of the live production bundle
+> (compiled constant `!0`), not inferred. ⚠ The booking-fee flag is **unverifiable from a
+> session** (server-only, page behind a vendor login); it needs TWO switches and the
+> billing one is off, so nothing is charged. Prod: 0 fee charges, 13 booked vendors.
+
+> ### ✅ DONE 2026-08-09: VENDOR SCHEDULING — do NOT rebuild any of it
+> **RULE 0 paid off again: everything the owner described already shipped.** Per-service
+> schedules ("Named Calendars", live-by-default since 2026-06-21) · manual blocks + the
+> 6-state day taxonomy incl. `locked` and `whitelist` · auto-close at `deposit_paid` ·
+> the Booked-Out Waitlist with vendor-picked acceptances. Nothing was redrawn.
+> 3 PRs merged (#4262 · #4263 · #4264), all verified applied in prod **by the object**.
+>
+> 🚨 **A FORWARD PRIMITIVE WITH NO INVERSE.** The auto-block that closes a booked date
+> had **no counterpart** — nothing anywhere deleted it, the vendor's own remove-block
+> path filters it out, and all six pool-release sites left it standing. A couple backing
+> out left that vendor reading BUSY to everyone else **permanently**, and the waitlist
+> built for that exact moment could only send couples to a date they still could not
+> book. Fixed as a trigger mirroring the auto-block. 🔑 **Ask "what un-does this?" at
+> write time** — see [[feedback_a_forward_primitive_with_no_inverse]].
+>
+> 🪤 **AND THE FIX SHIPPED INERT ON THE FIRST PUSH.** `blocked_at::date` on a block
+> written at PH midnight reads the **previous day** under prod's UTC session — so the
+> DELETE matched nothing. Green on a +08 laptop, red in CI. **The shipped forward twin
+> has the same flaw** (its documented idempotency never held; a second call writes a
+> duplicate) — both corrected to `AT TIME ZONE 'Asia/Manila'`. 🔑 **Matching a twin means
+> matching what it MEANS, not its characters** — the migration's own comment had praised
+> the byte-for-byte copy as the thing keeping the pair honest, and that is what carried
+> the bug across. Suites now `SET TIME ZONE 'UTC'` so the trap can't hide locally again.
+>
+> 🚨 **A FREE VENDOR COULD NOT BE PUT ON SOLO.** `vendor_tier_rank()` listed only
+> free·verified·pro·enterprise and sent the rest to `ELSE 0`, so **solo ranked BELOW
+> free** and the no-silent-downgrade guard refused the first paid upgrade anyone would
+> buy. Latent (no subscriptions sold yet), would have bitten on the first Solo purchase
+> with green CI. Fixed; prod now reads free=1, solo=3. ⚠ **NOT the 2026-07-01 "Solo <
+> Free" item marked "do not re-report"** — that was the TypeScript benefit table and is
+> genuinely fixed; this was a different function in SQL.
+>
+> ⏭ **OWNER DECISION, the only thing open:** the per-tier limits ship **SWITCHED OFF**
+> (`platform_settings.vendor_tier_pipeline_caps_enabled`). Owner grid: live clients per
+> date **1·3·5·10**, waitlist **0·1·3·5**. Off because every prod vendor is `free`, so
+> flipping it caps his own test shops — and at FREE=1 a second couple on the SAME date
+> must wait, which bends the 2026-07-24 *"inbox is never locked"* lock. Flip is one
+> UPDATE; **it has no admin button — named debt, not an oversight.**
+>
+> 📄 **Where the tiers are documented:** `apps/web/VENDOR_TIERS_AND_BENEFITS.md` (IN the
+> code repo — the owner-signed rate card, § 2 per tier) **and** the corpus
+> `Vendor_Monetization_Model_LOCKED_2026-07-25.md` § 1. Both now carry the new rows.
+> ⚠ That doc's token claims were **stale and self-contradicting** and are corrected:
+> answering is FREE on every tier (0 tokens ever redeemed in prod).
+> 🔑 **"whitelist" means TWO things here** — the § T1.1 *accepted-but-not-yet-locked*
+> client list (what the new cap counts) vs the calendar's approve-first DAY STATE
+> (uncapped). See [[project_setnayan_vendor_schedules_waitlist_blocking]].
+
+> ### ✅ DONE 2026-08-11: PUBLIC WEB ADDRESSES — forwarding, minting, correcting
+> **3 PRs (#4350 · #4351 · #4355). Do NOT rebuild any of it.** Full row in
+> `DECISION_LOG.md` 2026-08-11.
+>
+> 🚨 **FORWARDING HAD NEVER ONCE WORKED.** Two screens promise a renamed address
+> keeps its old link alive. Both writers wrote the ledger row. **Nothing read
+> it** — the only reader returned null on its first line unless the `/u/` cutover
+> flag was on, and that flag has never been on in prod. **Person handles had no
+> reader at any flag setting.** 🔑 **Forwarding was never part of that cutover;
+> tying it to that flag is what killed it.** Now ungated, covering weddings ·
+> shops · people, resolving to the CURRENT address so chained renames land live.
+> ⏱ **Window 90 days → 24 MONTHS.** Save-the-dates go out 6–12 months ahead, so
+> 90 days could not cover the printed QR it exists to protect. **One number, one
+> line, owner-changeable.** 🔒 The owner-locked **1-year closed-shop hold is
+> untouched** — verified: those rows set their own expiry and never read the
+> default.
+> ⚠ **A BRIEF CLAIM CORRECTED:** prod's one forwarding row points at an event
+> **since deleted**, so nobody is stranded today. The mechanism was dead anyway.
+>
+> 🚨 **THE WIZARD PREVIEWED A SAFE ADDRESS WHILE THE DATABASE MINTED A COLLIDING
+> ONE.** Two answers to one question. The app asks all five sources and fails
+> closed; the auto-mint asked three. **The word list was the SMALLEST of the
+> three holes** — it had drifted **15 words** behind, including `/creators` and
+> `/open-shop`, both live and sitemapped, so a business named "Creators" would
+> have been minted our own page **permanently** (shop addresses are immutable).
+> ✅ **`KNOWN_DB_MINT_GAP` is now EMPTY. A BASELINE IS A BILL, NOT A DECISION** —
+> every line was a decision that a shop may take one of our pages forever.
+>
+> 🔓 **NOBODY COULD CORRECT A SHOP ADDRESS, INCLUDING US.** The immutability
+> trigger is correct and is **NOT weakened**; its own migration named the escape
+> hatch and **nothing was ever built that uses it** (zero callers). There is now
+> one deliberate admin door that also **writes the forwarding row** — a
+> correction without forwarding is the exact harm the trigger prevents, moved to
+> a different culprit.
+> 🔑 **The hatch is opened by a FUNCTION-LEVEL `SET`, not `SET LOCAL`** —
+> `SET LOCAL` in a function body lasts to the end of the **transaction**, so a
+> caller doing more work still holds the door open. Mutation-proved: the leak
+> test goes red *and contaminates every later test in the file*.
+> ⚠ **The admin form is DIRECT, not a queue item, because NOTHING CAN FILE A
+> REQUEST** — `requestProfileCorrection` has **zero callers**, no screen renders
+> it, prod holds **zero rows**. A remedy behind an intake-less queue is a fix
+> nobody can reach.
+>
+> 🚨 **A FOURTH, FOUND WHILE VERIFYING — AND LIVE.** `location_city` went into
+> the locked-field list on 2026-08-10 and into the admin apply path, but **never
+> into the CHECK constraint** whose own comment says *"never widen one without
+> the other."* Prod listed eight fields ⇒ a city correction was **REJECTED BY
+> THE DATABASE** and shown to the vendor as *"please try again shortly"* —
+> forever. 🔑 **Same family as the phantom column · enum value · RPC argument ·
+> blocked iframe · wrong catalog: rejected, not thrown; the only symptom is an
+> absence.** Assume a sixth exists.
+>
+> ✅ **BUILT 2026-08-12 — commit `742a7519b`, "a vendor can finally ASK us to fix a permanently
+> wrong detail". It is mounted in My Shop. Do NOT rebuild it** (verified 2026-08-19); rebuilding
+> a shipped page is the failure RULE 0 exists to prevent.
+> ⏭ ~~**NAMED, NOT BUILT:** the correction queue still has **no vendor-side
+> intake**. That is a separate build, not an oversight of this one.
+>
+> ### 🔬 THEN AN ADVERSARIAL PASS OVER THAT WORK FOUND 10 MORE — 2 USER-FACING
+> (PRs #4363 · #4369. 13 candidates, 10 survived refutation, all re-verified by
+> hand against `origin/main` and prod before acting.)
+>
+> 🎟 **THE ONE URL ACTUALLY PRINTED ON AN INVITATION NEVER REACHED FORWARDING.**
+> A personal QR encodes `/{slug}?invite={token}`, and the page short-circuits
+> every TOKENED url to `/{slug}/redeem` **before** the forward runs — that route
+> then dropped the token, so the guest reached the right wedding **AS A COMPLETE
+> STRANGER**: no seat, no RSVP, a lock screen saying *"scan your invitation QR"*,
+> which is what they had just done. **Worse than the 404 it replaced** — it reads
+> as the couple shutting them out. ✅ Proven fixed **on the live site**: a
+> simulated printed QR for a renamed event now issues a guest session and renders
+> *"Welcome back"*.
+> 🔑 **A resolver wired into the obvious routes is not wired in.** Four routes
+> carry a public address; the two that carry the PRINTED artefacts were missed.
+>
+> 🔒 **A FORWARD MUST NOT OUT-DISCLOSE THE GATE IT LANDS ON — this bit twice.** A
+> `307` discloses in its `Location` header whatever the target then returns, so
+> forwarding a **hidden profile's** old handle published both that the word was
+> somebody's and what their handle is now. **The SHOP branch had the identical
+> hole** (#4369) while `app/v/[slug]/page.tsx` already stated the rule it broke:
+> *"don't leak the existence of suspended / closed profiles."*
+> ⚠ **NOT applied to events, deliberately** — a private event renders a lock
+> screen, not a 404 (measured: anonymous request returns **200**), so forwarding
+> discloses nothing a direct visit would not.
+>
+> 🚨 **The admin correction matched the shop with an unvalidated LIKE pattern** —
+> only the DESTINATION was format-checked, so `banawe%` could permanently move a
+> **different** shop's address while the operator read a success message echoing
+> what they typed.
+>
+> 🛡 **TWO GUARDS THAT COULD NOT FIRE, BOTH MINE:** the closed-shop mint test
+> seeded `hiraya-events` but the mint is **hyphen-free** and produces
+> `hirayaevents` — it compared against a word the mint can never hand out; and
+> the new lint knew **one** spelling, so `ALTER FUNCTION … SET setnayan.x` sailed
+> past.
+> 🪤 **AND THE NEW GUARDS WERE THEMSELVES DECORATIVE ON THEIR FIRST RUN** — the
+> mutation reported ZERO failures because the regexes matched the **sabotaged**
+> names as substrings (`DISABLED_foo` still contains `foo`). Same prefix trap as
+> `f.event_dateX`. **Anchor with `\b`, and PRINT THE OCCURRENCE COUNT before →
+> after; an unmeasured mutation proves nothing.**
+
+> ### ✅ DONE 2026-08-12: THE PHOTO WALL WAS ON EVERY GUEST'S PHONE, UNCONTROLLED
+> **PR #4360 · migration `20271133739556`. Do NOT rebuild it.** Full row in
+> `DECISION_LOG.md` 2026-08-12.
+>
+> 🚨 **THE ₱2,500 SKU IS TITLED "LIVE *VENUE* PHOTO WALL" AND ALSO RAN ON EVERY
+> INVITED GUEST'S PHONE.** The couple's card described a venue projection and
+> screen codes; the same feed mirrored onto every guest's phone for the whole
+> live window. **A couple who revoked every venue screen code — the only "off"
+> the product offered — would reasonably believe the wall was off. It was still
+> in a hundred hands.** The one honest sentence lived on the **website privacy
+> page**, where nobody managing the wall would meet it.
+>
+> 🔑 **THE THIRD "GATE WITH NO HANDLE."** `events.live_photo_wall_visibility`
+> shipped 2026-11-04 **for exactly this choice** and had **ZERO readers, ZERO
+> writers**. All 5 prod events sat on the untouched default. ⚠ A second,
+> **applied** migration misdescribed it as *"(venue wall)"* — that misreading is
+> what let it live. Applied migrations are not edited; the new `COMMENT ON
+> COLUMN` replaces what a reader actually queries.
+>
+> 🔑 **THE FIX IS ONE GATE, NOT THREE CHECKS.** **Three** guest surfaces each
+> asked SKU-ownership and nothing else — the slug page, the guest hub, and a
+> JSON feed re-serving 24 tiles every 25s. Checking a column in three places is
+> three chances to forget and the next surface makes four, so ownership and the
+> couple's choice are **fused into `guestWallMirrorActive()`**. **The feed route
+> is the one that mattered** — hiding the block while leaving it open keeps the
+> wall one URL away from anyone holding the slug, and the block repopulates
+> itself. **Closing the mirror closes the DATA, not the component.**
+> 🔒 **THE VENUE PROJECTION IS UNTOUCHED** (owner-locked 2026-06-11) and a test
+> asserts the boundary **in both directions**.
+>
+> 🚨 **A 404 IS A REFUSAL, NOT AN OUTAGE.** Closing now reaches phones that
+> already have the wall open, instead of only those that reload. A 5xx or
+> dropped fetch still runs the miss counter — a network blip that wiped the
+> celebration off every phone would be its own bug.
+>
+> 🔑 **`'tagged_only'` PROMISED A FILTER THAT EXISTS NOWHERE.** Default + the 5
+> prod rows move to `'all_with_consent'`, recording behaviour they already had
+> (0 events own the wall, so nothing visible changed). Same disease as
+> `sponsored_included`: **a stored value whose NAME misleads.** It stays legal
+> for the future build; the app can never write it.
+>
+> ⚖ **TWO DIRECTIONS OF FAILURE, BOTH DELIBERATE:** the value narrowing **fails
+> OPEN** (an unrecognised value must not silently delete a ₱2,500 feature — only
+> the couple, saying off, turns it off); the server gate **fails CLOSED** on a
+> read *error*.
+>
+> 🛡 **18 sabotages, all verified to have APPLIED. One stayed GREEN and was
+> decorative** — it matched the column name anywhere in the body, which the
+> **type cast** satisfied with the query gutted. Re-anchored to the `.select(…)`.
+> 🔬 Migration **dry-run against prod in a rolled-back transaction** first, per
+> the 2026-08-12 lesson that the PGlite replay runs as superuser.
+>
+> 🛑 **A CLAIM I MADE HERE WAS FALSE, RETRACTED THE SAME DAY.** I reported that
+> `test:unit`'s glob never matches `app/[slug]/` and that 188 tests had never run
+> in CI. **Measured: 308 app tests = 188 bracket + 120 non-bracket. They always
+> ran.** Brackets are a character class **in a pattern**, ordinary characters in a
+> matched **path**; the real trap only bites an EXPLICIT bracket path given to
+> `--test`. 🔑 **A SEARCH THAT CANNOT MATCH IS NOT A NEGATIVE RESULT** — I grepped
+> the log for a FILENAME where TAP prints test NAMES, so it could only return 0,
+> and it agreed with a trap already written down, which felt like confirmation.
+>
+> ✅ **OWNER CLOSED THIS 2026-08-12: the wall on a phone shows the WHOLE
+> EVENT** — *"a preview of what and how many photos and videos are taken"*. So
+> on/off is the whole choice and `'tagged_only'` is **RETIRED as an option, not
+> a future build**; filtering the wall per guest would destroy the only thing it
+> is for. The mirror **defaults ON**, preserving the owner's own 2026-06-12
+> directive.
+> 🔑 I first filed his answer about a guest's OWN photos as a WALL decision and
+> wrote a build spec from it. **An answer that fits the question you asked is not
+> proof it was about the thing you asked** — name the surface back before writing
+> a decision down. ⚠ Still unresolved from 2026-08-11: `Pricing.md` says HIDE
+> Live Photo Wall while the SKU is active and publicly listed.
+
+> ### ✅ DONE 2026-08-17: THE DOORS ARE DESIGNED — do NOT rebuild any of it
+> **PRs [#4484](https://github.com/iscasasola/setnayan-platform/pull/4484) (merged) +
+> [#4486](https://github.com/iscasasola/setnayan-platform/pull/4486) (merged) +
+> [#4491](https://github.com/iscasasola/setnayan-platform/pull/4491).**
+>
+> 🛑 **READ THIS BEFORE THE REST OF THE BLOCK — IT WAS WRITTEN AFTER #4484 AND WAS WRONG
+> BY THREE DOORS.** The count below says "ten". It is **thirteen**, and the three extras
+> were found only because the owner asked *"did we accomplish the goal here?"* and an
+> adversarial audit then beat my own guard:
+> **`/host/accept/[token]`** (co-host invite — wrapper BYTE-IDENTICAL to the Samahan one
+> deleted three files away, and the Samahan file's own comment says it *"mirrors"* it) ·
+> **`/[slug]/welcome`** (the +1 confirming their name — wrapper one word off `JoinShell`'s)
+> · **`/panood/cam/[token]`** (Live Studio camera seat, whose own header calls it *"A
+> DIRECT clone of the Papic seat-claim page"* that #4484 had just ported).
+> 🔑 **A HAND-ENUMERATED GUARD LIST IS A LIST OF THE DOORS YOU THOUGHT OF**, and
+> **A CLONE INHERITS THE BUG ITS TWIN ALREADY FIXED** — `/panood/cam` still carried the
+> *"one of the couple"* copy its twin had had corrected, surviving in the SIGNED-OUT arm
+> because every review pass was made signed in.
+> ⏭ **AND NINE MORE PAGES CARRY THE IDENTICAL DOOR CARD** (Papic `me`/`seat`/`pool`/
+> `guest`/`decorate`, the Live Studio·3D·Papic demos, Pabati). **Deliberately NOT ported** —
+> several use the card only for a gate/error state on a camera screen, so changing them is
+> a design call. They are **pinned as an exact-match bill** in the guard: a tenth page
+> adopting the shape fails, and porting one of the nine fails until its line is deleted.
+> ⚖ **THE BRIEF'S LITERAL GOAL IS STILL NOT MET AND THAT IS AN OWNER CALL.** It asked that
+> *"signing in, signing up, resetting a password, claiming an invitation or joining an
+> event all look like the same considered product."* Measured: **three** registers remain —
+> sign-in wears its own owner-locked card, sign-up + both password pages wear the marketing
+> register, and the thirteen doors wear the new one.
+>
+> **PR [#4484](https://github.com/iscasasola/setnayan-platform/pull/4484).** Every way *into*
+> Setnayan — the Alaga claim · the supplier claim + its finalize step · the four `/join` steps ·
+> both Papic doors · the Samahan invite — rendered through **SIX different hand-rolled wrappers**,
+> plus a local `Shell()` re-declared independently in **four** files. All ten now render through
+> one `<DoorShell>`.
+>
+> 🔑 **IT IS NOT A NEW DESIGN.** It reproduces the register the app already locked for the one
+> door that WAS designed — the sign-in card (`.sn-signin-terra`, owner 2026-07-18 *"we only want
+> 1 login"*): paper card · 3px terracotta top edge · terracotta eyebrow · ONE terracotta action ·
+> the wordmark as the way out. `JoinShell` had the right idea first and never left `/join` —
+> **three of its own siblings hand-copied its wrapper instead of importing it.**
+>
+> 🎨 **THE REAL DEFECT WAS COLOUR, AND IT IS THE SLOT NAMES — this will bite again.** In this repo
+> the Tailwind slot named **`terracotta` is the atelier GOLD `#A9834B`**; the CTA terracotta
+> `#C24E25` lives in the slot named **`mulberry`**. Inherited, and **backwards**, so
+> `text-terracotta` *looks* like the safe brand colour and is the unsafe one. **Measured 3.37:1 on
+> cream — below the 4.5:1 AA floor — on 10 eyebrows and inline links across the doors.** Now
+> **0**. Gold on an ICON is kept (3.37 clears the 3:1 non-text bar). Same family as design#6's
+> `#9A8F86`. **Reach for `text-mulberry` (4.61:1) or `text-link` (8.22:1); never the gold slot.**
+>
+> ⚖ **THRESHOLD vs DEAD END.** An expired or revoked link does NOT wear the action colour —
+> painting *"act on me"* on a screen with nothing to act on is a lie told to somebody who has just
+> been refused.
+>
+> 🛑 **TWO CLAIMS IN THE BRIEF DID NOT SURVIVE RULE 0 — do not act on them again.** `/login` is
+> **NOT** undesigned (it already renders the owner-locked shared card) and **`/signup` is not
+> either** (a full two-column marketing-register page, 860 lines). Both untouched. And the brief's
+> 12-file scope **omitted `/forgot-password` + `/reset-password`** while promising *"resetting a
+> password"* — both exist and are left in the marketing register. ⏭ **OWNER_DECISION, small:**
+> whether the account funnel (`/signup` · the two password pages) moves to the door register or
+> stays marketing. It is coherent either way today.
+>
+> 🪤 **I SHIPPED A CONTRAST BUG INTO MY OWN COMPONENT AND CAUGHT IT BY MEASURING.** The notice
+> first used `text-mulberry-700` — 5.86:1 light and **3.05:1 DARK**, because that slot flips to the
+> LIGHT theme's `#C24E25` on a dark panel. `mulberry-600` measures 4.92 / 5.78. **A light-only
+> contrast check waves this through.** Check both themes on any tinted block.
+>
+> 🛡 `doors-are-designed.test.ts` — 7 assertions, **every one mutation-checked by occurrence count**
+> (gold-as-text 0→2 · rogue `<main>` 0→1 · shell colour 4→2 · dead-end edge 1→0 · way out 1→0 ·
+> threshold edge 1→0), all six RED. It **strips comments before matching**: every ported door
+> carries a note naming the string it removed, so a raw-source guard reports the defect it just
+> fixed (raw 6, stripped 0, and **0 is the true number**).
+>
+> ⚠ **`lint-port-no-lost-controls` SKIPS A BASELINE ROUTE WHOSE KEY NO LONGER EXISTS.** Its
+> baseline sat at `484ec515b`, from before ~20 public pages (`/pricing` `/privacy` `/terms`
+> `/help` `/explore` + the six product doorways) moved into the **`(shell)` route group** — so
+> those 20 had been **silently unguarded since that move**. Regenerating re-keys and restores them.
+> Verified the regeneration absorbs **no real removal**: across the 381 routes present in both
+> baselines, **zero** destinations and **zero** actions were lost.
+>
+> 🪤 **AND I DESTROYED MY OWN WORK MID-SESSION.** A mutation run ended with `git checkout --` to
+> undo a sabotage; the ports were **not committed**, so `checkout` restored them from the index and
+> **six files silently reverted to `origin/main`** — while the guard still passed, because the
+> guard and the reverted files agreed. **Commit before you mutate, and restore from an explicit
+> backup, never from the index.** The first sabotage in that same run also **did not land**
+> (count 0→0) and its green result meant nothing — which is why the counts are printed.
+
+> ### 📋 WHAT IS LEFT — re-verified 2026-08-17, READ THIS BEFORE THE REGISTER
+> **[`WHAT_IS_LEFT_2026-08-17.md`](WHAT_IS_LEFT_2026-08-17.md) is the CURRENT one.**
+> It supersedes `WHAT_IS_ACTUALLY_LEFT_2026-08-12.md`, which in turn superseded the
+> code repo's `WHAT_IS_LEFT.md` (2026-08-07). **288 commits landed in the five days
+> between the last two**, which is the whole reason it needed doing again.
+> ⏭ **What the 08-17 pass changed:** exactly **one** of the 41 closed — the six service
+> pages (3D plan · event website · Patiktok · Live Studio · animated monogram · memories)
+> are each linked from the live homepage now, verified by fetching it. Everything else
+> spot-checked is unchanged, and prod is unchanged in substance (6 events · 39 guests ·
+> 2 shops, 1 published · **0 orders ever** · 0 of 45 booked suppliers is an account).
+> 🚨 **AND IT FOUND ONE THE 08-12 PASS MISSED:** the homepage still promises
+> *"keep it forever"* / *"for life"* in the **page title, the meta description and every
+> social card**, while the ruling is free-for-5-years-then-paid. The 08-12 pass checked
+> the product pages, found them clean, and closed it. **A correction at one site is not
+> a correction — grep the title and the share cards too.** The wording is an OWNER call
+> ("for life" is positioning), so it is flagged, not changed.
+>
+> **The counts below are the 2026-08-12 pass and are kept for the shape, not the total.**
+>
+> All **58** claims re-checked against shipped code and the live prod DB by six
+> independent readers, each group then attacked by a skeptic told to hunt BOTH
+> failure modes — shipped work reported as open, and broken work reported as
+> done. One verdict was overturned.
+>
+> **17 of 58 were ALREADY DONE.** Nearly a third. Five days of work closed them
+> and nothing in the register knew. 🔑 **That is the drift the register warned
+> about, now measured — assume this file rots at the same rate and re-verify
+> before acting on any line.**
+>
+> **41 open: 14 need the OWNER (a signature, a price, a ruling — no engineering
+> left), 24 need engineering, 3 are blocked on an outside party.**
+
+> ### ⏸ 2026-08-16: PR-H IS BUILT, MERGED, AND WAITING ON ONE OWNER PRESS — do NOT rebuild it
+> **Slice A [#4470](https://github.com/iscasasola/setnayan-platform/pull/4470) +
+> slice B [#4479](https://github.com/iscasasola/setnayan-platform/pull/4479), merged
+> 2026-08-15T18:21Z. BOTH FLAG-DARK.**
+> ✅ **Both slice-B migrations VERIFIED APPLIED IN PROD BY THE OBJECT**, not by
+> `schema_migrations`: the `lock_request_withdrawn` enum LABEL exists, the live
+> `get_vendor_event_brief` body carries the `'requested'` rung AND still routes it
+> through the shared `IN ('inquiry','requested')` payload, `vendor_agree_to_lock`
+> returns `package_lines_booked`, and the function COMMENT a reader queries says
+> "THREE-rung disclosure ladder".
+> 🔢 **Prod at the flip: 45 event-vendor rows · ONE with a supplier who could
+> answer · ZERO carrying any request marker · ZERO asks in flight · 13 real
+> bookings.** So flipping changes nothing retroactively — there is no in-flight
+> request to strand and no existing booking to re-open. Safe by arithmetic.
+> A couple pressing **Lock** now ASKS the supplier, and the supplier's yes is what
+> makes the booking. Full row: `DECISION_LOG.md` 2026-08-16.
+>
+> ✅ **RESOLVED SAME DAY — 2026-08-17. The flag flip IS now the only thing left.**
+> PR [#4488](https://github.com/iscasasola/setnayan-platform/pull/4488) (migration
+> `20271144481150_agree_stamps_the_link.sql`) fixed it, **verified applied in prod
+> BY THE OBJECT**: the live `vendor_agree_to_lock` body now carries
+> `selection_match_rank = 1, linked_vendor_profile_id =
+> COALESCE(marketplace_vendor_id, linked_vendor_profile_id)`. Its db test asserts
+> before AND after, that an *unanswered* ask stamps nothing, and pins the
+> `event_vendors_lock_request_marketplace_chk` constraint. **Do NOT rebuild it.**
+> ⚠ **Two process lessons from the same hour, both worth more than the fix:**
+> (1) **ANOTHER SESSION WORKS THIS REPO CONCURRENTLY** — a session branched to fix
+> this and found `origin/main`'s tip was already the fix, under a nearly identical
+> branch name. **`git fetch` and read the new tip before building.**
+> (2) A verification query reported `is_monotone = false` because it searched for
+> `COALESCE(linked_vendor_profile_id` while the real argument order is
+> `COALESCE(marketplace_vendor_id, …)`. **A SEARCH THAT CANNOT MATCH IS NOT A
+> NEGATIVE RESULT** — read the clause, never substring-test it.
+>
+> **The diagnosis is kept below, as history, because the LESSON generalises.**
+>
+> 🔴 **WHAT IT WAS (2026-08-17, now fixed).** Read out of production **by the
+> object** (`pg_get_functiondef`, not a
+> migration, not a comment): `vendor_agree_to_lock`'s single agree UPDATE set
+> `lock_request_state='agreed'` · `lock_agreed_at` · `lock_answered_by_user_id` ·
+> `lock_declined_at=NULL` · `lock_decline_reason=NULL` · `status → 'contracted'`
+> (monotone) · `updated_at` — and **NEITHER `linked_vendor_profile_id` NOR
+> `selection_match_rank`.**
+> `app/dashboard/[eventId]/vendors/actions.ts` (~1503) states the opposite:
+> *"The agree RPC stamps both alongside 'contracted', exactly as
+> `acquire_service_time_slot` already does."* Half true — `acquire_service_time_slot`
+> **did** stamp both (verified); the agree RPC **did not**, until #4488.
+> ⇒ **Had the flag gone on first**, the handshake would have become the main booking
+> path and every booking it made would have been a `contracted` row with a NULL
+> link, so everything keyed on that column would silently have lost handshake
+> bookings: the supplier doorway on
+> `/{slug}` · editorial first-pick credit · Real Stories vendor credit · Papic
+> vendor attribution · stage-note recipients · showcase credits · the verified
+> median · fraud detection · the plausibility scanner · venue-room-size.
+> It was inert throughout (0 linked rows · 0 asks in flight · flag off) — **which
+> is exactly the window in which it got fixed.** Deliberately NOT bundled into PR
+> #4483, the ordering fix that found it: changing an owner-gated PR-H function is
+> its own change. 🔑 **A sentence is not a mechanism — read the function body out
+> of prod before trusting a comment that says another object does something.**
+>
+> ✅ **CLOSED 2026-08-29 — THE FLAG IS ON, AND HAS BEEN FOR A LONG TIME. Owner,
+> unprompted: _"the 3 vercel has been long time set to true and i just did a
+> redeploy now."_ DO NOT ASK HIM TO FLIP IT AGAIN.**
+> 🔴 **SO THE HANDSHAKE IS LIVE: pressing _Lock_ ASKS the supplier, and their
+> yes is what makes the booking.** Every doc that calls this "waiting on one owner
+> press" — including this block until today — was wrong, and at least one session
+> designed a screen around the wrong arm because of it.
+> ⚠ **AND THE WIDELY-REPEATED REASON IT WENT UNCHECKED IS ITSELF FALSE.** Several
+> docs say the value "inlines at build time" so a signed-in bundle could reveal
+> it. **It cannot.** Measured 2026-08-29: all EIGHT importers of
+> `lib/lock-handshake-flag.ts` are server components or server actions, so the
+> value never reaches a browser. `NEXT_PUBLIC_` makes a variable *available* to
+> client code; it does not put it in the bundle unless client code reads it.
+> 🔑 **The only way to know a server-read flag's value is to ask the owner or read
+> the hosting settings — so ASK, rather than inferring from the code default.**
+>
+> 🔴 **`cancel_vendor_lock_request` HAD ZERO CALLERS FOR ITS WHOLE LIFE** — granted,
+> commented, db-tested, and unreachable, so a couple could not un-ask. **A forward
+> primitive with no inverse.** 🔑 A granted RPC nothing calls is **a gate with no
+> handle in a different costume**: it typechecks *because it is SQL*, and its db
+> tests pass *because a db test calls it directly*. New guard
+> `lib/rpcs-have-callers.test.ts` asks the only question that finds it — **does any
+> application code call this?** Register a row there when you add one.
+>
+> 🚨 **THE LOCK PATHS WERE FIVE, NOT TWO, AND THE LIST CAME FROM A COLUMN.**
+> Grepping every writer of `status='contracted'` found two the briefs never
+> mentioned (the wizard's *Lock this vendor* and its booth lock). **Never work from
+> a remembered list of paths; grep the column.** Assume a sixth.
+>
+> 🔒 **AN ASKED SUPPLIER MUST NOT GET THE VENUE ADDRESS OR THE RUN-OF-SHOW.** The
+> two-word "obvious repair" (adding `'pending'` to the BOOKED predicate in
+> `get_vendor_event_brief`) hands both to somebody who can still decline. The new
+> `'requested'` rung deliberately has **NO PAYLOAD OF ITS OWN** — one shared
+> pre-agreement build object, so the ceiling is structural. **Do not give it one.**
+> 🔑 **A test that only checks the happy stage passes while leaking** — assert what
+> the payload does NOT contain, on an event seeded WITH the secrets.
+>
+> ⛔ **NOT in scope and not oversights:** deposit-at-lock · `max_soft_holds_per_date`
+> (zero writers, and the vendor-settings route its own comment names does not
+> exist) · a supplier cancelling their own verification application. And the
+> `status` forgery bypass is **ASSERTED IN A PASSING TEST ON PURPOSE** — it closes
+> when the flag-off path is retired. **If that test ever FAILS, forgery was closed
+> and the test should be DELETED, not repaired.**
+
+> ### ▶▶▶ THE REDESIGN IS RUNNING AS TEN SESSIONS — START HERE (set 2026-08-12)
+> **[`REDESIGN_SESSIONS_2026-08-12.md`](REDESIGN_SESSIONS_2026-08-12.md)** is the register.
+> 📋 **Ready-to-paste prompts, one per session:**
+> **[`REDESIGN_SESSION_PROMPTS_2026-08-12.md`](REDESIGN_SESSION_PROMPTS_2026-08-12.md)** —
+> self-contained, with a shared header. 🛑 **Never more than two at once** (10 parallel
+> builds once shipped 44 defects); **4 and 6 share the rail — never together.**
+> Owner: *"let's start the redesign. we will also start redesign with multiple sessions
+> like what we did today."* Each session names what a person gets, what ALREADY SHIPS
+> (RULE 0 pre-answered — do not re-run it), its gate, and its own traps.
+> ⏭ **Order — CORRECTED 2026-08-13.** ~~1 → 2 → 3 first~~ **1 · 2 · 3 · 4 · 6 · 7 · 8 are DONE.**
+> ✅ **`design#6` (the public doorways + the price pages) IS DONE 2026-08-13 — PRs
+> [#4417](https://github.com/iscasasola/setnayan-platform/pull/4417) +
+> [#4419](https://github.com/iscasasola/setnayan-platform/pull/4419). Do NOT rebuild it.**
+> #4417 is merged and **verified live by the object**: `/api/health` reports its merge commit, and
+> the four doorways fetched from `www.setnayan.com` carry **zero** occurrences of the failing
+> `#9A8F86` and of `bg-white/60`, and exactly one `<h1>` each.
+> 🔑 **RULE 0 PAID AGAIN: the "shipped shell" half was already done** — all eight doorways were
+> already in `NAV_ROUTES`, so nothing was rebuilt. The defect was COLOUR, and it was a **real AA
+> failure**: a hand-typed `#9A8F86` put the struck-through half of every differentiator at
+> **3.06:1 on cream** on all eight public product pages. **Two contrast guards missed it and
+> neither was broken** — one checks token DEFINITIONS, the other only judges pairings where BOTH
+> sides are opaque, and the card fill was an alpha. **A defect can live in the seam between two
+> correct guards.**
+> 🔴 **AND THE BRIEF FOR IT WAS WRONG ABOUT THE CUSTOMER-SIDE GAP.** It said *"Free → Setnayan AI
+> is not framed as a delta"*; `/pricing` had led that card with "Everything in Free" since it was
+> built. The real gap was a PRICE: **Setnayan AI has had two since 2026-08-12** (sign-up ₱1,499 ·
+> regular ₱2,499, the sign-up one already being CHARGED) and the public page showed one, because
+> the catalog read never SELECTED the column. 🔑 **A brief can be right about the surface and
+> wrong about the defect — re-measure before building what it describes.**
+> 🔬 **THEN AN ADVERSARIAL PASS OVER design#6's OWN TWO PRs FOUND FOUR REGRESSIONS, ALL MINE**
+> (PR [#4423](https://github.com/iscasasola/setnayan-platform/pull/4423) · 20 candidates, 5 lenses,
+> 2 skeptics each, 4 survived).
+> 🚨 **`/alaala` BROKE THE RULE THE SAME COMMIT WROTE DOWN** — a hover tint put gold at **4.42:1**
+> on a live public page, and `_doorway.tsx`'s docblock states that exact number as the reason its
+> own cards avoid that surface. 🔑 **Gold has 0.29 of headroom on cream, so ANY tint under it
+> fails — including the kit's own `ink/0.04` at 4.47:1.** Hover must move the border or shadow.
+> 🚨 **A DOCBLOCK DESCRIBED A MECHANISM THAT DID NOT EXIST** — `/alaala` claimed it shared the
+> kit's colours; **there was no import.** *A sentence is not a mechanism*, written while writing
+> about it.
+> 🚨 **`/vendors` PRINTED `Infinity`** to the public. `String(Infinity)` is a valid string, so
+> nothing threw. **The rows that handled it hid how easy the others were to miss.**
+> 🔴 **`aiHasSignupPrice` HAD ZERO READERS** ⇒ two surfaces quoted different prices for one
+> product. **Fifth gate-with-no-handle.**
+> 🪤 **THE NEW GUARD REPRODUCED THE BLIND SPOT IT EXISTED TO CLOSE** (skipped alpha fills — the
+> very reason the older lint missed the original bug; mutation landed 2→3 and stayed GREEN), then
+> **cried wolf** on a file-level match. Both corrected.
+> 🔑 **A guard derived from a shared constant is strictly stronger for the pages that USE it and
+> BLIND to the one that does not — and the hand-ported page is exactly where the defect goes.**
+>
+> ⚖ **ONE OWNER CALL LEFT OPEN:** the ~450-cell vendor tier matrix is KEPT behind a disclosure
+> (he asked for a matrix on 2026-07-04) while `/vendors` now leads with per-plan deltas. If he
+> wants the grid gone entirely, that is one line.
+> ⏭ **5 IS MERGED** — #4402 (05:08Z) + #4406 (04:48Z), both verified on GitHub 2026-08-13, not
+> "in review" as this line read for hours after they landed. ~~**Left: 9 · 10.**~~
+> ⏭ **9 IS MERGED 2026-08-13 (PR #4418, merge `a20a48b2a`) — see the Session 9 row below.
+> LEFT: 10.**
+> ⏸ **#4413 (retire the ELN homepage) is CLOSED, unmerged, since 2026-08-13T12:11Z — leave it.**
+> It is the PARKED task of `DECISION_LOG.md` 2026-08-13: authorised by the owner, started, then
+> stopped on his own instruction. The branch was deleted and nothing is half-landed.
+> **Do not re-open, rebase or re-ask it.**
+> ⚠ This block said the PR was *"still OPEN and CONFLICTING… the PR itself was never closed"*
+> for two days after it was closed — so a session looking for an open PR would have found
+> nothing and had to work out why. Corrected 2026-08-15 by `gh pr view`, not by reading.
+> **Verify any PR state here with `gh pr view <#> --json state,mergedAt,closedAt` before acting
+> on it; this file has now been wrong about a PR's state three separate times.**
+> ✅ **7 (two levels + the events board) MERGED 2026-08-13 — PR
+> [#4415](https://github.com/iscasasola/setnayan-platform/pull/4415), merge `e77566b48`,
+> verified an ancestor of `origin/main`, and production self-reports it
+> (`/api/health` → `"version":"e77566b"`). Do NOT start it again.** The two nav levels and
+> the create-grid fold were **already correct and were not redrawn**; the delta was the
+> board — *Coming up* + *Finished* as two always-present shelves (the finished half had
+> hidden behind `?show=all`, and prod's one finished event is a wedding that already
+> happened) — plus **every card now saying whether you organise the event or were invited to
+> it**, because the couple dashboard admits organisers ONLY, so an invited card opens the
+> event's own public page instead of a 404. Two live 404 traps closed on the way (⌘K and the
+> auto-surfaced "you were added" row, both hardcoding the organiser dashboard for guest
+> memberships — the same harm Session 8 found and did not propagate).
+> 🪤 **AND THE MUTATION RUN CAUGHT TWO OF MY OWN GUARDS.** One was decoration — a
+> file-level count of a helper with THREE call sites, so deleting one card's stance left two
+> and it stayed green — and one **sabotage did not land at all** and would have read as a
+> pass. 🔑 **A FILE-LEVEL COUNT CANNOT SAY WHICH COMPONENT STILL RENDERS A THING**, and an
+> unmeasured mutation proves nothing: print the occurrence count before → after.
+> ⚠ **Verify any row here with `gh pr view <#> --json state,mergedAt` before trusting it** —
+> this block was wrong about Session 4 in three different ways at once.
+> ✅ **SESSION 4 IS NOT BLOCKED — THE GATE CLOSED 2026-08-13, IT MERGED, AND IT IS LIVE.**
+> The owner ruled the new front door replaces `/` and the ELN cinematic homepage is
+> *"retired completely"*. **Measured on `https://www.setnayan.com/`, not read:**
+> `fd-chipbar` · `fd-storyrow` · 24× `fd-kindtag`, **zero** `HomeReskin` markers, all four
+> chips live. 🔒 **`HomeReskin` STAYS as the flag's dark branch — owner 2026-08-13, asked
+> directly: "do not delete yet."** That keeps the flip reversible (set the value to `0` +
+> a cache-free rebuild). It does NOT reverse *"Retire it completely"* — it **sequences**
+> it. **Its continued import is a DECISION, not debt: do not clean it up, do not file it
+> as an unfinished retirement, do not re-ask.**
+> ⚠ This line previously called that deletion "still owed" and a session then asked the
+> owner a question he had already answered.
+> 🔑 **This line said an owner sentence BLOCKED Session 4 for a day after the gate closed,
+> the PR merged AND the flag was flipped** — three separate events, none of which reached
+> the file every session reads first. It is the third time this exact failure is recorded
+> in this file. **When a gate closes, edit every row that asserts it is open, in the same
+> commit — and a flag's default in code is not its value in production.**
+> ✅ **SESSION 9 (mutual stories) IS MERGED AND LIVE — PR
+> [#4418](https://github.com/iscasasola/setnayan-platform/pull/4418), merge `a20a48b2a`,
+> verified an ancestor of `origin/main` 2026-08-13. Do NOT start it again.**
+> ✅ **The migration is verified applied IN PROD BY THE OBJECT** — `person_story_items`'
+> table comment no longer says "counsel-gated" and carries the correction; `consented_at`'s
+> comment records its second job.
+> ✅ **AND PRODUCTION IS SERVING IT** — `/api/health` reports `"version":"a20a48b"`, measured,
+> not inferred from the merge. Fetched `https://www.setnayan.com/u/ana-at-marco` signed-out
+> and READ THE BODY: **no `<section class="uprof-md">` and no heading render** — the block is
+> correctly invisible to a stranger. (The two string matches in that HTML are my own CSS
+> comment + selector, which Next inlines twice; a naive grep reads them as a leak.)
+> ⚠ **THE SIGNED-IN PATH IS NOT SESSION-VERIFIABLE BY ME** — it needs authenticating as a
+> test account, which I do not do. It is covered by the tests (21 unit + 5 seeded db,
+> mutation-proved in both directions), NOT by a live observation. Do not upgrade that to
+> "verified on the live site".
+> Opening somebody's page shows the days you were both there. ⚠ **THE FLAG IS NO LONGER A
+> GATE: the owner set `NEXT_PUBLIC_PERSON_LIFE_STORIES=1` in Vercel on 2026-08-13**, so this
+> ships LIVE on merge, not dark. Safe today by arithmetic, not optimism — prod holds **0**
+> story items and **0** consented rows, so the intersection is empty for every pair of
+> accounts that exists; a visitor sees a written invitation and nothing else.
+> ⚖ **AND THE "COUNSEL GATE" WORDING WAS WRONG AND IS RETIRED.** Four sites said the flow was
+> inert until *"PH counsel signs off AND the owner sets the flag"* — two conditions. The first
+> was discharged by the **owner's own ruling as the NPC-registered DPO**, not by outside
+> counsel. **No external PH counsel opinion exists for Phase 2. Never write "counsel cleared"
+> for it** — a future reader acts on the stronger claim. Minors stay Phase 3 and are
+> genuinely counsel-gated.
+> 🔒 The privacy rule is the design: a day appears only when BOTH people are already visible
+> in it (consented · not hidden · public event), so it can only ever show what was already
+> shown, and it is a set INTERSECTION — symmetric by construction — so if either person
+> hides, the day leaves BOTH pages in the same instant. **Never derived from a guest list.**
+> 🔑 **The fifth GATE WITH NO HANDLE, found and fixed here:** `person_story_items.consented_at`
+> had **no writer for photo/clip rows, ever**, so this feature would have shipped correct and
+> permanently empty. It is now stamped only when the tagged guest's `photo_consent` is
+> exactly true.
+> ⚠ **Do not confuse the two Life-Flash flags.** `NEXT_PUBLIC_LIFE_STORY` is a ROLLOUT
+> switch with no counsel dependency (own events only). The other one publishes other
+> people's media.
+>
+> ### 🎨 STARTING A REDESIGN SESSION? READ THIS ROW NEXT (updated 2026-08-12)
+> ✅ **THE SEAM IS NOW DRAWN — that master-prompt deliverable is DONE, do not
+> re-commission it.** [`FRONT_DOOR_AND_SEAM_FINAL_2026-08-12.md`](FRONT_DOOR_AND_SEAM_FINAL_2026-08-12.md)
+> + [`prototypes/front_door_and_seam_2026-08-12.html`](prototypes/front_door_and_seam_2026-08-12.html):
+> the finalized front door (desktop + phone × launch-day-empty + busy), the My Home
+> expansion in its real states, and the sign-in↔public **round trip**, which is the
+> thing that had never existed. [`MASTER_DESIGN_PROMPT_2026-08-11.md`](MASTER_DESIGN_PROMPT_2026-08-11.md)
+> is now HISTORY — read the answer, not the ask.
+> ⏭ Still read **[`WHATS_NEXT_Design_Programme_2026-08-01.md`](WHATS_NEXT_Design_Programme_2026-08-01.md)**
+> — the ~40-unit port list and its gates.
+>
+> 🚨 **A BRIEF THAT SAID IT WAS MEASURED WAS WRONG FOUR TIMES.** Re-measuring
+> against prod + `origin/main` before drawing found: **Real Stories is empty too**
+> (0 published — so FOUR rails are bare on launch day, not three, and the Journal
+> alone carries the page) · there are **8** public tool doorways, not the 6 drawn,
+> and a guard enforces the set · **Pakanta is sold and has NO public page at all**,
+> so drawing it would have been a fake door · the taxonomy has **15** folders, not
+> 14. 🔑 **The category labels a customer reads today are the INTERNAL words** —
+> the live marketplace says *Look · Feast · Documentary · Booths*, which nobody
+> types. Renaming them is copy-only (addresses and anchors unchanged) and is an
+> **OWNER_DECISION** with a proposed list in the final doc.
+>
+> 🔴 **AND THE ONE NOBODY HAD ASKED:** the YouTube-shaped front door and the
+> owner-approved ELN cinematic homepage **cannot both be `/`**. Shipping the front
+> door RETIRES an owner-approved design. Drawing it was right either way;
+> **landing it needs the owner to say so.** See the programme's §6.
+>
+> ✅ **THE OWNER GATE IS CLOSED — all 19 archetypes/overlays APPROVED 2026-08-04,
+> no changes requested.** The prototypes are **BINDING**: port them, never redraw
+> them. A delta between a ported screen and its archetype is a defect in the
+> PORT, not a fresh design decision. **Do not ask him to review them again.**
+>
+> 🔴 **`design#3` IS NOT NEXT AND MUST NOT BE BUILT.** The persistent app shell
+> ALREADY SHIPS AND IS MOUNTED. ⏭ **`design#4` is what is next** — RECONCILE the
+> ~28 per-surface prototypes to the terracotta palette + the shipped shell. They
+> are still correct about COMPOSITION and carry only the old palette.
+> **RECONCILE, NEVER REDRAW.**
+> ⚠ The programme's own state table said *"design#3 is next"* for TEN DAYS while
+> that unit's entry carried a red DO-NOT-BUILD banner — corrected 2026-08-12.
+> 🔑 **The state table is what gets read, not the banner.** When a gate closes,
+> edit every row that asserts it is open, in the same commit.
+>
+> ⚠️ **`/` (the public homepage) WAS excluded from the programme — that exclusion
+> is now IN QUESTION, see the front-door row above and the programme's §6.** The
+> owner-APPROVED Filipino-USP hero/manifesto copy also targets exactly that page,
+> so whose scope it lands in is an **OWNER_DECISION**, not an engineering call.
+> ⏭ The six-state primitives from `design#1`/`#2` are **built but not mounted** —
+> adopting them per surface is open follow-up work, not a rebuild.
+
+> ### 🔬 AND A THIRD PASS FOUND 7 MORE — TWO INTRODUCED THE DAY BEFORE
+> (PR #4381. 26 candidates, 18 survived refutation, all re-verified by hand.)
+>
+> 🔴 **THE ADDRESS HOLD COVERED ONE DELETE PATH; THE DATABASE PERMITS ANOTHER.**
+> It was written in the ADMIN action — while prod carries a live RLS policy
+> `couple_can_delete_event`, so a couple can delete their own wedding straight
+> through PostgREST with **no server action and no hold written**, freeing the
+> word the same second. 🔑 **A PROMISE THE DATABASE DOES NOT KEEP IS NOT A
+> PROMISE — removing the button closes the BUTTON, not the DOOR**, the identical
+> lesson the shop-address trigger already cost. Now a BEFORE DELETE **trigger**;
+> the app-side write is deleted, not duplicated. ⚠ No couple-facing delete exists
+> in the product *today* — which is exactly the state the shop-address guard was
+> in when it was written.
+>
+> 🔴 **MY SHOP READ EVERY OTHER SHOP'S CORRECTION REQUESTS.** The read leaned on
+> RLS — but the policy is `owns the profile **OR is_admin()**`, deliberately wide
+> so the same helper backs `/admin/corrections`. **Prod has a vendor who IS an
+> admin** (the owner's own shop), so another shop's request rendered as his own
+> and removed that field from the ones he could ask about; enough of them and the
+> ask button disappears — **restoring the exact defect the card was built to
+> fix.** 🔑 **RLS IS A FLOOR, NOT A SCOPE. Read the policy before relying on it;
+> if it has a second disjunct it does not scope the narrower caller.** The
+> comment claiming *"RLS-scoped to this vendor"* was the false premise.
+>
+> ⏭ Also: a **verified shop could not change its LOGO anywhere** (the editor
+> refuses it and named a remedy the card did not offer) · a deleted wedding's
+> held address was refused with the **FORWARDING** wording, untrue by
+> construction · `slug-forwarding-window.ts` — the file whose whole purpose is
+> *the one number* — made **three false claims in one paragraph**, including a
+> constant that no longer exists.
+>
+> 🛡 **AND THREE GUARDS WERE DECORATION:** one proved the card was IMPORTED not
+> MOUNTED · one matched a FILE-LEVEL SUBSTRING so an import or a comment exempted
+> the file · one **could not fail at all** (a leak check on a transaction-local
+> setting, run as two statements — it dies at COMMIT).
+> 🔑 **FIVE guards written in two days passed while the thing they guard was
+> gone.** A mutation must look like the REGRESSION (delete the JSX, not rename
+> the symbol) and its landing must be MEASURED by occurrence count. Assume a
+> sixth.
+
+> ### ▶ ACTIVE 2026-08-07: PAPIC TIMING — three numbers, locked together
+> **Owner set all three in one sitting. They interlock; do not move one alone.**
+>
+> | | value |
+> |---|---|
+> | cameras may start shooting | **6 months** before the event |
+> | full-res ORIGINAL held at full resolution | **6 months from the event's FIRST capture** |
+> | …but never less than | **3 months after the event ENDS** (was 30 days; and until 2026-08-10 it counted from the event's FIRST day) |
+> | compressed gallery | **indefinitely** |
+> | guests may shoot | **the event day only**, unless the host presses a button |
+>
+> 🔑 **THE FLOOR IS THE PROMISE — NEVER DERIVE THE CAPTURE CAP FROM RETENTION.** My
+> first draft computed `5 = 6 months − 1 month`. The owner then set capture to six
+> months, at which point that same subtraction yields **ZERO** — the earliest
+> permitted photo's own clock expires ON the wedding day. What actually preserves
+> anything afterwards is `GREATEST(first_capture + 183d, event_date + 92d)` in
+> migration `20271102113000`. **92, not 90:** three calendar months is 89–92 days.
+>
+> 🚨 **Neither rule was in the code.** The no-window default was a **SINGLE DAY** —
+> mislabelled "legacy" while applying to every event whose couple never opened the
+> picker — which is what wrote `valid_from = valid_until` onto 6 of 13 prod seats.
+> And **guests had NO time gate at all**: `eventPapicGuestActive()` asks WHETHER
+> the event has a pass, never WHEN. Seats refused everything; guests were open
+> forever. The same feature, wrong in opposite directions.
+>
+> 🪤 **A SABOTAGE RUN PROVES NOTHING UNLESS THE BASELINE WAS GREEN AND THE
+> SABOTAGE APPLIED.** I ran a 4-way matrix against an already-red suite (two
+> results meaningless), and a `perl s///` without `/g` hit a line 50 above the one
+> I meant. Also: a guard matching `NOW() >= (f.event_date` **still matched
+> `f.event_dateX`** on the prefix, and `OR TRUE` neutered the clause while leaving
+> every searched string intact. Match the arithmetic, add `\b`, ban the tautology.
+> ⚠ `timeout` **does not exist on macOS** — `timeout 900 npx tsx …` printed
+> `exit=0` and ran nothing.
+>
+> ✅ **PR #4235 MERGED 2026-08-08 — the owner gate below is CLOSED. Do not ask for it again.**
+> (Verified 2026-08-19 with `gh pr view`. This line said an owner look was still needed for
+> eleven days after it merged, inside a block headed ACTIVE.)
+> ⏭ ~~**PR #4235 is deliberately NOT auto-merging**~~ (label `do-not-auto-merge`): it
+> also corrects the public `/privacy` notice, which now understated retention —
+> RA 10173 binds us to the period we DECLARE. A new guard **derives** the month
+> figure from `FULL_RES_POST_EVENT_GRACE_DAYS`, so copy and code cannot drift.
+> **Owner look needed before merge.** #4236 (guest host switch) is armed.
+
+> ### 🔴 COLD START? READ THE CODE REPO'S `HANDOFF_RESUME_2026-08-07.md` FIRST.
+> Set 2026-08-07 because the owner is continuing **on a new Claude account**, and
+> `~/.claude/.../memory/` does **NOT** travel. That file is self-contained: verified
+> prod state, the open URL decision, the 16-surface logo debt, the retention model,
+> and every trap inlined rather than linked. **This block is a summary of it, not a
+> replacement.**
+>
+> ⚠ **THESE NUMBERS ARE FROM 2026-08-07 AND THREE OF THEM ARE NOW FALSE. Re-measured 2026-08-19:
+> 8 events (not 5) · 14 Papic photos (not 0) · and the `setnaprod` shop is `verified` and no
+> longer hidden.** Still true: 0 orders ever, 0 fee charges. 🔑 **"Nothing is live to a stranger"
+> is the claim that decays first, and it is the one people lean on to call a change risk-free.**
+> ~~**Verified prod, 2026-08-07:** 5 events · 2 vendors, **both hidden** · **0** photos ·
+> **0** fee charges · **0** livestream channels. **Nothing is live to a stranger.**
+>
+> 🔗 **VENDOR BARE-ROOT URLs ARE ALREADY BUILT — DO NOT "MOVE" ANYTHING.**
+> `app/[slug]/page.tsx:219` already dispatches to `renderVendorBySlug`, and the vendor
+> sitemap already emits `${baseUrl}/${business_slug}`. `/v/[slug]` is LEGACY.
+> `setnayan.com/setnaprod` 404s only because that shop is unverified + hidden.
+> ✅ **CONFIRMED AGAINST PROD 2026-08-08, no longer inferred:** that row is
+> `public_visibility='hidden'` · `verification_state='unverified'` · `is_published=false`,
+> and `hidden` is the resting state of every unapproved shop (owner ruling 2026-07-27).
+> The address is permanent and correct; only an admin can publish it, from `/admin/verify`
+> → Visibility → **Hidden** tab (the vendor cannot — deliberately). My Shop already says so
+> in the dashboard: *"This is your address for good — it goes live to couples once Setnayan
+> approves your shop."*
+> ⚠ I reported this backwards **twice** — once calling the shop page's correct address
+> a defect, once calling a **200 that was the not-found body** a working page.
+> 🔑 **A STATUS CODE IS NOT A PAGE. READ THE BODY.**
+> ⏭ Real work (40 traps, 24 severe): one shared name registry (**zero collisions today,
+> 7 names — free now, a migration later**) · 14 unprotected route words incl. `creators`
+> + `open-shop`, both LIVE and sitemapped · rename-forwarding **has never run in prod and
+> expires at 90 days** while save-the-dates go out 6–12 months ahead · a retired slug is
+> **re-claimable** (one is free right now) · shops have **no** rename forwarding.
+> 🔴 **OWNER-ONLY, blocks event nesting only:** what a person's tag looks like. Nobody has
+> one; the one account that does reads `s89u-kemmf2adck`, so flipping today prints a
+> machine code on invitations forever.
+>
+> 🖼 **`logo_url` HOLDS `r2://`, NOT A URL** — a raw value in an `<img>` fails SILENTLY.
+> ✅ **DEBT IS ZERO (2026-08-08).** All 16 surfaces resolve; both debt lists — the lint
+> BASELINE and the test's KNOWN_UNRESOLVED — are empty. The public shop page sat there
+> labelled *"the highest-value one still owed"* until the owner approved his own shop,
+> opened the address and saw a broken glyph; the other 15 were swept the same day.
+> 🚨 **AND THE FIRST FIX STILL DID NOT SHOW THE PICTURE.** Measured live: the presigned
+> URL answered `200 image/png 34478 bytes`, and `/_next/image?url=…` answered **400**.
+> `lib/r2.ts` signs **virtual-host** URLs (bucket as a SUBDOMAIN) while `next.config.ts`
+> allowed only the account host — so **the remotePattern that existed to allow R2 images
+> had never matched a real R2 URL**, app-wide. Unseen only because prod has no portfolios
+> and no photos; the shop logo was the first R2 image the optimizer was ever asked for.
+> 🔑 **RESOLVING A REFERENCE IS NOT THE PICTURE ARRIVING — FETCH THE FINAL URL.** A
+> well-formed URL is not a working image, exactly as a 200 is not a page.
+> 🔑 **A BASELINE IS A BILL, NOT A DECISION.** Adding a line is deciding somebody sees a
+> broken picture until further notice.
+> 🪤 Also found by the adversarial pass: `/open-shop` could **500 outright** for a vendor
+> who already had a logo (an unguarded presign at top level in the page body) · a presigned
+> URL **baked into a prerendered blog page expires** 24h later with nothing to blame · one
+> "surface" was never broken and its field is now **renamed `logo_display_url`**, because a
+> resolved value living under a raw column's name misled two separate scans.
+> 💰 **FLAGGED, NOT FIXED:** presigned URLs are never stable, so `next/image` re-transforms
+> on every render and Vercel bills per transformation. ~Zero today, scales with real
+> galleries. Fixing it is a cost/design call (stable public-bucket URLs, or a rounded
+> signature window), not a bug fix.
+> 🗺 **AND OUR OWN CSP BLOCKED OUR OWN MAP.** The vendor location map embeds
+> openstreetmap.org; the enforced `frame-src` listed YouTube/Vimeo/Instagram/TikTok and
+> **not OSM**, so the map has been an empty grey panel on every shop page with coordinates
+> since it shipped. OSM answers 200 — the browser refused the frame. `next.config.ts`
+> already said *"New embed origins later extend this one list"*; **a sentence is not a
+> mechanism**, and there is now a test that fails when an iframe host is missing.
+> 🔑 **SAME DISEASE AS THE PHANTOM COLUMN / ENUM / RPC ARG: the browser or the database
+> DECLINES, and the only symptom is an absence.** Add "blocked iframe" and "unresolved
+> `r2://`" to that family.
+> ✅ **The vendor route SOFT-404 is FIXED (2026-08-08).** `app/v/[slug]/loading.tsx` forced
+> streaming, so the shell committed **HTTP 200** before `notFound()` ran — measured live:
+> `/v/definitely-not-a-real-shop-xyz` answered **200**, i.e. every junk or unapproved shop
+> URL told Google it had found a page. Deleted; no skeleton lost, because the canonical
+> bare-root path returns `renderVendorBySlug` *before* its `<Suspense>` and already blocks.
+> 🔑 **It was the SAME bug `04c03063d` fixed on the bare-root twin, and `first-byte.test.ts`
+> was written to hold it — the guard just never covered the sibling route serving the same
+> shop.** When you fix a route-shaped bug, sweep every route with that shape.
+> Also fixed: the bare-root 404 said *"This invitation link can't be found… check with the
+> host"* to someone opening a **shop** address. Correct 404, wrong audience — it reads as a
+> broken product. Both now guarded, all three assertions mutation-tested.
+> 🪤 `npx tsx --test "app/[slug]/_lib/first-byte.test.ts"` prints **"# tests 0 … # fail 0"** —
+> the `[slug]` brackets are a glob character class, so it runs NOTHING and exits green.
+> 🗄 **Retention — NOTHING IS DELETED, IT IS COMPRESSED:** the full-res ORIGINAL is held
+> **6 months from FIRST capture**, never less than **3 months after the event ENDS**, then
+> replaced by its compressed copy (sweep is DEFAULT-ON). **The photo itself is never
+> deleted** — only its resolution changes — and the compressed gallery is **free, FOR
+> LIFE** (owner **2026-08-18**: *"we keep it for life"*, superseding the 2026-08-07
+> five-year window, which had itself superseded "free forever"). **No end date, no paid
+> tier.** ⚠ The withdrawn paid option was never built or priced — that retires a PROMISE,
+> not a product. Drive is the only way a couple keeps ORIGINALS. Copy corrected across 9
+> screens, the warning email, the public privacy notice AND the regenerated NPC pack
+> (#4208 · #4209 · **#4539**).
+> ⚠ **This line read "compressed gallery FOREVER" for a day after the owner corrected it**,
+> while the storage bullet lower in this same file already said 5 years — the exact
+> read-from-the-middle failure this file warns about two blocks up. Grep the whole file for
+> the old wording when a number changes; a correction at one site is not a correction.
+> 🔴 **Paid preservation ALREADY EXISTS switched off** (₱999/yr) — owner
+> 2026-08-07: **not selling yet**; do not re-ask its four numbers.
+
+> ### ▶ ACTIVE: TIME — and the class of bug behind it
+> **Set 2026-08-04. This replaced the INTERCONNECTION LAYER block, which is DONE (14 PRs,
+> all merged; its findings live in `DECISION_LOG.md` 2026-08-01/02 and the memory notes).**
+>
+> **17 live defects in one day, all one disease: two values that LOOK alike and MEAN
+> different things, compared directly.** Nothing errored, nothing logged, CI was green
+> throughout. Shipped in PRs #4095 · #4098 · #4101 · #4105.
+>
+> **1 · A WALL CLOCK IS NOT AN INSTANT.** `event_schedule_blocks.start_at` stores the
+> VENUE'S wall clock in a UTC column (prod: `Ceremony 14:00+00`). Nine surfaces compared it
+> against a real instant ⇒ **out by exactly 480 minutes** in Manila. An on-time start
+> announced as *480 min behind* · the host's desk counting 8 min away as *"in 488 min"* · at
+> 2 PM the couple's dashboard reading the day as 6 AM · a guest at the reception told the
+> ceremony was still coming · a 2 PM ceremony in the photographer's phone at 10 PM · a 2 PM
+> appointment shown to both parties as 10 PM · **a call-time EMAIL with 10:00 PM in the
+> subject line**, one press from sending.
+> 🔑 **TWO FIXES, PICK BY WHAT YOU COMPARE:** `plannedInstant(iso, tz)` lifts a stored time
+> UP (use against `actual_start_at`); **`venueNowMs(tz, now)` brings `now` DOWN** (use to
+> locate a position — far smaller, every existing sort/countdown keeps working).
+> `datetimeLocalToIso(raw)` for anything posted from a form.
+> 🔑 **NO TIMEZONE ⇒ REPORT NOTHING.** A false *"20 min behind"* tells a coordinator to rush
+> a wedding that is on time.
+>
+> **2 · A DATE IS NOT AN INSTANT.** `events.event_date` is a DATE. `new Date('2026-12-12')`
+> is midnight UTC = the **11th** west of Greenwich ⇒ a 12 Dec wedding read **11 Dec** on the
+> save-the-date, the invitation and 41 screens. The relatives reading on a foreign phone are
+> the ones booking flights. Fixed at `formatEventDate` · `shortDate` · both `anchorIso`s ·
+> `calendarDayEpoch`.
+>
+> 🪤 **WHY IT ALL SURVIVED — READ THIS BEFORE WRITING A TEST.**
+> **CI RUNS IN UTC, THE ONE CLOCK WHERE BOTH MISTAKES CANCEL OUT.** So does every server
+> action. **Run the suite under `Asia/Manila`, `America/New_York`, `Pacific/Kiritimati`** —
+> 6483 tests are green in all four as of 2026-08-04, the first time that has ever been true.
+> 🔑 **THE TESTS ASSERTED THE BUGS.** Fixtures wrote `06:00Z` commented *"2 PM Manila"*; the
+> seed test's `localDate` used local **getters** matching an `anchorIso` that used local
+> **setters**. **Two halves wrong in the same direction agree with each other perfectly.**
+> A previous session even recorded one failure in a docblock as *"known, out of scope"* —
+> **a documented failure is still a failure.**
+> See [[project_setnayan_wall_clock_vs_instant]] · [[project_setnayan_date_is_not_an_instant]].
+>
+> **3 · 🔑 A GATE WITH NO HANDLE.** Face auto-tagging was built, **paid for and activated
+> 2026-06-19**, every flag green — and stored **nothing for 7 weeks**. `papic_face_mode` had
+> **ZERO writers anywhere**; all 5 prod events sat in the mode that hard-nulls the vector.
+> ✅ Switch built (`setEventFaceMode`, admin-only, DPO presses it per event); **owner decided
+> "on" 2026-08-04.** 🚨 **The stale comment is what kept it shut** — it claimed mode_a
+> fingerprints *"EVERY guest with no per-guest opt-in roster"*; false, both writers require
+> `biometric_consent` + `age_affirmation` server-side. **Trace to the WRITE, not the flag:
+> grep the column and ask whether every hit is a READ.**
+> 🚨 **THE DB IS THE AUTHORITY, NEVER THE MIGRATION SEED.** Five agent verdicts of "built but
+> switched off" were wrong on that basis — **all 20 privacy controls in prod are `active`.**
+> See [[project_setnayan_gate_with_no_handle]].
+>
+> **4 · 🎬 A FIX NOBODY CAN REACH IS NO FIX.** Three PRs retired the save-the-date veil
+> correctly and the owner's complaint repeated **verbatim for three days** — because the only
+> "See our page" button sat on the film's LAST beat, so the website was reachable only by
+> watching the whole film. ✅ A persistent exit now ships. 🔑 **`aria-hidden` +
+> `pointer-events-none` do NOT remove an element from the tab order** — gate such a control
+> on a real MOUNT condition (`started`), never a style.
+> See [[feedback_a_fix_nobody_can_reach_is_no_fix]].
+>
+> **5 · RULE 0 PAID OFF FOUR TIMES IN ONE DAY — nothing was rebuilt.** The photographer
+> hand-over (`booking_handovers` `kind='gallery_link'`, copy already says *"Big galleries stay
+> on your link"*), the **editorial vendor spotlight** (`journal_vendor_spotlights`, authored in
+> admin, rendered in `/blog/[slug]`, free + four-eyes-gated sponsored), **vendor partnerships**
+> (complete both sides, two-admin gate), and **all eleven** vendor "special services" the owner
+> listed — **zero genuinely missing.** ⏭ Real gaps found: no vendor→emcee channel · a vendor
+> cannot see their own captures · no avatar maker exists for anyone.
+>
+> ⏭ **OPEN, needing the owner:** (a) a control to delete orphaned files in the
+> **vendor-verification** bucket — `/admin/website-media` covers only `media`, and two
+> government IDs sit there unreferenced; (b) whether the corrected legacy-preservation counsel
+> brief was ever re-sent; (c) whether Partnerships should be *pushed* (nothing invites a vendor
+> into it) or merely kept.
+
+
+> ### ✅ DONE 2026-08-05: THE ADMIN WORK LIST — do NOT rebuild it
+> Owner, 2026-08-03: *"there are so many buttons and menus. we want this simplified and easier to
+> manage."* Then the decisive follow-up: *"a faster way to respond to quick actions needed instead
+> of them making jump to a new page."*
+>
+> 🔴 **START BY READING WHAT SHIPS.** `/admin/work` was ALREADY the ranked work list and
+> `/admin/more` was ALREADY the all-surfaces map — I nearly rebuilt both. Five merged PRs, all
+> delta: a triage strip (past promise · due soon · on pace) + lane chips; `?open=<queue>` expands
+> a drawer with the top 3 real items; **payments · verify · approvals settle on ONE CLICK**;
+> **reviews · payouts settle on a FORM**; clear queues collapse behind one line.
+>
+> 🔑 **THE ACTION SHAPE IS DECIDED BY WHAT THE CODE REFUSES TO RUN WITHOUT — not by taste.** This
+> corrected my own call mid-build: reviews looked like a one-click queue until
+> `overridePublishReview` turned out to throw *"Override reason is required"*. Same for payouts,
+> which needs the method AND the reference of a hand-made transfer. Read the action first. That is
+> now the test for the fact / judgement / needs-details split (`DECISION_LOG` 2026-08-04).
+>
+> 🔒 **JUDGEMENT QUEUES GET NO BUTTON AT ALL** — disputes, fraud, user reports, erasure requests,
+> integrity watch, concierge abuse, force majeure. Each shows a SENTENCE where the buttons would
+> be. A fast button invites a wrong call at speed on exactly the queues where being wrong costs
+> most; silence would read as an unfinished feature, so the sentence teaches the rule.
+>
+> 🪤 **`count === null` MEANS "NOT MEASURED", NOT "ZERO".** Filing an unmeasured queue under *"N
+> queues are clear"* puts it in the one place a reader has been told they need not look — and it
+> looks completely fine. Guarded and mutation-checked.
+>
+> 🪤 **FOUR PAYOUT COLUMN NAMES WERE WRONG ON THE FIRST PASS**, as three payment ones were the week
+> before. A Supabase select naming a phantom column returns an ERROR, NOT A CRASH ⇒ it ships as a
+> **silently empty drawer**. The column scan caught both; run it after any new query.
+>
+> ⏭ **The one thing left is the owner LOOKING** — nothing here has been seen on a real phone.
+>
+> **THEN A VERIFICATION PASS FOUND THREE MORE, ALL MINE, ALL GREEN IN CI — one disease:
+> A MECHANISM BUILT AND NEVER PROVEN REACHABLE.** Fixed in #4148.
+> 1. 🚨 **The duplicate-reference guard was INERT from the hour it merged.** It queried
+>    `status IN ('matched','paid')` — **there is no `'paid'`**; the enum is
+>    pending/matched/rejected. Postgres rejected the WHOLE query, `data` came back null, and
+>    it concluded *"no duplicates"* on every payment. Its seven tests passed because they read
+>    SOURCE and exercised the PURE comparison; **neither runs the query.** 🔑 **THE HOUSE RULE
+>    APPLIED ONE LEVEL TOO SHALLOW** — I knew "a phantom COLUMN returns an error, not a crash"
+>    and missed that **ENUM VALUES fail identically.**
+> 2. **`unreadable` could never be set** — it lived in a `catch`, but **Supabase does not
+>    throw**, it resolves with `{ error }`. A failed read still said *"Nothing waiting here"*
+>    with a green tick.
+> 3. **Every refusal was invisible** — the actions wrote `settle=`/`why=` into the URL and
+>    nothing read them. Worse, the payment flips to `matched` BEFORE the shortfall check, so
+>    the row vanished and the count dropped while the order stayed unpaid. A docblock I wrote
+>    asserted the opposite. 🔑 **A GUARD THAT REFUSES IN SILENCE IS INDISTINGUISHABLE FROM ONE
+>    THAT PASSED.**
+> 🛡 `lib/guards-can-actually-fire.test.ts` now enforces the class: statuses checked against
+> the migration enum, every peek read must check its error, every `settle=` outcome must have
+> somewhere to be shown. ⚠ Its status scan is scoped to the QUERY CHAIN — a first cut flagged
+> ten ORDER statuses and **a guard that cries wolf teaches you to skim past the one time it is
+> right.**
+>
+> **PAYMENTS — the owner's five asks (2026-08-05). THREE ALREADY WORKED.** Short payments +
+> the paste-the-bank-alert matcher + the request-better-proof button all ship. Built this
+> session: **duplicate detection** (#4146 · same order = REFUSED, no override; different order
+> = warn + typed acknowledgement; **NOT a UNIQUE constraint** — the corrected re-send, one
+> lump sum over two orders, and the BDO rail where our code WRAPS theirs are all honest
+> repeats) and **the photo upload that was refused outright** on the couple's order page and
+> the vendor's fee page (#4145 — `payments/<orderId>` was read as an EVENT id). 🔑 **What broke
+> was the SECOND chance**: the first screenshot arrives via a different screen, so
+> *"send a clearer picture"* was addressed to someone who could not.
+> 🚨 **`/admin/booking-fees` ("Fees owed") is NEW** (#4138) — no buttons by design; money is
+> confirmed where the PROOF is.
+> ⚠ **The "four-tier automatic bank-inbox matcher" in our own notes DOES NOT EXIST IN CODE.**
+> What ships is the admin pasting an alert into a box that highlights the likely row.
+> ⏭ Owner call: whether a reference should be REQUIRED on the four pay-Setnayan forms (cash is
+> only ever a couple→VENDOR thing, a different form Setnayan does not reconcile).
+
+> ### ▶ ALSO ACTIVE: PARTNERSHIPS + CONSENT — shipped 2026-08-05, read before touching either
+> **Owner ruling: partnerships are FREE on both sides, forever.** *"no payment for any. but we
+> have to build it properly."*
+>
+> 🚨 **`sponsored_included` / `sponsored_discounted` NEVER MEANT PAID PLACEMENT** — the vendor
+> sponsors their PARTNER'S SERVICE FOR THE COUPLE (in their package free / discounted alongside).
+> The word sent **two independent readers** to the same wrong conclusion: the 2026-07-27
+> ranking-honesty finding *"paid placement is reordering the marketplace"* (**now corrected in
+> `DECISION_LOG.md` — do not act on it**) and a 2026-08-05 pricing recommendation argued to the
+> owner twice. ✅ **Renamed at the source** (migration `20271108090000`): `included_in_package` ·
+> `discounted_together`. 🔑 **DOCUMENTATION WAS TRIED FIRST AND WAS NOT ENOUGH — a comment does
+> not travel with the value** into a query result, a log line or an audit. When a stored value's
+> NAME is what misleads, rename the value.
+> ⚠ I also mis-stated that partnerships carry a **two-admin gate — they do NOT**; that gate is on
+> **journal spotlights**. On partnerships it was RETIRED (it only ever flipped `admin_verified`,
+> which stopped gating visibility under the mutual-accept model).
+>
+> **Also fixed (PRs #4113 · #4116):** two files ranked the same four kinds in OPPOSITE orders
+> (the profile page picked alphabetically, Explore by `PARTNERSHIP_RANK`) — now one shared order,
+> **by what the COUPLE gets** · both bundle kinds rendered as the meaningless *"Preferred
+> partner"* · a partnership could never CHANGE kind (🔑 **moving INTO a pricing claim re-asks the
+> partner AND drops `accepted_at`, so the badge comes down while they decide** — it is a claim
+> about someone else's money) · partnerships had **nothing inviting a vendor in** (owner:
+> "promote") → a `build_partnerships` growth rec that **stops at 3 partnerships** and **hides on a
+> read error**, because a failed count returns 0 and 0 looks exactly like "you have none".
+>
+> **🪪 CONSENT — the words now follow the event's mode.** Because `papic_face_mode` had no writer
+> for 7 weeks, EVERY event is `mode_b` — yet the RSVP box said *"I consent to facial-recognition
+> photo matching for this event"* on all of them. Guests consented to a technique that never ran
+> and expected photos to find them. mode_a copy unchanged; mode_b now says **no facial
+> recognition runs**. 🔒 The 18+ box stays required in BOTH modes. ⛔ **The consent GATE on the
+> write path was deliberately NOT touched** — loosening it is an owner/DPO call.
+>
+> **🖼 A partially-denied gallery no longer reads as the whole album.** A coordinator could read
+> only vendor documentation shots (the couple-only sources refuse silently) and the card said
+> *"Your gallery"*. Now asks the permission question SEPARATELY and **fails toward the caveat**.
+> ⛔ Nothing widened — `COORDINATOR_AREAS` has **no photo area at all**; whether it should is an
+> OPEN product call.
+>
+> 🪤 **THREE SELF-CAUGHT FALSE ALARMS IN ONE STRETCH, all from one query each:** "`papic_photos`
+> has ZERO read policies ⇒ nobody can see their own gallery" (it has two `FOR ALL` policies —
+> my filter was `cmd='SELECT'`) · "`schema_migrations` lies, the rename never applied" (my read
+> raced the deploy; re-query showed the new CHECK) · and a mutation test that **silently did not
+> apply**, so its green meant nothing. 🔑 **VERIFY THE SABOTAGE LANDED BEFORE TRUSTING THE GREEN**,
+> and re-query before reporting anything scary.
+>
+> ⏭ **OPEN, owner-only:** coordinator→emcee (the emcee cannot read coordinator messages at all;
+> opening it means granting member-level access to the couple's private notes) · whether a
+> coordinator should ever see couple Papic photos · a per-vendor visibility switch for the couple.
+
+**If you are starting a session on ANY topic, do these three things first:**
+1. Read the ACTIVE block above (even if your task seems unrelated — it may already be covered).
+2. Run RULE 0 from the repo's own `CLAUDE.md`: grep for the feature noun in `apps/web` BEFORE
+   designing anything. Two features the owner asked for on 2026-07-27 turned out to already ship.
+3. Verify claims against **live prod or shipped code**, not against specs or handoffs — the
+   iteration specs are archive stubs and `schema_migrations` can lie about what actually landed.
+
+## 🧭 SOURCE OF TRUTH (read this FIRST — flipped 2026-06-07)
+
+**Canonical reference: [`AS_BUILT_GROUND_TRUTH_2026-06-07.md`](AS_BUILT_GROUND_TRUTH_2026-06-07.md).** Source-of-truth order: **(1) live site `www.setnayan.com` → (2) shipped code `apps/web` @ `origin/main` → (3) live prod DB → (4) the ground-truth doc → (5) iteration specs / dated handoffs = REFERENCE + HISTORY ONLY, may be stale.**
+
+> ⚠ **The canonical iteration specs are ARCHIVE STUBS as of 2026-07-02.** Each `NNNN_<slug>/NNNN_<slug>.md` (and its `.docx` mirror) has been **gutted to a one-screen pointer** — title + "where current truth lives" + a `git show 573a96c:<path>` recovery command + links to any newer dated siblings in the same folder. The full original bodies were **not deleted** — they live in git history at `573a96c` and are one command away. This replaced the old "append-a-banner-on-top-of-the-stale-body" pattern, which is exactly why stale prices/SKUs kept resurfacing: the stub is now the *only* thing the canonical filename serves, so a grep or a cold read can no longer surface superseded claims. **Do NOT re-expand these stubs** — if an iteration needs fresh detail, write a new dated file in its folder (a "newer sibling") or update the living main; never paste the old body back into `NNNN_<slug>.md`. When any spec disagrees with the live site / code / ground-truth doc, **the latter win.** The old "after every code change, edit the corpus + regenerate .docx + `[PENDING]` to `COWORK_INBOX`" sync mandate is **relaxed** — log notable decisions at the **bottom of `DECISION_LOG.md`**; the code is canonical, the corpus is the archive + decision history.
+
+## Status anchors (read these before any work)
+
+Two status docs sit at the spec-corpus root. Cross-reference them at the start of every session — they answer "where are we?" without re-reading the whole iteration tree.
+
+- **[V1_Gap_Analysis_Status.md](V1_Gap_Analysis_Status.md)** — did we update the *spec corpus* for each gap-audit item? (single-pane view of Tier 1/2/3 spec landings)
+- **[App_Build_Status.md](App_Build_Status.md)** — did we ship the *app code* for each iteration? (spec vs. live `origin/main` audit; ✅/⚠️/🟡/⛔ per iteration with what's still missing inline)
+- **[Installed_Stack_Inventory.md](Installed_Stack_Inventory.md)** — what's actually *wired under the hood*? (10-pass audit: deps, migrations, routes, actions, integrations, env vars, CI, desktop, PWA)
+- **[API_Integration_Checklist.md](API_Integration_Checklist.md)** — external service prereqs (signups, keys, DNS) the owner must action before code can run end-to-end.
+- **Repo-side mirrors** (at `https://github.com/iscasasola/setnayan-platform`): `STATUS.md` (living checkpoint), `HANDOFF.md` (cold-start handoff), `OWNER_ACTIONS.md` (phased launch checklist), `CHANGELOG.md` (every change with `SPEC IMPACT` flag), `COWORK_INBOX.md` (pending spec updates).
+
+When code lands ahead of a spec update, the repo appends a `[PENDING]` line to `COWORK_INBOX.md`. Walk those entries at the start of any Cowork session and apply each via the spec file it names, then mark `[DONE <date>]`.
+
+## What this product is
+
+**Setnayan** (spoken: SET-na-yan, brand-origin phrase *"Set na 'yan."* — Tagalog for "that's all set") is a Philippines-first life-events platform. V1 surface is weddings; the product is built for the broader event market (birthday · debut · christening · gender reveal · celebration · travel · corporate · tournament · anniversary · graduation · reunion) as event types unlock over time. One app, three role-routed doorways: **customers** plan events end-to-end, **vendors** run a free-during-launch business profile, **admins** (Setnayan team) run operations from a 7-surface internal console. The full 33-iteration spec spine is documented across `0000_*` through `0035_*` folders.
+
+**Papic** (the candid-capture iteration `0012_papic/`) is one of the in-app SKU-driven services within Setnayan. Designated friends/family ("paparazzi") shoot unlimited photos and 5-second clips, tag guests via QR scan, deposit everything into a shared gallery on the couple's existing Setnayan landing page. Every guest gets their tagged photos in real time and can render a 1–30 second personal souvenir reel from a pre-made template library.
+
+**Full Papic spec:** `02_Specifications/10_Papic_Feature_Specification.md` — read it when in doubt.
+
+## Locked V1 scope (do NOT expand without explicit owner sign-off)
+
+### SKUs
+
+**There is no price table in this file, on purpose.** Prices moved often enough that every copy of them became a way to quote a dead number. The only sources are, in order: the **live site** → the **live DB** (`platform_retail_catalog_v2`, `vendor_billing_catalog`) → **`Pricing.md § 00`**. Read one of those; never a table in a primer.
+
+**Vendor-side shape** (amounts live in `vendor_billing_catalog`): Solo · Pro Vendor · Enterprise · Custom, each 28-day with an annual, plus à-la-carte add-ons. **Token packs are RETIRED (2026-08-07)** — the vendor token currency is gone entirely. ⚠ **THERE IS A BOOKING FEE — but ⚠ CORRECTED 2026-08-06: the "0% commission on vendor bookings" line is *CORRECT AND STAYS*.** Owner, verbatim: *"this is not commission. it is a syncing fee/booking fee."* The couple pays the vendor directly and Setnayan never touches that money; the fee is charged to the VENDOR for the introduction + in-app sync. 🔑 **NEVER call it commission anywhere — product, copy, logs or admin.** (This sentence previously read "…is now FALSE", contradicting the correct statement 80 lines below it in this same file.) Owner-locked taper (`Vendor_Monetization_Model_LOCKED_2026-07-25.md` § 3, coded in `lib/booking-fee.ts` — **derive the rate, never re-type it**): **5% on the first ₱100,000 · 1% above · floor ₱50 · NO cap.** Scope: **SOURCED clients only** (BYO / vendor-invited / returning are free forever), and a verified vendor's **first 5 sourced bookings are free**. Currently **flag-dark** (`NEXT_PUBLIC_BOOKING_FEE_ENABLED`, default off) — nothing is charged until the owner flips it. Enterprise is a BOUNDED tier (up to 10 team seats · 100 km reach · unlimited categories); Custom is the truly-unlimited tier above it. Market Intel (Demand Radar + Price-Position) is **Pro-and-up**.
+
+### Papic — ONE product (owner-locked 2026-08-11)
+
+**There is no "Papic Pool" and no "Papic One".** There is **Papic**. A couple buys credits into
+one shared pot; the host can set some aside for a single camera's QR, where nobody else can spend
+them, and take unspent ones back. **Cameras are free and unlimited.**
+
+**Ladder — a SCROLLABLE list of rungs, priced off ₱1 = 1 credit.** The regular price IS the credit
+count; what you pay is a bundle discount off it, deepening as the number grows, plus a deeper
+sign-up-only discount on the same rungs.
+⚠ **NEVER re-type the figures here — they have gone stale before (caught + corrected 2026-08-29,
+this row) and will again.** `platform_retail_catalog_v2` is the ONLY source (`retail_price_php` for
+the regular price, `onboarding_price_php` for the sign-up price, by `service_code` — the
+`PAPIC_GUEST*` rows); `papic-rungs-are-fundable.db.test.ts` pins the live set; the rung count and
+top rung both change independently of this doc (a 100,000-credit rung exists in prod that no
+version of this table ever listed). **Ladder MECHANICS that don't drift with the numbers:**
+`apps/web/lib/papic-anchor-ladder.ts` derives every non-anchor rung from five/six owner-typed anchor
+prices (a step function of per-credit rate); the admin pricing screen writes the derived prices
+straight into the catalog, so the catalog — never this file, never the anchor module's own
+`PAPIC_ANCHORS_DEFAULT` fallback — is what's charged. ⚖ **A rung can be deliberately absent** (the
+owner has removed one before, when a lower rung priced the same as a higher one made it
+irrational to choose) — check the live catalog for the current set, don't assume any prior list.
+🚨 **A rung is THREE places:** the catalog row, the tier row, AND a line in `sku-activation.ts` —
+a sellable rung missing from that map takes the money and grants **zero** shots, silently.
+
+🔑 **DEDICATED CREDITS ARE A FLOOR, NOT A CEILING.** A capture spends the camera's own credits
+first and the pot pays the remainder ("spend 2 and take 6"); a camera never stops while the event
+has credits anywhere. This was shipped wrong once — the pool stood down for any camera that had
+*ever* held dedicated credits — and the owner caught it. One atomic gate decides both halves now
+(`papic_reserve_capture_split`); do NOT reintroduce a two-call sequence, because the first call
+mutates and the second then cannot tell "spent its last credit" from "never had any".
+
+⚠ Prices live in the catalog, never here.
+
+🛠 **THE BUILD HALF LANDED IN PR [#4883](https://github.com/iscasasola/setnayan-platform/pull/4883)
+(migration `20271170435163`), NOT before it.** The 2026-08-26 DECISION_LOG row for this ladder says
+*"Built as given"* and that was **false when written** — measured the same day: no migration on
+`origin/main`, no branch carrying `PAPIC_GUEST_50K` outside one negative test fixture, no open PR.
+Verify with `gh pr view 4883 --json state,mergedAt` before trusting this line.
+🔑 **A DECISION LOG IS NOT EVIDENCE THAT CODE EXISTS — grep for the object.** This is the same
+failure shape as the migration comments this file already warns about, one level up.
+
+🛑 **CORRECTED 2026-08-26 — `PAPIC_CAMERA_MINI_DAY` IS NOT LOAD-BEARING.** This line used to say it
+was *"still load-bearing (the `sku_code` of every 'mini' seat + the legacy grant path) — deactivate,
+never drop."* Measured against prod, not read: **0** seats carry it as `sku_code` (prod seats are
+`PAPIC_CAMERA_FREE` ×9 · `PAPIC_CAMERA_ONE_FREE` ×4), **0** seats are `tier='mini'`, and **0** rows
+exist in `papic_one_orders`. The legacy grant path reads it as
+`WHERE service_code='PAPIC_CAMERA_MINI_DAY' **AND t.is_active**` — that row is `is_active=false`, so
+the lookup already misses and `COALESCE(v_per, 50)` supplies a hardcoded 50. **The stored value is
+also 50.** It is held by a CASCADE foreign key, not by behaviour.
+🔑 **THE RULE THIS TAUGHT: a removability check must ask "has this done anything", not only "does
+anything point at it".** An FK is a pointer, not a job. Measuring pointers alone reported 22
+untouchable retired rows when most of that pile is dead wiring holding up dead names — all 13
+`papic_*` ones are exactly the rows still titled *"Papic Pool" / "Papic One" / "Papic Mini" /
+"Papic Ltd" / "Papic Max"*, the two-product model retired 2026-08-11. ⚠ Still verify per-row before
+sweeping: an inert pointer can be woken by a code change, and `CREATE OR REPLACE` on that very
+function has silently reverted a guard before.
+
+### Hard product constraints
+
+- **10-second hard cap on video clips.** Capped client-side. UI must enforce. ⚠ **CLIP CURRENCY IS NO LONGER FLAT — CORRECTED 2026-08-11.** This line said "10s = 7 points" and was wrong twice over: the flat weight had been **8** since 2026-07-29, and a clip is now priced **BY LENGTH** (owner): **1–2s = 2 · 3s = 3 · 4–6s = 5 · 7–10s = 8**; a photo stays 1. Ten seconds still costs 8, so nothing got more expensive — only short clips got cheaper. Derive from `PAPIC_CLIP_COST_BANDS` / `papicClipCost` in `apps/web/lib/papic-cameras.ts`, **never re-type a number**. 🔑 **AN UNMEASURED CLIP COSTS THE MOST**: the duration is stamped by the BROWSER, so an absent or nonsense length bills the top band — the only direction a tampered client cannot profit from. 🔒 **Storage is billed FLAT** (`PAPIC_PRESERVATION_UNITS_PER_CLIP`) because a stored row carries `is_clip` and no duration. ✅ **CORRECTED 2026-08-24 — "clips don't compress yet" is FALSE and was stale by ~3 weeks.** Verified on `origin/main` by the WRITER, not by a note: both capture paths (`app/api/papic/guest-capture/route.ts` and `app/papic/actions.ts`) `.update({ clip_web_r2_key, clip_web_bytes })`, and `clipEligibleForDrop` REFUSES to drop a full-res clip that has no web copy. 🔑 **The transcode runs in the GUEST'S BROWSER and is uploaded as a finished file — we pay ₱0 of compute for it.** The kept copy is **720p** (`web720`), owner-locked 2026-08-07 after a 1080p raise was declined. 📏 **MEASURED, not estimated** (DECISION_LOG 2026-08-07): a 10s clip is **0.25 → 0.47 MB** real footage, **0.70 → 1.48 MB** worst case ⇒ **a 10s kept clip is SMALLER THAN ONE PHONE PHOTO (3–5 MB)**, and a 150-clip event costs **+₱0.37/yr** realistic. Storage was never the argument against long clips — resolution was. ⚠ `BUILDS_REMAINING_VERIFIED_2026-08-08.md` item #36 carries the same dead claim; corrected there too.
+- **NO per-photo tag limit (owner 2026-08-06: "no tag limit. we can tag as many").** Supersedes the 20-tag lock of 2026-07-23, which superseded a 10-tag lock of 2026-06-17. Combined individual + table + face + self-link — none of it is counted against a ceiling any more. Migration `20271117449785`. ⚠ **The 20-cap was never the real bug:** the two capture screens hardcoded **10** while the DB had allowed 20 since 2026-07-23, so a paparazzo was cut off at half the real limit and told "that's the max" — the owner's decision reached the database and never reached the screen. 🔑 A 100,000 ceiling remains in `enforce_photo_tag_cap()` purely as a runaway-write backstop (retry storm / loop bug), **not** a product rule; no real photo approaches it.
+- **Untagged-still-delivered guarantee.** Every uploaded photo lands in the couple's gallery regardless of tagging status.
+- **Personal Reels:** vertical 9:16 only (1080×1920), 1–30 seconds duration, max 5 guest picks + max 5 couple memorable clips, template-driven render (no per-render AI).
+- **Music:** Setnayan-owned AI-generated catalogue only. No major-label music. No per-render music license fee.
+- **DSLR pairing is 1 phone : 1 DSLR.** Multi-DSLR-per-phone is V2. WiFi-SDK only in V1; no USB tether.
+- **Face detection is per-event-scoped.** Vector store never reused across weddings. Confidence ≥ 0.85 auto-tags; 0.65–0.85 surfaces a suggested tag; below 0.65 the photo uploads untagged.
+- **Capture metadata is mandatory.** Every photo and clip stamps `captured_at`, `geo_*` (when fix available), `device_model`, `paired_camera_brand/model` (when paired). Geo is stripped on outbound shares; original on R2 retains it.
+
+## Architecture summary
+
+### Stack
+
+- **Native apps:** iOS 16+ (SwiftUI + AVFoundation), Android 11+ (Compose + CameraX)
+- **Backend:** existing Setnayan backend (extend it, don't fork it)
+- **Storage:** Cloudflare R2 — **Asia-Pacific (APAC) · ✅ CONFIRMED IN THE CLOUDFLARE DASHBOARD 2026-08-01** (owner read `setnayan-media` → Location: *Asia-Pacific (APAC)*; bucket created 2026-05-13). The old "PH-region buckets" was false in two ways — **R2 has no Philippines region**, and it implied PH residency we do not have — and this line is where that claim propagated from into the live public `/privacy` notice. — ⚠ **NOT hot-90-days/cold-5-years.** That tiering was never built and no R2 lifecycle rule exists. The real model, enforced in application code (`lib/papic-fullres-drop.ts`, default-ON): the full-res **original is replaced by its compressed copy** ~183 days from the event's FIRST capture, floored at **3 months** after the event **ENDS** — `events.event_end_date` where the celebration spans several days, else `events.event_date` (owner 2026-08-07 raised the floor from 30 days; owner 2026-08-10 moved it off the event's first day, migration `20271126998711`); the **compressed web copy is kept free, FOR LIFE** (owner 2026-08-18 — *"we keep it for life"* — superseding the 2026-08-07 five-year window, which had superseded "free forever"; **no end date and no paid tier**, and the withdrawn paid option was never built or priced), so **NO PHOTO IS EVER DELETED** — only its resolution changes (owner, twice: *"again. not delete. just compress"*). 5 years applies to CHAT only.
+- **Render pipeline:** FFmpeg on Cloudflare Workers + R2 (or Hetzner VM pool fallback)
+- **Auth for paparazzi seats:** wedding-scoped ephemeral session tokens via QR-code claim flow (not username/password)
+- **QR scanning:** AVFoundation metadata output (iOS) / ML Kit Barcode Scanning (Android)
+
+### Data model (key tables — full schema in spec Part 4.1)
+
+```
+Event(event_id, couple_id, paparazzi_tier{3|5}, templates_unlocked[], geolocation_enabled{default true})
+PaparazziSeat(seat_id, event_id, claimer_user_id, claim_qr_token)
+Guest(guest_id, event_id, assigned_table_id, personal_qr_token)  -- existing in Setnayan
+Table(table_id, event_id, table_qr_token)
+Photo(photo_id, event_id, paparazzi_seat_id, r2_object_key, type{photo|clip},
+       captured_at, geo_lat, geo_lon, geo_accuracy_m, geo_unavailable,
+       device_model, paired_camera_brand, paired_camera_model,
+       auto_face_attempted, ...)
+PhotoTag(photo_id, guest_id, source{individual_qr|table_qr|auto_face|manual_pick}, confidence?, ...)
+Template(template_id, feel_category, manifest_json, paired_music_track_ids[])
+EventTemplateUnlock(event_id, template_id, purchased_at)
+PersonalReel(reel_id, event_id, guest_id, template_id, selected_photo_ids[], r2_output_key)
+DslrPairing(pairing_id, event_id, paparazzi_seat_id|live_stream_camera_id,
+            brand{canon|nikon|sony|fujifilm}, model, last_paired_at, status)
+FaceEnrollment(enrollment_id, event_id, guest_id, source{rsvp_profile|guest_portal|checkin_kiosk},
+               vector_blob, quality_score, captured_at, revoked_at?)
+```
+
+### Critical flows
+
+**Paparazzi capture → upload → tag:**
+1. Native app captures photo/clip → local SQLite WAL
+2. Background uploader (BGTaskScheduler/WorkManager) PUTs to R2 via signed URL
+3. Tag scanner sheet → scan guest QR (`setnayan:guest:{id}`) or table QR (`setnayan:table:{id}`)
+4. Tag intents flush to backend with the upload payload
+5. Backend fans out table-tag to all guests assigned to that table (⚠ **NO CAP** — the 10/20 ceilings were retired by the owner 2026-08-06, *"no tag limit. we can tag as many"*)
+
+**Personal Reel / Story render (⚠ CLIENT-SIDE, download-only — reversed 2026-07-23, owner):**
+The reel maker is **free** and renders **entirely in the guest's browser**; the output is **downloaded to their phone and Setnayan stores nothing** (no R2 write, no DB row, no shared feed). This matches the BYO-music not-distributor posture (`14_...Playbook.md §16.7`). See `DECISION_LOG.md` 2026-07-23.
+1. Guest opens the reel maker (reward for completing a Papic Challenge — see `0012_papic/Papic_Games_and_Vendor_Missions_Spec_2026-07-21.md §8`)
+2. Guest freely picks up to ~10 items — **any mix of their own Papic photos + clips** (relaxes the locked "5 guest + 5 couple" split) → target 30s, 9:16 1080×1920
+3. Picks music: their own upload (BYO, client-side per §16.7) **or** an owned-catalogue template track
+4. **Browser** loads the template manifest + the guest's source assets (pulled from R2 — prefer the compressed, geo-stripped `clip_web_r2_key` web-copy; egress is free) + music, and renders via WebCodecs (fallback ffmpeg.wasm)
+5. Output MP4 (~15–25 MB) → **guest downloads to phone.** Setnayan holds zero story files → no storage accumulation on our side. Cost to us = ₱0.
+
+## Music & template assets
+
+The music catalogue and template library are generated through a separate Cowork-driven workflow — see `14_Music_Catalogue_Cowork_Playbook.md`.
+
+- **Music catalogue:** ~400 owned AI-generated tracks (Suno Premier, generated once, owned forever) across 6 categories — Bridgerton-Feel, Taylor-Swift-Feel, Michael-Jackson-Feel, Jazz, Sunday Morning Vibes, Hip Hop. Stored under `/music_catalogue/{category}/{filename}.mp3`. Manifest at `/music_catalogue/catalogue_manifest.json`.
+- **Template library:** ~400 production-ready JSON manifests under `/template_library/{feel_category}/TPL_{nnn}.json`. Master index at `/template_library/library_index.json`. Schema documented in spec Part 4 / playbook Section 12.
+
+When the backend serves a template selection UI to the couple, it reads from `library_index.json`. When the renderer needs music for a render, it picks from the manifest based on the template's `music_pairing_categories` and `music_pairing_bpm_range`.
+
+## Cost shape
+
+Per-render cost: ~₱2–₱5 (FFmpeg compute + R2 storage; music free, CDN egress free on R2). Most digital SKUs run ~90–99% margin — the cost side is compute and storage, both small and roughly flat per event.
+
+**Live Stream cost is audience-independent.** YouTube absorbs all viewers at ₱0 marginal cost to Setnayan. Per-event cost scales only with camera count and stream duration; whether the wedding has 100 viewers or 1,000,000 viewers, Setnayan's bill is the same.
+
+## Payment system (V1 — apply-then-pay)
+
+Setnayan monetizes via **PHP-direct apply-then-pay** with manual reconciliation. Couples always pay in PHP and never see a token balance. **Neither does anyone else: the vendor-side token currency was RETIRED 2026-08-07** (owner lock 2026-07-21 — *"token can retire, there should be nothing that needs token anymore"*). No packs, no bundles, no grant surface, nothing that spends one. Prod never saw one bought or spent. ✅ **Both remaining token items are CLOSED** (owner 2026-08-07: *"tokens are already retired"* · PR #4223): the Custom plan's ₱100/cycle token axis is gone from the code, and creator outreach is FREE. 🪤 **Deactivating that catalog row would have done NOTHING** — a hardcoded ₱100 fallback took over, the `SETNAYAN_AI_RENEW` trap in a second costume. See `Pricing.md § 0.C`.
+
+- **Payment rails (V1):** static BDO + GCash receiving accounts owned by Setnayan. Customer applies for a service / order → receives payment instructions email with unique reference code → pays externally → Setnayan Team manually verifies against BDO/GCash inboxes within 24-hr SLA → service activates.
+- **PHP-only pricing.** No tokens, no in-app wallet balance, no spending primitive. Each order is a discrete PHP charge tied to a `service_orders` row with `service_key`, `customer_id`, `amount_php`, `reference_code`, `status ∈ pending_payment / paid / failed / refunded`.
+- **No CUSTOMER-side convenience fee** — couples are never surcharged. ⚠ **But the vendor side is no longer 0%: the BOOKING FEE (5% first ₱100k · 1% above · floor ₱50 · no cap, sourced clients only, first 5 free) was owner-locked 2026-07-25.** See the SKU section above; the rate lives in `lib/booking-fee.ts`, never in a doc. ✅ **"Setnayan does not hold money" is CORRECT and must stay** (owner, 2026-08-03: *"they do not transact on our website. they just set the final quotation and we charge them that booking fee and they pay it to sync on the app"*). The couple pays the vendor **directly, off-platform**; Setnayan never touches that money. The booking fee is charged to the VENDOR against their quoted figure — it is a platform fee for the introduction + the in-app sync, **not** a cut of the couple↔vendor deal, so 0% commission and a booking fee are both true at once. ⚠ **`lib/payouts.ts` + `/admin/payouts` are a LEGACY path, not the live model** — its own call site says so: *"Retired 2026-05-28 V2 cutover… Setnayan is now a software publisher, not a marketplace intermediary… new V2 orders won't route through it."* It fires only for pre-V2 orders carrying `vendor_profile_id`. A separate automated **Setnayan Pay gateway** (per-rail 1.5%/2.0%/2.5% in `setnayan_pay_methods`) is **dormant** — every row is `is_active=FALSE`, not charged in V1.
+- **V1.5 roadmap:** automated reconciliation via GCash Merchant API (probable) or PayMongo integration (under evaluation). Activation latency drops from 24-hr to minutes.
+- **Comp + Unlimited-Use Grants:** admin can issue free-render or unlimited-use grants to specific customer accounts. Grants are a `comp_grant_id` populated on `service_orders` that skip the payment-pending state.
+- **Spec convention:** prices are written in PHP everywhere — specs, design conversations and the in-app UI alike. Nothing talks in tokens any more.
+
+## What's NOT in V1 (don't build, don't backdoor in)
+
+- All-Guest Unlock tier (every guest can shoot via web)
+- Native Pro Capture Pack (RAW, manual focus peaking, ISO/shutter)
+- Roving Papic service tier (staff photographers)
+- Premium Photojournalism + Photo Book
+- AI Top-50 same-day curation
+- Live Photo Wall venue projection
+- Photo Mission system / crew leaderboard
+- Cross-paparazzi de-duplication
+- **BYO music is ALLOWED** as Guest Stories' "Your music (upload)" source, **client-side render ONLY** (uploaded audio never enters the server pipeline → Setnayan is not the distributor). Spec: `14_Music_Catalogue_Cowork_Playbook.md` §16.7.
+
+These are tracked in spec Part 6. Each is a future spec.
+
+## Privacy & compliance
+
+- PH Data Privacy Act (RA 10173) — guest consent at RSVP, opt-out flow, face-blur for opt-outs. ⚠ **Retention is NOT 5 years for photos, and photos are NOT deleted at all** — the full-res original is **replaced by a compressed copy** at **6 months from first capture**, floored at **3 months after the event ENDS** (default-ON); the compressed gallery is kept free, **for life** (owner 2026-08-18, superseding the 2026-08-07 five-year window and its never-built paid option), so the photo itself is never deleted. 5 years applies to MESSAGES, not photos. Cameras may start shooting **6 months before** the event — which is exactly why the floor, not the 6-month clock, is what preserves the photos after the day.
+- Couple has 7-day review window (configurable) before public unlock
+- NSFW filter is on by default and CANNOT be disabled
+- DPO is the **proprietor, Indalecio Sacdalan Casasola II** (registered on the NPC DPO system 2026-07-07). ⚠ Not Claire E. Buanhog — she is VP / co-founder and DBRT support. See [[dpo-designation-owner]].
+- **Data residency: NOTHING is hosted in the Philippines.** Database = **Supabase, Singapore** (this is also where the biometric face vectors live — `guest_face_enrollments.face_vector`, `user_face_profiles`). Object storage = **Cloudflare R2, Asia-Pacific (APAC)** (media + the source selfie images, *not* the vectors) — **✅ CONFIRMED IN THE DASHBOARD 2026-08-01**, no longer an assumption. Corrected 2026-07-31 from "PH-region buckets", which was false in two ways (no PH region exists; and it implied PH residency we do not have) and had propagated into the live public `/privacy` notice. ⚠ **Five buckets, not four** (`media` · `thread-files` · `vendor-contracts` · `samples` · **`vendor-verification`** — the last holds vendor government IDs); the code's `R2_BUCKETS` is canonical.
+
+## Common pitfalls / gotchas for engineers
+
+1. **Don't render reels server-side with major-label music.** Even with TOS click-through, server-side rendering makes Setnayan the direct infringer. Catalogue is owned-AI-generated only.
+2. ⚠ **CORRECTED 2026-08-07 — this said "don't auto-delete photos within 5 years… we match" and it is FALSE.** Full-resolution originals are **replaced by their compressed copy 6 months from the event's FIRST capture** (an engagement shoot starts the clock), floored at **3 months** after the event **ENDS** (owner 2026-08-07 — *"still preserve 3 months all their photos in high res before we compress it"*; was 30 days · owner 2026-08-10 — *"3 months after the event ends"*, so the floor counts from `event_end_date` where there is one, else `event_date`), and the sweep is **DEFAULT-ON** (`papic-fullres-drop.ts` — `!== 'false'`). The **compressed gallery is kept free, FOR LIFE** (owner **2026-08-18**, superseding the 2026-08-07 five-year window, which had superseded "free forever"). There is **no end date and no paid tier**; the withdrawn paid option was never built or priced. Google Drive is the only way a couple keeps ORIGINALS. The live `/privacy` page and the NPC pack now say exactly this. ⚠ **This file has now been wrong about this one number twice** — it said 5 years for five days after the code said six months, and it said 5 years while the owner had moved to for life. **Grep the whole file when a retention number changes; a correction at one site is not a correction.**
+3. **Tag fan-out from table QR.** ⚠ **No truncation — there is NO tag cap** (owner 2026-08-06). The old "alphabetize and truncate at 10" rule is retired; a 100,000 backstop remains in the trigger purely to stop a retry storm and is **not** a product rule.
+4. **Untagged photos still go to the couple.** Don't filter the couple's gallery view by tag presence.
+5. **Personal Reel duration is flexible (1–30s) but template slot durations don't all need to scale linearly.** Some templates have minimum slot durations; if guest picks 1s reel from a template with 4s minimum slots, swap to a shorter-template variant or surface an error.
+6. **Wedding-scoped session tokens.** A paparazzi seat token only works for its bound event. Don't allow cross-event reuse.
+7. **R2 free egress is a real architectural advantage.** Use Cloudflare's CDN end-to-end. Don't proxy through a different cloud unless absolutely necessary.
+
+## Companion documents
+
+- `10_Papic_Feature_Specification.md` — full product spec, single source of truth
+- `14_Music_Catalogue_Cowork_Playbook.md` — music + template asset generation playbook
+- `09_Panood_Feature_Specification.md` — Live Studio (livestream/control-room; renamed from "Panood" 2026-06-29; filename + internal SKU key `PANOOD_SYSTEM` unchanged) feature (cross-references the same backend + landing page)
+- `07_V1_Developer_Specification.md` — overall Setnayan V1 dev spec (RSVP, seating chart, payments — all of which Paparazzi depends on)
+- `13_Engineering_Brief.docx` — Setnayan engineering high-level brief
+
+## Iteration build order (forward-sequenced)
+
+`Status` = spec drafting state. `Built` = what exists in the codebase right now (✅ = shipped to code, ⚠ = partial, blank = unbuilt). Built status updated as each iteration's code lands; the doc's `Status` column stays as the spec-drafting field.
+
+| # | Folder | Status | Built | Surface |
+|---|---|---|---|---|
+| **0000** | `0000_app_shell_and_navigation/` | **drafted 2026-05-09** | ⚠ Phase 1 | **App shell foundation — universal Setnayan account (`users`), login, event picker, primary event auto-jump (1 active event jumps in; 2+ shows picker), event QR + scan-to-join flow with role picker, four bottom-nav tabs (Guest List / Vendors / Schedule / In-App Services), event-scoped URL pattern `/dashboard/[event-id]/[section]`, services launcher grid, unified Schedule view. Vendor accounts placeholder (deferred to Din)** |
+| 0001 | `0001_creating_guest_list/` | drafted | ✅ | Couple dashboard guest list + roles |
+| 0002 | `0002_qr_invitation_system/` | drafted | ✅ v2 | Personal invitation site renderer + branded QR |
+| **0004** | `0004_invitation_widgets/` | **drafted (this session)** | | Customization editor, Basic/Pro widget tiers, Pro purchases via wallet |
+| 0005 | `0005_led_background_maker/` | **🔴 REMOVED FROM THE PRODUCT 2026-08-11** | ⛔ deleted | ~~8K LED screen template maker (USB delivery, offline)~~ **It was SOLD (bundled into the ₱1,000 Animated Monogram) and could never be delivered: the maker saved a draft and nothing anywhere produced the 8K file or the posted USB that ten screens + `/features` in BOTH languages promised.** Owner: *"remove wall backdrop"* — chosen over building the only always-on paid server in the product (everything else renders in the customer's browser). Zero orders had ever been placed, so nobody was refunded. Route, save endpoint, template module, ownership alias and both (empty) tables deleted · PR #4356 · migration `20271132121622`. ✅ **Hiring an LED wall VENDOR is untouched and still works** — only the Setnayan-MADE backdrop is gone. ⚠ The `setnayan_pailaw` taxonomy leaf is deliberately LEFT (removing a leaf can strand shops). |
+| **0006** | `0006_vendors_management/` | **drafted 2026-05-09** | | Couple-managed vendor registry — hybrid service taxonomy (28 canonical + custom), flexible payment milestones, computed crew meals, R2 contracts. No wallet integration (vendor money is external) |
+| **0007** | `0007_budget_expenses/` | **drafted 2026-05-09** | | Couple's payment ledger — 3 line items per vendor (Package / Crew Meal / Transportation), payment log with proof, vendor QR display, .ics calendar export, Setnayan platform costs auto-populate from 0003 wallet |
+| **0008** | `0008_seating_chart_editor/` | **drafted 2026-05-09** | | Seating chart editor — 13-entry table catalog (round / long / king / sweetheart / serpentine), free-placed stage, role-tier ring auto-fill, QR-on-publish print pack, peer tagging is QR-scan only with tag-once trust handshake |
+| 0009 | `0009_photo_delivery/` | partial | | Google Drive integration for photo delivery |
+| **0010** | `0010_mood_board/` | **drafted 2026-05-09** | | Mood Board V1 — palettes only (role + venue), Setnayan Guide rule engine with 7 categories, 20 pre-template themes, color name library, image extraction, master palette dedup. Stylist persona + inspirations + venue segments deferred until stylist exists |
+| **0011** | `0011_live_stream/` | **drafted 2026-05-09 · re-revised 2026-05-09** | | Ships as **Live Studio, ONE SKU `LIVE_STUDIO`, per event-day, no per-camera fee** (canon: `Live_Studio_Unified_Spec_2026-07-25.md`). YouTube as sole in-app delivery, registers shared Custom Monogram Pack flag consumed by 0012 |
+| **0012** | `0012_paparazzi/` | **drafted 2026-05-09** | ⚠ webapp slice | Paparazzi V1 — native iOS/Android, rear-only, gesture shutter, QR tagging, consumes monogram pack |
+| **0013** | `0013_platform_stack_and_sync/` | **drafted 2026-05-09** | ⚠ partial | **Platform Stack & Sync Setup — Vercel + Supabase + Cloudflare R2 + GitHub. User Setup Checklist (Section A), Claude Code Implementation Guide (Section B), Integration Tests (Section C). MUST BUILD FIRST as Sprint 0 even though numbered 0013.** |
+| 0014 | `0014_v1_1_polish/` | empty (queued · no folder on disk yet) | | V1.1 polish — Photo Center, profile photo auto-update, expanded filters, battery escalation, delivered indicator (renamed from 0013, displaced by Platform Stack iteration) |
+| **0015** | `0015_main_website/` | **re-drafted 2026-05-11 · brand finalized 2026-05-12** | | **SETNAYAN public marketing site at setnayan.com (working) / setnayan.com (current). Two-sided split hero (couple ↔ vendor), free vendor registration during launch, feature catalog visible / prices hidden, EN-primary luxurious-Filipino-modern voice (TL · CEB toggles), uploaded symbol mark + SETNAYAN wordmark (spelled in full), "Set na 'yan." brand-origin. One product, three doorways (customer / vendor / admin role-router).** |
+| **0016** | `0016_step_by_step_plan_builder/` | **now "Setnayan AI"** | | **Setnayan AI — the couple-side assisted planner (DIY remains the free default). Deterministic, not an LLM. Price + tier shape live in `Pricing.md § 00` and the live catalog, never here. Full roadmap · nudges · vendor matching · honeymoon planning.** |
+| 0017 | `0017_patiktok/` | drafted | | Patiktok templates — short-form vertical video templates for the post-event "personal reel" experience (V1 Sulyap roadmap; complements 0024 Save-the-Date). |
+| 0018 | `0018_supplies_marketplace/` | drafted | | Supplies marketplace placeholder — third-vertical "Supplies" exploration (deferred; precursor to the second-vertical car-services concept). |
+| 0019 | `0019_communications/` | drafted 2026-05-11 | | **In-app communications: text chat between couples ↔ vendors; coordinator role gets per-thread join permission. Doc / sheet / pdf / image readers attached to threads with dedicated R2 storage. Vendor-side messages always display company logo (never personal photo) per § 3.10. Free use across the board. No in-app video meetings — couples + vendors use external tools.** |
+| 0020 | `0020_interaction_prototype/` | drafted 2026-05 | | Cross-cutting 8-phase interaction prototype (vendor → customer → Papic → other features). |
+| **0021** | `0021_couple_dashboard_fully_purchased/` | **drafted 2026-05-10 · theme system + icon migration pilot 2026-05-12** | | **Fully-purchased couple dashboard — 9 surfaces (Overview/Guests/Vendors/Schedule/Services/Seat Plan/Landing/QR Hub/Gallery). Pilot for the 5-theme system (Setnayan Default · Victorian · Classy · iOS · Forest Theme) with runtime theme picker + Lucide icon framework. Home deadline scheduler re-anchored to earliest-chosen-date + "Upcoming schedules" (2026-06-03).** |
+| **0022** | `0022_vendor_dashboard/` | **drafted 2026-05-10 · mandatory logo + chat masking 2026-05-12** | | **Vendor dashboard — 6 surfaces (Home/Services/Calendar/Clients/Threads/Team & Setnayan). Mandatory company logo upload at registration per § 2.1b. Pro subscription · plan builder · custom service categories.** |
+| **0023** | `0023_admin_console/` | **drafted 2026-05-12 · Team Pool + Payment Methods + § 9.1 scope 2026-05-12** | | **Setnayan internal admin surface — 29 surfaces. Vendor verification queues · payment reconciliation · disputes · pricing catalog · Team Pool widget (§ 10b) · 🟣 internal accounts (§ 10a) · Payment Methods upload (§ 3.5c) · two-admin approval queue gated to major decisions (§ 9.1) · surface #29 Promoted Events & Broadcast (V1.6 · § 3.16).** |
+| **0024** | `0024_save_the_date/` | **REDESIGNED 2026-06-17** | ⚠ reveals ✅ · content film 🟡 | **Save-the-Date = a continuous, self-playing, scrubbable CONTENT FILM (one elegant design · the 7-beat spine) under a chosen REVEAL OPENING (5: Sheer veil + four-flap/two-flap-side/two-flap-top/church-doors), recoloured to the couple's Mood Board · auto-plays fullscreen → ends → add-to-calendar (wedding + invitation-launch). FREE = the content film; PREMIUM = the cinematic openings ₱999/event (repriced 2026-07-10, was ₱799). **Built state 2026-06-18:** veil reveal PORTED #1671 · STD openings ₱799 buy flow SHIPPED #1705/#1709/#1718 (admin-approval handshake, fail-proofed) · content film (PR4 · 7-beat free film) 🟡 in build. See `0024_Save_the_Date_Content_and_Customization_2026-06-17.md` + `0024_Veil_Reveal_Spec_2026-06-17.md` + AS_BUILT § 10b.** |
+| **0025** | `0025_profile_settings/` | **drafted 2026-05-12** | | **Profile Settings surface lives inside 0021/0022/0023 dashboards. 6 tabs: Profile · Appearance (theme picker) · Notifications (preferences) · URL & Slug · Payment Methods · Privacy & Data (RA 10173 — data export + soft/hard account deletion + face data revocation + marketing consent).** |
+| **0026** | `0026_bir_tax_compliance/` | **drafted 2026-05-12** | | **BIR / PH tax compliance — Official Receipt generation per in-app SKU payment, VAT vs Percentage Tax decision matrix (V1 launches non-VAT), Vendor payout EWT + quarterly Form 2307 PDF, eFPS report exports for Setnayan's tax accountant, customer/vendor tax-document download surface. Critical for PH legal compliance — Setnayan can't accept payment without this.** |
+| **0028** | `0028_email_notifications/` | **drafted 2026-05-12** | | **Email-only notification fallback (SMS deferred to V1.5). 10 V1 templates: payment_instructions · payment_confirmed · refund_processed · new_vendor_message · vendor_status_change · vendor_unresponsive_48h · rsvp_received · wedding_day_reminder · save_the_date_sent · security_alert. Provider Resend (SendGrid fallback). Branded HTML + plaintext, RFC 8058 one-click unsubscribe, RA 10173 + CAN-SPAM compliant.** |
+| **0029** | `0029_help_center/` | **drafted 2026-05-12** | | **Help Center / FAQ at `setnayan.com/help` · 4 role tiles (customer/vendor/guest/admin) · ~90 V1 articles · full-text search · structured contact-form routing to admin roles · support ticket queue with 24-hr SLA. SEO via FAQPage schema.org. EN-only in V1; TL/CEB deferred.** |
+| **0030** | `0030_guided_tour/` | **drafted 2026-05-12** | | **First-time guided tour on initial login per account type. 8-step customer · 7-step vendor · 4-step guest · 6-step admin scripts. Driver.js library. Per-surface mini-tours (11 of them). Replayable from Settings. Tour analytics in 0023.** |
+| **0031** | `0031_day_of_guest/` | **drafted 2026-05-12** | | **Day-of guest experience — live-event mode auto-activates T-1hr to T+8hr on the personal landing page. 6 cards (what's-happening · your-table · live-photo-wall · video-guestbook · live-schedule · coordinator-broadcast). Offline-first PWA shell for venues with weak signal. 5-mode lifecycle (coming-soon → pre-event → live → recap → archive).** |
+| **0032** | `0032_contract_intelligence/` | **drafted 2026-05-12** | | **Contract Intelligence + Builder — AI-powered contract analysis (Claude API), 14-element detection, ~50-clause Setnayan template library, both-party e-signature flow (RA 8792 compliant), compliance checklist. Paid upgrade SKU at ₱199/contract OR free unlimited with Vendor Pro Weekly. External PH counsel review gate before launch.** |
+| **0033** | `0033_public_api_foundation/` | **drafted 2026-05-12** | | **Public API foundation — Cloudflare Workers gateway · OAuth2 PKCE · scoped tokens (16 scopes) · path-based versioning · rate-limit tiers (free 100/min · Pro 1K/min · Enterprise 10K/min) · webhook delivery infra · developers.setnayan.com portal. NO public endpoints in V1; plumbing for V1.5 phased rollout.** |
+| **0034** | `0034_payments_and_cart/` | **drafted 2026-05-12 · reconciliation module added 2026-05-12** | | **Payments & Cart spine — 8-table canonical schema + `payment_inbox_messages` reconciliation table. Customer add-to-cart → checkout → BDO + GCash QR codes → external pay → screenshot upload → admin reconciles (Approve / Reject-needs-more-proof / Reject permanently). Resubmission supported (same order_id). § 10a internal accounts skip payment-pending entirely; § 10b team-pool members get partial / full comp atomically. No Setnayan Pay convenience fee — commission is 0%. Reference codes 8-char Crockford base32. 7-day expiry on pending_payment. 4-tier fuzzy SQL matcher (`match_inbox_to_order`) auto-pairs bank/GCash inbox notifications to orders — exact code → amount+sender fuzzy → amount-only → unmatched. Admin reviews matcher suggestions but final approve/reject stays single-admin.** |
+| **0035** | `0035_observability/` | **drafted 2026-05-12** | | **Observability stack — Sentry (errors · ~₱1.5K/mo) + PostHog (product analytics · ~₱1K/mo) + Better Stack (uptime + status page + on-call · ~₱1K/mo). `/api/health` + `/api/health/deep` endpoints. Vercel Log Drains → Better Stack. Alert rules (critical paging Ops Lead · warning Slack · info digest). RA 10173 compliant — no PII in logs · session recordings disabled · PostHog opt-out toggle. Status page at `status.setnayan.com`. Total ~₱3.5K/month. Engineering effort ~1 week for one engineer.** |
+| **0036** | `0036_pakanta/` | **drafted 2026-05-14 · 3-tier locked** | | **Pakanta · Your Wedding's Own Song — 3-tier custom songwriter service powered by Suno Premier. Basic ₱1,999 (1 song · 24-hr turnaround · no lyric approval) · Premium ₱3,999 (1 song · 2 versions · 3 remakes · 8-section intake · lyric approval gate · 2–5 day) · Wedding Suite ₱9,999 (3 matching songs · same Personas · same key family · lyric through-line · mastering pass · 5–7 day). Library-save mechanic makes the couple's Pakanta song(s) the backing track for every Setnayan-rendered video at their wedding. Canonical ID prefix S89K-. 85–90% margins.** |
+| **0037** | `0037_bespoke_monogram/` | **drafted 2026-05-14 · prototype shipped · ⚠ LIVE SITE: ships as "Animated Monogram" — ₱999 (2026-07-10 reprice; was ₱1,999/₱2,499; see Pricing.md § 00)** | | **⚠ Live site sells this as "Animated Monogram" at ₱999 (2026-07-10; was ₱2,499/₱2,999), bundling the animation. _Original spec text:_ Bespoke Monogram (DALL-E) at ₱2,999 — fully in-app AI-driven monogram with 30-refinement loop. Couple fills brief (initials + 3 personality words + optional motif + reference uploads) → pays → brief LOCKS → DALL-E 3 HD generates 4 candidates within 5 sec → refine loop with text feedback + suggested chips (4 new variations per refinement; 30 free included; +₱199 for 10 more) → accept final → vectorizer.ai produces SVG → replaces event-wide monogram across QR center, hero, save-the-date, AI Highlight, SDE, LED, signage, gallery chrome. Customer-facing brand "Setnayan AI"; DALL-E/OpenAI never named. Retires Custom Monogram Pack ₱1,999 SKU. ~95% margin. Canonical ID prefix S89B-.** |
+| **0038** | `0038_editorial_and_affiliates/` | **drafted 2026-05-19** | | **Editorial & Affiliates · V1.1 traffic-monetization expansion. `setnayan.com/blog` (long-form articles, ~1/week cadence post-launch) + `setnayan.com/recommendations/[category]` (curated picks with disclosed affiliate links — Involve Asia primary network) + Sponsored Content (paid-for editorial features w/ unambiguous "Sponsored" badge, two-admin gate ≥₱100K). Git-tracked MD pattern (same as 0029 Help Center) — content lives in `apps/web/content/editorial/`. New tables: `editorial_articles` + `recommendation_pages` + `affiliate_links` + `affiliate_conversions` + `sponsored_slot_bookings`. PostHog `affiliate_link_clicked` event w/ no PII. Newsletter sponsorship slot extends 0028. Cross-coordinates with 0022 Boosted Ads + 0039 AdSense (sponsored articles + sponsored newsletter slots are AdSense-excluded).** |
+
+## Decision log
+
+> **Moved to [`DECISION_LOG.md`](DECISION_LOG.md)** (corpus root) — split out 2026-06-03 to keep this primer light in auto-loaded context. The full append-only log (457 rows, ~2.2 MB) is **not** auto-loaded; search it on demand, e.g. `grep -n "2026-06" DECISION_LOG.md`. **Append new rows there** in date order, format `| Date | Decision | Why-or-affected-files |` — not in this file.

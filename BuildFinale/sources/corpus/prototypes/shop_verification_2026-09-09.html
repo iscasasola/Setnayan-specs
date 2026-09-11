@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Papers Beside the Fields</title>
+<style>
+  :root{
+    --ground:#FFFFFF; --paper:#F7F5F2; --ink:#2C2A29; --ink-soft:#4F535B; --ink-faint:#6B6F77;
+    --cta:#C24E25; --link:#3B4E67; --gold:#A9834B; --gold-text:#8A6B39; --gold-soft:#F5EEE1;
+    --line:#E4E0DA; --ok:#2F6B4A; --ok-soft:#EDF4EF; --warn:#8C5A0E; --warn-soft:#FBF3E4;
+    --wait:#3B4E67; --wait-soft:#EEF1F5; --none:#6B6F77; --none-soft:#F1F0EE;
+    --body:"Hanken Grotesk","Helvetica Neue",Helvetica,Arial,sans-serif;
+    --mono:"Space Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --ground:#191817; --paper:#211F1E; --ink:#EFEBE4; --ink-soft:#B5B0A8; --ink-faint:#9A948C;
+    --cta:#E8703F; --link:#9FB3CC; --gold:#C2A06A; --gold-text:#D6B87F; --gold-soft:#332B1E;
+    --line:#332F2C; --ok:#7FBF97; --ok-soft:#1B2A21; --warn:#D9A648; --warn-soft:#2C2415;
+    --wait:#9FB3CC; --wait-soft:#1F262E; --none:#9A948C; --none-soft:#262422;
+  }}
+  :root[data-theme="dark"]{
+    --ground:#191817; --paper:#211F1E; --ink:#EFEBE4; --ink-soft:#B5B0A8; --ink-faint:#9A948C;
+    --cta:#E8703F; --link:#9FB3CC; --gold:#C2A06A; --gold-text:#D6B87F; --gold-soft:#332B1E;
+    --line:#332F2C; --ok:#7FBF97; --ok-soft:#1B2A21; --warn:#D9A648; --warn-soft:#2C2415;
+    --wait:#9FB3CC; --wait-soft:#1F262E; --none:#9A948C; --none-soft:#262422;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--ground);color:var(--ink);font-family:var(--body);margin:0;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:66rem;margin:0 auto;padding:2.5rem 1.25rem 5rem;display:flex;flex-direction:column;gap:2.75rem}
+  .eyebrow{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 .5rem}
+  h1{font-size:clamp(1.6rem,4vw,2.2rem);line-height:1.15;margin:0;font-weight:700;letter-spacing:-.02em;text-wrap:balance}
+  .lede{color:var(--ink-soft);margin:.7rem 0 0;max-width:40rem}
+  .frame-title{display:flex;align-items:baseline;gap:.8rem;flex-wrap:wrap;margin:0 0 .7rem}
+  .frame-title h2{font-size:1.15rem;margin:0;font-weight:700}
+  .frame-title span{font-size:.85rem;color:var(--ink-soft)}
+  .legend{display:flex;gap:1rem;flex-wrap:wrap;font-size:.82rem;margin-top:.9rem}
+  .legend i{font-style:normal;font-weight:700;margin-right:.25rem}
+  .legend .k-ok{color:var(--ok)} .legend .k-warn{color:var(--warn)} .legend .k-wait{color:var(--wait)} .legend .k-none{color:var(--none)}
+
+  /* ---------- frames ---------- */
+  .frame{border:1px solid var(--line);border-radius:14px;background:var(--ground);overflow:hidden;container-type:inline-size;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .frame.desktop{max-width:62rem}
+  .frame.phone{width:375px;max-width:100%;border-radius:28px}
+  .statusbar{display:flex;justify-content:space-between;padding:.6rem 1.1rem .1rem;font-family:var(--mono);font-size:.62rem;color:var(--ink-faint)}
+  .page{padding:1.1rem 1.4rem 1.8rem}
+
+  /* the one-line top of My Shop — the shipped page's only header */
+  .topline{display:flex;align-items:baseline;gap:1rem;border-bottom:1px solid var(--line);padding-bottom:.55rem;margin-bottom:1.1rem;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+  .topline b{font-size:1.15rem;letter-spacing:-.01em}
+  .topline nav{display:flex;gap:.9rem;font-size:.82rem;color:var(--ink-soft)}
+  .topline nav .on{color:var(--ink);font-weight:600;border-bottom:2px solid var(--cta);padding-bottom:.15rem}
+
+  .sec-head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:.5rem 1.5rem}
+  .sec-head h2{font-size:1.25rem;margin:0;font-weight:700;letter-spacing:-.01em}
+  .sec-head .sub{margin:.15rem 0 0;font-size:.88rem;color:var(--ink-soft);max-width:40rem}
+  .tally{display:flex;gap:.3rem 1rem;flex-wrap:wrap;font-size:.8rem;color:var(--ink-soft);margin:.9rem 0 .35rem}
+  .tally b{font-family:var(--mono);font-weight:700;color:var(--ink)}
+  .tally .d{display:inline-block;width:.6rem;height:.6rem;border-radius:2px;margin-right:.35rem;vertical-align:-1px}
+  .d-ok{background:var(--ok)} .d-warn{background:var(--warn)} .d-wait{background:var(--wait)} .d-none{background:var(--line)}
+  .bar{display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--line);gap:2px}
+  .bar span{display:block;height:100%}
+  .almost{margin:.6rem 0 0;font-size:.92rem}
+  .almost b{color:var(--ink)}
+
+  .banner{background:var(--paper);border-left:3px solid var(--gold);padding:.7rem .9rem;border-radius:3px;font-size:.88rem;margin-top:1rem}
+  .banner b{display:block;margin-bottom:.1rem}
+
+  /* ---------- a pair ---------- */
+  .pair{border:1px solid var(--line);border-radius:10px;margin-top:1rem;overflow:hidden}
+  .pair-head{display:flex;align-items:baseline;gap:.6rem;padding:.65rem .9rem;border-bottom:1px solid var(--line);background:var(--paper);flex-wrap:wrap}
+  .pair-head .num{font-family:var(--mono);font-size:.72rem;color:var(--ink-faint)}
+  .pair-head h3{margin:0;font-size:1rem;font-weight:700}
+  .pair-head .hint{font-size:.8rem;color:var(--ink-soft);flex:1 1 14rem}
+  .pill{font-family:var(--mono);font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;padding:.22rem .55rem;border-radius:3px;white-space:nowrap;margin-left:auto}
+  .pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.warn{background:var(--warn-soft);color:var(--warn)}
+  .pill.wait{background:var(--wait-soft);color:var(--wait)} .pill.none{background:var(--none-soft);color:var(--none)}
+
+  .pair-body{display:grid;grid-template-columns:minmax(14rem,5fr) auto minmax(16rem,7fr)}
+  .doc{padding:.9rem;border-right:1px solid var(--line)}
+  .arrow{display:flex;align-items:center;justify-content:center;padding:0 .6rem;font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);border-right:1px solid var(--line);background:var(--paper)}
+  .a-v{display:none}
+  .proves{padding:.5rem .9rem .9rem}
+
+  .thumb{display:flex;gap:.7rem;align-items:flex-start}
+  .paper-ico{width:52px;height:68px;border:1px solid var(--line);border-radius:4px;background:var(--ground);position:relative;flex:none;overflow:hidden}
+  .paper-ico::before{content:"";position:absolute;left:8px;right:8px;top:9px;height:3px;background:var(--line);box-shadow:0 8px 0 var(--line),0 16px 0 var(--line),0 24px 0 var(--line),0 32px 0 var(--line)}
+  .paper-ico::after{content:"";position:absolute;right:7px;bottom:7px;width:12px;height:12px;border:2px solid var(--ink-faint);border-radius:1px;opacity:.55}
+  .paper-ico.photo{transform:rotate(-2deg);background:var(--paper)}
+  .fname{font-family:var(--mono);font-size:.72rem;color:var(--ink);word-break:break-all}
+  .meta{font-size:.78rem;color:var(--ink-soft);margin:.15rem 0 0}
+  .readas{font-weight:600;font-size:.9rem;margin:.7rem 0 0}
+  .why{font-size:.8rem;color:var(--ink-soft);margin:.6rem 0 0;padding-top:.55rem;border-top:1px dashed var(--line)}
+  .mono{font-family:var(--mono);font-size:.92em}
+  .lnk{color:var(--link);text-decoration:underline;font-size:.82rem;font-weight:600;background:none;border:0;padding:0;cursor:pointer;font-family:inherit}
+
+  .drop{border:1.5px dashed var(--ink-faint);border-radius:8px;padding:1rem .8rem;text-align:center;background:var(--paper)}
+  .drop b{display:block;font-size:.9rem}
+  .drop p{font-size:.78rem;color:var(--ink-soft);margin:.3rem auto .7rem;max-width:22rem}
+  .btn{display:inline-block;border-radius:6px;padding:.48rem .85rem;font:600 .85rem var(--body);cursor:pointer;border:1px solid transparent;line-height:1.3}
+  .btn.cta{background:var(--cta);color:#fff}
+  .btn.ghost{border-color:var(--ink-faint);color:var(--ink);background:var(--ground)}
+  .btn[aria-disabled="true"]{opacity:.45;cursor:not-allowed}
+
+  .field{padding:.55rem 0;border-top:1px dashed var(--line)}
+  .field:first-child{border-top:0}
+  .lbl{display:block;font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:.25rem}
+  .in{width:100%;border:1px solid var(--line);border-radius:6px;padding:.45rem .6rem;font:inherit;font-size:.92rem;background:var(--ground);color:var(--ink)}
+  .in.mono{font-family:var(--mono);font-size:.88rem}
+  .in::placeholder{color:var(--ink-faint)}
+  .in.ok{border-color:var(--ok)}
+  .in.warn{border-color:var(--warn)}
+  .ro{font-size:.92rem;font-weight:600;margin:0}
+  .st{font-size:.8rem;margin:.35rem 0 0;display:flex;gap:.4rem;align-items:flex-start;line-height:1.4}
+  .st i{font-style:normal;font-weight:700;flex:none}
+  .st.ok{color:var(--ok)} .st.warn{color:var(--warn)} .st.wait{color:var(--wait)} .st.none{color:var(--none)}
+  .st.warn b{color:var(--warn)}
+  .cmp{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin:.5rem 0}
+  .cmp>div{border:1px solid var(--line);border-radius:6px;padding:.5rem .6rem;background:var(--ground)}
+  .cmp>div.this{border-color:var(--warn);background:var(--warn-soft)}
+  .cmp .src{font-family:var(--mono);font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-faint);margin-bottom:.2rem}
+  .cmp .val{font-size:.9rem;font-weight:600;margin:0}
+  .acts{display:flex;gap:.9rem;align-items:center;flex-wrap:wrap;margin-top:.45rem}
+  .purpose{font-size:.88rem;margin:.6rem 0 0}
+  .purpose b{font-weight:600}
+
+  .step{display:flex;align-items:baseline;gap:.6rem;border:1px solid var(--line);border-radius:10px;padding:.65rem .9rem;margin-top:1rem;flex-wrap:wrap;background:var(--paper)}
+  .step h3{margin:0;font-size:1rem}
+  .step .hint{font-size:.8rem;color:var(--ink-soft);flex:1 1 12rem}
+  .step .chev{font-family:var(--mono);color:var(--ink-faint);margin-left:auto}
+  .send{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;margin-top:1.2rem}
+  .send p{margin:0;font-size:.85rem;color:var(--ink-soft);max-width:30rem}
+
+  /* ---------- stacked at phone width (container, not viewport) ---------- */
+  @container (max-width:600px){
+    .page{padding:.7rem .85rem 1.6rem}
+    .pair-body{grid-template-columns:1fr}
+    .doc{border-right:0;border-bottom:1px solid var(--line)}
+    .arrow{border-right:0;border-bottom:1px solid var(--line);justify-content:flex-start;padding:.3rem .9rem}
+    .a-h{display:none} .a-v{display:inline}
+    .cmp{grid-template-columns:1fr}
+    .pill{margin-left:0;flex:0 0 auto}
+    .pair-head .hint{flex-basis:100%}
+    .sec-head h2{font-size:1.15rem}
+    .topline nav{gap:.7rem}
+  }
+
+  /* ---------- prose ---------- */
+  .prose{border-top:1px solid var(--line);padding-top:2rem;max-width:44rem}
+  .prose h2{font-size:1.4rem;margin:0 0 .3rem}
+  .prose p.sub{color:var(--ink-soft);margin:0 0 1.2rem}
+  .prose ol{padding-left:1.2rem;margin:0}
+  .prose li{margin:0 0 .9rem}
+  .prose li b{font-weight:700}
+  .prose .ask{color:var(--warn);font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Prototype · 2026-09-10 · My Shop → Get verified, redrawn as pairs</p>
+    <h1>The paper beside the fields it proves</h1>
+    <p class="lede">Same section, same place on My Shop. The only change: each document sits beside the details it proves, and every check reports on its own. The logo, tagline, photos and services stay where they are.</p>
+    <div class="legend">
+      <span class="k-ok"><i>✓</i>Matched on its own</span>
+      <span class="k-warn"><i>⚠</i>Mismatch — you can fix it</span>
+      <span class="k-wait"><i>◷</i>With a person at Setnayan</span>
+      <span class="k-none"><i>○</i>Not sent yet</span>
+    </div>
+  </header>
+
+  <!-- ============================================================ -->
+  <!-- 1 · DESKTOP, MIXED STATE                                      -->
+  <!-- ============================================================ -->
+  <div>
+    <div class="frame-title"><h2>1 · Desktop, a real mixed state</h2><span>three papers in, one mismatch, one line with a person, the bank proof not sent</span></div>
+    <div class="frame desktop">
+      <div class="page" id="mixed">
+
+        <div class="topline"><b>My Shop</b><nav><span>Business profile</span><span class="on">Get verified</span><span>Shop website</span><span>Service cards</span><span>Team</span></nav></div>
+
+        <div class="sec-head">
+          <div>
+            <h2>Get verified</h2>
+            <p class="sub">Four papers. Beside each one, the details it proves — type them, or let us fill them from your photo and check them. Each line is checked on its own, so you can see exactly what is left.</p>
+          </div>
+        </div>
+
+        <div class="tally">
+          <span><span class="d d-ok"></span><b>5</b> matched</span>
+          <span><span class="d d-warn"></span><b>1</b> for you to fix</span>
+          <span><span class="d d-wait"></span><b>1</b> with a person at Setnayan</span>
+          <span><span class="d d-none"></span><b>1</b> not sent</span>
+        </div>
+        <div class="bar" aria-hidden="true"><span style="flex:5;background:var(--ok)"></span><span style="flex:1;background:var(--warn)"></span><span style="flex:1;background:var(--wait)"></span><span style="flex:1;background:transparent"></span></div>
+        <p class="almost"><b>Settle the address and send your bank proof</b> — then everything left is on us.</p>
+
+        <!-- PAIR 1 · matched -->
+        <article class="pair">
+          <div class="pair-head"><span class="num">1</span><h3>Business registration</h3><span class="hint">DTI or SEC — whichever your business has. One box takes either; we can tell which from the paper.</span><span class="pill ok">✓ Matched</span></div>
+          <div class="pair-body">
+            <div class="doc">
+              <div class="thumb"><div class="paper-ico photo"></div><div><div class="fname">dti-certificate.jpg</div><p class="meta">Phone photo · 2.1 MB · sent <span class="mono">09 Sep</span></p><button class="lnk">Replace</button></div></div>
+              <p class="readas">Read as a DTI Business Name certificate</p>
+              <p class="meta">Valid until <span class="mono">14 Mar 2031</span> · Scope: City</p>
+              <p class="meta">Compared with DTI's own record for this number · <span class="mono">09 Sep, 14:12</span></p>
+            </div>
+            <div class="arrow"><span class="a-h">proves →</span><span class="a-v">proves ↓</span></div>
+            <div class="proves">
+              <div class="field"><label><span class="lbl">Registered business name</span><input class="in ok" value="HIRAYA EVENTS STYLING"></label><p class="st ok"><i>✓</i>Same on the certificate, in DTI's record and on your profile</p></div>
+              <div class="field"><label><span class="lbl">Owner's name</span><input class="in ok" value="Maria Cristina L. Villanueva"></label><p class="st ok"><i>✓</i>Same on the certificate and in DTI's record</p></div>
+              <div class="field"><label><span class="lbl">Registration number</span><input class="in mono ok" value="6789012"></label><p class="st ok"><i>✓</i>Found in DTI's record · no other Setnayan shop uses this number</p></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- PAIR 2 · mismatch -->
+        <article class="pair">
+          <div class="pair-head"><span class="num">2</span><h3>BIR Certificate of Registration</h3><span class="hint">Your COR — Form 2303.</span><span class="pill warn">⚠ 1 mismatch</span></div>
+          <div class="pair-body">
+            <div class="doc">
+              <div class="thumb"><div class="paper-ico"></div><div><div class="fname">bir-2303.pdf</div><p class="meta">PDF · 1 page · sent <span class="mono">09 Sep</span></p><button class="lnk">Replace</button></div></div>
+              <p class="readas">Read as BIR Form 2303</p>
+              <p class="meta">Registered <span class="mono">22 Apr 2019</span> · RDO 040</p>
+              <p class="meta">Registered name on it: <b>HIRAYA EVENTS STYLING</b> — same as your DTI certificate</p>
+            </div>
+            <div class="arrow"><span class="a-h">proves →</span><span class="a-v">proves ↓</span></div>
+            <div class="proves">
+              <div class="field"><label><span class="lbl">TIN</span><input class="in mono ok" value="123-456-789-000"></label><p class="st ok"><i>✓</i>Same on the COR and what you typed</p></div>
+              <div class="field">
+                <span class="lbl">Registered address</span>
+                <p class="st warn" style="margin-top:0"><i>⚠</i><span>Two different addresses. <b>Pick the right one</b> — nobody at Setnayan needs to look unless you ask.</span></p>
+                <div class="cmp">
+                  <div><div class="src">Your profile says · you typed it 12 Aug</div><p class="val">Unit 4B, 123 Katipunan Ave, Quezon City</p></div>
+                  <div class="this"><div class="src">Your COR says · read from the PDF</div><p class="val">Blk 7 Lot 12 Sampaguita St, Brgy. Holy Spirit, Quezon City</p></div>
+                </div>
+                <div class="acts"><button class="btn cta">Use the address on my COR</button><button class="lnk">My profile is right — ask Setnayan to look</button></div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- PAIR 3 · waiting on a person -->
+        <article class="pair">
+          <div class="pair-head"><span class="num">3</span><h3>Mayor's / Business Permit</h3><span class="hint">This year's, from your city.</span><span class="pill wait">◷ With a person</span></div>
+          <div class="pair-body">
+            <div class="doc">
+              <div class="thumb"><div class="paper-ico photo"></div><div><div class="fname">business-permit-2026.jpg</div><p class="meta">Phone photo · 3.4 MB · sent <span class="mono">09 Sep</span></p><button class="lnk">Replace</button></div></div>
+              <p class="readas">Read as a Quezon City Business Permit, 2026</p>
+              <p class="why">Every city prints its permit its own way and there is no registry to ask, so this one is matched against your DTI certificate, your COR and your profile. It is the slow one — usually a day.</p>
+            </div>
+            <div class="arrow"><span class="a-h">proves →</span><span class="a-v">proves ↓</span></div>
+            <div class="proves">
+              <div class="field"><label><span class="lbl">City</span><input class="in ok" value="Quezon City"></label><p class="st ok"><i>✓</i>Same on the permit, your COR and your profile</p></div>
+              <div class="field">
+                <span class="lbl">Address on the permit</span>
+                <p class="ro">Confirms your registered address</p>
+                <p class="st wait"><i>◷</i><span>The address line on the permit was too faint to read, so a person at Setnayan is matching it by eye. Nothing for you to do — a clearer photo makes it faster.</span></p>
+                <div class="acts"><button class="btn ghost">Send a clearer photo</button></div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- PAIR 4 · not sent -->
+        <article class="pair">
+          <div class="pair-head"><span class="num">4</span><h3>Bank account proof</h3><span class="hint">So money meant for you cannot land somewhere else.</span><span class="pill none">○ Not sent</span></div>
+          <div class="pair-body">
+            <div class="doc">
+              <div class="drop"><b>Take a photo, or choose a file</b><p>A screenshot of your Maya, GCash or bank account showing the account name and number. You can blur the balance.</p><button class="btn ghost">Choose</button></div>
+            </div>
+            <div class="arrow"><span class="a-h">proves →</span><span class="a-v">proves ↓</span></div>
+            <div class="proves">
+              <div class="field">
+                <span class="lbl">What this proves</span>
+                <p class="purpose">The name on the account is <b>HIRAYA EVENTS STYLING</b> or <b>Maria Cristina L. Villanueva</b> — the two names on your papers above. Nothing to type here.</p>
+                <p class="st none"><i>○</i>Not sent yet</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <div class="step"><span class="num" style="font-family:var(--mono);font-size:.72rem;color:var(--ink-faint)">5</span><h3>Confirm your contacts</h3><span class="hint">Email confirmed <span class="mono">02 Sep</span> · text message not yet</span><span class="chev">▾</span></div>
+
+        <div class="send">
+          <span class="btn cta" aria-disabled="true">Send for final check</span>
+          <p>Needs the address settled and your bank proof. After that, a 15-minute Google Meet to confirm it's you — nothing else from your side.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 1b · VARIANT: THE REGISTRY IS DOWN                            -->
+  <!-- ============================================================ -->
+  <div>
+    <div class="frame-title"><h2>1b · When DTI's registry is not answering</h2><span>it returned 504 twice on 09 Sep — a supplier will meet this. The check parks; it never passes and never fails.</span></div>
+    <div class="frame desktop">
+      <div class="page" style="padding-top:.9rem;padding-bottom:1rem">
+        <article class="pair" style="margin-top:0">
+          <div class="pair-head"><span class="num">1</span><h3>Business registration</h3><span class="hint">DTI or SEC — whichever your business has.</span><span class="pill wait">◷ Registry not answering</span></div>
+          <div class="pair-body">
+            <div class="doc">
+              <div class="thumb"><div class="paper-ico photo"></div><div><div class="fname">dti-certificate.jpg</div><p class="meta">Phone photo · 2.1 MB · sent <span class="mono">09 Sep</span></p><button class="lnk">Replace</button></div></div>
+              <p class="readas">Read as a DTI Business Name certificate</p>
+              <p class="meta">Valid until <span class="mono">14 Mar 2031</span> · Scope: City</p>
+              <p class="why">DTI's registry did not answer when we asked — it happens. We keep trying for a day; if it still does not answer, a person at Setnayan checks it. Your photo and your details are saved. Nothing to redo.</p>
+            </div>
+            <div class="arrow"><span class="a-h">proves →</span><span class="a-v">proves ↓</span></div>
+            <div class="proves">
+              <div class="field"><label><span class="lbl">Registered business name</span><input class="in" value="HIRAYA EVENTS STYLING"></label><p class="st wait"><i>◷</i>Read from your photo · waiting for DTI's record to compare</p></div>
+              <div class="field"><label><span class="lbl">Owner's name</span><input class="in" value="Maria Cristina L. Villanueva"></label><p class="st wait"><i>◷</i>Read from your photo · waiting for DTI's record to compare</p></div>
+              <div class="field"><label><span class="lbl">Registration number</span><input class="in mono" value="6789012"></label><p class="st wait"><i>◷</i>Read from your photo · waiting for DTI's record to compare</p></div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 2 · PHONE, 375px, same state                                  -->
+  <!-- ============================================================ -->
+  <div>
+    <div class="frame-title"><h2>2 · The same page at 375px</h2><span>the pair cannot sit side by side, so the paper sits on top and its fields directly under it — "proves ↓" keeps them one unit</span></div>
+    <div class="frame phone">
+      <div class="statusbar"><span>9:41</span><span>375 × ∞</span></div>
+      <div id="phone-mount"></div>
+      <noscript><p style="padding:1rem;font-size:.85rem">This frame clones the desktop markup above with a few lines of script; the same layout stacks by container width.</p></noscript>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 3 · EMPTY — what both real shops look like today              -->
+  <!-- ============================================================ -->
+  <div>
+    <div class="frame-title"><h2>3 · Empty — what both production shops look like today</h2><span>already verified, nothing filled in, no paper on file. A brand-new shop sees the same page without the first line.</span></div>
+    <div class="frame desktop">
+      <div class="page">
+
+        <div class="topline"><b>My Shop</b><nav><span>Business profile</span><span class="on">Get verified</span><span>Shop website</span><span>Service cards</span><span>Team</span></nav></div>
+
+        <div class="sec-head">
+          <div>
+            <h2>Get verified</h2>
+            <p class="sub">Four papers. Beside each one, the details it proves — type them, or let us fill them from your photo and check them. Each line is checked on its own, so you can see exactly what is left.</p>
+          </div>
+        </div>
+
+        <div class="banner"><b>You're verified, and the badge stays.</b>Setnayan now keeps the papers behind every badge, so send yours when they're handy. Start with your DTI or SEC certificate — it fills in the most.</div>
+
+        <div class="tally">
+          <span><span class="d d-none"></span><b>0</b> of 8 checks · nothing sent yet</span>
+        </div>
+        <div class="bar" aria-hidden="true"></div>
+
+        <!-- PAIR 1 empty -->
+        <article class="pair">
+          <div class="pair-head"><span class="num">1</span><h3>Business registration</h3><span class="hint">DTI or SEC — whichever your business has. One box takes either; we can tell which from the paper.</span><span class="pill none">○ Not sent</span></div>
+          <div class="pair-body">
+            <div class="doc">
+              <div class="drop"><b>Take a photo, or choose a file</b><p>Your DTI Business Name certificate, or your SEC Certificate of Registration. A phone photo is fine — we read it and fill in the details beside it for you to check.</p><button class="btn ghost">Choose</button></div>
+            </div>
+            <div class="arrow"><span class="a-h">proves →</span><span class="a-v">proves ↓</span></div>
+            <div class="proves">
+              <div class="field"><label><span class="lbl">Registered business name</span><input class="in" placeholder="Exactly as printed on the certificate"></label></div>
+              <div class="field"><label><span class="lbl">Owner's name</span><input class="in" placeholder="The person the registration is under"></label></div>
+              <div class="field"><label><span class="lbl">Registration number</span><input class="in mono" placeholder="DTI Business Name No. or SEC Registration No."></label><p class="st none"><i>○</i>Type these now, or send the certificate and we fill them in — you check them either way.</p></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- PAIR 2 empty -->
+        <article class="pair">
+          <div class="pair-head"><span class="num">2</span><h3>BIR Certificate of Registration</h3><span class="hint">Your COR — Form 2303.</span><span class="pill none">○ Not sent</span></div>
+          <div class="pair-body">
+            <div class="doc">
+              <div class="drop"><b>Take a photo, or choose a file</b><p>Your COR, Form 2303. PDF or a phone photo.</p><button class="btn ghost">Choose</button></div>
+            </div>
+            <div class="arrow"><span class="a-h">proves →</span><span class="a-v">proves ↓</span></div>
+            <div class="proves">
+              <div class="field"><label><span class="lbl">TIN</span><input class="in mono" placeholder="000-000-000-000"></label></div>
+              <div class="field"><label><span class="lbl">Registered address</span><input class="in" placeholder="As printed on the COR"></label><p class="st none"><i>○</i>We also check that the registered name on the COR matches your certificate above.</p></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- PAIR 3 empty -->
+        <article class="pair">
+          <div class="pair-head"><span class="num">3</span><h3>Mayor's / Business Permit</h3><span class="hint">This year's, from your city.</span><span class="pill none">○ Not sent</span></div>
+          <div class="pair-body">
+            <div class="doc">
+              <div class="drop"><b>Take a photo, or choose a file</b><p>This year's permit. A phone photo is fine — keep the whole page in frame.</p><button class="btn ghost">Choose</button></div>
+              <p class="why">Every city prints its permit its own way and there is no registry to ask, so this one is matched against your other papers and your profile. It is the slow one — usually a day.</p>
+            </div>
+            <div class="arrow"><span class="a-h">proves →</span><span class="a-v">proves ↓</span></div>
+            <div class="proves">
+              <div class="field"><label><span class="lbl">City</span><input class="in" placeholder="The city that issued it"></label></div>
+              <div class="field"><span class="lbl">Address on the permit</span><p class="ro">Confirms your registered address</p><p class="st none"><i>○</i>Checked against the address on your COR once both are in.</p></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- PAIR 4 empty -->
+        <article class="pair">
+          <div class="pair-head"><span class="num">4</span><h3>Bank account proof</h3><span class="hint">So money meant for you cannot land somewhere else.</span><span class="pill none">○ Not sent</span></div>
+          <div class="pair-body">
+            <div class="doc">
+              <div class="drop"><b>Take a photo, or choose a file</b><p>A screenshot of your Maya, GCash or bank account showing the account name and number. You can blur the balance.</p><button class="btn ghost">Choose</button></div>
+            </div>
+            <div class="arrow"><span class="a-h">proves →</span><span class="a-v">proves ↓</span></div>
+            <div class="proves">
+              <div class="field"><span class="lbl">What this proves</span><p class="purpose">The name on the account matches your registered business name or the owner's name from your certificate. Nothing to type here.</p><p class="st none"><i>○</i>Not sent yet</p></div>
+            </div>
+          </div>
+        </article>
+
+        <div class="step"><span class="num" style="font-family:var(--mono);font-size:.72rem;color:var(--ink-faint)">5</span><h3>Confirm your contacts</h3><span class="hint">Email confirmed <span class="mono">14 Jul</span> · text confirmed <span class="mono">14 Jul</span></span><span class="chev">▾</span></div>
+
+        <div class="send">
+          <span class="btn cta" aria-disabled="true">Send for final check</span>
+          <p>Opens once your four papers are in and their checks have run. You can send them one at a time, in any order.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 4 · THE CALLS I MADE                                          -->
+  <!-- ============================================================ -->
+  <section class="prose">
+    <h2>The calls I made and why</h2>
+    <p class="sub">Everything the brief did not settle, decided one way so it could be drawn. Each is reversible. The ones I would put to the owner are marked.</p>
+    <ol>
+      <li><b>The fields are filled from the photo, and the supplier confirms them.</b> The owner said "they need to fill them up as well", so every field stays a real box they can type into. But making a person retype a number we have already read off their own paper is a second chance to mistype it. The drawn behaviour: type it, or send the paper and it fills in — what is checked is the value in the box either way. <span class="ask">Ask the owner:</span> is it acceptable that a supplier who never types anything still gets a full set of matched fields?</li>
+      <li><b>The checks run the moment a paper lands, not when the application is sent.</b> That is the only way a mismatch reaches the supplier while they can still fix it themselves. The shipped "send for review" button stays, as the door to the human parts (anything parked with a person, and the Google Meet). It opens when the four papers are in and their checks have run — I did not make it wait for every check to be green, because a check parked with a person is not the supplier's fault.</li>
+      <li><b>A mismatch offers two exits, and never rewrites the profile on its own.</b> "Use the address on my COR" writes the paper's value into the profile — the supplier chose it, nobody at Setnayan looks. "My profile is right" parks that one line with a person. I deliberately did not add a third option to edit the value freehand: a third value that matches neither source is exactly what the check exists to catch. <span class="ask">One thing I could not settle from the corpus:</span> on an already-verified shop the identity fields (business name, owner name, and possibly the registered address) lock and changes go through the existing correction-request door. If registered address is one of the locked eight, "Use the address on my COR" must file a correction request instead of writing directly — same button, different plumbing, and the copy should then say "asks Setnayan to update it". I drew the direct write.</li>
+      <li><b>The Mayor's Permit is part automatic, part human — drawn honestly, per line.</b> The owner asked whether it could be automated. What can be read confidently (the city, this year's date, the name) is checked on its own like everything else; the line that could not be read is the only one that waits. The sentence under the paper says why this one is slower, once, in plain words. It never says "manual check".</li>
+      <li><b>The bank proof has no typed field, and says what it is for instead.</b> The brief lists no column for it, and inventing one (an "account name" box) would be a fifth thing to type that we then compare against a screenshot of itself. Its whole job is one sentence — the name on the account is one of the two names already on the papers above — so that is what the right-hand side says. If the owner wants the account name captured as data for payouts later, that is a column decision, not a design one.</li>
+      <li><b>The registry going down parks one check and touches nothing else.</b> Drawn as its own state (1b) because a supplier will meet it: the three fields under the certificate read "waiting for DTI's record", not "matched" and not "problem", and the paper stays sent. Retry for a day, then a person. I chose "a day" as the retry window; it is a guess and should be whatever the retry job actually does.</li>
+      <li><b>Nothing on the page says the QR was checked, and nothing ever should.</b> The DTI QR is a link that anyone can print on anything. The line under the certificate says "compared with DTI's own record for this number", which is the true claim. I would keep that wording in the build and add a guard so "QR verified" never appears.</li>
+      <li><b>The unit counted is the check — eight of them — not the paper.</b> Five matched, one to fix, one with a person, one not sent, plus a bar. This is what makes a shop with one mismatch feel four-fifths done. The summary sentence under the bar names the two things the supplier can still do and says the rest is on us. <span class="ask">Ask the owner:</span> the count of eight is a design number — it changes if a column is added or if the bank name becomes data. Fine as drawn?</li>
+      <li><b>On a verified shop the badge stays while the papers come in.</b> Both real shops are in this state today, so the empty frame is drawn with the badge kept and no deadline. I do not know whether the owner wants a deadline, or whether the badge should ever come down for a verified shop that never sends its papers. <span class="ask">This is his call</span>; the banner's first sentence changes with it.</li>
+      <li><b>The legal form is never asked.</b> The document says whether it is DTI or SEC, and the "read as" line tells the supplier what we saw, so a wrong read is visible before it does harm. If the read cannot tell, that pair goes to a person — it does not become a question to the supplier. <span class="ask">Honest gap:</span> I am confident about DTI's registry because it was decoded and reached today. I am not confident an SEC registration can be checked against an SEC record automatically at all; the SEC pair may be "read the paper, compare with the profile, a person confirms" until proven otherwise. The copy is written so it is true either way.</li>
+      <li><b>The existing "Government registration number" box is folded into pair 1.</b> The shipped section already has a lone box for it, with a duplicate-shop warning. It is the same column as the registration number beside the certificate, so it now lives there — the anti-farming check is kept as the second half of that line's status ("no other Setnayan shop uses this number"). Two boxes for one number would be the drift the pairs exist to remove.</li>
+      <li><b>Expiry and scope from the DTI certificate are shown, not stored.</b> The brief names no column for them, and both are useful to the supplier and to a reviewer, so they appear as read-only lines under the paper. Whether they deserve columns — the expiry in particular, since a five-year DTI registration will lapse on real shops — is a schema decision I did not make.</li>
+      <li><b>On the phone, the fields stay under their own paper.</b> The obvious alternative — all four uploads, then all the fields as one long form — is the one-page-nobody-finishes the owner was warned about. The "proves ↓" strip is the seam that keeps each pair one unit when it can no longer be side by side. Mismatch values stack one above the other at that width, the paper's value still marked.</li>
+      <li><b>One palette correction for the port.</b> The house prototype kit's faint grey (#767A82) measures 4.31:1 on white, under the 4.5:1 floor, and it is used for the small mono labels. This file uses #6B6F77 (5.04:1). Every other pairing here was checked: action colour on white 4.76, green on its tint 5.66, amber on its tint 5.31, slate-blue on white 8.5. Gold appears only as the banner's edge, never as text.</li>
+    </ol>
+  </section>
+
+</div>
+
+<script>
+  // The phone frame shows the SAME markup as frame 1; the layout stacks by container width, not by viewport.
+  (function(){
+    var src=document.getElementById('mixed'), mount=document.getElementById('phone-mount');
+    if(src&&mount){var c=src.cloneNode(true);c.removeAttribute('id');mount.appendChild(c);}
+  })();
+</script>
+</body>
+</html>
