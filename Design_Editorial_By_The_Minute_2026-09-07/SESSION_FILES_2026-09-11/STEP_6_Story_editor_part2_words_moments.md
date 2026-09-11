@@ -78,3 +78,12 @@ moment row must not be role=button with a nested button; words need a keyboard w
 of a still-empty new box.
 DONE WHEN: the step-4 Playwright script extended to words, looks, the phone toolbar,
 naming and reorder passes at 1280 and 390 touch with zero dialogs and zero errors.
+
+ALSO IN THIS STEP — FOUND LIVE 2026-09-11 (after step 4 merged): the page for "The story" shows
+"Make it yours" and then, UNDERNEATH it, the whole older editor — What goes in · The words · Your
+photos (cover + gallery uploads) · Section order · Your own columns · What they said · What shows.
+The approved prototype shows only "Make it yours" in this step. Owner ruling S6 (2026-09-09): nothing
+the shipped editor can do may be lost. So: keep every one of those controls working, but fold them
+under ONE closed disclosure at the bottom of the step, "More settings", so the step reads as Make it
+yours first. Do not delete, rename or re-order what is inside; a guard must fail if a control goes
+missing (there is a lost-controls lint — use it, do not regenerate its baseline to go green).
