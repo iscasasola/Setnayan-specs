@@ -224,7 +224,7 @@ work; **Fable** only for drawings.
 | CLEANUPS · N2-1 Hosts page coordinator email | ✅ SERVED | #5427 · d1d5a29 (a Setnayan coordinator gets "Message them"; the DB copy is kept — coordinator-broadcasts reads it) |
 | B2 both numbers after a lock (+ total now everywhere, fee follows every change) | ✅ SERVED | #5390 · e2a07f6; live: is_change_delta column, 7 functions carry change lines, recorder not exposed, 2 triggers, both migrations recorded (orchestrator read prod) |
 | H6 bench search hides full cards | ✅ SERVED (S2) — fcc2bc3; live: definer, service_role only (orchestrator read prod) | #5434 · server-only definer function (service_role), baseline unchanged; per-card daily limit joins via LOCK-PATH CAPACITY |
-| H4 payment never arrived | 🔁 DRAFT #5443 — gap FIXED by S2 (guard refuses any session change or delete of a refused/ruled row), full db suite re-running | orchestrator review: the payment guard let a session CLEAR a supplier's refusal / Setnayan's settlement (only SET was refused) — S2 closing it; then prod rehearsal + release |
+| H4 payment never arrived | ✅ SERVED (S2) | #5443 · 21ffe0a; orchestrator prod rehearsal + live check (migration recorded, anon cannot refuse) |
 | FOLLOW-UP · data export gap | ⬜ small, unowned | Found by S2 (H4): the couple's payment ledger (event_vendor_payments) is event-tier and NOT included in the personal data export (RA 10173 right of access) — predates H4. Check what the export's roster says and add it, or record why not. |
 | FOLLOW-UP · a re-sent deposit erases its refusal | ⬜ small, unowned | Found by S2 (H4): `guard_event_vendor_deposit_ack` lets a session clear deposit_declined_* / deposit_dispute_*, and `recordDeposit` (vendors/actions.ts ~4491) does so when a couple re-records — so a refused deposit leaves the admin queue with no trace. Existing, deliberate re-send design; the fix is to keep the earlier refusal as history (audit row) while still allowing the re-send. Installments can't do this (a re-send is a new row). |
 | L3 badge deadlines | ✅ MERGED | #5433 · guard fn +2 lines vs live (orchestrator line-hash diff) |
@@ -237,12 +237,12 @@ work; **Fable** only for drawings.
 | N5-C supplier can't open a thread on any event | ✅ MERGED | #5439 · prod rehearsal by the session |
 | N5-D grants hygiene (TRUNCATE, next_renewal_due_at) | ✅ MERGED | #5440 |
 | N5-E LOCK-PATH CAPACITY | ✅ MERGED | #5441 · the per-card daily limit really refuses; bench search mirrors it; tripwire removed |
-| LOCK-PATH 2 | ⏳ released #5444 | the supplier's Agree obeys the card's daily limit; the shop hold limit (3 unpaid couples/date, owner Rule 3 2026-05-24) really refuses; per-plan cap was already enforced (my brief misread it) |
+| LOCK-PATH 2 | ✅ MERGED | #5444 · 9b65f47 |
 | H2 card needs cover + what's included (+ host_mc label) | ✅ MERGED | #5442 · 27373ab; prod line-diff: save_vendor_service + fill_blank_service_card_title keep every live line; publish gate keeps the price rule |
 | C1 the Setnayan gift reaches the couple | ⏳ auto-merge | #5436 · bill = fee + gift, capped; photo counts match EX-2; B2's fee base untouched; gift columns SELECT-only for sessions |
 | FOLLOW-UP · gift snapshot at lock | ⬜ small | C1's two bounded gaps: a supplier could switch the gift off between the couple's lock and accepting payment; the booking's card sits on a couple-editable row — both close with a lock-time snapshot of the card + gift answer |
 | FOLLOW-UP · plan cap counts month-only dates | ⬜ small | Found by LP2: `enforce_vendor_whitelist_per_date`'s own count ignores date precision — a month-only couple being chased made a Free shop refuse a real 1-March couple (replay). Latent in prod (1 chased couple, day-precise). Make it day-precision-only like the other counts. |
-| running now | 🔨 HONEST SHOP · LOCK-PATH 2 · S2 on H4 (#5443) | next: SMALL RULINGS (after HONEST SHOP's E1), the export gap, the deposit re-send history, the gift snapshot |
+| running now | 🔨 FIX-DASHBOARD-BUTTON (#5446) · GREY-OUT (#5447) · NEW-NOT-ZERO · HONEST SHOP finish (#5423 → E1) · C1 #5436 auto-merge · S2 offered FOLLOW-UPS A | TEST ROUND 1 paused by the owner until the bugs he hit are live |
 | H5 Lock after "not free" + unavailable not planned | ✅ SERVED (S2) | #5425 · c913c6e in prod (S2 + orchestrator ancestry) |
 | H6 bench search hides a card with no bookings left on the date | 🔨 BUILDING (S2) · DO NOT LAUNCH A SECOND | hides on blocked day + full time slots (the two paths that really refuse); per-card daily limit waits for LOCK-PATH CAPACITY (tripwire test pins it); month = full every day |
 | LOCK-PATH CAPACITY | ✅ MERGED as N5-E #5441 | see N5-E row |
