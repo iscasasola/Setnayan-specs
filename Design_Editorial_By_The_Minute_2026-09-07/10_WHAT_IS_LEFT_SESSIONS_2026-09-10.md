@@ -25,7 +25,7 @@
 | **4** | Story · the editor, part 1 — photos | Tray, tap-to-add, ×, Automatic / I choose, Put all back, Undo, autosave | Opus 5 | high | ✅ **done** (PR #5430, merged + verified in prod 2026-09-11) | 5 |
 | **5** | Story · guests see the arranged pages | The public story shows each moment as laid out | Opus 5 | medium | ✅ **done** (PR #5428, merged + verified in prod 2026-09-11) | 4, 6 |
 | **6** | Story · the editor, part 2 — words and moments | Words + looks, the phone toolbar, naming, sets, reorder | Opus 5 | **medium** | after **4** | 5 |
-| **7** | Story · the prints carry the arrangement | A3 and A4 print each moment as laid out | Sonnet 5 | medium | ⏳ **PR opened** ([#5448](https://github.com/iscasasola/setnayan-platform/pull/5448), auto-merge armed 2026-09-11) | 6 |
+| **7** | Story · the prints carry the arrangement | A3 and A4 print each moment as laid out | Sonnet 5 | medium | ✅ **done** (PR [#5448](https://github.com/iscasasola/setnayan-platform/pull/5448), merged + verified in prod 2026-09-11) | 6 |
 | **8** | Story · the whole thing, driven end to end | Proof it works for a real host on a real phone | Opus 5 | high | after **6** and **7** | — |
 
 ⛔ **Never together:** 3 with 4/5/6/7 (all build on 3's data shape) · **4 with 6** (same editor files)
@@ -299,11 +299,12 @@ DONE WHEN: the step-4 Playwright script extended to words, looks, the phone tool
 naming and reorder passes at 1280 and 390 touch with zero dialogs and zero errors.
 ```
 
-## 7 · Story — the prints carry the arrangement · **Sonnet 5 · medium** · ⏳ PR OPENED, AUTO-MERGE ARMED 2026-09-11 (code PR #5448)
+## 7 · Story — the prints carry the arrangement · **Sonnet 5 · medium** · ✅ DONE, MERGED, VERIFIED LIVE 2026-09-11 (code PR #5448, merge `0250084`)
 
-**Verify with the object, not this line:** `gh pr view 5448 --json state,mergedAt`; once merged and
-deployed, `curl -s https://setnayan-platform-web.vercel.app/api/health` should report the merge
-commit's short SHA.
+**Verified with the object, not this line:** `gh pr view 5448 --json state,mergedAt` → merged
+2026-09-11T05:14:46Z; `curl -s https://setnayan-platform-web.vercel.app/api/health` reports
+`"version":"0250084"` — the merge commit's short SHA, confirmed serving live after 20 polls at
+~20s apart (~6–7 minutes for the Vercel deploy to roll out). Worktree pruned the same session.
 
 🔎 **WHAT SHIPPED.** Step 2's A4 seam (`keepsake-layout.ts`'s `A4PageSource.arranged` — a documented
 placeholder nothing produced) now carries a real `DrawnSheet`; `arrangedA4PageResolver` inserts one
