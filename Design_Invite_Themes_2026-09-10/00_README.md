@@ -37,3 +37,5 @@ background (it is one of the app's own public presets, no people).
 Published copy of the lineup: https://claude.ai/code/artifact/938658cb-2a5e-4e0e-a3d6-8f022f82b001
 
 What is left, in order, with a prompt for each session: `01_WHAT_IS_LEFT_SESSIONS_2026-09-10.md`.
+The owner answered its seven questions on 2026-09-11 (1 A · 2 A · 3 A · 4 B · 5 A · 6 B · 7 A — see
+`DECISION_LOG.md`); the prompts build those answers.
