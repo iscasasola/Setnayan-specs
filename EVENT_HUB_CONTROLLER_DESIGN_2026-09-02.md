@@ -246,7 +246,7 @@ now"* and clears itself. The controller's live indicator must follow that signal
 
 1. **It is the same URL.** `/[slug]` renders the editorial when the phase is `editorial`. There is
    no second address to control. The owner's own lock: *"The guest never gets a second link."*
-2. **"Editorial editing" is item 5 of the seven Pro items** (§ 5.3) — the product already prices the
+2. **"Editorial editing" is item 5 of the Pro items** (§ 5.3 — seven of them until 2026-09-11, eight since) — the product already prices the
    story as a **feature of the Event Hub Pro unlock**, not as a product.
 3. **`EDITORIAL_PRO` has NO catalog row at all.** Measured in `platform_retail_catalog_v2` on
    2026-09-02: the standalone a-la-carte Editorial Pro SKU was designed on 2026-07-04, its row was
@@ -505,10 +505,10 @@ supplies-marketplace · indoor-blueprint · mood-board · seating`.
 Owner, 2026-09-02: *"the cinematic reveal, added features like background music, upload
 photo/video, and other pro features should be managed on the controller as well."*
 
-**They are one named set, and four of the seven were named from memory.** `WEBSITE_PRO_ITEMS` —
-*"the seven Pro items, named the way the couple sees them"*. ⚠ **It moved on 2026-09-02:** EH4
+**They are one named set, and four of them were named from memory.** `WEBSITE_PRO_ITEMS` —
+*"the eight Pro items, named the way the couple sees them"*. ⚠ **It moved on 2026-09-02:** EH4
 (PR #5106) lifted it out of `website/editor/_components/pro-panels.tsx` into its own module
-**`apps/web/lib/website-pro-items.ts`**, so the seven names live in exactly one file and a guard
+**`apps/web/lib/website-pro-items.ts`**, so the names live in exactly one file and a guard
 asserts there is no second copy. Cite the module, not the panel:
 
 | # | Pro item | Which channel it belongs to |
@@ -520,13 +520,31 @@ asserts there is no second copy. Cite the module, not the panel:
 | 5 | **Editorial editing** | Editorial — ⚠ **free today**, § 2.4 |
 | 6 | **Background color** | all four |
 | 7 | **Button color** | all four |
+| 8 | **Invite link theme** | ⚠ **none of the four** — see the note below |
 
-🔑 **ALL SEVEN ARE ONE UNLOCK, NOT SEVEN.** `COUPLE_WEBSITE_PRO`, titled **"Event Hub Pro"** in the
+🔄 **SEVEN → EIGHT, 2026-09-11 (owner Q3 = A, `DECISION_LOG.md` "the seven invite-theme
+questions").** The invite link's four Pro themes shipped under this same unlock on 2026-09-10
+(#5409), gated by `eventCoupleWebsiteProActive` in
+`apps/web/app/[slug]/invite/_lib/load-invite-look.ts` — so for a day the umbrella **withheld
+something it did not name**. Price and SKU are unchanged; only the list a couple is shown grew.
+
+⚠ **ITEM 8 BELONGS TO NO CHANNEL, AND THAT IS NOT A GAP.** The four channels in this table are the
+four **public pages the Event Hub link becomes**; the invite link is a different door
+(`/[slug]/invite`). `LEAD_BY_CHANNEL` is therefore unchanged and no channel leads with it — it
+carries copy in `PITCH` for totality, exactly as the free `Editorial editing` does. It is SHOWN in
+every chip row, because the unlock genuinely covers it.
+
+🔒 **AND IT IS THE ONLY ITEM WITH AN EVENT-TYPE FENCE.** Owner Q7 = A, same day: the Pro invite
+themes are offered only where the event type may carry the Save-the-Date film
+(`resolveWeddingOnlyParts(profile).save_the_date_film` — the reveal's own fence, not a second copy
+of it). Every other celebration gets House. The other seven items have no such fence.
+
+🔑 **ALL EIGHT ARE ONE UNLOCK, NOT EIGHT.** `COUPLE_WEBSITE_PRO`, titled **"Event Hub Pro"** in the
 live catalog, **₱3,500**, active — measured in `platform_retail_catalog_v2` on 2026-09-02. The
-`pro-panels.tsx` docblock says it plainly: *"the seven Pro items are ONE unlock ... no per-feature
+`pro-panels.tsx` docblock says it plainly: *"the Pro items are ONE unlock ... no per-feature
 buy button."*
 
-**So the controller does NOT get seven upgrade slots. It gets one, offered seven times — on
+**So the controller does NOT get eight upgrade slots. It gets one, offered where it is missed — on
 whichever channel the couple is standing on when they hit the wall.** Cinematic Reveal is offered
 on the Save-the-Date channel; Background music on whichever channel is open; Photo gallery on RSVP.
 Same unlock, same price, bought in place. This is rule 1 of § 5.1 doing its job.
