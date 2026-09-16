@@ -1,5 +1,42 @@
 # 01 · WHAT IS LEFT — the invite themes, in order (2026-09-10)
 
+> ## ✅ CLOSED 2026-09-14 — ALL FIVE THEMES SHIP. THIS FILE'S SESSION TABLE IS HISTORY.
+>
+> **Do not run sessions 2, 3 or 4. They are done.** Measured on `origin/main`:
+> `apps/web/lib/invite-themes.ts` carries **house · capiz · velvet · galeriya · abaca, every one
+> `ready: true`**. Re-measure rather than trusting this line:
+> `git show origin/main:apps/web/lib/invite-themes.ts | grep -nE "id: '|ready:"`
+>
+> Velvet, Galeriya (#5485) and Abaca (#5486, served `2c26c3f80` at 06:45:57Z) landed in that order,
+> strictly serial, exactly as the sequencing rule required. Session 5's weddings-only fence (Q7) is
+> in the registry today.
+>
+> 🔑 **WHY THIS BANNER EXISTS, AND IT IS THE POINT OF THE WHOLE FILE.** This document told a
+> session to build three themes that already shipped. The orchestrator log beside it had already
+> misled a different session the same way — it reached a stale "QUEUED" paragraph and closed its
+> report with *"Not addressed, still open from the log."* It was right about what the log said and
+> wrong about the world. **A handoff decays fastest exactly where it is read most.** Treat every
+> row below as a hypothesis with a re-measure command, never as a state.
+>
+> **What is genuinely left is four things, and three of them are the owner's:**
+> 1. 👁 **He opens a Capiz invite on a phone** (session 1) — a look, not a decision. Never done.
+> 2. ⚖ **Should the couple's legibility setting (auto/lighten/darken) reach the invite doors?**
+>    It reaches **none** of them today. Unruled.
+> 3. ⚖ **The saved QR PNG carries no monogram while the on-screen SVG does.** Cosmetic, nothing
+>    claims otherwise, and he has never been asked.
+> 4. 🔨 **Three spillovers from Abaca, none of them Abaca's** — Capiz and Velvet position their
+>    grounds at FIXED PIXEL offsets while Abaca bounds the wordmark's contrast by RATIO (**a claim
+>    to check, not a defect: nobody has rendered them**) · a monogram over ~5 characters overruns
+>    Abaca's wax seal, and `resolveMonogram` permits 12, and Capiz ships the identical exposure ·
+>    Abaca shipped **two** of the three named faces on purpose (Bitter and Oswald 600 dress the
+>    wordmark, buttons, body copy and fields, which a skin may not restyle, so ~40 KB would have
+>    rendered nothing and `lint-fonts-are-local.mjs` fails an orphaned face). **I-6 must verify
+>    licences rather than assume five faces were fetched.**
+>
+> The profile-photo / face-consent split (the owner's 2026-09-13 idea) is NOT started and is not an
+> invite-theme row — it belongs to whoever owns face consent.
+
+
 > Built and merged: #5403 (three doors), #5409 (themes + Capiz), #5410 (the reveal opens the
 > invite). See `00_README.md`. ⚠ Verify any PR state with `gh pr view <n> --json state,mergedAt`
 > before trusting this line.
@@ -8,11 +45,11 @@
 
 | # | Session | What a person gets | Model | Effort | Starts when |
 |---|---|---|---|---|---|
-| **1** | Prove Capiz on setnayan.com | The owner watches a guest open a Capiz invite on a phone (reveal → three doors), and sees a couple without Event Hub Pro get House | **Sonnet 5** | medium | now (all three PRs live) |
-| **2** | Velvet · Classy | Couples with Event Hub Pro can choose Velvet | **Opus 5** | **high** | after 1 |
-| **3** | Galeriya · Sophisticated | …can choose Galeriya | **Opus 5** | **high** | after 2 |
-| **4** | Abaca · Rugged | …can choose Abaca | **Opus 5** | **high** | after 3 |
-| **5** | Event Hub Pro · the finishing touches | The invite button in the couple's own colour · the invite theme listed as Pro's eighth item · no second reveal right after arriving · Pro themes for weddings only · links to change the colour and background | **Opus 5** | **high** | after 1 · safe beside 2–4 |
+| **1** · 👁 OWNER — never done | Prove Capiz on setnayan.com | The owner watches a guest open a Capiz invite on a phone (reveal → three doors), and sees a couple without Event Hub Pro get House | **Sonnet 5** | medium | now (all three PRs live) |
+| **2** · ✅ SHIPPED | Velvet · Classy | Couples with Event Hub Pro can choose Velvet | **Opus 5** | **high** | after 1 |
+| **3** · ✅ SHIPPED (#5485) | Galeriya · Sophisticated | …can choose Galeriya | **Opus 5** | **high** | after 2 |
+| **4** · ✅ SHIPPED (#5486, served) | Abaca · Rugged | …can choose Abaca | **Opus 5** | **high** | after 3 |
+| **5** · ✅ SHIPPED — Q7 fence verified in the registry | Event Hub Pro · the finishing touches | The invite button in the couple's own colour · the invite theme listed as Pro's eighth item · no second reveal right after arriving · Pro themes for weddings only · links to change the colour and background | **Opus 5** | **high** | after 1 · safe beside 2–4 |
 
 ⛔ **Never together: 2, 3 and 4.** Each adds a line to the same two places (the skin switch in
 `invite-skin.tsx` and the theme's font loader), so run them one after another. **5 may run beside

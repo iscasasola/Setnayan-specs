@@ -205,3 +205,111 @@ and re-run it before pushing.
 NOT YET VERIFIED: nothing was rendered in a browser by this session. The y-coordinates and contrast
 ratios in the PR are the FIRST session's browser measurements carried forward — code verified,
 pixels not. The served check on setnayan.com is owed and is mine.
+
+## 2026-09-13 · TWO NEW OWNER RULINGS, from him walking the arrival again
+
+**A · THE LAST DOOR HANDS OVER THE QR.** Owner, verbatim: *"they get to see the QR Code so they can
+directly go to the event hub with their custom QR. just to save the qr and of course they have a
+button to proceed and see the event hub"* — and *"the invite link is that exact process. by the end,
+they get their custom QR specifically for their own event HUB."*
+⇒ Door 03 shows the guest's OWN QR, saveable, with the existing proceed button beneath it. IN FLIGHT
+(branch claude/the-last-door-hands-over-the-qr).
+⇒ RULE 0: the QR EXISTS — `/api/website/qr/guest/[guestId]`, already rendered on the Event Hub by
+site-body.tsx; `custom-qr-guest/**` is the branded variant and `CUSTOM_QR_GUEST` is in
+FREE_FOR_ALL_SKUS (free for every couple since 2026-09-06), so the QR is never gated on a purchase.
+Owner confirmed the principle himself: *"yes. we don't create."*
+🔑 A QR IS A CREDENTIAL, NOT A PICTURE — it is how a guest is recognised at the event, and
+`rotate-qr-actions.ts` exists to cut off a leaked one. Shown only to the holder of that guest's own
+session, never from a guessable URL.
+
+**B · THE REVEAL QUESTION IS ANSWERED — AND IT WAS NEVER THE DEFECT.** The owner did not ask for a
+repeat reveal. His answer explains the design instead: the invite link IS the one-time registration,
+and the QR is the way in from then on. This AFFIRMS the 2026-09-10 ruling already in
+`join-flow.tsx` (a returning guest goes to their details, not back to door 01). NOT being reversed.
+⚠ THE REAL DEFECT, which I had mis-framed as a reveal question: from the Reply door there is NO
+visible way onward to the Event Hub or the QR without re-submitting the form. THAT is what the owner
+hit on 2026-09-11 and called being "stuck". Being fixed in the same branch.
+🔑 I spent two exchanges treating "the reveal is once per browser" as the issue. It was not. The
+guest was not missing a film; they were missing a DOOR OUT. Also: my "one-time sight per browser"
+claim was WRONG for the Event Hub — `lib/reveal-once-per-visit.ts` keys on a per-TAB store, so a
+later visit plays it again. Corrected to the owner.
+
+**C · QUEUED, NOT STARTED — SPLIT THE PROFILE PHOTO FROM THE FACE CONSENT.** Owner's own idea, asked
+as a question: *"use as their profile photo?"*
+MEASURED: today a guest CANNOT give a photo without also consenting to facial recognition — the
+capture UI in `_components/selfie-capture.tsx` is gated behind the biometric-consent checkbox AND the
+18+ affirmation, and `submitRsvp` reads `biometric_consent` / `selfie_ref` / `selfie_quality`. The
+storage already exists and is unused for this purpose: `guests.photo_url` + `guests.photo_source`.
+⇒ THE DELTA: a plain profile photo needing NO biometric consent (so the couple can recognise someone
+on the list), kept separate from face enrolment, which stays consented and stays on the day / in the
+Papic camera per the 2026-09-11 ruling. This RAISES the number of photos while NARROWING what is
+collected under biometric consent — the better privacy position, not a looser one.
+⚠ Touches a consent flow under RA 10173. Its own session, after the QR door lands. Not started.
+
+SEQUENCING HOLDS: one build session at a time (the weekly limit was burned by three at once).
+Order: QR door (in flight) -> photo/consent split -> Galeriya -> Abaca.
+
+## 2026-09-13 · ⛔ CORRECTION — THE "SAVED" BUG IS SHIPPED. THIS LOG SAID OTHERWISE AND MISLED A SESSION.
+
+The 2026-09-11 entry "DEFECT THIS EXPOSED — QUEUED FOR THE SESSION THAT OWNS guests/invite/" is
+**STALE AS OF PR #5472 (merged and SERVED 2026-09-12)**. It was queued, then built as item 6 of the
+Event Hub Pro session, and it is LIVE.
+
+MEASURED on origin/main just now, in `app/dashboard/[eventId]/guests/invite/actions.ts`:
+    .update({ invite_theme: theme })
+    .select('event_id');
+  if (error || !data || data.length === 0) redirect(`…?theme=error`);
+Re-measure with: `git show origin/main:apps/web/app/dashboard/'[eventId]'/guests/invite/actions.ts | grep -n "select('event_id')"`
+
+🔑 WHY THIS ENTRY EXISTS AT ALL: the QR-door session read this log as its brief, reached the stale
+paragraph, and closed its report with "Not addressed, still open from the log". It was right about
+what the log said and wrong about the world — exactly the failure the platform CLAUDE.md warns of in
+its own top block: **a handoff decays fastest where it is read most.** The log is now a document that
+has already misled one session; treat every "QUEUED"/"OPEN" line in it as a hypothesis and re-measure
+before acting.
+
+STILL GENUINELY OPEN, re-checked at this writing — nothing else on this list is stale:
+ · The profile-photo / face-consent split (owner's 2026-09-13 idea). NOT started.
+ · Galeriya, then Abaca. NOT started; `ready: false` in the registry, so neither is offered.
+ · Whether the couple's legibility setting should reach the invite doors (it reaches none of them
+   today; Capiz and Velvet both rely on their own veil). Owner has not ruled.
+ · The saved QR PNG carries no monogram while the on-screen SVG does — `compositeMonogram` is
+   SVG-only and `site-body.tsx` has had the same asymmetry for months. Cosmetic; no copy claims
+   otherwise. Owner has not been asked.
+
+---
+
+## 2026-09-14 · THE GROUP IS CLOSED — and this log's own "STILL GENUINELY OPEN" list was half stale
+
+**Galeriya and Abaca both shipped.** The list above says of them *"NOT started; `ready: false` in the
+registry, so neither is offered."* That was true when written on 2026-09-13 and is false now.
+Measured on `origin/main`: **house · capiz · velvet · galeriya · abaca, all five `ready: true`.**
+Abaca merged `2c26c3f80` and was SERVED at 06:45:57Z, ancestry-confirmed — 5 min 17 s, the third of
+four landings that cluster at 5–6 minutes against Galeriya's single >19 min outlier. **One outlier is
+not a distribution**; it gets a row only if a second appears.
+
+🔑 **THIS ENTRY IS THE SECOND TIME THIS LOG HAS GONE STALE IN FOUR DAYS, AND THE FIRST TIME IT
+MISLED A SESSION.** The paragraph above already records the QR-door session reading a stale
+"QUEUED" line and closing its report with *"Not addressed, still open from the log"* — right about
+what the log said, wrong about the world. Now the "STILL GENUINELY OPEN" list, written **as the
+correction to that**, has itself decayed. A correction is not immune; it is just newer.
+
+### What is actually left (re-measure each; none is a state)
+
+| | | |
+|---|---|---|
+| 👁 | **The owner opens a Capiz invite on a phone** (session 1) | never done · a look, not a decision |
+| ⚖ | **Does the couple's legibility setting reach the invite doors?** | it reaches **none** of them · unruled |
+| ⚖ | **The saved QR PNG carries no monogram; the on-screen SVG does** | cosmetic · nothing claims otherwise · never asked |
+| 🔨 | **Capiz and Velvet position their grounds at FIXED PIXEL offsets** (`circle at 50% 190px`, `at 50% 300px`) while Abaca bounds the wordmark's contrast **by ratio** | ⚠ **A CLAIM TO CHECK, NOT A DEFECT — nobody has rendered them** |
+| 🔨 | **A monogram over ~5 characters overruns Abaca's wax seal**; `resolveMonogram` permits 12 | Capiz ships the identical exposure · it is the monogram's question, not a theme's |
+| 🔨 | **Abaca shipped two of three named faces, deliberately** | Bitter and Oswald 600 dress the wordmark, buttons, body copy and fields — a skin may not restyle those, so ~40 KB would render nothing and `lint-fonts-are-local.mjs` fails an orphaned face. **I-6 must verify licences, not assume five were fetched.** |
+
+The profile-photo / face-consent split (the owner's 2026-09-13 idea) is NOT started and is **not an
+invite-theme row** — it belongs to whoever owns face consent.
+
+### The rule this group earned
+
+**Every "QUEUED" / "OPEN" / "NOT started" line in this file is a hypothesis with an expiry date.**
+Before acting on one, run its re-measure. Where a line has no re-measure command, that is the defect
+— add one rather than trusting the sentence.
