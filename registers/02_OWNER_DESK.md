@@ -230,16 +230,18 @@ All four re-measured against production by a second session before being written
   **revisit before launch**. Pro is about **₱1,450/month** and is a card payment you have to make.
   **Nothing else on this desk is as unrecoverable as losing the database in December.**
 
-- ⚖ **THE VERIFIED BADGE CURRENTLY MEANS NOTHING — FOR EVERYONE WHO HAS IT.** Re-measured twice:
-  **2 shops are publicly Verified · 0 verification records exist.** Both `Saysay Live Band &
-  Hosting (FIXTURE)` **and `SetnaProd`** carry the badge with `is_demo = false`, so every filter
-  that hides demo data lets them through to `/`, `/explore` and the sitemap.
-  ⚠ **This was first put to you as "rename the fixture", and that was wrong** — a data fix for a
-  mechanism fault. `SetnaProd` is the proof: it is not a fixture, it wears the same unbacked badge,
-  and renaming the other one would have left the badge meaning nothing while looking resolved.
-  ⇒ **What you owe is a policy, not a rename: what must be true before a shop may show Verified?**
-  Engineering then pins it as an invariant — publicly-Verified shops may never outnumber
-  verification records — so it cannot drift back.
+- ⚪ **RETRACTED — "THE VERIFIED BADGE MEANS NOTHING" WAS WRONG.** Put on this desk on 2026-09-16
+  and withdrawn the same day. **Both badges are backed**: `vendor_verification_bypasses` holds
+  **2 rows**, matching the 2 badges exactly, each with a stated reason, an `admin_audit_log` entry
+  and a deadline of 2027-03-12. That is **your own vouch ruling of 2026-09-07** working as you
+  ruled it — same badge, no cap, the deadline holding it honest.
+  ⇒ **`vendor_verifications` = 0 is the expected reading, not the defect.** Nobody has ever
+  completed paper verification, and that is exactly why you authorised vouching.
+  🔑 **The row counted one table and drew a conclusion about a mechanism living in another** — and
+  the invariant first proposed off the back of it would have **forbidden your own ruling from nine
+  days earlier**, with every existing guard still green.
+  ⇒ **All that actually survives: `Saysay Live Band & Hosting (FIXTURE)` is publicly listed under
+  a name containing the word FIXTURE.** Rename or hide it; minutes. Nothing else here is owed.
 
 - ⚖ **ANYONE CAN MANUFACTURE ACCOUNTS, AND 5 OF YOUR 13 ALREADY ARE.** Anonymous sign-in is on and
   no bot check is live. Each signup also sends mail from our domain — **the same sending reputation
