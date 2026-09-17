@@ -934,6 +934,33 @@ log nothing"*) are both **RETRACTED**; LR-3 held. The failure is not carelessnes
 did not catch it, because the refuter asks *"is this already built?"* and *"is it already on the
 register?"* — **not** *"is the mechanism where I inferred it is?"*
 
+🧭 **AND THE STRUCTURAL FINDING THAT REORGANISES THIS WHOLE FILE: ROWS ASK THREE DIFFERENT
+QUESTIONS, AND ONE METHOD CANNOT ANSWER ALL THREE.**
+
+· **WRONGNESS rows** — *"this screen says/does something untrue."* Settle by EXECUTION: find the
+  render, find the pure seam, run it across its input space. Verdicts: REACHABLE / DEAD /
+  UNDERSTATED / NOT-PURE.
+· **CAPABILITY rows** — *"we should be able to do X."* There is **no branch to prove dead.**
+  Reachability on these produces a confident verdict about nothing. Settle by RULE 0 existence
+  instead: does the subsystem already ship, and is this an EXTEND rather than a build?
+· **OWNER rows** — the behaviour is exactly as described and whether it is a DEFECT is a product
+  judgement. Neither method applies; the owner rules.
+
+⇒ In the 33-row DAY block the split measured roughly **12 wrongness · 17 capability · the rest
+owner**, and the capability rows are answering "already built, extend it" far more often than the
+register assumes — a shipped day-of console with a specialization registry, a shipped Samahan and
+Usapan, a shipped channel pool, a shipped event-type profile, a shipped hub controller.
+**Classify a row before choosing how to check it.**
+
+⚠ **AND A NEW WAY TO GET IT WRONG, which is the exact inverse of this header's other lessons:
+BUILDING A WRITER FOR A DEAD COLUMN CREATES A SECOND SOURCE OF TRUTH.** `events.photo_wall_photos`
+has **no writer anywhere** and defaults to `'[]'`, so the editorial page's live-wall block is
+permanently false — but the capability ships two files away under another noun: the site body reads
+`getWallSnapshot`, the real screened Papic feed. **The obvious fix — write the column — would
+manufacture a second answer to "the day's candid photos".** Point the dead block at the working
+feed, or delete it. Everywhere else in this file an absence hid a mechanism under a different name;
+here an absence invites you to build a rival to one.
+
 🔑🔑🔑 **FOURTH PATTERN, 2026-09-17, AND IT POINTS THE OTHER WAY: ROWS IN THIS FILE ARE
 UNDERSTATED AT LEAST AS OFTEN AS THEY ARE WRONG.** A reachability triage of the DAY block found one
 DEAD row and three that are real **and name one instance of a defect whose mechanism produces
