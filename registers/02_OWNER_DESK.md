@@ -358,3 +358,17 @@ A sweep, a plan and this desk all counted a fixture as a real wedding, and the c
 otherwise was one `select` away. **Every population count in this file must carry
 `where is_sample = false`, and any figure that does not is unverified.**
 
+- ⚖ **TWO COLOUR TOKENS ARE UNREADABLE AND THEY CARRY ~54 TEXT ROLES ACROSS THE MARKETING SITE.
+  Repainting them is TWO LINES. Nobody has approved it, so nobody has done it.**
+  `--hr-grey` (**3.14:1**) and `--hr-grey-2` (**2.21:1**) fail the 4.5:1 readability bar **wherever
+  they are used** — not only in the footer where this was found. The footer fix has shipped, scoped
+  to the footer **on purpose**: repainting both tokens globally would fix all ~54 roles at once and
+  would be a **site-wide visual change to your marketing pages, made under cover of a footer
+  ticket.** ⇒ **Your call: repaint the two tokens site-wide, or keep fixing surface by surface?**
+  The two-line version is sitting there looking tempting, which is exactly why it was not taken.
+  ⚠ **AND A SECOND DECISION INSIDE IT, which is not obvious:** solving BOTH greys to the bar
+  **collapses them** — 0.1256 luminance apart becomes **−0.0022**, i.e. they cross. The quiet grey
+  and the loud one become the same grey in the wrong order, and every contrast test goes green while
+  the page's deliberate hierarchy disappears. **A contrast fix can make everything equally loud.**
+  The shipped footer fix puts the quiet one AT the bar and the loud one a step past it, and its
+  guard asserts they stay separated. Any site-wide repaint must do the same.
