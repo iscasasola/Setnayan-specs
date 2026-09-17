@@ -522,7 +522,7 @@ controller the *invite* session touches. Check Group 1's open PRs first.
 | # | Build id(s) | What a person gets | Status | Gated | Size · model | Re-measure |
 |---|---|---|---|---|---|---|
 | DAY-1 | **DAY-WHEEL** | Only the coordinator (or the host when there is none) can move the programme forward — enforced **in the database**, not just the button | PARTIAL | ⚖ | S · Opus | `select pg_get_functiondef(oid) from pg_proc where proname like '%advance%'` — runs against 8 test events today |
-| DAY-2 | **LS-POOL** ⇄ BF `NEXT_PUBLIC_LIVE_STUDIO_POOL_ONLY` + "pool channel reuse" | A couple is only put on a shared Setnayan livestream channel when the product and its price say so | OWNER-GATED | ⚖ **money · and reuse-vs-retire is unruled: one couple's strike can delete another's film** | S–M · Opus | `02_OWNER_DESK.md` Tier 5 |
+| DAY-2 | **LS-POOL** | A couple is only put on a shared Setnayan livestream channel when the product and its price say so | ✅ **ALREADY COMPLETE — shipped 2026-09-03 (LS8), verified in the live catalogue 2026-09-17.** `LIVE_STUDIO` **₱2,500 is_active TRUE** (updated 2026-09-03) and `LIVE_STUDIO_HOSTED_CHANNEL` **₱3,000 is_active TRUE** (created 2026-09-02, updated 2026-09-03). The hosted channel is **genuinely per-day, deliberately** — a Setnayan channel is a scarce resource while the software unlock is not. ⚠ **NOT AN OWNER ROW AND NEVER WAS.** It sat on his desk for a price that had been on sale for thirteen days, on a premise this register supplied — *"switched off right now and sells nothing"* — which was carried from a memory note and never re-read against the catalogue. **His 2026-09-16 figures CONFIRMED the shipped price; they did not set it.** ⛔ **IF THIS AREA IS EVER REOPENED, DO NOT WIDEN ONE GUARD:** the check forbidding any non-test surface from calling Live Studio *"priced per day"* was kept strict through LS8 on purpose — the prose was reworded instead — because the defect it guards is a surface telling a couple their ₱2,500 one-time unlock expires, and *"a regex that tried to tell the two SKUs apart by proximity would be the thing that quietly stops matching."* | no | — | `select service_code, retail_price_php, is_active, updated_at from platform_retail_catalog_v2 where service_code ilike 'LIVE_STUDIO%';` |
 | DAY-3 | **EH-ROOMS** ⇄ BF "Rooms per kind of event" | Each kind of event offers only its own rooms — a corporate day has no gifts page, a tournament seats spectators | PARTIAL | ⚖ | M · Opus | check Group 1 |
 | DAY-4 | **EH-MONEY** ⇄ BF **S6** | The Event Hub controller shows what this event already owns, as a filling meter | NOT BUILT | no | S–M · Opus | check Group 1 |
 | DAY-5 | **DAY-NOTICE** | A coordinator's urgent notice reaches the emcee instantly, as a quiet corner marker he opens on a beat | PARTIAL | ⚖ | S–M · Sonnet | — |
@@ -933,6 +933,20 @@ TWO DID NOT SURVIVE.** LR-8 (*"the Verified badge means nothing"*) and LR-21 (*"
 log nothing"*) are both **RETRACTED**; LR-3 held. The failure is not carelessness and the refuter
 did not catch it, because the refuter asks *"is this already built?"* and *"is it already on the
 register?"* — **not** *"is the mechanism where I inferred it is?"*
+
+⛔⛔ **AND THE ONE THAT LANDED ON THE ORCHESTRATOR: A DESK ITEM IS A CLAIM AND MUST BE MEASURED
+LIKE ONE.** The owner was asked *"what should Live Studio's hosted channel cost?"* on the stated
+premise that it was **"switched off right now and sells nothing."** Both SKUs were **live, active
+and at exactly his figures, updated thirteen days earlier.** He confirmed a shipped price and was
+thanked for a ruling.
+
+🔑 **The premise came from a memory note that ALSO CARRIED THE SQL TO DISPROVE IT, and the query was
+never run.** The rule broken — *an owner blocker is not open until you have checked whether it was
+already closed* — was written the same day, and applied to other sessions' blockers but not to the
+question going onto his own desk. ⇒ **Never describe the state of a paid thing without reading
+`platform_retail_catalog_v2` in the same breath.** Asking for a decision that already exists costs
+more than not asking: it spends the scarcest resource on the project and returns a confirmation
+that reads like a mandate.
 
 🔍 **A THIRD DEFECT CLASS, AND BOTH OF OUR METHODS ARE BLIND TO IT: THE MISSING MOUNT.**
 A shipped component is mounted on ONE surface and absent from its sibling. Found twice in one

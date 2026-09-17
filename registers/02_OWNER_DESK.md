@@ -302,3 +302,10 @@ may not reverse it — and meanwhile the photograph never actually left. Queued 
   supplier, with a test pinning that the generic kit passes through on every access path. ⇒ **This
   is not a build. It is one date.** Until it is set, suppliers are told the desks are free during
   launch and nothing tells them when that stops.
+
+- ⚠ **WITHDRAWN — I ASKED YOU FOR THE LIVE STUDIO HOSTED-CHANNEL PRICE AND IT WAS ALREADY ON SALE.**
+  I told you it was *"switched off right now and sells nothing"*. Measured in the live catalogue:
+  `LIVE_STUDIO` **₱2,500 active** and `LIVE_STUDIO_HOSTED_CHANNEL` **₱3,000 active**, both updated
+  **2026-09-03** — thirteen days before I asked. Your answer matched the shipped figures exactly,
+  so nothing was unblocked and nothing needs building. **The question should never have reached
+  you.** Recorded so the row is not re-opened: DAY-2 is complete.
