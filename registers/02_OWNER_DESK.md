@@ -329,27 +329,32 @@ may not reverse it — and meanwhile the photograph never actually left. Queued 
 
 ---
 
-## 🗓 CORRECTED 2026-09-17 — FOUR FACTS THIS DESK HAD WRONG, ALL RE-MEASURED
+## 🗓 CORRECTED 2026-09-17 — AND THEN CORRECTED AGAIN BY THE OWNER
 
-- 🚨 **THE FIRST WEDDING IS 12 DECEMBER, NOT 18. That is 86 days, not 92 — and it is not yours.**
-  `maria-and-jose` is **2026-12-12** with 32 guests; `cale-ice` is 2026-12-18 with **92** guests
-  (it has grown from 77). **Every date on every plan keys to 12 December.** Six days is the whole
-  margin between a rehearsal and a first live event.
+⛔ **THE FIRST "CORRECTION" BELOW WAS WRONG. `maria-and-jose` IS A SAMPLE WEDDING.** The owner said
+so; the database says so too — `events.is_sample = true`, and **it is the only row in the table with
+that flag set.** The column existed the whole time and **nobody filtered on it** — not the
+launch-readiness sweep, not the 92-day plan, not this desk. Every figure below has been re-measured
+with samples excluded.
 
-- 🚨 **BOTH DECEMBER WEDDINGS ARE HOSTED BY YOUR INTERNAL ACCOUNT** — `is_internal = true` on the
-  couple row of each. ⇒ **Every paid gate will pass silently on both real days**, which is the
-  false-green trap already on record, now sitting on the only two live events. **Nothing about
-  paywalls, entitlements or purchase flows can be proven on either December event.** It has to be
-  proven on a non-internal test event, and the December days will not reproduce what a real
-  customer meets.
+- ✅ **THERE IS ONE REAL DECEMBER WEDDING: `cale-ice`, 18 December — 92 days.** There is no 12
+  December deadline and there never was. Anything keyed to the 12th is keyed to a fixture.
+- ✅ **REAL GUEST NUMBERS, samples excluded: 101 guests across all live events, 100 with no email.
+  `cale-ice` alone holds 92 of them, 91 with no email.** The printed card conclusion is unchanged
+  and if anything stronger — it now rests entirely on the one wedding that is real.
+- ✅ **0 of 101 real guests have ever been sent an invitation.** Unchanged.
+- ⚠ **DECEMBER SUPPLIER ROWS: 4, not 46 — and still 0 linked to a Setnayan account.** The 46 was
+  almost entirely the sample. The gap is real; its SIZE was fiction.
+- ✅ **STILL TRUE AND UNAFFECTED: `cale-ice` is hosted by your internal account** (`is_internal =
+  true`), so **every paid gate passes silently on the one real day.** Nothing about paywalls can be
+  proven there.
+- ✅ **STILL TRUE: `cale-ice` has no coordinator and one member row — the couple.** 92 days out,
+  nobody is in the coordinator seat.
+- ✅ **STILL WITHDRAWN: the R2 "single blocker" is done** — secrets set 2026-09-14, both download
+  routes 302 to R2 and serve real files.
 
-- 🚨 **`cale-ice` HAS NO COORDINATOR AND NO MEMBERS BUT THE COUPLE.** Zero coordinator rows, one
-  member row total. `maria-and-jose`'s single coordinator is **`testnayan1@test.com` — a test
-  account.** ⇒ **Two weddings in 86 days with no real human in the coordinator seat.** That is a
-  naming question only you can answer, and it is not engineering work.
+🔑 **THE LESSON, AND IT IS THE THIRD TIME TODAY THE CORPUS HELD THE ANSWER: `is_sample` WAS THERE.**
+A sweep, a plan and this desk all counted a fixture as a real wedding, and the column that says
+otherwise was one `select` away. **Every population count in this file must carry
+`where is_sample = false`, and any figure that does not is unverified.**
 
-- ✅ **WITHDRAWN — "THE R2 RELEASE SECRETS ARE THE SINGLE BLOCKER ON THE DESKTOP APP."** They were
-  set on **2026-09-14** and the Apple secrets in June. Both routes work today:
-  `/api/download/mac` and `/api/download/windows` each return **302 to R2 and serve a real file**
-  (`Setnayan_0.0.1_aarch64.dmg`, `Setnayan_0.0.1_x64_en-US.msi`). **Do not action that item — it is
-  done.** It is the second thing this desk has asked you for that was already finished.
