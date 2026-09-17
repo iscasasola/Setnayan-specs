@@ -294,3 +294,11 @@ may not reverse it — and meanwhile the photograph never actually left. Queued 
   where **6 of 7 text roles fail** — the nav links, the column headings and the tagline go with it.
   ⇒ Engineering's to fix, not yours to rule on. Flagged because it is the legally-required privacy
   contact and it is the least readable thing on the page.
+
+- ⚖ **WHEN DOES THE FREE DAY-OF PERIOD END? One date, and a whole row is finished.** You ruled on
+  2026-09-11 that the specialist day-of desks are free during launch with a **"dated end, shown to
+  shops"** — and the single config value that holds that date **defaults UNSET**, because the
+  public-launch date has never been set. The console itself already ships ungated to every booked
+  supplier, with a test pinning that the generic kit passes through on every access path. ⇒ **This
+  is not a build. It is one date.** Until it is set, suppliers are told the desks are free during
+  launch and nothing tells them when that stops.

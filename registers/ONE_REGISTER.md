@@ -934,6 +934,27 @@ log nothing"*) are both **RETRACTED**; LR-3 held. The failure is not carelessnes
 did not catch it, because the refuter asks *"is this already built?"* and *"is it already on the
 register?"* — **not** *"is the mechanism where I inferred it is?"*
 
+🔍 **A THIRD DEFECT CLASS, AND BOTH OF OUR METHODS ARE BLIND TO IT: THE MISSING MOUNT.**
+A shipped component is mounted on ONE surface and absent from its sibling. Found twice in one
+block:
+· **DAY-6** — `RequestsInbox` renders INLINE inside the song desk, and the coordinator's
+  floor-command surface offers only a `<Link>` that leaves the fullscreen console.
+· **DAY-8** — `ScheduleUpdater` is mounted in `floor-command.tsx` (the coordinator's) and **absent
+  from `stage-script.tsx`** (the emcee's), so the emcee cannot retime a schedule he has been lent.
+
+🔑 **Neither method can see it.** A RULE 0 existence search finds the component and answers
+*"already ships"*. An execution pass finds no false branch, because nothing renders wrongly — the
+surface simply does not render it at all. **Only comparing SIBLING SURFACES finds a missing mount.**
+⇒ When a capability is confirmed to ship, ask the second question: **on which surfaces, and which
+of its siblings is missing it?** Enumerate the surfaces that share a role before closing the row.
+
+⚠ **AND A WAY TO LOCATE A ROW WRONG THAT SURVIVES ORDINARY CARE: MATCHING A NOUN INTO THE WRONG
+SUBSYSTEM.** DAY-7 (*"the emcee asks the couple his own questions"*) was filed against
+`lib/answers-desk.ts` on the strength of the word *answers*. That module is the SUPPLIER's
+"What's new" feed — unanswered reviews and lapsed booking asks. **Same failure as inferring a
+mechanism from a name, but with a real file at the end of it to make it convincing** — and a real
+file is far more persuasive than an absence. Location struck; DAY-7 is unverified again.
+
 📋 **THE FIRST BLOCK TRIAGED IN FULL — 21 of 40 DAY items settled 2026-09-17, none of them built.**
 · **WRONGNESS (8):** 1 DEAD · 1 REACHABLE-and-reuse · **3 UNDERSTATED** (6 footer roles · 4 green
   chips · a countdown 8 h LATE, sign inverted) · 1 REACHABLE · 2 NOT-PURE.
