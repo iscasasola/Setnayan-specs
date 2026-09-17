@@ -252,6 +252,61 @@ inverted. Every contrast test goes green while the deliberate hierarchy disappea
 
 ---
 
+## 4b · ⚠ RE-MEASURED 2026-09-17 ~16:30 PST — TWO BUILDS ARE ALREADY DONE, TWO SHRANK
+
+**Read this before §5. The fleet merged 24 PRs in the last day (#5542→#5566) and it moved the
+board.** Every line below was measured against `origin/main` just now, with the command.
+
+### ✅ ELIMINATED — do not build
+
+- **S1 (the NUL fix) IS DONE.** #5557 merged. Verified by scanning every source file on `main` in
+  python with an **allowlist** of source extensions: **0 NULs across 11,261 files.** The guard
+  walks the whole repo with a floor of 8,000.
+  ⚠ Do NOT verify this with `grep -c $'\x00'` — in zsh that is an **empty pattern** that matches
+  every line and returns a large number that looks like overwhelming confirmation. It is the file's
+  line count. Use python/perl, or `tr -d -c '\000' | wc -c`.
+- **S6-a (LR-22, the email allowlist) IS DONE.** The row says *"four strings in a Set"*;
+  `EMAIL_ENABLED_TYPES` on `main` now carries **11+ types** with reasoning comments, and the real
+  defect — **six `lock_request_*` types sitting in `MARKETING_GATED_EMAIL_TYPES`, which suppresses
+  unless `marketing_opt_in = TRUE` (NOT NULL DEFAULT FALSE, 9 users, 0 opted in)** — has been
+  removed, with the incident written into the code. `RESEND_API_KEY` is set in production, so mail
+  does send. 🔑 The comment left behind is worth reading: *"the gate's own comment asserted the
+  opposite while six transactional types sat in it. A sentence is not a mechanism."*
+
+### 🔻 SHRANK — build, but far smaller than the row says
+
+- **S2 (LR-14) is switched OFF, not missing.** The mechanism is fully built and correct in
+  `lib/guest-session.ts` — `sessionTokenMatchesDb` re-validates the QR token against the database at
+  a single chokepoint that every one of 24 importing files passes through, and its failure policy is
+  already reasoned (definitive mismatch → revoked; transport error → fails open, so an outage cannot
+  sign out every guest at once).
+  🛑 **It is gated behind `GUEST_SESSION_TOKEN_CHECK`, and `npx vercel env ls production` does NOT
+  list that variable — so the check does not run in production and the defect is LIVE.**
+  ⇒ **The build is: set the flag on, then DELETE it** so the chokepoint is unconditional, plus a
+  guard that executes the reader across (old token, new token) × (rotated, not rotated). **Minutes,
+  not hours** — re-rank it as the cheapest real security fix available.
+- **S6 reduces to the send-log half.** There is still **no general email delivery log**
+  (`papic_sampler_email_log` exists but is specific to one sampler). Lower urgency now that the
+  suppression bug is fixed and mail is sending. **Demote below S3–S5.**
+
+### 🔴 STILL FULLY OPEN — measured on `main` just now
+
+| build | measurement |
+|---|---|
+| **S3 · LR-6** password reset | no `app/auth/confirm` route; **0** `token_hash` references; the only two `verifyOtp` hits are a string inside `captcha-is-wired.test.ts` and a comment describing a **retired** path. Genuinely unbuilt. |
+| **S4 · SUP-52** guest song request | **0** song-request references anywhere under `app/[slug]` or `app/papic`. The supplier's inbox exists; the guest cannot post. |
+| **S5a · SUP-24** "on the marketplace since" | no match for `marketplace since` / `member since` / `on Setnayan since` anywhere in `apps/web`. Unbuilt. |
+| **S5b · LR-10** "planning our wedding" | **exactly two** hard-coded sites — `dashboard/[eventId]/vendors/_actions/unlock-category.ts:67` and `app/v/[slug]/inquiry-actions.ts:60`. Narrower than the row implies: two files, one sentence each. |
+
+🔑 **And note what the fleet already closed in this family:** #5560 and #5565 stopped asking a
+non-wedding which *side* a guest is on, and #5561 made two refusals name their real cause. **LR-10
+is the last survivor of the wedding-assumption family**, which is why it is now this small.
+
+⇒ **REVISED DAY: 4 builds, not 13** — S2 (minutes), S3, S4, S5a, S5b. That is comfortably
+achievable in one day and leaves room to pull from the spare list.
+
+---
+
 ## 5 · THE SEQUENCE — 6 sessions, 13 builds
 
 **All six start at once.** Within a session the order is strict, because each session's later rows
