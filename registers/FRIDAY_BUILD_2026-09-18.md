@@ -146,6 +146,29 @@ bracket globbing) were both wrong. One `type grep` settled it.
     --jq '.jobs[]|select(.name|test("typecheck"))|.steps[]|select(.conclusion=="failure" or .conclusion=="skipped")|"\(.conclusion)\t\(.name)"'
   ```
   The first `failure` in that list is the real one. This has cost time twice.
+- **A widened scope can silently not widen.** A guard's root moved from `apps/web` toward the
+  repo root with `join(HERE, '..', '..')` — two levels up from `apps/web/lib` lands back on
+  **`apps/web`**. Re-run expecting red, it came back **green**, and the file count had moved
+  5,972 → 5,982. Ten files, not thousands. **Green after a change is ambiguous: it means either
+  "nothing to find" or "the change did nothing."**
+
+🔑 **THE ONE RULE THAT COVERS ALL OF THESE — "green-shaped nothing".** Five distinct mechanisms in
+a single day reported success for work that never happened: an empty search pattern that matches
+every line · a guard window that slid onto the wrong cell · a `# tests 0` run · a CI summary naming
+the last *skipped* step · a scope that did not widen. **In four of the five, the pass/fail was green
+and a printed NUMBER was the tell.**
+⇒ **Print the size of what you searched — files walked, rows scanned, tests run, occurrences
+counted — and then read it.**
+⇒ **Give every guard a FLOOR, and make the floor fail the mistake actually made.** A floor above
+zero only catches a walk that matched nothing. The floor above went 3,000 → **8,000** precisely
+because `apps/web` alone is 5,982, so 3,000 would have passed the broken widening in silence.
+⇒ **A scope widening that has not first gone RED has not been tested, only written.**
+⇒ **Filter with an ALLOWLIST, never a denylist.** A NUL scan with a denylist of binary extensions
+reported 39 "source" files (`.jar`, `.bin`, `.avif`, model shards); an allowlist of source
+extensions reported the truth — 0 of 11,233. The same missing filter made a repair script rewrite
+**944 font files**. **When a working check is re-implemented somewhere new, the filter is the first
+thing that goes missing.**
+
 - **A CONFLICTING PR runs NO CI** and reports zero failing *and* zero running. Count the checks.
 - **A green check proves the code, never the merge path.** Five finished, green PRs sat unmerged
   for hours because they were **drafts** — checks run on a draft, go green, and `gh pr checks`
