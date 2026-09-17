@@ -545,7 +545,7 @@ controller the *invite* session touches. Check Group 1's open PRs first.
 | DAY-22 | **SAM-KEEP** ⇄ BF Samahan ("stitched film" + "a place where a samahan keeps things") | A samahan keeps its good moments: a stitched film of the day, and a permanent shelf | OWNER-GATED | ⚖ | M–L · Opus | — |
 | DAY-23 | **SAM-SHAPE** ⇄ BF Samahan (sub-groups · findable · hard delete) | Samahans can nest, be found by strangers, and be deleted outright | OWNER-GATED | ⚖ | M · Opus | — |
 | DAY-24 | BF Samahan | Photos can be sent in the group chat (Usapan); a Memories tab of past group moments | NOT STARTED | no | S · Sonnet ·rule | — |
-| DAY-25 | **GA-CAMERA** | The camera on the invitation page says when guests may shoot **before** the shutter, not after | NOT BUILT | no | S · Sonnet | — |
+| DAY-25 | **GA-CAMERA** | The camera on the invitation page says when guests may shoot **before** the shutter, not after | ✅ **ALREADY COMPLETE — closed by the owner 2026-09-17.** Asked which of two readings he meant, he answered **"the terms"**. The one-time UGC acceptance **ships and gates the first capture**: `/api/papic/accept-terms` stamps it and the guest camera refuses to shoot until it is stamped — the guest is told **before** the shutter, which is the row's whole ask. ⚠ **THE OTHER READING IS NOT AUTHORISED BY THIS ANSWER.** *When during the celebration guests may shoot at all* is a different mechanism, is unmeasured, and **is not to be built on the strength of this ruling.** If a time window is ever wanted it is a new row and a new question. 🔑 Asked rather than chosen because **one reading closed a row and the other started a build, and nothing in the tree could tell them apart.** | no | — | `grep -n 'accept-terms' apps/web/app/api/papic -r` and read what the guest camera gates its first capture on |
 | DAY-26 | **GA-QR-EMAIL** | A guest is sent their personal QR when it is first issued | OWNER-GATED | ⚖ | S · Opus | — |
 | DAY-27 | **FE-AFTER** | A finished event's progress rail shows an honest "after" stage | PARTIAL | no | S · Sonnet | — |
 | DAY-28 | **OB-ROLLOUT** | Real couples' Event Hubs open fully to guests by default, and the old phase-only code is removed | PARTIAL | ⚖ | S | — |
@@ -972,6 +972,15 @@ SERVICE, AND LIVE STUDIO IS THE SERVICE THEY STOPPED AT.**
 that service's own files — its files look complete, because for the parts it has, they are.
 ⚠ And do not reach for `DemoModeBanner` there: its layout states it is **admin-only**, reading a
 demo cookie. Wrong audience for a public prospect; the token-gated routes are the pattern.
+
+🗣 **AND THE INSTRUMENT THAT SETTLED TWO ROWS IN TWO DAYS: ONE WORD FROM THE OWNER, WHERE NO AMOUNT
+OF MEASURING WOULD HAVE HELPED.** *"ceiling"* settled whether a per-guest Papic number reserves or
+caps. *"the terms"* settled whether a camera row was about consent or about a time window. **In both
+the code was correct under one reading and absent under the other**, so every method in this header
+— execution, second routes, sibling comparison, RULE 0 — would have returned a confident verdict
+about the wrong question. ⇒ **When the ambiguity is in what somebody MEANT, more grepping is the
+wrong instrument.** Recognising that is itself a triage outcome, and it is why NOT-PURE and
+"ask him" are first-class answers in this file.
 
 ⚠ **FIVE ROWS WERE DELIBERATELY LEFT UNRANKED, and that is a result.** Two are programme-level
 (a ~40-unit design port; an interrupted conversion attack) — neither names a mechanism, neither has
