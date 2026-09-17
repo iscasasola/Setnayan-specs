@@ -948,6 +948,40 @@ question going onto his own desk. ⇒ **Never describe the state of a paid thing
 more than not asking: it spends the scarcest resource on the project and returns a confirmation
 that reads like a mandate.
 
+🏁 **THE DAY BLOCK, TRIAGED IN FULL — 35 of 40 settled 2026-09-17, NOTHING BUILT. The one-line
+version, and it is the most useful sentence produced about this codebase all week:**
+
+> **Of 40 items, one was dead, three were bigger than written, eight were already done, and nine
+> are a mount or a case away from working. Almost nothing is a subsystem.**
+
+ALREADY COMPLETE **8** · EXTEND **9** · OPEN **7** · DEAD **1** · UNDERSTATED **3** · REACHABLE
+**2** · NOT-PURE **4** · OWNER **3** · **unranked 5, deliberately**.
+
+🎯 **AND THE CLUSTER THAT EXPLAINS THE FAMILY: THE PLATFORM'S PATTERNS ARE APPLIED SERVICE BY
+SERVICE, AND LIVE STUDIO IS THE SERVICE THEY STOPPED AT.**
+· The **control-centre pattern** — owner-ruled 2026-08-28, *"a photo product opens on photographs"* —
+  is converted for **two of three services** (the papic stage, the 3D plan). Live Studio is the
+  third: when a couple already owns it, the page still renders the STORE layout whose primary
+  action is **"Open controller"** — a shop window whose main button links to the thing you own
+  (DAY-16).
+· The **token-gated demo pattern** ships for the papic and 3D-plan services **and for Live Studio's
+  camera join** (`panood/demo/[token]`) — but there is **no demo of the CONTROLLER**, which is the
+  half a prospect browsing *before they have phones* would drive (DAY-15). Same axis, same service,
+  one level finer.
+⇒ So look for the next defect **by asking which service a proven pattern skipped**, not by reading
+that service's own files — its files look complete, because for the parts it has, they are.
+⚠ And do not reach for `DemoModeBanner` there: its layout states it is **admin-only**, reading a
+demo cookie. Wrong audience for a public prospect; the token-gated routes are the pattern.
+
+⚠ **FIVE ROWS WERE DELIBERATELY LEFT UNRANKED, and that is a result.** Two are programme-level
+(a ~40-unit design port; an interrupted conversion attack) — neither names a mechanism, neither has
+a branch to execute, neither is answerable from the tree. One is ambiguous in a way that decides it
+(DAY-25: the UGC terms gate DOES fire pre-shutter, so one reading closes the row and the other
+opens a different mechanism entirely). One leans covered but is unproven (offline sync is mounted
+in the ROOT layout, but *"one bar of signal"* is degraded network, not offline — a different failure
+mode needing a test nobody here can run). One lost its location to a bad noun match.
+🔑 **Five honest gaps beat five invented verdicts.**
+
 🔍 **THE DEFECT CLASS BOTH OF OUR METHODS ARE BLIND TO — AND IT HAS TWO AXES.**
 **When a capability is confirmed to ship, ask what it ships FOR: WHICH SURFACES, and WHICH CASES.**
 

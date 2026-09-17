@@ -320,3 +320,14 @@ may not reverse it — and meanwhile the photograph never actually left. Queued 
   should samahans **nest**? should one be **deletable outright** rather than only leavable?
   ⚠ Deletion is the one with a cost attached — a samahan holds other members' posts, so "deleted
   outright" destroys other people's writing, not only the creator's.
+
+- ⚖ **ONE WORD DECIDES WHETHER A ROW IS DONE OR NOT STARTED.** A register row says *"the camera on
+  the invitation page says when guests may shoot **before** the shutter, not after."* Two readings,
+  and they have opposite answers:
+  **(a) the TERMS** — the one-time UGC acceptance a guest gives before their first photograph. That
+  **ships**: `/api/papic/accept-terms` stamps it and the guest camera gates its first capture on it.
+  Row closed.
+  **(b) the TIME WINDOW** — when during the celebration guests are allowed to shoot at all. That is
+  a different mechanism and is unmeasured. Row open.
+  ⇒ Which did you mean? Nobody should pick for you — one answer closes a row and the other starts a
+  build.
