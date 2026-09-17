@@ -928,6 +928,23 @@ production): 97 candidates, 87 survived an adversarial refuter, 61 of those bloc
 first event. Deduped against the 87 `NOT BUILT` rows above. **Nothing here was built or changed
 by that sweep — it wrote no code and opened no PRs.**
 
+⚠⚠ **STOP — READ THIS BEFORE BUILDING ANY LR ROW. THREE ROWS HAVE NOW BEEN CHECKED IN DEPTH AND
+TWO DID NOT SURVIVE.** LR-8 (*"the Verified badge means nothing"*) and LR-21 (*"the error boundaries
+log nothing"*) are both **RETRACTED**; LR-3 held. The failure is not carelessness and the refuter
+did not catch it, because the refuter asks *"is this already built?"* and *"is it already on the
+register?"* — **not** *"is the mechanism where I inferred it is?"*
+
+🔑 **BOTH RETRACTIONS HAVE THE SAME SHAPE: a code read found no mechanism at the name it expected,
+and the mechanism was living somewhere else.** The Verified badge is backed by
+`vendor_verification_bypasses`, not `vendor_verifications`. The browser error handler is in
+`app/_components/deferred-observability.tsx`, not `sentry.client.config.ts`. In both cases the
+count or the absence was accurate and the conclusion was wrong.
+
+⇒ **TREAT EVERY UNVERIFIED LR ROW AS A CANDIDATE, NOT A FINDING.** Before building one, find the
+mechanism by a second route — the live database, the served bundle, `vercel env ls`, the admin
+screen — and only then decide whether the row is real. An absence in the file you expected is the
+beginning of the measurement, not the end of it.
+
 ✅ **SEVEN INDEPENDENTLY RE-MEASURED by the orchestrator against production before being written
 here** — LR-1, LR-2, LR-3, LR-8, LR-12, LR-17, LR-24. A peer's measurement is a hypothesis like
 any other; these seven were re-run, not relayed.
@@ -970,7 +987,7 @@ reader would otherwise fall into:
 | LR-18 | sweep | Guests give a mobile number, allergies and **their FACE** on pages that never link the privacy notice or name the controller | 🔴 OPEN 2026-09-16 · ⚠ the policy itself is in good shape (current, DPO reachable) — **the gap is linkage**. Face data is sensitive personal information under RA 10173 | no | a-session (one shared component) | assert every guest-facing collection surface renders the controller line |
 | LR-19 | sweep | **Nothing records that anyone ever accepted Terms or Privacy** — and Privacy changed 2026-09-15 | 🔴 OPEN 2026-09-16 | no | a-session | `select * from information_schema.tables where table_name ilike '%consent%' or table_name ilike '%acceptance%';` |
 | LR-20 | sweep | **Nine subprocessors hold our users' data with no signed DPA** — our own code says so | 🔴 OPEN 2026-09-16 | ⚖ owner: nine signatures | owner-only | read `apps/web/lib/subprocessors.ts` — the list is generated from it |
-| LR-21 | sweep | Five of six error boundaries tell the customer **"We've logged the issue"** and log nothing | 🔴 OPEN 2026-09-16 · errors are already piling up in Vercel unread | no | a-session | grep each boundary for a reporter call; assert the REPORT, not the copy |
+| LR-21 | sweep | ~~Five of six error boundaries say "We've logged the issue" and log nothing~~ — **RETRACTED. Sentry is live in production and the boundaries do reach it.** | ⚪ **RETRACTED 2026-09-17.** The served page carries `sentry-environment=vercel-production`, `sentry-release=09741c4ac944e3` and a `sentry-public_key`; `vercel env ls production` shows `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_DSN` and `SENTRY_AUTH_TOKEN` all set. ⇒ **WHY A CODE READ MISSED IT:** `instrumentation.ts` registers Sentry for `nodejs` and `edge` ONLY, and there is no `sentry.client.config.ts` — so by the file names alone the browser SDK looks absent. **It is initialised in a COMPONENT instead** — `app/_components/deferred-observability.tsx`, deliberately deferred until after hydration for performance, with an RA 10173 PII scrubber attached. 🔑 **THE MECHANISM WAS REAL AND LIVING SOMEWHERE THE FILE NAMES DID NOT PREDICT.** Same shape as LR-8, where the badge's backing lived in `vendor_verification_bypasses` rather than `vendor_verifications`. ⇒ **WHAT SURVIVES IS A COMMENT NIT, NOT A DEFECT:** five boundaries say the capture happens via `instrumentation.ts`, which is untrue for the browser — the handler is the deferred component. Worth one line each so the next reader does not repeat this measurement. | no | minutes | `curl -s https://www.setnayan.com/ \| grep -o 'sentry-public_key'` → expect a match; `vercel env ls production \| grep -i sentry` |
 | LR-22 | sweep | **Nothing records whether any email was delivered**, and six notification call sites are silently dropped to a tray badge by the allowlist | 🔴 OPEN 2026-09-16 · **two have already fired against real paying suppliers.** The allowlist half is four strings in a Set | no | hours (allowlist) + a-session (send log) | `grep -n "EMAIL_ENABLED_TYPES" -A 30 apps/web/lib/notification-emit.ts` |
 | LR-23 | GH Actions | `deploy-prod` is fail-closed with **no retry** — a 25-minute Supabase maintenance window left production **13 commits and 7½ hours stale** on 2026-09-15 | 🔴 OPEN 2026-09-16 · it self-healed only because another PR merged later. The drift monitor fired into the Actions tab, **which nobody reads when every PR is green** | no | hours | `gh run list --workflow=deploy-prod.yml --limit 10 --json conclusion,createdAt,headSha` |
 
