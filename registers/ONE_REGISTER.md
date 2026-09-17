@@ -934,6 +934,19 @@ log nothing"*) are both **RETRACTED**; LR-3 held. The failure is not carelessnes
 did not catch it, because the refuter asks *"is this already built?"* and *"is it already on the
 register?"* — **not** *"is the mechanism where I inferred it is?"*
 
+✅ **AND ONE ENTRY THAT SAYS WHAT GOOD LOOKS LIKE, because everything else in this file is a
+complaint.** The Panood controller reads `retail_price_php` from `platform_retail_catalog_v2` LIVE,
+and on a catalogue miss it **degrades to a price-less sentence rather than inventing a number.**
+That is the behaviour every money-touching row in this register should be measured against — a
+standard already met somewhere in the tree, not a rule still waiting to be applied. When a row says
+"never derive a price from code", this is the shape it is asking for.
+
+⚖ **AND A LIMIT ON THE METHOD THAT IS CORRECTING THIS FILE, offered by the session using it:**
+execution proves a branch unreachable **through the seam you chose**. Pick the seam too far
+downstream and you can prove a dead branch dead while the live defect sits upstream of it. So
+**"NOT PURE — no clean seam, look at the actual screen" is a first-class answer** and is worth more
+than a verdict reached by stretching. A row declined honestly beats a row ranked confidently.
+
 🔑🔑 **THIRD INSTANCE, 2026-09-17 — AND IT COMPLETES THE PATTERN: A ROW'S *CONSEQUENCE* NEEDS ITS
 OWN MEASUREMENT, EVEN WHEN ITS *FACT* CHECKS OUT.** DAY-14's sentence really is in the file — and
 the branch that renders it is unreachable, proven by executing both deciders across all 12
