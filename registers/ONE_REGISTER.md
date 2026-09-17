@@ -1213,6 +1213,34 @@ reader would otherwise fall into:
 | LR-3 | sweep + prod | `oauth-refresh` is **not in the periodic-job registry at all**, so three expired YouTube grants still report `ok` | 🔴 OPEN 2026-09-16 · **RE-MEASURED: 3 grants, all 3 `connection_health = 'ok'`** — a value nothing has ever re-tested. All past the 7-day Testing window (granted 08-31/09-02); the 2026-09-07 deadline passed | ⚖ owner must publish the OAuth app | a-session | `grep -n "oauth-refresh" apps/web/lib/periodic-job-registry.ts` → **expect NO match**, then `select external_account_display, granted_at, last_refreshed_at, connection_health from live_studio_channel_grants;` |
 | LR-4 | sweep | ~~`samahan-story-sweep` is twelve days past a one-hour gap, so the claim path is broken~~ | ⚪ **RETRACTED.** The premise is accurate — the gap is 3,600,000 ms and the last claim is ~12.9 days old — and the conclusion is an **inferred cause**, the exact shape the base rate warns about. **The sweep is correctly IDLE:** its only trigger is one community page, and production holds exactly one community, one member and **zero stories ever posted**. The job also holds a claim row, so the compare-and-swap works for this key. | no | — | `select count(*) from samahans; select count(*) from samahan_stories;` before concluding anything about this job |
 | LR-6 | sweep | **A password reset only completes in the browser that asked for it — and dumps a Supabase SDK paragraph on the sign-in card** | 🔴 **CONFIRMED ON PRODUCTION, and survived 3 of 3 refuters.** Reproduced unauthenticated against the live site: the callback 307s to `/login?error=` carrying the raw SDK text, ending _"use @supabase/ssr on both the server and client to store the code verifier in cookies"_ — **and the repo's own error sanitiser passes it through**, because it is well-formed English prose. PKCE is not a choice made here: `@supabase/ssr` hard-sets it and the app never overrides. Prod `auth.flow_state` shows email links are 8/8 PKCE. **The fix does not exist** — no `app/auth/confirm`, no `token_hash`, no `verifyOtp` caller anywhere. 🔑 Half the pattern already ships: `generateLink` + Resend in `lib/event-account-link.ts`; extend it, do not invent a shape. ⚠ The verifier could NOT size how often a person has hit this and said so rather than guess. | no | a-session · **Opus** | `curl -s -o /dev/null -D - "https://www.setnayan.com/auth/callback?code=probe&next=%2Freset-password" \| grep -i '^location'` — broken while it contains "PKCE code verifier not found" |
+> 🚨 **LR-7(a)'s RETRACTION IS ITSELF RETRACTED — 2026-09-18. "Nothing proves a signup email is
+> real" is TRUE, and the retraction below rested on a bad inference I made.**
+>
+> The retraction argued: *"email confirmation is on and working — all 8 non-anonymous users have
+> `email_confirmed_at`."* **The column is true and means nothing.** `app/signup/actions.ts:329`
+> runs `admin.auth.admin.updateUserById(userId, { email_confirm: true })` on every signup (and
+> again at :135), deliberately — the docblock cites tight free-tier mail limits. Measured:
+>
+>     secs between created_at and email_confirmed_at | users
+>     0.0                                            |   5
+>     0.2                                            |   2
+>     150.3                                          |   1
+>
+> **Seven of eight confirmed in under a quarter of a second.** No human opens an inbox that fast.
+> 🔑 **`email_confirmed_at` records that a PROGRAM set it, not that anybody proved they own the
+> address.** Same shape as the `vendor_verification_bypasses` miss: the count was right and the
+> mechanism was somewhere else. The sweep corroborates independently — it lists *"retire the forced
+> email-confirm bypass"* as pending, which only parses if the bypass is live.
+>
+> ⚠ **AND THE ROW'S DOWNSTREAM REASONING INVERTS TOO.** It argued the typo case is harmless because
+> *"confirmation is required, so a typo'd account is never usable in the first place — the person
+> simply signs up again."* With auto-confirm, **a typo'd account IS immediately usable**: the person
+> signs in, uses it, and can never receive a reset, a receipt or any notice — and cannot change the
+> address, because no `updateUserById` call anywhere passes `{ email }`. The harm is therefore
+> **larger** than the "address changes later" case the row settles on, not smaller.
+>
+> ⇒ **Re-open LR-7(a). And check any other row that reads a column as proof of a human act.**
+
 | LR-7 | sweep | ~~Nothing proves a signup email is real~~ **— WRONG.** The typo half survives but is **much smaller than written** | 🟢 **SECOND-ROUTED TWICE 2026-09-17, and it narrowed both times.** **(a) RETRACTED:** email confirmation is on and working — `auth.users` holds 8 non-anonymous rows and **all 8 have `email_confirmed_at`**. **(b) The no-change-path claim SURVIVES a proper second route, not just a grep.** The admin console does a great deal with emails — `confirmUserEmail`, `unblacklistEmail`, a `blacklisted_emails` table, and two `auth.admin.updateUserById` calls in `app/admin/users/actions.ts` — but the two calls set `{ password }` and `{ email_confirm: true }`. **Neither passes `{ email }`.** Nobody, user or admin, can change an address. ⚠ **(c) BUT THE HARM IS NOT WHAT THE ROW SAYS, and this is the part that matters.** The row implies a typo leaves somebody locked out. It cannot: **confirmation is required, so a typo'd account is never usable in the first place** — the person simply signs up again with the right address, leaving an orphan row. 🔑 **THE REAL HARM IS THE ORDINARY ONE: a person whose address CHANGES** — new job, lost access — can never move their account, and neither can an admin. That is a genuine gap and a small build; it is not a launch blocker. 🔑 **AND THE METHOD IS THE POINT: this row was confirmed by me, then narrowed by second-routing my OWN confirmation.** A confirmation is the dangerous output — it becomes a build — so it earns the same hostility as the original claim. | no | small | `git grep -n 'updateUserById' -- apps/web` then read what each call PASSES, not that it exists |
 | LR-10 | sweep | Every couple's first message to every supplier says **"planning our wedding"** — including for a wake | 🔴 OPEN 2026-09-16 · one hard-coded opening across 17 celebration types | no | a-session | grep the opening line's symbol, then assert per `EventTypeProfile` — **never a banned-noun list** |
 | LR-11 | sweep | Onboarding opens supplier conversations in the couple's name **without showing the consent screen, and ignores the answer given** | 🔴 OPEN 2026-09-16 | no | a-session | in `onboarding-shell.tsx`, assert the gate READS the stored answer — pin the CONDITION, not the mount |
