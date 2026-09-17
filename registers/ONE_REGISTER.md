@@ -934,6 +934,33 @@ log nothing"*) are both **RETRACTED**; LR-3 held. The failure is not carelessnes
 did not catch it, because the refuter asks *"is this already built?"* and *"is it already on the
 register?"* — **not** *"is the mechanism where I inferred it is?"*
 
+📋 **THE FIRST BLOCK TRIAGED IN FULL — 21 of 40 DAY items settled 2026-09-17, none of them built.**
+· **WRONGNESS (8):** 1 DEAD · 1 REACHABLE-and-reuse · **3 UNDERSTATED** (6 footer roles · 4 green
+  chips · a countdown 8 h LATE, sign inverted) · 1 REACHABLE · 2 NOT-PURE.
+· **ALREADY COMPLETE (5):** DAY-1 · DAY-3 · DAY-4 · DAY-10 · DAY-27.
+· **EXTEND, genuinely open (4):** DAY-17 · DAY-19 · DAY-28 · DAY-33.
+· **OWNER (3, was 4):** DAY-28 · DAY-32b · DAY-32d. ⚠ **DAY-2 was removed from this list — the
+  owner had ALREADY ANSWERED IT** (2026-09-16: own YouTube channel ₱2,500 one-time; **hosted
+  channel ₱3,000/day**). 🔑 **AN OWNER BLOCKER IS NOT OPEN UNTIL YOU HAVE CHECKED WHETHER IT WAS
+  ALREADY CLOSED** — and a ruling that lives only in one session's transcript is a cost paid by
+  every other lane. Push rulings out; do not merely record them.
+· **Still unverified: 19.** Every one has a located home; none is measured.
+
+⚠⚠ **THE DISCLAIMER THAT BELONGS ON EVERY VERDICT IN THIS FILE, and was missing all week:**
+**nothing in that triage was opened in a browser.** Every verdict is arithmetic, execution of pure
+functions, or a read of a function body — never a screenshot. **ALREADY COMPLETE means the
+mechanism ships and enforces what the row asked, NOT that somebody watched it work.** The
+UNDERSTATED counts are exact; the completeness verdicts are strong but they are not observation.
+Say which kind of evidence a row carries, every time.
+
+⚖ **AND A CASE THAT NARROWS THIS FILE'S OWN "FAIL-CLOSED" RULE RATHER THAN OBEYING IT.**
+`loadYourOwnDay` carries `if (!gallery) return []; // the read FAILED — show less, never more`, and
+its docblock names the cost outright: *"here it would tell somebody who was at the wedding that they
+were not."* Somebody saw the sentence-shaped harm and chose fail-closed anyway. The rule elsewhere
+in this header — **fail-closed is right for a GATE and wrong for a SENTENCE** — does not settle
+this: it is a gate whose output IS a sentence about a person's own memory. **A harder case than the
+rule covers; narrow the rule, do not force the case.**
+
 🚨 **AND THE CONSEQUENCE OF THAT SPLIT, MEASURED ON THE FIRST BLOCK TO GET IT: THE WORK-LIST IS
 MOSTLY ALREADY BUILT.** Of the 33 DAY rows, **19 now have a located, shipped mechanism** and the
 three verified properly were **fully complete, not extend-candidates**:
