@@ -326,3 +326,30 @@ may not reverse it — and meanwhile the photograph never actually left. Queued 
   camera gates its first capture on it. **Row closed, nothing to build.** ⚠ The other reading — when
   during the celebration guests may shoot at all — is a different mechanism and is explicitly **not**
   authorised by that answer; if it is ever wanted it comes back as its own question.
+
+---
+
+## 🗓 CORRECTED 2026-09-17 — FOUR FACTS THIS DESK HAD WRONG, ALL RE-MEASURED
+
+- 🚨 **THE FIRST WEDDING IS 12 DECEMBER, NOT 18. That is 86 days, not 92 — and it is not yours.**
+  `maria-and-jose` is **2026-12-12** with 32 guests; `cale-ice` is 2026-12-18 with **92** guests
+  (it has grown from 77). **Every date on every plan keys to 12 December.** Six days is the whole
+  margin between a rehearsal and a first live event.
+
+- 🚨 **BOTH DECEMBER WEDDINGS ARE HOSTED BY YOUR INTERNAL ACCOUNT** — `is_internal = true` on the
+  couple row of each. ⇒ **Every paid gate will pass silently on both real days**, which is the
+  false-green trap already on record, now sitting on the only two live events. **Nothing about
+  paywalls, entitlements or purchase flows can be proven on either December event.** It has to be
+  proven on a non-internal test event, and the December days will not reproduce what a real
+  customer meets.
+
+- 🚨 **`cale-ice` HAS NO COORDINATOR AND NO MEMBERS BUT THE COUPLE.** Zero coordinator rows, one
+  member row total. `maria-and-jose`'s single coordinator is **`testnayan1@test.com` — a test
+  account.** ⇒ **Two weddings in 86 days with no real human in the coordinator seat.** That is a
+  naming question only you can answer, and it is not engineering work.
+
+- ✅ **WITHDRAWN — "THE R2 RELEASE SECRETS ARE THE SINGLE BLOCKER ON THE DESKTOP APP."** They were
+  set on **2026-09-14** and the Apple secrets in June. Both routes work today:
+  `/api/download/mac` and `/api/download/windows` each return **302 to R2 and serve a real file**
+  (`Setnayan_0.0.1_aarch64.dmg`, `Setnayan_0.0.1_x64_en-US.msi`). **Do not action that item — it is
+  done.** It is the second thing this desk has asked you for that was already finished.
