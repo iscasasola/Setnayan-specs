@@ -373,6 +373,14 @@ this group a person can confirm without a single command.
 | SUP-49 | **ROOM-08** | The wedding-words check also reads the components the guest pages borrow | NOT BUILT | no | S · Sonnet |
 | SUP-50 | **ROOM-09** | One privacy test stops using a home-made comment stripper | NOT BUILT | no | S · Sonnet |
 | SUP-51 | **ANS-02** ⇄ BF "Waitlist notify skips the open-date check" | "A slot opened" is never emailed for a past date, or a day that is not free | NOT BUILT | no | S · Sonnet |
+> ⏸ **SUP-52 PARKED 2026-09-18 — out of the owner's stated scope, NOT refuted.** Owner, this
+> morning: *"make the website fully functional for wedding and simple event at minimum."* A band's
+> song-request inbox is a SUPPLIER surface outside that minimum. The diagnosis below stands and was
+> re-measured on `main` on 2026-09-18 — **0** song-request references anywhere under
+> `apps/web/app/[slug]` or `apps/web/app/papic`, while the supplier's inbox and the July database
+> half are both fully built. **Pick it up the moment the wedding/simple-event pass closes.**
+> ⚠ Two components are named `RequestsInbox`, over different tables — check the shape, not the name.
+
 | SUP-52 | **ANS-03** ⇄ BF "Guest request a song" | A guest at the party can ask the band for a song — **the database half has been live since July** | 🔴 **CONFIRMED OPEN — re-measured 2026-09-16.** The supplier's end is fully built (`vendor-dashboard/on-the-day/live/[eventId]/_components/song-desk/requests-inbox.tsx`, plus `actions.ts`), and the row is right that the database half is old. **What is missing is the GUEST.** Nothing under `apps/web/app/[slug]` or `apps/web/app/papic` names a song request — so the band has an inbox that nobody can post to. 🔑 Classic shape for this codebase: every stage built except the join. | no | M · Opus |
 | SUP-53 | **ANS-04** ⇄ BF "Answers Desk withholds answers that now work" | The "not yet" list tells the truth, and the answers that now work can join it | PARTIAL | no | S · Sonnet (list) / M · Opus (lanes) |
 | SUP-54 | **ANS-05** | A posted crew shift records the right token count | PARTIAL | no | S · Opus |
