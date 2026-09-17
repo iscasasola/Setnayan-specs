@@ -309,3 +309,14 @@ may not reverse it — and meanwhile the photograph never actually left. Queued 
   **2026-09-03** — thirteen days before I asked. Your answer matched the shipped figures exactly,
   so nothing was unblocked and nothing needs building. **The question should never have reached
   you.** Recorded so the row is not re-opened: DAY-2 is complete.
+
+- ⚖ **DOES THE V1 SAMAHAN EXCLUSION STILL STAND? Asking BEFORE anyone spends a week reversing it.**
+  One register row asks that samahans be able to **nest, be findable by strangers, and be deleted
+  outright**. All three were **deliberately excluded from V1** — the foundation migration says so in
+  its own header (*"in V1 — no discovery, no nesting (parent_community_id is a deliberate later…)"*),
+  and the actions file has `leaveCommunity` and **no `deleteCommunity`**. Nothing is broken; a past
+  decision is simply still in force.
+  ⇒ **Three separate answers, and they can differ:** should a samahan be **findable by strangers**?
+  should samahans **nest**? should one be **deletable outright** rather than only leavable?
+  ⚠ Deletion is the one with a cost attached — a samahan holds other members' posts, so "deleted
+  outright" destroys other people's writing, not only the creator's.

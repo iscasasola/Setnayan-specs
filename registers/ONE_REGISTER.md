@@ -948,19 +948,27 @@ question going onto his own desk. ⇒ **Never describe the state of a paid thing
 more than not asking: it spends the scarcest resource on the project and returns a confirmation
 that reads like a mandate.
 
-🔍 **A THIRD DEFECT CLASS, AND BOTH OF OUR METHODS ARE BLIND TO IT: THE MISSING MOUNT.**
-A shipped component is mounted on ONE surface and absent from its sibling. Found twice in one
-block:
-· **DAY-6** — `RequestsInbox` renders INLINE inside the song desk, and the coordinator's
-  floor-command surface offers only a `<Link>` that leaves the fullscreen console.
-· **DAY-8** — `ScheduleUpdater` is mounted in `floor-command.tsx` (the coordinator's) and **absent
-  from `stage-script.tsx`** (the emcee's), so the emcee cannot retime a schedule he has been lent.
+🔍 **THE DEFECT CLASS BOTH OF OUR METHODS ARE BLIND TO — AND IT HAS TWO AXES.**
+**When a capability is confirmed to ship, ask what it ships FOR: WHICH SURFACES, and WHICH CASES.**
 
-🔑 **Neither method can see it.** A RULE 0 existence search finds the component and answers
+· **MISSING MOUNT (the surface axis).** A shipped component rendered on one surface and absent from
+  its sibling. `RequestsInbox` renders INLINE inside the song desk while the coordinator's
+  floor-command surface offers only a `<Link>` that leaves the fullscreen console (DAY-6).
+  `ScheduleUpdater` is mounted in `floor-command.tsx` and **absent from `stage-script.tsx`**, so the
+  emcee cannot retime a schedule he has been lent (DAY-8).
+· **MISSING CASE (the case axis).** A shipped mechanism with an ENUMERATED set of cases, and the
+  row's case is not in the set. The samahan notification machine is complete — a service-role
+  fan-out, pure decision rules split out so they can be exercised without a database, collapse keys
+  and URLs agreeing by construction, an hour-long window reasoned from the group's own posting
+  limit — and its enum is `{ story, message }`. **Joining is not one of them** (DAY-21).
+
+🔑 **Neither method can see either axis.** A RULE 0 existence search finds the mechanism and answers
 *"already ships"*. An execution pass finds no false branch, because nothing renders wrongly — the
-surface simply does not render it at all. **Only comparing SIBLING SURFACES finds a missing mount.**
-⇒ When a capability is confirmed to ship, ask the second question: **on which surfaces, and which
-of its siblings is missing it?** Enumerate the surfaces that share a role before closing the row.
+surface does not render it at all, or the case never arises. **Only comparing sibling surfaces, and
+reading the enum, finds these.**
+⇒ **Three of the four found so far are a one-line addition to something that already works.** That
+is the shape of most of this register's real content: not absent subsystems, but a shipped
+mechanism missing a mount or a case.
 
 ⚠ **AND A WAY TO LOCATE A ROW WRONG THAT SURVIVES ORDINARY CARE: MATCHING A NOUN INTO THE WRONG
 SUBSYSTEM.** DAY-7 (*"the emcee asks the couple his own questions"*) was filed against
