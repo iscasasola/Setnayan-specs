@@ -248,9 +248,24 @@ All four re-measured against production by a second session before being written
   that has to carry 133 December invitations**, none of which has ever been sent. Turnstile is
   already written up in `OWNER_ACTIONS.md`; about fifteen minutes.
 
-- ⚖ **A LOCKED-OUT PERSON STAYS LOCKED OUT.** Supabase Auth has no custom SMTP, so password resets
-  are capped at **two emails per hour for the entire platform**. Resend is configured and paid for
-  — Auth is simply not pointed at it. About twenty minutes in the dashboard.
+- ⚠ **CORRECTED — "A LOCKED-OUT PERSON STAYS LOCKED OUT" WAS OVERSTATED, BY ME.** Two things are
+  now measured. ✅ The **2-emails-per-hour cap is real**, confirmed from Supabase's own live docs:
+  all Auth email endpoints, scope *project*, two per hour on the built-in provider, configurable
+  only with custom SMTP. ⛔ But **"Auth has no custom SMTP" was asserted by nobody who checked it**
+  — there is no route to read that setting from a session, and it is the whole premise. And the
+  locked-out claim is false: the page does say what happened.
+  ⇒ **This is now a thirty-second look, not a build:** Dashboard → Project Settings → Auth → SMTP.
+  If it is already pointed at Resend, the row dissolves. Nobody should build until you have looked.
+
+- ⚠ **CORRECTED — THE GUEST-PHOTO WITHDRAWAL DOES NOT CONTRADICT YOUR RULING. I said twice that it
+  did, and I had it backwards.** What is true: a withdrawn photograph's FILE stays publicly
+  fetchable, unsigned — a fetch returns HTTP 200 — because the takedown stamps a flag and makes no
+  storage call. What is NOT true: that this breaks your 2026-09-16 ruling. **That ruling says
+  "final against OTHERS, never against her"** — she can put it back herself with one press. A
+  control the guest can reverse could never have implied the bytes were destroyed.
+  ⇒ So it is a genuine question of its own, and it is yours: **when a guest withdraws her
+  photograph, should the file be deleted — given she can undo the withdrawal?** Deleting makes the
+  undo impossible. That tension is the decision.
 
 🔑 **ONE THAT CONTRADICTS A RULING YOU MADE TODAY, so it is engineering's to fix, not yours:** a
 guest's photo withdrawal hides the picture from five pages and **leaves the file itself reachable
