@@ -256,3 +256,18 @@ All four re-measured against production by a second session before being written
 guest's photo withdrawal hides the picture from five pages and **leaves the file itself reachable
 by URL, permanently.** This morning you ruled that a guest's own removal is final and the couple
 may not reverse it — and meanwhile the photograph never actually left. Queued as LR-13.
+
+- ⚖ **DO YOU WANT PEOPLE TO TICK A BOX FOR THE TERMS AND THE PRIVACY POLICY?** Right now
+  `/signup` carries a sentence under the button — *"By signing up, you agree to our Terms and
+  Privacy"* — and **no checkbox**, so nothing affirmative happens and **nothing is recorded**.
+  Re-measured across every column in the database, not just tables with "consent" in the name:
+  about ninety consent columns exist (face enrolment, marketing, civil status, guests' UGC terms)
+  and **not one records platform Terms or Privacy acceptance.**
+  ⚠ **Your Privacy Policy changed on 2026-09-15 and there is no version stamp**, so nobody can say
+  which text any user is held to — or that they were ever held to one.
+  🔑 **The uncomfortable part: the product already asks affirmatively before it publishes a
+  couple's wedding photograph** — an owner ruling of 2026-07-12, enforced app-wide by a guard
+  because one door had missed it — **and asks nothing at all before binding them to the Terms.**
+  ⇒ This is yours as DPO before it is engineering's: **browsewrap (as now) or clickwrap (a box
+  they tick)?** The record cannot be built until you answer — stamping an acceptance that never
+  happened is worse than having none.
