@@ -934,6 +934,34 @@ log nothing"*) are both **RETRACTED**; LR-3 held. The failure is not carelessnes
 did not catch it, because the refuter asks *"is this already built?"* and *"is it already on the
 register?"* — **not** *"is the mechanism where I inferred it is?"*
 
+🔑🔑🔑 **FOURTH PATTERN, 2026-09-17, AND IT POINTS THE OTHER WAY: ROWS IN THIS FILE ARE
+UNDERSTATED AT LEAST AS OFTEN AS THEY ARE WRONG.** A reachability triage of the DAY block found one
+DEAD row and three that are real **and name one instance of a defect whose mechanism produces
+several**:
+
+· *"a Private site shows a success-green chip"* — it is **FOUR chips**. The rule is a denylist of
+  three literal phrasings (grey only for `'Not set' | 'Off' | 'Hidden'`, green for everything else),
+  so `Private`, `No schedule`, `0 photos` and `0 showing` all paint "nothing here" as success.
+  **Any new empty-state wording is green by default** — which is how the other three arrived.
+· *"the footer text is readable"* — it is **6 of 7 text roles**. Ground `#f2f2f0`, `--hr-grey`
+  **3.14:1** and `--hr-grey-2` **2.21:1** against a 4.5:1 bar, with nothing in that footer large
+  enough to earn the 3:1 exemption.
+· *"the countdown ends 8 hours early"* — it ends **8 hours LATE**, and the sign decides the fix.
+
+⇒ **FIXING THE ROW AS WRITTEN WOULD HAVE REPAIRED ONE CHIP OF FOUR AND ONE FOOTER LINE OF SIX — AND
+EACH FIX WOULD HAVE LOOKED COMPLETE.** So triage now carries a fourth verdict, **UNDERSTATED**,
+beside REACHABLE / DEAD / NOT-PURE. It is the category that decides how much of a block is really
+one job: four chips are one fix, six footer roles are one fix. **Ask what MECHANISM produced the
+instance the row names, then count the other instances it must also produce.**
+
+⚠ **AND A TRAP THAT IS THE MIRROR OF EVERY OTHER ONE IN THIS HEADER: A CORRECT COMPONENT WITH A
+WRONG INPUT READS AS A FALSE ROW.** The countdown widget is right — `target - Date.now()` is
+honest instant arithmetic. The defect is entirely in what reaches it: `events.event_date` is a
+`DATE` column, so it arrives as `"2027-02-14"`, and ECMAScript parses a date-only string as **UTC**
+— 08:00 Manila, not local midnight. **A session that opens the widget looking for the bug finds
+clean code and marks the row false.** Measure at the seam where the value ENTERS, not where it is
+used.
+
 ✅ **AND ONE ENTRY THAT SAYS WHAT GOOD LOOKS LIKE, because everything else in this file is a
 complaint.** The Panood controller reads `retail_price_php` from `platform_retail_catalog_v2` LIVE,
 and on a catalogue miss it **degrades to a price-less sentence rather than inventing a number.**

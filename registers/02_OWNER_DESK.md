@@ -271,3 +271,11 @@ may not reverse it — and meanwhile the photograph never actually left. Queued 
   ⇒ This is yours as DPO before it is engineering's: **browsewrap (as now) or clickwrap (a box
   they tick)?** The record cannot be built until you answer — stamping an acceptance that never
   happened is worse than having none.
+
+- 🔎 **NOT A DECISION — BUT YOU ARE THE DPO AND THIS IS YOUR CONTACT LINE.** The Data Protection
+  Officer contact in the footer of **every public page** is below the readability floor: the words
+  measure **2.21:1** and the email **3.14:1** against the 4.5:1 AA bar, on a `#f2f2f0` ground, with
+  nothing in that footer large enough to earn the 3:1 exemption. It is the worst case in a footer
+  where **6 of 7 text roles fail** — the nav links, the column headings and the tagline go with it.
+  ⇒ Engineering's to fix, not yours to rule on. Flagged because it is the legally-required privacy
+  contact and it is the least readable thing on the page.
