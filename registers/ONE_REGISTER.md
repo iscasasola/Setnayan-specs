@@ -1218,6 +1218,32 @@ reader would otherwise fall into:
 | LR-11 | sweep | Onboarding opens supplier conversations in the couple's name **without showing the consent screen, and ignores the answer given** | 🔴 OPEN 2026-09-16 | no | a-session | in `onboarding-shell.tsx`, assert the gate READS the stored answer — pin the CONDITION, not the mount |
 | LR-14 | sweep | **Replacing a guest's QR kills the printed code but leaves an already-open browser with full access — and hands it the NEW code** | 🔴 **CONFIRMED, survived 3 of 3 refuters.** Worse than the row: the stale session is not merely tolerated, it is *re-issued* the replacement. | no | hours · **Opus** | `grep -n guestSessionTokenCheckEnabled apps/web/lib/guest-session.ts` — the fix is to DELETE the flag, not to remember it |
 | LR-15 | sweep | `receipts.issued_to_tin` has no writer and the receipt never itemises | ⚪ **CONFIRMED THEN KILLED — 2 of 3 refuters.** Both halves check out literally, but **the itemisation already exists one page earlier**, so the row's own remedy is largely built, and `/features` publicly promises the itemised document. The remaining true residue is the TIN slot nobody can fill. **Not a launch blocker; re-file narrowly if anyone wants it.** | ⚖ owner: BIR registration (separate, already logged) | — | `grep -rn issued_to_tin apps/web --include=*.ts \| grep -v test` |
+> 🔬 **LR-16 MEASURED 2026-09-18 — the row's "5 of 7 screens" is wrong in BOTH the count and the
+> shape, and the fix is two files, not seven.** Enumerated independently (swept for the account
+> details themselves — `gcash_number|bdo_account_number|gcash_qr|bdo_qr` — because a payment
+> instruction is a thing you can pay *into*, rather than deriving the list from who already reads
+> the switch). **99 files mention the rails · 18 touch account details · 10 are payment surfaces ·
+> 3 honour the switch · 7 ignore it.**
+>
+> 🔑 **THE COUNT IS NOT THE FINDING. `components/billing/ManualCheckoutModal.tsx:69` declares its
+> OWN `export type PaymentChannel = 'gcash' | 'bdo'` and builds a hardcoded two-entry channel list
+> off `response.instructions`** — a **second, competing source of truth** for which rails are open,
+> when `lib/payment-channels.ts:19` already answers it (`PayChannel`, `PAY_CHANNELS`,
+> `openChannels(settings)`). Two of the seven surfaces are not independent screens at all; they are
+> this one shared modal. Same disease as the `papic_guest_spend_ceilings` near-miss in CLAUDE.md
+> rule 8: two mechanisms that disagree about one fact, each passing its own suite.
+>
+> ⇒ **THE CHOKE POINT IS `apps/web/app/api/v1/billing/initialize-maya/route.ts`** — it is the only
+> other file that builds `instructions` with `gcashQrUrl`/`bdoQrUrl`, and it is **switch-blind: 0
+> references to `gcash_enabled`, `bdo_enabled` or `openChannels`.** So is the modal. **Route the
+> API through `openChannels` and delete the modal's duplicate list, and most of the seven fall out
+> for free.**
+>
+> ⚖ **SCOPE (owner, 2026-09-18 — "wedding and simple event at minimum"):** in scope are
+> `app/papic/order/[token]/page.tsx` and the `choose-plan-sheet` → `ManualCheckoutModal` path, plus
+> the shared modal and the API route. **The five `vendor-dashboard` surfaces are supplier-facing
+> and wait with the rest of SUP-\*.**
+
 | LR-16 | sweep | Switching a payment rail off **does not stop 5 of 7 payment screens taking money on it** | 🟠 **PARTIALLY SECOND-ROUTED 2026-09-17 — not yet confirmed, not yet refuted.** A shared resolver DOES exist (`lib/payment-channels.ts`, with its own test) and **two payment surfaces read it**: `app/pay/[reference]/page.tsx` and `dashboard/[eventId]/_components/inline-checkout-drawer.tsx`, plus the admin settings pages that write the switches. So the mechanism is real and partly wired — which is exactly the state that produced LR-8 and LR-21. ⚠ **The row's claim is about the OTHER surfaces, and nobody has enumerated the seven.** Do that first: list every screen that renders a payment instruction, then check each against `payment-channels.ts`. Do not build from the count in this row | no | a-session | `git grep -ln 'gcash_enabled\|bdo_enabled' -- apps/web` for the readers, then enumerate payment surfaces independently and diff the two lists |
 | LR-17 | sweep | No receipt can be cancelled or re-issued; refunds are all-or-nothing and a refunded customer's receipt **still says "Total amount paid"** | 🔴 OPEN 2026-09-16 · **RE-MEASURED: `order_refunds` = 0 rows**, so the path is entirely untested | no | a-session | `select count(*) from order_refunds;` + grep for a re-issue action on `/admin/receipts` |
 | LR-18 | sweep | **Guest pages collect a mobile number, allergies and a FACE with no privacy link and no controller named** | 🔴 **CONFIRMED on the live site, survived 2 of 3 refuters.** The policy itself is current and the DPO reachable — the gap is linkage, on the surfaces where sensitive personal information is actually collected. | ⚖ DPO sign-off on the wording | a-session (one shared component) · **Opus** | open each guest-facing collection surface on the live site and look for the controller line |
