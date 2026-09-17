@@ -934,6 +934,41 @@ log nothing"*) are both **RETRACTED**; LR-3 held. The failure is not carelessnes
 did not catch it, because the refuter asks *"is this already built?"* and *"is it already on the
 register?"* — **not** *"is the mechanism where I inferred it is?"*
 
+🚨 **AND THE CONSEQUENCE OF THAT SPLIT, MEASURED ON THE FIRST BLOCK TO GET IT: THE WORK-LIST IS
+MOSTLY ALREADY BUILT.** Of the 33 DAY rows, **19 now have a located, shipped mechanism** and the
+three verified properly were **fully complete, not extend-candidates**:
+
+· **DAY-1** — *"enforced in the database, not just the button"* — is done **in the database**, which
+  was the row's whole point. The advance RPC raises `42501` unless the caller is on the event,
+  holds `SELECT … FOR UPDATE`, and **re-checks the precondition inside the UPDATE** so a lost race
+  cannot double-advance; `event_schedule_blocks` carries six RLS policies across four migrations.
+· **DAY-27** — shipped, guarded, mutation-checked by occurrence count.
+· **DAY-10** — closed earlier the same way.
+
+Sixteen more are located and unverified, every one with a shipped home: a whole day-of console with
+a `song_desk`/`stage_script`/`floor_command` registry (DAY-5→9), Samahan and Usapan
+(DAY-20→24), the channel pool, the event-type profile, the hub controller, the `?as=` preview, the
+wall routes, the papic stage, the QR route with its own guard, the RSVP projection.
+
+⇒ **SO THE DAY BLOCK IS NOT ~33 BUILDS.** It is a handful of genuine wrongness fixes — six found,
+four of them UNDERSTATED — sitting on a platform where most of the named capability already exists
+and **this register does not know it.** That matches the independent figure of **15 of 18** rows
+checked elsewhere, and a build session's own count of nine rows where the work existed and only the
+joins were missing.
+
+🔑 **THE RISK THAT FOLLOWS IS NOT WASTED EFFORT. IT IS REBUILDING A RIVAL TO SOMETHING THAT SHIPS**
+— DAY-32g's trap at register scale. **Confirm before building. Always, and especially when a row
+sounds like new work.**
+
+⚠ **TWO WAYS A GUARD IN THIS REPO HAS PASSED WITHOUT PROVING ANYTHING**, both found in its own
+history and both having already defeated a previous generation of the same test:
+· **an impossible fixture** — a predecessor guard was green only because its stub gave a delegate
+  no `event_members` row, a state the accept-invite action cannot produce. **A green test over an
+  impossible fixture is worth less than no test, because it stops the next person looking.**
+· **"keep the call, discard its result"** — beat one guard twice: leave the call site intact so
+  every source scan still finds it, and throw the return value away. **Exercise the decision; never
+  grep for it.**
+
 🧭 **AND THE STRUCTURAL FINDING THAT REORGANISES THIS WHOLE FILE: ROWS ASK THREE DIFFERENT
 QUESTIONS, AND ONE METHOD CANNOT ANSWER ALL THREE.**
 
