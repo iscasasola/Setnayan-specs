@@ -561,7 +561,7 @@ controller the *invite* session touches. Check Group 1's open PRs first.
 | DAY-30 | **DES-FOOTER** | Every public page's footer text — including the Data Protection Officer contact line — is readable | OWNER-GATED | ⚖ | S · Sonnet | contrast; ties to `dpo@setnayan.com` (Tier 4) |
 | DAY-31 | **PAY-REVIEW** | The interrupted attack on the one payment page's conversion is finished | NEEDS MEASURING | no | S · Opus | — |
 | DAY-32 ⊕ | BF guest-site block | Eight guest-site findings on the couple's website: countdown ends 8 hours early · the couple's song is silent at the seat pass · a "Private" site shows a success-green chip · the guest login cookie is never extended · preview the site as an invited guest · a guest whose invitation fails to load is told it failed · the live-photo-wall section can never show photos · address row, greeting, force-live, 44 px taps | MIXED | mostly no | M · Sonnet ·rule | a bundle of eight; `EVENT_WEBSITE_BUILD_PLAN` |
-| DAY-33 | **PH-6** ⇄ BF "Couple pins the website to one phase" | A couple chooses "show the RSVP version" instead of the clock deciding | NOT BUILT | ⚖ | M · Opus | — |
+| DAY-33 | **PH-6** ⇄ BF "Couple pins the website to one phase" | A couple chooses "show the RSVP version" instead of the clock deciding | ✅ **BUILT 2026-09-18 — PR #5641 (S31).** The ⚖ was already settled: DECISION_LOG 2026-07-02 (Automatic vs pin one of four phases). `events.launch_mode`/`manual_phase` existed since `20270426100000` with no reader (PR #2562 closed unmerged); now read by `/[slug]` + the arrival door, written from the editor row "Which version guests see". Re-measure: `git grep -n manualLaunchPhase origin/main -- apps/web` | no (ruled 2026-07-02) | M · Opus | guard `lib/the-couple-can-pin-a-phase.test.ts` |
 
 ---
 
