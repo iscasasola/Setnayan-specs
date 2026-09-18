@@ -282,6 +282,12 @@ stops a past couple's details travelling) + answers per event. Mirror `vendor_ac
 migration** — `event_song_picks` had to retrofit it and that is the mistake this pattern exists
 to avoid.
 
+> ✅ **BUILT 2026-09-18 (repo PR #5639) — and the answer location CHANGED.** Answers live in
+> `event_question_answers` (one row per question per event), answered on the couple's schedule
+> page under the host's segments and read on his Script tab. The working-folder route below was
+> NOT used: that table is coordinator-only and would have needed a role rename. No coordinator
+> read lane exists yet (Q4). See `DECISION_LOG.md` 2026-09-18 DAY-7.
+
 **Where the couple answers:** the working folder they already share with that vendor
 (`vendor_working_notes` — private/shared split, couple can write). **No new inbox.** ⚠ Its
 visibility enum and author role are named coordinator-only, so a host/MC author needs adding — a
