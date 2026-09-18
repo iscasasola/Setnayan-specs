@@ -510,3 +510,114 @@ Stated plainly so nobody discovers the omission on Saturday.
 measurement into the row.** A measurement kept in a session is a measurement the next session pays
 for again.
 
+
+---
+
+# THE THREAD SEQUENCE — steps 1–4, settled 2026-09-18
+
+The order matters and was set by the owner: *"you need to fix the chatbox first."*
+Each step's surface is the previous step's output, so building out of order means
+building on something about to be replaced.
+
+## ✅ Step 1 — one chat box · PR #5586, in CI
+
+Both thread pages render one `ChatBox` frame with slots: header · one-line
+notice · tabs · conversation · composer · tool tray. Every previous mount stays
+in each `page.tsx`, so the port-control inventory keeps every block and action —
+a control that became an icon, never one that vanished.
+
+Measured conversation height with a quote present (the whole point):
+
+| width | before | after · couple | after · supplier |
+|---|---|---|---|
+| 320 | **32** | 224 | 224 |
+| 360 | **32** | 224 | 224 |
+| 390 | **32** | 391 | 357 |
+| 1440 | **32** | 453 | 443 |
+
+⚠ **Two corrections to earlier work, both recorded because they cost something:**
+
+1. **PR #5584 did not fix the couple side — it changed the failure.** Swapping
+   the column's fixed `h-[calc(100dvh-12rem)]` for `min-h` left the list
+   unbounded: scroll-to-bottom scrolled nothing, and a thread opened at its
+   OLDEST message with the composer ~1100px below the fold at 390px. A minimum
+   with no ceiling is not a floor. Fixed by a bounded row plus a 27rem floor.
+2. **#5584's Counter-offer was dead on the supplier side** — `?compose=deal`
+   seeded the amendment builder inside a closed `<details>`, so the button
+   landed on a page that looked unchanged.
+
+🔑 **And the six-tab row I specified does not exist.** It is the client-brief
+page's `?tab=`, not the thread's. The thread ships All · Decisions · Files, and
+**Decisions already IS Quote + Payments + Schedule**. A spec drawn from a
+screenshot of the wrong page.
+
+## Step 2 — a supplier updates a quote; the couple re-accepts
+
+Owner ruling (a): surface the existing amendment loop as **"Update this quote"**
+on the new quote card, rather than giving `vendor_proposals` a revision chain.
+The loop ships already — `proposal_amendments`, the builder, a propose →
+accept/decline RPC, db tests — reachable only via the composer's 🧾, named after
+neither updating nor quoting.
+
+- **Depends on:** step 1 serving (the card is its surface).
+- **Scope:** an action on a `sent`/`accepted` quote card, opening the builder
+  pre-filled with the current line items; the couple's side shows it needs
+  re-acceptance.
+- **Not in scope:** a v1 → v2 → v3 history on the proposal. Amendments sit
+  beside it. That is option (b), and it means re-thinking the send-time freeze
+  (*"sending freezes these numbers"*), which exists so RSVP changes cannot alter
+  a sent quote.
+
+## Step 3 — make the booking fee chargeable
+
+**This is the blocker for step 4 and nothing else can remove it.**
+
+```
+NEXT_PUBLIC_BOOKING_FEE_ENABLED     "true"   ← set in Production
+NEXT_PUBLIC_BOOKING_FEE_RAIL_LIVE   ABSENT   ← never set
+```
+
+`isBookingFeeEnforced()` is a two-key gate; `booking_fee_charges` and
+`booking_fee_ledger` hold **0 rows and always have**. The code's comment says
+the second key flips *"once the rail is KYC-approved AND the checkout is
+wired."*
+
+- **Owner + engineering.** The KYC approval is the owner's; the checkout wiring
+  is a build.
+- ⚠ **Until this is done, step 4 cannot fire at all** — moving effects behind an
+  uncharg­eable fee means none of them happen.
+
+## Step 4 — the booking fee becomes the commit point
+
+Owner: *"it becomes final once we approve that we received their payment. that
+is when everything triggers."* The trigger is **admin approval of the
+supplier's booking-fee payment** — `approvePayment`, which already owns a
+per-SKU activation dispatcher (`lib/sku-activation.ts`) whose docblock says new
+hooks are added by editing that map, **never** by re-editing `approvePayment`.
+So the shape is a registration, not new machinery.
+
+Six effects, and where each stands:
+
+| # | effect | today |
+|---|---|---|
+| 1 | free Papic credits, if any | sized from `setnayan_gift_fee_basis_centavos` — genuinely fee-dependent, cannot fire earlier |
+| 2 | lock the supplier's schedule | `acquire_service_time_slot`, fires at **lock** |
+| 3 | finalise location + date | candidates live in `events.date_candidates` |
+| 4 | fill the budget planner | fires at **lock** and works — moving it is a change, not a fix |
+| 5 | record 1 locked customer | `triggerVendorActivityRecompute`, fires at lock; a guard already calls it *"counts a finalized booking that has not happened"* |
+| 6 | announce remaining vacancies to that supplier's other shortlists | **new** · owner's own question mark: *"(if setnayan AI is activated?)"* |
+
+**Four more that belong at the same moment and were not on the owner's list:**
+
+- **`archived_by_lock_of`** — archives every rival the couple was considering.
+  If the commit point moves and this does not, a couple loses their shortlist
+  for a booking that may never be paid for.
+- **`event_vendor_payment_plan`** — freezes the instalment schedule at lock.
+- **The contract.** `finalizeVendor` touches contracts 18 times;
+  `vendor_contracts` has **0 rows** and has never run.
+- **The couple's deposit**, which today is asked for *before* the supplier has
+  paid Setnayan anything.
+
+**Open, not decided:** what a "vacancy" counts against (`vendor_services.daily_capacity`
+exists); whether 6 needs Setnayan AI; and whether 1–3 and 5 should fire at lock
+in the meantime and be re-pointed later, or wait.
