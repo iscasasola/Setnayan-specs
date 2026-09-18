@@ -1,3 +1,47 @@
+# ✅ CLOSED 2026-09-18 — DO NOT USE AS A BUILD QUEUE
+
+> **Every build on this plan is MERGED AND SERVED.** Kept for its environment
+> section (§3) and its rules, which are still current. **The sequence in §5 is
+> history — do not pick rows from it.**
+>
+> | build | outcome |
+> |---|---|
+> | S1 · the NUL byte | ✅ served — 0 NULs across 11,261 source files, guard walks the whole repo |
+> | S2 · LR-14 guest QR | ✅ served — the flag is DELETED, revocation is unconditional |
+> | S3 · LR-6 password reset | ✅ served — `/auth/confirm` + `verifyOtp`, completes in any browser |
+> | S4 · SUP-52 song request | ⏸ PARKED — supplier surface, outside "wedding and simple event at minimum" |
+> | S5a · SUP-24 marketplace-since | ✅ served |
+> | S5b · LR-10 occasion wording | ✅ served — both call sites |
+> | S6 · LR-22 email allowlist | ✅ was ALREADY DONE when re-measured; only the send-log half remains |
+>
+> ## 🔑 WHAT THIS DAY ACTUALLY TAUGHT, none of which was on the plan
+>
+> **The owner's two dashboard tasks mattered more than the seven builds.** Custom
+> SMTP and Turnstile were ~35 minutes of his time and unblocked more than a day
+> of engineering. **A plan that lists only what sessions can build will always
+> mis-rank the day.**
+>
+> 🛑 **AND TURNSTILE WENT ON AND HAD TO COME BACK OFF.** Enforcement was enabled,
+> and email+password sign-in became impossible **on mobile** — the widget's
+> holder measures **293 × 0** at a 375px viewport, under Cloudflare's 300px
+> minimum for `size:'flexible'`, so an interactive challenge cannot paint at all.
+> Desktop (382 × 72) worked throughout, which is why it read as fine. On a
+> Philippines-first platform mobile is most users. Fixed by **#5581** (holder
+> floor + an early tap is queued) and **#5580** (a failed check now says why, to
+> the person and the console).
+>
+> ⚠ **ORDER THAT MUST BE HELD: #5581 SERVED → then captcha may be switched back
+> on → then the `/verify` gating question is answerable → then the seat-claim
+> ruling.** Enabling before that fix serves recreates the lockout exactly.
+>
+> ⚖ **STILL OPEN, and it only bites on an event day:** Cloudflare demands an
+> interactive solve when one IP makes many requests quickly — which IS a
+> reception, a hundred guests on one NAT'd venue WiFi. Being built behind an OFF
+> flag on the `join-door-throttle.ts` precedent ("sized for a VENUE, not a
+> laptop").
+
+---
+
 # THE FRIDAY BUILD — a self-contained handoff
 
 > **Written 2026-09-17 (Thu) by session `setnayan-platform-be`.**
