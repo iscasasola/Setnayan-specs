@@ -19,3 +19,18 @@
 > ```
 >
 > _Stubbed 2026-07-02 · corpus de-drift (append-and-banner → single living main). Rationale in [`DECISION_LOG.md`](../DECISION_LOG.md)._
+
+## § Gate — pinned privacy notice, vendor-side string (2026-09-18)
+
+The notice is pinned on BOTH sides (locked 2026-05-14). The EN canonical string above is addressed to the
+couple; until 2026-09-18 the same sentence was pinned above the SUPPLIER's conversation ("your vendor sees
+what they need from your profile"). The supplier now reads a line addressed to the supplier — same lock, same
+placement, same non-dismissibility, same list of items:
+
+> *"Everything you need for this event is already in Setnayan — their profile and this conversation carry it.
+> Never ask for private info in chat. government IDs · card numbers · full addresses · OTPs · passwords.
+> Couples are told to report a vendor who asks for these."*
+
+The couple's canonical string is unchanged, byte for byte (`apps/web/app/_components/chat-privacy-notice.tsx`,
+`viewer` prop; `lib/one-chat-box-everywhere.test.ts` asserts both).
+
