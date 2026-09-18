@@ -372,3 +372,56 @@ otherwise was one `select` away. **Every population count in this file must carr
   the page's deliberate hierarchy disappears. **A contrast fix can make everything equally loud.**
   The shipped footer fix puts the quiet one AT the bar and the loud one a step past it, and its
   guard asserts they stay separated. Any site-wide repaint must do the same.
+
+---
+
+## 🔒 RULING 2026-09-18 — THE BOOKING FEE IS THE COMMIT POINT
+
+Owner, verbatim, during the platform's first end-to-end booking run:
+
+> *"when lock and they have the complete handshake and the vendor pays us the
+> booking fee. budget planner should fill up the quotation."*
+>
+> *"they only proceed to deliver the free papic credits (if there is), lock on
+> the vendor schedule, finalize location and date (if ever it locks to a final
+> place or date for the event), adds to the budget planner, and records 1 locked
+> customer for the vendor. upon the vendor paying their booking fee. also
+> announces to the other shortlist of the vendors (each event of different
+> users) how many vacancies that are left (if setnayan AI is activated?)"*
+
+**Six effects, one trigger — the supplier paying their booking fee:**
+
+| # | effect | state today |
+|---|---|---|
+| 1 | deliver the free Papic credits, if any | columns exist: `event_vendors.setnayan_gift_locked_at`, `setnayan_gift_credits_at_lock`, `setnayan_gift_centavos_at_lock` — all NULL |
+| 2 | lock the date on the **vendor's** schedule | `vendor_calendar_blocks` exists · **0 rows** |
+| 3 | finalise location + date on the event, if that lock settles them | `events.date_candidates` holds candidates until one is locked |
+| 4 | fill the budget planner with the quotation | **ships today at LOCK, not at fee** — `a-locked-deal-reaches-the-budget.test.ts` |
+| 5 | record 1 locked customer for the supplier | — |
+| 6 | announce remaining vacancies to that supplier's other shortlists, across other couples' events | **new** · owner marked it *"(if setnayan AI is activated?)"* — his own open question |
+
+### ⚠ The dependency that blocks all of it
+
+`isBookingFeeEnforced()` is a **two-key gate**:
+
+```
+NEXT_PUBLIC_BOOKING_FEE_ENABLED     "true"   ← set in Production
+NEXT_PUBLIC_BOOKING_FEE_RAIL_LIVE   ABSENT   ← never set
+```
+
+`booking_fee_charges` and `booking_fee_ledger` hold **0 rows and always have**.
+The code's own comment says the second key flips *"once the rail is KYC-approved
+AND the checkout is wired."*
+
+🔑 **So moving these six effects behind the fee would stop all six happening at
+all, until that rail is live.** Item 4 in particular currently fires at lock and
+works. This is a sequencing decision, not just a rule: the fee has to be
+chargeable before it can be the commit point.
+
+### What is NOT yet decided
+
+- whether item 6 requires Setnayan AI (the owner wrote it with a question mark)
+- what a supplier's "vacancies" are counted against — a per-date capacity, a
+  daily capacity (`vendor_services.daily_capacity` exists), or a manual number
+- whether items 1–3 and 5 should fire at **lock** in the meantime and be
+  re-pointed at the fee later, or wait
