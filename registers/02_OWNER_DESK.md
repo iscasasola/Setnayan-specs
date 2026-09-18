@@ -425,3 +425,28 @@ chargeable before it can be the commit point.
   daily capacity (`vendor_services.daily_capacity` exists), or a manual number
 - whether items 1–3 and 5 should fire at **lock** in the meantime and be
   re-pointed at the fee later, or wait
+
+### Ruling 2026-09-18 — a supplier updates a quote; the couple re-accepts
+
+Owner: *"they can do updates and must be reaccepted. so they can negotiate of
+the benefits"* — then, on how to build it: **(a)**, surface the existing
+amendment loop as *"Update this quote"*, rather than (b) giving
+`vendor_proposals` its own revision chain.
+
+**Why (a):** the loop already ships — `proposal_amendments`, the amendment
+builder, a propose → accept/decline RPC, and db tests. It is reachable today
+only through the composer's **"Deal or meeting" → "Send a deal"**, below the
+fold and named after neither updating nor quoting. The work is naming and
+placement, not machinery.
+
+**What (a) does not give:** a single object showing quote v1 → v2 → v3.
+Amendments sit beside the proposal rather than superseding it. If a version
+history on the quote itself is wanted later, that is (b) and it is a bigger
+change — the send-time freeze (*"sending freezes these numbers — RSVP changes
+after today won't alter this proposal"*) exists for a real reason and would
+have to be re-thought rather than removed.
+
+**Sequenced after the chat-box consolidation** (owner: *"because you need to fix
+the chatbox first"*). The update action belongs on the quote card, and the quote
+card is moving into the conversation — building it before that lands would place
+it on a surface about to be replaced.
