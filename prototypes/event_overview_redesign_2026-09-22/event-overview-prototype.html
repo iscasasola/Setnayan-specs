@@ -300,10 +300,12 @@ body.is-after .s-coming{order:7} body.is-after .s-extras{order:8} body.is-after 
     <span class="on">Overview</span>
     <span>Guests <b style="font-weight:600;color:var(--ink-4)">81</b></span>
     <span>Your Team <b style="font-weight:600;color:var(--ink-4)">25</b></span>
+    <span>Suite <b style="font-weight:600;color:var(--ink-4)">3</b></span>
     <em>Go live</em>
     <span>Event Hub Controller</span>
-    <em>Around the event</em>
-    <span>Personalisation</span><span>Hosts</span><span>Schedule</span><span>Seat plan</span><span>Budget</span>
+    <em>Also in this event</em>
+    <span>Personalization</span><span>Hosts</span><span>Refer a couple</span><span>Schedule</span>
+    <span>Seat plan</span><span>Budget</span><span>Editorial</span><span>Galleries</span>
   </nav>
 
   <div class="main">
@@ -485,6 +487,36 @@ body.is-after .s-coming{order:7} body.is-after .s-extras{order:8} body.is-after 
             ['Ceremony','18 Dec · ceremony'],['+5 more blocks','']] },
   ];
 
+  /* Papic, as the tile resolves it (lib/papic-home-tile.ts): shotsLeft ·
+     shotsTotal · cameras · photosGathered · preCapture. The live event is
+     pre-capture, so the tile leads with shots left and flips to photos once
+     the first one is shot. Sub-pages are the shipped /studio/papic children. */
+  const PAPIC = {
+    shotsLeft: 100050, shotsTotal: 100050, cameras: 5, photos: 0, preCapture: true,
+    verdict: 'enough for your event',
+    rooms: [
+      ['Challenges', 'Prompts your guests shoot against', '/studio/papic/challenges'],
+      ['Crew cameras', '5 out · posters & print', '/studio/papic/crew'],
+      ['Moderation', 'Review what guests send', '/studio/papic/moderation'],
+      ['Run of show', 'When cameras open and close', '/studio/papic/run-of-show'],
+      ['Recap', 'The film at the end', '/studio/papic/recap'],
+    ],
+    orders: [['Papic Guest 500', 'payment pending'], ['Papic Guest 100k', 'active']],
+  };
+
+  /* Setnayan AI, priced by EVENT TYPE (lib/setnayan-ai-type-pricing.ts).
+     This event is a wedding → Tier A. The comeback price is the MIDPOINT of the
+     tier's own two prices (lib/setnayan-ai-comeback-offer.ts), so the discount
+     can never disagree with the price it discounts: (2499 + 1499) / 2 = 1999. */
+  const SAI_TIERS = {
+    A: { types: 'wedding',                        regular: 2499, signup: 1499 },
+    B: { types: 'debut · corporate · gala night', regular: 1499, signup:  899 },
+    C: { types: 'christening · birthday · …',     regular:  899, signup:  539 },
+    D: { types: 'tournament · date · hangout',    regular:  199, signup:  119 },
+  };
+  const SAI_TIER = 'A';
+  const midpoint = (t) => Math.floor((t.regular + t.signup) / 2);
+
   const STAGES = [['Dreaming',80],['Booking',8],['Inviting',52],['Finalizing',33],['Wedding day',0],['After',0]];
   const STAGE_DETAIL = { 2:{ done:['Guest list built — 81 invited','RSVPs coming in — 4 of 81 answered'],
     note:'4 attending so far — RSVPs typically take about 6 weeks to settle.' } };
@@ -507,11 +539,12 @@ body.is-after .s-coming{order:7} body.is-after .s-extras{order:8} body.is-after 
     ['novenue', 'No venue booked',          'free first-shortlist offer available'],
   ];
 
-  const S = { moment:'planning', sai:true, path:false, stage:2, panel:null, arg:null,
+  const S = { moment:'planning', sai:true, path:false, stage:2, panel:null, arg:null, saiArm:'comeback',
               open:{}, done:{}, on:{} };
   STATES.forEach(([k]) => (S.on[k] = false));
 
   const $ = (id) => document.getElementById(id);
+  const fmt = (n) => n.toLocaleString('en-PH');
   const esc = (t) => String(t).replace(/[&<>"]/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const toast = (t) => { $('toastText').textContent = t; $('toast').classList.add('on'); };
   $('toastOk').onclick = () => $('toast').classList.remove('on');
@@ -627,7 +660,7 @@ body.is-after .s-coming{order:7} body.is-after .s-extras{order:8} body.is-after 
 
     /* vitals */
     $('vitals').innerHTML = VITALS.map((v) =>
-      '<button class="vital" data-k="' + v.k.toLowerCase() + '" data-to="' + v.to + '">' +
+      '<button class="vital" data-k="' + v.k.toLowerCase() + '" data-open="vital" data-arg="' + v.k.toLowerCase() + '">' +
       '<span class="k">' + esc(v.k) + '</span><span class="n">' + esc(v.n) + '</span>' +
       '<span class="d">' + esc(v.d) + '</span>' +
       (v.seg ? '<span class="seg">' + v.seg.map(([c, w]) => '<i style="background:' + c + ';width:' + w + '%"></i>').join('') + '</span>' : '') +
@@ -654,10 +687,40 @@ body.is-after .s-coming{order:7} body.is-after .s-extras{order:8} body.is-after 
     if (S.on.nikah)    ex.push(exRow('nikah','The five essentials of your Nikah','Wali · witnesses · mahr · imam · separation','Open'));
     if (S.on.chinese)  ex.push(exRow('chinese','Tea ceremony serving order','Groom’s side, then bride’s, by seniority','Plan'));
     if (S.on.annual)   ex.push(exRow('annual','Make it an annual tradition','Carries the details forward; fresh guest list','Plan next year'));
-    if (S.on.aioffer && !S.sai) ex.push(exRow('aioffer','Setnayan AI','Briefing, ranking and a background guard','See what changes'));
+    if (S.on.aioffer && !S.sai) {
+      const t = SAI_TIERS[SAI_TIER];
+      const price = S.saiArm === 'comeback' ? midpoint(t) : t.regular;
+      ex.push(
+        '<div class="card" style="border-color:var(--gold-2);background:#FDFBF6;margin-bottom:9px"' +
+        sai('Sai · the offer, when you skipped it') + '>' +
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
+        '<span class="chip gold">Setnayan AI</span>' +
+        (S.saiArm === 'comeback'
+          ? '<span class="chip cta">your 24 hours · [11h left]</span>'
+          : '<span class="chip plain">tier ' + SAI_TIER + ' · ' + esc(t.types) + '</span>') + '</div>' +
+        '<b style="font-size:15.5px">You skipped Sai at sign-up — it is still here.</b>' +
+        '<p class="small">A briefing when you open the page, your decisions ranked, dates in the ' +
+        'order to take them, and a guard that speaks up when two things clash.</p>' +
+        '<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">' +
+        '<b style="font-size:22px">₱' + fmt(price) + '</b>' +
+        (S.saiArm === 'comeback'
+          ? '<span class="small" style="text-decoration:line-through">₱' + fmt(t.regular) + '</span>' +
+            '<span class="small">sign-up was ₱' + fmt(t.signup) + '</span>'
+          : '<span class="small">one-time, this event</span>') + '</div>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+        '<button class="btn sm" data-to="/studio/setnayan-ai">Turn Sai on</button>' +
+        '<button class="btn sm ghost" data-open="ex" data-arg="aioffer">What it changes</button></div>' +
+        '<p class="small">Prototype: <button class="pill" style="height:26px;font-size:11.5px" ' +
+        'data-act="saiarm">showing the <b>' + S.saiArm + '</b> arm — switch</button></p>' +
+        '</div>');
+    }
+    // The Sai card is a CARD; the rest are rows. Keep them in separate wrappers
+    // so a card never inherits the row list's borders.
+    const exCards = ex.filter((h) => h.startsWith('<div class="card"'));
+    const exRows = ex.filter((h) => !h.startsWith('<div class="card"'));
     $('extras').innerHTML = ex.length
       ? '<div class="sec-head"><h2>Also for you</h2><span class="count">' + ex.length + '</span></div>' +
-        '<div class="rows">' + ex.join('') + '</div>' : '';
+        exCards.join('') + (exRows.length ? '<div class="rows">' + exRows.join('') + '</div>' : '') : '';
     $('extras').hidden = !ex.length;
 
     /* progress */
@@ -741,7 +804,13 @@ body.is-after .s-coming{order:7} body.is-after .s-extras{order:8} body.is-after 
       annual: ['Recurring event', 'Make it an annual tradition',
         '<p>Clones this event’s details into next year’s planning instance. Details, not the guest list — that starts fresh.</p>' +
         ctaBtn('Plan next year', '/create-event')],
-      aioffer: ['Setnayan AI', 'What turning Sai on changes',
+      aioffer: ['Setnayan AI', 'What turning Sai on changes, and what it costs',
+        '<p class="small">Priced by EVENT TYPE, with a sign-up discount. The comeback price is the ' +
+        'midpoint of the tier\'s own two prices, so the discount cannot disagree with the price it discounts.</p>' +
+        '<div class="rows">' + Object.entries(SAI_TIERS).map(([k, t]) =>
+          '<div class="row" style="cursor:default"><span class="l"><b>Tier ' + k + '</b><span>' + esc(t.types) +
+          '</span></span><span class="v">₱' + fmt(t.regular) + ' · sign-up ₱' + fmt(t.signup) +
+          ' · comeback ₱' + fmt(midpoint(t)) + '</span></div>').join('') + '</div>' +
         '<p>Seven places on this page change: the briefing and the watch inside the day card, “· ranked” on the count, the wording under Needs you and under Coming up, the gold ranking numbers, the order the dates come in, and the note under your stage. An eighth appears only when Sai is OFF — the free first-venue shortlist.</p>' +
         '<p class="small">Price: read <b>platform_retail_catalog_v2</b>. The live overview and the catalogue disagree — see the report.</p>' +
         '<button class="btn" data-act="saion">Turn Sai on in the prototype</button>'],
@@ -758,6 +827,44 @@ body.is-after .s-coming{order:7} body.is-after .s-extras{order:8} body.is-after 
     help: () => ['On the day', 'Get help', '<p>[Verified, paid suppliers who opted into same-day work, nearest the venue first.]</p>'],
     wrapstory: () => ['After', 'Write your story',
       '<p>Words, photos and a front page. The last thing left to do.</p>' + ctaBtn('Open the story maker', '/story')],
+
+    /* Every number opens what is behind it — the owner's ask, 2026-09-22. */
+    vital: (k) => ({
+      papic: ['Papic', PAPIC.preCapture
+        ? fmt(PAPIC.shotsLeft) + ' shots ready'
+        : fmt(PAPIC.photos) + ' photos in',
+        '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
+        '<span class="chip ok">' + esc(PAPIC.verdict) + '</span>' +
+        '<span class="chip plain">' + PAPIC.cameras + ' cameras out</span>' +
+        '<span class="chip plain">' + fmt(PAPIC.photos) + ' shot so far</span></div>' +
+        '<p>Guests and your crew shoot on their own phones. Every shot spends one credit; ' +
+        'the tile flips from “shots ready” to “photos in” the moment the first one lands.</p>' +
+        '<div class="rows">' + PAPIC.rooms.map(([n, d, to]) =>
+          '<button class="row" data-to="' + to + '"><span class="l"><b>' + esc(n) +
+          '</b><span>' + esc(d) + '</span></span><span class="v">&rsaquo;</span></button>').join('') +
+        '</div>' +
+        '<p class="small">On this event: ' + PAPIC.orders.map(([n, st]) =>
+          esc(n) + ' <span class="chip ' + (st === 'active' ? 'ok' : 'cta') + '">' + esc(st) + '</span>').join(' · ') + '</p>' +
+        ctaBtn('Open Papic', '/studio/papic')],
+
+      guests: ['Guests', '4 attending · 77 to reply',
+        '<div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip ok">4 attending</span>' +
+        '<span class="chip warn">77 no reply yet</span><span class="chip plain">81 invited</span></div>' +
+        '<p>RSVPs typically take about 6 weeks to settle. Your headcount drives seating, ' +
+        'catering and the final budget.</p>' + ctaBtn('Open the roster', '/guests')],
+
+      budget: ['Budget', '₱26,499 committed',
+        '<div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip gold">1% of ₱2,250,000</span></div>' +
+        '<p>Committed means agreed and locked — the total now, after any change agreed in chat. ' +
+        'Only the budget page shows the breakdown.</p>' + ctaBtn('Open budget & payments', '/budget')],
+
+      next: ['Schedule', '18 Dec · Hair & makeup / preparations',
+        '<p>The next block on your programme. Two things land at 8:00 AM that day — Sai flagged it.</p>' +
+        '<div class="rows">' + BAND[4].rows.map(([nm, meta]) =>
+          '<button class="row" data-to="/schedule"><span class="l"><b>' + esc(nm) + '</b><span>' +
+          esc(meta) + '</span></span><span class="v">&rsaquo;</span></button>').join('') + '</div>' +
+        ctaBtn('Full programme', '/schedule?view=journey')],
+    }[k] || ['—', '—', '<p>[not captured]</p>']),
   };
 
   function renderPanel() {
@@ -790,6 +897,7 @@ body.is-after .s-coming{order:7} body.is-after .s-extras{order:8} body.is-after 
     else if (d.toast) toast(d.toast);
     else if (d.act === 'wrap') { S.moment = 'after'; S.panel = null; }
     else if (d.act === 'saion') { S.sai = true; S.panel = null; }
+    else if (d.act === 'saiarm') S.saiArm = S.saiArm === 'comeback' ? 'full' : 'comeback';
     else if (d.act === 'resolve') { toast('Opens /schedule — the two 8:00 AM blocks'); S.panel = null; }
     render();
   });

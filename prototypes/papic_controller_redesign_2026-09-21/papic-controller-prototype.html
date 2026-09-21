@@ -78,6 +78,11 @@ h1,h2{margin:0;font-weight:600}
 .stepper{display:flex;gap:8px;align-items:stretch}
 .stepper .sb{width:48px;flex-shrink:0;border-radius:14px;border:1px solid var(--line);background:#fff;font-size:22px}
 .stepper .sb:disabled{opacity:.35;cursor:default}
+/* OFF is a STATE, not an absence — same height, so nothing below it moves. */
+.stepper.off .val{background:var(--soft);border-style:dashed}
+.stepper.off .big{color:var(--ink-3);font-weight:500}
+/* The warning line is always rendered; only its text changes. */
+.note{display:block;min-height:15px;line-height:15px}
 .stepper .val{flex:1;border-radius:14px;background:#fff;border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px}
 .stepper .big{font-size:20px;font-weight:600}
 .small{font-size:12px;color:var(--ink-2)}
@@ -122,7 +127,11 @@ body.after .setup-sec .compact{display:flex}
 body.after .setup-sec h2.full-h{display:none}
 
 /* PHASE ORDER — one DOM, reordered */
-.s-dates{order:1}.s-guests{order:2}.s-credits{order:3}.s-filter{order:4}.s-challenges{order:5}.s-gallery{order:6}.s-kwento{order:7}.s-made{order:8}.s-wall{order:9}.s-more{order:10}
+/* OWNER ORDER 2026-09-22: credits + running balance FIRST, then coverage, then
+   allotment, then everything else. Money leads because it is the thing a couple
+   checks every time they open this page; the two blocks that SIZE it sit
+   directly under it so the suggestion is never far from its inputs. */
+.s-credits{order:1}.s-dates{order:2}.s-guests{order:3}.s-filter{order:4}.s-challenges{order:5}.s-gallery{order:6}.s-kwento{order:7}.s-made{order:8}.s-wall{order:9}.s-more{order:10}
 body.after .s-gallery{order:1} body.after .s-kwento{order:2} body.after .s-made{order:3} body.after .s-wall{order:4} body.after .s-credits{order:5}
 body.after .s-guests{order:6} body.after .s-filter{order:7} body.after .s-challenges{order:8} body.after .s-dates{order:9} body.after .s-more{order:10}
 
@@ -196,10 +205,10 @@ body.after .s-guests{order:6} body.after .s-filter{order:7} body.after .s-challe
     <div class="layout">
 
       <!-- DATES -->
-      <section class="sec s-dates" aria-label="Capture dates">
+      <section class="sec s-dates" aria-label="Coverage">
         <div class="next" id="datesOpen">
           <span class="eyebrow">Do this first</span>
-          <span class="q">When can cameras shoot?</span>
+          <span class="q">What days are we covering?</span>
           <div style="display:flex;gap:8px">
             <label style="flex:1">Start<input type="date" value="2026-07-25"></label>
             <!-- 2026-09-22 (owner): "we give them until lunch the next day."
@@ -216,35 +225,38 @@ body.after .s-guests{order:6} body.after .s-filter{order:7} body.after .s-challe
 
       <!-- GUESTS' SHOTS -->
       <section class="sec s-guests setup-sec" aria-label="Guests' shots">
-        <h2 class="full-h">Guests’ shots</h2>
+        <h2 class="full-h">Allotment</h2>
         <div class="card full">
           <span class="muted" style="font-size:14px">When they can shoot</span>
           <div class="seg" id="when"><button aria-pressed="true" data-v="day">Event day</button><button aria-pressed="false" data-v="early">From start day</button></div>
         </div>
         <div class="card full">
           <div class="sec-head"><span class="muted" style="font-size:14px">Most one guest can use</span><button class="switch" role="switch" aria-checked="false" aria-label="Most one guest can use" id="capSwitch"></button></div>
-          <div class="stepper" id="capStepper" hidden>
+          <!-- NEVER `hidden`. Collapsing a stepper moves every block below it,
+               so flipping the switch made the page JUMP under the thumb. It
+               stays, and goes quiet. -->
+          <div class="stepper" id="capStepper">
             <button class="sb" id="capLess" aria-label="Fewer">−</button>
             <div class="val" aria-live="polite"><span class="big" id="capVal">20 each</span></div>
             <button class="sb" id="capMore" aria-label="More">+</button>
           </div>
-          <span id="capOff" style="font-size:15px">No limit</span>
         </div>
         <!-- NEW 2026-09-22 (owner: "yes add minimum"). A ceiling alone guarantees
              a guest NOTHING — papic_guest_spend_ceilings holds a max only. -->
         <div class="card full">
           <div class="sec-head"><span class="muted" style="font-size:14px">Least one guest gets</span><button class="switch" role="switch" aria-checked="false" aria-label="Least one guest gets" id="minSwitch"></button></div>
-          <div class="stepper" id="minStepper" hidden>
+          <div class="stepper" id="minStepper">
             <button class="sb" id="minLess" aria-label="Fewer">−</button>
             <div class="val" aria-live="polite"><span class="big" id="minVal">5 each</span></div>
             <button class="sb" id="minMore" aria-label="More">+</button>
           </div>
-          <span id="minOff" style="font-size:15px">No minimum</span>
-          <span class="small" id="minWarn" hidden></span>
+          <!-- A reserved line, not a `hidden` one: the warning appears and
+               disappears as you step, and a collapsing note is the same jump. -->
+          <span class="small note" id="minWarn"></span>
         </div>
         <button class="row lone full" data-open="allot"><span>Give named guests their own</span><span class="v" id="allotV"></span></button>
         <button class="row lone full" data-open="crew"><span>Cameras</span><span class="v" id="crewSummary"></span></button>
-        <button class="row lone compact" data-open="guests"><span>Guests’ shots</span><span class="v" id="guestsCompact"></span></button>
+        <button class="row lone compact" data-open="guests"><span>Allotment</span><span class="v" id="guestsCompact"></span></button>
       </section>
 
       <!-- CREDITS (sticky right on desktop) -->
@@ -252,7 +264,9 @@ body.after .s-guests{order:6} body.after .s-filter{order:7} body.after .s-challe
         <div class="credits">
           <div class="glance"><div><b>9</b><span>photos</span></div><div><b id="gCams">4</b><span>cameras</span></div><div><b id="gDays">Aug 1</b><span>event day</span></div></div>
           <div class="sec-head"><h2>Credits</h2><span class="left muted" style="font-size:14px"><strong>50</strong> left</span></div>
-          <span class="pending" id="pending" hidden></span>
+          <!-- Reserved, never hidden: this block is now first, so anything that
+     appears here pushes every section below it. -->
+          <span class="pending note" id="pending"></span>
           <div class="stepper">
             <button class="sb" id="less" aria-label="Fewer credits">−</button>
             <div class="val" aria-live="polite"><span class="big" id="rungCredits"></span><span class="small" id="rungMeta"></span></div>
@@ -327,10 +341,15 @@ body.after .s-guests{order:6} body.after .s-filter{order:7} body.after .s-challe
       <section class="sec s-more" aria-label="More settings">
         <h2>More</h2>
         <div class="rows">
-          <button class="row" data-open="faces"><span>Finding people</span><span class="v" id="facesV"></span></button>
+          <!-- OWNER 2026-09-22: "set the toggles here if it only needs toggle
+               switches". These two panels held ONE switch each, so the panel was
+               a door onto a control that fits on the row it came from. -->
+          <div class="row"><span>Finding people</span><button class="switch" role="switch" aria-checked="true" aria-label="Finding people" data-sw="faces"></button></div>
+          <div class="row"><span>Guests add by hand</span><button class="switch" role="switch" aria-checked="true" aria-label="Guests add by hand" data-sw="hand"></button></div>
+          <!-- Blurred faces and Drive KEEP their panels: one is a report the
+               couple cannot set, the other is an OAuth connect. Neither is a switch. -->
           <button class="row" data-open="blur"><span>Blurred faces</span><span class="v" id="blurV"></span></button>
           <button class="row" data-toast="Run of show — [6 moments, 14:00 to 23:00]"><span>Run of show</span><span class="v">›</span></button>
-          <button class="row" data-open="hand"><span>Adding by hand</span><span class="v" id="handV"></span></button>
           <button class="row" data-open="drive"><span>Google Drive copy</span><span class="v" id="driveV"></span></button>
           <button class="row" data-toast="Opens the DSLR pairing guide"><span>DSLR &amp; help</span><span class="v">›</span></button>
           <!-- Inert ON PURPOSE, as it ships: no sheet, no press. The lane is built
@@ -411,20 +430,24 @@ body.after .s-guests{order:6} body.after .s-filter{order:7} body.after .s-challe
     // guests
     document.querySelectorAll('#when button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === S.when)));
     $('capSwitch').setAttribute('aria-checked', String(S.capOn));
-    $('capStepper').hidden = !S.capOn; $('capOff').hidden = S.capOn;
-    $('capVal').textContent = S.cap + ' each';
+    // The stepper never leaves. Off = dimmed + inert, so the page cannot jump.
+    $('capStepper').classList.toggle('off', !S.capOn);
+    $('capLess').disabled = !S.capOn; $('capMore').disabled = !S.capOn;
+    $('capVal').textContent = S.capOn ? S.cap + ' each' : 'No limit';
     $('crewSummary').textContent = S.crew.length + ' · ' + (unclaimed() ? unclaimed() + ' unclaimed' : 'all claimed') + ' ›';
 
     // minimum per guest — a FLOOR, the thing a ceiling alone cannot promise
     $('minSwitch').setAttribute('aria-checked', String(S.minOn));
-    $('minStepper').hidden = !S.minOn; $('minOff').hidden = S.minOn;
-    $('minVal').textContent = S.min + ' each';
+    $('minStepper').classList.toggle('off', !S.minOn);
+    $('minLess').disabled = !S.minOn; $('minMore').disabled = !S.minOn;
+    $('minVal').textContent = S.minOn ? S.min + ' each' : 'No minimum';
     // ⚠ A floor is a PROMISE, so it has to be payable. min × guests must fit the pot.
     const owed = S.min * GUEST_COUNT;
     const short = S.minOn && owed > POT;
-    $('minWarn').hidden = !short;
-    if (short) $('minWarn').textContent = fmt(S.min) + ' × ' + fmt(GUEST_COUNT) + ' guests = ' + fmt(owed)
-      + ' credits. You have ' + fmt(POT) + '. Buy ' + fmt(owed - POT) + ' more, or lower it.';
+    $('minWarn').textContent = short
+      ? fmt(S.min) + ' × ' + fmt(GUEST_COUNT) + ' guests = ' + fmt(owed) + ' credits. You have '
+        + fmt(POT) + '. Buy ' + fmt(owed - POT) + ' more, or lower it.'
+      : '';
     // named guests
     const named = Object.keys(S.allot).length;
     $('allotV').textContent = (named ? named + ' named' : 'Everyone the same') + ' ›';
@@ -436,7 +459,7 @@ body.after .s-guests{order:6} body.after .s-filter{order:7} body.after .s-challe
     $('rungMeta').textContent = peso(r[1]) + ' · ' + r[2] + '% off';
     $('less').disabled = S.rung === 0; $('more').disabled = S.rung === RUNGS.length - 1;
     $('buy').textContent = 'Buy · ' + peso(r[1]);
-    $('pending').hidden = !S.pending; $('pending').textContent = '+' + fmt(S.pending) + ' on the way · checking payment';
+    $('pending').textContent = S.pending ? '+' + fmt(S.pending) + ' on the way · checking payment' : '';
 
     // filter
     const L = LOOKS.find((l) => l[0] === S.look);
@@ -465,9 +488,7 @@ body.after .s-guests{order:6} body.after .s-filter{order:7} body.after .s-challe
     // wall + switches
     $('wallStyles').innerHTML = ['Mosaic','Grid','Hero','Polaroid'].map((w) => '<button class="pill" data-wall="' + w + '" aria-pressed="' + (S.wall === w) + '">' + w + '</button>').join('');
     document.querySelectorAll('[data-sw]').forEach((b) => b.setAttribute('aria-checked', String(!!S[b.dataset.sw])));
-    $('facesV').textContent = (S.faces ? 'On' : 'Off') + ' ›';
     $('blurV').textContent = (BLURRED ? BLURRED + ' guest' + (BLURRED === 1 ? '' : 's') : 'Nobody') + ' ›';
-    $('handV').textContent = (S.hand ? 'On' : 'Off') + ' ›';
     $('driveV').textContent = (S.drive ? 'On' : 'Connect') + ' ›';
     renderPanel();
   }
@@ -508,7 +529,7 @@ body.after .s-guests{order:6} body.after .s-filter{order:7} body.after .s-challe
         break;
       case 'guests':
         title = 'Guests’ shots';
-        html = '<div class="card"><span class="muted">When they can shoot</span><div class="seg">' + [['day','Event day'],['early','From start day']].map(([v, l]) => '<button aria-pressed="' + (S.when === v) + '" data-when="' + v + '">' + l + '</button>').join('') + '</div></div><div class="card"><div class="sec-head"><span class="muted">Limit per guest</span><button class="switch" role="switch" aria-checked="' + S.capOn + '" aria-label="Limit per guest" data-act="cap"></button></div>' + (S.capOn ? '<div class="stepper"><button class="sb" data-act="capLess" aria-label="Fewer">−</button><div class="val"><span class="big">' + S.cap + ' each</span></div><button class="sb" data-act="capMore" aria-label="More">+</button></div>' : '<span>No limit</span>') + '</div><button class="row lone" data-open="crew"><span>Cameras</span><span class="v">' + S.crew.length + ' ›</span></button>';
+        html = '<div class="card"><span class="muted">When they can shoot</span><div class="seg">' + [['day','Event day'],['early','From start day']].map(([v, l]) => '<button aria-pressed="' + (S.when === v) + '" data-when="' + v + '">' + l + '</button>').join('') + '</div></div><div class="card"><div class="sec-head"><span class="muted">Limit per guest</span><button class="switch" role="switch" aria-checked="' + S.capOn + '" aria-label="Limit per guest" data-act="cap"></button></div>' + (S.capOn ? '<div class="stepper"><button class="sb" data-act="capLess" aria-label="Fewer">−</button><div class="val"><span class="big">' + S.cap + ' each</span></div><button class="sb" data-act="capMore" aria-label="More">+</button></div>' : '<span>No limit</span>') + '</div><button class="row lone" data-open="allot"><span>Named guests</span><span class="v">' + (Object.keys(S.allot).length || 'none') + ' ›</span></button><button class="row lone" data-open="crew"><span>Cameras</span><span class="v">' + S.crew.length + ' ›</span></button>';
         break;
       case 'filter':
         title = 'Filter';
@@ -565,10 +586,6 @@ body.after .s-guests{order:6} body.after .s-filter{order:7} body.after .s-challe
         title = 'Screen code';
         html = '<p class="center muted" style="margin:24px 0 0">On the venue screen, open</p><p class="center" style="margin:0;font-weight:600">setnayan.com/wall</p><p class="center muted" style="margin:0">and enter</p><p class="center" style="margin:0;font-size:44px;font-weight:600;letter-spacing:.18em">[CODE]</p><button class="btn dark" data-act="close">Done</button>';
         break;
-      case 'faces': case 'hand':
-        title = S.panel === 'faces' ? 'Finding people' : 'Adding by hand';
-        html = '<div class="row lone"><span>' + (S.panel === 'faces' ? 'Find guests with a selfie' : 'Let guests add from their phone') + '</span><button class="switch" role="switch" aria-checked="' + S[S.panel] + '" aria-label="' + title + '" data-act="flip"></button></div>';
-        break;
       case 'drive':
         title = 'Google Drive';
         html = '<p style="margin:12px 0 0;font-size:16px">A copy of every photo, in your own Drive.</p><p class="small" style="margin:0">We only see the one folder we make.</p><button class="btn" data-act="drive">' + (S.drive ? 'Connected · disconnect' : 'Connect Google Drive') + '</button>';
@@ -618,7 +635,6 @@ body.after .s-guests{order:6} body.after .s-filter{order:7} body.after .s-challe
     else if (d.cam) toast(S.crew[d.cam] ? 'Old link dead · fresh QR ready' : 'QR ready to hand over');
     else if (d.act === 'addcam') S.crew.push(null);
     else if (d.act === 'cap') S.capOn = !S.capOn;
-    else if (d.act === 'flip') S[S.panel] = !S[S.panel];
     else if (d.act === 'drive') { S.drive = !S.drive; toast(S.drive ? 'Drive connected' : 'Drive disconnected'); }
     else if (d.act === 'paid') { S.pay = 'sent'; S.pending += RUNGS[S.rung][0]; }
     else if (d.act === 'close') S.panel = null;

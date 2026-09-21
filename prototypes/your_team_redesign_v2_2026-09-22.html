@@ -155,6 +155,10 @@ h1,h2,h3{margin:0;font-weight:600}
 .fold.open .fold-head{font-weight:600}
 .badge{font-family:'Space Mono',monospace;font-size:10px;padding:2px 7px;border-radius:999px;background:var(--soft);color:var(--ink-2);white-space:nowrap}
 .badge.lk{background:var(--ok-bg);color:var(--ok)}
+/* UNREAD. The one badge that means "waiting on you", so it is the only one
+   that carries the action colour — and it is the SAME at folder, category,
+   card and team-row level, because it is the same fact at four zoom levels. */
+.badge.nw{background:var(--mulberry);color:#fff;font-weight:700}
 .chv{color:var(--ink-3);transition:transform .15s;display:inline-block}
 .open > .fold-head .chv, .cat.open > .cat-head .chv{transform:rotate(180deg)}
 .fold-body{padding:0 0 6px 0;background:#FBFAF7;border-top:1px solid var(--line-2)}
@@ -232,8 +236,8 @@ body.after .planning-only{display:none}
 body:not(.after) .after-only{display:none}
 
 /* ORDER — one DOM, reordered by CSS */
-.s-team{order:1}.s-notes{order:2}.s-decide{order:3}.s-bench{order:4}.s-money{order:5}.s-plans{order:6}
-body.after .s-team{order:1} body.after .s-notes{order:2} body.after .s-money{order:3} body.after .s-plans{order:4} body.after .s-bench{order:5}
+.s-team{order:1}.s-bench{order:3}.s-money{order:4}.s-plans{order:5}
+body.after .s-team{order:1} body.after .s-money{order:2} body.after .s-plans{order:3} body.after .s-bench{order:4}
 
 /* ---------- DESKTOP ---------- */
 @media (min-width:1024px){
@@ -267,6 +271,8 @@ body.after .s-team{order:1} body.after .s-notes{order:2} body.after .s-money{ord
   <b>Prototype</b>
   <button class="pill" data-phase="before" aria-pressed="true">Planning</button>
   <button class="pill" data-phase="after" aria-pressed="false">After the day</button>
+  <button class="pill" id="stress" aria-pressed="false" title="100 suppliers inquired, a reply from each — does the bench still sit where it was?">100 inquiries</button>
+  <span class="small" id="rollup" style="margin-left:auto"></span>
   <span style="margin-left:auto" class="mono">v2 · 2026-09-22</span>
 </div>
 
@@ -302,22 +308,43 @@ body.after .s-team{order:1} body.after .s-notes{order:2} body.after .s-money{ord
         </div>
       </section>
 
-      <!-- 2 · FROM YOUR SUPPLIERS — notifications rows filtered to supplier-action kinds -->
-      <section class="sec s-notes" aria-label="From your suppliers">
-        <div class="sec-head"><h2>From your suppliers</h2>
-          <button class="pill" id="unreadOnly" aria-pressed="false" style="height:30px;font-size:12px">Unread</button></div>
-        <div class="rows" id="noteRows"></div>
-        <div class="flag"><span class="ph">FLAG</span> <code>notifications</code> has no <code>event_id</code>; these rows are matched by <code>related_url</code>. 21 of the latest 100 name this event.</div>
-      </section>
+      <!-- ══ THE TWO TASK SECTIONS ARE GONE — AND THAT IS THE DECISION ══════
+           Owner, 2026-09-22: *"overview will give me instructions on what to do
+           and what you showed a while ago are instructions and tasks on what i
+           need to respond to."*
 
-      <!-- 3 · DECIDE NEXT — stillNeedsDecision(); each row is the ?tab=shortlist&open=<tile> deep link -->
-      <section class="sec s-decide planning-only" aria-label="Decide next">
-        <div class="sec-head"><h2>Decide next</h2><span class="small" id="decideCount"></span></div>
-        <div class="rows" id="decideRows"></div>
-        <button class="row lone" data-open="alldecide"><span id="decideMore"></span><span class="chev">›</span></button>
-      </section>
+           He is drawing the line between two jobs that had been sharing one
+           page. "Decide next" (4 overdue doorways + "all 27") and "From your
+           suppliers" (notices with a Respond action) are both TASK LISTS —
+           being told what to do. Overview already owns that job and does it
+           better: `✦Decisions waiting on you · 9 open`, *"ranked by what closes
+           soonest — each one links to its room"*, PRIORITY 1–4.
 
-      <!-- 4 · FIND — shortlist-categories.tsx: two-level inline accordion + carousel + Find + Add manually -->
+           So both sections are deleted from THIS page. What is left is the
+           workshop: the people you have, finding and comparing more, locking
+           one, and whether it fits the budget.
+
+           🔑 AND IT FIXES THE COUNTS AT THE ROOT. Overview said "23 categories
+           still open" while this page said 27; Overview said "2 of 25 booked"
+           while this page implied 29; Overview said the coordinator was overdue
+           by 278 days while this page said 113 — 165 days apart, same category,
+           same couple. Two surfaces counting one fact will always drift. With
+           one owner there is nothing to drift.
+
+           WHAT REPLACES THEM, AND WHY IT IS NOT A TASK LIST:
+             • the per-folder / per-category / per-card BADGE — a count ON the
+               object, which tells you where to look without telling you what to
+               do, and cannot lengthen the page;
+             • the per-row action on a supplier you already hold ("Next: pay your
+               deposit to hold the date") — that is the state of that supplier and
+               the control belonging to it, not a queue. It is also what the live
+               page already says, so it is kept verbatim;
+             • one quiet line to Overview, below, CARRYING NO NUMBER — a second
+               copy of "9 open" here would re-create the drift this removes. -->
+      <a class="row lone planning-only" href="#" data-toast="Goes to the Overview — one ranked list of everything waiting on you." style="text-decoration:none;color:inherit;order:2">
+        <span>Decisions waiting on you</span><span class="chev">On your Overview ›</span></a>
+
+      <!-- 2 · FIND — shortlist-categories.tsx: two-level inline accordion + carousel + Find + Add manually -->
       <section class="sec s-bench fold-sec" aria-label="Find" id="bench">
         <div class="sec-head full"><h2>Find</h2><span class="small">12 folders</span></div>
         <div class="searchbox full"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" placeholder="Search your shortlist or the marketplace" aria-label="Search your shortlist or the marketplace"><button class="x" id="qx" aria-label="Clear search" hidden>✕</button></div>
@@ -395,13 +422,57 @@ body.after .s-team{order:1} body.after .s-notes{order:2} body.after .s-money{ord
       { id:'saysayfx', name:'Saysay Live Band & Hosting (FIXTURE)', cat:'Added by you · category misc', tile:'band', folder:'program', price:null, status:'cand', step:0, reviewed:false },
       { id:'sedah', name:'Seda Hotel', cat:'Added by you · category misc', tile:null, folder:null, price:null, status:'cand', step:0, reviewed:false },
     ],
+    /* ── FROM YOUR SUPPLIERS · the rewrite ──────────────────────────────────
+       `live` is the wording production sends TODAY, quoted exactly from the
+       `notifications` rows for this event. `title`/`body`/`act` are the
+       rewrite. The "As it reads today" pill in the section head swaps between
+       them, so the two can be compared on the same rows.
+
+       FIVE RULES, and every change below is one of them:
+        1 · THE SUPPLIER'S NAME IS THE HEADING, not buried mid-sentence. Today
+            two notices are titled the identical "Your payment info is ready"
+            and the only thing telling them apart sits in the body.
+        2 · TITLE = what happened. BODY = what to do next. Today the title
+            names a document ("payment info") and the body carries the news.
+        3 · LEAD WITH WHAT IT IS, NOT ITS CODE. "Order SNYQAVP292 marked paid"
+            is findable — the order page prints `public_id · reference_code` —
+            but it is not what a couple needs first: they bought 100,000 Papic
+            credits for ₱24,000.
+        4 · ONE THING THAT HAPPENED, ONE NOTICE. `payment_matched` and
+            `order_paid` both fired for the SAME ₱24,000 payment, naming the
+            same code. Collapsed to one.
+        5 · SETNAYAN IS NOT ONE OF YOUR SUPPLIERS. The ₱24,000 notices come
+            from us, not from a shop, so they sit in their own group.
+
+       And the action replaces an instruction to go find a page: today's "Open
+       the workspace to see how to pay them directly" becomes a button. */
     notes: [
-      { id:1, type:'payment_info_sent', title:'Your payment info is ready', body:'Your booking with Seda Vertis North is locked. Open the workspace to see how to pay them directly.', when:'Sep 20', read:false, go:'workspace#payments' },
-      { id:2, type:'payment_info_sent', title:'Your payment info is ready', body:'Your booking with Santuario de San Vicente de Paul Parish & Shrine of the Poor is locked. Open the workspace to see how to pay them directly.', when:'Sep 20', read:false, go:'workspace#payments' },
-      { id:3, type:'payment_matched', title:'Payment of ₱24,000 matched · order SNYQAVP292', body:'The Setnayan team confirmed your payment.', when:'Sep 20', read:false, go:'order' },
-      { id:4, type:'order_paid', title:'Order SNYQAVP292 marked paid', body:'Your order is fully paid. We’ll start work right away.', when:'Sep 20', read:false, go:'order' },
+      { id:1, from:'Seda Vertis North', kind:'supplier', type:'payment_info_sent',
+        title:'Ready for your deposit',
+        body:'They sent their bank details. Pay them directly, then send your proof.',
+        act:'Pay your deposit', when:'Sep 20', read:false, go:'workspace#payments',
+        live:{ title:'Your payment info is ready', body:'Your booking with Seda Vertis North is locked. Open the workspace to see how to pay them directly.' } },
+      { id:2, from:'Santuario de San Vicente de Paul Parish & Shrine of the Poor', kind:'supplier', type:'payment_info_sent',
+        title:'Ready for your deposit',
+        body:'They sent their bank details. Pay them directly, then send your proof.',
+        act:'Pay your deposit', when:'Sep 20', read:false, go:'workspace#payments',
+        live:{ title:'Your payment info is ready', body:'Your booking with Santuario de San Vicente de Paul Parish & Shrine of the Poor is locked. Open the workspace to see how to pay them directly.' } },
+      { id:3, from:'Setnayan', kind:'setnayan', type:'payment_matched + order_paid',
+        title:'Your ₱24,000 payment is confirmed',
+        body:'100,000 Papic credits are on this wedding. Nothing else owing.',
+        act:'See the order', when:'Sep 20', read:false, go:'order', collapsed:2,
+        live:{ title:'Payment of ₱24,000 matched · order SNYQAVP292', body:'The Setnayan team confirmed your payment.  ⊕  SECOND NOTICE: “Order SNYQAVP292 marked paid — Your order is fully paid. We’ll start work right away.”' } },
     ],
-    unreadOnly:false,
+    unreadOnly:false, liveWording:false,
+    /* Unread per CARD — the only place a count is stored. Seeded from the real
+       rows for this event: both locked venues sent their bank details. */
+    msgs: { 'c-seda':1, 'c-sant':1 },
+    /* Setnayan's own notices are not "from a supplier" — they are money news,
+       so they badge the Money block. Today: the ₱24,000 confirmation. */
+    setnayanUnread: 1,
+    /* The owner's stress case, switchable: inquiries out to ~100 suppliers with
+       a reply from each. Off by default so the page still shows the REAL 4. */
+    stress: false,
     decide: [
       { label:'Photo & Video', days:153, folder:'documentary', tile:'photo' },
       { label:'Coordinator / Planner', days:113, folder:'planning', tile:'coordinator' },
@@ -475,6 +546,70 @@ body.after .s-team{order:1} body.after .s-notes{order:2} body.after .s-money{ord
   const toast = (t) => { $('toastText').textContent = t; $('toast').classList.add('on'); };
   $('toastOk').onclick = () => $('toast').classList.remove('on');
 
+  /* ═══ UNREAD IS A BADGE, NOT A FEED ════════════════════════════════════════
+     Owner, 2026-09-22: *"if i have 100 vendors and i am inquire to all… i have
+     100 messages from suppliers. i will not be able to see the bench anymore."*
+     Then: *"how about a counter badge instead on the category and card?"*
+
+     He is right, and the defect is not only in this prototype — it SHIPS.
+     `waiting-for-quotes.tsx` and `pending-lock-proposals.tsx` both do a bare
+     `items.map(...)` with no cap and no "…and N more", and `vendors/page.tsx`
+     renders BOTH of them ABOVE `<ShortlistCategories>`. At 100 pending
+     inquiries production puts 100 rows between the top of the page and the
+     bench. Nothing in either file limits it.
+
+     🔑 THE RULE THIS FIXES: a list that grows without bound may never sit
+     between the top of the page and something you need. The page's height must
+     not depend on how busy the couple has been.
+
+     So unread lives as a COUNT on the thing it is about, and the counts roll up
+     from ONE source — the per-card map below. A folder's badge is the sum of
+     its categories, and a category's is the sum of its cards, computed, never
+     stored twice. Two stored counts would disagree within a week, and each
+     would pass its own test. */
+  const cardUnread = (cardId) => S.msgs[cardId] || 0;
+  const tileUnread = (tid) => (CARDS[tid] || []).reduce((n, c) => n + cardUnread(c.id), 0);
+  const folderUnread = (fid) => {
+    const f = FOLDERS.find((x) => x[0] === fid);
+    return f ? f[4].reduce((n, [tid]) => n + tileUnread(tid), 0) : 0;
+  };
+  const totalUnread = () => FOLDERS.reduce((n, f) => n + folderUnread(f[0]), 0);
+  /** A team member's own unread — their card's count, wherever it sits. */
+  const memberUnread = (m) => {
+    const c = allCards().find((x) => x.teamId === m.id || x.id === m.cardId);
+    return c ? cardUnread(c.id) : 0;
+  };
+  /** The badge itself. Small, mono, and the SAME shape at every level. */
+  const badge = (n, label) => n
+    ? `<span class="badge nw" title="${n} unread ${label}">${n} new</span>`
+    : '';
+
+  /* ── THE OWNER'S STRESS CASE, MADE REAL ────────────────────────────────────
+     100 suppliers inquired, a reply from each. Generated cards are marked
+     `[STRESS]` and are NOT production data — the point is the page's SHAPE, not
+     the names. Turning it off removes every generated card and its count, so
+     the real 4 notices come back exactly as they were. */
+  const STRESS_TOTAL = 100;
+  function applyStress(on) {
+    for (const tid of Object.keys(CARDS)) {
+      CARDS[tid] = CARDS[tid].filter((c) => c.kind !== 'stress');
+    }
+    for (const k of Object.keys(S.msgs)) if (k.startsWith('s-')) delete S.msgs[k];
+    S.threads = Object.fromEntries(Object.entries(S.threads).filter(([k]) => !k.startsWith('s-')));
+    if (!on) return;
+    const tiles = FOLDERS.flatMap((f) => f[4].map((t) => t[0]));
+    for (let i = 0; i < STRESS_TOTAL; i++) {
+      const tid = tiles[i % tiles.length];
+      const id = `s-${i}`;
+      (CARDS[tid] ||= []).push({
+        id, name: `[STRESS] Supplier ${i + 1}`, sub: 'Inquiry sent · replied',
+        kind: 'stress', pmin: null, pmax: null,
+      });
+      S.msgs[id] = 1;      // one unread reply each
+      S.threads[id] = true; // the conversation exists
+    }
+  }
+
   const L = () => S.team.filter((m) => m.status === 'locked');
   const A = () => S.team.filter((m) => m.status === 'asking');
   const C = () => S.team.filter((m) => m.status === 'cand');
@@ -492,15 +627,29 @@ body.after .s-team{order:1} body.after .s-notes{order:2} body.after .s-money{ord
 
     $('statusLine').textContent = after
       ? `${L().length} supplied your wedding · ${L().filter((m) => !m.reviewed).length} to review`
-      : `${L().length} locked · ${A().length ? A().length + ' asking · ' : ''}${C().length} to lock · ${open} to decide · ${unread} unread`;
+      // NO "to decide" AND NO "unread" HERE ANY MORE. Both are task counts, and
+      // Overview owns tasks (owner, 2026-09-22). Unread is carried by the badges
+      // on the folders, categories and cards; open decisions are carried by the
+      // bench's own per-folder "N to decide". This line states only what the
+      // roster IS.
+      : `${L().length} locked · ${A().length ? A().length + ' asking · ' : ''}${C().length} to lock`;
     $('anchorLine').textContent = after ? `${DATE_LABEL} · NCR` : `${DATE_LABEL} · NCR · 87 days`;
     $('teamH').textContent = after ? 'Who supplied your wedding' : 'Your team';
     $('teamCount').textContent = after ? '' : `${S.team.length} people`;
     $('clearCand').hidden = C().length === 0;
 
+    $('stress').setAttribute('aria-pressed', String(S.stress));
+    /* ── THE ROLL-UP SELF-CHECK ─────────────────────────────────────────────
+       Three levels show a count; only ONE stores it. This proves they agree at
+       every render, so a "3 new" folder can never sit over cards holding 5.
+       If a later edit stores a second count anywhere, this line goes red. */
+    const perCard = Object.entries(S.msgs).reduce((n, [, v]) => n + v, 0);
+    const byFolder = totalUnread();
+    const ok = perCard === byFolder;
+    $('rollup').innerHTML = `<span style="color:${ok ? 'var(--ok)' : 'var(--mulberry)'}">`
+      + `${ok ? '✓' : '✗'} ${byFolder} unread rolls up from ${perCard} card${perCard === 1 ? '' : 's'}</span>`;
+
     renderTeam(after);
-    renderNotes();
-    renderDecide(open);
     renderMoney();
     renderBench();
     renderPlans();
@@ -534,7 +683,11 @@ body.after .s-team{order:1} body.after .s-notes{order:2} body.after .s-money{ord
         : `<button class="btn sm" data-ask="${m.id}">Lock this</button>`;
       body = `<div class="acts">${lockBtn}<button class="btn sm ghost" data-toast="Opens the inquiry thread.">Open conversation</button><button class="rowrm" data-drop="${m.id}" aria-label="Remove ${esc(m.name)} from your build">✕</button></div>`;
     }
-    return `<div class="mem"><div class="top"><span class="dot${dot}" aria-hidden="true"></span><span class="nm">${esc(m.name)}<span class="cat">${esc(m.cat)}</span></span>${amt}</div>${body}</div>`;
+    // A message from someone already on the team badges THEIR row — the same
+    // badge shape the folder, the category and the card use.
+    const nUn = memberUnread(m);
+    const read = nUn ? `<div class="acts" style="margin-top:2px"><button class="btn sm" data-thread="${(allCards().find((x) => x.teamId === m.id) || {}).id}">Read ${nUn === 1 ? 'their message' : nUn + ' messages'}</button></div>` : '';
+    return `<div class="mem"><div class="top"><span class="dot${dot}" aria-hidden="true"></span><span class="nm">${esc(m.name)}${nUn ? ' ' + badge(nUn, 'from them') : ''}<span class="cat">${esc(m.cat)}</span></span>${amt}</div>${read}${body}</div>`;
   }
 
   function renderTeam(after) {
@@ -548,10 +701,60 @@ body.after .s-team{order:1} body.after .s-notes{order:2} body.after .s-money{ord
 
   function renderNotes() {
     $('unreadOnly').setAttribute('aria-pressed', String(S.unreadOnly));
+    $('liveWording').setAttribute('aria-pressed', String(S.liveWording));
     const rows = S.notes.filter((n) => !S.unreadOnly || !n.read);
-    $('noteRows').innerHTML = rows.length ? rows.map((n) =>
-      `<button class="note" data-note="${n.id}"><span class="ud${n.read ? ' rd' : ''}" aria-hidden="true"></span><span class="lbl"><b>${esc(n.title)}</b><small>${esc(n.body)}</small></span><span class="when">${n.when}</span></button>`).join('')
-      : '<div class="note"><span class="lbl muted">Nothing unread.</span></div>';
+    if (!rows.length) {
+      $('noteRows').innerHTML = '<div class="note"><span class="lbl muted">Nothing unread.</span></div>';
+      return;
+    }
+    // RULE 1 + RULE 5 · grouped by WHO it came from, suppliers before Setnayan.
+    // In "as it reads today" mode the grouping is dropped too, because today
+    // there is none — it is one flat list, and that is part of what makes it
+    // hard to read.
+    if (S.liveWording) {
+      $('noteRows').innerHTML = rows.map((n) => {
+        const extra = n.collapsed ? ` <span class="ph">${n.collapsed} SEPARATE NOTICES</span>` : '';
+        return `<button class="note" data-note="${n.id}">`
+          + `<span class="ud${n.read ? ' rd' : ''}" aria-hidden="true"></span>`
+          + `<span class="lbl"><b>${esc(n.live.title)}</b>${extra}<small>${esc(n.live.body)}</small></span>`
+          + `<span class="when">${n.when}</span></button>`;
+      }).join('');
+      return;
+    }
+    // ── THE CEILING ─────────────────────────────────────────────────────────
+    // At most NOTE_CEILING rows ever render here, whatever the volume. The rest
+    // go behind one row of fixed height. This section's height is now
+    // INDEPENDENT of how many suppliers have written — which is the whole point:
+    // the bench below must sit at the same distance from the top for a couple
+    // with 4 messages and a couple with 100.
+    const NOTE_CEILING = 3;
+    const shown = rows.slice(0, NOTE_CEILING);
+    const hidden = rows.length - shown.length;
+    const groups = [];
+    for (const n of shown) {
+      const g = groups.find((x) => x.from === n.from);
+      if (g) g.rows.push(n);
+      else groups.push({ from: n.from, kind: n.kind, rows: [n] });
+    }
+    groups.sort((a, b) => (a.kind === b.kind ? 0 : a.kind === 'supplier' ? -1 : 1));
+    const tail = hidden
+      ? `<button class="note" data-open="allnotes"><span class="lbl"><b>${hidden} more from your suppliers</b><small>Open the chat box — every thread in one place.</small></span><span class="when">›</span></button>`
+      : '';
+    $('noteRows').innerHTML = groups.map((g) => {
+      const unread = g.rows.filter((r) => !r.read).length;
+      return `<div class="grp"><span class="eyebrow">${esc(g.from)}</span>`
+        + `<span class="small">${unread ? unread + ' new' : ''}</span></div>`
+        + g.rows.map((n) =>
+            `<div class="note">`
+            + `<span class="ud${n.read ? ' rd' : ''}" aria-hidden="true"></span>`
+            + `<span class="lbl"><b>${esc(n.title)}</b><small>${esc(n.body)}</small>`
+            // RULE 2 · the next step is a control, not a sentence telling the
+            // couple to go and find one.
+            + `<span class="acts" style="margin-top:8px">`
+            + `<button class="btn sm" data-note="${n.id}">${esc(n.act)}</button></span>`
+            + `</span><span class="when">${n.when}</span></div>`,
+          ).join('');
+    }).join('') + tail;
   }
 
   function renderDecide(open) {
@@ -600,15 +803,22 @@ body.after .s-team{order:1} body.after .s-notes{order:2} body.after .s-money{ord
       const lock = c.pmin == null ? '' : `<button class="btn sm" data-lockcard="${c.id}">Lock this</button>`;
       acts = `<button class="btn sm ghost" data-add="${c.id}">${addLbl}</button>${inq}${lock}`;
     }
+    // THE CARD IS WHERE THE MESSAGE ACTUALLY LIVES. A reply from this supplier
+    // badges this card, and opening the conversation clears it — so the count
+    // never has to be reconciled with a feed, because there is no feed.
+    const nUn = cardUnread(c.id);
+    const unreadBtn = nUn
+      ? `<button class="btn sm" data-thread="${c.id}">Read ${nUn === 1 ? 'their reply' : `${nUn} replies`}</button>`
+      : '';
     const corner = chosen ? '<span class="corner">Chosen</span>' : (m ? '<span class="corner gd">In build</span>' : '');
     const cmp = c.kind === 'ph' ? '' : `<button class="cmp" data-cmp="${c.id}" aria-pressed="${cmpOn}" aria-label="Compare ${esc(c.name)}">${cmpOn ? '✓' : '⇄'}</button>`;
     return `<div class="vc${chosen ? ' chosen' : inTeam ? ' inbuild' : ''}" data-card="${c.id}">
       <div class="img${c.kind === 'ph' ? ' ph-img' : ''}">${corner}${cmp}${c.kind === 'ph' ? '[PHOTO]' : c.kind === 'team' ? 'no photo' : 'photo'}</div>
-      <button class="nm" style="border:0;background:none;padding:0;text-align:left;font:inherit;font-weight:600" data-detail="${c.id}">${esc(c.name)}</button>
+      <button class="nm" style="border:0;background:none;padding:0;text-align:left;font:inherit;font-weight:600" data-detail="${c.id}">${esc(c.name)}${nUn ? ' ' + badge(nUn, 'from them') : ''}</button>
       <span class="sub">${esc(c.sub)}</span>
       <span class="pr${price ? '' : ' none'}">${price || 'No price recorded'}</span>
       ${fitChips(c)}
-      <div class="acts">${acts}</div></div>`;
+      <div class="acts">${unreadBtn}${acts}</div></div>`;
   }
 
   function sortCards(cs) {
@@ -640,9 +850,12 @@ body.after .s-team{order:1} body.after .s-notes{order:2} body.after .s-money{ord
           else inner = `<div class="emptycat"><span>No one considered yet.</span><button class="btn sm ghost" data-find="${tid}">Find ${esc(tl)}</button><button class="btn sm ghost" data-manual="${tid}">Add manually</button></div>`;
           inner += `<div class="notneeded">Not needed? <button data-remove="${tid}">Remove ${esc(tl)} from your event</button></div>`;
         }
-        return `<div class="cat${tOpen ? ' open' : ''}" id="tile-${tid}"><div class="cat-head-row"><button class="cat-head" aria-expanded="${tOpen}" data-tile="${tid}"><span class="lbl">${esc(tl)}</span>${covered ? '<span class="cat-plan" style="font-size:11px;color:#41603b">✓ Covered</span>' : ''}${count ? `<span class="cat-count">${count}</span>` : ''}<span class="chv">⌄</span></button>${hint ? `<button class="cat-info" aria-expanded="${S.hint === tid}" aria-label="What does ${esc(tl)} cover?" data-hint="${tid}">i</button>` : ''}</div>${S.hint === tid && hint ? `<div class="hintbox"><span>${esc(hint)}</span></div>` : ''}${!tOpen && lockedNames.length ? `<p class="cat-locked">🔒 ${esc(lockedNames.join(', '))}</p>` : ''}<div class="cat-body">${inner}</div></div>`;
+        return `<div class="cat${tOpen ? ' open' : ''}" id="tile-${tid}"><div class="cat-head-row"><button class="cat-head" aria-expanded="${tOpen}" data-tile="${tid}"><span class="lbl">${esc(tl)}</span>${badge(tileUnread(tid), 'in this category')}${covered ? '<span class="cat-plan" style="font-size:11px;color:#41603b">✓ Covered</span>' : ''}${count ? `<span class="cat-count">${count}</span>` : ''}<span class="chv">⌄</span></button>${hint ? `<button class="cat-info" aria-expanded="${S.hint === tid}" aria-label="What does ${esc(tl)} cover?" data-hint="${tid}">i</button>` : ''}</div>${S.hint === tid && hint ? `<div class="hintbox"><span>${esc(hint)}</span></div>` : ''}${!tOpen && lockedNames.length ? `<p class="cat-locked">🔒 ${esc(lockedNames.join(', '))}</p>` : ''}<div class="cat-body">${inner}</div></div>`;
       }).join('')}</div>`;
-      return `<div class="fold${fOpen ? ' open' : ''}" id="fold-${fid}"><button class="fold-head" aria-expanded="${fOpen}" data-fold="${fid}"><span class="lbl">${esc(label)}</span>${locked ? `<span class="badge lk">● ${locked} locked</span>` : ''}<span class="badge">${decide} to decide</span><span class="chv">⌄</span></button>${body}</div>`;
+      // The folder's badge is the SUM of its categories — never a second
+      // stored number. It sits FIRST, before "locked" and "to decide", because
+      // it is the only one of the three that is waiting on the couple.
+      return `<div class="fold${fOpen ? ' open' : ''}" id="fold-${fid}"><button class="fold-head" aria-expanded="${fOpen}" data-fold="${fid}"><span class="lbl">${esc(label)}</span>${badge(folderUnread(fid), 'in this folder')}${locked ? `<span class="badge lk">● ${locked} locked</span>` : ''}<span class="badge">${decide} to decide</span><span class="chv">⌄</span></button>${body}</div>`;
     }).join('') || '<div class="row muted">Nothing matches.</div>';
   }
 
@@ -666,6 +879,16 @@ body.after .s-team{order:1} body.after .s-notes{order:2} body.after .s-money{ord
     if (!S.panel) return;
     let title = '', sub = '', html = '';
     const P = S.panel;
+    if (P === 'allnotes') {
+      // The one place a list is ALLOWED to be unbounded: behind a door, where
+      // its length cannot push anything else off the page.
+      const all = S.notes.filter((n) => !S.unreadOnly || !n.read);
+      title = 'From your suppliers'; sub = `${all.length} notice${all.length === 1 ? '' : 's'}`;
+      html = all.map((n) =>
+        `<div class="tilerow" style="align-items:flex-start"><span class="lbl"><b>${esc(n.from)}</b><br>${esc(n.title)}<br><small class="muted">${esc(n.body)}</small></span><span class="when">${n.when}</span></div>`).join('')
+        + `<button class="btn dark" data-toast="Goes to /dashboard/[eventId]/messages — the one chat box.">Open the chat box</button>`
+        + `<span class="small">Every thread in one place. This page keeps a badge on the supplier, not a copy of the thread — <code>/messages</code> is the shipped inbox and stays the one place a conversation lives.</span>`;
+    }
     if (P === 'detail') {
       const c = cardById(S.arg); const m = teamOf(c);
       title = c.name; sub = tileLabel(c.tile);
@@ -793,7 +1016,13 @@ body.after .s-team{order:1} body.after .s-notes{order:2} body.after .s-money{ord
     else if (t.id === 'cmpClear') S.compare = [];
     else if (d.add) { addToBuild(cardById(d.add)); toast('In your build. Lock it from Your team.'); if (d.close) S.panel = null; }
     else if (d.inquire) { S.threads[d.inquire] = true; toast('Inquiry sent. Their reply lands under “From your suppliers”.'); }
-    else if (d.thread) { toast('Opens the conversation.'); return; }
+    // Opening the conversation is what CLEARS the badge — the count and the
+    // act of reading are the same mechanism, so there is nothing to reconcile.
+    else if (d.thread) {
+      const had = cardUnread(d.thread);
+      delete S.msgs[d.thread];
+      toast(had ? 'Opened the conversation — badge cleared.' : 'Opens the conversation.');
+    }
     else if (d.lockcard) { const m = addToBuild(cardById(d.lockcard)); askLock(m); if (d.close) S.panel = null; }
     else if (d.ask) askLock(S.team.find((x) => x.id === d.ask));
     else if (d.advance) { const m = S.team.find((x) => x.id === d.advance); if (m.step >= 3) { m.status = 'locked'; m.deposit = 'confirmed'; m.covers = ''; toast('Locked — they accepted your payment.'); } else m.step += 1; }
@@ -807,6 +1036,9 @@ body.after .s-team{order:1} body.after .s-notes{order:2} body.after .s-money{ord
     else if (d.setprice) { const m = S.team.find((x) => x.id === d.setprice); const v = parseInt(($('priceIn').value || '').replace(/[^0-9]/g, ''), 10); m.price = Number.isFinite(v) && v > 0 ? v : null; S.panel = null; }
     else if (d.note) { const n = S.notes.find((x) => x.id === +d.note); n.read = true; S.panel = 'note'; S.arg = n.id; }
     else if (t.id === 'unreadOnly') S.unreadOnly = !S.unreadOnly;
+    else if (t.id === 'liveWording') S.liveWording = !S.liveWording;
+    else if (t.id === 'stress') { S.stress = !S.stress; applyStress(S.stress); S.openFolder = null; S.openTile = null;
+      toast(S.stress ? '100 suppliers inquired, one reply each. The bench has not moved.' : 'Back to the 4 real notices.'); }
     else if (t.id === 'qx') { S.q = ''; $('q').value = ''; }
     else if (d.remove) { const locked = (CARDS[d.remove] || []).some((c) => { const m = teamOf(c); return m && m.status === 'locked'; }); toast(locked ? 'Refused — something here is locked.' : `${tileLabel(d.remove)} removed from your event.`); return; }
     else if (t.id === 'clearCand') { S.team = S.team.filter((x) => x.status !== 'cand'); toast('Candidates cleared. Locked rows untouched.'); }
