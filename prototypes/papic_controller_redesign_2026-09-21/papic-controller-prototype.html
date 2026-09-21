@@ -16,6 +16,14 @@
   Phase (prototype bar at the top): BEFORE the event = set-up order · AFTER = results lead, setup collapses.
   Real values: 17 price rungs read off prod 2026-09-21 · 5 looks from lib/papic-photo-styles.ts ·
   challenge prompts from the challenge library seed. Placeholders are marked [LIKE THIS].
+
+  2026-09-22 — CAMERAS PANEL CHANGED, AND IT IS AN OPEN OWNER CALL.
+  It used to give each camera a ± stepper of "Its own credits" vs "Shoots from the pot".
+  That was FAITHFUL to the shipped PapicCamerasCard (owner 2026-08-11: "the host can dedicate a
+  specific number of shots for a specific QR code"), but it contradicts the LATER ruling
+  (owner 2026-09-16: "no dedicated shots individually"). The panel now shows camera CLAIMS
+  (who holds it, Show QR / Reissue) and one line saying every camera shoots the shared pool —
+  which is what the live page's own Crew-cameras sheet already says. Revert if 2026-08-11 wins.
 -->
 <style>
 :root{
@@ -114,9 +122,9 @@ body.after .setup-sec .compact{display:flex}
 body.after .setup-sec h2.full-h{display:none}
 
 /* PHASE ORDER — one DOM, reordered */
-.s-dates{order:1}.s-guests{order:2}.s-credits{order:3}.s-filter{order:4}.s-challenges{order:5}.s-gallery{order:6}.s-kwento{order:7}.s-wall{order:8}.s-more{order:9}
-body.after .s-gallery{order:1} body.after .s-kwento{order:2} body.after .s-wall{order:3} body.after .s-credits{order:4}
-body.after .s-guests{order:5} body.after .s-filter{order:6} body.after .s-challenges{order:7} body.after .s-dates{order:8} body.after .s-more{order:9}
+.s-dates{order:1}.s-guests{order:2}.s-credits{order:3}.s-filter{order:4}.s-challenges{order:5}.s-gallery{order:6}.s-kwento{order:7}.s-made{order:8}.s-wall{order:9}.s-more{order:10}
+body.after .s-gallery{order:1} body.after .s-kwento{order:2} body.after .s-made{order:3} body.after .s-wall{order:4} body.after .s-credits{order:5}
+body.after .s-guests{order:6} body.after .s-filter{order:7} body.after .s-challenges{order:8} body.after .s-dates{order:9} body.after .s-more{order:10}
 
 /* ---------- panel: full screen on phone, side drawer on desktop ---------- */
 .scrim{position:fixed;inset:0;background:rgba(23,22,15,.45);z-index:40;display:none}
@@ -154,7 +162,7 @@ body.after .s-guests{order:5} body.after .s-filter{order:6} body.after .s-challe
   .page-head .back{display:none}
   .layout{display:grid;grid-template-columns:minmax(0,1fr) 360px;column-gap:32px;row-gap:28px;padding:8px 0 64px;align-items:start}
   .layout > .sec{grid-column:1}
-  .layout > .s-credits{grid-column:2;grid-row:1 / span 8;position:sticky;top:124px;align-self:start}
+  .layout > .s-credits{grid-column:2;grid-row:1 / span 9;position:sticky;top:124px;align-self:start}
   .glance{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;border-bottom:1px solid #E6DFD3;padding-bottom:14px}
   .glance div{display:flex;flex-direction:column}.glance b{font-size:22px;font-weight:600}.glance span{font-size:12px;color:var(--ink-2)}
   .grid{grid-template-columns:repeat(6,minmax(0,1fr))}
@@ -217,7 +225,7 @@ body.after .s-guests{order:5} body.after .s-filter{order:6} body.after .s-challe
           </div>
           <span id="capOff" style="font-size:15px">No limit</span>
         </div>
-        <button class="row lone full" data-open="crew"><span>Crew cameras</span><span class="v" id="crewSummary"></span></button>
+        <button class="row lone full" data-open="crew"><span>Cameras</span><span class="v" id="crewSummary"></span></button>
         <button class="row lone compact" data-open="guests"><span>Guests’ shots</span><span class="v" id="guestsCompact"></span></button>
       </section>
 
@@ -250,6 +258,8 @@ body.after .s-guests{order:5} body.after .s-filter{order:6} body.after .s-challe
           <div><h2>Challenges</h2><span class="small" id="pickedLine"></span></div>
           <button class="btn ghost" data-open="challenges">Pick</button>
         </div>
+        <!-- VendorChallengesApproval — renders only while something is waiting -->
+        <button class="row lone full" id="vendorCh" data-open="vendorch"><span>From your suppliers</span><span class="v gold" id="vendorChV"></span></button>
         <button class="row lone compact" data-open="challenges"><span>Challenges</span><span class="v" id="chCompact"></span></button>
       </section>
 
@@ -262,6 +272,7 @@ body.after .s-guests{order:5} body.after .s-filter{order:6} body.after .s-challe
         <span class="small center">Tap to keep full size</span>
         <div class="rows">
           <button class="row" data-open="review"><span>Review guest photos</span><span class="v gold" id="revLeft"></span></button>
+          <button class="row" data-open="supplier"><span>Suppliers&rsquo; photos</span><span class="v" id="supV"></span></button>
           <div class="row"><span>Guests can browse</span><button class="switch" role="switch" aria-checked="true" aria-label="Guests can browse" data-sw="shared"></button></div>
         </div>
       </section>
@@ -272,6 +283,15 @@ body.after .s-guests{order:5} body.after .s-filter{order:6} body.after .s-challe
         <div class="rows">
           <button class="row" data-open="kwento"><span>Guest messages</span><span class="v gold" id="kwLeft"></span></button>
           <button class="row" data-toast="Kwento Magazine · PDF downloading"><span>Kwento Magazine</span><span class="v">PDF ›</span></button>
+        </div>
+      </section>
+
+      <!-- MADE FOR YOU — RecapCard + LifeFlashCard on the live page -->
+      <section class="sec s-made" aria-label="Made for you">
+        <h2>Made for you</h2>
+        <div class="rows">
+          <button class="row" data-toast="Your Recap — [9 photos, 3 messages]"><span>Your Recap</span><span class="v gold">Ready ›</span></button>
+          <button class="row" data-toast="This day, as a flash — [a 20-second cut]"><span>This day, as a flash</span><span class="v gold">Ready ›</span></button>
         </div>
       </section>
 
@@ -293,7 +313,11 @@ body.after .s-guests{order:5} body.after .s-filter{order:6} body.after .s-challe
           <button class="row" data-open="hand"><span>Adding by hand</span><span class="v" id="handV"></span></button>
           <button class="row" data-open="drive"><span>Google Drive copy</span><span class="v" id="driveV"></span></button>
           <button class="row" data-toast="Opens the DSLR pairing guide"><span>DSLR &amp; help</span><span class="v">›</span></button>
+          <!-- Inert ON PURPOSE, as it ships: no sheet, no press. The lane is built
+               and switched off behind the outstanding supplier-privacy ruling. -->
+          <div class="row" style="opacity:.55"><span>Suppliers send their work</span><span class="v">Not open yet</span></div>
         </div>
+        <p class="small" style="margin:2px 2px 0"><b style="color:var(--ink)">Outside the library, on purpose:</b> your save-the-date film and your event film live with your event&rsquo;s pages, not here.</p>
       </section>
     </div>
   </div>
@@ -324,12 +348,15 @@ body.after .s-guests{order:5} body.after .s-filter{order:6} body.after .s-challe
   const KW = [['[Guest · Table 2]','[Congratulations, Ana & Marco!]'],['[Guest · Table 7]','[Best party of the year.]'],['[Guest · Lia]','[a guest’s message]']];
   const CAP = 9, POT = 50;
 
-  const S = { phase:'before', dates:false, rung:0, pending:0, method:'GCash', when:'day', capOn:false, cap:20, look:'ORIG', chip:'All', kept:{}, chosen:{}, reviewed:{}, kw:{}, crew:[0,0,0,0], wall:'Mosaic', shared:true, phones:true, faces:true, hand:true, drive:false, panel:null, pay:'pick' };
+  const S = { phase:'before', dates:false, rung:0, pending:0, method:'GCash', when:'day', capOn:false, cap:20, look:'ORIG', chip:'All', kept:{}, chosen:{}, reviewed:{}, kw:{}, crew:['[Guest · Ana]','[Guest · Marco]',null,null], wall:'Mosaic', shared:true, phones:true, faces:true, hand:true, drive:false, sup:{}, vendorCh:{}, panel:null, pay:'pick' };
+  // Suppliers who handed over work, and challenges a supplier suggested. [PLACEHOLDER NAMES]
+  const SUP = [['[Saysay Films]','[24 photos]'],['[Studio Marcos]','[8 photos]']];
+  const VCH = ['[Catch the couple under the arch.]','[Get the whole barkada in one frame.]'];
   const $ = (id) => document.getElementById(id);
   const fmt = (n) => n.toLocaleString('en-PH');
   const peso = (n) => '₱' + fmt(n);
   const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-  const crewTotal = () => S.crew.reduce((a,b) => a+b, 0);
+  const unclaimed = () => S.crew.filter((c) => !c).length;
   const picked = () => Object.values(S.chosen).filter(Boolean).length;
   const toast = (t) => { $('toastText').textContent = t; $('toast').classList.add('on'); };
   $('toastOk').onclick = () => $('toast').classList.remove('on');
@@ -348,7 +375,7 @@ body.after .s-guests{order:5} body.after .s-filter{order:6} body.after .s-challe
     $('capSwitch').setAttribute('aria-checked', String(S.capOn));
     $('capStepper').hidden = !S.capOn; $('capOff').hidden = S.capOn;
     $('capVal').textContent = S.cap + ' each';
-    $('crewSummary').textContent = S.crew.length + ' · ' + fmt(crewTotal()) + ' own ›';
+    $('crewSummary').textContent = S.crew.length + ' · ' + (unclaimed() ? unclaimed() + ' unclaimed' : 'all claimed') + ' ›';
     $('guestsCompact').textContent = (S.when === 'day' ? 'Event day' : 'From start day') + ' · ' + (S.capOn ? S.cap + ' each' : 'no limit') + ' ›';
 
     // credits
@@ -375,6 +402,13 @@ body.after .s-guests{order:5} body.after .s-filter{order:6} body.after .s-challe
     $('revLeft').textContent = rl ? rl + ' new ›' : 'All done ›';
     const kl = KW.filter((_, i) => !S.kw[i]).length;
     $('kwLeft').textContent = kl ? kl + ' to review ›' : 'All done ›';
+
+    // suppliers' photos + supplier-suggested challenges
+    const sl = SUP.filter((_, i) => !S.sup[i]).length;
+    $('supV').textContent = sl ? sl + ' to review ›' : 'All done ›';
+    const vl = VCH.filter((_, i) => !S.vendorCh[i]).length;
+    $('vendorCh').hidden = !vl;                       // renders only while something waits
+    $('vendorChV').textContent = vl + ' waiting ›';
 
     // wall + switches
     $('wallStyles').innerHTML = ['Mosaic','Grid','Hero','Polaroid'].map((w) => '<button class="pill" data-wall="' + w + '" aria-pressed="' + (S.wall === w) + '">' + w + '</button>').join('');
@@ -412,16 +446,32 @@ body.after .s-guests{order:5} body.after .s-filter{order:6} body.after .s-challe
         html = KW.map(([who, text], i) => '<div class="msg"><span class="small">' + esc(who) + '</span><span style="font-size:16px;line-height:1.4">' + esc(text) + '</span>' + (S.kw[i] ? '<span class="done-note">' + (S.kw[i] === 'wall' ? 'On the wall' : 'Hidden') + '</span>' : '<div style="display:flex;gap:8px"><button class="btn" style="flex:1;height:44px;font-size:14px" data-kw="' + i + ':wall">Show on wall</button><button class="pill" style="height:44px" data-kw="' + i + ':hide">Hide</button></div>') + '</div>').join('');
         break;
       case 'crew':
-        title = 'Crew cameras'; meta = fmt(POT - crewTotal()) + ' in the pot';
-        html = S.crew.map((own, i) => '<div class="card" style="flex-direction:row;align-items:center;padding:10px 10px 10px 16px"><span style="flex:1;display:flex;flex-direction:column"><span>Camera ' + (i + 1) + '</span><span class="small">' + (own ? 'Its own credits' : 'Shoots from the pot') + '</span></span><div class="stepper"><button class="sb" style="width:40px;height:40px" data-crew="' + i + ':-5" aria-label="Less">−</button><span style="width:40px;display:flex;align-items:center;justify-content:center;font-weight:600">' + own + '</span><button class="sb" style="width:40px;height:40px" data-crew="' + i + ':5" aria-label="More">+</button></div></div>').join('') + '<button class="pill" style="height:50px;border-style:dashed" data-act="addcam">+ Add a camera</button>';
+        title = 'Cameras'; meta = S.crew.length + ' handed out';
+        html = '<span class="small">Every camera shoots from your ' + fmt(POT) + ' credits. Nothing is set aside.</span>'
+          + S.crew.map((who, i) => '<div class="card" style="flex-direction:row;align-items:center;padding:10px 10px 10px 16px"><span style="flex:1;display:flex;flex-direction:column"><span>Camera ' + (i + 1) + '</span><span class="small">' + (who ? esc(who) : 'Not claimed yet') + '</span></span><button class="pill" data-cam="' + i + '">' + (who ? 'Reissue' : 'Show QR') + '</button></div>').join('')
+          + '<button class="pill" style="height:50px;border-style:dashed" data-act="addcam">+ Add a camera</button>';
         break;
       case 'guests':
         title = 'Guests’ shots';
-        html = '<div class="card"><span class="muted">When they can shoot</span><div class="seg">' + [['day','Event day'],['early','From start day']].map(([v, l]) => '<button aria-pressed="' + (S.when === v) + '" data-when="' + v + '">' + l + '</button>').join('') + '</div></div><div class="card"><div class="sec-head"><span class="muted">Limit per guest</span><button class="switch" role="switch" aria-checked="' + S.capOn + '" aria-label="Limit per guest" data-act="cap"></button></div>' + (S.capOn ? '<div class="stepper"><button class="sb" data-act="capLess" aria-label="Fewer">−</button><div class="val"><span class="big">' + S.cap + ' each</span></div><button class="sb" data-act="capMore" aria-label="More">+</button></div>' : '<span>No limit</span>') + '</div><button class="row lone" data-open="crew"><span>Crew cameras</span><span class="v">' + S.crew.length + ' ›</span></button>';
+        html = '<div class="card"><span class="muted">When they can shoot</span><div class="seg">' + [['day','Event day'],['early','From start day']].map(([v, l]) => '<button aria-pressed="' + (S.when === v) + '" data-when="' + v + '">' + l + '</button>').join('') + '</div></div><div class="card"><div class="sec-head"><span class="muted">Limit per guest</span><button class="switch" role="switch" aria-checked="' + S.capOn + '" aria-label="Limit per guest" data-act="cap"></button></div>' + (S.capOn ? '<div class="stepper"><button class="sb" data-act="capLess" aria-label="Fewer">−</button><div class="val"><span class="big">' + S.cap + ' each</span></div><button class="sb" data-act="capMore" aria-label="More">+</button></div>' : '<span>No limit</span>') + '</div><button class="row lone" data-open="crew"><span>Cameras</span><span class="v">' + S.crew.length + ' ›</span></button>';
         break;
       case 'filter':
         title = 'Filter';
         html = '<div class="looks">' + LOOKS.map(([id, label, , css]) => '<button class="look" data-look="' + id + '" aria-pressed="' + (S.look === id) + '"><svg viewBox="0 0 60 72" aria-hidden="true" style="filter:' + css + '"><rect width="60" height="72" fill="#E9B98A"/><rect y="40" width="60" height="32" fill="#6F8F6A"/><circle cx="46" cy="16" r="7" fill="#F7E3B5"/><circle cx="22" cy="34" r="6" fill="#5A3A2A"/><rect x="16" y="40" width="12" height="22" rx="5" fill="#F4F1EC"/><circle cx="37" cy="33" r="6" fill="#3A2A22"/><rect x="31" y="39" width="12" height="23" rx="5" fill="#2C2A29"/></svg>' + label + '</button>').join('') + '</div>';
+        break;
+      case 'supplier':
+        title = 'Suppliers’ photos'; meta = SUP.filter((_, i) => !S.sup[i]).length + ' left';
+        html = '<span class="small">Their finished work, before anyone else sees it.</span>'
+          + SUP.map(([who, n], i) => '<div class="msg"><span class="small">' + esc(who) + ' · ' + esc(n) + '</span>'
+            + (S.sup[i] ? '<span class="done-note">' + (S.sup[i] === 'hide' ? 'Hidden' : 'In your gallery') + '</span>'
+              : '<div style="display:flex;gap:8px"><button class="btn" style="flex:1;height:44px;font-size:14px" data-sup="' + i + ':keep">Add to gallery</button><button class="pill" style="height:44px" data-sup="' + i + ':hide">Hide</button></div>') + '</div>').join('');
+        break;
+      case 'vendorch':
+        title = 'From your suppliers'; meta = VCH.filter((_, i) => !S.vendorCh[i]).length + ' waiting';
+        html = '<span class="small">A supplier suggested these. They only go live if you say so.</span>'
+          + VCH.map((t, i) => '<div class="msg"><span style="font-size:16px;line-height:1.4">' + esc(t) + '</span>'
+            + (S.vendorCh[i] ? '<span class="done-note">' + (S.vendorCh[i] === 'no' ? 'Declined' : 'Added') + '</span>'
+              : '<div style="display:flex;gap:8px"><button class="btn" style="flex:1;height:44px;font-size:14px" data-vch="' + i + ':yes">Add it</button><button class="pill" style="height:44px" data-vch="' + i + ':no">No thanks</button></div>') + '</div>').join('');
         break;
       case 'screen':
         title = 'Screen code';
@@ -467,8 +517,10 @@ body.after .s-guests{order:5} body.after .s-filter{order:6} body.after .s-challe
     else if (d.ch) S.chosen[d.ch] = !S.chosen[d.ch];
     else if (d.rev) { const [i, v] = d.rev.split(':'); S.reviewed[i] = v; }
     else if (d.kw) { const [i, v] = d.kw.split(':'); S.kw[i] = v; }
-    else if (d.crew) { const [i, v] = d.crew.split(':').map(Number); if (v > 0 && crewTotal() + v > POT) toast('Only ' + POT + ' in the pot'); else S.crew[i] = Math.max(0, S.crew[i] + v); }
-    else if (d.act === 'addcam') S.crew.push(0);
+    else if (d.sup) { const [i, v] = d.sup.split(':'); S.sup[i] = v; }
+    else if (d.vch) { const [i, v] = d.vch.split(':'); S.vendorCh[i] = v; }
+    else if (d.cam) toast(S.crew[d.cam] ? 'Old link dead · fresh QR ready' : 'QR ready to hand over');
+    else if (d.act === 'addcam') S.crew.push(null);
     else if (d.act === 'cap') S.capOn = !S.capOn;
     else if (d.act === 'flip') S[S.panel] = !S[S.panel];
     else if (d.act === 'drive') { S.drive = !S.drive; toast(S.drive ? 'Drive connected' : 'Drive disconnected'); }
