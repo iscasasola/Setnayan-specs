@@ -354,6 +354,7 @@ body.open .panel{display:flex}
   <b>Prototype</b>
   <button class="pill" data-phase="ordinary" aria-pressed="true">Ordinary day</button>
   <button class="pill" data-phase="eventday" aria-pressed="false">Event day</button>
+  <button class="pill" data-phase="feedue" aria-pressed="false">Event day · fee unpaid</button>
   <span class="sp">Saysay Host and Band · real shop, real prices · feed volumes illustrative</span>
 </div>
 
@@ -428,7 +429,7 @@ body.open .panel{display:flex}
           <div class="desk" id="deskList">
 
             <!-- EVENT-DAY ONLY: the day's request jumps to the top -->
-            <div class="ans" data-tone="book" data-only="eventday">
+            <div class="ans" data-tone="book" data-only="eventday feedue">
               <div class="ans-h"><span class="kind">On the day</span><span class="waited hot">now</span></div>
               <p class="t">The coordinator is asking for your set to start 20 minutes late</p>
               <p class="s">Ana &amp; Miguel · reception · [REQUEST TEXT]</p>
@@ -933,6 +934,27 @@ body.open .panel{display:flex}
           </div>
         </div>
 
+        <!-- EVENT DAY, FEE UNPAID. Owner 2026-09-22: "event hub for the vendors
+             for the event they will cater will work if booking fee is paid."
+             Already built (`event-access-stage.ts` + `event-locked-by-fee.tsx`,
+             wired into 9 surfaces incl. this console) and switched OFF in
+             production — measured 2026-09-22, both switches. -->
+        <div class="sec" data-only="feedue">
+          <div class="warn">
+            <p class="lbl" style="color:var(--late)">Locked until the fee is paid</p>
+            <p style="margin-top:6px;font-size:15px"><b>Ana &amp; Miguel · today.</b> Your booking fee on this one is <b>₱837.50</b> and it has not reached us yet.</p>
+            <p style="margin-top:6px">Pay it and this room opens straight away. The couple sees nothing about this.</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+              <button class="btn pri sm" data-panel="pay-fee">Pay ₱837.50</button>
+              <button class="btn ghost sm" data-panel="reply">Talk to Setnayan</button>
+            </div>
+          </div>
+          <div class="rows">
+            <button class="row"><span class="k"><b class="t">Message the couple</b><span class="s">Never locked — you can always reach the people you are working for</span></span><span class="chev">›</span></button>
+          </div>
+          <p class="hint">⚠ Open question for the owner: at 6pm on the wedding day, at the venue, should this still lock? The console has its own event window (T−1h → T+8h) and the fee lock does not currently know about it.</p>
+        </div>
+
         <!-- ORDINARY DAY: the honest compact state -->
         <div class="sec" data-only="ordinary">
           <div class="card sunk">
@@ -1143,7 +1165,15 @@ const ROOM = {
   customers:   {title:'My Customers',   status:()=>'4 booked · 7 in conversation · 3 unread'},
   shop:        {title:'My Shop',        status:()=>'Verified · 2 services · your page is live'},
   performance: {title:'My Performance', status:()=>'Health 72 · Solo plan'},
-  hub:         {title:'Event Hub',      status:()=>body.dataset.phase==='eventday' ? 'Ana & Miguel · today' : 'No event today · next is 30 Oct'},
+  hub:         {title:'Event Hub',      status:()=>{
+    // `feedue` IS an event day — the fee is what is missing, not the wedding.
+    // Saying "no event today" there would be the page's own status line lying
+    // about why the room is shut.
+    const p = body.dataset.phase;
+    if (p === 'feedue') return 'Ana & Miguel · today · locked until the fee is paid';
+    if (p === 'eventday') return 'Ana & Miguel · today';
+    return 'No event today · next is 30 Oct';
+  }},
   plan:        {title:'Plan',           status:()=>'Solo · ₱1,000 per 28 days · ₱837.50 due'},
 };
 function answers(){ return $$('#deskList .ans').filter(a=>!a.hidden && !a.dataset.done).length; }
@@ -1166,11 +1196,18 @@ $$('[data-goto]').forEach(b=> b.onclick = ()=> toast('That leaves the shop and g
 /* ── phase (prototype bar) ─────────────────────────────────────────────── */
 function applyPhase(){
   const p = body.dataset.phase;
-  $$('[data-only]').forEach(el=> el.hidden = el.dataset.only !== p);
-  $$('[data-today-n]').forEach(el=> el.textContent = p==='eventday' ? '1' : '0');
+  // `eventday` and `feedue` are the SAME day. The only difference is whether
+  // the booking fee reached Setnayan, so everything that is about the day
+  // answers to both and only the Event Hub's own body differs.
+  const onDay = p === 'eventday' || p === 'feedue';
+  $$('[data-only]').forEach(el=>{
+    const want = el.dataset.only.split(' ');
+    el.hidden = !want.includes(p) && !(want.includes('anyday') && onDay);
+  });
+  $$('[data-today-n]').forEach(el=> el.textContent = onDay ? '1' : '0');
   $$('[data-hubn]').forEach(el=>{
-    el.textContent = p==='eventday' ? 'Today' : '—';
-    el.classList.toggle('new', p==='eventday');
+    el.textContent = p==='feedue' ? 'Locked' : onDay ? 'Today' : '—';
+    el.classList.toggle('new', onDay);
   });
   recount();
   $('#roomStatus').textContent = ROOM[body.dataset.room].status();

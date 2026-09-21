@@ -71,10 +71,6 @@ h1,h2{margin:0;font-weight:600}
 .seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;background:var(--soft);border-radius:999px;padding:4px}
 .seg button{height:40px;border:0;border-radius:999px;background:transparent;font-size:14px}
 .seg button[aria-pressed="true"]{background:#fff;font-weight:600;box-shadow:0 1px 3px rgba(23,22,15,.12)}
-/* the capture window can now stop on one of THREE days, so this one is 3-up */
-#endPick{grid-template-columns:repeat(3,minmax(0,1fr))}
-#endPick button{display:flex;align-items:center;justify-content:center;color:var(--night-ink)}
-#endPick button[aria-pressed="true"]{color:var(--night)}
 .switch{width:44px;height:26px;flex-shrink:0;border:0;border-radius:999px;background:#D9D3C8;padding:3px;display:flex}
 .switch::after{content:"";width:20px;height:20px;border-radius:999px;background:#fff;transition:transform .15s}
 .switch[aria-checked="true"]{background:var(--gold)}
@@ -204,10 +200,15 @@ body.after .s-guests{order:6} body.after .s-filter{order:7} body.after .s-challe
         <div class="next" id="datesOpen">
           <span class="eyebrow">Do this first</span>
           <span class="q">When can cameras shoot?</span>
-          <label style="display:block">Start<input type="date" value="2026-07-25"></label>
-          <!-- NEW 2026-09-22 (owner). The end used to be PINNED to the event day —
-               lib/papic-window.ts: "may extend BEFORE it but never AFTER". -->
-          <label style="display:block">Last day<span class="seg" id="endPick" style="margin-top:4px;background:#221F17"></span></label>
+          <div style="display:flex;gap:8px">
+            <label style="flex:1">Start<input type="date" value="2026-07-25"></label>
+            <!-- 2026-09-22 (owner): "we give them until lunch the next day."
+                 The end used to be PINNED to the event day — lib/papic-window.ts:
+                 "may extend BEFORE it but never AFTER". It is now automatic, not a
+                 choice: nobody has to think about it, and the morning after and a
+                 next-day brunch both fall inside it. -->
+            <label>Cameras close<span class="fixed" id="endsAt"></span></label>
+          </div>
           <button class="btn" id="saveDates">Save dates</button>
         </div>
         <button class="row lone" id="datesSet" hidden><span>Cameras open</span><span class="v" id="datesSummary"></span></button>
@@ -368,7 +369,7 @@ body.after .s-guests{order:6} body.after .s-filter{order:7} body.after .s-challe
   const CAP = 9, POT = 50;
 
   const S = { phase:'before', dates:false, rung:0, pending:0, method:'GCash', when:'day', capOn:false, cap:20, look:'ORIG', chip:'All', kept:{}, chosen:{}, reviewed:{}, kw:{}, crew:['[Guest · Ana]','[Guest · Marco]',null,null], wall:'Mosaic', shared:true, phones:true, faces:true, hand:true, drive:false, sup:{}, vendorCh:{},
-              minOn:false, min:5, allot:{}, end:'day', panel:null, pay:'pick' };
+              minOn:false, min:5, allot:{}, panel:null, pay:'pick' };
   // Suppliers who handed over work, and challenges a supplier suggested. [PLACEHOLDER NAMES]
   const SUP = [['[Saysay Films]','[24 photos]'],['[Studio Marcos]','[8 photos]']];
   // Named guests. Roles drive the SUGGESTED number, exactly as suggestedAllotment()
@@ -378,9 +379,14 @@ body.after .s-guests{order:6} body.after .s-filter{order:7} body.after .s-challe
   const GUEST_COUNT = 146;      // live guests in prod 2026-09-22
   // Guests who asked to be blurred for OTHER guests. The couple never sees a blur.
   const BLURRED = 0;            // prod 2026-09-22: 146 guests, 0 faceblock_enabled
-  // Where capture may STOP. Owner 2026-09-22: "yes the can end on the event day,
-  // morning after and next day brunch." The event day is Aug 1 in this mock.
-  const ENDS = [['day','Event day','Aug 1'],['after','Morning after','Aug 2'],['brunch','Next-day brunch','Aug 3']];
+  // WHERE CAPTURE STOPS. Owner 2026-09-22: "we give them until lunch the next day."
+  // Automatic, not a choice — the morning after and a next-day brunch both fall
+  // inside it, so the three end-points he named are covered by one rule nobody
+  // has to configure. His alternative ("12 hours after their event ends") is NOT
+  // BUILDABLE: `events` holds event_date and event_end_date as DATES, with no
+  // clock time anywhere, so "when their event ends" is unknown to us.
+  // ⚠ 2pm is THE ONE NUMBER CHOSEN HERE, not measured — see the reply.
+  const CLOSES = 'Aug 2, 2pm';  // event day is Aug 1 in this mock
   const VCH = ['[Catch the couple under the arch.]','[Get the whole barkada in one frame.]'];
   const $ = (id) => document.getElementById(id);
   const fmt = (n) => n.toLocaleString('en-PH');
@@ -399,11 +405,8 @@ body.after .s-guests{order:6} body.after .s-filter{order:7} body.after .s-challe
     $('gCams').textContent = S.crew.length;
     const datesDone = S.dates || S.phase === 'after';
     $('datesOpen').hidden = datesDone; $('datesSet').hidden = !datesDone;
-    const endRow = ENDS.find((e) => e[0] === S.end);
-    $('endPick').innerHTML = ENDS.map(([v, label, date]) =>
-      '<button data-end="' + v + '" aria-pressed="' + (S.end === v) + '" style="font-size:13px;flex-direction:column;height:46px;line-height:1.15">'
-      + label + '<span style="font-size:11px;opacity:.7">' + date + '</span></button>').join('');
-    $('datesSummary').textContent = 'Jul 25 – ' + endRow[2] + ' ›';
+    $('endsAt').textContent = CLOSES;
+    $('datesSummary').textContent = 'Jul 25 – ' + CLOSES + ' ›';
 
     // guests
     document.querySelectorAll('#when button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === S.when)));
@@ -586,7 +589,6 @@ body.after .s-guests{order:6} body.after .s-filter{order:7} body.after .s-challe
     else if (t.id === 'capSwitch') S.capOn = !S.capOn;
     else if (t.id === 'capLess' || d.act === 'capLess') S.cap = Math.max(5, S.cap - 5);
     else if (t.id === 'capMore' || d.act === 'capMore') S.cap += 5;
-    else if (d.end) S.end = d.end;
     else if (t.id === 'minSwitch') S.minOn = !S.minOn;
     else if (t.id === 'minLess') S.min = Math.max(1, S.min - 5);
     // ⚠ A floor can never exceed the ceiling, or the two controls contradict.

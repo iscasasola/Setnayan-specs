@@ -8,42 +8,42 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <!--
-  EVENT OVERVIEW — responsive redesign prototype (2026-09-22)
-  Route it stands for: /dashboard/[eventId]            (the couple's event Home / Overview)
-  Measured live 2026-09-22 on www.setnayan.com/dashboard/044f7e64-95aa-4dcb-84c1-7263bf494eaa
-  signed in as the host of "Indalecio & Claire", 87 days out, Setnayan AI ACTIVE.
+  EVENT OVERVIEW — responsive redesign prototype  ·  v2, 2026-09-22
+  Route: /dashboard/[eventId]   (the couple's event Home / Overview)
+  Measured live on www.setnayan.com/dashboard/044f7e64-95aa-4dcb-84c1-7263bf494eaa
+  signed in as the host of "Indalecio & Claire" — 87 days out, Setnayan AI ACTIVE.
+
+  v2 adds what one event in one state could never show:
+    · SAI ON / OFF        the page has two states; the live event is AI-on only
+    · SHOW SAI'S PATH     outlines and numbers all 7 places Sai appears (+1 only when Sai is OFF)
+    · STATES panel        every conditional block the page can render
+                          (no date · free camera · handover · Nikah · tea · annual ·
+                           AI offer · access requests · event-day prep · refused read)
+    · Real sub-screens    every "Needs you" / "Coming up" / watch row opens the shipped
+                          inspector shape (eyebrow · title · chips · copy · ONE cta)
 
   One DOM, two layouts:
-    < 1024px  one column, sections ordered by the current moment
-    >= 1024px the real shell (top bar + left rail) - the flow in the wide left column,
-              THE DAY + the numbers + Sai's watch sticky in the right column.
-              Sub-screens open as a right-side drawer instead of full screen.
+    < 1024px  one column, ordered by the moment. Sub-screens open full screen.
+    >=1024px  real shell (top bar + left rail). Flow left; the day + numbers + watch
+              sticky right. Sub-screens open as a drawer; at >=1280px the drawer docks
+              as a column and the page makes room, standing in for the Overview's
+              shipped third inspector column (InspectorLayout, ?inspect=).
 
-  Moment (prototype bar at the top): Planning - On the day - After. One DOM, CSS `order`.
-
-  Colours, radii and font are read off the live page's own CSS custom properties
-  (--sn-*, --m-*) on 2026-09-22. Every figure, name, label and destination is real
-  unless wrapped in [SQUARE BRACKETS].
-
-  RULINGS HONOURED (see report):
-   - 2026-07-13 owner override: dashboard cells EXPAND IN PLACE. The "Around your event"
-     band expands inline; it is NOT a stretched link and NOT a drawer.
-   - 2026-07-12 council: STATUS -> ACT -> NAVIGATE; decisions above, journey rail below
-     the band; inbox is not a decision; ONE global vendor-masking note; no paywall teaser.
+  Colours, radii, font read off the live page's own custom properties 2026-09-22.
+  Every figure, name, label, destination and sentence is real unless in [BRACKETS].
 -->
 <style>
 :root{
-  /* read off the live page 2026-09-22 */
   --ink:#2C2A29; --ink-2:#6E6A62; --ink-3:#8A857B; --ink-4:#A09A8E;
   --line:#E1DCD1; --line-2:#EDE8DE; --soft:#F4F2EC; --page:#FFFFFF; --paper:#FBFAF7;
-  --gold:#8A6B39; --gold-2:#A9834B; --gold-3:#CBA766; --gold-100:#F3ECDF;
+  --gold:#8A6B39; --gold-2:#A9834B; --gold-3:#CBA766; --gold-100:#F3ECDF; --gold-800:#5C4726;
   --cta:#C24E25; --cta-2:#B04722;
-  --night:#17160F; --night-card:#1E2229; --night-ink:#FBFAF7; --night-2:#B6B9BE; --night-gold:#CBA766; --night-line:#3A372C;
+  --night:#17160F; --night-ink:#FBFAF7; --night-2:#B6B9BE; --night-gold:#CBA766;
   --ok:#5E7C52; --ok-deep:#4F6B4A; --ok-soft:#E9EEE3;
   --warn:#B77E2E; --warn-deep:#7A5119; --warn-soft:#F6EAD2;
+  --info:#4E6C82; --info-soft:#E2EAEF;
   --link:#3B4E67;
   --r-xl:18px; --r-lg:14px; --r-md:10px; --r-sm:6px; --r-pill:999px;
-  --sh-tile:0 1px 2px rgba(40,34,24,.05),0 18px 40px -26px rgba(30,26,18,.4);
   --sh-sm:0 1px 2px rgba(30,26,18,.06);
 }
 *{box-sizing:border-box}
@@ -55,18 +55,24 @@ h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.015em}
 a{color:inherit}
 
 /* ---------- prototype bar ---------- */
-.proto{position:sticky;top:0;z-index:60;display:flex;gap:8px;align-items:center;padding:8px 16px;background:#EDEAE4;font-size:12px;color:var(--ink-2);flex-wrap:wrap}
+.proto{position:sticky;top:0;z-index:60;background:#EDEAE4;padding:8px 14px;font-size:12px;color:var(--ink-2)}
+.proto .r{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
 .proto b{font-weight:700;color:var(--ink)}
-.proto .pill{height:30px}
+.proto .pill{height:28px;font-size:12px;padding:0 11px}
+.proto .sep{width:1px;height:18px;background:#D8D3C8}
 
 .pill{height:34px;padding:0 13px;border-radius:var(--r-pill);border:1px solid var(--line);background:#fff;font-size:13px;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
 .pill[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.pill.saipill[aria-pressed="true"]{background:var(--gold);border-color:var(--gold)}
+.switch{width:38px;height:22px;flex:none;border:0;border-radius:var(--r-pill);background:#D9D3C8;padding:3px;display:flex}
+.switch::after{content:"";width:16px;height:16px;border-radius:var(--r-pill);background:#fff;transition:transform .15s}
+.switch[aria-checked="true"]{background:var(--gold-2)}
+.switch[aria-checked="true"]::after{transform:translateX(16px)}
 
 /* ---------- shell ---------- */
 .shell-top,.shell-rail{display:none}
 .app{display:block}
 
-/* ---------- page head ---------- */
 .page-head{padding:14px 16px 2px}
 .page-head h1{font-size:23px;line-height:1.15}
 .status{display:block;margin-top:4px;font-size:13.5px;color:var(--ink-2)}
@@ -77,11 +83,9 @@ a{color:inherit}
 .sec-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .sec h2{font-size:16.5px}
 .count{font-size:12px;color:var(--ink-2);font-weight:600}
-.muted{color:var(--ink-2)}
-.small{font-size:12.5px;color:var(--ink-2)}
+.small{font-size:12.5px;color:var(--ink-2);margin:0}
 .eyebrow{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700}
 
-/* cards + rows */
 .card{border:1px solid var(--line);border-radius:var(--r-lg);background:#fff;padding:14px 16px;display:flex;flex-direction:column;gap:9px;box-shadow:var(--sh-sm)}
 .rows{border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;background:#fff;box-shadow:var(--sh-sm)}
 .row{min-height:52px;width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border:0;border-bottom:1px solid var(--line-2);background:#fff;font-size:14.5px;text-align:left}
@@ -91,37 +95,51 @@ a{color:inherit}
 .row .l{min-width:0;display:flex;flex-direction:column;gap:2px}
 .row .l b{font-weight:600}
 .row .l span{font-size:12.5px;color:var(--ink-2)}
+.row[aria-current="true"]{background:var(--gold-100)}
 .lone{border:1px solid var(--line);border-radius:var(--r-lg);background:#fff}
 .btn{height:44px;border:0;border-radius:var(--r-pill);background:var(--cta);color:#fff;font-size:14px;font-weight:700;padding:0 18px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
 .btn.gold{background:var(--gold-2)}
-.btn.ghost{background:#fff;border:1px solid var(--gold-2);color:var(--gold);height:38px;font-size:13.5px}
-.btn.dark{background:var(--ink)}
+.btn.ghost{background:#fff;border:1px solid var(--gold-2);color:var(--gold)}
 .btn.sm{height:36px;font-size:13px;padding:0 14px}
-.chip{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:var(--r-pill);font-size:11px;font-weight:700;letter-spacing:.02em}
+.chip{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:var(--r-pill);font-size:11px;font-weight:700}
 .chip.warn{background:var(--warn-soft);color:var(--warn-deep)}
 .chip.ok{background:var(--ok-soft);color:var(--ok-deep)}
-.chip.gold{background:var(--gold-100);color:var(--gold)}
+.chip.gold{background:var(--gold-100);color:var(--gold-800)}
 .chip.cta{background:#FBEAE3;color:var(--cta-2)}
-.udot{width:7px;height:7px;border-radius:var(--r-pill);background:var(--warn);flex:none}
+.chip.pri{background:var(--gold);color:#fff;letter-spacing:.04em}
+.chip.plain{background:#fff;border:1px solid var(--line);color:var(--ink-2)}
 .num{font-size:11px;width:22px;height:22px;border-radius:var(--r-pill);background:var(--ink);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;flex:none}
+.num.one{background:var(--gold-100);color:var(--gold-800);border:1px solid var(--gold-2)}
+.udot{width:7px;height:7px;border-radius:var(--r-pill);background:var(--warn);flex:none}
 
-/* ---------- THE DAY (obsidian focal) ---------- */
-.day{background:var(--night);color:var(--night-ink);border-radius:var(--r-xl);padding:18px;display:flex;flex-direction:column;gap:14px}
+.alert{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:var(--r-lg);font-size:13.5px;border:1px solid;width:100%;text-align:left}
+.alert.info{background:var(--info-soft);border-color:#CBD9E2;color:#2F4655}
+.alert.gold{background:var(--gold-100);border-color:#E3D5B7;color:var(--gold-800)}
+.alert.warn{background:var(--warn-soft);border-color:#E8D5AE;color:var(--warn-deep)}
+.alert .l{flex:1;min-width:0}
+
+/* ---------- THE DAY ---------- */
+.day{background:var(--night);color:var(--night-ink);border-radius:var(--r-xl);padding:18px;display:flex;flex-direction:column;gap:13px}
 .day .eyebrow{color:var(--night-gold)}
 .day .date{font-size:24px;font-weight:700;line-height:1.1}
-.day .sub{font-size:12.5px;color:var(--night-2)}
+.day .sub{font-size:12.5px;color:var(--night-2);line-height:1.4}
 .day .cdrow{display:flex;align-items:baseline;gap:8px}
 .day .cd{font-size:46px;font-weight:800;letter-spacing:-.03em;line-height:1}
 .bar{height:5px;border-radius:var(--r-pill);background:rgba(255,255,255,.14);overflow:hidden}
 .bar i{display:block;height:100%;background:var(--night-gold)}
 .day .barlab{font-size:11.5px;color:var(--night-2)}
 .day .barlab b{color:var(--night-gold)}
-.watch{border-top:1px solid var(--night-line);padding-top:12px;display:flex;flex-direction:column;gap:8px}
-.watch .wrow{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;border:0;background:transparent;color:var(--night-ink);padding:0;text-align:left;font-size:13.5px}
-.watch .wrow .t{display:flex;align-items:center;gap:8px;min-width:0}
+.rule{height:1px;background:rgba(255,255,255,.12)}
+.brief{font-size:14.5px;font-weight:600;line-height:1.35;margin:6px 0 10px}
+.bchips{display:flex;gap:6px;flex-wrap:wrap}
+.bchips span{border-radius:var(--r-pill);padding:4px 10px;font-size:11.5px;font-weight:600;background:rgba(255,255,255,.10)}
+.watch{display:flex;flex-direction:column;gap:6px}
+.wrow{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;border:0;background:transparent;color:var(--night-ink);padding:3px 0;text-align:left;font-size:13.5px}
+.wrow .t{display:flex;align-items:center;gap:8px;min-width:0}
+.wrow .t i{font-style:normal;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:800}
 .dot{width:7px;height:7px;border-radius:var(--r-pill);background:var(--night-gold);flex:none}
+.dot.guard{background:#8FB3C9}
 
-/* ---------- vitals ---------- */
 .vitals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .vital{border:1px solid var(--line);border-radius:var(--r-lg);background:#fff;padding:11px 12px;display:flex;flex-direction:column;gap:3px;text-align:left;box-shadow:var(--sh-sm)}
 .vital .k{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
@@ -130,16 +148,14 @@ a{color:inherit}
 .vital .seg{display:flex;height:4px;border-radius:var(--r-pill);overflow:hidden;background:var(--line-2);margin-top:3px}
 .vital .seg i{display:block;height:100%}
 
-/* ---------- needs you ---------- */
-.need{display:flex;align-items:center;gap:11px;padding:12px 14px;border-bottom:1px solid var(--line-2);background:#fff}
+.need{width:100%;display:flex;align-items:center;gap:11px;padding:12px 14px;border:0;border-bottom:1px solid var(--line-2);background:#fff;text-align:left}
 .rows .need:last-child{border-bottom:0}
+.need[aria-current="true"]{background:var(--gold-100)}
 .need .l{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .need .l b{font-size:14.5px;font-weight:700}
-.need .l span{font-size:12.5px;color:var(--ink-2)}
-.need .meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.need .btn{flex:none}
+.need .meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-2)}
+.need .go{flex:none;color:var(--ink-3);font-size:18px}
 
-/* ---------- band (expand in place) ---------- */
 .band .bcard{border:1px solid var(--line);border-radius:var(--r-lg);background:#fff;overflow:hidden;box-shadow:var(--sh-sm)}
 .band .bhead{width:100%;display:flex;align-items:center;gap:10px;padding:12px 14px;border:0;background:#fff;text-align:left}
 .band .bhead .l{flex:1;min-width:0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
@@ -153,8 +169,7 @@ a{color:inherit}
 .foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:4px}
 .foot a{font-size:13px;font-weight:700;color:var(--link);text-decoration:none}
 
-/* ---------- progress rail ---------- */
-.rail{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.rail{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
 .stage{flex:none;min-width:104px;border:1px solid var(--line);border-radius:var(--r-lg);background:#fff;padding:9px 10px;display:flex;flex-direction:column;gap:5px;text-align:left}
 .stage[aria-pressed="true"]{border-color:var(--gold-2);background:var(--gold-100)}
 .stage b{font-size:13px;font-weight:700}
@@ -162,44 +177,56 @@ a{color:inherit}
 .stage .bar{height:4px;background:var(--line-2)}
 .stage .bar i{background:var(--gold-2)}
 .here{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-weight:800}
+.icon-btn{width:42px;height:42px;border:0;background:transparent;display:inline-flex;align-items:center;justify-content:center;border-radius:var(--r-pill);flex:none}
+.icon-btn.ring{border:1px solid var(--line);background:#fff;width:32px;height:32px;font-size:14px}
 
-/* ---------- moment blocks ---------- */
+/* ---------- SAI PATH ---------- */
+[data-sai]{position:relative}
+body.sai-path [data-sai]{outline:2px dashed var(--gold-2);outline-offset:4px;border-radius:var(--r-md)}
+body.sai-path #needCount::after{left:auto!important;right:-6px}
+body.sai-path [data-sai]::after{content:attr(data-sai);position:absolute;top:-11px;left:-6px;z-index:5;
+  background:var(--gold);color:#fff;font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+  padding:2px 7px;border-radius:var(--r-pill);white-space:nowrap;pointer-events:none;box-shadow:0 1px 4px rgba(30,26,18,.35)}
+
+/* ---------- moments ---------- */
 .compact{display:none}
 .onlyday,.onlyafter{display:none}
 body.is-day .onlyday{display:flex} body.is-after .onlyafter{display:flex}
 body.is-day .notday{display:none} body.is-after .notafter{display:none}
-/* on the day + after, the planning stack folds to one line each */
 body.is-day .fold .full,body.is-after .fold .full{display:none}
 body.is-day .fold .compact,body.is-after .fold .compact{display:flex}
-
-.rightcol{display:contents}
 body.is-after .vital[data-k="guests"],
 body.is-after .vital[data-k="papic"],
 body.is-after .vital[data-k="next"]{display:none}
 body.is-after .vitals{grid-template-columns:minmax(0,1fr)}
-/* ORDER - one DOM, reordered by moment */
-.s-day{order:1}.s-need{order:2}.s-coming{order:3}.s-vitals{order:4}.s-band{order:5}.s-progress{order:6}
+
+.rightcol{display:contents}
+.s-alerts{order:0}.s-day{order:1}.s-need{order:2}.s-meanwhile{order:3}.s-coming{order:4}
+.s-vitals{order:5}.s-band{order:6}.s-extras{order:7}.s-progress{order:8}
 .s-now{order:0}.s-wrap{order:0}
-body.is-day .s-now{order:1} body.is-day .s-day{order:2} body.is-day .s-need{order:3} body.is-day .s-band{order:4}
-body.is-day .s-coming{order:5} body.is-day .s-vitals{order:6} body.is-day .s-progress{order:7}
-body.is-after .s-wrap{order:1} body.is-after .s-band{order:2} body.is-after .s-vitals{order:3} body.is-after .s-progress{order:4}
-body.is-after .s-need{order:5} body.is-after .s-coming{order:6} body.is-after .s-day{order:7}
+body.is-day .s-now{order:1} body.is-day .s-day{order:2} body.is-day .s-meanwhile{order:3}
+body.is-day .s-band{order:4} body.is-day .s-need{order:5} body.is-day .s-coming{order:6}
+body.is-day .s-vitals{order:7} body.is-day .s-extras{order:8} body.is-day .s-progress{order:9}
+body.is-after .s-wrap{order:1} body.is-after .s-meanwhile{order:2} body.is-after .s-band{order:3}
+body.is-after .s-vitals{order:4} body.is-after .s-progress{order:5} body.is-after .s-need{order:6}
+body.is-after .s-coming{order:7} body.is-after .s-extras{order:8} body.is-after .s-day{order:9}
 
 /* ---------- panel ---------- */
 .scrim{position:fixed;inset:0;background:rgba(23,22,15,.45);z-index:70;display:none}
 .panel{position:fixed;inset:0;background:#fff;z-index:71;display:none;flex-direction:column}
 .open .scrim{display:block} .open .panel{display:flex}
-.panel-head{display:flex;align-items:center;gap:4px;padding:10px 14px 8px 6px;border-bottom:1px solid var(--line-2)}
-.panel-head .t{flex:1;font-size:17px;font-weight:700}
-.panel-body{flex:1;overflow-y:auto;padding:14px 16px 32px;display:flex;flex-direction:column;gap:10px}
-.icon-btn{width:42px;height:42px;border:0;background:transparent;display:inline-flex;align-items:center;justify-content:center;border-radius:var(--r-pill);flex:none}
-.icon-btn.ring{border:1px solid var(--line);background:#fff;width:34px;height:34px}
+.panel-head{display:flex;align-items:center;gap:4px;padding:10px 14px 10px 6px;border-bottom:1px solid var(--line-2)}
+.panel-head .t{flex:1;min-width:0}
+.panel-head .t .e{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.panel-head .t .h{display:block;font-size:17px;font-weight:700;line-height:1.2}
+.panel-body{flex:1;overflow-y:auto;padding:14px 16px 32px;display:flex;flex-direction:column;gap:12px}
+.panel-body p{margin:0;font-size:14px;line-height:1.5;color:#4A4742}
+.panel-body .btn{align-self:flex-start}
 .toast{position:fixed;left:16px;right:16px;bottom:18px;z-index:80;border-radius:var(--r-lg);background:var(--ink);color:#fff;padding:13px 15px;font-size:13.5px;display:none;justify-content:space-between;align-items:center;gap:12px}
 .toast.on{display:flex}
 .toast button{border:0;background:transparent;color:var(--gold-3);font-weight:700}
 
-/* bottom bar (phone only, the real one) */
-.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;align-items:center;justify-content:space-around;height:62px;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-top:1px solid var(--line-2);font-size:10.5px;color:var(--ink-3)}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;align-items:center;justify-content:space-around;height:62px;background:rgba(255,255,255,.94);border-top:1px solid var(--line-2);font-size:10.5px;color:var(--ink-3)}
 .tabbar span{display:flex;flex-direction:column;align-items:center;gap:3px}
 .tabbar span.on{color:var(--gold)}
 .tabbar i{width:18px;height:18px;border-radius:var(--r-sm);background:currentColor;opacity:.75;display:block}
@@ -222,32 +249,41 @@ body.is-after .s-need{order:5} body.is-after .s-coming{order:6} body.is-after .s
   .page-head h1{font-size:28px}
   .layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;column-gap:28px;row-gap:26px;padding:10px 0 60px;align-items:start}
   .layout > .sec{grid-column:1}
-  .rightcol{display:flex;flex-direction:column;gap:12px;grid-column:2;grid-row:1 / span 10;position:sticky;top:120px;align-self:start}
-  .rightcol .sec{gap:9px}
+  .rightcol{display:flex;flex-direction:column;gap:12px;grid-column:2;grid-row:1 / span 12;position:sticky;top:120px;align-self:start}
   .rightcol .sec-head h2{font-size:14px}
-  .vitals{grid-template-columns:repeat(2,minmax(0,1fr))}
   .band .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
-  .wrapgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-  .nowgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-  .panel{inset:0 0 0 auto;width:420px;box-shadow:-8px 0 24px rgba(23,22,15,.10)}
+  .wrapgrid,.nowgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .panel{inset:0 0 0 auto;width:400px;box-shadow:-8px 0 24px rgba(23,22,15,.10)}
   .toast{left:auto;right:22px;width:340px}
   .stage{min-width:0;flex:1}
   .rail{overflow:visible}
 }
+@media (min-width:1280px){
+  body.open .scrim{display:none}
+  body.open .app{padding-right:400px}
+  body.open .panel{border-left:1px solid var(--line-2);box-shadow:none}
+}
 @media (max-width:1023px){
-  .wrapgrid,.nowgrid{display:flex;flex-direction:column;gap:9px}
-  .band .grid2{display:flex;flex-direction:column;gap:9px}
+  .wrapgrid,.nowgrid,.band .grid2{display:flex;flex-direction:column;gap:9px}
 }
 </style>
 </head>
-<body class="is-planning">
+<body class="is-planning sai-on">
 
 <div class="proto" role="group" aria-label="Prototype controls">
-  <b>Prototype</b>
-  <button class="pill" data-moment="planning" aria-pressed="true">Planning</button>
-  <button class="pill" data-moment="day" aria-pressed="false">On the day</button>
-  <button class="pill" data-moment="after" aria-pressed="false">After</button>
-  <span style="margin-left:auto">Not part of the app</span>
+  <div class="r">
+    <b>Prototype</b>
+    <button class="pill" data-moment="planning" aria-pressed="true">Planning</button>
+    <button class="pill" data-moment="day" aria-pressed="false">On the day</button>
+    <button class="pill" data-moment="after" aria-pressed="false">After</button>
+    <span class="sep"></span>
+    <span style="display:inline-flex;align-items:center;gap:7px">Setnayan&nbsp;AI
+      <button class="switch" role="switch" aria-checked="true" id="saiSwitch" aria-label="Setnayan AI"></button>
+    </span>
+    <button class="pill saipill" data-toggle="path" aria-pressed="false">Show Sai&rsquo;s path</button>
+    <button class="pill" data-open="states">States&hellip;</button>
+    <span style="margin-left:auto">Not part of the app</span>
+  </div>
 </div>
 
 <div class="shell-top">
@@ -267,28 +303,25 @@ body.is-after .s-need{order:5} body.is-after .s-coming{order:6} body.is-after .s
     <em>Go live</em>
     <span>Event Hub Controller</span>
     <em>Around the event</em>
-    <span>Personalisation</span>
-    <span>Hosts</span>
-    <span>Schedule</span>
-    <span>Seat plan</span>
-    <span>Budget</span>
+    <span>Personalisation</span><span>Hosts</span><span>Schedule</span><span>Seat plan</span><span>Budget</span>
   </nav>
 
   <div class="main">
     <div class="page-head">
-      <h1 id="pageTitle">Kumusta, Indalecio &amp; Claire</h1>
+      <h1>Kumusta, Indalecio &amp; Claire</h1>
       <span class="status" id="statusLine"></span>
     </div>
 
     <div class="layout">
 
-      <!-- ═══ ON THE DAY ONLY - what is happening now ═══ -->
+      <section class="sec s-alerts" aria-label="Attention" id="alerts" hidden></section>
+
       <section class="sec s-now onlyday" aria-label="Right now">
         <div class="sec-head"><h2>Right now</h2><button class="pill" data-open="close">Close out the day</button></div>
         <div class="card" style="background:var(--night);color:var(--night-ink);border:0">
           <span class="eyebrow" style="color:var(--night-gold)">Happening now</span>
           <b style="font-size:19px">[Reception &middot; dinner service]</b>
-          <span class="sub" style="font-size:12.5px;color:var(--night-2)">Next: [First dance &middot; 8:40 PM]</span>
+          <span style="font-size:12.5px;color:var(--night-2)">Next: [First dance &middot; 8:40 PM]</span>
         </div>
         <div class="nowgrid">
           <button class="row lone" data-open="live"><span class="l"><b>Live desk</b><span>Announcements &amp; the wall</span></span><span class="v">&rsaquo;</span></button>
@@ -300,89 +333,69 @@ body.is-after .s-need{order:5} body.is-after .s-coming{order:6} body.is-after .s
         </div>
       </section>
 
-      <!-- ═══ AFTER ONLY - that's a wrap ═══ -->
       <section class="sec s-wrap onlyafter" aria-label="Looking back">
         <h2>That&rsquo;s a wrap &mdash; Friday, December 18</h2>
         <div class="wrapgrid">
           <button class="row lone" data-open="wrapstory" style="border-color:var(--cta);background:#FDF6F3">
             <span class="l"><b>Write your story</b><span>[not written yet]</span></span><span class="v cta">Start &rsaquo;</span></button>
-          <button class="row lone" data-toast="Opens /galleries"><span class="l"><b>Photos</b><span>[n] from cameras &amp; guests</span></span><span class="v">&rsaquo;</span></button>
-          <button class="row lone" data-toast="Opens /guests"><span class="l"><b>Guests</b><span>81 &middot; [n] checked in</span></span><span class="v">&rsaquo;</span></button>
-          <button class="row lone" data-toast="Opens /vendors?tab=build"><span class="l"><b>Your team</b><span>2 suppliers &middot; leave a review</span></span><span class="v">&rsaquo;</span></button>
-          <button class="row lone" data-toast="Opens /suite"><span class="l"><b>Suite</b><span>3 services</span></span><span class="v">&rsaquo;</span></button>
-          <button class="row lone" data-toast="Opens your event page"><span class="l"><b>Your page</b><span>[/slug] stays live</span></span><span class="v">&rsaquo;</span></button>
+          <button class="row lone" data-to="/galleries"><span class="l"><b>Photos</b><span>[n] from cameras &amp; guests</span></span><span class="v">&rsaquo;</span></button>
+          <button class="row lone" data-to="/guests"><span class="l"><b>Guests</b><span>81 &middot; [n] checked in</span></span><span class="v">&rsaquo;</span></button>
+          <button class="row lone" data-to="/vendors?tab=build"><span class="l"><b>Your team</b><span>2 suppliers &middot; leave a review</span></span><span class="v">&rsaquo;</span></button>
+          <button class="row lone" data-to="/suite"><span class="l"><b>Suite</b><span>3 services</span></span><span class="v">&rsaquo;</span></button>
+          <button class="row lone" data-to="/[slug]"><span class="l"><b>Your page</b><span>[/slug] stays live</span></span><span class="v">&rsaquo;</span></button>
         </div>
       </section>
 
-      <!-- ═══ RIGHT COLUMN on desktop · plain sections in the phone flow ═══ -->
       <aside class="rightcol">
-      <section class="sec s-day" aria-label="The wedding day">
-        <div class="day">
-          <div>
-            <span class="eyebrow">The wedding day</span>
-            <div class="date" style="margin-top:5px">Friday, December 18</div>
-            <div class="sub">The date is locked</div>
-          </div>
-          <div>
-            <div class="cdrow"><span class="cd" id="cdNum">87</span><span class="sub" id="cdWord">days to go</span></div>
-            <div class="bar" style="margin-top:10px"><i style="width:8%"></i></div>
-            <div class="barlab" style="margin-top:6px"><b>8%</b> locked in</div>
-          </div>
-          <div class="watch notafter">
-            <button class="wrow" data-open="watch">
-              <span class="t"><span class="dot"></span><span>Sai&rsquo;s watch</span></span>
-              <span class="sub">1 flag &rsaquo;</span>
-            </button>
-            <span class="sub" style="font-size:11.5px">Two things land at 8:00 AM on Dec 18.</span>
-          </div>
-        </div>
-
-      </section>
-
-      <!-- ═══ YOUR NUMBERS ═══ -->
-      <section class="sec s-vitals" aria-label="Your numbers">
-        <div class="sec-head"><h2>Your numbers</h2></div>
-        <div class="vitals" id="vitals"></div>
-      </section>
+        <section class="sec s-day" aria-label="The event day">
+          <div class="day" id="dayCard"></div>
+        </section>
+        <section class="sec s-vitals" aria-label="Your numbers">
+          <div class="sec-head"><h2>Your numbers</h2></div>
+          <div class="vitals" id="vitals"></div>
+        </section>
       </aside>
 
-      <!-- ═══ NEEDS YOU - the ONE canonical action list ═══ -->
       <section class="sec s-need fold" aria-label="Needs you">
-        <div class="sec-head full"><h2>Needs you</h2><span class="count" id="needCount">4</span></div>
+        <div class="sec-head full"><h2>Needs you</h2><span class="count" id="needCount"></span></div>
+        <p class="small full" id="needSub"></p>
         <div class="rows full" id="needRows"></div>
-        <button class="row lone compact" data-open="needs"><span class="l"><b>Needs you</b></span><span class="v" id="needCompact">4 open &rsaquo;</span></button>
+        <div class="full" id="venueOffer"></div>
+        <button class="row lone compact" data-open="needs"><span class="l"><b>Needs you</b></span><span class="v" id="needCompact"></span></button>
       </section>
 
-      <!-- ═══ COMING UP - dates, not decisions ═══ -->
+      <section class="sec s-meanwhile" aria-label="Meanwhile" id="meanwhile" hidden></section>
+
       <section class="sec s-coming fold" aria-label="Coming up">
         <div class="sec-head full"><h2>Coming up</h2><span class="count">6 dates</span></div>
+        <p class="small full" id="comingSub"></p>
         <div class="rows full" id="comingRows"></div>
-        <div class="foot full"><span class="small">Checklist 7% done</span><a href="#" data-toast="Opens /checklist">Full checklist &rarr;</a></div>
+        <div class="foot full"><span class="small">Checklist 7% done</span><a href="#" data-to="/checklist">Full checklist &rarr;</a></div>
         <button class="row lone compact" data-open="coming"><span class="l"><b>Coming up</b></span><span class="v">6 dates &rsaquo;</span></button>
       </section>
 
-
-      <!-- ═══ AROUND YOUR EVENT - expands in place (owner ruling 2026-07-13) ═══ -->
       <section class="sec s-band band" aria-label="Around your event">
         <div class="sec-head"><h2>Around your event</h2></div>
         <div class="grid2" id="bandCards"></div>
         <div class="foot">
           <span class="small">Suppliers always appear by company.</span>
-          <a href="#" data-toast="Opens /activity">Recent activity &rarr;</a>
+          <a href="#" data-to="/activity">Recent activity &rarr;</a>
         </div>
       </section>
 
-      <!-- ═══ PROGRESS ═══ -->
+      <section class="sec s-extras" aria-label="Also for you" id="extras" hidden></section>
+
       <section class="sec s-progress" aria-label="Progress">
-        <div class="sec-head"><h2>Progress</h2><span style="display:flex;align-items:center;gap:6px">
-          <span class="count" id="stageNow">Inviting &middot; 52%</span>
-          <button class="icon-btn ring" data-step="-1" aria-label="Previous stage">&larr;</button>
-          <button class="icon-btn ring" data-step="1" aria-label="Next stage">&rarr;</button>
-        </span></div>
+        <div class="sec-head"><h2>Progress</h2>
+          <span style="display:flex;align-items:center;gap:6px">
+            <span class="count" id="stageNow"></span>
+            <button class="icon-btn ring" data-step="-1" aria-label="Previous stage">&larr;</button>
+            <button class="icon-btn ring" data-step="1" aria-label="Next stage">&rarr;</button>
+          </span>
+        </div>
         <div class="rail" id="rail" role="group" aria-label="Stages"></div>
         <div class="card" id="stageCard"></div>
       </section>
-
 
     </div>
   </div>
@@ -396,8 +409,8 @@ body.is-after .s-need{order:5} body.is-after .s-coming{order:6} body.is-after .s
   <div class="scrim" id="scrim"></div>
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="panelTitle">
     <div class="panel-head">
-      <button class="icon-btn" id="panelBack" aria-label="Back"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-      <span class="t" id="panelTitle"></span><span class="muted" id="panelMeta" style="font-size:13px;padding-right:6px"></span>
+      <button class="icon-btn" id="panelBack" aria-label="Close"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <span class="t"><span class="e" id="panelEyebrow"></span><span class="h" id="panelTitle"></span></span>
     </div>
     <div class="panel-body" id="panelBody"></div>
   </div>
@@ -406,42 +419,59 @@ body.is-after .s-need{order:5} body.is-after .s-coming{order:6} body.is-after .s
 
 <script>
 (() => {
-  /* ───────── real data, read off the live page 2026-09-22 ─────────
-     Event 044f7e64 "Indalecio & Claire" · Fri 18 Dec · 87 days out · Setnayan AI active.
-     [SQUARE BRACKETS] = not sourced; see the report. */
+  /* ═══ real data, read off the live page 2026-09-22 · [BRACKETS] = not sourced ═══ */
 
   const NEEDS = [
-    { id:'coord', title:'Lock your coordinator', sub:'Nothing booked · overdue by 278 days',
-      cta:'Browse', to:'/explore?tile=coordinator&from=plan', chip:['warn','overdue'], kind:'book' },
-    { id:'pay',   title:'Papic Guest 500', sub:'Order placed · ref SNCNJ1E3Y8',
-      cta:'Settle', to:'/orders', chip:['cta','₱350'], kind:'pay' },
-    { id:'pick',  title:'Logistics & misc', sub:'2 options saved · none locked',
-      cta:'Compare', to:'/vendors', chip:['gold','2 saved'], kind:'pick' },
-    { id:'rsvp',  title:'77 guests to chase', sub:'4 of 81 have replied',
-      cta:'Open', to:'/guests', chip:null, kind:'chase' },
+    { id:'coord', group:'Book a vendor', groupSub:'23 categories still open',
+      title:'Lock your coordinator', chip:['warn','not booked yet'],
+      sub:'Nothing booked · overdue by 278 days',
+      why:'Your day-of conductor. Best coordinators book 9–12 months out; the earlier you lock yours, the more they can shape every choice downstream.',
+      cta:'Browse coordinators', to:'/explore?tile=coordinator&from=plan' },
+    { id:'pay', group:'Settle a payment', groupSub:'1 waiting',
+      title:'Papic Guest 500', chip:['cta','₱350 pending'],
+      sub:'Order placed · ref SNCNJ1E3Y8',
+      why:'An order is waiting on payment. Until it is settled the service stays pending.',
+      cta:'Settle payment', to:'/orders' },
+    { id:'pick', group:'Pick an option', groupSub:'Saved options waiting on a lock',
+      title:'Pick your logistics & misc', chip:null,
+      sub:'2 options saved · none locked yet',
+      why:'You have shortlisted suppliers here but locked none. Locking is what turns a saved option into a booking.',
+      cta:'Compare & lock', to:'/vendors' },
+    { id:'rsvp', group:'Chase replies', groupSub:'4 of 81 answered',
+      title:'77 guests to chase', chip:null,
+      sub:'4 attending · 77 still to reply',
+      why:'RSVPs typically take about 6 weeks to settle. Your headcount drives seating, catering and the final budget.',
+      cta:'Open the roster', to:'/guests' },
   ];
+  const SETDATE = { id:'setdate', group:'Set up', groupSub:'Everything waits on this',
+    title:'Set your wedding date', chip:['warn','no date yet'],
+    sub:'Your public page, save-the-date and every deadline wait on it',
+    why:'Until the date is set, the date-gated lifecycle (Save-the-Date → Event → Editorial) cannot start and no deadline can be worked out.',
+    cta:'Set the date', to:'/date-selection' };
 
   const COMING = [
-    ['18 Oct','Book your Accommodation','/vendors','typical: 2 months before'],
-    ['18 Oct','Book your Logistics & Misc','/vendors','typical: 2 months before'],
-    ['19 Oct','Pre-Cana seminar cutoff','/contracts','parish rule: 60 days before'],
-    ['18 Nov','Book your Crew Meals','/vendors','typical: 1 month before'],
-    ['18 Dec','Hair & makeup / preparations','/schedule','12:00 AM – 12:00 PM'],
-    ['18 Dec','Vendor ingress & styling','/schedule','2:00 AM – 1:00 PM'],
+    ['18 Oct','Book your Accommodation','typical: 2 months before','/vendors',
+     'Recommended deadline — most couples have this booked about 2 months before the wedding.'],
+    ['18 Oct','Book your Logistics & Misc','typical: 2 months before','/vendors',
+     'Recommended deadline — most couples have this booked about 2 months before the wedding.'],
+    ['19 Oct','Pre-Cana seminar cutoff','parish rule: 60 days before','/contracts',
+     'Most Catholic parishes require completion 60 days before the wedding'],
+    ['18 Nov','Book your Crew Meals','typical: 1 month before','/vendors',
+     'Recommended deadline — most couples have this booked about 1 months before the wedding.'],
+    ['18 Dec','Hair & makeup / preparations','12:00 AM – 12:00 PM','/schedule','Scheduled block · 12:00 AM – 12:00 PM'],
+    ['18 Dec','Vendor ingress & styling','2:00 AM – 1:00 PM','/schedule','Scheduled block · 2:00 AM – 1:00 PM'],
   ];
 
   const VITALS = [
-    { k:'Guests', n:'4', d:'attending · 77 to reply', to:'/guests',
-      seg:[['#5E7C52',5],['#B77E2E',95]] },
+    { k:'Guests', n:'4', d:'attending · 77 to reply', to:'/guests', seg:[['#5E7C52',5],['#B77E2E',95]] },
     { k:'Budget', n:'₱26,499', d:'committed of ₱2,250,000', to:'/budget', seg:[['#8A6B39',1],['#EDE8DE',99]] },
-    { k:'Papic',  n:'100,050', d:'shots ready · 5 cameras out', to:'/studio/papic', note:'enough for your event' },
-    { k:'Next',   n:'18 Dec', d:'Hair & makeup / preparations', to:'/schedule?view=journey' },
+    { k:'Papic', n:'100,050', d:'shots ready · 5 cameras out', to:'/studio/papic', note:'enough for your event' },
+    { k:'Next', n:'18 Dec', d:'Hair & makeup / preparations', to:'/schedule?view=journey' },
   ];
 
   const BAND = [
-    { id:'hosts', name:'Hosts', count:'1 account', cta:['Add a host','/hosts'],
-      rows:[['You','host']], empty:'Invite your partner, family or a coordinator.' },
-    { id:'team', name:'Your team', count:'2 of 25 booked', cta:['Manage','/vendors'],
+    { id:'hosts', name:'Hosts', count:'1 account', cta:['Add a host','/hosts'], rows:[['You','host']] },
+    { id:'team', name:'Your team', count:'2 of 25 booked', cta:['Manage vendors','/vendors'],
       rows:[['Seda Vertis North','venue · contracted'],
             ['Santuario de San Vicente de Paul Parish & Shrine of the Poor','religious venue · contracted']] },
     { id:'threads', name:'Conversations', count:'1 unread', cta:['Open threads','/messages'],
@@ -452,70 +482,158 @@ body.is-after .s-need{order:5} body.is-after .s-coming{order:6} body.is-after .s
       rows:[['Hair & makeup / preparations','18 Dec · pre-ceremony'],
             ['Vendor ingress & styling','18 Dec · pre-ceremony'],
             ['Guests arrive','18 Dec · pre-ceremony'],
-            ['Ceremony','18 Dec · ceremony'],
-            ['+5 more blocks','']] },
+            ['Ceremony','18 Dec · ceremony'],['+5 more blocks','']] },
   ];
 
-  const STAGES = [
-    ['Dreaming',80],['Booking',8],['Inviting',52],['Finalizing',33],['Wedding day',0],['After',0],
-  ];
-  const STAGE_DETAIL = {
-    2:{ done:['Guest list built — 81 invited','RSVPs coming in — 4 of 81 answered'], todo:[],
-        note:'4 attending so far — RSVPs typically settle in about 6 weeks.' },
-  };
-  const WATCH = 'Two things land on Fri, Dec 18, 8:00 AM: Hair & makeup / preparations and Vendor ingress & styling. That’s a clash — want to resolve it now?';
+  const STAGES = [['Dreaming',80],['Booking',8],['Inviting',52],['Finalizing',33],['Wedding day',0],['After',0]];
+  const STAGE_DETAIL = { 2:{ done:['Guest list built — 81 invited','RSVPs coming in — 4 of 81 answered'],
+    note:'4 attending so far — RSVPs typically take about 6 weeks to settle.' } };
 
-  /* ───────── state ───────── */
-  const S = { moment:'planning', open:{ team:false, services:false, sched:false, hosts:false, threads:false },
-              stage:2, panel:null, done:{} };
+  const WATCH = [{ id:'clash', cat:'guard', tpl:'[template id]',
+    copy:'Two things land on Fri, Dec 18, 8:00 AM: Hair & makeup / preparations and Vendor ingress & styling. That’s a clash — want to resolve it now?' }];
+  const BRIEFING = 'You’re 8% locked in, 2 decisions need you, next deadline overdue by 278 days.';
+
+  const STATES = [
+    ['access',  'Access request waiting',   'a coordinator asked to join'],
+    ['prep',    'Prepare for event day',    'T-3 days → T+1 day'],
+    ['refused', 'A read was refused',       'must be SAID, not shown as empty'],
+    ['nodate',  'No date set yet',          'event_date is NULL'],
+    ['handover','A supplier delivered',     'handover not acknowledged'],
+    ['papicnew','Free camera not used yet', 'nothing shot yet, not dismissed'],
+    ['nikah',   'Muslim wedding track',     'ceremony_type muslim'],
+    ['chinese', 'Chinese (Tsinoy) track',   'ceremony_type chinese'],
+    ['annual',  'Recurring event type',     'canPlanNextYear'],
+    ['aioffer', 'Setnayan AI not owned',    'paywall on · event lacks AI'],
+    ['novenue', 'No venue booked',          'free first-shortlist offer available'],
+  ];
+
+  const S = { moment:'planning', sai:true, path:false, stage:2, panel:null, arg:null,
+              open:{}, done:{}, on:{} };
+  STATES.forEach(([k]) => (S.on[k] = false));
+
   const $ = (id) => document.getElementById(id);
-  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const esc = (t) => String(t).replace(/[&<>"]/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const toast = (t) => { $('toastText').textContent = t; $('toast').classList.add('on'); };
   $('toastOk').onclick = () => $('toast').classList.remove('on');
-  const live = () => NEEDS.filter((n) => !S.done[n.id]);
 
-  /* ───────── render ───────── */
+  const needList = () => {
+    const base = S.on.nodate ? [SETDATE].concat(NEEDS) : NEEDS;
+    return base.filter((n) => !S.done[n.id]);
+  };
+  /* the label only exists while "Show Sai's path" is on */
+  const sai = (label) => (S.path ? ' data-sai="' + label + '"' : '');
+
   function render() {
-    document.body.className = 'is-' + S.moment;  // 'day'/'after' alone would collide with the .day card class
+    document.body.className = 'is-' + S.moment + (S.sai ? ' sai-on' : '') +
+      (S.path ? ' sai-path' : '') + (S.panel ? ' open' : '');
     document.querySelectorAll('[data-moment]').forEach((b) =>
       b.setAttribute('aria-pressed', String(b.dataset.moment === S.moment)));
+    $('saiSwitch').setAttribute('aria-checked', String(S.sai));
+    document.querySelector('[data-toggle="path"]').setAttribute('aria-pressed', String(S.path));
 
-    const n = live().length;
-    const stat = {
-      planning: '<b>87 days</b> · 8% locked in · <b>' + n + '</b> need you',
+    const list = needList(), n = list.length;
+    $('statusLine').innerHTML = {
+      planning: (S.on.nodate ? '<b>No date yet</b>' : '<b>87 days</b>') +
+                ' · 8% locked in · <b>' + n + '</b> need you',
       day:      '<b>Today</b> · [Reception · dinner service] · 9 blocks',
       after:    '<b>Friday, December 18</b> · that’s a wrap · 1 thing left',
     }[S.moment];
-    $('statusLine').innerHTML = stat;
-    $('cdNum').textContent = S.moment === 'planning' ? '87' : S.moment === 'day' ? '0' : '—';
-    $('cdWord').textContent = S.moment === 'planning' ? 'days to go' : S.moment === 'day' ? 'it’s today' : 'it happened';
-    $('needCount').textContent = n ? n : 'all clear';
-    $('needCompact').textContent = (n ? n + ' open' : 'all clear') + ' ›';
-    $('stageNow').textContent = STAGES[S.stage][0] + ' · ' + STAGES[S.stage][1] + '%';
+
+    /* alerts */
+    const al = [];
+    if (S.on.access) al.push('<button class="alert info" data-open="access"><span class="l"><b>1 access request is waiting</b></span><span>&rsaquo;</span></button>');
+    if (S.on.prep) al.push('<button class="alert gold" data-open="prep"><span class="l"><b>Prepare for event day</b> · so it works on weak signal</span><span>&rsaquo;</span></button>');
+    if (S.on.refused) al.push('<div class="alert warn"><span class="l">Some of this page is missing — we couldn’t load your suppliers.</span></div>');
+    $('alerts').innerHTML = al.join(''); $('alerts').hidden = !al.length;
+
+    /* the day */
+    const nd = S.on.nodate;
+    const cd  = S.moment === 'planning' ? (nd ? '—' : '87') : S.moment === 'day' ? '0' : '—';
+    const cdw = nd && S.moment === 'planning' ? 'date not set'
+              : S.moment === 'planning' ? 'days to go' : S.moment === 'day' ? 'it’s today' : 'it happened';
+    $('dayCard').innerHTML =
+      '<div><span class="eyebrow">The wedding day</span>' +
+      '<div class="date" style="margin-top:5px">' + (nd ? 'Date not set' : 'Friday, December 18') + '</div>' +
+      '<div class="sub">' + (nd ? 'Pick it — everything below dates itself from it' : 'The date is locked') + '</div></div>' +
+      '<div><div class="cdrow"><span class="cd">' + cd + '</span><span class="sub">' + cdw + '</span></div>' +
+      '<div class="bar" style="margin-top:10px"><i style="width:8%"></i></div>' +
+      '<div class="barlab" style="margin-top:6px"><b>8%</b> locked in</div></div>' +
+      (S.sai
+        ? '<div class="rule"></div>' +
+          '<div' + sai('Sai 1 · briefing') + '><span class="eyebrow">Sai · your briefing</span>' +
+          '<p class="brief">' + esc(BRIEFING) + '</p>' +
+          '<div class="bchips"><span>87 days to go</span><span>Most urgent: lock your coordinator</span></div></div>' +
+          '<div class="rule"></div>' +
+          '<div class="watch"' + sai('Sai 2 · the watch') + '>' +
+          '<span class="eyebrow">Setnayan AI · the watch · ' + WATCH.length + '</span>' +
+          WATCH.map((w) =>
+            '<button class="wrow" data-open="watch" data-arg="' + w.id + '">' +
+            '<span class="t"><span class="dot ' + w.cat + '"></span><i>' +
+            (w.cat === 'guard' ? 'Guard' : 'Secretary') + '</i></span><span class="sub">read &rsaquo;</span></button>' +
+            '<span class="sub" style="font-size:11.5px">' + esc(w.copy.slice(0, 62)) + '…</span>').join('') +
+          '</div>'
+        : '<div class="rule"></div><div class="sub">Setnayan AI is off for this event. ' +
+          'Nothing here stops working — you rank your own list.</div>');
 
     /* needs you */
-    $('needRows').innerHTML = n ? live().map((x) =>
-      '<div class="need"><span class="num">' + (live().indexOf(x) + 1) + '</span>' +
+    $('needCount').textContent = n ? n + (S.sai ? ' · ranked' : '') : 'all clear';
+    if (S.path && S.sai) $('needCount').setAttribute('data-sai', 'Sai 3 · “· ranked”');
+    else $('needCount').removeAttribute('data-sai');
+    $('needCompact').textContent = (n ? n + ' open' : 'all clear') + ' ›';
+    $('needSub').textContent = S.sai
+      ? 'Ranked by what closes soonest — each one links to its room.'
+      : 'Choices only you can make — everything else keeps moving without you.';
+    if (S.path) $('needSub').setAttribute('data-sai', 'Sai 4 · the wording'); else $('needSub').removeAttribute('data-sai');
+    $('needSub').hidden = !n;
+    $('needRows').innerHTML = n ? list.map((x, i) =>
+      '<button class="need" data-need="' + x.id + '" aria-current="' + (S.panel === 'need' && S.arg === x.id) + '">' +
+      '<span class="num' + (S.sai ? ' one' : '') + '"' +
+        (S.sai && i === 0 ? sai('Sai 5 · the ranking') : '') + '>' + (i + 1) + '</span>' +
       '<span class="l"><b>' + esc(x.title) + '</b><span class="meta">' +
         (x.chip ? '<span class="chip ' + x.chip[0] + '">' + esc(x.chip[1]) + '</span>' : '') +
         esc(x.sub) + '</span></span>' +
-      '<button class="btn sm ' + (x.kind === 'pay' ? '' : 'gold') + '" data-need="' + x.id + '">' + esc(x.cta) + '</button></div>'
-    ).join('') : '<div class="need"><span class="l"><b>Nothing needs you today.</b><span>Next date: 18 Oct · Accommodation</span></span></div>';
+      '<span class="go">&rsaquo;</span></button>').join('')
+      : '<div class="need"><span class="l"><b>Nothing needs you today.</b>' +
+        '<span class="meta">Next date: 18 Oct · Accommodation</span></span></div>';
+
+    /* the FREE Sai — only when Sai is OFF and no venue is booked */
+    $('venueOffer').innerHTML = (!S.sai && S.on.novenue)
+      ? '<div class="card" style="border-color:var(--gold-2);background:#FDFBF6"' + sai('Sai · free, when off') + '>' +
+        '<span class="chip gold" style="align-self:flex-start">Setnayan AI · Free</span>' +
+        '<b style="font-size:15.5px">Let Sai find your first venue shortlist — free</b>' +
+        '<p class="small">Sai picks up to 5 reception venues that fit your date, budget &amp; area and puts them on your shortlist.</p>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+        '<button class="btn sm" data-toast="Sai is looking…">Build my venue shortlist</button>' +
+        '<button class="btn sm ghost" data-to="/vendors?open=reception">Browse on your own</button></div>' +
+        '<p class="small" style="color:var(--warn-deep)">⚠ the live page prints a price under this card — see the report</p></div>'
+      : '';
+
+    /* meanwhile */
+    $('meanwhile').innerHTML = S.on.handover
+      ? '<span class="eyebrow" style="color:var(--ink-3)">Meanwhile</span>' +
+        '<button class="row lone" data-open="handover"><span class="l">' +
+        '<b>[Studio Hiraya] delivered your gallery.</b><span>+[1] more waiting in your vendor rooms.</span>' +
+        '</span><span class="v gold">Look &rsaquo;</span></button>' : '';
+    $('meanwhile').hidden = !S.on.handover;
 
     /* coming up */
-    $('comingRows').innerHTML = COMING.map(([d, t, to, hint]) =>
-      '<button class="row" data-to="' + to + '"><span class="l"><b>' + esc(t) + '</b><span>' + esc(hint) + '</span></span>' +
-      '<span class="v">' + d + ' ›</span></button>').join('');
+    $('comingSub').textContent = S.sai ? 'In the order Sai would take them.' : 'By date.';
+    if (S.path && S.sai) $('comingSub').setAttribute('data-sai', 'Sai 6 · ordering');
+    else $('comingSub').removeAttribute('data-sai');
+    $('comingRows').innerHTML = COMING.map(([d, t, hint], i) =>
+      '<button class="row" data-coming="' + i + '" aria-current="' + (S.panel === 'coming' && S.arg === String(i)) + '">' +
+      '<span class="l"><b>' + esc(t) + '</b><span>' + esc(hint) + '</span></span>' +
+      '<span class="v">' + d + ' &rsaquo;</span></button>').join('');
 
     /* vitals */
     $('vitals').innerHTML = VITALS.map((v) =>
-      '<button class="vital" data-k="' + v.k.toLowerCase() + '" data-to="' + v.to + '"><span class="k">' + esc(v.k) + '</span>' +
-      '<span class="n">' + esc(v.n) + '</span><span class="d">' + esc(v.d) + '</span>' +
+      '<button class="vital" data-k="' + v.k.toLowerCase() + '" data-to="' + v.to + '">' +
+      '<span class="k">' + esc(v.k) + '</span><span class="n">' + esc(v.n) + '</span>' +
+      '<span class="d">' + esc(v.d) + '</span>' +
       (v.seg ? '<span class="seg">' + v.seg.map(([c, w]) => '<i style="background:' + c + ';width:' + w + '%"></i>').join('') + '</span>' : '') +
-      (v.note ? '<span class="d" style="color:var(--ok-deep)">' + esc(v.note) + '</span>' : '') +
-      '</button>').join('');
+      (v.note ? '<span class="d" style="color:var(--ok-deep)">' + esc(v.note) + '</span>' : '') + '</button>').join('');
 
-    /* band - expand in place */
+    /* band */
     $('bandCards').innerHTML = BAND.map((b) => {
       const on = !!S.open[b.id];
       return '<div class="bcard"><button class="bhead" data-band="' + b.id + '" aria-expanded="' + on + '">' +
@@ -525,88 +643,154 @@ body.is-after .s-need{order:5} body.is-after .s-coming{order:6} body.is-after .s
         (on ? '<div class="bbody">' + b.rows.map(([nm, meta]) =>
           '<span class="mini"><span class="n">' + esc(nm) + '</span><span class="small">' + esc(meta) + '</span></span>').join('') +
           '<div class="foot" style="border-top:1px solid var(--line-2);margin-top:2px"><span></span>' +
-          '<a href="#" data-to="' + b.cta[1] + '">' + esc(b.cta[0]) + ' &rarr;</a></div></div>' : '') +
-      '</div>';
+          '<a href="#" data-to="' + b.cta[1] + '">' + esc(b.cta[0]) + ' &rarr;</a></div></div>' : '') + '</div>';
     }).join('');
 
+    /* also for you */
+    const exRow = (k, t, s, c) => '<button class="row" data-open="ex" data-arg="' + k + '">' +
+      '<span class="l"><b>' + t + '</b><span>' + s + '</span></span><span class="v gold">' + c + ' &rsaquo;</span></button>';
+    const ex = [];
+    if (S.on.papicnew) ex.push(exRow('papicnew','Your free camera is ready','One free camera + a shared pool, on every event','Set up'));
+    if (S.on.nikah)    ex.push(exRow('nikah','The five essentials of your Nikah','Wali · witnesses · mahr · imam · separation','Open'));
+    if (S.on.chinese)  ex.push(exRow('chinese','Tea ceremony serving order','Groom’s side, then bride’s, by seniority','Plan'));
+    if (S.on.annual)   ex.push(exRow('annual','Make it an annual tradition','Carries the details forward; fresh guest list','Plan next year'));
+    if (S.on.aioffer && !S.sai) ex.push(exRow('aioffer','Setnayan AI','Briefing, ranking and a background guard','See what changes'));
+    $('extras').innerHTML = ex.length
+      ? '<div class="sec-head"><h2>Also for you</h2><span class="count">' + ex.length + '</span></div>' +
+        '<div class="rows">' + ex.join('') + '</div>' : '';
+    $('extras').hidden = !ex.length;
+
     /* progress */
+    $('stageNow').textContent = STAGES[S.stage][0] + ' · ' + STAGES[S.stage][1] + '%';
     $('rail').innerHTML = STAGES.map(([nm, p], i) =>
       '<button class="stage" data-stage="' + i + '" aria-pressed="' + (i === S.stage) + '">' +
       (i === S.stage ? '<span class="here">You are here</span>' : '') +
       '<b>' + esc(nm) + '</b><span class="bar"><i style="width:' + p + '%"></i></span>' +
       '<span class="p">' + p + '% complete</span></button>').join('');
     const d = STAGE_DETAIL[S.stage];
-    $('stageCard').innerHTML = d
-      ? '<b style="font-size:14px">' + esc(STAGES[S.stage][0]) + '</b>' +
-        d.done.map((t) => '<span class="mini"><span class="n">✓ ' + esc(t) + '</span><span class="chip ok">Set na ’yan</span></span>').join('') +
-        (d.todo.length ? d.todo.map((t) => '<span class="mini"><span class="n">' + esc(t) + '</span></span>').join('')
-                       : '<span class="small">Nothing left in this stage.</span>') +
-        '<span class="small">' + esc(d.note) + '</span>'
-      : '<b style="font-size:14px">' + esc(STAGES[S.stage][0]) + '</b><span class="small">[' + STAGES[S.stage][1] + '% — stage detail not captured for this stage]</span>';
+    $('stageCard').innerHTML = '<b style="font-size:14px">' + esc(STAGES[S.stage][0]) + '</b>' +
+      (d ? d.done.map((t) => '<span class="mini"><span class="n">✓ ' + esc(t) +
+             '</span><span class="chip ok">Set na ’yan</span></span>').join('') +
+           '<p class="small">Nothing left in this stage.</p>'
+         : '<p class="small">[' + STAGES[S.stage][1] + '% — stage detail not captured for this stage]</p>') +
+      (S.sai && d ? '<p class="small" style="color:var(--gold-800)"' + sai('Sai 7 · stage note') + '>✦ ' + esc(d.note) + '</p>' : '');
 
     renderPanel();
   }
 
-  /* ───────── panel ───────── */
+  /* ═══ sub-screens — the shipped inspector shape: eyebrow · title · chips · copy · ONE cta ═══ */
+  const ctaBtn = (label, to) => '<button class="btn" data-to="' + to + '">' + esc(label) + ' →</button>';
+  const chips = (chip, groupSub) => '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
+    (chip ? '<span class="chip ' + chip[0] + '">' + esc(chip[1]) + '</span>' : '') +
+    '<span class="chip plain">' + esc(groupSub) + '</span></div>';
+
   const PANELS = {
-    watch: () => ['Sai’s watch', '1 flag',
-      '<div class="card"><span class="eyebrow">Guard</span><span style="font-size:14px;line-height:1.4">' + esc(WATCH) + '</span>' +
-      '<div style="display:flex;gap:8px"><button class="btn sm" data-act="resolve">Resolve the clash</button>' +
-      '<button class="btn sm ghost" data-act="close">Not now</button></div></div>' +
-      '<span class="small">Sai fires a few alerts a week at most — deduped, most urgent first.</span>'],
-    needs: () => ['Needs you', live().length + ' open',
-      live().map((x) => '<button class="row lone" data-need="' + x.id + '"><span class="l"><b>' + esc(x.title) +
-        '</b><span>' + esc(x.sub) + '</span></span><span class="v gold">' + esc(x.cta) + ' ›</span></button>').join('')
-      || '<span class="small">All clear.</span>'],
-    coming: () => ['Coming up', '6 dates',
-      COMING.map(([d, t, to, hint]) => '<button class="row lone" data-to="' + to + '"><span class="l"><b>' +
+    need: (id) => {
+      const x = NEEDS.concat([SETDATE]).find((y) => y.id === id) || NEEDS[0];
+      return [x.group, x.title, chips(x.chip, x.groupSub) + '<p>' + esc(x.sub) + '</p><p>' + esc(x.why) + '</p>' +
+        ctaBtn(x.cta, x.to) + '<p class="small">One action — the same room the row points at.</p>'];
+    },
+    coming: (i) => {
+      const r = COMING[+i];
+      return ['Dates coming up', r[1], chips(null, r[0]) + '<p>' + esc(r[4]) + '</p>' + ctaBtn('Open', r[3]) +
+        (r[1] === 'Book your Crew Meals'
+          ? '<p class="small" style="color:var(--warn-deep)">⚠ the live page prints “about 1 months” — see the report</p>' : '')];
+    },
+    watch: (id) => {
+      const w = WATCH.find((x) => x.id === id) || WATCH[0];
+      const role = w.cat === 'guard' ? 'Guard' : 'Secretary';
+      return ['Sai on watch', role,
+        '<p style="font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--info)">' +
+        role + ' · ' + esc(w.tpl) + '</p><p>' + esc(w.copy) + '</p>' +
+        '<button class="btn gold" data-act="resolve">Resolve the clash →</button>' +
+        '<p class="small">A background guard surfaced this — it only speaks up when something changes. There’s nothing you must do.</p>'];
+    },
+    needs: () => ['Needs you', needList().length + ' open',
+      needList().map((x) => '<button class="row lone" data-need="' + x.id + '"><span class="l"><b>' +
+        esc(x.title) + '</b><span>' + esc(x.sub) + '</span></span><span class="v gold">' +
+        esc(x.cta) + ' ›</span></button>').join('') || '<p>All clear.</p>'],
+    comingAll: () => ['Coming up', '6 dates',
+      COMING.map(([d, t, hint], i) => '<button class="row lone" data-coming="' + i + '"><span class="l"><b>' +
         esc(t) + '</b><span>' + esc(hint) + '</span></span><span class="v">' + d + ' ›</span></button>').join('')],
-    close: () => ['Close out the day', '',
-      '<span style="font-size:14.5px;line-height:1.45">Marks the celebration finished. Your planning tools stay, and the page turns to the looking-back view.</span>' +
-      '<button class="btn" data-act="wrap">Close out the day</button>' +
-      '<span class="small">It also flips on its own at 06:00 the morning after.</span>'],
-    live: () => ['Live desk', '', '<span class="small">[Opens /live — announcements, the photo wall and what is happening now.]</span>'],
-    table: () => ['Your table', '', '<span class="small">[Head table + nearby tables — not captured; this event is 87 days out.]</span>'],
-    wall: () => ['Photo wall', '', '<span class="small">[Live wall — shows only when LIVE_WALL is owned.]</span>'],
-    prog: () => ['Programme', '9 blocks',
+    states: () => ['Prototype', 'What else this page can render',
+      '<p>The live event shows none of these. Flip one on and it lands where it belongs.</p>' +
+      STATES.map(([k, label, cond]) =>
+        '<div class="row lone" style="cursor:default"><span class="l"><b>' + esc(label) + '</b>' +
+        '<span>' + esc(cond) + '</span></span><button class="switch" role="switch" aria-checked="' +
+        !!S.on[k] + '" data-state="' + k + '" aria-label="' + esc(label) + '"></button></div>').join('')],
+    access: () => ['Access requests', '1 access request is waiting',
+      '<p>[A coordinator asked to join this event.] The host decides what to share — the doorway renders nothing at all when nothing is waiting.</p>' +
+      ctaBtn('Open requests', '/access-requests')],
+    prep: () => ['Event day', 'Prepare for event day',
+      '<p>Downloads the schedule, seating and contacts so the day works on weak signal. Shows only from 3 days before to 1 day after.</p>' +
+      ctaBtn('Prepare', '/live')],
+    handover: () => ['Meanwhile', '[Studio Hiraya] delivered your gallery',
+      '<p>A supplier left something in their workspace. “Confirm receipt” there is the one dismissal — acknowledging it clears this row here.</p>' +
+      '<p class="small">The thumbnail is a hatched placeholder on purpose: a handover is a link or a file, not a resolvable preview.</p>' +
+      ctaBtn('Look', '/vendors/[id]/workspace')],
+    ex: (k) => ({
+      papicnew: ['Papic', 'Your free camera is ready',
+        '<p>Every event is armed at creation with a free shared pool of credits and one free dedicated camera. This says so once, and disappears the moment the first photo is shot.</p>' +
+        ctaBtn('Set up Papic', '/studio/papic')],
+      nikah: ['Muslim wedding', 'The five essentials of your Nikah',
+        '<p>The five validity pillars as a checklist, plus the mahr and gender-separation editor. Wali, witnesses and imam are counted off your guest roles.</p>' +
+        ctaBtn('Open', '/guests')],
+      chinese: ['Chinese wedding', 'Tea ceremony serving order',
+        '<p>Plan who you serve first — groom’s side, then bride’s, in order of seniority. Free; never routed through the paid add-ons catalogue.</p>' +
+        ctaBtn('Plan the order', '/guests/tea-ceremony')],
+      annual: ['Recurring event', 'Make it an annual tradition',
+        '<p>Clones this event’s details into next year’s planning instance. Details, not the guest list — that starts fresh.</p>' +
+        ctaBtn('Plan next year', '/create-event')],
+      aioffer: ['Setnayan AI', 'What turning Sai on changes',
+        '<p>Seven places on this page change: the briefing and the watch inside the day card, “· ranked” on the count, the wording under Needs you and under Coming up, the gold ranking numbers, the order the dates come in, and the note under your stage. An eighth appears only when Sai is OFF — the free first-venue shortlist.</p>' +
+        '<p class="small">Price: read <b>platform_retail_catalog_v2</b>. The live overview and the catalogue disagree — see the report.</p>' +
+        '<button class="btn" data-act="saion">Turn Sai on in the prototype</button>'],
+    }[k] || ['—', '—', '<p>[not captured]</p>']),
+    close: () => ['On the day', 'Close out the day',
+      '<p>Marks the celebration finished. The planning tools stay; the page turns to the looking-back view. It also flips on its own at 06:00 the morning after.</p>' +
+      '<button class="btn" data-act="wrap">Close out the day</button>'],
+    live: () => ['On the day', 'Live desk', '<p>[Opens /live — announcements, the photo wall and what is happening now.]</p>'],
+    table: () => ['On the day', 'Your table', '<p>[Head table + nearby tables — not captured; this event is 87 days out.]</p>'],
+    wall: () => ['On the day', 'Photo wall', '<p>[Live wall — renders only when LIVE_WALL is owned.]</p>'],
+    prog: () => ['On the day', 'Programme',
       BAND[4].rows.map(([nm, meta]) => '<span class="mini"><span class="n">' + esc(nm) + '</span><span class="small">' + esc(meta) + '</span></span>').join('')],
-    broadcast: () => ['Coordinator', '', '<span class="small">[Latest coordinator broadcast + call times — none on this event.]</span>'],
-    help: () => ['Get help', '', '<span class="small">[Same-day suppliers nearest the venue — not captured.]</span>'],
-    wrapstory: () => ['Write your story', '',
-      '<span style="font-size:14.5px;line-height:1.45">Words, photos and a front page. The last thing left to do.</span>' +
-      '<button class="btn" data-toast="Opens /story">Open the story maker</button>'],
+    broadcast: () => ['On the day', 'Coordinator', '<p>[Latest coordinator broadcast + vendor call times — none on this event.]</p>'],
+    help: () => ['On the day', 'Get help', '<p>[Verified, paid suppliers who opted into same-day work, nearest the venue first.]</p>'],
+    wrapstory: () => ['After', 'Write your story',
+      '<p>Words, photos and a front page. The last thing left to do.</p>' + ctaBtn('Open the story maker', '/story')],
   };
 
   function renderPanel() {
-    const wrap = $('panelWrap');
-    wrap.classList.toggle('open', !!S.panel);
+    $('panelWrap').classList.toggle('open', !!S.panel);
     if (!S.panel) return;
-    const [t, m, html] = PANELS[S.panel]();
-    $('panelTitle').textContent = t; $('panelMeta').textContent = m; $('panelBody').innerHTML = html;
+    const fn = PANELS[S.panel];
+    if (!fn) return;
+    const out = fn(S.arg);
+    $('panelEyebrow').textContent = out[0];
+    $('panelTitle').textContent = out[1];
+    $('panelBody').innerHTML = out[2];
   }
 
-  /* ───────── events ───────── */
   document.addEventListener('click', (e) => {
-    const t = e.target.closest('[data-moment],[data-band],[data-stage],[data-step],[data-open],[data-need],[data-to],[data-toast],[data-act]');
+    const t = e.target.closest('#saiSwitch,[data-moment],[data-toggle],[data-state],[data-band],[data-stage],[data-step],[data-open],[data-need],[data-coming],[data-to],[data-toast],[data-act]');
     if (!t) return;
     e.preventDefault();
     const d = t.dataset;
-    if (d.moment) { S.moment = d.moment; S.panel = null; }
+    if (t.id === 'saiSwitch') S.sai = !S.sai;
+    else if (d.moment) { S.moment = d.moment; S.panel = null; }
+    else if (d.toggle === 'path') S.path = !S.path;
+    else if (d.state) S.on[d.state] = !S.on[d.state];
     else if (d.band) S.open[d.band] = !S.open[d.band];
     else if (d.stage) S.stage = +d.stage;
     else if (d.step) S.stage = Math.min(STAGES.length - 1, Math.max(0, S.stage + (+d.step)));
-    else if (d.open) S.panel = d.open;
-    else if (d.need) {
-      const x = NEEDS.find((y) => y.id === d.need);
-      toast('Opens ' + x.to);
-      S.done[x.id] = true;            // so "all clear" is reachable
-      if (S.panel === 'needs' && !live().length) S.panel = null;
-    }
-    else if (d.to) toast('Opens ' + d.to);
+    else if (d.need) { S.panel = 'need'; S.arg = d.need; }
+    else if (d.coming) { S.panel = 'coming'; S.arg = d.coming; }
+    else if (d.open) { S.panel = (d.open === 'coming' ? 'comingAll' : d.open); S.arg = d.arg || null; }
+    else if (d.to) { toast('Opens ' + d.to); if (S.panel === 'need') { S.done[S.arg] = true; } S.panel = null; }
     else if (d.toast) toast(d.toast);
     else if (d.act === 'wrap') { S.moment = 'after'; S.panel = null; }
+    else if (d.act === 'saion') { S.sai = true; S.panel = null; }
     else if (d.act === 'resolve') { toast('Opens /schedule — the two 8:00 AM blocks'); S.panel = null; }
-    else if (d.act === 'close') S.panel = null;
     render();
   });
   $('panelBack').onclick = () => { S.panel = null; render(); };

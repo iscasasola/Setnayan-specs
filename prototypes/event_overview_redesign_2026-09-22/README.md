@@ -1,5 +1,10 @@
 # Event overview — redesign prototype (2026-09-22)
 
+> ✅ **OWNER APPROVED 2026-09-22 — "yes to all" on the three rulings** (a date is not a decision ·
+> one rank mark, not two · after the day the stale vitals go). Recorded in `DECISION_LOG.md`.
+> The price discrepancy at the bottom of this file is **still open** — it is money, and it was
+> not one of the three.
+
 **Route:** `/dashboard/[eventId]` — the couple's event Home / Overview.
 Not the Event Hub Controller (`GO LIVE` in the rail), not the public event page.
 
@@ -7,7 +12,40 @@ Built with the method in `REDESIGN_PAGE_PROMPT_2026-09-21.md`, copying the shape
 `prototypes/papic_controller_redesign_2026-09-21/papic-controller-prototype.html`.
 
 **File:** `event-overview-prototype.html` — one file, opens in any browser, phone and desktop.
-Prototype bar at the top switches the moment: **Planning · On the day · After**.
+
+The prototype bar carries four controls, none of them part of the app:
+
+| Control | What it shows |
+|---|---|
+| **Planning · On the day · After** | the three moments; the same DOM re-ordered by CSS `order` |
+| **Setnayan AI** on/off | the page's **two states**. The live event is AI-on only, so the free state had never been seen. |
+| **Show Sai's path** | outlines and numbers the **7** places Sai changes the page (+1 that appears only when Sai is **off**) |
+| **States…** | **11** conditional blocks the live event does not meet the condition for — flip one on and it lands where it belongs |
+
+Every "Needs you", "Coming up" and watch row opens a real sub-screen in the shipped
+inspector shape (`overview-inspector-body.tsx`): eyebrow · title · chips · copy · **one** action.
+On a phone it is full screen; from 1024px a drawer; from 1280px it docks as a column and the
+page makes room, standing in for the Overview's shipped third inspector column.
+
+## Where Sai roams (7 + 1)
+
+1. the briefing sentence + two chips, inside the day card
+2. **the watch** — guard/secretary rows, inside the day card
+3. `· ranked` appended to the open count
+4. the wording under *Needs you* — Sai on: *"Ranked by what closes soonest"*; off: *"Choices only you can make"*
+5. the ranking itself — the gold numbers (the live page's `PRIORITY n` chips, folded into one mark)
+6. the wording and order of *Coming up* — *"In the order Sai would take them"* vs *"By date"*
+7. the note under your current stage on the rail
+8. **only when Sai is OFF** — *"Let Sai find your first venue shortlist — free"*, the free sample
+
+## The 11 conditional blocks (States…)
+
+access request waiting · prepare for event day (T-3d→T+1d) · a refused read (said, not shown as
+empty) · no date set · a supplier handover (**"Meanwhile"**) · free camera not used yet · Muslim
+wedding track · Chinese tea ceremony · recurring event · Setnayan AI not owned · no venue booked.
+
+When **no date** is set, *"Set your wedding date"* takes rank ① of *Needs you* — everything on
+the page dates itself from it.
 
 ## What it is measured against
 
@@ -69,7 +107,19 @@ coordinator broadcast, same-day suppliers, the photo count, check-ins, the story
 Structure and copy for those come from the shipped components
 (`_components/day-of-mode/grid.tsx`, `_components/after/finished-event-summary.tsx`).
 
-## One bug found on the live page while measuring
+## Three things found on the live page while measuring
 
-The Papic tile prints **`100050`** with no thousands separator, while every other figure on the
-page is formatted (`₱26,499`, `₱2,250,000`). The prototype shows `100,050`.
+1. **`100050`** — the Papic tile prints the shot count with no thousands separator, while every
+   other figure on the page is formatted (`₱26,499`, `₱2,250,000`). The prototype shows `100,050`.
+2. **"about 1 months before the wedding"** — the Crew Meals deadline copy does not singularise.
+   Reproduced verbatim in the prototype's sub-screen, with a marker.
+3. 💰 **A price on the free Overview disagrees with the live catalogue.** The free
+   first-venue-shortlist card prints, from a code constant
+   (`FIRST_VENUE_SHORTLIST_UPSELL`, pinned by a test):
+   *"the full Sai is ₱499 first 28 days → ₱799 per 28 days"*.
+   `platform_retail_catalog_v2`, read 2026-09-22, says the active SKU is **`SETNAYAN_AI`
+   ₱2,499 one-time** (onboarding ₱1,499); the ₱799/28d SKU (`SETNAYAN_AI_RENEW`) is
+   **`is_active = false`**. The prototype shows the card with the price line **removed** and a
+   marker in its place. **Owner call — not changed here.**
+   Re-measure: `select service_code, retail_price_php, onboarding_price_php, billing_period,
+   is_active from platform_retail_catalog_v2 where service_code like 'SETNAYAN_AI%';`
