@@ -53,29 +53,31 @@ decided or ruled out (e.g. the Papic tabs were ruled out on 2026-08-27). Say wha
 - Keep text that carries a fact the user needs: money, dates, status, errors, consequences.
 - Show instead of tell: a filter picked by seeing it applied, a switch instead of a sentence.
 
-## 7 · Build the interactive prototype
-- Make it a **Design canvas Artifact** in the site's real look (read colours, font and radius
-  off the live page).
-- Boards: **Today** (the live page's blocks in order, with scatter problems marked), then the
-  redesign at **both sizes**, each marked interactive:
-  - **Phone** (390×844): one column in the order from step 5.
-  - **Desktop** (1440×900) inside the site's real shell (top bar + left rail, as the live page
-    shows it). Same order and same words, but use the width: the main flow in a wide left
-    column, and what the user needs at every moment (status, credits and Buy) in a narrower
-    right column that stays in view while the left scrolls. Grids get more columns (e.g. gallery
-    6 across). Phone bottom sheets become side drawers; sub-screens open in the main column.
-  - Measure the live page at desktop width too (screenshot + block order), since it can scatter
-    differently from phone.
-- **Every row and button works**: steppers step, switches switch, the buy flow goes to payment
-  and ends in a pending state, and each "›" row opens its own screen with a back arrow.
-- Add a canvas note listing the new order.
+## 7 · Build the interactive prototype — ONE file, phone AND desktop
+Copy the pattern in `papic-controller-prototype.html` (in this kit). Do not start from scratch.
+- **One HTML file, one DOM, two layouts.** No framework, opens in any browser. The site's real
+  look: read colours, font and radius off the live page into CSS variables.
+- **Phone (< 1024px):** one column in the order from step 5. Sub-screens and the pay flow open
+  **full screen** with a back arrow.
+- **Desktop (≥ 1024px):** inside the site's real shell (top bar + left rail). The flow sits in a
+  wide left column, and what the user needs at every moment (status at a glance, credits, Buy)
+  sits in a **right column that stays in view** (`position: sticky`). Grids get more columns (e.g.
+  gallery 6 across). Sub-screens open as a **right-side drawer** over a dimmed page.
+- **Order by CSS `order`, not by duplicated markup.** A body class for the moment
+  (`before` / `after`) re-orders the same sections, and finished setup collapses to one-line rows.
+- A small grey **"Prototype" bar** at the top switches the moment. It is clearly not part of the app.
+- **Every row and button works**: steppers step, switches switch, the buy flow ends pending, each
+  "›" opens its screen, Escape closes it.
+- Test it at 375px and 1440px in the browser before sending it (screenshots of both). Check that
+  `hidden` really hides (`[hidden]{display:none!important}`, since `display:flex` overrides it).
+- Optional: also publish it as a Design canvas (see `canvas-version/` for the file shape).
 
 ## 8 · Check the order, then report
 Before replying, ask yourself: does any block depend on a choice made below it? Is anything the
 user needs right now buried under something they already finished? Fix it.
 
 Reply briefly with:
-1. The link.
+1. The prototype file (and link if published).
 2. A table: section → what you can do there.
 3. What's placeholder or unverified.
 4. At most 2–3 decisions for the owner, recommendation first. Don't ask what the code or
