@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your Team — redesign prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<!--
+  YOUR TEAM — responsive redesign prototype (2026-09-22)
+  Route it stands for: /dashboard/[eventId]/vendors   (rail row "Your Team" · masthead <h1>Your Team</h1>)
+  NOT: /vendor-dashboard/team (a supplier's own crew) and NOT /dashboard/[eventId]/manpower.
+
+  One DOM, two layouts:
+    < 1024px  one column, sections in the order of the current phase; sub-screens full screen
+    >= 1024px shell (top bar + left rail) · flow in the wide left column · Money sticky right;
+              sub-screens open as a right-side drawer over a dimmed page
+  Phase (prototype bar at the top): PLANNING = team first, then what to decide · AFTER THE DAY = review leads.
+
+  REAL DATA — event 044f7e64 ("Indalecio & Claire"), measured live + from the database 2026-09-22:
+    date 2026-12-18 (Fri) · region 'ncr' · estimated_budget_centavos 225000000 (= PHP 2,250,000) · band premium
+    contracted: Seda Vertis North (venue, hard_single_group=reception_venue, covers_plan_groups=[catering,cake,accommodation])
+                Santuario de San Vicente de Paul Parish & Shrine of the Poor (religious_venue, hard_single_group=ceremony_venue)
+                -- both total_cost_php = NULL, which is why the live LOCKED tile reads PHP 0
+    considering: Saysay Live Band & Hosting (FIXTURE), Seda Hotel -- both total_cost_php = NULL
+    live Payments section: "PHP 26,499 paid . PHP 0 to go . 100% of what you have committed is paid."
+    live "Still needs your decision": Photo & Video 153D, Coordinator / Planner 113D, Live Band 98D,
+                Stylist / Decorator 88D OVERDUE, "...and 23 more to decide." (= 27 open)
+    live bench: 12 folder rows with the counts reproduced below; 6 SORT BY options
+    live coverage strip: "Cover your event . Covered 0 of 5" (Escort / Reception / Ceremony / Catering / Cake)
+    tokens read off the live page: ink #2C2A29 . line #E1DCD1 . mulberry #C24E25 . gold #A9834B .
+                card radius 14px . Hanken Grotesk + Space Mono . bottom nav 66px
+
+  PLACEHOLDERS (nothing below is invented as fact):
+    [NO PRICE]      a locked/candidate row whose total_cost_php is NULL in production
+    [PROTO]         a state this prototype demonstrates that no row on this event is in right now
+                    (the lock handshake steps; a saved plan)
+    [FLAG]          a number the live page and the database disagree about -- see the reply, not fixed here
+-->
+<style>
+:root{
+  --ink:#2C2A29; --ink-2:#6F6A62; --ink-3:#9A948A;
+  --line:#E1DCD1; --line-2:#F0EBE3; --soft:#F6F3EE; --page:#FFFFFF;
+  --mulberry:#C24E25; --gold:#A9834B; --gold-2:#8C6932;
+  --ok-bg:#E8F1E6; --ok:#2F6B35; --warn:#8A4B12; --warn-bg:#FBF0E4;
+  --r-lg:20px; --r-md:14px; --r-sm:10px;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{font-family:'Hanken Grotesk',ui-sans-serif,system-ui,sans-serif;background:var(--page);color:var(--ink);-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;color:inherit}
+h1,h2,h3{margin:0;font-weight:600}
+.mono{font-family:'Space Mono',ui-monospace,Menlo,monospace}
+
+/* prototype bar */
+.proto{position:sticky;top:0;z-index:30;display:flex;gap:8px;align-items:center;padding:8px 16px;background:#EDEAE4;font-size:12px;color:var(--ink-2)}
+.proto b{font-weight:600;color:var(--ink)}
+.proto .pill{height:30px}
+.pill{height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13px;white-space:nowrap}
+.pill[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+
+/* shell */
+.shell-top,.shell-rail{display:none}
+.app{display:block}
+
+/* page head */
+.page-head{display:flex;align-items:flex-start;gap:4px;padding:12px 16px 2px 8px}
+.icon-btn{width:44px;height:44px;border:0;background:transparent;display:inline-flex;align-items:center;justify-content:center;border-radius:999px}
+.page-head h1{font-size:24px;font-weight:500;line-height:1.15}
+.status{display:block;font-size:13px;color:var(--ink-2);margin-top:2px}
+.anchor-line{font-size:12px;color:var(--ink-3);margin-top:1px}
+
+.layout{display:flex;flex-direction:column;gap:22px;padding:10px 16px 48px}
+.sec{display:flex;flex-direction:column;gap:10px;min-width:0}
+.sec h2{font-size:17px}
+.sec-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.eyebrow{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.muted{color:var(--ink-2)}
+.small{font-size:12px;color:var(--ink-2)}
+.center{text-align:center}
+.card{border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;display:flex;flex-direction:column;gap:10px;background:#fff}
+.rows{border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;background:#fff}
+.row{min-height:52px;width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border:0;border-bottom:1px solid var(--line-2);background:#fff;font-size:15px;text-align:left}
+.rows .row:last-child{border-bottom:0}
+.row .v{color:var(--ink-2);white-space:nowrap}
+.lone{border:1px solid var(--line);border-radius:var(--r-md)}
+.btn{height:48px;border:0;border-radius:999px;background:var(--mulberry);color:#fff;font-size:15px;font-weight:600;padding:0 22px}
+.btn.dark{background:var(--ink)}
+.btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink);height:42px;font-weight:500}
+.btn.sm{height:36px;font-size:13px;padding:0 14px}
+.btn:disabled{opacity:.45;cursor:default}
+
+/* a member of the team */
+.mem{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line-2);background:#fff}
+.rows .mem:last-child{border-bottom:0}
+.mem .top{display:flex;align-items:flex-start;gap:10px}
+.dot{width:9px;height:9px;border-radius:999px;flex-shrink:0;margin-top:6px;background:var(--ok)}
+.dot.cand{background:var(--gold)}
+.dot.wait{background:var(--warn)}
+.mem .nm{flex:1;min-width:0;font-size:15px;font-weight:600;line-height:1.25}
+.mem .cat{display:block;font-size:11.5px;font-weight:400;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-top:2px}
+.mem .amt{font-size:14px;font-weight:600;white-space:nowrap}
+.mem .amt.none{font-weight:400;font-size:12px;color:var(--ink-3)}
+.next-line{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px}
+.covers{font-size:12px;color:var(--ink-2)}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.rowrm{width:36px;height:36px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:15px;color:var(--ink-2)}
+
+/* handshake steps */
+.steps{display:flex;gap:4px;margin-top:2px}
+.steps i{flex:1;height:4px;border-radius:999px;background:var(--line)}
+.steps i.on{background:var(--warn)}
+.stepnote{font-size:12.5px;color:var(--warn)}
+
+/* decide */
+.need{min-height:50px;width:100%;display:flex;align-items:center;gap:10px;padding:10px 16px;border:0;border-bottom:1px solid var(--line-2);background:#fff;font-size:15px;text-align:left}
+.rows .need:last-child{border-bottom:0}
+.need .lbl{flex:1;min-width:0}
+.od{font-size:10.5px;letter-spacing:.08em;padding:3px 7px;border-radius:999px;background:var(--warn-bg);color:var(--warn);white-space:nowrap}
+.chev{color:var(--ink-3)}
+
+/* money */
+.money{background:var(--soft);border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:14px}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tile{display:flex;flex-direction:column;gap:2px}
+.tile .k{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.tile .v{font-size:17px;font-weight:600;line-height:1.2}
+.tile .v.sm{font-size:13.5px;font-weight:500}
+.tile .v.gd{color:var(--ok)} .tile .v.bd{color:var(--mulberry)} .tile .v.non{color:var(--ink-3);font-weight:400}
+.money .bar{height:6px;border-radius:999px;background:#E6E0D6;overflow:hidden;display:flex}
+.money .bar b{display:block;background:var(--ok)}
+.money .bar i{display:block;background:var(--gold)}
+.flagnote{font-size:11.5px;color:var(--warn);background:var(--warn-bg);border-radius:var(--r-sm);padding:7px 9px}
+
+/* bench */
+.searchbox{height:46px;border:1px solid var(--line);border-radius:999px;display:flex;align-items:center;gap:8px;padding:0 16px;color:var(--ink-3);font-size:14px;background:#fff;width:100%;text-align:left}
+.sorts{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.sorts::-webkit-scrollbar{display:none}
+.fold{min-height:52px;width:100%;display:flex;align-items:center;gap:10px;padding:11px 16px;border:0;border-bottom:1px solid var(--line-2);background:#fff;font-size:15px;text-align:left}
+.rows .fold:last-child{border-bottom:0}
+.fold .lbl{flex:1;min-width:0}
+.badge{font-size:11px;padding:2px 7px;border-radius:999px;background:var(--soft);color:var(--ink-2);white-space:nowrap}
+.badge.lk{background:var(--ok-bg);color:var(--ok)}
+
+/* panel: full screen on phone, drawer on desktop */
+.scrim{position:fixed;inset:0;background:rgba(23,22,15,.45);z-index:40;display:none}
+.panel{position:fixed;inset:0;background:#fff;z-index:41;display:none;flex-direction:column}
+.open .scrim{display:block} .open .panel{display:flex}
+.panel-head{display:flex;align-items:center;gap:4px;padding:10px 16px 8px 8px;border-bottom:1px solid var(--line-2)}
+.panel-head .t{flex:1;font-size:18px;font-weight:600;line-height:1.2}
+.panel-head .t small{display:block;font-size:11.5px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.panel-body{flex:1;overflow-y:auto;padding:14px 16px 28px;display:flex;flex-direction:column;gap:10px}
+
+/* vendor card (the bench's three-action card) */
+.vcard{border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;display:flex;flex-direction:column;gap:9px;background:#fff}
+.vcard .hd{display:flex;gap:10px;align-items:flex-start}
+.vcard .th{width:44px;height:44px;border-radius:var(--r-sm);background:var(--soft);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--ink-3)}
+.vcard .nm{flex:1;min-width:0;font-size:15px;font-weight:600;line-height:1.25}
+.vcard .nm small{display:block;font-size:12px;font-weight:400;color:var(--ink-2);margin-top:2px}
+.fits{display:flex;gap:6px;flex-wrap:wrap}
+.fit{font-size:11px;padding:3px 8px;border-radius:999px;background:var(--soft);color:var(--ink-2)}
+.fit.ok{background:var(--ok-bg);color:var(--ok)}
+.fit.no{background:var(--warn-bg);color:var(--warn)}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.tilerow{min-height:48px;width:100%;display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--line);border-radius:var(--r-md);background:#fff;font-size:15px;text-align:left}
+.tilerow .lbl{flex:1;min-width:0}
+.check{width:54px;height:54px;border-radius:999px;background:var(--ok-bg);color:var(--ok);display:flex;align-items:center;justify-content:center;font-size:25px;margin:6px auto 0}
+.toast{position:fixed;left:16px;right:16px;bottom:24px;z-index:50;border-radius:14px;background:var(--ink);color:#fff;padding:13px 16px;font-size:14px;display:none;justify-content:space-between;align-items:center;gap:12px}
+.toast.on{display:flex}
+.toast button{border:0;background:transparent;color:#E8C89A;font-weight:600}
+.ph{font-size:10.5px;letter-spacing:.08em;color:var(--gold-2);border:1px dashed var(--gold);border-radius:999px;padding:1px 7px;white-space:nowrap}
+
+/* compact one-liners when the phase folds a section away */
+.compact{display:none}
+body.after .fold-sec .full{display:none}
+body.after .fold-sec .compact{display:flex}
+body.after .fold-sec h2.full-h{display:none}
+body.after .planning-only{display:none}
+body:not(.after) .after-only{display:none}
+
+/* PHASE ORDER — one DOM, reordered by CSS */
+.s-team{order:1}.s-decide{order:2}.s-money{order:3}.s-bench{order:4}.s-plans{order:5}
+body.after .s-team{order:1} body.after .s-money{order:2} body.after .s-plans{order:3} body.after .s-bench{order:4}
+
+/* ---------- DESKTOP ---------- */
+@media (min-width:1024px){
+  body{background:#FAF8F4}
+  .shell-top{display:flex;align-items:center;gap:16px;height:58px;padding:0 24px;background:#fff;border-bottom:1px solid var(--line-2);position:sticky;top:46px;z-index:20}
+  .shell-top .brand{font-weight:700;letter-spacing:.2em;font-size:13px}
+  .shell-top .search{flex:1;max-width:480px;height:38px;border:1px solid var(--line);border-radius:999px;display:flex;align-items:center;padding:0 16px;color:var(--ink-3);font-size:13.5px}
+  .app{display:grid;grid-template-columns:96px 1fr}
+  .shell-rail{display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 0;border-right:1px solid var(--line-2);background:#fff;min-height:calc(100vh - 104px);font-size:11px;color:var(--ink-2)}
+  .shell-rail span{padding:8px 4px;text-align:center;line-height:1.2}
+  .shell-rail span.grp{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-top:8px}
+  .shell-rail span.on{color:var(--mulberry);font-weight:600}
+  .main{max-width:1240px;width:100%;margin:0 auto;padding:6px 32px}
+  .page-head{padding:20px 0 6px}
+  .page-head h1{font-size:30px}
+  .page-head .back{display:none}
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 352px;column-gap:32px;row-gap:26px;padding:8px 0 64px;align-items:start}
+  .layout > .sec{grid-column:1}
+  .layout > .s-money{grid-column:2;grid-row:1 / span 6;position:sticky;top:120px;align-self:start}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .two{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .rows,.card{background:#fff}
+  .panel{inset:0 0 0 auto;width:460px;box-shadow:-8px 0 24px rgba(23,22,15,.10)}
+  .toast{left:auto;right:24px;width:380px}
+}
+</style>
+</head>
+<body>
+
+<div class="proto" role="group" aria-label="Prototype controls">
+  <b>Prototype</b>
+  <button class="pill" data-phase="before" aria-pressed="true">Planning</button>
+  <button class="pill" data-phase="after" aria-pressed="false">After the day</button>
+</div>
+
+<div class="shell-top"><span class="brand">SETNAYAN</span><span class="search">Search events, people, suppliers</span></div>
+
+<div class="app">
+  <nav class="shell-rail" aria-label="Event menu">
+    <span class="grp">Plan</span>
+    <span>Overview</span><span>Guests</span><span class="on">Your Team</span><span>Studio</span>
+    <span class="grp">Also</span>
+    <span>Schedule</span><span>Seat plan</span><span>Budget</span><span>Event Hub</span>
+  </nav>
+
+  <div class="main">
+    <div class="page-head">
+      <button class="icon-btn back" aria-label="Back to the event"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <div>
+        <h1>Your Team</h1>
+        <span class="status" id="statusLine"></span>
+        <span class="anchor-line" id="anchorLine"></span>
+      </div>
+    </div>
+
+    <div class="layout">
+
+      <!-- ── 1 · THE TEAM ───────────────────────────────────────────── -->
+      <section class="sec s-team" aria-label="Your team">
+        <div class="sec-head">
+          <h2 id="teamH">Your team</h2>
+          <span class="small" id="teamCount"></span>
+        </div>
+        <div class="rows" id="teamRows"></div>
+        <button class="btn ghost planning-only" id="clearCand" hidden>Clear candidates</button>
+      </section>
+
+      <!-- ── 2 · DECIDE NEXT ────────────────────────────────────────── -->
+      <section class="sec s-decide planning-only" aria-label="Decide next">
+        <div class="sec-head"><h2>Decide next</h2><span class="small" id="decideCount"></span></div>
+        <div class="rows" id="decideRows"></div>
+        <button class="row lone" data-open="alldecide"><span id="decideMore"></span><span class="chev">›</span></button>
+      </section>
+
+      <!-- ── 3 · MONEY (sticky right on desktop) ────────────────────── -->
+      <section class="sec s-money" aria-label="Money">
+        <div class="money">
+          <div class="sec-head"><h2>Money</h2><span class="small" id="moneyOne"></span></div>
+          <div class="bar" aria-hidden="true"><b id="barPaid"></b><i id="barLock"></i></div>
+          <div class="tiles">
+            <div class="tile"><span class="k">Budget</span><span class="v" id="tBudget"></span></div>
+            <div class="tile"><span class="k">Locked</span><span class="v" id="tLocked"></span></div>
+            <div class="tile"><span class="k">Paid</span><span class="v" id="tPaid"></span></div>
+            <div class="tile"><span class="k">Still to lock</span><span class="v" id="tCand"></span></div>
+            <div class="tile" style="grid-column:1/-1"><span class="k">Unspent</span><span class="v" id="tBuffer"></span></div>
+          </div>
+          <div class="flagnote" id="moneyFlag"></div>
+          <button class="row lone" data-open="payments" style="border-radius:var(--r-md)"><span>Budget &amp; payments</span><span class="chev">›</span></button>
+        </div>
+      </section>
+
+      <!-- ── 4 · ADD SOMEONE (the bench) ────────────────────────────── -->
+      <section class="sec s-bench fold-sec" aria-label="Add someone">
+        <h2 class="full-h">Add someone</h2>
+        <button class="searchbox full" data-open="search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Search your shortlist or the marketplace</button>
+        <div class="sorts full" id="sorts"></div>
+        <div class="rows full" id="foldRows"></div>
+        <button class="row lone compact" data-open="search"><span>Add someone</span><span class="v">12 categories ›</span></button>
+      </section>
+
+      <!-- ── 5 · PLANS ──────────────────────────────────────────────── -->
+      <section class="sec s-plans fold-sec" aria-label="Plans">
+        <h2 class="full-h">Plans</h2>
+        <div class="rows full" id="planRows"></div>
+        <button class="row lone full" id="savePlan"><span>Save these candidates as a plan</span><span class="chev">›</span></button>
+        <button class="row lone compact" data-open="plans"><span>Plans</span><span class="v" id="plansCompact"></span></button>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<div id="panelWrap">
+  <div class="scrim" id="scrim"></div>
+  <aside class="panel" role="dialog" aria-modal="true" aria-labelledby="panelTitle">
+    <div class="panel-head">
+      <button class="icon-btn" id="panelBack" aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <span class="t" id="panelTitle"></span>
+    </div>
+    <div class="panel-body" id="panelBody"></div>
+  </aside>
+</div>
+
+<div class="toast" id="toast"><span id="toastText"></span><button id="toastOk">OK</button></div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => Number(n).toLocaleString('en-PH');
+  const peso = (n) => '₱' + fmt(n);
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  // ─── REAL DATA (event 044f7e64, measured 2026-09-22) ───────────────────
+  const BUDGET = 2250000;              // events.estimated_budget_centavos 225000000
+  const PAID = 26499;                  // live Payments section: "₱26,499 paid · ₱0 to go"
+  const DATE_LABEL = 'Friday, December 18, 2026';
+  const REGION = 'NCR';                // events.region 'ncr' — live page prints the raw slug
+  const DAYS_TO_GO = 87;
+
+  const S = {
+    phase: 'before',
+    panel: null, panelArg: null,
+    // status: 'locked' | 'asking' (handshake) | 'cand'
+    team: [
+      { id:'seda', name:'Seda Vertis North', cat:'Venues & churches · Reception venue',
+        price:null, status:'locked', step:4,
+        next:'Pay your deposit to hold the date', covers:['Catering','Cake','Accommodation'],
+        reviewed:false },
+      { id:'sant', name:'Santuario de San Vicente de Paul Parish & Shrine of the Poor',
+        cat:'Venues & churches · Ceremony venue',
+        price:null, status:'locked', step:4,
+        next:'Pay your deposit to hold the date', covers:[], reviewed:false },
+      { id:'saysay', name:'Saysay Live Band & Hosting', cat:'Hosts, music & program · Live band',
+        price:null, status:'cand', step:0, next:null, covers:[], reviewed:false },
+      { id:'sedah', name:'Seda Hotel', cat:'Logistics & misc',
+        price:null, status:'cand', step:0, next:null, covers:[], reviewed:false },
+    ],
+    // live "Still needs your decision" — 4 shown + 23 more
+    decide: [
+      { label:'Photo & Video', days:-153, tile:'documentary' },
+      { label:'Coordinator / Planner', days:-113, tile:'planning' },
+      { label:'Live Band', days:-98, tile:'program' },
+      { label:'Stylist / Decorator', days:-88, tile:'design' },
+    ],
+    decideHidden: 23,
+    sort: 'best',
+    plans: [],
+    openFold: null,
+  };
+
+  const SORTS = [
+    ['best','Best matches'], ['near','Nearest to your venue'], ['fits','Fits your budget'],
+    ['new','New here'], ['low','Lowest price'], ['top','Top rated'],
+  ];
+
+  // the 12 live folder rows, with their live counts
+  const FOLDS = [
+    ['venue','Venues & churches',2,1], ['planning','Coordinators & planners',0,3],
+    ['feast','Catering & cake',2,2], ['design','Styling, flowers & lights',0,8],
+    ['program','Hosts, music & program',0,9], ['documentary','Photo & video',0,2],
+    ['look','Attire, hair & make-up',0,9], ['booths','Booths, carts & bars',0,15],
+    ['prints','Invites, prints & souvenirs',0,2], ['transport','Cars & transport',0,3],
+    ['logistics-safety','Logistics & safety',0,1], ['insurance','Insurance & protection',0,1],
+  ];
+
+  // tiles inside a folder (live example: Photo & video → Photo & Video, Editorial)
+  const TILES = {
+    documentary: ['Photo & Video','Editorial'],
+    planning: ['Coordinator / Planner','On-the-day Coordinator','Event Manager'],
+    program: ['Hosts / Emcee','Live Band','Mobile DJ','Sound & Lights'],
+    design: ['Stylist / Decorator','Florist','Lights & Effects'],
+    venue: ['Reception Venue','Ceremony Venue'],
+    feast: ['Catering','Cake'],
+  };
+
+  const STEP_NOTE = [
+    '', 'You asked them to lock — waiting for their answer',
+    'They agreed — waiting for their payment request',
+    'They asked for the deposit — pay and send proof',
+    'Proof sent — waiting for them to accept',
+  ];
+
+  const toast = (t) => { $('toastText').textContent = t; $('toast').classList.add('on'); };
+  $('toastOk').onclick = () => $('toast').classList.remove('on');
+
+  const lockedRows = () => S.team.filter((m) => m.status === 'locked');
+  const askingRows = () => S.team.filter((m) => m.status === 'asking');
+  const candRows   = () => S.team.filter((m) => m.status === 'cand');
+  const sumPrice   = (rows) => rows.reduce((a, m) => a + (m.price || 0), 0);
+  const unpriced   = (rows) => rows.filter((m) => m.price == null).length;
+
+  // ─── render ────────────────────────────────────────────────────────────
+  function render() {
+    const after = S.phase === 'after';
+    document.body.classList.toggle('after', after);
+    document.querySelectorAll('[data-phase]').forEach((b) =>
+      b.setAttribute('aria-pressed', String(b.dataset.phase === S.phase)));
+
+    const L = lockedRows(), A = askingRows(), C = candRows();
+    const open = S.decide.length + S.decideHidden;
+
+    $('statusLine').textContent = after
+      ? `${L.length} supplied your wedding · ${L.filter((m) => !m.reviewed).length} to review`
+      : `${L.length} locked · ${A.length ? A.length + ' mid-handshake · ' : ''}${C.length} candidate${C.length === 1 ? '' : 's'} · ${open} to decide`;
+    $('anchorLine').textContent = after
+      ? `${DATE_LABEL} · ${REGION}`
+      : `${DATE_LABEL} · ${REGION} · ${DAYS_TO_GO} days to go`;
+
+    $('teamH').textContent = after ? 'Who supplied your wedding' : 'Your team';
+    $('teamCount').textContent = after ? '' : (L.length + A.length + C.length) + ' people';
+    $('clearCand').hidden = C.length === 0 || after;
+
+    // team rows
+    $('teamRows').innerHTML = S.team.map((m) => {
+      const amt = m.price == null
+        ? '<span class="amt none">No price yet</span>'
+        : '<span class="amt">' + peso(m.price) + '</span>';
+      const dot = m.status === 'locked' ? '' : (m.status === 'asking' ? ' wait' : ' cand');
+      let body = '';
+      if (after) {
+        body = m.status === 'locked'
+          ? (m.reviewed
+              ? '<span class="next-line" style="color:var(--ok)">✓ Reviewed</span>'
+              : '<div class="acts"><button class="btn sm" data-review="' + m.id + '">Write a review</button>'
+                + '<button class="btn sm ghost" data-toast="Opens the workspace thread.">Message them</button></div>')
+          : '<span class="next-line muted">Not locked — nothing to review</span>';
+      } else if (m.status === 'locked') {
+        body = '<div class="next-line"><strong>Next:</strong> ' + esc(m.next) + '</div>'
+          + '<div class="acts"><button class="btn sm" data-toast="Opens the deposit screen with their published payment methods.">Pay your deposit</button>'
+          + '<button class="btn sm ghost" data-toast="Opens the supplier workspace.">Workspace</button></div>'
+          + (m.covers.length ? '<span class="covers">Covers ' + m.covers.join(' · ').toLowerCase() + '</span>' : '');
+      } else if (m.status === 'asking') {
+        body = '<div class="steps" aria-hidden="true">'
+          + [1,2,3,4].map((i) => '<i class="' + (i <= m.step ? 'on' : '') + '"></i>').join('')
+          + '</div><span class="stepnote">Step ' + m.step + ' of 4 · ' + STEP_NOTE[m.step]
+          + ' <span class="ph">PROTO</span></span>'
+          + '<div class="acts"><button class="btn sm" data-advance="' + m.id + '">'
+          + (m.step >= 4 ? 'They accepted — lock it' : 'Next step') + '</button>'
+          + '<button class="btn sm ghost" data-cancel="' + m.id + '">Cancel the ask</button></div>';
+      } else {
+        body = '<div class="acts"><button class="btn sm" data-ask="' + m.id + '">Ask them to lock</button>'
+          + '<button class="btn sm ghost" data-toast="Opens the inquiry thread.">Message</button>'
+          + '<button class="rowrm" data-drop="' + m.id + '" aria-label="Remove ' + esc(m.name) + ' from your build">✕</button></div>';
+      }
+      return '<div class="mem"><div class="top"><span class="dot' + dot + '" aria-hidden="true"></span>'
+        + '<span class="nm">' + esc(m.name) + '<span class="cat">' + esc(m.cat) + '</span></span>'
+        + amt + '</div>' + body + '</div>';
+    }).join('');
+
+    // decide
+    $('decideCount').textContent = open + ' open';
+    $('decideRows').innerHTML = S.decide.map((d) =>
+      '<button class="need" data-fold="' + d.tile + '"><span class="lbl">' + esc(d.label) + '</span>'
+      + '<span class="od mono">' + Math.abs(d.days) + 'd overdue</span><span class="chev">›</span></button>').join('');
+    $('decideMore').textContent = 'All ' + open + ' open decisions';
+
+    // money — ONE place, and it never states a number the data does not have
+    const lockedPriced = sumPrice(L), candPriced = sumPrice(C);
+    const lockedUn = unpriced(L), candUn = unpriced(C);
+    $('moneyOne').textContent = peso(PAID) + ' paid';
+    $('tBudget').textContent = peso(BUDGET);
+    $('tPaid').innerHTML = peso(PAID) + ' <span class="small">· ₱0 to go</span>';
+    $('tLocked').innerHTML = lockedUn === L.length && L.length
+      ? '<span class="non">' + L.length + ' locked · no price yet</span>'
+      : peso(lockedPriced) + (lockedUn ? ' <span class="small">+ ' + lockedUn + ' unpriced</span>' : '');
+    $('tCand').innerHTML = candUn === C.length && C.length
+      ? '<span class="non">' + C.length + ' candidate' + (C.length === 1 ? '' : 's') + ' · no price yet</span>'
+      : (C.length ? peso(candPriced) + (candUn ? ' <span class="small">+ ' + candUn + ' unpriced</span>' : '') : '<span class="non">None</span>');
+    const known = lockedPriced + candPriced;
+    const buffer = BUDGET - known;
+    $('tBuffer').innerHTML = (lockedUn + candUn)
+      ? '<span class="v sm non">' + peso(buffer) + ' of ' + peso(BUDGET) + ' unspent — but ' + (lockedUn + candUn) + ' of your people have no price recorded, so this is not what is left.</span>'
+      : '<span class="' + (buffer >= 0 ? 'gd' : 'bd') + '">' + peso(Math.abs(buffer)) + (buffer >= 0 ? ' to spare' : ' over') + '</span>';
+    const pct = (n) => Math.max(0, Math.min(100, (n / BUDGET) * 100)) + '%';
+    $('barPaid').style.width = pct(PAID);
+    $('barLock').style.width = pct(Math.max(0, known - PAID));
+    $('moneyFlag').innerHTML = (lockedUn && PAID > 0)
+      ? '<span class="ph">FLAG</span> The live page shows <b>LOCKED ₱0</b> and <b>₱26,499 paid</b> on the same screen. Both read off production: the two locked suppliers have <code>total_cost_php = NULL</code>. A price nobody recorded must not print as ₱0.'
+      : '';
+    $('moneyFlag').hidden = !(lockedUn && PAID > 0);
+
+    // bench
+    $('sorts').innerHTML = SORTS.map(([id, label]) =>
+      '<button class="pill" data-sort="' + id + '" aria-pressed="' + (S.sort === id) + '">' + label + '</button>').join('');
+    $('foldRows').innerHTML = FOLDS.map(([id, label, locked, decide]) =>
+      '<button class="fold" data-fold="' + id + '"><span class="lbl">' + esc(label) + '</span>'
+      + (locked ? '<span class="badge lk">● ' + locked + ' locked</span>' : '')
+      + '<span class="badge">' + decide + ' to decide</span><span class="chev">›</span></button>').join('');
+
+    // plans
+    $('planRows').innerHTML = S.plans.length
+      ? S.plans.map((p, i) => '<button class="row" data-plan="' + i + '"><span>' + esc(p.name)
+          + ' <span class="ph">PROTO</span></span><span class="v">' + p.n + ' candidates ›</span></button>').join('')
+      : '<div class="row" style="color:var(--ink-3)"><span>No saved plans yet</span></div>';
+    $('plansCompact').textContent = (S.plans.length || 'No') + ' saved ›';
+
+    renderPanel();
+  }
+
+  // ─── panel ─────────────────────────────────────────────────────────────
+  function renderPanel() {
+    const wrap = $('panelWrap');
+    wrap.classList.toggle('open', !!S.panel);
+    if (!S.panel) return;
+    let title = '', sub = '', html = '';
+
+    if (S.panel === 'fold') {
+      const f = FOLDS.find((x) => x[0] === S.panelArg);
+      title = f ? f[1] : 'Category';
+      sub = f ? ((f[2] ? f[2] + ' locked · ' : '') + f[3] + ' to decide') : '';
+      const tiles = TILES[S.panelArg] || ['[CATEGORY LIST NOT CAPTURED]'];
+      html = tiles.map((t) =>
+        '<button class="tilerow" data-tile="' + esc(t) + '"><span class="lbl">' + esc(t) + '</span>'
+        + '<span class="badge" data-hint="' + esc(t) + '">ⓘ</span><span class="chev">›</span></button>').join('')
+        + '<div class="two" style="margin-top:6px">'
+        + '<button class="btn ghost" data-toast="Opens the marketplace search for this folder.">Find more</button>'
+        + '<button class="btn ghost" data-toast="Opens the add-a-supplier-yourself form.">Add manually</button></div>'
+        + '<span class="small">Tap a category to see who you are considering.</span>';
+    }
+
+    if (S.panel === 'tile') {
+      title = S.panelArg; sub = 'Who you are considering';
+      html = '<div class="vcard"><div class="hd"><span class="th">◷</span>'
+        + '<span class="nm">[SUPPLIER NAME]<small>[PRICE] · [LOCATION]</small></span></div>'
+        + '<div class="fits"><span class="fit ok">Free on Dec 18</span><span class="fit">Reaches your venue</span><span class="fit no">Over your budget</span></div>'
+        + '<div class="two"><button class="btn sm" data-toast="Adds them to your build as a candidate.">＋ Add to build</button>'
+        + '<button class="btn sm ghost" data-toast="Opens the inquiry composer.">Inquire</button>'
+        + '<button class="btn sm ghost" data-toast="Asks them to lock — the handshake starts.">Lock now</button></div></div>'
+        + '<span class="small">The three actions are the shipped bench card (spec PR-D). Names, prices and photos are '
+        + '<span class="ph">PLACEHOLDER</span> — this event has no shortlisted supplier in this category.</span>';
+    }
+
+    if (S.panel === 'alldecide') {
+      title = 'Open decisions';
+      sub = (S.decide.length + S.decideHidden) + ' categories with no lock';
+      html = S.decide.map((d) =>
+        '<button class="tilerow" data-fold="' + d.tile + '"><span class="lbl">' + esc(d.label) + '</span>'
+        + '<span class="od mono">' + Math.abs(d.days) + 'd overdue</span><span class="chev">›</span></button>').join('')
+        + '<div class="tilerow" style="color:var(--ink-3)"><span class="lbl">'
+        + S.decideHidden + ' more, not yet overdue <span class="ph">PLACEHOLDER</span></span></div>'
+        + '<span class="small">The live page lists 4 and says “…and 23 more to decide.” The full 27 were not enumerated on screen.</span>';
+    }
+
+    if (S.panel === 'payments') {
+      title = 'Budget & payments'; sub = peso(PAID) + ' paid · ₱0 to go';
+      html = '<div class="card"><div class="sec-head"><span class="eyebrow">Paid</span><strong>' + peso(PAID) + '</strong></div>'
+        + '<div class="bar" aria-hidden="true"><b style="width:100%"></b></div>'
+        + '<span class="small">100% of what you have committed is paid.</span></div>'
+        + '<button class="btn dark" data-toast="Goes to /budget — set a target, plan allotments, itemize costs, log payments.">Open budget &amp; payments</button>'
+        + '<span class="small">The doorway and both numbers are the live Payments section, unchanged.</span>';
+    }
+
+    if (S.panel === 'plans') {
+      title = 'Plans'; sub = S.plans.length + ' saved';
+      html = (S.plans.length
+        ? S.plans.map((p) => '<div class="tilerow"><span class="lbl">' + esc(p.name) + '</span><span class="v">' + p.n + ' candidates</span></div>').join('')
+        : '<div class="tilerow" style="color:var(--ink-3)"><span class="lbl">No saved plans yet</span></div>')
+        + '<span class="small">Locked suppliers are pinned identically in every plan. Saving snapshots your candidates under a name.</span>';
+    }
+
+    if (S.panel === 'saveplan') {
+      title = 'Save this plan'; sub = candRows().length + ' candidates';
+      html = '<label class="small" style="display:flex;flex-direction:column;gap:6px">Name (optional)'
+        + '<input id="planName" placeholder="Plan A" style="height:46px;border:1px solid var(--line);border-radius:var(--r-md);padding:0 14px;font:inherit;font-size:15px"></label>'
+        + '<button class="btn" data-act="confirmplan">Save plan</button>'
+        + '<span class="small">Leave it blank and we name it for you.</span>';
+    }
+
+    if (S.panel === 'search') {
+      title = 'Find a supplier'; sub = 'Your shortlist and the whole marketplace';
+      html = '<div class="searchbox" style="cursor:default">Type a name, a service or a place</div>'
+        + '<div class="sorts">' + SORTS.map(([id, l]) => '<button class="pill" data-sort="' + id + '" aria-pressed="' + (S.sort === id) + '">' + l + '</button>').join('') + '</div>'
+        + FOLDS.map(([id, label, , d]) => '<button class="tilerow" data-fold="' + id + '"><span class="lbl">' + esc(label) + '</span><span class="badge">' + d + '</span><span class="chev">›</span></button>').join('');
+    }
+
+    if (S.panel === 'review') {
+      const m = S.team.find((x) => x.id === S.panelArg);
+      title = 'Review'; sub = m ? m.name : '';
+      html = '<div class="card"><span class="eyebrow">How did they do?</span>'
+        + '<div class="sorts">' + [1,2,3,4,5].map((n) => '<button class="pill" data-stars="' + n + '">' + '★'.repeat(n) + '</button>').join('') + '</div></div>'
+        + '<button class="btn" data-act="postreview">Post review</button>'
+        + '<span class="small">The review surface is shipped — <code>reviewStatusByVendorId</code> is already passed into this section.</span>';
+    }
+
+    if (S.panel === 'hint') {
+      title = 'What does it cover?'; sub = S.panelArg;
+      html = '<p style="margin:0;font-size:15px;line-height:1.45">[GROUP HINT — the shipped ⓘ reads it from <code>wedding-plan-groups.ts</code>]</p>'
+        + '<button class="btn ghost" data-toast="Writes a category exclusion — refused if anything in it is locked.">Not needed — remove it</button>';
+    }
+
+    $('panelTitle').innerHTML = esc(title) + (sub ? '<small>' + esc(sub) + '</small>' : '');
+    $('panelBody').innerHTML = html;
+  }
+
+  // ─── events (one delegated handler) ────────────────────────────────────
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('button');
+    if (!t) { if (e.target.id === 'scrim') { S.panel = null; render(); } return; }
+    const d = t.dataset;
+    if (d.phase) S.phase = d.phase;
+    else if (d.sort) S.sort = d.sort;
+    else if (d.fold) { S.panel = 'fold'; S.panelArg = d.fold; }
+    else if (d.tile) { S.panel = 'tile'; S.panelArg = d.tile; }
+    else if (d.hint) { S.panel = 'hint'; S.panelArg = d.hint; }
+    else if (d.open) { S.panel = d.open; S.panelArg = null; }
+    else if (d.ask) {
+      const m = S.team.find((x) => x.id === d.ask);
+      m.status = 'asking'; m.step = 1;
+      toast('Asked them to lock. It is not locked until they agree.');
+    }
+    else if (d.advance) {
+      const m = S.team.find((x) => x.id === d.advance);
+      if (m.step >= 4) { m.status = 'locked'; m.step = 4; m.next = 'Pay your deposit to hold the date'; toast('Locked.'); }
+      else m.step += 1;
+    }
+    else if (d.cancel) { const m = S.team.find((x) => x.id === d.cancel); m.status = 'cand'; m.step = 0; }
+    else if (d.drop) { S.team = S.team.filter((x) => x.id !== d.drop); toast('Removed from your build.'); }
+    else if (d.review) { S.panel = 'review'; S.panelArg = d.review; }
+    else if (d.stars) { toast(d.stars + ' star' + (d.stars === '1' ? '' : 's') + ' selected.'); return; }
+    else if (t.id === 'clearCand') { S.team = S.team.filter((x) => x.status !== 'cand'); toast('Candidates cleared. Locked suppliers untouched.'); }
+    else if (t.id === 'savePlan') { S.panel = 'saveplan'; }
+    else if (d.act === 'confirmplan') {
+      const inp = $('planName');
+      const name = (inp && inp.value.trim()) || ('Plan ' + String.fromCharCode(65 + S.plans.length));
+      S.plans.push({ name: name.slice(0, 60), n: candRows().length });
+      S.panel = null; toast('Saved as “' + name.slice(0, 60) + '”. Locked suppliers are pinned in every plan.');
+    }
+    else if (d.act === 'postreview') { const m = S.team.find((x) => x.id === S.panelArg); if (m) m.reviewed = true; S.panel = null; toast('Review posted.'); }
+    else if (t.id === 'panelBack') S.panel = null;
+    else if (d.toast) { toast(d.toast); return; }
+    else return;
+    render();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && S.panel) { S.panel = null; render(); } });
+  render();
+})();
+</script>
+</body>
+</html>

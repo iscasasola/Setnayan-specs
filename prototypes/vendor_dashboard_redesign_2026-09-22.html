@@ -1,0 +1,1441 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vendor dashboard — redesign prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<!--
+  THE COMPLETE VENDOR DASHBOARD — responsive redesign prototype (2026-09-22)
+  Built to setnayan-page-redesign-kit/REDESIGN-PAGE-PROMPT.md, copying the shape of
+  papic-controller-prototype.html.
+
+  WHAT IT STANDS FOR: /vendor-dashboard and its five owner-locked rooms —
+    overview (Today) · customers (My Customers) · shop (My Shop) ·
+    performance (My Performance) · on-the-day (Event Hub), plus the Plan row.
+  The five KEYS are contracts (staff filter · admin rename registry · localStorage ·
+  badge map) and are unchanged here. Only labels, order and density move.
+
+  DESIGNED TOWARD TWO APPROVED DRAWINGS (RULE 0 · step 3):
+    · prototypes/vendor_dashboard_rearranged_2026-08-26.html — owner "yes i agree".
+      Its PROPOSED state is the spine of the Today room: "Needs your answer", one
+      list, oldest first, plus "Good news · nothing to answer" split out.
+    · prototypes/shop_page_2026-09-10.html — My Shop as six doors on one page.
+      Door order and door names are that drawing's, verbatim.
+
+  ONE DOM, TWO LAYOUTS:
+    < 1024px  one column · bottom bar of five · sub-screens open full screen
+    >= 1024px shell (top bar + 88px rail) · flow left · glance/money/filter sticky right
+              · sub-screens open as a right drawer over a dimmed page
+
+  REAL DATA (read from production 2026-09-22, not invented):
+    Shop        Saysay Host and Band — verified · Solo (vendor_profiles)
+    Services    Live band from PHP 35,000 · Host/MC from PHP 40,000 (vendor_services)
+    Perk        "Free 1-hour extension for Setnayan couples" (exclusive_perk_text)
+    Fee bill    PHP 837.50 on a PHP 16,750 declared booking, booking #6 — the first
+                five are free (booking_fee_ledger, 2026-09-20; the owner's own bill)
+    Plan        Solo 1,000/28d · 10,400/yr · Pro 2,500 / 26,000 · Enterprise
+                10,000 / 104,000 · extra seat 250 · extra branch 1,000
+                (vendor_billing_catalog — the live table, NOT the code fallback)
+    Couples     Ana & Miguel 13 Mar 2027 · Indalecio & Claire 18 Dec 2026 ·
+                Maria & Jose 12 Dec 2026 · Rosa & Ben 30 Oct 2026 (events)
+  Everything marked [LIKE THIS] is a placeholder. Feed volumes are illustrative of a
+  busy shop, exactly as the 2026-08-26 drawing says of its own counts.
+
+  ── THE CONTRACT: 64 ADDRESSES, CHECKED ONE BY ONE (2026-09-22) ─────────────
+  `git ls-tree origin/main apps/web/app/vendor-dashboard | grep page.tsx` = 64.
+  14 of them are FORWARDS into a hub (bookings · branches · calendar · clients ·
+  contracts · demand · earnings · funnel · manpower · messages · payday ·
+  payment-options · profile · proposals · services · verify), so they need no
+  place of their own — they need the section they forward into, and each has one.
+
+  DELIBERATELY ABSENT, with the reason:
+    · /more            RETIRED 2026-07-16 — the 5-page IA replaced it.
+    · /tax-documents   RETIRED 2026-05-29 — no Form 2307 is issued under V1.
+    · the nav FAB      Ships as a floating "Check inquiries" button into
+                       /bookings. In this redesign the inquiries ARE the home
+                       page, so a button that jumps to them is a door to the
+                       room you are standing in. Removing it is a proposal, not
+                       an oversight — say so to the owner rather than let it
+                       vanish quietly.
+    · GuidedTour, PromoFreeWindowBannerVendor — real, but they are overlays on
+                       top of whatever room you are in, not rooms. Not drawn.
+
+  CAUGHT ON THE SECOND PASS — each one had been missed and is now in:
+    · the TOP BAR at every width, carrying the bell and the account panel. The
+      account panel holds the ONLY Sign out on every vendor screen (owner-locked
+      2026-08-13); the first draft hid the bar below 1024 and stranded the phone.
+    · /notifications — the tray. It is history, not a second to-do list, and the
+      drawer says so.
+    · /lines — MY LINES, the emcee's script library (owner-locked 2026-08-01).
+      The demo shop is a host/MC; this was the most relevant tool on the page
+      and it was not on it.
+    · the LIVE console (/on-the-day/live/[eventId]) — the generic kit (floor
+      clock · requests inbox · stage notes · seat scanner · portfolio credits)
+      AND the specialization slot. `specialization-registry.tsx` ships three
+      surfaces — song_desk · stage_script · floor_command — and Saysay runs two
+      trades, so it gets two, switchable.
+    · the customer card's SIX tabs (`VENDOR_CLIENT_TABS`: chat · quote ·
+      payments · files · schedule · details) plus the six things a couple hands
+      over (production sheet · seat plan · mood board · cocktail · editorial
+      media · challenge photos). The first draft's drawer had three rows.
+    · /deep-search and /subscription/custom — priced but with no door. Both now
+      open from the Plan room, which is where the shipped doorway is.
+    · the Papic credits a supplier EARNS from a booking (5% of the fee, cap
+      1,000, granted on payment approval).
+-->
+<style>
+:root{
+  /* Tokens lifted from prototypes/vendor_dashboard_rearranged_2026-08-26.html,
+     which lifted them from admin_designed_2026-08-03.html — owner-approved.
+     gold #A9834B is 3.37:1 on white: rules and icons only, never text. */
+  --ground:#FFFFFF; --panel:#FBFAF7; --sunk:#F4F2EC;
+  --ink:#2C2A29; --ink-soft:#4F535B; --ink-faint:#767A82;
+  --line:#E6E0D6; --line-soft:#F1ECE3;
+  --gold:#A9834B; --gold-text:#8A6B39; --gold-soft:#F5EEE1;
+  --slate:#3B4E67; --slate-soft:#EDF1F6;
+  --ok:#4F6B4A; --ok-soft:#EDF1E8;
+  --late:#B65A3A; --late-soft:#F7E9E6; --cta:#C24E25;
+  --night:#17160F; --night-line:#3A372C; --night-ink:#F4EFE6; --night-2:#B8AE9E;
+  --shadow:0 1px 2px rgba(44,42,41,.05), 0 10px 28px -22px rgba(44,42,41,.38);
+  --sans:"Hanken Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"Space Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --r-lg:20px; --r-md:14px; --r-sm:10px;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{font-family:var(--sans);background:var(--ground);color:var(--ink);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;color:inherit}
+h1,h2,h3{margin:0;font-weight:600}
+a{color:inherit}
+.mono{font-family:var(--mono)}
+
+/* ---------- prototype bar (clearly not the app) ---------- */
+.proto{position:sticky;top:0;z-index:60;display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 14px;background:#EDEAE4;font-size:12px;color:var(--ink-soft)}
+.proto b{font-weight:700;color:var(--ink)}
+.proto .sp{margin-left:auto;font-size:11px;color:var(--ink-faint)}
+.pill{height:30px;padding:0 13px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12.5px;white-space:nowrap}
+.pill[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:600}
+
+/* ---------- shell ---------- */
+/* THE TOP BAR IS AT EVERY WIDTH, and that is owner-locked, not a layout taste.
+   It carries the notifications bell and the account panel, and the account
+   panel carries the ONLY Sign out on every vendor screen (owner 2026-08-13).
+   The first draft of this prototype hid it below 1024 — which strands every
+   supplier on a phone with no way out and no error to notice. */
+.shell-top{display:flex;align-items:center;gap:10px;height:52px;padding:0 14px;background:var(--ground);border-bottom:1px solid var(--line-soft);position:sticky;top:44px;z-index:40}
+.shell-top .brand{font-weight:700;letter-spacing:.18em;font-size:12px}
+.shell-top .search{display:none}
+.shell-top .util{margin-left:auto;display:flex;align-items:center;gap:6px}
+.bell{position:relative;width:38px;height:38px;border:0;background:transparent;border-radius:999px;font-size:17px}
+.bell .ct{position:absolute;top:3px;right:2px;font-family:var(--mono);font-size:9px;font-weight:700;background:var(--late);color:#fff;border-radius:999px;padding:0 4px;line-height:14px}
+.avatar{width:32px;height:32px;border-radius:999px;background:var(--sunk);border:1px solid var(--line);font-size:11.5px;font-weight:700}
+.app{display:block}
+.main{padding:0 0 96px}
+
+/* ---------- page head ---------- */
+.page-head{padding:14px 16px 2px}
+.page-head h1{font-size:25px;font-weight:600;letter-spacing:-.02em;line-height:1.1}
+.status{display:block;margin-top:3px;font-size:13px;color:var(--ink-soft)}
+.layout{display:flex;flex-direction:column;gap:22px;padding:14px 16px 24px}
+.sec{display:flex;flex-direction:column;gap:9px;min-width:0}
+.sec > h2{font-size:16.5px;letter-spacing:-.01em}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+/* At 375 the heading and its count fight for one line and both wrap badly.
+   Stack them: heading, then the count under it. */
+@media (max-width:420px){ .sec-head{flex-direction:column;gap:2px} .sec-head .n{order:-1} }
+.sec-head .n{font-family:var(--mono);font-size:12px;color:var(--ink-faint)}
+.eyebrow{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-text)}
+.lbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint)}
+.muted{color:var(--ink-soft)}
+.hint{font-size:12px;color:var(--ink-faint)}
+
+/* ---------- cards / rows ---------- */
+.card{border:1px solid var(--line);border-radius:var(--r-md);background:var(--ground);padding:13px 15px}
+.card.sunk{background:var(--panel)}
+.rows{border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;background:var(--ground)}
+.rows > *:not(:last-child){border-bottom:1px solid var(--line-soft)}
+.row{min-height:50px;width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;border:0;background:transparent;font-size:14.5px;text-align:left;font-family:inherit}
+.row .k{min-width:0}
+.row .t{display:block;font-weight:600}
+.row .s{display:block;font-size:12.5px;color:var(--ink-soft);margin-top:1px}
+.row .v{font-family:var(--mono);font-size:12.5px;color:var(--ink-faint);white-space:nowrap}
+.row .chev{color:var(--ink-faint);font-size:17px}
+.fold{width:100%;display:flex;align-items:center;gap:10px;padding:12px 14px;border:0;background:transparent;text-align:left;font-size:14.5px;font-family:inherit}
+.fold .fs{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--ink-faint)}
+.fold .chev{color:var(--ink-faint);font-size:17px;transition:transform .18s}
+.fold[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.foldbody{padding:0 14px 14px;font-size:14px;color:var(--ink-soft);display:flex;flex-direction:column;gap:9px}
+
+/* ---------- answer desk ---------- */
+.desk{display:flex;flex-direction:column;gap:8px}
+.ans{border:1px solid var(--line);border-left:3px solid var(--line);border-radius:var(--r-md);background:var(--ground);padding:12px 14px;display:flex;flex-direction:column;gap:9px}
+.ans[data-tone="book"]{border-left-color:var(--ok)}
+.ans[data-tone="money"]{border-left-color:var(--gold)}
+.ans[data-tone="lead"]{border-left-color:var(--slate)}
+.ans[data-tone="judge"]{border-left-color:var(--late);background:var(--late-soft)}
+.ans-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.kind{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.ans[data-tone="book"] .kind{color:var(--ok)}
+.ans[data-tone="money"] .kind{color:var(--gold-text)}
+.ans[data-tone="lead"] .kind{color:var(--slate)}
+.ans[data-tone="judge"] .kind{color:var(--late)}
+.ans[data-tone="none"] .kind{color:var(--ink-faint)}
+.waited{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+.waited.hot{color:var(--late);font-weight:700}
+.ans .t{font-size:15px;font-weight:600;line-height:1.3}
+.ans .s{font-size:13px;color:var(--ink-soft)}
+.ans .acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.new-tag{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--slate-soft);color:var(--slate);border-radius:999px;padding:2px 7px}
+
+/* ---------- buttons ---------- */
+.btn{height:40px;border:0;border-radius:999px;background:var(--ink);color:#fff;font-size:13.5px;font-weight:600;padding:0 17px;white-space:nowrap}
+.btn.pri{background:var(--cta)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.btn.sm{height:34px;font-size:12.5px;padding:0 13px}
+.btn:disabled{opacity:.4;cursor:default}
+.linkish{border:0;background:transparent;padding:0;font-size:13px;font-weight:600;color:var(--gold-text);text-decoration:underline;text-underline-offset:2px}
+
+/* ---------- glance / kpis ---------- */
+.kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.kpi{border:1px solid var(--line);border-radius:var(--r-sm);background:var(--panel);padding:10px 12px}
+.kpi .kn{font-family:var(--mono);font-size:21px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.kpi .kl{font-size:11.5px;color:var(--ink-soft);margin-top:2px}
+
+/* ---------- money note ---------- */
+.money{border:1px solid var(--gold);background:var(--gold-soft);border-radius:var(--r-md);padding:13px 15px;display:flex;flex-direction:column;gap:9px}
+.money .amt{font-family:var(--mono);font-size:22px;font-weight:700}
+.warn{border:1px solid var(--late);background:var(--late-soft);border-radius:var(--r-md);padding:13px 15px;font-size:13.5px;color:var(--ink)}
+.good{border:1px solid var(--ok);background:var(--ok-soft);border-radius:var(--r-md);padding:12px 14px;font-size:13.5px}
+
+/* ---------- switches / steppers / segments ---------- */
+.switch{width:44px;height:26px;flex-shrink:0;border:0;border-radius:999px;background:#D9D3C8;padding:3px;display:flex}
+.switch::after{content:"";width:20px;height:20px;border-radius:999px;background:#fff;transition:transform .15s}
+.switch[aria-checked="true"]{background:var(--ok)}
+.switch[aria-checked="true"]::after{transform:translateX(18px)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--ground)}
+.seg button{border:0;background:transparent;font:inherit;font-size:12.5px;padding:7px 14px;color:var(--ink-soft)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff;font-weight:600}
+.stepper{display:inline-flex;align-items:center;gap:6px}
+.stepper .sb{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:#fff;font-size:17px;line-height:1}
+.stepper .sb:disabled{opacity:.35;cursor:default}
+.stepper .val{font-family:var(--mono);font-size:15px;font-weight:700;min-width:40px;text-align:center}
+
+/* ---------- calendar ---------- */
+.cal{border:1px solid var(--line);border-radius:var(--r-md);padding:11px;background:var(--ground)}
+.cal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cal-h .m{font-weight:600;font-size:14.5px}
+.dow,.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.dow span{text-align:center;font-family:var(--mono);font-size:9.5px;color:var(--ink-faint);padding-bottom:4px}
+.day{aspect-ratio:1/1;border:1px solid transparent;border-radius:8px;background:var(--panel);font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);display:flex;align-items:center;justify-content:center;position:relative}
+.day[data-st="booked"]{background:var(--ok);color:#fff;font-weight:700;border-color:var(--ok)}
+.day[data-st="held"]{background:var(--gold-soft);color:var(--gold-text);font-weight:700;border-color:var(--gold)}
+.day[data-st="blocked"]{background:repeating-linear-gradient(45deg,#EFEAE1,#EFEAE1 3px,#fff 3px,#fff 6px);color:var(--ink-faint)}
+.day[data-st="full"]{background:var(--late-soft);color:var(--late);font-weight:700;border-color:var(--late)}
+.day[data-st="wait"]{background:var(--slate-soft);color:var(--slate);font-weight:700;border-color:var(--slate)}
+.day[aria-pressed="true"]{outline:2px solid var(--cta);outline-offset:1px}
+.key{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--ink-soft);margin-top:9px}
+.key i{width:9px;height:9px;border-radius:3px;display:inline-block;margin-right:4px;vertical-align:-1px}
+
+/* ---------- doors (My Shop) ---------- */
+.doors{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.door{border:1px solid var(--line);border-radius:var(--r-md);background:var(--ground);padding:11px 12px;text-align:left;font-family:inherit}
+.door[aria-pressed="true"]{border-color:var(--ink);background:var(--sunk)}
+.door .dt{font-size:14px;font-weight:600;display:block}
+.door .dq{font-size:11.5px;color:var(--ink-soft);display:block;margin-top:2px;line-height:1.35}
+.door .dn{font-family:var(--mono);font-size:10.5px;color:var(--gold-text);display:block;margin-top:5px}
+
+/* ---------- tiles / shelves ---------- */
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.tile{border:1px solid var(--line);border-radius:var(--r-sm);background:var(--ground);padding:10px 12px;text-align:left;font-family:inherit;font-size:13.5px}
+.tile .tt{font-weight:600;display:block}
+.tile .ts{font-size:11.5px;color:var(--ink-soft);display:block;margin-top:2px;line-height:1.35}
+
+/* ---------- bars (performance) ---------- */
+.bar{height:9px;border-radius:999px;background:var(--sunk);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--gold);border-radius:999px}
+.fun{display:flex;flex-direction:column;gap:7px}
+.fun .fr{display:grid;grid-template-columns:96px 1fr 58px;gap:9px;align-items:center;font-size:13px}
+.fun .fr .v{font-family:var(--mono);font-size:12.5px;text-align:right;color:var(--ink-soft)}
+
+/* ---------- dark event card ---------- */
+.night{background:var(--night);color:var(--night-ink);border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:11px}
+.night .eyebrow{color:#C2A06A}
+.night .q{font-size:20px;font-weight:600;line-height:1.2}
+.night .chips{display:flex;gap:6px;flex-wrap:wrap}
+.night .chip{font-family:var(--mono);font-size:11px;font-weight:700;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:4px 10px}
+.night .btn{background:#C2A06A;color:var(--night)}
+.night .sub{font-size:12.5px;color:var(--night-2)}
+
+/* ---------- bottom bar (phone) ---------- */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:35;display:grid;grid-template-columns:repeat(5,1fr);background:var(--ground);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.tabbar button{border:0;background:transparent;padding:9px 2px 10px;font-size:10.5px;color:var(--ink-faint);display:flex;flex-direction:column;align-items:center;gap:3px;position:relative}
+.tabbar button[aria-current="page"]{color:var(--ink);font-weight:700}
+.tabbar button[aria-current="page"] .ic{background:var(--sunk)}
+.tabbar .ic{width:26px;height:22px;border-radius:7px;display:flex;align-items:center;justify-content:center}
+.tabbar .ct{position:absolute;top:4px;right:calc(50% - 20px);font-family:var(--mono);font-size:9.5px;font-weight:700;background:var(--late);color:#fff;border-radius:999px;padding:0 5px;line-height:15px}
+
+/* ---------- drawer / panel ---------- */
+.scrim{position:fixed;inset:0;background:rgba(23,22,15,.45);z-index:70;display:none}
+.panel{position:fixed;inset:0;background:var(--ground);z-index:71;display:none;flex-direction:column}
+body.open .scrim{display:block}
+body.open .panel{display:flex}
+.panel-head{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line-soft)}
+.panel-head .t{flex:1;font-size:17px;font-weight:600}
+.icon-btn{width:40px;height:40px;border:0;background:transparent;display:inline-flex;align-items:center;justify-content:center;border-radius:999px}
+.panel-body{flex:1;overflow-y:auto;padding:14px 16px 32px;display:flex;flex-direction:column;gap:11px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field span{font-size:11.5px;color:var(--ink-soft)}
+.field input,.field textarea,.field select{border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 11px;font:inherit;font-size:14.5px;background:#fff;color:var(--ink)}
+.field textarea{min-height:82px;resize:vertical}
+.toast{position:fixed;left:14px;right:14px;bottom:84px;z-index:80;border-radius:var(--r-md);background:var(--ink);color:#fff;padding:12px 14px;font-size:13.5px;display:none;gap:12px;justify-content:space-between;align-items:center}
+.toast.on{display:flex}
+.toast button{border:0;background:transparent;color:#C2A06A;font-weight:700}
+
+/* ---------- room switching ---------- */
+.room{display:none}
+.room.on{display:contents}
+
+/* THE RIGHT COLUMN ON A PHONE is just another section — but it must not lead.
+   On a phone the answer list is the page; the glance and the money follow it.
+   Order, never duplicated markup. */
+.aside{display:flex;flex-direction:column;gap:12px}
+.room > .sec{order:1}
+/* ⚠ AFTER the line above, and equally specific — `.aside` alone loses to
+   `.room > .sec`, because the right column carries BOTH classes. */
+.room > .aside{order:5}
+/* The "Waiting on you" card exists so the desktop's sticky column can say the
+   count while you are scrolled past the heading. On a phone the heading is
+   right there, so the card would be the same fact twice. */
+@media (max-width:1023px){ [data-desktop-only]{display:none} }
+
+/* ================= DESKTOP ================= */
+@media (min-width:1024px){
+  body{background:#FAF8F4}
+  .shell-top{height:58px;padding:0 22px;gap:16px}
+  .shell-top .brand{letter-spacing:.2em;font-size:13px}
+  .shell-top .search{flex:1;max-width:460px;height:36px;border:1px solid var(--line);border-radius:999px;display:flex;align-items:center;padding:0 14px;color:var(--ink-faint);font-size:13px}
+  .app{display:grid;grid-template-columns:232px 1fr}
+  .rail{display:flex;flex-direction:column;gap:1px;padding:14px 10px;border-right:1px solid var(--line-soft);background:var(--panel);min-height:calc(100vh - 102px);position:sticky;top:102px;align-self:start}
+  .rail .grp{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-text);padding:8px 9px 6px}
+  .rail .grp.up{color:var(--ink-faint)}
+  .rail .nav{display:flex;align-items:center;gap:9px;width:100%;padding:8px 9px;border-radius:8px;font-size:13.5px;color:var(--ink-soft);background:transparent;border:0;text-align:left;font-family:inherit}
+  .rail .nav[aria-current="page"]{background:var(--sunk);color:var(--ink);font-weight:600}
+  .rail .nav .n{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--ink-faint)}
+  .rail .nav .n.new{background:var(--late);color:#fff;border-radius:999px;padding:1px 6px;font-size:9.5px;font-weight:700}
+  .rail .foot{margin-top:auto;padding:10px 9px;font-size:10.5px;color:var(--ink-faint);line-height:1.45;border-top:1px solid var(--line)}
+  .tabbar{display:none}
+  .main{max-width:1280px;margin:0 auto;padding:0 28px 60px;width:100%}
+  .page-head{padding:22px 0 4px}
+  .page-head h1{font-size:29px}
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;column-gap:28px;row-gap:24px;padding:12px 0 40px;align-items:start}
+  /* ⚠ `.room` is display:contents, so its .sec children are GRID ITEMS of
+     .layout — but the child combinator is DOM-based, not box-based, so
+     `.layout > .sec` matches nothing here. Scope to .room instead. */
+  .room > .sec{grid-column:1}
+  .room > .aside{grid-column:2;grid-row:1 / span 20;position:sticky;top:124px;align-self:start}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .doors{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .tiles{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .panel{inset:0 0 0 auto;width:460px;box-shadow:-8px 0 28px rgba(23,22,15,.10)}
+  .toast{left:auto;right:24px;bottom:24px;width:360px}
+  .card,.rows,.cal,.door,.tile,.ans{background:var(--ground)}
+}
+@media (max-width:1023px){ .rail{display:none} }
+</style>
+</head>
+<body data-room="overview" data-phase="ordinary">
+
+<!-- PROTOTYPE BAR — deliberately not part of the app -->
+<div class="proto" role="group" aria-label="Prototype controls">
+  <b>Prototype</b>
+  <button class="pill" data-phase="ordinary" aria-pressed="true">Ordinary day</button>
+  <button class="pill" data-phase="eventday" aria-pressed="false">Event day</button>
+  <span class="sp">Saysay Host and Band · real shop, real prices · feed volumes illustrative</span>
+</div>
+
+<div class="shell-top">
+  <span class="brand">SETNAYAN</span>
+  <span class="search">Search couples, bookings, tools</span>
+  <span class="util">
+    <button class="bell" data-panel="bell" aria-label="Notifications">✉<span class="ct">4</span></button>
+    <button class="avatar" data-panel="account" aria-label="Your account">SH</button>
+  </span>
+</div>
+
+<div class="app">
+
+  <!-- ===================== RAIL (desktop) ===================== -->
+  <nav class="rail" aria-label="Shop menu">
+    <div class="grp up">Your account</div>
+    <button class="nav" data-goto="overview"><span>◫</span><span>Home</span></button>
+    <button class="nav" data-goto="overview"><span>✦</span><span>Marketplace</span></button>
+    <div class="grp">▣ Saysay Host and Band</div>
+    <button class="nav" data-room-btn="overview"><span>⌂</span><span>Today</span><span class="n new" data-count="answers">5</span></button>
+    <button class="nav" data-room-btn="customers"><span>☺</span><span>My Customers</span><span class="n new">7</span></button>
+    <button class="nav" data-room-btn="shop"><span>▤</span><span>My Shop</span></button>
+    <button class="nav" data-room-btn="performance"><span>◷</span><span>My Performance</span></button>
+    <button class="nav" data-room-btn="hub"><span>◈</span><span>Event Hub</span><span class="n" data-hubn>—</span></button>
+    <button class="nav" data-room-btn="plan"><span>⚡</span><span>Plan</span><span class="n">Solo</span></button>
+    <div class="foot">Five rooms, five keys — unchanged. Answering has a name and a number.</div>
+  </nav>
+
+  <div class="main">
+
+    <div class="page-head">
+      <h1 id="roomTitle">Today</h1>
+      <span class="status" id="roomStatus"></span>
+    </div>
+
+    <div class="layout" id="layout">
+
+      <!-- ============================================================ -->
+      <!-- ROOM 1 · TODAY                                               -->
+      <!-- ============================================================ -->
+      <div class="room" data-room-body="overview">
+
+        <!-- RIGHT COLUMN: what you need at every moment -->
+        <div class="aside sec">
+          <div class="card sunk" data-desktop-only>
+            <p class="lbl">Waiting on you</p>
+            <p style="font-family:var(--mono);font-size:32px;font-weight:700;line-height:1.05;margin-top:4px" data-count="answers">5</p>
+            <p class="hint" style="margin-top:2px">Oldest has waited <b>4 days</b>.</p>
+            <button class="btn pri sm" style="margin-top:9px;width:100%" data-scroll="desk">Answer them</button>
+          </div>
+          <div class="kpis">
+            <div class="kpi"><div class="kn" data-today-n>0</div><div class="kl">events today</div></div>
+            <div class="kpi"><div class="kn">₱46,500</div><div class="kl">booked this month [ILLUSTRATIVE]</div></div>
+            <div class="kpi"><div class="kn">7</div><div class="kl">open conversations</div></div>
+            <div class="kpi"><div class="kn">4.9</div><div class="kl">rating</div></div>
+          </div>
+          <div class="money">
+            <p class="lbl" style="color:var(--gold-text)">You owe Setnayan</p>
+            <p class="amt">₱837.50</p>
+            <p style="font-size:12.5px;line-height:1.4">Booking fee on the <b>Rosa &amp; Ben</b> booking — 5% of ₱16,750 declared. Your 6th booking; the first five were free.</p>
+            <button class="btn sm" data-panel="pay-fee">Pay this fee</button>
+          </div>
+        </div>
+
+        <!-- 1 · THE ONE LIST -->
+        <div class="sec" id="desk">
+          <div class="sec-head">
+            <h2>Needs your answer</h2>
+            <span class="n"><b data-count="answers">5</b> waiting · oldest 4 days</span>
+          </div>
+          <div class="desk" id="deskList">
+
+            <!-- EVENT-DAY ONLY: the day's request jumps to the top -->
+            <div class="ans" data-tone="book" data-only="eventday">
+              <div class="ans-h"><span class="kind">On the day</span><span class="waited hot">now</span></div>
+              <p class="t">The coordinator is asking for your set to start 20 minutes late</p>
+              <p class="s">Ana &amp; Miguel · reception · [REQUEST TEXT]</p>
+              <div class="acts">
+                <button class="btn pri sm" data-answer="Told the coordinator: yes.">Yes, noted</button>
+                <button class="btn ghost sm" data-panel="reply">Reply</button>
+              </div>
+            </div>
+
+            <div class="ans" data-tone="book">
+              <div class="ans-h"><span class="kind">Booking request</span><span class="waited hot">waiting 4 days</span></div>
+              <p class="t">Ana &amp; Miguel want to book you — 13 Mar 2027</p>
+              <p class="s">Host &amp; MC · 4 days left to answer · agreeing costs you <b>₱2,000</b> (5% of ₱40,000 declared)</p>
+              <div class="acts">
+                <button class="btn pri sm" data-answer="Agreed. Ana &amp; Miguel are booked — the deposit is now their next step.">Agree to this booking</button>
+                <button class="btn ghost sm" data-panel="decline">Decline</button>
+                <button class="linkish" data-panel="fee-why">Why ₱2,000?</button>
+              </div>
+            </div>
+
+            <div class="ans" data-tone="money">
+              <div class="ans-h"><span class="kind">Money in</span><span class="waited">waiting 2 days</span></div>
+              <p class="t">A deposit says it arrived — Indalecio &amp; Claire, ₱15,000</p>
+              <p class="s">GCash · their receipt is on this row · [RECEIPT IMAGE]</p>
+              <div class="acts">
+                <button class="btn pri sm" data-answer="Recorded. Their balance moved and they were told.">Confirm it arrived</button>
+                <button class="btn ghost sm" data-panel="never">It never arrived</button>
+                <button class="linkish" data-panel="receipt">See receipt</button>
+              </div>
+            </div>
+
+            <div class="ans" data-tone="lead">
+              <div class="ans-h"><span class="kind">New inquiry</span><span class="waited">waiting 1 day</span></div>
+              <p class="t">A couple asked about 12 Dec 2026</p>
+              <p class="s">Live band · Metro Manila · answering is free, anywhere in the Philippines</p>
+              <div class="acts">
+                <button class="btn pri sm" data-answer="Accepted. You can see who they are — the conversation is open.">Accept</button>
+                <button class="btn ghost sm" data-panel="decline">Not available</button>
+              </div>
+            </div>
+
+            <div class="ans" data-tone="lead">
+              <div class="ans-h"><span class="kind">Meeting time</span><span class="waited">waiting 1 day</span></div>
+              <p class="t">Maria &amp; Jose proposed Thu 2 Oct, 3:00 PM</p>
+              <p class="s">Video call · you cannot answer a time you proposed yourself</p>
+              <div class="acts">
+                <button class="btn pri sm" data-answer="Confirmed for Thu 2 Oct, 3:00 PM.">Accept the time</button>
+                <button class="btn ghost sm" data-panel="propose">Propose another</button>
+              </div>
+            </div>
+
+            <div class="ans" data-tone="lead">
+              <div class="ans-h"><span class="kind">Quote never sent</span><span class="waited">drafted 3 days ago</span></div>
+              <p class="t">A quote for Rosa &amp; Ben is still a draft</p>
+              <p class="s">₱35,000 · live band · they are waiting on it</p>
+              <div class="acts">
+                <button class="btn pri sm" data-answer="Quote sent to Rosa &amp; Ben.">Send it</button>
+                <button class="btn ghost sm" data-panel="quote">Open the quote</button>
+              </div>
+            </div>
+
+            <div class="ans" data-tone="lead">
+              <div class="ans-h"><span class="kind">Review to answer</span><span class="waited">5 days ago</span></div>
+              <p class="t">4 stars from the Tala &amp; Migo wedding</p>
+              <p class="s">“[REVIEW TEXT]” — a reply is public and sits under the review.</p>
+              <div class="acts" style="flex-direction:column;align-items:stretch">
+                <label class="field"><span>Your reply</span><textarea placeholder="Thank them, or answer what they raised."></textarea></label>
+                <div style="display:flex;gap:8px"><button class="btn pri sm" data-answer="Your reply is public under that review.">Post reply</button></div>
+              </div>
+            </div>
+
+            <div class="ans" data-tone="lead">
+              <div class="ans-h"><span class="kind">Crew gig</span><span class="new-tag">not in today's list</span><span class="waited">closes in 2 days</span></div>
+              <p class="t">A paid gig on 12 Dec, ₱3,500 — offered by [SHOP]</p>
+              <p class="s">Manpower · today this only exists inside My Shop → Manpower.</p>
+              <div class="acts">
+                <button class="btn pri sm" data-answer="Taken. It is on your calendar for 12 Dec.">Take it</button>
+                <button class="btn ghost sm" data-answer="Passed.">Pass</button>
+              </div>
+            </div>
+
+            <div class="ans" data-tone="lead">
+              <div class="ans-h"><span class="kind">Waitlist</span><span class="new-tag">not in today's list</span><span class="waited">waiting 3 days</span></div>
+              <p class="t">Three couples are waiting on 14 Feb — you have room for one more</p>
+              <p class="s">Today this only exists inside My Customers → Availability &amp; capacity.</p>
+              <div class="acts"><button class="btn pri sm" data-panel="waitlist">Choose who</button></div>
+            </div>
+
+            <div class="ans" data-tone="judge">
+              <div class="ans-h"><span class="kind">Their call, your release</span><span class="waited hot">waiting 4 days</span></div>
+              <p class="t">A couple wants this celebration removed — Tala &amp; Migo</p>
+              <p class="s">You were paid for it. Your record is kept either way, and nothing goes until you answer. There is no fast button on this one.</p>
+              <div class="acts"><button class="btn ghost sm" data-panel="release">Read it</button></div>
+            </div>
+
+            <div class="ans" data-tone="judge">
+              <div class="ans-h"><span class="kind">Dispute</span><span class="waited hot">opened 6 days ago</span></div>
+              <p class="t">A case is open on the [COUPLE] booking</p>
+              <p class="s">Money is held while this is open. A person at Setnayan is on it with you.</p>
+              <div class="acts"><button class="btn ghost sm" data-panel="dispute">Open it</button></div>
+            </div>
+
+          </div>
+          <p class="hint">A plain yes or no answers on the row. Something needing a reason or a number opens a box. A judgement gets a sentence and a way in, and no fast button.</p>
+        </div>
+
+        <!-- 2 · GOOD NEWS -->
+        <div class="sec">
+          <h2>Good news · nothing to answer</h2>
+          <div class="rows">
+            <button class="fold" aria-expanded="false" data-fold><span>5 stars from the Tala &amp; Migo wedding</span><span class="fs">just now</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>“[REVIEW TEXT]” — no reply needed. It is already on your public page.</div>
+            <button class="fold" aria-expanded="false" data-fold><span>You were featured in a story</span><span class="fs">2 days ago</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>[STORY TITLE] — your work is credited. Read it on your public page.</div>
+            <button class="fold" aria-expanded="false" data-fold><span>A shop recommended you</span><span class="fs">4 days ago</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>[SHOP] vouched for you. It shows as a badge on your marketplace card.</div>
+          </div>
+        </div>
+
+        <!-- 3 · THE REST, FOLDED -->
+        <div class="sec">
+          <h2>Next 5 events · open tasks · first steps</h2>
+          <div class="rows">
+            <button class="fold" aria-expanded="false" data-fold><span>Upcoming schedules</span><span class="fs">Next 5</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>
+              <div class="rows">
+                <button class="row"><span class="k"><b class="t">Rosa &amp; Ben</b><span class="s">Live band · Metro Manila</span></span><span class="v">30 Oct</span></button>
+                <button class="row"><span class="k"><b class="t">Maria &amp; Jose</b><span class="s">Host &amp; MC · [CITY]</span></span><span class="v">12 Dec</span></button>
+                <button class="row"><span class="k"><b class="t">Indalecio &amp; Claire</b><span class="s">Live band · Metro Manila</span></span><span class="v">18 Dec</span></button>
+                <button class="row"><span class="k"><b class="t">Ana &amp; Miguel</b><span class="s">Host &amp; MC · Calabarzon</span></span><span class="v">13 Mar</span></button>
+              </div>
+            </div>
+            <button class="fold" aria-expanded="false" data-fold><span>Ongoing</span><span class="fs">4 open</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>
+              <div class="rows">
+                <button class="row"><span class="k"><b class="t">Send the contract to Rosa &amp; Ben</b><span class="s">Due in 3 days</span></span><span class="chev">›</span></button>
+                <button class="row"><span class="k"><b class="t">Add your set list for 12 Dec</b><span class="s">No due date</span></span><span class="chev">›</span></button>
+                <button class="row"><span class="k"><b class="t">Upload 3 portfolio photos</b><span class="s">[DUE]</span></span><span class="chev">›</span></button>
+                <button class="row"><span class="k"><b class="t">Confirm your crew for 18 Dec</b><span class="s">Due in 11 days</span></span><span class="chev">›</span></button>
+              </div>
+            </div>
+            <button class="fold" aria-expanded="false" data-fold><span>Finish setting up</span><span class="fs">8 of 8 fields in</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>Your shop is verified and listed. Nothing is blocking couples from finding you.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- ROOM 2 · MY CUSTOMERS                                        -->
+      <!-- ============================================================ -->
+      <div class="room" data-room-body="customers">
+
+        <div class="aside sec">
+          <div class="kpis">
+            <div class="kpi"><div class="kn">4</div><div class="kl">booked</div></div>
+            <div class="kpi"><div class="kn">7</div><div class="kl">in conversation</div></div>
+            <div class="kpi"><div class="kn">₱46,500</div><div class="kl">money in, this month [ILLUSTRATIVE]</div></div>
+            <div class="kpi"><div class="kn">3</div><div class="kl">unread threads</div></div>
+          </div>
+          <div class="card sunk">
+            <p class="lbl">Your booking QR</p>
+            <div style="margin:9px 0;width:100%;aspect-ratio:1/1;max-width:150px;background:repeating-conic-gradient(var(--ink) 0 25%, #fff 0 50%) 0 0/16px 16px;border-radius:8px" aria-label="[QR CODE]"></div>
+            <div class="seg" role="group" aria-label="QR mode">
+              <button aria-pressed="true" data-seg>Shortlist</button><button aria-pressed="false" data-seg>Locked</button>
+            </div>
+            <p class="hint" style="margin-top:7px">Show it and a couple books you on the spot.</p>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-head"><h2>Your dates</h2><span class="n">March 2027</span></div>
+          <div class="cal">
+            <div class="cal-h"><button class="icon-btn" aria-label="Previous month">‹</button><span class="m">March 2027</span><button class="icon-btn" aria-label="Next month">›</button></div>
+            <div class="dow"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
+            <div class="days" id="calDays"></div>
+            <div class="key">
+              <span><i style="background:var(--ok)"></i>Booked</span>
+              <span><i style="background:var(--gold-soft);border:1px solid var(--gold)"></i>Held</span>
+              <span><i style="background:var(--slate-soft);border:1px solid var(--slate)"></i>Waitlist</span>
+              <span><i style="background:var(--late-soft);border:1px solid var(--late)"></i>Full</span>
+              <span><i style="background:#EFEAE1"></i>Blocked</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-head"><h2>Your people</h2><span class="n">11 rows</span></div>
+          <div class="seg" role="group" aria-label="Filter people" style="align-self:flex-start">
+            <button aria-pressed="true" data-seg>All</button><button aria-pressed="false" data-seg>Booked</button><button aria-pressed="false" data-seg>Talking</button><button aria-pressed="false" data-seg>Waitlist</button>
+          </div>
+          <div class="rows">
+            <button class="row" data-panel="client"><span class="k"><b class="t">Ana &amp; Miguel</b><span class="s">13 Mar 2027 · asked to book you</span></span><span class="v" style="color:var(--ok)">Answer</span></button>
+            <button class="row" data-panel="client"><span class="k"><b class="t">Indalecio &amp; Claire</b><span class="s">18 Dec 2026 · booked</span></span><span class="v">₱15,000 in</span></button>
+            <button class="row" data-panel="client"><span class="k"><b class="t">Maria &amp; Jose</b><span class="s">12 Dec 2026 · booked</span></span><span class="v">No plan yet</span></button>
+            <button class="row" data-panel="client"><span class="k"><b class="t">Rosa &amp; Ben</b><span class="s">30 Oct 2026 · booked</span></span><span class="v">Fee due</span></button>
+            <button class="row" data-panel="client"><span class="k"><b class="t">A couple planning a wedding in Metro Manila</b><span class="s">12 Dec 2026 · in conversation</span></span><span class="v">—</span></button>
+            <button class="row" data-panel="client"><span class="k"><b class="t">A couple planning a wedding in Bicol</b><span class="s">[DATE] · in conversation</span></span><span class="v">—</span></button>
+          </div>
+          <p class="hint">A masked row carries no money figure — a balance beside an anonymous row would name the person.</p>
+        </div>
+
+        <div class="sec">
+          <h2>Everything else about your people</h2>
+          <div class="rows">
+            <button class="fold" aria-expanded="false" data-fold><span>New inquiries</span><span class="fs">3 waiting</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>The work queue of leads. The same three also sit at the top of Today — answered in either place.</div>
+            <button class="fold" aria-expanded="false" data-fold><span>Messages</span><span class="fs">3 unread</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>Your conversations — reply, reveal, and log outcomes. [THREAD LIST]</div>
+            <button class="fold" aria-expanded="false" data-fold><span>Payday</span><span class="fs">₱15,000 due</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>The cash-flow timeline: what has landed, what is due, and when. [TIMELINE]</div>
+            <button class="fold" aria-expanded="false" data-fold><span>Clients</span><span class="fs">11</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>Booked · in conversation · outside clients you imported yourself.</div>
+            <button class="fold" aria-expanded="false" data-fold><span>Availability &amp; capacity</span><span class="fs">1 per day</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>
+              <div class="rows">
+                <div class="row"><span class="k"><b class="t">Bookings per day</b><span class="s">Solo allows 1. Pro raises it.</span></span><span class="stepper"><button class="sb" data-step="-1">−</button><span class="val" data-stepval>1</span><button class="sb" data-step="1">+</button></span></div>
+                <div class="row"><span class="k"><b class="t">Take a waitlist when full</b><span class="s">Couples can queue for a taken date</span></span><button class="switch" role="switch" aria-checked="true" data-switch></button></div>
+                <button class="row"><span class="k"><b class="t">Block dates</b><span class="s">Holidays, rest days, your own events</span></span><span class="chev">›</span></button>
+                <button class="row"><span class="k"><b class="t">Import your own clients</b><span class="s">Bookings you made outside Setnayan</span></span><span class="chev">›</span></button>
+              </div>
+            </div>
+            <button class="fold" aria-expanded="false" data-fold><span>Proposals</span><span class="fs">1 draft</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>Build quotes and reusable templates. The Rosa &amp; Ben draft is the one on Today.</div>
+            <button class="fold" aria-expanded="false" data-fold><span>Contracts</span><span class="fs">2 out</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>Send, sign, and track. Moved here from My Shop — a contract is about one customer.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- ROOM 3 · MY SHOP — six doors                                 -->
+      <!-- ============================================================ -->
+      <div class="room" data-room-body="shop">
+
+        <div class="aside sec">
+          <div class="card">
+            <div style="display:flex;align-items:center;gap:9px">
+              <span style="width:38px;height:38px;border-radius:9px;background:var(--sunk);display:flex;align-items:center;justify-content:center;font-weight:700">SH</span>
+              <div style="min-width:0"><b style="display:block;font-size:14.5px">Saysay Host and Band</b><span class="hint">setnayan.com/[SLUG]</span></div>
+            </div>
+            <p style="margin-top:10px"><span class="good" style="display:inline-block;padding:4px 10px;font-size:12px;font-weight:600">Verified by Setnayan · since [DATE]</span></p>
+            <p class="hint" style="margin-top:7px">8 of 8 fields in — a measure, not a grade.</p>
+            <div class="bar" style="margin-top:5px"><i style="width:100%;background:var(--ink-faint)"></i></div>
+            <button class="btn ghost sm" style="margin-top:10px;width:100%" data-panel="as-couple">View as a couple</button>
+          </div>
+          <div class="kpis">
+            <div class="kpi"><div class="kn">[N]</div><div class="kl">profile views, this week</div></div>
+            <div class="kpi"><div class="kn">4.9</div><div class="kl">[N] reviews</div></div>
+            <div class="kpi"><div class="kn">[N]</div><div class="kl">couples saved you</div></div>
+            <div class="kpi"><div class="kn">[N]</div><div class="kl">shops recommend you</div></div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-head"><h2>Six doors</h2><span class="n">one page</span></div>
+          <div class="doors" id="doorNav">
+            <button class="door" data-door="d1" aria-pressed="true"><span class="dt">Your shop</span><span class="dq">Shop information, verification, branches and team</span><span class="dn">Verified · 8 of 8 fields</span></button>
+            <button class="door" data-door="d2" aria-pressed="false"><span class="dt">Your website</span><span class="dq">Edit the website couples see</span><span class="dn">Live · [N] sections</span></button>
+            <button class="door" data-door="d3" aria-pressed="false"><span class="dt">What you sell</span><span class="dq">Coverage, service cards and packages</span><span class="dn">2 services · 0 packages</span></button>
+            <button class="door" data-door="d4" aria-pressed="false"><span class="dt">Auto-reply</span><span class="dq">The assistant that answers for you</span><span class="dn">Off</span></button>
+            <button class="door" data-door="d5" aria-pressed="false"><span class="dt">Getting paid</span><span class="dq">Bank, GCash and your earnings</span><span class="dn">1 method</span></button>
+            <button class="door" data-door="d6" aria-pressed="false"><span class="dt">Other tools</span><span class="dq">Crew gigs and the rest of your tools</span><span class="dn">14 tools</span></button>
+          </div>
+        </div>
+
+        <!-- DOOR 1 -->
+        <div class="sec" data-doorbody="d1">
+          <h2>Your shop</h2>
+          <div class="rows">
+            <button class="fold" aria-expanded="true" data-fold><span>Shop information</span><span class="fs">8 of 8 in</span><span class="chev">›</span></button>
+            <div class="foldbody">
+              <label class="field"><span>Business name</span><input value="Saysay Host and Band"></label>
+              <label class="field"><span>Web address</span><input value="setnayan.com/[SLUG]" disabled></label>
+              <label class="field"><span>City</span><input value="[CITY]"></label>
+              <label class="field"><span>In business since</span><input value="[YEAR]"></label>
+              <p class="hint">Seven of these lock once you are verified. Ask Setnayan to change a locked one.</p>
+            </div>
+            <button class="fold" aria-expanded="false" data-fold><span>Your papers</span><span class="fs">Verified</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>
+              <div class="rows">
+                <div class="row"><span class="k"><b class="t">DTI registration</b><span class="s">[NUMBER] · checked [DATE]</span></span><button class="btn ghost sm">Replace</button></div>
+                <div class="row"><span class="k"><b class="t">BIR 2303</b><span class="s">[NUMBER] · checked [DATE]</span></span><button class="btn ghost sm">Replace</button></div>
+                <div class="row"><span class="k"><b class="t">Mayor's permit</b><span class="s">Good until [DATE] · renews yearly</span></span><button class="btn sm">Renew</button></div>
+                <div class="row"><span class="k"><b class="t">Valid ID</b><span class="s">Not on file — a person at Setnayan verified you; send it when handy, the badge stays.</span></span><button class="btn ghost sm">Send</button></div>
+              </div>
+            </div>
+            <button class="fold" aria-expanded="false" data-fold><span>Something here is wrong?</span><span class="fs">Ask Setnayan</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>These lock with the papers: web address · shop name · business owner · company address · city · contact number · company email · year established · logo.</div>
+            <button class="fold" aria-expanded="false" data-fold><span>Team</span><span class="fs">Add up to 1</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>Solo includes 1 seat. Extra seats are <b>₱250</b> per 28 days.</div>
+            <button class="fold" aria-expanded="false" data-fold><span>Branch</span><span class="fs">Upgrade to add</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>An extra branch is <b>₱1,000</b> per 28 days and gets its own team and calendar.</div>
+          </div>
+        </div>
+
+        <!-- DOOR 2 -->
+        <div class="sec" data-doorbody="d2" hidden>
+          <h2>Your website</h2>
+          <div class="rows">
+            <div class="row"><span class="k"><b class="t">Your page is live</b><span class="s">setnayan.com/[SLUG]</span></span><button class="btn ghost sm" data-panel="as-couple">Preview</button></div>
+            <div class="row"><span class="k"><b class="t">Cover photo</b><span class="s">[IMAGE]</span></span><button class="btn ghost sm">Change</button></div>
+            <div class="row"><span class="k"><b class="t">Show your prices publicly</b><span class="s">Couples see “from ₱35,000”</span></span><button class="switch" role="switch" aria-checked="true" data-switch></button></div>
+            <div class="row"><span class="k"><b class="t">Show your reply time</b><span class="s">[CLAIM]</span></span><button class="switch" role="switch" aria-checked="true" data-switch></button></div>
+            <div class="row"><span class="k"><b class="t">Connect Instagram</b><span class="s">Pull your posts into your gallery</span></span><button class="btn ghost sm">Connect</button></div>
+          </div>
+        </div>
+
+        <!-- DOOR 3 -->
+        <div class="sec" data-doorbody="d3" hidden>
+          <h2>What you sell</h2>
+          <div class="rows">
+            <button class="row" data-panel="service"><span class="k"><b class="t">Host &amp; MC</b><span class="s">From ₱40,000 · fixed · crew meal required</span></span><span class="v">Live</span></button>
+            <button class="row" data-panel="service"><span class="k"><b class="t">Live band</b><span class="s">From ₱35,000 · fixed · free 1-hour extension for Setnayan couples</span></span><span class="v">Live</span></button>
+          </div>
+          <div class="rows">
+            <button class="fold" aria-expanded="false" data-fold><span>Packages</span><span class="fs">0</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>You have none yet. A package bundles services at one price. Solo allows 1 category.</div>
+            <button class="fold" aria-expanded="false" data-fold><span>Where you work</span><span class="fs">[RADIUS]</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>Service radius, suggested coverage, and the venues you are a fit for. [MAP]</div>
+          </div>
+          <button class="btn pri sm" style="align-self:flex-start" data-panel="service">Add a service</button>
+        </div>
+
+        <!-- DOOR 4 -->
+        <div class="sec" data-doorbody="d4" hidden>
+          <h2>Auto-reply</h2>
+          <div class="rows">
+            <div class="row"><span class="k"><b class="t">Answer for me when I'm busy</b><span class="s">Vendor AI — <b>₱1,500</b> per 28 days</span></span><button class="switch" role="switch" aria-checked="false" data-switch></button></div>
+            <div class="row"><span class="k"><b class="t">What it may say</b><span class="s">Your prices, your dates, your coverage — never a discount</span></span><span class="chev">›</span></div>
+          </div>
+          <p class="hint">Off today. Answering couples yourself is free and always will be.</p>
+        </div>
+
+        <!-- DOOR 5 -->
+        <div class="sec" data-doorbody="d5" hidden>
+          <h2>Getting paid</h2>
+          <div class="rows">
+            <div class="row"><span class="k"><b class="t">GCash</b><span class="s">[NUMBER] · couples can see this</span></span><button class="btn ghost sm">Edit</button></div>
+            <button class="row"><span class="k"><b class="t">Add a bank account</b><span class="s">Some couples prefer a transfer</span></span><span class="chev">›</span></button>
+          </div>
+          <div class="rows">
+            <button class="fold" aria-expanded="true" data-fold><span>Earnings</span><span class="fs">this year</span><span class="chev">›</span></button>
+            <div class="foldbody">
+              <div class="kpis">
+                <div class="kpi"><div class="kn">₱[N]</div><div class="kl">paid to you</div></div>
+                <div class="kpi"><div class="kn">₱15,000</div><div class="kl">received, awaiting the event</div></div>
+                <div class="kpi"><div class="kn">₱837.50</div><div class="kl">booking fees owed</div></div>
+                <div class="kpi"><div class="kn">0%</div><div class="kl">commission</div></div>
+              </div>
+              <p class="hint">You keep 100% of what a couple pays you — it is settled directly between you.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- DOOR 6 -->
+        <div class="sec" data-doorbody="d6" hidden>
+          <h2>Other tools</h2>
+          <div class="rows">
+            <div class="row"><span class="k"><b class="t">Crew gigs</b><span class="s">Paid work on events already booked</span></span><span class="v" style="color:var(--late)">1 open</span></div>
+          </div>
+          <p class="lbl" style="margin-top:6px">What couples see</p>
+          <div class="tiles">
+            <button class="tile"><span class="tt">Reviews</span><span class="ts">Ratings and written reviews from booked couples.</span></button>
+            <button class="tile"><span class="tt">Track record</span><span class="ts">Completed events and the public proof they build.</span></button>
+            <button class="tile"><span class="tt">Stories</span><span class="ts">Editorial features starring your work.</span></button>
+            <button class="tile"><span class="tt">Recaps</span><span class="ts">Living recaps from events you served.</span></button>
+            <button class="tile"><span class="tt">Attributes</span><span class="ts">Traits and tags that sharpen your matching.</span></button>
+            <button class="tile"><span class="tt">Your segments</span><span class="ts">The parts of the night you run — couples tick these onto their timeline.</span></button>
+            <button class="tile"><span class="tt">Repertoire</span><span class="ts">Your set list for couples to browse.</span></button>
+            <button class="tile" data-panel="lines"><span class="tt">My lines</span><span class="ts">Your script library — lines save themselves as you write them on a wedding.</span></button>
+            <button class="tile"><span class="tt">Moodboard library</span><span class="ts">Photos couples browse when picking their look.</span></button>
+          </div>
+          <p class="lbl" style="margin-top:6px">Working with others</p>
+          <div class="tiles">
+            <button class="tile"><span class="tt">Recommend</span><span class="ts">Vendors you vouch for, and who vouches for you.</span></button>
+            <button class="tile"><span class="tt">Partnerships</span><span class="ts">Preferred-partner ties with other vendors.</span></button>
+            <button class="tile"><span class="tt">Creators</span><span class="ts">Offer discounts to creators for a credited feature.</span></button>
+            <button class="tile"><span class="tt">Team &amp; Setnayan</span><span class="ts">Seats, roles, and your Setnayan relationship.</span></button>
+          </div>
+          <p class="lbl" style="margin-top:6px">Protection</p>
+          <div class="tiles">
+            <button class="tile"><span class="tt">Disputes</span><span class="ts">Open cases and their timelines.</span></button>
+            <button class="tile"><span class="tt">Theft Watch</span><span class="ts">Portfolio-theft reports and takedowns.</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- ROOM 4 · MY PERFORMANCE                                      -->
+      <!-- ============================================================ -->
+      <div class="room" data-room-body="performance">
+
+        <div class="aside sec">
+          <div class="card sunk">
+            <p class="lbl">Window</p>
+            <div class="seg" style="margin-top:7px" role="group" aria-label="Window">
+              <button aria-pressed="false" data-seg data-win>Daily</button><button aria-pressed="true" data-seg data-win>Monthly</button><button aria-pressed="false" data-seg data-win>Annual</button>
+            </div>
+            <label class="field" style="margin-top:10px"><span>Service</span>
+              <select><option>All services</option><option>Host &amp; MC</option><option>Live band</option></select>
+            </label>
+            <p class="hint" style="margin-top:8px">This controls the <b>Over time</b> block only. Everything else on this page ignores it, and says so.</p>
+          </div>
+          <div class="kpis">
+            <div class="kpi"><div class="kn">72</div><div class="kl">health [ILLUSTRATIVE]</div></div>
+            <div class="kpi"><div class="kn">[N]</div><div class="kl">typical reply</div></div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-head"><h2>Do this next</h2><span class="n">3 ideas</span></div>
+          <div class="rows">
+            <div class="row"><span class="k"><b class="t">Reply faster than 4 hours</b><span class="s">Couples see your reply time on your card. Yours is not shown yet.</span></span><button class="btn pri sm">How</button></div>
+            <div class="row"><span class="k"><b class="t">Add 3 more portfolio photos</b><span class="s">Shops with 12+ get more saves.</span></span><button class="btn ghost sm">Add</button></div>
+            <div class="row"><span class="k"><b class="t">Publish a package</b><span class="s">You have 2 services and 0 packages.</span></span><button class="btn ghost sm">Build one</button></div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h2>How you stand</h2>
+          <div class="card">
+            <div style="display:flex;align-items:baseline;gap:9px"><span class="mono" style="font-size:30px;font-weight:700">72</span><span class="muted" style="font-size:13.5px">health · +4 this month [ILLUSTRATIVE]</span></div>
+            <div class="bar" style="margin-top:9px"><i style="width:72%"></i></div>
+            <p class="hint" style="margin-top:8px">Made of your reply time, your reviews, how complete your shop is, and how often you convert.</p>
+          </div>
+          <div class="card">
+            <p class="lbl">What couples are told about your replies</p>
+            <p style="margin-top:5px;font-size:14.5px">Nothing shown yet — you need more replied conversations before a claim can be made.</p>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-head"><h2>Over time</h2><span class="n" data-win-label>Monthly</span></div>
+          <div class="card">
+            <p class="lbl">Your booking funnel</p>
+            <div class="fun" style="margin-top:9px">
+              <div class="fr"><span>Views</span><span class="bar"><i style="width:100%"></i></span><span class="v">[N]</span></div>
+              <div class="fr"><span>Inquiries</span><span class="bar"><i style="width:42%"></i></span><span class="v">[N]</span></div>
+              <div class="fr"><span>Quotes sent</span><span class="bar"><i style="width:21%"></i></span><span class="v">[N]</span></div>
+              <div class="fr"><span>Booked</span><span class="bar"><i style="width:9%"></i></span><span class="v">[N]</span></div>
+            </div>
+          </div>
+          <div class="rows">
+            <button class="fold" aria-expanded="false" data-fold><span>Setnayan vs your own book</span><span class="fs">ROI</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>What Setnayan sourced against what you brought yourself, against what you pay for Solo (₱1,000 per 28 days). [CHART]</div>
+            <button class="fold" aria-expanded="false" data-fold><span>Where your bookings come from</span><span class="fs">[N] sources</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>Sources with fewer than [MIN-N] bookings stay hidden so the read is reliable.</div>
+            <button class="fold" aria-expanded="false" data-fold><span>Where your profile views come from</span><span class="fs">[N]</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>[BREAKDOWN]</div>
+            <button class="fold" aria-expanded="false" data-fold><span>What type of customer inquires</span><span class="fs">[N]</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>Website · recommendations · storyteller chapters · editorial features. [BREAKDOWN]</div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-head"><h2>Conversion &amp; replies</h2><span class="n">last 12 months · not filtered</span></div>
+          <div class="rows">
+            <button class="fold" aria-expanded="false" data-fold><span>When inquiries arrive</span><span class="fs">heatmap</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>[HEATMAP] — needs a long window to read, which is why the filter above does not touch it.</div>
+            <button class="fold" aria-expanded="false" data-fold><span>Deals you won and lost</span><span class="fs">[N]</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>[BREAKDOWN]</div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-head"><h2>Looking ahead &amp; the market</h2><span class="n">not filtered</span></div>
+          <div class="rows">
+            <button class="fold" aria-expanded="false" data-fold><span>Your capacity</span><span class="fs">1 per day</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>How full your next months are against what you allow per day.</div>
+            <button class="fold" aria-expanded="false" data-fold><span>Demand radar</span><span class="fs">Pro</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>Where demand is building in your market — counts only, de-identified, small groups hidden. Pro is <b>₱2,500</b> per 28 days.</div>
+            <button class="fold" aria-expanded="false" data-fold><span>How your prices sit</span><span class="fs">Pro</span><span class="chev">›</span></button>
+            <div class="foldbody" hidden>Your band against the field, nationwide totals only.</div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-head"><h2>Reputation</h2><span class="n">all-time</span></div>
+          <div class="rows">
+            <div class="row"><span class="k"><b class="t">4.9 average</b><span class="s">[N] reviews · [N] answered</span></span><span class="chev">›</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- ROOM 5 · EVENT HUB                                           -->
+      <!-- ============================================================ -->
+      <div class="room" data-room-body="hub">
+
+        <div class="aside sec" data-only="eventday">
+          <div class="kpis">
+            <div class="kpi"><div class="kn">62%</div><div class="kl">delivered to them</div></div>
+            <div class="kpi"><div class="kn">180 / 200</div><div class="kl">pax attending</div></div>
+            <div class="kpi"><div class="kn">[N]</div><div class="kl">clips captured</div></div>
+            <div class="kpi"><div class="kn">[N]</div><div class="kl">photos captured</div></div>
+          </div>
+          <div class="card sunk">
+            <p class="lbl">Guest review QR</p>
+            <div style="margin:9px 0;width:100%;aspect-ratio:1/1;max-width:150px;background:repeating-conic-gradient(var(--ink) 0 25%, #fff 0 50%) 0 0/16px 16px;border-radius:8px" aria-label="[QR CODE]"></div>
+            <p class="hint">Display it at the reception — guests scan and review you on the spot.</p>
+          </div>
+        </div>
+
+        <!-- ORDINARY DAY: the honest compact state -->
+        <div class="sec" data-only="ordinary">
+          <div class="card sunk">
+            <p class="eyebrow">No event today</p>
+            <p style="margin-top:6px;font-size:15px">This room fills up on the day. Your next one is <b>Rosa &amp; Ben, 30 Oct</b>.</p>
+            <p class="hint" style="margin-top:6px">Nothing here is a zero — it is simply not today. Set up beforehand below.</p>
+          </div>
+          <div class="rows">
+            <button class="row"><span class="k"><b class="t">Set up your day-of tools</b><span class="s">Pick which tools are on, per booking</span></span><span class="chev">›</span></button>
+            <button class="row"><span class="k"><b class="t">Your segments</b><span class="s">The parts of the night you run</span></span><span class="chev">›</span></button>
+            <button class="row"><span class="k"><b class="t">Read the event brief</b><span class="s">Rosa &amp; Ben, 30 Oct</span></span><span class="chev">›</span></button>
+          </div>
+        </div>
+
+        <!-- EVENT DAY: the full console -->
+        <div class="sec" data-only="eventday">
+          <div class="night">
+            <p class="eyebrow">Today · [TIME]</p>
+            <p class="q">Ana &amp; Miguel</p>
+            <p class="sub">[VENUE] · Calabarzon · you are on Host &amp; MC</p>
+            <div class="chips"><span class="chip">180 / 200 pax</span><span class="chip">Reception 6:00 PM</span><span class="chip">Your set 8:30 PM</span></div>
+            <button class="btn" data-panel="brief">Open the brief</button>
+          </div>
+        </div>
+
+        <div class="sec" data-only="eventday">
+          <h2>Delivering to them</h2>
+          <div class="card">
+            <div style="display:flex;align-items:baseline;gap:9px"><span class="mono" style="font-size:26px;font-weight:700">62%</span><span class="muted" style="font-size:13.5px">done · [STAGE]</span></div>
+            <div class="bar" style="margin-top:9px"><i style="width:62%;background:var(--ok)"></i></div>
+            <p class="hint" style="margin-top:8px">They see this live. Post your link and mark complete from the brief.</p>
+          </div>
+        </div>
+
+        <div class="sec" data-only="eventday">
+          <div class="sec-head"><h2>Your desk</h2><span class="n">host &amp; MC · live band</span></div>
+          <!-- THE SPECIALIZATION SLOT. `specialization-registry.tsx` ships three:
+               song_desk (band/singer/DJ) · stage_script (host/MC) · floor_command
+               (coordinator). This shop runs two trades, so it gets two. -->
+          <div class="seg" style="align-self:flex-start" role="group" aria-label="Your trade">
+            <button aria-pressed="true" data-seg data-spec>Stage script</button>
+            <button aria-pressed="false" data-seg data-spec>Song desk</button>
+          </div>
+          <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+            <div><p class="lbl">Running time</p><p class="mono" style="font-size:26px;font-weight:700;margin-top:2px">20:14</p></div>
+            <div style="text-align:right"><p class="hint">Next cue</p><p style="font-weight:600">Your set · 8:30 PM</p></div>
+          </div>
+          <div class="rows" data-specbody="0">
+            <button class="row" data-panel="lines"><span class="k"><b class="t">My lines</b><span class="s">Your script library — pull a line into tonight's script</span></span><span class="v">[N] saved</span></button>
+            <button class="row" data-panel="script"><span class="k"><b class="t">Tonight's script</b><span class="s">Cues, names and pronunciations for this wedding</span></span><span class="chev">›</span></button>
+            <button class="row" data-panel="notes"><span class="k"><b class="t">Stage notes</b><span class="s">What the couple or coordinator wants said</span></span><span class="v" style="color:var(--late)">2 new</span></button>
+          </div>
+          <div class="rows" data-specbody="1" hidden>
+            <button class="row"><span class="k"><b class="t">Tonight's set</b><span class="s">The songs, in order, as the couple approved them</span></span><span class="v">[N] songs</span></button>
+            <button class="row"><span class="k"><b class="t">Requests from guests</b><span class="s">What the floor is asking for</span></span><span class="v" style="color:var(--late)">[N] new</span></button>
+            <button class="row"><span class="k"><b class="t">Their do-not-play list</b><span class="s">Agreed with the couple beforehand</span></span><span class="chev">›</span></button>
+          </div>
+        </div>
+
+        <div class="sec" data-only="eventday">
+          <div class="sec-head"><h2>Asking you</h2><span class="n">from the couple &amp; coordinator</span></div>
+          <div class="rows">
+            <div class="row"><span class="k"><b class="t">“Can you move the first dance to 8:15?”</b><span class="s">Coordinator · 4 min ago</span></span><button class="btn pri sm" data-answer="Answered: yes. It is on their screen too.">Yes</button></div>
+            <div class="row"><span class="k"><b class="t">“Please greet Lola Paz by name”</b><span class="s">Ana · 12 min ago</span></span><button class="btn pri sm" data-answer="Noted — it is in tonight's script.">Add to script</button></div>
+          </div>
+          <p class="hint">The same two also ring on Today, so you cannot miss them if this room is closed.</p>
+        </div>
+
+        <div class="sec" data-only="eventday">
+          <h2>Tell the coordinator</h2>
+          <div class="rows">
+            <button class="row" data-answer="Coordinator told: you have arrived."><span class="k"><b class="t">I've arrived</b></span><span class="chev">›</span></button>
+            <button class="row" data-answer="Coordinator told: you are set up."><span class="k"><b class="t">I'm set up</b></span><span class="chev">›</span></button>
+            <button class="row" data-answer="Coordinator told: you are running late."><span class="k"><b class="t">Running late</b></span><span class="chev">›</span></button>
+            <button class="row" data-panel="reply"><span class="k"><b class="t">Something else</b></span><span class="chev">›</span></button>
+          </div>
+        </div>
+
+        <div class="sec" data-only="eventday">
+          <h2>Your part of the night</h2>
+          <div class="rows">
+            <div class="row"><span class="k"><b class="t">Entrance</b><span class="s">6:30 PM · [NOTES]</span></span><button class="switch" role="switch" aria-checked="true" data-switch></button></div>
+            <div class="row"><span class="k"><b class="t">First dance</b><span class="s">8:00 PM · [SONG]</span></span><button class="switch" role="switch" aria-checked="true" data-switch></button></div>
+            <div class="row"><span class="k"><b class="t">Your set</b><span class="s">8:30 PM · 60 min</span></span><button class="switch" role="switch" aria-checked="true" data-switch></button></div>
+            <div class="row"><span class="k"><b class="t">Last song</b><span class="s">[TIME] · [SONG]</span></span><button class="switch" role="switch" aria-checked="false" data-switch></button></div>
+          </div>
+          <p class="hint">The couple follows along on their own screen as you tick these.</p>
+        </div>
+
+        <div class="sec" data-only="eventday">
+          <h2>Capture</h2>
+          <div class="tiles">
+            <button class="tile"><span class="tt">Recap clips</span><span class="ts">[N] of 3 · 5 seconds each</span></button>
+            <button class="tile"><span class="tt">Portfolio photos</span><span class="ts">[N] of 3 · for your own page</span></button>
+            <button class="tile"><span class="tt">Review the couple</span><span class="ts">Opens once you mark complete</span></button>
+          </div>
+          <div class="rows">
+            <!-- The credits a supplier EARNS from a booking — 5% of the fee,
+                 capped at 1,000, granted when the payment is approved. -->
+            <button class="row" data-panel="credits"><span class="k"><b class="t">Your Papic credits</b><span class="s">Earned from this booking · use them to pull guests' shots into your portfolio</span></span><span class="v">[N] credits</span></button>
+            <button class="row"><span class="k"><b class="t">Shots taken for you</b><span class="s">Photos guests captured on your prompt</span></span><span class="v">[N]</span></button>
+          </div>
+        </div>
+
+        <div class="sec" data-only="eventday">
+          <h2>On the floor</h2>
+          <div class="rows">
+            <button class="row"><span class="k"><b class="t">Scan a guest's seat</b><span class="s">Point at their QR to find the table</span></span><span class="chev">›</span></button>
+            <button class="row"><span class="k"><b class="t">Seat plan</b><span class="s">Where everyone is sitting tonight</span></span><span class="chev">›</span></button>
+            <button class="row"><span class="k"><b class="t">Their mood board</b><span class="s">The look they picked</span></span><span class="chev">›</span></button>
+            <button class="row"><span class="k"><b class="t">Production sheet</b><span class="s">The full run-down for this event</span></span><span class="chev">›</span></button>
+            <button class="row"><span class="k"><b class="t">Ask for more access</b><span class="s">Some parts open only when the couple says yes</span></span><span class="chev">›</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- ROOM 6 · PLAN                                                -->
+      <!-- ============================================================ -->
+      <div class="room" data-room-body="plan">
+
+        <div class="aside sec">
+          <div class="card sunk">
+            <p class="lbl">You are on</p>
+            <p style="font-size:22px;font-weight:700;margin-top:4px">Solo</p>
+            <p class="mono" style="font-size:15px;margin-top:2px">₱1,000 <span class="muted" style="font-family:var(--sans);font-size:13px">per 28 days</span></p>
+            <p class="hint" style="margin-top:7px">Renews [DATE]. 1 category · 1 seat · 1 booking per day.</p>
+            <button class="btn ghost sm" style="margin-top:9px;width:100%">Switch to annual · ₱10,400</button>
+          </div>
+          <div class="money">
+            <p class="lbl" style="color:var(--gold-text)">Due now</p>
+            <p class="amt">₱837.50</p>
+            <p style="font-size:12.5px">Booking fee · Rosa &amp; Ben</p>
+            <button class="btn sm" data-panel="pay-fee">Pay it</button>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h2>What you pay</h2>
+          <div class="rows">
+            <div class="row"><span class="k"><b class="t">Your plan</b><span class="s">Solo · per 28 days</span></span><span class="v">₱1,000</span></div>
+            <div class="row"><span class="k"><b class="t">Booking fee</b><span class="s">5% of what you declare, per booking. Your first five were free.</span></span><span class="v">5%</span></div>
+            <div class="row"><span class="k"><b class="t">Commission on what couples pay you</b><span class="s">Settled directly between you and them</span></span><span class="v">0%</span></div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h2>Move up</h2>
+          <div class="rows">
+            <div class="row"><span class="k"><b class="t">Pro</b><span class="s">3 categories · 3 seats · demand radar · price position · full analytics</span></span><span class="v">₱2,500 / 28d</span></div>
+            <div class="row"><span class="k"><b class="t">Pro, annual</b><span class="s">Save 20%</span></span><span class="v">₱26,000 / yr</span></div>
+            <div class="row"><span class="k"><b class="t">Enterprise</b><span class="s">Nationwide reach · branches · unlimited seats</span></span><span class="v">₱10,000 / 28d</span></div>
+            <div class="row"><span class="k"><b class="t">Enterprise, annual</b><span class="s">Save 20%</span></span><span class="v">₱104,000 / yr</span></div>
+          </div>
+          <p class="hint">Prices read from <span class="mono">vendor_billing_catalog</span> on 2026-09-22 — the live table couples and suppliers are actually charged from.</p>
+        </div>
+
+        <div class="sec">
+          <h2>Add on</h2>
+          <div class="rows">
+            <div class="row"><span class="k"><b class="t">Extra team seat</b><span class="s">Per 28 days</span></span><span class="v">₱250</span></div>
+            <div class="row"><span class="k"><b class="t">Extra branch</b><span class="s">Own team and calendar · per 28 days</span></span><span class="v">₱1,000</span></div>
+            <div class="row"><span class="k"><b class="t">Auto-reply assistant</b><span class="s">Per 28 days</span></span><span class="v">₱1,500</span></div>
+            <div class="row"><span class="k"><b class="t">3D booth at one event</b><span class="s">Branded, one event</span></span><span class="v">₱500</span></div>
+            <div class="row"><span class="k"><b class="t">Deep search</b><span class="s">Per search · Solo always pays</span></span><span class="v">₱500</span></div>
+          </div>
+          <div class="rows">
+            <button class="row" data-panel="deep"><span class="k"><b class="t">Run a deep search</b><span class="s">We go and find what is public about a lead before you answer</span></span><span class="chev">›</span></button>
+            <button class="row"><span class="k"><b class="t">Ask for a custom plan</b><span class="s">Build your own out of the pieces above</span></span><span class="chev">›</span></button>
+            <button class="row"><span class="k"><b class="t">Your invoices</b><span class="s">What you have paid Setnayan</span></span><span class="chev">›</span></button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /layout -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ===================== BOTTOM BAR (phone) ===================== -->
+<nav class="tabbar" aria-label="Shop menu">
+  <button data-room-btn="overview" aria-current="page"><span class="ic">⌂</span>Today<span class="ct" data-count="answers">5</span></button>
+  <button data-room-btn="customers"><span class="ic">☺</span>Customers<span class="ct">7</span></button>
+  <button data-room-btn="shop"><span class="ic">▤</span>Shop</button>
+  <button data-room-btn="performance"><span class="ic">◷</span>Performance</button>
+  <button data-room-btn="hub"><span class="ic">◈</span>Event Hub</button>
+</nav>
+
+<!-- ===================== DRAWER ===================== -->
+<div class="scrim" id="scrim"></div>
+<div class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panelTitle">
+  <div class="panel-head">
+    <button class="icon-btn" id="panelClose" aria-label="Close">‹</button>
+    <span class="t" id="panelTitle">—</span>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+</div>
+
+<div class="toast" id="toast" role="status"><span id="toastText"></span><button id="toastX">Close</button></div>
+
+<script>
+const $  = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+const body = document.body;
+
+/* ── rooms ─────────────────────────────────────────────────────────────── */
+const ROOM = {
+  overview:    {title:'Today',          status:()=>`Kumusta, Saysay Host and Band · ${answers()} waiting on you`},
+  customers:   {title:'My Customers',   status:()=>'4 booked · 7 in conversation · 3 unread'},
+  shop:        {title:'My Shop',        status:()=>'Verified · 2 services · your page is live'},
+  performance: {title:'My Performance', status:()=>'Health 72 · Solo plan'},
+  hub:         {title:'Event Hub',      status:()=>body.dataset.phase==='eventday' ? 'Ana & Miguel · today' : 'No event today · next is 30 Oct'},
+  plan:        {title:'Plan',           status:()=>'Solo · ₱1,000 per 28 days · ₱837.50 due'},
+};
+function answers(){ return $$('#deskList .ans').filter(a=>!a.hidden && !a.dataset.done).length; }
+function setRoom(k){
+  body.dataset.room = k;
+  $$('.room').forEach(r=>r.classList.toggle('on', r.dataset.roomBody===k));
+  $$('[data-room-btn]').forEach(b=>{
+    const on = b.dataset.roomBtn===k;
+    b.setAttribute('aria-current', on ? 'page' : 'false');
+    if(!on) b.removeAttribute('aria-current');
+  });
+  $('#roomTitle').textContent = ROOM[k].title;
+  $('#roomStatus').textContent = ROOM[k].status();
+  applyPhase();
+  window.scrollTo({top:0});
+}
+$$('[data-room-btn]').forEach(b=> b.onclick = ()=> setRoom(b.dataset.roomBtn));
+$$('[data-goto]').forEach(b=> b.onclick = ()=> toast('That leaves the shop and goes to your own account — out of scope for this prototype.'));
+
+/* ── phase (prototype bar) ─────────────────────────────────────────────── */
+function applyPhase(){
+  const p = body.dataset.phase;
+  $$('[data-only]').forEach(el=> el.hidden = el.dataset.only !== p);
+  $$('[data-today-n]').forEach(el=> el.textContent = p==='eventday' ? '1' : '0');
+  $$('[data-hubn]').forEach(el=>{
+    el.textContent = p==='eventday' ? 'Today' : '—';
+    el.classList.toggle('new', p==='eventday');
+  });
+  recount();
+  $('#roomStatus').textContent = ROOM[body.dataset.room].status();
+}
+$$('.proto [data-phase]').forEach(b=> b.onclick = ()=>{
+  body.dataset.phase = b.dataset.phase;
+  $$('.proto [data-phase]').forEach(x=> x.setAttribute('aria-pressed', String(x===b)));
+  applyPhase();
+});
+
+/* ── the desk: every row answers ───────────────────────────────────────── */
+function recount(){
+  const n = answers();
+  $$('[data-count="answers"]').forEach(el=> el.textContent = String(n));
+  const s = $('#roomStatus'); if(s && body.dataset.room==='overview') s.textContent = ROOM.overview.status();
+}
+$$('[data-answer]').forEach(b=> b.onclick = ()=>{
+  const card = b.closest('.ans');
+  if(card){
+    card.dataset.done = '1';
+    card.style.transition='opacity .22s'; card.style.opacity='.35';
+    card.querySelectorAll('button,textarea,input').forEach(x=> x.disabled = true);
+    const done = document.createElement('p');
+    done.className='s'; done.style.color='var(--ok)'; done.style.fontWeight='600';
+    done.textContent='✓ Answered — it is off your list.';
+    card.appendChild(done);
+  }
+  toast(b.dataset.answer);
+  recount();
+});
+
+/* ── folds ─────────────────────────────────────────────────────────────── */
+$$('[data-fold]').forEach(f=> f.onclick = ()=>{
+  const open = f.getAttribute('aria-expanded')==='true';
+  f.setAttribute('aria-expanded', String(!open));
+  const b = f.nextElementSibling;
+  if(b && b.classList.contains('foldbody')) b.hidden = open;
+});
+
+/* ── segments, switches, steppers ──────────────────────────────────────── */
+$$('[data-seg]').forEach(b=> b.onclick = ()=>{
+  b.parentElement.querySelectorAll('button').forEach(x=> x.setAttribute('aria-pressed', String(x===b)));
+  if(b.hasAttribute('data-win')) $$('[data-win-label]').forEach(l=> l.textContent = b.textContent);
+  if(b.hasAttribute('data-spec')){
+    const i = [...b.parentElement.children].indexOf(b);
+    $$('[data-specbody]').forEach(x=> x.hidden = Number(x.dataset.specbody) !== i);
+  }
+});
+$$('[data-switch]').forEach(s=> s.onclick = ()=> s.setAttribute('aria-checked', String(s.getAttribute('aria-checked')!=='true')));
+$$('[data-step]').forEach(b=> b.onclick = ()=>{
+  const val = b.parentElement.querySelector('[data-stepval]');
+  const n = Math.max(1, Math.min(9, Number(val.textContent) + Number(b.dataset.step)));
+  val.textContent = String(n);
+  const dec = b.parentElement.querySelector('[data-step="-1"]');
+  if(dec) dec.disabled = n<=1;
+});
+
+/* ── doors ─────────────────────────────────────────────────────────────── */
+$$('[data-door]').forEach(d=> d.onclick = ()=>{
+  $$('[data-door]').forEach(x=> x.setAttribute('aria-pressed', String(x===d)));
+  $$('[data-doorbody]').forEach(b=> b.hidden = b.dataset.doorbody !== d.dataset.door);
+  d.scrollIntoView({behavior:'smooth', block:'nearest'});
+});
+
+/* ── calendar ──────────────────────────────────────────────────────────── */
+(function cal(){
+  const host = $('#calDays'); if(!host) return;
+  // March 2027 starts on a Monday.
+  const states = {13:'booked', 6:'held', 14:'wait', 20:'blocked', 21:'blocked', 27:'full'};
+  let html = '<span></span>'; // 1 Mar 2027 is a Monday → one blank for Sunday
+  for(let d=1; d<=31; d++){
+    const st = states[d] || '';
+    html += `<button class="day"${st?` data-st="${st}"`:''} aria-pressed="false">${d}</button>`;
+  }
+  host.innerHTML = html;
+  $$('.day', host).forEach(b=> b.onclick = ()=>{
+    $$('.day', host).forEach(x=> x.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true');
+    const st = b.dataset.st;
+    toast(st ? `13 Mar-style day — this one is ${ {booked:'booked',held:'held for a couple deciding',wait:'full with a waitlist',blocked:'blocked by you',full:'at your daily limit'}[st] }.` : 'Free. Couples can book this date.');
+  });
+})();
+
+/* ── drawer ────────────────────────────────────────────────────────────── */
+const PANEL = {
+  'pay-fee': ['Pay ₱837.50', `
+    <div class="money"><p class="amt">₱837.50</p><p style="font-size:12.5px">Booking fee · Rosa &amp; Ben · 5% of ₱16,750 declared · booking #6.</p></div>
+    <label class="field"><span>Pay with</span><select><option>GCash</option><option>Bank transfer</option><option>Card</option></select></label>
+    <p class="hint">[PAYMENT INSTRUCTIONS] — the real flow ends with a reference you send back here.</p>
+    <button class="btn pri" data-close data-say="Marked as sent. Setnayan will confirm it — you will see it on Today.">I've sent it</button>`],
+  'fee-why': ['Why ₱2,000', `
+    <p>Setnayan charges <b>5%</b> of the amount you declare for a booking it sourced. You declared <b>₱40,000</b> for Ana &amp; Miguel, so agreeing costs <b>₱2,000</b>.</p>
+    <p>Your first five bookings were free. This would be your seventh.</p>
+    <p>Nothing is taken from what the couple pays you — that is settled directly between you, at 0% commission.</p>
+    <button class="btn ghost" data-close>Got it</button>`],
+  decline:  ['Decline', `
+    <label class="field"><span>Why? They will see this.</span><select><option>Already booked that date</option><option>Outside my coverage</option><option>Not my kind of event</option><option>Another reason</option></select></label>
+    <label class="field"><span>Anything to add</span><textarea placeholder="Optional."></textarea></label>
+    <button class="btn pri" data-close data-say="Declined. They were told, and the date is free again.">Send it</button>`],
+  never:    ['It never arrived', `
+    <p>We will tell them it never reached you. Their record of paying is cleared, so they can send it again with the right receipt.</p>
+    <p class="hint">This is reversible only by them sending again — say it only if you are sure.</p>
+    <button class="btn pri" data-close data-say="We told them it never reached you. They can send again.">Yes, it never arrived</button>`],
+  receipt:  ['Their receipt', `<div style="height:220px;border:1px dashed var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--ink-faint)">[RECEIPT IMAGE]</div>
+    <p class="hint">GCash · ₱15,000 · reference [REF] · sent [DATE].</p><button class="btn ghost" data-close>Close</button>`],
+  propose:  ['Propose another time', `
+    <label class="field"><span>Date</span><input type="date"></label>
+    <label class="field"><span>Time</span><input type="time"></label>
+    <button class="btn pri" data-close data-say="Sent. They answer next — you cannot accept a time you proposed.">Propose it</button>`],
+  reply:    ['Reply', `<label class="field"><span>Your message</span><textarea placeholder="Write to them."></textarea></label>
+    <button class="btn pri" data-close data-say="Sent.">Send</button>`],
+  quote:    ['Quote · Rosa &amp; Ben', `
+    <div class="rows"><div class="row"><span class="k"><b class="t">Live band</b><span class="s">6:00 PM – 10:00 PM</span></span><span class="v">₱35,000</span></div>
+    <div class="row"><span class="k"><b class="t">Free 1-hour extension</b><span class="s">Your Setnayan perk</span></span><span class="v">₱0</span></div></div>
+    <p class="mono" style="font-size:19px;font-weight:700">Total ₱35,000</p>
+    <button class="btn pri" data-close data-say="Quote sent to Rosa &amp; Ben.">Send it</button>`],
+  waitlist: ['Who gets 14 Feb', `
+    <div class="rows">
+      <button class="row"><span class="k"><b class="t">[COUPLE A]</b><span class="s">Queued 12 days ago · live band</span></span><span class="v">Pick</span></button>
+      <button class="row"><span class="k"><b class="t">[COUPLE B]</b><span class="s">Queued 9 days ago · host &amp; MC</span></span><span class="v">Pick</span></button>
+      <button class="row"><span class="k"><b class="t">[COUPLE C]</b><span class="s">Queued 3 days ago · live band</span></span><span class="v">Pick</span></button>
+    </div>
+    <p class="hint">The two you do not pick are told the date went, so they can move on.</p>
+    <button class="btn ghost" data-close>Not yet</button>`],
+  release:  ['Their call, your release', `
+    <p>A couple has asked for the <b>Tala &amp; Migo</b> celebration to be removed. You were paid for it.</p>
+    <p>Your record of the booking, your earnings and your track-record count are kept either way. What goes is the public page, the photos and the story.</p>
+    <p>Nothing goes until you answer, and there is no time limit on this one.</p>
+    <button class="btn ghost" data-close data-say="Agreed — the celebration will be taken down.">I agree to release it</button>
+    <button class="btn ghost" data-close data-say="Declined — a person at Setnayan will take it from here.">I don't agree</button>`],
+  dispute:  ['Dispute · [COUPLE]', `
+    <p>Opened [DATE]. Money on this booking is held while it is open.</p>
+    <div class="rows"><div class="row"><span class="k"><b class="t">[THEIR ACCOUNT]</b><span class="s">[DATE]</span></span></div>
+    <div class="row"><span class="k"><b class="t">Setnayan asked for [X]</b><span class="s">[DATE]</span></span></div></div>
+    <label class="field"><span>Your side</span><textarea placeholder="What happened, in your words."></textarea></label>
+    <button class="btn pri" data-close data-say="Filed. A person at Setnayan is on it with you.">Send my side</button>`],
+  /* The six tabs the shipped customer card actually has — `VENDOR_CLIENT_TABS`
+     in lib. A drawer with three rows would have quietly dropped three. */
+  client:   ['Customer', `
+    <div class="seg" style="align-self:flex-start;flex-wrap:wrap" role="group" aria-label="Customer">
+      <button aria-pressed="true" data-seg>Chat</button><button aria-pressed="false" data-seg>Quote</button><button aria-pressed="false" data-seg>Payments</button>
+      <button aria-pressed="false" data-seg>Files</button><button aria-pressed="false" data-seg>Schedule</button><button aria-pressed="false" data-seg>Details</button>
+    </div>
+    <div class="rows">
+      <div class="row"><span class="k"><b class="t">Date</b></span><span class="v">[DATE]</span></div>
+      <div class="row"><span class="k"><b class="t">What they booked</b></span><span class="v">[SERVICE]</span></div>
+      <div class="row"><span class="k"><b class="t">Paid so far</b></span><span class="v">[AMOUNT]</span></div>
+      <div class="row"><span class="k"><b class="t">Booking fee</b><span class="s">What you owe Setnayan on this one</span></span><span class="v">[AMOUNT]</span></div>
+    </div>
+    <p class="lbl">What they can hand you</p>
+    <div class="rows">
+      <button class="row"><span class="k"><b class="t">Production sheet</b><span class="s">The full run-down</span></span><span class="chev">›</span></button>
+      <button class="row"><span class="k"><b class="t">Seat plan</b><span class="s">Where everyone sits</span></span><span class="chev">›</span></button>
+      <button class="row"><span class="k"><b class="t">Mood board</b><span class="s">The look they picked</span></span><span class="chev">›</span></button>
+      <button class="row"><span class="k"><b class="t">Cocktail &amp; segments</b><span class="s">The parts of the night</span></span><span class="chev">›</span></button>
+      <button class="row"><span class="k"><b class="t">Photos &amp; clips you added</b><span class="s">For your portfolio and their recap</span></span><span class="chev">›</span></button>
+      <button class="row"><span class="k"><b class="t">Challenge photos</b><span class="s">Shots guests took on your prompt</span></span><span class="chev">›</span></button>
+    </div>
+    <button class="btn pri" data-close data-say="Marked complete. Reviews are open on this booking.">Mark complete</button>`],
+  bell:     ['Notifications', `
+    <div class="rows">
+      <div class="row"><span class="k"><b class="t">Ana &amp; Miguel asked to book you</b><span class="s">4 days ago · also on Today</span></span><span class="v" style="color:var(--late)">New</span></div>
+      <div class="row"><span class="k"><b class="t">A deposit was logged</b><span class="s">2 days ago · also on Today</span></span><span class="v" style="color:var(--late)">New</span></div>
+      <div class="row"><span class="k"><b class="t">Your booking fee is due</b><span class="s">₱837.50 · 2 days ago</span></span><span class="v" style="color:var(--late)">New</span></div>
+      <div class="row"><span class="k"><b class="t">You were featured in a story</b><span class="s">2 days ago</span></span><span class="v" style="color:var(--late)">New</span></div>
+      <div class="row"><span class="k"><b class="t">5 stars from Tala &amp; Migo</b><span class="s">5 days ago</span></span></div>
+    </div>
+    <p class="hint">Anything here that needs an answer is also on Today. This tray is the history, not a second to-do list.</p>
+    <button class="btn ghost" data-close data-say="Marked all read.">Mark all read</button>`],
+  account:  ['Saysay Host and Band', `
+    <div class="rows">
+      <div class="row"><span class="k"><b class="t">[NAME]</b><span class="s">[EMAIL]</span></span></div>
+    </div>
+    <p class="lbl">Switch to</p>
+    <div class="rows">
+      <button class="row"><span class="k"><b class="t">Your own account</b><span class="s">Your events and your Alaala</span></span><span class="chev">›</span></button>
+      <button class="row"><span class="k"><b class="t">SetnaProd</b><span class="s">Your other shop</span></span><span class="chev">›</span></button>
+    </div>
+    <div class="rows">
+      <button class="row"><span class="k"><b class="t">Your plan</b><span class="s">Solo · ₱1,000 per 28 days</span></span><span class="chev">›</span></button>
+      <button class="row"><span class="k"><b class="t">Notification settings</b></span><span class="chev">›</span></button>
+    </div>
+    <button class="btn ghost" data-close data-say="Signed out.">Sign out</button>
+    <p class="hint">Sign out lives here and nowhere else — at every width, including this phone.</p>`],
+  lines:    ['My lines', `
+    <p class="hint">Your script library. Lines save themselves here as you write them on a wedding.</p>
+    <label class="field"><span>Search your lines</span><input placeholder="entrance, lola, toast…"></label>
+    <div class="rows">
+      <button class="row"><span class="k"><b class="t">Entrance — the couple</b><span class="s">“[LINE]”</span></span><span class="v">Use</span></button>
+      <button class="row"><span class="k"><b class="t">Introducing the ninongs</b><span class="s">“[LINE]”</span></span><span class="v">Use</span></button>
+      <button class="row"><span class="k"><b class="t">Before the first dance</b><span class="s">“[LINE]”</span></span><span class="v">Use</span></button>
+    </div>
+    <button class="btn pri" data-close data-say="Pulled into tonight's script.">Add to tonight</button>`],
+  script:   ['Tonight\'s script', `
+    <div class="rows">
+      <div class="row"><span class="k"><b class="t">6:30 PM · Entrance</b><span class="s">“[LINE]”</span></span></div>
+      <div class="row"><span class="k"><b class="t">Names to get right</b><span class="s">Lola Paz · [PRONUNCIATION]</span></span></div>
+      <div class="row"><span class="k"><b class="t">8:00 PM · First dance</b><span class="s">“[LINE]” · [SONG]</span></span></div>
+    </div>
+    <button class="btn ghost" data-close>Close</button>`],
+  notes:    ['Stage notes', `
+    <div class="rows">
+      <div class="row"><span class="k"><b class="t">“Please greet Lola Paz by name”</b><span class="s">Ana · 12 min ago</span></span><span class="v" style="color:var(--late)">New</span></div>
+      <div class="row"><span class="k"><b class="t">“No open bar jokes”</b><span class="s">Coordinator · 40 min ago</span></span><span class="v" style="color:var(--late)">New</span></div>
+    </div>
+    <label class="field"><span>Note to yourself</span><textarea placeholder="Anything you want on the stand."></textarea></label>
+    <button class="btn pri" data-close data-say="Saved to tonight's stand.">Save</button>`],
+  credits:  ['Your Papic credits', `
+    <p>You earn credits from a booking when the couple's payment is approved — <b>5%</b> of the fee, capped at <b>1,000</b> credits.</p>
+    <div class="rows">
+      <div class="row"><span class="k"><b class="t">Earned on this booking</b></span><span class="v">[N]</span></div>
+      <div class="row"><span class="k"><b class="t">Your balance</b></span><span class="v">[N]</span></div>
+    </div>
+    <p class="hint">Spend them pulling guests' shots of your work into your own portfolio. A top-up pack is ₱500 for 100 credits.</p>
+    <button class="btn ghost" data-close>Close</button>`],
+  deep:     ['Deep search', `
+    <p>We go and find what is public about a lead — their venue, their date, who else they have approached — before you spend a reply on them.</p>
+    <label class="field"><span>Who</span><input placeholder="Name, venue or the lead's reference"></label>
+    <p class="hint">₱500 per search on Solo. Pro and above include some each cycle.</p>
+    <button class="btn pri" data-close data-say="Running. The dossier lands in your notifications.">Run it · ₱500</button>`],
+  service:  ['Service', `
+    <label class="field"><span>What it is</span><input value="Live band"></label>
+    <label class="field"><span>Starts at</span><input value="₱35,000"></label>
+    <label class="field"><span>Your Setnayan perk</span><input value="Free 1-hour extension for Setnayan couples"></label>
+    <div class="rows"><div class="row"><span class="k"><b class="t">Crew meal required</b></span><button class="switch" role="switch" aria-checked="true" data-switch></button></div>
+    <div class="row"><span class="k"><b class="t">Show on your page</b></span><button class="switch" role="switch" aria-checked="true" data-switch></button></div></div>
+    <button class="btn pri" data-close data-say="Saved.">Save</button>`],
+  'as-couple': ['As a couple sees you', `
+    <div style="height:170px;border-radius:12px;background:linear-gradient(135deg,var(--sunk),var(--gold-soft));display:flex;align-items:flex-end;padding:14px"><b style="font-size:19px">Saysay Host and Band</b></div>
+    <p class="hint">Verified · Calabarzon &amp; NCR · from ₱35,000</p>
+    <div class="rows"><div class="row"><span class="k"><b class="t">Host &amp; MC</b></span><span class="v">from ₱40,000</span></div>
+    <div class="row"><span class="k"><b class="t">Live band</b></span><span class="v">from ₱35,000</span></div></div>
+    <button class="btn ghost" data-close>Close</button>`],
+  brief:    ['Event brief · Ana &amp; Miguel', `
+    <div class="rows">
+      <div class="row"><span class="k"><b class="t">Call time</b></span><span class="v">[TIME]</span></div>
+      <div class="row"><span class="k"><b class="t">Reception</b></span><span class="v">6:00 PM</span></div>
+      <div class="row"><span class="k"><b class="t">Your set</b></span><span class="v">8:30 PM</span></div>
+      <div class="row"><span class="k"><b class="t">Guests</b></span><span class="v">180 / 200</span></div>
+      <div class="row"><span class="k"><b class="t">Coordinator</b></span><span class="v">[NAME]</span></div>
+    </div>
+    <button class="btn pri" data-close data-say="Marked complete. Reviews are now open on this booking.">Mark complete</button>`],
+};
+function openPanel(k){
+  const [t,h] = PANEL[k] || ['[SCREEN]', '<p class="hint">This screen is a placeholder in the prototype.</p><button class="btn ghost" data-close>Close</button>'];
+  $('#panelTitle').innerHTML = t;
+  $('#panelBody').innerHTML = h;
+  body.classList.add('open');
+  $$('#panelBody [data-close]').forEach(b=> b.onclick = ()=>{ closePanel(); if(b.dataset.say) toast(b.dataset.say); });
+  $$('#panelBody [data-switch]').forEach(s=> s.onclick = ()=> s.setAttribute('aria-checked', String(s.getAttribute('aria-checked')!=='true')));
+  $('#panelClose').focus();
+}
+function closePanel(){ body.classList.remove('open'); }
+$$('[data-panel]').forEach(b=> b.onclick = (e)=>{ e.stopPropagation(); openPanel(b.dataset.panel); });
+$('#panelClose').onclick = closePanel;
+$('#scrim').onclick = closePanel;
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closePanel(); });
+
+/* ── misc ──────────────────────────────────────────────────────────────── */
+$$('[data-scroll]').forEach(b=> b.onclick = ()=> document.getElementById(b.dataset.scroll).scrollIntoView({behavior:'smooth', block:'start'}));
+let tT;
+function toast(msg){ $('#toastText').innerHTML = msg; $('#toast').classList.add('on'); clearTimeout(tT); tT=setTimeout(()=>$('#toast').classList.remove('on'), 4200); }
+$('#toastX').onclick = ()=> $('#toast').classList.remove('on');
+
+setRoom('overview');
+</script>
+</body>
+</html>

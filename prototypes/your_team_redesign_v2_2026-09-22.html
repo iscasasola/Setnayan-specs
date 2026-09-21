@@ -1,0 +1,831 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your Team — redesign prototype v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<!--
+  YOUR TEAM — responsive redesign prototype v2 (2026-09-22)
+  Route it stands for: /dashboard/[eventId]/vendors   (rail "Your Team" · <h1>Your Team</h1>)
+
+  v2 fixes v1's flaw (owner: "finding service cards on the different categories seem lost now"):
+  the bench is back as the shipped TWO-LEVEL INLINE ACCORDION (shortlist-categories.tsx, owner
+  2026-06-16) — folder → categories → horizontal card carousel + Find + Add manually — and it
+  sits directly under the team, not in a drawer. Drawers are kept for genuinely separate screens
+  only (a card's detail, the compare tray, all decisions, budget, deposit, save-a-plan, review).
+
+  One DOM, two layouts:  < 1024px one column, sub-screens full screen · ≥ 1024px shell + wide flow
+  column + sticky Money column, sub-screens as a right drawer. Sections are ordered by CSS `order`;
+  body.after re-orders the same sections.
+
+  REAL DATA (event 044f7e64 "Indalecio & Claire", measured 2026-09-22 — see the reply for sources):
+    date Fri 18 Dec 2026 · 87 days · region ncr · budget ₱2,250,000 · band premium
+    contracted: Seda Vertis North (reception_venue; covers catering, cake, accommodation) ·
+                Santuario de San Vicente de Paul Parish & Shrine of the Poor (ceremony_venue)
+                — both total_cost_php NULL, deposit NULL, source host_manual, lock_request_state NULL
+    considering: Saysay Live Band & Hosting (FIXTURE) · Seda Hotel — both NULL price, category misc
+    marketplace: ONE published vendor, "Saysay Host and Band": host_mc ₱40,000 · live_band ₱35,000
+    venue_directory: 110 rows · 59 non-demo (name/type/city/photo, NO price) · 51 demo (priced)
+    notifications: 4 real supplier-action rows for this event (no event_id column — matched by URL)
+    live Payments lens: ₱26,499 paid · ₱0 to go (Setnayan ORDER money, not supplier money)
+
+  MARKERS:  [PLACEHOLDER] not sourced · [DEMO ROW] is_demo=true in venue_directory · [PROTO] a
+  state no row is in today (the handshake, a saved plan) · [FLAG] live page and data disagree.
+-->
+<style>
+:root{
+  --ink:#2C2A29; --ink-2:#6F6A62; --ink-3:#9A948A;
+  --line:#E1DCD1; --line-2:#F0EBE3; --soft:#F6F3EE; --page:#FFFFFF;
+  --mulberry:#C24E25; --gold:#A9834B;
+  --ok-bg:#E8F1E6; --ok:#2F6B35; --warn:#8A4B12; --warn-bg:#FBF0E4;
+  --r-lg:20px; --r-md:14px; --r-sm:10px;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{font-family:'Hanken Grotesk',ui-sans-serif,system-ui,sans-serif;background:var(--page);color:var(--ink);-webkit-font-smoothing:antialiased}
+button,input{font-family:inherit;color:inherit}
+button{cursor:pointer}
+h1,h2,h3{margin:0;font-weight:600}
+.mono{font-family:'Space Mono',ui-monospace,Menlo,monospace}
+.eyebrow{font-family:'Space Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+
+/* prototype bar — clearly not the app */
+.proto{position:sticky;top:0;z-index:30;display:flex;gap:8px;align-items:center;padding:8px 16px;background:#E4E1DB;font-size:12px;color:var(--ink-2);border-bottom:1px dashed #B9B4AA}
+.proto b{font-weight:600;color:var(--ink)}
+.proto .pill{height:28px}
+.pill{height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13px;white-space:nowrap}
+.pill[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+
+/* shell */
+.shell-top,.shell-rail{display:none}
+.app{display:block}
+
+/* page head */
+.page-head{display:flex;align-items:flex-start;gap:4px;padding:12px 16px 2px 8px}
+.icon-btn{width:44px;height:44px;border:0;background:transparent;display:inline-flex;align-items:center;justify-content:center;border-radius:999px}
+.page-head h1{font-size:24px;font-weight:500;line-height:1.15}
+.status{display:block;font-size:13px;color:var(--ink-2);margin-top:2px}
+.anchor-line{font-size:12px;color:var(--ink-3);margin-top:1px}
+
+.layout{display:flex;flex-direction:column;gap:24px;padding:10px 16px 120px}
+.sec{display:flex;flex-direction:column;gap:10px;min-width:0}
+.sec h2{font-size:24px;font-weight:500}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.muted{color:var(--ink-2)}
+.small{font-size:12px;color:var(--ink-2)}
+.center{text-align:center}
+.card{border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;display:flex;flex-direction:column;gap:10px;background:#fff}
+.rows{border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;background:#fff}
+.row{min-height:52px;width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border:0;border-bottom:1px solid var(--line-2);background:#fff;font-size:15px;text-align:left}
+.rows .row:last-child{border-bottom:0}
+.row .v{color:var(--ink-2);white-space:nowrap}
+.lone{border:1px solid var(--line);border-radius:var(--r-md)}
+.btn{height:46px;border:0;border-radius:999px;background:var(--mulberry);color:#fff;font-size:15px;font-weight:600;padding:0 20px}
+.btn.dark{background:var(--ink)}
+.btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink);height:42px;font-weight:500}
+.btn.sm{height:34px;font-size:13px;padding:0 13px}
+.btn:disabled{opacity:.45;cursor:default}
+.chev{color:var(--ink-3)}
+.ph{font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.06em;color:#7A5E2E;border:1px dashed var(--gold);border-radius:999px;padding:1px 6px;white-space:nowrap;vertical-align:middle}
+.flag{font-size:12px;color:var(--warn);background:var(--warn-bg);border-radius:var(--r-sm);padding:7px 10px;line-height:1.4}
+
+/* team member rows */
+.grp{padding:12px 14px 6px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff;border-bottom:1px solid var(--line-2)}
+.mem{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line-2);background:#fff}
+.rows .mem:last-child{border-bottom:0}
+.mem .top{display:flex;align-items:flex-start;gap:10px}
+.dot{width:9px;height:9px;border-radius:999px;flex-shrink:0;margin-top:6px;background:var(--ok)}
+.dot.cand{background:var(--gold)} .dot.wait{background:var(--warn)}
+.mem .nm{flex:1;min-width:0;font-size:15px;font-weight:600;line-height:1.25}
+.mem .cat{display:block;font-family:'Space Mono',monospace;font-size:10px;font-weight:400;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-top:3px}
+.mem .amt{font-size:14px;font-weight:600;white-space:nowrap;text-align:right}
+.mem .amt button{display:block;margin-top:2px;border:0;background:none;padding:0;font-size:12px;color:var(--mulberry);font-weight:600;text-decoration:underline;text-underline-offset:2px}
+.mem .amt.none{font-weight:400;font-size:12px;color:var(--ink-3)}
+.next-line{font-size:13.5px}
+.dep{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+.covers{font-size:12px;color:var(--ink-2)}
+.acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.rowrm{width:34px;height:34px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:15px;color:var(--ink-2)}
+.steps{display:flex;gap:4px}
+.steps i{flex:1;height:4px;border-radius:999px;background:var(--line)}
+.steps i.on{background:var(--warn)}
+.stepnote{font-size:12.5px;color:var(--warn)}
+
+/* notifications */
+.note{min-height:56px;width:100%;display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border:0;border-bottom:1px solid var(--line-2);background:#fff;font-size:14px;text-align:left;line-height:1.35}
+.rows .note:last-child{border-bottom:0}
+.note .ud{width:8px;height:8px;border-radius:999px;background:var(--mulberry);flex-shrink:0;margin-top:6px}
+.note .ud.rd{background:transparent;border:1px solid var(--line)}
+.note .lbl{flex:1;min-width:0}
+.note .lbl b{font-weight:600}
+.note .lbl small{display:block;color:var(--ink-2);font-size:12.5px;margin-top:2px}
+.note .when{font-family:'Space Mono',monospace;font-size:10px;color:var(--ink-3);white-space:nowrap;margin-top:4px}
+
+/* decide */
+.need{min-height:50px;width:100%;display:flex;align-items:center;gap:10px;padding:10px 16px;border:0;border-bottom:1px solid var(--line-2);background:#fff;font-size:15px;text-align:left}
+.rows .need:last-child{border-bottom:0}
+.need .lbl{flex:1;min-width:0}
+.od{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.06em;padding:3px 7px;border-radius:999px;background:var(--warn-bg);color:var(--warn);white-space:nowrap}
+
+/* money */
+.money{background:var(--soft);border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:12px}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tile{display:flex;flex-direction:column;gap:2px;min-width:0}
+.tile .k{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.tile .v{font-size:17px;font-weight:600;line-height:1.2}
+.tile .v.sm{font-size:13.5px;font-weight:500}
+.tile .v.gd{color:var(--ok)} .tile .v.bd{color:var(--mulberry)} .tile .v.non{color:var(--ink-3);font-weight:400;font-size:13.5px}
+.cov{display:flex;gap:6px;flex-wrap:wrap}
+.cov span{font-size:12px;padding:4px 9px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--ink-2)}
+.cov span.on{border-color:var(--ok);color:var(--ok);background:var(--ok-bg)}
+
+/* bench — the shipped two-level inline accordion */
+.searchbox{height:46px;border:1px solid var(--line);border-radius:999px;display:flex;align-items:center;gap:8px;padding:0 16px;background:#fff;width:100%}
+.searchbox input{flex:1;border:0;outline:0;background:transparent;font-size:14px;min-width:0}
+.searchbox .x{border:0;background:none;color:var(--ink-3);font-size:16px;padding:0 2px}
+.sorts{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.sorts::-webkit-scrollbar{display:none}
+.fold{border-bottom:1px solid var(--line-2);background:#fff}
+.rows .fold:last-child{border-bottom:0}
+.fold-head{min-height:52px;width:100%;display:flex;align-items:center;gap:10px;padding:11px 16px;border:0;background:#fff;font-size:15px;text-align:left}
+.fold-head .lbl{flex:1;min-width:0}
+.fold.open .fold-head{font-weight:600}
+.badge{font-family:'Space Mono',monospace;font-size:10px;padding:2px 7px;border-radius:999px;background:var(--soft);color:var(--ink-2);white-space:nowrap}
+.badge.lk{background:var(--ok-bg);color:var(--ok)}
+.chv{color:var(--ink-3);transition:transform .15s;display:inline-block}
+.open > .fold-head .chv, .cat.open > .cat-head .chv{transform:rotate(180deg)}
+.fold-body{padding:0 0 6px 0;background:#FBFAF7;border-top:1px solid var(--line-2)}
+.cat{border-bottom:1px solid var(--line-2)}
+.cat:last-child{border-bottom:0}
+.cat-head-row{display:flex;align-items:center;padding-right:10px}
+.cat-head{min-height:48px;flex:1;min-width:0;display:flex;align-items:center;gap:10px;padding:9px 16px 9px 28px;border:0;background:transparent;font-size:14.5px;text-align:left}
+.cat-head .lbl{flex:1;min-width:0}
+.cat.open .cat-head{font-weight:600}
+.cat-info{width:26px;height:26px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12px;color:var(--ink-2);flex-shrink:0}
+.cat-count{font-family:'Space Mono',monospace;font-size:10px;padding:2px 7px;border-radius:999px;background:var(--soft);color:var(--ink-2)}
+.cat-locked{font-size:12px;color:var(--ok);padding:0 16px 8px 28px;margin:0}
+.hintbox{margin:0 16px 10px 28px;padding:8px 10px;border-radius:var(--r-sm);background:#fff;border:1px solid var(--line);font-size:13px;line-height:1.4;display:flex;flex-direction:column;gap:8px}
+.cat-body{padding:2px 0 10px}
+.rail{display:flex;gap:10px;overflow-x:auto;padding:4px 16px 8px 28px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.rail::-webkit-scrollbar{display:none}
+.vc{flex:0 0 232px;scroll-snap-align:start;border:1px solid var(--line);border-radius:var(--r-md);background:#fff;display:flex;flex-direction:column;gap:8px;padding:10px 12px 12px;position:relative}
+.vc.chosen{border-color:var(--ok)}
+.vc.inbuild{border-color:var(--gold)}
+.vc .img{height:84px;border-radius:var(--r-sm);background:linear-gradient(135deg,#E8E2D6,#D5CDBE);display:flex;align-items:flex-end;padding:6px 8px;font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#5B554B;position:relative}
+.vc .img.ph-img{background:repeating-linear-gradient(135deg,#F1EDE5 0 8px,#E8E2D6 8px 16px)}
+.vc .corner{position:absolute;top:6px;left:6px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border-radius:999px;background:var(--ok);color:#fff}
+.vc .corner.gd{background:var(--gold)}
+.vc .cmp{position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13px;color:var(--ink-2);display:flex;align-items:center;justify-content:center;padding:0}
+.vc .cmp[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.vc .nm{font-size:14.5px;font-weight:600;line-height:1.25}
+.vc .sub{font-size:12px;color:var(--ink-2);line-height:1.35}
+.vc .pr{font-size:14px;font-weight:600}
+.vc .pr.none{font-weight:400;font-size:12px;color:var(--ink-3)}
+.fits{display:flex;gap:5px;flex-wrap:wrap}
+.fit{font-size:10.5px;padding:3px 7px;border-radius:999px;background:var(--soft);color:var(--ink-2)}
+.fit.ok{background:var(--ok-bg);color:var(--ok)} .fit.warn{background:var(--warn-bg);color:var(--warn)}
+.vc .acts{margin-top:auto}
+.vc .acts .btn.sm{height:32px;font-size:12.5px;padding:0 11px}
+.vc.railend{border-style:dashed;justify-content:center;align-items:center;gap:8px;background:transparent;flex-basis:150px}
+.vc.railend .btn{width:100%}
+.emptycat{padding:2px 16px 4px 28px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--ink-2)}
+.notneeded{margin:6px 16px 2px 28px;font-size:12px;color:var(--ink-3)}
+.notneeded button{border:0;background:none;padding:0;color:var(--ink-2);text-decoration:underline;text-underline-offset:2px;font-size:12px}
+
+/* compare bar (fixed) */
+.cmpbar{position:fixed;left:16px;right:16px;bottom:16px;z-index:35;border-radius:14px;background:var(--ink);color:#fff;padding:10px 12px 10px 16px;font-size:14px;display:none;justify-content:space-between;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(23,22,15,.25)}
+.cmpbar.on{display:flex}
+.cmpbar .btn{height:36px;font-size:13px;background:#fff;color:var(--ink)}
+.cmpbar .x{border:0;background:none;color:#D9D3C8;font-size:13px;padding:0 4px}
+
+/* panel: full screen on phone, drawer on desktop */
+.scrim{position:fixed;inset:0;background:rgba(23,22,15,.45);z-index:40;display:none}
+.panel{position:fixed;inset:0;background:#fff;z-index:41;display:none;flex-direction:column}
+.open .scrim{display:block} .open .panel{display:flex}
+.panel-head{display:flex;align-items:center;gap:4px;padding:10px 16px 8px 8px;border-bottom:1px solid var(--line-2)}
+.panel-head .t{flex:1;font-size:18px;font-weight:600;line-height:1.2}
+.panel-head .t small{display:block;font-family:'Space Mono',monospace;font-size:10px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+.panel-body{flex:1;overflow-y:auto;padding:14px 16px 28px;display:flex;flex-direction:column;gap:10px}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.tilerow{min-height:48px;width:100%;display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--line);border-radius:var(--r-md);background:#fff;font-size:15px;text-align:left}
+.tilerow .lbl{flex:1;min-width:0}
+.pick{min-height:52px;border-radius:var(--r-md);padding:10px 14px;display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:#fff;text-align:left;font-size:15px}
+.pick[aria-pressed="true"]{border:2px solid var(--mulberry)}
+.check{width:54px;height:54px;border-radius:999px;background:var(--ok-bg);color:var(--ok);display:flex;align-items:center;justify-content:center;font-size:25px;margin:6px auto 0}
+.inp{height:46px;border:1px solid var(--line);border-radius:var(--r-md);padding:0 14px;font-size:15px;width:100%;outline:0}
+.cmpt{width:100%;border-collapse:collapse;font-size:13px}
+.cmpt th,.cmpt td{text-align:left;vertical-align:top;padding:8px 6px;border-bottom:1px solid var(--line-2)}
+.cmpt th{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:400;width:26%}
+.cmpt td b{font-weight:600}
+.toast{position:fixed;left:16px;right:16px;bottom:24px;z-index:50;border-radius:14px;background:var(--ink);color:#fff;padding:13px 16px;font-size:14px;display:none;justify-content:space-between;align-items:center;gap:12px}
+.toast.on{display:flex}
+.toast button{border:0;background:transparent;color:#E8C89A;font-weight:600}
+
+/* phase folding */
+.compact{display:none}
+body.after .fold-sec .full{display:none}
+body.after .fold-sec .compact{display:flex}
+body.after .planning-only{display:none}
+body:not(.after) .after-only{display:none}
+
+/* ORDER — one DOM, reordered by CSS */
+.s-team{order:1}.s-notes{order:2}.s-decide{order:3}.s-bench{order:4}.s-money{order:5}.s-plans{order:6}
+body.after .s-team{order:1} body.after .s-notes{order:2} body.after .s-money{order:3} body.after .s-plans{order:4} body.after .s-bench{order:5}
+
+/* ---------- DESKTOP ---------- */
+@media (min-width:1024px){
+  body{background:#FAF8F4}
+  .shell-top{display:flex;align-items:center;gap:16px;height:58px;padding:0 24px;background:#fff;border-bottom:1px solid var(--line-2);position:sticky;top:45px;z-index:20}
+  .shell-top .brand{font-weight:700;letter-spacing:.2em;font-size:13px}
+  .shell-top .search{flex:1;max-width:480px;height:38px;border:1px solid var(--line);border-radius:999px;display:flex;align-items:center;padding:0 16px;color:var(--ink-3);font-size:13.5px}
+  .app{display:grid;grid-template-columns:96px 1fr}
+  .shell-rail{display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 0;border-right:1px solid var(--line-2);background:#fff;min-height:calc(100vh - 103px);font-size:11px;color:var(--ink-2)}
+  .shell-rail span{padding:8px 4px;text-align:center;line-height:1.2}
+  .shell-rail span.rg{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-top:8px}
+  .shell-rail span.on{color:var(--mulberry);font-weight:600}
+  .main{max-width:1240px;width:100%;margin:0 auto;padding:6px 32px}
+  .page-head{padding:20px 0 6px}
+  .page-head h1{font-size:30px}
+  .page-head .back{display:none}
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 352px;column-gap:32px;row-gap:26px;padding:8px 0 120px;align-items:start}
+  .layout > .sec{grid-column:1}
+  .layout > .s-money{grid-column:2;grid-row:1 / span 6;position:sticky;top:118px;align-self:start}
+  .rows,.card{background:#fff}
+  .vc{flex-basis:248px}
+  .panel{inset:0 0 0 auto;width:520px;box-shadow:-8px 0 24px rgba(23,22,15,.10)}
+  .toast{left:auto;right:24px;width:380px}
+  .cmpbar{left:auto;right:24px;width:420px}
+}
+</style>
+</head>
+<body>
+
+<div class="proto" role="group" aria-label="Prototype controls">
+  <b>Prototype</b>
+  <button class="pill" data-phase="before" aria-pressed="true">Planning</button>
+  <button class="pill" data-phase="after" aria-pressed="false">After the day</button>
+  <span style="margin-left:auto" class="mono">v2 · 2026-09-22</span>
+</div>
+
+<div class="shell-top"><span class="brand">SETNAYAN</span><span class="search">Search events, people, suppliers</span></div>
+
+<div class="app">
+  <nav class="shell-rail" aria-label="Event menu">
+    <span class="rg">Plan</span>
+    <span>Overview</span><span>Guests</span><span class="on">Your Team</span><span>Studio</span>
+    <span class="rg">Also</span>
+    <span>Schedule</span><span>Seat plan</span><span>Budget</span><span>Event Hub</span>
+  </nav>
+
+  <div class="main">
+    <div class="page-head">
+      <button class="icon-btn back" aria-label="Back to the event"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <div>
+        <h1>Your Team</h1>
+        <span class="status" id="statusLine"></span>
+        <span class="anchor-line" id="anchorLine"></span>
+      </div>
+    </div>
+
+    <div class="layout">
+
+      <!-- 1 · YOUR TEAM — build-locked.tsx + lib/your-team.ts (approved renderTeam shape) -->
+      <section class="sec s-team" aria-label="Your team">
+        <div class="sec-head"><h2 id="teamH">Your team</h2><span class="small" id="teamCount"></span></div>
+        <div class="rows" id="teamRows"></div>
+        <div class="acts planning-only">
+          <button class="btn ghost sm" id="clearCand" hidden>Clear candidates</button>
+          <button class="btn ghost sm" id="savePlan">Save as a plan</button>
+        </div>
+      </section>
+
+      <!-- 2 · FROM YOUR SUPPLIERS — notifications rows filtered to supplier-action kinds -->
+      <section class="sec s-notes" aria-label="From your suppliers">
+        <div class="sec-head"><h2>From your suppliers</h2>
+          <button class="pill" id="unreadOnly" aria-pressed="false" style="height:30px;font-size:12px">Unread</button></div>
+        <div class="rows" id="noteRows"></div>
+        <div class="flag"><span class="ph">FLAG</span> <code>notifications</code> has no <code>event_id</code>; these rows are matched by <code>related_url</code>. 21 of the latest 100 name this event.</div>
+      </section>
+
+      <!-- 3 · DECIDE NEXT — stillNeedsDecision(); each row is the ?tab=shortlist&open=<tile> deep link -->
+      <section class="sec s-decide planning-only" aria-label="Decide next">
+        <div class="sec-head"><h2>Decide next</h2><span class="small" id="decideCount"></span></div>
+        <div class="rows" id="decideRows"></div>
+        <button class="row lone" data-open="alldecide"><span id="decideMore"></span><span class="chev">›</span></button>
+      </section>
+
+      <!-- 4 · FIND — shortlist-categories.tsx: two-level inline accordion + carousel + Find + Add manually -->
+      <section class="sec s-bench fold-sec" aria-label="Find" id="bench">
+        <div class="sec-head full"><h2>Find</h2><span class="small">12 folders</span></div>
+        <div class="searchbox full"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" placeholder="Search your shortlist or the marketplace" aria-label="Search your shortlist or the marketplace"><button class="x" id="qx" aria-label="Clear search" hidden>✕</button></div>
+        <div class="sorts full" id="sorts"></div>
+        <div class="rows full" id="foldRows"></div>
+        <button class="row lone compact" data-jump="bench"><span>Find</span><span class="v">12 folders ›</span></button>
+      </section>
+
+      <!-- 5 · MONEY — merkado-budget-lens.tsx + resolveEventMoney; sticky right on desktop -->
+      <section class="sec s-money" aria-label="Money">
+        <div class="money">
+          <div class="sec-head"><h2 style="font-size:20px">Money</h2><span class="small">Budget ₱2,250,000</span></div>
+          <div class="tiles">
+            <div class="tile"><span class="k">Locked</span><span class="v" id="tLocked"></span></div>
+            <div class="tile"><span class="k">If you lock these</span><span class="v" id="tCand"></span></div>
+            <div class="tile"><span class="k">Paid to suppliers</span><span class="v" id="tPaidSup"></span></div>
+            <div class="tile"><span class="k">Setnayan orders</span><span class="v sm">₱26,499 paid<br><span class="small">₱0 to go</span></span></div>
+            <div class="tile" style="grid-column:1/-1"><span class="k">Buffer · if you lock these</span><span class="v" id="tBuffer"></span></div>
+          </div>
+          <div class="flag" id="moneyFlag"></div>
+          <div>
+            <span class="eyebrow">Covered</span>
+            <div class="cov" id="cov" style="margin-top:6px"></div>
+            <div class="flag" style="margin-top:8px"><span class="ph">FLAG</span> Live strip says <b>Covered 0 of 5</b>; the bench badges say ● 2 locked. Not fixed here.</div>
+          </div>
+          <button class="row lone" data-open="payments"><span>Budget &amp; payments</span><span class="chev">›</span></button>
+        </div>
+      </section>
+
+      <!-- 6 · PLANS — build-compare.tsx: saved candidate sets, locked rows pinned -->
+      <section class="sec s-plans fold-sec" aria-label="Plans">
+        <div class="sec-head full"><h2>Plans</h2><span class="small" id="plansCount"></span></div>
+        <div class="rows full" id="planRows"></div>
+        <button class="btn ghost full" data-open="plans">Compare side by side</button>
+        <button class="row lone compact" data-open="plans"><span>Plans</span><span class="v" id="plansCompact"></span></button>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<div class="cmpbar" id="cmpbar"><span id="cmpText"></span><span style="display:flex;gap:6px;align-items:center"><button class="btn" data-open="compare">Compare</button><button class="x" id="cmpClear">Clear</button></span></div>
+
+<div id="panelWrap">
+  <div class="scrim" id="scrim"></div>
+  <aside class="panel" role="dialog" aria-modal="true" aria-labelledby="panelTitle">
+    <div class="panel-head">
+      <button class="icon-btn" id="panelBack" aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <span class="t" id="panelTitle"></span>
+    </div>
+    <div class="panel-body" id="panelBody"></div>
+  </aside>
+</div>
+
+<div class="toast" id="toast" role="status"><span id="toastText"></span><button id="toastOk">OK</button></div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => Number(n).toLocaleString('en-PH');
+  const peso = (n) => '₱' + fmt(n);
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const BUDGET = 2250000;
+  const DATE_LABEL = 'Friday, December 18, 2026';
+
+  // ─── THE TEAM (event_vendors rows, measured) ───────────────────────────
+  // status: locked | asking (handshake, step 1–3) | cand (in build)
+  // deposit: due | sent | confirmed   (build-locked.tsx DepositLine)
+  const S = {
+    phase: 'before', panel: null, arg: null,
+    team: [
+      { id:'seda', name:'Seda Vertis North', cat:'Reception venue', tile:'reception', folder:'venue', price:null, status:'locked', deposit:'due', covers:'Covers catering · cake · accommodation', reviewed:false },
+      { id:'sant', name:'Santuario de San Vicente de Paul Parish & Shrine of the Poor', cat:'Ceremony venue', tile:'ceremony', folder:'venue', price:null, status:'locked', deposit:'due', covers:'', reviewed:false },
+      { id:'saysayfx', name:'Saysay Live Band & Hosting (FIXTURE)', cat:'Added by you · category misc', tile:'band', folder:'program', price:null, status:'cand', step:0, reviewed:false },
+      { id:'sedah', name:'Seda Hotel', cat:'Added by you · category misc', tile:null, folder:null, price:null, status:'cand', step:0, reviewed:false },
+    ],
+    notes: [
+      { id:1, type:'payment_info_sent', title:'Your payment info is ready', body:'Your booking with Seda Vertis North is locked. Open the workspace to see how to pay them directly.', when:'Sep 20', read:false, go:'workspace#payments' },
+      { id:2, type:'payment_info_sent', title:'Your payment info is ready', body:'Your booking with Santuario de San Vicente de Paul Parish & Shrine of the Poor is locked. Open the workspace to see how to pay them directly.', when:'Sep 20', read:false, go:'workspace#payments' },
+      { id:3, type:'payment_matched', title:'Payment of ₱24,000 matched · order SNYQAVP292', body:'The Setnayan team confirmed your payment.', when:'Sep 20', read:false, go:'order' },
+      { id:4, type:'order_paid', title:'Order SNYQAVP292 marked paid', body:'Your order is fully paid. We’ll start work right away.', when:'Sep 20', read:false, go:'order' },
+    ],
+    unreadOnly:false,
+    decide: [
+      { label:'Photo & Video', days:153, folder:'documentary', tile:'photo' },
+      { label:'Coordinator / Planner', days:113, folder:'planning', tile:'coordinator' },
+      { label:'Live Band', days:98, folder:'program', tile:'band' },
+      { label:'Stylist / Decorator', days:88, folder:'design', tile:'stylist' },
+    ],
+    decideHidden: 23,
+    sort:'best', q:'', openFolder:null, openTile:null, hint:null,
+    compare:[], plans:[], threads:{}, method:'GCash',
+  };
+
+  const SORTS = [['best','Best matches'],['near','Nearest to your venue'],['fits','Fits your budget'],['new','New here'],['low','Lowest price'],['top','Top rated']];
+
+  // the 12 live folder rows + live counts; tiles measured only for Photo & video
+  const FOLDERS = [
+    ['venue','Venues & churches',2,1,[['reception','Reception Venue'],['ceremony','Ceremony Venue']]],
+    ['planning','Coordinators & planners',0,3,[['coordinator','Coordinator / Planner'],['otd','On-the-day Coordinator']]],
+    ['feast','Catering & cake',2,2,[['catering','Catering'],['cake','Cake']]],
+    ['design','Styling, flowers & lights',0,8,[['stylist','Stylist / Decorator'],['florist','Florist']]],
+    ['program','Hosts, music & program',0,9,[['host','Hosts / Emcee'],['band','Live Band'],['dj','Mobile DJ']]],
+    ['documentary','Photo & video',0,2,[['photo','Photo & Video'],['editorial','Editorial']]],
+    ['look','Attire, hair & make-up',0,9,[['gown','Bridal Gown'],['hmua','Hair & Make-up']]],
+    ['booths','Booths, carts & bars',0,15,[['photobooth','Photo Booth'],['bar','Mobile Bar']]],
+    ['prints','Invites, prints & souvenirs',0,2,[['invites','Invitations'],['souvenirs','Souvenirs']]],
+    ['transport','Cars & transport',0,3,[['bridalcar','Bridal Car']]],
+    ['logistics-safety','Logistics & safety',0,1,[['security','Security']]],
+    ['insurance','Insurance & protection',0,1,[['insurance','Event Insurance']]],
+  ];
+  const MEASURED_TILES = new Set(['documentary']);
+  const COVERED = { catering:'Seda Vertis North', cake:'Seda Vertis North' };
+  const HINT = { reception:'Where the party is. Sets your date and location — and can cover catering, cake and rooms.', ceremony:'Where you say the vows. Church, chapel or civil.', photo:'Stills and film of the day.', band:'Live music for the program or the party.', host:'Runs the program on the mic.' };
+
+  // ─── BENCH CARDS ────────────────────────────────────────────────────────
+  // real: the two published service cards · demo: venue_directory is_demo=true · dir: non-demo directory row · ph: placeholder
+  const CARDS = {
+    reception: [
+      { id:'c-seda', teamId:'seda', name:'Seda Vertis North', sub:'Quezon City · added by you', kind:'team' },
+      { id:'c-disc', name:'Discovery Suites Ortigas — Grand Ballroom', sub:'Pasig · 80–300 guests', city:'Pasig', cap:'80–300', pmin:180000, pmax:380000, am:'catering included · valet parking · bridal suite', kind:'demo' },
+      { id:'c-glor', name:'Glorietta Activity Center', sub:'Makati · 100–400 guests', city:'Makati', cap:'100–400', pmin:80000, pmax:250000, am:'parking 50+ · AV equipment · dance floor', kind:'demo' },
+      { id:'c-marr', name:'Manila Marriott Hotel — Grand Ballroom', sub:'Pasay · 100–500 guests', city:'Pasay', cap:'100–500', pmin:280000, pmax:600000, am:'catering included · valet parking · bridal suite', kind:'demo' },
+      { id:'c-shan', name:'Shangri-La at the Fort — Grand Ballroom', sub:'Taguig · 100–500 guests', city:'Taguig', cap:'100–500', pmin:350000, pmax:800000, am:'catering included · valet parking · bridal suite', kind:'demo' },
+      { id:'c-conr', name:'Conrad Manila', sub:'Pasay · hotel ballroom', city:'Pasay', kind:'dir' },
+      { id:'c-peni', name:'The Peninsula Manila', sub:'Makati · hotel ballroom', city:'Makati', kind:'dir' },
+    ],
+    ceremony: [
+      { id:'c-sant', teamId:'sant', name:'Santuario de San Vicente de Paul Parish & Shrine of the Poor', sub:'Added by you', kind:'team' },
+      { id:'c-cath', name:'Manila Cathedral', sub:'Manila · Catholic church', city:'Manila', kind:'dir' },
+      { id:'c-agus', name:'San Agustin Church', sub:'Manila · Catholic church', city:'Manila', kind:'dir' },
+      { id:'c-stod', name:'Sto. Domingo Church', sub:'Quezon City · Catholic church', city:'Quezon City', kind:'dir' },
+      { id:'c-ctk', name:'Christ the King Parish — Greenmeadows', sub:'Quezon City · Catholic church', city:'Quezon City', kind:'dir' },
+    ],
+    host: [ { id:'c-host', name:'Saysay Host and Band', sub:'Hosts / Emcee · fixed price', pmin:40000, pmax:40000, kind:'real', vendor:'saysay' } ],
+    band: [
+      { id:'c-band', name:'Saysay Host and Band', sub:'Live band · fixed price', pmin:35000, pmax:35000, kind:'real', vendor:'saysay' },
+      { id:'c-sfx', teamId:'saysayfx', name:'Saysay Live Band & Hosting (FIXTURE)', sub:'Added by you · category misc', kind:'team' },
+    ],
+    photo: [ { id:'c-ph1', name:'[SUPPLIER NAME]', sub:'[CITY] · [PRICE]', kind:'ph' } ],
+  };
+  const allCards = () => Object.entries(CARDS).flatMap(([tile, cs]) => cs.map((c) => ({ ...c, tile })));
+  const cardById = (id) => allCards().find((c) => c.id === id);
+  const tileLabel = (tid) => { for (const f of FOLDERS) for (const t of f[4]) if (t[0] === tid) return t[1]; return tid; };
+  const folderOfTile = (tid) => FOLDERS.find((f) => f[4].some((t) => t[0] === tid));
+
+  const STAGE = [
+    '', 'Waiting for them to agree to the lock',
+    'They agreed — payment request received',
+    'Proof sent — they are confirming your payment',
+  ];
+  const STAGE_BTN = ['', '▶ They agree + send a payment request', '▶ I paid — send the proof', '▶ They accept the payment'];
+
+  const toast = (t) => { $('toastText').textContent = t; $('toast').classList.add('on'); };
+  $('toastOk').onclick = () => $('toast').classList.remove('on');
+
+  const L = () => S.team.filter((m) => m.status === 'locked');
+  const A = () => S.team.filter((m) => m.status === 'asking');
+  const C = () => S.team.filter((m) => m.status === 'cand');
+  const teamOf = (card) => card.teamId ? S.team.find((m) => m.id === card.teamId) : S.team.find((m) => m.cardId === card.id);
+  const unpriced = (rows) => rows.filter((m) => m.price == null).length;
+  const sum = (rows) => rows.reduce((a, m) => a + (m.price || 0), 0);
+
+  // ─── render ─────────────────────────────────────────────────────────────
+  function render() {
+    const after = S.phase === 'after';
+    document.body.classList.toggle('after', after);
+    document.querySelectorAll('[data-phase]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.phase === S.phase)));
+    const open = S.decide.length + S.decideHidden;
+    const unread = S.notes.filter((n) => !n.read).length;
+
+    $('statusLine').textContent = after
+      ? `${L().length} supplied your wedding · ${L().filter((m) => !m.reviewed).length} to review`
+      : `${L().length} locked · ${A().length ? A().length + ' asking · ' : ''}${C().length} to lock · ${open} to decide · ${unread} unread`;
+    $('anchorLine').textContent = after ? `${DATE_LABEL} · NCR` : `${DATE_LABEL} · NCR · 87 days`;
+    $('teamH').textContent = after ? 'Who supplied your wedding' : 'Your team';
+    $('teamCount').textContent = after ? '' : `${S.team.length} people`;
+    $('clearCand').hidden = C().length === 0;
+
+    renderTeam(after);
+    renderNotes();
+    renderDecide(open);
+    renderMoney();
+    renderBench();
+    renderPlans();
+    renderCompareBar();
+    renderPanel();
+  }
+
+  function memberRow(m, after) {
+    const amt = m.price == null
+      ? `<span class="amt none">No price recorded${m.status !== 'locked' || !after ? `<button data-price="${m.id}">Set price</button>` : ''}</span>`
+      : `<span class="amt">${peso(m.price)}<button data-price="${m.id}">Edit</button></span>`;
+    const dot = m.status === 'locked' ? '' : (m.status === 'asking' ? ' wait' : ' cand');
+    let body = '';
+    if (after) {
+      body = m.status === 'locked'
+        ? (m.reviewed ? '<span class="next-line" style="color:var(--ok)">✓ Reviewed</span>'
+          : `<div class="acts"><button class="btn sm" data-review="${m.id}">Write a review</button><button class="btn sm ghost" data-toast="Opens the workspace thread.">Message</button></div>`)
+        : '<span class="next-line muted">Not locked — nothing to review</span>';
+    } else if (m.status === 'locked') {
+      if (m.deposit === 'due') body = `<div class="next-line"><b>Next:</b> pay your deposit to hold the date.</div><div class="acts"><button class="btn sm" data-deposit="${m.id}">Pay your deposit</button><button class="btn sm ghost" data-toast="Opens /vendors/<id>/workspace.">Workspace</button></div>`;
+      else if (m.deposit === 'sent') body = `<span class="dep">Deposit sent · waiting for them to confirm</span><div class="acts"><button class="btn sm ghost" data-depconfirm="${m.id}">${STAGE_BTN[3]} <span class="ph">PROTO</span></button></div>`;
+      else body = `<span class="dep">Deposit confirmed</span>`;
+      if (m.covers) body += `<span class="covers">${esc(m.covers)}</span>`;
+    } else if (m.status === 'asking') {
+      body = `<div class="steps" aria-hidden="true">${[1,2,3].map((i) => `<i class="${i <= m.step ? 'on' : ''}"></i>`).join('')}</div>`
+        + `<span class="stepnote">Step ${m.step} of 3 · ${STAGE[m.step]} <span class="ph">PROTO</span></span>`
+        + `<div class="acts"><button class="btn sm" data-advance="${m.id}">${STAGE_BTN[m.step]}</button><button class="btn sm ghost" data-withdraw="${m.id}">Take it back</button></div>`;
+    } else {
+      const lockBtn = m.price == null
+        ? `<button class="btn sm ghost" data-price="${m.id}">Ask for a price to lock</button>`
+        : `<button class="btn sm" data-ask="${m.id}">Lock this</button>`;
+      body = `<div class="acts">${lockBtn}<button class="btn sm ghost" data-toast="Opens the inquiry thread.">Open conversation</button><button class="rowrm" data-drop="${m.id}" aria-label="Remove ${esc(m.name)} from your build">✕</button></div>`;
+    }
+    return `<div class="mem"><div class="top"><span class="dot${dot}" aria-hidden="true"></span><span class="nm">${esc(m.name)}<span class="cat">${esc(m.cat)}</span></span>${amt}</div>${body}</div>`;
+  }
+
+  function renderTeam(after) {
+    let h = '';
+    const l = L(), a = A(), c = C();
+    h += l.map((m) => memberRow(m, after)).join('') || '<div class="mem"><span class="muted">Nothing locked yet.</span></div>';
+    if (!after && a.length) h += `<div class="grp"><span class="eyebrow">⏳ Lock in progress</span><span class="small">${a.length}</span></div>` + a.map((m) => memberRow(m, after)).join('');
+    if (c.length) h += `<div class="grp"><span class="eyebrow">${after ? 'Not locked' : 'In your build — ready to lock'}</span><span class="small">${c.length}</span></div>` + c.map((m) => memberRow(m, after)).join('');
+    $('teamRows').innerHTML = h;
+  }
+
+  function renderNotes() {
+    $('unreadOnly').setAttribute('aria-pressed', String(S.unreadOnly));
+    const rows = S.notes.filter((n) => !S.unreadOnly || !n.read);
+    $('noteRows').innerHTML = rows.length ? rows.map((n) =>
+      `<button class="note" data-note="${n.id}"><span class="ud${n.read ? ' rd' : ''}" aria-hidden="true"></span><span class="lbl"><b>${esc(n.title)}</b><small>${esc(n.body)}</small></span><span class="when">${n.when}</span></button>`).join('')
+      : '<div class="note"><span class="lbl muted">Nothing unread.</span></div>';
+  }
+
+  function renderDecide(open) {
+    $('decideCount').textContent = `${open} open`;
+    $('decideRows').innerHTML = S.decide.map((d) =>
+      `<button class="need" data-jumptile="${d.tile}"><span class="lbl">${esc(d.label)}</span><span class="od">${d.days}d overdue</span><span class="chev">›</span></button>`).join('');
+    $('decideMore').textContent = `All ${open} open decisions`;
+  }
+
+  function renderMoney() {
+    const l = L(), c = C(), lu = unpriced(l), cu = unpriced(c);
+    const phrase = (rows, un, noun) => !rows.length ? '<span class="non">None</span>'
+      : un === rows.length ? `<span class="non">${rows.length} ${noun} · no price recorded</span>`
+      : `${peso(sum(rows))}${un ? ` <span class="small">+ ${un} without a price</span>` : ''}`;
+    $('tLocked').innerHTML = phrase(l, lu, 'locked');
+    $('tCand').innerHTML = phrase(c, cu, c.length === 1 ? 'candidate' : 'candidates');
+    $('tPaidSup').innerHTML = '<span class="non">None recorded</span>';
+    const un = lu + cu;
+    if (un) $('tBuffer').innerHTML = `<span class="non">Not knowable — ${un} of your people have no price</span>`;
+    else { const b = BUDGET - sum(l) - sum(c); $('tBuffer').innerHTML = `<span class="${b >= 0 ? 'gd' : 'bd'}">${peso(Math.abs(b))} ${b >= 0 ? 'to spare' : 'over'}</span>`; }
+    $('moneyFlag').innerHTML = `<span class="ph">FLAG</span> Live page prints <b>LOCKED ₱0</b> and <b>₱2,250,000 to spare</b> beside <b>₱26,499 paid</b>. The ₱26,499 is Setnayan order money (₱24,000 of it order SNYQAVP292), not money paid to a supplier; the locked rows have no price recorded, so ₱0 is a lie.`;
+    const cov = [['Escort', null], ['Reception', 'Seda Vertis North'], ['Ceremony', 'Santuario'], ['Catering', 'via Seda'], ['Cake', 'via Seda']];
+    $('cov').innerHTML = cov.map(([k, v]) => `<span class="${v ? 'on' : ''}">${v ? '● ' : '○ '}${k}${v ? ' · ' + esc(v) : ''}</span>`).join('');
+  }
+
+  function fitChips(c) {
+    // the shipped FitBadges (Free on your date / Fits budget / Reaches you) need live inputs this prototype lacks
+    if (c.kind === 'team') return '';
+    return `<span class="fits"><span class="fit ph">Fit badges · live</span>${c.kind === 'demo' ? '<span class="ph">DEMO ROW</span>' : c.kind === 'ph' ? '<span class="ph">PLACEHOLDER</span>' : c.kind === 'dir' ? '<span class="fit">Directory · no price listed</span>' : ''}</span>`;
+  }
+
+  function cardHtml(c, tile) {
+    const m = teamOf(c);
+    const inTeam = !!m;
+    const chosen = m && m.status === 'locked';
+    const price = c.pmin != null ? (c.pmin === c.pmax ? peso(c.pmin) : `${peso(c.pmin)} – ${peso(c.pmax)}`) : (m && m.price != null ? peso(m.price) : null);
+    const cmpOn = S.compare.includes(c.id);
+    let acts = '';
+    if (chosen) acts = `<span class="dep" style="color:var(--ok)">★ Chosen</span>`;
+    else if (m && m.status === 'asking') acts = `<span class="dep" style="color:var(--warn)">Waiting on them · step ${m.step} of 3</span>`;
+    else if (m) acts = `<span class="dep" style="color:var(--gold)">In your build</span> <button class="btn sm ghost" data-drop="${m.id}">Remove</button>`;
+    else if (c.kind === 'ph') acts = `<button class="btn sm ghost" data-toast="Placeholder card — no supplier in this category yet.">＋ Add to build</button>`;
+    else {
+      const addLbl = c.pmin == null ? 'Add to build' : '＋ Add to build';
+      const inq = S.threads[c.id] ? `<button class="btn sm ghost" data-thread="${c.id}">Open conversation</button>` : `<button class="btn sm ghost" data-inquire="${c.id}">Inquire</button>`;
+      const lock = c.pmin == null ? '' : `<button class="btn sm" data-lockcard="${c.id}">Lock this</button>`;
+      acts = `<button class="btn sm ghost" data-add="${c.id}">${addLbl}</button>${inq}${lock}`;
+    }
+    const corner = chosen ? '<span class="corner">Chosen</span>' : (m ? '<span class="corner gd">In build</span>' : '');
+    const cmp = c.kind === 'ph' ? '' : `<button class="cmp" data-cmp="${c.id}" aria-pressed="${cmpOn}" aria-label="Compare ${esc(c.name)}">${cmpOn ? '✓' : '⇄'}</button>`;
+    return `<div class="vc${chosen ? ' chosen' : inTeam ? ' inbuild' : ''}" data-card="${c.id}">
+      <div class="img${c.kind === 'ph' ? ' ph-img' : ''}">${corner}${cmp}${c.kind === 'ph' ? '[PHOTO]' : c.kind === 'team' ? 'no photo' : 'photo'}</div>
+      <button class="nm" style="border:0;background:none;padding:0;text-align:left;font:inherit;font-weight:600" data-detail="${c.id}">${esc(c.name)}</button>
+      <span class="sub">${esc(c.sub)}</span>
+      <span class="pr${price ? '' : ' none'}">${price || 'No price recorded'}</span>
+      ${fitChips(c)}
+      <div class="acts">${acts}</div></div>`;
+  }
+
+  function sortCards(cs) {
+    if (S.sort !== 'low') return cs;
+    return [...cs].sort((a, b) => (a.pmin ?? 1e12) - (b.pmin ?? 1e12));
+  }
+
+  function renderBench() {
+    $('sorts').innerHTML = SORTS.map(([id, l]) => `<button class="pill" data-sort="${id}" aria-pressed="${S.sort === id}">${l}</button>`).join('');
+    $('qx').hidden = !S.q;
+    const q = S.q.trim().toLowerCase();
+    const searching = q.length > 0;
+    const match = (s) => !searching || s.toLowerCase().includes(q);
+    $('foldRows').innerHTML = FOLDERS.map(([fid, label, locked, decide, tiles]) => {
+      const tilesShown = tiles.filter(([tid, tl]) => match(label) || match(tl) || (CARDS[tid] || []).some((c) => match(c.name)));
+      if (searching && !tilesShown.length) return '';
+      const fOpen = searching || S.openFolder === fid;
+      const body = !fOpen ? '' : `<div class="fold-body">${!MEASURED_TILES.has(fid) ? '<div class="notneeded"><span class="ph">tiles not measured</span></div>' : ''}${tilesShown.map(([tid, tl]) => {
+        const cs = sortCards(CARDS[tid] || []);
+        const tOpen = searching || S.openTile === tid;
+        const lockedNames = cs.filter((c) => { const m = teamOf(c); return m && m.status === 'locked'; }).map((c) => c.name);
+        const covered = COVERED[tid];
+        const count = cs.filter((c) => c.kind !== 'ph').length;
+        const hint = HINT[tid];
+        let inner = '';
+        if (tOpen) {
+          if (covered) inner = `<div class="emptycat"><span>✓ Covered by ${esc(covered)}</span><button class="btn sm ghost" data-toast="Reopens the category — the lock that covers it stays.">Reopen</button></div>`;
+          else if (cs.length) inner = `<div class="rail">${cs.map((c) => cardHtml(c, tid)).join('')}<div class="vc railend"><button class="btn ghost sm" data-find="${tid}">Find ${esc(tl)}</button><button class="btn ghost sm" data-manual="${tid}">Add manually</button></div></div>`;
+          else inner = `<div class="emptycat"><span>No one considered yet.</span><button class="btn sm ghost" data-find="${tid}">Find ${esc(tl)}</button><button class="btn sm ghost" data-manual="${tid}">Add manually</button></div>`;
+          inner += `<div class="notneeded">Not needed? <button data-remove="${tid}">Remove ${esc(tl)} from your event</button></div>`;
+        }
+        return `<div class="cat${tOpen ? ' open' : ''}" id="tile-${tid}"><div class="cat-head-row"><button class="cat-head" aria-expanded="${tOpen}" data-tile="${tid}"><span class="lbl">${esc(tl)}</span>${covered ? '<span class="cat-plan" style="font-size:11px;color:#41603b">✓ Covered</span>' : ''}${count ? `<span class="cat-count">${count}</span>` : ''}<span class="chv">⌄</span></button>${hint ? `<button class="cat-info" aria-expanded="${S.hint === tid}" aria-label="What does ${esc(tl)} cover?" data-hint="${tid}">i</button>` : ''}</div>${S.hint === tid && hint ? `<div class="hintbox"><span>${esc(hint)}</span></div>` : ''}${!tOpen && lockedNames.length ? `<p class="cat-locked">🔒 ${esc(lockedNames.join(', '))}</p>` : ''}<div class="cat-body">${inner}</div></div>`;
+      }).join('')}</div>`;
+      return `<div class="fold${fOpen ? ' open' : ''}" id="fold-${fid}"><button class="fold-head" aria-expanded="${fOpen}" data-fold="${fid}"><span class="lbl">${esc(label)}</span>${locked ? `<span class="badge lk">● ${locked} locked</span>` : ''}<span class="badge">${decide} to decide</span><span class="chv">⌄</span></button>${body}</div>`;
+    }).join('') || '<div class="row muted">Nothing matches.</div>';
+  }
+
+  function renderPlans() {
+    $('plansCount').textContent = S.plans.length ? `${S.plans.length} saved` : '';
+    $('planRows').innerHTML = S.plans.length
+      ? S.plans.map((p, i) => `<button class="row" data-load="${i}"><span>${esc(p.name)} <span class="ph">PROTO</span></span><span class="v">${p.n} candidates · Load ›</span></button>`).join('')
+      : '<div class="row" style="color:var(--ink-3)"><span>No saved plans yet · locked rows are pinned in every plan</span></div>';
+    $('plansCompact').textContent = `${S.plans.length || 'No'} saved ›`;
+  }
+
+  function renderCompareBar() {
+    const n = S.compare.length;
+    $('cmpbar').classList.toggle('on', n > 0);
+    if (n) { const t = cardById(S.compare[0]).tile; $('cmpText').textContent = `${n} ${tileLabel(t).toLowerCase()}${n === 1 ? ' · pick one more' : ''}`; }
+  }
+
+  // ─── panels ─────────────────────────────────────────────────────────────
+  function renderPanel() {
+    $('panelWrap').classList.toggle('open', !!S.panel);
+    if (!S.panel) return;
+    let title = '', sub = '', html = '';
+    const P = S.panel;
+    if (P === 'detail') {
+      const c = cardById(S.arg); const m = teamOf(c);
+      title = c.name; sub = tileLabel(c.tile);
+      const price = c.pmin != null ? (c.pmin === c.pmax ? peso(c.pmin) : `${peso(c.pmin)} – ${peso(c.pmax)}`) : 'No price recorded';
+      html = `<div class="vc" style="flex-basis:auto"><div class="img${c.kind === 'ph' ? ' ph-img' : ''}" style="height:140px">${c.kind === 'ph' ? '[PHOTO]' : 'photo'}</div></div>
+        <div class="card"><div class="sec-head"><span class="eyebrow">Price</span><b>${price}</b></div>${c.cap ? `<div class="sec-head"><span class="eyebrow">Guests</span><span>${c.cap}</span></div>` : ''}${c.city ? `<div class="sec-head"><span class="eyebrow">City</span><span>${esc(c.city)}</span></div>` : ''}${c.am ? `<div class="sec-head"><span class="eyebrow">Amenities</span><span style="text-align:right">${esc(c.am)}</span></div>` : ''}<div class="sec-head"><span class="eyebrow">Fit</span><span class="ph">Fit badges · live</span></div>${c.kind === 'real' ? '<div class="sec-head"><span class="eyebrow">Shop</span><span>Saysay Host and Band · published</span></div>' : ''}${c.kind === 'demo' ? '<span class="flag"><span class="ph">DEMO ROW</span> is_demo = true in venue_directory. Not bookable via Setnayan.</span>' : ''}</div>
+        ${m ? `<span class="small">${m.status === 'locked' ? '★ Chosen — locked for your date.' : m.status === 'asking' ? 'Waiting on them.' : 'In your build.'}</span>` : c.kind === 'ph' ? '' : `<div class="two"><button class="btn ghost" data-add="${c.id}" data-close="1">＋ Add to build</button>${c.pmin != null ? `<button class="btn" data-lockcard="${c.id}" data-close="1">Lock this</button>` : '<button class="btn ghost" data-toast="Ask for a price to add this to your build">Ask for a price</button>'}</div>`}
+        <span class="small">vendor-quickview-inspector.tsx — same ShortlistVendor data, richer presentation.</span>`;
+    }
+    if (P === 'compare') {
+      const cs = S.compare.map(cardById);
+      title = 'Compare'; sub = cs.length ? tileLabel(cs[0].tile) : '';
+      const rows = [
+        ['Price', (c) => c.pmin != null ? (c.pmin === c.pmax ? `<b>${peso(c.pmin)}</b>` : `<b>${peso(c.pmin)}</b> – ${peso(c.pmax)}`) : '<span class="muted">Not listed</span>'],
+        ['Of your budget', (c) => c.pmin != null ? `${(c.pmin / BUDGET * 100).toFixed(1)}%${c.pmax !== c.pmin ? ` – ${(c.pmax / BUDGET * 100).toFixed(1)}%` : ''} of ₱2,250,000` : '<span class="muted">—</span>'],
+        ['Guests', (c) => c.cap || '<span class="muted">—</span>'],
+        ['City', (c) => c.city || '<span class="muted">—</span>'],
+        ['Amenities', (c) => c.am || '<span class="muted">—</span>'],
+        ['Fit', () => '<span class="ph">Fit badges · live</span>'],
+        ['Source', (c) => c.kind === 'demo' ? '<span class="ph">DEMO ROW</span>' : c.kind === 'dir' ? 'Directory' : c.kind === 'real' ? 'Published shop' : 'Added by you'],
+      ];
+      html = `<div style="overflow-x:auto"><table class="cmpt"><thead><tr><th></th>${cs.map((c) => `<td><b>${esc(c.name)}</b></td>`).join('')}</tr></thead><tbody>${rows.map(([k, f]) => `<tr><th>${k}</th>${cs.map((c) => `<td>${f(c)}</td>`).join('')}</tr>`).join('')}<tr><th></th>${cs.map((c) => { const m = teamOf(c); return `<td><div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start">${m ? `<span class="dep">${m.status === 'locked' ? '★ Chosen' : 'In build'}</span>` : `<button class="btn sm ghost" data-add="${c.id}">＋ Add to build</button>${c.pmin != null ? `<button class="btn sm" data-lockcard="${c.id}" data-close="1">Lock this</button>` : ''}`}<button class="btn sm ghost" data-cmp="${c.id}">Drop</button></div></td>`; }).join('')}</tr></tbody></table></div>
+        <span class="small">Budget ₱2,250,000 has nothing else priced against it — 2 locked and ${C().length} candidates carry no price, so “of your budget” is against the whole budget, not what is left.</span>`;
+    }
+    if (P === 'alldecide') {
+      title = 'Open decisions'; sub = `${S.decide.length + S.decideHidden} with no lock`;
+      html = S.decide.map((d) => `<button class="tilerow" data-jumptile="${d.tile}" data-close="1"><span class="lbl">${esc(d.label)}</span><span class="od">${d.days}d overdue</span><span class="chev">›</span></button>`).join('')
+        + `<div class="tilerow" style="color:var(--ink-3)"><span class="lbl">${S.decideHidden} more, not yet overdue <span class="ph">PLACEHOLDER</span></span></div><span class="small">Live page lists 4 and says “…and 23 more to decide.” The 23 were not enumerated.</span>`;
+    }
+    if (P === 'payments') {
+      title = 'Budget & payments'; sub = 'Doorway to /budget';
+      html = `<div class="card"><div class="sec-head"><span class="eyebrow">Setnayan orders</span><b>₱26,499 paid · ₱0 to go</b></div><div class="sec-head"><span class="eyebrow">Suppliers</span><span class="muted">Nothing recorded</span></div><div class="sec-head"><span class="eyebrow">Still owed</span><span class="ph">resolveEventMoney · live</span></div></div>
+        <button class="btn dark" data-toast="Goes to /budget — set a target, plan allotments, itemize costs, log payments.">Open budget &amp; payments</button>
+        <span class="small">One number here (Still owed from the resolver) and the doorway — per the BUD-8 ruling the lens computes no total of its own.</span>`;
+    }
+    if (P === 'deposit') {
+      const m = S.team.find((x) => x.id === S.arg);
+      title = 'Pay your deposit'; sub = m.name;
+      html = `<div class="card"><div class="sec-head"><span class="eyebrow">Deposit</span><b>${m.price != null ? '[DEPOSIT AMOUNT — from their payment request]' : 'No price recorded'}</b></div><div class="sec-head"><span class="eyebrow">Their methods</span><span class="ph">PLACEHOLDER</span></div></div>
+        <div class="two">${['GCash','BDO'].map((x) => `<button class="pick" style="justify-content:center" data-method="${x}" aria-pressed="${S.method === x}">${x}</button>`).join('')}</div>
+        <button class="btn" data-paid="${m.id}">I’ve paid — send proof</button>
+        <span class="small">Proof goes to the supplier; it is confirmed only when they accept it (couple-asks, supplier-agrees).</span>`;
+    }
+    if (P === 'price') {
+      const m = S.team.find((x) => x.id === S.arg);
+      title = 'Set a price'; sub = m.name;
+      html = `<label class="small" style="display:flex;flex-direction:column;gap:6px">Agreed total, ₱<input class="inp" id="priceIn" inputmode="numeric" placeholder="e.g. 250000" value="${m.price ?? ''}"></label>
+        <button class="btn" data-setprice="${m.id}">Save price</button>
+        <span class="small">self-added-price.tsx — a price you record here is what Locked and Buffer add up. Nothing is charged.</span>`;
+    }
+    if (P === 'note') {
+      const n = S.notes.find((x) => x.id === S.arg);
+      title = n.title; sub = n.type;
+      html = `<p style="margin:0;font-size:15px;line-height:1.45">${esc(n.body)}</p><button class="btn dark" data-toast="${n.go === 'order' ? 'Opens the order.' : 'Opens /vendors/<id>/workspace#payments.'}">${n.go === 'order' ? 'Open order' : 'Open workspace'}</button>`;
+    }
+    if (P === 'plans') {
+      title = 'Plans'; sub = 'Side by side';
+      const cols = [{ name:'Current', rows: C().map((m) => m.name) }, ...S.plans.map((p) => ({ name:p.name, rows:p.rows }))];
+      html = `<div style="overflow-x:auto"><table class="cmpt"><thead><tr><th></th>${cols.map((c) => `<td><b>${esc(c.name)}</b></td>`).join('')}</tr></thead><tbody>${L().map((m) => `<tr><th>🔒 pinned</th>${cols.map(() => `<td>${esc(m.name)}</td>`).join('')}</tr>`).join('')}<tr><th>Candidates</th>${cols.map((c) => `<td>${c.rows.length ? c.rows.map(esc).join('<br>') : '<span class="muted">none</span>'}</td>`).join('')}</tr><tr><th>Dates</th>${cols.map(() => '<td><span class="ph">shared free days · live</span></td>').join('')}</tr></tbody></table></div>
+        <span class="small">Locked rows are pinned identically in every column; only candidates vary. “No single date works — swap one” is the shipped Compare rule.</span>`;
+    }
+    if (P === 'saveplan') {
+      title = 'Save this plan'; sub = `${C().length} candidates`;
+      html = `<label class="small" style="display:flex;flex-direction:column;gap:6px">Name (optional)<input class="inp" id="planName" placeholder="Plan A"></label><button class="btn" data-act="confirmplan">Save plan</button>`;
+    }
+    if (P === 'review') {
+      const m = S.team.find((x) => x.id === S.arg);
+      title = 'Review'; sub = m.name;
+      html = `<div class="card"><span class="eyebrow">How did they do?</span><div class="sorts">${[1,2,3,4,5].map((n) => `<button class="pill" data-stars="${n}">${'★'.repeat(n)}</button>`).join('')}</div></div><button class="btn" data-act="postreview">Post review</button>`;
+    }
+    if (P === 'find') {
+      title = `Find ${tileLabel(S.arg)}`; sub = 'From the whole marketplace';
+      const real = (CARDS[S.arg] || []).filter((c) => c.kind === 'real' || c.kind === 'demo' || c.kind === 'dir');
+      html = `<div class="searchbox" style="cursor:default"><input placeholder="Search ${esc(tileLabel(S.arg).toLowerCase())}" aria-label="Search"></div>` + (real.length ? real.map((c) => `<button class="tilerow" data-detail="${c.id}"><span class="lbl">${esc(c.name)}<br><span class="small">${esc(c.sub)}</span></span><span class="chev">›</span></button>`).join('') : '<div class="tilerow" style="color:var(--ink-3)"><span class="lbl">The marketplace holds no published card here yet.</span></div>')
+        + '<span class="small">The shipped “Find” opens a second rail under the carousel; shown as a screen here for room.</span>';
+    }
+    if (P === 'manual') {
+      title = 'Add manually'; sub = tileLabel(S.arg);
+      html = `<label class="small" style="display:flex;flex-direction:column;gap:6px">Name<input class="inp" id="mvName" placeholder="Their business name"></label><label class="small" style="display:flex;flex-direction:column;gap:6px">Agreed price, ₱ (optional)<input class="inp" id="mvPrice" inputmode="numeric"></label><button class="btn" data-act="confirmmanual">Add to your build</button><span class="small">If that name is already on Setnayan, you are offered the real card instead.</span>`;
+    }
+    $('panelTitle').innerHTML = esc(title) + (sub ? `<small>${esc(sub)}</small>` : '');
+    $('panelBody').innerHTML = html;
+  }
+
+  // ─── actions ─────────────────────────────────────────────────────────────
+  function jumpTile(tid) {
+    const f = folderOfTile(tid); if (!f) return;
+    S.openFolder = f[0]; S.openTile = tid; S.q = ''; $('q').value = '';
+    history.replaceState(null, '', `#tab=shortlist&open=${tid}`);
+    render();
+    const el = $('tile-' + tid); if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }
+  function addToBuild(c) {
+    if (teamOf(c)) return teamOf(c);
+    const m = { id:'t-' + c.id, cardId:c.id, name:c.name, cat:tileLabel(c.tile), tile:c.tile, price:c.pmin != null && c.pmin === c.pmax ? c.pmin : null, status:'cand', step:0, reviewed:false };
+    S.team.push(m); return m;
+  }
+  function askLock(m) {
+    if (m.price == null) { toast('Ask for a price to add this to your build'); return; }
+    m.status = 'asking'; m.step = 1;
+    toast('Asked them to lock. It is not locked until they accept your payment.');
+  }
+
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('button');
+    if (!t) { if (e.target.id === 'scrim') { S.panel = null; render(); } return; }
+    const d = t.dataset;
+    if (d.phase) S.phase = d.phase;
+    else if (d.sort) { S.sort = d.sort; if (!['best','low'].includes(d.sort)) toast('Ranked live from your venue, budget and their reviews.'); }
+    else if (d.fold) { S.openFolder = S.openFolder === d.fold ? null : d.fold; S.openTile = null; }
+    else if (d.tile) S.openTile = S.openTile === d.tile ? null : d.tile;
+    else if (d.hint) S.hint = S.hint === d.hint ? null : d.hint;
+    else if (d.jumptile) { jumpTile(d.jumptile); if (d.close) { S.panel = null; render(); } return; }
+    else if (d.jump === 'bench') { S.phase = 'before'; render(); $('bench').scrollIntoView({ behavior:'smooth' }); return; }
+    else if (d.open) { S.panel = d.open; S.arg = null; }
+    else if (d.detail) { S.panel = 'detail'; S.arg = d.detail; }
+    else if (d.find) { S.panel = 'find'; S.arg = d.find; }
+    else if (d.manual) { S.panel = 'manual'; S.arg = d.manual; }
+    else if (d.cmp) {
+      const c = cardById(d.cmp);
+      if (S.compare.includes(c.id)) S.compare = S.compare.filter((x) => x !== c.id);
+      else { if (S.compare.length && cardById(S.compare[0]).tile !== c.tile) { S.compare = []; toast('One category at a time.'); } if (S.compare.length >= 4) { toast('Up to 4.'); return; } S.compare.push(c.id); }
+      if (S.panel === 'compare' && S.compare.length < 2) S.panel = null;
+    }
+    else if (t.id === 'cmpClear') S.compare = [];
+    else if (d.add) { addToBuild(cardById(d.add)); toast('In your build. Lock it from Your team.'); if (d.close) S.panel = null; }
+    else if (d.inquire) { S.threads[d.inquire] = true; toast('Inquiry sent. Their reply lands under “From your suppliers”.'); }
+    else if (d.thread) { toast('Opens the conversation.'); return; }
+    else if (d.lockcard) { const m = addToBuild(cardById(d.lockcard)); askLock(m); if (d.close) S.panel = null; }
+    else if (d.ask) askLock(S.team.find((x) => x.id === d.ask));
+    else if (d.advance) { const m = S.team.find((x) => x.id === d.advance); if (m.step >= 3) { m.status = 'locked'; m.deposit = 'confirmed'; m.covers = ''; toast('Locked — they accepted your payment.'); } else m.step += 1; }
+    else if (d.withdraw) { const m = S.team.find((x) => x.id === d.withdraw); m.status = 'cand'; m.step = 0; toast('Taken back.'); }
+    else if (d.drop) { S.team = S.team.filter((x) => x.id !== d.drop); toast('Removed from your build.'); }
+    else if (d.deposit) { S.panel = 'deposit'; S.arg = d.deposit; }
+    else if (d.method) S.method = d.method;
+    else if (d.paid) { const m = S.team.find((x) => x.id === d.paid); m.deposit = 'sent'; S.panel = null; toast('Proof sent — waiting for them to confirm.'); }
+    else if (d.depconfirm) { S.team.find((x) => x.id === d.depconfirm).deposit = 'confirmed'; }
+    else if (d.price) { S.panel = 'price'; S.arg = d.price; }
+    else if (d.setprice) { const m = S.team.find((x) => x.id === d.setprice); const v = parseInt(($('priceIn').value || '').replace(/[^0-9]/g, ''), 10); m.price = Number.isFinite(v) && v > 0 ? v : null; S.panel = null; }
+    else if (d.note) { const n = S.notes.find((x) => x.id === +d.note); n.read = true; S.panel = 'note'; S.arg = n.id; }
+    else if (t.id === 'unreadOnly') S.unreadOnly = !S.unreadOnly;
+    else if (t.id === 'qx') { S.q = ''; $('q').value = ''; }
+    else if (d.remove) { const locked = (CARDS[d.remove] || []).some((c) => { const m = teamOf(c); return m && m.status === 'locked'; }); toast(locked ? 'Refused — something here is locked.' : `${tileLabel(d.remove)} removed from your event.`); return; }
+    else if (t.id === 'clearCand') { S.team = S.team.filter((x) => x.status !== 'cand'); toast('Candidates cleared. Locked rows untouched.'); }
+    else if (t.id === 'savePlan') S.panel = 'saveplan';
+    else if (d.act === 'confirmplan') { const name = ($('planName').value.trim()) || ('Plan ' + String.fromCharCode(65 + S.plans.length)); S.plans.push({ name:name.slice(0, 60), n:C().length, rows:C().map((m) => m.name) }); S.panel = null; toast(`Saved as “${name}”.`); }
+    else if (d.load !== undefined) { toast(`“${S.plans[d.load].name}” loaded — locked rows untouched.`); return; }
+    else if (d.act === 'confirmmanual') { const name = ($('mvName').value.trim()) || 'My supplier'; const v = parseInt(($('mvPrice').value || '').replace(/[^0-9]/g, ''), 10); const tile = S.arg; const id = 'c-mv' + Date.now(); CARDS[tile] = CARDS[tile] || []; CARDS[tile].push({ id, name, sub:'Added by you', kind:'team', teamId:'t-' + id }); S.team.push({ id:'t-' + id, name, cat:tileLabel(tile) + ' · added by you', tile, price:Number.isFinite(v) && v > 0 ? v : null, status:'cand', step:0, reviewed:false }); S.panel = null; S.openTile = tile; }
+    else if (d.review) { S.panel = 'review'; S.arg = d.review; }
+    else if (d.stars) { toast(d.stars + ' star' + (d.stars === '1' ? '' : 's')); return; }
+    else if (d.act === 'postreview') { S.team.find((x) => x.id === S.arg).reviewed = true; S.panel = null; toast('Review posted.'); }
+    else if (t.id === 'panelBack') S.panel = null;
+    else if (d.toast) { toast(d.toast); return; }
+    else return;
+    render();
+  });
+  $('q').addEventListener('input', (e) => { S.q = e.target.value; render(); $('q').focus(); const v = $('q').value; $('q').setSelectionRange(v.length, v.length); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && S.panel) { S.panel = null; render(); } });
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Event overview — redesign prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!--
+  EVENT OVERVIEW — responsive redesign prototype (2026-09-22)
+  Route it stands for: /dashboard/[eventId]            (the couple's event Home / Overview)
+  Measured live 2026-09-22 on www.setnayan.com/dashboard/044f7e64-95aa-4dcb-84c1-7263bf494eaa
+  signed in as the host of "Indalecio & Claire", 87 days out, Setnayan AI ACTIVE.
+
+  One DOM, two layouts:
+    < 1024px  one column, sections ordered by the current moment
+    >= 1024px the real shell (top bar + left rail) - the flow in the wide left column,
+              THE DAY + the numbers + Sai's watch sticky in the right column.
+              Sub-screens open as a right-side drawer instead of full screen.
+
+  Moment (prototype bar at the top): Planning - On the day - After. One DOM, CSS `order`.
+
+  Colours, radii and font are read off the live page's own CSS custom properties
+  (--sn-*, --m-*) on 2026-09-22. Every figure, name, label and destination is real
+  unless wrapped in [SQUARE BRACKETS].
+
+  RULINGS HONOURED (see report):
+   - 2026-07-13 owner override: dashboard cells EXPAND IN PLACE. The "Around your event"
+     band expands inline; it is NOT a stretched link and NOT a drawer.
+   - 2026-07-12 council: STATUS -> ACT -> NAVIGATE; decisions above, journey rail below
+     the band; inbox is not a decision; ONE global vendor-masking note; no paywall teaser.
+-->
+<style>
+:root{
+  /* read off the live page 2026-09-22 */
+  --ink:#2C2A29; --ink-2:#6E6A62; --ink-3:#8A857B; --ink-4:#A09A8E;
+  --line:#E1DCD1; --line-2:#EDE8DE; --soft:#F4F2EC; --page:#FFFFFF; --paper:#FBFAF7;
+  --gold:#8A6B39; --gold-2:#A9834B; --gold-3:#CBA766; --gold-100:#F3ECDF;
+  --cta:#C24E25; --cta-2:#B04722;
+  --night:#17160F; --night-card:#1E2229; --night-ink:#FBFAF7; --night-2:#B6B9BE; --night-gold:#CBA766; --night-line:#3A372C;
+  --ok:#5E7C52; --ok-deep:#4F6B4A; --ok-soft:#E9EEE3;
+  --warn:#B77E2E; --warn-deep:#7A5119; --warn-soft:#F6EAD2;
+  --link:#3B4E67;
+  --r-xl:18px; --r-lg:14px; --r-md:10px; --r-sm:6px; --r-pill:999px;
+  --sh-tile:0 1px 2px rgba(40,34,24,.05),0 18px 40px -26px rgba(30,26,18,.4);
+  --sh-sm:0 1px 2px rgba(30,26,18,.06);
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{font-family:'Hanken Grotesk',ui-sans-serif,system-ui,sans-serif;background:var(--page);color:var(--ink);-webkit-font-smoothing:antialiased;font-size:15px}
+button{font-family:inherit;cursor:pointer;color:inherit}
+h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.015em}
+a{color:inherit}
+
+/* ---------- prototype bar ---------- */
+.proto{position:sticky;top:0;z-index:60;display:flex;gap:8px;align-items:center;padding:8px 16px;background:#EDEAE4;font-size:12px;color:var(--ink-2);flex-wrap:wrap}
+.proto b{font-weight:700;color:var(--ink)}
+.proto .pill{height:30px}
+
+.pill{height:34px;padding:0 13px;border-radius:var(--r-pill);border:1px solid var(--line);background:#fff;font-size:13px;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.pill[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+
+/* ---------- shell ---------- */
+.shell-top,.shell-rail{display:none}
+.app{display:block}
+
+/* ---------- page head ---------- */
+.page-head{padding:14px 16px 2px}
+.page-head h1{font-size:23px;line-height:1.15}
+.status{display:block;margin-top:4px;font-size:13.5px;color:var(--ink-2)}
+.status b{color:var(--ink);font-weight:700}
+
+.layout{display:flex;flex-direction:column;gap:22px;padding:14px 16px 96px}
+.sec{display:flex;flex-direction:column;gap:9px}
+.sec-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sec h2{font-size:16.5px}
+.count{font-size:12px;color:var(--ink-2);font-weight:600}
+.muted{color:var(--ink-2)}
+.small{font-size:12.5px;color:var(--ink-2)}
+.eyebrow{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700}
+
+/* cards + rows */
+.card{border:1px solid var(--line);border-radius:var(--r-lg);background:#fff;padding:14px 16px;display:flex;flex-direction:column;gap:9px;box-shadow:var(--sh-sm)}
+.rows{border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;background:#fff;box-shadow:var(--sh-sm)}
+.row{min-height:52px;width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border:0;border-bottom:1px solid var(--line-2);background:#fff;font-size:14.5px;text-align:left}
+.rows .row:last-child{border-bottom:0}
+.row .v{color:var(--ink-2);font-size:13.5px;white-space:nowrap}
+.row .v.gold{color:var(--gold)} .row .v.cta{color:var(--cta);font-weight:600}
+.row .l{min-width:0;display:flex;flex-direction:column;gap:2px}
+.row .l b{font-weight:600}
+.row .l span{font-size:12.5px;color:var(--ink-2)}
+.lone{border:1px solid var(--line);border-radius:var(--r-lg);background:#fff}
+.btn{height:44px;border:0;border-radius:var(--r-pill);background:var(--cta);color:#fff;font-size:14px;font-weight:700;padding:0 18px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn.gold{background:var(--gold-2)}
+.btn.ghost{background:#fff;border:1px solid var(--gold-2);color:var(--gold);height:38px;font-size:13.5px}
+.btn.dark{background:var(--ink)}
+.btn.sm{height:36px;font-size:13px;padding:0 14px}
+.chip{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:var(--r-pill);font-size:11px;font-weight:700;letter-spacing:.02em}
+.chip.warn{background:var(--warn-soft);color:var(--warn-deep)}
+.chip.ok{background:var(--ok-soft);color:var(--ok-deep)}
+.chip.gold{background:var(--gold-100);color:var(--gold)}
+.chip.cta{background:#FBEAE3;color:var(--cta-2)}
+.udot{width:7px;height:7px;border-radius:var(--r-pill);background:var(--warn);flex:none}
+.num{font-size:11px;width:22px;height:22px;border-radius:var(--r-pill);background:var(--ink);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;flex:none}
+
+/* ---------- THE DAY (obsidian focal) ---------- */
+.day{background:var(--night);color:var(--night-ink);border-radius:var(--r-xl);padding:18px;display:flex;flex-direction:column;gap:14px}
+.day .eyebrow{color:var(--night-gold)}
+.day .date{font-size:24px;font-weight:700;line-height:1.1}
+.day .sub{font-size:12.5px;color:var(--night-2)}
+.day .cdrow{display:flex;align-items:baseline;gap:8px}
+.day .cd{font-size:46px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.bar{height:5px;border-radius:var(--r-pill);background:rgba(255,255,255,.14);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--night-gold)}
+.day .barlab{font-size:11.5px;color:var(--night-2)}
+.day .barlab b{color:var(--night-gold)}
+.watch{border-top:1px solid var(--night-line);padding-top:12px;display:flex;flex-direction:column;gap:8px}
+.watch .wrow{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;border:0;background:transparent;color:var(--night-ink);padding:0;text-align:left;font-size:13.5px}
+.watch .wrow .t{display:flex;align-items:center;gap:8px;min-width:0}
+.dot{width:7px;height:7px;border-radius:var(--r-pill);background:var(--night-gold);flex:none}
+
+/* ---------- vitals ---------- */
+.vitals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.vital{border:1px solid var(--line);border-radius:var(--r-lg);background:#fff;padding:11px 12px;display:flex;flex-direction:column;gap:3px;text-align:left;box-shadow:var(--sh-sm)}
+.vital .k{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.vital .n{font-size:21px;font-weight:800;letter-spacing:-.02em}
+.vital .d{font-size:11.5px;color:var(--ink-2);line-height:1.3}
+.vital .seg{display:flex;height:4px;border-radius:var(--r-pill);overflow:hidden;background:var(--line-2);margin-top:3px}
+.vital .seg i{display:block;height:100%}
+
+/* ---------- needs you ---------- */
+.need{display:flex;align-items:center;gap:11px;padding:12px 14px;border-bottom:1px solid var(--line-2);background:#fff}
+.rows .need:last-child{border-bottom:0}
+.need .l{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.need .l b{font-size:14.5px;font-weight:700}
+.need .l span{font-size:12.5px;color:var(--ink-2)}
+.need .meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.need .btn{flex:none}
+
+/* ---------- band (expand in place) ---------- */
+.band .bcard{border:1px solid var(--line);border-radius:var(--r-lg);background:#fff;overflow:hidden;box-shadow:var(--sh-sm)}
+.band .bhead{width:100%;display:flex;align-items:center;gap:10px;padding:12px 14px;border:0;background:#fff;text-align:left}
+.band .bhead .l{flex:1;min-width:0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.band .bhead b{font-size:14.5px;font-weight:700}
+.band .bhead .c{font-size:12.5px;color:var(--ink-2)}
+.band .chev{transition:transform .18s;flex:none;color:var(--ink-3)}
+.band .bhead[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.band .bbody{border-top:1px solid var(--line-2);padding:10px 14px 12px;display:flex;flex-direction:column;gap:8px}
+.mini{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13.5px}
+.mini .n{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:4px}
+.foot a{font-size:13px;font-weight:700;color:var(--link);text-decoration:none}
+
+/* ---------- progress rail ---------- */
+.rail{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.stage{flex:none;min-width:104px;border:1px solid var(--line);border-radius:var(--r-lg);background:#fff;padding:9px 10px;display:flex;flex-direction:column;gap:5px;text-align:left}
+.stage[aria-pressed="true"]{border-color:var(--gold-2);background:var(--gold-100)}
+.stage b{font-size:13px;font-weight:700}
+.stage .p{font-size:11px;color:var(--ink-2)}
+.stage .bar{height:4px;background:var(--line-2)}
+.stage .bar i{background:var(--gold-2)}
+.here{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-weight:800}
+
+/* ---------- moment blocks ---------- */
+.compact{display:none}
+.onlyday,.onlyafter{display:none}
+body.is-day .onlyday{display:flex} body.is-after .onlyafter{display:flex}
+body.is-day .notday{display:none} body.is-after .notafter{display:none}
+/* on the day + after, the planning stack folds to one line each */
+body.is-day .fold .full,body.is-after .fold .full{display:none}
+body.is-day .fold .compact,body.is-after .fold .compact{display:flex}
+
+.rightcol{display:contents}
+body.is-after .vital[data-k="guests"],
+body.is-after .vital[data-k="papic"],
+body.is-after .vital[data-k="next"]{display:none}
+body.is-after .vitals{grid-template-columns:minmax(0,1fr)}
+/* ORDER - one DOM, reordered by moment */
+.s-day{order:1}.s-need{order:2}.s-coming{order:3}.s-vitals{order:4}.s-band{order:5}.s-progress{order:6}
+.s-now{order:0}.s-wrap{order:0}
+body.is-day .s-now{order:1} body.is-day .s-day{order:2} body.is-day .s-need{order:3} body.is-day .s-band{order:4}
+body.is-day .s-coming{order:5} body.is-day .s-vitals{order:6} body.is-day .s-progress{order:7}
+body.is-after .s-wrap{order:1} body.is-after .s-band{order:2} body.is-after .s-vitals{order:3} body.is-after .s-progress{order:4}
+body.is-after .s-need{order:5} body.is-after .s-coming{order:6} body.is-after .s-day{order:7}
+
+/* ---------- panel ---------- */
+.scrim{position:fixed;inset:0;background:rgba(23,22,15,.45);z-index:70;display:none}
+.panel{position:fixed;inset:0;background:#fff;z-index:71;display:none;flex-direction:column}
+.open .scrim{display:block} .open .panel{display:flex}
+.panel-head{display:flex;align-items:center;gap:4px;padding:10px 14px 8px 6px;border-bottom:1px solid var(--line-2)}
+.panel-head .t{flex:1;font-size:17px;font-weight:700}
+.panel-body{flex:1;overflow-y:auto;padding:14px 16px 32px;display:flex;flex-direction:column;gap:10px}
+.icon-btn{width:42px;height:42px;border:0;background:transparent;display:inline-flex;align-items:center;justify-content:center;border-radius:var(--r-pill);flex:none}
+.icon-btn.ring{border:1px solid var(--line);background:#fff;width:34px;height:34px}
+.toast{position:fixed;left:16px;right:16px;bottom:18px;z-index:80;border-radius:var(--r-lg);background:var(--ink);color:#fff;padding:13px 15px;font-size:13.5px;display:none;justify-content:space-between;align-items:center;gap:12px}
+.toast.on{display:flex}
+.toast button{border:0;background:transparent;color:var(--gold-3);font-weight:700}
+
+/* bottom bar (phone only, the real one) */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;align-items:center;justify-content:space-around;height:62px;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-top:1px solid var(--line-2);font-size:10.5px;color:var(--ink-3)}
+.tabbar span{display:flex;flex-direction:column;align-items:center;gap:3px}
+.tabbar span.on{color:var(--gold)}
+.tabbar i{width:18px;height:18px;border-radius:var(--r-sm);background:currentColor;opacity:.75;display:block}
+
+/* ---------- DESKTOP ---------- */
+@media (min-width:1024px){
+  body{background:var(--paper)}
+  .tabbar{display:none}
+  .shell-top{display:flex;align-items:center;gap:16px;height:56px;padding:0 22px;background:#fff;border-bottom:1px solid var(--line-2);position:sticky;top:46px;z-index:40}
+  .shell-top .brand{font-weight:800;letter-spacing:.2em;font-size:13px}
+  .shell-top .search{flex:1;max-width:460px;height:36px;border:1px solid var(--line);border-radius:var(--r-pill);display:flex;align-items:center;padding:0 14px;color:var(--ink-4);font-size:13px}
+  .shell-top .me{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-2)}
+  .app{display:grid;grid-template-columns:186px 1fr}
+  .shell-rail{display:flex;flex-direction:column;gap:3px;padding:16px 12px;border-right:1px solid var(--line-2);background:#fff;min-height:calc(100vh - 102px);font-size:13px;color:var(--ink-2);position:sticky;top:102px;align-self:start;max-height:calc(100vh - 102px);overflow:auto}
+  .shell-rail em{font-style:normal;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-4);font-weight:700;padding:12px 8px 4px}
+  .shell-rail span{padding:7px 8px;border-radius:var(--r-md);display:flex;justify-content:space-between}
+  .shell-rail span.on{background:var(--gold-100);color:var(--gold);font-weight:700}
+  .main{max-width:1180px;width:100%;margin:0 auto;padding:4px 28px}
+  .page-head{padding:20px 0 4px}
+  .page-head h1{font-size:28px}
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;column-gap:28px;row-gap:26px;padding:10px 0 60px;align-items:start}
+  .layout > .sec{grid-column:1}
+  .rightcol{display:flex;flex-direction:column;gap:12px;grid-column:2;grid-row:1 / span 10;position:sticky;top:120px;align-self:start}
+  .rightcol .sec{gap:9px}
+  .rightcol .sec-head h2{font-size:14px}
+  .vitals{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .band .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .wrapgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .nowgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .panel{inset:0 0 0 auto;width:420px;box-shadow:-8px 0 24px rgba(23,22,15,.10)}
+  .toast{left:auto;right:22px;width:340px}
+  .stage{min-width:0;flex:1}
+  .rail{overflow:visible}
+}
+@media (max-width:1023px){
+  .wrapgrid,.nowgrid{display:flex;flex-direction:column;gap:9px}
+  .band .grid2{display:flex;flex-direction:column;gap:9px}
+}
+</style>
+</head>
+<body class="is-planning">
+
+<div class="proto" role="group" aria-label="Prototype controls">
+  <b>Prototype</b>
+  <button class="pill" data-moment="planning" aria-pressed="true">Planning</button>
+  <button class="pill" data-moment="day" aria-pressed="false">On the day</button>
+  <button class="pill" data-moment="after" aria-pressed="false">After</button>
+  <span style="margin-left:auto">Not part of the app</span>
+</div>
+
+<div class="shell-top">
+  <span class="brand">SETNAYAN</span>
+  <span class="search">Search events, people, vendors</span>
+  <span class="me"><span class="pill" style="background:var(--cta);border-color:var(--cta);color:#fff">+ Create event</span> Ice Casasola</span>
+</div>
+
+<div class="app">
+  <nav class="shell-rail" aria-label="Event menu">
+    <span style="color:var(--ink-3)">&larr; Back to events</span>
+    <em>Indalecio &amp; Claire</em>
+    <em>Plan</em>
+    <span class="on">Overview</span>
+    <span>Guests <b style="font-weight:600;color:var(--ink-4)">81</b></span>
+    <span>Your Team <b style="font-weight:600;color:var(--ink-4)">25</b></span>
+    <em>Go live</em>
+    <span>Event Hub Controller</span>
+    <em>Around the event</em>
+    <span>Personalisation</span>
+    <span>Hosts</span>
+    <span>Schedule</span>
+    <span>Seat plan</span>
+    <span>Budget</span>
+  </nav>
+
+  <div class="main">
+    <div class="page-head">
+      <h1 id="pageTitle">Kumusta, Indalecio &amp; Claire</h1>
+      <span class="status" id="statusLine"></span>
+    </div>
+
+    <div class="layout">
+
+      <!-- ═══ ON THE DAY ONLY - what is happening now ═══ -->
+      <section class="sec s-now onlyday" aria-label="Right now">
+        <div class="sec-head"><h2>Right now</h2><button class="pill" data-open="close">Close out the day</button></div>
+        <div class="card" style="background:var(--night);color:var(--night-ink);border:0">
+          <span class="eyebrow" style="color:var(--night-gold)">Happening now</span>
+          <b style="font-size:19px">[Reception &middot; dinner service]</b>
+          <span class="sub" style="font-size:12.5px;color:var(--night-2)">Next: [First dance &middot; 8:40 PM]</span>
+        </div>
+        <div class="nowgrid">
+          <button class="row lone" data-open="live"><span class="l"><b>Live desk</b><span>Announcements &amp; the wall</span></span><span class="v">&rsaquo;</span></button>
+          <button class="row lone" data-open="table"><span class="l"><b>Your table</b><span>[Head table &middot; 12]</span></span><span class="v">&rsaquo;</span></button>
+          <button class="row lone" data-open="wall"><span class="l"><b>Photo wall</b><span>[live]</span></span><span class="v">&rsaquo;</span></button>
+          <button class="row lone" data-open="prog"><span class="l"><b>Programme</b><span>9 blocks</span></span><span class="v">&rsaquo;</span></button>
+          <button class="row lone" data-open="broadcast"><span class="l"><b>Coordinator</b><span>[no message yet]</span></span><span class="v">&rsaquo;</span></button>
+          <button class="row lone" data-open="help"><span class="l"><b>Get help</b><span>Same-day suppliers</span></span><span class="v cta">&rsaquo;</span></button>
+        </div>
+      </section>
+
+      <!-- ═══ AFTER ONLY - that's a wrap ═══ -->
+      <section class="sec s-wrap onlyafter" aria-label="Looking back">
+        <h2>That&rsquo;s a wrap &mdash; Friday, December 18</h2>
+        <div class="wrapgrid">
+          <button class="row lone" data-open="wrapstory" style="border-color:var(--cta);background:#FDF6F3">
+            <span class="l"><b>Write your story</b><span>[not written yet]</span></span><span class="v cta">Start &rsaquo;</span></button>
+          <button class="row lone" data-toast="Opens /galleries"><span class="l"><b>Photos</b><span>[n] from cameras &amp; guests</span></span><span class="v">&rsaquo;</span></button>
+          <button class="row lone" data-toast="Opens /guests"><span class="l"><b>Guests</b><span>81 &middot; [n] checked in</span></span><span class="v">&rsaquo;</span></button>
+          <button class="row lone" data-toast="Opens /vendors?tab=build"><span class="l"><b>Your team</b><span>2 suppliers &middot; leave a review</span></span><span class="v">&rsaquo;</span></button>
+          <button class="row lone" data-toast="Opens /suite"><span class="l"><b>Suite</b><span>3 services</span></span><span class="v">&rsaquo;</span></button>
+          <button class="row lone" data-toast="Opens your event page"><span class="l"><b>Your page</b><span>[/slug] stays live</span></span><span class="v">&rsaquo;</span></button>
+        </div>
+      </section>
+
+      <!-- ═══ RIGHT COLUMN on desktop · plain sections in the phone flow ═══ -->
+      <aside class="rightcol">
+      <section class="sec s-day" aria-label="The wedding day">
+        <div class="day">
+          <div>
+            <span class="eyebrow">The wedding day</span>
+            <div class="date" style="margin-top:5px">Friday, December 18</div>
+            <div class="sub">The date is locked</div>
+          </div>
+          <div>
+            <div class="cdrow"><span class="cd" id="cdNum">87</span><span class="sub" id="cdWord">days to go</span></div>
+            <div class="bar" style="margin-top:10px"><i style="width:8%"></i></div>
+            <div class="barlab" style="margin-top:6px"><b>8%</b> locked in</div>
+          </div>
+          <div class="watch notafter">
+            <button class="wrow" data-open="watch">
+              <span class="t"><span class="dot"></span><span>Sai&rsquo;s watch</span></span>
+              <span class="sub">1 flag &rsaquo;</span>
+            </button>
+            <span class="sub" style="font-size:11.5px">Two things land at 8:00 AM on Dec 18.</span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ═══ YOUR NUMBERS ═══ -->
+      <section class="sec s-vitals" aria-label="Your numbers">
+        <div class="sec-head"><h2>Your numbers</h2></div>
+        <div class="vitals" id="vitals"></div>
+      </section>
+      </aside>
+
+      <!-- ═══ NEEDS YOU - the ONE canonical action list ═══ -->
+      <section class="sec s-need fold" aria-label="Needs you">
+        <div class="sec-head full"><h2>Needs you</h2><span class="count" id="needCount">4</span></div>
+        <div class="rows full" id="needRows"></div>
+        <button class="row lone compact" data-open="needs"><span class="l"><b>Needs you</b></span><span class="v" id="needCompact">4 open &rsaquo;</span></button>
+      </section>
+
+      <!-- ═══ COMING UP - dates, not decisions ═══ -->
+      <section class="sec s-coming fold" aria-label="Coming up">
+        <div class="sec-head full"><h2>Coming up</h2><span class="count">6 dates</span></div>
+        <div class="rows full" id="comingRows"></div>
+        <div class="foot full"><span class="small">Checklist 7% done</span><a href="#" data-toast="Opens /checklist">Full checklist &rarr;</a></div>
+        <button class="row lone compact" data-open="coming"><span class="l"><b>Coming up</b></span><span class="v">6 dates &rsaquo;</span></button>
+      </section>
+
+
+      <!-- ═══ AROUND YOUR EVENT - expands in place (owner ruling 2026-07-13) ═══ -->
+      <section class="sec s-band band" aria-label="Around your event">
+        <div class="sec-head"><h2>Around your event</h2></div>
+        <div class="grid2" id="bandCards"></div>
+        <div class="foot">
+          <span class="small">Suppliers always appear by company.</span>
+          <a href="#" data-toast="Opens /activity">Recent activity &rarr;</a>
+        </div>
+      </section>
+
+      <!-- ═══ PROGRESS ═══ -->
+      <section class="sec s-progress" aria-label="Progress">
+        <div class="sec-head"><h2>Progress</h2><span style="display:flex;align-items:center;gap:6px">
+          <span class="count" id="stageNow">Inviting &middot; 52%</span>
+          <button class="icon-btn ring" data-step="-1" aria-label="Previous stage">&larr;</button>
+          <button class="icon-btn ring" data-step="1" aria-label="Next stage">&rarr;</button>
+        </span></div>
+        <div class="rail" id="rail" role="group" aria-label="Stages"></div>
+        <div class="card" id="stageCard"></div>
+      </section>
+
+
+    </div>
+  </div>
+</div>
+
+<nav class="tabbar" aria-label="Bottom">
+  <span class="on"><i></i>Overview</span><span><i></i>Guests</span><span><i></i>Your Team</span><span><i></i>Suite</span>
+</nav>
+
+<div id="panelWrap">
+  <div class="scrim" id="scrim"></div>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="panelTitle">
+    <div class="panel-head">
+      <button class="icon-btn" id="panelBack" aria-label="Back"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <span class="t" id="panelTitle"></span><span class="muted" id="panelMeta" style="font-size:13px;padding-right:6px"></span>
+    </div>
+    <div class="panel-body" id="panelBody"></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"><span id="toastText"></span><button id="toastOk">OK</button></div>
+
+<script>
+(() => {
+  /* ───────── real data, read off the live page 2026-09-22 ─────────
+     Event 044f7e64 "Indalecio & Claire" · Fri 18 Dec · 87 days out · Setnayan AI active.
+     [SQUARE BRACKETS] = not sourced; see the report. */
+
+  const NEEDS = [
+    { id:'coord', title:'Lock your coordinator', sub:'Nothing booked · overdue by 278 days',
+      cta:'Browse', to:'/explore?tile=coordinator&from=plan', chip:['warn','overdue'], kind:'book' },
+    { id:'pay',   title:'Papic Guest 500', sub:'Order placed · ref SNCNJ1E3Y8',
+      cta:'Settle', to:'/orders', chip:['cta','₱350'], kind:'pay' },
+    { id:'pick',  title:'Logistics & misc', sub:'2 options saved · none locked',
+      cta:'Compare', to:'/vendors', chip:['gold','2 saved'], kind:'pick' },
+    { id:'rsvp',  title:'77 guests to chase', sub:'4 of 81 have replied',
+      cta:'Open', to:'/guests', chip:null, kind:'chase' },
+  ];
+
+  const COMING = [
+    ['18 Oct','Book your Accommodation','/vendors','typical: 2 months before'],
+    ['18 Oct','Book your Logistics & Misc','/vendors','typical: 2 months before'],
+    ['19 Oct','Pre-Cana seminar cutoff','/contracts','parish rule: 60 days before'],
+    ['18 Nov','Book your Crew Meals','/vendors','typical: 1 month before'],
+    ['18 Dec','Hair & makeup / preparations','/schedule','12:00 AM – 12:00 PM'],
+    ['18 Dec','Vendor ingress & styling','/schedule','2:00 AM – 1:00 PM'],
+  ];
+
+  const VITALS = [
+    { k:'Guests', n:'4', d:'attending · 77 to reply', to:'/guests',
+      seg:[['#5E7C52',5],['#B77E2E',95]] },
+    { k:'Budget', n:'₱26,499', d:'committed of ₱2,250,000', to:'/budget', seg:[['#8A6B39',1],['#EDE8DE',99]] },
+    { k:'Papic',  n:'100,050', d:'shots ready · 5 cameras out', to:'/studio/papic', note:'enough for your event' },
+    { k:'Next',   n:'18 Dec', d:'Hair & makeup / preparations', to:'/schedule?view=journey' },
+  ];
+
+  const BAND = [
+    { id:'hosts', name:'Hosts', count:'1 account', cta:['Add a host','/hosts'],
+      rows:[['You','host']], empty:'Invite your partner, family or a coordinator.' },
+    { id:'team', name:'Your team', count:'2 of 25 booked', cta:['Manage','/vendors'],
+      rows:[['Seda Vertis North','venue · contracted'],
+            ['Santuario de San Vicente de Paul Parish & Shrine of the Poor','religious venue · contracted']] },
+    { id:'threads', name:'Conversations', count:'1 unread', cta:['Open threads','/messages'],
+      rows:[['[Supplier thread]','1 unread']], flag:true },
+    { id:'services', name:'Your services', count:'3 orders', cta:['Open orders','/orders'],
+      rows:[['Papic Guest 500','payment pending'],['Setnayan AI','active'],['Papic Guest 100k','active']] },
+    { id:'sched', name:'Schedule', count:'9 blocks', cta:['See full schedule','/schedule?view=journey'],
+      rows:[['Hair & makeup / preparations','18 Dec · pre-ceremony'],
+            ['Vendor ingress & styling','18 Dec · pre-ceremony'],
+            ['Guests arrive','18 Dec · pre-ceremony'],
+            ['Ceremony','18 Dec · ceremony'],
+            ['+5 more blocks','']] },
+  ];
+
+  const STAGES = [
+    ['Dreaming',80],['Booking',8],['Inviting',52],['Finalizing',33],['Wedding day',0],['After',0],
+  ];
+  const STAGE_DETAIL = {
+    2:{ done:['Guest list built — 81 invited','RSVPs coming in — 4 of 81 answered'], todo:[],
+        note:'4 attending so far — RSVPs typically settle in about 6 weeks.' },
+  };
+  const WATCH = 'Two things land on Fri, Dec 18, 8:00 AM: Hair & makeup / preparations and Vendor ingress & styling. That’s a clash — want to resolve it now?';
+
+  /* ───────── state ───────── */
+  const S = { moment:'planning', open:{ team:false, services:false, sched:false, hosts:false, threads:false },
+              stage:2, panel:null, done:{} };
+  const $ = (id) => document.getElementById(id);
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const toast = (t) => { $('toastText').textContent = t; $('toast').classList.add('on'); };
+  $('toastOk').onclick = () => $('toast').classList.remove('on');
+  const live = () => NEEDS.filter((n) => !S.done[n.id]);
+
+  /* ───────── render ───────── */
+  function render() {
+    document.body.className = 'is-' + S.moment;  // 'day'/'after' alone would collide with the .day card class
+    document.querySelectorAll('[data-moment]').forEach((b) =>
+      b.setAttribute('aria-pressed', String(b.dataset.moment === S.moment)));
+
+    const n = live().length;
+    const stat = {
+      planning: '<b>87 days</b> · 8% locked in · <b>' + n + '</b> need you',
+      day:      '<b>Today</b> · [Reception · dinner service] · 9 blocks',
+      after:    '<b>Friday, December 18</b> · that’s a wrap · 1 thing left',
+    }[S.moment];
+    $('statusLine').innerHTML = stat;
+    $('cdNum').textContent = S.moment === 'planning' ? '87' : S.moment === 'day' ? '0' : '—';
+    $('cdWord').textContent = S.moment === 'planning' ? 'days to go' : S.moment === 'day' ? 'it’s today' : 'it happened';
+    $('needCount').textContent = n ? n : 'all clear';
+    $('needCompact').textContent = (n ? n + ' open' : 'all clear') + ' ›';
+    $('stageNow').textContent = STAGES[S.stage][0] + ' · ' + STAGES[S.stage][1] + '%';
+
+    /* needs you */
+    $('needRows').innerHTML = n ? live().map((x) =>
+      '<div class="need"><span class="num">' + (live().indexOf(x) + 1) + '</span>' +
+      '<span class="l"><b>' + esc(x.title) + '</b><span class="meta">' +
+        (x.chip ? '<span class="chip ' + x.chip[0] + '">' + esc(x.chip[1]) + '</span>' : '') +
+        esc(x.sub) + '</span></span>' +
+      '<button class="btn sm ' + (x.kind === 'pay' ? '' : 'gold') + '" data-need="' + x.id + '">' + esc(x.cta) + '</button></div>'
+    ).join('') : '<div class="need"><span class="l"><b>Nothing needs you today.</b><span>Next date: 18 Oct · Accommodation</span></span></div>';
+
+    /* coming up */
+    $('comingRows').innerHTML = COMING.map(([d, t, to, hint]) =>
+      '<button class="row" data-to="' + to + '"><span class="l"><b>' + esc(t) + '</b><span>' + esc(hint) + '</span></span>' +
+      '<span class="v">' + d + ' ›</span></button>').join('');
+
+    /* vitals */
+    $('vitals').innerHTML = VITALS.map((v) =>
+      '<button class="vital" data-k="' + v.k.toLowerCase() + '" data-to="' + v.to + '"><span class="k">' + esc(v.k) + '</span>' +
+      '<span class="n">' + esc(v.n) + '</span><span class="d">' + esc(v.d) + '</span>' +
+      (v.seg ? '<span class="seg">' + v.seg.map(([c, w]) => '<i style="background:' + c + ';width:' + w + '%"></i>').join('') + '</span>' : '') +
+      (v.note ? '<span class="d" style="color:var(--ok-deep)">' + esc(v.note) + '</span>' : '') +
+      '</button>').join('');
+
+    /* band - expand in place */
+    $('bandCards').innerHTML = BAND.map((b) => {
+      const on = !!S.open[b.id];
+      return '<div class="bcard"><button class="bhead" data-band="' + b.id + '" aria-expanded="' + on + '">' +
+        '<span class="l"><b>' + esc(b.name) + '</b><span class="c">' + esc(b.count) + '</span>' +
+        (b.flag ? '<span class="udot" aria-hidden="true"></span>' : '') + '</span>' +
+        '<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>' +
+        (on ? '<div class="bbody">' + b.rows.map(([nm, meta]) =>
+          '<span class="mini"><span class="n">' + esc(nm) + '</span><span class="small">' + esc(meta) + '</span></span>').join('') +
+          '<div class="foot" style="border-top:1px solid var(--line-2);margin-top:2px"><span></span>' +
+          '<a href="#" data-to="' + b.cta[1] + '">' + esc(b.cta[0]) + ' &rarr;</a></div></div>' : '') +
+      '</div>';
+    }).join('');
+
+    /* progress */
+    $('rail').innerHTML = STAGES.map(([nm, p], i) =>
+      '<button class="stage" data-stage="' + i + '" aria-pressed="' + (i === S.stage) + '">' +
+      (i === S.stage ? '<span class="here">You are here</span>' : '') +
+      '<b>' + esc(nm) + '</b><span class="bar"><i style="width:' + p + '%"></i></span>' +
+      '<span class="p">' + p + '% complete</span></button>').join('');
+    const d = STAGE_DETAIL[S.stage];
+    $('stageCard').innerHTML = d
+      ? '<b style="font-size:14px">' + esc(STAGES[S.stage][0]) + '</b>' +
+        d.done.map((t) => '<span class="mini"><span class="n">✓ ' + esc(t) + '</span><span class="chip ok">Set na ’yan</span></span>').join('') +
+        (d.todo.length ? d.todo.map((t) => '<span class="mini"><span class="n">' + esc(t) + '</span></span>').join('')
+                       : '<span class="small">Nothing left in this stage.</span>') +
+        '<span class="small">' + esc(d.note) + '</span>'
+      : '<b style="font-size:14px">' + esc(STAGES[S.stage][0]) + '</b><span class="small">[' + STAGES[S.stage][1] + '% — stage detail not captured for this stage]</span>';
+
+    renderPanel();
+  }
+
+  /* ───────── panel ───────── */
+  const PANELS = {
+    watch: () => ['Sai’s watch', '1 flag',
+      '<div class="card"><span class="eyebrow">Guard</span><span style="font-size:14px;line-height:1.4">' + esc(WATCH) + '</span>' +
+      '<div style="display:flex;gap:8px"><button class="btn sm" data-act="resolve">Resolve the clash</button>' +
+      '<button class="btn sm ghost" data-act="close">Not now</button></div></div>' +
+      '<span class="small">Sai fires a few alerts a week at most — deduped, most urgent first.</span>'],
+    needs: () => ['Needs you', live().length + ' open',
+      live().map((x) => '<button class="row lone" data-need="' + x.id + '"><span class="l"><b>' + esc(x.title) +
+        '</b><span>' + esc(x.sub) + '</span></span><span class="v gold">' + esc(x.cta) + ' ›</span></button>').join('')
+      || '<span class="small">All clear.</span>'],
+    coming: () => ['Coming up', '6 dates',
+      COMING.map(([d, t, to, hint]) => '<button class="row lone" data-to="' + to + '"><span class="l"><b>' +
+        esc(t) + '</b><span>' + esc(hint) + '</span></span><span class="v">' + d + ' ›</span></button>').join('')],
+    close: () => ['Close out the day', '',
+      '<span style="font-size:14.5px;line-height:1.45">Marks the celebration finished. Your planning tools stay, and the page turns to the looking-back view.</span>' +
+      '<button class="btn" data-act="wrap">Close out the day</button>' +
+      '<span class="small">It also flips on its own at 06:00 the morning after.</span>'],
+    live: () => ['Live desk', '', '<span class="small">[Opens /live — announcements, the photo wall and what is happening now.]</span>'],
+    table: () => ['Your table', '', '<span class="small">[Head table + nearby tables — not captured; this event is 87 days out.]</span>'],
+    wall: () => ['Photo wall', '', '<span class="small">[Live wall — shows only when LIVE_WALL is owned.]</span>'],
+    prog: () => ['Programme', '9 blocks',
+      BAND[4].rows.map(([nm, meta]) => '<span class="mini"><span class="n">' + esc(nm) + '</span><span class="small">' + esc(meta) + '</span></span>').join('')],
+    broadcast: () => ['Coordinator', '', '<span class="small">[Latest coordinator broadcast + call times — none on this event.]</span>'],
+    help: () => ['Get help', '', '<span class="small">[Same-day suppliers nearest the venue — not captured.]</span>'],
+    wrapstory: () => ['Write your story', '',
+      '<span style="font-size:14.5px;line-height:1.45">Words, photos and a front page. The last thing left to do.</span>' +
+      '<button class="btn" data-toast="Opens /story">Open the story maker</button>'],
+  };
+
+  function renderPanel() {
+    const wrap = $('panelWrap');
+    wrap.classList.toggle('open', !!S.panel);
+    if (!S.panel) return;
+    const [t, m, html] = PANELS[S.panel]();
+    $('panelTitle').textContent = t; $('panelMeta').textContent = m; $('panelBody').innerHTML = html;
+  }
+
+  /* ───────── events ───────── */
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-moment],[data-band],[data-stage],[data-step],[data-open],[data-need],[data-to],[data-toast],[data-act]');
+    if (!t) return;
+    e.preventDefault();
+    const d = t.dataset;
+    if (d.moment) { S.moment = d.moment; S.panel = null; }
+    else if (d.band) S.open[d.band] = !S.open[d.band];
+    else if (d.stage) S.stage = +d.stage;
+    else if (d.step) S.stage = Math.min(STAGES.length - 1, Math.max(0, S.stage + (+d.step)));
+    else if (d.open) S.panel = d.open;
+    else if (d.need) {
+      const x = NEEDS.find((y) => y.id === d.need);
+      toast('Opens ' + x.to);
+      S.done[x.id] = true;            // so "all clear" is reachable
+      if (S.panel === 'needs' && !live().length) S.panel = null;
+    }
+    else if (d.to) toast('Opens ' + d.to);
+    else if (d.toast) toast(d.toast);
+    else if (d.act === 'wrap') { S.moment = 'after'; S.panel = null; }
+    else if (d.act === 'resolve') { toast('Opens /schedule — the two 8:00 AM blocks'); S.panel = null; }
+    else if (d.act === 'close') S.panel = null;
+    render();
+  });
+  $('panelBack').onclick = () => { S.panel = null; render(); };
+  $('scrim').onclick = () => { S.panel = null; render(); };
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && S.panel) { S.panel = null; render(); } });
+
+  render();
+})();
+</script>
+</body>
+</html>
