@@ -380,7 +380,10 @@ body.after .s-dates{order:9} body.after .s-more{order:10}
                couple cannot set, the other is an OAuth connect. Neither is a switch. -->
           <button class="row" data-open="blur"><span>Blurred faces</span><span class="v" id="blurV"></span></button>
           <button class="row" data-toast="Run of show — [6 moments, 14:00 to 23:00]"><span>Run of show</span><span class="v">›</span></button>
-          <button class="row" data-open="drive"><span>Google Drive copy</span><span class="v" id="driveV"></span></button>
+          <!-- OWNER 2026-09-22: "google drive when clicked should directly ask
+               to login your google drive account". One action, so no door in
+               front of it — the same rule as the switch-only rows above. -->
+          <button class="row" data-act="drive"><span>Google Drive copy</span><span class="v" id="driveV"></span></button>
           <button class="row" data-toast="Opens the DSLR pairing guide"><span>DSLR &amp; help</span><span class="v">›</span></button>
           <!-- Inert ON PURPOSE, as it ships: no sheet, no press. The lane is built
                and switched off behind the outstanding supplier-privacy ruling. -->
@@ -410,7 +413,45 @@ body.after .s-dates{order:9} body.after .s-more{order:10}
   // ---------- data (real where sourced) ----------
   const RUNGS = [[100,70,30],[200,140,30],[300,210,30],[400,280,30],[500,350,30],[1000,700,30],[2000,1400,30],[3000,1680,44],[4000,2240,44],[5000,2800,44],[6000,3360,44],[7000,3920,44],[10000,4500,55],[20000,7200,64],[30000,10800,64],[50000,15000,70],[100000,24000,76]];
   const LOOKS = [['ORIG','Orig','Clean & true','contrast(1.06) saturate(1.1) brightness(1.005)'],['RETRO','Retro','Warm film, fine grain','sepia(0.16) saturate(1.05) contrast(0.92) brightness(1.05)'],['MONO','Mono','Rich black & white','grayscale(1) contrast(1.24) brightness(1.04)'],['CINE','Cine','Teal & orange','contrast(1.14) saturate(1.12) brightness(0.99) hue-rotate(-6deg)'],['LOMO','Lomo','Lo-fi toy camera','saturate(1.5) contrast(1.2) brightness(1.05) hue-rotate(4deg)']];
-  const CH = ['Catch the kiss.','Catch a dip. One photo.','Catch the first yawn of the night.','Get 5+ people dancing in one frame.','Snap the best-looking plate of the night.','Find the prettiest florals in the room.','Catch the bouquet or garter toss — or the scramble.','Catch the biggest reaction of the night on somebody’s face.','Catch somebody adjusting somebody else’s collar, veil or hair.','Catch the LED wall, fairy lights, or dance-floor glow.','Catch a group all checking the same photo on one phone.'];
+  // ── THE CHALLENGE LIBRARY ───────────────────────────────────────────────────
+  // 631 prompts in 12 categories (papic_challenge_library, prod 2026-09-22). The
+  // first cut of this prototype listed ELEVEN, so 620 were unreachable.
+  // Prompts + categories are real; `picked` is a real count of DISTINCT events
+  // that armed that prompt (papic_missions.library_id).
+  // ⚠ THE COUNTS ARE THIN AND SAYING SO IS THE POINT: 72 library picks across
+  // FIVE celebrations, most-picked = 4. A "most picked" ranking on five events
+  // is noise, so the count is shown as a fact and never as a ranking.
+  const CH_LIB = 631;
+  const CH_CATS = [['stories','Tell a story'],['greeting','A message for them'],['anywhere','Wherever you are'],
+    ['couple_family','With the host'],['meet_room','With other guests'],['selfie','Just you'],
+    ['fashion_candids','What you wore'],['stories_couple','About the two of them'],['food_drinks','Food & drinks'],
+    ['decor_booth','The room'],['band_dance','Dancing & music'],['big_moments','The big moments']];
+  const CH = [
+    ['stories','Share a story about your most memorable experience with {who}. Ten seconds.',4],
+    ['stories','Share a story about the first time you met {who}. Ten seconds.',4],
+    ['greeting','Ten seconds to camera: your message for {host}.',2],
+    ['greeting','Say congratulations to {host} properly. Ten seconds.',0],
+    ['anywhere','Point the camera at whatever is on your left. No adjusting.',0],
+    ['anywhere','Whatever is on your right, right now. One shot.',0],
+    ['couple_family','Catch the newlyweds mid-kiss.',4],
+    ['couple_family','Sneak onto the floor and dance with the bride or groom. Now. Go.',4],
+    ['meet_room','Introduce yourself to somebody you have never met. Photo together.',1],
+    ['meet_room','Meet a total stranger. Selfie. Instant friend.',0],
+    ['selfie','First selfie of the night. Prove you arrived.',1],
+    ['selfie','Selfie at the door, before you even sit down.',0],
+    ['fashion_candids','Full length. Show what you wore today.',1],
+    ['fashion_candids','Best runway walk, then pose. Show the fit.',0],
+    ['stories_couple','When did you know these two were it? Ten seconds.',4],
+    ['stories_couple','Your favourite thing about the two of them together. Ten seconds.',2],
+    ['food_drinks','Raise a glass at the drinks station. Any drink counts. Clink!',2],
+    ["food_drinks","Order the couple's signature cocktail or mocktail and show it off.",2],
+    ['decor_booth','Hit the photo booth or photo wall and grab a shot.',4],
+    ['decor_booth','Pose at the main backdrop, arch, or stage.',1],
+    ['band_dance','Get 5+ people dancing in one frame.',4],
+    ['band_dance','Dance your way through the grand entrance or send-off tunnel.',2],
+    ['big_moments','The send-off or the last dance.',4],
+    ['big_moments','The petal, bubble, sparkler, or confetti toss.',2],
+  ];
   const MOMENTS = [['Midday',0],['Cocktails',0],['Entrance',1],['Dinner',0],['First dance',1],['Money dance',0]];
   const TONES = ['#8E7B62','#6B5A45','#A38B6A','#5E5446','#7D6A52','#4E4638'];
   const REV = [['[Table 4 QR]','#7D6A52'],['[Guest · Lia]','#5E5446']];
@@ -418,13 +459,15 @@ body.after .s-dates{order:9} body.after .s-more{order:10}
   const CAP = 9, POT = 50;
 
   const S = { phase:'before', dates:false, rung:0, pending:0, method:'GCash', when:'day', capOn:false, cap:20, look:'ORIG', chip:'All', kept:{}, chosen:{}, reviewed:{}, kw:{}, crew:['[Guest · Ana]','[Guest · Marco]',null,null], wall:'Mosaic', shared:true, phones:true, faces:true, hand:true, drive:false, sup:{}, vendorCh:{},
-              minOn:false, min:5, allot:{}, panel:null, pay:'pick' };
+              minOn:false, min:5, allot:{}, q:'', chq:'', chcat:'', panel:null, pay:'pick' };
   // Suppliers who handed over work, and challenges a supplier suggested. [PLACEHOLDER NAMES]
   const SUP = [['[Saysay Films]','[24 photos]'],['[Studio Marcos]','[8 photos]']];
   // Named guests. Roles drive the SUGGESTED number, exactly as suggestedAllotment()
   // does with ROLE_MULTIPLIER in lib/papic-guest-allotments.ts. [PLACEHOLDER NAMES]
-  const GUESTS = [['[Lia Ramos]','Principal sponsor',3],['[Tita Nena]','Ninang',3],['[Jun Alvarez]','Cord sponsor',2],
-                  ['[Mika Santos]','Guest',1],['[Paolo Reyes]','Guest',1],['[Bea Cruz]','Guest',1],['[Kap Danny]','Guest',1]];
+  const GUESTS = [['[Lia Ramos]','Principal sponsor',3],['[Tita Nena]','Ninang',3],['[Ninong Boy]','Ninong',3],
+                  ['[Jun Alvarez]','Cord sponsor',2],['[Grace Lim]','Veil sponsor',2],['[Ate Cha]','Candle sponsor',2],
+                  ['[Mika Santos]','Guest',1],['[Paolo Reyes]','Guest',1],['[Bea Cruz]','Guest',1],
+                  ['[Kap Danny]','Guest',1],['[Rina Dizon]','Guest',1],['[Ton Mercado]','Guest',1]];
   const GUEST_COUNT = 146;      // live guests in prod 2026-09-22
   // Guests who asked to be blurred for OTHER guests. The couple never sees a blur.
   const BLURRED = 0;            // prod 2026-09-22: 146 guests, 0 faceblock_enabled
@@ -526,7 +569,7 @@ body.after .s-dates{order:9} body.after .s-more{order:10}
     $('chCompact').textContent = picked() + ' of ' + CAP + ' ›';
 
     // gallery
-    $('chips').innerHTML = ['All','Us','Videos','Kept'].map((c) => '<button class="pill" data-chip="' + c + '" aria-pressed="' + (S.chip === c) + '">' + c + '</button>').join('');
+    $('chips').innerHTML = ['All','Us','Snippets','Kept'].map((c) => '<button class="pill" data-chip="' + c + '" aria-pressed="' + (S.chip === c) + '">' + c + '</button>').join('');
     $('grid').innerHTML = MOMENTS.map(([m, vid], i) => '<button class="tile" data-tile="' + i + '" aria-pressed="' + !!S.kept[i] + '" aria-label="Keep ' + m + ' full size" style="background:' + TONES[i] + '">' + m + (vid ? ' ▶' : '') + '</button>').join('');
     const rl = REV.filter((_, i) => !S.reviewed[i]).length;
     $('revLeft').textContent = rl ? rl + ' new ›' : 'All done ›';
@@ -544,8 +587,64 @@ body.after .s-dates{order:9} body.after .s-more{order:10}
     $('wallStyles').innerHTML = ['Mosaic','Grid','Hero','Polaroid'].map((w) => '<button class="pill" data-wall="' + w + '" aria-pressed="' + (S.wall === w) + '">' + w + '</button>').join('');
     document.querySelectorAll('[data-sw]').forEach((b) => b.setAttribute('aria-checked', String(!!S[b.dataset.sw])));
     $('blurV').textContent = (BLURRED ? BLURRED + ' guest' + (BLURRED === 1 ? '' : 's') : 'Nobody') + ' ›';
-    $('driveV').textContent = (S.drive ? 'On' : 'Connect') + ' ›';
+    $('driveV').textContent = S.drive ? 'On ›' : 'Sign in ›';
     renderPanel();
+  }
+
+  /**
+   * The rows, ordered exactly as `orderAllotmentPickerRows` ships: filter by the
+   * query, then a STABLE partition putting guests the couple has already named
+   * first. Two filters, not a comparator \u2014 the same reason the real one gives.
+   */
+  function allotRows(rest) {
+    const q = S.q.trim().toLowerCase();
+    const idx = GUESTS.map((g, i) => i);
+    const matches = q ? idx.filter((i) => GUESTS[i][0].toLowerCase().includes(q)) : idx;
+    const ordered = [...matches.filter((i) => S.allot[i] != null), ...matches.filter((i) => S.allot[i] == null)];
+    if (ordered.length === 0) {
+      return '<p class="small" style="margin:8px 0">Nobody on your list matches \u201c' + esc(S.q) + '\u201d.</p>';
+    }
+    const shown = ordered.map((i) => {
+      const [who, role, mult] = GUESTS[i];
+      const sug = Math.ceil((rest || 1) * mult);
+      const val = S.allot[i];
+      return '<div class="card" style="flex-direction:row;align-items:center;padding:10px 10px 10px 16px">'
+        + '<span style="flex:1;display:flex;flex-direction:column"><span>' + esc(who) + '</span>'
+        + '<span class="small">' + esc(role) + (val == null ? ' \u00b7 suggested ' + fmt(sug) : '') + '</span></span>'
+        + '<div class="stepper"><button class="sb" style="width:40px;height:40px" data-al="' + i + ':-5" aria-label="Less">\u2212</button>'
+        + '<span style="width:52px;display:flex;align-items:center;justify-content:center;font-weight:600">'
+        + (val == null ? '<span class="small">\u2014</span>' : fmt(val)) + '</span>'
+        + '<button class="sb" style="width:40px;height:40px" data-al="' + i + ':5" aria-label="More">+</button></div></div>';
+    }).join('');
+    const hidden = GUEST_COUNT - ordered.length;
+    return shown + (hidden > 0
+      ? '<p class="small center" style="margin:2px 0">' + fmt(hidden) + ' more on your list \u00b7 search to find anyone</p>'
+      : '');
+  }
+
+  /** The prompt rows — category chip AND free text, both filters over one list. */
+  function chRows() {
+    const q = S.chq.trim().toLowerCase();
+    const rows = CH.map((c, i) => [c, i])
+      .filter(([c]) => !S.chcat || c[0] === S.chcat)
+      .filter(([c]) => !q || c[1].toLowerCase().includes(q));
+    if (rows.length === 0) {
+      return '<p class="small" style="margin:8px 0">Nothing matches \u201c' + esc(S.chq) + '\u201d in this category.</p>';
+    }
+    const catLabel = (k) => (CH_CATS.find((c) => c[0] === k) || [null, k])[1];
+    return rows.map(([c, i]) => {
+      const on = !!S.chosen[i];
+      const full = !on && picked() >= CAP;
+      return '<button class="pick" data-ch="' + i + '" aria-pressed="' + on + '"' + (full ? ' disabled' : '') + '>'
+        + '<span style="flex:1;display:flex;flex-direction:column;gap:2px"><span>' + esc(c[1]) + '</span>'
+        + '<span class="small">' + esc(catLabel(c[0]))
+        // A count of 0 is shown as nothing, never as "0 picked" \u2014 an absence of
+        // data must not read as a verdict on the prompt.
+        + (c[2] ? ' \u00b7 ' + c[2] + ' celebration' + (c[2] === 1 ? '' : 's') + ' picked this' : '')
+        + '</span></span>'
+        + '<span class="m">' + (on ? '\u2713' : '+') + '</span></button>';
+    }).join('')
+      + '<p class="small center" style="margin:2px 0">' + fmt(CH_LIB - rows.length) + ' more \u00b7 search or pick a category</p>';
   }
 
   // ---------- render panel ----------
@@ -562,10 +661,18 @@ body.after .s-dates{order:9} body.after .s-more{order:10}
           ? '<div class="check">✓</div><p class="center" style="font-size:17px;font-weight:600;margin:0">+' + fmt(r[0]) + ' on the way</p><p class="center muted" style="margin:0">They land once we confirm payment.</p><button class="btn dark" data-act="close">Done</button>'
           : '<div class="credits" style="flex-direction:row;justify-content:space-between;font-size:15px"><span>+' + fmt(r[0]) + ' credits</span><strong>' + peso(r[1]) + '</strong></div><div class="two">' + ['GCash','BDO'].map((m) => '<button class="pick" style="justify-content:center" data-method="' + m + '" aria-pressed="' + (S.method === m) + '">' + m + '</button>').join('') + '</div><button class="btn" data-act="paid">I’ve paid ' + peso(r[1]) + '</button><span class="small center">[Payment instructions: real flow not yet captured]</span>';
         break;
-      case 'challenges':
+      case 'challenges': {
         title = 'Challenges'; meta = picked() + ' of ' + CAP;
-        html = CH.map((t, i) => { const on = !!S.chosen[i]; const full = !on && picked() >= CAP; return '<button class="pick" data-ch="' + i + '" aria-pressed="' + on + '"' + (full ? ' disabled' : '') + '><span style="flex:1">' + esc(t) + '</span><span class="m">' + (on ? '✓' : '+') + '</span></button>'; }).join('');
+        html = '<span class="small">' + fmt(CH_LIB) + ' to choose from. Pick up to ' + CAP + '.</span>'
+          + '<input id="chQ" type="search" placeholder="Search all ' + fmt(CH_LIB) + ' challenges" value="' + esc(S.chq) + '" '
+          + 'style="height:44px;border-radius:12px;border:1px solid var(--line);padding:0 14px;font:inherit;font-size:15px">'
+          + '<div class="chips" id="chCats">'
+          + '<button class="pill" data-chcat="" aria-pressed="' + (S.chcat === '') + '">All</button>'
+          + CH_CATS.map(([k, label]) => '<button class="pill" data-chcat="' + k + '" aria-pressed="' + (S.chcat === k) + '">' + esc(label) + '</button>').join('')
+          + '</div>'
+          + '<div id="chRows" style="display:flex;flex-direction:column;gap:10px">' + chRows() + '</div>';
         break;
+      }
       case 'review':
         title = 'Guest photos'; meta = REV.filter((_, i) => !S.reviewed[i]).length + ' left';
         html = '<div class="rev">' + REV.map(([who, tone], i) => '<div style="display:flex;flex-direction:column;gap:6px"><div class="tile" style="background:' + tone + ';opacity:' + (S.reviewed[i] === 'hide' ? .3 : 1) + '">' + esc(who) + '</div>' + (S.reviewed[i] ? '<span class="small center" style="height:40px;display:flex;align-items:center;justify-content:center">' + (S.reviewed[i] === 'hide' ? 'Hidden' : 'Kept') + '</span>' : '<div class="two"><button class="btn dark" style="height:40px;font-size:13px" data-rev="' + i + ':keep">Keep</button><button class="pill" style="height:40px" data-rev="' + i + ':hide">Hide</button></div>') + '</div>').join('') + '</div>';
@@ -595,21 +702,22 @@ body.after .s-dates{order:9} body.after .s-more{order:10}
         const takenA = Object.values(S.allot).reduce((a, b) => a + b, 0);
         const restHeads = GUEST_COUNT - Object.keys(S.allot).length;
         const rest = restHeads > 0 ? Math.max(0, Math.floor((POT - takenA) / restHeads)) : 0;
-        meta = Object.keys(S.allot).length + ' of ' + fmt(GUEST_COUNT);
-        html = '<span class="small">Give a guest their own number. Everyone you don’t name splits what is left — '
+        const namedN = Object.keys(S.allot).length;
+        meta = namedN ? namedN + ' named' : '';
+        html = '<span class="small">Give a guest their own number. Everyone you don\u2019t name splits what is left \u2014 '
           + '<b>' + fmt(rest) + ' each</b> right now.</span>'
-          + GUESTS.map(([who, role, mult], i) => {
-              const sug = Math.ceil((rest || 1) * mult);
-              const val = S.allot[i];
-              return '<div class="card" style="flex-direction:row;align-items:center;padding:10px 10px 10px 16px">'
-                + '<span style="flex:1;display:flex;flex-direction:column"><span>' + esc(who) + '</span>'
-                + '<span class="small">' + esc(role) + (val == null ? ' · suggested ' + fmt(sug) : '') + '</span></span>'
-                + '<div class="stepper"><button class="sb" style="width:40px;height:40px" data-al="' + i + ':-5" aria-label="Less">−</button>'
-                + '<span style="width:52px;display:flex;align-items:center;justify-content:center;font-weight:600">'
-                + (val == null ? '<span class="small">—</span>' : fmt(val)) + '</span>'
-                + '<button class="sb" style="width:40px;height:40px" data-al="' + i + ':5" aria-label="More">+</button></div></div>';
-            }).join('')
-          + (Object.keys(S.allot).length ? '<button class="pill" style="height:44px" data-act="clearallot">Clear all names</button>' : '');
+          // \u26a0 THE SHIPPED PICKER HAS THIS AND THE FIRST CUT DROPPED IT. Owner
+          // 2026-08-31: "there might be over 200 guests, and we should not list
+          // them all. or let the user search a guest from the list". It is a
+          // FILTER over guests already loaded, never a fetch.
+          + '<input id="allotQ" type="search" placeholder="Search your guest list" value="' + esc(S.q) + '" '
+          + 'style="height:44px;border-radius:12px;border:1px solid var(--line);padding:0 14px;font:inherit;font-size:15px">'
+          + '<div id="allotRows" style="display:flex;flex-direction:column;gap:10px">' + allotRows(rest) + '</div>'
+          + '<p class="small" style="margin:2px 0 0">Guests come from your guest list \u2014 '
+          + '<b>add or remove them there</b>, not here.</p>'
+          + '<button class="row lone" data-toast="Opens your guest list"><span>Open guest list</span>'
+          + '<span class="v">' + fmt(GUEST_COUNT) + ' \u203a</span></button>'
+          + (namedN ? '<button class="pill" style="height:44px" data-act="clearallot">Clear all names</button>' : '');
         break;
       }
       case 'blur':
@@ -640,10 +748,6 @@ body.after .s-dates{order:9} body.after .s-more{order:10}
       case 'screen':
         title = 'Screen code';
         html = '<p class="center muted" style="margin:24px 0 0">On the venue screen, open</p><p class="center" style="margin:0;font-weight:600">setnayan.com/wall</p><p class="center muted" style="margin:0">and enter</p><p class="center" style="margin:0;font-size:44px;font-weight:600;letter-spacing:.18em">[CODE]</p><button class="btn dark" data-act="close">Done</button>';
-        break;
-      case 'drive':
-        title = 'Google Drive';
-        html = '<p style="margin:12px 0 0;font-size:16px">A copy of every photo, in your own Drive.</p><p class="small" style="margin:0">We only see the one folder we make.</p><button class="btn" data-act="drive">' + (S.drive ? 'Connected · disconnect' : 'Connect Google Drive') + '</button>';
         break;
     }
     $('panelTitle').textContent = title; $('panelMeta').textContent = meta; $('panelBody').innerHTML = html;
@@ -682,6 +786,7 @@ body.after .s-dates{order:9} body.after .s-more{order:10}
     else if (d.open) { S.panel = d.open; }
     else if (d.toast) toast(d.toast);
     else if (d.method) S.method = d.method;
+    else if (d.chcat !== undefined) S.chcat = d.chcat;
     else if (d.ch) S.chosen[d.ch] = !S.chosen[d.ch];
     else if (d.rev) { const [i, v] = d.rev.split(':'); S.reviewed[i] = v; }
     else if (d.kw) { const [i, v] = d.kw.split(':'); S.kw[i] = v; }
@@ -690,12 +795,36 @@ body.after .s-dates{order:9} body.after .s-more{order:10}
     else if (d.cam) toast(S.crew[d.cam] ? 'Old link dead · fresh QR ready' : 'QR ready to hand over');
     else if (d.act === 'addcam') S.crew.push(null);
     else if (d.act === 'cap') S.capOn = !S.capOn;
-    else if (d.act === 'drive') { S.drive = !S.drive; toast(S.drive ? 'Drive connected' : 'Drive disconnected'); }
+    else if (d.act === 'drive') {
+      // Straight to Google. Disconnecting is the only thing that needs a
+      // second thought, so that is what keeps a confirmation.
+      if (S.drive) { S.drive = false; toast('Drive disconnected'); }
+      else { S.drive = true; toast('Opening Google sign-in… a copy of every photo lands in your Drive'); }
+    }
     else if (d.act === 'paid') { S.pay = 'sent'; S.pending += RUNGS[S.rung][0]; }
     else if (d.act === 'close') S.panel = null;
     else return;
     render();
   });
+  /*
+   * A keystroke redraws ONLY its own list. Re-rendering the whole panel would
+   * replace the <input> the person is typing into and drop the caret on every
+   * letter — which is how a search box becomes unusable while looking fine.
+   */
+  document.addEventListener('input', (e) => {
+    const t = e.target;
+    if (t.id === 'allotQ') {
+      S.q = t.value;
+      const takenA = Object.values(S.allot).reduce((a, b) => a + b, 0);
+      const heads = GUEST_COUNT - Object.keys(S.allot).length;
+      const rest = heads > 0 ? Math.max(0, Math.floor((POT - takenA) / heads)) : 0;
+      const box = $('allotRows'); if (box) box.innerHTML = allotRows(rest);
+    } else if (t.id === 'chQ') {
+      S.chq = t.value;
+      const box = $('chRows'); if (box) box.innerHTML = chRows();
+    }
+  });
+
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && S.panel) { S.panel = null; render(); } });
   render();
 })();
