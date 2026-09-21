@@ -98,6 +98,10 @@ h1,h2{margin:0;font-weight:600}
 .next .btn{background:var(--gold-2);color:var(--night);height:48px}
 
 /* credits */
+.rec{border-radius:14px;background:#fff;border:1px solid var(--line);padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.rec b{font-size:17px;font-weight:600}
+.rec .why{font-size:11px;color:var(--ink-3)}
+.rec .gap{font-size:12px;color:var(--gold);font-weight:600}
 .credits{background:var(--soft);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px}
 .credits .left strong{font-size:22px;font-weight:600;color:var(--ink)}
 .pending{font-size:13px;color:var(--gold)}
@@ -131,9 +135,32 @@ body.after .setup-sec h2.full-h{display:none}
    allotment, then everything else. Money leads because it is the thing a couple
    checks every time they open this page; the two blocks that SIZE it sit
    directly under it so the suggestion is never far from its inputs. */
-.s-credits{order:1}.s-dates{order:2}.s-guests{order:3}.s-filter{order:4}.s-challenges{order:5}.s-gallery{order:6}.s-kwento{order:7}.s-made{order:8}.s-wall{order:9}.s-more{order:10}
-body.after .s-gallery{order:1} body.after .s-kwento{order:2} body.after .s-made{order:3} body.after .s-wall{order:4} body.after .s-credits{order:5}
-body.after .s-guests{order:6} body.after .s-filter{order:7} body.after .s-challenges{order:8} body.after .s-dates{order:9} body.after .s-more{order:10}
+/* ── THE ORDER, AND WHY IT IS THIS ────────────────────────────────────────────
+   Owner set the top three: Credits + balance, Coverage, Allotment — "what it
+   costs and who gets it". The rest is grouped by WHEN YOU TOUCH IT, which is
+   what makes a long page manageable:
+
+     4-6  THE ROOM   — decided before, experienced during. Filter (the look on
+                       every photo), Challenges (what guests are asked to catch),
+                       Live wall (what the venue screen shows).
+                       🔑 Live wall moved UP from 9th. It is a SETUP job — pick a
+                       style, get the screen code — and it was sitting below the
+                       results it helps produce.
+     7-9  WHAT YOU GOT — Gallery, Kwento, Made for you. Empty before the day, so
+                       they sit under the things that fill them.
+     10   MORE       — everything you touch once or never.
+
+   After the day the two blocks swap: results lead, the room and the setup fold
+   to one line each. Same DOM, `order` only. */
+.s-credits{order:1}.s-dates{order:2}.s-guests{order:3}
+.s-filter{order:4}.s-challenges{order:5}.s-wall{order:6}
+.s-gallery{order:7}.s-kwento{order:8}.s-made{order:9}.s-more{order:10}
+/* On the day and after: what you got, then the room that is still running, then
+   the money (you can still run out mid-reception), then the setup, folded. */
+body.after .s-gallery{order:1} body.after .s-kwento{order:2} body.after .s-made{order:3}
+body.after .s-wall{order:4} body.after .s-credits{order:5}
+body.after .s-guests{order:6} body.after .s-filter{order:7} body.after .s-challenges{order:8}
+body.after .s-dates{order:9} body.after .s-more{order:10}
 
 /* ---------- panel: full screen on phone, side drawer on desktop ---------- */
 .scrim{position:fixed;inset:0;background:rgba(23,22,15,.45);z-index:40;display:none}
@@ -220,7 +247,7 @@ body.after .s-guests{order:6} body.after .s-filter{order:7} body.after .s-challe
           </div>
           <button class="btn" id="saveDates">Save dates</button>
         </div>
-        <button class="row lone" id="datesSet" hidden><span>Cameras open</span><span class="v" id="datesSummary"></span></button>
+        <button class="row lone" id="datesSet" hidden><span>Coverage</span><span class="v" id="datesSummary"></span></button>
       </section>
 
       <!-- GUESTS' SHOTS -->
@@ -264,6 +291,9 @@ body.after .s-guests{order:6} body.after .s-filter{order:7} body.after .s-challe
         <div class="credits">
           <div class="glance"><div><b>9</b><span>photos</span></div><div><b id="gCams">4</b><span>cameras</span></div><div><b id="gDays">Aug 1</b><span>event day</span></div></div>
           <div class="sec-head"><h2>Credits</h2><span class="left muted" style="font-size:14px"><strong>50</strong> left</span></div>
+          <!-- The recommendation sits ON the buy control, which is the whole
+               reason money moved to the top of the page. -->
+          <div class="rec" id="rec"></div>
           <!-- Reserved, never hidden: this block is now first, so anything that
      appears here pushes every section below it. -->
           <span class="pending note" id="pending"></span>
@@ -406,6 +436,20 @@ body.after .s-guests{order:6} body.after .s-filter{order:7} body.after .s-challe
   // clock time anywhere, so "when their event ends" is unknown to us.
   // ⚠ 2pm is THE ONE NUMBER CHOSEN HERE, not measured — see the reply.
   const CLOSES = 'Aug 2, 2pm';  // event day is Aug 1 in this mock
+
+  // ── THE RECOMMENDATION ──────────────────────────────────────────────────────
+  // NOT INVENTED HERE. Every figure is `papic_event_pool_config`, read off prod
+  // 2026-09-22 — admin-editable, live since migration 20270826385580, and the
+  // same row `lib/papic-credit-estimate.ts` already uses on the couple's Home
+  // tile. The formula is `computeEventPool`'s, unchanged:
+  //     clamp(guests x points_per_guest, floor_points, ceiling_points)
+  // 🔑 Owner 2026-08-31: "don't guess". A number that tells a couple how much to
+  // spend comes from that table or it does not ship.
+  const POOL_CFG = { pointsPerGuest: 150, floor: 5000, ceiling: 30000 };
+  const EVENT_TYPE = 'Wedding';
+  const rawRec = GUEST_COUNT * POOL_CFG.pointsPerGuest;
+  const REC = Math.min(Math.max(rawRec, POOL_CFG.floor), POOL_CFG.ceiling);
+  const CLAMPED = rawRec > POOL_CFG.ceiling;
   const VCH = ['[Catch the couple under the arch.]','[Get the whole barkada in one frame.]'];
   const $ = (id) => document.getElementById(id);
   const fmt = (n) => n.toLocaleString('en-PH');
@@ -454,6 +498,17 @@ body.after .s-guests{order:6} body.after .s-filter{order:7} body.after .s-challe
     $('guestsCompact').textContent = (S.when === 'day' ? 'Event day' : 'From start day') + ' · ' + (S.capOn ? S.cap + ' each' : 'no limit') + ' ›';
 
     // credits
+    // Recommendation — derived, never typed. Shows its own arithmetic so a
+    // couple can see WHY, and so a wrong number is legible instead of trusted.
+    const shortBy = Math.max(0, REC - POT - S.pending);
+    $('rec').innerHTML =
+      '<b>' + fmt(REC) + ' credits</b>'
+      + '<span class="why">' + esc(EVENT_TYPE) + ' \u00b7 ' + fmt(GUEST_COUNT) + ' guests \u00d7 '
+      + POOL_CFG.pointsPerGuest + (CLAMPED ? ' \u00b7 capped at ' + fmt(POOL_CFG.ceiling) : '') + '</span>'
+      + (shortBy
+          ? '<span class="gap">' + fmt(shortBy) + ' short of it</span>'
+          : '<span class="why">You have enough.</span>');
+
     const r = RUNGS[S.rung];
     $('rungCredits').textContent = '+' + fmt(r[0]);
     $('rungMeta').textContent = peso(r[1]) + ' · ' + r[2] + '% off';
