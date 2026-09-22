@@ -280,6 +280,21 @@ body.after .s-dates{order:9} body.after .s-more{order:10}
 #x-camfail:checked~.chrome label[for="x-camfail"]{background:#FFD9D5;color:#7A1710;border-color:#FFD9D5;font-weight:600}
 #x-loading:checked~.chrome label[for="x-loading"]{background:#F4EFE6;color:#262420;border-color:#F4EFE6;font-weight:600}
 #x-retire:checked~.chrome label[for="x-retire"]{background:#FFD9D5;color:#7A1710;border-color:#FFD9D5;font-weight:600}
+
+/* The write-up sits BELOW the page and never inside it — placement was the whole
+   lesson of the last three rounds. Every state's own reasoning stays in that
+   state; this is a collection point, not a second copy. */
+.foot{max-width:720px;margin:26px auto 60px;padding:22px 20px;background:#fff;border:1px solid var(--line);border-radius:20px}
+.foot h2{font-size:19px}
+.foot h3{font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:20px 0 7px}
+.foot p,.foot li{font-size:13.5px;line-height:1.62}
+.foot .fsub{font-size:12.5px;color:var(--ink-2)}
+.foot ul,.foot ol{padding-left:19px;margin:6px 0}
+.foot li{margin-bottom:7px}
+.foot table{border-collapse:collapse;width:100%;font-size:12.5px;margin:8px 0}
+.foot th,.foot td{text-align:left;padding:6px 7px;border-bottom:1px solid var(--line-2);vertical-align:top}
+.foot th{color:var(--ink-3);font-size:10.5px;text-transform:uppercase;letter-spacing:.07em}
+.foot .qn{border-left:3px solid var(--amber-line,#E8C583);padding-left:11px;margin:11px 0;list-style-position:inside}
 </style>
 </head>
 <body>
@@ -497,5 +512,61 @@ body.after .s-dates{order:9} body.after .s-more{order:10}
 </div>
 
 
+
+<div class="foot">
+  <h2>In plain language</h2>
+  <p class="fsub">For someone who has not followed the thread. The reasoning for each state stays
+     inside that state; this is where it is collected.</p>
+
+  <h3>What changes</h3>
+  <ul>
+    <li><b>The order.</b> Credits and the running balance first, then Coverage, then Allotment, then the room (filter, challenges, live wall), then what you got. After the day the results lead and the setup folds to one line each.</li>
+    <li><b>The recommendation moves onto this page</b> and shows its arithmetic — 146 guests × 150 a head. It already existed; it was only on the home tile.</li>
+    <li><b>Per-event-type numbers.</b> Today a christening, a debut and a wedding are all quoted 150 a head. All 17 types get their own, admin-editable.</li>
+    <li><b>A minimum per guest</b>, beside the maximum that already ships — and checked against the pot, because a floor is a promise.</li>
+    <li><b>Dedicated per-camera credits are retired.</b> Every camera shoots the shared pool.</li>
+    <li><b>All 631 challenges become reachable</b>, in 12 categories, with a count of how many celebrations picked each.</li>
+    <li><b>Blur becomes per person</b> — only the guest who asked — with face tagging as a hard precondition.</li>
+  </ul>
+
+  <h3>What is deliberately NOT changing</h3>
+  <ul>
+    <li><b>The capture-window picker and its rules.</b> Another session owns that file; only this block’s name and position move.</li>
+    <li><b>The QR render, the monogram resolver, the credit stepper, the five filter looks.</b> They ship and they work.</li>
+    <li><b><code>paparazzi_seats</code></b> — 24 live rows. A seat is the camera claim, not an allowance.</li>
+    <li><b>Wedding stays at 150 a head</b>, so no live couple’s number moves. 9 of the 11 live events are weddings — that is the acceptance test.</li>
+  </ul>
+
+  <h3>Needs a migration — a scheduling fact, not just a design one</h3>
+  <table>
+    <tr><th>Build</th><th>What the migration does</th></tr>
+    <tr><td>Allotment floor</td><td>A minimum beside <code>ceiling_points</code></td></tr>
+    <tr><td>Retirement</td><td>Drops <code>papic_dedicate_shots</code></td></tr>
+    <tr><td>Per-type</td><td>17 rows, each with per-head, floor and ceiling</td></tr>
+    <tr><td>Learning loop</td><td>Records which events exhausted their pool, so the average can exclude them</td></tr>
+    <tr><td>Blur</td><td>Binds a detected face to a tagged guest</td></tr>
+  </table>
+  <p class="fsub">Two other sessions have migrations queued, so approving these sets an order.</p>
+
+  <h3>What this cannot prove</h3>
+  <ul>
+    <li><b>That it renders in the real app.</b> This is hand-written HTML, not the React components. It proves the plan, not the build.</li>
+    <li><b>Anything about a real wedding.</b> Production holds 26 captures, 0 allotments and 0 blurred faces — no event has run end to end.</li>
+    <li><b>The blur itself.</b> Whether a detected face can be reliably tied to a tagged guest needs real photos on a real device.</li>
+  </ul>
+
+  <h3>Open questions</h3>
+  <ol>
+    <li class="qn"><b>The “you’ve used your 25 shots” wording.</b> The one screen with no shipped words to borrow.<br>
+      <b>Recommendation:</b> the wording in that state.<br>
+      <b>Cost of being wrong:</b> a guest reads “run out of shots”, believes the celebration is empty, and comes to you mid-reception.</li>
+    <li class="qn"><b>Does the learning loop ship dormant, or not at all this wave?</b> 9 weddings hold 100,362 credits granted and <b>one</b> used.<br>
+      <b>Recommendation:</b> build it dormant, with the minimum-sample gate and the exhausted-pool exclusion baked in while the reasoning is fresh.<br>
+      <b>Cost of being wrong:</b> a later session writes the naive average, it reads ~0 per head, and the recommendation collapses to nothing.</li>
+    <li class="qn"><b>Is blur worth this wave at all?</b> 146 guests, <b>0</b> have ever used it.<br>
+      <b>Recommendation:</b> keep it last and drop it without hesitation if the wave shrinks.<br>
+      <b>Cost of being wrong:</b> the biggest and most privacy-sensitive build delays four finished ones.</li>
+  </ol>
+</div>
 </body>
 </html>
