@@ -202,6 +202,33 @@ no inquiry thread (no Check-inquiry button), **calendar unknown → NEVER greys 
 shipped payment-gated gate already exempts vendors without `marketplace_vendor_id`; they lock
 directly via the Lock-Free `recordDeposit` path). Slice: part of PR-D (card variants).
 
+> **⟳ UPDATED 2026-09-20 (repo PR #5777) — the sheet this section describes has changed shape.
+> The four rules above all still hold; what changed is what the modal carries and how it saves.**
+>
+> - **"Two-step submit" is gone.** One sheet carries all eight owner-listed fields — Vendor Name ·
+>   Contact Person · Contact Number · Address Pin · Services Covered · Inclusions · Price · Payment
+>   Plan — and saves through ONE server action, `addManualSupplier`, which *composes* the existing
+>   `createManualVendor` → `attachManualVendorToCategory` → `updateVendorCosts` →
+>   `updateHostServiceDetails` → `saveSelfAddedPaymentPlan` rather than re-implementing them.
+>   Past the attach, the supplier exists and a later failure is a warning, never a failed add.
+> - **The claim QR is no longer a one-shot.** It was offered only in the post-save panel, which
+>   dies with the modal, while the workspace refused to make one before `contracted+`. The
+>   workspace now offers it at ANY status (`canOfferInvite` asks only `canInviteSupplier`).
+> - **No "ask for a price" for a manual vendor.** There is nobody to ask. The bench resolver
+>   answers `set_price` (the couple types it) for off-platform picks and keeps `needs_price` for
+>   marketplace ones — consistent with "skips the lock handshake" above: an off-platform supplier
+>   takes no requests and gives no approvals.
+> - **Venue addresses are required.** `venue` and `religious_venue` must carry an exact address
+>   (`lib/manual-venue-address.ts`); every other category may. The map pin is always optional.
+> - **On claim, the couple's card seeds the supplier's first card** (price via `agreedTotalNow`,
+>   transport, crew, inclusions) through the same `CanvasInitial` the `?from=` doorway uses.
+>
+> ⚠ **§10 (PR-J found-you attribution) is still NOT BUILT** — verified 2026-09-20: there is no
+> `first_found_at`, no found-record table and no lead alert anywhere in the repo, so every manual
+> add is currently treated as a free own-client import. The sheet above makes a manual add
+> considerably more complete, which raises (does not create) the stakes of that gap: a couple
+> who found a vendor on Setnayan can now record the whole booking manually, fee-free.
+
 ## 10 · "Found-you" attribution on manual imports (owner, same day) — NEW slice PR-J
 > Owner: a couple who finds a business here, contacts them outside the app, and manually imports
 > them is NOT a free own-client import. **Threshold: "found" = the couple OPENED the vendor's card
