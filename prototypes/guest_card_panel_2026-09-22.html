@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guest card — redesign prototype</title>
+<!--
+  GUEST CARD POP-UP — responsive redesign prototype (2026-09-22)
+
+  What it stands for: ONE panel per guest, opened from the roster at
+  /dashboard/[eventId]/guests. It replaces TWO surfaces that ship today:
+    • the read-only quick view  (guests/_components/guest-detail-body.tsx
+      — the sheet below xl, and the ?inspect= inspector column at >=xl)
+    • the standalone edit page  (guests/[guestId]/page.tsx)
+  Today the quick view's only way into the edit form is "Open full details",
+  which is a page navigation. That extra click is what this removes.
+
+  One DOM, two layouts:
+    < 1024px   roster is one column; a name opens the card FULL SCREEN with a
+               back arrow.
+    >= 1024px  site shell (top bar + left rail); roster in the wide left
+               column; the card is a right-side drawer that is FULL HEIGHT
+               and scrolls independently of the roster (position: sticky,
+               height: 100dvh, overflow-y: auto, overscroll-behavior: contain).
+
+  Phase (prototype bar): BEFORE the day = RSVP and the invitation lead.
+  ON THE DAY / AFTER = seat and the QR lead; RSVP folds to one line.
+
+  Real parts and real data:
+    • labels from apps/web/lib/guests.ts — SIDE_LABELS, GROUP_CATEGORY_LABELS,
+      RSVP_LABELS, MEAL_LABELS, INVITED_TO_LABELS, PLUS_ONE_CHOICES,
+      ROLE_LABELS; ATTIRE_LABELS from guests/[guestId]/page.tsx
+    • side ORDER is Groom's / Bride's / Both — owner ruling 2026-09-20
+    • the QR strip is Download - Write to NFC - Copy link, the one component
+      app/_components/qr-actions.tsx, in that order (pinned by
+      app/_components/every-qr-carries-the-strip.test.ts)
+    • colours / fonts / radius from the approved drawing
+      prototypes/guests_living_roster_2026-07-10.html, whose drawer is already
+      a full-height 392px right panel on desktop and a bottom sheet on mobile
+    • the guest shown is the one in the owner's screenshots: Ms. Claire Estoras
+      Buanhog, S89G-76H2QVH5GK
+  Placeholders are marked [LIKE THIS].
+-->
+<style>
+:root{
+  --bg:#FFFFFF; --surface:#FFFFFF; --soft:#F7F5F1;
+  --ink:#2C2A29; --ink-soft:#4F535B; --ink-faint:#6F7278;
+  --line:rgba(30,34,41,.12); --line-soft:rgba(30,34,41,.06);
+  --gold:#A9834B; --gold-deep:#8A6B39; --gold-wash:rgba(197,160,89,.12);
+  --cta:#C24E25; --cta-ink:#FFFFFF;
+  --sage-fill:#e3ece0; --sage-ink:#364632; --sage-dot:#4F6B4A;
+  --warn-fill:#f4ecd8; --warn-ink:#8A6B39;
+  --blush-fill:#f4d7c9; --blush-ink:#783b28;
+  --sky-fill:#e0f0f7; --sky-ink:#2a5f7a;
+  --shadow:0 12px 32px -14px rgba(30,34,41,.4);
+  --font-display:Georgia,'Times New Roman',serif;
+  --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  --font-mono:ui-monospace,'SF Mono',Menlo,monospace;
+  --r-lg:20px; --r-md:14px; --r-sm:10px;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;font-size:15px}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer}
+h1,h2,h3{margin:0;font-weight:600}
+a{color:inherit}
+
+/* ---------- prototype bar (clearly not the app) ---------- */
+.proto{position:sticky;top:0;z-index:60;display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+  padding:7px 14px;background:#EDEAE4;font-size:12px;color:var(--ink-soft);border-bottom:1px solid var(--line)}
+.proto b{font-weight:700;color:var(--ink);letter-spacing:.04em}
+.proto .grp{display:flex;gap:4px;align-items:center}
+.proto .pill{height:26px;padding:0 11px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12px}
+.proto .pill[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.proto .note{margin-left:auto;font-size:11px;color:var(--ink-faint)}
+
+/* ---------- desktop shell (>=1024 only) ---------- */
+.shell-top,.shell-rail{display:none}
+
+/* ---------- roster (master) ---------- */
+.app{display:block}
+.master{padding:14px 16px 40px}
+.master-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:4px}
+.master-head h1{font-family:var(--font-display);font-size:26px;font-weight:400;letter-spacing:-.01em}
+.master-sub{font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 14px}
+.searchbar{display:flex;gap:8px;margin-bottom:14px}
+.searchbar input{flex:1;height:42px;border:1px solid var(--line);border-radius:var(--r-md);padding:0 13px;background:#fff}
+.searchbar .sq{width:42px;height:42px;border:1px solid var(--line);border-radius:var(--r-md);background:#fff;display:flex;align-items:center;justify-content:center;color:var(--ink-faint)}
+.grouphead{font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);
+  padding:14px 4px 7px;display:flex;gap:7px;align-items:center}
+.rows{border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;background:#fff}
+.grow{display:flex;align-items:center;gap:11px;width:100%;padding:11px 13px;border:0;border-bottom:1px solid var(--line-soft);
+  background:#fff;text-align:left;border-left:3px solid transparent}
+.rows .grow:last-child{border-bottom:0}
+.grow:hover{background:rgba(197,160,89,.06)}
+.grow[aria-current="true"]{background:var(--gold-wash);border-left-color:var(--gold)}
+.av{width:36px;height:36px;flex:0 0 36px;border-radius:999px;background:var(--gold-wash);color:var(--gold-deep);
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.02em}
+.av.groom{background:var(--sky-fill);color:var(--sky-ink)}
+.grow .who{min-width:0;flex:1;display:block;overflow:hidden}
+.grow .nm{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grow .sub{display:block;font-size:12px;color:var(--ink-faint);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grow .rs{font-size:12px;color:var(--ink-soft);white-space:nowrap;display:flex;align-items:center;gap:5px}
+.dot{width:6px;height:6px;border-radius:999px;background:var(--sage-dot);flex:0 0 6px}
+.dot.pend{background:var(--gold)}
+
+/* ---------- the card: phone = full screen, desktop = right drawer ---------- */
+.scrim{position:fixed;top:var(--proto,40px);left:0;right:0;bottom:0;z-index:49;border:0;
+  background:rgba(30,34,41,.40);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+
+.card{position:fixed;top:var(--proto,40px);left:var(--peek,58px);right:0;bottom:0;z-index:50;
+  background:var(--surface);display:flex;flex-direction:column;
+  border-left:1px solid var(--line);border-radius:24px 0 0 24px;
+  box-shadow:-18px 0 40px -20px rgba(30,34,41,.45);
+  animation:slidein .26s cubic-bezier(.2,.7,.2,1)}
+@keyframes slidein{from{transform:translateX(30px);opacity:.35}to{transform:none;opacity:1}}
+.card[hidden]{display:none!important}
+
+/* card head — sticky, carries identity + the one status line + close */
+.card-head{flex:0 0 auto;padding:10px 14px 12px;border-bottom:1px solid var(--line);background:var(--surface)}
+.card-head .top{display:flex;align-items:center;gap:6px;margin-bottom:9px}
+.iconbtn{width:40px;height:40px;border:0;background:transparent;border-radius:999px;display:inline-flex;
+  align-items:center;justify-content:center;color:var(--ink-soft);font-size:17px;line-height:1}
+.iconbtn:hover{background:var(--line-soft);color:var(--ink)}
+.card-head .flash{margin-left:auto;font-size:12px;color:var(--sage-ink);white-space:nowrap}
+.card-head .flash.saving{color:var(--ink-faint)}
+.card-head .flash.bad{color:var(--cta)}
+.card-head .pid{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--ink-faint)}
+.idrow{display:flex;align-items:center;gap:11px}
+.idrow .av{width:46px;height:46px;flex:0 0 46px;font-size:15px}
+.idrow h2{font-family:var(--font-display);font-size:22px;font-weight:400;letter-spacing:-.01em;line-height:1.15}
+.statusline{margin-top:3px;font-size:12.5px;color:var(--ink-soft)}
+.statusline .sep{color:var(--ink-faint);margin:0 5px}
+
+/* card body — THE independent scroller */
+.card-body{flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+  padding:4px 14px 20px;display:flex;flex-direction:column;gap:6px}
+
+.sec{display:flex;flex-direction:column;gap:8px;padding:13px 0 3px;border-top:1px solid var(--line-soft)}
+.sec:first-child{border-top:0}
+.sec > h3{font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);font-weight:500}
+.hint{font-size:11.5px;color:var(--ink-faint)}
+
+/* segmented control (RSVP, extra seats) */
+.seg{display:flex;gap:4px;background:var(--soft);border-radius:999px;padding:4px}
+.seg button{flex:1;height:36px;border:0;border-radius:999px;background:transparent;font-size:13px;white-space:nowrap;padding:0 6px}
+.seg button[aria-pressed="true"]{background:#fff;font-weight:600;box-shadow:0 1px 3px rgba(30,34,41,.14)}
+.seg.rsvp button[aria-pressed="true"][data-v="attending"]{background:var(--sage-fill);color:var(--sage-ink)}
+.seg.rsvp button[aria-pressed="true"][data-v="pending"]{background:var(--warn-fill);color:var(--warn-ink)}
+.seg.rsvp button[aria-pressed="true"][data-v="maybe"]{background:var(--sky-fill);color:var(--sky-ink)}
+.seg.rsvp button[aria-pressed="true"][data-v="declined"]{background:var(--blush-fill);color:var(--blush-ink)}
+.locked{display:flex;align-items:center;gap:8px;height:44px;padding:0 14px;border-radius:999px;
+  background:var(--sage-fill);color:var(--sage-ink);font-size:14px}
+.locked .lk{margin-left:auto;font-size:11px;opacity:.7}
+
+/* chips (invited to, tags) */
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{height:32px;padding:0 13px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13px;
+  display:inline-flex;align-items:center;gap:5px}
+.chip[aria-pressed="true"]{border-color:var(--gold);background:var(--gold-wash);color:var(--gold-deep);font-weight:600}
+.chip.ro{height:28px;font-size:12px;border-style:dashed;color:var(--ink-soft);cursor:default}
+.chip.ro.bride{background:var(--blush-fill);border-color:transparent;color:var(--blush-ink)}
+.chip.ro.seat{background:var(--sky-fill);border-color:transparent;color:var(--sky-ink)}
+
+/* rows (disclosures + navigations) */
+.rowset{border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;background:#fff}
+.row{width:100%;min-height:50px;display:flex;align-items:center;gap:12px;padding:9px 13px;border:0;
+  border-bottom:1px solid var(--line-soft);background:#fff;text-align:left;font-size:14px}
+.rowset .row:last-child{border-bottom:0}
+.row:hover{background:var(--soft)}
+.row .lbl{flex:0 0 auto;color:var(--ink)}
+.row .v{margin-left:auto;color:var(--ink-faint);text-align:right;min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:62%}
+.row .v.empty{font-style:italic;opacity:.75}
+.row .caret{flex:0 0 auto;color:var(--ink-faint);font-size:13px}
+.row[aria-expanded="true"] .caret{transform:rotate(90deg)}
+.panelbody{padding:12px 13px 14px;background:var(--soft);border-bottom:1px solid var(--line-soft);
+  display:flex;flex-direction:column;gap:11px}
+.rowset .panelbody:last-child{border-bottom:0}
+
+/* fields */
+.fields{display:grid;grid-template-columns:1fr;gap:10px}
+.fields.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.fields.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.f > span{font-size:11px;letter-spacing:.04em;color:var(--ink-faint)}
+.f input,.f select,.f textarea{height:42px;border:1px solid var(--line);border-radius:var(--r-sm);
+  padding:0 11px;background:#fff;width:100%}
+.f textarea{height:auto;min-height:78px;padding:9px 11px;resize:vertical;line-height:1.45}
+.f select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--ink-faint) 50%),linear-gradient(135deg,var(--ink-faint) 50%,transparent 50%);
+  background-position:calc(100% - 16px) 19px,calc(100% - 11px) 19px;background-size:5px 5px;background-repeat:no-repeat;padding-right:32px}
+.req{color:var(--cta)}
+
+/* switches */
+.sw{display:flex;align-items:center;gap:11px;padding:10px 13px;border:1px solid var(--line);
+  border-radius:var(--r-md);background:#fff;width:100%;text-align:left}
+.sw .txt{min-width:0;flex:1}
+.sw .txt b{display:block;font-weight:500;font-size:14px}
+.sw .txt small{color:var(--ink-faint);font-size:11.5px}
+.switch{width:44px;height:26px;flex:0 0 44px;border:0;border-radius:999px;background:#D9D3C8;padding:3px;display:flex}
+.switch::after{content:"";width:20px;height:20px;border-radius:999px;background:#fff;transition:transform .15s}
+.switch[aria-checked="true"]{background:var(--gold)}
+.switch[aria-checked="true"]::after{transform:translateX(18px)}
+
+/* invitation / QR */
+.qr{display:flex;gap:12px;align-items:flex-start;padding:13px;border:1px solid var(--line);border-radius:var(--r-md);background:#fff}
+.qr svg{flex:0 0 88px;width:88px;height:88px;border-radius:var(--r-sm);border:1px solid var(--line-soft)}
+.qr .qt{min-width:0}
+.qr .qt b{display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);font-weight:500}
+.qr .qt p{margin:5px 0 0;font-size:12.5px;color:var(--ink-soft);line-height:1.4}
+.strip{display:flex;gap:6px;flex-wrap:wrap}
+.strip button{height:36px;padding:0 13px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13px;
+  display:inline-flex;align-items:center;gap:6px}
+.strip button:hover{border-color:var(--gold);color:var(--gold-deep)}
+
+/* danger + save */
+.danger{display:flex;flex-direction:column;gap:7px;padding-bottom:6px}
+.danger button{height:42px;border-radius:var(--r-md);border:1px solid var(--line);background:#fff;
+  font-size:13.5px;color:var(--cta);text-align:left;padding:0 13px}
+.danger button:hover{border-color:var(--cta)}
+.danger .why{font-size:11.5px;color:var(--ink-faint);padding:0 2px}
+.foundation{font-size:12px;color:var(--ink-faint);padding:9px 2px 2px}
+
+.card-body{padding-bottom:calc(22px + env(safe-area-inset-bottom))}
+
+/* ---------- PHASE ORDER: one DOM, reordered by CSS ---------- */
+.s-rsvp{order:1}.s-invite{order:2}.s-blocks{order:3}.s-seat{order:4}.s-party{order:5}
+.s-extra{order:6}.s-privacy{order:7}.s-name{order:8}.s-contact{order:9}.s-notes{order:10}
+.s-tags{order:11}.s-danger{order:12}
+body.after .s-seat{order:1} body.after .s-invite{order:2} body.after .s-rsvp{order:3}
+body.after .s-privacy{order:4} body.after .s-blocks{order:5} body.after .s-extra{order:6}
+body.after .s-party{order:7} body.after .s-name{order:8} body.after .s-contact{order:9}
+body.after .s-notes{order:10} body.after .s-tags{order:11} body.after .s-danger{order:12}
+/* after the day RSVP is settled — it folds to one line */
+.fold{display:none}
+body.after .s-rsvp .full{display:none}
+body.after .s-rsvp .fold{display:flex}
+
+/* ============ DESKTOP ============ */
+@media (min-width:1024px){
+  .shell-top{display:flex;align-items:center;gap:14px;height:56px;padding:0 20px;border-bottom:1px solid var(--line);background:#fff;
+    position:sticky;top:var(--proto,40px);z-index:40}
+  .shell-top .brand{font-family:var(--font-display);font-size:17px;letter-spacing:.02em}
+  .shell-top .ev{font-size:13px;color:var(--ink-faint)}
+  .shell-top .me{margin-left:auto;width:32px;height:32px;border-radius:999px;background:var(--gold-wash);color:var(--gold-deep);
+    display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+  .app{display:flex;align-items:flex-start}
+  .shell-rail{display:flex;flex-direction:column;gap:2px;flex:0 0 208px;padding:16px 10px;
+    position:sticky;top:calc(var(--proto,40px) + 56px);height:calc(100dvh - var(--proto,40px) - 56px);border-right:1px solid var(--line);background:#fff}
+  .shell-rail a{padding:8px 12px;border-radius:var(--r-sm);font-size:13.5px;color:var(--ink-soft);text-decoration:none}
+  .shell-rail a[aria-current]{background:var(--gold-wash);color:var(--gold-deep);font-weight:600}
+
+  /* master reflows to leave room for the rail; it keeps the PAGE scroll */
+  .master{flex:1 1 0%;min-width:0;padding:22px 26px 60px;max-width:900px}
+  .master-head h1{font-size:30px}
+
+  /* the card: a full-height right drawer with its OWN scroll */
+  .scrim{display:block;position:fixed;inset:0;z-index:44;background:rgba(30,34,41,.22);border:0}
+  .scrim[hidden]{display:none!important}
+  .card{position:sticky;top:calc(var(--proto,40px) + 56px);inset:auto;left:auto;border-radius:0;box-shadow:var(--shadow);z-index:45;flex:0 0 clamp(400px,33vw,560px);
+    width:clamp(400px,33vw,560px);height:calc(100dvh - var(--proto,40px) - 56px);
+    border-left:1px solid var(--line);box-shadow:var(--shadow);border-radius:0;
+    animation:slidein-r .26s cubic-bezier(.2,.7,.2,1)}
+  @keyframes slidein-r{from{transform:translateX(22px);opacity:.3}to{transform:none;opacity:1}}
+  /* on desktop the roster is right there beside it — no peek strip needed */
+  .scrim{display:none!important}
+  .card-head .back{display:none}
+  .fields.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fields.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .card-body{padding:4px 18px 22px}
+  .card-head{padding:12px 18px 14px}
+}
+@media (max-width:1023px){
+  .fields.two,.fields.three{grid-template-columns:1fr}
+  .card-head .close{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .card{animation:none!important}
+}
+</style>
+</head>
+<body class="before">
+
+<div class="proto">
+  <b>PROTOTYPE</b>
+  <span class="grp">
+    <button class="pill" data-phase="before" aria-pressed="true">Before the day</button>
+    <button class="pill" data-phase="after" aria-pressed="false">On the day / after</button>
+  </span>
+  <span class="note">Resize the window across 1024px &middot; Esc closes the card</span>
+</div>
+
+<div class="shell-top">
+  <span class="brand">SETNAYAN</span>
+  <span class="ev">Claire &amp; Indalecio &middot; 12 Dec 2026</span>
+  <span class="me">IC</span>
+</div>
+
+<div class="app">
+  <div class="shell-rail">
+    <a href="#">Overview</a>
+    <a href="#" aria-current="page">Guests</a>
+    <a href="#">Suppliers</a>
+    <a href="#">Budget</a>
+    <a href="#">Invitation</a>
+    <a href="#">Studio</a>
+  </div>
+
+  <!-- ============ ROSTER (master) ============ -->
+  <main class="master">
+    <div class="master-head"><h1>Guests</h1></div>
+    <p class="master-sub">4 of 230 pax &middot; 81 listed &middot; 5% confirmed</p>
+
+    <div class="searchbar">
+      <input placeholder="Search names, roles, groups, RSVP&hellip;">
+      <button class="sq" aria-label="Filter">&#9776;</button>
+      <button class="sq" aria-label="Add guest">+</button>
+    </div>
+
+    <div class="grouphead">Bride &amp; Groom <span style="text-transform:none;letter-spacing:0">always first</span></div>
+    <div class="rows" id="roster"></div>
+
+    <div class="grouphead">VIP &middot; Immediate family</div>
+    <div class="rows" id="roster2"></div>
+  </main>
+
+  <!-- ============ THE ONE CARD ============ -->
+  <button class="scrim" id="scrim" aria-label="Close" hidden></button>
+
+  <section class="card" id="card" role="dialog" aria-modal="false" aria-labelledby="cardName" hidden>
+    <header class="card-head">
+      <div class="top">
+        <button class="iconbtn back" id="back" aria-label="Back to guest list">&#8249;</button>
+        <span class="flash" id="flash" role="status"></span>
+        <span class="pid" id="cardPid">S89G-76H2QVH5GK</span>
+        <button class="iconbtn close" id="close" aria-label="Close">&#10005;</button>
+      </div>
+      <div class="idrow">
+        <span class="av" id="cardAv">CB</span>
+        <div style="min-width:0">
+          <h2 id="cardName">Ms. Claire Estoras Buanhog</h2>
+          <div class="statusline" id="statusline"></div>
+        </div>
+      </div>
+    </header>
+
+    <div class="card-body" id="cardBody">
+
+      <!-- 1 · RSVP ------------------------------------------------------->
+      <section class="sec s-rsvp">
+        <h3>RSVP</h3>
+        <div class="full" id="rsvpFull">
+          <div class="seg rsvp" id="rsvpSeg" hidden>
+            <button data-v="attending">Attending</button>
+            <button data-v="pending">Pending</button>
+            <button data-v="maybe">Maybe</button>
+            <button data-v="declined">Declined</button>
+          </div>
+          <div class="locked" id="rsvpLocked">&#10003; Attending <span class="lk">Foundation &middot; always</span></div>
+          <p class="hint" id="recordedAt" hidden>Answer recorded 14 Aug 2026, 9:02 PM</p>
+          <div class="fields two" style="margin-top:10px">
+            <label class="f"><span>Meal</span>
+              <select id="meal">
+                <option>No preference</option><option>Beef</option><option>Chicken</option>
+                <option>Fish</option><option>Vegetarian</option><option>Vegan</option><option>Kids</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <button class="row fold" style="border:1px solid var(--line);border-radius:var(--r-md)">
+          <span class="lbl">RSVP</span><span class="v" id="rsvpFoldV">Attending &middot; No preference</span><span class="caret">&#8250;</span>
+        </button>
+      </section>
+
+      <!-- 2 · INVITATION ------------------------------------------------->
+      <section class="sec s-invite">
+        <h3>Invitation</h3>
+        <div class="qr">
+          <svg id="qrArt" viewBox="0 0 100 100" aria-hidden="true"></svg>
+          <div class="qt">
+            <b>Personal QR</b>
+            <p id="qrBlurb">Opens Claire&rsquo;s own page &mdash; invitation &amp; RSVP, their gallery, find-my-seat.</p>
+          </div>
+        </div>
+        <div class="strip">
+          <button data-toast="Branded PNG downloaded.">&#8595; Download</button>
+          <button data-toast="Hold a tag to the back of the phone&hellip; [NFC]">((&middot;)) Write to NFC</button>
+          <button data-toast="Link copied.">&#9112; Copy link</button>
+        </div>
+        <div class="rowset">
+          <button class="row" id="inviteRow">
+            <span class="lbl">Email a sign-in link</span><span class="v" id="inviteV"></span><span class="caret">&#8250;</span>
+          </button>
+          <button class="row" data-toast="[Opens Studio &rsaquo; Customize guest QRs]">
+            <span class="lbl">Customize guest QRs</span><span class="v">Your colours</span><span class="caret">&#8250;</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 3 · INVITED TO -------------------------------------------------->
+      <section class="sec s-blocks">
+        <h3>Invited to</h3>
+        <div class="chips" id="blocks">
+          <button class="chip" data-v="ceremony" aria-pressed="true">Ceremony</button>
+          <button class="chip" data-v="reception" aria-pressed="true">Reception</button>
+          <button class="chip" data-v="cocktails" aria-pressed="true">Cocktails</button>
+          <button class="chip" data-v="after_party" aria-pressed="true">After-party</button>
+          <button class="chip" data-v="rehearsal_dinner" aria-pressed="true">Rehearsal dinner</button>
+        </div>
+      </section>
+
+      <!-- 4 · SEAT -------------------------------------------------------->
+      <section class="sec s-seat">
+        <h3>Seat</h3>
+        <div class="rowset">
+          <button class="row" data-toast="[Opens the seating chart at Table 3]">
+            <span class="lbl">Table</span><span class="v" id="seatV">~Table 3 &middot; suggested</span><span class="caret">&#8250;</span>
+          </button>
+        </div>
+        <div class="fields two">
+          <label class="f"><span>Attire &middot; 3D seat plan</span>
+            <select id="attire"><option>Neutral / auto</option><option selected>Gown</option><option>Suit</option></select>
+          </label>
+        </div>
+      </section>
+
+      <!-- 5 · PARTY ------------------------------------------------------->
+      <section class="sec s-party">
+        <h3>Party</h3>
+        <div class="fields three">
+          <label class="f"><span>Side <i class="req">*</i></span>
+            <select id="side">
+              <option value="Groom's side">Groom&rsquo;s side</option>
+              <option value="Bride's side" selected>Bride&rsquo;s side</option>
+              <option value="Both sides">Both sides</option>
+            </select>
+          </label>
+          <label class="f"><span>Group <i class="req">*</i></span>
+            <select id="group">
+              <option>Family</option><option>Friends</option><option>Work</option>
+              <option>School</option><option>Officiant</option><option selected>Other</option>
+            </select>
+          </label>
+          <label class="f"><span>Role</span>
+            <select id="role" disabled><option>Bride</option></select>
+          </label>
+        </div>
+        <p class="hint" id="roleHint">Bride &amp; groom are set when the event is made &mdash; the role is locked.</p>
+      </section>
+
+      <!-- 6 · EXTRA SEATS -------------------------------------------------->
+      <section class="sec s-extra">
+        <h3>Extra seats</h3>
+        <div class="seg" id="plusSeg">
+          <button data-v="0" aria-pressed="true">None</button>
+          <button data-v="1">+1</button><button data-v="2">+2</button>
+          <button data-v="3">+3</button><button data-v="4">+4</button>
+        </div>
+        <p class="hint" id="plusState" hidden>Awaiting +1 to confirm their name</p>
+      </section>
+
+      <!-- 7 · PRIVACY ------------------------------------------------------>
+      <section class="sec s-privacy">
+        <h3>Privacy</h3>
+        <button class="sw" data-sw="consent">
+          <span class="txt"><b>OK to tag in photos</b><small>RA 10173 &middot; asked at RSVP</small></span>
+          <span class="switch" aria-checked="true" role="switch"></span>
+        </button>
+        <button class="sw" data-sw="faceblock">
+          <span class="txt"><b>Blur faces on the Live Wall</b><small>FaceBlock &mdash; blurs every face in the shot</small></span>
+          <span class="switch" aria-checked="false" role="switch"></span>
+        </button>
+        <button class="sw" data-sw="norecog">
+          <span class="txt"><b>Exclude from face recognition</b><small>e.g. a minor</small></span>
+          <span class="switch" aria-checked="false" role="switch"></span>
+        </button>
+      </section>
+
+      <!-- 8 · NAME (folds to one line) ------------------------------------>
+      <section class="sec s-name">
+        <h3>Name</h3>
+        <div class="rowset">
+          <button class="row" data-disc="discName" aria-expanded="false">
+            <span class="lbl">Full name</span><span class="v" id="nameV">Ms. Claire Estoras Buanhog</span><span class="caret">&#8250;</span>
+          </button>
+          <div class="panelbody" id="discName" hidden>
+            <div class="fields three">
+              <label class="f"><span>Prefix</span><input id="f_prefix" value="Ms."></label>
+              <label class="f"><span>First name <i class="req">*</i></span><input id="f_first" value="Claire"></label>
+              <label class="f"><span>Middle name</span><input id="f_middle" value="Estoras"></label>
+            </div>
+            <div class="fields three">
+              <label class="f"><span>Last name <i class="req">*</i></span><input id="f_last" value="Buanhog"></label>
+              <label class="f"><span>Suffix</span><input id="f_suffix" value=""></label>
+              <label class="f"><span>Display name</span><input id="f_display" placeholder="e.g. Tito Boy &amp; Tita Cora"></label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9 · CONTACT (folds) --------------------------------------------->
+      <section class="sec s-contact">
+        <h3>Contact</h3>
+        <div class="rowset">
+          <button class="row" data-disc="discContact" aria-expanded="false">
+            <span class="lbl">Email &amp; mobile</span><span class="v" id="contactV">buanhogclaire@gmail.com</span><span class="caret">&#8250;</span>
+          </button>
+          <div class="panelbody" id="discContact" hidden>
+            <div class="fields two">
+              <label class="f"><span>Email</span><input id="f_email" type="email" value="buanhogclaire@gmail.com"></label>
+              <label class="f"><span>Mobile</span><input id="f_mobile" placeholder="+63 &hellip;"></label>
+            </div>
+            <div class="fields two">
+              <label class="f"><span>Dietary</span><input id="f_diet" placeholder="halal &middot; nut allergy &middot; &hellip;"></label>
+              <label class="f"><span>Relationship</span><input id="f_rel" placeholder="e.g. Eldest Uncle"></label>
+            </div>
+            <!-- Chinese / Tsinoy weddings only — hidden on every other rite -->
+            <div class="fields two" id="teaWrap" hidden>
+              <label class="f"><span>Tea-ceremony order</span><input id="f_tea" type="number" placeholder="Lower serves first"></label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10 · NOTES (folds) ---------------------------------------------->
+      <section class="sec s-notes">
+        <h3>Notes</h3>
+        <div class="rowset">
+          <button class="row" data-disc="discNotes" aria-expanded="false">
+            <span class="lbl">Private note</span><span class="v empty" id="notesV">None</span><span class="caret">&#8250;</span>
+          </button>
+          <div class="panelbody" id="discNotes" hidden>
+            <label class="f"><textarea id="f_notes" placeholder="Only you and your co-hosts can see this."></textarea></label>
+            <p class="hint">Only you and your co-hosts can see this. Claire never sees it.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11 · TAGS (auto, read-only) ------------------------------------->
+      <section class="sec s-tags">
+        <h3>Tags</h3>
+        <div class="chips" id="tags"></div>
+        <p class="hint">Set by side, group, role, table and groups above &mdash; not typed.</p>
+      </section>
+
+      <!-- 12 · DANGER ----------------------------------------------------->
+      <section class="sec s-danger">
+        <div class="danger" id="dangerZone" hidden>
+          <button data-toast="[Removes the guest &mdash; undo snackbar on the roster]">Remove guest</button>
+          <button data-toast="[New QR issued &middot; their account unlinked]">Take this seat back</button>
+          <p class="why">Taking the seat back issues a new QR and unlinks their account.</p>
+        </div>
+        <p class="foundation" id="foundationNote">Foundation of the event &mdash; can&rsquo;t be removed.</p>
+      </section>
+
+    </div>
+
+
+  </section>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────
+// Seed. The first two are the couple from the owner's screenshots; the rest
+// mirror the roster rows visible there. [PLACEHOLDER] marks anything not read
+// off the shipped code or those screenshots.
+// ─────────────────────────────────────────────────────────────────────────
+var GUESTS = [
+  {id:'g1', pid:'S89G-76H2QVH5GK', prefix:'Ms.', first:'Claire', middle:'Estoras', last:'Buanhog', suffix:'',
+   ini:'CB', side:"Bride's side", group:'Other', role:'Bride', couple:true, rsvp:'attending',
+   meal:'No preference', attire:'Gown', seat:'~Table 3 · suggested', plus:0, plusState:null,
+   email:'buanhogclaire@gmail.com', groups:[], consent:true, faceblock:false, norecog:false,
+   recorded:null, notes:''},
+  {id:'g2', pid:'S89G-4KD0PQX21B', prefix:'Mr.', first:'Indalecio', middle:'Sacdalan', last:'Casasola', suffix:'II',
+   ini:'IC', side:"Groom's side", group:'Other', role:'Groom', couple:true, rsvp:'attending',
+   meal:'No preference', attire:'Suit', seat:'~Table 3 · suggested', plus:0, plusState:null,
+   email:'iscasasolaii@gmail.com', groups:[], consent:true, faceblock:false, norecog:false,
+   recorded:null, notes:''},
+  {id:'g3', pid:'S89G-7M1TCV93RQ', prefix:'', first:'Milagros', middle:'', last:'Buanhog', suffix:'',
+   ini:'MB', side:"Bride's side", group:'Family', role:"Bride's Parents", couple:false, rsvp:'pending',
+   meal:'No preference', attire:'Neutral / auto', seat:'~Table 3 · suggested', plus:1,
+   plusState:'Awaiting +1 to confirm their name', email:'', groups:['Family'],
+   consent:true, faceblock:false, norecog:false, recorded:null, notes:''},
+  {id:'g4', pid:'S89G-J20WYB5ND8', prefix:'', first:'Peregrino', middle:'', last:'Buanhog', suffix:'',
+   ini:'PB', side:"Bride's side", group:'Family', role:"Bride's Parents", couple:false, rsvp:'pending',
+   meal:'Beef', attire:'Suit', seat:'~Table 3 · suggested', plus:0, plusState:null,
+   email:'', groups:['Family'], consent:true, faceblock:false, norecog:false,
+   recorded:null, notes:''},
+  {id:'g5', pid:'S89G-QT48HZ6LEA', prefix:'Atty.', first:'Eufrocina', middle:'M.', last:'Sacdalan-Casasola', suffix:'',
+   ini:'ES', side:"Groom's side", group:'Family', role:"Groom's Parents", couple:false, rsvp:'pending',
+   meal:'Fish', attire:'Gown', seat:'~Table 3 · suggested', plus:0, plusState:null,
+   email:'', groups:['Family'], consent:false, faceblock:true, norecog:false,
+   recorded:'Answer recorded 14 Aug 2026, 9:02 PM', notes:'Prefers a seat near the aisle. [PLACEHOLDER]'}
+];
+var RSVP_LABELS = {attending:'Attending', pending:'Pending', maybe:'Maybe', declined:'Declined'};
+var cur = null;
+
+// ── roster ──────────────────────────────────────────────────────────────
+function rowHtml(g){
+  var sub = g.plus ? '<span class="sub">+ ' + g.plus + ' extra seat' + (g.plus>1?'s':'') + '</span>'
+                   : (g.groups.length ? '<span class="sub">' + g.groups.join(' · ') + '</span>' : '');
+  return '<button class="grow" data-id="' + g.id + '">' +
+    '<span class="av ' + (g.side.indexOf('Groom')===0?'groom':'') + '">' + g.ini + '</span>' +
+    '<span class="who"><span class="nm">' + [g.prefix,g.first,g.middle,g.last,g.suffix].filter(Boolean).join(' ') + '</span>' + sub + '</span>' +
+    '<span class="rs"><i class="dot ' + (g.rsvp==='attending'?'':'pend') + '"></i>' + RSVP_LABELS[g.rsvp] + '</span>' +
+    '<span class="caret" style="color:var(--ink-faint)">&#8250;</span></button>';
+}
+function paintRoster(){
+  document.getElementById('roster').innerHTML  = GUESTS.slice(0,2).map(rowHtml).join('');
+  document.getElementById('roster2').innerHTML = GUESTS.slice(2).map(rowHtml).join('');
+  Array.prototype.forEach.call(document.querySelectorAll('.grow'), function(b){
+    if (cur && b.dataset.id === cur.id) b.setAttribute('aria-current','true');
+    b.addEventListener('click', function(){ open(b.dataset.id); });
+  });
+}
+
+// ── decorative QR, seeded from the id (never scannable — same as shipped) ──
+function paintQr(seedStr){
+  var h = 2166136261;
+  for (var i=0;i<seedStr.length;i++){ h ^= seedStr.charCodeAt(i); h = Math.imul(h,16777619); }
+  var r = (h + 7) >>> 0;
+  function rnd(){ r ^= r<<13; r>>>=0; r ^= r>>>17; r ^= r<<5; r>>>=0; return r/4294967296; }
+  var N=13, m=100/N, d='';
+  function inEye(x,y){ function e(cx,cy){return x>=cx&&x<cx+3&&y>=cy&&y<cy+3;} return e(0,0)||e(N-3,0)||e(0,N-3); }
+  for (var y=0;y<N;y++) for (var x=0;x<N;x++){
+    if (inEye(x,y)) continue;
+    if (rnd()>0.5) d += 'M'+(x*m)+' '+(y*m)+'h'+m+'v'+m+'h'+(-m)+'z';
+  }
+  function eye(cx,cy){ return 'M'+(cx*m)+' '+(cy*m)+'h'+(3*m)+'v'+(3*m)+'h'+(-3*m)+'z'; }
+  document.getElementById('qrArt').innerHTML =
+    '<path d="'+d+'" fill="#8A6B39"></path>' +
+    '<path d="'+eye(0,0)+' '+eye(N-3,0)+' '+eye(0,N-3)+'" fill="#8A6B39"></path>';
+}
+
+// ── the card ────────────────────────────────────────────────────────────
+function $(id){ return document.getElementById(id); }
+function fullName(g){ return [g.prefix,g.first,g.middle,g.last,g.suffix].filter(Boolean).join(' '); }
+
+function paintStatus(){
+  var g = cur;
+  var bits = [RSVP_LABELS[g.rsvp], g.side, g.role, g.seat.replace(' · suggested','')];
+  if (g.plus) bits.push('+' + g.plus + ' seat' + (g.plus>1?'s':''));
+  $('statusline').innerHTML = bits.join('<span class="sep">&middot;</span>');
+  $('rsvpFoldV').textContent = RSVP_LABELS[g.rsvp] + ' · ' + $('meal').value;
+  var tags = [
+    '<span class="chip ro ' + (g.side.indexOf('Bride')===0?'bride':'') + '">' + g.side + '</span>',
+    '<span class="chip ro">' + g.group + '</span>',
+    '<span class="chip ro">' + g.role + '</span>',
+    '<span class="chip ro seat">' + g.seat.replace(' · suggested','') + '</span>'
+  ].concat(g.groups.map(function(x){ return '<span class="chip ro">' + x + '</span>'; }));
+  $('tags').innerHTML = tags.join('');
+}
+
+function open(id){
+  cur = GUESTS.filter(function(g){ return g.id === id; })[0];
+  var g = cur;
+  $('flash').textContent = ''; $('flash').className = 'flash';
+
+  $('cardName').textContent = fullName(g);
+  $('cardPid').textContent  = g.pid;
+  $('cardAv').textContent   = g.ini;
+  $('cardAv').className     = 'av' + (g.side.indexOf('Groom')===0 ? ' groom' : '');
+  $('qrBlurb').innerHTML    = 'Opens ' + g.first + '&rsquo;s own page &mdash; invitation &amp; RSVP, their gallery, find-my-seat.';
+  paintQr(g.pid);
+
+  // RSVP — the couple is always attending, and says so instead of offering a choice
+  $('rsvpSeg').hidden    = g.couple;
+  $('rsvpLocked').hidden = !g.couple;
+  Array.prototype.forEach.call($('rsvpSeg').children, function(b){
+    b.setAttribute('aria-pressed', String(b.dataset.v === g.rsvp));
+  });
+  $('recordedAt').hidden = !g.recorded;
+  if (g.recorded) $('recordedAt').textContent = g.recorded;
+
+  $('meal').value   = g.meal;
+  $('attire').value = g.attire;
+  $('side').value   = g.side;
+  $('group').value  = g.group;
+  $('seatV').textContent = g.seat;
+
+  // Role: locked for the couple, a real picker for everyone else
+  var role = $('role');
+  role.innerHTML = '<option>' + g.role + '</option>' +
+    (g.couple ? '' : ['Maid of Honour','Best Man','Bridesmaid','Groomsman','Principal Sponsor','Guest']
+      .filter(function(r){ return r !== g.role; })
+      .map(function(r){ return '<option>' + r + '</option>'; }).join(''));
+  role.disabled = g.couple;
+  $('roleHint').hidden = !g.couple;
+
+  Array.prototype.forEach.call($('plusSeg').children, function(b){
+    b.setAttribute('aria-pressed', String(Number(b.dataset.v) === g.plus));
+  });
+  $('plusState').hidden = !g.plusState;
+  if (g.plusState) $('plusState').textContent = g.plusState;
+
+  setSwitch('consent', g.consent); setSwitch('faceblock', g.faceblock); setSwitch('norecog', g.norecog);
+
+  $('nameV').textContent    = fullName(g);
+  $('contactV').textContent = g.email || 'None yet';
+  $('contactV').className   = 'v' + (g.email ? '' : ' empty');
+  $('f_email').value        = g.email;
+  $('f_prefix').value = g.prefix; $('f_first').value = g.first;
+  $('f_middle').value = g.middle; $('f_last').value  = g.last; $('f_suffix').value = g.suffix;
+  $('f_notes').value  = g.notes;
+  $('notesV').textContent = g.notes || 'None';
+  $('notesV').className   = 'v' + (g.notes ? '' : ' empty');
+
+  // The sign-in link needs an address. `inviteGuestByEmailAction` redirects
+  // with ?invite=no_email when there is none, so the row says so up front.
+  $('inviteV').textContent = g.email || 'No email yet';
+  $('inviteV').className   = 'v' + (g.email ? '' : ' empty');
+  $('inviteRow').dataset.toast = g.email
+    ? 'Sign-in link sent to ' + g.email + '.'
+    : 'No email on file — add one under Contact and save first.';
+
+  $('dangerZone').hidden     = g.couple;
+  $('foundationNote').hidden = !g.couple;
+
+  ['discName','discContact','discNotes'].forEach(function(d){ $(d).hidden = true; });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-disc]'), function(b){
+    b.setAttribute('aria-expanded','false');
+  });
+
+  paintStatus();
+  $('card').hidden = false;
+  $('scrim').hidden = false;
+  $('cardBody').scrollTop = 0;
+  paintRoster();
+  $('card').focus();
+}
+function close(){
+  cur = null;
+  $('card').hidden = true; $('scrim').hidden = true;
+  paintRoster();
+}
+function setSwitch(key, on){
+  var sw = document.querySelector('[data-sw="' + key + '"] .switch');
+  sw.setAttribute('aria-checked', String(!!on));
+}
+function toast(msg, bad){
+  var f = $('flash');
+  f.textContent = msg; f.className = 'flash' + (bad ? ' bad' : '');
+  clearTimeout(toast._t); toast._t = setTimeout(function(){ f.textContent = ''; f.className = 'flash'; }, 2800);
+}
+
+/* AUTOSAVE — every edit commits on its own; there is no Save button.
+   A required field that has been emptied is the one thing that cannot be
+   saved, so it says so instead of silently storing a blank name. */
+function touched(){
+  var first = $('f_first').value.trim(), last = $('f_last').value.trim();
+  if (!first || !last){
+    toast(!first ? 'First name is required' : 'Last name is required', true);
+    return;
+  }
+  var f = $('flash');
+  f.textContent = 'Saving\u2026'; f.className = 'flash saving';
+  clearTimeout(touched._t);
+  touched._t = setTimeout(function(){
+    f.textContent = '\u2713 Saved'; f.className = 'flash';
+    clearTimeout(touched._c);
+    touched._c = setTimeout(function(){ f.textContent = ''; }, 2200);
+  }, 380);
+}
+
+// ── wiring ──────────────────────────────────────────────────────────────
+document.addEventListener('click', function(e){
+  var t = e.target.closest ? e.target.closest('button') : null;
+  if (!t) return;
+
+  if (t.id === 'close' || t.id === 'back' || t.id === 'scrim'){ close(); return; }
+
+  if (t.dataset.phase){
+    document.body.className = t.dataset.phase;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-phase]'), function(b){
+      b.setAttribute('aria-pressed', String(b === t));
+    });
+    return;
+  }
+  if (t.dataset.disc){
+    var p = $(t.dataset.disc), openNow = p.hidden;
+    p.hidden = !openNow; t.setAttribute('aria-expanded', String(openNow));
+    return;
+  }
+  if (t.dataset.sw){
+    var sw = t.querySelector('.switch');
+    var on = sw.getAttribute('aria-checked') !== 'true';
+    sw.setAttribute('aria-checked', String(on));
+    if (cur) cur[t.dataset.sw === 'consent' ? 'consent' : t.dataset.sw] = on;
+    touched();
+    return;
+  }
+  if (t.parentElement && t.parentElement.id === 'rsvpSeg'){
+    Array.prototype.forEach.call(t.parentElement.children, function(b){
+      b.setAttribute('aria-pressed', String(b === t));
+    });
+    cur.rsvp = t.dataset.v; touched(); paintStatus(); paintRoster();
+    return;
+  }
+  if (t.parentElement && t.parentElement.id === 'plusSeg'){
+    Array.prototype.forEach.call(t.parentElement.children, function(b){
+      b.setAttribute('aria-pressed', String(b === t));
+    });
+    cur.plus = Number(t.dataset.v); touched(); paintStatus(); paintRoster();
+    return;
+  }
+  if (t.classList.contains('chip') && t.dataset.v){
+    t.setAttribute('aria-pressed', String(t.getAttribute('aria-pressed') !== 'true'));
+    touched();
+    return;
+  }
+  if (t.closest('#dangerZone')){
+    if (t.dataset.armed !== '1'){
+      t.dataset.armed = '1';
+      t.dataset.was = t.textContent;
+      t.textContent = 'Tap again to confirm';
+      setTimeout(function(){ t.dataset.armed = ''; t.textContent = t.dataset.was; }, 3500);
+      return;
+    }
+    t.dataset.armed = ''; t.textContent = t.dataset.was;
+    toast(t.dataset.toast);
+    return;
+  }
+  if (t.dataset.toast){ toast(t.dataset.toast); return; }
+});
+
+document.addEventListener('change', function(e){
+  if (!cur) return;
+  var id = e.target.id;
+  if (id === 'side')   cur.side   = e.target.value;
+  if (id === 'group')  cur.group  = e.target.value;
+  if (id === 'role')   cur.role   = e.target.value;
+  if (id === 'meal')   cur.meal   = e.target.value;
+  if (id === 'attire') cur.attire = e.target.value;
+  if (id === 'f_first' || id === 'f_last' || id === 'f_prefix' || id === 'f_middle' || id === 'f_suffix'){
+    cur.prefix = $('f_prefix').value; cur.first = $('f_first').value; cur.middle = $('f_middle').value;
+    cur.last = $('f_last').value; cur.suffix = $('f_suffix').value;
+    $('cardName').textContent = fullName(cur); $('nameV').textContent = fullName(cur);
+  }
+  if (id === 'f_email'){
+    cur.email = e.target.value;
+    $('contactV').textContent = cur.email || 'None yet';
+    $('contactV').className   = 'v' + (cur.email ? '' : ' empty');
+  }
+  if (id === 'f_notes'){
+    cur.notes = e.target.value;
+    $('notesV').textContent = cur.notes || 'None';
+    $('notesV').className   = 'v' + (cur.notes ? '' : ' empty');
+  }
+  touched(); paintStatus(); paintRoster();
+});
+
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape' && !$('card').hidden) close();
+});
+
+function syncChrome(){
+  var h = document.querySelector('.proto').offsetHeight;
+  document.documentElement.style.setProperty('--proto', h + 'px');
+}
+addEventListener('resize', syncChrome);
+syncChrome();
+paintRoster();
+</script>
+</body>
+</html>
