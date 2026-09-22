@@ -57,6 +57,11 @@
   --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
   --font-mono:ui-monospace,'SF Mono',Menlo,monospace;
   --r-lg:20px; --r-md:14px; --r-sm:10px;
+  /* motion */
+  --ease:cubic-bezier(.22,.8,.26,1);
+  --ease-out:cubic-bezier(.16,1,.3,1);
+  --ease-in:cubic-bezier(.4,0,.9,.35);
+  --dur:.34s; --dur-s:.19s;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -94,7 +99,9 @@ a{color:inherit}
 .grow{display:flex;align-items:center;gap:11px;width:100%;padding:11px 13px;border:0;border-bottom:1px solid var(--line-soft);
   background:#fff;text-align:left;border-left:3px solid transparent}
 .rows .grow:last-child{border-bottom:0}
+.grow{transition:background-color .22s var(--ease),border-left-color .26s var(--ease)}
 .grow:hover{background:rgba(197,160,89,.06)}
+.grow:active{background:rgba(197,160,89,.12)}
 .grow[aria-current="true"]{background:var(--gold-wash);border-left-color:var(--gold)}
 .av{width:36px;height:36px;flex:0 0 36px;border-radius:999px;background:var(--gold-wash);color:var(--gold-deep);
   display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.02em}
@@ -108,14 +115,20 @@ a{color:inherit}
 
 /* ---------- the card: phone = full screen, desktop = right drawer ---------- */
 .scrim{position:fixed;top:var(--proto,40px);left:0;right:0;bottom:0;z-index:49;border:0;
-  background:rgba(30,34,41,.40);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+  background:rgba(30,34,41,.40);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+  animation:fadein .34s var(--ease-out) both}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+@keyframes fadeout{from{opacity:1}to{opacity:0}}
+.scrim.closing{animation:fadeout .22s var(--ease-in) both}
 
 .card{position:fixed;top:var(--proto,40px);left:var(--peek,58px);right:0;bottom:0;z-index:50;
   background:var(--surface);display:flex;flex-direction:column;
   border-left:1px solid var(--line);border-radius:24px 0 0 24px;
   box-shadow:-18px 0 40px -20px rgba(30,34,41,.45);
-  animation:slidein .26s cubic-bezier(.2,.7,.2,1)}
-@keyframes slidein{from{transform:translateX(30px);opacity:.35}to{transform:none;opacity:1}}
+  animation:slidein .40s var(--ease-out) both;will-change:transform,opacity}
+@keyframes slidein{from{transform:translateX(34px);opacity:0}to{transform:none;opacity:1}}
+@keyframes slideout{from{transform:none;opacity:1}to{transform:translateX(34px);opacity:0}}
+.card.closing{animation:slideout .22s var(--ease-in) both}
 .card[hidden]{display:none!important}
 
 /* card head — sticky, carries identity + the one status line + close */
@@ -124,7 +137,9 @@ a{color:inherit}
 .iconbtn{width:40px;height:40px;border:0;background:transparent;border-radius:999px;display:inline-flex;
   align-items:center;justify-content:center;color:var(--ink-soft);font-size:17px;line-height:1}
 .iconbtn:hover{background:var(--line-soft);color:var(--ink)}
-.card-head .flash{margin-left:auto;font-size:12px;color:var(--sage-ink);white-space:nowrap}
+.card-head .flash{margin-left:auto;font-size:12px;color:var(--sage-ink);white-space:nowrap;
+  transition:opacity .2s var(--ease),transform .2s var(--ease)}
+.card-head .flash:empty{opacity:0;transform:translateY(-3px)}
 .card-head .flash.saving{color:var(--ink-faint)}
 .card-head .flash.bad{color:var(--cta)}
 .card-head .pid{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--ink-faint)}
@@ -138,19 +153,33 @@ a{color:inherit}
 .card-body{flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
   padding:4px 14px 20px;display:flex;flex-direction:column;gap:6px}
 
-.sec{display:flex;flex-direction:column;gap:8px;padding:13px 0 3px;border-top:1px solid var(--line-soft)}
+.sec{display:flex;flex-direction:column;gap:8px;padding:13px 0 3px;border-top:1px solid var(--line-soft);
+  animation:rise .44s var(--ease-out) both;animation-delay:calc(var(--i,0) * 26ms)}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 .sec:first-child{border-top:0}
 .sec > h3{font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);font-weight:500}
 .hint{font-size:11.5px;color:var(--ink-faint)}
+.sublab{font-size:11px;letter-spacing:.04em;color:var(--ink-faint)}
 
 /* segmented control (RSVP, extra seats) */
-.seg{display:flex;gap:4px;background:var(--soft);border-radius:999px;padding:4px}
-.seg button{flex:1;height:36px;border:0;border-radius:999px;background:transparent;font-size:13px;white-space:nowrap;padding:0 6px}
-.seg button[aria-pressed="true"]{background:#fff;font-weight:600;box-shadow:0 1px 3px rgba(30,34,41,.14)}
-.seg.rsvp button[aria-pressed="true"][data-v="attending"]{background:var(--sage-fill);color:var(--sage-ink)}
-.seg.rsvp button[aria-pressed="true"][data-v="pending"]{background:var(--warn-fill);color:var(--warn-ink)}
-.seg.rsvp button[aria-pressed="true"][data-v="maybe"]{background:var(--sky-fill);color:var(--sky-ink)}
-.seg.rsvp button[aria-pressed="true"][data-v="declined"]{background:var(--blush-fill);color:var(--blush-ink)}
+.seg{position:relative;display:flex;gap:4px;background:var(--soft);border-radius:999px;padding:4px}
+.seg button{position:relative;z-index:1;flex:1;height:36px;border:0;border-radius:999px;background:transparent;
+  font-size:13px;font-weight:500;white-space:nowrap;padding:0 6px;color:var(--ink-soft);
+  transition:color .22s var(--ease)}
+.seg button:active{transform:scale(.94)}
+.seg .thumb{position:absolute;top:4px;bottom:4px;left:0;border-radius:999px;background:#fff;
+  box-shadow:0 1px 3px rgba(30,34,41,.16);pointer-events:none;
+  transition:transform .34s var(--ease),width .34s var(--ease),background-color .24s var(--ease)}
+.seg .thumb.cold{transition:none}
+.seg button[aria-pressed="true"]{color:var(--ink);font-weight:600}
+.seg.rsvp[data-v="attending"] .thumb{background:var(--sage-fill)}
+.seg.rsvp[data-v="pending"]   .thumb{background:var(--warn-fill)}
+.seg.rsvp[data-v="maybe"]     .thumb{background:var(--sky-fill)}
+.seg.rsvp[data-v="declined"]  .thumb{background:var(--blush-fill)}
+.seg.rsvp[data-v="attending"] button[aria-pressed="true"]{color:var(--sage-ink)}
+.seg.rsvp[data-v="pending"]   button[aria-pressed="true"]{color:var(--warn-ink)}
+.seg.rsvp[data-v="maybe"]     button[aria-pressed="true"]{color:var(--sky-ink)}
+.seg.rsvp[data-v="declined"]  button[aria-pressed="true"]{color:var(--blush-ink)}
 .locked{display:flex;align-items:center;gap:8px;height:44px;padding:0 14px;border-radius:999px;
   background:var(--sage-fill);color:var(--sage-ink);font-size:14px}
 .locked .lk{margin-left:auto;font-size:11px;opacity:.7}
@@ -158,7 +187,9 @@ a{color:inherit}
 /* chips (invited to, tags) */
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{height:32px;padding:0 13px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13px;
-  display:inline-flex;align-items:center;gap:5px}
+  display:inline-flex;align-items:center;gap:5px;
+  transition:background-color .22s var(--ease),border-color .22s var(--ease),color .22s var(--ease),transform .13s var(--ease)}
+.chip:active{transform:scale(.94)}
 .chip[aria-pressed="true"]{border-color:var(--gold);background:var(--gold-wash);color:var(--gold-deep);font-weight:600}
 .chip.ro{height:28px;font-size:12px;border-style:dashed;color:var(--ink-soft);cursor:default}
 .chip.ro.bride{background:var(--blush-fill);border-color:transparent;color:var(--blush-ink)}
@@ -169,15 +200,21 @@ a{color:inherit}
 .row{width:100%;min-height:50px;display:flex;align-items:center;gap:12px;padding:9px 13px;border:0;
   border-bottom:1px solid var(--line-soft);background:#fff;text-align:left;font-size:14px}
 .rowset .row:last-child{border-bottom:0}
+.row{transition:background .2s var(--ease)}
 .row:hover{background:var(--soft)}
+.row:active{background:var(--line-soft)}
+.row .caret{transition:transform .3s var(--ease),color .2s}
+.row[aria-expanded="true"] .caret{color:var(--gold-deep)}
 .row .lbl{flex:0 0 auto;color:var(--ink)}
 .row .v{margin-left:auto;color:var(--ink-faint);text-align:right;min-width:0;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:62%}
 .row .v.empty{font-style:italic;opacity:.75}
 .row .caret{flex:0 0 auto;color:var(--ink-faint);font-size:13px}
 .row[aria-expanded="true"] .caret{transform:rotate(90deg)}
-.panelbody{padding:12px 13px 14px;background:var(--soft);border-bottom:1px solid var(--line-soft);
-  display:flex;flex-direction:column;gap:11px}
+.panelbody{max-height:0;opacity:0;overflow:hidden;padding:0 13px;background:var(--soft);
+  border-bottom:1px solid var(--line-soft);display:flex;flex-direction:column;gap:11px;
+  transition:max-height .36s var(--ease),opacity .26s var(--ease),padding .36s var(--ease)}
+.panelbody.open{opacity:1;padding:12px 13px 14px}
 .rowset .panelbody:last-child{border-bottom:0}
 
 /* fields */
@@ -195,25 +232,33 @@ a{color:inherit}
 
 /* switches */
 .sw{display:flex;align-items:center;gap:11px;padding:10px 13px;border:1px solid var(--line);
-  border-radius:var(--r-md);background:#fff;width:100%;text-align:left}
+  border-radius:var(--r-md);background:#fff;width:100%;text-align:left;
+  transition:border-color .22s var(--ease),background-color .22s var(--ease)}
+.sw:hover{border-color:var(--gold)}
 .sw .txt{min-width:0;flex:1}
 .sw .txt b{display:block;font-weight:500;font-size:14px}
 .sw .txt small{color:var(--ink-faint);font-size:11.5px}
 .switch{width:44px;height:26px;flex:0 0 44px;border:0;border-radius:999px;background:#D9D3C8;padding:3px;display:flex}
-.switch::after{content:"";width:20px;height:20px;border-radius:999px;background:#fff;transition:transform .15s}
+.switch{transition:background-color .26s var(--ease)}
+.switch::after{content:"";width:20px;height:20px;border-radius:999px;background:#fff;
+  box-shadow:0 1px 2px rgba(30,34,41,.25);transition:transform .3s var(--ease)}
 .switch[aria-checked="true"]{background:var(--gold)}
 .switch[aria-checked="true"]::after{transform:translateX(18px)}
 
 /* invitation / QR */
 .qr{display:flex;gap:12px;align-items:flex-start;padding:13px;border:1px solid var(--line);border-radius:var(--r-md);background:#fff}
 .qr svg{flex:0 0 88px;width:88px;height:88px;border-radius:var(--r-sm);border:1px solid var(--line-soft)}
+.qr svg path{animation:qrIn .5s var(--ease-out) both;animation-delay:.12s;transform-origin:50% 50%}
+@keyframes qrIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
 .qr .qt{min-width:0}
 .qr .qt b{display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);font-weight:500}
 .qr .qt p{margin:5px 0 0;font-size:12.5px;color:var(--ink-soft);line-height:1.4}
 .strip{display:flex;gap:6px;flex-wrap:wrap}
 .strip button{height:36px;padding:0 13px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13px;
   display:inline-flex;align-items:center;gap:6px}
+.strip button{transition:border-color .2s var(--ease),color .2s var(--ease),transform .13s var(--ease)}
 .strip button:hover{border-color:var(--gold);color:var(--gold-deep)}
+.strip button:active{transform:scale(.95)}
 
 /* danger + save */
 .danger{display:flex;flex-direction:column;gap:7px;padding-bottom:6px}
@@ -226,13 +271,14 @@ a{color:inherit}
 .card-body{padding-bottom:calc(22px + env(safe-area-inset-bottom))}
 
 /* ---------- PHASE ORDER: one DOM, reordered by CSS ---------- */
-.s-rsvp{order:1}.s-invite{order:2}.s-blocks{order:3}.s-seat{order:4}.s-party{order:5}
-.s-extra{order:6}.s-privacy{order:7}.s-name{order:8}.s-contact{order:9}.s-notes{order:10}
-.s-tags{order:11}.s-danger{order:12}
-body.after .s-seat{order:1} body.after .s-invite{order:2} body.after .s-rsvp{order:3}
-body.after .s-privacy{order:4} body.after .s-blocks{order:5} body.after .s-extra{order:6}
-body.after .s-party{order:7} body.after .s-name{order:8} body.after .s-contact{order:9}
-body.after .s-notes{order:10} body.after .s-tags{order:11} body.after .s-danger{order:12}
+/* BEFORE the day — the QR leads (it is what you send them), then who they are,
+   then what you change most. */
+.s-invite{order:1}.s-details{order:2}.s-rsvp{order:3}.s-seat{order:4}
+.s-party{order:5}.s-privacy{order:6}.s-tags{order:7}.s-danger{order:8}
+/* ON THE DAY / AFTER — the seat leads (finding people); RSVP is settled. */
+body.after .s-seat{order:1} body.after .s-invite{order:2} body.after .s-details{order:3}
+body.after .s-rsvp{order:4} body.after .s-party{order:5} body.after .s-privacy{order:6}
+body.after .s-tags{order:7} body.after .s-danger{order:8}
 /* after the day RSVP is settled — it folds to one line */
 .fold{display:none}
 body.after .s-rsvp .full{display:none}
@@ -277,7 +323,9 @@ body.after .s-rsvp .fold{display:flex}
   .card-head .close{display:none}
 }
 @media (prefers-reduced-motion:reduce){
-  .card{animation:none!important}
+  *,*::before,*::after{
+    animation-duration:.001ms!important;animation-delay:0ms!important;
+    transition-duration:.001ms!important;transition-delay:0ms!important}
 }
 </style>
 </head>
@@ -289,7 +337,7 @@ body.after .s-rsvp .fold{display:flex}
     <button class="pill" data-phase="before" aria-pressed="true">Before the day</button>
     <button class="pill" data-phase="after" aria-pressed="false">On the day / after</button>
   </span>
-  <span class="note">Resize the window across 1024px &middot; Esc closes the card</span>
+  <span class="note">Resize across 1024px &middot; Esc closes</span>
 </div>
 
 <div class="shell-top">
@@ -348,40 +396,13 @@ body.after .s-rsvp .fold{display:flex}
 
     <div class="card-body" id="cardBody">
 
-      <!-- 1 · RSVP ------------------------------------------------------->
-      <section class="sec s-rsvp">
-        <h3>RSVP</h3>
-        <div class="full" id="rsvpFull">
-          <div class="seg rsvp" id="rsvpSeg" hidden>
-            <button data-v="attending">Attending</button>
-            <button data-v="pending">Pending</button>
-            <button data-v="maybe">Maybe</button>
-            <button data-v="declined">Declined</button>
-          </div>
-          <div class="locked" id="rsvpLocked">&#10003; Attending <span class="lk">Foundation &middot; always</span></div>
-          <p class="hint" id="recordedAt" hidden>Answer recorded 14 Aug 2026, 9:02 PM</p>
-          <div class="fields two" style="margin-top:10px">
-            <label class="f"><span>Meal</span>
-              <select id="meal">
-                <option>No preference</option><option>Beef</option><option>Chicken</option>
-                <option>Fish</option><option>Vegetarian</option><option>Vegan</option><option>Kids</option>
-              </select>
-            </label>
-          </div>
-        </div>
-        <button class="row fold" style="border:1px solid var(--line);border-radius:var(--r-md)">
-          <span class="lbl">RSVP</span><span class="v" id="rsvpFoldV">Attending &middot; No preference</span><span class="caret">&#8250;</span>
-        </button>
-      </section>
-
-      <!-- 2 · INVITATION ------------------------------------------------->
+      <!-- 1 · INVITATION — the QR sits above the name (owner 2026-09-22) ---->
       <section class="sec s-invite">
-        <h3>Invitation</h3>
         <div class="qr">
           <svg id="qrArt" viewBox="0 0 100 100" aria-hidden="true"></svg>
           <div class="qt">
             <b>Personal QR</b>
-            <p id="qrBlurb">Opens Claire&rsquo;s own page &mdash; invitation &amp; RSVP, their gallery, find-my-seat.</p>
+            <p id="qrBlurb">Opens their own page &mdash; invitation, gallery, find-my-seat.</p>
           </div>
         </div>
         <div class="strip">
@@ -399,77 +420,147 @@ body.after .s-rsvp .fold{display:flex}
         </div>
       </section>
 
-      <!-- 3 · INVITED TO -------------------------------------------------->
-      <section class="sec s-blocks">
-        <h3>Invited to</h3>
-        <div class="chips" id="blocks">
-          <button class="chip" data-v="ceremony" aria-pressed="true">Ceremony</button>
-          <button class="chip" data-v="reception" aria-pressed="true">Reception</button>
-          <button class="chip" data-v="cocktails" aria-pressed="true">Cocktails</button>
-          <button class="chip" data-v="after_party" aria-pressed="true">After-party</button>
-          <button class="chip" data-v="rehearsal_dinner" aria-pressed="true">Rehearsal dinner</button>
+      <!-- 2 · DETAILS — name, contact and the private note: three rows that open -->
+      <section class="sec s-details">
+        <h3>Details</h3>
+        <div class="rowset">
+          <button class="row" data-disc="discName" aria-expanded="false">
+            <span class="lbl">Name</span><span class="v" id="nameV"></span><span class="caret">&#8250;</span>
+          </button>
+          <div class="panelbody" id="discName">
+            <div class="fields three">
+              <label class="f"><span>Prefix</span><input id="f_prefix"></label>
+              <label class="f"><span>First <i class="req">*</i></span><input id="f_first"></label>
+              <label class="f"><span>Middle</span><input id="f_middle"></label>
+            </div>
+            <div class="fields three">
+              <label class="f"><span>Last <i class="req">*</i></span><input id="f_last"></label>
+              <label class="f"><span>Suffix</span><input id="f_suffix"></label>
+              <label class="f"><span>Display name</span><input id="f_display" placeholder="Tito Boy &amp; Tita Cora"></label>
+            </div>
+          </div>
+
+          <button class="row" data-disc="discContact" aria-expanded="false">
+            <span class="lbl">Email &amp; mobile</span><span class="v" id="contactV"></span><span class="caret">&#8250;</span>
+          </button>
+          <div class="panelbody" id="discContact">
+            <div class="fields two">
+              <label class="f"><span>Email</span><input id="f_email" type="email"></label>
+              <label class="f"><span>Mobile</span><input id="f_mobile" placeholder="+63 &hellip;"></label>
+            </div>
+          </div>
+
+          <button class="row" data-disc="discNotes" aria-expanded="false">
+            <span class="lbl">Private note</span><span class="v empty" id="notesV">None</span><span class="caret">&#8250;</span>
+          </button>
+          <div class="panelbody" id="discNotes">
+            <label class="f"><textarea id="f_notes"></textarea></label>
+            <p class="hint">Only you and your co-hosts can see this.</p>
+          </div>
         </div>
       </section>
 
-      <!-- 4 · SEAT -------------------------------------------------------->
+      <!-- 3 · RSVP — coming, to what, and what they eat.
+           Dietary sits WITH meal (owner 2026-09-22); it was filed under contact. -->
+      <section class="sec s-rsvp">
+        <h3>RSVP</h3>
+        <div class="full">
+          <div class="seg rsvp" id="rsvpSeg" hidden>
+            <button data-v="attending">Attending</button>
+            <button data-v="pending">Pending</button>
+            <button data-v="maybe">Maybe</button>
+            <button data-v="declined">Declined</button>
+          </div>
+          <div class="locked" id="rsvpLocked">&#10003; Attending <span class="lk">Foundation &middot; always</span></div>
+          <p class="hint" id="recordedAt" hidden></p>
+          <span class="sublab">Invited to</span>
+          <div class="chips" id="blocks">
+            <button class="chip" data-v="ceremony" aria-pressed="true">Ceremony</button>
+            <button class="chip" data-v="reception" aria-pressed="true">Reception</button>
+            <button class="chip" data-v="cocktails" aria-pressed="true">Cocktails</button>
+            <button class="chip" data-v="after_party" aria-pressed="true">After-party</button>
+            <button class="chip" data-v="rehearsal_dinner" aria-pressed="true">Rehearsal dinner</button>
+          </div>
+          <div class="fields two">
+            <label class="f"><span>Meal</span>
+              <select id="meal">
+                <option>No preference</option><option>Beef</option><option>Chicken</option>
+                <option>Fish</option><option>Vegetarian</option><option>Vegan</option><option>Kids</option>
+              </select>
+            </label>
+            <label class="f"><span>Dietary</span>
+              <input id="f_diet" placeholder="halal &middot; nut allergy">
+            </label>
+          </div>
+        </div>
+        <button class="row fold" style="border:1px solid var(--line);border-radius:var(--r-md)">
+          <span class="lbl">RSVP</span><span class="v" id="rsvpFoldV"></span><span class="caret">&#8250;</span>
+        </button>
+      </section>
+
+      <!-- 4 · SEAT — where they sit, how many seats, what they wear in 3D -->
       <section class="sec s-seat">
         <h3>Seat</h3>
         <div class="rowset">
           <button class="row" data-toast="[Opens the seating chart at Table 3]">
-            <span class="lbl">Table</span><span class="v" id="seatV">~Table 3 &middot; suggested</span><span class="caret">&#8250;</span>
+            <span class="lbl">Table</span><span class="v" id="seatV"></span><span class="caret">&#8250;</span>
           </button>
         </div>
+        <span class="sublab">Extra seats</span>
+        <div class="seg" id="plusSeg">
+          <button data-v="0" aria-pressed="true">None</button>
+          <button data-v="1">+1</button><button data-v="2">+2</button>
+          <button data-v="3">+3</button><button data-v="4">+4</button>
+        </div>
+        <p class="hint" id="plusState" hidden></p>
         <div class="fields two">
           <label class="f"><span>Attire &middot; 3D seat plan</span>
-            <select id="attire"><option>Neutral / auto</option><option selected>Gown</option><option>Suit</option></select>
+            <select id="attire"><option>Neutral / auto</option><option>Gown</option><option>Suit</option></select>
           </label>
         </div>
       </section>
 
-      <!-- 5 · PARTY ------------------------------------------------------->
+      <!-- 5 · PARTY — side, group, role and how they are related.
+           Relationship and tea-ceremony order live HERE, not under contact. -->
       <section class="sec s-party">
         <h3>Party</h3>
         <div class="fields three">
           <label class="f"><span>Side <i class="req">*</i></span>
             <select id="side">
-              <option value="Groom's side">Groom&rsquo;s side</option>
-              <option value="Bride's side" selected>Bride&rsquo;s side</option>
+              <option value="Groom&#39;s side">Groom&rsquo;s side</option>
+              <option value="Bride&#39;s side">Bride&rsquo;s side</option>
               <option value="Both sides">Both sides</option>
             </select>
           </label>
           <label class="f"><span>Group <i class="req">*</i></span>
             <select id="group">
               <option>Family</option><option>Friends</option><option>Work</option>
-              <option>School</option><option>Officiant</option><option selected>Other</option>
+              <option>School</option><option>Officiant</option><option>Other</option>
             </select>
           </label>
-          <label class="f"><span>Role</span>
-            <select id="role" disabled><option>Bride</option></select>
-          </label>
+          <label class="f"><span>Role</span><select id="role"></select></label>
         </div>
         <p class="hint" id="roleHint">Bride &amp; groom are set when the event is made &mdash; the role is locked.</p>
-      </section>
-
-      <!-- 6 · EXTRA SEATS -------------------------------------------------->
-      <section class="sec s-extra">
-        <h3>Extra seats</h3>
-        <div class="seg" id="plusSeg">
-          <button data-v="0" aria-pressed="true">None</button>
-          <button data-v="1">+1</button><button data-v="2">+2</button>
-          <button data-v="3">+3</button><button data-v="4">+4</button>
+        <div class="fields two">
+          <label class="f"><span>Relationship</span>
+            <input id="f_rel" placeholder="e.g. Eldest Uncle">
+          </label>
+          <!-- Chinese / Tsinoy rites only — hidden on every other ceremony -->
+          <label class="f" id="teaWrap" hidden><span>Tea-ceremony order</span>
+            <input id="f_tea" type="number" placeholder="Lower serves first">
+          </label>
         </div>
-        <p class="hint" id="plusState" hidden>Awaiting +1 to confirm their name</p>
       </section>
 
-      <!-- 7 · PRIVACY ------------------------------------------------------>
+      <!-- 6 · PRIVACY -->
       <section class="sec s-privacy">
         <h3>Privacy</h3>
         <button class="sw" data-sw="consent">
-          <span class="txt"><b>OK to tag in photos</b><small>RA 10173 &middot; asked at RSVP</small></span>
+          <span class="txt"><b>OK to tag in photos</b><small>RA 10173</small></span>
           <span class="switch" aria-checked="true" role="switch"></span>
         </button>
         <button class="sw" data-sw="faceblock">
-          <span class="txt"><b>Blur faces on the Live Wall</b><small>FaceBlock &mdash; blurs every face in the shot</small></span>
+          <span class="txt"><b>Blur faces on the Live Wall</b><small>Blurs every face in the shot</small></span>
           <span class="switch" aria-checked="false" role="switch"></span>
         </button>
         <button class="sw" data-sw="norecog">
@@ -478,74 +569,13 @@ body.after .s-rsvp .fold{display:flex}
         </button>
       </section>
 
-      <!-- 8 · NAME (folds to one line) ------------------------------------>
-      <section class="sec s-name">
-        <h3>Name</h3>
-        <div class="rowset">
-          <button class="row" data-disc="discName" aria-expanded="false">
-            <span class="lbl">Full name</span><span class="v" id="nameV">Ms. Claire Estoras Buanhog</span><span class="caret">&#8250;</span>
-          </button>
-          <div class="panelbody" id="discName" hidden>
-            <div class="fields three">
-              <label class="f"><span>Prefix</span><input id="f_prefix" value="Ms."></label>
-              <label class="f"><span>First name <i class="req">*</i></span><input id="f_first" value="Claire"></label>
-              <label class="f"><span>Middle name</span><input id="f_middle" value="Estoras"></label>
-            </div>
-            <div class="fields three">
-              <label class="f"><span>Last name <i class="req">*</i></span><input id="f_last" value="Buanhog"></label>
-              <label class="f"><span>Suffix</span><input id="f_suffix" value=""></label>
-              <label class="f"><span>Display name</span><input id="f_display" placeholder="e.g. Tito Boy &amp; Tita Cora"></label>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 9 · CONTACT (folds) --------------------------------------------->
-      <section class="sec s-contact">
-        <h3>Contact</h3>
-        <div class="rowset">
-          <button class="row" data-disc="discContact" aria-expanded="false">
-            <span class="lbl">Email &amp; mobile</span><span class="v" id="contactV">buanhogclaire@gmail.com</span><span class="caret">&#8250;</span>
-          </button>
-          <div class="panelbody" id="discContact" hidden>
-            <div class="fields two">
-              <label class="f"><span>Email</span><input id="f_email" type="email" value="buanhogclaire@gmail.com"></label>
-              <label class="f"><span>Mobile</span><input id="f_mobile" placeholder="+63 &hellip;"></label>
-            </div>
-            <div class="fields two">
-              <label class="f"><span>Dietary</span><input id="f_diet" placeholder="halal &middot; nut allergy &middot; &hellip;"></label>
-              <label class="f"><span>Relationship</span><input id="f_rel" placeholder="e.g. Eldest Uncle"></label>
-            </div>
-            <!-- Chinese / Tsinoy weddings only — hidden on every other rite -->
-            <div class="fields two" id="teaWrap" hidden>
-              <label class="f"><span>Tea-ceremony order</span><input id="f_tea" type="number" placeholder="Lower serves first"></label>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 10 · NOTES (folds) ---------------------------------------------->
-      <section class="sec s-notes">
-        <h3>Notes</h3>
-        <div class="rowset">
-          <button class="row" data-disc="discNotes" aria-expanded="false">
-            <span class="lbl">Private note</span><span class="v empty" id="notesV">None</span><span class="caret">&#8250;</span>
-          </button>
-          <div class="panelbody" id="discNotes" hidden>
-            <label class="f"><textarea id="f_notes" placeholder="Only you and your co-hosts can see this."></textarea></label>
-            <p class="hint">Only you and your co-hosts can see this. Claire never sees it.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- 11 · TAGS (auto, read-only) ------------------------------------->
+      <!-- 7 · TAGS — read-only, set by everything above -->
       <section class="sec s-tags">
-        <h3>Tags</h3>
         <div class="chips" id="tags"></div>
-        <p class="hint">Set by side, group, role, table and groups above &mdash; not typed.</p>
+        <p class="hint">Set automatically &mdash; not typed.</p>
       </section>
 
-      <!-- 12 · DANGER ----------------------------------------------------->
+      <!-- 8 · REMOVE -->
       <section class="sec s-danger">
         <div class="danger" id="dangerZone" hidden>
           <button data-toast="[Removes the guest &mdash; undo snackbar on the roster]">Remove guest</button>
@@ -636,6 +666,99 @@ function paintQr(seedStr){
 
 // ── the card ────────────────────────────────────────────────────────────
 function $(id){ return document.getElementById(id); }
+var REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* The sliding thumb under a segmented control. One per .seg, created once. */
+function initSegs(){
+  Array.prototype.forEach.call(document.querySelectorAll('.seg'), function(seg){
+    if (seg.querySelector('.thumb')) return;
+    var th = document.createElement('span');
+    th.className = 'thumb cold';
+    seg.insertBefore(th, seg.firstChild);
+  });
+}
+function moveThumb(seg, animate){
+  var th = seg.querySelector('.thumb');
+  var b  = seg.querySelector('button[aria-pressed="true"]');
+  if (!th) return;
+  if (!b || !seg.offsetWidth){ th.style.opacity = '0'; return; }
+  th.style.opacity = '1';
+  if (!animate) th.classList.add('cold');
+  th.style.width = b.offsetWidth + 'px';
+  th.style.transform = 'translateX(' + b.offsetLeft + 'px)';
+  seg.dataset.v = b.dataset.v || '';
+  if (!animate) requestAnimationFrame(function(){ th.classList.remove('cold'); });
+}
+function moveAllThumbs(animate){
+  Array.prototype.forEach.call(document.querySelectorAll('.seg'), function(seg){
+    moveThumb(seg, animate);
+  });
+}
+
+/* Stagger follows what you SEE, not source order — so the cascade still runs
+   top to bottom after the phase switch reorders the sections. */
+function restagger(){
+  var secs = Array.prototype.slice.call(document.querySelectorAll('.card-body .sec'));
+  secs.sort(function(a,b){
+    return (parseInt(getComputedStyle(a).order,10)||0) - (parseInt(getComputedStyle(b).order,10)||0);
+  });
+  secs.forEach(function(el,i){ el.style.setProperty('--i', i); });
+  return secs;
+}
+/* Re-run the rise cascade (card opened, or swapped to another guest). */
+function replayRise(){
+  if (REDUCED) return;
+  var secs = document.querySelectorAll('.card-body .sec');
+  Array.prototype.forEach.call(secs, function(el){ el.style.animation = 'none'; });
+  void $('cardBody').offsetWidth;
+  Array.prototype.forEach.call(secs, function(el){ el.style.animation = ''; });
+}
+
+/* Height-animated disclosure — measured, so it works at both widths. */
+function toggleDisc(btn){
+  var p = $(btn.dataset.disc);
+  var opening = !p.classList.contains('open');
+  if (opening){
+    p.classList.add('open');
+    p.style.maxHeight = 'none';
+    var h = p.scrollHeight;
+    p.style.maxHeight = '0px';
+    void p.offsetHeight;
+    p.style.maxHeight = h + 'px';
+  } else {
+    p.style.maxHeight = p.scrollHeight + 'px';
+    void p.offsetHeight;
+    p.classList.remove('open');
+    p.style.maxHeight = '0px';
+  }
+  btn.setAttribute('aria-expanded', String(opening));
+}
+function shutDiscs(){
+  ['discName','discContact','discNotes'].forEach(function(d){
+    var p = $(d); p.classList.remove('open'); p.style.maxHeight = '0px';
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-disc]'), function(b){
+    b.setAttribute('aria-expanded','false');
+  });
+}
+
+/* FLIP: the sections physically travel to their new places on a phase switch. */
+function setPhase(next){
+  var open = !$('card').hidden;
+  if (!open || REDUCED){ document.body.className = next; restagger(); return; }
+  var secs  = Array.prototype.slice.call(document.querySelectorAll('.card-body .sec'));
+  var first = secs.map(function(el){ return el.getBoundingClientRect().top; });
+  document.body.className = next;
+  restagger();
+  var last = secs.map(function(el){ return el.getBoundingClientRect().top; });
+  secs.forEach(function(el,i){
+    var dy = first[i] - last[i];
+    if (!dy) return;
+    el.animate([{ transform:'translateY(' + dy + 'px)' }, { transform:'none' }],
+               { duration:460, easing:'cubic-bezier(.22,.8,.26,1)' });
+  });
+  moveAllThumbs(false);
+}
 function fullName(g){ return [g.prefix,g.first,g.middle,g.last,g.suffix].filter(Boolean).join(' '); }
 
 function paintStatus(){
@@ -643,7 +766,7 @@ function paintStatus(){
   var bits = [RSVP_LABELS[g.rsvp], g.side, g.role, g.seat.replace(' · suggested','')];
   if (g.plus) bits.push('+' + g.plus + ' seat' + (g.plus>1?'s':''));
   $('statusline').innerHTML = bits.join('<span class="sep">&middot;</span>');
-  $('rsvpFoldV').textContent = RSVP_LABELS[g.rsvp] + ' · ' + $('meal').value;
+  $('rsvpFoldV').textContent = RSVP_LABELS[g.rsvp] + ' · ' + g.meal;
   var tags = [
     '<span class="chip ro ' + (g.side.indexOf('Bride')===0?'bride':'') + '">' + g.side + '</span>',
     '<span class="chip ro">' + g.group + '</span>',
@@ -704,6 +827,9 @@ function open(id){
   $('f_prefix').value = g.prefix; $('f_first').value = g.first;
   $('f_middle').value = g.middle; $('f_last').value  = g.last; $('f_suffix').value = g.suffix;
   $('f_notes').value  = g.notes;
+  $('f_diet').value   = g.diet || '';
+  $('f_rel').value    = g.rel || '';
+  $('f_mobile').value = g.mobile || '';
   $('notesV').textContent = g.notes || 'None';
   $('notesV').className   = 'v' + (g.notes ? '' : ' empty');
 
@@ -718,22 +844,37 @@ function open(id){
   $('dangerZone').hidden     = g.couple;
   $('foundationNote').hidden = !g.couple;
 
-  ['discName','discContact','discNotes'].forEach(function(d){ $(d).hidden = true; });
-  Array.prototype.forEach.call(document.querySelectorAll('[data-disc]'), function(b){
-    b.setAttribute('aria-expanded','false');
-  });
-
+  shutDiscs();
   paintStatus();
-  $('card').hidden = false;
+
+  var card = $('card'), wasOpen = !card.hidden;
+  card.classList.remove('closing');
+  $('scrim').classList.remove('closing');
+  card.hidden = false;
   $('scrim').hidden = false;
   $('cardBody').scrollTop = 0;
+
+  restagger();
+  initSegs();
+  // Measure only once the panel is laid out, else every width reads 0.
+  requestAnimationFrame(function(){ moveAllThumbs(false); });
+  // Already open on another guest → replay the cascade so the swap is visible.
+  if (wasOpen) replayRise();
+
   paintRoster();
-  $('card').focus();
+  card.focus();
 }
 function close(){
-  cur = null;
-  $('card').hidden = true; $('scrim').hidden = true;
-  paintRoster();
+  var c = $('card'), sc = $('scrim');
+  if (c.hidden) return;
+  c.classList.add('closing'); sc.classList.add('closing');
+  clearTimeout(close._t);
+  close._t = setTimeout(function(){
+    c.classList.remove('closing'); sc.classList.remove('closing');
+    c.hidden = true; sc.hidden = true;
+    cur = null;
+    paintRoster();
+  }, REDUCED ? 0 : 230);
 }
 function setSwitch(key, on){
   var sw = document.querySelector('[data-sw="' + key + '"] .switch');
@@ -772,17 +913,13 @@ document.addEventListener('click', function(e){
   if (t.id === 'close' || t.id === 'back' || t.id === 'scrim'){ close(); return; }
 
   if (t.dataset.phase){
-    document.body.className = t.dataset.phase;
     Array.prototype.forEach.call(document.querySelectorAll('[data-phase]'), function(b){
       b.setAttribute('aria-pressed', String(b === t));
     });
+    setPhase(t.dataset.phase);
     return;
   }
-  if (t.dataset.disc){
-    var p = $(t.dataset.disc), openNow = p.hidden;
-    p.hidden = !openNow; t.setAttribute('aria-expanded', String(openNow));
-    return;
-  }
+  if (t.dataset.disc){ toggleDisc(t); return; }
   if (t.dataset.sw){
     var sw = t.querySelector('.switch');
     var on = sw.getAttribute('aria-checked') !== 'true';
@@ -795,6 +932,7 @@ document.addEventListener('click', function(e){
     Array.prototype.forEach.call(t.parentElement.children, function(b){
       b.setAttribute('aria-pressed', String(b === t));
     });
+    moveThumb(t.parentElement, true);
     cur.rsvp = t.dataset.v; touched(); paintStatus(); paintRoster();
     return;
   }
@@ -802,6 +940,7 @@ document.addEventListener('click', function(e){
     Array.prototype.forEach.call(t.parentElement.children, function(b){
       b.setAttribute('aria-pressed', String(b === t));
     });
+    moveThumb(t.parentElement, true);
     cur.plus = Number(t.dataset.v); touched(); paintStatus(); paintRoster();
     return;
   }
@@ -843,6 +982,9 @@ document.addEventListener('change', function(e){
     $('contactV').textContent = cur.email || 'None yet';
     $('contactV').className   = 'v' + (cur.email ? '' : ' empty');
   }
+  if (id === 'f_diet')   cur.diet   = e.target.value;
+  if (id === 'f_rel')    cur.rel    = e.target.value;
+  if (id === 'f_mobile') cur.mobile = e.target.value;
   if (id === 'f_notes'){
     cur.notes = e.target.value;
     $('notesV').textContent = cur.notes || 'None';
@@ -859,8 +1001,21 @@ function syncChrome(){
   var h = document.querySelector('.proto').offsetHeight;
   document.documentElement.style.setProperty('--proto', h + 'px');
 }
-addEventListener('resize', syncChrome);
+addEventListener('resize', function(){
+  syncChrome();
+  moveAllThumbs(false);
+  ['discName','discContact','discNotes'].forEach(function(d){
+    var p = $(d);
+    if (p.classList.contains('open')){
+      p.style.maxHeight = 'none';
+      var h = p.scrollHeight;
+      p.style.maxHeight = h + 'px';
+    }
+  });
+});
 syncChrome();
+initSegs();
+restagger();
 paintRoster();
 </script>
 </body>
