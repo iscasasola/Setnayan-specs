@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One door — FINAL interactive prototype (2026-09-22)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<!--
+  ONE DOOR — redesign prototype (2026-09-22)
+  Routes it stands for:
+    the sign-in popup      app/_components/auth/sign-in-here-panel.tsx + app/login/_components/sign-in-card.tsx  (live: 44 words · 6 buttons)
+    /signup                app/signup/page.tsx  (live: 136 words couple · 107 vendor · 7 buttons · 5–6 inputs; PR #5867 adds the Terms box)
+    the basic profile      app/dashboard/(account)/profile/page.tsx, Profile tab  (live: 93 words · 5 tabs · 21 inputs)
+    /open-shop             app/open-shop/_components/open-shop-wizard.tsx  (live: 4 steps, one question each; 34 words on step 1)
+  One DOM, two layouts:
+    < 1024px  the popup is a full-width card over the dimmed page; the shop wizard is full screen with a back arrow
+    ≥ 1024px  shell (top bar + left rail); the popup is the centred greige card (owner 2026-07-18: one login, a popup, dimmed background,
+              anywhere); the wizard runs in the wide left column with "your shop at a glance" + the Open button sticky on the right
+  Prototype bar: Signed out / Signed in — the same page, the same doors, and step 3 of the wizard changes shape.
+  Real values: colours, fonts and radii read off setnayan.com/login 2026-09-22 · 16 service parents, the Photo & video and Attire branches
+  and their leaves, the 17 event types, every field label and error sentence read off /open-shop and the code · the fee line from
+  lib/booking-fee-disclosure.ts with the live schedule (5% of the first ₱100,000, then 1%, minimum ₱50; first 5 free).
+  Placeholders are marked [LIKE THIS].
+-->
+<style>
+:root{
+  --ink:#2C2A29; --ink-2:#6F6A62; --ink-3:#9A948A; --line:#E1DCD1; --line-2:#EFEBE4; --soft:#F4F1EC; --page:#FFFFFF;
+  --cta:#C24E25; --cta-2:#B04722; --gold:#A9834B; --deep:#5C4726;
+  --card:#F2F2F0; --card-ink:#54514D; --card-grey:#8C8884; --card-label:#A8A4A0; --card-line:rgba(42,43,46,.12);
+  --ok-bg:#E8F1E6; --ok:#2F6B35; --warn-bg:#FBEFE9; --warn-line:#E7B9A6;
+  --r-lg:22px; --r-md:14px; --r-sm:8px;
+  --sans:'Hanken Grotesk',ui-sans-serif,system-ui,sans-serif; --mono:'Space Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{font-family:var(--sans);background:var(--page);color:var(--ink);-webkit-font-smoothing:antialiased;font-size:15px}
+button,input,textarea,select{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer}
+h1,h2,h3{margin:0;font-weight:600}
+a{color:var(--cta-2)}
+.proto{position:sticky;top:0;z-index:60;display:flex;gap:8px;align-items:center;padding:8px 16px;background:#EDEAE4;font-size:12px;color:var(--ink-2)}
+.proto b{font-weight:600;color:var(--ink)}
+.pill{height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13px;white-space:nowrap}
+.pill[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.proto .pill{height:30px}
+.proto .sp{flex:1}
+
+.states{position:sticky;top:46px;z-index:59;display:flex;gap:6px;align-items:center;padding:6px 16px;background:#F6F3EE;border-bottom:1px solid var(--line);overflow-x:auto;white-space:nowrap;font-size:12px}
+.states b{color:var(--ink-2);font-weight:600;margin-right:4px}
+.states .pill{height:28px;font-size:12px;padding:0 10px}
+.states .pill.sim[aria-pressed="true"]{background:#8A3418;border-color:#8A3418}
+.states .grp{color:var(--ink-3);font-family:var(--mono);font-size:10px;letter-spacing:.1em;margin:0 4px 0 8px}
+body.hasStates .top{top:87px}
+.amber{background:#FFF3D6;border:1px solid #E9C46A;color:#6B4E00;border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.4}
+.amber b{color:#4A3600}
+.banner.warn{background:#FFF3D6;border:1px solid #E9C46A;color:#6B4E00}
+.banner .src{display:block;margin-top:4px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+.avail.wait{color:var(--card-grey)}
+.measure{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--card-grey)}
+.removed{font-size:11px;color:#8A3418;line-height:1.4}
+.removed s{opacity:.8}
+/* ---------- create event (stand-in of /dashboard/create-event, compressed) ---------- */
+.ev-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px}
+.ev-tile{height:72px;border:1px solid var(--line);border-radius:12px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px}
+.ev-tile[aria-pressed="true"]{border:2px solid var(--gold);background:#FBF6EE;font-weight:600}
+.ev-tile span:first-child{font-size:22px}
+.consent{border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;background:#fff;display:flex;flex-direction:column;gap:8px}
+/* ---------- summary (plain language, end of file) ---------- */
+.summary{max-width:760px;margin:0 auto;padding:40px 16px 80px;display:flex;flex-direction:column;gap:18px;border-top:1px solid var(--line)}
+.summary h2{font-size:20px} .summary h3{font-size:15px;margin-top:6px}
+.summary p,.summary li{font-size:14px;line-height:1.5;color:var(--ink)}
+.summary ol,.summary ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.summary .q b{display:block}
+body.wiz .summary,body.event .summary{display:flex}
+/* ---------- top bar (both layouts) ---------- */
+.top{display:flex;align-items:center;gap:12px;height:56px;padding:0 16px;border-bottom:1px solid var(--line-2);background:#fff;position:sticky;top:46px;z-index:20}
+.top .brand{font-weight:700;letter-spacing:.2em;font-size:13px;text-decoration:none;color:var(--ink)}
+.top .search{display:none}
+.top .sp{flex:1}
+.top .link{background:none;border:0;font-size:14px;font-weight:500;color:var(--ink);padding:8px 4px}
+.top .link.cta{color:var(--cta)}
+.avatar{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:4px 12px 4px 4px;background:#fff;font-size:13px;font-weight:500}
+.avatar .a{width:26px;height:26px;border-radius:999px;background:var(--gold);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+/* ---------- shell rail (desktop only) ---------- */
+.shell-rail{display:none}
+.app{display:block}
+
+/* ---------- public shop page (the page behind the popup) ---------- */
+.main{padding:16px 16px 48px;display:flex;flex-direction:column;gap:18px}
+.shop-head{display:flex;gap:14px;align-items:center}
+.mark{width:56px;height:56px;border-radius:14px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--ink-2)}
+.shop-head h1{font-size:22px;font-weight:600;line-height:1.1}
+.muted{color:var(--ink-2)} .small{font-size:12px;color:var(--ink-2)}
+.rows{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#fff}
+.row{min-height:52px;width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 16px;border:0;border-bottom:1px solid var(--line-2);background:#fff;font-size:15px;text-align:left}
+.rows .row:last-child{border-bottom:0}
+.row .v{color:var(--ink-2)} .row .v.gold{color:var(--gold)}
+.card{border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;display:flex;flex-direction:column;gap:10px;background:#fff}
+.btn{height:48px;border:0;border-radius:999px;background:var(--cta);color:#fff;font-size:14px;font-weight:600;padding:0 22px}
+.btn:hover{background:var(--cta-2)}
+.btn.dark{background:var(--ink)} .btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.sm{height:40px;font-size:13px;padding:0 16px}
+textarea.enq{width:100%;min-height:84px;border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;resize:vertical;font-size:15px}
+.toast{position:fixed;left:16px;right:16px;bottom:24px;z-index:70;border-radius:14px;background:var(--ink);color:#fff;padding:14px 16px;font-size:14px;display:none;justify-content:space-between;align-items:center;gap:12px}
+.toast.on{display:flex}
+.toast button{border:0;background:transparent;color:#E3C48C;font-weight:600}
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--cta-2)}
+
+/* ---------- THE POPUP — one card for sign in · create account · basic profile ---------- */
+.ov{position:fixed;inset:0;z-index:50;background:rgba(38,38,36,.46);backdrop-filter:blur(9px) saturate(1.05);-webkit-backdrop-filter:blur(9px) saturate(1.05);display:none;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto}
+.ov.on{display:flex}
+.pc{position:relative;width:100%;max-width:460px;background:var(--card);color:var(--card-ink);border-top:3px solid var(--cta);box-shadow:0 30px 90px rgba(20,22,26,.22);padding:30px 24px 22px;display:flex;flex-direction:column;gap:12px;margin:auto 0}
+.pc .x{position:absolute;top:10px;right:10px;width:36px;height:36px;border:0;background:transparent;font-size:16px;color:var(--card-grey)}
+.pc .title{font-size:32px;font-style:italic;font-weight:400;line-height:1.05;color:var(--card-ink)}
+.pc .sub{font-size:13.5px;color:var(--card-grey);margin:0}
+.oauth{display:flex;flex-direction:column;gap:8px}
+.oauth button{height:44px;border-radius:8px;border:1px solid rgba(44,42,41,.2);background:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px}
+.or{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--card-label)}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--card-line)}
+.f{display:flex;flex-direction:column;gap:4px}
+.f label,.f .l{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--card-label)}
+.f input,.f select{height:45px;border:1px solid var(--card-line);background:#fff;padding:0 12px;font-size:14px;border-radius:0}
+.f input:focus{outline:2px solid var(--cta);outline-offset:-1px}
+.f .hint{font-size:12px;color:var(--card-grey)}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.chk{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--card-ink);line-height:1.4;cursor:pointer}
+.chk input{width:15px;height:15px;margin-top:2px;flex-shrink:0;accent-color:var(--cta)}
+.pc .rowb{display:flex;align-items:center;justify-content:space-between;font-size:12.5px}
+.pc .submit{height:47px;border-radius:999px;border:0;background:var(--cta);color:#fff;font-size:14px;font-weight:600}
+.pc .submit:hover{background:var(--cta-2)}
+.pc .foot{font-size:12.5px;color:var(--card-grey);text-align:center}
+.pc a,.pc .lnk{color:var(--cta-2);text-decoration:none;background:none;border:0;padding:0;font-size:inherit;cursor:pointer}
+.banner{padding:10px 12px;font-size:13px;border-radius:8px}
+.banner.err{background:var(--warn-bg);border:1px solid var(--warn-line);color:#8A3418}
+.banner.ok{background:var(--ok-bg);color:var(--ok)}
+.photo{display:flex;align-items:center;gap:14px}
+.photo .ring{width:72px;height:72px;border-radius:999px;border:1.5px dashed var(--card-label);background:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--card-grey);text-align:center;line-height:1.2;flex-shrink:0}
+.photo .ring.set{border-style:solid;background:var(--gold);color:#fff;font-size:20px;font-weight:700}
+.tag{display:flex;align-items:center;height:45px;border:1px solid var(--card-line);background:#fff;padding:0 12px;font-size:14px;gap:2px}
+.tag span.at{color:var(--card-grey)} .tag input{flex:1;border:0;height:100%;padding:0;background:transparent;font-size:14px;min-width:0}
+.tag input:focus{outline:none}
+.avail{font-size:12px} .avail.ok{color:var(--ok)} .avail.no{color:#8A3418}
+.fold{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--card-line);background:#fff;height:45px;padding:0 12px;font-size:14px;width:100%;text-align:left}
+.fold .v{color:var(--card-grey);font-size:13px}
+
+/* ---------- THE SHOP WIZARD (/open-shop) ---------- */
+.wiz{display:none}
+body.wiz .main{display:none} body.wiz .wiz{display:block}
+.event{display:none} body.event .main{display:none} body.event .event{display:block}
+.event .wiz-body{display:flex;flex-direction:column;gap:18px;max-width:640px}
+.wiz-head{display:flex;align-items:center;gap:4px;padding:8px 8px 0}
+.icon-btn{width:44px;height:44px;border:0;background:transparent;display:inline-flex;align-items:center;justify-content:center;border-radius:999px}
+.wiz-body{padding:12px 16px 48px;display:flex;flex-direction:column;gap:18px}
+.seg4{display:flex;gap:6px}
+.seg4 span{height:4px;flex:1;border-radius:999px;background:var(--line);overflow:hidden}
+.seg4 span i{display:block;height:100%;width:0;background:var(--deep);transition:width .4s}
+.seg4 span.on i{width:100%}
+.q{font-size:20px;font-weight:600;line-height:1.15}
+.wf{display:flex;flex-direction:column;gap:6px}
+.wf .l{font-size:14px;font-weight:500}
+.wf .l em{font-style:normal;font-weight:400;color:var(--ink-3);margin-left:6px;font-size:13px}
+.wf .l b{color:var(--cta);font-weight:600;margin-left:3px}
+.wf input,.wf select{height:46px;border:1px solid var(--line);border-radius:var(--r-sm);padding:0 12px;font-size:15px;background:#fff}
+.wf input:read-only{background:var(--soft);color:var(--ink-2)}
+.wf input:focus{outline:2px solid var(--cta);outline-offset:-1px}
+.logo-ring{width:112px;height:112px;border-radius:999px;border:1.5px dashed var(--line);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--ink-2);text-align:center;line-height:1.25;margin:4px auto;background:#fff}
+.logo-ring.set{border-style:solid;background:var(--soft);font-size:26px;font-weight:700;color:var(--ink-2)}
+.addr{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:13px}
+.addr .u{font-family:var(--mono);font-size:12.5px;color:var(--ink)}
+.addr .u input{font-family:var(--mono);font-size:12.5px;border:0;border-bottom:1px solid var(--line);padding:2px 0;width:150px;background:transparent}
+.grid-ev{display:grid;grid-template-columns:repeat(auto-fit,minmax(8.5rem,1fr));gap:6px}
+.ev{display:flex;align-items:center;gap:6px;height:42px;padding:0 12px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:14px;text-align:left}
+.ev[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.ev .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.drill{border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;background:#fff}
+.drill .crumb{display:flex;align-items:center;gap:6px;padding:10px 12px;border-bottom:1px solid var(--line-2);font-size:13px;color:var(--ink-2);flex-wrap:wrap}
+.drill .crumb button{border:0;background:none;padding:0;color:var(--cta-2);font-weight:500}
+.drill .opt{width:100%;min-height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border:0;border-bottom:1px solid var(--line-2);background:#fff;font-size:15px;text-align:left}
+.drill .opt:last-child{border-bottom:0}
+.drill .opt[aria-pressed="true"]{background:#FBF6EE;font-weight:600}
+.drill .opt .ar{color:var(--ink-3)}
+.drill .list{max-height:300px;overflow-y:auto}
+.picked{display:flex;align-items:center;justify-content:space-between;border:2px solid var(--gold);border-radius:var(--r-md);padding:12px 14px;background:#FBF6EE;font-size:15px;font-weight:600}
+.picked button{border:0;background:none;color:var(--cta-2);font-weight:500;font-size:13px}
+.map{position:relative;height:220px;border-radius:var(--r-md);border:1px solid var(--line);background:repeating-linear-gradient(0deg,#F4F1EC 0 22px,#ECE7DE 22px 23px),repeating-linear-gradient(90deg,transparent 0 22px,#ECE7DE 22px 23px);overflow:hidden}
+.map .pin{position:absolute;left:50%;top:48%;transform:translate(-50%,-100%);font-size:34px;line-height:1}
+.map .ph{position:absolute;left:12px;bottom:10px;font-size:11px;color:var(--ink-3);font-family:var(--mono)}
+.map .mine{position:absolute;right:10px;top:10px;height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12px}
+.confirm{display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;background:#fff}
+.confirm .c{font-size:17px;font-weight:600}
+.confirm.ok{border-color:#BFD7BA;background:var(--ok-bg)}
+.fee{border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;background:#fff;display:flex;flex-direction:column;gap:4px}
+.fee b{font-size:14px} .fee span{font-size:13px;color:var(--ink-2);line-height:1.4}
+.nav{display:flex;gap:8px;align-items:center}
+.nav .back{width:48px;height:48px;flex-shrink:0;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:18px}
+.nav .btn{flex:1}
+.glance{display:none}
+.opened{display:flex;flex-direction:column;gap:14px;align-items:stretch;text-align:center;padding-top:16px}
+.check{width:64px;height:64px;border-radius:999px;background:var(--ok-bg);color:var(--ok);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto}
+.mini-oauth{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.mini-oauth button{height:44px;border-radius:var(--r-sm);border:1px solid var(--line);background:#fff;font-size:14px}
+.acct{border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;background:var(--soft);display:flex;flex-direction:column;gap:8px}
+.acct .who{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:500}
+.acct .who .a{width:32px;height:32px;border-radius:999px;background:var(--gold);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.step{display:flex;flex-direction:column;gap:16px}
+
+/* ---------- DESKTOP ---------- */
+@media (min-width:1024px){
+  body{background:#FAF8F4}
+  .top{height:60px;padding:0 24px}
+  .top .search{display:flex;flex:1;max-width:520px;height:40px;border:1px solid var(--line);border-radius:999px;align-items:center;padding:0 16px;color:var(--ink-3);font-size:14px}
+  .app{display:grid;grid-template-columns:88px 1fr}
+  .shell-rail{display:flex;flex-direction:column;align-items:center;gap:18px;padding:20px 0;border-right:1px solid var(--line-2);background:#fff;min-height:calc(100vh - 106px);font-size:11px;color:var(--ink-2)}
+  .shell-rail span.on{color:var(--gold);font-weight:600}
+  .shell-rail .grp{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--ink-3);margin-top:6px}
+  .main{max-width:760px;width:100%;margin:0 auto;padding:24px 32px 64px}
+  .shop-head h1{font-size:28px}
+  .pc{margin:auto}
+  .wiz{max-width:1200px;margin:0 auto;padding:8px 32px}
+  .wiz-head{padding:16px 0 0}
+  .wiz-head .back{display:none}
+  .wiz-body{display:grid;grid-template-columns:minmax(0,1fr) 360px;column-gap:32px;row-gap:24px;padding:12px 0 64px;align-items:start}
+  .wiz-body > .seg4{grid-column:1 / -1}
+  .wiz-body > .step{grid-column:1}
+  .wiz-body > .glance{grid-column:2;grid-row:2 / span 6;position:sticky;top:124px;display:flex;flex-direction:column;gap:12px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px}
+  .glance h2{font-size:15px}
+  .glance .g{display:flex;justify-content:space-between;gap:12px;font-size:14px;border-bottom:1px solid var(--line-2);padding:8px 0}
+  .glance .g:last-of-type{border-bottom:0}
+  .glance .g span:first-child{color:var(--ink-2)} .glance .g span:last-child{text-align:right;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .glance .g span.ph{color:var(--ink-3)}
+  .nav-m{display:none}
+  .toast{left:auto;right:24px;width:380px}
+  .map{height:320px}
+  .drill .list{max-height:360px}
+}
+@media (max-width:1023px){ .glance{display:none!important} .nav-d{display:none!important} }
+</style>
+</head>
+<body>
+
+<div class="proto" role="group" aria-label="Prototype controls">
+  <b>Prototype</b>
+  <button class="pill" data-auth="out" aria-pressed="true">Signed out</button>
+  <button class="pill" data-auth="in" aria-pressed="false">Signed in (Ana &amp; Marco)</button>
+  <button class="pill sim" data-act="failshop" aria-pressed="false" title="Simulate: the account is created but the shop write fails">Simulate: shop write fails</button>
+  <span class="sp"></span>
+  <button class="pill" data-act="reset">Reset</button>
+</div>
+<div class="states" role="group" aria-label="Jump to a state">
+  <b>Jump to</b>
+  <span class="grp">SIGN IN</span>
+  <button class="pill" data-state="signin">Sign in</button>
+  <button class="pill" data-state="signin-error">Wrong password</button>
+  <span class="grp">CREATE ACCOUNT</span>
+  <button class="pill" data-state="signup">Create account</button>
+  <button class="pill" data-state="signup-google">Google chosen</button>
+  <button class="pill" data-state="profile">You</button>
+  <button class="pill" data-state="profile-checking">@name checking…</button>
+  <button class="pill" data-state="profile-taken">@name taken</button>
+  <button class="pill" data-state="profile-full">Full name open</button>
+  <span class="grp">EVENT</span>
+  <button class="pill" data-state="event-debut">Create event · Debut · consent</button>
+  <button class="pill" data-state="event-wake">Create event · Wake</button>
+  <span class="grp">OPEN A SHOP</span>
+  <button class="pill" data-state="shop-1">Step 1</button>
+  <button class="pill" data-state="shop-2">Step 2</button>
+  <button class="pill" data-state="shop-3">Step 3 · new account</button>
+  <button class="pill" data-state="shop-3-google">Step 3 · Google chosen</button>
+  <button class="pill" data-state="shop-email-taken">Email already registered</button>
+  <button class="pill" data-state="shop-4">Step 4</button>
+  <button class="pill" data-state="terms-server">Terms refused by server</button>
+  <button class="pill" data-state="shop-failed">Account made, shop failed</button>
+  <button class="pill" data-state="shop-3-in">Step 3 · signed in</button>
+  <button class="pill" data-state="opened">Opened</button>
+  <span class="grp">NOTES</span>
+  <a class="pill" href="#summary" style="display:inline-flex;align-items:center;text-decoration:none;color:inherit">About this prototype</a>
+</div>
+
+<div class="top">
+  <a class="brand" href="#" data-act="home">SETNAYAN</a>
+  <span class="search">Search events, people, vendors</span>
+  <span class="sp"></span>
+  <button class="link" data-act="createevent" id="topEvent" hidden>Create event</button>
+  <button class="link" data-act="openshop" id="topShop">Open your shop</button>
+  <button class="link cta" data-act="signin" id="topSignin">Sign in</button>
+  <button class="avatar" id="topAvatar" hidden data-act="avatar"><span class="a">A&amp;</span>Ana &amp; Marco</button>
+</div>
+
+<div class="app">
+  <nav class="shell-rail" aria-label="Site menu" id="rail"></nav>
+
+  <div>
+    <!-- THE PAGE BEHIND: a public shop page (real shop off the front door). The popup opens OVER it and it stays. -->
+    <div class="main" id="shopPage">
+      <div class="shop-head">
+        <div class="mark">SH</div>
+        <div>
+          <h1>Saysay Host and Band</h1>
+          <span class="muted">Hosts, music &amp; program · verified</span>
+        </div>
+        <span class="sp" style="flex:1"></span>
+        <button class="btn ghost sm" data-act="save" id="saveBtn">♡ Save</button>
+      </div>
+
+      <div class="rows">
+        <button class="row" data-toast="[Service details — not part of this prototype]"><span>Hosting</span><span class="v">[PRICE] ›</span></button>
+        <button class="row" data-toast="[Service details — not part of this prototype]"><span>Live band</span><span class="v">[PRICE] ›</span></button>
+      </div>
+
+      <div class="card">
+        <span class="muted" style="font-size:14px">Ask about your date</span>
+        <textarea class="enq" id="enq" placeholder="Hi! Are you free on Oct 11? We’re 120 guests in Quezon City…"></textarea>
+        <button class="btn" data-act="send" id="sendBtn">Send</button>
+        <span class="small" id="enqNote"></span>
+      </div>
+
+      <div class="card">
+        <b style="font-size:16px">Open your shop — free while we’re new.</b>
+        <span class="muted" style="font-size:14px;line-height:1.45">Couples pay you directly — we never take a cut of it. Your first 5 bookings we introduce are free; after that a booking fee of 5% of the first ₱100,000, then 1%, minimum ₱50, only on couples we bring you.</span>
+        <button class="btn dark" data-act="openshop">Open your shop →</button>
+      </div>
+    </div>
+
+    <!-- /open-shop — the wizard. Four steps, one question each (owner 2026-08-10). Step 3 also creates the account when there is none. -->
+    <div class="wiz" id="wiz">
+      <div class="wiz-head">
+        <button class="icon-btn back" data-act="wizback" aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <h1 style="font-size:22px;font-weight:500" id="wizTitle">Open your shop</h1>
+      </div>
+      <div class="wiz-body" id="wizBody"></div>
+    </div>
+
+    <!-- /dashboard/create-event — the SHIPPED page, compressed to the parts this change touches. The delta is the consent block. -->
+    <div class="event" id="event">
+      <div class="wiz-head">
+        <button class="icon-btn back" data-act="home" aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <h1 style="font-size:22px;font-weight:500">Create event</h1>
+      </div>
+      <div class="wiz-body" id="eventBody"></div>
+    </div>
+  </div>
+</div>
+
+<!-- END-OF-FILE SUMMARY (build-sessions/PROTOTYPE-SPEC.md) -->
+<section class="summary" id="summary" aria-label="About this prototype">
+  <h2>About this prototype</h2>
+  <p>Three builds, one journey: the sign-in popup, creating an account and your profile, and opening a shop. Approved on 2026-09-22 (<i>"approved. account inside step 3, consent per event, small card for signup"</i>). This file adds the states the first drawing skipped: every refusal, the check that is still running, the email that already has an account, and the submit that half-succeeds.</p>
+  <h3>1 · What changes, one sentence per screen</h3>
+  <ul>
+    <li><b>Sign in</b> — unchanged in words (44 words · 6 buttons as shipped); it is the card everything else now copies.</li>
+    <li><b>Create account</b> — the /signup page becomes this same small card (39 words here; shipped 136 for a couple, 107 for a vendor). The brand panel, the four bullets, the first/last name boxes and the Stories consent leave this screen.</li>
+    <li><b>You</b> — one new card right after the account exists: photo (optional), display name, @account name with a live availability check, full name folded away, phone. Done or Later; all of it also lives under Profile &amp; settings.</li>
+    <li><b>Create event</b> — the Stories consent is asked HERE, once per event, in words that name the event type (17 types; the old sentence said "my wedding").</li>
+    <li><b>Open a shop, step 3</b> — a password under the company email creates the account with the shop in one press; Google / Apple; "Have an account? Sign in" opens the popup in place and keeps what was typed. Reverses the 2026-07-10 "login first" bounce.</li>
+    <li><b>Open a shop, last step</b> — the Terms box (unticked) above the one button that creates anything, when an account is being created.</li>
+  </ul>
+  <h3>1b · The controls contract — every live control, and where it is now</h3>
+  <p>Measured on setnayan.com on 2026-09-22 before drawing. Nothing is removed to remove its text; each one is kept, moved, or named as removed with what replaces it.</p>
+  <ul>
+    <li><b>Sign-in popup (6 buttons · 3 inputs):</b> ✕ · Continue with Google · Continue with Apple · Forgot password? · Continue · Create one, free · Email · Password · Stay signed in — <i>all kept, unchanged.</i></li>
+    <li><b>/signup (7 controls · 6 inputs):</b> SETNAYAN wordmark → <i>kept as the ✕ / page behind</i> · Continue with Google · Continue with Apple · Create account · free · Terms · Privacy · Sign in — <i>all kept</i> · First name + Last name (optional) → <i>moved to the You card</i> · Email · Password · Stay signed in — <i>kept</i> · Include my wedding in Stories (couples only) → <i>moved to Create event, per event, event-neutral words</i> · the Terms box from PR #5867 — <i>kept, unticked</i>. <b>Removed:</b> the v2.1 brand panel, "Start free · 90 seconds", "Set your day in motion", the four benefit bullets, "One account, every celebration", "We never sell your data — RA 10173 compliant" → <i>replaced by the same small card as sign-in; the RA 10173 line lives on /privacy.</i></li>
+    <li><b>Profile tab (Profile &amp; settings):</b> photo · Display name · Account name (@slug) · Prefix · First · Middle · Last · Suffix · Phone · Birthday · Save — <i>all kept there; the You card is a first-run subset (photo, display name, @account name, full name, phone). Birthday stays on the profile page only.</i></li>
+    <li><b>/open-shop (4 steps):</b> Shop logo · Shop name · web address · Primary service (drill) · Events you serve (17) · Your name · Your position · Contact number · Company email · address · map · Use my location · Yes, that's right · Continue · Back · Open my shop — free · the fee line — <i>all kept.</i> <b>Added:</b> Password (new account only) · Continue with Google / Apple (step 3) · Have an account? Sign in · the Terms box (last step, new account only).</li>
+    <li><b>Doors kept:</b> "Create your shop" in the account menu · "Open your shop" on the front door and /vendors · <code>/login?next=/open-shop&amp;as=vendor</code> survives as the no-JavaScript fallback of the step-3 Sign in link.</li>
+  </ul>
+  <h3>2 · What is deliberately NOT changing</h3>
+  <ul>
+    <li>The four shop steps, one question each, the map pin you must confirm, the permanent web address, the logo optional until verification (owner 2026-08-10 / 2026-07-21).</li>
+    <li>The consent field's name, value and the 8 RA 10173 guardrails (2026-05-19) — only WHEN it is asked and its wording move.</li>
+    <li>The Terms gate itself (CTRL-B3, PR #5867) — one implementation, imported, not re-written.</li>
+    <li>Google and Apple as the only sign-in providers; email-only inside the phone shell; the Turnstile bot check.</li>
+    <li>Signed-in vendors: name read from the account, no password, no Terms box on this path.</li>
+  </ul>
+  <h3>3 · What this cannot prove</h3>
+  <ul>
+    <li>The Google / Apple leg is simulated. Only a real tap through Google's consent page proves the typed steps come back (a one-hour, same-tab draft, never the password). A scripted walk cannot log into Google, so this is the one check that needs a person.</li>
+    <li>Email confirmation is the shipped V1 work-around (admin auto-confirm, no link waited for) on both doors; PR #5872's <code>isEmailVerificationRequired</code> gate is not on main yet, and this prototype does not draw the "check your email" branch that gate will re-introduce.</li>
+    <li>The "@name checking…" delay is faked at 700 ms; the real check is a network call to the same availability helper the shop address uses.</li>
+    <li>"Account made, shop failed" is simulated with a switch. In production the two writes are one server action; what is proven is only what the screen says afterwards, not how often it happens.</li>
+    <li>The bot check (Turnstile) does not render here. Measured earlier: it cannot render inside the browser pane at all, so a real phone is the only test.</li>
+    <li>A preview of the built code needs <code>R2_PUBLIC_URL</code> and <code>ENCRYPTION_KEY</code> in Vercel's Preview scope (measured 2026-09-22: Production-only today) — until then a preview can 500 in ways that look like this design's fault.</li>
+    <li>Nothing here touched production data. Real numbers used: 17 event types, the service tree's Photo &amp; video and Attire branches, the live fee schedule (5% of the first ₱100,000, then 1%, minimum ₱50, first 5 free).</li>
+  </ul>
+  <h3>4 · Open questions</h3>
+  <ol>
+    <li class="q"><b>Where does per-event consent live?</b> Today <code>users.public_summary_consent_at</code> is one timestamp per ACCOUNT, written at sign-up, and eight surfaces read it (front door, Real Stories admin, the event's Story page and privacy page, the wedding onboarding). Per event needs a column on <code>events</code> and those readers repointed. <b>Recommendation:</b> <code>events.public_summary_consent_at</code> plus keep the account column as the legacy fallback for events created before the change. <b>Cost if wrong:</b> a couple's Debut is shown in Stories because their Wedding once said yes, or the reverse — a consent that legally attaches to the wrong thing.</li>
+    <li class="q"><b>What does "Later" on the You card leave behind?</b> A display name is required to finish; Later keeps the email's local part as the name and the @tag. <b>Recommendation:</b> allow Later; the profile page already exists. <b>Cost if wrong:</b> guest lists show "maria" instead of a name until they visit Profile.</li>
+    <li class="q"><b>Build order.</b> Build 1 (this card) edits <code>apps/web/app/signup/actions.ts</code>, which PR #5867 and PR #5872 both edit and conflict over. <b>Recommendation:</b> build 3 first (done, committed, waiting), then 2, then 1 once both PRs are on main. <b>Cost if wrong:</b> a third writer on a file already in a two-way conflict, rebased twice.</li>
+  </ol>
+</section>
+
+<!-- THE POPUP: sign in · create account · your profile — one card, dimmed page behind, everywhere -->
+<div class="ov" id="ov">
+  <div class="pc" role="dialog" aria-modal="true" aria-label="Sign in" id="pc"></div>
+</div>
+
+<div class="toast" id="toast" role="status"><span id="toastText"></span><button id="toastOk">OK</button></div>
+
+<script>
+(() => {
+  // ---------- REAL DATA (sourced) ----------
+  const USER = { name: 'Ana & Marco', email: 'ana@example.com', tag: 'ana-at-marco' }; // the test account seen on prod; email is a [PLACEHOLDER]
+  const PARENTS = ['Venues & churches','Coordinators & planners','Catering & cake','Styling, flowers & lights','Hosts, music & program','Photo & video','Attire, hair & make-up','Booths, carts & bars','Invites, prints & souvenirs','Cars & transport','Guest experiences','Dining extras','Logistics & safety','Insurance & protection','Specialty','Funeral homes & farewell'];
+  const TREE = {
+    'Photo & video': { 'Photo & Video': ['Boudoir Photographer','Drone Operator','Drone Videographer','Engagement Photographer','Highlight Reel Specialist','Photography','Pre-Nup Photographer','Pre-Nup Shoot Locations','Same-Day Edit Specialist','Studio Portrait Photographer','Videography'] },
+    'Attire, hair & make-up': {
+      "Bride's Attire": ['Bridal gown (custom)','Bridal Gown (Rental)','Filipiniana Balintawak','Filipiniana Maria Clara','Filipiniana Terno','Maranao Wedding Attire (malong-inspired)','Modest INC Bridal Attire','Modest Muslim Bridal Attire','Qipao / Cheongsam Bridal','Sari / Lehenga Bridal','Tausug Wedding Attire (beadwork-heavy)','Yakan Textile Bridal'],
+      "Groom's Attire": ['Barong Tagalog (Custom)','Barong Tagalog (Rental)','Maranao Groom Attire (malong/okir)','Modest Muslim Groom Attire','Sherwani / Groom Attire','Tausug Groom Attire (beadwork)','Wedding Suits / Tuxedos (Custom)','Wedding Suits / Tuxedos (Rental)','Yakan Textile Groom Attire'],
+      "Women's Attire": ['Bridesmaid Dresses','Debutante Ball Gown','Flower Girl Dresses','Junior Bridesmaid Dresses','Mother-of-Bride Gowns','Sponsor Attire — Ninang Sets'],
+      "Men's Attire": ['18 Roses / Escort Attire','Groomsman Sets (matched)'],
+      'HMUA': ['Bridal Hair Stylists']
+    }
+  };
+  const EVENTS = [['wedding','💍','Wedding'],['debut','👑','Debut'],['gender_reveal','🎈','Gender Reveal'],['birthday','🎂','Birthday'],['celebration','🥂','Celebration'],['travel','✈️','Travel'],['corporate','🏢','Corporate'],['tournament','🏆','Tournament'],['christening','🕯️','Christening'],['anniversary','💞','Anniversary'],['graduation','🎓','Graduation'],['reunion','🤝','Reunion'],['gala_night','🌟','Gala Night'],['simple_event','📅','Simple Event'],['date','💕','Date'],['hangout','🍿','Hangout'],['wake','🕊️','Wake']];
+  const ERR = { // lib/open-shop-validation.ts · lib/human-auth-error.ts · lib/terms-agreement.ts · app/signup ERROR_COPY
+    shopName: 'Give your shop a name.', service: 'Pick your primary service.', contactName: 'Add your name.', contactPhone: 'Add a contact number.',
+    contactEmail: 'Add a valid company email.', contactPhoneNotPh: 'That doesn’t look like a Philippine number. Use 09XX XXX XXXX, or your landline with its area code.', locationPin: 'Place your pin on the map — type your address, or tap the map.',
+    locationConfirm: 'Check the address on the map, then tap “Yes, that’s right”.', slugTaken: 'That web address is taken — pick another.',
+    slugShape: 'Your web address needs 3–32 letters, numbers or hyphens.', pwMatch: 'That email and password do not match. Check both and try again.',
+    pwShort: 'Password must be at least 8 characters.', terms: 'Please agree to the Terms and Privacy Policy to create your account.',
+    missing: 'Please enter both an email and a password.', tagTaken: 'That address is already taken. Please pick another.'
+  };
+  const FEE = { h: 'Opening your shop is free, and running it stays free.', d: 'You only pay Setnayan when a couple books you THROUGH Setnayan — and your first 5 of those are free. After that the booking fee is 5% of the first ₱100,000, then 1%, minimum ₱50 of the agreed total.' };
+  // ⚠ The shipped sentence says "my wedding" — written 2026-05-19 when every event was a wedding; there are 17 event types now (owner, 2026-09-22: "why is it asking about wedding? we have multiple events"). Event-neutral here; whether it should be asked PER EVENT instead is decision #2 in the report.
+  const STORIES = 'Include my celebrations in Setnayan’s Stories showcase. 30 days after each event, its editorial page becomes publicly searchable on setnayan.com/realstories. I can keep any of them private at any time.';
+  const TAKEN = new Set(['setnayan','saysay','ana','anaandmarco','maria']); // [PLACEHOLDER] stand-in for lib/slug-availability
+  const TAKEN_EMAILS = new Set(['ana@example.com', 'testnayan1@test.com']); // [PLACEHOLDER] emails that already have an account
+  const ERR_EMAIL_TAKEN = 'That email already has a Setnayan account. Sign in to keep going — what you typed stays.';
+  const ERR_SHOP = 'Could not open your shop.'; // becomeVendor's own fallback sentence
+
+  // ---------- STATE ----------
+  const fresh = () => ({
+    signedIn: false, me: null, popup: null, err: null, afterSignIn: null,
+    enquiry: '', saved: false, sent: false,
+    view: 'shop', step: 1,
+    shop: { logo: false, name: '', slug: null, service: null, events: ['wedding'], you: '', pos: '', phone: '', email: '', pw: '', pinned: false, confirmed: false, address: '', city: '', agree: false, oauth: null },
+    drill: { p: null, b: null },
+    prof: { photo: false, nick: '', tag: '', full: false, prefix: '', first: '', middle: '', last: '', suffix: '', phone: '', stories: false },
+    si: { email: '', pw: '' }, su: { email: '', pw: '', agree: false },
+    tagCheck: 'idle', failShop: false, errSrc: null, shopFailed: false,
+    ev: { who: 'me', type: 'debut', name: '', date: '', consent: false }
+  });
+  let S = fresh();
+  Object.defineProperty(window, '__S', { get: () => S }); // prototype-only: lets a test read the state
+  const $ = (id) => document.getElementById(id);
+  const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 32); // spaces DROPPED (migration 20271123576947)
+  const tagify = (s) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 32);
+  const toast = (t) => { $('toastText').textContent = t; $('toast').classList.add('on'); };
+  $('toastOk').onclick = () => $('toast').classList.remove('on');
+  const slug = () => S.shop.slug ?? slugify(S.shop.name);
+  const initials = (n) => n.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+
+  function signIn(me) {
+    S.signedIn = true; S.me = me; S.popup = null; S.err = null;
+    if (S.afterSignIn === 'save') { S.saved = true; toast('Saved · Saysay Host and Band'); }
+    if (S.afterSignIn === 'send') { S.sent = true; toast('Sent · the enquiry you typed went as written'); }
+    if (S.afterSignIn === 'wiz') { S.step = 3; toast('Signed in as ' + me.name + ' · your shop details are still here; the password box is gone'); }
+    S.afterSignIn = null;
+  }
+
+  // ---------- RENDER: page + top bar + rail ----------
+  function render() {
+    document.querySelectorAll('[data-auth]').forEach((b) => b.setAttribute('aria-pressed', String((b.dataset.auth === 'in') === S.signedIn)));
+    $('topSignin').hidden = S.signedIn; $('topAvatar').hidden = !S.signedIn;
+    if (S.me) { $('topAvatar').innerHTML = '<span class="a">' + esc(initials(S.me.name)) + '</span>' + esc(S.me.name); }
+    // the seam: signed in, the rail re-sorts — your groups rise, the public ones stay below
+    $('rail').innerHTML = (S.signedIn ? '<span class="grp">MINE</span><span>Events</span><span>Memories</span><span>People</span><span class="grp">SITE</span>' : '') + '<span>Discover</span><span>Stories</span><span>Studio</span>';
+    document.body.classList.toggle('wiz', S.view === 'wiz' || S.view === 'opened');
+    document.body.classList.toggle('event', S.view === 'event');
+    document.body.classList.add('hasStates');
+    $('topEvent').hidden = !S.signedIn;
+    document.querySelector('[data-act=failshop]').setAttribute('aria-pressed', String(S.failShop));
+    renderEvent();
+    $('saveBtn').textContent = S.saved ? '♥ Saved' : '♡ Save';
+    $('sendBtn').textContent = S.sent ? 'Sent ✓' : 'Send';
+    $('enqNote').textContent = S.signedIn ? '' : 'You’ll be asked to sign in — what you typed stays.';
+    renderPopup();
+    renderWiz();
+  }
+
+  // ---------- RENDER: the popup (one card, three faces) ----------
+  function renderPopup() {
+    $('ov').classList.toggle('on', !!S.popup);
+    if (!S.popup) return;
+    const pc = $('pc');
+    const banner = S.err ? '<div class="banner err" role="alert">' + esc(S.err) + '</div>' : '';
+    const oauth = (verb) => '<div class="oauth"><button data-oauth="google"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M21.8 12.2c0-.7-.1-1.4-.2-2H12v3.9h5.5a4.7 4.7 0 0 1-2 3.1v2.5h3.3c1.9-1.8 3-4.4 3-7.5z"/><path fill="#34A853" d="M12 22c2.7 0 5-.9 6.7-2.4l-3.3-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.1H3v2.6A10 10 0 0 0 12 22z"/><path fill="#FBBC05" d="M6.4 14a6 6 0 0 1 0-3.9V7.5H3a10 10 0 0 0 0 9z"/><path fill="#EA4335" d="M12 5.9c1.5 0 2.8.5 3.8 1.5l2.9-2.9A10 10 0 0 0 3 7.5L6.4 10c.8-2.3 3-4.1 5.6-4.1z"/></svg>Continue with Google</button><button data-oauth="apple"> Continue with Apple</button></div><div class="or">or ' + verb + ' with email</div>';
+    let html = '';
+    if (S.popup === 'signin') {
+      pc.setAttribute('aria-label', 'Sign in');
+      html = '<span class="eyebrow">Welcome back</span><div class="title">Sign in to Setnayan.</div><p class="sub">One account for couples and vendors. Pick up right where you left off.</p><span class="measure">As shipped · 44 words · 6 buttons · unchanged</span>' + banner + oauth('continue') +
+        '<div class="f"><label for="si-email">Email</label><input id="si-email" type="email" autocomplete="email" placeholder="you@setnayan.com" value="' + esc(S.si.email) + '"></div>' +
+        '<div class="f"><label for="si-pw">Password</label><input id="si-pw" type="password" autocomplete="current-password" placeholder="••••••••" value="' + esc(S.si.pw) + '"></div>' +
+        '<div class="rowb"><label class="chk"><input type="checkbox" checked> Stay signed in</label><a href="#" data-toast="Forgot password → /forgot-password (unchanged)">Forgot password?</a></div>' +
+        '<button class="submit" data-act="dosignin">Continue</button>' +
+        '<div class="foot">No account yet? <button class="lnk" data-act="signup">Create one, free</button></div>';
+    } else if (S.popup === 'signup') {
+      pc.setAttribute('aria-label', 'Create account');
+      html = '<span class="eyebrow">New here</span><div class="title">Create your account.</div><span class="measure">This card · 39 words · shipped /signup · 136 (couple) · 107 (vendor)</span>' +
+        '<div class="amber"><b>⚠ Build waits.</b> This card edits signup/actions.ts, which PR #5867 and PR #5872 both edit and conflict over. It is built only after both are on main.</div>' +
+        '<div class="removed">Removed from this screen: <s>brand panel</s> · <s>4 bullets</s> · <s>first / last name</s> → the You card · <s>Stories consent</s> → asked when an event is created</div>' + banner + oauth('sign up') +
+        '<div class="f"><label for="su-email">Email</label><input id="su-email" type="email" autocomplete="email" placeholder="you@setnayan.com" value="' + esc(S.su.email) + '"></div>' +
+        '<div class="f"><label for="su-pw">Password</label><input id="su-pw" type="password" autocomplete="new-password" placeholder="At least 8 characters" value="' + esc(S.su.pw) + '"></div>' +
+        '<label class="chk"><input type="checkbox" id="su-agree"' + (S.su.agree ? ' checked' : '') + '> <span>I agree to the <a href="#" data-toast="/terms">Terms</a> and <a href="#" data-toast="/privacy">Privacy Policy</a>.</span></label>' +
+        '<div class="rowb"><label class="chk"><input type="checkbox" checked> Stay signed in</label></div>' +
+        '<button class="submit" data-act="dosignup">Create account · free</button>' +
+        '<div class="foot">Have an account? <button class="lnk" data-act="signin">Sign in</button></div>';
+    } else if (S.popup === 'profile') {
+      pc.setAttribute('aria-label', 'Your profile');
+      const P = S.prof; const tag = P.tag; const taken = tag && TAKEN.has(tag); const badShape = tag && tag.length < 3; const checking = S.tagCheck === 'checking';
+      html = '<span class="eyebrow">You</span><div class="title">How should we call you?</div>' + banner +
+        '<div class="photo"><button class="ring' + (P.photo ? ' set' : '') + '" data-act="photo" aria-label="Add a photo">' + (P.photo ? esc(initials(P.nick || 'A M')) : 'Add a photo<br>optional') + '</button><div class="f" style="flex:1"><label for="p-nick">Display name</label><input id="p-nick" placeholder="How you want to appear in the app" value="' + esc(P.nick) + '"></div></div>' +
+        '<div class="f"><span class="l">Account name</span><div class="tag"><span class="at">@</span><input id="p-tag" placeholder="your-handle" value="' + esc(tag) + '"></div>' +
+          (tag ? '<span class="avail ' + (checking ? 'wait' : taken || badShape ? 'no' : 'ok') + '">' + (checking ? 'Checking…' : taken ? esc(ERR.tagTaken) : badShape ? 'Use 3–32 characters: lowercase letters, numbers and hyphens only.' : 'setnayan.com/' + esc(tag) + ' · available') + '</span>' : '<span class="hint">How people find and tag you.</span>') + '</div>' +
+        (P.full
+          ? '<div class="f"><span class="l">Full name <span style="text-transform:none;letter-spacing:0;font-family:var(--sans);font-size:12px">· for guest lists and invitations · optional</span></span><div class="two"><input id="p-prefix" placeholder="Prefix · Mr., Atty." value="' + esc(P.prefix) + '"><input id="p-suffix" placeholder="Suffix · Jr., II" value="' + esc(P.suffix) + '"></div><input id="p-first" placeholder="First name" value="' + esc(P.first) + '"><input id="p-middle" placeholder="Middle name" value="' + esc(P.middle) + '"><input id="p-last" placeholder="Last name" value="' + esc(P.last) + '"></div>'
+          : '<button class="fold" data-act="full"><span>Full name</span><span class="v">for invitations · optional ›</span></button>') +
+        '<div class="f"><label for="p-phone">Phone <span style="text-transform:none;letter-spacing:0;font-family:var(--sans)">· optional</span></label><input id="p-phone" type="tel" inputmode="tel" placeholder="+63 917 …" value="' + esc(P.phone) + '"></div>' +
+        '<div class="removed">Not here any more: <s>' + esc(STORIES.slice(0, 44)) + '…</s> — asked when an event is created, in that event\'s own words.</div>' +
+        '<button class="submit" data-act="doprofile"' + (checking ? ' disabled style="opacity:.6"' : '') + '>' + (checking ? 'Checking the name…' : 'Done') + '</button>' +
+        '<div class="foot"><button class="lnk" data-act="later">Later</button> · everything here lives under Profile &amp; settings</div>';
+    }
+    pc.innerHTML = '<button class="x" data-act="close" aria-label="Close">✕</button>' + html;
+    const first = pc.querySelector('input:not([type=checkbox])'); if (first && !S.err) first.focus();
+  }
+
+  // ---------- RENDER: the wizard ----------
+  function renderWiz() {
+    if (S.view === 'shop') return;
+    const W = S.shop; const body = $('wizBody');
+    $('wizTitle').textContent = S.view === 'opened' ? 'Your shop is open' : 'Open your shop';
+    if (S.view === 'opened') {
+      body.innerHTML = '<div class="step opened"><div class="check">✓</div><div class="q">' + esc(W.name) + '</div><span class="muted">setnayan.com/' + esc(slug()) + ' · ' + esc(W.city) + '</span>' +
+        (S.me && !S.signedInBefore ? '<span class="small">Your account is ready — you’re signed in as ' + esc(S.me.name) + '.</span>' : '') +
+        '<div class="rows" style="text-align:left;margin-top:8px"><button class="row" data-toast="→ /vendor-dashboard/shop (profile checklist)"><span>Complete your profile</span><span class="v gold">Next ›</span></button><button class="row" data-toast="→ Get verified (DTI or SEC · BIR 2303 · Mayor’s Permit · bank proof)"><span>Get verified</span><span class="v">After the profile ›</span></button><button class="row" data-toast="→ /vendor-dashboard"><span>Go to My Shop</span><span class="v">›</span></button></div></div>';
+      return;
+    }
+    const seg = '<div class="seg4" role="progressbar" aria-valuemin="1" aria-valuemax="4" aria-valuenow="' + S.step + '" aria-label="Step ' + S.step + ' of 4">' + [1,2,3,4].map((n) => '<span class="' + (n <= S.step ? 'on' : '') + '"><i></i></span>').join('') + '</div>';
+    const banner = S.err ? '<div class="banner ' + (S.errSrc === 'warn' ? 'warn' : 'err') + '" role="alert">' + esc(S.err) + (S.errSrc === 'server' ? '<span class="src">Refused by the server — the box was missing from the POST, the browser\'s own required check was bypassed</span>' : S.errSrc === 'warn' ? '<span class="src">Account ✓ · shop ✗ · you are signed in · nothing typed is lost</span>' : '') + '</div>' : '';
+    let step = '';
+    if (S.step === 1) {
+      const s = slug(); const bad = W.name && s.length < 3; const taken = TAKEN.has(s);
+      step = '<div class="q">Your shop</div>' + banner +
+        '<div class="wf"><span class="l">Shop logo<em>optional</em></span><button class="logo-ring' + (W.logo ? ' set' : '') + '" data-act="logo">' + (W.logo ? esc(initials(W.name || 'S')) : 'Add your logo') + '</button><span class="small" style="text-align:center">Needed before your shop is approved — add it now or later.</span></div>' +
+        '<div class="wf"><label class="l" for="w-name">Shop name<b>*</b></label><input id="w-name" maxlength="128" placeholder="e.g. Banawe Florals" value="' + esc(W.name) + '">' +
+        (W.name ? '<div class="addr"><span class="u">setnayan.com/<input id="w-slug" value="' + esc(s) + '" maxlength="32" aria-label="Web address"></span>' + (taken ? '<span class="avail no">' + esc(ERR.slugTaken) + '</span>' : bad ? '<span class="avail no">' + esc(ERR.slugShape) + '</span>' : '<span class="avail ok">available</span>') + '<span class="small" style="width:100%">Your web address. Permanent once the shop opens.</span></div>' : '') + '</div>';
+    } else if (S.step === 2) {
+      const D = S.drill; let picker = '';
+      if (W.service) {
+        picker = '<div class="picked"><span>' + esc(W.service) + '</span><button data-act="unpick">Change</button></div>';
+      } else {
+        const crumb = '<div class="crumb">' + (D.p ? '<button data-act="drill-root">All</button><span>›</span>' + (D.b ? '<button data-act="drill-parent">' + esc(D.p) + '</button><span>›</span><span>' + esc(D.b) + '</span>' : '<span>' + esc(D.p) + '</span>') : '<span>Search what you do — e.g. photographer, catering</span>') + '</div>';
+        let list = '';
+        if (!D.p) list = PARENTS.map((p) => '<button class="opt" data-parent="' + esc(p) + '"><span>' + esc(p) + '</span><span class="ar">›</span></button>').join('');
+        else if (!D.b) { const br = TREE[D.p]; list = br ? Object.keys(br).map((b) => '<button class="opt" data-branch="' + esc(b) + '"><span>' + esc(b) + '</span><span class="ar">' + br[b].length + ' ›</span></button>').join('') : '<div class="opt" style="color:var(--ink-3)">[branches of “' + esc(D.p) + '” not captured — real tree has 70 branches · ~237 services]</div>'; }
+        else list = TREE[D.p][D.b].map((l) => '<button class="opt" data-leaf="' + esc(l) + '"><span>' + esc(l) + '</span><span class="ar">+</span></button>').join('');
+        picker = '<div class="drill">' + crumb + '<div class="list">' + list + '</div></div>';
+      }
+      step = '<div class="q">What you do</div>' + banner +
+        '<div class="wf"><span class="l">Primary service<b>*</b></span>' + picker + '<span class="small">Pick one — add more later.</span></div>' +
+        '<div class="wf"><span class="l">Events you serve</span><div class="grid-ev">' + EVENTS.map(([k, e, l]) => '<button class="ev" data-ev="' + k + '" aria-pressed="' + W.events.includes(k) + '"><span aria-hidden="true">' + e + '</span><span class="t">' + esc(l) + '</span></button>').join('') + '</div><span class="small">Pick all that apply.</span></div>';
+    } else if (S.step === 3) {
+      if (S.signedIn) {
+        step = '<div class="q">Who you are</div>' + banner +
+          '<div class="acct"><div class="who"><span class="a">' + esc(initials(S.me.name)) + '</span><span>' + esc(S.me.name) + '</span></div><span class="small">From your account.</span></div>' +
+          '<div class="wf"><label class="l" for="w-pos">Your position<em>optional</em></label><input id="w-pos" maxlength="64" placeholder="e.g. Owner" value="' + esc(W.pos) + '"></div>' +
+          '<div class="wf"><label class="l" for="w-phone">Contact number<b>*</b></label><input id="w-phone" type="tel" inputmode="tel" placeholder="+63 917 …" value="' + esc(W.phone) + '"></div>' +
+          '<div class="wf"><label class="l" for="w-email">Company email<b>*</b></label><input id="w-email" type="email" placeholder="hello@yourstudio.ph" value="' + esc(W.email || S.me.email) + '"></div>';
+      } else {
+        step = '<div class="q">Who you are</div><span class="small" style="margin-top:-10px">This also creates your Setnayan account.</span><div class="amber"><b>Reverses a ruling.</b> 2026-07-10 sent a stranger to /login first. Owner 2026-09-22: the account is created here instead; "Sign in" below is for people who have one.</div>' + banner +
+          (W.oauth ? '<div class="acct"><div class="who"><span class="a">' + esc(initials(W.you)) + '</span><span>' + esc(W.you) + '</span></div><span class="small">' + esc(W.email) + ' · from ' + esc(W.oauth) + ' · <button class="lnk" data-act="unoauth" style="background:none;border:0;padding:0;color:var(--cta-2)">Change</button></span></div>'
+            : '<div class="mini-oauth"><button data-woauth="Google">Continue with Google</button><button data-woauth="Apple">Continue with Apple</button></div><div class="amber"><b>Simulated here.</b> The real tap leaves for Google\'s page and comes back with a one-hour, same-tab draft of steps 1–3 (never the password). A script cannot log into Google, so this leg needs one real tap on a preview to prove the draft comes back.</div><div class="or" style="color:var(--ink-3)">or with email</div>' +
+              '<div class="wf"><label class="l" for="w-you">Your name<b>*</b></label><input id="w-you" maxlength="128" placeholder="e.g. Ana Reyes" value="' + esc(W.you) + '"></div>') +
+          '<div class="wf"><label class="l" for="w-pos">Your position<em>optional</em></label><input id="w-pos" maxlength="64" placeholder="e.g. Owner" value="' + esc(W.pos) + '"></div>' +
+          '<div class="wf"><label class="l" for="w-phone">Contact number<b>*</b></label><input id="w-phone" type="tel" inputmode="tel" placeholder="+63 917 …" value="' + esc(W.phone) + '"></div>' +
+          (W.oauth ? '' : '<div class="wf"><label class="l" for="w-email">Company email<b>*</b></label><input id="w-email" type="email" placeholder="hello@yourstudio.ph" value="' + esc(W.email) + '"><span class="small">You’ll sign in with this.</span></div>' +
+            '<div class="wf"><label class="l" for="w-pw">Password<b>*</b></label><input id="w-pw" type="password" autocomplete="new-password" placeholder="At least 8 characters" value="' + esc(W.pw) + '"></div>') +
+          '<span class="small">Have an account? <button class="lnk" data-act="signin-from-wiz" style="background:none;border:0;padding:0;color:var(--cta-2);font-size:inherit">Sign in</button> — what you typed stays.</span>';
+      }
+    } else {
+      step = '<div class="q">Where you are</div>' + banner +
+        '<div class="wf"><span class="l">Where you are<b>*</b></span><input id="w-addr" placeholder="Type your address" value="' + esc(W.address) + '">' +
+        '<div class="map" data-act="pin" role="button" aria-label="Tap the map to place your pin">' + (W.pinned ? '<span class="pin">📍</span>' : '') + '<button class="mine" data-act="mine">Use my location</button><span class="ph">[MAP — Leaflet, as shipped] · tap to place the pin</span></div></div>' +
+        (W.pinned ? '<div class="confirm' + (W.confirmed ? ' ok' : '') + '"><span class="small">City</span><span class="c">' + esc(W.city) + '</span><span class="muted" style="font-size:14px">' + esc(W.address || '[address the pin resolved to]') + '</span>' + (W.confirmed ? '<span class="small" style="color:var(--ok)">Confirmed ✓</span>' : '<div style="display:flex;gap:8px"><button class="btn sm" data-act="confirm">Yes, that’s right</button><button class="btn ghost sm" data-act="unpin">Move the pin</button></div>') + '</div>' : '') +
+        '<div class="fee"><b>' + esc(FEE.h) + '</b><span>' + esc(FEE.d) + '</span></div>' +
+        (S.signedIn || W.oauth ? '' : '<div class="amber"><b>Email confirmation, as shipped.</b> The new account is auto-confirmed by the admin API — the V1 work-around /signup already uses because Supabase\'s own mailer lands in spam — so no confirmation link is waited for. PR #5872 puts that flip behind <code>isEmailVerificationRequired</code>; when it lands, the same gate applies to this door.</div>') +
+        (S.signedIn || W.oauth ? '' : '<label class="chk" style="color:var(--ink)"><input type="checkbox" id="w-agree"' + (W.agree ? ' checked' : '') + '> <span>I agree to the <a href="#" data-toast="/terms">Terms</a> and <a href="#" data-toast="/privacy">Privacy Policy</a>.</span></label>');
+    }
+    const last = S.step === 4;
+    const nav = (cls) => '<div class="nav ' + cls + '">' + (S.step > 1 ? '<button class="back" data-act="back" aria-label="Back">←</button>' : '') + (last ? '<button class="btn" data-act="open">Open my shop — free</button>' : '<button class="btn" data-act="next">Continue →</button>') + '</div>';
+    const g = (k, v, ph) => '<div class="g"><span>' + k + '</span><span' + (v ? '' : ' class="ph"') + '>' + esc(v || ph) + '</span></div>';
+    const glance = '<aside class="glance" aria-label="Your shop at a glance"><h2>At a glance</h2>' +
+      g('Shop', W.name, 'Step 1') + g('Address', W.name ? 'setnayan.com/' + slug() : '', 'Step 1') + g('Service', W.service, 'Step 2') + g('Events', W.events.length + ' picked', '') +
+      g('Contact', S.signedIn ? S.me.name : W.you, 'Step 3') + g('City', W.confirmed ? W.city : '', 'Step 4') + (S.shopFailed ? g('Account', '✓ created', '') + g('Shop', '✗ not opened', '') : '') +
+      '<button class="btn" data-act="open"' + (last ? '' : ' disabled') + '>Open my shop — free</button><span class="small" style="text-align:center">Free to open · ' + (S.signedIn ? 'your account' : W.oauth ? 'account from ' + esc(W.oauth) : 'account created with it') + '</span></aside>';
+    body.innerHTML = seg + '<div class="step">' + step + nav('nav-m') + nav('nav-d') + '</div>' + glance;
+    const first = body.querySelector('input:not([type=checkbox]):not([readonly])'); if (first && !S.err) first.focus();
+  }
+
+  // ---------- RENDER: create event (the consent block is the delta) ----------
+  function renderEvent() {
+    if (S.view !== 'event') return;
+    const L = EVENTS.find((e) => e[0] === S.ev.type) || EVENTS[0];
+    const noun = L[2];
+    $('eventBody').innerHTML =
+      '<div class="amber"><b>Shipped page, shown compressed.</b> /dashboard/create-event already asks who it is for, the type, the date, the place and the size. The only change is the consent block at the bottom.</div>' +
+      '<div class="wf"><span class="l">Who this event is for</span><div class="seg" style="grid-template-columns:repeat(3,minmax(0,1fr))">' + [['me','Me'],['someone','Someone I know'],['business','A business']].map(([k, l]) => '<button aria-pressed="' + (S.ev.who === k) + '" data-evwho="' + k + '">' + l + '</button>').join('') + '</div></div>' +
+      '<div class="wf"><span class="l">Event type</span><div class="ev-tiles">' + EVENTS.map(([k, e, l]) => '<button class="ev-tile" data-evtype="' + k + '" aria-pressed="' + (S.ev.type === k) + '"><span aria-hidden="true">' + e + '</span><span>' + esc(l) + '</span></button>').join('') + '</div><span class="small">[photo tiles as shipped — emoji stand in here]</span></div>' +
+      '<div class="wf"><label class="l" for="ev-name">Name<em>optional</em></label><input id="ev-name" placeholder="' + esc(noun) + '" value="' + esc(S.ev.name) + '"></div>' +
+      '<div class="wf"><label class="l" for="ev-date">When</label><input id="ev-date" type="date" value="' + esc(S.ev.date) + '"></div>' +
+      '<div class="consent"><span class="small" style="font-weight:600;color:var(--ink)">Stories showcase · this ' + esc(noun) + ' only</span>' +
+        '<label class="chk" style="color:var(--ink);font-size:14px"><input type="checkbox" id="ev-consent"' + (S.ev.consent ? ' checked' : '') + '> <span><b style="font-weight:500">Include this ' + esc(noun) + ' in Setnayan’s Stories showcase.</b> 30 days after the event, its editorial page becomes publicly searchable on setnayan.com/realstories. You can keep it private at any time.</span></label>' +
+        '<span class="small">Starts unticked. The same field, value and the 8 RA 10173 guardrails as the sign-up box it replaces (2026-05-19). Old sentence: “Include my wedding…” — owner 2026-09-22: “why is it asking about wedding? we have multiple events”.</span>' +
+        '<div class="amber"><b>⚠ Not yet decided — where this is stored.</b> Today <code>users.public_summary_consent_at</code> is ONE timestamp per account, written at sign-up. Per event needs a column on <code>events</code> (build 2 = likely a migration) and the eight readers repointed. Recommendation: <code>events.public_summary_consent_at</code>, account column kept as legacy fallback.</div>' +
+      '</div>' +
+      '<button class="btn" data-act="startplanning">Start planning</button>' +
+      '<span class="small center">Location · size · budget band · concierge continue below as shipped [not drawn]</span>';
+  }
+
+  // ---------- VALIDATION (the wizard's gate, per step, shared strings) ----------
+  function validate(n) {
+    const W = S.shop;
+    if (n === 1) { if (!W.name.trim()) return ERR.shopName; if (slug().length < 3) return ERR.slugShape; if (TAKEN.has(slug())) return ERR.slugTaken; return null; }
+    if (n === 2) return W.service ? null : ERR.service;
+    if (n === 3) {
+      if (!S.signedIn && !W.oauth && !W.you.trim()) return ERR.contactName;
+      if (!W.phone.trim()) return ERR.contactPhone;
+      if (!/^(?:(?:\+63|0)9\d{9}|(?:\+63|0)?[2-8]\d{6,9})$/.test(W.phone.replace(/[^\d+]/g, ''))) return ERR.contactPhoneNotPh;
+      if (!S.signedIn && !W.oauth) { if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(W.email)) return ERR.contactEmail; if (W.pw.length < 8) return ERR.pwShort; }
+      else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(W.email || (S.me && S.me.email) || '')) return ERR.contactEmail;
+      return null;
+    }
+    if (!W.pinned) return ERR.locationPin;
+    if (!W.confirmed) return ERR.locationConfirm;
+    if (!S.signedIn && !W.oauth && !W.agree) return ERR.terms;
+    return null;
+  }
+
+  // ---------- INPUT SYNC (values survive re-render) ----------
+  document.addEventListener('input', (e) => {
+    const t = e.target; const id = t.id; const W = S.shop; const P = S.prof;
+    const map = { 'si-email': () => S.si.email = t.value, 'si-pw': () => S.si.pw = t.value, 'su-email': () => S.su.email = t.value, 'su-pw': () => S.su.pw = t.value,
+      'w-name': () => { W.name = t.value; W.slug = null; }, 'w-slug': () => { W.slug = slugify(t.value); }, 'w-pos': () => W.pos = t.value, 'w-phone': () => W.phone = t.value, 'w-email': () => W.email = t.value, 'w-pw': () => W.pw = t.value, 'w-you': () => W.you = t.value, 'w-addr': () => W.address = t.value,
+      'p-nick': () => { P.nick = t.value; P.tag = tagify(t.value); }, 'p-tag': () => P.tag = tagify(t.value), 'p-phone': () => P.phone = t.value, 'p-prefix': () => P.prefix = t.value, 'p-first': () => P.first = t.value, 'p-middle': () => P.middle = t.value, 'p-last': () => P.last = t.value, 'p-suffix': () => P.suffix = t.value, 'enq': () => S.enquiry = t.value, 'ev-name': () => S.ev.name = t.value };
+    if (map[id]) { map[id](); if (id === 'w-name') { const a = $('w-slug'); if (a) a.value = slug(); const ok = document.querySelector('.addr'); if (!ok && W.name) renderWiz(); if (ok && !W.name) renderWiz(); else if (ok) { renderAddrOnly(); } } if (id === 'p-nick') { const g = $('p-tag'); if (g) g.value = P.tag; renderTagOnly(); } if (id === 'p-tag' || id === 'w-slug') { id === 'p-tag' ? renderTagOnly() : renderAddrOnly(); } }
+  });
+  document.addEventListener('change', (e) => {
+    const t = e.target;
+    if (t.id === 'su-agree') S.su.agree = t.checked;
+    if (t.id === 'w-agree') S.shop.agree = t.checked;
+    if (t.id === 'p-stories') S.prof.stories = t.checked;
+    if (t.id === 'ev-consent') S.ev.consent = t.checked;
+    if (t.id === 'ev-date') S.ev.date = t.value;
+  });
+  function renderAddrOnly() { const a = document.querySelector('.addr .avail'); if (!a) return; const s = slug(); if (TAKEN.has(s)) { a.className = 'avail no'; a.textContent = ERR.slugTaken; } else if (s.length < 3) { a.className = 'avail no'; a.textContent = ERR.slugShape; } else { a.className = 'avail ok'; a.textContent = 'available'; } }
+  let tagTimer = null;
+  function renderTagOnly() {
+    const a = document.querySelector('.pc .avail, .pc .f .hint'); if (!a) return; const tag = S.prof.tag;
+    if (!tag) { S.tagCheck = 'idle'; a.className = 'hint'; a.textContent = 'How people find and tag you.'; return; }
+    if (tag.length < 3) { S.tagCheck = 'idle'; a.className = 'avail no'; a.textContent = 'Use 3–32 characters: lowercase letters, numbers and hyphens only.'; return; }
+    // The real control asks the server (lib/slug-availability) after a pause; until it answers, it does not know.
+    S.tagCheck = 'checking'; a.className = 'avail wait'; a.textContent = 'Checking…';
+    const btn = document.querySelector('.pc [data-act=doprofile]'); if (btn) { btn.disabled = true; btn.style.opacity = '.6'; btn.textContent = 'Checking the name…'; }
+    clearTimeout(tagTimer);
+    tagTimer = setTimeout(() => { if (S.popup !== 'profile') return; S.tagCheck = TAKEN.has(tag) ? 'taken' : 'ok'; renderPopup(); }, 700);
+  }
+
+  // ---------- EVENTS (one delegated handler) ----------
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('button, a, [data-act="pin"]'); if (t && t.dataset.state) return; if (!t) { if (e.target.id === 'ov') { S.popup = null; S.err = null; S.afterSignIn = null; render(); } return; }
+    if (t.tagName === 'A' && !t.dataset.toast && !t.dataset.act) return;
+    e.preventDefault();
+    const d = t.dataset; const W = S.shop; const P = S.prof; S.err = null; S.errSrc = null;
+    if (d.auth) { if (d.auth === 'in') { S.signedIn = true; S.me = { ...USER }; S.signedInBefore = true; } else { S.signedIn = false; S.me = null; S.signedInBefore = false; } S.popup = null; }
+    else if (d.act === 'reset') { S = fresh(); $('enq').value = ''; }
+    else if (d.act === 'home') { S.view = 'shop'; }
+    else if (d.act === 'signin') { S.popup = 'signin'; }
+    else if (d.act === 'signup') { S.popup = 'signup'; }
+    else if (d.act === 'avatar') toast('Account menu — Profile & settings · Your Story · Create your shop · Sign out (unchanged)');
+    else if (d.act === 'close') { S.popup = null; S.afterSignIn = null; if (S.view === 'shop') {} }
+    else if (d.act === 'save') { if (S.signedIn) { S.saved = !S.saved; } else { S.afterSignIn = 'save'; S.popup = 'signin'; } }
+    else if (d.act === 'send') { if (!S.enquiry.trim()) { toast('Type your enquiry first.'); return; } if (S.signedIn) S.sent = true; else { S.afterSignIn = 'send'; S.popup = 'signin'; } }
+    else if (d.oauth) { // Google / Apple in the popup: for the prototype, both succeed
+      if (S.popup === 'signin') signIn({ ...USER }); else { S.me = { name: 'Maria Magsaysay', email: 'maria@gmail.com', tag: 'maria-magsaysay' }; S.signedIn = true; P.nick = 'Maria Magsaysay'; P.tag = 'maria-magsaysay'; S.popup = 'profile'; }
+    }
+    else if (d.act === 'dosignin') {
+      if (!S.si.email || !S.si.pw) { S.err = ERR.missing; }
+      else if (S.si.pw.length < 8 || /wrong/i.test(S.si.pw)) { S.err = ERR.pwMatch; } // a wrong password renders HERE — the page behind is untouched
+      else { signIn({ name: USER.name, email: S.si.email, tag: USER.tag }); if (S.afterSignIn === null && S.view === 'wiz') {} }
+    }
+    else if (d.act === 'signin-from-wiz') { S.afterSignIn = 'wiz'; S.popup = 'signin'; }
+    else if (d.act === 'dosignup') {
+      if (!S.su.email || !S.su.pw) S.err = ERR.missing; else if (S.su.pw.length < 8) S.err = ERR.pwShort; else if (!S.su.agree) S.err = ERR.terms;
+      else { S.me = { name: '', email: S.su.email, tag: '' }; S.signedIn = true; S.popup = 'profile'; }
+    }
+    else if (d.act === 'photo') P.photo = !P.photo;
+    else if (d.act === 'full') P.full = true;
+    else if (d.act === 'doprofile') {
+      if (S.tagCheck === 'checking') { return; }
+      if (!P.nick.trim()) { S.err = 'Add a display name.'; }
+      else if (P.tag.length < 3 || TAKEN.has(P.tag)) { S.err = TAKEN.has(P.tag) ? ERR.tagTaken : 'Use 3–32 characters: lowercase letters, numbers and hyphens only.'; }
+      else { S.me = { ...S.me, name: P.nick, tag: P.tag }; S.popup = null; toast('Welcome, ' + P.nick + ' · you’re back on the page you were reading'); }
+    }
+    else if (d.act === 'later') { S.me = { ...S.me, name: S.me.email.split('@')[0], tag: tagify(S.me.email.split('@')[0]) }; S.popup = null; toast('You can finish this any time under Profile & settings'); }
+    else if (d.act === 'openshop') { S.view = 'wiz'; S.step = 1; }
+    else if (d.act === 'wizback') { if (S.view === 'opened') S.view = 'shop'; else if (S.step > 1) S.step--; else S.view = 'shop'; }
+    else if (d.act === 'back') S.step = Math.max(1, S.step - 1);
+    else if (d.act === 'next') { const err = validate(S.step); if (err) S.err = err; else S.step = Math.min(4, S.step + 1); }
+    else if (d.act === 'open') {
+      for (const n of [1,2,3,4]) { const err = validate(n); if (err) { S.err = err; S.step = n; render(); return; } }
+      // THE MOST LIKELY REAL PATH: a stranger who is not a stranger. The server says the email has an
+      // account; the wizard goes back to step 3 with that sentence, opens the sign-in popup IN PLACE with
+      // the email filled in, and keeps every typed value. After the sign-in, step 3 changes shape.
+      if (!S.signedIn && !W.oauth && TAKEN_EMAILS.has(W.email.trim().toLowerCase())) {
+        S.step = 3; S.err = ERR_EMAIL_TAKEN; S.errSrc = null; S.si = { email: W.email, pw: '' }; S.afterSignIn = 'wiz'; S.popup = 'signin'; render(); return;
+      }
+      if (!S.signedIn) { const nm = W.you.trim().split(/\s+/).map((w) => w[0].toUpperCase() + w.slice(1).toLowerCase()).join(' '); S.signedIn = true; S.me = { name: nm, email: W.email, tag: tagify(nm) }; } // title-cased at the source, like lib/person-name-case.ts
+      // ONE SUBMIT, TWO WRITES. If the shop write fails after the account was created, the person is signed
+      // in, told exactly that, and the same button is offered again — now as an existing account.
+      if (S.failShop) { S.shopFailed = true; S.step = 4; S.err = 'Your account is ready — you\'re signed in as ' + S.me.name + '. Your shop did not open: ' + ERR_SHOP + ' Nothing you typed is lost. Press “Open my shop” again.'; S.errSrc = 'warn'; render(); return; }
+      S.shopFailed = false; S.view = 'opened';
+    }
+    else if (d.act === 'failshop') { S.failShop = !S.failShop; }
+    else if (d.act === 'createevent') { S.view = 'event'; }
+    else if (d.evtype) { S.ev.type = d.evtype; S.ev.consent = false; }
+    else if (d.evwho) { S.ev.who = d.evwho; }
+    else if (d.act === 'startplanning') { const L = EVENTS.find((e) => e[0] === S.ev.type); toast((S.ev.name || L[2]) + ' created · Stories consent ' + (S.ev.consent ? 'recorded for THIS event only' : 'not given — the event stays private')); S.view = 'shop'; }
+    else if (d.act === 'logo') W.logo = !W.logo;
+    else if (d.parent) { S.drill.p = d.parent; S.drill.b = null; }
+    else if (d.branch) { S.drill.b = d.branch; }
+    else if (d.leaf) { W.service = d.leaf; }
+    else if (d.act === 'unpick') { W.service = null; S.drill = { p: null, b: null }; }
+    else if (d.act === 'drill-root') { S.drill = { p: null, b: null }; }
+    else if (d.act === 'drill-parent') { S.drill.b = null; }
+    else if (d.ev) { W.events = W.events.includes(d.ev) ? W.events.filter((x) => x !== d.ev) : [...W.events, d.ev]; }
+    else if (d.woauth) { W.oauth = d.woauth; W.you = 'Ana Reyes'; W.email = 'ana.reyes@' + (d.woauth === 'Google' ? 'gmail.com' : 'icloud.com'); }
+    else if (d.act === 'unoauth') { W.oauth = null; W.you = ''; W.email = ''; }
+    else if (d.act === 'pin' || d.act === 'mine') { W.pinned = true; W.confirmed = false; W.city = 'Quezon City'; if (!W.address) W.address = d.act === 'mine' ? '[your current location]' : '[address under the pin]'; }
+    else if (d.act === 'unpin') { W.pinned = false; W.confirmed = false; }
+    else if (d.act === 'confirm') { W.confirmed = true; }
+    else if (d.toast) { toast(d.toast); return; }
+    else return;
+    if (S.signedIn && S.popup === null && S.afterSignIn === 'wiz') { S.afterSignIn = null; }
+    render();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && S.popup) { S.popup = null; S.err = null; S.afterSignIn = null; render(); }
+    if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+      e.preventDefault();
+      const pc = e.target.closest('.pc'); if (pc) { const b = pc.querySelector('.submit'); if (b) b.click(); return; }
+      if (e.target.closest('.wiz') && S.step < 4) $('wizBody').querySelector('[data-act="next"]')?.click(); // Enter never opens the shop (owner 2026-08-10)
+    }
+  });
+  // ---------- deep links: #state[&embed] opens the prototype at one screen (used by the board) ----------
+  function applyState(h) {
+    const [state, ...flags] = h.split('&');
+    S = fresh(); $('enq').value = '';
+    const shop = () => { S.shop.name = 'Banawe Florals'; S.shop.service = 'Photography'; S.shop.events = ['wedding', 'debut']; S.shop.you = 'Ana Reyes'; S.shop.pos = 'Owner'; S.shop.phone = '0917 123 4567'; S.shop.email = 'hello@banaweflorals.ph'; S.view = 'wiz'; };
+    const me = () => { S.signedIn = true; S.me = { ...USER }; S.signedInBefore = true; };
+    switch (state) {
+      case 'signin': S.enquiry = 'Hi! Are you free on Oct 11? We are 120 guests in QC.'; S.afterSignIn = 'send'; S.popup = 'signin'; break;
+      case 'signin-error': S.enquiry = 'Hi! Are you free on Oct 11? We are 120 guests in QC.'; S.afterSignIn = 'send'; S.popup = 'signin'; S.si = { email: 'ana@example.com', pw: 'wrongpass' }; S.err = ERR.pwMatch; break;
+      case 'signup': S.popup = 'signup'; break;
+      case 'profile': S.signedIn = true; S.me = { name: '', email: 'maria@example.com', tag: '' }; S.prof.nick = 'Maria Magsaysay'; S.prof.tag = 'maria-magsaysay'; S.popup = 'profile'; break;
+      case 'profile-full': S.signedIn = true; S.me = { name: '', email: 'maria@example.com', tag: '' }; S.prof.nick = 'Maria Magsaysay'; S.prof.tag = 'maria-magsaysay'; S.prof.full = true; S.prof.prefix = ''; S.prof.first = 'Maria'; S.prof.last = 'Magsaysay'; S.popup = 'profile'; break;
+      case 'shop-1': S.shop.name = 'Banawe Florals'; S.view = 'wiz'; S.step = 1; break;
+      case 'shop-2': shop(); S.step = 2; break;
+      case 'shop-3': shop(); S.step = 3; break;
+      case 'shop-3-in': me(); shop(); S.shop.you = ''; S.step = 3; break;
+      case 'shop-4': shop(); S.step = 4; S.shop.pinned = true; S.shop.confirmed = true; S.shop.city = 'Quezon City'; S.shop.address = '[address under the pin]'; break;
+      case 'opened': shop(); S.shop.city = 'Quezon City'; S.me = { name: 'Ana Reyes', email: 'hello@banaweflorals.ph', tag: 'ana-reyes' }; S.signedIn = true; S.view = 'opened'; break;
+      case 'signup-google': S.signedIn = true; S.me = { name: 'Maria Magsaysay', email: 'maria@gmail.com', tag: 'maria-magsaysay' }; S.prof.nick = 'Maria Magsaysay'; S.prof.tag = 'maria-magsaysay'; S.prof.photo = true; S.popup = 'profile'; break;
+      case 'profile-checking': S.signedIn = true; S.me = { name: '', email: 'maria@example.com', tag: '' }; S.prof.nick = 'Maria Magsaysay'; S.prof.tag = 'maria-magsaysay'; S.tagCheck = 'checking'; S.popup = 'profile'; break;
+      case 'profile-taken': S.signedIn = true; S.me = { name: '', email: 'maria@example.com', tag: '' }; S.prof.nick = 'Maria'; S.prof.tag = 'maria'; S.tagCheck = 'taken'; S.popup = 'profile'; break;
+      case 'event-debut': me(); S.view = 'event'; S.ev.type = 'debut'; S.ev.name = 'Bea’s 18th'; break;
+      case 'event-wake': me(); S.view = 'event'; S.ev.type = 'wake'; break;
+      case 'shop-3-google': shop(); S.step = 3; S.shop.oauth = 'Google'; S.shop.you = 'Ana Reyes'; S.shop.email = 'ana.reyes@gmail.com'; break;
+      case 'shop-email-taken': shop(); S.shop.email = 'ana@example.com'; S.step = 3; S.err = ERR_EMAIL_TAKEN; S.si = { email: 'ana@example.com', pw: '' }; S.afterSignIn = 'wiz'; S.popup = 'signin'; break;
+      case 'terms-server': shop(); S.step = 4; S.shop.pinned = true; S.shop.confirmed = true; S.shop.city = 'Quezon City'; S.shop.address = '[address under the pin]'; S.err = ERR.terms; S.errSrc = 'server'; break;
+      case 'home': break;
+      case 'signed-in-sent': me(); S.enquiry = 'Hi! Are you free on Oct 11? We are 120 guests in QC.'; S.sent = true; toast('Sent · the enquiry you typed went as written'); break;
+      case 'profile-done': S.signedIn = true; S.me = { name: 'Maria Magsaysay', email: 'maria@example.com', tag: 'maria-magsaysay' }; toast('Welcome, Maria Magsaysay · you’re back on the page you were reading'); break;
+      case 'shop-1-in': me(); S.shop.name = 'Banawe Florals'; S.view = 'wiz'; S.step = 1; break;
+      case 'shop-2-in': me(); shop(); S.shop.you = ''; S.step = 2; break;
+      case 'shop-4-in': me(); shop(); S.shop.you = ''; S.step = 4; S.shop.pinned = true; S.shop.confirmed = true; S.shop.city = 'Quezon City'; S.shop.address = '[address under the pin]'; break;
+      case 'shop-4-google': shop(); S.shop.oauth = 'Google'; S.shop.email = 'ana.reyes@gmail.com'; S.step = 4; S.shop.pinned = true; S.shop.confirmed = true; S.shop.city = 'Quezon City'; S.shop.address = '[address under the pin]'; break;
+      case 'event-done': me(); toast('Bea’s 18th created · Stories consent recorded for THIS event only'); break;
+      case 'shop-failed': shop(); S.step = 4; S.shop.pinned = true; S.shop.confirmed = true; S.shop.city = 'Quezon City'; S.shop.address = '[address under the pin]'; S.signedIn = true; S.me = { name: 'Ana Reyes', email: 'hello@banaweflorals.ph', tag: 'ana-reyes' }; S.failShop = true; S.shopFailed = true; S.err = 'Your account is ready — you’re signed in as Ana Reyes. Your shop did not open: ' + ERR_SHOP + ' Nothing you typed is lost. Press “Open my shop” again.'; S.errSrc = 'warn'; break;
+      default: return;
+    }
+    if (flags.includes('embed')) document.querySelector('.proto').hidden = true;
+    if (S.enquiry) $('enq').value = S.enquiry;
+  }
+  document.querySelectorAll('[data-state]').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); applyState(b.dataset.state); document.querySelectorAll('[data-state]').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); render(); window.scrollTo(0, 0); }));
+  window.__proto = { applyState, render, get S() { return S; } };
+  (function applyHash() { const h = (window.__STATE || location.hash).replace(/^#/, ''); if (h) applyState(h); })();
+  render();
+})();
+</script>
+</body>
+</html>
