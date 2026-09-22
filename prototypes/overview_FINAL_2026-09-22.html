@@ -1,0 +1,1211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Event overview — redesign prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!--
+  EVENT OVERVIEW — responsive redesign prototype  ·  v2, 2026-09-22
+  Route: /dashboard/[eventId]   (the couple's event Home / Overview)
+  Measured live on www.setnayan.com/dashboard/044f7e64-95aa-4dcb-84c1-7263bf494eaa
+  signed in as the host of "Indalecio & Claire" — 87 days out, Setnayan AI ACTIVE.
+
+  v2 adds what one event in one state could never show:
+    · SAI ON / OFF        the page has two states; the live event is AI-on only
+    · SHOW SAI'S PATH     outlines and numbers all 7 places Sai appears (+1 only when Sai is OFF)
+    · STATES panel        every conditional block the page can render
+                          (no date · free camera · handover · Nikah · tea · annual ·
+                           AI offer · access requests · event-day prep · refused read)
+    · Real sub-screens    every "Needs you" / "Coming up" / watch row opens the shipped
+                          inspector shape (eyebrow · title · chips · copy · ONE cta)
+
+  One DOM, two layouts:
+    < 1024px  one column, ordered by the moment. Sub-screens open full screen.
+    >=1024px  real shell (top bar + left rail). Flow left; the day + numbers + watch
+              sticky right. Sub-screens open as a drawer; at >=1280px the drawer docks
+              as a column and the page makes room, standing in for the Overview's
+              shipped third inspector column (InspectorLayout, ?inspect=).
+
+  Colours, radii, font read off the live page's own custom properties 2026-09-22.
+  Every figure, name, label, destination and sentence is real unless in [BRACKETS].
+-->
+<style>
+:root{
+  --ink:#2C2A29; --ink-2:#6E6A62; --ink-3:#8A857B; --ink-4:#A09A8E;
+  --line:#E1DCD1; --line-2:#EDE8DE; --soft:#F4F2EC; --page:#FFFFFF; --paper:#FBFAF7;
+  --gold:#8A6B39; --gold-2:#A9834B; --gold-3:#CBA766; --gold-100:#F3ECDF; --gold-800:#5C4726;
+  --cta:#C24E25; --cta-2:#B04722;
+  --night:#17160F; --night-ink:#FBFAF7; --night-2:#B6B9BE; --night-gold:#CBA766;
+  --ok:#5E7C52; --ok-deep:#4F6B4A; --ok-soft:#E9EEE3;
+  --warn:#B77E2E; --warn-deep:#7A5119; --warn-soft:#F6EAD2;
+  --info:#4E6C82; --info-soft:#E2EAEF;
+  --link:#3B4E67;
+  --r-xl:18px; --r-lg:14px; --r-md:10px; --r-sm:6px; --r-pill:999px;
+  --sh-sm:0 1px 2px rgba(30,26,18,.06);
+  /* motion — the app's own tokens (globals.css --sn-dur-* / --sn-ease-*) */
+  --dur-micro:120ms; --dur-control:200ms; --dur-elem:320ms; --dur-enter:640ms;
+  --ease:cubic-bezier(.2,.7,.2,1); --ease-out:cubic-bezier(.16,1,.3,1);
+}
+
+/* ══════════ MOTION ══════════
+   Every keyframe below is the app's own, copied from globals.css rather than
+   invented: sn-rise (the reveal), sn-pick-bounce (selection), journey-rail-grow
+   (a bar filling), journey-node-pop (the stage node), and the 0.13s scale(.96)
+   press with a brightness dip. The reduced-motion block at the end is the same
+   blast-radius rule the app ships. */
+@keyframes rise      { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:none} }
+@keyframes fadein    { from{opacity:0} to{opacity:1} }
+@keyframes scalein   { from{opacity:0;transform:scale(.94)} to{opacity:1;transform:none} }
+@keyframes pickbounce{ 0%{scale:1} 38%{scale:1.15} 68%{scale:.98} 100%{scale:1} }
+@keyframes railgrow  { from{transform:scaleX(0)} to{transform:scaleX(1)} }
+@keyframes nodepop   { 0%{opacity:0;scale:.2} 70%{opacity:1;scale:1.18} 100%{opacity:1;scale:1} }
+@keyframes beacon    { 0%,100%{opacity:.45;transform:scale(1)} 50%{opacity:1;transform:scale(1.5)} }
+@keyframes drawerR   { from{transform:translateX(24px);opacity:0} to{transform:none;opacity:1} }
+@keyframes sheetUp   { from{transform:translateY(22px);opacity:0} to{transform:none;opacity:1} }
+@keyframes toastUp   { from{transform:translateY(16px);opacity:0} to{transform:none;opacity:1} }
+
+/* section entrances — staggered, replayed whenever the moment changes */
+.layout > *{animation:rise var(--dur-enter) both var(--ease-out)}
+.layout > *:nth-child(2){animation-delay:.05s} .layout > *:nth-child(3){animation-delay:.10s}
+.layout > *:nth-child(4){animation-delay:.15s} .layout > *:nth-child(5){animation-delay:.20s}
+.layout > *:nth-child(6){animation-delay:.25s} .layout > *:nth-child(7){animation-delay:.30s}
+.layout > *:nth-child(8){animation-delay:.35s} .layout > *:nth-child(9){animation-delay:.40s}
+
+/* the press, exactly as the app does it */
+button,summary,a{transition:scale .13s var(--ease),filter .13s ease}
+button:not(:disabled):active,summary:active{scale:.96;filter:brightness(.97)}
+.vital:active,.need:active,.row:active,.bhead:active,.stage:active{scale:.97}
+.bounce{animation:pickbounce .42s var(--ease)}
+
+/* bars fill rather than appear */
+.bar i,.vital .seg i{transform-origin:left center;animation:railgrow 900ms var(--ease-out) both;animation-delay:.16s}
+/* the watch dot breathes while something is flagged */
+.dot{animation:beacon 2.6s ease-in-out infinite}
+/* rows and cards inside a panel arrive in sequence */
+.panel-body > *{animation:rise var(--dur-elem) both var(--ease-out)}
+.panel-body > *:nth-child(2){animation-delay:.04s} .panel-body > *:nth-child(3){animation-delay:.08s}
+.panel-body > *:nth-child(4){animation-delay:.12s} .panel-body > *:nth-child(5){animation-delay:.16s}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{font-family:'Hanken Grotesk',ui-sans-serif,system-ui,sans-serif;background:var(--page);color:var(--ink);-webkit-font-smoothing:antialiased;font-size:15px}
+button{font-family:inherit;cursor:pointer;color:inherit}
+h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.015em}
+a{color:inherit}
+
+/* ---------- prototype bar ---------- */
+.proto{position:sticky;top:0;z-index:60;background:#EDEAE4;padding:8px 14px;font-size:12px;color:var(--ink-2)}
+.proto .r{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.proto b{font-weight:700;color:var(--ink)}
+.proto .pill{height:28px;font-size:12px;padding:0 11px}
+.proto .sep{width:1px;height:18px;background:#D8D3C8}
+
+.pill{height:34px;padding:0 13px;border-radius:var(--r-pill);border:1px solid var(--line);background:#fff;font-size:13px;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.pill[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.pill.saipill[aria-pressed="true"]{background:var(--gold);border-color:var(--gold)}
+.switch{width:38px;height:22px;flex:none;border:0;border-radius:var(--r-pill);background:#D9D3C8;padding:3px;display:flex}
+.switch::after{content:"";width:16px;height:16px;border-radius:var(--r-pill);background:#fff;transition:transform .15s}
+.switch[aria-checked="true"]{background:var(--gold-2)}
+.switch[aria-checked="true"]::after{transform:translateX(16px)}
+
+/* ---------- shell ---------- */
+.shell-top,.shell-rail{display:none}
+.app{display:block}
+
+.page-head{padding:14px 16px 2px}
+.page-head h1{font-size:23px;line-height:1.15}
+.status{display:block;margin-top:4px;font-size:13.5px;color:var(--ink-2)}
+.status b{color:var(--ink);font-weight:700}
+
+.layout{display:flex;flex-direction:column;gap:22px;padding:14px 16px 96px}
+.sec{display:flex;flex-direction:column;gap:9px}
+.sec-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sec h2{font-size:16.5px}
+.count{font-size:12px;color:var(--ink-2);font-weight:600}
+.small{font-size:12.5px;color:var(--ink-2);margin:0}
+.eyebrow{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700}
+
+.card{border:1px solid var(--line);border-radius:var(--r-lg);background:#fff;padding:14px 16px;display:flex;flex-direction:column;gap:9px;box-shadow:var(--sh-sm)}
+.rows{border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;background:#fff;box-shadow:var(--sh-sm)}
+.row{min-height:52px;width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border:0;border-bottom:1px solid var(--line-2);background:#fff;font-size:14.5px;text-align:left}
+.rows .row:last-child{border-bottom:0}
+.row .v{color:var(--ink-2);font-size:13.5px;white-space:nowrap}
+.row .v.gold{color:var(--gold)} .row .v.cta{color:var(--cta);font-weight:600}
+.row .l{min-width:0;display:flex;flex-direction:column;gap:2px}
+.row .l b{font-weight:600}
+.row .l span{font-size:12.5px;color:var(--ink-2)}
+.row[aria-current="true"]{background:var(--gold-100)}
+.lone{border:1px solid var(--line);border-radius:var(--r-lg);background:#fff}
+.btn{height:44px;border:0;border-radius:var(--r-pill);background:var(--cta);color:#fff;font-size:14px;font-weight:700;padding:0 18px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn.gold{background:var(--gold-2)}
+.btn.ghost{background:#fff;border:1px solid var(--gold-2);color:var(--gold)}
+.btn.sm{height:36px;font-size:13px;padding:0 14px}
+.chip{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:var(--r-pill);font-size:11px;font-weight:700}
+.chip.warn{background:var(--warn-soft);color:var(--warn-deep)}
+.chip.ok{background:var(--ok-soft);color:var(--ok-deep)}
+.chip.gold{background:var(--gold-100);color:var(--gold-800)}
+.chip.cta{background:#FBEAE3;color:var(--cta-2)}
+.chip.pri{background:var(--gold);color:#fff;letter-spacing:.04em}
+.chip.plain{background:#fff;border:1px solid var(--line);color:var(--ink-2)}
+.num{font-size:11px;width:22px;height:22px;border-radius:var(--r-pill);background:var(--ink);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;flex:none}
+.num.one{background:var(--gold-100);color:var(--gold-800);border:1px solid var(--gold-2)}
+.udot{width:7px;height:7px;border-radius:var(--r-pill);background:var(--warn);flex:none}
+
+.alert{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:var(--r-lg);font-size:13.5px;border:1px solid;width:100%;text-align:left}
+.alert.info{background:var(--info-soft);border-color:#CBD9E2;color:#2F4655}
+.alert.gold{background:var(--gold-100);border-color:#E3D5B7;color:var(--gold-800)}
+.alert.warn{background:var(--warn-soft);border-color:#E8D5AE;color:var(--warn-deep)}
+.alert .l{flex:1;min-width:0}
+
+/* ---------- THE DAY ---------- */
+.day{background:var(--night);color:var(--night-ink);border-radius:var(--r-xl);padding:18px;display:flex;flex-direction:column;gap:13px}
+.day .eyebrow{color:var(--night-gold)}
+.day .date{font-size:24px;font-weight:700;line-height:1.1}
+.day .sub{font-size:12.5px;color:var(--night-2);line-height:1.4}
+.day .cdrow{display:flex;align-items:baseline;gap:8px}
+.day .cd{font-size:46px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.bar{height:5px;border-radius:var(--r-pill);background:rgba(255,255,255,.14);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--night-gold)}
+.day .barlab{font-size:11.5px;color:var(--night-2)}
+.day .barlab b{color:var(--night-gold)}
+.rule{height:1px;background:rgba(255,255,255,.12)}
+.brief{font-size:14.5px;font-weight:600;line-height:1.35;margin:6px 0 10px}
+.bchips{display:flex;gap:6px;flex-wrap:wrap}
+.bchips span{border-radius:var(--r-pill);padding:4px 10px;font-size:11.5px;font-weight:600;background:rgba(255,255,255,.10)}
+.watch{display:flex;flex-direction:column;gap:6px}
+.wrow{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;border:0;background:transparent;color:var(--night-ink);padding:3px 0;text-align:left;font-size:13.5px}
+.wrow .t{display:flex;align-items:center;gap:8px;min-width:0}
+.wrow .t i{font-style:normal;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:800}
+.dot{width:7px;height:7px;border-radius:var(--r-pill);background:var(--night-gold);flex:none}
+.dot.guard{background:#8FB3C9}
+
+.vitals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.vital{border:1px solid var(--line);border-radius:var(--r-lg);background:#fff;padding:11px 12px;display:flex;flex-direction:column;gap:3px;text-align:left;box-shadow:var(--sh-sm)}
+.vital .k{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.vital .n{font-size:21px;font-weight:800;letter-spacing:-.02em}
+.vital .d{font-size:11.5px;color:var(--ink-2);line-height:1.3}
+.vital .seg{display:flex;height:4px;border-radius:var(--r-pill);overflow:hidden;background:var(--line-2);margin-top:3px}
+.vital .seg i{display:block;height:100%}
+
+.need{width:100%;display:flex;align-items:center;gap:11px;padding:12px 14px;border:0;border-bottom:1px solid var(--line-2);background:#fff;text-align:left}
+.rows .need:last-child{border-bottom:0}
+.need[aria-current="true"]{background:var(--gold-100)}
+.need .l{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.need .l b{font-size:14.5px;font-weight:700}
+.need .meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-2)}
+.need .go{flex:none;color:var(--ink-3);font-size:18px}
+
+.band .bcard{border:1px solid var(--line);border-radius:var(--r-lg);background:#fff;overflow:hidden;box-shadow:var(--sh-sm)}
+.band .bhead{width:100%;display:flex;align-items:center;gap:10px;padding:12px 14px;border:0;background:#fff;text-align:left}
+.band .bhead .l{flex:1;min-width:0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.band .bhead b{font-size:14.5px;font-weight:700}
+.band .bhead .c{font-size:12.5px;color:var(--ink-2)}
+.band .chev{transition:transform .18s;flex:none;color:var(--ink-3)}
+.band .bhead[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.band .bwrap{display:grid;grid-template-rows:0fr;transition:grid-template-rows var(--dur-elem) var(--ease-out)}
+.band .bcard.open .bwrap{grid-template-rows:1fr}
+.band .bwrap > div{overflow:hidden}
+.band .bbody{border-top:1px solid var(--line-2);padding:10px 14px 12px;display:flex;flex-direction:column;gap:8px;
+  opacity:0;transition:opacity var(--dur-control) var(--ease-out)}
+.band .bcard.open .bbody{opacity:1;transition-delay:.06s}
+.mini{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13.5px}
+.mini .n{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:4px}
+.foot a{font-size:13px;font-weight:700;color:var(--link);text-decoration:none}
+
+.rail{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.stage{flex:none;min-width:104px;border:1px solid var(--line);border-radius:var(--r-lg);background:#fff;padding:9px 10px;display:flex;flex-direction:column;gap:5px;text-align:left}
+.stage[aria-pressed="true"]{border-color:var(--gold-2);background:var(--gold-100)}
+.stage b{font-size:13px;font-weight:700}
+.stage .p{font-size:11px;color:var(--ink-2)}
+.stage .bar{height:4px;background:var(--line-2)}
+.stage .bar i{background:var(--gold-2)}
+.stage[aria-pressed="true"] .here{animation:nodepop 440ms var(--ease) both}
+.here{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-weight:800}
+.icon-btn{width:42px;height:42px;border:0;background:transparent;display:inline-flex;align-items:center;justify-content:center;border-radius:var(--r-pill);flex:none}
+.icon-btn.ring{border:1px solid var(--line);background:#fff;width:32px;height:32px;font-size:14px}
+
+.sk{background:linear-gradient(90deg,#EFEBE3 25%,#F7F4EE 37%,#EFEBE3 63%);background-size:400% 100%;animation:shim 1.5s ease-in-out infinite;border-radius:8px;margin-bottom:9px}
+@keyframes shim{0%{background-position:100% 0}100%{background-position:0 0}}
+.amber{border:1px solid #E8D5AE;border-left:4px solid var(--warn);background:#FDF6E7;border-radius:12px;padding:11px 13px;margin-top:8px}
+.amber .atag{display:inline-block;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--warn-deep);background:#F6EAD2;border-radius:var(--r-pill);padding:2px 8px;margin-bottom:6px}
+.amber .small{color:#5C4726;line-height:1.5;margin-top:5px}
+.atab{border-collapse:collapse;width:100%;margin-top:7px;font-size:11.5px}
+.atab th,.atab td{text-align:left;padding:3px 7px 3px 0;border-bottom:1px solid #EADFC4;color:#5C4726}
+.atab th{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+
+/* ---------- SAI PATH ---------- */
+[data-sai]{position:relative}
+body.sai-path [data-sai]{outline:2px dashed var(--gold-2);outline-offset:4px;border-radius:var(--r-md)}
+body.sai-path #needCount::after{left:auto!important;right:-6px}
+body.sai-path [data-sai]::after{animation:scalein var(--dur-control) both var(--ease-out);content:attr(data-sai);position:absolute;top:-11px;left:-6px;z-index:5;
+  background:var(--gold);color:#fff;font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+  padding:2px 7px;border-radius:var(--r-pill);white-space:nowrap;pointer-events:none;box-shadow:0 1px 4px rgba(30,26,18,.35)}
+
+/* ---------- moments ---------- */
+.compact{display:none}
+.onlyday,.onlyafter{display:none}
+body.is-day .onlyday{display:flex} body.is-after .onlyafter{display:flex}
+body.is-day .notday{display:none} body.is-after .notafter{display:none}
+body.is-day .fold .full,body.is-after .fold .full{display:none}
+body.is-day .fold .compact,body.is-after .fold .compact{display:flex}
+body.is-after .vital[data-k="guests"],
+body.is-after .vital[data-k="papic"],
+body.is-after .vital[data-k="next"]{display:none}
+body.is-after .vitals{grid-template-columns:minmax(0,1fr)}
+
+.rightcol{display:contents}
+.s-alerts{order:0}.s-day{order:1}.s-need{order:2}.s-meanwhile{order:3}.s-coming{order:4}
+.s-vitals{order:5}.s-band{order:6}.s-extras{order:7}.s-progress{order:8}
+.s-now{order:0}.s-wrap{order:0}
+body.is-day .s-now{order:1} body.is-day .s-day{order:2} body.is-day .s-meanwhile{order:3}
+body.is-day .s-band{order:4} body.is-day .s-need{order:5} body.is-day .s-coming{order:6}
+body.is-day .s-vitals{order:7} body.is-day .s-extras{order:8} body.is-day .s-progress{order:9}
+body.is-after .s-wrap{order:1} body.is-after .s-meanwhile{order:2} body.is-after .s-band{order:3}
+body.is-after .s-vitals{order:4} body.is-after .s-progress{order:5} body.is-after .s-need{order:6}
+body.is-after .s-coming{order:7} body.is-after .s-extras{order:8} body.is-after .s-day{order:9}
+
+/* ---------- panel ---------- */
+.scrim{position:fixed;inset:0;background:rgba(23,22,15,.45);z-index:70;display:none}
+.panel{position:fixed;inset:0;background:#fff;z-index:71;display:none;flex-direction:column}
+.open .scrim{display:block;animation:fadein var(--dur-control) both}
+.open .panel{display:flex;animation:sheetUp var(--dur-elem) both var(--ease-out)}
+.panel-head{display:flex;align-items:center;gap:4px;padding:10px 14px 10px 6px;border-bottom:1px solid var(--line-2)}
+.panel-head .t{flex:1;min-width:0}
+.panel-head .t .e{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.panel-head .t .h{display:block;font-size:17px;font-weight:700;line-height:1.2}
+.panel-body{flex:1;overflow-y:auto;padding:14px 16px 32px;display:flex;flex-direction:column;gap:12px}
+.panel-body p{margin:0;font-size:14px;line-height:1.5;color:#4A4742}
+.panel-body .btn{align-self:flex-start}
+.toast{position:fixed;left:16px;right:16px;bottom:18px;z-index:80;border-radius:var(--r-lg);background:var(--ink);color:#fff;padding:13px 15px;font-size:13.5px;display:none;justify-content:space-between;align-items:center;gap:12px}
+.toast.on{display:flex;animation:toastUp var(--dur-control) both var(--ease-out)}
+.toast button{border:0;background:transparent;color:var(--gold-3);font-weight:700}
+
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;align-items:center;justify-content:space-around;height:62px;background:rgba(255,255,255,.94);border-top:1px solid var(--line-2);font-size:10.5px;color:var(--ink-3)}
+.tabbar span{display:flex;flex-direction:column;align-items:center;gap:3px}
+.tabbar span.on{color:var(--gold)}
+.tabbar i{width:18px;height:18px;border-radius:var(--r-sm);background:currentColor;opacity:.75;display:block}
+
+
+.writeup{max-width:900px;margin:36px auto 60px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:26px 28px}
+.writeup h2{font-size:19px;margin-bottom:5px}
+.writeup h3{font-size:14px;margin:20px 0 6px;color:var(--gold-800)}
+.writeup p,.writeup li,.writeup td{font-size:13px;line-height:1.6;color:#3A382F}
+.writeup .wsub{color:var(--ink-2);font-size:12.5px}
+.writeup ul,.writeup ol{margin:5px 0 0;padding-left:19px}
+.writeup li{margin-bottom:6px}
+.writeup table{border-collapse:collapse;width:100%;margin-top:7px}
+.writeup th,.writeup td{text-align:left;padding:5px 9px 5px 0;border-bottom:1px solid var(--line-2);vertical-align:top}
+.writeup th{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.writeup code{font-family:ui-monospace,monospace;font-size:11.5px;background:var(--soft);padding:1px 4px;border-radius:4px}
+.q{border-left:3px solid var(--gold-2);padding:7px 0 7px 12px;margin-top:10px}
+.q b{color:var(--gold-800)}
+.q .rec{display:block;color:var(--ink);font-weight:600;margin:3px 0}
+
+/* ---------- DESKTOP ---------- */
+@media (min-width:1024px){
+  body{background:var(--paper)}
+  .tabbar{display:none}
+  .shell-top{display:flex;align-items:center;gap:16px;height:56px;padding:0 22px;background:#fff;border-bottom:1px solid var(--line-2);position:sticky;top:46px;z-index:40}
+  .shell-top .brand{font-weight:800;letter-spacing:.2em;font-size:13px}
+  .shell-top .search{flex:1;max-width:460px;height:36px;border:1px solid var(--line);border-radius:var(--r-pill);display:flex;align-items:center;padding:0 14px;color:var(--ink-4);font-size:13px}
+  .shell-top .me{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-2)}
+  .app{display:grid;grid-template-columns:186px 1fr}
+  .shell-rail{display:flex;flex-direction:column;gap:3px;padding:16px 12px;border-right:1px solid var(--line-2);background:#fff;min-height:calc(100vh - 102px);font-size:13px;color:var(--ink-2);position:sticky;top:102px;align-self:start;max-height:calc(100vh - 102px);overflow:auto}
+  .shell-rail em{font-style:normal;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-4);font-weight:700;padding:12px 8px 4px}
+  .shell-rail span{padding:7px 8px;border-radius:var(--r-md);display:flex;justify-content:space-between}
+  .shell-rail span.on{background:var(--gold-100);color:var(--gold);font-weight:700}
+  .main{max-width:1180px;width:100%;margin:0 auto;padding:4px 28px}
+  .page-head{padding:20px 0 4px}
+  .page-head h1{font-size:28px}
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;column-gap:28px;row-gap:26px;padding:10px 0 60px;align-items:start}
+  .layout > .sec{grid-column:1}
+  .rightcol{display:flex;flex-direction:column;gap:12px;grid-column:2;grid-row:1 / span 12;position:sticky;top:120px;align-self:start}
+  .rightcol .sec-head h2{font-size:14px}
+  .band .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .wrapgrid,.nowgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .panel{inset:0 0 0 auto;width:400px;box-shadow:-8px 0 24px rgba(23,22,15,.10)}
+  .open .panel{animation:drawerR var(--dur-elem) both var(--ease-out)}
+  .toast{left:auto;right:22px;width:340px}
+  .stage{min-width:0;flex:1}
+  .rail{overflow:visible}
+}
+@media (min-width:1280px){
+  /*
+    ⚡ AT >=1280 THE PANEL IS NOT A DRAWER — IT IS A COLUMN THAT PUSHES.
+    The kit's pattern is a drawer over a dimmed page, and that is right for the
+    Papic controller. This page is different and the difference is the point:
+    `.sn-inspector-rail` already ships here, takes clamp(340px,30vw,420px)+24px,
+    and the MASTER REFLOWS into what is left. Drawn as a drawer, the prototype
+    would hide the squeeze — which is exactly how the earlier prototype misled
+    everyone about the sticky column.
+  */
+  body.open .scrim{display:none}
+  /*
+    ⚠ THE FIRST CUT OF THIS MADE THE PANEL A STATIC SIBLING and the master did
+    NOT reflow — `.main` kept its `max-width:1180px`, so the panel OVERLAPPED
+    the content at 1440 (measured: mainW 1180, panel left inside main's right
+    edge). A prototype that draws the panel on top of the flow hides the squeeze
+    it exists to show, which is the same failure as drawing it as a drawer.
+
+    `#panelWrap` sits outside `.app` in the DOM, so it cannot be a flex sibling
+    of `.main` without restructuring. It stays FIXED, and the master is made to
+    reflow by giving up its max-width and reserving the rail's real width.
+  */
+  body.open .panel{
+    position:fixed;inset:0 0 0 auto;
+    width:clamp(340px,30vw,420px);
+    border-left:1px solid var(--line-2);box-shadow:none;animation:none;
+  }
+  body.open .main{
+    max-width:none;
+    padding-right:calc(clamp(340px,30vw,420px) + 24px);
+  }
+  /* …and the sticky status column gives way, because two right columns do not
+     fit: 1,038 - 364 - 364 leaves about 310px of flow. One at a time. */
+  body.open .layout{display:block}
+  body.open .rightcol{display:block}
+  body.open .rightcol .sec + .sec{margin-top:22px}
+}
+@media (max-width:1023px){
+  .wrapgrid,.nowgrid,.band .grid2{display:flex;flex-direction:column;gap:9px}
+}
+
+/* Accessibility — WCAG 2.2 § 2.3.3. The app's global block, copied verbatim in
+   spirit: anyone who asked their OS for less motion gets a still page. */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms!important;animation-delay:.001ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.001ms!important;transition-delay:.001ms!important;
+    scroll-behavior:auto!important;
+  }
+}
+</style>
+</head>
+<body class="is-planning sai-on">
+
+<div class="proto" role="group" aria-label="Prototype controls">
+  <div class="r">
+    <b>Prototype</b>
+    <button class="pill" data-moment="planning" aria-pressed="true">Planning</button>
+    <button class="pill" data-moment="day" aria-pressed="false">On the day</button>
+    <button class="pill" data-moment="after" aria-pressed="false">After</button>
+    <span class="sep"></span>
+    <span style="display:inline-flex;align-items:center;gap:7px">Setnayan&nbsp;AI
+      <button class="switch" role="switch" aria-checked="true" id="saiSwitch" aria-label="Setnayan AI"></button>
+    </span>
+    <button class="pill saipill" data-toggle="path" aria-pressed="false">Show Sai&rsquo;s path</button>
+    <button class="pill" data-open="states">States&hellip;</button>
+    <span style="margin-left:auto">Not part of the app</span>
+  </div>
+</div>
+
+<div class="shell-top">
+  <span class="brand">SETNAYAN</span>
+  <span class="search">Search events, people, vendors</span>
+  <span class="me"><span class="pill" style="background:var(--cta);border-color:var(--cta);color:#fff">+ Create event</span> Ice Casasola</span>
+</div>
+
+<div class="app">
+  <nav class="shell-rail" aria-label="Event menu">
+    <span style="color:var(--ink-3)">&larr; Back to events</span>
+    <em>Indalecio &amp; Claire</em>
+    <em>Plan</em>
+    <span class="on">Overview</span>
+    <span>Guests <b style="font-weight:600;color:var(--ink-4)">81</b></span>
+    <span>Your Team <b style="font-weight:600;color:var(--ink-4)">25</b></span>
+    <span>Suite <b style="font-weight:600;color:var(--ink-4)">3</b></span>
+    <em>Go live</em>
+    <span>Event Hub Controller</span>
+    <em>Also in this event</em>
+    <span>Personalization</span><span>Hosts</span><span>Refer a couple</span><span>Schedule</span>
+    <span>Seat plan</span><span>Budget</span><span>Editorial</span><span>Galleries</span>
+  </nav>
+
+  <div class="main">
+    <div class="page-head">
+      <h1>Kumusta, Indalecio &amp; Claire</h1>
+      <span class="status" id="statusLine"></span>
+    </div>
+
+    <div class="layout">
+
+      <section class="sec s-alerts" aria-label="Attention" id="alerts" hidden></section>
+
+      <section class="sec s-now onlyday" aria-label="Right now">
+        <div class="sec-head"><h2>Right now</h2><button class="pill" data-open="close">Close out the day</button></div>
+        <div class="card" style="background:var(--night);color:var(--night-ink);border:0">
+          <span class="eyebrow" style="color:var(--night-gold)">Happening now</span>
+          <b style="font-size:19px">[Reception &middot; dinner service]</b>
+          <span style="font-size:12.5px;color:var(--night-2)">Next: [First dance &middot; 8:40 PM]</span>
+        </div>
+        <div class="nowgrid">
+          <button class="row lone" data-open="live"><span class="l"><b>Live desk</b><span>Announcements &amp; the wall</span></span><span class="v">&rsaquo;</span></button>
+          <button class="row lone" data-open="table"><span class="l"><b>Your table</b><span>[Head table &middot; 12]</span></span><span class="v">&rsaquo;</span></button>
+          <button class="row lone" data-open="wall"><span class="l"><b>Photo wall</b><span>[live]</span></span><span class="v">&rsaquo;</span></button>
+          <button class="row lone" data-open="prog"><span class="l"><b>Programme</b><span>9 blocks</span></span><span class="v">&rsaquo;</span></button>
+          <button class="row lone" data-open="broadcast"><span class="l"><b>Coordinator</b><span>[no message yet]</span></span><span class="v">&rsaquo;</span></button>
+          <button class="row lone" data-open="help"><span class="l"><b>Get help</b><span>Same-day suppliers</span></span><span class="v cta">&rsaquo;</span></button>
+        </div>
+      </section>
+
+      <section class="sec s-wrap onlyafter" aria-label="Looking back">
+        <h2>That&rsquo;s a wrap &mdash; Friday, December 18</h2>
+        <div class="wrapgrid">
+          <button class="row lone" data-open="wrapstory" style="border-color:var(--cta);background:#FDF6F3">
+            <span class="l"><b>Write your story</b><span>[not written yet]</span></span><span class="v cta">Start &rsaquo;</span></button>
+          <button class="row lone" data-to="/galleries"><span class="l"><b>Photos</b><span>[n] from cameras &amp; guests</span></span><span class="v">&rsaquo;</span></button>
+          <button class="row lone" data-to="/guests"><span class="l"><b>Guests</b><span>81 &middot; [n] checked in</span></span><span class="v">&rsaquo;</span></button>
+          <button class="row lone" data-to="/vendors?tab=build"><span class="l"><b>Your team</b><span>2 suppliers &middot; leave a review</span></span><span class="v">&rsaquo;</span></button>
+          <button class="row lone" data-to="/suite"><span class="l"><b>Suite</b><span>3 services</span></span><span class="v">&rsaquo;</span></button>
+          <button class="row lone" data-to="/[slug]"><span class="l"><b>Your page</b><span>[/slug] stays live</span></span><span class="v">&rsaquo;</span></button>
+        </div>
+      </section>
+
+      <aside class="rightcol">
+        <section class="sec s-day" aria-label="The event day">
+          <div class="day" id="dayCard"></div>
+        </section>
+        <section class="sec s-vitals" aria-label="Your numbers">
+          <div class="sec-head"><h2>Your numbers</h2></div>
+          <div class="vitals" id="vitals"></div>
+        </section>
+      </aside>
+
+      <section class="sec s-need fold" aria-label="Needs you">
+        <div class="sec-head full"><h2>Needs you</h2><span class="count" id="needCount"></span></div>
+        <p class="small full" id="needSub"></p>
+        <div class="rows full" id="needRows"></div>
+        <div class="full" id="venueOffer"></div>
+        <button class="row lone compact" data-open="needs"><span class="l"><b>Needs you</b></span><span class="v" id="needCompact"></span></button>
+      </section>
+
+      <section class="sec s-meanwhile" aria-label="Meanwhile" id="meanwhile" hidden></section>
+
+      <section class="sec s-coming fold" aria-label="Coming up">
+        <div class="sec-head full"><h2>Coming up</h2><span class="count">6 dates</span></div>
+        <p class="small full" id="comingSub"></p>
+        <div class="rows full" id="comingRows"></div>
+        <div class="foot full"><span class="small">Checklist 7% done</span><a href="#" data-to="/checklist">Full checklist &rarr;</a></div>
+        <button class="row lone compact" data-open="coming"><span class="l"><b>Coming up</b></span><span class="v">6 dates &rsaquo;</span></button>
+      </section>
+
+      <section class="sec s-band band" aria-label="Around your event">
+        <div class="sec-head"><h2>Around your event</h2></div>
+        <div class="grid2" id="bandCards"></div>
+        <div class="foot">
+          <span class="small">Suppliers always appear by company.</span>
+          <a href="#" data-to="/activity">Recent activity &rarr;</a>
+        </div>
+      </section>
+
+      <section class="sec s-extras" aria-label="Also for you" id="extras" hidden></section>
+
+      <section class="sec s-progress" aria-label="Progress">
+        <div class="sec-head"><h2>Progress</h2>
+          <span style="display:flex;align-items:center;gap:6px">
+            <span class="count" id="stageNow"></span>
+            <button class="icon-btn ring" data-step="-1" aria-label="Previous stage">&larr;</button>
+            <button class="icon-btn ring" data-step="1" aria-label="Next stage">&rarr;</button>
+          </span>
+        </div>
+        <div class="rail" id="rail" role="group" aria-label="Stages"></div>
+        <div class="card" id="stageCard"></div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<nav class="tabbar" aria-label="Bottom">
+  <span class="on"><i></i>Overview</span><span><i></i>Guests</span><span><i></i>Your Team</span><span><i></i>Suite</span>
+</nav>
+
+
+<section class="writeup">
+  <h2>Event Overview — what these five builds do</h2>
+  <p class="wsub">Route <code>/dashboard/[eventId]</code>. Measured live 2026-09-22 on your own event
+  (Indalecio &amp; Claire, 87 days out): <b>662 words · 40 controls · 6.2 phone screens · 3,165px on desktop</b>.
+  Every control on that page survives here — nothing was removed to remove its text.</p>
+
+  <h3>1 · What changes</h3>
+  <table>
+    <tr><th>Build</th><th>One line</th><th>Where it is</th></tr>
+    <tr><td><b>A date is not a decision</b></td><td>The board said “9 open decisions”; six were recommended deadlines nobody resolves by reading. They get their own <i>Coming up · 6 dates</i>. The count becomes <b>4</b>.</td><td>merged #5855</td></tr>
+    <tr><td><b>One decision list</b></td><td>The top panel stopped printing the first three rows of the board below it. “Lock your coordinator” rendered <b>three times</b> on one page.</td><td>merged #5863</td></tr>
+    <tr><td><b>Say it once</b></td><td>Eight lines gone, each describing something already on screen.</td><td>open #5865</td></tr>
+    <tr><td><b>One thing is row ①</b></td><td>The “Today’s one thing” card folds into the first row, keeping its name and the page’s single filled button.</td><td>in #5865</td></tr>
+    <tr><td><b>Status stays in view</b></td><td>At 1280 the flow takes the left, the day + numbers pin right — and give way when the side panel opens.</td><td>draft #5874</td></tr>
+  </table>
+
+  <h3>2 · What is deliberately NOT changing</h3>
+  <ul>
+    <li><b>The phone.</b> Every column rule is behind a min-width. Measured at 375px: no sideways scroll, same order, 3.1 screens against today’s 6.2.</li>
+    <li><b>Expand-in-place.</b> The band cards still expand rather than navigate — your ruling of 2026-07-13, which reversed the council’s “no accordion”. Designed toward it, not around it.</li>
+    <li><b>The hopeful empty lines.</b> “No vendors booked yet — start with the ones that book out first…” and its four siblings all stay, and stay visible while the card is shut.</li>
+    <li><b>“Never a personal profile.”</b> The privacy promise, once, at the foot of the band.</li>
+    <li><b>Papic always holds a tile.</b> I tried gating it after the day; CI caught your 2026-07-30 ruling — <i>“always hold a slot”</i> — and I reverted it.</li>
+  </ul>
+
+  <h3>3 · What this cannot prove</h3>
+  <ul>
+    <li><b>It is a drawing.</b> The real page is a 3,000-line server component reading your database. Copy and figures here are lifted from the live screen and the shipped components, but this is not it.</li>
+    <li><b>I have never seen the real wide layout.</b> The Overview needs a sign-in and I do not type passwords. I verified the <i>mechanism</i> in a browser — closed: grid + 336px sticky; open: the panel takes 420px, content ends at 996 and the panel starts at 1020, so the flow is 782px and never the ~310px two fixed columns would leave. An <b><code>rd/…</code> branch does build a real Vercel preview</b> (<code>claude/*</code> is skipped by name in <code>apps/web/vercel.json</code> — I had that wrong and was corrected), which is how to see it for real.</li>
+    <li><b>Brand-new and after-the-day are drawn, not measured.</b> Bracketed values are ones I could not source.</li>
+    <li><b>The overdue figure is <code>[N]</code> on purpose.</b> I measured “278 days” on the live page <i>before</i> #5860 repointed it at the lock-by floor. Printing 278 now would be a stale number wearing a confident face.</li>
+  </ul>
+
+  <h3>4 · Open questions — recommendation first, then the cost of getting it wrong</h3>
+  <div class="q"><b>1 · A free event sees no dates at all. Ungate it?</b>
+  <span class="rec">Recommend: no — but say something.</span>
+  The dates rail is part of what Setnayan AI sells. But a free couple has six real deadlines and no hint they exist —
+  turn Setnayan AI off in the bar above and the whole section is missing. A one-line “Sai keeps your dates in order →” is honest and sells.
+  <br><i>Wrong either way:</i> ungate and you give away paid value permanently and quietly; stay silent and a free couple misses a parish cutoff they were never shown.</div>
+
+  <div class="q"><b>2 · The Sai price on the free Overview is wrong today.</b>
+  <span class="rec">Recommend: read the catalogue for the viewer’s own event type.</span>
+  Turn Setnayan AI off and switch on “No venue booked” to see it: the card prints “₱499 first 28 days → ₱799 per 28 days”,
+  a subscription framing on a one-time tiered product, both numbers stale. A wedding is Tier A → <b>₱2,499</b>, or <b>₱1,999</b> in the comeback window.
+  <br><i>Wrong:</i> a price on screen that checkout does not charge. The worst class of bug on this product, and it is live now.</div>
+
+  <div class="q"><b>3 · “Open” means two different things on two pages.</b>
+  <span class="rec">Recommend: rename both; do not reconcile the numbers.</span>
+  This page says <i>23 categories still open</i>; Your Team says <i>27</i>. They answer different questions — 12 plan groups carry
+  <code>countsTowardLockable: false</code> and this page also scopes by event type, while Your Team counts groups engaged or inside their window. Both are right; the shared word is the defect.
+  Proposed: here → <b>“23 of 25 categories not booked”</b>; Your Team → <b>“27 need a decision”</b>. Neither says “open”.
+  <br><i>Wrong:</i> force them to agree and you break one of two legitimate measures; leave it and the couple keeps meeting two numbers wearing one word.</div>
+
+  <h3>5 · What I measured before drawing, and what it changed</h3>
+  <ul>
+    <li><code>platform_retail_catalog_v2</code> → the four real Sai rungs. Turned the amber panel from “this is stale” into what it should say.</li>
+    <li><code>apps/web/vercel.json</code> → <code>claude/*</code> skipped <b>by name</b>. I had reported “no vercel.json in the repo” after checking only the root; that was wrong, and it means a preview <i>is</i> possible.</li>
+    <li><code>todays-one-thing.ts:560</code> → <code>lockLeadDaysFor</code> is live, so 278 became <code>[N]</code>.</li>
+    <li><code>read-refused-notice.tsx</code> → the two refusal sentences word for word. Switch on “A read was refused”: tiles say “couldn’t load”, never ₱0 and never “nothing yet”.</li>
+    <li>The real <code>.sn-inspector-rail</code> rule → <code>clamp(340px,30vw,420px)+24px</code> with the master reflowing. The earlier prototype drew a drawer and hid this; it is why PR 5 could not be checked.</li>
+  </ul>
+</section>
+
+<div id="panelWrap">
+  <div class="scrim" id="scrim"></div>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="panelTitle">
+    <div class="panel-head">
+      <button class="icon-btn" id="panelBack" aria-label="Close"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <span class="t"><span class="e" id="panelEyebrow"></span><span class="h" id="panelTitle"></span></span>
+    </div>
+    <div class="panel-body" id="panelBody"></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"><span id="toastText"></span><button id="toastOk">OK</button></div>
+
+<script>
+(() => {
+  /* ═══ real data, read off the live page 2026-09-22 · [BRACKETS] = not sourced ═══ */
+
+  const NEEDS = [
+    { id:'coord', group:'Book a vendor', groupSub:'23 categories still open',
+      title:'Lock your coordinator', chip:['warn','not booked yet'],
+      sub:'Nothing booked · overdue by [N] days',
+      why:'Your day-of conductor. Best coordinators book 9–12 months out; the earlier you lock yours, the more they can shape every choice downstream.',
+      cta:'Browse coordinators', to:'/explore?tile=coordinator&from=plan' },
+    { id:'pay', group:'Settle a payment', groupSub:'1 waiting',
+      title:'Papic Guest 500', chip:['cta','₱350 pending'],
+      sub:'Order placed · ref SNCNJ1E3Y8',
+      why:'An order is waiting on payment. Until it is settled the service stays pending.',
+      cta:'Settle payment', to:'/orders' },
+    { id:'pick', group:'Pick an option', groupSub:'Saved options waiting on a lock',
+      title:'Pick your logistics & misc', chip:null,
+      sub:'2 options saved · none locked yet',
+      why:'You have shortlisted suppliers here but locked none. Locking is what turns a saved option into a booking.',
+      cta:'Compare & lock', to:'/vendors' },
+    { id:'rsvp', group:'Chase replies', groupSub:'4 of 81 answered',
+      title:'77 guests to chase', chip:null,
+      sub:'4 attending · 77 still to reply',
+      why:'RSVPs typically take about 6 weeks to settle. Your headcount drives seating, catering and the final budget.',
+      cta:'Open the roster', to:'/guests' },
+  ];
+  const SETDATE = { id:'setdate', group:'Set up', groupSub:'Everything waits on this',
+    title:'Set your wedding date', chip:['warn','no date yet'],
+    sub:'Your public page, save-the-date and every deadline wait on it',
+    why:'Until the date is set, the date-gated lifecycle (Save-the-Date → Event → Editorial) cannot start and no deadline can be worked out.',
+    cta:'Set the date', to:'/date-selection' };
+
+  const COMING = [
+    ['18 Oct','Book your Accommodation','typical: 2 months before','/vendors',
+     'Recommended deadline — most couples have this booked about 2 months before the wedding.'],
+    ['18 Oct','Book your Logistics & Misc','typical: 2 months before','/vendors',
+     'Recommended deadline — most couples have this booked about 2 months before the wedding.'],
+    ['19 Oct','Pre-Cana seminar cutoff','parish rule: 60 days before','/contracts',
+     'Most Catholic parishes require completion 60 days before the wedding'],
+    ['18 Nov','Book your Crew Meals','typical: 1 month before','/vendors',
+     'Recommended deadline — most couples have this booked about 1 months before the wedding.'],
+    ['18 Dec','Hair & makeup / preparations','12:00 AM – 12:00 PM','/schedule','Scheduled block · 12:00 AM – 12:00 PM'],
+    ['18 Dec','Vendor ingress & styling','2:00 AM – 1:00 PM','/schedule','Scheduled block · 2:00 AM – 1:00 PM'],
+  ];
+
+  const VITALS = [
+    { k:'Guests', n:'4', d:'attending · 77 to reply', to:'/guests', seg:[['#5E7C52',5],['#B77E2E',95]] },
+    { k:'Budget', n:'₱26,499', d:'committed of ₱2,250,000', to:'/budget', seg:[['#8A6B39',1],['#EDE8DE',99]] },
+    { k:'Papic', n:'100,050', d:'shots ready · 5 cameras out', to:'/studio/papic', note:'enough for your event' },
+    { k:'Next', n:'18 Dec', d:'Hair & makeup / preparations', to:'/schedule?view=journey' },
+  ];
+
+  const BAND = [
+    { id:'hosts', name:'Hosts', count:'1 account', cta:['Add a host','/hosts'], rows:[['You','host']] },
+    { id:'team', name:'Your team', count:'2 of 25 booked', cta:['Manage vendors','/vendors'],
+      rows:[['Seda Vertis North','venue · contracted'],
+            ['Santuario de San Vicente de Paul Parish & Shrine of the Poor','religious venue · contracted']] },
+    { id:'threads', name:'Conversations', count:'1 unread', cta:['Open threads','/messages'],
+      rows:[['[Supplier thread]','1 unread']], flag:true },
+    { id:'services', name:'Your services', count:'3 orders', cta:['Open orders','/orders'],
+      rows:[['Papic Guest 500','payment pending'],['Setnayan AI','active'],['Papic Guest 100k','active']] },
+    { id:'sched', name:'Schedule', count:'9 blocks', cta:['See full schedule','/schedule?view=journey'],
+      rows:[['Hair & makeup / preparations','18 Dec · pre-ceremony'],
+            ['Vendor ingress & styling','18 Dec · pre-ceremony'],
+            ['Guests arrive','18 Dec · pre-ceremony'],
+            ['Ceremony','18 Dec · ceremony'],['+5 more blocks','']] },
+  ];
+
+  /* Papic, as the tile resolves it (lib/papic-home-tile.ts): shotsLeft ·
+     shotsTotal · cameras · photosGathered · preCapture. The live event is
+     pre-capture, so the tile leads with shots left and flips to photos once
+     the first one is shot. Sub-pages are the shipped /studio/papic children. */
+  const PAPIC = {
+    shotsLeft: 100050, shotsTotal: 100050, cameras: 5, photos: 0, preCapture: true,
+    verdict: 'enough for your event',
+    rooms: [
+      ['Challenges', 'Prompts your guests shoot against', '/studio/papic/challenges'],
+      ['Crew cameras', '5 out · posters & print', '/studio/papic/crew'],
+      ['Moderation', 'Review what guests send', '/studio/papic/moderation'],
+      ['Run of show', 'When cameras open and close', '/studio/papic/run-of-show'],
+      ['Recap', 'The film at the end', '/studio/papic/recap'],
+    ],
+    orders: [['Papic Guest 500', 'payment pending'], ['Papic Guest 100k', 'active']],
+  };
+
+  /* Setnayan AI, priced by EVENT TYPE (lib/setnayan-ai-type-pricing.ts).
+     This event is a wedding → Tier A. The comeback price is the MIDPOINT of the
+     tier's own two prices (lib/setnayan-ai-comeback-offer.ts), so the discount
+     can never disagree with the price it discounts: (2499 + 1499) / 2 = 1999. */
+  const SAI_TIERS = {
+    A: { types: 'wedding',                        regular: 2499, signup: 1499 },
+    B: { types: 'debut · corporate · gala night', regular: 1499, signup:  899 },
+    C: { types: 'christening · birthday · …',     regular:  899, signup:  539 },
+    D: { types: 'tournament · date · hangout',    regular:  199, signup:  119 },
+  };
+  const SAI_TIER = 'A';
+  const midpoint = (t) => Math.floor((t.regular + t.signup) / 2);
+
+  const STAGES = [['Dreaming',80],['Booking',8],['Inviting',52],['Finalizing',33],['Wedding day',0],['After',0]];
+  const STAGE_DETAIL = { 2:{ done:['Guest list built — 81 invited','RSVPs coming in — 4 of 81 answered'],
+    note:'4 attending so far — RSVPs typically take about 6 weeks to settle.' } };
+
+  const WATCH = [{ id:'clash', cat:'guard', tpl:'[template id]',
+    copy:'Two things land on Fri, Dec 18, 8:00 AM: Hair & makeup / preparations and Vendor ingress & styling. That’s a clash — want to resolve it now?' }];
+  const BRIEFING = 'You’re 8% locked in, 2 decisions need you, next deadline overdue by [N] days.';
+
+  /* platform_retail_catalog_v2, read 2026-09-22. Comeback = midpoint of the
+     tier's own two prices (lib/setnayan-ai-comeback-offer.ts). Never invented. */
+  const SAI_LADDER = [
+    ['A','wedding','₱2,499','₱1,499','₱1,999'],
+    ['B','debut · corporate · gala night','₱1,499','₱899','₱1,199'],
+    ['C','christening · birthday · travel · anniversary …','₱899','₱539','₱719'],
+    ['D','tournament · gender reveal · date · hangout','₱199','₱119','₱159'],
+  ];
+
+  const STATES = [
+    ['access',  'Access request waiting',   'a coordinator asked to join'],
+    ['prep',    'Prepare for event day',    'T-3 days → T+1 day'],
+    ['refused', 'A read was refused',       'must be SAID, not shown as empty'],
+    ['nodate',  'No date set yet',          'event_date is NULL'],
+    ['handover','A supplier delivered',     'handover not acknowledged'],
+    ['papicnew','Free camera not used yet', 'nothing shot yet, not dismissed'],
+    ['nikah',   'Muslim wedding track',     'ceremony_type muslim'],
+    ['chinese', 'Chinese (Tsinoy) track',   'ceremony_type chinese'],
+    ['annual',  'Recurring event type',     'canPlanNextYear'],
+    ['aioffer', 'Setnayan AI not owned',    'paywall on · event lacks AI'],
+    ['novenue', 'No venue booked',          'free first-shortlist offer available'],
+    ['loading', 'Still loading',            'the shipped loading.tsx, never a blank'],
+  ];
+
+  const S = { moment:'planning', sai:true, path:false, stage:2, panel:null, arg:null, saiArm:'comeback',
+              open:{}, done:{}, on:{} };
+  STATES.forEach(([k]) => (S.on[k] = false));
+
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => n.toLocaleString('en-PH');
+  const esc = (t) => String(t).replace(/[&<>"]/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const toast = (t) => { $('toastText').textContent = t; $('toast').classList.add('on'); };
+  $('toastOk').onclick = () => $('toast').classList.remove('on');
+
+  const needList = () => {
+    const base = S.on.nodate ? [SETDATE].concat(NEEDS) : NEEDS;
+    return base.filter((n) => !S.done[n.id]);
+  };
+  /* the label only exists while "Show Sai's path" is on */
+  const sai = (label) => (S.path ? ' data-sai="' + label + '"' : '');
+
+  /* Built once. The body is ALWAYS in the DOM — a 0fr → 1fr grid row is the
+     only way to transition to an automatic height, and that needs the element
+     to exist on both sides of the change. */
+  function buildBand() {
+    $('bandCards').innerHTML = BAND.map((b) =>
+      '<div class="bcard" data-card="' + b.id + '">' +
+      '<button class="bhead" data-band="' + b.id + '" aria-expanded="false">' +
+      '<span class="l"><b>' + esc(b.name) + '</b><span class="c">' + esc(b.count) + '</span>' +
+      (b.flag ? '<span class="udot" aria-hidden="true"></span>' : '') + '</span>' +
+      '<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>' +
+      '</button><div class="bwrap"><div><div class="bbody">' +
+      b.rows.map(([nm, meta]) =>
+        '<span class="mini"><span class="n">' + esc(nm) + '</span><span class="small">' + esc(meta) + '</span></span>').join('') +
+      '<div class="foot" style="border-top:1px solid var(--line-2);margin-top:2px"><span></span>' +
+      '<a href="#" data-to="' + b.cta[1] + '">' + esc(b.cta[0]) + ' &rarr;</a></div>' +
+      '</div></div></div></div>').join('');
+  }
+  function syncBand() {
+    BAND.forEach((b) => {
+      const card = document.querySelector('[data-card="' + b.id + '"]');
+      if (!card) return;
+      const on = !!S.open[b.id];
+      card.classList.toggle('open', on);
+      card.querySelector('.bhead').setAttribute('aria-expanded', String(on));
+    });
+  }
+
+  /* Numbers count up, the way the shipped <CountUp> does. Re-runs only when the
+     value actually changed, so a re-render for some other reason does not make
+     every figure spin again. */
+  let lastDayHtml = null;
+  const counted = new Map();
+  function countUp(el, value, suffix, key) {
+    if (!el) return;
+    const prev = counted.get(key || el.id);
+    if (prev === value) return;
+    counted.set(key || el.id, value);
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const from = typeof prev === 'number' ? prev : 0;
+    if (reduce || value === from) { el.textContent = fmt(value) + (suffix || ''); return; }
+    const t0 = performance.now(), dur = 640;
+    const step = (t) => {
+      const k = Math.min(1, (t - t0) / dur);
+      const eased = 1 - Math.pow(1 - k, 3);           // ease-out cubic
+      el.textContent = fmt(Math.round(from + (value - from) * eased)) + (suffix || '');
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  /* Replay the staggered entrance — used when the moment changes and the
+     sections re-order under the same DOM. */
+  function replayEntrance() {
+    const l = document.querySelector('.layout');
+    [...l.children].forEach((el) => { el.style.animation = 'none'; void el.offsetWidth; el.style.animation = ''; });
+  }
+
+  function render() {
+    /* The loading state is the whole page, so it short-circuits everything else.
+       It exists because a skeleton and an empty page are the same pixels if you
+       do not draw one — and "no guests yet" to a couple with 180 names is the
+       disease this project has shipped seven fixes for. */
+    if (S.on.loading) {
+      document.body.className = 'is-' + S.moment;
+      const sk = (h, w) => '<div class="sk" style="height:' + h + 'px;width:' + (w || '100%') + '"></div>';
+      document.querySelector('.layout').innerHTML =
+        '<div class="sec">' + sk(15, '180px') + sk(28, '70%') + '</div>' +
+        '<div class="sec">' + sk(188) + '</div>' +
+        '<div class="sec">' + sk(16, '120px') + sk(62) + sk(62) + sk(62) + '</div>' +
+        '<div class="sec">' + sk(16, '100px') + sk(108) + '</div>' +
+        '<p class="small">This is the shipped <code>loading.tsx</code> shape — a skeleton, ' +
+        'never a blank page and never a zero.</p>';
+      renderPanel();
+      return;
+    }
+    document.body.className = 'is-' + S.moment + (S.sai ? ' sai-on' : '') +
+      (S.path ? ' sai-path' : '') + (S.panel ? ' open' : '');
+    document.querySelectorAll('[data-moment]').forEach((b) =>
+      b.setAttribute('aria-pressed', String(b.dataset.moment === S.moment)));
+    $('saiSwitch').setAttribute('aria-checked', String(S.sai));
+    document.querySelector('[data-toggle="path"]').setAttribute('aria-pressed', String(S.path));
+
+    const list = needList(), n = list.length;
+    $('statusLine').innerHTML = {
+      planning: (S.on.nodate ? '<b>No date yet</b>' : '<b>87 days</b>') +
+                ' · 8% locked in · <b>' + n + '</b> need you',
+      day:      '<b>Today</b> · [Reception · dinner service] · 9 blocks',
+      after:    '<b>Friday, December 18</b> · that’s a wrap · 1 thing left',
+    }[S.moment];
+
+    /* alerts */
+    const al = [];
+    if (S.on.access) al.push('<button class="alert info" data-open="access"><span class="l"><b>1 access request is waiting</b></span><span>&rsaquo;</span></button>');
+    if (S.on.prep) al.push('<button class="alert gold" data-open="prep"><span class="l"><b>Prepare for event day</b> · so it works on weak signal</span><span>&rsaquo;</span></button>');
+    if (S.on.refused) al.push('<div class="alert warn"><span class="l">Some of this page is missing — we couldn’t load your suppliers.</span></div>');
+    $('alerts').innerHTML = al.join(''); $('alerts').hidden = !al.length;
+
+    /* the day */
+    const nd = S.on.nodate;
+    const cd  = S.moment === 'planning' ? (nd ? '—' : 87) : S.moment === 'day' ? 0 : '—';
+    const cdw = nd && S.moment === 'planning' ? 'date not set'
+              : S.moment === 'planning' ? 'days to go' : S.moment === 'day' ? 'it’s today' : 'it happened';
+    const dayHtml =
+      '<div><span class="eyebrow">The wedding day</span>' +
+      '<div class="date" style="margin-top:5px">' + (nd ? 'Date not set' : 'Friday, December 18') + '</div>' +
+      '<div class="sub">' + (nd ? 'Pick it — everything below dates itself from it' : 'The date is locked') + '</div></div>' +
+      '<div><div class="cdrow"><span class="cd" id="cdNum">' + (typeof cd === 'number' ? '0' : cd) + '</span><span class="sub">' + cdw + '</span></div>' +
+      '<div class="bar" style="margin-top:10px"><i style="width:8%"></i></div>' +
+      '<div class="barlab" style="margin-top:6px"><b>8%</b> locked in</div></div>' +
+      (S.sai
+        ? '<div class="rule"></div>' +
+          '<div' + sai('Sai 1 · briefing') + '><span class="eyebrow">Sai · your briefing</span>' +
+          '<p class="brief">' + esc(BRIEFING) + '</p>' +
+          '<div class="bchips"><span>87 days to go</span><span>Most urgent: lock your coordinator</span></div></div>' +
+          '<div class="rule"></div>' +
+          '<div class="watch"' + sai('Sai 2 · the watch') + '>' +
+          '<span class="eyebrow">Setnayan AI · the watch · ' + WATCH.length + '</span>' +
+          WATCH.map((w) =>
+            '<button class="wrow" data-open="watch" data-arg="' + w.id + '">' +
+            '<span class="t"><span class="dot ' + w.cat + '"></span><i>' +
+            (w.cat === 'guard' ? 'Guard' : 'Secretary') + '</i></span><span class="sub">read &rsaquo;</span></button>' +
+            '<span class="sub" style="font-size:11.5px">' + esc(w.copy.slice(0, 62)) + '…</span>').join('') +
+          '</div>'
+        : '<div class="rule"></div><div class="sub">Setnayan AI is off for this event. ' +
+          'Nothing here stops working — you rank your own list.</div>');
+    /* Write only on a real change. A node replaced for an unrelated reason
+       replays its bar fill and restarts its counter from zero — which is what
+       the first cut did every time a panel opened. */
+    if (dayHtml !== lastDayHtml) { $('dayCard').innerHTML = dayHtml; lastDayHtml = dayHtml; }
+
+    if (typeof cd === 'number') countUp($('cdNum'), cd);
+
+    /* needs you */
+    $('needCount').textContent = n ? n + (S.sai ? ' · ranked' : '') : 'all clear';
+    if (S.path && S.sai) $('needCount').setAttribute('data-sai', 'Sai 3 · “· ranked”');
+    else $('needCount').removeAttribute('data-sai');
+    $('needCompact').textContent = (n ? n + ' open' : 'all clear') + ' ›';
+    $('needSub').textContent = S.sai
+      ? 'Ranked by what closes soonest — each one links to its room.'
+      : 'Choices only you can make — everything else keeps moving without you.';
+    if (S.path) $('needSub').setAttribute('data-sai', 'Sai 4 · the wording'); else $('needSub').removeAttribute('data-sai');
+    $('needSub').hidden = !n;
+    $('needRows').innerHTML = n ? list.map((x, i) =>
+      '<button class="need" data-need="' + x.id + '" aria-current="' + (S.panel === 'need' && S.arg === x.id) + '">' +
+      '<span class="num' + (S.sai ? ' one' : '') + '"' +
+        (S.sai && i === 0 ? sai('Sai 5 · the ranking') : '') + '>' + (i + 1) + '</span>' +
+      '<span class="l"><b>' + esc(x.title) + '</b><span class="meta">' +
+        (x.chip ? '<span class="chip ' + x.chip[0] + '">' + esc(x.chip[1]) + '</span>' : '') +
+        esc(x.sub) + '</span></span>' +
+      '<span class="go">&rsaquo;</span></button>').join('')
+      : '<div class="need"><span class="l"><b>Nothing needs you today.</b>' +
+        '<span class="meta">Next date: 18 Oct · Accommodation</span></span></div>';
+
+    /* the FREE Sai — only when Sai is OFF and no venue is booked */
+    $('venueOffer').innerHTML = (!S.sai && S.on.novenue)
+      ? '<div class="card" style="border-color:var(--gold-2);background:#FDFBF6"' + sai('Sai · free, when off') + '>' +
+        '<span class="chip gold" style="align-self:flex-start">Setnayan AI · Free</span>' +
+        '<b style="font-size:15.5px">Let Sai find your first venue shortlist — free</b>' +
+        '<p class="small">Sai picks up to 5 reception venues that fit your date, budget &amp; area and puts them on your shortlist.</p>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+        '<button class="btn sm" data-toast="Sai is looking…">Build my venue shortlist</button>' +
+        '<button class="btn sm ghost" data-to="/vendors?open=reception">Browse on your own</button></div>' +
+        '<div class="amber"><span class="atag">shown today · the price is wrong</span>' +
+        '<span class="small" style="text-decoration:line-through;color:var(--ink-3)">Venue help starts free — the full Sai is ₱499 first 28 days → ₱799 per 28 days.</span>' +
+        '<p class="small">A <b>subscription</b> framing on a <b>one-time, tiered</b> product, and both numbers are stale: ' +
+        '₱499 was Tier C’s sign-up price before the 2026-08-28 ruling moved it to ₱539; ₱799 is a row that is not sold. ' +
+        'From <b>platform_retail_catalog_v2</b>, read 2026-09-22:</p>' +
+        '<table class="atab"><tr><th>Tier</th><th>Event types</th><th>Regular</th><th>Sign-up</th><th>Comeback</th></tr>' +
+        SAI_LADDER.map((t) => '<tr' + (t[0] === 'A' ? ' style="font-weight:700"' : '') + '>' +
+          t.slice(0, 5).map((c) => '<td>' + c + '</td>').join('') + '</tr>').join('') + '</table>' +
+        '<p class="small">A wedding is <b>Tier A</b>, so this card should read <b>₱2,499</b> — or <b>₱1,999</b> inside the ' +
+        '24-hour comeback window, the midpoint of the tier’s own two prices.</p></div></div>'
+      : '';
+
+    /* meanwhile */
+    $('meanwhile').innerHTML = S.on.handover
+      ? '<span class="eyebrow" style="color:var(--ink-3)">Meanwhile</span>' +
+        '<button class="row lone" data-open="handover"><span class="l">' +
+        '<b>[Studio Hiraya] delivered your gallery.</b><span>+[1] more waiting in your vendor rooms.</span>' +
+        '</span><span class="v gold">Look &rsaquo;</span></button>' : '';
+    $('meanwhile').hidden = !S.on.handover;
+
+    /* coming up */
+    $('comingSub').textContent = S.sai ? 'In the order Sai would take them.' : 'By date.';
+    if (S.path && S.sai) $('comingSub').setAttribute('data-sai', 'Sai 6 · ordering');
+    else $('comingSub').removeAttribute('data-sai');
+    $('comingRows').innerHTML = COMING.map(([d, t, hint], i) =>
+      '<button class="row" data-coming="' + i + '" aria-current="' + (S.panel === 'coming' && S.arg === String(i)) + '">' +
+      '<span class="l"><b>' + esc(t) + '</b><span>' + esc(hint) + '</span></span>' +
+      '<span class="v">' + d + ' &rsaquo;</span></button>').join('');
+
+    /* vitals */
+    $('vitals').innerHTML = VITALS.map((v) =>
+      '<button class="vital" data-k="' + v.k.toLowerCase() + '" data-open="vital" data-arg="' + v.k.toLowerCase() + '">' +
+      '<span class="k">' + esc(v.k) + '</span><span class="n">' + esc(v.n) + '</span>' +
+      '<span class="d">' + esc(v.d) + '</span>' +
+      (v.seg ? '<span class="seg">' + v.seg.map(([c, w]) => '<i style="background:' + c + ';width:' + w + '%"></i>').join('') + '</span>' : '') +
+      (v.note ? '<span class="d" style="color:var(--ok-deep)">' + esc(v.note) + '</span>' : '') + '</button>').join('');
+
+    /* band — state only. The markup is built ONCE in buildBand(), because a
+       node replaced on every render starts at its final height and the
+       expand transition can never play. */
+    syncBand();
+
+    /* also for you */
+    const exRow = (k, t, s, c) => '<button class="row" data-open="ex" data-arg="' + k + '">' +
+      '<span class="l"><b>' + t + '</b><span>' + s + '</span></span><span class="v gold">' + c + ' &rsaquo;</span></button>';
+    const ex = [];
+    if (S.on.papicnew) ex.push(exRow('papicnew','Your free camera is ready','One free camera + a shared pool, on every event','Set up'));
+    if (S.on.nikah)    ex.push(exRow('nikah','The five essentials of your Nikah','Wali · witnesses · mahr · imam · separation','Open'));
+    if (S.on.chinese)  ex.push(exRow('chinese','Tea ceremony serving order','Groom’s side, then bride’s, by seniority','Plan'));
+    if (S.on.annual)   ex.push(exRow('annual','Make it an annual tradition','Carries the details forward; fresh guest list','Plan next year'));
+    if (S.on.aioffer && !S.sai) {
+      const t = SAI_TIERS[SAI_TIER];
+      const price = S.saiArm === 'comeback' ? midpoint(t) : t.regular;
+      ex.push(
+        '<div class="card" style="border-color:var(--gold-2);background:#FDFBF6;margin-bottom:9px"' +
+        sai('Sai · the offer, when you skipped it') + '>' +
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
+        '<span class="chip gold">Setnayan AI</span>' +
+        (S.saiArm === 'comeback'
+          ? '<span class="chip cta">your 24 hours · [11h left]</span>'
+          : '<span class="chip plain">tier ' + SAI_TIER + ' · ' + esc(t.types) + '</span>') + '</div>' +
+        '<b style="font-size:15.5px">You skipped Sai at sign-up — it is still here.</b>' +
+        '<p class="small">A briefing when you open the page, your decisions ranked, dates in the ' +
+        'order to take them, and a guard that speaks up when two things clash.</p>' +
+        '<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">' +
+        '<b style="font-size:22px">₱' + fmt(price) + '</b>' +
+        (S.saiArm === 'comeback'
+          ? '<span class="small" style="text-decoration:line-through">₱' + fmt(t.regular) + '</span>' +
+            '<span class="small">sign-up was ₱' + fmt(t.signup) + '</span>'
+          : '<span class="small">one-time, this event</span>') + '</div>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+        '<button class="btn sm" data-to="/studio/setnayan-ai">Turn Sai on</button>' +
+        '<button class="btn sm ghost" data-open="ex" data-arg="aioffer">What it changes</button></div>' +
+        '<p class="small">Prototype: <button class="pill" style="height:26px;font-size:11.5px" ' +
+        'data-act="saiarm">showing the <b>' + S.saiArm + '</b> arm — switch</button></p>' +
+        '</div>');
+    }
+    // The Sai card is a CARD; the rest are rows. Keep them in separate wrappers
+    // so a card never inherits the row list's borders.
+    const exCards = ex.filter((h) => h.startsWith('<div class="card"'));
+    const exRows = ex.filter((h) => !h.startsWith('<div class="card"'));
+    $('extras').innerHTML = ex.length
+      ? '<div class="sec-head"><h2>Also for you</h2><span class="count">' + ex.length + '</span></div>' +
+        exCards.join('') + (exRows.length ? '<div class="rows">' + exRows.join('') + '</div>' : '') : '';
+    $('extras').hidden = !ex.length;
+
+    /* progress */
+    $('stageNow').textContent = STAGES[S.stage][0] + ' · ' + STAGES[S.stage][1] + '%';
+    $('rail').innerHTML = STAGES.map(([nm, p], i) =>
+      '<button class="stage" data-stage="' + i + '" aria-pressed="' + (i === S.stage) + '">' +
+      (i === S.stage ? '<span class="here">You are here</span>' : '') +
+      '<b>' + esc(nm) + '</b><span class="bar"><i style="width:' + p + '%"></i></span>' +
+      '<span class="p">' + p + '% complete</span></button>').join('');
+    const d = STAGE_DETAIL[S.stage];
+    $('stageCard').innerHTML = '<b style="font-size:14px">' + esc(STAGES[S.stage][0]) + '</b>' +
+      (d ? d.done.map((t) => '<span class="mini"><span class="n">✓ ' + esc(t) +
+             '</span><span class="chip ok">Set na ’yan</span></span>').join('') +
+           '<p class="small">Nothing left in this stage.</p>'
+         : '<p class="small">[' + STAGES[S.stage][1] + '% — stage detail not captured for this stage]</p>') +
+      (S.sai && d ? '<p class="small" style="color:var(--gold-800)"' + sai('Sai 7 · stage note') + '>✦ ' + esc(d.note) + '</p>' : '');
+
+    renderPanel();
+  }
+
+  /* ═══ sub-screens — the shipped inspector shape: eyebrow · title · chips · copy · ONE cta ═══ */
+  const ctaBtn = (label, to) => '<button class="btn" data-to="' + to + '">' + esc(label) + ' →</button>';
+  const chips = (chip, groupSub) => '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
+    (chip ? '<span class="chip ' + chip[0] + '">' + esc(chip[1]) + '</span>' : '') +
+    '<span class="chip plain">' + esc(groupSub) + '</span></div>';
+
+  const PANELS = {
+    need: (id) => {
+      const x = NEEDS.concat([SETDATE]).find((y) => y.id === id) || NEEDS[0];
+      return [x.group, x.title, chips(x.chip, x.groupSub) + '<p>' + esc(x.sub) + '</p><p>' + esc(x.why) + '</p>' +
+        ctaBtn(x.cta, x.to) + '<p class="small">One action — the same room the row points at.</p>'];
+    },
+    coming: (i) => {
+      const r = COMING[+i];
+      return ['Dates coming up', r[1], chips(null, r[0]) + '<p>' + esc(r[4]) + '</p>' + ctaBtn('Open', r[3]) +
+        (r[1] === 'Book your Crew Meals'
+          ? '<p class="small" style="color:var(--warn-deep)">⚠ the live page prints “about 1 months” — see the report</p>' : '')];
+    },
+    watch: (id) => {
+      const w = WATCH.find((x) => x.id === id) || WATCH[0];
+      const role = w.cat === 'guard' ? 'Guard' : 'Secretary';
+      return ['Sai on watch', role,
+        '<p style="font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--info)">' +
+        role + ' · ' + esc(w.tpl) + '</p><p>' + esc(w.copy) + '</p>' +
+        '<button class="btn gold" data-act="resolve">Resolve the clash →</button>' +
+        '<p class="small">A background guard surfaced this — it only speaks up when something changes. There’s nothing you must do.</p>'];
+    },
+    needs: () => ['Needs you', needList().length + ' open',
+      needList().map((x) => '<button class="row lone" data-need="' + x.id + '"><span class="l"><b>' +
+        esc(x.title) + '</b><span>' + esc(x.sub) + '</span></span><span class="v gold">' +
+        esc(x.cta) + ' ›</span></button>').join('') || '<p>All clear.</p>'],
+    comingAll: () => ['Coming up', '6 dates',
+      COMING.map(([d, t, hint], i) => '<button class="row lone" data-coming="' + i + '"><span class="l"><b>' +
+        esc(t) + '</b><span>' + esc(hint) + '</span></span><span class="v">' + d + ' ›</span></button>').join('')],
+    states: () => ['Prototype', 'What else this page can render',
+      '<p>The live event shows none of these. Flip one on and it lands where it belongs.</p>' +
+      STATES.map(([k, label, cond]) =>
+        '<div class="row lone" style="cursor:default"><span class="l"><b>' + esc(label) + '</b>' +
+        '<span>' + esc(cond) + '</span></span><button class="switch" role="switch" aria-checked="' +
+        !!S.on[k] + '" data-state="' + k + '" aria-label="' + esc(label) + '"></button></div>').join('')],
+    access: () => ['Access requests', '1 access request is waiting',
+      '<p>[A coordinator asked to join this event.] The host decides what to share — the doorway renders nothing at all when nothing is waiting.</p>' +
+      ctaBtn('Open requests', '/access-requests')],
+    prep: () => ['Event day', 'Prepare for event day',
+      '<p>Downloads the schedule, seating and contacts so the day works on weak signal. Shows only from 3 days before to 1 day after.</p>' +
+      ctaBtn('Prepare', '/live')],
+    handover: () => ['Meanwhile', '[Studio Hiraya] delivered your gallery',
+      '<p>A supplier left something in their workspace. “Confirm receipt” there is the one dismissal — acknowledging it clears this row here.</p>' +
+      '<p class="small">The thumbnail is a hatched placeholder on purpose: a handover is a link or a file, not a resolvable preview.</p>' +
+      ctaBtn('Look', '/vendors/[id]/workspace')],
+    ex: (k) => ({
+      papicnew: ['Papic', 'Your free camera is ready',
+        '<p>Every event is armed at creation with a free shared pool of credits and one free dedicated camera. This says so once, and disappears the moment the first photo is shot.</p>' +
+        ctaBtn('Set up Papic', '/studio/papic')],
+      nikah: ['Muslim wedding', 'The five essentials of your Nikah',
+        '<p>The five validity pillars as a checklist, plus the mahr and gender-separation editor. Wali, witnesses and imam are counted off your guest roles.</p>' +
+        ctaBtn('Open', '/guests')],
+      chinese: ['Chinese wedding', 'Tea ceremony serving order',
+        '<p>Plan who you serve first — groom’s side, then bride’s, in order of seniority. Free; never routed through the paid add-ons catalogue.</p>' +
+        ctaBtn('Plan the order', '/guests/tea-ceremony')],
+      annual: ['Recurring event', 'Make it an annual tradition',
+        '<p>Clones this event’s details into next year’s planning instance. Details, not the guest list — that starts fresh.</p>' +
+        ctaBtn('Plan next year', '/create-event')],
+      aioffer: ['Setnayan AI', 'What turning Sai on changes, and what it costs',
+        '<p class="small">Priced by EVENT TYPE, with a sign-up discount. The comeback price is the ' +
+        'midpoint of the tier\'s own two prices, so the discount cannot disagree with the price it discounts.</p>' +
+        '<div class="rows">' + Object.entries(SAI_TIERS).map(([k, t]) =>
+          '<div class="row" style="cursor:default"><span class="l"><b>Tier ' + k + '</b><span>' + esc(t.types) +
+          '</span></span><span class="v">₱' + fmt(t.regular) + ' · sign-up ₱' + fmt(t.signup) +
+          ' · comeback ₱' + fmt(midpoint(t)) + '</span></div>').join('') + '</div>' +
+        '<p>Seven places on this page change: the briefing and the watch inside the day card, “· ranked” on the count, the wording under Needs you and under Coming up, the gold ranking numbers, the order the dates come in, and the note under your stage. An eighth appears only when Sai is OFF — the free first-venue shortlist.</p>' +
+        '<p class="small">Price: read <b>platform_retail_catalog_v2</b>. The live overview and the catalogue disagree — see the report.</p>' +
+        '<button class="btn" data-act="saion">Turn Sai on in the prototype</button>'],
+    }[k] || ['—', '—', '<p>[not captured]</p>']),
+    close: () => ['On the day', 'Close out the day',
+      '<p>Marks the celebration finished. The planning tools stay; the page turns to the looking-back view. It also flips on its own at 06:00 the morning after.</p>' +
+      '<button class="btn" data-act="wrap">Close out the day</button>'],
+    live: () => ['On the day', 'Live desk', '<p>[Opens /live — announcements, the photo wall and what is happening now.]</p>'],
+    table: () => ['On the day', 'Your table', '<p>[Head table + nearby tables — not captured; this event is 87 days out.]</p>'],
+    wall: () => ['On the day', 'Photo wall', '<p>[Live wall — renders only when LIVE_WALL is owned.]</p>'],
+    prog: () => ['On the day', 'Programme',
+      BAND[4].rows.map(([nm, meta]) => '<span class="mini"><span class="n">' + esc(nm) + '</span><span class="small">' + esc(meta) + '</span></span>').join('')],
+    broadcast: () => ['On the day', 'Coordinator', '<p>[Latest coordinator broadcast + vendor call times — none on this event.]</p>'],
+    help: () => ['On the day', 'Get help', '<p>[Verified, paid suppliers who opted into same-day work, nearest the venue first.]</p>'],
+    wrapstory: () => ['After', 'Write your story',
+      '<p>Words, photos and a front page. The last thing left to do.</p>' + ctaBtn('Open the story maker', '/story')],
+
+    /* Every number opens what is behind it — the owner's ask, 2026-09-22. */
+    vital: (k) => ({
+      papic: ['Papic', PAPIC.preCapture
+        ? fmt(PAPIC.shotsLeft) + ' shots ready'
+        : fmt(PAPIC.photos) + ' photos in',
+        '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
+        '<span class="chip ok">' + esc(PAPIC.verdict) + '</span>' +
+        '<span class="chip plain">' + PAPIC.cameras + ' cameras out</span>' +
+        '<span class="chip plain">' + fmt(PAPIC.photos) + ' shot so far</span></div>' +
+        '<p>Guests and your crew shoot on their own phones. Every shot spends one credit; ' +
+        'the tile flips from “shots ready” to “photos in” the moment the first one lands.</p>' +
+        '<div class="rows">' + PAPIC.rooms.map(([n, d, to]) =>
+          '<button class="row" data-to="' + to + '"><span class="l"><b>' + esc(n) +
+          '</b><span>' + esc(d) + '</span></span><span class="v">&rsaquo;</span></button>').join('') +
+        '</div>' +
+        '<p class="small">On this event: ' + PAPIC.orders.map(([n, st]) =>
+          esc(n) + ' <span class="chip ' + (st === 'active' ? 'ok' : 'cta') + '">' + esc(st) + '</span>').join(' · ') + '</p>' +
+        ctaBtn('Open Papic', '/studio/papic')],
+
+      guests: ['Guests', '4 attending · 77 to reply',
+        '<div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip ok">4 attending</span>' +
+        '<span class="chip warn">77 no reply yet</span><span class="chip plain">81 invited</span></div>' +
+        '<p>RSVPs typically take about 6 weeks to settle. Your headcount drives seating, ' +
+        'catering and the final budget.</p>' + ctaBtn('Open the roster', '/guests')],
+
+      budget: ['Budget', '₱26,499 committed',
+        '<div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip gold">1% of ₱2,250,000</span></div>' +
+        '<p>Committed means agreed and locked — the total now, after any change agreed in chat. ' +
+        'Only the budget page shows the breakdown.</p>' + ctaBtn('Open budget & payments', '/budget')],
+
+      next: ['Schedule', '18 Dec · Hair & makeup / preparations',
+        '<p>The next block on your programme. Two things land at 8:00 AM that day — Sai flagged it.</p>' +
+        '<div class="rows">' + BAND[4].rows.map(([nm, meta]) =>
+          '<button class="row" data-to="/schedule"><span class="l"><b>' + esc(nm) + '</b><span>' +
+          esc(meta) + '</span></span><span class="v">&rsaquo;</span></button>').join('') + '</div>' +
+        ctaBtn('Full programme', '/schedule?view=journey')],
+    }[k] || ['—', '—', '<p>[not captured]</p>']),
+  };
+
+  function renderPanel() {
+    $('panelWrap').classList.toggle('open', !!S.panel);
+    if (!S.panel) return;
+    const fn = PANELS[S.panel];
+    if (!fn) return;
+    const out = fn(S.arg);
+    $('panelEyebrow').textContent = out[0];
+    $('panelTitle').textContent = out[1];
+    $('panelBody').innerHTML = out[2];
+  }
+
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('#saiSwitch,[data-moment],[data-toggle],[data-state],[data-band],[data-stage],[data-step],[data-open],[data-need],[data-coming],[data-to],[data-toast],[data-act]');
+    if (!t) return;
+    e.preventDefault();
+    const d = t.dataset;
+    let replay = false, bounce = null;
+    if (t.id === 'saiSwitch') { S.sai = !S.sai; replay = true; }
+    else if (d.moment) { S.moment = d.moment; S.panel = null; replay = true; bounce = t; }
+    else if (d.toggle === 'path') S.path = !S.path;
+    else if (d.state) {
+      const was = S.on[d.state];
+      S.on[d.state] = !was;
+      // coming back out of the skeleton has to put the page back
+      if (d.state === 'loading' && was) window.__restoreLayout();
+    }
+    else if (d.band) { S.open[d.band] = !S.open[d.band]; syncBand(); render(); return; }
+    else if (d.stage) { S.stage = +d.stage; bounce = t; }
+    else if (d.step) S.stage = Math.min(STAGES.length - 1, Math.max(0, S.stage + (+d.step)));
+    else if (d.need) { S.panel = 'need'; S.arg = d.need; }
+    else if (d.coming) { S.panel = 'coming'; S.arg = d.coming; }
+    else if (d.open) { S.panel = (d.open === 'coming' ? 'comingAll' : d.open); S.arg = d.arg || null; }
+    else if (d.to) { toast('Opens ' + d.to); if (S.panel === 'need') { S.done[S.arg] = true; } S.panel = null; }
+    else if (d.toast) toast(d.toast);
+    else if (d.act === 'wrap') { S.moment = 'after'; S.panel = null; }
+    else if (d.act === 'saion') { S.sai = true; S.panel = null; }
+    else if (d.act === 'saiarm') S.saiArm = S.saiArm === 'comeback' ? 'full' : 'comeback';
+    else if (d.act === 'resolve') { toast('Opens /schedule — the two 8:00 AM blocks'); S.panel = null; }
+    render();
+    if (replay) replayEntrance();
+    if (bounce) { bounce.classList.remove('bounce'); void bounce.offsetWidth; bounce.classList.add('bounce'); }
+  });
+  $('panelBack').onclick = () => { S.panel = null; render(); };
+  $('scrim').onclick = () => { S.panel = null; render(); };
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && S.panel) { S.panel = null; render(); } });
+
+  /* The loading branch replaces .layout's markup, so keep the real thing to
+     restore. Without this, switching loading OFF leaves the skeleton behind —
+     a prototype control that silently does nothing is worse than none. */
+  const LAYOUT_HTML = document.querySelector('.layout').innerHTML;
+  const restore = () => {
+    document.querySelector('.layout').innerHTML = LAYOUT_HTML;
+    buildBand();
+    /* ⚠ AND CLEAR THE MEMOS. Restoring the markup brings back the template's
+       literal "0" in the countdown. The day card is only rewritten when its
+       HTML changed (lastDayHtml) and the counter only animates when the value
+       changed (counted) — so both decided there was nothing to do and the page
+       sat there reading "0 days to go". Measured, not theorised: the screenshot
+       showed 0 while the status line above it said 87. */
+    lastDayHtml = null;
+    counted.clear();
+  };
+  window.__restoreLayout = restore;
+  buildBand();
+  render();
+})();
+</script>
+</body>
+</html>

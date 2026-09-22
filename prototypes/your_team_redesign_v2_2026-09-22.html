@@ -159,6 +159,9 @@ h1,h2,h3{margin:0;font-weight:600}
    that carries the action colour — and it is the SAME at folder, category,
    card and team-row level, because it is the same fact at four zoom levels. */
 .badge.nw{background:var(--mulberry);color:#fff;font-weight:700}
+/* The locked card's next step — was a roster row, now lives on the card. */
+.vc .nextline{font-size:12.5px;line-height:1.35}
+.vc .covers{font-size:11.5px;color:var(--ink-2)}
 .chv{color:var(--ink-3);transition:transform .15s;display:inline-block}
 .open > .fold-head .chv, .cat.open > .cat-head .chv{transform:rotate(180deg)}
 .fold-body{padding:0 0 6px 0;background:#FBFAF7;border-top:1px solid var(--line-2)}
@@ -236,8 +239,8 @@ body.after .planning-only{display:none}
 body:not(.after) .after-only{display:none}
 
 /* ORDER — one DOM, reordered by CSS */
-.s-team{order:1}.s-bench{order:3}.s-money{order:4}.s-plans{order:5}
-body.after .s-team{order:1} body.after .s-money{order:2} body.after .s-plans{order:3} body.after .s-bench{order:4}
+.s-bench{order:1}.s-money{order:2}.s-plans{order:3}
+body.after .s-money{order:1} body.after .s-plans{order:2} body.after .s-bench{order:3}
 
 /* ---------- DESKTOP ---------- */
 @media (min-width:1024px){
@@ -272,11 +275,29 @@ body.after .s-team{order:1} body.after .s-money{order:2} body.after .s-plans{ord
   <button class="pill" data-phase="before" aria-pressed="true">Planning</button>
   <button class="pill" data-phase="after" aria-pressed="false">After the day</button>
   <button class="pill" id="stress" aria-pressed="false" title="100 suppliers inquired, a reply from each — does the bench still sit where it was?">100 inquiries</button>
-  <span class="small" id="rollup" style="margin-left:auto"></span>
+  <span class="small" id="rollup" style="margin-left:auto"><span style="color:var(--ok)">✓ 2 unread rolls up from 2 cards</span></span>
   <span style="margin-left:auto" class="mono">v2 · 2026-09-22</span>
 </div>
 
 <div class="shell-top"><span class="brand">SETNAYAN</span><span class="search">Search events, people, suppliers</span></div>
+
+
+<!-- ══ WHY THIS PAGE IS STATIC-FIRST ═══════════════════════════════════════
+     Owner, 2026-09-22, twice, with screenshots of a page showing only headings
+     and empty labels: *"this is what i see only"* then *"still nothing"*.
+
+     🔑 EVERY VALUE WAS WRITTEN BY JAVASCRIPT, and his viewer does not run it.
+     My first fix was a <noscript> block — and it did nothing, because <noscript>
+     renders only when scripting is DISABLED. A sandbox that blocks inline
+     scripts under CSP leaves scripting nominally "enabled", so the script never
+     runs AND the fallback never shows: the worst of both, a blank page with no
+     safety net.
+
+     So every JS-filled container below is now SEEDED with its real default
+     content in the markup. Scripts blocked → the page reads correctly.
+     Scripts running → `render()` overwrites the same nodes on load and nothing
+     is duplicated. Static first, JS as enhancement — never JS as the only
+     source of a pixel. -->
 
 <div class="app">
   <nav class="shell-rail" aria-label="Event menu">
@@ -291,22 +312,13 @@ body.after .s-team{order:1} body.after .s-money{order:2} body.after .s-plans{ord
       <button class="icon-btn back" aria-label="Back to the event"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
       <div>
         <h1>Your Team</h1>
-        <span class="status" id="statusLine"></span>
-        <span class="anchor-line" id="anchorLine"></span>
+        <span class="status" id="statusLine">2 locked · 2 to lock</span>
+        <span class="anchor-line" id="anchorLine">Friday, December 18, 2026 · NCR · 87 days</span>
       </div>
     </div>
 
     <div class="layout">
 
-      <!-- 1 · YOUR TEAM — build-locked.tsx + lib/your-team.ts (approved renderTeam shape) -->
-      <section class="sec s-team" aria-label="Your team">
-        <div class="sec-head"><h2 id="teamH">Your team</h2><span class="small" id="teamCount"></span></div>
-        <div class="rows" id="teamRows"></div>
-        <div class="acts planning-only">
-          <button class="btn ghost sm" id="clearCand" hidden>Clear candidates</button>
-          <button class="btn ghost sm" id="savePlan">Save as a plan</button>
-        </div>
-      </section>
 
       <!-- ══ THE TWO TASK SECTIONS ARE GONE — AND THAT IS THE DECISION ══════
            Owner, 2026-09-22: *"overview will give me instructions on what to do
@@ -348,8 +360,8 @@ body.after .s-team{order:1} body.after .s-money{order:2} body.after .s-plans{ord
       <section class="sec s-bench fold-sec" aria-label="Find" id="bench">
         <div class="sec-head full"><h2>Find</h2><span class="small">12 folders</span></div>
         <div class="searchbox full"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" placeholder="Search your shortlist or the marketplace" aria-label="Search your shortlist or the marketplace"><button class="x" id="qx" aria-label="Clear search" hidden>✕</button></div>
-        <div class="sorts full" id="sorts"></div>
-        <div class="rows full" id="foldRows"></div>
+        <div class="sorts full" id="sorts"><button class="pill" data-sort="best" aria-pressed="true">Best matches</button><button class="pill" data-sort="near" aria-pressed="false">Nearest to your venue</button><button class="pill" data-sort="fits" aria-pressed="false">Fits your budget</button><button class="pill" data-sort="new" aria-pressed="false">New here</button><button class="pill" data-sort="low" aria-pressed="false">Lowest price</button><button class="pill" data-sort="top" aria-pressed="false">Top rated</button></div>
+        <div class="rows full" id="foldRows"><div class="fold"><div class="fold-head" style="cursor:default"><span class="lbl">Venues &amp; churches</span><span class="badge lk">● 2 locked</span><span class="badge">1 to decide</span><span class="chv">⌄</span></div><div class="fold-body" style="display:block"><div style="padding:2px 14px 12px;display:flex;flex-wrap:wrap;gap:6px"><span class="badge">Reception</span><span class="badge">Ceremony</span><span class="badge">Accommodation</span></div></div></div><div class="fold"><div class="fold-head" style="cursor:default"><span class="lbl">Coordinators &amp; planners</span><span class="badge">3 to decide</span><span class="chv">⌄</span></div><div class="fold-body" style="display:block"><div style="padding:2px 14px 12px;display:flex;flex-wrap:wrap;gap:6px"><span class="badge">Coordinator / Planner</span><span class="badge">Date &amp; Feng-shui Specialist</span><span class="badge">Travel &amp; Honeymoon</span><span class="badge">Paperwork &amp; Government</span></div></div></div><div class="fold"><div class="fold-head" style="cursor:default"><span class="lbl">Catering &amp; cake</span><span class="badge lk">● 2 locked</span><span class="badge">2 to decide</span><span class="chv">⌄</span></div><div class="fold-body" style="display:block"><div style="padding:2px 14px 12px;display:flex;flex-wrap:wrap;gap:6px"><span class="badge">Cake</span><span class="badge">Catering</span><span class="badge">Stations</span><span class="badge">Crew Meals</span></div></div></div><div class="fold"><div class="fold-head" style="cursor:default"><span class="lbl">Styling, flowers &amp; lights</span><span class="badge">8 to decide</span><span class="chv">⌄</span></div><div class="fold-body" style="display:block"><div style="padding:2px 14px 12px;display:flex;flex-wrap:wrap;gap:6px"><span class="badge">Stylist / Decorator</span><span class="badge">Florist</span><span class="badge">Lights &amp; Sound</span><span class="badge">Dance Floor</span><span class="badge">Outdoor</span><span class="badge">Fireworks</span><span class="badge">LED Wall</span><span class="badge">Digital Services</span></div></div></div><div class="fold"><div class="fold-head" style="cursor:default"><span class="lbl">Hosts, music &amp; program</span><span class="badge">9 to decide</span><span class="chv">⌄</span></div><div class="fold-body" style="display:block"><div style="padding:2px 14px 12px;display:flex;flex-wrap:wrap;gap:6px"><span class="badge">Live Band</span><span class="badge">Choir</span><span class="badge">Orchestra</span><span class="badge">Wedding Singer</span><span class="badge">DJ</span><span class="badge">Choreographer</span><span class="badge">Performers</span><span class="badge">Host / MC</span><span class="badge">AV / Production</span></div></div></div><div class="fold"><div class="fold-head" style="cursor:default"><span class="lbl">Photo &amp; video</span><span class="badge">2 to decide</span><span class="chv">⌄</span></div><div class="fold-body" style="display:block"><div style="padding:2px 14px 12px;display:flex;flex-wrap:wrap;gap:6px"><span class="badge">Photo &amp; Video</span><span class="badge">Editorial</span></div></div></div><div class="fold"><div class="fold-head" style="cursor:default"><span class="lbl">Attire, hair &amp; make-up</span><span class="badge">9 to decide</span><span class="chv">⌄</span></div><div class="fold-body" style="display:block"><div style="padding:2px 14px 12px;display:flex;flex-wrap:wrap;gap:6px"><span class="badge">Bride&#x27;s Attire</span><span class="badge">Groom&#x27;s Attire</span><span class="badge">Women&#x27;s Attire</span><span class="badge">Men&#x27;s Attire</span><span class="badge">Filipiniana &amp; Barongs</span><span class="badge">HMUA</span><span class="badge">Grooming</span><span class="badge">Wellness &amp; Fitness</span><span class="badge">Jewelleries &amp; Accessories</span></div></div></div><div class="fold"><div class="fold-head" style="cursor:default"><span class="lbl">Booths, carts &amp; bars</span><span class="badge">15 to decide</span><span class="chv">⌄</span></div><div class="fold-body" style="display:block"><div style="padding:2px 14px 12px;display:flex;flex-wrap:wrap;gap:6px"><span class="badge">Mobile Bar</span><span class="badge">Coffee / Espresso</span><span class="badge">Mocktail</span><span class="badge">Food Truck</span><span class="badge">Dessert</span><span class="badge">Massage Chair</span><span class="badge">Food Cart</span><span class="badge">Photo Booth</span><span class="badge">Perfume Bar</span><span class="badge">Arcade / Games</span><span class="badge">Henna / Tattoo</span><span class="badge">Mini Nail Bar</span><span class="badge">Tarot / Astrology / Palmistry</span><span class="badge">Caricature / Calligraphy / Painting</span><span class="badge">Engraving / Embroidery</span></div></div></div><div class="fold"><div class="fold-head" style="cursor:default"><span class="lbl">Invites, prints &amp; souvenirs</span><span class="badge">2 to decide</span><span class="chv">⌄</span></div><div class="fold-body" style="display:block"><div style="padding:2px 14px 12px;display:flex;flex-wrap:wrap;gap:6px"><span class="badge">Printing</span><span class="badge">Souvenir / Giveaways</span></div></div></div><div class="fold"><div class="fold-head" style="cursor:default"><span class="lbl">Cars &amp; transport</span><span class="badge">3 to decide</span><span class="chv">⌄</span></div><div class="fold-body" style="display:block"><div style="padding:2px 14px 12px;display:flex;flex-wrap:wrap;gap:6px"><span class="badge">Bridal Car</span><span class="badge">Guest Shuttle</span><span class="badge">Escort</span></div></div></div><div class="fold"><div class="fold-head" style="cursor:default"><span class="lbl">Logistics &amp; safety</span><span class="badge">1 to decide</span><span class="chv">⌄</span></div><div class="fold-body" style="display:block"><div style="padding:2px 14px 12px;display:flex;flex-wrap:wrap;gap:6px"><span class="badge">Medic / First-aid</span><span class="badge">Everything else</span></div></div></div><div class="fold"><div class="fold-head" style="cursor:default"><span class="lbl">Insurance &amp; protection</span><span class="badge">1 to decide</span><span class="chv">⌄</span></div><div class="fold-body" style="display:block"><div style="padding:2px 14px 12px;display:flex;flex-wrap:wrap;gap:6px"><span class="badge">Event Insurance</span></div></div></div></div>
         <button class="row lone compact" data-jump="bench"><span>Find</span><span class="v">12 folders ›</span></button>
       </section>
 
@@ -358,13 +370,13 @@ body.after .s-team{order:1} body.after .s-money{order:2} body.after .s-plans{ord
         <div class="money">
           <div class="sec-head"><h2 style="font-size:20px">Money</h2><span class="small">Budget ₱2,250,000</span></div>
           <div class="tiles">
-            <div class="tile"><span class="k">Locked</span><span class="v" id="tLocked"></span></div>
-            <div class="tile"><span class="k">If you lock these</span><span class="v" id="tCand"></span></div>
-            <div class="tile"><span class="k">Paid to suppliers</span><span class="v" id="tPaidSup"></span></div>
+            <div class="tile"><span class="k">Locked</span><span class="v" id="tLocked"><span class="non">2 locked · no price recorded</span></span></div>
+            <div class="tile"><span class="k">If you lock these</span><span class="v" id="tCand"><span class="non">2 candidates · no price recorded</span></span></div>
+            <div class="tile"><span class="k">Paid to suppliers</span><span class="v" id="tPaidSup"><span class="non">None recorded</span></span></div>
             <div class="tile"><span class="k">Setnayan orders</span><span class="v sm">₱26,499 paid<br><span class="small">₱0 to go</span></span></div>
-            <div class="tile" style="grid-column:1/-1"><span class="k">Buffer · if you lock these</span><span class="v" id="tBuffer"></span></div>
+            <div class="tile" style="grid-column:1/-1"><span class="k">Buffer · if you lock these</span><span class="v" id="tBuffer"><span class="non">Not knowable — 4 of your people have no price</span></span></div>
           </div>
-          <div class="flag" id="moneyFlag"></div>
+          <div class="flag" id="moneyFlag"><span class="ph">FLAG</span> Live page prints <b>LOCKED ₱0</b> and <b>₱2,250,000 to spare</b> beside <b>₱26,499 paid</b>. The ₱26,499 is Setnayan order money, not money paid to a supplier; the locked rows have no price recorded, so ₱0 is a lie.</div>
           <div>
             <span class="eyebrow">Covered</span>
             <div class="cov" id="cov" style="margin-top:6px"></div>
@@ -377,8 +389,15 @@ body.after .s-team{order:1} body.after .s-money{order:2} body.after .s-plans{ord
       <!-- 6 · PLANS — build-compare.tsx: saved candidate sets, locked rows pinned -->
       <section class="sec s-plans fold-sec" aria-label="Plans">
         <div class="sec-head full"><h2>Plans</h2><span class="small" id="plansCount"></span></div>
-        <div class="rows full" id="planRows"></div>
-        <button class="btn ghost full" data-open="plans">Compare side by side</button>
+        <div class="rows full" id="planRows"><div class="row" style="color:var(--ink-3)"><span>No saved plans yet · locked rows are pinned in every plan</span></div></div>
+        <div class="acts full">
+          <button class="btn ghost sm" data-open="plans">Compare side by side</button>
+          <!-- MOVED HERE WITH THE ROSTER'S REMOVAL. Both act on the CANDIDATE
+               SET rather than on one supplier, so neither belongs on a card —
+               and Plans is the section that owns candidate sets. -->
+          <button class="btn ghost sm" id="savePlan">Save as a plan</button>
+          <button class="btn ghost sm" id="clearCand" hidden>Clear candidates</button>
+        </div>
         <button class="row lone compact" data-open="plans"><span>Plans</span><span class="v" id="plansCompact"></span></button>
       </section>
 
@@ -420,7 +439,7 @@ body.after .s-team{order:1} body.after .s-money{order:2} body.after .s-plans{ord
       { id:'seda', name:'Seda Vertis North', cat:'Reception venue', tile:'reception', folder:'venue', price:null, status:'locked', deposit:'due', covers:'Covers catering · cake · accommodation', reviewed:false },
       { id:'sant', name:'Santuario de San Vicente de Paul Parish & Shrine of the Poor', cat:'Ceremony venue', tile:'ceremony', folder:'venue', price:null, status:'locked', deposit:'due', covers:'', reviewed:false },
       { id:'saysayfx', name:'Saysay Live Band & Hosting (FIXTURE)', cat:'Added by you · category misc', tile:'band', folder:'program', price:null, status:'cand', step:0, reviewed:false },
-      { id:'sedah', name:'Seda Hotel', cat:'Added by you · category misc', tile:null, folder:null, price:null, status:'cand', step:0, reviewed:false },
+      { id:'sedah', name:'Seda Hotel', cat:'Added by you · category misc', tile:'logistics', folder:'logistics-safety', cardId:'c-sedah', price:null, status:'cand', step:0, reviewed:false },
     ],
     /* ── FROM YOUR SUPPLIERS · the rewrite ──────────────────────────────────
        `live` is the wording production sends TODAY, quoted exactly from the
@@ -487,21 +506,55 @@ body.after .s-team{order:1} body.after .s-money{order:2} body.after .s-plans{ord
   const SORTS = [['best','Best matches'],['near','Nearest to your venue'],['fits','Fits your budget'],['new','New here'],['low','Lowest price'],['top','Top rated']];
 
   // the 12 live folder rows + live counts; tiles measured only for Photo & video
+  /* ── THE REAL CATEGORIES ─────────────────────────────────────────────────
+     Owner, 2026-09-22: *"where are the different categories?"* — because he
+     could only see the twelve FOLDERS, and every folder's category list in the
+     first cut was invented (two plausible names each) behind a "tiles not
+     measured" marker.
+
+     These are the real ones. Source: `TILE_PARENT` + `WEDDING_TILE_LABEL` +
+     `WEDDING_TILE_ORDER` in `lib/taxonomy.ts` on origin/main, filtered to the
+     rows that serve a wedding and are not `marketplace_hidden`, read live:
+
+         select id, parent_id, label_en, marketplace_hidden,
+                (applicable_event_types is null
+                 or 'wedding' = any(applicable_event_types)) as serves_wedding
+           from service_categories where tier = 2 order by parent_id, sort_order;
+
+     **78 tier-2 categories exist across 16 folders.** A wedding sees 12 folders
+     and the 61 categories below — the other four folders (Guest experiences,
+     Dining extras, Specialty, Funeral homes & farewell) and rows like Tour
+     Guide, Trophies & Awards, Referees / Officials, Kids' Entertainer and
+     Transfers & Rentals are scoped to other event types and correctly never
+     appear here.
+
+     ⚠ FOUR ARE HIDDEN AND STILL LISTED IN THE COMMENT, NOT THE DATA:
+     `officiants` and `counseling_seminars` (the 2026-08-27 owner ruling — a
+     priest comes with the parish, not shopped for), `livestream`, and my own
+     `everything_else`. They are `marketplace_hidden`, so the bench shows them
+     only when they already hold one of the couple's suppliers. `everything_else`
+     appears under Logistics & safety below for exactly that reason: Seda Hotel
+     is filed there.
+
+     The 4th number in each row is the live "to decide" count measured on
+     production, which is why it does not always equal the category count —
+     Reception and Ceremony are locked, Catering and Cake are covered by Seda. */
   const FOLDERS = [
-    ['venue','Venues & churches',2,1,[['reception','Reception Venue'],['ceremony','Ceremony Venue']]],
-    ['planning','Coordinators & planners',0,3,[['coordinator','Coordinator / Planner'],['otd','On-the-day Coordinator']]],
-    ['feast','Catering & cake',2,2,[['catering','Catering'],['cake','Cake']]],
-    ['design','Styling, flowers & lights',0,8,[['stylist','Stylist / Decorator'],['florist','Florist']]],
-    ['program','Hosts, music & program',0,9,[['host','Hosts / Emcee'],['band','Live Band'],['dj','Mobile DJ']]],
+    ['venue','Venues & churches',2,1,[['reception','Reception'],['ceremony','Ceremony'],['accommodation','Accommodation']]],
+    ['planning','Coordinators & planners',0,3,[['coordinator','Coordinator / Planner'],['date_specialist','Date & Feng-shui Specialist'],['travel_honeymoon','Travel & Honeymoon'],['wedding_paperwork','Paperwork & Government']]],
+    ['feast','Catering & cake',2,2,[['cake','Cake'],['catering','Catering'],['stations','Stations'],['crew_meals','Crew Meals']]],
+    ['design','Styling, flowers & lights',0,8,[['stylist','Stylist / Decorator'],['florist','Florist'],['lights_sound','Lights & Sound'],['dance_floor','Dance Floor'],['outdoor','Outdoor'],['fireworks','Fireworks'],['led_wall','LED Wall'],['digital_services','Digital Services']]],
+    ['program','Hosts, music & program',0,9,[['band','Live Band'],['choir','Choir'],['orchestra','Orchestra'],['wedding_singer','Wedding Singer'],['dj','DJ'],['choreographer','Choreographer'],['performers','Performers'],['host','Host / MC'],['av_production','AV / Production']]],
     ['documentary','Photo & video',0,2,[['photo','Photo & Video'],['editorial','Editorial']]],
-    ['look','Attire, hair & make-up',0,9,[['gown','Bridal Gown'],['hmua','Hair & Make-up']]],
-    ['booths','Booths, carts & bars',0,15,[['photobooth','Photo Booth'],['bar','Mobile Bar']]],
-    ['prints','Invites, prints & souvenirs',0,2,[['invites','Invitations'],['souvenirs','Souvenirs']]],
-    ['transport','Cars & transport',0,3,[['bridalcar','Bridal Car']]],
-    ['logistics-safety','Logistics & safety',0,1,[['security','Security']]],
+    ['look','Attire, hair & make-up',0,9,[['brides_attire',"Bride's Attire"],['grooms_attire',"Groom's Attire"],['womens_attire',"Women's Attire"],['mens_attire',"Men's Attire"],['filipiniana','Filipiniana & Barongs'],['hmua','HMUA'],['grooming','Grooming'],['wellness','Wellness & Fitness'],['jewellery','Jewelleries & Accessories']]],
+    ['booths','Booths, carts & bars',0,15,[['bar','Mobile Bar'],['coffee','Coffee / Espresso'],['mocktail','Mocktail'],['food_truck','Food Truck'],['dessert','Dessert'],['massage_chair','Massage Chair'],['food_cart','Food Cart'],['photobooth','Photo Booth'],['perfume_bar','Perfume Bar'],['arcade','Arcade / Games'],['henna','Henna / Tattoo'],['nail_bar','Mini Nail Bar'],['tarot','Tarot / Astrology / Palmistry'],['caricature','Caricature / Calligraphy / Painting'],['engraving','Engraving / Embroidery']]],
+    ['prints','Invites, prints & souvenirs',0,2,[['invites','Printing'],['souvenirs','Souvenir / Giveaways']]],
+    ['transport','Cars & transport',0,3,[['bridalcar','Bridal Car'],['guest_shuttle','Guest Shuttle'],['escort','Escort']]],
+    ['logistics-safety','Logistics & safety',0,1,[['event_medic','Medic / First-aid'],['logistics','Everything else']]],
     ['insurance','Insurance & protection',0,1,[['insurance','Event Insurance']]],
   ];
-  const MEASURED_TILES = new Set(['documentary']);
+  /* Every folder's categories are now measured, so nothing carries the marker. */
+  const MEASURED_TILES = new Set(['venue','planning','feast','design','program','documentary','look','booths','prints','transport','logistics-safety','insurance']);
   const COVERED = { catering:'Seda Vertis North', cake:'Seda Vertis North' };
   const HINT = { reception:'Where the party is. Sets your date and location — and can cover catering, cake and rooms.', ceremony:'Where you say the vows. Church, chapel or civil.', photo:'Stills and film of the day.', band:'Live music for the program or the party.', host:'Runs the program on the mic.' };
 
@@ -530,6 +583,15 @@ body.after .s-team{order:1} body.after .s-money{order:2} body.after .s-plans{ord
       { id:'c-sfx', teamId:'saysayfx', name:'Saysay Live Band & Hosting (FIXTURE)', sub:'Added by you · category misc', kind:'team' },
     ],
     photo: [ { id:'c-ph1', name:'[SUPPLIER NAME]', sub:'[CITY] · [PRICE]', kind:'ph' } ],
+    /* 🪤 A SUPPLIER WITH NO CATEGORY HAS NO CARD — AND WITH THE ROSTER GONE,
+       NOWHERE TO BE. Production has `Seda Hotel` and `Saysay Live Band &
+       Hosting (FIXTURE)` on `event_vendors.category = 'misc'`, and `misc` has
+       NO bench tile, so folding the roster into the bench would have deleted
+       them from the couple's view entirely. This prototype gives `misc` a home
+       under Logistics & safety so nothing vanishes — but the real fix is a
+       decision: either `misc` gets a real tile, or self-added suppliers get an
+       "Everything else" folder. FLAGGED, not invented. */
+    logistics: [ { id:'c-sedah', teamId:'sedah', name:'Seda Hotel', sub:'Added by you · category misc', kind:'team' } ],
   };
   const allCards = () => Object.entries(CARDS).flatMap(([tile, cs]) => cs.map((c) => ({ ...c, tile })));
   const cardById = (id) => allCards().find((c) => c.id === id);
@@ -634,9 +696,6 @@ body.after .s-team{order:1} body.after .s-money{order:2} body.after .s-plans{ord
       // roster IS.
       : `${L().length} locked · ${A().length ? A().length + ' asking · ' : ''}${C().length} to lock`;
     $('anchorLine').textContent = after ? `${DATE_LABEL} · NCR` : `${DATE_LABEL} · NCR · 87 days`;
-    $('teamH').textContent = after ? 'Who supplied your wedding' : 'Your team';
-    $('teamCount').textContent = after ? '' : `${S.team.length} people`;
-    $('clearCand').hidden = C().length === 0;
 
     $('stress').setAttribute('aria-pressed', String(S.stress));
     /* ── THE ROLL-UP SELF-CHECK ─────────────────────────────────────────────
@@ -649,55 +708,16 @@ body.after .s-team{order:1} body.after .s-money{order:2} body.after .s-plans{ord
     $('rollup').innerHTML = `<span style="color:${ok ? 'var(--ok)' : 'var(--mulberry)'}">`
       + `${ok ? '✓' : '✗'} ${byFolder} unread rolls up from ${perCard} card${perCard === 1 ? '' : 's'}</span>`;
 
-    renderTeam(after);
     renderMoney();
+    // Only meaningful while there ARE candidates; `[hidden]` really hides it.
+    $('clearCand').hidden = C().length === 0;
     renderBench();
     renderPlans();
     renderCompareBar();
     renderPanel();
   }
 
-  function memberRow(m, after) {
-    const amt = m.price == null
-      ? `<span class="amt none">No price recorded${m.status !== 'locked' || !after ? `<button data-price="${m.id}">Set price</button>` : ''}</span>`
-      : `<span class="amt">${peso(m.price)}<button data-price="${m.id}">Edit</button></span>`;
-    const dot = m.status === 'locked' ? '' : (m.status === 'asking' ? ' wait' : ' cand');
-    let body = '';
-    if (after) {
-      body = m.status === 'locked'
-        ? (m.reviewed ? '<span class="next-line" style="color:var(--ok)">✓ Reviewed</span>'
-          : `<div class="acts"><button class="btn sm" data-review="${m.id}">Write a review</button><button class="btn sm ghost" data-toast="Opens the workspace thread.">Message</button></div>`)
-        : '<span class="next-line muted">Not locked — nothing to review</span>';
-    } else if (m.status === 'locked') {
-      if (m.deposit === 'due') body = `<div class="next-line"><b>Next:</b> pay your deposit to hold the date.</div><div class="acts"><button class="btn sm" data-deposit="${m.id}">Pay your deposit</button><button class="btn sm ghost" data-toast="Opens /vendors/<id>/workspace.">Workspace</button></div>`;
-      else if (m.deposit === 'sent') body = `<span class="dep">Deposit sent · waiting for them to confirm</span><div class="acts"><button class="btn sm ghost" data-depconfirm="${m.id}">${STAGE_BTN[3]} <span class="ph">PROTO</span></button></div>`;
-      else body = `<span class="dep">Deposit confirmed</span>`;
-      if (m.covers) body += `<span class="covers">${esc(m.covers)}</span>`;
-    } else if (m.status === 'asking') {
-      body = `<div class="steps" aria-hidden="true">${[1,2,3].map((i) => `<i class="${i <= m.step ? 'on' : ''}"></i>`).join('')}</div>`
-        + `<span class="stepnote">Step ${m.step} of 3 · ${STAGE[m.step]} <span class="ph">PROTO</span></span>`
-        + `<div class="acts"><button class="btn sm" data-advance="${m.id}">${STAGE_BTN[m.step]}</button><button class="btn sm ghost" data-withdraw="${m.id}">Take it back</button></div>`;
-    } else {
-      const lockBtn = m.price == null
-        ? `<button class="btn sm ghost" data-price="${m.id}">Ask for a price to lock</button>`
-        : `<button class="btn sm" data-ask="${m.id}">Lock this</button>`;
-      body = `<div class="acts">${lockBtn}<button class="btn sm ghost" data-toast="Opens the inquiry thread.">Open conversation</button><button class="rowrm" data-drop="${m.id}" aria-label="Remove ${esc(m.name)} from your build">✕</button></div>`;
-    }
-    // A message from someone already on the team badges THEIR row — the same
-    // badge shape the folder, the category and the card use.
-    const nUn = memberUnread(m);
-    const read = nUn ? `<div class="acts" style="margin-top:2px"><button class="btn sm" data-thread="${(allCards().find((x) => x.teamId === m.id) || {}).id}">Read ${nUn === 1 ? 'their message' : nUn + ' messages'}</button></div>` : '';
-    return `<div class="mem"><div class="top"><span class="dot${dot}" aria-hidden="true"></span><span class="nm">${esc(m.name)}${nUn ? ' ' + badge(nUn, 'from them') : ''}<span class="cat">${esc(m.cat)}</span></span>${amt}</div>${read}${body}</div>`;
-  }
 
-  function renderTeam(after) {
-    let h = '';
-    const l = L(), a = A(), c = C();
-    h += l.map((m) => memberRow(m, after)).join('') || '<div class="mem"><span class="muted">Nothing locked yet.</span></div>';
-    if (!after && a.length) h += `<div class="grp"><span class="eyebrow">⏳ Lock in progress</span><span class="small">${a.length}</span></div>` + a.map((m) => memberRow(m, after)).join('');
-    if (c.length) h += `<div class="grp"><span class="eyebrow">${after ? 'Not locked' : 'In your build — ready to lock'}</span><span class="small">${c.length}</span></div>` + c.map((m) => memberRow(m, after)).join('');
-    $('teamRows').innerHTML = h;
-  }
 
   function renderNotes() {
     $('unreadOnly').setAttribute('aria-pressed', String(S.unreadOnly));
@@ -792,10 +812,42 @@ body.after .s-team{order:1} body.after .s-money{order:2} body.after .s-plans{ord
     const chosen = m && m.status === 'locked';
     const price = c.pmin != null ? (c.pmin === c.pmax ? peso(c.pmin) : `${peso(c.pmin)} – ${peso(c.pmax)}`) : (m && m.price != null ? peso(m.price) : null);
     const cmpOn = S.compare.includes(c.id);
+    /* ═══ THE CARD CARRIES EVERYTHING ABOUT THIS SUPPLIER ═════════════════
+       Owner, 2026-09-22: *"just move them to their cards and make a badge
+       counter on the category/cards."*
+
+       The separate "Your team" roster is GONE. It was a second drawing of
+       suppliers the bench already draws — the same two locked venues appeared
+       as roster rows AND as cards in Venues & churches, each with its own copy
+       of the price, the status and the actions. So a supplier now has ONE
+       representation, its card, and the card carries the full state: what it
+       costs, whether it is locked, what is waiting, and what to do next.
+
+       🔑 THE BADGE IS WHAT MAKES THIS SAFE. Without a per-category and
+       per-card count, folding the roster into the bench would bury a locked
+       supplier behind a closed folder with nothing to say it was there. The
+       badge (and the folder's "● N locked") is the wayfinder the roster used
+       to be, at a size that cannot grow the page. */
     let acts = '';
-    if (chosen) acts = `<span class="dep" style="color:var(--ok)">★ Chosen</span>`;
-    else if (m && m.status === 'asking') acts = `<span class="dep" style="color:var(--warn)">Waiting on them · step ${m.step} of 3</span>`;
-    else if (m) acts = `<span class="dep" style="color:var(--gold)">In your build</span> <button class="btn sm ghost" data-drop="${m.id}">Remove</button>`;
+    const setPrice = m && m.price == null
+      ? `<button class="btn sm ghost" data-price="${m.id}">Set price</button>` : '';
+    if (chosen) {
+      acts = `<span class="dep" style="color:var(--ok)">★ Locked</span>`
+        + `<button class="btn sm" data-deposit="${m.id}">Pay your deposit</button>`
+        + `<button class="btn sm ghost" data-toast="Opens /vendors/<id>/workspace.">Workspace</button>`
+        + setPrice;
+    } else if (m && m.status === 'asking') {
+      acts = `<span class="dep" style="color:var(--warn)">Waiting on them · step ${m.step} of 3</span>`
+        + `<button class="btn sm" data-advance="${m.id}">${STAGE_BTN[m.step]}</button>`
+        + `<button class="btn sm ghost" data-withdraw="${m.id}">Take it back</button>`;
+    } else if (m) {
+      const lockOrAsk = m.price == null
+        ? `<button class="btn sm ghost" data-price="${m.id}">Ask for a price to lock</button>`
+        : `<button class="btn sm" data-ask="${m.id}">Lock this</button>`;
+      acts = `<span class="dep" style="color:var(--gold)">In your build</span>${lockOrAsk}`
+        + `<button class="btn sm ghost" data-thread="${c.id}">Open conversation</button>`
+        + `<button class="btn sm ghost" data-drop="${m.id}">Remove</button>`;
+    }
     else if (c.kind === 'ph') acts = `<button class="btn sm ghost" data-toast="Placeholder card — no supplier in this category yet.">＋ Add to build</button>`;
     else {
       const addLbl = c.pmin == null ? 'Add to build' : '＋ Add to build';
@@ -818,6 +870,8 @@ body.after .s-team{order:1} body.after .s-money{order:2} body.after .s-plans{ord
       <span class="sub">${esc(c.sub)}</span>
       <span class="pr${price ? '' : ' none'}">${price || 'No price recorded'}</span>
       ${fitChips(c)}
+      ${chosen ? `<span class="nextline"><b>Next:</b> pay your deposit to hold the date.</span>` : ''}
+      ${chosen && m.covers ? `<span class="covers">${esc(m.covers)}</span>` : ''}
       <div class="acts">${unreadBtn}${acts}</div></div>`;
   }
 
