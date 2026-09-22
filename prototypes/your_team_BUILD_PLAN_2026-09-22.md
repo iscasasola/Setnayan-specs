@@ -2,7 +2,20 @@
 
 **Approved drawing:** `prototypes/your_team_FINAL_2026-09-22.html` — owner, verbatim: **"that is good enough"**.
 
-**Status: PLAN ONLY. The prototype is approved; the WAVE IS NOT OPEN.** Two of seven prototypes are
+## ✅ BOTH OPEN QUESTIONS ANSWERED BY THE OWNER — 2026-09-22, verbatim
+
+> **"1. messages"** · **"2. yes"**
+
+- **Q1 · the badge counts UNREAD MESSAGES in that supplier's thread** — `unreadThreadIds` /
+  `unread` in `lib/conversation-list.ts`. NOT notifications. Slice 1 is unblocked.
+- **Q2 · the money split is YES** — "Paid to suppliers" and "Setnayan orders" become separate
+  figures, and the buffer refuses to compute while any locked or candidate row has no price.
+  Slice 3 is unblocked.
+
+Both matched my recommendation, so nothing in the drawing changes — but see the roll-up correction
+under Slice 1, which his answer to Q1 exposed.
+
+**Status: PLAN ONLY. The prototype is approved, both questions are answered; the WAVE IS NOT OPEN.** Two of seven prototypes are
 undelivered and four are being rebuilt JavaScript-free. Nothing here is built until the REDESIGN
 CONTROLLER launches a slice.
 
@@ -62,20 +75,41 @@ A defect the owner found himself. **Needs nothing from his desk.**
 - **Sabotage to watch go red:** return `items` unchanged from `capRows` → unit test fires. Remove
   the cap from one component → source guard fires.
 
-### SLICE 1 · Badge counters — **BLOCKED on open question 1**
+### SLICE 1 · Badge counters — **UNBLOCKED: it counts MESSAGES**
 
-Per-card unread, rolled up to category and folder, from **one** stored source. Two stored counts
+Per-supplier unread, rolled up to category and folder, from **one** stored source. Two stored counts
 disagree within a week and each passes its own test.
 
-⛔ **Do not start until the owner says what the badge counts.** See question 1 below — the answer
-decides which table it reads, what the action says, and what clearing it does.
+**Source, settled:** `unreadThreadIds` / `unread` from `lib/conversation-list.ts` — "something was
+said here after the viewer last opened it". **Not** `notifications`. The action beside it stays
+"Read their reply", and opening the thread is the clearing act.
+
+🪤 **THE CORRECTION HIS ANSWER EXPOSED — count SUPPLIERS, not CARDS.**
+The approved drawing sums a count per *card*, and that would inflate. Unread is per **thread**,
+i.e. per supplier, while one supplier can occupy several cards: Seda Vertis North covers catering,
+cake and accommodation, so it renders as a linked copy in those tiles. One unread message from them
+would have shown as 1 in Venues **and** 1 in Catering & cake — a folder total of 2+ for a single
+message, worst exactly where a venue package covers several categories, which is the common case.
+
+The shipped code already states the rule, in `lib/shortlist-taxonomy.ts`:
+
+```
+// A linked copy is the same booking shown again — count suppliers, not cards.
+pickCount += vendors.filter((x) => x.includedWith == null).length;
+```
+
+So the roll-up filters `includedWith == null`, exactly as `pickCount` does. **The drawing does not
+change** — a badge still appears on the linked card, because a couple looking at that card should
+see it — but the *totals* count each supplier once.
 
 - **Pure module:** `lib/bench-unread.ts` — `cardUnread` / `tileUnread` / `folderUnread` from one
   `Map`, with the roll-up as a function.
 - **Files:** `lib/bench-unread.ts` (new) · `_components/shortlist-categories.tsx` ·
   `vendors/page.tsx` · `lib/bench-unread.test.ts` (new).
-- **Proof:** folder total === Σ category totals === Σ card counts over a 100+ fixture; opening one
-  thread clears exactly one card.
+- **Proof:** folder total === Σ category totals === Σ **suppliers** (not cards) over a 100+ fixture
+  that INCLUDES a linked copy; opening one thread clears exactly one supplier everywhere they appear.
+- **Sabotage that must go red:** drop the `includedWith == null` filter → the linked-copy fixture
+  double-counts and the invariant fires. That is the defect the drawing would have shipped.
 - **Sabotage:** store a second count at category level and let it drift → the invariant fires.
 
 ### SLICE 2 · A supplier is their card — the biggest slice
@@ -97,7 +131,7 @@ cards"*.
 - 🪤 A supplier whose category has no tile would have no card and vanish — which is why #5871 landed
   first. Two of this couple's four suppliers are `category = 'misc'`.
 
-### SLICE 3 · The money split — **BLOCKED on open question 2**
+### SLICE 3 · The money split — **UNBLOCKED: the owner said yes**
 
 "Paid to suppliers" and "Setnayan orders" become separate figures, and the buffer refuses to compute
 while any locked or candidate row has no price.
@@ -121,12 +155,12 @@ still says "23 categories still open" leaves one number with nothing saying whic
 
 ---
 
-## Open questions — TWO are load-bearing. Three are not.
+## Open questions — BOTH ANSWERED 2026-09-22 ("1. messages" · "2. yes"). Kept below for the reasoning.
 
 The controller asked which are genuinely load-bearing, meaning **the build is wrong if he answers
 the other way**. These two:
 
-### 1 · What does the badge count? · blocks SLICE 1
+### 1 · What does the badge count? · ✅ ANSWERED: **messages**
 
 Three different mechanisms could power "1 new" on a supplier's card, and they are not the same fact:
 
@@ -151,7 +185,7 @@ the "From your suppliers" feed — and then removed that feed from the design. T
 wasted: Overview's activity tile needs it and event deletion can finally cascade. But **my page
 probably does not use it**, and the record should not imply otherwise.
 
-### 2 · The money split · blocks SLICE 3
+### 2 · The money split · ✅ ANSWERED: **yes**
 
 Separate "paid to suppliers" from "Setnayan orders", and let the buffer refuse to compute while
 anyone is unpriced.
