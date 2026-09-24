@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Event covers v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Bodoni+Moda:wght@600&family=Jost:wght@400;500&family=Schibsted+Grotesk:wght@500;600&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2C2A29; --paper:#FFFFFF; --paper-2:#F4F2EC; --line:#E1DCD1; --line-soft:#EDE8DE;
+  --muted:#6E6A62; --ink-300:#A09A8E; --gold:#A9834B; --gold-700:#8A6B39; --gold-wash:#F3ECDF;
+  --danger:#9A3B2B; --danger-wash:#FBEEEA;
+  --sans:'Hanken Grotesk','Helvetica Neue',Helvetica,Arial,sans-serif;
+  --pahina:'Fraunces',Georgia,serif; --corm:'Cormorant Garamond',Georgia,serif;
+  --bodoni:'Bodoni Moda','Didot','Bodoni 72',Georgia,serif; --jost:'Jost','Futura','Avenir Next',sans-serif;
+  --schib:'Schibsted Grotesk','Helvetica Neue',Helvetica,Arial,sans-serif;
+  --ease:cubic-bezier(.22,.7,.25,1);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;
+  background:linear-gradient(160deg,#F7F5F0 0%,#F1EEE6 48%,#F6F2EA 100%);background-size:220% 220%;
+  animation:canvas 46s ease-in-out infinite alternate}
+@keyframes canvas{from{background-position:0% 0%}to{background-position:100% 100%}}
+input[type=radio]{position:absolute;opacity:0;pointer-events:none;width:0;height:0}
+a{color:inherit}
+
+/* ── prototype bar — not part of the app ─────────────────────────────── */
+.bar{position:sticky;top:0;z-index:30;display:flex;gap:6px 22px;flex-wrap:wrap;align-items:center;justify-content:center;
+  padding:9px 16px;background:rgba(244,242,236,.72);backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);
+  box-shadow:0 1px 0 rgba(44,42,41,.07)}
+.grp{display:flex;gap:3px;align-items:center;flex-wrap:wrap}
+.grp b{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-right:6px;font-weight:700}
+.grp label{font-size:12.5px;padding:6px 12px;border-radius:999px;cursor:pointer;color:var(--ink);user-select:none;
+  transition:background .3s var(--ease),color .3s var(--ease),transform .15s var(--ease)}
+.grp label:hover{background:rgba(44,42,41,.07)} .grp label:active{transform:scale(.95)}
+.bar .proto{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-300);font-weight:700;padding:5px 8px;border:1px dashed var(--ink-300);border-radius:6px}
+#v-mob:checked~.bar label[for=v-mob],#v-tp:checked~.bar label[for=v-tp],#v-tl:checked~.bar label[for=v-tl],#v-dt:checked~.bar label[for=v-dt],
+#p-two:checked~.bar label[for=p-two],#p-one:checked~.bar label[for=p-one],
+#s-over:checked~.bar label[for=s-over],#s-below:checked~.bar label[for=s-below]{background:var(--ink);color:#fff}
+
+/* ── the viewport frame ───────────────────────────────────────────────── */
+.stage{padding:26px 16px 80px;display:flex;justify-content:center}
+.frame{width:1180px;max-width:100%;transition:width .5s var(--ease)}
+#v-mob:checked~.stage .frame{width:375px;padding:0 16px} /* a real phone: 375 with the app's 16px gutter → 343 of content */
+#v-tp:checked~.stage .frame{width:768px}
+#v-tl:checked~.stage .frame{width:1024px}
+
+/* ── section head (the template's) ────────────────────────────────────── */
+.sec-head{display:flex;align-items:center;gap:10px;margin:0 0 16px;flex-wrap:wrap}
+.sec-head h2{font-size:21px;font-weight:600;margin:0;letter-spacing:-.01em}
+.sec-head.ex{margin-top:54px}
+.sec-head.ex h2{font-size:16px;color:var(--muted)}
+.iconbtn{width:26px;height:26px;border-radius:50%;display:inline-grid;place-items:center;flex:none;font-size:15px;line-height:1;text-decoration:none;
+  transition:transform .2s var(--ease),background .3s var(--ease)}
+.iconbtn:active{transform:scale(.92)}
+.add{background:var(--ink);color:#fff;font-size:18px} .add:hover{background:#000;transform:scale(1.06)}
+.info{position:relative;color:var(--muted);border:1.5px solid var(--ink-300);font-family:Georgia,serif;font-style:italic;font-size:13px;cursor:default;outline:none}
+.info:hover,.info:focus{border-color:var(--ink);color:var(--ink)}
+.tip{position:absolute;left:50%;top:calc(100% + 8px);transform:translate(-50%,-4px);width:250px;padding:10px 12px;border-radius:12px;
+  background:rgba(44,42,41,.94);color:#fff;font:400 12px/1.5 var(--sans);font-style:normal;text-align:left;
+  opacity:0;pointer-events:none;transition:opacity .25s var(--ease),transform .25s var(--ease);z-index:10;backdrop-filter:blur(8px)}
+.info:hover .tip,.info:focus .tip{opacity:1;transform:translate(-50%,0)}
+.sec-head .hint{font-size:13px;color:var(--muted)}
+.count{margin-left:auto;font-size:12px;color:var(--ink-300);letter-spacing:.04em}
+
+/* ── the grid ─────────────────────────────────────────────────────────── */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;transition:gap .4s var(--ease)}
+#v-tl:checked~.stage .grid{grid-template-columns:repeat(4,1fr)}
+#v-tp:checked~.stage .grid{grid-template-columns:repeat(3,1fr)}
+#v-mob:checked~.stage .grid{grid-template-columns:repeat(2,1fr);gap:12px}
+#v-mob:checked~#p-one:checked~.stage .grid{grid-template-columns:1fr}
+
+/* ── the card IS the hero ─────────────────────────────────────────────── */
+.card{position:relative;display:block;color:inherit;text-decoration:none;border-radius:18px;overflow:hidden;background:var(--paper-2);
+  container-type:inline-size;isolation:isolate;
+  box-shadow:0 1px 2px rgba(44,42,41,.06),0 12px 28px -8px rgba(44,42,41,.18);
+  transition:transform .35s var(--ease),box-shadow .35s var(--ease);
+  animation:cardIn .55s var(--ease) both;animation-delay:calc(var(--i,0) * 60ms)}
+@keyframes cardIn{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
+.card:hover{transform:translateY(-4px);box-shadow:0 2px 4px rgba(44,42,41,.06),0 26px 46px -12px rgba(44,42,41,.30)}
+.card:active{transform:translateY(-1px) scale(.985);transition-duration:.12s}
+.card:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.hero{position:relative;aspect-ratio:4/5;--sb:54px;overflow:hidden}
+#s-below:checked~.stage .hero{--sb:0px}
+
+/* the invitation paper — the hub's own card, filling the shape */
+.paper{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  padding:9% 9% calc(var(--sb) + 5%);background:var(--pp,#FBFAF7);color:var(--pi,var(--ink));
+  transition:padding .45s var(--ease),transform .6s var(--ease)}
+.card:hover .paper{transform:scale(1.02)}
+.paper::before{content:"";position:absolute;inset:5.5%;border:1px solid var(--pf,rgba(169,131,75,.45));pointer-events:none}
+.eb{margin:0 0 2.2cqw;font-size:clamp(6.5px,3.1cqw,11px);letter-spacing:.3em;text-transform:uppercase;opacity:.62;padding-left:.3em}
+.mark{width:25cqw;max-width:120px;height:auto;aspect-ratio:1;margin:0 0 2.2cqw;fill:var(--mi,#3A1418);display:block;flex:none}
+.mark.circ{width:19cqw;max-width:88px;aspect-ratio:1;border:1px solid var(--pf,rgba(169,131,75,.45));border-radius:50%;display:grid;place-items:center;
+  font:italic 500 clamp(10px,7cqw,24px)/1 var(--corm);color:var(--mc,#C97B4B);letter-spacing:.02em}
+.nm{margin:0;font:300 clamp(15px,10.5cqw,36px)/1.02 var(--pahina);letter-spacing:-.01em;text-wrap:balance}
+.nm span{display:block}
+.nm .and{font-size:.5em;font-style:italic;color:var(--gild,#A9834B);line-height:1.15}
+.ln{margin:2cqw 0 0;font-size:clamp(7px,3.5cqw,12px);line-height:1.35;opacity:.8}
+.dt{display:flex;align-items:center;justify-content:center;gap:2.5cqw;margin:2.2cqw 0 0;font:400 clamp(9.5px,5.4cqw,18px)/1.2 var(--pahina)}
+.dt i{display:block;width:5cqw;height:1px;background:var(--gild,#A9834B);opacity:.6}
+.tm{margin:1.2cqw 0 0;font-size:clamp(6.5px,3cqw,10.5px);letter-spacing:.24em;text-transform:uppercase;opacity:.62;padding-left:.24em}
+/* the crop rule: under 200px the hero keeps mark · names · date and drops its minor lines */
+@container (max-width:199px){
+  .eb,.ln,.tm,.att .x2,.tag,.kick .chip+.chip{display:none}
+  .hero{--sb:60px}
+  .paper{padding-top:14%} .mark{width:22cqw} .mark.circ{width:17cqw}
+  /* the strip stacks: attention on top, progress beneath — a word is never cut */
+  .strip{height:auto;min-height:60px;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;padding:6px 10px 7px}
+  .strip.solo{justify-content:center}
+  .att b{font-size:15px} .att small{font-size:8px} .ring{width:22px;height:22px} .ring i{width:16px;height:16px;font-size:6.5px} .left{font-size:11px}
+  .prog{gap:6px} .chip{font-size:7.5px;padding:3px 6px}
+}
+
+/* THEMES — the hub's own materials (globals.css [data-hub-theme=…]) */
+.t-capiz{--pp:#F4F1EB;--pf:rgba(197,160,89,.45);--gild:#C5A059}
+/* pearl under shell light — the hub carries capiz as a fine grain (--pahina-grain-opacity .035), not a lattice */
+.t-capiz .paper{background-image:
+  radial-gradient(ellipse at 42% 24%,rgba(255,255,255,.55) 0,rgba(255,255,255,0) 62%),
+  radial-gradient(ellipse at 70% 90%,color-mix(in srgb,var(--accent,#3A1418) 7%,transparent) 0,transparent 55%),
+  radial-gradient(rgba(44,42,41,.07) .6px,transparent .9px);
+  background-size:auto,auto,4px 4px}
+.t-velvet{--pp:#1C161A;--pi:#F0EAE0;--pf:rgba(197,160,89,.45);--gild:#C5A059;--mc:#15121A}
+.t-velvet .paper{background-color:color-mix(in oklab,#0d090c 52%,var(--accent,#4A1E2B));
+  background-image:radial-gradient(80% 55% at 50% 26%,rgba(255,255,255,.07) 0,rgba(255,255,255,0) 70%),
+  radial-gradient(90% 40% at 50% 100%,rgba(0,0,0,.45) 0,rgba(0,0,0,0) 70%)}
+.t-velvet .paper::before{box-shadow:inset 0 0 0 3px var(--pp),inset 0 0 0 4px rgba(197,160,89,.42)}
+.t-velvet .nm{font-family:var(--bodoni);font-weight:600;letter-spacing:-.005em;line-height:1.05}
+.t-velvet .eb,.t-velvet .tm,.t-velvet .ln{font-family:var(--jost);font-weight:500}
+.t-velvet .eb{letter-spacing:.32em;padding-left:.32em}
+.t-velvet .mark.circ{background:#FBF9F6;border-color:var(--accent,#4A1E2B);box-shadow:0 0 0 2px #FBF9F6,0 0 0 3px #C5A059;font-family:var(--bodoni);font-style:normal;font-weight:600}
+.t-galeriya{--pp:#E9EAEC;--pf:rgba(189,192,197,.9);--gild:#8E9298;--mc:#2C2A29}
+.t-galeriya .paper{align-items:flex-start;text-align:left;padding-left:17%}
+.t-galeriya .paper::before{inset:0 auto 0 8.5%;border:0;border-left:1px solid #BDC0C5}
+.t-galeriya .nm{position:relative;font:600 clamp(15px,11.5cqw,38px)/.94 var(--schib);letter-spacing:-.04em}
+.t-galeriya .nm::before{content:"";position:absolute;left:-8.6cqw;top:2%;bottom:2%;width:3px;background:var(--accent,#C24E25)}
+.t-galeriya .nm .and{font-style:normal;font-size:.55em;color:#8E9298;letter-spacing:-.02em}
+.t-galeriya .eb,.t-galeriya .ln,.t-galeriya .tm{font-family:var(--schib);font-weight:500}
+.t-galeriya .dt{justify-content:flex-start;font-family:var(--schib);font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.t-galeriya .dt i{display:none}
+.t-galeriya .mark.circ{border-radius:0;border:1px solid #BDC0C5;font-family:var(--schib);font-style:normal;font-weight:600;letter-spacing:-.03em;width:16cqw}
+
+/* the solemn masthead — no card, no celebration line (invitationCard → null) */
+.t-solemn{--pp:#FBFAF7;--gild:#A9834B}
+.t-solemn .paper::before{display:none}
+.t-solemn .no{margin:0 0 2.4cqw;font-size:clamp(6.5px,3.2cqw,11px);letter-spacing:.22em;opacity:.55}
+.t-solemn .rule{width:18cqw;height:1px;background:var(--gild);opacity:.6;margin:3cqw 0}
+.t-solemn .dt{color:var(--gild);font-size:clamp(11px,6.4cqw,22px)}
+.t-solemn .venue{margin:1.2cqw 0 0;font-size:clamp(7px,3.6cqw,12px);opacity:.7}
+
+/* their own hero photo — the plate on the hub, the whole shape here */
+.hero-photo{background:var(--ph)}
+.hero-photo::before{content:"";position:absolute;inset:0;background:var(--ph);transition:transform .7s var(--ease)}
+.card:hover .hero-photo::before{transform:scale(1.04)}
+.hero-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(20,14,12,.72) 0,rgba(20,14,12,.35) 38%,transparent 62%)}
+.over{position:absolute;left:8%;right:8%;bottom:calc(var(--sb) + 6%);z-index:1;color:#fff;text-align:left;transition:bottom .45s var(--ease)}
+.over .mark.circ{width:15cqw;border-color:rgba(255,255,255,.5);color:#fff;margin:0 0 2.4cqw;background:rgba(20,14,12,.25);backdrop-filter:blur(6px)}
+.over .nm{text-shadow:0 1px 10px rgba(0,0,0,.35)}
+.over .nm .and{color:#E0CCA0}
+.over .dt{justify-content:flex-start;color:#E0CCA0;margin-top:1.8cqw}
+.over .dt i{background:#E0CCA0}
+.tag{position:absolute;left:8%;top:14%;z-index:1;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+
+/* kicker chips · overflow */
+.kick{position:absolute;top:8px;left:8px;right:44px;display:flex;gap:4px;flex-wrap:wrap;z-index:3}
+.chip{font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:4px 7px;border-radius:999px;
+  background:rgba(255,255,255,.66);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--ink);white-space:nowrap;
+  transition:background .3s var(--ease)}
+.dark .chip{background:rgba(20,14,16,.48);color:#F3EDE4}
+.chip.ex{background:var(--ink);color:#fff}
+.dark .chip.ex{background:#F3EDE4;color:var(--ink)}
+.more{position:absolute;top:6px;right:6px;z-index:4;width:30px;height:30px;border-radius:10px;display:grid;place-items:center;
+  background:rgba(255,255,255,.66);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);font-size:16px;line-height:1;color:var(--ink);
+  transition:transform .2s var(--ease),background .3s var(--ease)}
+.more:hover{background:#fff;transform:scale(1.08)} .more:active{transform:scale(.94)}
+.dark .more{background:rgba(20,14,16,.48);color:#F3EDE4} .dark .more:hover{background:rgba(20,14,16,.7)}
+
+/* ── the strip: only what the hero cannot say ─────────────────────────── */
+.strip{position:absolute;left:0;right:0;bottom:0;z-index:2;height:54px;display:flex;align-items:center;justify-content:space-between;gap:6px;
+  padding:0 10px 0 12px;background:rgba(255,255,255,.6);backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55);transition:background .45s var(--ease),padding .45s var(--ease)}
+.strip.solo{justify-content:flex-start}
+.dark .strip{background:rgba(24,16,18,.46);color:#F3EDE4;box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+#s-below:checked~.stage .strip{position:static;height:auto;padding:9px 12px 11px;background:var(--paper);backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
+#s-below:checked~.stage .dark .strip{background:var(--paper);color:var(--ink)}
+.att{display:flex;align-items:baseline;gap:3px;min-width:0;color:var(--gold-700);white-space:nowrap;overflow:hidden;margin:0}
+.att b{font-size:18px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1}
+.att small{font-size:8.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.92}
+.att .sep{opacity:.4;margin:0 3px;font-size:11px}
+.att.late{color:var(--danger)}
+.dark .att{color:#E9C98A} .dark .att.late{color:#F2A08E}
+#s-below:checked~.stage .dark .att{color:var(--gold-700)} #s-below:checked~.stage .dark .att.late{color:var(--danger)}
+.att.unknown{font:italic 400 10.5px/1.3 var(--sans);color:var(--muted);letter-spacing:0;text-transform:none;white-space:normal}
+.dark .att.unknown{color:rgba(243,237,228,.7)}
+.prog{display:flex;align-items:center;gap:7px;flex:none;min-width:0}
+@property --pp{syntax:'<number>';inherits:false;initial-value:0}
+.ring{--pp:var(--p);width:30px;height:30px;flex:none;border-radius:50%;display:grid;place-items:center;
+  background:conic-gradient(var(--gold) calc(var(--pp) * 1%),rgba(44,42,41,.12) 0);
+  animation:sweep 1.2s var(--ease) both;animation-delay:calc(.45s + var(--i,0) * 60ms)}
+@keyframes sweep{from{--pp:0}to{--pp:var(--p)}}
+.dark .ring{background:conic-gradient(#E0CCA0 calc(var(--pp) * 1%),rgba(255,255,255,.16) 0)}
+.ring i{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.88);display:grid;place-items:center;
+  font:600 8.5px/1 var(--sans);font-style:normal;color:var(--ink);letter-spacing:-.01em}
+.dark .ring i{background:rgba(30,22,24,.82);color:#F3EDE4}
+#s-below:checked~.stage .dark .ring{background:conic-gradient(var(--gold) calc(var(--pp) * 1%),rgba(44,42,41,.12) 0)}
+#s-below:checked~.stage .dark .ring i{background:#fff;color:var(--ink)}
+.ring.null{animation:none;background:rgba(44,42,41,.10)} .ring.null i{color:var(--muted)}
+.left{font-size:12.5px;font-weight:700;line-height:1.05;letter-spacing:-.01em;white-space:nowrap}
+.left small{display:block;font-size:9px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;opacity:.65;margin-top:2px}
+.left.soft{font-weight:600;font-size:12px}
+
+/* the dashed new tile — part of the grid */
+.newtile{border:1.5px dashed var(--line);border-radius:18px;min-height:160px;display:grid;place-items:center;color:var(--muted);text-decoration:none;
+  transition:border-color .3s var(--ease),color .3s var(--ease),transform .2s var(--ease),background .3s var(--ease)}
+.newtile:hover{border-color:var(--gold);color:var(--gold-700);background:rgba(255,255,255,.4)} .newtile:active{transform:scale(.98)}
+.newtile span{text-align:center;font-size:13px} .newtile b{display:block;font-size:24px;font-weight:400;margin-bottom:2px}
+
+/* notes */
+.notes{margin-top:44px;max-width:760px;font-size:13px;line-height:1.7;color:var(--muted)}
+.notes h3{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);margin:22px 0 6px}
+.notes b{color:var(--ink)} .notes ul{padding-left:18px;margin:6px 0} .notes li{margin:4px 0}
+.notes code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;background:rgba(255,255,255,.7);padding:1px 5px;border-radius:4px;color:var(--ink)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .ring{--pp:var(--p)}
+}
+</style></head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="mono" viewBox="0 0 1024 1024"><path d="M252.2 499.5C249.7 505.6 245.6 511 242.2 516.7C235.7 527.8 229.9 539.3 224.4 550.9C207.4 586.5 195.1 628.3 191.9 667.5C191.4 674.4 190 681.5 190 688.5L190 708.5C190 715.1 191 721.9 191.8 728.5C196.8 769.6 212.1 808 237.9 840.6C240.5 843.9 243 847.6 246 850.5L262.9 867.5C268.6 873.2 275.5 877.9 281.9 882.6C317.8 908.6 360.7 923.6 404.5 928.1C411.4 928.9 418.5 930 425.5 930L448.5 930C451.6 930 454.5 929.3 457.5 929.1C468.6 928.2 479.6 927.4 490.6 925.2C499.9 923.5 509.1 922.1 518.3 919.7C592.2 900.9 657.6 860.2 712.1 807.6C739.7 781 765.4 750.5 782.4 715.9C792.2 696 801 674.4 804.9 652.5C806.5 643.5 808.1 634.5 809 625.5C810.2 612.5 810 598.3 808.2 585.5C807.4 579.8 806.9 574.2 805.9 568.5C799.8 533.7 778.7 504.5 745.9 490.6C735 486 723.2 483 711.5 482C672 478.7 628.9 494.2 594.7 513.2C586 518.1 577.4 523.1 569.1 528.6C564.1 531.9 559.4 535.8 554 538.2L554 480.5C584.8 472.1 615.1 462.3 645.3 451.7C684.7 437.9 723.2 421.5 762.2 406.7C779 400.3 795.7 393.6 812.3 386.8C822.4 382.6 832.9 376.5 843.5 374.4C859.3 400.8 868.5 431.3 873.2 461.5C873.7 464.8 874.3 468.2 874.8 471.5C875.6 477.4 875.6 487 885.3 483.7C893 481.1 889.5 468.2 889.1 462.5C888.8 459 889.2 455.6 888.4 452.2C887.9 450 888.2 447.8 887.8 445.6C886.6 438.9 885.4 432.2 883.8 425.6C880.6 412.4 875.9 399.5 870.5 387C867.4 380.1 863.6 373.4 860.5 366.5C871.1 359.6 887.2 353.4 899 347.5C940.9 326.7 996.2 295.1 1010.7 247.3C1022.3 208.8 996.9 187.1 961.5 181.1C951.5 179.4 941.5 178.1 931.5 177.1C927.5 176.7 923.5 177.2 919.5 176.9C914.5 176.7 909.6 176 904.5 176C899.8 176 895.2 176.8 890.5 177C882.5 177.2 874.5 177.2 866.5 178.1C853.4 179.7 840.5 181.9 827.5 183.9C815.5 185.7 803.2 187.8 791.4 190.7L736.2 204.3C727 206.5 717.4 209.4 708.4 212.5C708.8 213 708.8 213.8 709.2 214.3C710.4 215.7 722.9 223.2 724.5 223.2C727.5 223.3 757.9 212.1 763.8 210.4C801.9 199.1 840.9 190.9 880.5 188C889.1 187.3 897.9 186 906.5 186L932.5 186C935.6 186 938.4 186.7 941.5 187C964.8 188.9 993.3 197.4 999.1 223.5C1001.4 233.9 999.1 244.3 994.1 253.6C990.9 259.5 986.8 265.8 982 270.5L967 285.5C963.3 289.2 959 292.3 955.1 295.5C930 316.4 902 333.8 872.7 348.2C866.7 351.1 860.8 354.5 854.5 356.7C841.9 341.3 830 325.7 816.5 311C815.1 309.4 814 307.6 812.6 306.1L790 283.5C784.9 278.3 779 273.7 773.6 268.9C751.1 249.3 727.3 231.5 702.1 215.4C690.9 208.3 679.6 200.6 667.9 194.3L629.6 173.8C626.5 172.1 622.8 170.4 619.5 168.9L588 154.4C575.9 148.9 563.3 144.3 550.9 139.6C490 116.4 427.1 101.3 362.5 95.9C354.7 95.2 345.2 94 337.5 94L305.5 94C302.5 94 299.5 94.7 296.5 94.9C285.1 95.7 273.8 96.4 262.5 97.8C188.2 107.3 112.4 135.5 60.4 191.9C31.1 223.8 9.6 263.1 10.2 307.5C10.2 313.9 11.2 320.2 11.9 326.5C13.9 344.8 20.3 363 29.6 379C62.6 435.6 139.7 471 200.7 487.8C217.7 492.5 235 495.5 252.2 499.5ZM837.3 364.5C831 367.6 824.4 369.8 817.9 372.4C800.5 379.3 782.8 385.3 765.4 391.7L608.6 450.1C602.1 452.5 595.2 454.1 588.7 456.2C577.4 459.9 565.8 464.1 554 465.6L554 314.8C549 316.9 543.9 320 539.4 323.1L499.4 350.9C495.8 353.4 471.6 371.7 470.5 373.9C469.6 375.5 470 377.8 470 379.5L470 483.5C458.6 486.1 447.1 486.7 435.5 488.1C417.3 490.3 398.9 491.9 380.5 492C369.7 492 357.5 494.8 347.1 491.5C352.8 482.3 360.4 474.2 367.5 466C374.7 457.6 381.7 448.8 389.5 441L418.5 412.1C428.6 401.9 440.1 392.8 451 383.5C497.7 343.3 549.8 309.2 603.7 279.2C623 268.5 642.7 258.5 662.7 249.2C671.2 245.2 687.4 239.8 693.9 234.5C690.9 232.4 677.3 223.3 674.5 223.2C670.6 223 642.9 233.6 637.2 235.6C606.1 246.7 575 258.6 545.1 272.5L520.5 283.9C492.7 296.8 461.3 312.9 435.5 329.4L405.4 348.7C404.8 349.1 404.1 349.6 403.5 350.1L379.5 367.2C363.5 378.6 347.8 391.6 333.5 405.1L317.6 420.3C302.9 434.3 288.9 450 276.6 466.1C271.7 472.5 267.2 479.4 261.9 485.5C234.7 482.4 207.6 476.1 181.3 468.3C111.8 447.6 42.2 411.4 35.9 330.5C35.8 328.1 35.1 325.9 35 323.5C34.7 313 37 298.5 39.8 288.4C44.7 270.7 53.4 254.5 64.4 239.9C78.3 221.3 95.8 205.5 114.7 192.1C140.6 173.9 168.8 158.7 198.8 148.4C236 135.6 274.5 130 313.5 127.9C438.5 121.3 576.3 160.2 684.6 222.9C727.6 247.7 773.4 281 805 319.4C815.7 332.3 831.1 349.1 837.3 364.5ZM470 498.4L470 615.5C470 617.3 470.3 619.5 469.7 621.3C468.6 624.6 461.5 632.3 459.1 635.7C454.1 642.7 449.3 649.9 444.6 657.1C420.2 694.1 383 768.8 432.1 801.4C437.8 805.2 444.8 806 451.5 806C475.5 806 495.3 781.4 490.8 757.6C486.7 736.4 464.2 719.4 442.9 728.4C435.5 731.6 431.5 736.8 426.5 742.8C426.7 713.3 442.4 678.8 459.4 654.9C462.8 650.2 465.6 645.6 470 641.8L470 724.1C476.1 727.6 482 731.4 486.4 737.1C504.4 760.1 495.6 793.6 470 806.5L470 892.5C470 898.5 469 904.6 468.5 910.6C497.7 906.9 527 897.4 554 885.8L554 556.5C580.1 538.4 602.4 524.5 632.1 512.6C655.3 503.2 681.4 496.4 706.5 498.1C745.6 500.7 780.2 525.2 788.8 564.6C791.6 577.5 792.1 591.3 790.9 604.5C785.6 661.7 749.2 721.5 714.6 766.1C706.8 776.1 698.9 786.5 690 795.5L675.2 810.5C625.2 861 558.5 896.2 489.4 911.8C475.2 915 460.8 916.6 446.4 918.7C443.1 919.2 439.8 918.8 436.5 919C429.5 919.5 422.6 920.3 415.5 919.9C413.1 919.7 410.9 919.1 408.5 919C343.4 915.6 292.4 882.6 263.5 824C253.6 803.7 248.6 781.7 246.1 759.5C245.8 756.5 246.1 753.5 245.9 750.5C243.1 699.6 258.8 648.3 279.8 602.3C286.7 587.2 293.7 572 302.4 557.8C306.9 550.4 330.2 510.5 335.1 507.6C336.9 506.6 339.5 507 341.5 507L380.5 507C383.9 507 387.1 506.2 390.5 506C393.8 505.9 397.2 506.2 400.5 506C402.2 505.9 403.8 505.3 405.5 505.1C408.2 504.8 410.8 505.2 413.5 504.9C422.8 504.1 432.2 503 441.5 501.9C451 500.8 460.5 498.6 470 498.4Z" fill-rule="evenodd"/><path d="M353 26.3L353 41.5C358.5 42.1 364 41.6 369.5 42.1C398.8 44.6 437.1 51.2 455.4 77.1C462 86.4 464.5 96.9 467.5 107.7C482.4 113 498.2 116.3 513.3 121.2C526.1 125.4 540.8 132 553.5 134.9C555.3 120 556 105 561.3 90.8C574.1 57 612.3 47.1 644.5 43.1C653.3 42 662.2 42.5 671 41.5L671 26.3C662.4 25.8 654 27.3 645.5 27.9C635.2 28.7 624.8 29.1 614.5 29.9C603.6 30.8 592.5 30.6 581.5 31C558.5 31.9 535.5 32.6 512.5 32.6C489.2 32.6 465.8 31.9 442.5 31C431.5 30.6 420.4 30.8 409.5 29.9C399.2 29.1 388.8 28.7 378.5 27.9C370 27.3 361.6 25.8 353 26.3Z" fill-rule="evenodd"/><path d="M353 982.5L353 997.7C361.6 998.2 370 996.7 378.5 996.1C388.8 995.3 399.2 994.9 409.5 994.1C420.4 993.2 431.5 993.4 442.5 993C465.8 992.1 489.2 991.4 512.5 991.4C535.5 991.4 558.5 992.1 581.5 993C592.5 993.4 603.6 993.2 614.5 994.1C624.8 994.9 635.2 995.3 645.5 996.1C654 996.7 662.4 998.2 671 997.7L671 982.5C662.2 981.5 653.3 982 644.5 980.9C599.6 975.4 565.4 963.3 556.4 914.5C555.4 914.5 554.5 914 553.5 914C552.1 914.1 530.1 921.7 526.3 922.7C513.9 926.1 501.1 928.7 488.4 930.8C484 931.5 465.1 932.7 462.8 934.3C462.3 934.6 454.4 948.5 452.4 950.9C445.9 958.9 436.6 964.6 427.3 968.8C409.4 977 389 980.2 369.5 981.9C364 982.4 358.5 981.9 353 982.5Z" fill-rule="evenodd"/><path d="M470 146.5L470 303.6C475.5 301.7 480.2 298.4 485.4 295.9L534.4 272C540.7 268.9 547.5 266.2 554 263.5L554 168.5C536.1 161.8 517.2 157.4 498.7 152.7C489.3 150.2 479.7 147.7 470 146.5Z" fill-rule="evenodd"/></symbol></svg>
+
+<input type="radio" name="v" id="v-mob"><input type="radio" name="v" id="v-tp"><input type="radio" name="v" id="v-tl"><input type="radio" name="v" id="v-dt" checked>
+<input type="radio" name="p" id="p-two" checked><input type="radio" name="p" id="p-one">
+<input type="radio" name="s" id="s-over" checked><input type="radio" name="s" id="s-below">
+
+<div class="bar">
+  <span class="proto">Prototype</span>
+  <div class="grp"><b>Viewport</b><label for="v-mob">Mobile</label><label for="v-tp">Tablet P</label><label for="v-tl">Tablet L</label><label for="v-dt">Desktop</label></div>
+  <div class="grp"><b>Phone grid</b><label for="p-two">Two-up</label><label for="p-one">One-up</label></div>
+  <div class="grp"><b>Strip</b><label for="s-over">Over the hero</label><label for="s-below">Below the hero</label></div>
+</div>
+
+<div class="stage"><div class="frame">
+
+  <div class="sec-head">
+    <h2>Planning</h2>
+    <a class="iconbtn add" href="#" aria-label="New event">+</a>
+    <span class="iconbtn info" tabindex="0" aria-label="What is this?">i<span class="tip">Events you run. Each cover is your Event Hub’s own first screen; the strip carries only what the hub doesn’t say — what needs you, and how far along you are.</span></span>
+    <span class="hint">yours to run</span>
+    <span class="count">3 events</span>
+  </div>
+
+  <div class="grid">
+
+    <!-- Maria & Jose · Dec 12 · house theme · generated mark · 17 overdue · 18% · 79 days -->
+    <a class="card" href="#" style="--i:0" aria-label="Maria and Jose · Kasal, you organise this · December 12, 2026 · 17 tasks overdue · 18% planned · 79 days to go">
+      <div class="hero t-house">
+        <div class="paper">
+          <p class="eb">Together with their families</p>
+          <span class="mark circ" aria-hidden="true">M &amp; J</span>
+          <h3 class="nm"><span>Maria</span><span class="and">and</span><span>Jose</span></h3>
+          <p class="ln">invite you to celebrate their wedding</p>
+          <p class="dt"><i></i>December 12, 2026<i></i></p>
+        </div>
+      </div>
+      <div class="kick"><span class="chip">Kasal</span><span class="chip">You organise this</span></div>
+      <span class="more" aria-hidden="true">⋮</span>
+      <div class="strip">
+        <p class="att late"><b>17</b><small>tasks overdue</small></p>
+        <div class="prog"><span class="ring" style="--p:18"><i>18%</i></span><span class="left">79 days<small>to go</small></span></div>
+      </div>
+    </a>
+
+    <!-- Indalecio & Claire · Dec 18 · 1:30 PM · capiz · uploaded monogram · 25 need you · 1 payment · 7% · 85 days -->
+    <a class="card" href="#" style="--i:1" aria-label="Indalecio and Claire · Kasal, you organise this · December 18, 2026, 1:30 PM · 25 need you, 1 payment to settle · 7% planned · 85 days to go">
+      <div class="hero t-capiz" style="--accent:#3A1418">
+        <div class="paper">
+          <p class="eb">Together with their families</p>
+          <svg class="mark" viewBox="0 0 1024 1024" aria-hidden="true"><use href="#mono"></use></svg>
+          <h3 class="nm"><span>Indalecio</span><span class="and">and</span><span>Claire</span></h3>
+          <p class="ln">invite you to celebrate their wedding</p>
+          <p class="dt"><i></i>December 18, 2026<i></i></p>
+          <p class="tm">1:30 PM</p>
+        </div>
+      </div>
+      <div class="kick"><span class="chip">Kasal</span><span class="chip">You organise this</span></div>
+      <span class="more" aria-hidden="true">⋮</span>
+      <div class="strip">
+        <p class="att"><b>25</b><small>need you</small><span class="x2"><span class="sep">·</span><b>1</b><small>payment</small></span></p>
+        <div class="prog"><span class="ring" style="--p:7"><i>7%</i></span><span class="left">85 days<small>to go</small></span></div>
+      </div>
+    </a>
+
+    <!-- Tambayan sa kanto · hangout · one host · no date · no attention · no progress -->
+    <a class="card" href="#" style="--i:2" aria-label="Tambayan sa kanto · Hangout, you organise this · date to be set · just getting started">
+      <div class="hero t-house">
+        <div class="paper">
+          <p class="eb">You are invited</p>
+          <span class="mark circ" aria-hidden="true">T</span>
+          <h3 class="nm"><span>Tambayan sa kanto</span></h3>
+          <p class="ln">invites you to celebrate</p>
+        </div>
+      </div>
+      <div class="kick"><span class="chip">Hangout</span><span class="chip">You organise this</span></div>
+      <span class="more" aria-hidden="true">⋮</span>
+      <div class="strip solo">
+        <div class="prog"><span class="left soft">Just getting started<small>Date to be set</small></span></div>
+      </div>
+    </a>
+
+    <a class="newtile" href="#" style="--i:3"><span><b>+</b>New event</span></a>
+  </div>
+
+  <div class="sec-head ex">
+    <h2>Example covers</h2>
+    <span class="hint">not your events — the same shape, as other hubs would fill it</span>
+  </div>
+
+  <div class="grid">
+
+    <!-- EXAMPLE · hero photo set · house · masthead type over the photo -->
+    <a class="card dark" href="#" style="--i:0;--ph:radial-gradient(60% 45% at 68% 28%,rgba(255,214,170,.8),transparent 70%),radial-gradient(55% 40% at 22% 66%,rgba(128,84,64,.7),transparent 70%),radial-gradient(30% 22% at 78% 64%,rgba(255,240,220,.35),transparent 70%),linear-gradient(180deg,#C29A7C 0%,#7A5446 52%,#33221F 100%)" aria-label="Example · Ana and Luis · Kasal · January 30, 2027 · 8 need you · 42% planned · 128 days to go">
+      <div class="hero hero-photo">
+        <span class="tag">their hero photo</span>
+        <div class="over">
+          <span class="mark circ" aria-hidden="true">A &amp; L</span>
+          <h3 class="nm"><span>Ana</span><span class="and">and</span><span>Luis</span></h3>
+          <p class="dt"><i></i>January 30, 2027</p>
+        </div>
+      </div>
+      <div class="kick"><span class="chip ex">Example</span><span class="chip">Kasal</span></div>
+      <span class="more" aria-hidden="true">⋮</span>
+      <div class="strip">
+        <p class="att"><b>8</b><small>need you</small></p>
+        <div class="prog"><span class="ring" style="--p:42"><i>42%</i></span><span class="left">128 days<small>to go</small></span></div>
+      </div>
+    </a>
+
+    <!-- EXAMPLE · velvet (Opulent, Pro) · the one dark theme -->
+    <a class="card dark" href="#" style="--i:1" aria-label="Example · Bea and Miguel · Kasal · February 14, 2027, 6:00 PM · 3 payments to settle · 61% planned · 143 days to go">
+      <div class="hero t-velvet" style="--accent:#4A1E2B">
+        <div class="paper">
+          <p class="eb">Together with their families</p>
+          <span class="mark circ" aria-hidden="true">B &amp; M</span>
+          <h3 class="nm"><span>Bea</span><span class="and">and</span><span>Miguel</span></h3>
+          <p class="ln">invite you to celebrate their wedding</p>
+          <p class="dt"><i></i>February 14, 2027<i></i></p>
+          <p class="tm">6:00 PM</p>
+        </div>
+      </div>
+      <div class="kick"><span class="chip ex">Example</span><span class="chip">Kasal</span></div>
+      <span class="more" aria-hidden="true">⋮</span>
+      <div class="strip">
+        <p class="att"><b>3</b><small>payments to settle</small></p>
+        <div class="prog"><span class="ring" style="--p:61"><i>61%</i></span><span class="left">143 days<small>to go</small></span></div>
+      </div>
+    </a>
+
+    <!-- EXAMPLE · galeriya (Modern, Pro) · flat wall, one rule, the accent tab -->
+    <a class="card" href="#" style="--i:2" aria-label="Example · Cale and Ice · Kasal · March 6, 2027, 4:00 PM · 12 need you · 33% planned · 163 days to go">
+      <div class="hero t-galeriya" style="--accent:#C24E25">
+        <div class="paper">
+          <p class="eb">Together with their families</p>
+          <span class="mark circ" aria-hidden="true">C&amp;I</span>
+          <h3 class="nm"><span>Cale</span><span class="and">and</span><span>Ice</span></h3>
+          <p class="ln">invite you to celebrate their wedding</p>
+          <p class="dt">March 6, 2027</p>
+          <p class="tm">4:00 PM</p>
+        </div>
+      </div>
+      <div class="kick"><span class="chip ex">Example</span><span class="chip">Kasal</span></div>
+      <span class="more" aria-hidden="true">⋮</span>
+      <div class="strip">
+        <p class="att"><b>12</b><small>need you</small></p>
+        <div class="prog"><span class="ring" style="--p:33"><i>33%</i></span><span class="left">163 days<small>to go</small></span></div>
+      </div>
+    </a>
+
+    <!-- EXAMPLE · solemn (a wake) · no invitation card, the quiet masthead -->
+    <a class="card" href="#" style="--i:3" aria-label="Example · Rosario Santos · Wake · October 6, 2026 · Sta. Clara Chapel · 3 need you · 55% planned · 12 days to go">
+      <div class="hero t-solemn">
+        <div class="paper">
+          <p class="no">№ 01</p>
+          <span class="mark circ" aria-hidden="true">R S</span>
+          <h3 class="nm"><span>Rosario Santos</span></h3>
+          <span class="rule" aria-hidden="true"></span>
+          <p class="dt">October 6, 2026</p>
+          <p class="venue">Sta. Clara Chapel</p>
+        </div>
+      </div>
+      <div class="kick"><span class="chip ex">Example</span><span class="chip">Wake</span></div>
+      <span class="more" aria-hidden="true">⋮</span>
+      <div class="strip">
+        <p class="att"><b>3</b><small>need you</small></p>
+        <div class="prog"><span class="ring" style="--p:55"><i>55%</i></span><span class="left">12 days<small>to go</small></span></div>
+      </div>
+    </a>
+
+    <!-- EXAMPLE · the reads failed · UNKNOWN is not ZERO -->
+    <a class="card" href="#" style="--i:4" aria-label="Example · Rina and Paolo · Kasal · April 24, 2027 · couldn’t load what needs you · progress couldn’t load · 212 days to go">
+      <div class="hero t-house">
+        <div class="paper">
+          <p class="eb">Together with their families</p>
+          <span class="mark circ" aria-hidden="true">R &amp; P</span>
+          <h3 class="nm"><span>Rina</span><span class="and">and</span><span>Paolo</span></h3>
+          <p class="ln">invite you to celebrate their wedding</p>
+          <p class="dt"><i></i>April 24, 2027<i></i></p>
+        </div>
+      </div>
+      <div class="kick"><span class="chip ex">Example</span><span class="chip">Kasal</span></div>
+      <span class="more" aria-hidden="true">⋮</span>
+      <div class="strip">
+        <p class="att unknown">Couldn’t load what needs you</p>
+        <div class="prog"><span class="ring null"><i>–</i></span><span class="left">212 days<small>to go</small></span></div>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="notes">
+    <h3>What changed from the first draft</h3>
+    <ul>
+      <li><b>The cover is the hub’s own first screen, filling the whole shape.</b> No paper-inside-a-frame-inside-a-card. The paper’s hairline runs to 5.5% from the edge, the way the hub draws it (<code>border-gild/45</code>), and the strip sits on top of its lower margin.</li>
+      <li><b>Nothing under the hero repeats the hero.</b> Names and date are printed once, by the paper. The strip carries only what the paper cannot say: <b>what needs you</b> (number first) and <b>how far · how long</b>.</li>
+      <li><b>It adapts to whichever hero the couple built.</b> Three shapes exist in the hub today and all three are here: the invitation card in their theme (House · Capiz · Velvet · Galeriya), their own hero photo with the masthead type over it, and the solemn masthead with no card at all. One host reads “You are invited / invites you to celebrate”; no date prints no date line.</li>
+      <li><b>Small covers crop, they don’t shrink.</b> Under 200px the paper keeps its three load-bearing parts — mark · names · date — and drops the eyebrow, the invitation line and the time; the strip keeps only the most urgent item and stacks it above the progress so no word is ever cut; the kicker keeps the type chip and drops the stance. Everything is sized from the cover’s own width, so the phone two-up and the desktop four-up are the same design at two crops.</li>
+      <li><b>Unknown is not zero.</b> A failed read prints “Couldn’t load what needs you” and a blank ring — never a confident 0.</li>
+      <li><b>Sorted soonest first</b>, undated at the tail. The dashed <b>+ New</b> tile is part of the grid. The whole card is one link; only ⋮ is nested.</li>
+    </ul>
+    <h3>Two decisions for the owner</h3>
+    <ul>
+      <li><b>Strip over the hero (glass) or below it (paper)?</b> Compare with the bar. Recommendation: <b>over</b> — the card stays one object and the paper shows through; “below” re-introduces a second surface the design brief bans.</li>
+      <li><b>Phone: two-up or one-up?</b> Recommendation: <b>two-up</b> — the mark, names and date still read at 163px, and a phone sees three events above the fold instead of one. One-up is a poster feed; it looks lovely and hides the other events.</li>
+    </ul>
+    <h3>Not verified from a screenshot</h3>
+    <ul>
+      <li>The Velvet and Galeriya covers are drawn from the theme tokens (<code>[data-hub-theme='velvet']</code> · <code>[data-hub-theme='galeriya']</code> in <code>globals.css</code>) and the door skins, not from a rendered hub — Velvet’s card on the hub reads as velvet-dark paper with cream Bodoni because the theme moves <code>--color-cream</code> and <code>--color-ink</code> together.</li>
+      <li>A wake’s quiet masthead defaults its eyebrow to “You are invited” (<code>PahinaMasthead</code>, <code>eyebrow = 'You are invited'</code>) and <code>site-body.tsx</code> passes none; the card above omits it. Worth an owner look on the hub itself.</li>
+    </ul>
+  </div>
+
+</div></div>
+</body></html>

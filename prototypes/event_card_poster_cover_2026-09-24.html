@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Event Posters</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2C2A29; --paper:#FFFFFF; --paper-2:#F4F2EC; --line:#E1DCD1;
+  --line-soft:#EDE8DE; --muted:#6E6A62; --ink-300:#A09A8E;
+  --gold:#A9834B; --gold-700:#8A6B39; --gold-wash:#F3ECDF;
+  --amber-line:#CBA766; --danger:#9A3B2B; --danger-wash:#FBEEEA;
+  --inv:#FAF7F2; --inv-line:#E8D9C9; --inv-ink:#2A2D34; --inv-wine:#3A1418; --inv-and:#C9A98C;
+  --serif:'Cormorant Garamond',Georgia,serif; --sans:'Hanken Grotesk','Helvetica Neue',Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper-2);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+input[type=radio]{position:absolute;opacity:0;pointer-events:none}
+
+/* ── prototype bar (not part of the app) ───────────────────── */
+.bar{position:sticky;top:0;z-index:20;display:flex;gap:18px;flex-wrap:wrap;align-items:center;justify-content:center;
+  padding:10px 16px;background:rgba(244,242,236,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  box-shadow:0 1px 0 rgba(44,42,41,.06)}
+.grp{display:flex;gap:4px;align-items:center}
+.grp b{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-right:6px;font-weight:600}
+.grp label{font-size:12.5px;padding:6px 12px;border-radius:999px;cursor:pointer;color:var(--ink);
+  transition:background .3s,color .3s,transform .15s}
+.grp label:hover{background:rgba(44,42,41,.06)} .grp label:active{transform:scale(.96)}
+#v-mob:checked~.bar label[for=v-mob],#v-tp:checked~.bar label[for=v-tp],#v-tl:checked~.bar label[for=v-tl],#v-dt:checked~.bar label[for=v-dt],
+#c-poster:checked~.bar label[for=c-poster],#c-photo:checked~.bar label[for=c-photo],#c-today:checked~.bar label[for=c-today]
+{background:var(--ink);color:#fff}
+
+/* ── the viewport frame ───────────────────────────────────── */
+.stage{padding:28px 16px 60px;display:flex;justify-content:center}
+.frame{width:1180px;max-width:100%;transition:width .45s cubic-bezier(.22,.7,.25,1)}
+#v-mob:checked~.stage .frame{width:375px}
+#v-tp:checked~.stage .frame{width:768px}
+#v-tl:checked~.stage .frame{width:1024px}
+
+.sec-head{display:flex;align-items:center;gap:11px;margin:0 0 16px}
+.sec-head h2{font-size:21px;font-weight:600;margin:0;letter-spacing:-.01em}
+.iconbtn{width:26px;height:26px;border-radius:50%;display:inline-grid;place-items:center;flex:none;font-size:13px}
+.info{color:var(--muted);border:1.5px solid var(--ink-300);font-family:Georgia,serif;font-style:italic}
+.sec-head .hint{font-size:13px;color:var(--muted)}
+
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+#v-tl:checked~.stage .grid{grid-template-columns:repeat(3,1fr)}
+#v-tp:checked~.stage .grid{grid-template-columns:repeat(2,1fr)}
+#v-mob:checked~.stage .grid{grid-template-columns:1fr}
+
+.card{position:relative;display:block;text-decoration:none;color:inherit;overflow:hidden;border-radius:18px;background:var(--paper);
+  box-shadow:0 1px 2px rgba(44,42,41,.05),0 10px 26px rgba(44,42,41,.07);transition:transform .3s cubic-bezier(.22,.7,.25,1),box-shadow .3s}
+.card:hover{transform:translateY(-3px);box-shadow:0 2px 4px rgba(44,42,41,.05),0 18px 36px rgba(44,42,41,.12)}
+.card:active{transform:scale(.985)}
+
+/* ── the cover: three treatments, one slot ────────────────── */
+.cover{position:relative;aspect-ratio:4/5;background:#EFE9E0}
+.chips{position:absolute;top:10px;left:10px;display:flex;gap:5px;flex-wrap:wrap;z-index:3}
+.chip{font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:4px 8px;border-radius:999px;
+  background:rgba(255,255,255,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--ink);font-weight:600}
+.more{position:absolute;top:8px;right:8px;z-index:3;width:28px;height:34px;border-radius:12px;display:grid;place-items:center;
+  background:rgba(255,255,255,.72);backdrop-filter:blur(8px);font-size:15px;color:var(--ink)}
+.poster,.photo,.today{position:absolute;inset:0;transition:opacity .45s ease}
+.photo,.today{opacity:0}
+#c-photo:checked~.stage .poster,#c-today:checked~.stage .poster{opacity:0}
+#c-photo:checked~.stage .photo{opacity:1}
+#c-today:checked~.stage .today{opacity:1}
+
+/* the invitation — the same card the Event Hub opens on */
+.poster{padding:40px 14px 14px;background:radial-gradient(120% 80% at 50% 0%,#F6F0E8,#EFE7DC)}
+.paper{height:100%;background:var(--inv);border-radius:6px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:14px 10px;box-shadow:0 1px 1px rgba(58,20,24,.05),0 8px 18px rgba(58,20,24,.10)}
+.paper::before{content:"";position:absolute;inset:7px;border:1px solid var(--inv-line);border-radius:2px;pointer-events:none}
+.eb{font-size:7.5px;letter-spacing:.28em;text-transform:uppercase;color:#7C7870;margin-bottom:8px}
+.mono{width:34%;height:auto;fill:var(--inv-wine);margin:0 0 8px}
+.mono.txt{width:auto;font-family:var(--serif);font-style:italic;font-size:26px;color:#C97B4B;line-height:1}
+.nm{font-family:var(--serif);font-size:25px;line-height:1.02;color:var(--inv-ink);font-weight:500}
+.nm.solo{font-size:23px;margin-bottom:2px}
+.and{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--inv-and);line-height:1.2}
+.ln{font-size:9px;color:#5B5750;margin:8px 0 7px}
+.dt{display:flex;align-items:center;gap:7px;font-family:var(--serif);font-size:13.5px;color:var(--inv-ink);font-weight:500}
+.dt i{width:16px;height:1px;background:var(--inv-line)}
+.dt.tbd{font-size:12px;color:#8A857C;font-style:italic}
+.tm{font-size:7.5px;letter-spacing:.24em;color:#7C7870;margin-top:4px}
+
+/* their own hero photo, when they set one — it still wins */
+.photo,.today{background:var(--ph)}
+.photo::after,.today::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.5),transparent 55%)}
+.phn{position:absolute;left:14px;right:14px;bottom:14px;z-index:2;color:#fff;font-family:var(--serif);font-size:24px;line-height:1.05}
+.photo .phn::before{content:"their hero photo";display:block;font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;opacity:.75;margin-bottom:4px}
+/* today: the stock type photo + a small mark */
+.today{aspect-ratio:auto}
+.today .phn{font-family:var(--sans);font-size:15px;font-weight:600}
+.tmark{position:absolute;right:12px;bottom:-1px;z-index:3;width:44px;height:44px;border-radius:12px;background:#fff;display:grid;place-items:center;overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.tmark .mono{width:32px;margin:0} .tmark .mono.txt{font-size:13px}
+
+.body{padding:13px 15px 15px}
+.name{font-size:15px;font-weight:600;margin:0 0 2px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#c-poster:checked~.stage .name{display:none}  /* the poster already says it */
+.when{font-size:12px;color:var(--muted);margin:0 0 10px}
+.att{font-size:12px;line-height:1.35;padding:7px 10px;border-radius:10px;margin-bottom:10px;background:var(--gold-wash);color:var(--gold-700)}
+.att.late{background:var(--danger-wash);color:var(--danger)}
+.att b{font-variant-numeric:tabular-nums}
+.prog{display:flex;align-items:center;gap:10px}
+.ring{width:32px;height:32px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:9px;font-weight:600;color:var(--muted);
+  background:conic-gradient(var(--gold) calc(var(--p) * 1%), var(--line-soft) 0)}
+.ring i{width:24px;height:24px;border-radius:50%;background:#fff;display:grid;place-items:center;font-style:normal}
+.left{font-size:13px;font-weight:600}
+
+.newtile{border:1.5px dashed var(--line);border-radius:18px;min-height:220px;display:grid;place-items:center;color:var(--muted);text-decoration:none;
+  transition:border-color .3s,color .3s,transform .15s}
+.newtile:hover{border-color:var(--gold);color:var(--gold-700)} .newtile:active{transform:scale(.98)}
+.newtile span{text-align:center;font-size:13px} .newtile b{display:block;font-size:24px;font-weight:400}
+
+.notes{margin-top:40px;max-width:720px;font-size:13px;line-height:1.7;color:var(--muted)}
+.notes b{color:var(--ink)} .notes ul{padding-left:18px;margin:6px 0}
+@media (prefers-reduced-motion:reduce){.card,.frame,.poster,.photo,.today{transition:none}}
+</style></head><body>
+
+<input type="radio" name="v" id="v-mob"><input type="radio" name="v" id="v-tp"><input type="radio" name="v" id="v-tl"><input type="radio" name="v" id="v-dt" checked>
+<input type="radio" name="c" id="c-poster" checked><input type="radio" name="c" id="c-photo"><input type="radio" name="c" id="c-today">
+
+<div class="bar">
+  <div class="grp"><b>Prototype · cover</b><label for="c-poster">Invitation poster</label><label for="c-photo">If they add a hero photo</label><label for="c-today">Today</label></div>
+  <div class="grp"><b>Screen</b><label for="v-mob">Mobile</label><label for="v-tp">Tablet P</label><label for="v-tl">Tablet L</label><label for="v-dt">Desktop</label></div>
+</div>
+
+<div class="stage"><div class="frame">
+  <div class="sec-head"><h2>Planning</h2><span class="iconbtn info">i</span><span class="hint">yours to run</span></div>
+  <div class="grid">
+<a class="card" href="#" style="--i:0">
+    <div class="cover">
+      <div class="chips"><span class="chip">Kasal</span><span class="chip">&#9825; You organise this</span></div>
+      <span class="more" aria-hidden="true">&#8942;</span>
+      <div class="poster "><div class="paper">
+      <span class="eb">Together with their families</span><span class="mono txt">M &amp; J</span><span class="nm solo">Maria &amp; Jose</span><span class="ln">invite you to celebrate their wedding</span><span class="dt"><i></i>December 12, 2026<i></i></span></div></div>
+      <div class="photo" style="--ph:linear-gradient(160deg,#6f8fae,#3d5670)"><span class="phn">Maria &amp; Jose</span></div>
+      <div class="today" style="--ph:linear-gradient(160deg,#6f8fae,#3d5670)"><span class="phn">&#9733; Maria &amp; Jose</span><span class="tmark"><span class="mono txt">M &amp; J</span></span></div>
+    </div>
+    <div class="body">
+      <p class="name">Maria &amp; Jose</p>
+      <p class="when">Dec 12</p>
+      <div class="att late"><b>17</b>&nbsp;tasks overdue</div><div class="prog"><div class="ring" style="--p:18"><i>18%</i></div><span class="left">79 days to go</span></div>
+    </div></a>
+<a class="card" href="#" style="--i:1">
+    <div class="cover">
+      <div class="chips"><span class="chip">Kasal</span><span class="chip">&#9825; You organise this</span></div>
+      <span class="more" aria-hidden="true">&#8942;</span>
+      <div class="poster "><div class="paper">
+      <span class="eb">Together with their families</span><svg class="mono" viewBox="0 0 1024 1024" aria-hidden="true"><path d="M252.2 499.5C249.7 505.6 245.6 511 242.2 516.7C235.7 527.8 229.9 539.3 224.4 550.9C207.4 586.5 195.1 628.3 191.9 667.5C191.4 674.4 190 681.5 190 688.5L190 708.5C190 715.1 191 721.9 191.8 728.5C196.8 769.6 212.1 808 237.9 840.6C240.5 843.9 243 847.6 246 850.5L262.9 867.5C268.6 873.2 275.5 877.9 281.9 882.6C317.8 908.6 360.7 923.6 404.5 928.1C411.4 928.9 418.5 930 425.5 930L448.5 930C451.6 930 454.5 929.3 457.5 929.1C468.6 928.2 479.6 927.4 490.6 925.2C499.9 923.5 509.1 922.1 518.3 919.7C592.2 900.9 657.6 860.2 712.1 807.6C739.7 781 765.4 750.5 782.4 715.9C792.2 696 801 674.4 804.9 652.5C806.5 643.5 808.1 634.5 809 625.5C810.2 612.5 810 598.3 808.2 585.5C807.4 579.8 806.9 574.2 805.9 568.5C799.8 533.7 778.7 504.5 745.9 490.6C735 486 723.2 483 711.5 482C672 478.7 628.9 494.2 594.7 513.2C586 518.1 577.4 523.1 569.1 528.6C564.1 531.9 559.4 535.8 554 538.2L554 480.5C584.8 472.1 615.1 462.3 645.3 451.7C684.7 437.9 723.2 421.5 762.2 406.7C779 400.3 795.7 393.6 812.3 386.8C822.4 382.6 832.9 376.5 843.5 374.4C859.3 400.8 868.5 431.3 873.2 461.5C873.7 464.8 874.3 468.2 874.8 471.5C875.6 477.4 875.6 487 885.3 483.7C893 481.1 889.5 468.2 889.1 462.5C888.8 459 889.2 455.6 888.4 452.2C887.9 450 888.2 447.8 887.8 445.6C886.6 438.9 885.4 432.2 883.8 425.6C880.6 412.4 875.9 399.5 870.5 387C867.4 380.1 863.6 373.4 860.5 366.5C871.1 359.6 887.2 353.4 899 347.5C940.9 326.7 996.2 295.1 1010.7 247.3C1022.3 208.8 996.9 187.1 961.5 181.1C951.5 179.4 941.5 178.1 931.5 177.1C927.5 176.7 923.5 177.2 919.5 176.9C914.5 176.7 909.6 176 904.5 176C899.8 176 895.2 176.8 890.5 177C882.5 177.2 874.5 177.2 866.5 178.1C853.4 179.7 840.5 181.9 827.5 183.9C815.5 185.7 803.2 187.8 791.4 190.7L736.2 204.3C727 206.5 717.4 209.4 708.4 212.5C708.8 213 708.8 213.8 709.2 214.3C710.4 215.7 722.9 223.2 724.5 223.2C727.5 223.3 757.9 212.1 763.8 210.4C801.9 199.1 840.9 190.9 880.5 188C889.1 187.3 897.9 186 906.5 186L932.5 186C935.6 186 938.4 186.7 941.5 187C964.8 188.9 993.3 197.4 999.1 223.5C1001.4 233.9 999.1 244.3 994.1 253.6C990.9 259.5 986.8 265.8 982 270.5L967 285.5C963.3 289.2 959 292.3 955.1 295.5C930 316.4 902 333.8 872.7 348.2C866.7 351.1 860.8 354.5 854.5 356.7C841.9 341.3 830 325.7 816.5 311C815.1 309.4 814 307.6 812.6 306.1L790 283.5C784.9 278.3 779 273.7 773.6 268.9C751.1 249.3 727.3 231.5 702.1 215.4C690.9 208.3 679.6 200.6 667.9 194.3L629.6 173.8C626.5 172.1 622.8 170.4 619.5 168.9L588 154.4C575.9 148.9 563.3 144.3 550.9 139.6C490 116.4 427.1 101.3 362.5 95.9C354.7 95.2 345.2 94 337.5 94L305.5 94C302.5 94 299.5 94.7 296.5 94.9C285.1 95.7 273.8 96.4 262.5 97.8C188.2 107.3 112.4 135.5 60.4 191.9C31.1 223.8 9.6 263.1 10.2 307.5C10.2 313.9 11.2 320.2 11.9 326.5C13.9 344.8 20.3 363 29.6 379C62.6 435.6 139.7 471 200.7 487.8C217.7 492.5 235 495.5 252.2 499.5ZM837.3 364.5C831 367.6 824.4 369.8 817.9 372.4C800.5 379.3 782.8 385.3 765.4 391.7L608.6 450.1C602.1 452.5 595.2 454.1 588.7 456.2C577.4 459.9 565.8 464.1 554 465.6L554 314.8C549 316.9 543.9 320 539.4 323.1L499.4 350.9C495.8 353.4 471.6 371.7 470.5 373.9C469.6 375.5 470 377.8 470 379.5L470 483.5C458.6 486.1 447.1 486.7 435.5 488.1C417.3 490.3 398.9 491.9 380.5 492C369.7 492 357.5 494.8 347.1 491.5C352.8 482.3 360.4 474.2 367.5 466C374.7 457.6 381.7 448.8 389.5 441L418.5 412.1C428.6 401.9 440.1 392.8 451 383.5C497.7 343.3 549.8 309.2 603.7 279.2C623 268.5 642.7 258.5 662.7 249.2C671.2 245.2 687.4 239.8 693.9 234.5C690.9 232.4 677.3 223.3 674.5 223.2C670.6 223 642.9 233.6 637.2 235.6C606.1 246.7 575 258.6 545.1 272.5L520.5 283.9C492.7 296.8 461.3 312.9 435.5 329.4L405.4 348.7C404.8 349.1 404.1 349.6 403.5 350.1L379.5 367.2C363.5 378.6 347.8 391.6 333.5 405.1L317.6 420.3C302.9 434.3 288.9 450 276.6 466.1C271.7 472.5 267.2 479.4 261.9 485.5C234.7 482.4 207.6 476.1 181.3 468.3C111.8 447.6 42.2 411.4 35.9 330.5C35.8 328.1 35.1 325.9 35 323.5C34.7 313 37 298.5 39.8 288.4C44.7 270.7 53.4 254.5 64.4 239.9C78.3 221.3 95.8 205.5 114.7 192.1C140.6 173.9 168.8 158.7 198.8 148.4C236 135.6 274.5 130 313.5 127.9C438.5 121.3 576.3 160.2 684.6 222.9C727.6 247.7 773.4 281 805 319.4C815.7 332.3 831.1 349.1 837.3 364.5ZM470 498.4L470 615.5C470 617.3 470.3 619.5 469.7 621.3C468.6 624.6 461.5 632.3 459.1 635.7C454.1 642.7 449.3 649.9 444.6 657.1C420.2 694.1 383 768.8 432.1 801.4C437.8 805.2 444.8 806 451.5 806C475.5 806 495.3 781.4 490.8 757.6C486.7 736.4 464.2 719.4 442.9 728.4C435.5 731.6 431.5 736.8 426.5 742.8C426.7 713.3 442.4 678.8 459.4 654.9C462.8 650.2 465.6 645.6 470 641.8L470 724.1C476.1 727.6 482 731.4 486.4 737.1C504.4 760.1 495.6 793.6 470 806.5L470 892.5C470 898.5 469 904.6 468.5 910.6C497.7 906.9 527 897.4 554 885.8L554 556.5C580.1 538.4 602.4 524.5 632.1 512.6C655.3 503.2 681.4 496.4 706.5 498.1C745.6 500.7 780.2 525.2 788.8 564.6C791.6 577.5 792.1 591.3 790.9 604.5C785.6 661.7 749.2 721.5 714.6 766.1C706.8 776.1 698.9 786.5 690 795.5L675.2 810.5C625.2 861 558.5 896.2 489.4 911.8C475.2 915 460.8 916.6 446.4 918.7C443.1 919.2 439.8 918.8 436.5 919C429.5 919.5 422.6 920.3 415.5 919.9C413.1 919.7 410.9 919.1 408.5 919C343.4 915.6 292.4 882.6 263.5 824C253.6 803.7 248.6 781.7 246.1 759.5C245.8 756.5 246.1 753.5 245.9 750.5C243.1 699.6 258.8 648.3 279.8 602.3C286.7 587.2 293.7 572 302.4 557.8C306.9 550.4 330.2 510.5 335.1 507.6C336.9 506.6 339.5 507 341.5 507L380.5 507C383.9 507 387.1 506.2 390.5 506C393.8 505.9 397.2 506.2 400.5 506C402.2 505.9 403.8 505.3 405.5 505.1C408.2 504.8 410.8 505.2 413.5 504.9C422.8 504.1 432.2 503 441.5 501.9C451 500.8 460.5 498.6 470 498.4Z" fill-rule="evenodd"/><path d="M353 26.3L353 41.5C358.5 42.1 364 41.6 369.5 42.1C398.8 44.6 437.1 51.2 455.4 77.1C462 86.4 464.5 96.9 467.5 107.7C482.4 113 498.2 116.3 513.3 121.2C526.1 125.4 540.8 132 553.5 134.9C555.3 120 556 105 561.3 90.8C574.1 57 612.3 47.1 644.5 43.1C653.3 42 662.2 42.5 671 41.5L671 26.3C662.4 25.8 654 27.3 645.5 27.9C635.2 28.7 624.8 29.1 614.5 29.9C603.6 30.8 592.5 30.6 581.5 31C558.5 31.9 535.5 32.6 512.5 32.6C489.2 32.6 465.8 31.9 442.5 31C431.5 30.6 420.4 30.8 409.5 29.9C399.2 29.1 388.8 28.7 378.5 27.9C370 27.3 361.6 25.8 353 26.3Z" fill-rule="evenodd"/><path d="M353 982.5L353 997.7C361.6 998.2 370 996.7 378.5 996.1C388.8 995.3 399.2 994.9 409.5 994.1C420.4 993.2 431.5 993.4 442.5 993C465.8 992.1 489.2 991.4 512.5 991.4C535.5 991.4 558.5 992.1 581.5 993C592.5 993.4 603.6 993.2 614.5 994.1C624.8 994.9 635.2 995.3 645.5 996.1C654 996.7 662.4 998.2 671 997.7L671 982.5C662.2 981.5 653.3 982 644.5 980.9C599.6 975.4 565.4 963.3 556.4 914.5C555.4 914.5 554.5 914 553.5 914C552.1 914.1 530.1 921.7 526.3 922.7C513.9 926.1 501.1 928.7 488.4 930.8C484 931.5 465.1 932.7 462.8 934.3C462.3 934.6 454.4 948.5 452.4 950.9C445.9 958.9 436.6 964.6 427.3 968.8C409.4 977 389 980.2 369.5 981.9C364 982.4 358.5 981.9 353 982.5Z" fill-rule="evenodd"/><path d="M470 146.5L470 303.6C475.5 301.7 480.2 298.4 485.4 295.9L534.4 272C540.7 268.9 547.5 266.2 554 263.5L554 168.5C536.1 161.8 517.2 157.4 498.7 152.7C489.3 150.2 479.7 147.7 470 146.5Z" fill-rule="evenodd"/></svg><span class="nm solo">Indalecio &amp; Claire</span><span class="ln">invite you to celebrate their wedding</span><span class="dt"><i></i>December 18, 2026<i></i></span><span class="tm">1:30 PM</span></div></div>
+      <div class="photo" style="--ph:linear-gradient(160deg,#7d97b3,#44607a)"><span class="phn">Indalecio &amp; Claire</span></div>
+      <div class="today" style="--ph:linear-gradient(160deg,#7d97b3,#44607a)"><span class="phn">&#9733; Indalecio &amp; Claire</span><span class="tmark"><svg class="mono" viewBox="0 0 1024 1024" aria-hidden="true"><path d="M252.2 499.5C249.7 505.6 245.6 511 242.2 516.7C235.7 527.8 229.9 539.3 224.4 550.9C207.4 586.5 195.1 628.3 191.9 667.5C191.4 674.4 190 681.5 190 688.5L190 708.5C190 715.1 191 721.9 191.8 728.5C196.8 769.6 212.1 808 237.9 840.6C240.5 843.9 243 847.6 246 850.5L262.9 867.5C268.6 873.2 275.5 877.9 281.9 882.6C317.8 908.6 360.7 923.6 404.5 928.1C411.4 928.9 418.5 930 425.5 930L448.5 930C451.6 930 454.5 929.3 457.5 929.1C468.6 928.2 479.6 927.4 490.6 925.2C499.9 923.5 509.1 922.1 518.3 919.7C592.2 900.9 657.6 860.2 712.1 807.6C739.7 781 765.4 750.5 782.4 715.9C792.2 696 801 674.4 804.9 652.5C806.5 643.5 808.1 634.5 809 625.5C810.2 612.5 810 598.3 808.2 585.5C807.4 579.8 806.9 574.2 805.9 568.5C799.8 533.7 778.7 504.5 745.9 490.6C735 486 723.2 483 711.5 482C672 478.7 628.9 494.2 594.7 513.2C586 518.1 577.4 523.1 569.1 528.6C564.1 531.9 559.4 535.8 554 538.2L554 480.5C584.8 472.1 615.1 462.3 645.3 451.7C684.7 437.9 723.2 421.5 762.2 406.7C779 400.3 795.7 393.6 812.3 386.8C822.4 382.6 832.9 376.5 843.5 374.4C859.3 400.8 868.5 431.3 873.2 461.5C873.7 464.8 874.3 468.2 874.8 471.5C875.6 477.4 875.6 487 885.3 483.7C893 481.1 889.5 468.2 889.1 462.5C888.8 459 889.2 455.6 888.4 452.2C887.9 450 888.2 447.8 887.8 445.6C886.6 438.9 885.4 432.2 883.8 425.6C880.6 412.4 875.9 399.5 870.5 387C867.4 380.1 863.6 373.4 860.5 366.5C871.1 359.6 887.2 353.4 899 347.5C940.9 326.7 996.2 295.1 1010.7 247.3C1022.3 208.8 996.9 187.1 961.5 181.1C951.5 179.4 941.5 178.1 931.5 177.1C927.5 176.7 923.5 177.2 919.5 176.9C914.5 176.7 909.6 176 904.5 176C899.8 176 895.2 176.8 890.5 177C882.5 177.2 874.5 177.2 866.5 178.1C853.4 179.7 840.5 181.9 827.5 183.9C815.5 185.7 803.2 187.8 791.4 190.7L736.2 204.3C727 206.5 717.4 209.4 708.4 212.5C708.8 213 708.8 213.8 709.2 214.3C710.4 215.7 722.9 223.2 724.5 223.2C727.5 223.3 757.9 212.1 763.8 210.4C801.9 199.1 840.9 190.9 880.5 188C889.1 187.3 897.9 186 906.5 186L932.5 186C935.6 186 938.4 186.7 941.5 187C964.8 188.9 993.3 197.4 999.1 223.5C1001.4 233.9 999.1 244.3 994.1 253.6C990.9 259.5 986.8 265.8 982 270.5L967 285.5C963.3 289.2 959 292.3 955.1 295.5C930 316.4 902 333.8 872.7 348.2C866.7 351.1 860.8 354.5 854.5 356.7C841.9 341.3 830 325.7 816.5 311C815.1 309.4 814 307.6 812.6 306.1L790 283.5C784.9 278.3 779 273.7 773.6 268.9C751.1 249.3 727.3 231.5 702.1 215.4C690.9 208.3 679.6 200.6 667.9 194.3L629.6 173.8C626.5 172.1 622.8 170.4 619.5 168.9L588 154.4C575.9 148.9 563.3 144.3 550.9 139.6C490 116.4 427.1 101.3 362.5 95.9C354.7 95.2 345.2 94 337.5 94L305.5 94C302.5 94 299.5 94.7 296.5 94.9C285.1 95.7 273.8 96.4 262.5 97.8C188.2 107.3 112.4 135.5 60.4 191.9C31.1 223.8 9.6 263.1 10.2 307.5C10.2 313.9 11.2 320.2 11.9 326.5C13.9 344.8 20.3 363 29.6 379C62.6 435.6 139.7 471 200.7 487.8C217.7 492.5 235 495.5 252.2 499.5ZM837.3 364.5C831 367.6 824.4 369.8 817.9 372.4C800.5 379.3 782.8 385.3 765.4 391.7L608.6 450.1C602.1 452.5 595.2 454.1 588.7 456.2C577.4 459.9 565.8 464.1 554 465.6L554 314.8C549 316.9 543.9 320 539.4 323.1L499.4 350.9C495.8 353.4 471.6 371.7 470.5 373.9C469.6 375.5 470 377.8 470 379.5L470 483.5C458.6 486.1 447.1 486.7 435.5 488.1C417.3 490.3 398.9 491.9 380.5 492C369.7 492 357.5 494.8 347.1 491.5C352.8 482.3 360.4 474.2 367.5 466C374.7 457.6 381.7 448.8 389.5 441L418.5 412.1C428.6 401.9 440.1 392.8 451 383.5C497.7 343.3 549.8 309.2 603.7 279.2C623 268.5 642.7 258.5 662.7 249.2C671.2 245.2 687.4 239.8 693.9 234.5C690.9 232.4 677.3 223.3 674.5 223.2C670.6 223 642.9 233.6 637.2 235.6C606.1 246.7 575 258.6 545.1 272.5L520.5 283.9C492.7 296.8 461.3 312.9 435.5 329.4L405.4 348.7C404.8 349.1 404.1 349.6 403.5 350.1L379.5 367.2C363.5 378.6 347.8 391.6 333.5 405.1L317.6 420.3C302.9 434.3 288.9 450 276.6 466.1C271.7 472.5 267.2 479.4 261.9 485.5C234.7 482.4 207.6 476.1 181.3 468.3C111.8 447.6 42.2 411.4 35.9 330.5C35.8 328.1 35.1 325.9 35 323.5C34.7 313 37 298.5 39.8 288.4C44.7 270.7 53.4 254.5 64.4 239.9C78.3 221.3 95.8 205.5 114.7 192.1C140.6 173.9 168.8 158.7 198.8 148.4C236 135.6 274.5 130 313.5 127.9C438.5 121.3 576.3 160.2 684.6 222.9C727.6 247.7 773.4 281 805 319.4C815.7 332.3 831.1 349.1 837.3 364.5ZM470 498.4L470 615.5C470 617.3 470.3 619.5 469.7 621.3C468.6 624.6 461.5 632.3 459.1 635.7C454.1 642.7 449.3 649.9 444.6 657.1C420.2 694.1 383 768.8 432.1 801.4C437.8 805.2 444.8 806 451.5 806C475.5 806 495.3 781.4 490.8 757.6C486.7 736.4 464.2 719.4 442.9 728.4C435.5 731.6 431.5 736.8 426.5 742.8C426.7 713.3 442.4 678.8 459.4 654.9C462.8 650.2 465.6 645.6 470 641.8L470 724.1C476.1 727.6 482 731.4 486.4 737.1C504.4 760.1 495.6 793.6 470 806.5L470 892.5C470 898.5 469 904.6 468.5 910.6C497.7 906.9 527 897.4 554 885.8L554 556.5C580.1 538.4 602.4 524.5 632.1 512.6C655.3 503.2 681.4 496.4 706.5 498.1C745.6 500.7 780.2 525.2 788.8 564.6C791.6 577.5 792.1 591.3 790.9 604.5C785.6 661.7 749.2 721.5 714.6 766.1C706.8 776.1 698.9 786.5 690 795.5L675.2 810.5C625.2 861 558.5 896.2 489.4 911.8C475.2 915 460.8 916.6 446.4 918.7C443.1 919.2 439.8 918.8 436.5 919C429.5 919.5 422.6 920.3 415.5 919.9C413.1 919.7 410.9 919.1 408.5 919C343.4 915.6 292.4 882.6 263.5 824C253.6 803.7 248.6 781.7 246.1 759.5C245.8 756.5 246.1 753.5 245.9 750.5C243.1 699.6 258.8 648.3 279.8 602.3C286.7 587.2 293.7 572 302.4 557.8C306.9 550.4 330.2 510.5 335.1 507.6C336.9 506.6 339.5 507 341.5 507L380.5 507C383.9 507 387.1 506.2 390.5 506C393.8 505.9 397.2 506.2 400.5 506C402.2 505.9 403.8 505.3 405.5 505.1C408.2 504.8 410.8 505.2 413.5 504.9C422.8 504.1 432.2 503 441.5 501.9C451 500.8 460.5 498.6 470 498.4Z" fill-rule="evenodd"/><path d="M353 26.3L353 41.5C358.5 42.1 364 41.6 369.5 42.1C398.8 44.6 437.1 51.2 455.4 77.1C462 86.4 464.5 96.9 467.5 107.7C482.4 113 498.2 116.3 513.3 121.2C526.1 125.4 540.8 132 553.5 134.9C555.3 120 556 105 561.3 90.8C574.1 57 612.3 47.1 644.5 43.1C653.3 42 662.2 42.5 671 41.5L671 26.3C662.4 25.8 654 27.3 645.5 27.9C635.2 28.7 624.8 29.1 614.5 29.9C603.6 30.8 592.5 30.6 581.5 31C558.5 31.9 535.5 32.6 512.5 32.6C489.2 32.6 465.8 31.9 442.5 31C431.5 30.6 420.4 30.8 409.5 29.9C399.2 29.1 388.8 28.7 378.5 27.9C370 27.3 361.6 25.8 353 26.3Z" fill-rule="evenodd"/><path d="M353 982.5L353 997.7C361.6 998.2 370 996.7 378.5 996.1C388.8 995.3 399.2 994.9 409.5 994.1C420.4 993.2 431.5 993.4 442.5 993C465.8 992.1 489.2 991.4 512.5 991.4C535.5 991.4 558.5 992.1 581.5 993C592.5 993.4 603.6 993.2 614.5 994.1C624.8 994.9 635.2 995.3 645.5 996.1C654 996.7 662.4 998.2 671 997.7L671 982.5C662.2 981.5 653.3 982 644.5 980.9C599.6 975.4 565.4 963.3 556.4 914.5C555.4 914.5 554.5 914 553.5 914C552.1 914.1 530.1 921.7 526.3 922.7C513.9 926.1 501.1 928.7 488.4 930.8C484 931.5 465.1 932.7 462.8 934.3C462.3 934.6 454.4 948.5 452.4 950.9C445.9 958.9 436.6 964.6 427.3 968.8C409.4 977 389 980.2 369.5 981.9C364 982.4 358.5 981.9 353 982.5Z" fill-rule="evenodd"/><path d="M470 146.5L470 303.6C475.5 301.7 480.2 298.4 485.4 295.9L534.4 272C540.7 268.9 547.5 266.2 554 263.5L554 168.5C536.1 161.8 517.2 157.4 498.7 152.7C489.3 150.2 479.7 147.7 470 146.5Z" fill-rule="evenodd"/></svg></span></div>
+    </div>
+    <div class="body">
+      <p class="name">Indalecio &amp; Claire</p>
+      <p class="when">Dec 18</p>
+      <div class="att wait"><b>25</b>&nbsp;need you · 1 payment to settle</div><div class="prog"><div class="ring" style="--p:7"><i>7%</i></div><span class="left">85 days to go</span></div>
+    </div></a>
+<a class="card" href="#" style="--i:2">
+    <div class="cover">
+      <div class="chips"><span class="chip">Hangout</span><span class="chip">&#9825; You organise this</span></div>
+      <span class="more" aria-hidden="true">&#8942;</span>
+      <div class="poster solo"><div class="paper">
+      <span class="eb">You are invited</span><span class="mono txt">T</span><span class="nm solo">Tambayan sa kanto</span><span class="ln">invites you to celebrate</span><span class="dt tbd">Date to be set</span></div></div>
+      <div class="photo" style="--ph:linear-gradient(160deg,#6b5a45,#3b2f24)"><span class="phn">Tambayan sa kanto</span></div>
+      <div class="today" style="--ph:linear-gradient(160deg,#6b5a45,#3b2f24)"><span class="phn">&#9733; Tambayan sa kanto</span><span class="tmark"><span class="mono txt">T</span></span></div>
+    </div>
+    <div class="body">
+      <p class="name">Tambayan sa kanto</p>
+      <p class="when">Date to be set</p>
+      <div class="prog"><span class="left">Just getting started</span></div>
+    </div></a>
+    <a class="newtile" href="#"><span><b>+</b>New event</span></a>
+  </div>
+
+  <div class="notes">
+    <b>What changes:</b> only the card's cover. Everything under it (date, the one attention row, the ring and days to go) is the approved collection-card template, unchanged, now sorted soonest-first (Dec 12 before Dec 18).
+    <ul>
+      <li><b>Invitation poster</b>: the same card your Event Hub opens on (eyebrow, monogram, names, line, date, time), read from the same place, so the two can never disagree. The name line under the cover is dropped because the poster already says it.</li>
+      <li><b>If they add a hero photo</b>: the photo still wins, as it does on the Event Hub today.</li>
+      <li><b>No date yet</b> (Tambayan): the poster says "Date to be set". One host, so it reads "You are invited".</li>
+      <li><b>A funeral</b> gets no invitation card on the Event Hub, so its card keeps today's quiet cover.</li>
+      <li>Real data: your event's own monogram and time. Maria &amp; Jose has no monogram or time set yet, so it shows the generated "M &amp; J".</li>
+    </ul>
+  </div>
+</div></div>
+</body></html>
