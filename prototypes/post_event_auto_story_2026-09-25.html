@@ -1,0 +1,1047 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Post Event · Auto story · Rafael &amp; Isabel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cormorant+SC:wght@500;600&family=Pinyon+Script&family=EB+Garamond:ital,wght@0,400;1,400&family=Great+Vibes&family=Instrument+Serif:ital@0;1&family=Jost:wght@400;500&family=Fraunces:wght@600&family=Lora:ital,wght@0,400;1,400&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Libre+Baskerville:ital@0;1&family=Yeseva+One&family=Quicksand:wght@400;500&family=Italiana&family=Limelight&family=Josefin+Sans:wght@400;500&family=Poiret+One&family=Prata&family=Crimson+Pro:ital,wght@0,400;1,400&family=Syne:wght@800&family=Outfit:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   POST EVENT — THE STORY THE EVENT HUB MAKER WRITES ON ITS OWN, THE MORNING AFTER.
+   Script-free prototype (the owner's viewer runs no JavaScript).
+   State = hidden inputs at the top of <body>; every control is a <label>; open-up
+   scenes are :target overlays; motion is CSS scroll-driven with a static fallback.
+   Theme default: LUXE (assets/theme-backgrounds-2026-09-24/THEMES-2026-09-24.md).
+   Built from what ships: app/[slug]/_components/editorial/ (section names + order),
+   app/[slug]/_components/story/ (the reader), app/[slug]/recap, lib/whats-next.ts,
+   lib/story-edition.ts, dashboard/[eventId]/story (the Story Maker steps).
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root{
+  /* LUXE — Pro · near-black velvet, chandelier gold (measured palette) */
+  --bg:#0e0504; --bg-rgb:14,5,4; --bg2:#34130c; --bg2-rgb:52,19,12;
+  --ink:#f3e7dc; --ink-rgb:243,231,220; --ink2:#e6cdb9; --ink3:#b99c87;
+  --gold:#e3a86f; --gold-rgb:227,168,111; --gold2:#f8cc95; --gold2-rgb:248,204,149; --gold3:#5a2a1c; --on-gold:#0e0504;
+  --head:"Bodoni Moda",Georgia,serif; --body:"Cormorant Garamond",Georgia,serif; --label:"Cormorant SC",Georgia,serif; --script:"Pinyon Script",cursive;
+  --orn:"✦"; --scrim:.62; --panel:rgba(14,5,4,.55);
+  --hero-img:url(../assets/theme-backgrounds-2026-09-24/luxe-poster.jpg);
+  --ease-out:cubic-bezier(.2,.7,.2,1); --ease-soft:cubic-bezier(.4,0,.2,1); --ease-snap:cubic-bezier(.16,1,.3,1); --dur:.3s;
+  --motion-dur:1.9s; --motion-rise:28px; --motion-blur:8px; --stagger:.24s;
+  --shadow-2:0 2px 6px rgba(0,0,0,.5),0 24px 60px -20px rgba(0,0,0,.9);
+  --shadow-3:0 10px 30px -10px rgba(0,0,0,.8),0 60px 120px -40px rgba(0,0,0,.95);
+  --r-press:999px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:#141010;color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.45;-webkit-font-smoothing:antialiased;overflow:hidden}
+input.st{position:absolute;opacity:0;pointer-events:none;width:0;height:0}
+label{cursor:pointer;-webkit-tap-highlight-color:transparent}
+a{color:inherit;text-decoration:none}
+::selection{background:var(--gold3)}
+video{display:block}
+
+/* ── Reviewer chrome: viewport simulator (brief §6) + view switch ─────────── */
+.vpbar{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:60;display:flex;gap:10px;align-items:center}
+.vpbar .pill{display:flex;gap:2px;padding:4px;border-radius:999px;background:rgba(20,17,14,.6);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 8px 30px -10px rgba(0,0,0,.6)}
+.vpbar label{color:#cdbfa8;font-family:"Cormorant SC",Georgia,serif;font-size:12px;letter-spacing:.14em;padding:6px 12px;border-radius:999px;transition:all var(--dur) var(--ease-out);text-transform:uppercase;white-space:nowrap}
+.vpbar label:hover{color:#fff}
+.vpbar label:active{transform:scale(.96)}
+#vp-m:checked~.vpbar [for=vp-m],#vp-tp:checked~.vpbar [for=vp-tp],#vp-tl:checked~.vpbar [for=vp-tl],#vp-d:checked~.vpbar [for=vp-d],
+#view-guest:checked~.vpbar [for=view-guest],#view-maker:checked~.vpbar [for=view-maker]{background:#e3a86f;color:#1a1612}
+@media (max-width:640px){.vpbar .vps{display:none}}
+@media (max-width:520px){.vpbar{top:6px}}
+
+/* ── Device frame ───────────────────────────────────────────────────────── */
+.stage{position:fixed;inset:0;display:grid;place-items:center;padding:58px 0 44px}
+.frame{position:relative;width:100%;height:100%;background:var(--bg);color:var(--ink);font-family:var(--body);overflow:hidden;container-type:size;container-name:app;transition:width .5s var(--ease-out),height .5s var(--ease-out),border-radius .5s var(--ease-out),background .6s var(--ease-soft),color .6s var(--ease-soft);box-shadow:var(--shadow-3)}
+#vp-m:checked~.stage .frame{width:min(375px,100%);height:min(812px,100%);border-radius:28px}
+#vp-tp:checked~.stage .frame{width:min(768px,100%);height:min(1024px,100%);border-radius:20px}
+#vp-tl:checked~.stage .frame{width:min(1080px,100%);height:min(780px,100%);border-radius:20px}
+#vp-d:checked~.stage .frame{width:100%;height:100%;border-radius:0}
+@media (max-width:640px){.stage{padding:48px 0 44px}.frame{border-radius:0!important;width:100%!important;height:100%!important}}
+/* the seamless canvas: a barely-moving velvet gradient */
+.frame::before{content:"";position:absolute;inset:-20%;z-index:0;pointer-events:none;background:radial-gradient(60% 50% at 20% 10%,rgba(var(--gold2-rgb),.16),transparent 60%),radial-gradient(50% 40% at 90% 90%,rgba(var(--gold-rgb),.14),transparent 60%);animation:drift 24s var(--ease-soft) infinite alternate}
+@keyframes drift{to{transform:translate(3%,2%) scale(1.04)}}
+.scroll{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;z-index:1;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:rgba(var(--ink-rgb),.18) transparent}
+#view-maker:checked~.stage .scroll.guest{display:none}
+#view-guest:checked~.stage .scroll.mkview{display:none}
+
+/* ── Type ───────────────────────────────────────────────────────────────── */
+.eye{font-family:var(--label);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink3)}
+.eye.gold{color:var(--gold)}
+h1,h2,h3{font-family:var(--head);font-weight:400;margin:0;line-height:1.02;letter-spacing:-.005em}
+h1{font-size:clamp(40px,9cqw,104px)}
+h2{font-size:clamp(30px,5.4cqw,64px)}
+h3{font-size:clamp(22px,3cqw,32px)}
+.script{font-family:var(--script);font-weight:400;color:var(--gold);letter-spacing:0}
+.foil{background:linear-gradient(100deg,var(--gold2) 0%,var(--gold) 35%,#fff3dd 50%,var(--gold) 65%,var(--gold2) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;background-size:200% 100%;animation:glint 6s linear infinite}
+@keyframes glint{to{background-position:200% 0}}
+@media (prefers-reduced-motion:reduce){.foil{animation:none;background-position:35% 0}}
+/* .foil: the owner-approved shimmer (2026-09-25) — names + one headline number per view, never more */
+.rule{display:flex;align-items:center;gap:14px;color:var(--gold);font-size:14px;margin:18px 0}
+.rule::before,.rule::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(var(--gold-rgb),.6),transparent)}
+.rule span::before{content:var(--orn)}
+.num{font-family:var(--head);font-size:clamp(46px,8cqw,112px);line-height:.9;letter-spacing:-.02em}
+.muted{color:var(--ink2)}
+.dim{color:var(--ink3)}
+.small{font-size:14px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:var(--r-press);background:rgba(var(--bg2-rgb),.7);color:var(--ink);font-family:var(--label);font-size:12px;letter-spacing:.14em;text-transform:uppercase;transition:all var(--dur) var(--ease-out);white-space:nowrap}
+.chip:hover{background:rgba(var(--gold-rgb),.18)}
+.chip:active{transform:scale(.96)}
+.chip.on{background:var(--gold);color:var(--on-gold)}
+.pro{display:inline-flex;align-items:center;padding:3px 8px;border-radius:var(--r-press);background:var(--gold);color:var(--on-gold);font-family:var(--label);font-size:10px;letter-spacing:.18em;text-transform:uppercase;line-height:1;font-weight:600}
+.auto{display:inline-flex;align-items:center;padding:3px 8px;border-radius:var(--r-press);background:rgba(var(--ink-rgb),.12);color:var(--ink);font-family:var(--label);font-size:10px;letter-spacing:.18em;text-transform:uppercase;line-height:1}
+.skip{display:inline-flex;align-items:center;padding:3px 8px;border-radius:var(--r-press);background:transparent;box-shadow:inset 0 0 0 1px rgba(var(--ink-rgb),.25);color:var(--ink3);font-family:var(--label);font-size:10px;letter-spacing:.18em;text-transform:uppercase;line-height:1}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:13px 22px;border-radius:var(--r-press);background:var(--gold);color:var(--on-gold);font-family:var(--label);font-size:13px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;transition:all var(--dur) var(--ease-out);box-shadow:0 10px 30px -14px rgba(var(--gold-rgb),.9);white-space:nowrap}
+.btn:hover{transform:translateY(-1px);box-shadow:0 14px 36px -14px rgba(var(--gold-rgb),1)}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px rgba(var(--ink-rgb),.35)}
+.btn.ghost:hover{box-shadow:inset 0 0 0 1px rgba(var(--ink-rgb),.7)}
+
+/* (i) tooltips — the only place secondary text lives (brief §2) */
+.i{position:relative;display:inline-grid;place-items:center;width:18px;height:18px;border-radius:999px;box-shadow:inset 0 0 0 1px currentColor;font:600 10px/1 var(--label);color:var(--ink3);vertical-align:middle;margin-left:6px;cursor:help;transition:all var(--dur) var(--ease-out)}
+.i:hover,.i:focus{color:var(--gold);outline:none}
+.i::after{content:attr(data-tip);position:absolute;display:none;left:50%;bottom:calc(100% + 10px);transform:translate(-50%,6px);width:max-content;max-width:min(280px,70cqw);padding:10px 12px;border-radius:6px;background:rgba(20,10,8,.94);color:#f3e7dc;font:400 13px/1.4 var(--body);letter-spacing:0;text-transform:none;text-align:left;white-space:normal;opacity:0;pointer-events:none;transition:all var(--dur) var(--ease-out);box-shadow:var(--shadow-2);z-index:30;backdrop-filter:blur(10px)}
+.i:hover::after,.i:focus::after{display:block;animation:tipIn .25s var(--ease-out) both}
+@keyframes tipIn{from{opacity:0;transform:translate(-50%,6px)}to{opacity:1;transform:translate(-50%,0)}}
+.i.r::after{left:auto;right:-6px;transform:translate(0,6px)}
+.i.r:hover::after,.i.r:focus::after{animation-name:tipInR}
+@keyframes tipInR{from{opacity:0;transform:translate(0,6px)}to{opacity:1;transform:translate(0,0)}}
+
+/* ── Scenes (guest view) ────────────────────────────────────────────────── */
+.sc{position:relative;padding:12cqh 6cqw;display:grid;grid-template-columns:minmax(0,1fr);align-content:center;min-height:70cqh}
+.sc .in{max-width:1180px;width:100%;margin:0 auto;min-width:0}
+.sc .in>*{position:relative}
+.sc.tight{min-height:0;padding-top:8cqh;padding-bottom:8cqh}
+/* motion on everything — scroll-driven where supported, a static page otherwise */
+.rv{opacity:1}
+@supports (animation-timeline: view()){
+  @media (prefers-reduced-motion:no-preference){
+    .rv{animation:rise linear both;animation-timeline:view();animation-range:entry 8% entry 55%}
+    .rv.d1{animation-range:entry 14% entry 62%}
+    .rv.d2{animation-range:entry 20% entry 70%}
+    .rv.d3{animation-range:entry 26% entry 78%}
+  }
+}
+@keyframes rise{from{opacity:0;transform:translateY(var(--motion-rise));filter:blur(var(--motion-blur))}to{opacity:1;transform:none;filter:blur(0)}}
+/* Cinematic (Luxe) on the cover — a clock, not the scroll */
+@media (prefers-reduced-motion:no-preference){
+  .cine>*{animation:cine var(--motion-dur) var(--ease-snap) both}
+  .cine>*:nth-child(2){animation-delay:calc(var(--stagger)*1)}.cine>*:nth-child(3){animation-delay:calc(var(--stagger)*2)}.cine>*:nth-child(4){animation-delay:calc(var(--stagger)*3)}.cine>*:nth-child(5){animation-delay:calc(var(--stagger)*4)}.cine>*:nth-child(6){animation-delay:calc(var(--stagger)*5)}
+}
+@keyframes cine{from{opacity:0;transform:translateY(var(--motion-rise));filter:blur(var(--motion-blur))}to{opacity:1;transform:none;filter:blur(0)}}
+@media (prefers-reduced-motion:reduce){.rv,.cine>*{animation:none!important;opacity:1!important;transform:none!important;filter:none!important}}
+
+/* photo plates — sample media: the theme posters stand in for captures */
+.pl{position:relative;background:var(--p,linear-gradient(135deg,var(--bg2),var(--bg))) var(--pp,center)/cover;overflow:hidden;transition:transform .6s var(--ease-out),filter .6s var(--ease-out)}
+.pl::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.35));opacity:0;transition:opacity .4s}
+.pl:hover{transform:scale(1.015)}
+.pl:hover::after{opacity:1}
+.pl .cap{position:absolute;left:12px;bottom:10px;z-index:1;font-family:var(--label);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#f3e7dc;text-shadow:0 1px 6px rgba(0,0,0,.7);opacity:0;transform:translateY(4px);transition:all .35s var(--ease-out)}
+.pl:hover .cap{opacity:1;transform:none}
+.pl.clip::before{content:"";position:absolute;inset:0;z-index:1;background:radial-gradient(circle at center,rgba(255,255,255,.0) 0 26px,transparent 27px);}
+.play{position:absolute;inset:0;z-index:2;display:grid;place-items:center;pointer-events:none}
+.play i{display:grid;place-items:center;width:64px;height:64px;border-radius:999px;background:rgba(14,5,4,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35),0 10px 30px rgba(0,0,0,.5);transition:transform var(--dur) var(--ease-out)}
+.play i::after{content:"";margin-left:5px;border-left:18px solid #f3e7dc;border-top:11px solid transparent;border-bottom:11px solid transparent}
+a:hover .play i{transform:scale(1.06)}
+.living{position:absolute;top:12px;left:12px;z-index:2;display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:999px;background:rgba(14,5,4,.55);backdrop-filter:blur(8px);font-family:var(--label);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#f3e7dc}
+.living::before{content:"";width:6px;height:6px;border-radius:999px;background:var(--gold);animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.35;transform:scale(.7)}}
+
+/* ── Cover (T4 · Full photo, words on top) ─────────────────────────────── */
+.cover{position:relative;min-height:100cqh;display:grid;align-items:end;padding:0;overflow:hidden}
+.cover .bg{position:absolute;inset:0;background:var(--hero-img) center 30%/cover;transform:scale(1.04);animation:kb 26s var(--ease-soft) infinite alternate}
+@keyframes kb{to{transform:scale(1.12) translate(-1%,1%)}}
+.cover video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cover .scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(var(--bg-rgb),.15),rgba(var(--bg-rgb),var(--scrim)) 52%,var(--bg) 100%)}
+.cover .sweep{position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(var(--gold2-rgb),.08) 50%,transparent 60%);background-size:300% 100%;animation:sweep 9s linear infinite;mix-blend-mode:screen}
+@keyframes sweep{from{background-position:200% 0}to{background-position:-100% 0}}
+.cover .in{position:relative;padding:14cqh 6cqw 9cqh}
+.masthead{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 20px;align-items:baseline;margin-bottom:5cqh}
+.kick{position:relative;height:1.3em;overflow:hidden}
+.kick span{position:absolute;left:0;top:0;white-space:nowrap}
+@media (prefers-reduced-motion:no-preference){
+  .kick span:first-child{animation:handA 8.4s var(--ease-soft) infinite}
+  .kick span:last-child{animation:handB 8.4s var(--ease-soft) infinite}
+}
+@media (prefers-reduced-motion:reduce){.kick span:last-child{display:none}}
+@keyframes handA{0%,42%{opacity:1;transform:none}50%,92%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:none}}
+@keyframes handB{0%,42%{opacity:0;transform:translateY(8px)}50%,92%{opacity:1;transform:none}100%{opacity:0;transform:translateY(8px)}}
+.mono{display:flex;align-items:center;justify-content:center;gap:2px;width:84px;height:84px;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(var(--gold-rgb),.9),inset 0 0 0 5px var(--bg),inset 0 0 0 6px rgba(var(--gold-rgb),.6);font-family:var(--script);font-size:34px;color:var(--gold);animation:float 6s ease-in-out infinite;margin-bottom:24px}
+@keyframes float{50%{transform:translateY(-6px)}}
+.cover h1{margin:6px 0 14px}
+.dateline{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-size:clamp(16px,1.6cqw,21px)}
+.cover .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:5cqh;align-items:center}
+.cover .edition{font-family:var(--label);letter-spacing:.2em;text-transform:uppercase;font-size:12px;color:var(--ink2)}
+
+/* ── Before the day (T24 Timeline) ─────────────────────────────────────── */
+.tl{display:grid;gap:22px;margin-top:22px;position:relative;padding-left:26px}
+.tl::before{content:"";position:absolute;left:5px;top:6px;bottom:6px;width:1px;background:linear-gradient(180deg,transparent,rgba(var(--gold-rgb),.7),transparent)}
+.tl>div{position:relative}
+.tl>div::before{content:"";position:absolute;left:-25px;top:8px;width:9px;height:9px;border-radius:999px;background:var(--gold);box-shadow:0 0 0 4px var(--bg)}
+.tl b{font-family:var(--head);font-weight:400;font-size:22px;display:block}
+@container app (min-width:900px){.tl{grid-template-columns:repeat(4,1fr);padding-left:0;padding-top:26px}.tl::before{left:0;right:0;top:5px;bottom:auto;height:1px;width:auto;background:linear-gradient(90deg,transparent,rgba(var(--gold-rgb),.7),transparent)}.tl>div::before{left:0;top:-25px}}
+
+/* ── By the numbers (T12 Big number) ───────────────────────────────────── */
+.nums{display:grid;gap:34px 28px;grid-template-columns:repeat(2,1fr);margin-top:26px}
+.nums .eye{margin-top:8px}
+@container app (min-width:700px){.nums{grid-template-columns:repeat(4,1fr)}}
+@container app (min-width:1000px){.nums{grid-template-columns:1.4fr 1fr 1fr 1fr;align-items:end}.nums>div:first-child .num{font-size:clamp(90px,12cqw,190px)}}
+
+/* ── Chapters (T1 / T2 / T5) ───────────────────────────────────────────── */
+.ch{display:grid;gap:26px;align-items:center}
+.ch .pl{aspect-ratio:4/3;width:100%}
+.ch .words{max-width:520px}
+.ch .words p{font-size:clamp(18px,1.6cqw,22px);margin:14px 0 0;color:var(--ink2)}
+.ch .clock{font-family:var(--head);font-size:clamp(28px,3.4cqw,44px);color:var(--gold)}
+@container app (min-width:900px){.ch{grid-template-columns:1.15fr .85fr;gap:6cqw}.ch.right .pl{order:2}.ch .pl{aspect-ratio:5/4}}
+/* the SCRUB transition: pinned, scroll-driven, reversible (THEMES · Transitions) */
+.scrub-wrap{min-height:170cqh;position:relative}
+.scrub-wrap .sticky{position:sticky;top:0;min-height:100cqh;display:grid;align-content:center;padding:8cqh 6cqw}
+@supports (animation-timeline: view()){
+  @media (prefers-reduced-motion:no-preference){
+    .scrub-wrap .pl{animation:scrubIn linear both;animation-timeline:view();animation-range:entry 15% exit 25%}
+    .scrub-wrap .words{animation:scrubWords linear both;animation-timeline:view();animation-range:entry 30% exit 25%}
+  }
+}
+@keyframes scrubIn{from{clip-path:inset(30% 30% 30% 30% round 4px);filter:saturate(.4)}to{clip-path:inset(0 0 0 0 round 0);filter:saturate(1)}}
+@keyframes scrubWords{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.more-ch{display:flex;gap:14px;align-items:center;justify-content:center;margin-top:5cqh}
+.more-ch .dots{display:flex;gap:6px}.more-ch .dots i{width:5px;height:5px;border-radius:999px;background:var(--gold);opacity:.6}
+
+/* ── Open-up previews (NEW template family) ────────────────────────────── */
+.collage{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:minmax(0,1fr);gap:8px;margin-top:22px;aspect-ratio:3/2}
+.collage .pl:first-child{grid-column:span 2;grid-row:span 2}
+@container app (min-width:900px){.collage{grid-template-columns:repeat(4,1fr);aspect-ratio:2/1}.collage .pl:first-child{grid-column:span 2;grid-row:span 2}}
+.seeall{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-top:22px}
+.film-prev{position:relative;aspect-ratio:16/9;width:100%;margin-top:22px;display:block}
+.film-prev .pl{position:absolute;inset:0}
+.film-prev .meta{position:absolute;left:18px;bottom:16px;z-index:3;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.you-prev{display:grid;gap:18px;margin-top:22px;max-width:640px}
+.wishes{display:grid;gap:26px;margin-top:22px}
+@container app (min-width:900px){.wishes{grid-template-columns:repeat(3,1fr);gap:4cqw}}
+.wish{padding-left:18px;position:relative}
+.wish::before{content:"“";position:absolute;left:-6px;top:-22px;font-family:var(--head);font-size:64px;color:var(--gold);opacity:.7;line-height:1}
+.wish p{font-size:clamp(18px,1.5cqw,21px);margin:0 0 10px;font-style:italic}
+.wish .by{font-family:var(--label);letter-spacing:.14em;text-transform:uppercase;font-size:12px;color:var(--ink3)}
+
+/* ── Q&A (T25) · Letters (T22) · Vendors (T20 · T17) · Powered (T8) ────── */
+.qa{display:grid;gap:22px;margin-top:22px}
+.qa dt{font-family:var(--head);font-size:clamp(20px,2cqw,26px);color:var(--gold)}
+.qa dd{margin:8px 0 0;color:var(--ink2);display:flex;flex-wrap:wrap;gap:8px 18px}
+@container app (min-width:900px){.qa{grid-template-columns:repeat(2,1fr);gap:26px 5cqw}}
+.cols{display:grid;gap:26px;margin-top:22px}
+.cols h3{font-style:italic}
+.cols p{margin:10px 0 0;color:var(--ink2)}
+@container app (min-width:900px){.cols{grid-template-columns:repeat(2,1fr);gap:5cqw}}
+.strip{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(200px,1fr);gap:10px;overflow-x:auto;min-width:0;max-width:100%;margin-top:22px;scroll-snap-type:x mandatory;scrollbar-width:none;padding-bottom:6px}
+.strip::-webkit-scrollbar{display:none}
+.strip .pl{aspect-ratio:3/4;scroll-snap-align:start}
+.two{display:grid;gap:26px;margin-top:22px}
+@container app (min-width:900px){.two{grid-template-columns:1fr 1fr;gap:5cqw}}
+.team{display:grid;gap:12px 22px;margin-top:14px}
+.team div{display:flex;justify-content:space-between;gap:12px;align-items:baseline;padding:8px 0;position:relative}
+.team div::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,rgba(var(--gold-rgb),.35),transparent)}
+.team b{font-weight:500;font-family:var(--head);font-size:20px}
+.powered{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+
+/* ── Letter (T11) · Song (T8) · Back cover (T10) ───────────────────────── */
+.letter{max-width:720px;margin:0 auto;text-align:center}
+.letter p{font-size:clamp(20px,2cqw,28px);line-height:1.4;font-style:italic;margin:18px 0}
+.letter .sig{font-family:var(--script);font-size:clamp(34px,4cqw,54px);color:var(--gold);margin-top:14px}
+.song{display:flex;flex-wrap:wrap;gap:20px;align-items:center;justify-content:center;text-align:center}
+.song .wave{display:flex;gap:3px;align-items:center;height:28px}
+.song .wave i{width:3px;height:8px;background:var(--gold);border-radius:2px;animation:wave 1.4s ease-in-out infinite}
+.song .wave i:nth-child(2){animation-delay:.1s;height:16px}.song .wave i:nth-child(3){animation-delay:.2s;height:24px}.song .wave i:nth-child(4){animation-delay:.3s;height:14px}.song .wave i:nth-child(5){animation-delay:.4s;height:20px}.song .wave i:nth-child(6){animation-delay:.5s;height:9px}
+@keyframes wave{50%{transform:scaleY(.35)}}
+.back{min-height:70cqh;text-align:center;display:grid;place-items:center}
+.back h2{font-size:clamp(34px,6cqw,72px)}
+.foot{padding:5cqh 6cqw 10cqh;text-align:center}
+
+/* ── OPEN-UP overlays (:target) ────────────────────────────────────────── */
+.openup{position:absolute;inset:0;z-index:20;display:none;background:var(--bg);color:var(--ink)}
+.openup:target{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr;animation:openIn .5s var(--ease-snap) both}
+@keyframes openIn{from{opacity:0;transform:scale(.97) translateY(12px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.openup:target{animation:none}}
+.openup .bar{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 5cqw;background:linear-gradient(180deg,var(--bg) 70%,transparent)}
+.openup .bar h3{font-size:clamp(20px,2.4cqw,30px)}
+.close{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:999px;background:rgba(var(--ink-rgb),.1);transition:all var(--dur) var(--ease-out);font-size:20px;line-height:1}
+.close:hover{background:rgba(var(--ink-rgb),.2)}
+.close:active{transform:scale(.94)}
+.openup .body{overflow-y:auto;padding:10px 5cqw 8cqh;scrollbar-width:thin}
+.tabs{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin:6px 0 18px}
+.tabs .tab{font-family:var(--head);font-size:clamp(20px,2.2cqw,28px);color:var(--ink3);padding:6px 0;position:relative;transition:color var(--dur) var(--ease-out)}
+.tabs .tab::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .35s var(--ease-snap)}
+.tabs .tab.on,#gt-yours:checked~.stage [for=gt-yours].tab,#gt-all:checked~.stage [for=gt-all].tab,#gt-own:checked~.stage [for=gt-own].tab{color:var(--ink)}
+.tabs .tab.on::after,#gt-yours:checked~.stage [for=gt-yours].tab::after,#gt-all:checked~.stage [for=gt-all].tab::after,#gt-own:checked~.stage [for=gt-own].tab::after{transform:scaleX(1)}
+.hours{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 0 10px;margin-bottom:14px}
+.hours::-webkit-scrollbar{display:none}
+#gh-all:checked~.stage [for=gh-all],#gh-m:checked~.stage [for=gh-m],#gh-a:checked~.stage [for=gh-a],#gh-e:checked~.stage [for=gh-e],#gh-n:checked~.stage [for=gh-n]{background:var(--gold);color:var(--on-gold)}
+.gal{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.gal .pl{aspect-ratio:1}
+@container app (min-width:700px){.gal{grid-template-columns:repeat(5,1fr)}}
+@container app (min-width:1000px){.gal{grid-template-columns:repeat(7,1fr);gap:8px}}
+/* time-of-day filter — captures are filed by shutter time (galleryCaptures.atMs) */
+#gh-m:checked~.stage .gal .pl:not(.m),#gh-a:checked~.stage .gal .pl:not(.a),#gh-e:checked~.stage .gal .pl:not(.e),#gh-n:checked~.stage .gal .pl:not(.n){display:none}
+/* who is looking — the story is redacted per reader (redactStoryLayers) */
+#gt-yours:checked~.stage .gal .pl:not(.yours){display:none}
+#gt-own:checked~.stage .gal .pl:not(.own){display:none}
+#gt-own:checked~.stage .gal .pl.own{display:block}
+#as-public:checked~.stage .gal .pl:not(.pub){display:none}
+#as-public:checked~.stage .only-guest,#as-public:checked~.stage .only-couple,
+#as-guest:checked~.stage .only-public,#as-guest:checked~.stage .only-couple,
+#as-couple:checked~.stage .only-guest,#as-couple:checked~.stage .only-public{display:none!important}
+.gal .pl.own{box-shadow:inset 0 0 0 1px rgba(var(--gold-rgb),.9)}
+.gal .pl.own .cap{opacity:1;transform:none}
+#as-couple:checked~.stage .gal .pl.own{display:block}
+.gal .pl.own{display:none}
+#gt-yours:checked~.stage .gal .pl.own{display:none!important}
+.count{font-family:var(--label);letter-spacing:.16em;text-transform:uppercase;font-size:12px;color:var(--ink3)}
+.count b{color:var(--ink);font-weight:600}
+/* film */
+.film-stage{display:grid;gap:18px}
+.film-frame{position:relative;aspect-ratio:16/9;width:100%;max-height:70cqh;margin:0 auto;transition:all .5s var(--ease-out)}
+#fs-full:checked~.stage .film-frame{aspect-ratio:auto;height:78cqh}
+.film-frame .pl{position:absolute;inset:0}
+.fsrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#fs-full:checked~.stage [for=fs-full],#fs-place:checked~.stage [for=fs-place]{background:var(--gold);color:var(--on-gold)}
+/* find yourself */
+.you-list{display:grid;gap:14px;margin-top:18px;max-width:720px}
+.you-list a{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 0;position:relative;transition:padding-left var(--dur) var(--ease-out)}
+.you-list a:hover{padding-left:8px}
+.you-list a::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,rgba(var(--gold-rgb),.4),transparent)}
+.you-list b{font-family:var(--head);font-weight:400;font-size:22px;color:var(--gold);min-width:92px;display:inline-block;margin-right:8px}
+.you-list .eye{white-space:nowrap}
+.wall{display:grid;gap:28px;max-width:820px}
+@container app (min-width:900px){.wall{grid-template-columns:1fr 1fr;gap:28px 5cqw;max-width:none}}
+
+/* ── THE MAKER — scene navigator ───────────────────────────────────────── */
+.maker{min-height:100%;display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"top" "canvas" "ins" "rail";gap:0}
+.mtop{grid-area:top;position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;padding:14px 5cqw;background:linear-gradient(180deg,var(--bg) 60%,transparent);backdrop-filter:blur(8px)}
+.mtop>div{min-width:0;max-width:100%}
+.mtop .steps{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;min-width:0;max-width:100%}
+.mtop .steps::-webkit-scrollbar{display:none}
+.mtop .steps span{padding:6px 10px;border-radius:999px;font-family:var(--label);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);white-space:nowrap;transition:all var(--dur) var(--ease-out)}
+.mtop .steps span.on{background:rgba(var(--ink-rgb),.12);color:var(--ink)}
+.rail{grid-area:rail;padding:8px 5cqw 12cqh}
+.rail .grp{margin:26px 0 8px;display:flex;align-items:center;gap:10px}
+.row{display:grid;grid-template-columns:auto 1fr auto;gap:0 12px;align-items:center;padding:12px 8px;margin:0 -8px;border-radius:0;position:relative;transition:all var(--dur) var(--ease-out)}
+.row:hover{background:rgba(var(--ink-rgb),.05)}
+.row::after{content:"";position:absolute;left:8px;right:8px;bottom:0;height:1px;background:rgba(var(--ink-rgb),.08)}
+.row .no{font-family:var(--head);font-size:20px;color:var(--ink3);width:28px;text-align:right}
+.row .t{display:flex;flex-direction:column;gap:5px;min-width:0}
+.row .t b{font-weight:500;font-size:18px;font-family:var(--head);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row .t small{font-size:13px;color:var(--ink3);display:flex;gap:6px 12px;flex-wrap:wrap;align-items:center}
+.row .t small em{font-style:normal;color:var(--ink2)}
+.row .ctl{display:flex;gap:4px;align-items:center}
+.ic{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:999px;color:var(--ink3);transition:all var(--dur) var(--ease-out);font-size:14px}
+.ic:hover{background:rgba(var(--ink-rgb),.1);color:var(--ink)}
+.ic:active{transform:scale(.92)}
+.ic.lock{cursor:default;opacity:.7}
+.ic.lock:hover{background:transparent;color:var(--ink3)}
+.eyeic::before{content:"◉"}
+.row.sel{background:rgba(var(--gold-rgb),.1)}
+.row.sel .no{color:var(--gold)}
+/* hidden scenes — in the guest view they vanish; here the row dims and says so */
+.hidden-note{display:none;color:var(--gold)}
+.row.off .t b,.row.off .t small,.row.off .no{opacity:.45}
+.row.off .hidden-note{display:inline}
+.row.off .eyeic::before{content:"◌"}
+.row.skipped .t b,.row.skipped .no{opacity:.5}
+.canvas{grid-area:canvas;padding:6px 5cqw 10px;display:grid;gap:12px;min-width:0}
+.rail,.ins{min-width:0}
+.row{min-width:0}.row .t{min-width:0}
+.cvhead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;min-width:0}
+.cvhead>*{min-width:0}
+.thumb{position:relative;aspect-ratio:9/13;width:100%;max-width:min(340px,100%);margin:0 auto;background:var(--bg);box-shadow:var(--shadow-2);overflow:hidden;display:none;padding:22px 18px;transition:all .4s var(--ease-out)}
+.thumb .ph{background:var(--p,linear-gradient(135deg,var(--bg2),var(--bg))) center/cover;position:relative}
+.thumb .ln{height:6px;border-radius:0;background:rgba(var(--ink-rgb),.25);margin:8px 0}
+.thumb .ln.s{width:55%}.thumb .ln.xs{width:35%;background:rgba(var(--gold-rgb),.7)}
+.thumb .big{font-family:var(--head);font-size:44px;color:var(--ink);line-height:1}
+.thumb .tt{font-family:var(--head);font-size:22px;color:var(--ink);line-height:1.1}
+.thumb .badge{position:absolute;right:12px;bottom:12px;padding:5px 9px;border-radius:999px;background:var(--gold);color:var(--on-gold);font-family:var(--label);font-size:10px;letter-spacing:.16em;text-transform:uppercase}
+.thumb.t4 .ph,.thumb.t14 .ph{position:absolute;inset:0}
+.thumb.t4 .words,.thumb.t14 .words{position:absolute;left:18px;right:18px;bottom:22px}
+.thumb.t1{display:none;grid-template-rows:auto 1fr}.thumb.t1 .ph{aspect-ratio:4/3;margin-bottom:14px}
+.thumb.t2 .ph{aspect-ratio:4/3;margin-bottom:14px;margin-left:20%}
+.thumb.t5 .ph{aspect-ratio:1;margin-bottom:14px}
+.thumb.t12{display:none;align-content:center;text-align:center}
+.thumb.t21 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;aspect-ratio:1}.thumb.t21 .grid .ph:first-child{grid-column:span 2;grid-row:span 2}
+.thumb.t19 .grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;aspect-ratio:1}
+.thumb.t20 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;aspect-ratio:3/2}
+.thumb.t17 .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;aspect-ratio:2/1.3}
+.thumb.t22 .grid,.thumb.t23 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.thumb.t24 .tl{gap:12px;margin-top:10px}.thumb.t24 .tl b{font-size:14px}
+.thumb.t25 dl{margin:10px 0 0}.thumb.t25 dt{font-family:var(--head);color:var(--gold);font-size:14px;margin-top:8px}.thumb.t25 dd{margin:2px 0 0}
+.thumb.t11{display:none;align-content:center;text-align:center;font-style:italic}
+.thumb.t10{display:none;align-content:center;text-align:center}
+.thumb .mini-play{position:absolute;inset:0;display:grid;place-items:center}.thumb .mini-play i{width:34px;height:34px;border-radius:999px;background:rgba(14,5,4,.55);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35);display:grid;place-items:center}.thumb .mini-play i::after{content:"";margin-left:3px;border-left:9px solid #f3e7dc;border-top:6px solid transparent;border-bottom:6px solid transparent}
+.ins{grid-area:ins;padding:10px 5cqw 20px}
+.ins dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px 18px;align-items:baseline}
+.ins dd{min-width:0;overflow-wrap:anywhere}
+.ins dt{font-family:var(--label);letter-spacing:.16em;text-transform:uppercase;font-size:11px;color:var(--ink3);padding-top:4px}
+.ins dd{margin:0;font-size:16px;color:var(--ink)}
+.ins dd .src{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--ink2);background:rgba(var(--ink-rgb),.08);padding:2px 6px;border-radius:0;overflow-wrap:anywhere}
+.ins .per{display:none}
+.ins .acts{display:grid;gap:8px;margin-top:22px}
+.ins .act{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;position:relative;transition:padding-left var(--dur) var(--ease-out)}
+.ins .act:hover{padding-left:6px}
+.ins .act::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:rgba(var(--ink-rgb),.08)}
+.ins .act span{display:flex;gap:10px;align-items:center}
+.ins .act .free{font-family:var(--label);letter-spacing:.16em;text-transform:uppercase;font-size:10px;color:var(--ink3)}
+.probegin{margin:28px 0 8px;display:flex;align-items:center;gap:12px;color:var(--gold)}
+.probegin::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(var(--gold-rgb),.7),transparent)}
+@container app (min-width:700px){
+  .maker{grid-template-columns:minmax(300px,.9fr) minmax(0,1.1fr);grid-template-areas:"top top" "rail canvas" "rail ins";align-content:start}
+  .rail{padding:8px 0 12cqh 5cqw}.canvas,.ins{padding-left:3cqw;padding-right:5cqw}
+  .canvas{position:sticky;top:64px;align-self:start}
+}
+@container app (min-width:1000px){
+  .maker{grid-template-columns:minmax(320px,.8fr) minmax(0,1.2fr) minmax(300px,.8fr);grid-template-areas:"top top top" "rail canvas ins";align-content:start}
+  .ins{position:sticky;top:64px;align-self:start;padding:24px 5cqw 20px 0}
+  .canvas{padding:18px 3cqw 20px}
+}
+/* which scene is selected */
+#sel-cover:checked~.stage .row.r-cover,#sel-before:checked~.stage .row.r-before,#sel-numbers:checked~.stage .row.r-numbers,#sel-ch1:checked~.stage .row.r-ch1,#sel-ch2:checked~.stage .row.r-ch2,#sel-ch3:checked~.stage .row.r-ch3,#sel-gallery:checked~.stage .row.r-gallery,#sel-film:checked~.stage .row.r-film,#sel-you:checked~.stage .row.r-you,#sel-kwento:checked~.stage .row.r-kwento,#sel-asked:checked~.stage .row.r-asked,#sel-letters:checked~.stage .row.r-letters,#sel-vendors:checked~.stage .row.r-vendors,#sel-wall:checked~.stage .row.r-wall,#sel-said:checked~.stage .row.r-said,#sel-powered:checked~.stage .row.r-powered,#sel-loved:checked~.stage .row.r-loved,#sel-couple:checked~.stage .row.r-couple,#sel-song:checked~.stage .row.r-song,#sel-next:checked~.stage .row.r-next{background:rgba(var(--gold-rgb),.1)}
+#sel-cover:checked~.stage .row.r-cover .no,#sel-before:checked~.stage .row.r-before .no,#sel-numbers:checked~.stage .row.r-numbers .no,#sel-ch1:checked~.stage .row.r-ch1 .no,#sel-ch2:checked~.stage .row.r-ch2 .no,#sel-ch3:checked~.stage .row.r-ch3 .no,#sel-gallery:checked~.stage .row.r-gallery .no,#sel-film:checked~.stage .row.r-film .no,#sel-you:checked~.stage .row.r-you .no,#sel-kwento:checked~.stage .row.r-kwento .no,#sel-asked:checked~.stage .row.r-asked .no,#sel-letters:checked~.stage .row.r-letters .no,#sel-vendors:checked~.stage .row.r-vendors .no,#sel-wall:checked~.stage .row.r-wall .no,#sel-said:checked~.stage .row.r-said .no,#sel-powered:checked~.stage .row.r-powered .no,#sel-loved:checked~.stage .row.r-loved .no,#sel-couple:checked~.stage .row.r-couple .no,#sel-song:checked~.stage .row.r-song .no,#sel-next:checked~.stage .row.r-next .no{color:var(--gold)}
+#sel-cover:checked~.stage .cv-cover,#sel-before:checked~.stage .cv-before,#sel-numbers:checked~.stage .cv-numbers,#sel-ch1:checked~.stage .cv-ch1,#sel-ch2:checked~.stage .cv-ch2,#sel-ch3:checked~.stage .cv-ch3,#sel-gallery:checked~.stage .cv-gallery,#sel-film:checked~.stage .cv-film,#sel-you:checked~.stage .cv-you,#sel-kwento:checked~.stage .cv-kwento,#sel-asked:checked~.stage .cv-asked,#sel-letters:checked~.stage .cv-letters,#sel-vendors:checked~.stage .cv-vendors,#sel-wall:checked~.stage .cv-wall,#sel-said:checked~.stage .cv-said,#sel-powered:checked~.stage .cv-powered,#sel-loved:checked~.stage .cv-loved,#sel-couple:checked~.stage .cv-couple,#sel-song:checked~.stage .cv-song,#sel-next:checked~.stage .cv-next{display:grid}
+#sel-cover:checked~.stage .p-cover,#sel-before:checked~.stage .p-before,#sel-numbers:checked~.stage .p-numbers,#sel-ch1:checked~.stage .p-ch1,#sel-ch2:checked~.stage .p-ch2,#sel-ch3:checked~.stage .p-ch3,#sel-gallery:checked~.stage .p-gallery,#sel-film:checked~.stage .p-film,#sel-you:checked~.stage .p-you,#sel-kwento:checked~.stage .p-kwento,#sel-asked:checked~.stage .p-asked,#sel-letters:checked~.stage .p-letters,#sel-vendors:checked~.stage .p-vendors,#sel-wall:checked~.stage .p-wall,#sel-said:checked~.stage .p-said,#sel-powered:checked~.stage .p-powered,#sel-loved:checked~.stage .p-loved,#sel-couple:checked~.stage .p-couple,#sel-song:checked~.stage .p-song,#sel-next:checked~.stage .p-next{display:contents}
+/* hide toggles: guest view loses the scene, navigator dims the row */
+#hide-before:checked~.stage #s-before,#hide-numbers:checked~.stage #s-numbers,#hide-ch1:checked~.stage #s-ch1,#hide-gallery:checked~.stage #s-gallery,#hide-film:checked~.stage #s-film,#hide-you:checked~.stage #s-you,#hide-kwento:checked~.stage #s-kwento,#hide-asked:checked~.stage #s-asked,#hide-letters:checked~.stage #s-letters,#hide-vendors:checked~.stage #s-vendors,#hide-powered:checked~.stage #s-powered,#hide-loved:checked~.stage #s-loved,#hide-couple:checked~.stage #s-couple{display:none}
+
+#hide-before:checked~.stage .r-before .t,#hide-numbers:checked~.stage .r-numbers .t,#hide-ch1:checked~.stage .r-ch1 .t,#hide-gallery:checked~.stage .r-gallery .t,#hide-film:checked~.stage .r-film .t,#hide-you:checked~.stage .r-you .t,#hide-kwento:checked~.stage .r-kwento .t,#hide-asked:checked~.stage .r-asked .t,#hide-letters:checked~.stage .r-letters .t,#hide-vendors:checked~.stage .r-vendors .t,#hide-powered:checked~.stage .r-powered .t,#hide-loved:checked~.stage .r-loved .t,#hide-couple:checked~.stage .r-couple .t{opacity:.45}
+#hide-before:checked~.stage .r-before .hidden-note,#hide-numbers:checked~.stage .r-numbers .hidden-note,#hide-ch1:checked~.stage .r-ch1 .hidden-note,#hide-gallery:checked~.stage .r-gallery .hidden-note,#hide-film:checked~.stage .r-film .hidden-note,#hide-you:checked~.stage .r-you .hidden-note,#hide-kwento:checked~.stage .r-kwento .hidden-note,#hide-asked:checked~.stage .r-asked .hidden-note,#hide-letters:checked~.stage .r-letters .hidden-note,#hide-vendors:checked~.stage .r-vendors .hidden-note,#hide-powered:checked~.stage .r-powered .hidden-note,#hide-loved:checked~.stage .r-loved .hidden-note,#hide-couple:checked~.stage .r-couple .hidden-note{display:inline;opacity:1}
+#hide-before:checked~.stage .r-before .eyeic::before,#hide-numbers:checked~.stage .r-numbers .eyeic::before,#hide-ch1:checked~.stage .r-ch1 .eyeic::before,#hide-gallery:checked~.stage .r-gallery .eyeic::before,#hide-film:checked~.stage .r-film .eyeic::before,#hide-you:checked~.stage .r-you .eyeic::before,#hide-kwento:checked~.stage .r-kwento .eyeic::before,#hide-asked:checked~.stage .r-asked .eyeic::before,#hide-letters:checked~.stage .r-letters .eyeic::before,#hide-vendors:checked~.stage .r-vendors .eyeic::before,#hide-powered:checked~.stage .r-powered .eyeic::before,#hide-loved:checked~.stage .r-loved .eyeic::before,#hide-couple:checked~.stage .r-couple .eyeic::before{content:"◌"}
+/* +7 more chapters */
+.more-rows{display:none}
+#more-ch:checked~.stage .more-rows{display:block}
+#more-ch:checked~.stage .more-lbl .open,.more-lbl .shut{display:none}
+#more-ch:checked~.stage .more-lbl .shut{display:inline}
+
+/* ── Reviewer strip (bottom) — not in the product ──────────────────────── */
+.revbar{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;align-items:center;gap:14px;padding:7px 14px;background:rgba(20,17,14,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#cdbfa8;font:italic 400 13px/1 "Cormorant Garamond",Georgia,serif;overflow-x:auto;scrollbar-width:none}
+.revbar::-webkit-scrollbar{display:none}
+.revbar .rv{flex:none;letter-spacing:.02em;color:#e9b96a;font-style:italic;font-family:"Cormorant Garamond",Georgia,serif;font-size:13px}
+.revbar .grp2{display:flex;gap:2px;align-items:center;flex:none;padding:2px;border-radius:999px;background:rgba(255,255,255,.05)}
+.revbar label{flex:none;display:inline-flex;align-items:center;gap:7px;padding:5px 10px;border-radius:999px;font:500 11px/1 "Cormorant SC",Georgia,serif;letter-spacing:.14em;text-transform:uppercase;color:#a89a86;transition:all var(--dur) var(--ease-out);white-space:nowrap}
+.revbar label:hover{color:#fff;background:rgba(255,255,255,.08)}
+.revbar label:active{transform:scale(.96)}
+.revbar .sw{width:14px;height:14px;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.2)}
+#as-guest:checked~.revbar [for=as-guest],#as-public:checked~.revbar [for=as-public],#as-couple:checked~.revbar [for=as-couple]{background:#e3a86f;color:#1a1612}
+#th-classic:checked~.revbar [for=th-classic],#th-rustic:checked~.revbar [for=th-rustic],#th-modern:checked~.revbar [for=th-modern],#th-cinderella:checked~.revbar [for=th-cinderella],#th-luxe:checked~.revbar [for=th-luxe],#th-vintage:checked~.revbar [for=th-vintage],#th-whimsical:checked~.revbar [for=th-whimsical],#th-regency:checked~.revbar [for=th-regency],#th-gatsby:checked~.revbar [for=th-gatsby],#th-cyber:checked~.revbar [for=th-cyber]{background:rgba(255,255,255,.14);color:#fff}
+
+/* ── THEMES — the whole look flips (THEMES-2026-09-24.md) ─────────────── */
+.frame .heroVid{display:none}
+#th-luxe:checked~.stage .frame .heroVid{display:block}
+#th-classic:checked~.stage .frame{--bg:#f6f1e7;--bg-rgb:246,241,231;--bg2:#ffffff;--bg2-rgb:255,255,255;--ink:#2b241c;--ink-rgb:43,36,28;--ink2:#6f665a;--ink3:#8a7e6f;--gold:#b8934a;--gold-rgb:184,147,74;--gold2:#8a6a2b;--gold2-rgb:138,106,43;--gold3:#f0e3c4;--on-gold:#2b241c;--head:"Cormorant Garamond",Georgia,serif;--body:"EB Garamond",Georgia,serif;--label:"Cormorant SC",Georgia,serif;--script:"Great Vibes",cursive;--orn:"❦";--scrim:.2;--hero-img:repeating-linear-gradient(0deg,rgba(43,36,28,.03) 0 1px,transparent 1px 3px),linear-gradient(#f6f1e7,#f6f1e7);--motion-dur:.7s;--motion-rise:0px;--motion-blur:0px;--stagger:.05s;--r-press:4px;--shadow-2:0 2px 6px rgba(43,36,28,.08),0 24px 60px -20px rgba(43,36,28,.3);--shadow-3:0 10px 30px -10px rgba(43,36,28,.3),0 60px 120px -40px rgba(43,36,28,.4)}
+#th-classic:checked~.stage .frame h1{font-weight:500}
+#th-modern:checked~.stage .frame{--bg:#f5f0eb;--bg-rgb:245,240,235;--bg2:#d6cec9;--bg2-rgb:214,206,201;--ink:#2b2b1a;--ink-rgb:43,43,26;--ink2:#5c574f;--ink3:#8a857c;--gold:#3a4a1c;--gold-rgb:58,74,28;--gold2:#7d8f5a;--gold2-rgb:125,143,90;--gold3:#e3e6d6;--on-gold:#ffffff;--head:"Instrument Serif",Georgia,serif;--body:"Jost",system-ui,sans-serif;--label:"Jost",system-ui,sans-serif;--script:"Instrument Serif",Georgia,serif;--orn:"·";--scrim:.35;--hero-img:url(../assets/theme-backgrounds-2026-09-24/modern-poster.jpg);--motion-dur:.7s;--motion-rise:0px;--motion-blur:0px;--stagger:.05s;--shadow-2:0 2px 6px rgba(43,43,26,.08),0 24px 60px -20px rgba(43,43,26,.3);--shadow-3:0 10px 30px -10px rgba(43,43,26,.3),0 60px 120px -40px rgba(43,43,26,.4)}
+#th-modern:checked~.stage .frame .script{font-style:italic}
+#th-rustic:checked~.stage .frame{--bg:#fbf0e4;--bg-rgb:251,240,228;--bg2:#f0d5b4;--bg2-rgb:240,213,180;--ink:#2b1d10;--ink-rgb:43,29,16;--ink2:#6a4a2e;--ink3:#9a7a5c;--gold:#8b5333;--gold-rgb:139,83,51;--gold2:#d7a26f;--gold2-rgb:215,162,111;--gold3:#f0d5b4;--on-gold:#fbf0e4;--head:"Fraunces",Georgia,serif;--body:"Lora",Georgia,serif;--label:"Lora",Georgia,serif;--script:"Fraunces",Georgia,serif;--orn:"❧";--scrim:.45;--hero-img:url(../assets/theme-backgrounds-2026-09-24/rustic-poster.jpg);--motion-dur:1.2s;--motion-rise:10px;--motion-blur:0px;--stagger:.14s;--r-press:6px;--shadow-2:0 2px 6px rgba(43,29,16,.08),0 24px 60px -20px rgba(43,29,16,.3);--shadow-3:0 10px 30px -10px rgba(43,29,16,.3),0 60px 120px -40px rgba(43,29,16,.4)}
+#th-rustic:checked~.stage .frame h1,#th-rustic:checked~.stage .frame h2,#th-rustic:checked~.stage .frame h3{font-weight:600}
+#th-vintage:checked~.stage .frame{--bg:#eadbc6;--bg-rgb:234,219,198;--bg2:#e1cdb9;--bg2-rgb:225,205,185;--ink:#33261a;--ink-rgb:51,38,26;--ink2:#5a4128;--ink3:#8a6f52;--gold:#634b2f;--gold-rgb:99,75,47;--gold2:#a88a62;--gold2-rgb:168,138,98;--gold3:#e1cdb9;--on-gold:#f8efe0;--head:"Playfair Display",Georgia,serif;--body:"Libre Baskerville",Georgia,serif;--label:"Libre Baskerville",Georgia,serif;--script:"Playfair Display",Georgia,serif;--orn:"❦";--scrim:.45;--hero-img:url(../assets/theme-backgrounds-2026-09-24/vintage-poster.jpg);--motion-dur:1.2s;--motion-rise:10px;--motion-blur:0px;--stagger:.14s;--r-press:2px;--shadow-2:0 2px 6px rgba(51,38,26,.1),0 24px 60px -20px rgba(51,38,26,.3);--shadow-3:0 10px 30px -10px rgba(51,38,26,.3),0 60px 120px -40px rgba(51,38,26,.4)}
+#th-vintage:checked~.stage .frame .script{font-style:italic}
+#th-whimsical:checked~.stage .frame{--bg:#fbf7f0;--bg-rgb:251,247,240;--bg2:#faf6ee;--bg2-rgb:250,246,238;--ink:#3f3626;--ink-rgb:63,54,38;--ink2:#6e6146;--ink3:#9a8c6e;--gold:#9c7684;--gold-rgb:156,118,132;--gold2:#c9aab3;--gold2-rgb:201,170,179;--gold3:#f1e6ea;--on-gold:#3f3626;--head:"Yeseva One",Georgia,serif;--body:"Quicksand",system-ui,sans-serif;--label:"Quicksand",system-ui,sans-serif;--script:"Yeseva One",Georgia,serif;--orn:"✿";--scrim:.3;--hero-img:url(../assets/theme-backgrounds-2026-09-24/whimsical-poster.jpg);--motion-dur:.75s;--motion-rise:22px;--motion-blur:0px;--stagger:.09s;--shadow-2:0 2px 6px rgba(63,54,38,.08),0 24px 60px -20px rgba(63,54,38,.3);--shadow-3:0 10px 30px -10px rgba(63,54,38,.3),0 60px 120px -40px rgba(63,54,38,.4)}
+#th-cinderella:checked~.stage .frame{--bg:#eef3f8;--bg-rgb:238,243,248;--bg2:#d4dfe7;--bg2-rgb:212,223,231;--ink:#253039;--ink-rgb:37,48,57;--ink2:#49586a;--ink3:#7b8a99;--gold:#7590a3;--gold-rgb:117,144,163;--gold2:#a9bcc9;--gold2-rgb:169,188,201;--gold3:#e3ebf2;--on-gold:#253039;--head:"Italiana",Georgia,serif;--body:"Cormorant Garamond",Georgia,serif;--label:"Cormorant SC",Georgia,serif;--script:"Italiana",Georgia,serif;--orn:"✧";--scrim:.35;--hero-img:url(../assets/theme-backgrounds-2026-09-24/cinderella-poster.jpg);--shadow-2:0 2px 6px rgba(37,48,57,.1),0 24px 60px -20px rgba(37,48,57,.3);--shadow-3:0 10px 30px -10px rgba(37,48,57,.3),0 60px 120px -40px rgba(37,48,57,.4)}
+#th-cinderella:checked~.stage .frame h1,#th-cinderella:checked~.stage .frame h2{text-transform:uppercase;letter-spacing:.04em}
+#th-gatsby:checked~.stage .frame{--bg:#110504;--bg-rgb:17,5,4;--bg2:#331610;--bg2-rgb:51,22,16;--ink:#f7e6cf;--ink-rgb:247,230,207;--ink2:#dcbf9d;--ink3:#b8a083;--gold:#ecbf8f;--gold-rgb:236,191,143;--gold2:#f5d9b5;--gold2-rgb:245,217,181;--gold3:#4a2a1c;--on-gold:#110504;--head:"Limelight",Georgia,serif;--body:"Josefin Sans",system-ui,sans-serif;--label:"Poiret One",system-ui,sans-serif;--script:"Poiret One",system-ui,sans-serif;--orn:"◆";--scrim:.64;--hero-img:url(../assets/theme-backgrounds-2026-09-24/great-gatsby-poster.jpg);--r-press:4px}
+#th-gatsby:checked~.stage .frame h1,#th-gatsby:checked~.stage .frame h2{letter-spacing:.04em}
+#th-regency:checked~.stage .frame{--bg:#f6efe6;--bg-rgb:246,239,230;--bg2:#e2b997;--bg2-rgb:226,185,151;--ink:#33261f;--ink-rgb:51,38,31;--ink2:#6d5043;--ink3:#9a7f70;--gold:#c99a63;--gold-rgb:201,154,99;--gold2:#dcac7d;--gold2-rgb:220,172,125;--gold3:#f1dcc4;--on-gold:#33261f;--head:"Prata",Georgia,serif;--body:"Crimson Pro",Georgia,serif;--label:"Crimson Pro",Georgia,serif;--script:"Prata",Georgia,serif;--orn:"❦";--scrim:.35;--hero-img:url(../assets/theme-backgrounds-2026-09-24/regency-poster.jpg);--motion-dur:.75s;--motion-rise:22px;--motion-blur:0px;--stagger:.09s;--shadow-2:0 2px 6px rgba(51,38,31,.08),0 24px 60px -20px rgba(51,38,31,.3);--shadow-3:0 10px 30px -10px rgba(51,38,31,.3),0 60px 120px -40px rgba(51,38,31,.4)}
+#th-cyber:checked~.stage .frame{--bg:#0b0a12;--bg-rgb:11,10,18;--bg2:#26222d;--bg2-rgb:38,34,45;--ink:#f1ecf7;--ink-rgb:241,236,247;--ink2:#c9bcd4;--ink3:#9a8ea8;--gold:#ec8cd6;--gold-rgb:236,140,214;--gold2:#78c7d9;--gold2-rgb:120,199,217;--gold3:#3a2540;--on-gold:#0b0a12;--head:"Syne",system-ui,sans-serif;--body:"Outfit",system-ui,sans-serif;--label:"Outfit",system-ui,sans-serif;--script:"Syne",system-ui,sans-serif;--orn:"◇";--scrim:.58;--hero-img:url(../assets/theme-backgrounds-2026-09-24/cyber-neon-poster.jpg);--r-press:8px}
+#th-cyber:checked~.stage .frame h1,#th-cyber:checked~.stage .frame h2,#th-cyber:checked~.stage .frame h3{font-weight:800;text-transform:uppercase;letter-spacing:-.03em}
+#th-cyber:checked~.stage .frame h1,#th-cyber:checked~.stage .frame h2{text-shadow:0 0 18px rgba(236,140,214,.55)}
+/* the .frame background follows --bg */
+</style>
+</head>
+<body>
+
+<!-- ═══ STATE (all script-free) ═══════════════════════════════════════════ -->
+<!-- viewport -->
+<input class="st" type="radio" name="vp" id="vp-m">
+<input class="st" type="radio" name="vp" id="vp-tp">
+<input class="st" type="radio" name="vp" id="vp-tl">
+<input class="st" type="radio" name="vp" id="vp-d" checked>
+<!-- the two ways to see the same story -->
+<input class="st" type="radio" name="view" id="view-guest" checked>
+<input class="st" type="radio" name="view" id="view-maker">
+<!-- who is reading (reviewer switch) -->
+<input class="st" type="radio" name="as" id="as-guest" checked>
+<input class="st" type="radio" name="as" id="as-public">
+<input class="st" type="radio" name="as" id="as-couple">
+<!-- theme (reviewer switch) -->
+<input class="st" type="radio" name="th" id="th-classic">
+<input class="st" type="radio" name="th" id="th-rustic">
+<input class="st" type="radio" name="th" id="th-modern">
+<input class="st" type="radio" name="th" id="th-cinderella">
+<input class="st" type="radio" name="th" id="th-luxe" checked>
+<input class="st" type="radio" name="th" id="th-vintage">
+<input class="st" type="radio" name="th" id="th-whimsical">
+<input class="st" type="radio" name="th" id="th-regency">
+<input class="st" type="radio" name="th" id="th-gatsby">
+<input class="st" type="radio" name="th" id="th-cyber">
+<!-- gallery: tab + time of day -->
+<input class="st" type="radio" name="gt" id="gt-all" checked>
+<input class="st" type="radio" name="gt" id="gt-yours">
+<input class="st" type="radio" name="gt" id="gt-own">
+<input class="st" type="radio" name="gh" id="gh-all" checked>
+<input class="st" type="radio" name="gh" id="gh-m">
+<input class="st" type="radio" name="gh" id="gh-a">
+<input class="st" type="radio" name="gh" id="gh-e">
+<input class="st" type="radio" name="gh" id="gh-n">
+<!-- film: in place / full screen -->
+<input class="st" type="radio" name="fs" id="fs-place" checked>
+<input class="st" type="radio" name="fs" id="fs-full">
+<!-- maker: selected scene -->
+<input class="st" type="radio" name="sel" id="sel-cover" checked>
+<input class="st" type="radio" name="sel" id="sel-before">
+<input class="st" type="radio" name="sel" id="sel-numbers">
+<input class="st" type="radio" name="sel" id="sel-ch1">
+<input class="st" type="radio" name="sel" id="sel-ch2">
+<input class="st" type="radio" name="sel" id="sel-ch3">
+<input class="st" type="radio" name="sel" id="sel-gallery">
+<input class="st" type="radio" name="sel" id="sel-film">
+<input class="st" type="radio" name="sel" id="sel-you">
+<input class="st" type="radio" name="sel" id="sel-kwento">
+<input class="st" type="radio" name="sel" id="sel-asked">
+<input class="st" type="radio" name="sel" id="sel-letters">
+<input class="st" type="radio" name="sel" id="sel-vendors">
+<input class="st" type="radio" name="sel" id="sel-wall">
+<input class="st" type="radio" name="sel" id="sel-said">
+<input class="st" type="radio" name="sel" id="sel-powered">
+<input class="st" type="radio" name="sel" id="sel-loved">
+<input class="st" type="radio" name="sel" id="sel-couple">
+<input class="st" type="radio" name="sel" id="sel-song">
+<input class="st" type="radio" name="sel" id="sel-next">
+<!-- maker: hide toggles (free) -->
+<input class="st" type="checkbox" id="hide-before">
+<input class="st" type="checkbox" id="hide-numbers">
+<input class="st" type="checkbox" id="hide-ch1">
+<input class="st" type="checkbox" id="hide-gallery">
+<input class="st" type="checkbox" id="hide-film">
+<input class="st" type="checkbox" id="hide-you">
+<input class="st" type="checkbox" id="hide-kwento">
+<input class="st" type="checkbox" id="hide-asked">
+<input class="st" type="checkbox" id="hide-letters">
+<input class="st" type="checkbox" id="hide-vendors">
+<input class="st" type="checkbox" id="hide-powered">
+<input class="st" type="checkbox" id="hide-loved">
+<input class="st" type="checkbox" id="hide-couple">
+<input class="st" type="checkbox" id="more-ch">
+
+<!-- ═══ REVIEWER CHROME (top): viewport + the two ways ═══════════════════ -->
+<nav class="vpbar" aria-label="Preview only">
+  <div class="pill vps"><label for="vp-m">Mobile</label><label for="vp-tp">Tablet P</label><label for="vp-tl">Tablet L</label><label for="vp-d">Desktop</label></div>
+  <div class="pill"><label for="view-guest">As guests see it</label><label for="view-maker">In the Maker</label></div>
+</nav>
+
+<div class="stage"><div class="frame">
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     (1) THE GUEST-FACING POST EVENT — the story, scene by scene
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="scroll guest">
+
+  <!-- 0 · COVER — T4 Full photo, words on top · Post Event keeps its own cover -->
+  <section class="cover" id="s-cover" aria-label="Cover">
+    <div class="bg"></div>
+    <video class="heroVid" autoplay muted loop playsinline poster="../assets/theme-backgrounds-2026-09-24/luxe-poster.jpg" aria-hidden="true"><source src="../assets/theme-backgrounds-2026-09-24/luxe-loop.mp4" type="video/mp4"></video>
+    <div class="scrim"></div><div class="sweep"></div>
+    <div class="in cine">
+      <div class="masthead">
+        <div class="eye gold kick"><span>The Recap</span><span>Ang Kwento</span></div>
+        <div class="edition">Vol. I · No. 12 <span class="i r" tabindex="0" data-tip="Stamped once, at publish (event_editorial.edition_no) — never recomputed. Counts Setnayan weddings in the awards cycle.">i</span></div>
+      </div>
+      <div class="mono">R<span style="font-size:.6em">&amp;</span>I</div>
+      <h1 class="foil">Rafael &amp; Isabel<br>Are Married</h1>
+      <div class="dateline"><span>Saturday, 12 December 2026</span><span class="dim">·</span><span>Casa Ibarra, Tagaytay</span><span class="dim">·</span><span class="muted">186 guests</span></div>
+      <div class="cta">
+        <a class="btn" href="#s-numbers">Read the day</a>
+        <a class="btn ghost" href="#open-film">Watch the Film</a>
+        <span class="eye">A living memory.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1 · BEFORE THE DAY — T24 Timeline · optional chapter from Our Love Story -->
+  <section class="sc tight" id="s-before" aria-label="Before the day">
+    <div class="in">
+      <div class="eye gold rv">Before the day</div>
+      <h2 class="rv d1">Six years, four chapters</h2>
+      <div class="tl rv d2">
+        <div><b>2020</b><span class="muted">Met at a friend's sinigang night in Quezon City</span></div>
+        <div><b>2022</b><span class="muted">First trip together — Siargao, one broken board</span></div>
+        <div><b>2025</b><span class="muted">He asked on the Tagaytay ridge. She said yes before he finished.</span></div>
+        <div><b class="script" style="font-size:30px">12 · 12 · 2026</b><span class="muted">The day itself</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · BY THE NUMBERS — T12 Big number · from metrics -->
+  <section class="sc" id="s-numbers" aria-label="By the numbers">
+    <div class="in">
+      <div class="eye gold rv">By the numbers</div>
+      <div class="nums">
+        <div class="rv"><div class="num foil">1,240</div><div class="eye">Photos &amp; moments <span class="i" tabindex="0" data-tip="Every clean Papic capture from the day — photos and 5-second living moments. You see the count for your layer: guests see the celebration's, the public sees what was shared with everyone.">i</span></div></div>
+        <div class="rv d1"><div class="num">186</div><div class="eye">Guests</div></div>
+        <div class="rv d2"><div class="num">171</div><div class="eye">Attending</div></div>
+        <div class="rv d3"><div class="num">10</div><div class="eye">Chapters</div></div>
+      </div>
+      <div class="rule rv d3"><span></span></div>
+      <div class="rv d3 muted" style="display:flex;gap:8px 22px;flex-wrap:wrap"><span><b>9</b> living moments</span><span><b>42</b> wishes</span><span><b>6</b> suppliers</span><span><b>2 h 14 m</b> broadcast</span></div>
+    </div>
+  </section>
+
+  <!-- 3 · AS THE DAY UNFOLDED — chapter 1 · T1 Photo left, words right · SCRUB -->
+  <section class="scrub-wrap" id="s-ch1" aria-label="As the day unfolded — Getting ready">
+    <div class="sticky">
+      <div class="in">
+        <div class="eye gold">As the Day Unfolded</div>
+        <div class="ch" style="margin-top:22px">
+          <div class="pl" style="--p:url(../assets/theme-backgrounds-2026-09-24/regency-poster.jpg);--pp:center 40%"><span class="cap">8:40 AM · 61 captures</span></div>
+          <div class="words">
+            <div class="clock">8:40 AM</div>
+            <h3>Getting ready</h3>
+            <p>The suite at Casa Ibarra, the veil on the chair, and 61 captures before anyone had coffee. The first chapter writes itself from the first shutter.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- chapter 2 · T5 Clip with a caption -->
+  <section class="sc" id="s-ch2" aria-label="The vows">
+    <div class="in ch right">
+      <a class="pl clip rv" href="#open-film" style="--p:url(../assets/theme-backgrounds-2026-09-24/vintage-poster.jpg);--pp:center 55%"><span class="living">Living moment · 5 s</span><span class="play"><i></i></span><span class="cap">2:30 PM · the vows</span></a>
+      <div class="words rv d1">
+        <div class="clock">2:30 PM</div>
+        <h3>The vows</h3>
+        <p>A five-second moment leads this chapter because one was in the bucket. Two photographs stand beside it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- chapter 3 · T2 Photo right, words left -->
+  <section class="sc" id="s-ch3" aria-label="First dance">
+    <div class="in ch">
+      <div class="pl rv" style="--p:url(../assets/theme-backgrounds-2026-09-24/great-gatsby-poster.jpg);--pp:center 60%"><span class="cap">6:05 PM · 88 captures</span></div>
+      <div class="words rv d1">
+        <div class="clock">6:05 PM</div>
+        <h3>First dance</h3>
+        <p>Eighty-eight captures in eleven minutes — the busiest stretch of the day, and the chandeliers knew it.</p>
+      </div>
+    </div>
+    <div class="in more-ch rv d2"><span class="dots"><i></i><i></i><i></i></span><span class="muted">7 more chapters follow, in the order they happened</span><span class="dots"><i></i><i></i><i></i></span></div>
+  </section>
+
+  <!-- 4 · THE GALLERY — OPEN-UP · preview T21 Collage of 5–6 -->
+  <section class="sc" id="s-gallery" aria-label="From the Day">
+    <div class="in">
+      <div class="eye gold rv">From the Day</div>
+      <h2 class="rv d1">The six best, then all of them</h2>
+      <a href="#open-gallery" class="collage rv d2" aria-label="Open the full gallery">
+        <span class="pl" style="--p:url(../assets/theme-backgrounds-2026-09-24/luxe-poster.jpg)"><span class="cap">6:41 PM</span></span>
+        <span class="pl" style="--p:url(../assets/theme-backgrounds-2026-09-24/cinderella-poster.jpg);--pp:center 30%"><span class="cap">2:48 PM</span></span>
+        <span class="pl" style="--p:url(../assets/theme-backgrounds-2026-09-24/whimsical-poster.jpg);--pp:center 70%"><span class="cap">4:12 PM</span></span>
+        <span class="pl" style="--p:url(../assets/theme-backgrounds-2026-09-24/rustic-poster.jpg);--pp:left 40%"><span class="cap">5:30 PM</span></span>
+        <span class="pl" style="--p:url(../assets/theme-backgrounds-2026-09-24/modern-poster.jpg);--pp:center 20%"><span class="cap">9:02 AM</span></span>
+        <span class="pl" style="--p:url(../assets/theme-backgrounds-2026-09-24/ballroom-velvet-chandeliers-poster.jpg);--pp:center 80%"><span class="cap">10:15 PM</span></span>
+      </a>
+      <div class="seeall rv d3">
+        <a class="btn" href="#open-gallery"><span class="only-guest">See all 1,240 photos</span><span class="only-public">See all 312 photos</span><span class="only-couple">See all 1,278 photos</span></a>
+        <span class="count"><span class="only-guest">Yours · <b>23</b> &nbsp;·&nbsp; Everyone's · <b>1,240</b></span><span class="only-public">Shared with everyone · <b>312</b></span><span class="only-couple">Everything · <b>1,278</b> <span class="i r" tabindex="0" data-tip="What you see is not what a guest sees. A guest opens their own captures and what you shared with the celebration; a visitor with the public link sees only the 312 whose takers said yes to everyone.">i</span></span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · WATCH THE FILM — OPEN-UP · preview T14 Full clip · Live Studio replay -->
+  <section class="sc" id="s-film" aria-label="Watch the Film">
+    <div class="in">
+      <div class="eye gold rv">Watch the Film</div>
+      <h2 class="rv d1">The broadcast, replayed</h2>
+      <a href="#open-film" class="film-prev rv d2" aria-label="Open the film">
+        <span class="pl" style="--p:url(../assets/theme-backgrounds-2026-09-24/luxe-poster.jpg);--pp:center 35%"></span>
+        <span class="play"><i></i></span>
+        <span class="meta"><span class="chip">Live Studio · 2 h 14 m</span><span class="chip">Livestream replay</span></span>
+      </a>
+      <div class="seeall rv d3"><span class="muted">Also: <em>The videographer's cut</em> · 6 min</span><a class="btn ghost" href="#open-film">Full screen · In place</a></div>
+    </div>
+  </section>
+
+  <!-- 6 · WERE YOU THERE? — OPEN-UP · exists in code (were-you-there.tsx) -->
+  <section class="sc tight" id="s-you" aria-label="Were you there?">
+    <div class="in">
+      <div class="eye gold rv">Find yourself</div>
+      <h2 class="rv d1">Were you there?</h2>
+      <div class="you-prev rv d2">
+        <div class="only-guest"><span class="num" style="font-size:clamp(40px,6cqw,80px)">23</span> <span class="muted" style="font-size:20px">of your captures, in 6 moments</span></div>
+        <div class="only-public muted" style="font-size:20px">There is nothing to type. This part opens from your own Papic link — it is for the people who were there.</div>
+        <div class="only-couple muted" style="font-size:20px">Each guest is shown only their own account of the day. There is no name field, for anyone <span class="i" tabindex="0" data-tip="Owner ruling 2026-09-07: no lookup by name, ever. The identity is the signed guest session from that person's own Papic link.">i</span></div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn only-guest" href="#open-you">Open your day</a><a class="btn ghost only-public" href="#open-you">How this works</a><a class="btn ghost only-couple" href="#open-you">See it as a guest</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · WHAT THEY WHISPERED — OPEN-UP · preview T23 Three short blocks · Kwento -->
+  <section class="sc" id="s-kwento" aria-label="What They Whispered">
+    <div class="in">
+      <div class="eye gold rv">What They Whispered</div>
+      <h2 class="rv d1">Forty-two wishes</h2>
+      <div class="wishes">
+        <div class="wish rv d1"><p>Rafa, you finally stopped talking long enough to say I do. Proud of you, pare.</p><div class="by">Kuya Dan</div></div>
+        <div class="wish rv d2"><p>Isabel, your Lola would have cried through the whole thing. I did it for her.</p><div class="by">Tita Marites</div></div>
+        <div class="wish rv d3"><p>Best sinigang, best couple. The order is correct.</p><div class="by">A guest</div></div>
+      </div>
+      <div class="seeall rv d3"><a class="btn ghost" href="#open-wishes">Read all 42</a><span class="count">Approved · screened · <b>42</b></span></div>
+    </div>
+  </section>
+
+  <!-- 8 · WHAT WE ASKED — T25 Questions & answers · Papic Challenge -->
+  <section class="sc tight" id="s-asked" aria-label="What We Asked">
+    <div class="in">
+      <div class="eye gold rv">What We Asked</div>
+      <h2 class="rv d1">Seven answers</h2>
+      <dl class="qa rv d2">
+        <div><dt>Where did you first meet the two of them?</dt><dd><span>"Sinigang night, 2020. I brought the rice."</span><span class="dim">— Kuya Dan</span></dd></div>
+        <div><dt>One word for tonight</dt><dd><span>"Chandeliers."</span><span>"Finally."</span><span>"Kilig."</span><span class="dim">+4 more</span></dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- 9 · LETTERS TO THE EDITOR — T22 Two columns · guest_columns -->
+  <section class="sc tight" id="s-letters" aria-label="Letters to the Editor">
+    <div class="in">
+      <div class="eye gold rv">Letters to the Editor</div>
+      <h2 class="rv d1">Three letters</h2>
+      <div class="cols">
+        <div class="rv d1"><h3>On the first dance</h3><p>Eleven minutes is a long time to hold a note, and the band held it. Somebody at table nine started the clap and the room followed…</p><div class="by eye" style="margin-top:10px">A friend of the groom</div></div>
+        <div class="rv d2"><h3>What the ridge remembers</h3><p>I was there the day he asked. I was not supposed to be, but I was. So this is a letter from a witness twice over…</p><div class="by eye" style="margin-top:10px">Unsigned <span class="i" tabindex="0" data-tip="The byline and the role ride the same consent. A writer who did not agree to be named is not named — and neither is their role.">i</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 · FROM YOUR VENDORS — T20 Photo strip · recommended vendor's day-of media -->
+  <section class="sc tight" id="s-vendors" aria-label="From Your Vendors">
+    <div class="in">
+      <div class="eye gold rv">From Your Vendors</div>
+      <h2 class="rv d1">Casa Ibarra's own frames</h2>
+      <div class="strip rv d2">
+        <div class="pl" style="--p:url(../assets/theme-backgrounds-2026-09-24/regency-poster.jpg);--pp:center 20%"><span class="cap">Casa Ibarra</span></div>
+        <div class="pl" style="--p:url(../assets/theme-backgrounds-2026-09-24/rustic-poster.jpg);--pp:center 50%"><span class="cap">Casa Ibarra</span></div>
+        <div class="pl" style="--p:url(../assets/theme-backgrounds-2026-09-24/whimsical-poster.jpg);--pp:center 30%"><span class="cap">Bloom &amp; Bough</span></div>
+        <div class="pl" style="--p:url(../assets/theme-backgrounds-2026-09-24/modern-poster.jpg);--pp:center 60%"><span class="cap">Bloom &amp; Bough</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 · POWERED BY SETNAYAN — T8 Words only · paid orders -->
+  <section class="sc tight" id="s-powered" aria-label="Powered by Setnayan">
+    <div class="in" style="text-align:center">
+      <div class="eye gold rv">Powered by Setnayan</div>
+      <div class="powered rv d1" style="justify-content:center"><span class="chip">Papic</span><span class="chip">Live Studio</span><span class="chip">Event Hub Pro</span><span class="chip">Seating</span></div>
+    </div>
+  </section>
+
+  <!-- 12 · VENDORS WE LOVED · THE TEAM — T17 Two side by side -->
+  <section class="sc tight" id="s-loved" aria-label="Vendors We Loved">
+    <div class="in two">
+      <div class="rv"><div class="eye gold">Vendors We Loved</div><h2 style="margin-top:8px">Two we'd book again</h2>
+        <div class="team">
+          <div><b>Casa Ibarra</b><span class="muted small">"They moved the ceremony indoors in eleven minutes."</span></div>
+          <div><b>Bloom &amp; Bough</b><span class="muted small">"The arch survived the wind. We did not."</span></div>
+        </div>
+      </div>
+      <div class="rv d1"><div class="eye">The team</div>
+        <div class="team">
+          <div><b>Casa Ibarra</b><span class="eye">Venue</span></div>
+          <div><b>Bloom &amp; Bough</b><span class="eye">Florals</span></div>
+          <div><b>Studio Hiraya</b><span class="eye">Photo &amp; video</span></div>
+          <div><b>Kusina Ligaya</b><span class="eye">Catering</span></div>
+          <div><b>The Tres Marias</b><span class="eye">Band</span></div>
+          <div><b>Marra Bridal</b><span class="eye">Gown</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 · FROM THE COUPLE — T11 Letter · locked to the close -->
+  <section class="sc" id="s-couple" aria-label="From the couple">
+    <div class="in letter">
+      <div class="eye gold rv">From the couple</div>
+      <h2 class="rv d1">Salamat</h2>
+      <p class="rv d2">To the 171 of you who came, and the 15 who could not: this page is yours as much as ours. Every photograph on it was taken by someone we love.</p>
+      <div class="sig rv d3">Rafael &amp; Isabel</div>
+    </div>
+  </section>
+
+  <!-- 14 · THEIR SONG — locked last · Pakanta song or the typed title -->
+  <section class="sc tight" id="s-song" aria-label="Their song">
+    <div class="in song rv">
+      <span class="wave"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      <div><div class="eye gold">Their Song</div><h3 class="script" style="font-size:38px">"Ikaw at Ako"</h3><div class="dim small">the song they had made · 3:42</div></div>
+    </div>
+  </section>
+
+  <!-- 15 · BACK COVER — What comes next · T10 Title card · absent until chosen -->
+  <section class="sc back" id="s-next" aria-label="What comes next">
+    <div class="in rv">
+      <div class="eye gold">What comes next</div>
+      <h2 style="margin-top:14px">First anniversary</h2>
+      <div class="muted" style="margin-top:12px;font-size:20px">12 December 2027 · <span class="dim">No. 2 opens with it</span> <span class="i" tabindex="0" data-tip="Derived: it takes its date from the day you just had. Chosen in What's next; when nothing is chosen, the story ends on the song and this scene is absent — not empty.">i</span></div>
+      <div class="rule"><span></span></div>
+      <div class="eye">Previously · No. 1</div>
+    </div>
+  </section>
+  <div class="foot eye">Powered by Setnayan · setnayan.com</div>
+</div><!-- /scroll.guest -->
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     OPEN-UP SCENES — tap opens full screen inside the Hub; close returns to the scene
+     ════════════════════════════════════════════════════════════════════════ -->
+
+<!-- GALLERY · viewer-dependent tabs -->
+<section class="openup" id="open-gallery" aria-label="The full gallery">
+  <div class="bar"><h3>From the Day</h3><a class="close" href="#s-gallery" aria-label="Close and return to the story">×</a></div>
+  <div class="body">
+    <div class="tabs">
+      <label class="tab only-guest" for="gt-yours">Yours</label>
+      <label class="tab only-guest" for="gt-all">Everyone's</label>
+      <span class="tab on only-public">Shared with everyone</span>
+      <label class="tab only-couple" for="gt-all">Everything</label>
+      <label class="tab only-couple" for="gt-own">Your own uploads <span class="pro">Pro</span></label>
+      <span class="count" style="margin-left:auto"><span class="only-guest">Captures · <b>1,240</b></span><span class="only-public">Captures · <b>312</b></span><span class="only-couple">Captures · <b>1,278</b></span></span>
+      <span class="i r only-guest" tabindex="0" data-tip="Yours = what you took and the moments you are in, from your own Papic link. Everyone's = what the couple shared with the celebration. No other guest's private captures are ever here.">i</span>
+      <span class="i r only-public" tabindex="0" data-tip="A public visitor sees only the captures whose takers said yes to everyone. There is no Yours tab without a Papic link.">i</span>
+      <span class="i r only-couple" tabindex="0" data-tip="What guests can see: a guest gets Yours + Everyone's (1,240). The public link gets 312. Your own uploads (38) are Pro and sit in both once added.">i</span>
+    </div>
+    <div class="hours">
+      <label class="chip" for="gh-all">All day</label><label class="chip" for="gh-m">Morning</label><label class="chip" for="gh-a">Afternoon</label><label class="chip" for="gh-e">Evening</label><label class="chip" for="gh-n">Night</label>
+      <span class="i" tabindex="0" data-tip="Captures are filed by shutter time. The couple's own uploads carry no time, so they show only under All day.">i</span>
+    </div>
+    <div class="gal">
+      <div class="pl m pub yours" style="--p:url(../assets/theme-backgrounds-2026-09-24/modern-poster.jpg);--pp:center 20%"><span class="cap">9:02 AM</span></div>
+      <div class="pl m" style="--p:url(../assets/theme-backgrounds-2026-09-24/regency-poster.jpg);--pp:center 40%"><span class="cap">8:40 AM</span></div>
+      <div class="pl m pub" style="--p:url(../assets/theme-backgrounds-2026-09-24/rustic-poster.jpg);--pp:left 30%"><span class="cap">10:15 AM</span></div>
+      <div class="pl m yours" style="--p:url(../assets/theme-backgrounds-2026-09-24/whimsical-poster.jpg);--pp:center 10%"><span class="cap">11:20 AM</span></div>
+      <div class="pl a pub yours" style="--p:url(../assets/theme-backgrounds-2026-09-24/vintage-poster.jpg);--pp:center 55%"><span class="cap">2:30 PM</span></div>
+      <div class="pl a pub" style="--p:url(../assets/theme-backgrounds-2026-09-24/cinderella-poster.jpg);--pp:center 30%"><span class="cap">2:48 PM</span></div>
+      <div class="pl a" style="--p:url(../assets/theme-backgrounds-2026-09-24/regency-poster.jpg);--pp:center 80%"><span class="cap">3:15 PM</span></div>
+      <div class="pl a yours" style="--p:url(../assets/theme-backgrounds-2026-09-24/whimsical-poster.jpg);--pp:center 70%"><span class="cap">4:12 PM</span></div>
+      <div class="pl a pub" style="--p:url(../assets/theme-backgrounds-2026-09-24/rustic-poster.jpg);--pp:right 40%"><span class="cap">5:30 PM</span></div>
+      <div class="pl e pub yours" style="--p:url(../assets/theme-backgrounds-2026-09-24/great-gatsby-poster.jpg);--pp:center 60%"><span class="cap">6:05 PM</span></div>
+      <div class="pl e pub" style="--p:url(../assets/theme-backgrounds-2026-09-24/luxe-poster.jpg);--pp:center 30%"><span class="cap">6:41 PM</span></div>
+      <div class="pl e" style="--p:url(../assets/theme-backgrounds-2026-09-24/ballroom-velvet-chandeliers-poster.jpg);--pp:center 50%"><span class="cap">7:10 PM</span></div>
+      <div class="pl e yours" style="--p:url(../assets/theme-backgrounds-2026-09-24/great-gatsby-poster.jpg);--pp:left 30%"><span class="cap">7:52 PM</span></div>
+      <div class="pl e pub" style="--p:url(../assets/theme-backgrounds-2026-09-24/luxe-poster.jpg);--pp:right 60%"><span class="cap">8:30 PM</span></div>
+      <div class="pl n pub" style="--p:url(../assets/theme-backgrounds-2026-09-24/cyber-neon-poster.jpg);--pp:center 40%"><span class="cap">10:15 PM</span></div>
+      <div class="pl n yours" style="--p:url(../assets/theme-backgrounds-2026-09-24/ballroom-velvet-chandeliers-poster.jpg);--pp:center 80%"><span class="cap">10:40 PM</span></div>
+      <div class="pl n" style="--p:url(../assets/theme-backgrounds-2026-09-24/cyber-neon-poster.jpg);--pp:left 20%"><span class="cap">11:02 PM</span></div>
+      <div class="pl m a e n own" style="--p:linear-gradient(135deg,rgba(var(--gold-rgb),.35),rgba(var(--bg2-rgb),.9))"><span class="cap" style="opacity:1;color:var(--ink)">Add your own photos · Pro</span></div>
+    </div>
+    <div class="seeall" style="margin-top:26px"><span class="count only-guest">Showing your layer · <b>1,240</b> of 1,240</span><span class="count only-public">Showing the public layer · <b>312</b></span><span class="count only-couple">Showing everything · <b>1,278</b></span><a class="btn ghost" href="#s-gallery">Back to the story</a></div>
+  </div>
+</section>
+
+<!-- FILM · Live Studio replay -->
+<section class="openup" id="open-film" aria-label="Watch the Film">
+  <div class="bar"><h3>Watch the Film</h3><a class="close" href="#s-film" aria-label="Close and return to the story">×</a></div>
+  <div class="body film-stage">
+    <div class="fsrow"><label class="chip" for="fs-place">In place</label><label class="chip" for="fs-full">Full screen</label><span class="count" style="margin-left:auto">The broadcast, replayed · <b>2 h 14 m</b></span></div>
+    <div class="film-frame"><div class="pl" style="--p:url(../assets/theme-backgrounds-2026-09-24/luxe-poster.jpg);--pp:center 35%"></div><span class="play"><i></i></span><span class="living">Live Studio · 12 Dec</span></div>
+    <div class="fsrow"><span class="eye">Chapters</span><a class="chip" href="#open-film">2:30 PM · The vows</a><a class="chip" href="#open-film">6:05 PM · First dance</a><a class="chip" href="#open-film">9:40 PM · The toast</a></div>
+    <div class="rule"><span></span></div>
+    <div class="fsrow"><span class="eye">Also</span><a class="chip" href="#open-film">The videographer's cut · 6 min</a><span class="i" tabindex="0" data-tip="Films the couple attached themselves are free and ungated. The Live Studio replay is the broadcast Setnayan produced; it shows while the Live Studio unlock is active.">i</span></div>
+  </div>
+</section>
+
+<!-- WERE YOU THERE? · the guest's own account, from their own Papic link -->
+<section class="openup" id="open-you" aria-label="Were you there?">
+  <div class="bar"><h3>Were you there?</h3><a class="close" href="#s-you" aria-label="Close and return to the story">×</a></div>
+  <div class="body">
+    <div class="only-guest">
+      <div class="eye gold">Your day</div>
+      <div style="display:flex;gap:8px 28px;flex-wrap:wrap;align-items:baseline;margin-top:8px"><span class="num" style="font-size:clamp(56px,8cqw,110px)">23</span><span class="muted" style="font-size:20px">captures · first at 8:52 AM · last at 10:40 PM</span></div>
+      <div class="you-list">
+        <a href="#s-ch1"><span><b>8:52 AM</b> Getting ready</span><span class="eye">Jump to that minute →</span></a>
+        <a href="#s-ch2"><span><b>2:31 PM</b> The vows</span><span class="eye">Jump to that minute →</span></a>
+        <a href="#s-ch3"><span><b>6:07 PM</b> First dance</span><span class="eye">Jump to that minute →</span></a>
+        <a href="#s-gallery"><span><b>7:52 PM</b> The toast</span><span class="eye">Jump to that minute →</span></a>
+        <a href="#s-gallery"><span><b>10:40 PM</b> Last dance</span><span class="eye">Jump to that minute →</span></a>
+      </div>
+      <div class="rule"><span></span></div>
+      <a class="btn ghost" href="#open-gallery">Your 23 captures in the gallery</a>
+    </div>
+    <div class="only-public wall">
+      <div><div class="eye gold">There is nothing to type</div><h2 style="margin-top:10px">This part is for the people who were there</h2></div>
+      <div class="muted" style="font-size:20px">Open the story from your own Papic link and this scene becomes your account of the day: your captures, the moments you are in, the minute you arrived. Nobody can look anybody else up here — there is no name field, for anyone.</div>
+    </div>
+    <div class="only-couple wall">
+      <div><div class="eye gold">What each guest sees</div><h2 style="margin-top:10px">Their own day, nobody else's</h2></div>
+      <div class="muted" style="font-size:20px">A guest who opens the story from their Papic link sees their own captures and the moments they appear in, with a jump to each minute. You cannot fill or edit this scene; you can only hide it. <span class="i" tabindex="0" data-tip="Shipped: were-you-there.tsx · the identity is the signed guest session from _lib/your-own-day.server.ts. no-name-field-on-the-story.test.ts holds the line.">i</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- WISHES · What They Whispered -->
+<section class="openup" id="open-wishes" aria-label="All the wishes">
+  <div class="bar"><h3>What They Whispered</h3><a class="close" href="#s-kwento" aria-label="Close and return to the story">×</a></div>
+  <div class="body">
+    <div class="count" style="margin-bottom:22px">Approved · screened · <b>42</b> <span class="i" tabindex="0" data-tip="Only approved, screen-cleared wishes reach the page. A wish whose photo was withheld still appears as words.">i</span></div>
+    <div class="wishes" style="margin-top:0">
+      <div class="wish"><p>Rafa, you finally stopped talking long enough to say I do. Proud of you, pare.</p><div class="by">Kuya Dan · 2:41 PM</div></div>
+      <div class="wish"><p>Isabel, your Lola would have cried through the whole thing. I did it for her.</p><div class="by">Tita Marites · 3:05 PM</div></div>
+      <div class="wish"><p>Best sinigang, best couple. The order is correct.</p><div class="by">A guest · 7:20 PM</div></div>
+      <div class="wish"><p>May your fights be short and your leftovers long.</p><div class="by">Ninang Bea · 7:48 PM</div></div>
+      <div class="wish"><p>I flew in from Dubai for this and I would do it again tomorrow.</p><div class="by">Paolo · 8:12 PM</div></div>
+      <div class="wish"><p>To the couple who seated me next to the dessert table: I see you, and I thank you.</p><div class="by">A guest · 9:30 PM</div></div>
+      <div class="wish"><p>Your first dance was eleven minutes. Mine lasted forty seconds. Teach me.</p><div class="by">Kuya Migs · 9:51 PM</div></div>
+      <div class="wish"><p>Mahal namin kayo. Umuwi na kayo, late na.</p><div class="by">Mama · 11:02 PM</div></div>
+      <div class="wish dim"><p>34 more…</p></div>
+    </div>
+    <div class="seeall" style="margin-top:28px"><a class="btn ghost" href="#s-kwento">Back to the story</a></div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     (2) THE SAME STORY INSIDE THE EVENT HUB MAKER — scene navigator
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="scroll mkview">
+<div class="maker">
+  <div class="mtop">
+    <div style="display:flex;gap:12px;align-items:baseline;flex-wrap:wrap"><span class="eye gold">Event Hub Maker</span><b style="font-family:var(--head);font-weight:400;font-size:20px">Post Event</b><span class="auto">Auto · written 13 Dec, 6:02 AM</span><span class="i" tabindex="0" data-tip="The morning after, the Maker compiles every scene below from what already happened — nothing was typed. Every Auto scene is free. Changing the look or adding your own photos is Event Hub Pro.">i</span></div>
+    <div class="steps"><span>Save the Date</span><span>Invitation</span><span>On the Day</span><span class="on">Post Event</span><span>Publish to Discover</span></div>
+  </div>
+
+  <!-- CANVAS: the selected scene, as a phone -->
+  <div class="canvas">
+    <div class="cvhead"><span class="eye">Canvas · phone</span><span class="count">Theme · <b>Luxe</b> <span class="pro">Pro</span></span></div>
+    <div class="thumb t4 cv-cover"><div class="ph" style="--p:url(../assets/theme-backgrounds-2026-09-24/luxe-poster.jpg)"></div><div class="words" style="text-shadow:0 2px 10px rgba(0,0,0,.6)"><div class="ln xs"></div><div class="tt">Rafael &amp; Isabel<br>Are Married</div><div class="ln s"></div></div><span class="badge">T4</span></div>
+    <div class="thumb t24 cv-before"><div class="ln xs"></div><div class="tt">Six years, four chapters</div><div class="tl"><div><b>2020</b><div class="ln s"></div></div><div><b>2022</b><div class="ln s"></div></div><div><b>2025</b><div class="ln s"></div></div><div><b>12 · 12 · 2026</b><div class="ln s"></div></div></div><span class="badge">T24</span></div>
+    <div class="thumb t12 cv-numbers"><div class="ln xs" style="margin:0 auto"></div><div class="big">1,240</div><div class="ln s" style="margin:12px auto"></div><div style="display:flex;gap:14px;justify-content:center;margin-top:14px"><span class="tt">186</span><span class="tt">171</span><span class="tt">10</span></div><span class="badge">T12</span></div>
+    <div class="thumb t1 cv-ch1"><div class="ph" style="--p:url(../assets/theme-backgrounds-2026-09-24/regency-poster.jpg)"></div><div class="ln xs"></div><div class="tt">8:40 AM · Getting ready</div><div class="ln"></div><div class="ln s"></div><span class="badge">T1 · Scrub</span></div>
+    <div class="thumb t5 cv-ch2"><div class="ph" style="--p:url(../assets/theme-backgrounds-2026-09-24/vintage-poster.jpg)"><span class="mini-play"><i></i></span></div><div class="ln xs"></div><div class="tt">2:30 PM · The vows</div><div class="ln s"></div><span class="badge">T5</span></div>
+    <div class="thumb t2 cv-ch3"><div class="ph" style="--p:url(../assets/theme-backgrounds-2026-09-24/great-gatsby-poster.jpg)"></div><div class="ln xs"></div><div class="tt">6:05 PM · First dance</div><div class="ln"></div><div class="ln s"></div><span class="badge">T2</span></div>
+    <div class="thumb t21 cv-gallery"><div class="ln xs"></div><div class="tt">The six best</div><div class="grid" style="margin-top:10px"><div class="ph" style="--p:url(../assets/theme-backgrounds-2026-09-24/luxe-poster.jpg)"></div><div class="ph" style="--p:url(../assets/theme-backgrounds-2026-09-24/cinderella-poster.jpg)"></div><div class="ph" style="--p:url(../assets/theme-backgrounds-2026-09-24/whimsical-poster.jpg)"></div><div class="ph" style="--p:url(../assets/theme-backgrounds-2026-09-24/rustic-poster.jpg)"></div><div class="ph" style="--p:url(../assets/theme-backgrounds-2026-09-24/modern-poster.jpg)"></div></div><div class="ln xs" style="margin-top:14px"></div><span class="badge">Open-up · T21</span></div>
+    <div class="thumb t14 cv-film"><div class="ph" style="--p:url(../assets/theme-backgrounds-2026-09-24/luxe-poster.jpg)"><span class="mini-play"><i></i></span></div><div class="words"><div class="ln xs"></div><div class="tt">The broadcast, replayed</div></div><span class="badge">Open-up · T14</span></div>
+    <div class="thumb t12 cv-you"><div class="ln xs" style="margin:0 auto"></div><div class="tt">Were you there?</div><div class="big" style="margin-top:14px">23</div><div class="ln s" style="margin:12px auto"></div><span class="badge">Open-up · new</span></div>
+    <div class="thumb t23 cv-kwento"><div class="ln xs"></div><div class="tt">Forty-two wishes</div><div class="grid" style="grid-template-columns:1fr"><div><div class="ln"></div><div class="ln s"></div></div><div><div class="ln"></div><div class="ln s"></div></div><div><div class="ln"></div><div class="ln s"></div></div></div><span class="badge">Open-up · T23</span></div>
+    <div class="thumb t25 cv-asked"><div class="ln xs"></div><div class="tt">What We Asked</div><dl><dt>Where did you first meet them?</dt><dd class="ln s"></dd><dt>One word for tonight</dt><dd class="ln s"></dd></dl><span class="badge">T25</span></div>
+    <div class="thumb t22 cv-letters"><div class="ln xs"></div><div class="tt">Letters to the Editor</div><div class="grid"><div><div class="ln"></div><div class="ln"></div><div class="ln s"></div></div><div><div class="ln"></div><div class="ln"></div><div class="ln s"></div></div></div><span class="badge">T22</span></div>
+    <div class="thumb t20 cv-vendors"><div class="ln xs"></div><div class="tt">From Your Vendors</div><div class="grid" style="margin-top:10px"><div class="ph" style="--p:url(../assets/theme-backgrounds-2026-09-24/regency-poster.jpg)"></div><div class="ph" style="--p:url(../assets/theme-backgrounds-2026-09-24/rustic-poster.jpg)"></div><div class="ph" style="--p:url(../assets/theme-backgrounds-2026-09-24/whimsical-poster.jpg)"></div></div><span class="badge">T20</span></div>
+    <div class="thumb t19 cv-wall"><div class="ln xs"></div><div class="tt dim">Live Photo Wall</div><div class="grid" style="margin-top:10px;opacity:.35"><div class="ph"></div><div class="ph"></div><div class="ph"></div><div class="ph"></div></div><span class="badge" style="background:transparent;box-shadow:inset 0 0 0 1px var(--gold);color:var(--gold)">Skipped · T19</span></div>
+    <div class="thumb t23 cv-said"><div class="ln xs"></div><div class="tt dim">What They Said</div><div class="grid" style="opacity:.35"><div><div class="ln"></div><div class="ln s"></div></div><div><div class="ln"></div><div class="ln s"></div></div></div><span class="badge" style="background:transparent;box-shadow:inset 0 0 0 1px var(--gold);color:var(--gold)">Skipped · T23</span></div>
+    <div class="thumb t10 cv-powered"><div class="ln xs" style="margin:0 auto"></div><div class="tt">Powered by Setnayan</div><div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:12px"><span class="chip">Papic</span><span class="chip">Live Studio</span></div><span class="badge">T8</span></div>
+    <div class="thumb t17 cv-loved"><div class="ln xs"></div><div class="tt">Vendors We Loved</div><div class="grid" style="margin-top:10px"><div><div class="ln"></div><div class="ln s"></div><div class="ln s"></div></div><div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div></div><span class="badge">T17</span></div>
+    <div class="thumb t11 cv-couple"><div class="ln xs" style="margin:0 auto"></div><div class="tt">Salamat</div><div class="ln" style="margin:14px auto"></div><div class="ln s" style="margin:0 auto"></div><div class="script" style="font-size:26px;margin-top:14px">Rafael &amp; Isabel</div><span class="badge">T11 · pinned</span></div>
+    <div class="thumb t10 cv-song"><div class="ln xs" style="margin:0 auto"></div><div class="script" style="font-size:28px">"Ikaw at Ako"</div><div class="ln s" style="margin:12px auto"></div><span class="badge">T8 · pinned last</span></div>
+    <div class="thumb t10 cv-next"><div class="ln xs" style="margin:0 auto"></div><div class="tt">First anniversary</div><div class="ln s" style="margin:12px auto"></div><div class="eye">No. 2 opens with it</div><span class="badge">T10 · optional</span></div>
+  </div>
+
+  <!-- INSPECTOR -->
+  <aside class="ins">
+    <div class="eye" style="margin-bottom:14px">Filled from</div>
+    <dl>
+      <div class="per p-cover"><dt>Source</dt><dd>Names, date, venue · the living hero · edition stamp <span class="src">events · event_editorial.edition_no</span></dd><dt>Template</dt><dd>4 · Full photo, words on top ★</dd><dt>Transition</dt><dd>Cover → Numbers · <em>Auto, Slow 1.4×</em></dd></div>
+      <div class="per p-before"><dt>Source</dt><dd>Milestones from Our Love Story <span class="src">love_story.milestones</span></dd><dt>Template</dt><dd>24 · Timeline</dd><dt>Transition</dt><dd>Scroll</dd></div>
+      <div class="per p-numbers"><dt>Source</dt><dd>Guests, attending, captures, chapters <span class="src">metrics · guests · papic_photos</span></dd><dt>Template</dt><dd>12 · Big number</dd><dt>Transition</dt><dd>Numbers → Chapter 1 · <em>Scrub</em></dd></div>
+      <div class="per p-ch1"><dt>Source</dt><dd>First Papic bucket, 08:40, 61 clean captures · named after the run-of-show block <span class="src">papic_photos · event schedule</span></dd><dt>Template</dt><dd>1 · Photo left, words right ★</dd><dt>Transition</dt><dd><em>Scrub</em> — pinned, reversible</dd></div>
+      <div class="per p-ch2"><dt>Source</dt><dd>A 5-second living moment led this bucket <span class="src">papic 5s clip · captured_at</span></dd><dt>Template</dt><dd>5 · Clip with a caption</dd><dt>Transition</dt><dd>Scroll</dd></div>
+      <div class="per p-ch3"><dt>Source</dt><dd>88 captures in 11 minutes <span class="src">papic_photos · dayChapters[2]</span></dd><dt>Template</dt><dd>2 · Photo right, words left ★</dd><dt>Transition</dt><dd>Scroll</dd></div>
+      <div class="per p-gallery"><dt>Source</dt><dd>All clean captures, filed by shutter time · your uploads join here <span class="src">galleryPhotos · galleryCaptures.atMs · events.our_photos</span></dd><dt>Template</dt><dd>Open-up · preview 21 · Collage of 5–6</dd><dt>Opens to</dt><dd>Tabs per reader · time-of-day filter</dd></div>
+      <div class="per p-film"><dt>Source</dt><dd>The Live Studio broadcast · your attached films <span class="src">watchFilmEmbedUrl · films</span></dd><dt>Template</dt><dd>Open-up · preview 14 · Full clip</dd><dt>Opens to</dt><dd>Full screen · In place</dd></div>
+      <div class="per p-you"><dt>Source</dt><dd>Each guest's own signed Papic-link session — not yours to fill <span class="src">your-own-day.server.ts</span></dd><dt>Template</dt><dd>Open-up · new</dd><dt>Opens to</dt><dd>Their captures, their minutes</dd></div>
+      <div class="per p-kwento"><dt>Source</dt><dd>Approved, screened guest wishes <span class="src">photo_messages</span></dd><dt>Template</dt><dd>Open-up · preview 23 · Three short blocks</dd><dt>Opens to</dt><dd>Read all 42</dd></div>
+      <div class="per p-asked"><dt>Source</dt><dd>Papic Challenge answers, four consent gates <span class="src">challengeAnswers</span></dd><dt>Template</dt><dd>25 · Questions &amp; answers</dd><dt>Transition</dt><dd>Scroll</dd></div>
+      <div class="per p-letters"><dt>Source</dt><dd>Approved guest columns <span class="src">guest_columns</span></dd><dt>Template</dt><dd>22 · Two columns</dd><dt>Transition</dt><dd>Scroll</dd></div>
+      <div class="per p-vendors"><dt>Source</dt><dd>Day-of media from suppliers you recommended <span class="src">vendorMedia</span></dd><dt>Template</dt><dd>20 · Photo strip</dd><dt>Transition</dt><dd>Scroll</dd></div>
+      <div class="per p-wall"><dt>Source</dt><dd>Live Photo Wall — not on this event, so the scene is skipped <span class="src">photo_wall_photos · LIVE_WALL</span></dd><dt>Template</dt><dd>19 · Grid of four</dd><dt>Transition</dt><dd>—</dd></div>
+      <div class="per p-said"><dt>Source</dt><dd>Reviews — none yet, so the scene is skipped <span class="src">draft_json.reviews</span></dd><dt>Template</dt><dd>23 · Three short blocks</dd><dt>Transition</dt><dd>—</dd></div>
+      <div class="per p-powered"><dt>Source</dt><dd>Setnayan services you paid for <span class="src">orders → servicesAvailed</span></dd><dt>Template</dt><dd>8 · Words only ★</dd><dt>Transition</dt><dd>Scroll</dd></div>
+      <div class="per p-loved"><dt>Source</dt><dd>Suppliers you recommended + the credit list <span class="src">vendor_recommendations · vendors</span></dd><dt>Template</dt><dd>17 · Two side by side</dd><dt>Transition</dt><dd>Scroll</dd></div>
+      <div class="per p-couple"><dt>Source</dt><dd>Your thank-you note — composed for you until you write one <span class="src">events.special_message</span></dd><dt>Template</dt><dd>11 · Letter</dd><dt>Position</dt><dd>Pinned to the close</dd></div>
+      <div class="per p-song"><dt>Source</dt><dd>The song you had made, or the title you typed <span class="src">pakanta_song_r2_key · love_story.anchors.song</span></dd><dt>Template</dt><dd>8 · Words only ★</dd><dt>Position</dt><dd>Pinned last</dd></div>
+      <div class="per p-next"><dt>Source</dt><dd>What you announce in What's next · absent until chosen <span class="src">event_editorial · whats-next.ts</span></dd><dt>Template</dt><dd>10 · Title card</dd><dt>Position</dt><dd>After the song</dd></div>
+    </dl>
+    <div class="acts">
+      <div class="act"><span>Words <span class="i" tabindex="0" data-tip="Retitle, rewrite the caption, name the moment. Free on every Auto scene.">i</span></span><span class="free">Free</span></div>
+      <div class="act"><span>Show · Hide</span><span class="free">Free</span></div>
+      <div class="act"><span>Order <span class="i" tabindex="0" data-tip="Move a scene earlier or later. The close is pinned: From the couple, then the song. Owner call pending — the shipped Story Maker marks order as Pro.">i</span></span><span class="free">Free ·?</span></div>
+      <div class="probegin eye">Pro begins here</div>
+      <div class="act"><span>Theme — the whole look <span class="i" tabindex="0" data-tip="Fonts, palette, ornaments, backgrounds, reveal and motion, on every stage and every printable. Classic is free.">i</span></span><span class="pro">Pro</span></div>
+      <div class="act"><span>Swap the template <span class="i" tabindex="0" data-tip="Any of the 25 arrangements for this scene, plus its transition — Scroll · Scrub · Auto.">i</span></span><span class="pro">Pro</span></div>
+      <div class="act"><span>Add your own photos &amp; clips <span class="i" tabindex="0" data-tip="Owner, 2026-09-24: uploading the couple's own photos is Pro. Guests' Papic captures are free and already here.">i</span></span><span class="pro">Pro</span></div>
+      <div class="act"><span>Your own scene</span><span class="pro">Pro</span></div>
+    </div>
+  </aside>
+
+  <!-- RAIL: scene navigator -->
+  <div class="rail">
+    <div class="grp"><span class="eye">Scenes · 20</span><span class="dim small">· 2 skipped</span><span class="i" tabindex="0" data-tip="◉ shows the scene, ◌ hides it. ↑↓ move it. A padlock means the position is fixed. Every row says Auto and names what filled it.">i</span></div>
+
+    <div class="row r-cover"><span class="no">0</span><label class="t" for="sel-cover"><b>Cover <span class="auto">Auto</span></b><small>T4 · Full photo, words on top<em>· events · living hero</em></small></label><span class="ctl"><span class="ic lock" title="Post Event keeps its own cover">🔒</span></span></div>
+    <div class="row r-before"><span class="no">1</span><label class="t" for="sel-before"><b>Before the day <span class="auto">Auto</span> <span class="hidden-note eye" style="color:var(--gold)">Hidden</span></b><small>T24 · Timeline<em>· Our Love Story</em>· optional chapter</small></label><span class="ctl"><label class="ic eyeic" for="hide-before" title="Show / hide"></label><span class="ic" title="Move earlier">↑</span><span class="ic" title="Move later">↓</span></span></div>
+    <div class="row r-numbers"><span class="no">2</span><label class="t" for="sel-numbers"><b>By the Numbers <span class="auto">Auto</span> <span class="hidden-note eye" style="color:var(--gold)">Hidden</span></b><small>T12 · Big number<em>· metrics</em></small></label><span class="ctl"><label class="ic eyeic" for="hide-numbers" title="Show / hide"></label><span class="ic" title="Move earlier">↑</span><span class="ic" title="Move later">↓</span></span></div>
+
+    <div class="grp"><span class="eye">As the Day Unfolded</span><span class="dim small">· 10 chapters, in the order they happened</span></div>
+    <div class="row r-ch1"><span class="no">3</span><label class="t" for="sel-ch1"><b>8:40 AM · Getting ready <span class="auto">Auto</span> <span class="hidden-note eye" style="color:var(--gold)">Hidden</span></b><small>T1 · Photo left, words right<em>· papic_photos · 61</em>· Scrub</small></label><span class="ctl"><label class="ic eyeic" for="hide-ch1" title="Show / hide"></label><span class="ic" title="Move earlier">↑</span><span class="ic" title="Move later">↓</span></span></div>
+    <div class="row r-ch2"><span class="no">4</span><label class="t" for="sel-ch2"><b>2:30 PM · The vows <span class="auto">Auto</span></b><small>T5 · Clip with a caption<em>· papic 5 s clip</em></small></label><span class="ctl"><span class="ic eyeic" title="Show / hide"></span><span class="ic" title="Move earlier">↑</span><span class="ic" title="Move later">↓</span></span></div>
+    <div class="row r-ch3"><span class="no">5</span><label class="t" for="sel-ch3"><b>6:05 PM · First dance <span class="auto">Auto</span></b><small>T2 · Photo right, words left<em>· papic_photos · 88</em></small></label><span class="ctl"><span class="ic eyeic" title="Show / hide"></span><span class="ic" title="Move earlier">↑</span><span class="ic" title="Move later">↓</span></span></div>
+    <label class="row more-lbl" for="more-ch"><span class="no dim">…</span><span class="t"><b class="dim" style="font-size:15px"><span class="open">7 more chapters</span><span class="shut">Fewer chapters</span></b></span><span class="ctl"><span class="ic">⌄</span></span></label>
+    <div class="more-rows">
+      <div class="row"><span class="no">6</span><span class="t"><b>7:52 PM · The toast <span class="auto">Auto</span></b><small>T1<em>· papic_photos · 44</em></small></span><span class="ctl"><span class="ic eyeic"></span><span class="ic">↑</span><span class="ic">↓</span></span></div>
+      <div class="row"><span class="no">7</span><span class="t"><b>8:30 PM · Cake <span class="auto">Auto</span></b><small>T5<em>· papic 5 s clip</em></small></span><span class="ctl"><span class="ic eyeic"></span><span class="ic">↑</span><span class="ic">↓</span></span></div>
+      <div class="row"><span class="no">8</span><span class="t"><b>9:40 PM · Speeches <span class="auto">Auto</span></b><small>T2<em>· papic_photos · 39</em></small></span><span class="ctl"><span class="ic eyeic"></span><span class="ic">↑</span><span class="ic">↓</span></span></div>
+      <div class="row"><span class="no">9</span><span class="t"><b>10:15 PM · Bouquet <span class="auto">Auto</span></b><small>T1<em>· papic_photos · 27</em></small></span><span class="ctl"><span class="ic eyeic"></span><span class="ic">↑</span><span class="ic">↓</span></span></div>
+      <div class="row"><span class="no">10</span><span class="t"><b>10:40 PM · Last dance <span class="auto">Auto</span></b><small>T5<em>· papic 5 s clip</em></small></span><span class="ctl"><span class="ic eyeic"></span><span class="ic">↑</span><span class="ic">↓</span></span></div>
+      <div class="row"><span class="no">11</span><span class="t"><b>11:02 PM · Send-off <span class="auto">Auto</span></b><small>T2<em>· papic_photos · 18</em></small></span><span class="ctl"><span class="ic eyeic"></span><span class="ic">↑</span><span class="ic">↓</span></span></div>
+      <div class="row"><span class="no">12</span><span class="t"><b>11:30 PM · After <span class="auto">Auto</span></b><small>T1<em>· papic_photos · 9</em></small></span><span class="ctl"><span class="ic eyeic"></span><span class="ic">↑</span><span class="ic">↓</span></span></div>
+    </div>
+
+    <div class="grp"><span class="eye">Open-up scenes</span><span class="dim small">· a preview in the flow, a tap opens it, closing returns here</span><span class="pro" style="background:transparent;box-shadow:inset 0 0 0 1px var(--gold);color:var(--gold)">New family</span></div>
+    <div class="row r-gallery"><span class="no">13</span><label class="t" for="sel-gallery"><b>From the Day · Gallery <span class="auto">Auto</span> <span class="hidden-note eye" style="color:var(--gold)">Hidden</span></b><small>Preview T21 · Collage of 5–6<em>· galleryPhotos · 1,240</em>· tabs per reader</small></label><span class="ctl"><label class="ic eyeic" for="hide-gallery" title="Show / hide"></label><span class="ic" title="Move earlier">↑</span><span class="ic" title="Move later">↓</span></span></div>
+    <div class="row r-film"><span class="no">14</span><label class="t" for="sel-film"><b>Watch the Film <span class="auto">Auto</span> <span class="hidden-note eye" style="color:var(--gold)">Hidden</span></b><small>Preview T14 · Full clip<em>· Live Studio replay · films</em></small></label><span class="ctl"><label class="ic eyeic" for="hide-film" title="Show / hide"></label><span class="ic" title="Move earlier">↑</span><span class="ic" title="Move later">↓</span></span></div>
+    <div class="row r-you"><span class="no">15</span><label class="t" for="sel-you"><b>Were you there? <span class="auto">Auto</span> <span class="hidden-note eye" style="color:var(--gold)">Hidden</span></b><small>New<em>· each guest's own Papic link</em>· no name field</small></label><span class="ctl"><label class="ic eyeic" for="hide-you" title="Show / hide"></label><span class="ic" title="Move earlier">↑</span><span class="ic" title="Move later">↓</span></span></div>
+    <div class="row r-kwento"><span class="no">16</span><label class="t" for="sel-kwento"><b>What They Whispered <span class="auto">Auto</span> <span class="hidden-note eye" style="color:var(--gold)">Hidden</span></b><small>Preview T23 · Three short blocks<em>· photo_messages · 42</em></small></label><span class="ctl"><label class="ic eyeic" for="hide-kwento" title="Show / hide"></label><span class="ic" title="Move earlier">↑</span><span class="ic" title="Move later">↓</span></span></div>
+
+    <div class="grp"><span class="eye">The rest of the day</span></div>
+    <div class="row r-asked"><span class="no">17</span><label class="t" for="sel-asked"><b>What We Asked <span class="auto">Auto</span> <span class="hidden-note eye" style="color:var(--gold)">Hidden</span></b><small>T25 · Questions &amp; answers<em>· challengeAnswers · 7</em></small></label><span class="ctl"><label class="ic eyeic" for="hide-asked" title="Show / hide"></label><span class="ic" title="Move earlier">↑</span><span class="ic" title="Move later">↓</span></span></div>
+    <div class="row r-letters"><span class="no">18</span><label class="t" for="sel-letters"><b>Letters to the Editor <span class="auto">Auto</span> <span class="hidden-note eye" style="color:var(--gold)">Hidden</span></b><small>T22 · Two columns<em>· guest_columns · 3</em></small></label><span class="ctl"><label class="ic eyeic" for="hide-letters" title="Show / hide"></label><span class="ic" title="Move earlier">↑</span><span class="ic" title="Move later">↓</span></span></div>
+    <div class="row r-vendors"><span class="no">19</span><label class="t" for="sel-vendors"><b>From Your Vendors <span class="auto">Auto</span> <span class="hidden-note eye" style="color:var(--gold)">Hidden</span></b><small>T20 · Photo strip<em>· vendorMedia · 2 suppliers</em></small></label><span class="ctl"><label class="ic eyeic" for="hide-vendors" title="Show / hide"></label><span class="ic" title="Move earlier">↑</span><span class="ic" title="Move later">↓</span></span></div>
+    <div class="row r-wall skipped"><span class="no">—</span><label class="t" for="sel-wall"><b>Live Photo Wall <span class="skip">Skipped</span></b><small>T19 · Grid of four<em>· no Live Photo Wall on this event</em></small></label><span class="ctl"><span class="i r" tabindex="0" data-tip="Auto never leaves an empty scene. A source with nothing in it is skipped, not shown as a placeholder.">i</span></span></div>
+    <div class="row r-said skipped"><span class="no">—</span><label class="t" for="sel-said"><b>What They Said <span class="skip">Skipped</span></b><small>T23 · Three short blocks<em>· no reviews yet</em></small></label><span class="ctl"><span class="i r" tabindex="0" data-tip="Appears on its own the day the first review is approved.">i</span></span></div>
+    <div class="row r-powered"><span class="no">20</span><label class="t" for="sel-powered"><b>Powered by Setnayan <span class="auto">Auto</span> <span class="hidden-note eye" style="color:var(--gold)">Hidden</span></b><small>T8 · Words only<em>· orders · 4 services</em></small></label><span class="ctl"><label class="ic eyeic" for="hide-powered" title="Show / hide"></label><span class="ic" title="Move earlier">↑</span><span class="ic" title="Move later">↓</span></span></div>
+    <div class="row r-loved"><span class="no">21</span><label class="t" for="sel-loved"><b>Vendors We Loved · The team <span class="auto">Auto</span> <span class="hidden-note eye" style="color:var(--gold)">Hidden</span></b><small>T17 · Two side by side<em>· vendor_recommendations · 6 credits</em></small></label><span class="ctl"><label class="ic eyeic" for="hide-loved" title="Show / hide"></label><span class="ic" title="Move earlier">↑</span><span class="ic" title="Move later">↓</span></span></div>
+
+    <div class="grp"><span class="eye">The close</span><span class="dim small">· pinned — the story ends on your word, then your song</span></div>
+    <div class="row r-couple"><span class="no">22</span><label class="t" for="sel-couple"><b>From the couple <span class="auto">Auto</span> <span class="hidden-note eye" style="color:var(--gold)">Hidden</span></b><small>T11 · Letter<em>· special_message · composed until you write</em></small></label><span class="ctl"><label class="ic eyeic" for="hide-couple" title="Show / hide"></label><span class="ic lock" title="Pinned to the close">🔒</span></span></div>
+    <div class="row r-song"><span class="no">23</span><label class="t" for="sel-song"><b>Their Song <span class="auto">Auto</span></b><small>T8 · Words only<em>· pakanta song · "Ikaw at Ako"</em></small></label><span class="ctl"><span class="ic lock" title="Pinned last">🔒</span></span></div>
+    <div class="row r-next"><span class="no">24</span><label class="t" for="sel-next"><b>What comes next <span class="auto" style="background:transparent;box-shadow:inset 0 0 0 1px rgba(var(--ink-rgb),.25)">Optional</span></b><small>T10 · Title card<em>· What's next · First anniversary</em>· absent until chosen</small></label><span class="ctl"><span class="ic lock" title="After the song">🔒</span></span></div>
+
+    <div class="grp" style="margin-top:34px"><span class="eye gold">Then</span></div>
+    <div class="row" style="grid-template-columns:1fr auto"><span class="t"><b>Apply <span class="dim small">— live for the people of this celebration</span></b><small>Guests already have the link. Nothing goes further until you say so.</small></span><span class="ctl"><a class="btn" href="#s-cover">Apply</a></span></div>
+    <div class="row" style="grid-template-columns:1fr auto"><span class="t"><b>Publish to Discover <span class="i" tabindex="0" data-tip="The stage's one special step. The existing consent rule applies: only captures whose takers said yes to everyone travel; the public gallery you saw as 'Viewing as: Public' is exactly what Discover shows.">i</span></b><small>Everyone · 312 of 1,240 captures qualify today</small></span><span class="ctl"><a class="btn ghost" href="#s-cover">Review consent</a></span></div>
+    <div class="row" style="grid-template-columns:1fr auto"><span class="t"><b>Your own scene</b><small>Any of the 25 templates, your words, your photos</small></span><span class="ctl"><span class="pro">Pro</span></span></div>
+  </div>
+</div>
+</div><!-- /scroll.mkview -->
+
+</div><!-- /frame --></div><!-- /stage -->
+
+<!-- ═══ REVIEWER STRIP — not in the product ══════════════════════════════ -->
+<nav class="revbar" aria-label="Preview only">
+  <span class="rv">Preview only — not in the product</span>
+  <div class="grp2"><span class="rv" style="padding:0 8px;color:#a89a86">Viewing as</span><label for="as-guest">Guest</label><label for="as-public">Public</label><label for="as-couple">Couple</label></div>
+  <div class="grp2">
+    <label for="th-classic"><span class="sw" style="background:linear-gradient(135deg,#f6f1e7 50%,#b8934a 50%)"></span>Classic</label>
+    <label for="th-rustic"><span class="sw" style="background:linear-gradient(135deg,#fbf0e4 50%,#8b5333 50%)"></span>Rustic</label>
+    <label for="th-modern"><span class="sw" style="background:linear-gradient(135deg,#f5f0eb 50%,#3a4a1c 50%)"></span>Modern</label>
+    <label for="th-cinderella"><span class="sw" style="background:linear-gradient(135deg,#eef3f8 50%,#8a9eae 50%)"></span>Cinderella</label>
+    <label for="th-luxe"><span class="sw" style="background:linear-gradient(135deg,#0e0504 50%,#e3a86f 50%)"></span>Luxe</label>
+    <label for="th-vintage"><span class="sw" style="background:linear-gradient(135deg,#eadbc6 50%,#634b2f 50%)"></span>Vintage</label>
+    <label for="th-whimsical"><span class="sw" style="background:linear-gradient(135deg,#fbf7f0 50%,#c9aab3 50%)"></span>Whimsical</label>
+    <label for="th-regency"><span class="sw" style="background:linear-gradient(135deg,#f6efe6 50%,#dcac7d 50%)"></span>Regency</label>
+    <label for="th-gatsby"><span class="sw" style="background:linear-gradient(135deg,#110504 50%,#ecbf8f 50%)"></span>Great Gatsby</label>
+    <label for="th-cyber"><span class="sw" style="background:linear-gradient(135deg,#0b0a12 50%,#ec8cd6 50%)"></span>Cyber Neon</label>
+  </div>
+</nav>
+</body>
+</html>
