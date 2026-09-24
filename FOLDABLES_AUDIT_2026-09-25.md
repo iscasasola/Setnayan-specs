@@ -103,8 +103,10 @@ the seating editor is behind sign-in and was not driven).
    turns true. Guard: `app/_components/frontdoor/unfolding-ends-the-drawer.test.ts` holds the hook's
    breakpoint to the drawer's `max-width` in `front-door.css` (agreement, not a value). Red under both
    sabotages (effect removed; hook moved to `xl`).
-2. **The sheet fits foldables and hinges** — `app/_components/sheet-fold.css` (+ `data-sheet` /
-   `data-sheet-panel` on `sheet.tsx`). Measured by injecting the rule into production under emulation:
+2. **The sheet fits foldables and hinges** — the FOLDABLES block at the end of `app/globals.css`
+   (+ `data-sheet` / `data-sheet-panel` on `sheet.tsx`). 🪤 First pushed as `sheet-fold.css` imported
+   from `sheet.tsx`; the unit runner loads that module under node, where a `.css` import is a
+   SyntaxError — CI went red. The guard now fails if a stylesheet import returns to `sheet.tsx`. Measured by injecting the rule into production under emulation:
 
    | case | before | after |
    |---|---|---|
@@ -116,11 +118,10 @@ the seating editor is behind sign-in and was not driven).
    Every guest page's "Everything else" sheet rides this — no `app/[slug]` file was touched.
    Guard: two new tests in `sheet-agrees-with-the-nav.test.ts` (the cap's ceiling = the dock point;
    the hooks and import exist). Red under both sabotages.
-3. **A spanned phone reads on one screen** — `app/_components/frontdoor/front-door-fold.css`
-   (loaded by `app-rail-shell.tsx`): at ≥1024 with two side-by-side segments `--fd-rail` becomes the
+3. **A spanned phone reads on one screen** — same globals.css block: at ≥1024 with two side-by-side segments `--fd-rail` becomes the
    left segment, so the content column starts on the right screen. Hinge-crossing elements on `/`:
    **10 → 1** (the top-bar search). Guard in `unfolding-ends-the-drawer.test.ts`; red when the floor
-   moves off 1024 or the import is dropped.
+   moves off 1024.
 
 Screens: `foldables-audit-2026-09-25/inject/{before,after}__duo-span___.png`,
 `…/after__fold-book___cale-ice__sheet.png`, `…/after__tablet-band___cale-ice__sheet.png`,
