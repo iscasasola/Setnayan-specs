@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Scenes Cross-Fade</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Jost:wght@300;400;500&display=swap">
+
+<!--
+  HOLD + MOVE, PER SECTION — WITH A TRUE CROSS-FADE. NO SCRIPT.  2026-09-24
+
+  Owner, 2026-09-24: scenes hold ships only if consecutive scenes TRULY
+  cross-fade ("B - let's make it work"). Then: "so we can set both and hybrid.
+  some can scrub some can page move." and "still have a fallback for phones who
+  cannot run the effect."
+
+  So the choice is PER SECTION:
+    HOLD — the section pins; the scroll scrubs it (fades, reveals) and scrubbing
+           back reverses it exactly, because nothing here is time-based.
+    MOVE — the ordinary section that travels up past the reader.
+
+  A RUN is a stretch of consecutive HOLD sections. Inside a run, neighbours
+  cross-fade. At a run's edges there is no fade: the first HOLD section of a
+  run scrolls in like a page and pins; the last one un-pins and scrolls away
+  like a page. That is the clean MOVE↔HOLD handoff.
+
+  WHY THE 2026-09-23 PROTOTYPE COULD NOT CROSS-FADE
+    Each chapter faded over its own `contain` range, which ends a full viewport
+    before the chapter leaves; the next chapter's `contain` starts only when its
+    top reaches the top of the screen. With a 70vh overlap that left a 30vh gap
+    in which neither scene was visible: 0 overlaps and a blank screen (measured
+    here: 0/60 overlap, 14–15/60 blank).
+
+  THE TECHNIQUE
+    1. Every section is followed by an empty SPACER. A HOLD section's spacer is
+       170vh tall and names a view timeline `--sN`. (A MOVE section's spacer is
+       display:none; the section names `--sN` itself, only for the progress mark.)
+    2. A HOLD section is `position:sticky; top:0; height:100svh`, and every HOLD
+       section except the first of its run has `margin-top:-100svh`. Net flow
+       height zero, so the SPACERS BUTT TOGETHER, and each section is already
+       pinned when its spacer starts to enter — it appears in place, never rises.
+    3. Because spacers butt together and are ≥ 100vh, spacer N's `exit` range and
+       spacer N+1's `entry` range are the SAME stretch of scroll. Section N fades
+       out over `exit 25%–85%`, section N+1 fades in over `entry 15%–75%`: both
+       are part-visible from 25% to 75% of every handoff, at any screen size.
+    4. The sticky containing block is the RUN wrapper, so the whole run un-pins
+       together when its last spacer ends — no pin can outlive its run.
+    5. `timeline-scope` on <body> lets a section (a sibling of its spacer) and
+       the fixed progress mark (outside <main>) see the spacers' timelines.
+
+  THE PROTOTYPE SWITCH (radios, CSS only): Hybrid · All hold · All move.
+    One markup. "All hold" dissolves the run wrappers (display:contents) so the
+    page is one run. In the product the renderer simply wraps each run of
+    consecutive HOLD sections in one element — the switch is prototype chrome.
+
+  FALLBACK — every section is the plain MOVE page whenever:
+    · prefers-reduced-motion: reduce; or
+    · the browser lacks animation-timeline / animation-range / timeline-scope.
+      (A browser with view() but no timeline-scope would otherwise stack HOLD
+      sections at full opacity — the guard includes it on purpose.)
+-->
+
+<style>
+:root{
+  --paper:#F4F1EC; --ink:#2C2A29; --soft:#6B655C; --line:#DCD6CA;
+  --accent:#44543F; --gold:#A38A58; --card:#FBF9F5;
+  --tint1:#ECEDE5; --tint2:#EFE9DE;
+  --disp:'Fraunces',Georgia,serif;
+  --sans:'Jost',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#1C1B19; --ink:#ECE7DE; --soft:#A9A295; --line:#3A3731;
+    --accent:#A9BC9F; --gold:#C9AF78; --card:#24221F; --tint1:#21231F; --tint2:#25221D;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#1C1B19; --ink:#ECE7DE; --soft:#A9A295; --line:#3A3731;
+  --accent:#A9BC9F; --gold:#C9AF78; --card:#24221F; --tint1:#21231F; --tint2:#25221D;
+}
+*{ box-sizing:border-box; }
+html,body{ margin:0; background:var(--paper); }
+body{ font-family:var(--sans); color:var(--ink); -webkit-font-smoothing:antialiased; }
+.cfg{ position:absolute; opacity:0; pointer-events:none; }
+
+/* ── prototype chrome: the mode switch, bottom-centre ── */
+.bar{ position:fixed; z-index:60; left:50%; transform:translateX(-50%);
+  bottom:calc(14px + env(safe-area-inset-bottom,0px));
+  display:flex; gap:2px; padding:4px; border-radius:100px; align-items:center;
+  background:rgba(20,20,20,.88); color:#e9e9e4; font-size:12px;
+  box-shadow:0 6px 20px rgba(0,0,0,.18); white-space:nowrap; }
+.chip{ border-radius:100px; padding:7px 12px; cursor:pointer; color:#c6c6c1; }
+#m-hybrid:checked ~ .bar [for=m-hybrid],
+#m-hold:checked   ~ .bar [for=m-hold],
+#m-move:checked   ~ .bar [for=m-move]{ background:#f2f2ee; color:#111; }
+.bar .why{ display:none; padding:0 10px 0 6px; color:#9b9b95; font-size:11px; }
+
+/* ══ BASE = MOVE for every section: the ordinary long page. Everything that
+   pins or fades is an opt-in below, inside the support + motion guard. ══ */
+.run{ display:block; }
+.sp{ display:none; }
+.prog{ display:none; }
+.scene{ padding:clamp(64px,11vw,120px) 16px; display:grid; place-items:center; background:var(--paper); }
+.s2,.s4{ background:var(--tint1); }
+.s3,.s5{ background:var(--tint2); }
+.inner{ width:100%; max-width:720px; margin:0 auto; text-align:center; }
+
+@supports (animation-timeline: view()) and (animation-range: entry 0% exit 100%) and (timeline-scope: none){
+@media (prefers-reduced-motion: no-preference){
+
+  body{ timeline-scope: --s1, --s2, --s3, --s4, --s5; }
+
+  /* "All hold": dissolve the hybrid's run wrappers — the whole page is one run */
+  #m-hold:checked ~ .page .run{ display:contents; }
+
+  /* ── HOLD sections: pinned, transparent, one screen tall ── */
+  #m-hold:checked   ~ .page .scene,
+  #m-hybrid:checked ~ .page :is(.s1,.s2,.s4){
+    position:sticky; top:0;
+    height:100vh; height:100svh;             /* svh: never taller than what a phone shows */
+    padding:clamp(40px,7vh,84px) 16px;
+    background:transparent; overflow:hidden;
+  }
+  /* every HOLD section but the first of its run is pulled up by its own
+     height: spacers butt together, and it is pinned before it fades in */
+  #m-hold:checked   ~ .page :is(.s2,.s3,.s4,.s5),
+  #m-hybrid:checked ~ .page .s2{ margin-top:-100vh; margin-top:-100svh; }
+
+  /* ── spacers: the scroll distance a HOLD section consumes.
+     ≥ 100vh is REQUIRED (it is what makes exit(N) == entry(N+1));
+     the extra 70vh is the hold. ── */
+  #m-hold:checked   ~ .page .sp,
+  #m-hybrid:checked ~ .page :is(.sp1,.sp2,.sp4){ display:block; height:170vh; }
+
+  /* ── timeline names: on the spacer for a HOLD section, on the section itself
+     for a MOVE one (used only by the progress mark). Exactly one per name. ── */
+  #m-hold:checked ~ .page .sp1, #m-hybrid:checked ~ .page .sp1{ view-timeline:--s1 block; }
+  #m-hold:checked ~ .page .sp2, #m-hybrid:checked ~ .page .sp2{ view-timeline:--s2 block; }
+  #m-hold:checked ~ .page .sp3, #m-hybrid:checked ~ .page .s3 { view-timeline:--s3 block; }
+  #m-hold:checked ~ .page .sp4, #m-hybrid:checked ~ .page .sp4{ view-timeline:--s4 block; }
+  #m-hold:checked ~ .page .sp5, #m-hybrid:checked ~ .page .s5 { view-timeline:--s5 block; }
+  #m-move:checked ~ .page .scene{ view-timeline:none; }
+
+  /* ── the cross-fades. IN on a HOLD section that is not first in its run,
+     OUT on one that is not last. Shorthand first, THEN timeline + range (the
+     shorthand resets them). OUT is listed last so it wins once it starts; it
+     has no backwards fill, so before its window IN (or opacity:1) rules. ── */
+  /* first of run, not last — both modes */
+  #m-hold:checked ~ .page .s1, #m-hybrid:checked ~ .page .s1{
+    animation: out linear forwards;
+    animation-timeline: --s1;
+    animation-range: exit 25% exit 85%;
+  }
+  /* hybrid: s2 is the last of its run (the venue MOVES next) — in only */
+  #m-hybrid:checked ~ .page .s2{
+    animation: in linear both;
+    animation-timeline: --s2;
+    animation-range: entry 15% entry 75%;
+  }
+  /* all hold: s2–s4 are mid-run — in and out */
+  #m-hold:checked ~ .page .s2{ animation: in linear both, out linear forwards;
+    animation-timeline: --s2, --s2; animation-range: entry 15% entry 75%, exit 25% exit 85%; }
+  #m-hold:checked ~ .page .s3{ animation: in linear both, out linear forwards;
+    animation-timeline: --s3, --s3; animation-range: entry 15% entry 75%, exit 25% exit 85%; }
+  #m-hold:checked ~ .page .s4{ animation: in linear both, out linear forwards;
+    animation-timeline: --s4, --s4; animation-range: entry 15% entry 75%, exit 25% exit 85%; }
+  /* all hold: s5 is the last — in only */
+  #m-hold:checked ~ .page .s5{ animation: in linear both;
+    animation-timeline: --s5; animation-range: entry 15% entry 75%; }
+  /* hybrid: s4 is a run of one — no fade at all; it pins and SCRUBS (below) */
+
+  /* ── scrubbing inside a HOLD section: the story beats arrive one at a time
+     while it is pinned, and leave again if you scroll back ── */
+  #m-hold:checked ~ .page .s4 .beats li, #m-hybrid:checked ~ .page .s4 .beats li{
+    animation: beat linear both; animation-timeline: --s4; }
+  #m-hold:checked ~ .page .s4 .beats li:nth-child(1), #m-hybrid:checked ~ .page .s4 .beats li:nth-child(1){ animation-range: entry 30% entry 60%; }
+  #m-hold:checked ~ .page .s4 .beats li:nth-child(2), #m-hybrid:checked ~ .page .s4 .beats li:nth-child(2){ animation-range: entry 70% contain 10%; }
+  #m-hold:checked ~ .page .s4 .beats li:nth-child(3), #m-hybrid:checked ~ .page .s4 .beats li:nth-child(3){ animation-range: contain 20% contain 60%; }
+
+  /* ── the progress mark: five segments, one per section, fixed at the top.
+     Shown whenever any section holds (a pinned page hides how much is left). ── */
+  #m-hold:checked ~ .prog, #m-hybrid:checked ~ .prog{
+    display:flex; gap:4px; position:fixed; z-index:50; pointer-events:none;
+    top:calc(8px + env(safe-area-inset-top,0px)); left:16px; right:16px;
+    max-width:420px; margin:0 auto; padding:7px 10px; border-radius:100px;
+    background:color-mix(in srgb, var(--paper) 82%, transparent);
+    -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+  }
+  .prog i{ flex:1; height:2px; border-radius:2px; overflow:hidden;
+    background:color-mix(in srgb, var(--ink) 16%, transparent); }
+  .prog i::after{ content:""; display:block; height:100%; background:var(--accent);
+    transform-origin:0 50%; transform:scaleX(0); animation: fill linear both; }
+  .prog i:nth-child(1)::after{ animation-timeline:--s1; }
+  .prog i:nth-child(2)::after{ animation-timeline:--s2; }
+  .prog i:nth-child(3)::after{ animation-timeline:--s3; }
+  .prog i:nth-child(4)::after{ animation-timeline:--s4; }
+  .prog i:nth-child(5)::after{ animation-timeline:--s5; }
+  /* all hold: each segment runs mid-handoff to mid-handoff */
+  #m-hold:checked ~ .prog i:nth-child(1)::after{ animation-range: contain 0% exit 55%; }
+  #m-hold:checked ~ .prog i:is(:nth-child(2),:nth-child(3),:nth-child(4))::after{ animation-range: entry 45% exit 55%; }
+  #m-hold:checked ~ .prog i:nth-child(5)::after{ animation-range: entry 45% contain 100%; }
+  /* hybrid: HOLD segments follow their spacers, MOVE segments their own box */
+  #m-hybrid:checked ~ .prog i:nth-child(1)::after{ animation-range: contain 0% exit 55%; }
+  #m-hybrid:checked ~ .prog i:nth-child(2)::after{ animation-range: entry 45% exit 50%; }
+  #m-hybrid:checked ~ .prog i:nth-child(3)::after{ animation-range: entry 50% exit 50%; }
+  #m-hybrid:checked ~ .prog i:nth-child(4)::after{ animation-range: entry 0% exit 50%; }
+  #m-hybrid:checked ~ .prog i:nth-child(5)::after{ animation-range: entry 50% entry 100%; }
+}
+}
+
+@keyframes in{
+  from{ opacity:0; transform:translateY(28px) scale(.985); pointer-events:none; }
+  to  { opacity:1; transform:none;                          pointer-events:auto; }
+}
+@keyframes out{
+  from{ opacity:1; transform:none;                           pointer-events:auto; }
+  to  { opacity:0; transform:translateY(-28px) scale(.985); pointer-events:none; }
+}
+@keyframes beat{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:none; } }
+@keyframes fill{ to{ transform:scaleX(1); } }
+
+/* say so on the switch when HOLD cannot run here */
+@supports not ((animation-timeline: view()) and (animation-range: entry 0% exit 100%) and (timeline-scope: none)){
+  .bar .why{ display:inline; } .bar .why::after{ content:"hold unsupported here"; }
+}
+@media (prefers-reduced-motion: reduce){
+  .bar .why{ display:inline; } .bar .why::after{ content:"reduced motion: all move"; }
+}
+
+/* ── the content, identical in every mode ── */
+.k{ font-size:10.5px; letter-spacing:.28em; text-transform:uppercase;
+  color:var(--accent); margin:0 0 12px; font-weight:500; }
+.h{ font-family:var(--disp); font-weight:300; font-size:clamp(30px,6.2vw,56px);
+  line-height:1.06; margin:0 0 14px; text-wrap:balance; }
+.t{ font-size:clamp(15px,1.3vw,17px); line-height:1.7; color:var(--soft); font-weight:300;
+  max-width:50ch; margin:0 auto; text-wrap:pretty; }
+.cards{ display:grid; gap:10px; margin-top:24px;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); }
+.card{ background:var(--card); border:1px solid var(--line);
+  border-radius:3px; padding:13px 15px; text-align:left; }
+.card b{ display:block; font-family:var(--disp); font-weight:400; font-size:18px; margin-bottom:2px; }
+.card span{ font-size:13.5px; color:var(--soft); font-weight:300; }
+
+/* s1 — the invitation card */
+.invite{ max-width:420px; margin:0 auto; padding:clamp(28px,6vw,48px) clamp(20px,5vw,40px);
+  background:var(--card); border:1px solid var(--line); outline:1px solid var(--gold);
+  outline-offset:-10px; border-radius:2px; }
+.invite .pre{ font-size:13px; color:var(--soft); font-weight:300; line-height:1.6; margin:0 0 18px; }
+.invite .names{ font-family:var(--disp); font-weight:300; font-size:clamp(38px,9vw,60px);
+  line-height:1; margin:0 0 6px; }
+.invite .amp{ display:block; font-size:.5em; color:var(--gold); margin:6px 0; }
+.invite .when{ font-size:11px; letter-spacing:.24em; text-transform:uppercase;
+  color:var(--accent); margin:20px 0 0; line-height:1.9; }
+.hint{ margin-top:22px; font-size:12px; color:var(--soft); letter-spacing:.06em; }
+
+/* s3 — a drawn map tile, no image */
+.map{ height:clamp(96px,18vh,160px); margin-top:20px; border:1px solid var(--line);
+  border-radius:3px; position:relative; overflow:hidden;
+  background:
+    linear-gradient(115deg, transparent 46%, color-mix(in srgb,var(--gold) 45%,transparent) 46.4%, color-mix(in srgb,var(--gold) 45%,transparent) 48%, transparent 48.4%),
+    linear-gradient(20deg, transparent 60%, var(--line) 60.3%, var(--line) 61.5%, transparent 61.8%),
+    color-mix(in srgb, var(--accent) 9%, var(--card)); }
+.map::after{ content:""; position:absolute; left:58%; top:42%; width:14px; height:14px;
+  border-radius:50% 50% 50% 0; transform:rotate(-45deg); background:var(--accent); }
+
+/* s4 — our story beats */
+.beats{ list-style:none; padding:0; margin:22px auto 0; max-width:460px; text-align:left; }
+.beats li{ display:grid; grid-template-columns:64px 1fr; gap:12px; padding:10px 0;
+  border-top:1px solid var(--line); font-size:14.5px; color:var(--soft); font-weight:300; line-height:1.55; }
+.beats b{ font-family:var(--disp); font-weight:400; color:var(--ink); font-size:17px; }
+
+/* s5 — RSVP */
+.rsvp{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:24px; }
+.btn{ display:inline-block; padding:13px 22px; border-radius:100px; text-decoration:none;
+  font-size:14.5px; border:1px solid var(--accent); color:var(--accent); }
+.btn.primary{ background:var(--accent); color:var(--paper); }
+.fine{ margin-top:14px; font-size:12.5px; color:var(--soft); }
+
+.tail{ padding:64px 16px 120px; text-align:center; }
+.tail p{ font-size:13px; color:var(--soft); max-width:56ch; margin:0 auto; line-height:1.7; font-weight:300; }
+</style>
+</head>
+<body>
+
+<input class="cfg" type="radio" name="m" id="m-hybrid" checked aria-label="Hybrid">
+<input class="cfg" type="radio" name="m" id="m-hold" aria-label="All hold">
+<input class="cfg" type="radio" name="m" id="m-move" aria-label="All move">
+
+<div class="bar">
+  <label class="chip" for="m-hybrid">Hybrid</label>
+  <label class="chip" for="m-hold">All hold</label>
+  <label class="chip" for="m-move">All move</label>
+  <span class="why"></span>
+</div>
+
+<div class="prog" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+
+<main class="page">
+
+  <!-- RUN: invitation → the day (HOLD, cross-fade between them) -->
+  <div class="run">
+    <section class="scene s1" aria-label="The invitation">
+      <div class="inner">
+        <div class="invite">
+          <p class="pre">Together with their families</p>
+          <p class="names">Isabel<span class="amp">&amp;</span>Marco</p>
+          <p class="pre" style="margin:14px 0 0">request the pleasure of your company<br>as they begin their life together</p>
+          <p class="when">Saturday &middot; 8 February 2027<br>Silang, Cavite</p>
+        </div>
+        <p class="hint">Scroll &darr;</p>
+      </div>
+    </section>
+    <i class="sp sp1" aria-hidden="true"></i>
+
+    <section class="scene s2" aria-label="The day">
+      <div class="inner">
+        <p class="k">The day</p>
+        <h2 class="h">Saturday, the eighth of February</h2>
+        <p class="t">Guests seated by half past three. The ceremony at four, in the chapel on the east lawn.</p>
+        <div class="cards">
+          <div class="card"><b>3:30</b><span>Guests seated</span></div>
+          <div class="card"><b>4:00</b><span>Ceremony</span></div>
+          <div class="card"><b>5:30</b><span>Cocktails</span></div>
+          <div class="card"><b>7:00</b><span>Dinner</span></div>
+        </div>
+      </div>
+    </section>
+    <i class="sp sp2" aria-hidden="true"></i>
+  </div>
+
+  <!-- MOVE in the hybrid -->
+  <section class="scene s3" aria-label="The venue">
+    <div class="inner">
+      <p class="k">The venue</p>
+      <h2 class="h">Hacienda Isabella, Silang</h2>
+      <p class="t">About ninety minutes from Makati. Parking is free and on the grounds, and the lawn is soft &mdash; block heels will thank you.</p>
+      <div class="map" role="img" aria-label="Map pin at Hacienda Isabella"></div>
+      <div class="cards">
+        <div class="card"><b>By car</b><span>CAVITEX, then Aguinaldo</span></div>
+        <div class="card"><b>By bus</b><span>Any Tagaytay bus</span></div>
+      </div>
+    </div>
+  </section>
+  <i class="sp sp3" aria-hidden="true"></i>
+
+  <!-- RUN of one: our story (HOLD, scrubbed) -->
+  <div class="run">
+    <section class="scene s4" aria-label="Our story">
+      <div class="inner">
+        <p class="k">Our story</p>
+        <h2 class="h">Nine years, one jeepney</h2>
+        <ul class="beats">
+          <li><b>2018</b><span>Same jeepney to Katipunan, same wrong stop.</span></li>
+          <li><b>2022</b><span>A move to Cebu, and a lot of night flights.</span></li>
+          <li><b>2025</b><span>Asked on the east lawn &mdash; where we will marry.</span></li>
+        </ul>
+      </div>
+    </section>
+    <i class="sp sp4" aria-hidden="true"></i>
+  </div>
+
+  <!-- MOVE in the hybrid -->
+  <section class="scene s5" aria-label="RSVP">
+    <div class="inner">
+      <p class="k">RSVP</p>
+      <h2 class="h">Will you join us?</h2>
+      <p class="t">Kindly reply by the tenth of January so we can set a place for you.</p>
+      <div class="rsvp">
+        <a class="btn primary" href="#rsvp-yes" id="rsvp-yes">Joyfully accept</a>
+        <a class="btn" href="#rsvp-no" id="rsvp-no">Regretfully decline</a>
+      </div>
+      <p class="fine">Two seats are held in your name.</p>
+    </div>
+  </section>
+  <i class="sp sp5" aria-hidden="true"></i>
+
+</main>
+
+<footer class="tail">
+  <p><b>Hybrid</b>: invitation and the day HOLD and cross-fade; the venue MOVES; our story
+    HOLDS on its own and its beats are scrubbed by the scroll; RSVP MOVES. <b>All hold</b>:
+    one run of five. <b>All move</b>: the ordinary page &mdash; which is also what every guest
+    gets under reduced motion, or in a browser that cannot drive animation from scroll.</p>
+</footer>
+
+</body>
+</html>
