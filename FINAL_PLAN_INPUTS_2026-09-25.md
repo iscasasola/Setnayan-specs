@@ -28,3 +28,4 @@ Fable writes the final plan AFTER the theme board, the improved reveals and the 
 24. **Maker bar (final):** Logo · Hero · Reveal · Love Story │ Save the Date · Invitation · On the Day · Post Event. Hero designed once; every stage + the event-card poster derive from it; Post Event cover starts from the hero until a post-event photo is chosen.
 25. **Maker bar (final, supersedes 24):** Logo · Hero · Reveal · Love Story │ Save the Date · Invitation · On the Day · Post Event │ Prints & Tickets.
 26. **Prints & Tickets free tier:** PDF of guest QR codes for DIY (reuse invitation/print + custom-qr-guest/print); samples of themed pieces; Pro = themed print-ready set.
+27. **Free QR PDF lives on the Guest list** ("Download QR codes (PDF)", reusing the QR sheet); Prints & Tickets points to it.
