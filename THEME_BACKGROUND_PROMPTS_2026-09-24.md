@@ -128,3 +128,11 @@ Method: generate the still (above, 9:16) → Higgsfield image-to-video, 5 s, sub
 8. **Regency** — Candlelight softly flickering, wisteria gently swaying, soft light glinting on gilded mirrors, seamless 5-second loop, calm.
 9. **Great Gatsby** — Gold confetti slowly falling and glinting, champagne bubbles rising, soft spotlight shimmer, seamless 5-second loop.
 10. **Cyber (Neon)** — Light rain falling, neon reflections rippling on the wet ground, lights softly pulsing, seamless 5-second loop, calm.
+
+---
+
+## Revisions (owner, 2026-09-24)
+
+- **Classic has no photo or video** — the free theme uses a colour/paper ground only (media backgrounds are Pro).
+- **Modern — better prompt:** Sunlit minimalist gallery interior with a sweeping curved travertine wall and a smooth polished concrete floor, soft late-afternoon sunlight casting long clean shadows of palm leaves across the wall, warm neutral tones of sand, stone and ivory, one sculptural white ceramic vase with a single dried branch at the far edge, architectural clean lines, serene luxury modern wedding mood, photorealistic, editorial photography, large calm empty space in the centre for text. Avoid: text, letters, logos, watermark, people, faces, hands, clutter in the centre, harsh contrast, cartoon, 3D render look.
+- **Modern — motion:** The palm leaf shadows sway gently across the curved wall as a light breeze passes, sunlight shimmering softly, everything else perfectly still, seamless 5-second loop, calm, no camera movement, no zoom, no text, no people.
