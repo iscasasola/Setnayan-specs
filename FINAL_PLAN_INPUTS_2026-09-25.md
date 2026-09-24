@@ -29,3 +29,4 @@ Fable writes the final plan AFTER the theme board, the improved reveals and the 
 25. **Maker bar (final, supersedes 24):** Logo · Hero · Reveal · Love Story │ Save the Date · Invitation · On the Day · Post Event │ Prints & Tickets.
 26. **Prints & Tickets free tier:** PDF of guest QR codes for DIY (reuse invitation/print + custom-qr-guest/print); samples of themed pieces; Pro = themed print-ready set.
 27. **Free QR PDF lives on the Guest list** ("Download QR codes (PDF)", reusing the QR sheet); Prints & Tickets points to it.
+28. **Auto text colour:** every scene + main background picks a readable text tone automatically (readableTextOn / resolveStdLegibility / frame luminance + scrim); accents only where AA passes; free for everyone; test every theme × light/dark bg.
