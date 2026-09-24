@@ -111,3 +111,20 @@ Recommendation: one **Atmosphere** image per theme (serves as hero background, s
 8. **Regency (Bridgerton)** — Regency-era ballroom with gilded mirrors, candle chandeliers and cascading wisteria, pale Wedgwood blue and soft lilac tones, elegant soft blur, high-society romantic wedding mood, photorealistic, large calm empty space in the centre for text. Avoid: (same).
 9. **Great Gatsby** — 1920s jazz-age gala with champagne towers, strings of pearls and falling gold confetti under a warm spotlight, black and gold art deco glamour, smoky soft bokeh, luxurious wedding mood, photorealistic, large calm empty space in the centre for text. Avoid: (same).
 10. **Cyber (Neon)** — Rain-slick city rooftop at night with blurred neon lights in magenta and cyan, glossy reflections on wet ground, soft haze, cinematic futuristic celebration mood, photorealistic, large dark calm empty space in the centre for text. Avoid: text, letters, logos, watermark, signage, people, faces, hands, clutter in the centre, harsh shadows, cartoon, 3D render look.
+
+---
+
+## 5-second loop videos (owner: "how about we do a 5 second loop video so it is all pro feel instead of generic")
+
+Method: generate the still (above, 9:16) → Higgsfield image-to-video, 5 s, subtle motion → the still is the reduced-motion / slow-network fallback frame. Rules: slow subtle motion only; seamless loop (last frame = first); muted autoplay loop (matches "short clips loop"); compress to ~2–3 MB per 5 s at 1080×1920 (H.264 MP4 + WebM), plays only on screen. Pro (media background). Append to every motion prompt: "no text, no people, keep the centre calm, no camera shake, no zoom."
+
+1. **Classic** — Very slow gentle drift of soft light across the petals, a few petals softly settling, subtle depth shift, seamless 5-second loop, calm, no camera shake.
+2. **Rustic** — Warm golden light flickering softly, fairy lights gently twinkling, pampas grass swaying slightly in a light breeze, seamless 5-second loop, calm.
+3. **Modern** — Slow soft daylight sweeping across the wall from the arched window, orchid barely moving, minimal motion, seamless 5-second loop.
+4. **Cinderella** — Silver dust slowly floating and sparkling in moonlight, soft shimmer through the windows, dreamy gentle motion, seamless 5-second loop.
+5. **Luxe** — Candle flames gently flickering, chandelier crystals softly glinting, warm bokeh slowly drifting, seamless 5-second loop, calm.
+6. **Vintage** — Dust motes drifting slowly through the slanted sunbeams, light softly breathing, subtle film grain flicker, seamless 5-second loop.
+7. **Whimsical** — Paper lanterns and ribbons swaying gently in the breeze, a butterfly drifting past slowly, soft playful motion, seamless 5-second loop.
+8. **Regency** — Candlelight softly flickering, wisteria gently swaying, soft light glinting on gilded mirrors, seamless 5-second loop, calm.
+9. **Great Gatsby** — Gold confetti slowly falling and glinting, champagne bubbles rising, soft spotlight shimmer, seamless 5-second loop.
+10. **Cyber (Neon)** — Light rain falling, neon reflections rippling on the wet ground, lights softly pulsing, seamless 5-second loop, calm.
