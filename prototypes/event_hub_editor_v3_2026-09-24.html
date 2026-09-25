@@ -1,0 +1,734 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Event Hub editor — v3</title>
+<meta name="description" content="Zero-JS checkpoint v2, Keynote-style: toolbar with the stage bar · a resizable scene navigator with drag-to-arrange · a big canvas edited directly · one contextual inspector (Format · Animate · Transition · Content) that appears only on selection. Real fields from shipped panels.">
+<style>
+:root{--paper:#FBFAF7;--hair:#EDE8DE;--line:#E1DCD1;--ink:#1B1A17;--ink7:#3A382F;--ink5:#6E6A62;--ink4:#8A857B;--ink3:#A09A8E;--ob:#17160F;
+  --gold1:#F3ECDF;--gold3:#CBA766;--gold5:#A9834B;--gold7:#8A6B39;--cta:#C24E25;--success:#5E7C52;--danger:#A6483B;
+  --glass:rgba(255,255,255,.72);--blur:blur(22px) saturate(1.5);
+  --sh-tile:0 1px 2px rgba(40,34,24,.05),0 18px 40px -26px rgba(30,26,18,.4);--sh-hi:0 1px 2px rgba(40,34,24,.06),0 28px 54px -30px rgba(30,26,18,.5);
+  --ease:cubic-bezier(.2,.7,.2,1);--ease-out:cubic-bezier(.16,1,.3,1);--ctrl:200ms;--elem:320ms;--enter:640ms;--r-full:999px;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;--serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;--mono:ui-monospace,Menlo,monospace;--fw:1440px}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.45;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}h1,h2,h3,p{margin:0}form{margin:0}
+input.sw{position:absolute;opacity:0;pointer-events:none;width:0;height:0}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+.press{transition:transform var(--ctrl) var(--ease),background var(--elem) var(--ease),color var(--elem) var(--ease),box-shadow var(--elem) var(--ease),outline-color var(--elem) var(--ease),opacity var(--elem) var(--ease);cursor:pointer;user-select:none}
+.press:active{transform:scale(.96)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+
+/* prototype bar (not the app) */
+.bar{position:sticky;top:0;z-index:60;display:flex;gap:6px 18px;flex-wrap:wrap;align-items:center;justify-content:center;padding:8px 14px;background:rgba(244,242,236,.72);backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);box-shadow:0 1px 0 rgba(44,42,41,.07)}
+.bar .proto{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);font-weight:700;padding:5px 8px;border:1px dashed var(--ink3);border-radius:6px}
+.grp{display:flex;gap:2px;align-items:center}.grp b{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink5);margin-right:6px;font-weight:700}
+.grp label{font-size:12px;padding:5px 11px;border-radius:var(--r-full)}.grp label:hover{background:rgba(44,42,41,.07)}
+#vp-m:checked~.bar label[for=vp-m],#vp-tp:checked~.bar label[for=vp-tp],#vp-tl:checked~.bar label[for=vp-tl],#vp-dt:checked~.bar label[for=vp-dt],#drag:checked~.bar label[for=drag],#menu:checked~.bar label[for=menu]{background:var(--ink);color:#fff}
+
+/* frame — at Desktop the editor IS the viewport: 100% wide, 100dvh tall, no gutters; the simulator states keep their device widths */
+.stage-wrap{display:flex;justify-content:center;padding:0;position:relative;min-height:100dvh}
+.frame{width:100%;position:relative;transition:width var(--enter) var(--ease),height var(--enter) var(--ease);background:var(--paper);overflow:clip;height:calc(100dvh - 40px);display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:56px minmax(0,1fr)}
+#barc:checked~.stage-wrap .frame{height:100dvh}
+#vp-tl:checked~.stage-wrap,#vp-tp:checked~.stage-wrap,#vp-m:checked~.stage-wrap{padding:22px 12px 60px}
+#vp-tl:checked~.stage-wrap .frame,#vp-tp:checked~.stage-wrap .frame,#vp-m:checked~.stage-wrap .frame{box-shadow:var(--sh-hi);border-radius:22px;height:860px}
+#vp-tl:checked~.stage-wrap .frame{width:1024px}#vp-tp:checked~.stage-wrap .frame{width:768px}#vp-m:checked~.stage-wrap .frame{width:375px;border-radius:38px;height:812px}
+/* the prototype bar collapses to a corner toggle so it never eats editor space */
+#barc:checked~.bar{display:none}
+.barbtn{position:fixed;right:10px;bottom:10px;z-index:70;width:34px;height:34px;border-radius:50%;background:rgba(27,26,23,.85);color:#fff;display:grid;place-items:center;font-size:12px;box-shadow:var(--sh-hi)}
+
+/* ── 1 · THE TOOLBAR — our stage bar, Play · Add · ⋯ ── */
+.top{display:flex;align-items:center;gap:6px;padding:0 14px;min-width:0;overflow:hidden;background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);position:relative;z-index:20}
+.top .brand{font-family:var(--serif);font-size:16px;letter-spacing:.06em;color:var(--ink5);margin-right:8px}
+.ib{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:var(--ink5);font-size:15px;position:relative}
+.ib:hover{background:rgba(27,26,23,.06);color:var(--ink)}
+.ib .lab{position:absolute;left:50%;top:calc(100% + 6px);transform:translateX(-50%) translateY(-4px);background:rgba(27,26,23,.94);color:#fff;font-size:11px;padding:4px 8px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity var(--ctrl),transform var(--ctrl);z-index:50}
+.ib:hover .lab{opacity:1;transform:translateX(-50%)}
+#navc:checked~.stage-wrap label[for=navc],#snap-off:checked~.stage-wrap label[for=snap-t]{background:var(--ink);color:#fff}
+.stages{display:flex;gap:2px;align-items:center;margin:0 auto}
+.stages .chip{font-size:13.5px;font-weight:600;padding:8px 14px;border-radius:var(--r-full);color:var(--ink5);display:inline-flex;align-items:center;gap:6px}
+.stages .chip:hover{background:rgba(27,26,23,.06);color:var(--ink)}
+#wh-std:checked~.stage-wrap label[for=wh-std],#wh-inv:checked~.stage-wrap label[for=wh-inv],#wh-day:checked~.stage-wrap label[for=wh-day],#wh-pe:checked~.stage-wrap label[for=wh-pe]{background:var(--ink);color:#fff}
+.stages .dot{width:5px;height:5px;border-radius:50%;background:var(--cta)}
+.stages .ch{width:5px;height:5px;border-radius:50%;background:var(--gold5);display:none}
+#sim-names:checked~.frame .stages .ch,#sim-hero:checked~.frame .chip[for=wh-std] .ch,#sim-hero:checked~.frame .chip[for=wh-inv] .ch,#sim-hero:checked~.frame .chip[for=wh-day] .ch{display:inline-block}
+#applied:checked~.frame .stages .ch{display:none!important}
+#vp-m:checked~.stage-wrap .top{padding:0 8px;gap:2px}#vp-m:checked~.stage-wrap .top .brand,#vp-m:checked~.stage-wrap label[for=navc]{display:none}
+#vp-m:checked~.stage-wrap .stages{overflow-x:auto;scrollbar-width:none;margin:0;flex:1}#vp-m:checked~.stage-wrap .stages .chip{font-size:12px;padding:7px 10px;white-space:nowrap}
+/* the Apply bar rides the toolbar, only with changes */
+.applybar{display:none;align-items:center;gap:8px;padding:4px 4px 4px 12px;border-radius:var(--r-full);background:var(--ink);color:#fff;font-size:12px;animation:rise var(--enter) var(--ease-out) both}
+@keyframes rise{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+#sim-names:checked~.frame .applybar,#sim-hero:checked~.frame .applybar{display:flex}
+#applied:checked~.frame .applybar{display:none!important}
+.applybar .n{font-weight:700;font-variant-numeric:tabular-nums}
+.stage-wrap:has(#sim-names:checked):has(#sim-hero:checked) .applybar .n::before{content:"2 changes"}
+.stage-wrap:has(#sim-names:checked):not(:has(#sim-hero:checked)) .applybar .n::before,.stage-wrap:has(#sim-hero:checked):not(:has(#sim-names:checked)) .applybar .n::before{content:"1 change"}
+.applybar .b{padding:6px 12px;border-radius:var(--r-full);font-weight:600;font-size:12px}
+.applybar .b.ghost{box-shadow:inset 0 0 0 1px rgba(255,255,255,.28)}.applybar .b.ghost:hover{background:rgba(255,255,255,.1)}
+.applybar .b.apply{background:var(--gold3);color:var(--ob)}.applybar .b.apply:hover{background:#DCBE85}
+.applybar .pro,.applybar .needs{display:none}
+#sim-hero:checked~.frame .applybar .free{display:none}#sim-hero:checked~.frame .applybar .pro{display:inline-flex}#sim-hero:checked~.frame .applybar .needs{display:inline}
+.applybar .needs{color:rgba(251,250,247,.7);font-size:11px}
+#vp-m:checked~.stage-wrap .applybar{position:absolute;left:50%;transform:translateX(-50%);top:62px;z-index:32;padding:5px 5px 5px 12px}
+#vp-m:checked~.stage-wrap .applybar .needs{display:none!important}
+.toast{display:none;align-items:center;gap:8px;padding:6px 12px;border-radius:var(--r-full);background:var(--success);color:#fff;font-size:12px;font-weight:600}
+#applied:checked~.frame .toast{display:flex}
+#vp-m:checked~.stage-wrap .toast{position:absolute;left:50%;transform:translateX(-50%);top:62px;z-index:32}
+
+/* ── the work area: navigator · canvas · inspector (inspector only when selected) ── */
+.work{display:flex;min-height:0;min-width:0;height:100%;position:relative}
+/* ── 2 · NAVIGATOR — resizable, collapsible ── */
+.work{--navw:132px}
+#nw-n:checked~.stage-wrap .work{--navw:96px}#nw-w:checked~.stage-wrap .work{--navw:220px}
+#navc:checked~.stage-wrap .work{--navw:0px}
+.nav{width:var(--navw);overflow:auto;padding:16px 10px 24px 14px;scrollbar-width:none;display:flex;flex-direction:column;flex:none;position:relative;transition:width var(--enter) var(--ease),padding var(--enter) var(--ease)}
+#navc:checked~.stage-wrap .nav{padding:0;overflow:hidden}
+/* the edge handle: three width presets, always visible on desktop / tablet-L */
+.navgrip{position:absolute;left:var(--navw);top:50%;transform:translate(-50%,-50%);z-index:26;display:flex;flex-direction:column;gap:2px;padding:4px 2px;border-radius:var(--r-full);background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:var(--sh-tile);transition:left var(--enter) var(--ease)}
+.navgrip label{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;color:var(--ink4)}
+.navgrip label:hover{background:rgba(27,26,23,.08);color:var(--ink)}
+#nw-n:checked~.stage-wrap .navgrip label[for=nw-n],#nw-m:checked~.stage-wrap .navgrip label[for=nw-m],#nw-w:checked~.stage-wrap .navgrip label[for=nw-w]{background:var(--ink);color:#fff}
+#navc:checked~.stage-wrap .navgrip{display:none}
+#vp-tp:checked~.stage-wrap .navgrip,#vp-m:checked~.stage-wrap .navgrip{display:none}
+.pl{display:none;flex-direction:column;counter-reset:sc}
+#wh-std:checked~.stage-wrap .pl[data-when=std],#wh-inv:checked~.stage-wrap .pl[data-when=inv],#wh-day:checked~.stage-wrap .pl[data-when=day],#wh-pe:checked~.stage-wrap .pl[data-when=pe]{display:flex}
+.sc{position:relative;display:block;counter-increment:sc;padding:4px 0 4px 14px;cursor:grab}
+.sc::before{content:counter(sc);position:absolute;left:0;top:6px;font-size:9px;font-weight:700;color:var(--ink3)}
+.sc .th{width:100%;aspect-ratio:16/10;border-radius:7px;background:#fff;box-shadow:var(--sh-tile);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6%;font-size:6.5px;overflow:hidden;position:relative;outline:2px solid transparent;outline-offset:2px;container-type:inline-size;transition:transform var(--elem) var(--ease),box-shadow var(--elem) var(--ease)}
+.sc .th .nm{font-family:var(--serif);font-size:9cqw;line-height:1.05;font-weight:300;text-align:center}
+.sc .th .ph{width:100%;height:38%;border-radius:3px;background:linear-gradient(135deg,#C29A7C,#7A5446)}.sc .th .ph.none{background:linear-gradient(135deg,#FBFAF7,#F3ECDF);border:1px solid rgba(169,131,75,.35)}
+.sc .th .bars{display:flex;flex-direction:column;gap:2px;width:78%}.sc .th .bars i{display:block;height:3px;border-radius:2px;background:rgba(27,26,23,.1)}
+.sc .th .sw{display:flex;gap:3px}.sc .th .sw i{width:7px;height:7px;border-radius:50%}
+.sc .th .cta{display:block;width:60%;height:6px;border-radius:999px;background:var(--cta)}
+.sc .th .cover{width:100%;height:38%;border-radius:3px;background:linear-gradient(90deg,rgba(203,167,102,.5),rgba(203,167,102,.15))}
+.sc .th .film{position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,rgba(203,167,102,.35),transparent 60%),#17160F}
+.sc .th .film .nm{position:absolute;left:0;right:0;top:36%;color:#FBFAF7}
+.sc .th .ghost{color:var(--ink3);font-style:italic;font-size:6.5cqw}
+.sc .shared{position:absolute;right:3px;top:7px;width:6px;height:6px;border-radius:50%;background:var(--gold3);box-shadow:0 0 0 2px #fff}
+.sc .pend{display:none;position:absolute;right:3px;bottom:7px;width:6px;height:6px;border-radius:50%;background:var(--gold5);box-shadow:0 0 0 2px #fff}
+#sim-names:checked~.frame .sc[data-f=hero] .pend,#sim-hero:checked~.frame .sc[data-f=hero] .pend{display:block}
+#applied:checked~.frame .sc .pend{display:none!important}
+#pt-film:checked~.stage-wrap .sc[for=pt-film] .th,#pt-hero:checked~.stage-wrap .sc[for=pt-hero] .th,#pt-words:checked~.stage-wrap .sc[for=pt-words] .th,#pt-details:checked~.stage-wrap .sc[for=pt-details] .th,#pt-dress:checked~.stage-wrap .sc[for=pt-dress] .th,#pt-msg:checked~.stage-wrap .sc[for=pt-msg] .th,#pt-bring:checked~.stage-wrap .sc[for=pt-bring] .th,#pt-custom:checked~.stage-wrap .sc[for=pt-custom] .th,#pt-rsvp:checked~.stage-wrap .sc[for=pt-rsvp] .th,#pt-seat:checked~.stage-wrap .sc[for=pt-seat] .th,#pt-cues:checked~.stage-wrap .sc[for=pt-cues] .th,#pt-live:checked~.stage-wrap .sc[for=pt-live] .th,#pt-cover:checked~.stage-wrap .sc[for=pt-cover] .th,#pt-chapters:checked~.stage-wrap .sc[for=pt-chapters] .th,#pt-publish:checked~.stage-wrap .sc[for=pt-publish] .th{outline-color:var(--gold5)}
+/* the transition between two scenes — ours */
+.tr{display:flex;justify-content:center;align-items:center;gap:4px;padding:0 0 0 14px;height:16px;font-size:8px;color:var(--ink4)}
+.tr i{display:block;width:1px;height:10px;background:var(--line)}
+.tr b{font-weight:600;font-size:8px;color:var(--ink5);padding:1px 6px;border-radius:var(--r-full);background:rgba(27,26,23,.06)}
+.tr b:hover{background:var(--ink);color:#fff}
+.add{margin:6px 0 0 14px;height:40px;border-radius:7px;border:1px dashed var(--ink3);display:grid;place-items:center;color:var(--ink4);font-size:18px}
+.add:hover{border-color:var(--gold5);color:var(--ink)}
+/* pre-baked DRAG state: the dress-code scene lifted, an insertion line above Our story */
+#drag:checked~.stage-wrap .sc[data-drag] .th{transform:rotate(-2deg) scale(1.05) translateX(6px);box-shadow:0 24px 40px -18px rgba(30,26,18,.55);outline-color:transparent;opacity:.95}
+#drag:checked~.stage-wrap .sc[data-drag]{cursor:grabbing}
+.ins{display:none;height:3px;margin:2px 0 2px 14px;border-radius:2px;background:var(--gold5)}
+#drag:checked~.stage-wrap .ins{display:block}
+/* pre-baked long-press / right-click menu */
+.cm{display:none;position:absolute;left:100%;top:20px;z-index:45;min-width:150px;padding:6px;border-radius:12px;background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:var(--sh-hi);flex-direction:column}
+#menu:checked~.stage-wrap .cm{display:flex}
+.cm span{font-size:12.5px;padding:7px 10px;border-radius:8px;color:var(--ink7)}.cm span:hover{background:rgba(27,26,23,.06)}.cm span.d{color:var(--danger)}
+/* phone / tablet-P: canvas on top, navigator as a strip, inspector as a sheet */
+#vp-tp:checked~.stage-wrap .work,#vp-m:checked~.stage-wrap .work{flex-direction:column}
+#vp-tp:checked~.stage-wrap .nav,#vp-m:checked~.stage-wrap .nav{order:2;width:auto;max-width:none;min-width:0;resize:none;flex-direction:row;padding:8px 14px 10px;overflow-x:auto;overflow-y:hidden}
+#vp-tp:checked~.stage-wrap .nav::after,#vp-m:checked~.stage-wrap .nav::after{display:none}
+#vp-tp:checked~.stage-wrap .pl,#vp-m:checked~.stage-wrap .pl{flex-direction:row;align-items:flex-start}
+#vp-tp:checked~.stage-wrap .sc,#vp-m:checked~.stage-wrap .sc{flex:0 0 84px;padding:12px 0 0}
+#vp-tp:checked~.stage-wrap .sc::before,#vp-m:checked~.stage-wrap .sc::before{top:0;left:2px}
+#vp-tp:checked~.stage-wrap .tr,#vp-m:checked~.stage-wrap .tr{flex-direction:column;padding:26px 4px 0;height:auto;flex:0 0 auto}
+#vp-tp:checked~.stage-wrap .tr i,#vp-m:checked~.stage-wrap .tr i{width:10px;height:1px}
+#vp-tp:checked~.stage-wrap .add,#vp-m:checked~.stage-wrap .add{flex:0 0 40px;height:52px;margin:12px 0 0 6px}
+#vp-tp:checked~.stage-wrap .ins,#vp-m:checked~.stage-wrap .ins{display:none}
+
+/* ── 3 · THE CANVAS — edit directly on it ── */
+.main{flex:1;display:flex;align-items:center;justify-content:center;padding:22px 26px;min-width:0;min-height:0;background:radial-gradient(120% 90% at 50% 0%,rgba(203,167,102,.08),transparent 60%)}
+#vp-tp:checked~.stage-wrap .main,#vp-m:checked~.stage-wrap .main{order:1;flex:1;padding:8px 14px}
+/* the scene fills whatever the toolbar, navigator and inspector leave — height-fit, aspect kept */
+.big{display:none;width:min(100%,calc((100dvh - 150px) * 16 / 11));max-width:none;aspect-ratio:16/11;border-radius:16px;background:#fff;box-shadow:var(--sh-hi);position:relative;overflow:hidden;animation:fade var(--elem) var(--ease) both}
+@keyframes fade{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:none}}
+#vp-tl:checked~.stage-wrap .big,#vp-tp:checked~.stage-wrap .big{width:min(100%,calc(760px * 16 / 11))}
+#vp-m:checked~.stage-wrap .big{aspect-ratio:9/11;border-radius:22px;width:100%}
+#pd-phone:checked~.stage-wrap .big{aspect-ratio:9/13;width:min(100%,calc((100dvh - 150px) * 9 / 13))}
+#pt-film:checked~.stage-wrap .big[data-p=film],#pt-hero:checked~.stage-wrap .big[data-p=hero],#pt-words:checked~.stage-wrap .big[data-p=words],#pt-details:checked~.stage-wrap .big[data-p=details],#pt-dress:checked~.stage-wrap .big[data-p=dress],#pt-msg:checked~.stage-wrap .big[data-p=msg],#pt-bring:checked~.stage-wrap .big[data-p=bring],#pt-custom:checked~.stage-wrap .big[data-p=custom],#pt-rsvp:checked~.stage-wrap .big[data-p=rsvp],#pt-seat:checked~.stage-wrap .big[data-p=seat],#pt-cues:checked~.stage-wrap .big[data-p=cues],#pt-live:checked~.stage-wrap .big[data-p=live],#pt-cover:checked~.stage-wrap .big[data-p=cover],#pt-chapters:checked~.stage-wrap .big[data-p=chapters],#pt-publish:checked~.stage-wrap .big[data-p=publish]{display:block}
+.big .in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:8% 9%;text-align:center}
+.big .eb{font-size:10px;letter-spacing:.3em;text-transform:uppercase;opacity:.6}
+.big .nm{font-family:var(--serif);font-size:clamp(22px,4vw,40px);line-height:1.02;font-weight:300}
+.big .ln{font-size:13px;opacity:.75}
+.big .txt{font-size:13px;line-height:1.55;text-align:left;max-width:52ch}.big .txt.ph{color:var(--ink3);font-style:italic}
+.big .bars{display:flex;flex-direction:column;gap:6px;width:70%}.big .bars i{display:block;height:9px;border-radius:4px;background:rgba(27,26,23,.07)}
+.big .hero{display:block;width:100%;height:42%;border-radius:10px;background:linear-gradient(135deg,#C29A7C,#7A5446)}
+.big .hero.none{background:linear-gradient(135deg,#FBFAF7,#F3ECDF);border:1px solid rgba(169,131,75,.35);display:grid;place-items:center;color:var(--ink3);font-size:12px;font-style:italic}
+.big .cover{display:block;width:100%;height:42%;border-radius:10px;background:linear-gradient(90deg,rgba(203,167,102,.5),rgba(203,167,102,.15))}
+.big .film{position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,rgba(203,167,102,.35),transparent 60%),#17160F;color:#FBFAF7}
+.big .cd{display:flex;gap:18px}.big .cd b{display:block;font-size:26px;letter-spacing:-.02em}.big .cd small{font-size:9px;letter-spacing:.14em;text-transform:uppercase;opacity:.6}
+.big .sw{display:flex;gap:10px}.big .sw i{width:26px;height:26px;border-radius:50%}
+.big .cta{display:block;height:40px;border-radius:999px;background:var(--cta);color:#fff;font-size:13px;line-height:40px;font-weight:600;width:56%}
+.big .rows{display:flex;flex-direction:column;gap:8px;width:80%;text-align:left;font-size:12.5px}.big .rows span{display:flex;gap:12px}.big .rows b{width:64px;font-variant-numeric:tabular-nums}
+.big .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:80%}.big .tiles i{display:grid;place-items:center;height:56px;border-radius:10px;background:rgba(27,26,23,.05);font-size:12px;font-style:normal;color:var(--ink5)}
+.big .chap{display:block;height:44px;border-radius:9px;background:linear-gradient(90deg,rgba(203,167,102,.25),rgba(203,167,102,.08));width:80%}
+/* selection: click text / photo / words → the inspector appears */
+.ed{border-radius:6px;outline:1.5px dashed transparent;outline-offset:6px;transition:outline-color var(--elem)}
+.ed:hover{outline-color:var(--gold3)}
+#sl-text:checked~.stage-wrap .ed.t,#sl-photo:checked~.stage-wrap .ed.p,#sl-words:checked~.stage-wrap .ed.w{outline-color:var(--gold5);outline-style:solid}
+.n-a,.n-b,.h-a,.h-b{display:contents}
+#sim-names:checked~.frame .n-a,#sim-names:not(:checked)~.frame .n-b,#sim-hero:checked~.frame .h-a,#sim-hero:not(:checked)~.frame .h-b{display:none!important}
+.cv .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(203,167,102,.2) 1px,transparent 1px),linear-gradient(90deg,rgba(203,167,102,.2) 1px,transparent 1px);background-size:12.5% 16.66%;transition:opacity var(--elem)}
+#snap-off:checked~.stage-wrap .cv .grid{opacity:0}
+.el{position:absolute;border-radius:8px;transition:left var(--enter) var(--ease),top var(--enter) var(--ease),width var(--enter) var(--ease)}
+.el.photo{left:12.5%;top:16.66%;width:50%;height:50%;background:linear-gradient(135deg,#C29A7C,#7A5446)}
+.el.text{left:12.5%;top:72%;width:62.5%;font-family:var(--serif);font-size:clamp(14px,2.2vw,22px);line-height:1.1;text-align:left}
+.el.orn{right:8%;top:12%;width:22%;aspect-ratio:1;border-radius:50%;border:1px solid var(--gold3);opacity:.7}
+#snap-off:checked~.stage-wrap .el.photo{left:6%;top:8%;width:60%}#snap-off:checked~.stage-wrap .el.text{left:34%;top:74%;width:80%}
+#sl-photo:checked~.stage-wrap .el.photo{outline:1.5px solid var(--gold5)}
+.el .h{position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;border:1.5px solid var(--gold5);opacity:0;transition:opacity var(--ctrl)}
+#sl-photo:checked~.stage-wrap .el.photo .h{opacity:1}
+.h.nw{left:-4px;top:-4px}.h.n{left:calc(50% - 4px);top:-4px}.h.ne{right:-4px;top:-4px}.h.w{left:-4px;top:calc(50% - 4px)}.h.e{right:-4px;top:calc(50% - 4px)}.h.sw{left:-4px;bottom:-4px}.h.s{left:calc(50% - 4px);bottom:-4px}.h.se{right:-4px;bottom:-4px}
+#play:checked~.stage-wrap .big .hero,#play:checked~.stage-wrap .big .el.photo{animation:rise2 var(--enter) var(--ease-out) both}
+#play:checked~.stage-wrap .big .nm,#play:checked~.stage-wrap .big .el.text{animation:rise2 var(--enter) var(--ease-out) .18s both}
+@keyframes rise2{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+#play:checked~.stage-wrap .ed,#play:checked~.stage-wrap .el.photo{outline-color:transparent!important}#play:checked~.stage-wrap .el .h{opacity:0!important}
+
+/* ── 4 · THE INSPECTOR — one, contextual, only when something is selected ── */
+.insp{width:0;flex:none;overflow:hidden;transition:width var(--enter) var(--ease);display:flex;flex-direction:column;background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:-1px 0 0 rgba(27,26,23,.05)}
+#sl-text:checked~.stage-wrap .insp,#sl-photo:checked~.stage-wrap .insp,#sl-words:checked~.stage-wrap .insp,#sl-scene:checked~.stage-wrap .insp,#sl-main:checked~.stage-wrap .insp{width:300px}
+#vp-tl:checked~#sl-text:checked~.stage-wrap .insp,#vp-tl:checked~#sl-photo:checked~.stage-wrap .insp,#vp-tl:checked~#sl-words:checked~.stage-wrap .insp,#vp-tl:checked~#sl-scene:checked~.stage-wrap .insp,#vp-tl:checked~#sl-main:checked~.stage-wrap .insp{width:270px}
+.insp .tabs{display:flex;gap:2px;padding:12px 12px 0;position:sticky;top:0}
+.insp .tabs label{flex:1;text-align:center;font-size:11.5px;font-weight:600;padding:7px 4px;border-radius:8px;color:var(--ink5);white-space:nowrap}
+.insp .tabs label:hover{background:rgba(27,26,23,.06)}
+#tb-format:checked~.stage-wrap label[for=tb-format],#tb-anim:checked~.stage-wrap label[for=tb-anim],#tb-trans:checked~.stage-wrap label[for=tb-trans],#tb-content:checked~.stage-wrap label[for=tb-content]{background:var(--ink);color:#fff}
+.insp .x{position:absolute;right:10px;top:10px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:var(--ink5);font-size:15px;background:rgba(27,26,23,.05)}
+.insp .body{padding:14px 16px 24px;overflow:auto;display:flex;flex-direction:column;gap:14px;min-width:270px}
+.tabp{display:none;flex-direction:column;gap:14px}
+#tb-format:checked~.stage-wrap .tabp[data-t=format],#tb-anim:checked~.stage-wrap .tabp[data-t=anim],#tb-trans:checked~.stage-wrap .tabp[data-t=trans],#tb-content:checked~.stage-wrap .tabp[data-t=content]{display:flex}
+/* Format follows the selection */
+.fm{display:none;flex-direction:column;gap:14px}
+#sl-text:checked~.stage-wrap .fm[data-s=text],#sl-photo:checked~.stage-wrap .fm[data-s=photo],#sl-words:checked~.stage-wrap .fm[data-s=words],#sl-scene:checked~.stage-wrap .fm[data-s=scene]{display:flex}
+/* Content follows the scene */
+.ct{display:none;flex-direction:column;gap:12px}
+#pt-words:checked~.stage-wrap .ct[data-p=words],#pt-details:checked~.stage-wrap .ct[data-p=details],#pt-dress:checked~.stage-wrap .ct[data-p=dress],#pt-msg:checked~.stage-wrap .ct[data-p=msg],#pt-bring:checked~.stage-wrap .ct[data-p=bring],#pt-rsvp:checked~.stage-wrap .ct[data-p=rsvp],#pt-cues:checked~.stage-wrap .ct[data-p=cues],#pt-film:checked~.stage-wrap .ct[data-p=film],#pt-chapters:checked~.stage-wrap .ct[data-p=chapters],#pt-cover:checked~.stage-wrap .ct[data-p=cover],#pt-publish:checked~.stage-wrap .ct[data-p=publish],#pt-seat:checked~.stage-wrap .ct[data-p=seat],#pt-live:checked~.stage-wrap .ct[data-p=live],#pt-hero:checked~.stage-wrap .ct[data-p=hero],#pt-custom:checked~.stage-wrap .ct[data-p=custom]{display:flex}
+/* phone / tablet-P: the inspector is a sheet */
+#vp-tp:checked~.stage-wrap .insp,#vp-m:checked~.stage-wrap .insp{position:absolute;left:0;right:0;bottom:0;top:auto;width:auto!important;max-height:0;border-radius:22px 22px 0 0;box-shadow:0 -20px 50px -30px rgba(30,26,18,.6);transition:max-height var(--enter) var(--ease-out);z-index:30}
+#vp-tp:checked~#sl-text:checked~.stage-wrap .insp,#vp-tp:checked~#sl-photo:checked~.stage-wrap .insp,#vp-tp:checked~#sl-words:checked~.stage-wrap .insp,#vp-tp:checked~#sl-scene:checked~.stage-wrap .insp,#vp-m:checked~#sl-text:checked~.stage-wrap .insp,#vp-m:checked~#sl-photo:checked~.stage-wrap .insp,#vp-m:checked~#sl-words:checked~.stage-wrap .insp,#vp-m:checked~#sl-scene:checked~.stage-wrap .insp,#vp-tp:checked~#sl-main:checked~.stage-wrap .insp,#vp-m:checked~#sl-main:checked~.stage-wrap .insp{max-height:64%}
+#vp-m:checked~.stage-wrap .insp .body{min-width:0}
+.f{display:flex;flex-direction:column;gap:5px}
+.f .lb{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink5);display:flex;align-items:center;gap:8px}
+.f .lb .lock,.f .lb .free{margin-left:auto}
+.f .in{border-bottom:1px solid var(--line);padding:6px 0;font-size:14px;display:flex;align-items:center;gap:8px}.f .in small{color:var(--ink4);font-size:11.5px}.f .in.ph{color:var(--ink3);font-style:italic;font-size:13px}.f .in.multi{min-height:48px;align-items:flex-start;line-height:1.45}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.chip{font-size:11.5px;font-weight:600;padding:6px 10px;border-radius:var(--r-full);background:rgba(27,26,23,.06);color:var(--ink5)}.chip:hover{background:rgba(27,26,23,.12);color:var(--ink)}.chip.on{background:var(--ink);color:#fff}
+.lock{display:inline-flex;align-items:center;gap:4px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--gold7);padding:2px 5px;border-radius:var(--r-full);opacity:.85}
+.lock::before{content:"";width:6px;height:8px;border:1.5px solid currentColor;border-radius:2px 2px 1px 1px;border-top-width:3px;box-sizing:border-box;display:inline-block;position:relative;top:1px}
+.lock:hover{background:var(--gold1);opacity:1}
+.free{font-size:9px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--success);opacity:.75}
+.try{font-size:10.5px;font-weight:600;color:var(--gold7);padding:4px 9px;border-radius:var(--r-full);background:rgba(203,167,102,.14);margin-left:auto;white-space:nowrap}.try:hover{background:var(--gold3);color:var(--ob)}
+#sim-names:checked~.frame .try[for=sim-names],#sim-hero:checked~.frame .try[for=sim-hero]{background:var(--ink);color:#fff}
+.info{position:relative;width:16px;height:16px;border-radius:50%;display:inline-grid;place-items:center;color:var(--ink4);border:1.5px solid var(--ink3);font:italic 500 9.5px/1 var(--serif);cursor:default;outline:none;flex:none}
+.info:hover,.info:focus{border-color:var(--ink);color:var(--ink)}
+.tip{position:absolute;right:0;top:calc(100% + 8px);width:230px;padding:9px 11px;border-radius:10px;background:rgba(27,26,23,.94);color:#fff;font:400 11.5px/1.5 var(--sans);font-style:normal;text-align:left;letter-spacing:0;text-transform:none;opacity:0;pointer-events:none;transition:opacity var(--ctrl);z-index:40}
+.info:hover .tip,.info:focus .tip{opacity:1}
+.sw3{display:flex;gap:5px;flex-wrap:wrap}.sw3 label{font-size:11.5px;font-weight:600;padding:6px 10px;border-radius:var(--r-full);background:rgba(27,26,23,.06);color:var(--ink5)}
+#tm-scrub:checked~.stage-wrap label[for=tm-scrub],#tm-once:checked~.stage-wrap label[for=tm-once],#an-page:checked~.stage-wrap label[for=an-page],#an-el:checked~.stage-wrap label[for=an-el],#an-text:checked~.stage-wrap label[for=an-text],#mo-still:checked~.stage-wrap label[for=mo-still],#mo-calm:checked~.stage-wrap label[for=mo-calm],#mo-edit:checked~.stage-wrap label[for=mo-edit],#mo-cine:checked~.stage-wrap label[for=mo-cine],#trn-scroll:checked~.stage-wrap label[for=trn-scroll],#trn-scrub:checked~.stage-wrap label[for=trn-scrub],#trn-auto:checked~.stage-wrap label[for=trn-auto],#snap-on:checked~.stage-wrap label[for=snap-on],#snap-off:checked~.stage-wrap label[for=snap-off],#pd-phone:checked~.stage-wrap label[for=pd-phone],#pd-desk:checked~.stage-wrap label[for=pd-desk],#md-shown:checked~.stage-wrap label[for=md-shown],#md-hidden:checked~.stage-wrap label[for=md-hidden],#md-auto:checked~.stage-wrap label[for=md-auto],#vis-pub:checked~.stage-wrap label[for=vis-pub],#vis-unl:checked~.stage-wrap label[for=vis-unl],#vis-priv:checked~.stage-wrap label[for=vis-priv]{background:var(--ink);color:#fff}
+.fine{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:11.5px;align-items:center}.fine b{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink4);font-weight:700}
+#tm-scrub:checked~.stage-wrap .fine .time{opacity:.4}#tm-once:checked~.stage-wrap .fine .out{opacity:.4}
+.swatches{display:flex;gap:8px}.swatches i{width:24px;height:24px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.phonecheck{display:none;gap:10px;align-items:flex-start}#snap-off:checked~.stage-wrap .phonecheck{display:flex}
+.phonecheck .pc{width:72px;aspect-ratio:9/16;border-radius:10px;background:#fff;box-shadow:var(--sh-tile);position:relative;overflow:hidden;flex:none}
+.phonecheck .pc .el.photo{left:6%;top:6%;width:60%;height:28%}.phonecheck .pc .el.text{left:34%;top:38%;width:80%;font-size:7px;outline:1.5px solid var(--danger)}
+.phonecheck .warn{font-size:11px;color:var(--danger)}.phonecheck .warn small{display:block;color:var(--ink5)}
+.list{display:flex;flex-direction:column;font-size:12.5px}.list span{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--hair)}.list small{color:var(--ink5)}
+.micro{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--gold7)}
+.soft{color:var(--ink5)}.tag{font-size:9px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--ink4);background:rgba(27,26,23,.05);padding:2px 6px;border-radius:var(--r-full)}.tag.ok{color:var(--success);background:rgba(94,124,82,.12)}
+.poster{width:96px;aspect-ratio:3/4;border-radius:8px;background:#9a244f;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font:300 9px var(--serif);text-align:center;box-shadow:var(--sh-tile)}
+#sim-hero:checked~.frame .poster{background:linear-gradient(180deg,#C29A7C 0%,#7A5446 52%,#33221F 100%)}
+
+/* ⋯ · Add · Pro · Reset — small panels, closed by default */
+.scrim{position:absolute;inset:0;z-index:40;background:rgba(27,26,23,.18);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);opacity:0;visibility:hidden;transition:opacity var(--elem),visibility 0s var(--elem)}
+.ov{position:absolute;right:14px;top:62px;width:300px;max-height:calc(100% - 80px);overflow:auto;z-index:41;padding:16px 18px;border-radius:16px;background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:var(--sh-hi);display:none;flex-direction:column;gap:14px;animation:slide var(--elem) var(--ease-out) both}
+@keyframes slide{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:none}}
+#p-more:checked~.stage-wrap .ov[data-p=more],#p-pro:checked~.stage-wrap .ov[data-p=pro],#p-add:checked~.stage-wrap .ov[data-p=add]{display:flex}
+#p-reset:checked~.frame .ov[data-p=reset]{display:flex}
+#p-more:checked~.stage-wrap .scrim,#p-pro:checked~.stage-wrap .scrim,#p-add:checked~.stage-wrap .scrim{opacity:1;visibility:visible;transition-delay:0s}
+#p-reset:checked~.frame .scrim{opacity:1;visibility:visible;transition-delay:0s}
+#vp-m:checked~.stage-wrap .ov{right:0;left:0;top:auto;bottom:0;width:auto;border-radius:22px 22px 0 0;max-height:80%}
+.ov .hd{display:flex;align-items:center}.ov h3{font-size:14px;font-weight:600;flex:1}
+.ov .x{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:var(--ink5);font-size:16px}.ov .x:hover{background:rgba(27,26,23,.08)}
+.ov .made{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}.ov .made i{aspect-ratio:9/12;border-radius:6px;background:#fff;box-shadow:var(--sh-tile);display:grid;place-items:center;font:300 7px var(--serif);text-align:center;overflow:hidden}
+.ov .made i.pst{background:#9a244f;color:#fff}#sim-hero:checked~.frame .ov .made i.pst,#sim-hero:checked~.frame .ov .made i.h{background:linear-gradient(180deg,#C29A7C,#7A5446);color:#fff}
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 14px;border-radius:var(--r-full);font-size:12.5px;font-weight:600;background:var(--ink);color:#fff}.btn:hover{background:#000}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}.btn.danger{background:transparent;color:var(--danger);box-shadow:inset 0 0 0 1px rgba(166,72,59,.35)}
+.scope{display:flex;flex-direction:column;gap:5px;font-size:12px}.scope span{display:flex;gap:8px}.scope b{font-family:var(--mono);font-weight:400;color:var(--gold5);flex:none}.scope .keep b{color:var(--success)}
+/* scene layout templates: slots on the grid, desktop + phone twin */
+.fam{font-size:11px;font-weight:600;color:var(--ink7);margin:4px 0 -6px}
+.tplov{width:380px}.tgrid{grid-template-columns:repeat(4,1fr)}
+.tcard .tth2{position:absolute;right:-4px;bottom:14px;width:26%;aspect-ratio:9/16;border-radius:4px;background:#fff;box-shadow:var(--sh-tile);overflow:hidden;outline:1.5px solid var(--paper)}
+.tcard{position:relative}.tcard .tth{width:86%;align-self:flex-start}
+#ly-1:checked~.stage-wrap label[for=ly-1] .tth,#ly-2:checked~.stage-wrap label[for=ly-2] .tth,#ly-3:checked~.stage-wrap label[for=ly-3] .tth,#ly-4:checked~.stage-wrap label[for=ly-4] .tth,#ly-8:checked~.stage-wrap label[for=ly-8] .tth,#ly-9:checked~.stage-wrap label[for=ly-9] .tth,#ly-13:checked~.stage-wrap label[for=ly-13] .tth,#ly-17:checked~.stage-wrap label[for=ly-17] .tth,#ly-18:checked~.stage-wrap label[for=ly-18] .tth,#ly-19:checked~.stage-wrap label[for=ly-19] .tth,#ly-20:checked~.stage-wrap label[for=ly-20] .tth,#ly-22:checked~.stage-wrap label[for=ly-22] .tth,#ly-23:checked~.stage-wrap label[for=ly-23] .tth{outline:2px solid var(--gold5);outline-offset:2px}
+.slots{display:none;position:absolute;inset:8% 9%;gap:4%}
+.slot{border-radius:10px;display:grid;place-items:center;text-align:center;font-size:12px;color:var(--ink4);outline:1.5px dashed rgba(169,131,75,.5);transition:background var(--elem)}
+.slot:hover{background:rgba(203,167,102,.12)}
+.slot.media{background:repeating-linear-gradient(45deg,rgba(27,26,23,.04) 0 4px,transparent 4px 10px)}
+.slot.text{font-family:var(--serif);font-size:clamp(16px,2.4vw,26px);color:var(--ink);line-height:1.1;font-weight:300}.slot.text small{font-family:var(--sans);font-size:11px;color:var(--ink4);font-weight:400}
+#ly-1:checked~.stage-wrap .big[data-p=new] .slots{display:grid;grid-template-columns:1fr 1fr}
+#ly-2:checked~.stage-wrap .big[data-p=new] .slots{display:grid;grid-template-columns:1fr 1fr}#ly-2:checked~.stage-wrap .slot.media{order:2}
+#ly-3:checked~.stage-wrap .big[data-p=new] .slots{display:grid;grid-template-rows:1.3fr 1fr}
+#ly-4:checked~.stage-wrap .big[data-p=new] .slots{display:grid;inset:0}#ly-4:checked~.stage-wrap .slot.media{grid-area:1/1;border-radius:0;outline:0}#ly-4:checked~.stage-wrap .slot.text{grid-area:1/1;align-self:end;justify-self:start;padding:6%;outline:0}
+#ly-8:checked~.stage-wrap .big[data-p=new] .slots,#ly-9:checked~.stage-wrap .big[data-p=new] .slots{display:grid}#ly-8:checked~.stage-wrap .slot.media,#ly-9:checked~.stage-wrap .slot.media{display:none}
+#ly-13:checked~.stage-wrap .big[data-p=new] .slots{display:grid;inset:0}#ly-13:checked~.stage-wrap .slot.text{display:none}#ly-13:checked~.stage-wrap .slot.media{border-radius:0;outline:0}
+#ly-17:checked~.stage-wrap .big[data-p=new] .slots,#ly-18:checked~.stage-wrap .big[data-p=new] .slots,#ly-19:checked~.stage-wrap .big[data-p=new] .slots,#ly-20:checked~.stage-wrap .big[data-p=new] .slots,#ly-22:checked~.stage-wrap .big[data-p=new] .slots,#ly-23:checked~.stage-wrap .big[data-p=new] .slots{display:grid;grid-template-columns:1fr 1fr}
+#ly-17:checked~.stage-wrap .slot.text,#ly-18:checked~.stage-wrap .slot.text,#ly-19:checked~.stage-wrap .slot.text,#ly-20:checked~.stage-wrap .slot.text{font-family:var(--sans);font-size:12px;color:var(--ink4);background:repeating-linear-gradient(45deg,rgba(27,26,23,.04) 0 4px,transparent 4px 10px)}
+#ly-22:checked~.stage-wrap .slot.media,#ly-23:checked~.stage-wrap .slot.media{background:none;font-family:var(--serif);font-size:clamp(16px,2.4vw,26px);color:var(--ink)}
+#ly-1:checked~.stage-wrap .addhint,#ly-2:checked~.stage-wrap .addhint,#ly-3:checked~.stage-wrap .addhint,#ly-4:checked~.stage-wrap .addhint,#ly-8:checked~.stage-wrap .addhint,#ly-9:checked~.stage-wrap .addhint,#ly-13:checked~.stage-wrap .addhint,#ly-17:checked~.stage-wrap .addhint,#ly-18:checked~.stage-wrap .addhint,#ly-19:checked~.stage-wrap .addhint,#ly-20:checked~.stage-wrap .addhint,#ly-22:checked~.stage-wrap .addhint,#ly-23:checked~.stage-wrap .addhint{opacity:0}
+.rtd{display:none}#mo-still:checked~.stage-wrap .rtd,#mo-edit:checked~.stage-wrap .rtd,#mo-cine:checked~.stage-wrap .rtd{display:inline-flex}
+#mo-still:checked~.stage-wrap .tdef,#mo-edit:checked~.stage-wrap .tdef,#mo-cine:checked~.stage-wrap .tdef{display:none}
+/* preview as: desktop · phone · both */
+.seg{display:inline-flex;gap:1px;padding:2px;border-radius:var(--r-full);background:rgba(27,26,23,.06)}
+.seg label{font-size:11px;padding:4px 8px;border-radius:var(--r-full);color:var(--ink5);letter-spacing:-1px}
+#pd-desk:checked~.stage-wrap .seg label[for=pd-desk],#pd-phone:checked~.stage-wrap .seg label[for=pd-phone],#pd-both:checked~.stage-wrap .seg label[for=pd-both]{background:var(--ink);color:#fff}
+#vp-m:checked~.stage-wrap .seg{display:none}
+.phone-pv{display:none;flex:none;width:150px;margin-left:22px;text-align:center}
+#pd-both:checked~.stage-wrap .phone-pv{display:block}
+#pd-both:checked~.stage-wrap .big{max-width:480px}
+.pp{width:150px;aspect-ratio:9/17;border-radius:18px;background:#fff;box-shadow:var(--sh-hi);position:relative;overflow:hidden}
+.pp-in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:14px 12px;text-align:center}
+.pp .hero{display:block;width:100%;height:30%;border-radius:8px;background:linear-gradient(135deg,#C29A7C,#7A5446)}
+.pp .hero.none{background:linear-gradient(135deg,#FBFAF7,#F3ECDF);border:1px solid rgba(169,131,75,.35);font-size:8px;color:var(--ink3);font-style:italic;display:grid;place-items:center}
+.pp .nm{font-family:var(--serif);font-size:15px;line-height:1.05;font-weight:300}.pp .ln{font-size:8px;opacity:.7}
+.pp .off{display:none;position:absolute;left:38%;bottom:12%;width:110%;text-align:left;font-family:var(--serif);font-size:11px;outline:1.5px solid var(--danger);outline-offset:3px;border-radius:3px}
+#snap-off:checked~.stage-wrap .pp .off{display:block}
+#snap-off:checked~.stage-wrap .pp .hero{width:64%;align-self:flex-start;height:24%}
+.pp-ok,.pp-warn{font-size:10.5px;margin-top:8px;color:var(--success)}.pp-warn{display:none;color:var(--danger)}
+#snap-off:checked~.stage-wrap .pp-ok{display:none}#snap-off:checked~.stage-wrap .pp-warn{display:block}
+#vp-m:checked~.stage-wrap .phone-pv,#vp-tp:checked~.stage-wrap .phone-pv{display:none!important}
+/* Main (pinned) · scene background · add text / photo drops · fonts · focal */
+/* Main selected — the layer behind every scene */
+.main{position:relative}
+.mainlayer{display:none;position:absolute;inset:14px;border-radius:18px;background:#FBFAF7;box-shadow:inset 0 0 0 1px var(--line);align-items:flex-start;justify-content:flex-start;padding:14px 16px;transition:background var(--elem)}
+#sl-main:checked~.stage-wrap .mainlayer{display:flex}
+#sl-main:checked~.stage-wrap .big{opacity:.28;box-shadow:none;outline:1.5px dashed var(--gold5);outline-offset:4px;background:transparent!important}
+#sl-main:checked~.stage-wrap .big *{visibility:hidden}
+#sl-main:checked~.stage-wrap .big .in{visibility:visible}#sl-main:checked~.stage-wrap .big .in>*{visibility:visible}
+#mb-photo:checked~.stage-wrap .mainlayer{background:linear-gradient(135deg,#C29A7C,#7A5446);color:#fff}
+#mb-clip:checked~.stage-wrap .mainlayer{background:linear-gradient(135deg,#9DB3C4,#4E6A7A);color:#fff}
+#mb-move:checked~.stage-wrap .mainlayer{background:radial-gradient(circle at 30% 30%,rgba(203,167,102,.55),transparent 60%),#2A2720;color:#F3ECDF}
+#mb-photo:checked~.stage-wrap .mainlayer .micro,#mb-clip:checked~.stage-wrap .mainlayer .micro,#mb-move:checked~.stage-wrap .mainlayer .micro{color:inherit}
+/* Main background — a compact pinned row, not a scene */
+.mainrow{display:flex;align-items:center;gap:8px;height:44px;flex:none;margin:0 0 8px 14px;padding:0 6px;border-radius:10px;font-size:10.5px;color:var(--ink5);outline:2px solid transparent;outline-offset:1px}
+.mainrow:hover{background:rgba(27,26,23,.05)}
+.mainrow .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#nw-n:checked~.stage-wrap .mainrow .t{display:none}
+.mainbg{width:22px;height:22px;border-radius:6px;flex:none;background:#FBFAF7;box-shadow:inset 0 0 0 1px var(--line);transition:background var(--elem)}
+#sl-main:checked~.stage-wrap .mainrow{outline-color:var(--gold5)}
+#vp-tp:checked~.stage-wrap .mainrow,#vp-m:checked~.stage-wrap .mainrow{margin:14px 6px 0 0;height:40px;padding:0 8px}
+#vp-m:checked~.stage-wrap .mainrow .t{display:none}
+#mb-photo:checked~.stage-wrap .mainbg{background:linear-gradient(135deg,#C29A7C,#7A5446)}
+#mb-clip:checked~.stage-wrap .mainbg{background:linear-gradient(135deg,#9DB3C4,#4E6A7A)}
+#mb-move:checked~.stage-wrap .mainbg{background:radial-gradient(circle at 30% 30%,rgba(203,167,102,.55),transparent 60%),#2A2720}
+
+/* the main background shows behind the canvas area (and through scenes set to None) */
+#mb-photo:checked~.stage-wrap .main{background:linear-gradient(135deg,rgba(194,154,124,.35),rgba(122,84,70,.35))}
+#mb-clip:checked~.stage-wrap .main{background:linear-gradient(135deg,rgba(157,179,196,.35),rgba(78,106,122,.35))}
+#mb-move:checked~.stage-wrap .main{background:radial-gradient(circle at 30% 30%,rgba(203,167,102,.35),transparent 60%),#3A362C}
+#mb-photo:checked~#bg-none:checked~.stage-wrap .big:not(.cv){background:linear-gradient(135deg,rgba(194,154,124,.5),rgba(122,84,70,.5)),#fff}
+#mb-move:checked~#bg-none:checked~.stage-wrap .big:not(.cv){background:radial-gradient(circle at 30% 30%,rgba(203,167,102,.35),transparent 60%),#F3ECDF}
+#bg-color:checked~.stage-wrap .big{background:#F3ECDF}
+#bg-photo:checked~.stage-wrap .big{background:linear-gradient(135deg,#C29A7C,#7A5446)}
+#bg-clip:checked~.stage-wrap .big{background:linear-gradient(135deg,#9DB3C4,#4E6A7A)}
+#bg-photo:checked~.stage-wrap .big .nm,#bg-photo:checked~.stage-wrap .big .eb,#bg-photo:checked~.stage-wrap .big .ln,#bg-clip:checked~.stage-wrap .big .nm,#bg-clip:checked~.stage-wrap .big .eb,#bg-clip:checked~.stage-wrap .big .ln{color:#fff}
+.tf-scene,.tf-main{display:none}
+#sl-scene:checked~.stage-wrap .tf-el,#sl-main:checked~.stage-wrap .tf-el{display:none}#sl-scene:checked~.stage-wrap .tf-scene,#sl-main:checked~.stage-wrap .tf-main{display:inline}
+#sl-main:checked~.stage-wrap .fm[data-s=main]{display:flex}
+#sl-main:checked~.stage-wrap .tabp[data-t=format] .micro,#sl-main:checked~.stage-wrap .tabp[data-t=format]>.f{display:none}
+.mbm{display:none}#mb-move:checked~.stage-wrap .mbm{display:flex}#mb-move:checked~.stage-wrap .mbc,#mb-photo:checked~.stage-wrap .mbc,#mb-clip:checked~.stage-wrap .mbc{display:none}
+.bgc,.bgp{display:none}#bg-color:checked~.stage-wrap .bgc{display:flex}#bg-photo:checked~.stage-wrap .bgp,#bg-clip:checked~.stage-wrap .bgp{display:flex}
+#bg-none:checked~.stage-wrap label[for=bg-none],#bg-photo:checked~.stage-wrap label[for=bg-photo],#bg-clip:checked~.stage-wrap label[for=bg-clip],#bg-color:checked~.stage-wrap label[for=bg-color],#mb-color:checked~.stage-wrap label[for=mb-color],#mb-photo:checked~.stage-wrap label[for=mb-photo],#mb-clip:checked~.stage-wrap label[for=mb-clip],#mb-move:checked~.stage-wrap label[for=mb-move]{background:var(--ink);color:#fff}
+.ed.empty{position:absolute;inset:0;outline:0;border-radius:16px}
+#sl-scene:checked~.stage-wrap .big .ed.empty{box-shadow:inset 0 0 0 2px var(--gold5)}
+.drop-text,.drop-photo{display:none}
+#pt-new:checked~#sl-text:checked~.stage-wrap .drop-text{display:block}
+#pt-new:checked~#sl-photo:checked~.stage-wrap .drop-photo{display:block}
+#pt-new:checked~#sl-text:checked~.stage-wrap .addhint,#pt-new:checked~#sl-photo:checked~.stage-wrap .addhint{opacity:0}
+#pt-new:checked~#sl-text:checked~.stage-wrap .drop-text .h,#pt-new:checked~#sl-photo:checked~.stage-wrap .drop-photo .h{opacity:1}
+.drop-photo .focal{position:absolute;inset:0;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr)}.drop-photo .focal i{border:1px dashed rgba(255,255,255,.45)}
+#fo-1:checked~.stage-wrap .focal i:nth-child(1),#fo-2:checked~.stage-wrap .focal i:nth-child(2),#fo-3:checked~.stage-wrap .focal i:nth-child(3),#fo-4:checked~.stage-wrap .focal i:nth-child(4),#fo-5:checked~.stage-wrap .focal i:nth-child(5),#fo-6:checked~.stage-wrap .focal i:nth-child(6),#fo-7:checked~.stage-wrap .focal i:nth-child(7),#fo-8:checked~.stage-wrap .focal i:nth-child(8),#fo-9:checked~.stage-wrap .focal i:nth-child(9){background:rgba(255,255,255,.3)}
+.focalgrid{display:grid;grid-template-columns:repeat(3,22px);gap:3px}.focalgrid label{width:22px;height:16px;border-radius:3px;background:rgba(27,26,23,.08)}
+#fo-1:checked~.stage-wrap label[for=fo-1],#fo-2:checked~.stage-wrap label[for=fo-2],#fo-3:checked~.stage-wrap label[for=fo-3],#fo-4:checked~.stage-wrap label[for=fo-4],#fo-5:checked~.stage-wrap label[for=fo-5],#fo-6:checked~.stage-wrap label[for=fo-6],#fo-7:checked~.stage-wrap label[for=fo-7],#fo-8:checked~.stage-wrap label[for=fo-8],#fo-9:checked~.stage-wrap label[for=fo-9]{background:var(--gold5)}
+#ft-cormorant:checked~.stage-wrap label[for=ft-cormorant],#ft-fraunces:checked~.stage-wrap label[for=ft-fraunces],#ft-playfair:checked~.stage-wrap label[for=ft-playfair],#ft-caslon:checked~.stage-wrap label[for=ft-caslon],#ft-vidaloka:checked~.stage-wrap label[for=ft-vidaloka],#ft-cinzel:checked~.stage-wrap label[for=ft-cinzel],#ft-script:checked~.stage-wrap label[for=ft-script]{background:var(--ink);color:#fff}
+#ft-cinzel:checked~.stage-wrap .big .nm,#ft-cinzel:checked~.stage-wrap .drop-text{letter-spacing:.08em;text-transform:uppercase;font-size:.8em}
+#ft-script:checked~.stage-wrap .big .nm,#ft-script:checked~.stage-wrap .drop-text{font-style:italic}
+/* the transition marker as a control · the new blank scene · templates · exit */
+.tr.live{height:32px;position:relative;padding-left:14px}
+.tr .hit{display:flex;align-items:center;justify-content:center;gap:4px;height:32px;width:100%;border-radius:8px}
+.tr .hit:hover{background:rgba(27,26,23,.05)}.tr .hit:hover b{background:var(--ink);color:#fff}
+.tr .hit b{transition:background var(--elem),color var(--elem),transform var(--ctrl)}.tr .hit:active b{transform:scale(.94)}
+.l-scrub,.l-auto,.sp-slow,.sp-fast{display:none}
+#t1-scrub:checked~.stage-wrap .l-scroll,#t1-auto:checked~.stage-wrap .l-scroll,#t1-scrub:checked~.stage-wrap .l-auto,#t1-auto:checked~.stage-wrap .l-scrub{display:none}
+#t1-scrub:checked~.stage-wrap .l-scrub,#t1-auto:checked~.stage-wrap .l-auto{display:inline}
+#s1-slow:checked~.stage-wrap .sp-slow,#s1-fast:checked~.stage-wrap .sp-fast{display:inline}#s1-slow:checked~.stage-wrap .sp-normal,#s1-fast:checked~.stage-wrap .sp-normal{display:none}
+#t1-scroll:checked~.stage-wrap label[for=t1-scroll],#t1-scrub:checked~.stage-wrap label[for=t1-scrub],#t1-auto:checked~.stage-wrap label[for=t1-auto],#s1-slow:checked~.stage-wrap label[for=s1-slow],#s1-normal:checked~.stage-wrap label[for=s1-normal],#s1-fast:checked~.stage-wrap label[for=s1-fast]{background:var(--ink);color:#fff}
+.pop{display:none;position:absolute;left:calc(var(--navw) + 10px);top:206px;z-index:46;width:220px;padding:12px 14px;border-radius:14px;background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:var(--sh-hi);flex-direction:column;gap:10px;animation:slide var(--elem) var(--ease-out) both}
+#tp1:checked~.stage-wrap .pop{display:flex}
+.pop .spd{display:none;flex-direction:column;gap:6px}#t1-auto:checked~.stage-wrap .pop .spd{display:flex}
+#vp-tp:checked~.stage-wrap .pop,#vp-m:checked~.stage-wrap .pop{left:14px;right:14px;width:auto;top:auto;bottom:118px}
+#tp1:checked~.stage-wrap .tr.live .hit{background:rgba(27,26,23,.06)}#tp1:checked~.stage-wrap .tr.live .hit b{background:var(--ink);color:#fff}
+.sc.new,.tr.new{display:none}#pt-new:checked~.stage-wrap .sc.new{display:block}#pt-new:checked~.stage-wrap .tr.new{display:flex}
+#pt-new:checked~.stage-wrap .big[data-p=new]{display:block}#pt-new:checked~.stage-wrap .sc.new .th{outline-color:var(--gold5)}
+.addrow{display:flex;gap:4px;margin:6px 0 0 14px}.addrow .add{margin:0;flex:1}.addrow .add.tpl{flex:0 0 26px;font-size:12px}
+#vp-tp:checked~.stage-wrap .addrow,#vp-m:checked~.stage-wrap .addrow{flex:0 0 auto;margin:12px 0 0 6px;flex-direction:column}#vp-tp:checked~.stage-wrap .addrow .add,#vp-m:checked~.stage-wrap .addrow .add{flex:0 0 auto;height:24px;width:40px;margin:0;font-size:14px}
+.tplov{width:340px}.tgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.tcard{display:flex;flex-direction:column;gap:4px;align-items:center;text-align:center}.tcard small{font-size:10px;color:var(--ink5);line-height:1.2}.tcard small em{display:block;font-style:normal;font-size:8.5px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em}
+.tcard .tth{width:100%;aspect-ratio:16/10;border-radius:6px;background:#fff;box-shadow:var(--sh-tile);position:relative;overflow:hidden;transition:transform var(--elem) var(--ease)}.tcard:hover .tth{transform:translateY(-2px)}
+.tp-photo{position:absolute;border-radius:3px;background:linear-gradient(135deg,#C29A7C,#7A5446)}.tp-line{position:absolute;height:4px;border-radius:2px;background:rgba(27,26,23,.12)}.tp-dot{position:absolute;top:40%;width:14%;aspect-ratio:1;border-radius:50%}.tp-cta{position:absolute;left:30%;top:62%;width:40%;height:9px;border-radius:999px;background:var(--cta)}
+#p-exit:checked~.frame .ov[data-p=exit]{display:flex}#p-exit:checked~.frame .scrim{opacity:1;visibility:visible;transition-delay:0s}
+.ov .n::before{content:""}.stage-wrap:has(#sim-names:checked):has(#sim-hero:checked) .ov .n::before{content:"2 changes. "}.stage-wrap:has(#sim-names:checked):not(:has(#sim-hero:checked)) .ov .n::before,.stage-wrap:has(#sim-hero:checked):not(:has(#sim-names:checked)) .ov .n::before{content:"1 change. "}
+
+.barbtn{display:none}#barc:checked~.barbtn{display:grid}
+/* v3 · 25 templates · the picker follows the editing view */
+.tplov{width:420px}.tgrid{grid-template-columns:repeat(5,1fr)}
+.tcard .tth,.tcard .tth2{container-type:inline-size}
+.tp-col{position:absolute}.tp-txt{position:absolute;font-family:var(--serif);font-style:normal;text-align:center;line-height:1;color:var(--ink)}
+.tp-play{position:absolute;width:0;height:0;border-left:8px solid rgba(255,255,255,.9);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.tp-dotln{position:absolute;top:44%;width:8%;aspect-ratio:1;border-radius:50%;background:var(--gold5)}
+.st-std,.st-day,.st-pe{display:none}#wh-std:checked~.stage-wrap .st-std,#wh-day:checked~.stage-wrap .st-day,#wh-pe:checked~.stage-wrap .st-pe{display:inline}
+#wh-std:checked~.stage-wrap .st-inv,#wh-day:checked~.stage-wrap .st-inv,#wh-pe:checked~.stage-wrap .st-inv{display:none}
+.v-phone,.v-both{display:none}
+#pd-phone:checked~.stage-wrap .v-desk,#pd-both:checked~.stage-wrap .v-desk,#vp-m:checked~.stage-wrap .v-desk{display:none}
+#pd-phone:checked~.stage-wrap .v-phone,#vp-m:checked~.stage-wrap .v-phone{display:inline}#pd-both:checked~.stage-wrap .v-both{display:inline}
+/* Desktop view: desktop thumb only · Phone view: phone thumb only, big · Both: side by side */
+.tcard .tth2{display:none}
+#pd-phone:checked~.stage-wrap .tcard .tth,#vp-m:checked~.stage-wrap .tcard .tth{display:none}
+#pd-phone:checked~.stage-wrap .tcard .tth2,#vp-m:checked~.stage-wrap .tcard .tth2{display:block;position:static;width:58%;right:auto;bottom:auto;outline:0;border-radius:7px}
+#pd-both:checked~.stage-wrap .tcard{flex-direction:row;flex-wrap:wrap;justify-content:flex-start;gap:4px}
+#pd-both:checked~.stage-wrap .tcard .tth{width:62%}#pd-both:checked~.stage-wrap .tcard .tth2{display:block;position:static;width:28%;right:auto;bottom:auto;outline:0}
+#pd-both:checked~.stage-wrap .tcard small{width:100%;text-align:left}
+#pd-both:checked~.stage-wrap .tgrid{grid-template-columns:repeat(3,1fr)}
+#vp-m:checked~.stage-wrap .tgrid{grid-template-columns:repeat(4,1fr)}
+
+/* playback: loop mark on clips, ▶ on tap-to-play; when tapped: Full screen · In place */
+.pbmark{position:absolute;right:10px;bottom:10px;width:26px;height:26px;border-radius:50%;background:rgba(27,26,23,.7);color:#fff;display:none;place-items:center;font-size:12px}
+.pbmark.loop{display:grid;font-size:14px}
+#pb-tap:checked~.stage-wrap .pbmark.loop{display:none}#pb-tap:checked~.stage-wrap .pbmark.tap{display:grid;width:40px;height:40px;right:calc(50% - 20px);bottom:calc(50% - 20px);font-size:16px}
+.pbfull{display:none;position:absolute;left:10px;bottom:10px;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:rgba(27,26,23,.55);padding:3px 7px;border-radius:999px}
+#pb-tap:checked~#fs-full:checked~.stage-wrap .pbfull{display:block}
+.whentap{display:none}#pb-tap:checked~.stage-wrap .whentap{display:flex}
+.fs-b{display:none}#fs-place:checked~.stage-wrap .fs-a{display:none}#fs-place:checked~.stage-wrap .fs-b{display:inline}
+#pb-auto:checked~.stage-wrap label[for=pb-auto],#pb-loop:checked~.stage-wrap label[for=pb-loop],#pb-tap:checked~.stage-wrap label[for=pb-tap],#fs-full:checked~.stage-wrap label[for=fs-full],#fs-place:checked~.stage-wrap label[for=fs-place]{background:var(--ink);color:#fff}
+
+/* the eye — hide from guests (mode 'hidden'), tap again to show; ≥32px hit area, lower-right */
+.eye{position:absolute;right:-6px;bottom:-4px;width:32px;height:32px;display:grid;place-items:center;font-size:13px;color:var(--ink4);opacity:0;transition:opacity var(--ctrl),color var(--ctrl);border-radius:50%;z-index:2}
+.sc:hover .eye,#vp-m:checked~.stage-wrap .eye,#vp-tp:checked~.stage-wrap .eye{opacity:1}
+.eye .off{display:none}
+#hide-dress:checked~.stage-wrap .sc[for=pt-dress] .th{opacity:.35}
+#hide-dress:checked~.stage-wrap .sc[for=pt-dress] .eye{opacity:1;color:var(--danger)}
+#hide-dress:checked~.stage-wrap .sc[for=pt-dress] .eye .on{display:none}#hide-dress:checked~.stage-wrap .sc[for=pt-dress] .eye .off{display:inline}
+#hide-dress:checked~.stage-wrap .tr-dress{display:none}
+#vp-tp:checked~.stage-wrap .eye,#vp-m:checked~.stage-wrap .eye{right:-4px;bottom:-8px}
+
+/* v3 fix · every thumbnail is the SAME fixed frame; content stays inside it */
+.tcard .tth{position:relative;overflow:hidden;aspect-ratio:16/10;border-radius:6px;width:100%}
+.tcard .tth2{overflow:hidden;aspect-ratio:9/16;border-radius:5px}
+.tcard small{display:block;min-height:22px}
+#pd-phone:checked~.stage-wrap .tcard .tth2,#vp-m:checked~.stage-wrap .tcard .tth2{display:block;position:relative;width:64%;margin:0 auto;right:auto;bottom:auto;outline:0;border-radius:7px}
+#pd-both:checked~.stage-wrap .tcard{flex-direction:row;flex-wrap:wrap;align-items:flex-start;gap:4%}
+#pd-both:checked~.stage-wrap .tcard .tth{width:66%}
+#pd-both:checked~.stage-wrap .tcard .tth2{display:block;position:relative;width:26%;right:auto;bottom:auto;outline:0;margin:0}
+#pd-both:checked~.stage-wrap .tcard small{width:100%;text-align:left}
+#pd-both:checked~.stage-wrap .tgrid{grid-template-columns:repeat(3,1fr)}
+#vp-m:checked~.stage-wrap .tgrid{grid-template-columns:repeat(3,1fr);gap:10px 8px}
+#vp-m:checked~.stage-wrap .tplov{max-height:82%}
+.tgrid{gap:12px 8px}
+
+.notes{max-width:900px;margin:0 auto;padding:10px 20px 60px;font-size:12.5px;line-height:1.6;color:var(--ink5)}.notes code{font-family:var(--mono);font-size:11px;background:rgba(27,26,23,.05);padding:1px 4px;border-radius:4px}
+</style></head>
+<body>
+
+<input class="sw" type="radio" name="vp" id="vp-m"><input class="sw" type="radio" name="vp" id="vp-tp"><input class="sw" type="radio" name="vp" id="vp-tl"><input class="sw" type="radio" name="vp" id="vp-dt" checked>
+<input class="sw" type="checkbox" id="drag"><input class="sw" type="checkbox" id="hide-dress"><input class="sw" type="checkbox" id="menu"><input class="sw" type="checkbox" id="barc">
+<input class="sw" type="radio" name="wh" id="wh-std"><input class="sw" type="radio" name="wh" id="wh-inv" checked><input class="sw" type="radio" name="wh" id="wh-day"><input class="sw" type="radio" name="wh" id="wh-pe">
+<input class="sw" type="radio" name="pt" id="pt-film"><input class="sw" type="radio" name="pt" id="pt-hero" checked><input class="sw" type="radio" name="pt" id="pt-words"><input class="sw" type="radio" name="pt" id="pt-details"><input class="sw" type="radio" name="pt" id="pt-dress"><input class="sw" type="radio" name="pt" id="pt-msg"><input class="sw" type="radio" name="pt" id="pt-bring"><input class="sw" type="radio" name="pt" id="pt-custom"><input class="sw" type="radio" name="pt" id="pt-rsvp"><input class="sw" type="radio" name="pt" id="pt-seat"><input class="sw" type="radio" name="pt" id="pt-cues"><input class="sw" type="radio" name="pt" id="pt-live"><input class="sw" type="radio" name="pt" id="pt-cover"><input class="sw" type="radio" name="pt" id="pt-chapters"><input class="sw" type="radio" name="pt" id="pt-publish"><input class="sw" type="radio" name="pt" id="pt-new">
+<input class="sw" type="radio" name="sl" id="sl-none" checked><input class="sw" type="radio" name="sl" id="sl-text"><input class="sw" type="radio" name="sl" id="sl-photo"><input class="sw" type="radio" name="sl" id="sl-words"><input class="sw" type="radio" name="sl" id="sl-scene"><input class="sw" type="radio" name="sl" id="sl-main">
+<input class="sw" type="radio" name="bg" id="bg-none" checked><input class="sw" type="radio" name="bg" id="bg-photo"><input class="sw" type="radio" name="bg" id="bg-clip"><input class="sw" type="radio" name="bg" id="bg-color">
+<input class="sw" type="radio" name="mb" id="mb-color" checked><input class="sw" type="radio" name="mb" id="mb-photo"><input class="sw" type="radio" name="mb" id="mb-clip"><input class="sw" type="radio" name="mb" id="mb-move">
+<input class="sw" type="radio" name="fo" id="fo-1"><input class="sw" type="radio" name="fo" id="fo-2"><input class="sw" type="radio" name="fo" id="fo-3"><input class="sw" type="radio" name="fo" id="fo-4"><input class="sw" type="radio" name="fo" id="fo-5" checked><input class="sw" type="radio" name="fo" id="fo-6"><input class="sw" type="radio" name="fo" id="fo-7"><input class="sw" type="radio" name="fo" id="fo-8"><input class="sw" type="radio" name="fo" id="fo-9">
+<input class="sw" type="radio" name="ft" id="ft-cormorant" checked><input class="sw" type="radio" name="ft" id="ft-fraunces"><input class="sw" type="radio" name="ft" id="ft-playfair"><input class="sw" type="radio" name="ft" id="ft-caslon"><input class="sw" type="radio" name="ft" id="ft-vidaloka"><input class="sw" type="radio" name="ft" id="ft-cinzel"><input class="sw" type="radio" name="ft" id="ft-script">
+<input class="sw" type="radio" name="tb" id="tb-format" checked><input class="sw" type="radio" name="tb" id="tb-anim"><input class="sw" type="radio" name="tb" id="tb-trans"><input class="sw" type="radio" name="tb" id="tb-content">
+<input class="sw" type="checkbox" id="navc"><input class="sw" type="radio" name="nw" id="nw-n"><input class="sw" type="radio" name="nw" id="nw-m" checked><input class="sw" type="radio" name="nw" id="nw-w">
+<input class="sw" type="radio" name="tm" id="tm-scrub" checked><input class="sw" type="radio" name="tm" id="tm-once"><input class="sw" type="radio" name="an" id="an-el" checked><input class="sw" type="radio" name="an" id="an-page"><input class="sw" type="radio" name="an" id="an-text"><input class="sw" type="radio" name="mo" id="mo-calm" checked><input class="sw" type="radio" name="mo" id="mo-still"><input class="sw" type="radio" name="mo" id="mo-edit"><input class="sw" type="radio" name="mo" id="mo-cine">
+<input class="sw" type="radio" name="trn" id="trn-scroll" checked><input class="sw" type="radio" name="trn" id="trn-scrub"><input class="sw" type="radio" name="trn" id="trn-auto"><input class="sw" type="radio" name="snap" id="snap-on" checked><input class="sw" type="radio" name="snap" id="snap-off">
+<input class="sw" type="radio" name="pd" id="pd-desk" checked><input class="sw" type="radio" name="pd" id="pd-phone"><input class="sw" type="radio" name="pd" id="pd-both"><input class="sw" type="radio" name="md" id="md-shown" checked><input class="sw" type="radio" name="md" id="md-hidden"><input class="sw" type="radio" name="md" id="md-auto"><input class="sw" type="radio" name="vis" id="vis-pub" checked><input class="sw" type="radio" name="vis" id="vis-unl"><input class="sw" type="radio" name="vis" id="vis-priv">
+<input class="sw" type="radio" name="ly" id="ly-blank" checked><input class="sw" type="radio" name="ly" id="ly-1"><input class="sw" type="radio" name="ly" id="ly-2"><input class="sw" type="radio" name="ly" id="ly-3"><input class="sw" type="radio" name="ly" id="ly-4"><input class="sw" type="radio" name="ly" id="ly-5"><input class="sw" type="radio" name="ly" id="ly-6"><input class="sw" type="radio" name="ly" id="ly-7"><input class="sw" type="radio" name="ly" id="ly-8"><input class="sw" type="radio" name="ly" id="ly-9"><input class="sw" type="radio" name="ly" id="ly-10"><input class="sw" type="radio" name="ly" id="ly-11"><input class="sw" type="radio" name="ly" id="ly-12"><input class="sw" type="radio" name="ly" id="ly-13"><input class="sw" type="radio" name="ly" id="ly-14"><input class="sw" type="radio" name="ly" id="ly-15"><input class="sw" type="radio" name="ly" id="ly-16"><input class="sw" type="radio" name="ly" id="ly-17"><input class="sw" type="radio" name="ly" id="ly-18"><input class="sw" type="radio" name="ly" id="ly-19"><input class="sw" type="radio" name="ly" id="ly-20"><input class="sw" type="radio" name="ly" id="ly-21"><input class="sw" type="radio" name="ly" id="ly-22"><input class="sw" type="radio" name="ly" id="ly-23"><input class="sw" type="radio" name="ly" id="ly-24"><input class="sw" type="radio" name="ly" id="ly-25">
+<input class="sw" type="radio" name="pb" id="pb-auto" checked><input class="sw" type="radio" name="pb" id="pb-loop"><input class="sw" type="radio" name="pb" id="pb-tap"><input class="sw" type="radio" name="fs" id="fs-full" checked><input class="sw" type="radio" name="fs" id="fs-place">
+<input class="sw" type="checkbox" id="play"><input class="sw" type="checkbox" id="p-more"><input class="sw" type="checkbox" id="p-pro"><input class="sw" type="checkbox" id="p-add"><input class="sw" type="checkbox" id="p-exit"><input class="sw" type="checkbox" id="tp1">
+<input class="sw" type="radio" name="t1" id="t1-scroll" checked><input class="sw" type="radio" name="t1" id="t1-scrub"><input class="sw" type="radio" name="t1" id="t1-auto"><input class="sw" type="radio" name="s1" id="s1-slow"><input class="sw" type="radio" name="s1" id="s1-normal" checked><input class="sw" type="radio" name="s1" id="s1-fast">
+
+<div class="bar" role="toolbar" aria-label="Prototype controls"><span class="proto">v3</span><div class="grp"><b>Viewport</b><label class="press" for="vp-m">Mobile</label><label class="press" for="vp-tp">Tablet P</label><label class="press" for="vp-tl">Tablet L</label><label class="press" for="vp-dt">Desktop</label></div><div class="grp"><b>Show</b><label class="press" for="drag">Dragging a scene</label><label class="press" for="menu">Long-press menu</label></div><label class="press" for="barc" style="font-size:11px;color:var(--ink4);padding:4px 8px">hide bar</label></div>
+<label class="barbtn press" for="barc" title="Prototype controls">v2</label>
+
+<form class="stage-wrap" action="#" onsubmit="return false">
+<input class="sw" type="checkbox" id="sim-names"><input class="sw" type="checkbox" id="sim-hero"><input class="sw" type="checkbox" id="applied"><input class="sw" type="checkbox" id="p-reset">
+<div class="frame">
+
+  <!-- ══ 1 · TOOLBAR ══ -->
+  <header class="top">
+    <label class="ib press exit" for="p-exit" aria-label="Exit the editor">✕<span class="lab">Done · back to the Event Hub Controller</span></label>
+    <label class="ib press" for="navc" aria-label="Show or hide the navigator">▤<span class="lab">Navigator</span></label>
+    <label class="ib press" for="play" aria-label="Play from this scene">▶<span class="lab">Play from here</span></label>
+    <label class="ib press" for="pt-new" aria-label="New blank scene">＋<span class="lab">New blank scene</span></label>
+    <label class="ib press" for="p-add" aria-label="Scene templates" style="width:22px;margin-left:-8px;font-size:11px">▾<span class="lab">Scene templates</span></label>
+    <nav class="stages" aria-label="Stage">
+      <label class="chip press" for="wh-std">Save the Date<span class="ch"></span></label>
+      <label class="chip press" for="wh-inv"><span class="dot" title="Live today"></span>Invitation<span class="ch"></span></label>
+      <label class="chip press" for="wh-day">On the Day<span class="ch"></span></label>
+      <label class="chip press" for="wh-pe">Post Event<span class="ch"></span></label>
+    </nav>
+    <div class="applybar" role="status"><span class="n"></span><span class="needs">· needs Event Hub Pro · [PRICE] · one-time</span><button class="b ghost press" type="reset" title="Back to the last applied version">Restore</button><label class="b apply press free" for="applied">Apply</label><label class="b apply press pro" for="p-pro">Unlock and apply</label></div>
+    <div class="toast">✓ Applied<button class="b ghost press" type="reset" style="padding:4px 8px;font-size:11px">OK</button></div>
+    <div class="seg" role="group" aria-label="Preview as"><label class="press" for="pd-desk" title="Desktop">▭</label><label class="press" for="pd-phone" title="Phone">▯</label><label class="press" for="pd-both" title="Both, side by side">▭▯</label></div>
+    <label class="ib press" for="snap-off" aria-label="Snap grid off"><span class="snap-i">⊞</span><span class="lab">Snap grid</span></label>
+    <label class="ib press" for="p-more" aria-label="More">⋯<span class="lab">Preview · View as · address</span></label>
+  </header>
+
+  <div class="work">
+    <!-- ══ 2 · NAVIGATOR (drag the edge to resize · ▤ collapses) ══ -->
+    <nav class="nav" aria-label="Scenes">
+      <!-- MAIN — pinned above scene 1: the background behind every scene of this stage -->
+      <label class="mainrow press" for="sl-main" title="The background behind every scene"><span class="mainbg"></span><span class="t">Main background</span></label>
+      <div class="pl" data-when="std">
+        <label class="sc press" for="pt-film"><span class="th"><span class="film"><span class="nm">Save<br>the date</span></span></span><span class="eye" aria-hidden="true"><span class="on">◉</span></span></label>
+        <div class="tr"><i></i><b>Auto</b><i></i></div>
+        <label class="sc press" for="pt-hero" data-f="hero"><span class="th"><span class="ph none h-a"></span><span class="ph h-b"></span><span class="nm n-a">Indalecio<br>&amp; Claire</span><span class="nm n-b">Ice<br>&amp; Claire</span></span><span class="shared" title="Also on Invitation · On the Day · Poster"></span><span class="pend"></span><span class="eye" aria-hidden="true"><span class="on">◉</span></span></label>
+        <div class="tr"><i></i><b>Scroll</b><i></i></div>
+        <label class="sc press" for="pt-words"><span class="th"><span class="bars"><i></i><i></i><i style="width:60%"></i></span></span><span class="shared" title="Also on Invitation · Post Event"></span><span class="eye" aria-hidden="true"><span class="on">◉</span></span></label>
+        <label class="add press" for="p-add" title="Add a scene">＋</label>
+      </div>
+      <div class="pl" data-when="inv">
+        <label class="sc press" for="pt-hero" data-f="hero"><span class="th"><span class="ph none h-a"></span><span class="ph h-b"></span><span class="nm n-a">Indalecio<br>&amp; Claire</span><span class="nm n-b">Ice<br>&amp; Claire</span></span><span class="shared" title="Also on Save the Date · On the Day · Poster"></span><span class="pend"></span>
+          <div class="cm" role="menu"><span>Move up</span><span>Move down</span><span>Duplicate</span><span>Hide</span><span class="d">Delete</span></div></label>
+        <!-- the marker IS the control: tap → popover; the label follows the choice -->
+        <div class="tr live"><label class="hit press" for="tp1" title="Tap to set the transition"><i></i><b><span class="l-scroll">Scroll</span><span class="l-scrub">Scrub</span><span class="l-auto">Auto<span class="sp-slow"> · Slow</span><span class="sp-normal"> · Normal</span><span class="sp-fast"> · Fast</span></span></b><i></i></label></div>
+        <div class="ins" aria-hidden="true"></div>
+        <label class="sc press" for="pt-words"><span class="th"><span class="bars"><i></i><i></i><i style="width:60%"></i><i></i></span></span><span class="shared" title="Also on Save the Date · Post Event"></span><span class="eye" aria-hidden="true"><span class="on">◉</span></span></label>
+        <div class="tr"><i></i><b>Scrub</b><i></i></div>
+        <label class="sc press" for="pt-details"><span class="th"><span class="bars"><i style="width:40%"></i><i></i><i style="width:40%"></i><i></i></span></span><span class="shared" title="Also On the Day"></span><span class="eye" aria-hidden="true"><span class="on">◉</span></span></label>
+        <div class="tr tr-dress"><i></i><b>Scroll</b><i></i></div>
+        <label class="sc press" for="pt-dress" data-drag><span class="th"><span class="sw"><i style="background:#9a244f"></i><i style="background:#F3ECDF"></i><i style="background:#CBA766"></i><i style="background:#5E7C52"></i></span><span class="bars" style="margin-top:4px"><i style="width:50%"></i></span></span><label class="eye press" for="hide-dress" title="Hide from guests · tap again to show"><span class="on">◉</span><span class="off">⊘</span></label></label>
+        <div class="tr"><i></i><b>Scroll</b><i></i></div>
+        <label class="sc press" for="pt-msg"><span class="th"><span class="ghost">hidden until written</span></span><span class="eye" aria-hidden="true"><span class="on">◉</span></span></label>
+        <div class="tr"><i></i><b>Scroll</b><i></i></div>
+        <label class="sc press" for="pt-bring"><span class="th"><span class="ghost">hidden until written</span></span><span class="eye" aria-hidden="true"><span class="on">◉</span></span></label>
+        <div class="tr"><i></i><b>Auto</b><i></i></div>
+        <label class="sc press" for="pt-custom"><span class="th"><span style="position:absolute;left:8%;top:10%;width:50%;height:48%;border-radius:3px;background:linear-gradient(135deg,#C29A7C,#7A5446)"></span><span class="nm" style="position:absolute;left:12%;bottom:12%;font-size:7cqw"><span class="n-a">Indalecio &amp; Claire</span><span class="n-b">Ice &amp; Claire</span></span></span><span class="eye" aria-hidden="true"><span class="on">◉</span></span></label>
+        <div class="tr"><i></i><b>Scroll</b><i></i></div>
+        <label class="sc press" for="pt-rsvp" style="cursor:default"><span class="th"><span class="bars" style="width:60%"><i></i><i></i></span><span class="cta"></span></span><span class="eye" aria-hidden="true"><span class="on">◉</span></span></label>
+        <!-- after "+": a new blank scene, selected (pre-baked; it stays while selected) -->
+        <div class="tr new"><i></i><b>Scroll</b><i></i></div>
+        <label class="sc new press" for="pt-new"><span class="th"><i class="grid" style="position:absolute;inset:0;background-image:linear-gradient(rgba(203,167,102,.25) 1px,transparent 1px),linear-gradient(90deg,rgba(203,167,102,.25) 1px,transparent 1px);background-size:12.5% 16.66%"></i><span class="ghost" style="position:relative">blank</span></span><span class="pro" style="position:absolute;right:3px;top:7px;width:6px;height:6px;border-radius:50%;background:var(--gold3);box-shadow:0 0 0 2px #fff"></span></label>
+        <div class="addrow"><label class="add press" for="pt-new" title="New blank scene">＋</label><label class="add tpl press" for="p-add" title="Scene templates">▾</label></div>
+      </div>
+      <div class="pl" data-when="day">
+        <label class="sc press" for="pt-hero" data-f="hero"><span class="th"><span class="ph none h-a" style="height:30%"></span><span class="ph h-b" style="height:30%"></span><span class="nm">1:30 PM</span></span><span class="shared" title="Also on Save the Date · Invitation · Poster"></span><span class="pend"></span><span class="eye" aria-hidden="true"><span class="on">◉</span></span></label>
+        <div class="tr"><i></i><b>Scroll</b><i></i></div>
+        <label class="sc press" for="pt-details"><span class="th"><span class="bars"><i style="width:40%;background:var(--cta)"></i><i></i><i style="width:40%"></i><i></i></span></span><span class="shared" title="Also on the Invitation"></span><span class="eye" aria-hidden="true"><span class="on">◉</span></span></label>
+        <div class="tr"><i></i><b>Scroll</b><i></i></div>
+        <label class="sc press" for="pt-seat"><span class="th"><span class="nm" style="font-size:8cqw">Table 4</span><span class="bars" style="width:50%"><i></i></span></span><span class="eye" aria-hidden="true"><span class="on">◉</span></span></label>
+        <div class="tr"><i></i><b>Scroll</b><i></i></div>
+        <label class="sc press" for="pt-cues"><span class="th"><span class="bars"><i></i><i style="width:50%"></i></span></span><span class="eye" aria-hidden="true"><span class="on">◉</span></span></label>
+        <div class="tr"><i></i><b>Scroll</b><i></i></div>
+        <label class="sc press" for="pt-live"><span class="th"><span class="sw"><i style="background:rgba(27,26,23,.1);border-radius:3px;width:16px"></i><i style="background:rgba(27,26,23,.1);border-radius:3px;width:16px"></i></span></span><span class="eye" aria-hidden="true"><span class="on">◉</span></span></label>
+        <label class="add press" for="p-add" title="Add a scene">＋</label>
+      </div>
+      <div class="pl" data-when="pe">
+        <label class="sc press" for="pt-cover"><span class="th"><span class="cover"></span><span class="nm" style="font-size:7cqw">The day,<br>as it was told</span></span><span class="eye" aria-hidden="true"><span class="on">◉</span></span></label>
+        <div class="tr"><i></i><b>Scrub</b><i></i></div>
+        <label class="sc press" for="pt-chapters"><span class="th"><span class="bars"><i></i><i style="width:70%"></i></span><span class="cover" style="height:22%"></span></span><span class="eye" aria-hidden="true"><span class="on">◉</span></span></label>
+        <div class="tr"><i></i><b>Scrub</b><i></i></div>
+        <label class="sc press" for="pt-words"><span class="th"><span class="bars"><i></i><i></i><i style="width:60%"></i></span></span><span class="shared" title="Also on Save the Date · Invitation"></span><span class="eye" aria-hidden="true"><span class="on">◉</span></span></label>
+        <div class="tr"><i></i><b>Scroll</b><i></i></div>
+        <label class="sc press" for="pt-publish"><span class="th"><span class="ghost">Powered by Setnayan</span></span><span class="eye" aria-hidden="true"><span class="on">◉</span></span></label>
+        <label class="add press" for="p-add" title="Add a column">＋</label>
+      </div>
+    </nav>
+    <!-- the navigator's edge handle: width presets (the real build drags smoothly with a script) -->
+    <div class="navgrip" aria-label="Navigator width"><label class="press" for="nw-n" title="Narrow">▏</label><label class="press" for="nw-m" title="Medium">▎</label><label class="press" for="nw-w" title="Wide">▍</label></div>
+    <!-- the transition popover — OUTSIDE the scrolling navigator so it is never clipped -->
+    <div class="pop" role="dialog" aria-label="Transition to the next scene"><p class="micro">Scene 1 → 2</p><div class="sw3"><label class="press" for="t1-scroll">Scroll</label><label class="press" for="t1-scrub">Scrub</label><label class="press" for="t1-auto">Auto-scroll</label></div><div class="spd"><span class="micro">Speed</span><div class="sw3"><label class="press" for="s1-slow">Slow</label><label class="press" for="s1-normal">Normal</label><label class="press" for="s1-fast">Fast</label></div></div><div style="display:flex;justify-content:space-between;align-items:center"><label class="press soft" for="tb-trans" style="font-size:11.5px">More…</label><label class="press soft" for="tp1" style="font-size:11.5px;font-weight:600">Done</label></div></div>
+
+    <!-- ══ 3 · THE CANVAS — click a thing to select it; the inspector appears ══ -->
+    <section class="main" aria-label="The scene">
+      <!-- Main selected: the background layer fills the canvas; scene 1 fades to an outline -->
+      <div class="mainlayer"><span class="micro">Main background · behind every scene</span></div>
+      <div class="big" data-p="hero"><div class="in"><label class="ed p press hero h-a none" for="sl-photo">Your invitation card shows here — tap to add a photo</label><label class="ed p press hero h-b" for="sl-photo"><span class="pbmark loop">∞</span><span class="pbmark tap">▶</span><span class="pbfull">Full screen</span></label><label class="ed t press eb" for="sl-text">You are invited</label><label class="ed t press nm" for="sl-text"><span class="n-a">Indalecio<br>&amp; Claire</span><span class="n-b">Ice<br>&amp; Claire</span></label><label class="ed t press ln" for="sl-text">Friday · 18 December 2026 · 1:30 PM</label></div></div>
+      <div class="big" data-p="film"><div class="film"></div><div class="in" style="color:#FBFAF7"><label class="ed w press eb" for="sl-words">Save the date</label><label class="ed t press nm" for="sl-text"><span class="n-a">Indalecio<br>&amp; Claire</span><span class="n-b">Ice<br>&amp; Claire</span></label><label class="ed t press ln" for="sl-text">Friday · 18 December 2026</label><div class="cd"><span><b>85</b><small>days</small></span><span><b>04</b><small>hrs</small></span><span><b>12</b><small>min</small></span></div></div></div>
+      <div class="big" data-p="words"><div class="in"><label class="ed w press eb" for="sl-words">Our story</label><label class="ed w press txt ph" for="sl-words">One jeepney, two strangers, and rain that would not stop. — tap to write how you met, the spark, the almost, the yes.</label></div></div>
+      <div class="big" data-p="details"><div class="in"><label class="ed w press eb" for="sl-words">Details</label><label class="ed w press rows" for="sl-words"><span><b>1:30 PM</b>Ceremony · [location]</span><span><b>3:00 PM</b>Cocktails · [location]</span><span><b>5:00 PM</b>Reception · [location]</span></label><span class="ln">6 public blocks · from your Schedule</span></div></div>
+      <div class="big" data-p="dress"><div class="in"><label class="ed w press eb" for="sl-words">Dress code</label><label class="ed w press sw" for="sl-words"><i style="background:#9a244f"></i><i style="background:#F3ECDF"></i><i style="background:#CBA766"></i><i style="background:#5E7C52"></i><i style="background:#1B1A17"></i></label><label class="ed w press txt ph" for="sl-words">e.g. Look magical · Dress in Filipiniana · Garden formal</label></div></div>
+      <div class="big" data-p="msg"><div class="in"><label class="ed w press eb" for="sl-words">A note from us</label><label class="ed w press txt ph" for="sl-words">A heartfelt note to everyone joining you… (hidden on your page until written)</label></div></div>
+      <div class="big" data-p="bring"><div class="in"><label class="ed w press eb" for="sl-words">What to bring</label><label class="ed w press txt ph" for="sl-words">Gifts, registry, or a kind no-gift note… (hidden until written)</label></div></div>
+      <div class="big cv" data-p="custom"><i class="grid"></i><label class="el photo press" for="sl-photo"><span class="h nw"></span><span class="h n"></span><span class="h ne"></span><span class="h w"></span><span class="h e"></span><span class="h sw"></span><span class="h s"></span><span class="h se"></span></label><label class="el text ed t press" for="sl-text"><span class="n-a">Indalecio &amp; Claire</span><span class="n-b">Ice &amp; Claire</span> · the little things</label><i class="el orn"></i></div>
+      <div class="big" data-p="rsvp"><div class="in"><label class="ed w press eb" for="sl-words">Reply</label><div class="bars"><i></i><i></i><i style="width:70%"></i></div><span class="cta">Reply</span></div></div>
+      <div class="big" data-p="seat"><div class="in"><span class="eb">Your seat</span><span class="nm">Table 4</span><span class="ln">the walk to it · your QR · the seat finder</span></div></div>
+      <div class="big" data-p="cues"><div class="in"><label class="ed w press eb" for="sl-words">Camera</label><label class="ed w press rows" for="sl-words"><span><b>[when]</b>[moment] · cameras up</span><span><b>[when]</b>[moment] · phones down</span></label></div></div>
+      <div class="big" data-p="live"><div class="in"><span class="eb">On the day</span><div class="tiles"><i>Watch live</i><i>The wall</i></div><span class="ln">appear when the Suite runs them</span></div></div>
+      <div class="big" data-p="cover"><div class="in"><label class="ed p press cover" for="sl-photo"></label><label class="ed t press nm" for="sl-text">The day,<br>as it was told</label></div></div>
+      <div class="big" data-p="chapters"><div class="in"><label class="ed w press eb" for="sl-words">Chapters</label><label class="ed w press nm" for="sl-words" style="font-size:22px">Maria &amp; Juan Are Married</label><span class="chap"></span><span class="chap" style="opacity:.5"></span></div></div>
+      <div class="big" data-p="publish"><div class="in"><span class="eb">Publish</span><span class="nm" style="font-size:22px">Draft</span><label class="ed w press ln" for="sl-words">Share your story · Draft · Guests only · Public</label></div></div>
+      <!-- side-by-side: the same scene on a phone — snap on reflows, snap off is flagged -->
+      <div class="phone-pv" aria-label="On a phone">
+        <div class="pp"><div class="pp-in">
+          <span class="hero h-a none">card</span><span class="hero h-b"></span>
+          <span class="nm"><span class="n-a">Indalecio<br>&amp; Claire</span><span class="n-b">Ice<br>&amp; Claire</span></span>
+          <span class="ln">Friday · 18 Dec 2026</span>
+          <span class="off"><span class="n-a">Indalecio &amp; Claire</span><span class="n-b">Ice &amp; Claire</span> · the little things</span>
+        </div></div>
+        <p class="pp-ok">Snap on · reflows on its own</p>
+        <p class="pp-warn">Snap off · text runs off the right edge at 375px — nudge it, or turn snap on</p>
+      </div>
+      <!-- the new blank scene: rails on, a quiet centred Add -->
+      <div class="big cv" data-p="new"><i class="grid"></i>
+        <label class="ed empty press" for="sl-scene" aria-label="Tap the empty scene to set its background"></label>
+        <div class="in addhint"><span class="micro" style="color:var(--ink4)">Add</span><div class="chips"><label class="chip press" for="sl-text">Text</label><label class="chip press" for="sl-photo">Photo · clip</label><span class="chip">Ornament</span></div><span class="soft" style="font-size:11px">Your own scene · <span class="lock" style="padding:0 4px">Pro</span> · a draft until you Apply · tap the empty scene for its background</span></div>
+        <!-- a chosen template: slots on the rails-on grid (Media left shown; others pre-baked by their radios) -->
+        <div class="slots"><label class="slot media press" for="sl-photo"><span>Photo · clip</span></label><label class="slot text press" for="sl-text"><span class="n-a">Indalecio &amp; Claire</span><span class="n-b">Ice &amp; Claire</span><br><small>Your words here — the type scales per device.</small></label></div>
+        <!-- dropped by Add → Text -->
+        <label class="el text drop-text ed t press" for="sl-text" style="left:12.5%;top:60%;width:75%"><span class="n-a">Indalecio &amp; Claire</span><span class="n-b">Ice &amp; Claire</span> · the little things<span class="h nw"></span><span class="h ne"></span><span class="h sw"></span><span class="h se"></span></label>
+        <!-- dropped by Add → Photo/clip -->
+        <label class="el photo drop-photo press" for="sl-photo" style="left:12.5%;top:8%;width:50%;height:46%"><span class="h nw"></span><span class="h n"></span><span class="h ne"></span><span class="h w"></span><span class="h e"></span><span class="h sw"></span><span class="h s"></span><span class="h se"></span><span class="focal"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></label>
+      </div>
+    </section>
+
+    <!-- ══ 4 · THE INSPECTOR — one, contextual, hidden until a selection ══ -->
+    <aside class="insp" aria-label="Inspector">
+      <div class="tabs"><label class="press" for="tb-format"><span class="tf-el">Format</span><span class="tf-scene">Scene</span><span class="tf-main">Main</span></label><label class="press" for="tb-anim">Animate</label><label class="press" for="tb-trans">Transition</label><label class="press" for="tb-content">Content</label></div>
+      <label class="x press" for="sl-none" aria-label="Deselect" style="display:none">×</label>
+      <div class="body">
+        <!-- FORMAT · follows the selection -->
+        <div class="tabp" data-t="format">
+          <div class="fm" data-s="text">
+            <div class="f"><span class="lb">Names <span class="free">Free</span></span><div class="in"><span class="n-a">Indalecio &amp; Claire</span><span class="n-b">Ice &amp; Claire</span><label class="try press" for="sim-names">Try “Ice”</label></div></div>
+            <div class="f"><span class="lb">Date &amp; time <span class="free">Free</span></span><div class="in">Friday 18 December 2026 <small>· 1:30 PM · Asia/Manila</small></div></div>
+            <div class="f"><span class="lb">Monogram <span class="free">Free</span></span><div class="in">I &amp; C <small>· your onboarding mark ›</small></div></div>
+            <div class="f"><span class="lb">Font <label class="lock press" for="p-pro">Pro</label></span><div class="sw3 fonts"><label class="press" for="ft-cormorant">Cormorant</label><label class="press" for="ft-fraunces">Fraunces</label><label class="press" for="ft-playfair">Playfair</label><label class="press" for="ft-caslon">Libre Caslon</label><label class="press" for="ft-vidaloka">Vidaloka</label><label class="press" for="ft-cinzel">Cinzel</label><label class="press" for="ft-script">Great Vibes</label></div></div>
+            <div class="f"><span class="lb">Size · Colour · Align <label class="lock press" for="p-pro">Pro</label></span><div class="chips"><span class="chip">S</span><span class="chip on">M</span><span class="chip">L</span><span class="chip">XL</span><span class="chip" style="padding:6px"><i style="display:block;width:12px;height:12px;border-radius:50%;background:var(--ink)"></i></span><span class="chip" style="padding:6px"><i style="display:block;width:12px;height:12px;border-radius:50%;background:var(--gold3)"></i></span><span class="chip" style="padding:6px"><i style="display:block;width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1px var(--line)"></i></span><span class="chip">⇤</span><span class="chip on">≡</span><span class="chip">⇥</span></div></div>
+          </div>
+          <div class="fm" data-s="photo">
+            <div class="f"><span class="lb">Photo · clip <label class="lock press" for="p-pro">Pro</label></span><div class="in"><span class="h-a soft">Not set — your invitation card shows</span><span class="h-b">your-photo.jpg</span><label class="try press" for="sim-hero">Try a photo</label></div><span class="soft" style="font-size:11px">Your own uploads · from your Photos · one hero on your Event Hub: Save the Date · Invitation · On the Day · Poster.</span></div>
+            <div class="f"><span class="lb">Hero video (free) <span class="free">Free</span></span><div class="in ph">No video</div></div>
+            <div class="f"><span class="lb">Crop · focal point <span class="free">Free</span></span><div class="focalgrid"><label class="press" for="fo-1"></label><label class="press" for="fo-2"></label><label class="press" for="fo-3"></label><label class="press" for="fo-4"></label><label class="press" for="fo-5"></label><label class="press" for="fo-6"></label><label class="press" for="fo-7"></label><label class="press" for="fo-8"></label><label class="press" for="fo-9"></label></div></div>
+            <div class="f"><span class="lb">Zoom</span><div class="chips"><span class="chip on">1×</span><span class="chip">1.2×</span><span class="chip">1.5×</span></div></div>
+            <div class="f"><span class="lb">Playback <span class="info" tabindex="0">i<span class="tip">Chosen by length: a clip up to about 15 s loops silently; anything longer waits for a tap. Plays only while on screen; stills under reduced motion; plays inline on iPhone.</span></span></span><div class="sw3"><label class="press" for="pb-auto">Auto <small class="pb-a">· loops (0:09)</small></label><label class="press" for="pb-loop">Loops silently</label><label class="press" for="pb-tap">Tap to play</label></div></div>
+            <div class="f whentap"><span class="lb">When tapped</span><div class="sw3"><label class="press" for="fs-full">Full screen</label><label class="press" for="fs-place">In place</label></div><span class="soft" style="font-size:11px"><span class="fs-a">Opens a full-screen player with sound; closing returns here.</span><span class="fs-b">Plays inside its frame, in the scene.</span></span></div>
+            <div class="f"><span class="lb">Poster preview</span><div style="display:flex;gap:12px;align-items:center"><span class="poster"><span style="font-size:6px;letter-spacing:.2em;text-transform:uppercase;opacity:.75">Kasal</span><span class="n-a">Indalecio<br>&amp; Claire</span><span class="n-b">Ice<br>&amp; Claire</span><span style="font-size:6px;opacity:.75">18 Dec 2026</span></span><span class="soft" style="font-size:11.5px">On your home and public profile — the hero photo wins when set.</span></div></div>
+          </div>
+          <div class="fm" data-s="words"><p class="soft" style="font-size:12px">The words of this scene live in <b>Content</b>. Format here is the look:</p></div>
+          <!-- MAIN — the background behind every scene of this stage -->
+          <div class="fm" data-s="main">
+            <div class="f"><span class="lb">Main background <label class="lock press" for="p-pro">Pro</label> <span class="info" tabindex="0">i<span class="tip">Behind every scene. A scene whose own background is “None — show main” lets it through, so Scrub and Auto scenes read as one continuous piece.</span></span></span><div class="sw3"><label class="press" for="mb-color">Colour</label><label class="press" for="mb-photo">Photo</label><label class="press" for="mb-clip">Clip</label><label class="press" for="mb-move">Moving backdrop</label></div></div>
+            <div class="f mbc"><span class="lb">Colour</span><div class="swatches"><i style="background:#FBFAF7"></i><i style="background:#F3ECDF"></i><i style="background:#1B1A17"></i><i style="background:#9a244f"></i></div></div>
+            <div class="f mbm"><span class="lb">Moving backdrop</span><div class="chips"><span class="chip on">Gilded Dusk</span><span class="chip">Capiz Glow</span></div><span class="soft" style="font-size:11px">Scene · How strong</span></div>
+            <div class="f"><span class="lb">Buttons</span><div class="swatches"><i style="background:#C24E25"></i><i style="background:#CBA766"></i><i style="background:#1B1A17"></i></div></div>
+            <span class="soft" style="font-size:11px">Today this is one setting for the whole Event Hub (all stages).</span>
+          </div>
+          <!-- SCENE — tap the empty canvas -->
+          <div class="fm" data-s="scene">
+            <div class="f"><span class="lb">Scene background <label class="lock press" for="p-pro">Pro</label></span><div class="sw3"><label class="press" for="bg-none">None — show main</label><label class="press" for="bg-photo">Photo</label><label class="press" for="bg-clip">Clip</label><label class="press" for="bg-color">Colour</label></div></div>
+            <div class="f bgc"><span class="lb">Colour</span><div class="swatches"><i style="background:#F3ECDF"></i><i style="background:#FBFAF7"></i><i style="background:#1B1A17"></i><i style="background:#9a244f"></i></div></div>
+            <div class="f bgp"><span class="lb">Focal point · Zoom · During</span><div class="focalgrid"><label class="press" for="fo-1"></label><label class="press" for="fo-2"></label><label class="press" for="fo-3"></label><label class="press" for="fo-4"></label><label class="press" for="fo-5"></label><label class="press" for="fo-6"></label><label class="press" for="fo-7"></label><label class="press" for="fo-8"></label><label class="press" for="fo-9"></label></div><div class="chips"><span class="chip on">1×</span><span class="chip">1.2×</span><span class="chip">1.5×</span><span class="chip on">Still</span><span class="chip">Lift</span></div></div>
+          </div>
+          <p class="micro">Scene</p>
+          <div class="f"><span class="lb">This scene <span class="free">Free</span></span><div class="sw3"><label class="press" for="md-shown">Shown</label><label class="press" for="md-hidden">Hidden</label><label class="press" for="md-auto">Auto</label></div></div>
+          <div class="f"><span class="lb">Background · Buttons <label class="lock press" for="p-pro">Pro</label></span><div class="swatches"><i style="background:#FBFAF7"></i><i style="background:#C24E25"></i></div></div>
+          <div class="f"><span class="lb">Art direction <label class="lock press" for="p-pro">Pro</label></span><div class="chips"><span class="chip on">Daylight</span><span class="chip">Candlelight</span></div></div>
+          <div class="f"><span class="lb">Invite theme <label class="lock press" for="p-pro">Pro</label></span><div class="chips"><span class="chip on">[current]</span><span class="chip">[theme names — next]</span></div></div>
+          <div class="f"><span class="lb">Magic Move <label class="lock press" for="p-pro">Pro</label></span><div class="chips"><span class="chip on">Nothing travels</span><span class="chip">[options — next]</span></div></div>
+          <div class="f"><span class="lb">Snap grid</span><div class="sw3"><label class="press" for="snap-on">On</label><label class="press" for="snap-off">Off</label></div><div class="phonecheck"><div class="pc"><div class="el photo"></div><div class="el text">Indalecio &amp; Claire</div></div><p class="warn">At 375px the text runs off the right edge.<small>Nudge it left, or turn snap back on.</small></p></div></div>
+          <div class="f"><span class="lb">Reset</span><label class="btn ghost press" for="p-reset" style="font-size:12px;min-height:32px">Reset this stage to default…</label></div>
+        </div>
+        <!-- ANIMATE -->
+        <div class="tabp" data-t="anim">
+          <p class="micro" style="display:flex;gap:8px;align-items:center">Animate <label class="lock press" for="p-pro">Pro</label></p>
+          <div class="sw3"><label class="press" for="tm-scrub">Follows the scroll</label><label class="press" for="tm-once">Plays once</label></div>
+          <div class="sw3"><label class="press" for="an-page">Page</label><label class="press" for="an-el">Element</label><label class="press" for="an-text">Text</label></div>
+          <div class="sw3"><label class="press" for="mo-still">Still</label><label class="press" for="mo-calm">Calm</label><label class="press" for="mo-edit">Editorial</label><label class="press" for="mo-cine">Cinematic</label></div>
+          <p class="soft tdef" style="font-size:11px">Template default: <b>Calm</b> · Fine tune: Auto — already running; change anything and it is yours.</p>
+          <label class="btn ghost press rtd" for="mo-calm" style="align-self:flex-start;min-height:28px;font-size:11.5px">Reset to template default</label>
+          <div class="fine"><b>In</b><span>Rise · Fade · None</span><b>During</b><span>Ken Burns · Parallax · Drift · Still</span><b class="out">Out</b><span class="out">Fade away · Lift away · Settle back · Stay put</span><b>Stagger</b><span>0.18s</span><b class="time">Duration</b><span class="time">1.2s</span><b class="time">Delay</b><span class="time">0s</span></div>
+          <label class="btn press" for="play" style="align-self:flex-start;background:var(--gold3);color:var(--ob);min-height:32px;font-size:12px">▶ Play from here</label>
+        </div>
+        <!-- TRANSITION -->
+        <div class="tabp" data-t="trans">
+          <p class="micro" style="display:flex;gap:8px;align-items:center">To the next scene <label class="lock press" for="p-pro">Pro</label></p>
+          <div class="sw3"><label class="press" for="trn-scroll">Scroll</label><label class="press" for="trn-scrub">Scrub</label><label class="press" for="trn-auto">Auto-scroll</label></div>
+          <div class="f"><span class="lb">Speed</span><div class="chips"><span class="chip">Slow</span><span class="chip on">Normal</span><span class="chip">Fast</span></div></div>
+          <span class="soft" style="font-size:11px">Same Animate system as the scene's elements. Consecutive Scrub scenes cross-fade.</span>
+        </div>
+        <!-- CONTENT · follows the scene -->
+        <div class="tabp" data-t="content">
+          <div class="ct" data-p="hero"><p class="soft" style="font-size:12px">Names, date and time: select the text. The photo: select the hero.</p></div>
+          <div class="ct" data-p="film"><div class="f"><span class="lb">Set the mood <span class="free">Free</span></span><div class="chips"><span class="chip on">Auto</span><span class="chip">Lighten</span><span class="chip">Darken</span></div></div><div class="f"><span class="lb">What your film shows <span class="free">Free</span></span><div class="in"><small>Auto-filled from your love story · add the ceremony:</small> [ceremony]</div></div><div class="f"><span class="lb">Opening <label class="lock press" for="p-pro">Pro</label></span><div class="chips"><span class="chip on">Sheer veil</span><span class="chip">Envelope</span><span class="chip">Gender reveal</span></div></div><div class="f"><span class="lb">Your song <label class="lock press" for="p-pro">Pro</label></span><div class="in ph">No song yet</div></div><div class="f"><span class="lb">Invitation opens on <span class="free">Free</span></span><div class="in">[date]</div></div></div>
+          <div class="ct" data-p="words"><p class="micro">The beginning</p><div class="f"><span class="lb">How you met <span class="free">Free</span></span><div class="in multi ph">One jeepney, two strangers, and rain that would not stop.</div></div><div class="f"><span class="lb">The year you met · Together since</span><div class="in ph">2022</div></div><p class="micro">The spark</p><div class="f"><span class="lb">The first thing you noticed was…</span><div class="in multi ph">The way she laughed before the punchline.</div></div><div class="f"><span class="lb">Why did that stick?</span><div class="in multi ph">Because nobody else laughs like that.</div></div><p class="micro">The almost</p><div class="f"><span class="lb">There was a moment you almost didn’t make it because…</span><div class="in multi ph">Two cities, one long year.</div></div><div class="f"><span class="lb">What kept you going?</span><div class="in multi ph">Sunday calls that never got shorter.</div></div><p class="micro">The yes</p><div class="f"><span class="lb">You knew the moment…</span><div class="in multi ph">The sun came up over the ridge and the question was already out.</div></div><div class="f"><span class="lb">How the other of you felt · The year · The setting</span><div class="in ph">Yes — before the sentence even finished.</div></div><p class="micro">The little things · Your song</p></div>
+          <div class="ct" data-p="details"><div class="f"><span class="lb">Where <span class="free">Free</span></span><div class="in">[venue_name] <small>· [venue_address]</small></div></div><div class="f"><span class="lb">When <span class="free">Free</span> <span class="info" tabindex="0">i<span class="tip">Mirrors the blocks marked public on your Schedule page — edit times there.</span></span></span><div class="list"><span>1:30 PM · Ceremony<small>[location]</small></span><span>3:00 PM · Cocktails<small>[location]</small></span><span>5:00 PM · Reception<small>[location]</small></span><span><small>6 public · open Schedule ›</small></span></div></div></div>
+          <div class="ct" data-p="dress"><div class="f"><span class="lb">Title <span class="free">Free</span></span><div class="in ph">e.g. Look magical · Dress in Filipiniana · Garden formal <small>· 80</small></div></div><div class="f"><span class="lb">In your own voice</span><div class="in multi ph">A sentence or two on what you're picturing. Formal? Garden party? Filipiniana? <small>· 600</small></div></div><div class="f"><span class="lb">Palette</span><div class="swatches"><i style="background:#9a244f"></i><i style="background:#F3ECDF"></i><i style="background:#CBA766"></i><i style="background:#5E7C52"></i><i style="background:#1B1A17"></i></div></div><div class="f"><span class="lb">What each group wears · What each role wears</span><div class="list"><span>Guests<small>[dress_code_config]</small></span><span>Entourage<small>[dress_code_config]</small></span></div></div></div>
+          <div class="ct" data-p="msg"><div class="f"><span class="lb">Your message <span class="free">Free</span></span><div class="in multi ph">A heartfelt note to everyone joining you… <small>· up to 600 · we start you off from your event details</small></div></div></div>
+          <div class="ct" data-p="bring"><div class="f"><span class="lb">What to bring <span class="free">Free</span></span><div class="in multi ph">Gifts, registry, or a kind no-gift note… <small>· up to 600</small></div></div></div>
+          <div class="ct" data-p="rsvp"><div class="f"><span class="lb">What guests fill in <span class="free">Free</span></span><div class="list"><span>First name · Last name<span class="tag ok">Always</span></span><span>Email<small>you@email.com</small></span><span>Mobile<small>+63 …</small></span><span>What should we call you? (optional)</span><span>Meal preference</span><span>Dietary notes<small>halal · nut allergy · …</small></span></div></div><div class="f"><span class="lb">Invitation backdrop <label class="lock press" for="p-pro">Pro</label></span><div class="chips"><span class="chip on">Off</span><span class="chip">Gilded Dusk</span><span class="chip">Capiz Glow</span></div><span class="soft" style="font-size:11px">Scene · How strong</span></div></div>
+          <div class="ct" data-p="cues"><div class="f"><span class="lb">When you want guests shooting, and when present <span class="free">Free</span></span><div class="list"><span>[moment] · [when]<span class="tag ok">Shoot</span></span><span>[moment] · [when]<span class="tag">Present</span></span><span><small>+ add</small></span></div><span class="soft" style="font-size:11px">Fields of PhotoMomentsPanel — next.</span></div></div>
+          <div class="ct" data-p="seat"><p class="soft" style="font-size:12px">Each guest sees their table and the walk to it (from your Seat plan), their QR, and the seat finder.</p></div>
+          <div class="ct" data-p="live"><p class="soft" style="font-size:12px">Watch live and The wall appear when the Suite runs them.</p></div>
+          <div class="ct" data-p="custom"><div class="f"><span class="lb">Heading (optional) <span class="free">Free</span></span><div class="in ph">up to 80</div></div><div class="f"><span class="lb">Your own words</span><div class="in multi ph">This section stays hidden until you write something. <small>· up to 4,000</small></div></div><div class="f"><span class="lb">Add to this scene</span><div class="chips"><span class="chip">＋ Your photo · clip</span><span class="chip">＋ A line of text</span><span class="chip">＋ Theme ornament</span></div></div></div>
+          <div class="ct" data-p="chapters"><p class="micro">The words</p><div class="f"><span class="lb">Headline · Kicker · Standfirst <span class="free">Free</span></span><div class="in ph">Maria &amp; Juan Are Married <small>· A big-hearted celebration</small></div></div><div class="f"><span class="lb">Closing line · Byline</span><div class="in ph">And on the day, everything was just set. <small>· By the Setnayan Desk</small></div></div><p class="micro">What goes in</p><div class="list"><span>Living hero<span class="tag ok">On</span></span><span>Photos<span class="tag ok">On</span></span><span>Thank-you note<span class="tag">Off</span></span></div><p class="micro">Section order</p><div class="list"><span>By the Numbers</span><span>Photo gallery</span><span>Guest wishes</span><span>Vendor team</span><span>Live Photo Wall · Watch the film</span><span>What they whispered · Letters to the editor · From the couple</span><span><small>Powered by Setnayan — always closes the paper</small><label class="lock press" for="p-pro">Pro</label></span></div><div class="f"><span class="lb">Your own columns <span class="free">Free</span></span><div class="in ph">What is this column called?</div></div></div>
+          <div class="ct" data-p="cover"><div class="f"><span class="lb">Cover <span class="free">Free</span></span><div class="in"><small>From the day's photos · or upload — its own, not the shared hero</small></div></div><div class="f"><span class="lb">Album</span><div class="in"><small>Photos in: — · pick from Galleries</small></div></div></div>
+          <div class="ct" data-p="publish"><div class="f"><span class="lb">Share your story <span class="free">Free</span></span><div class="chips"><span class="chip on">Draft</span><span class="chip">Guests only</span><span class="chip">Public</span></div></div><div class="f"><span class="lb">On Discover <span class="info" tabindex="0">i<span class="tip">Listed only when published to everyone, your Event Hub is Public, and you opted in.</span></span></span><div class="in"><span class="tag">Off</span> <small>Show my story on Discover</small></div></div></div>
+        </div>
+        <label class="btn ghost press" for="sl-none" style="align-self:flex-start;min-height:30px;font-size:12px">Done</label>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ⋯ · Add · Pro · Reset — closed by default -->
+  <label class="scrim" for="p-more" aria-hidden="true"></label>
+  <div class="ov" data-p="more"><div class="hd"><h3>More</h3><label class="x press" for="p-more">×</label></div>
+    <div class="f"><span class="lb">Preview</span><div class="sw3"><label class="press" for="pd-desk">Desktop</label><label class="press" for="pd-phone">Phone</label></div></div>
+    <div class="f"><span class="lb">View as</span><div class="chips"><span class="chip on">You</span><span class="chip">Coordinator</span><span class="chip">Supplier</span><span class="chip">Guest</span><span class="chip">Guest who replied</span><span class="chip">Stranger</span></div></div>
+    <div class="f"><span class="lb">Address</span><div class="in" style="font-family:var(--mono)"><small>setnayan.com/</small>cale-ice <span class="tag ok" style="margin-left:auto">Yours</span></div></div>
+    <div class="f"><span class="lb">Who can view</span><div class="sw3"><label class="press" for="vis-pub">Public</label><label class="press" for="vis-unl">Unlisted</label><label class="press" for="vis-priv">Private</label></div></div>
+    <div class="f"><span class="lb">Guests get</span><div class="chips"><span class="chip on">Automatic</span><span class="chip">Always Save the Date</span><span class="chip">Always Invitation</span><span class="chip">Always On the Day</span><span class="chip">Always Post Event</span></div></div>
+    <div class="f"><span class="lb">Open browsing</span><div class="chips"><span class="chip on">Off</span><span class="chip">On</span></div></div>
+    <a class="btn ghost press" href="https://setnayan.com/cale-ice" target="_blank" rel="noopener" style="font-size:12px;min-height:32px">Open the live page ↗</a>
+  </div>
+  <label class="scrim" for="p-add" aria-hidden="true"></label>
+  <div class="ov tplov" data-p="add"><div class="hd"><h3>Add a scene to <span class="st-std">Save the Date</span><span class="st-inv">the Invitation</span><span class="st-day">On the Day</span><span class="st-pe">Post Event</span></h3><label class="x press" for="p-add">×</label></div><p class="micro">Your own scene <span class="lock" style="padding:0 4px">Pro</span> · ★ = the four approved arrangements · shown <span class="v-desk">as on desktop</span><span class="v-phone">as on a phone</span><span class="v-both">desktop · phone</span></p><p class="fam">Media + text</p><div class="tgrid"><label class="tcard press" for="ly-1"><span class="tth"><i class="tp-photo" style="left:6%;top:12%;width:44%;height:76%"></i><i class="tp-line" style="left:56%;top:32%;width:36%;height:7%"></i><i class="tp-line" style="left:56%;top:48%;width:30%;height:5%"></i></span><span class="tth2"><i class="tp-photo" style="left:10%;top:6%;width:80%;height:42%"></i><i class="tp-line" style="left:12%;top:58%;width:76%;height:6%"></i><i class="tp-line" style="left:12%;top:70%;width:50%;height:5%"></i></span><small>★ 1 · Photo left, words right</small></label><label class="tcard press" for="ly-2"><span class="tth"><i class="tp-photo" style="left:50%;top:12%;width:44%;height:76%"></i><i class="tp-line" style="left:8%;top:32%;width:36%;height:7%"></i><i class="tp-line" style="left:8%;top:48%;width:30%;height:5%"></i></span><span class="tth2"><i class="tp-photo" style="left:10%;top:6%;width:80%;height:42%"></i><i class="tp-line" style="left:12%;top:58%;width:76%;height:6%"></i><i class="tp-line" style="left:12%;top:70%;width:50%;height:5%"></i></span><small>★ 2 · Photo right, words left</small></label><label class="tcard press" for="ly-3"><span class="tth"><i class="tp-photo" style="left:10%;top:6%;width:80%;height:50%"></i><i class="tp-line" style="left:22%;top:68%;width:56%;height:7%"></i><i class="tp-line" style="left:30%;top:82%;width:40%;height:5%"></i></span><span class="tth2"><i class="tp-photo" style="left:8%;top:6%;width:84%;height:44%"></i><i class="tp-line" style="left:14%;top:60%;width:72%;height:6%"></i><i class="tp-line" style="left:20%;top:72%;width:60%;height:5%"></i></span><small>3 · Photo above, words below</small></label><label class="tcard press" for="ly-4"><span class="tth"><i class="tp-photo" style="left:0%;top:0%;width:100%;height:100%;border-radius:0"></i><i class="tp-line" style="left:10%;top:70%;width:50%;height:7%;background:rgba(255,255,255,.85)"></i></span><span class="tth2"><i class="tp-photo" style="left:0%;top:0%;width:100%;height:100%;border-radius:0"></i><i class="tp-line" style="left:12%;top:78%;width:60%;height:6%;background:rgba(255,255,255,.85)"></i></span><small>★ 4 · Full photo, words on top</small></label><label class="tcard press" for="ly-5"><span class="tth"><i class="tp-photo" style="left:8%;top:8%;width:84%;height:66%"></i><i class="tp-play" style="left:46%;top:32%"></i><i class="tp-line" style="left:30%;top:84%;width:40%;height:5%"></i></span><span class="tth2"><i class="tp-photo" style="left:8%;top:8%;width:84%;height:52%"></i><i class="tp-play" style="left:42%;top:26%"></i><i class="tp-line" style="left:24%;top:70%;width:52%;height:5%"></i></span><small>5 · Clip with a caption</small></label><label class="tcard press" for="ly-6"><span class="tth"><i class="tp-photo" style="left:8%;top:8%;width:34%;height:84%"></i><i class="tp-line" style="left:50%;top:30%;width:42%;height:9%;background:rgba(203,167,102,.5)"></i><i class="tp-line" style="left:56%;top:50%;width:30%;height:5%"></i></span><span class="tth2"><i class="tp-photo" style="left:20%;top:6%;width:60%;height:46%"></i><i class="tp-line" style="left:14%;top:60%;width:72%;height:7%;background:rgba(203,167,102,.5)"></i><i class="tp-line" style="left:26%;top:74%;width:48%;height:5%"></i></span><small>6 · Portrait photo + pull quote</small></label><label class="tcard press" for="ly-7"><span class="tth"><i class="tp-photo" style="left:0%;top:0%;width:50%;height:100%;border-radius:0"></i><i class="tp-col" style="left:50%;top:0%;width:50%;height:100%;background:#F3ECDF"></i><i class="tp-line" style="left:58%;top:40%;width:32%;height:7%"></i><i class="tp-line" style="left:58%;top:54%;width:24%;height:5%"></i></span><span class="tth2"><i class="tp-photo" style="left:0%;top:0%;width:100%;height:50%;border-radius:0"></i><i class="tp-col" style="left:0%;top:50%;width:100%;height:50%;background:#F3ECDF"></i><i class="tp-line" style="left:14%;top:64%;width:72%;height:6%"></i><i class="tp-line" style="left:14%;top:76%;width:50%;height:5%"></i></span><small>7 · Half photo, half colour</small></label></div><p class="fam">Text only</p><div class="tgrid"><label class="tcard press" for="ly-8"><span class="tth"><i class="tp-line" style="left:14%;top:26%;width:72%;height:9%"></i><i class="tp-line" style="left:14%;top:46%;width:72%;height:5%"></i><i class="tp-line" style="left:14%;top:58%;width:60%;height:5%"></i></span><span class="tth2"><i class="tp-line" style="left:12%;top:30%;width:76%;height:7%"></i><i class="tp-line" style="left:12%;top:48%;width:76%;height:5%"></i><i class="tp-line" style="left:12%;top:58%;width:60%;height:5%"></i></span><small>★ 8 · Words only</small></label><label class="tcard press" for="ly-9"><span class="tth"><i class="tp-line" style="left:22%;top:32%;width:56%;height:11%;background:rgba(203,167,102,.5)"></i><i class="tp-line" style="left:34%;top:62%;width:32%;height:5%"></i></span><span class="tth2"><i class="tp-line" style="left:14%;top:36%;width:72%;height:9%;background:rgba(203,167,102,.5)"></i><i class="tp-line" style="left:30%;top:60%;width:40%;height:5%"></i></span><small>9 · Big quote</small></label><label class="tcard press" for="ly-10"><span class="tth"><i class="tp-txt" style="left:0%;top:38%;width:100%;font-size:11cqw"><span class="n-a">Indalecio &amp; Claire</span><span class="n-b">Ice &amp; Claire</span></i></span><span class="tth2"><i class="tp-txt" style="left:0%;top:40%;width:100%;font-size:12cqw"><span class="n-a">Indalecio &amp; Claire</span><span class="n-b">Ice &amp; Claire</span></i></span><small>10 · Title card</small></label><label class="tcard press" for="ly-11"><span class="tth"><i class="tp-line" style="left:16%;top:20%;width:68%;height:5%"></i><i class="tp-line" style="left:16%;top:32%;width:68%;height:5%"></i><i class="tp-line" style="left:16%;top:44%;width:60%;height:5%"></i><i class="tp-line" style="left:16%;top:56%;width:64%;height:5%"></i><i class="tp-line" style="left:52%;top:74%;width:32%;height:6%;background:rgba(203,167,102,.5)"></i></span><span class="tth2"><i class="tp-line" style="left:12%;top:16%;width:76%;height:5%"></i><i class="tp-line" style="left:12%;top:28%;width:76%;height:5%"></i><i class="tp-line" style="left:12%;top:40%;width:70%;height:5%"></i><i class="tp-line" style="left:12%;top:52%;width:72%;height:5%"></i><i class="tp-line" style="left:12%;top:64%;width:60%;height:5%"></i><i class="tp-line" style="left:50%;top:80%;width:38%;height:5%;background:rgba(203,167,102,.5)"></i></span><small>11 · Letter</small></label><label class="tcard press" for="ly-12"><span class="tth"><i class="tp-txt" style="left:0%;top:26%;width:100%;font-size:26cqw">85</i><i class="tp-line" style="left:36%;top:72%;width:28%;height:5%"></i></span><span class="tth2"><i class="tp-txt" style="left:0%;top:30%;width:100%;font-size:30cqw">85</i><i class="tp-line" style="left:30%;top:72%;width:40%;height:5%"></i></span><small>12 · Big number</small></label></div><p class="fam">Media only</p><div class="tgrid"><label class="tcard press" for="ly-13"><span class="tth"><i class="tp-photo" style="left:0%;top:0%;width:100%;height:100%;border-radius:0"></i></span><span class="tth2"><i class="tp-photo" style="left:0%;top:0%;width:100%;height:100%;border-radius:0"></i></span><small>13 · Full photo</small></label><label class="tcard press" for="ly-14"><span class="tth"><i class="tp-photo" style="left:0%;top:0%;width:100%;height:100%;border-radius:0"></i><i class="tp-play" style="left:46%;top:44%"></i></span><span class="tth2"><i class="tp-photo" style="left:0%;top:0%;width:100%;height:100%;border-radius:0"></i><i class="tp-play" style="left:42%;top:46%"></i></span><small>14 · Full clip</small></label><label class="tcard press" for="ly-15"><span class="tth"><i class="tp-col" style="left:0%;top:0%;width:100%;height:100%;background:#F3ECDF"></i><i class="tp-photo" style="left:24%;top:10%;width:52%;height:80%"></i></span><span class="tth2"><i class="tp-col" style="left:0%;top:0%;width:100%;height:100%;background:#F3ECDF"></i><i class="tp-photo" style="left:14%;top:16%;width:72%;height:64%"></i></span><small>15 · Framed photo</small></label><label class="tcard press" for="ly-16"><span class="tth"><i class="tp-col" style="left:0%;top:0%;width:100%;height:100%;background:#9a244f"></i><i class="tp-txt" style="left:0%;top:30%;width:100%;font-size:22cqw"><span style="color:#fff;font-style:italic">I&amp;C</span></i></span><span class="tth2"><i class="tp-col" style="left:0%;top:0%;width:100%;height:100%;background:#9a244f"></i><i class="tp-txt" style="left:0%;top:36%;width:100%;font-size:26cqw"><span style="color:#fff;font-style:italic">I&amp;C</span></i></span><small>16 · Monogram on colour</small></label></div><p class="fam">Group of photos</p><div class="tgrid"><label class="tcard press" for="ly-17"><span class="tth"><i class="tp-photo" style="left:6%;top:12%;width:42%;height:76%"></i><i class="tp-photo" style="left:52%;top:12%;width:42%;height:76%"></i></span><span class="tth2"><i class="tp-photo" style="left:10%;top:6%;width:80%;height:42%"></i><i class="tp-photo" style="left:10%;top:52%;width:80%;height:42%"></i></span><small>17 · Two side by side</small></label><label class="tcard press" for="ly-18"><span class="tth"><i class="tp-photo" style="left:6%;top:8%;width:56%;height:84%"></i><i class="tp-photo" style="left:66%;top:8%;width:28%;height:39%"></i><i class="tp-photo" style="left:66%;top:53%;width:28%;height:39%"></i></span><span class="tth2"><i class="tp-photo" style="left:10%;top:6%;width:80%;height:46%"></i><i class="tp-photo" style="left:10%;top:56%;width:38%;height:38%"></i><i class="tp-photo" style="left:52%;top:56%;width:38%;height:38%"></i></span><small>18 · Three mosaic</small></label><label class="tcard press" for="ly-19"><span class="tth"><i class="tp-photo" style="left:6%;top:8%;width:42%;height:39%"></i><i class="tp-photo" style="left:52%;top:8%;width:42%;height:39%"></i><i class="tp-photo" style="left:6%;top:53%;width:42%;height:39%"></i><i class="tp-photo" style="left:52%;top:53%;width:42%;height:39%"></i></span><span class="tth2"><i class="tp-photo" style="left:8%;top:8%;width:40%;height:40%"></i><i class="tp-photo" style="left:52%;top:8%;width:40%;height:40%"></i><i class="tp-photo" style="left:8%;top:52%;width:40%;height:40%"></i><i class="tp-photo" style="left:52%;top:52%;width:40%;height:40%"></i></span><small>19 · Grid of four</small></label><label class="tcard press" for="ly-20"><span class="tth"><i class="tp-photo" style="left:4%;top:20%;width:28%;height:60%"></i><i class="tp-photo" style="left:36%;top:20%;width:28%;height:60%"></i><i class="tp-photo" style="left:68%;top:20%;width:28%;height:60%"></i></span><span class="tth2"><i class="tp-photo" style="left:8%;top:22%;width:70%;height:56%"></i><i class="tp-photo" style="left:84%;top:22%;width:30%;height:56%"></i></span><small>20 · Photo strip</small></label><label class="tcard press" for="ly-21"><span class="tth"><i class="tp-photo" style="left:4%;top:6%;width:30%;height:44%"></i><i class="tp-photo" style="left:36%;top:6%;width:28%;height:44%"></i><i class="tp-photo" style="left:66%;top:6%;width:30%;height:44%"></i><i class="tp-photo" style="left:4%;top:54%;width:44%;height:40%"></i><i class="tp-photo" style="left:50%;top:54%;width:46%;height:40%"></i></span><span class="tth2"><i class="tp-photo" style="left:8%;top:6%;width:40%;height:28%"></i><i class="tp-photo" style="left:52%;top:6%;width:40%;height:28%"></i><i class="tp-photo" style="left:8%;top:38%;width:40%;height:28%"></i><i class="tp-photo" style="left:52%;top:38%;width:40%;height:28%"></i><i class="tp-photo" style="left:8%;top:70%;width:40%;height:24%"></i><i class="tp-photo" style="left:52%;top:70%;width:40%;height:24%"></i></span><small>21 · Collage of 5–6</small></label></div><p class="fam">Group of texts</p><div class="tgrid"><label class="tcard press" for="ly-22"><span class="tth"><i class="tp-line" style="left:8%;top:28%;width:36%;height:7%"></i><i class="tp-line" style="left:8%;top:46%;width:36%;height:5%"></i><i class="tp-line" style="left:56%;top:28%;width:36%;height:7%"></i><i class="tp-line" style="left:56%;top:46%;width:36%;height:5%"></i></span><span class="tth2"><i class="tp-line" style="left:12%;top:20%;width:76%;height:6%"></i><i class="tp-line" style="left:12%;top:32%;width:60%;height:5%"></i><i class="tp-line" style="left:12%;top:56%;width:76%;height:6%"></i><i class="tp-line" style="left:12%;top:68%;width:60%;height:5%"></i></span><small>22 · Two columns</small></label><label class="tcard press" for="ly-23"><span class="tth"><i class="tp-line" style="left:6%;top:30%;width:26%;height:7%"></i><i class="tp-line" style="left:6%;top:46%;width:26%;height:5%"></i><i class="tp-line" style="left:37%;top:30%;width:26%;height:7%"></i><i class="tp-line" style="left:37%;top:46%;width:26%;height:5%"></i><i class="tp-line" style="left:68%;top:30%;width:26%;height:7%"></i><i class="tp-line" style="left:68%;top:46%;width:26%;height:5%"></i></span><span class="tth2"><i class="tp-line" style="left:12%;top:16%;width:60%;height:6%"></i><i class="tp-line" style="left:12%;top:40%;width:60%;height:6%"></i><i class="tp-line" style="left:12%;top:64%;width:60%;height:6%"></i></span><small>23 · Three short blocks</small></label><label class="tcard press" for="ly-24"><span class="tth"><i class="tp-line" style="left:6%;top:50%;width:88%;height:2%;background:rgba(203,167,102,.6)"></i><i class="tp-dotln" style="left:14%"></i><i class="tp-dotln" style="left:40%"></i><i class="tp-dotln" style="left:66%"></i><i class="tp-line" style="left:8%;top:62%;width:16%;height:5%"></i><i class="tp-line" style="left:34%;top:62%;width:16%;height:5%"></i><i class="tp-line" style="left:60%;top:62%;width:16%;height:5%"></i></span><span class="tth2"><i class="tp-line" style="left:18%;top:8%;width:2%;height:84%;background:rgba(203,167,102,.6)"></i><i class="tp-dotln" style="left:14%;top:14%"></i><i class="tp-dotln" style="left:14%;top:44%"></i><i class="tp-dotln" style="left:14%;top:74%"></i><i class="tp-line" style="left:30%;top:14%;width:56%;height:5%"></i><i class="tp-line" style="left:30%;top:44%;width:56%;height:5%"></i><i class="tp-line" style="left:30%;top:74%;width:56%;height:5%"></i></span><small>24 · Timeline</small></label><label class="tcard press" for="ly-25"><span class="tth"><i class="tp-line" style="left:8%;top:22%;width:30%;height:7%;background:rgba(203,167,102,.5)"></i><i class="tp-line" style="left:8%;top:36%;width:36%;height:5%"></i><i class="tp-line" style="left:56%;top:52%;width:30%;height:7%;background:rgba(203,167,102,.5)"></i><i class="tp-line" style="left:56%;top:66%;width:36%;height:5%"></i></span><span class="tth2"><i class="tp-line" style="left:12%;top:14%;width:50%;height:6%;background:rgba(203,167,102,.5)"></i><i class="tp-line" style="left:12%;top:26%;width:70%;height:5%"></i><i class="tp-line" style="left:12%;top:50%;width:50%;height:6%;background:rgba(203,167,102,.5)"></i><i class="tp-line" style="left:12%;top:62%;width:70%;height:5%"></i></span><small>25 · Questions &amp; answers</small></label></div><p class="micro">Built-in scenes · pre-filled from your event · free</p>
+    <div class="tgrid">
+      <label class="tcard press" for="pt-words"><span class="tth"><i class="tp-line" style="left:14%;top:30%;width:72%"></i><i class="tp-line" style="left:14%;top:44%;width:60%"></i><i class="tp-line" style="left:14%;top:58%;width:66%"></i></span><small>Our story</small></label>
+      <label class="tcard press" for="pt-details"><span class="tth"><i class="tp-line" style="left:14%;top:26%;width:30%"></i><i class="tp-line" style="left:50%;top:26%;width:36%"></i><i class="tp-line" style="left:14%;top:46%;width:30%"></i><i class="tp-line" style="left:50%;top:46%;width:36%"></i></span><small>Details &amp; schedule</small></label>
+      <label class="tcard press" for="pt-dress"><span class="tth"><i class="tp-dot" style="left:16%;background:#9a244f"></i><i class="tp-dot" style="left:34%;background:#F3ECDF"></i><i class="tp-dot" style="left:52%;background:#CBA766"></i><i class="tp-dot" style="left:70%;background:#5E7C52"></i></span><small>Dress code</small></label>
+      <label class="tcard press" for="pt-rsvp"><span class="tth"><i class="tp-line" style="left:20%;top:28%;width:60%"></i><i class="tp-line" style="left:20%;top:44%;width:60%"></i><i class="tp-cta"></i></span><small>Reply form</small></label>
+      <label class="tcard press" for="pt-cues"><span class="tth"><i class="tp-line" style="left:14%;top:34%;width:50%"></i><i class="tp-line" style="left:14%;top:54%;width:40%"></i></span><small>Camera cues</small></label>
+      <label class="tcard press" for="pt-msg"><span class="tth"><i class="tp-line" style="left:14%;top:34%;width:72%"></i><i class="tp-line" style="left:14%;top:50%;width:50%"></i></span><small>Special message <em>hidden</em></small></label>
+      <label class="tcard press" for="pt-bring"><span class="tth"><i class="tp-line" style="left:14%;top:34%;width:72%"></i><i class="tp-line" style="left:14%;top:50%;width:40%"></i></span><small>What to bring <em>hidden</em></small></label>
+    </div>
+    <span class="soft" style="font-size:11px">A hidden built-in turns on here, in this position. Blank scenes are a draft until you Apply.</span>
+  </div>
+  <label class="scrim" for="p-exit" aria-hidden="true"></label>
+  <div class="ov" data-p="exit" style="right:auto;left:14px"><div class="hd"><h3>Leave the editor?</h3><label class="x press" for="p-exit">×</label></div>
+    <p class="soft" style="font-size:12.5px"><span class="n"></span>You have unapplied changes. Guests still see the last applied version.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><label class="btn press" for="applied" style="background:var(--gold3);color:var(--ob)">Apply</label><label class="btn ghost press" for="p-exit">Keep as draft</label><button class="btn danger press" type="reset">Discard</button></div>
+    <span class="soft" style="font-size:11px">Back to the Event Hub Controller. With no changes, ✕ leaves at once.</span>
+  </div>
+  <label class="scrim" for="p-pro" aria-hidden="true"></label>
+  <div class="ov" data-p="pro"><div class="hd"><h3>What you made, on every stage.</h3><label class="x press" for="p-pro">×</label></div>
+    <div class="made"><i class="h"><span class="n-a">Indalecio<br>&amp; Claire</span><span class="n-b">Ice<br>&amp; Claire</span></i><i class="h"><span class="n-a">Indalecio<br>&amp; Claire</span><span class="n-b">Ice<br>&amp; Claire</span></i><i class="h"><span class="n-a">Indalecio<br>&amp; Claire</span><span class="n-b">Ice<br>&amp; Claire</span></i><i><span class="n-a">Indalecio<br>&amp; Claire</span><span class="n-b">Ice<br>&amp; Claire</span></i><i class="pst"><span class="n-a">Indalecio<br>&amp; Claire</span><span class="n-b">Ice<br>&amp; Claire</span></i></div>
+    <p style="font-size:14px"><span class="lock" style="font-size:12px;text-transform:none;letter-spacing:.03em;opacity:1;padding:0"><b>[PRICE]</b> · one-time · all four stages</span></p>
+    <div style="display:flex;gap:8px"><label class="btn press" for="applied">Unlock and apply</label><label class="btn ghost press" for="p-pro">Keep drafting</label></div>
+    <p class="soft" style="font-size:11px">Free stays free: the page we write, your words and facts, the reply form, the schedule. [PRICE] is read from the catalogue (COUPLE_WEBSITE_PRO).</p>
+  </div>
+  <label class="scrim" for="p-reset" aria-hidden="true"></label>
+  <div class="ov" data-p="reset"><div class="hd"><h3>Back to the page we wrote for you?</h3><label class="x press" for="p-reset">×</label></div>
+    <div class="scope"><span><b>●</b>This stage's look and words go back to what we prefilled from your event details.</span><span><b>●</b>Scenes you hid or reordered here come back in the default order.</span><span class="keep"><b>✓</b>Kept: guests and replies, the schedule, your galleries, the story, the address, who can view.</span><span class="keep"><b>✓</b>Other stages untouched. Restore brings back the last applied version.</span></div>
+    <div style="display:flex;gap:8px"><button class="btn danger press" type="reset">Reset this stage</button><label class="btn ghost press" for="p-reset">Keep my changes</label></div>
+  </div>
+</div>
+</form>
+
+<div class="notes"><p><b>Seamless and smooth — the acceptance bar (owner 2026-09-24):</b> 0 blank frames; opacity/transform only; the next scene’s media preloaded; reduced motion = fades only. Every editor interaction on the shared tokens (<code>--sn-ease</code> = cubic-bezier(.2,.7,.2,1), <code>--sn-ease-out</code> = cubic-bezier(.16,1,.3,1), <code>--sn-dur-micro</code> 120 · <code>control</code> 200 · <code>elem</code> 320 · <code>enter</code> 640 ms): stage switch → scene cross-fade <code>elem · ease</code> · scene select on canvas → fade+scale <code>elem · ease</code> · inspector slide-in/out <code>enter · ease-out</code> (width), tab swap <code>elem</code> · transition popover / templates / ⋯ / exit → slide+fade <code>elem · ease-out</code> · navigator resize/collapse <code>enter · ease</code> (width) · drag lift <code>elem · ease</code>, drop settle <code>enter · ease-out</code> · thumbnail ring / chip / button state <code>control · ease</code>, press scale <code>micro</code> · Apply bar rise <code>enter · ease-out</code> · eye hide/show dim <code>control</code> · Play replay <code>enter · ease-out</code> staggered 180 ms. In this file the same tokens drive every transition (<code>--ctrl</code>/<code>--elem</code>/<code>--enter</code>/<code>--ease</code>/<code>--ease-out</code> mirror them).</p><p><b>The eye (owner 2026-09-24):</b> every scene thumbnail carries an eye at its lower-right (hover on desktop, always on touch, 32 px hit area). Tap → hidden from guests: the thumbnail dims, the eye crosses out, the transition before it is skipped so the previous scene hands over to the next visible one; tap again → shown. Hidden is not deleted — still editable. It reuses the shipped model <code>invitation_widgets.mode</code> ('auto' · 'shown' · 'hidden', <code>SectionsPanel</code> Show/Hide/Auto): the eye is the shown/hidden override; <b>Auto</b> (the content decides — e.g. a message hidden until written) stays in the long-press menu and the Scene tab, and an Auto scene shows the eye half-lit.</p><p><b>Playback (owner 2026-09-24):</b> short clips loop silently (auto by length, ≤ ~15 s), longer videos wait for a tap; for tap-to-play the couple picks <b>Full screen</b> (default) or <b>In place</b>. Recommend Full screen as the default: guests are on phones, a long video wants sound and the whole screen, and the frame in a scene is small and often portrait-cropped; In place suits silent, decorative footage. Media plays only while on screen, stills under reduced motion, <code>playsinline</code>. ⚠ <code>GUEST_HERO_VIDEO_PLAYBACK = false</code> today — the hero video does not play for guests; the build must reconcile the flag with this ruling.</p><p><b>v3 · the 25 templates</b> (default preset · transition): ★ 1 Photo left, words right · Calm · Scroll — ★ 2 Photo right, words left · Calm · Scroll — 3 Photo above, words below · Calm · Scroll — ★ 4 Full photo, words on top · Cinematic · Scrub — 5 Clip with a caption · Cinematic · Scroll (clip = own upload, Pro) — 6 Portrait photo + pull quote · Editorial · Scrub — 7 Half photo, half colour with words · Calm · Scroll — ★ 8 Words only · Editorial · Scroll — 9 Big quote · Editorial · Scrub — 10 Title card · Editorial · Scroll (one huge line · real names) — 11 Letter · Still · Scroll (built on the special message) — 12 Big number · Editorial · Scroll (built on the countdown · "85 days to go" is real) — 13 Full photo · Cinematic · Scrub — 14 Full clip · Cinematic · Scrub (own upload, Pro) — 15 Framed photo · Calm · Scroll (keepsake print on colour) — 16 Monogram on colour · Still · Scroll (built on the monogram) — 17 Two side by side · Calm · staggered · Scroll (phone: stacked) — 18 Three mosaic · Calm · staggered · Scroll (phone: 1 + 2) — 19 Grid of four · Calm · staggered · Scroll (phone: 2×2) — 20 Photo strip · Still · Scroll (phone: swipe) — 21 Collage of 5–6 · Calm · staggered · Scroll (phone: 2 columns) — 22 Two columns · Editorial · Scroll (phone: stacked) — 23 Three short blocks · Editorial · staggered · Scroll (milestones · phone: list) — 24 Timeline · Editorial · staggered · Scrub (built on love-story milestones / schedule) — 25 Questions &amp; answers · Editorial · Scroll (phone: list). The picker follows the editing view (Desktop · Mobile · Both) and names the stage it adds to. Placeholders: photo gradients stand for the couple’s uploads; grey bars stand for words; names, monogram and “85” are real.</p>
+<p><b>v2 · Keynote's model, our parts.</b> Toolbar: navigator toggle · Play from here · Add · <b>the stage bar</b> (Save the Date · Invitation · On the Day · Post Event; red dot = live today, gold dot = unapplied) · Apply/Restore only when there are changes · Snap grid · ⋯ (Preview · View as · address · who can view · guests get · open browsing · open live). Navigator: numbered thumbnails scaled to its width, <b>drag its right edge to resize</b> (CSS <code>resize</code>), ▤ collapses it; <b>drag a scene to arrange</b> (pre-baked “Dragging a scene” state: lifted thumbnail + insertion line); long-press / right-click menu: Move up · Move down · Duplicate · Hide · Delete (pre-baked); a gold dot = shared across stages; the <b>transition</b> between scenes; ＋ at the end. Canvas: click text → Format for text; click a photo → Format for photo (handles on the blank scene); click words → Content. <b>One inspector</b>, hidden until a selection, tabs Format · Animate · Transition · Content; “Done” deselects. Phone: canvas on top, navigator strip, inspector as a sheet.</p>
+<p><b>Template defaults (preset · transition to the next scene)</b> — each ships running, Fine tune “Auto”, “Reset to template default” appears once changed: ★ Media left · Calm · Scroll — ★ Media right · Calm · Scroll — Media above · Calm · Scroll — ★ Full-bleed + words · Cinematic (slow during) · Scrub — ★ Words only · Editorial (text reveal) · Scroll — Big quote · Editorial · Scrub — Full-bleed photo/clip · Cinematic · Scrub — 2 side by side · Calm, staggered · Scroll — 3 mosaic · Calm, staggered · Scroll — 4 grid · Calm, staggered · Scroll — Strip · Still (swipe) · Scroll — 2 columns · Editorial · Scroll — 3 short blocks · Editorial, staggered · Scroll. Presets are the shipped <code>HUB_MOTION_PRESETS</code> (still · calm · editorial · cinematic); In/Out/During/Timeline are <code>HUB_IN · HUB_OUT · HUB_DURING · HUB_TIMELINE</code> in <code>lib/hub-canvas.ts</code>.</p>
+<p><b>Backgrounds.</b> Main = the page colour (<code>events.site_bg_color</code>, <code>ColorsPanel</code>, Pro) and the moving backdrop (<code>events.rsvp_backdrop</code>, <code>SpatialBackdrop</code> rendered from <code>app/[slug]/page.tsx</code> — one column per event, so it is one setting for all stages today; whether it renders beyond the Invitation stage is <b>next</b>). Scene = <code>HubSectionCanvas</code> (<code>lib/hub-canvas.ts</code>: arrangement · focal 1–9 · zoom · during; renderer <code>hub-canvas-frame.tsx</code>; picker <code>sections-panel.tsx</code>) with the new default “None — show main”. Recommend: keep Main one-per-Event-Hub in v1 (matches the columns), add per-stage Main only if a couple asks.</p>
+<p><b>Full-screen.</b> The editor escapes the shell: no app nav, no event rail, no phone bar; ✕ at the left returns to the Event Hub Controller and warns when the draft has unapplied changes (Apply · Keep as draft · Discard). Real build: the coverage register's <code>chromeless</code> archetype — the pattern the live screen already uses (<code>apps/web/app/live/screen/page.tsx</code> and <code>app/wall/[eventId]</code> sit OUTSIDE the <code>dashboard/[eventId]</code> layout tree, so they never receive <code>AppRailShell</code>); the editor route follows suit (e.g. <code>app/hub-editor/[eventId]</code>) rather than hiding the rail from inside the event layout.</p>
+<p>Shipped sources: Content → <code>StoryPanel</code>/<code>story-fields</code>, <code>SchedulePeekPanel</code>, <code>DressCodePanel</code>, <code>TextPanel</code>, <code>rsvp-widget</code>, <code>RsvpBackdropPanel</code>, <code>PhotoMomentsPanel</code>, <code>StdBuilderClient</code>/<code>StdPanel</code>, the Story Maker (<code>editorial-editor</code>, <code>cover-step</code>, <code>saveEditorial</code>), <code>custom-sections</code> limits · Format → event details, <code>monogram_*</code>, <code>ColorsPanel</code>, <code>HeroPhotoPanel</code>, <code>SiteChromePanel</code>, <code>SectionsPanel</code> (Shown/Hidden/Auto · reorder = <code>moveWidgetUp/Down</code> behind the drag), the invite-theme picker, the poster (approved template) · ⋯ → <code>SlugField</code>, <code>VisibilityPanel</code>, <code>LaunchPhasePanel</code>, <code>OpenBrowsePanel</code>. <b>New only:</b> stage switch as editing switch · shared dot · draft bar · Transition · Snap toggle · one unlock · poster preview · drag-to-arrange and the resizable navigator (real build: pointer events + ⌥↑/⌥↓). “Scene” pending the owner's OK as UI copy. “Next”: theme names, typeface/Magic Move lists, camera-cue fields, seat fields.</p>
+</div>
+</body></html>

@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Scroll Scrub Auto</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500&display=swap">
+
+<!--
+  THREE TRANSITION MODES, PER SECTION — SCROLL · SCRUB · AUTO.  NO SCRIPT.  2026-09-24
+
+  Owner, 2026-09-24: "hybrid perfect" … "Let's do that for the save the date as
+  well. this also means to create 3 effects on transition now. 1. Scroll
+  2. Scrub 3. Auto-scroll (can set the speed)".
+
+  SCROLL  the ordinary section; it travels up past the reader.
+  SCRUB   pinned; the scroll drives it and scrolling back reverses it
+          (2026-09-24 hybrid prototype: one-viewport spacers butt together, so
+          exit(N) == entry(N+1) and neighbours truly cross-fade).
+  AUTO    NEW. One screen that plays its scenes by itself, over TIME.
+          Consecutive AUTO sections form one run and cross-fade on a clock:
+          handoff k starts at t_k = (sum of the earlier scenes' seconds) × speed;
+          the incoming scene fades in over 15–75% of the handoff and the outgoing
+          one out over 25–85% — the same shape as SCRUB, with time for scroll.
+          · SPEED multiplies every duration: Slow 1.4× · Normal 1× · Fast 0.6×.
+            Normal = the durations the live Save-the-Date film already uses.
+          · PAUSE is a checkbox → `animation-play-state: paused`.
+          · STARTS WHEN SEEN: `timeline-trigger` on the run + `animation-trigger:
+            play pause` on its scenes — it plays when the run is on screen,
+            pauses when it leaves, resumes when you come back. Where triggers
+            are unsupported the run simply plays from page load.
+          · Speed change and Replay swap every AUTO keyframe NAME for an
+            identical alias, which restarts the run (CSS has no "restart").
+
+  Each (stage × preset) is rendered as its own pre-grouped copy — exactly what
+  the real renderer does from each section's mode. Radios pick the copy.
+
+  FALLBACKS
+    · prefers-reduced-motion: reduce → every section is SCROLL; nothing auto-advances.
+    · no scroll-driven animations → SCRUB sections become SCROLL; AUTO still
+      plays (it needs only ordinary time-based CSS animation); no progress mark.
+    · no scroll triggers → AUTO plays from load instead of from first sight.
+-->
+
+<style>
+:root{
+  --paper:#FBFBFA; --tint:#F4F1EC; --ink:#1E2229; --soft:#5E6168; --line:#E2DED6;
+  --gold:#C5A059; --gold-ink:#8C6A2A; --mul:#5C2542; --card:#FFFFFF;
+  --disp:'Cormorant Garamond',Georgia,serif; --sans:'Jost',system-ui,sans-serif;
+  --f:1; --F:1.2s;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#1E2229; --tint:#23272F; --ink:#FBFBFA; --soft:#AEB2BA; --line:#353A44;
+    --gold:#E0CCA0; --gold-ink:#E0CCA0; --mul:#B8889C; --card:#262B34;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#1E2229; --tint:#23272F; --ink:#FBFBFA; --soft:#AEB2BA; --line:#353A44;
+  --gold:#E0CCA0; --gold-ink:#E0CCA0; --mul:#B8889C; --card:#262B34;
+}
+*{ box-sizing:border-box; }
+html,body{ margin:0; background:var(--paper); }
+body{ font-family:var(--sans); color:var(--ink); -webkit-font-smoothing:antialiased; }
+.cfg{ position:absolute; opacity:0; pointer-events:none; width:1px; height:1px; }
+
+/* ══ prototype bar (bottom) ══ */
+.bar{ position:fixed; z-index:80; left:8px; right:8px; bottom:calc(8px + env(safe-area-inset-bottom,0px));
+  max-width:760px; margin:0 auto; background:rgba(18,18,20,.92); color:#e9e9e4;
+  border-radius:14px; padding:6px 8px; font-size:11.5px; box-shadow:0 8px 28px rgba(0,0,0,.25); }
+.rows{ display:flex; flex-wrap:wrap; gap:4px 10px; align-items:center; }
+.grp{ display:flex; align-items:center; gap:2px; }
+.grp > span{ color:#8e8e88; font-size:10px; letter-spacing:.08em; text-transform:uppercase; margin-right:3px; }
+.chip{ border-radius:100px; padding:5px 9px; cursor:pointer; color:#c6c6c1; white-space:nowrap; }
+.tog{ margin-left:auto; cursor:pointer; color:#9b9b95; padding:5px 6px; }
+.tog::before{ content:"Hide controls"; }
+#ui:checked ~ .bar .rows{ display:none; }
+#ui:checked ~ .bar .tog::before{ content:"Show controls"; }
+#ui:checked ~ .bar{ left:auto; right:8px; }
+#st-std:checked ~ .bar [for=st-std], #st-inv:checked ~ .bar [for=st-inv],
+#pr-scroll:checked ~ .bar [for=pr-scroll], #pr-scrub:checked ~ .bar [for=pr-scrub],
+#pr-auto:checked ~ .bar [for=pr-auto], #pr-mixed:checked ~ .bar [for=pr-mixed],
+#sp-slow:checked ~ .bar [for=sp-slow], #sp-norm:checked ~ .bar [for=sp-norm], #sp-fast:checked ~ .bar [for=sp-fast],
+#vp-full:checked ~ .bar [for=vp-full], #vp-phone:checked ~ .bar [for=vp-phone]{ background:#f2f2ee; color:#111; }
+.why{ display:none; color:#9b9b95; font-size:10.5px; }
+
+/* the mode legend shown on each section (prototype only) */
+.mode-tag{ position:absolute; left:12px; top:calc(40px + env(safe-area-inset-top,0px)); z-index:2; font-size:9.5px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--soft); border:1px solid var(--line); border-radius:100px; padding:3px 8px;
+  background:color-mix(in srgb,var(--paper) 80%,transparent); }
+
+/* ══ viewport ══ */
+#vp-phone:checked ~ main{ max-width:390px; margin:0 auto; box-shadow:0 0 0 1px var(--line), 0 30px 80px rgba(0,0,0,.18); }
+
+/* ══ BASE = SCROLL for every section: the plain long page ══ */
+.v{ display:none; }
+#st-std:checked ~ #pr-scroll:checked ~ main .v-std-scroll,
+#st-std:checked ~ #pr-scrub:checked ~ main .v-std-scrub,
+#st-std:checked ~ #pr-auto:checked ~ main .v-std-auto,
+#st-std:checked ~ #pr-mixed:checked ~ main .v-std-mixed,
+#st-inv:checked ~ #pr-scroll:checked ~ main .v-inv-scroll,
+#st-inv:checked ~ #pr-scrub:checked ~ main .v-inv-scrub,
+#st-inv:checked ~ #pr-auto:checked ~ main .v-inv-auto,
+#st-inv:checked ~ #pr-mixed:checked ~ main .v-inv-mixed{ display:block; }
+.srun,.arun{ display:block; position:relative; }
+.sp,.prog,.pp{ display:none; }
+.scene{ position:relative; padding:clamp(64px,11vw,120px) 20px; display:grid; place-items:center; text-align:center; background:var(--paper); }
+.s-names,.s-ceremony,.s-invitation,.s-day,.s-story{ background:var(--tint); }
+.inner{ width:100%; max-width:680px; margin:0 auto; }
+
+/* ── the three modes' mechanics ─────────────────────────────────────────── */
+.e-bloom{--inS:bloom;--inA:var(--k-bloom)}
+.e-rise{--inS:rise;--inA:var(--k-rise)}
+.e-zoom{--inS:zoom;--inA:var(--k-zoom)}
+.e-slideL{--inS:slideL;--inA:var(--k-slideL)}
+.e-slideR{--inS:slideR;--inA:var(--k-slideR)}
+.e-breathe{--inS:breathe;--inA:var(--k-breathe)}
+.e-blurIn{--inS:blurIn;--inA:var(--k-blurIn)}
+.e-pop{--inS:pop;--inA:var(--k-pop)}
+
+@media (prefers-reduced-motion: no-preference){
+  /* AUTO: one screen; its scenes stacked and sequenced on a clock */
+  .arun{ display:grid; height:100vh; height:100svh; overflow:hidden; background:var(--paper); }
+  .arun > .A{ grid-area:1 / 1; background:transparent; padding:clamp(40px,7vh,84px) 20px; }
+  .A.rf:not(.rl){ animation: var(--k-out) calc(.6 * var(--F)) linear forwards;
+    animation-delay: calc(var(--b) * var(--f) * 1s + .25 * var(--F)); }
+  .A.rl:not(.rf){ animation: var(--inA) calc(.6 * var(--F)) ease-out both;
+    animation-delay: calc(var(--a) * var(--f) * 1s + .15 * var(--F)); }
+  .A:not(.rf):not(.rl){ animation: var(--inA) calc(.6 * var(--F)) ease-out both, var(--k-out) calc(.6 * var(--F)) linear forwards;
+    animation-delay: calc(var(--a) * var(--f) * 1s + .15 * var(--F)), calc(var(--b) * var(--f) * 1s + .25 * var(--F)); }
+  /* contents of an AUTO scene can sequence too: the story beats arrive in turn */
+  .A .beats li{ animation: var(--k-beat) calc(.9s * var(--f)) ease-out both; }
+  .A .beats li:nth-child(1){ animation-delay: calc(var(--a) * var(--f) * 1s + var(--F)); }
+  .A .beats li:nth-child(2){ animation-delay: calc(var(--a) * var(--f) * 1s + var(--F) + 1.2s * var(--f)); }
+  .A .beats li:nth-child(3){ animation-delay: calc(var(--a) * var(--f) * 1s + var(--F) + 2.4s * var(--f)); }
+  /* the guest's pause / play */
+  .pp{ display:block; position:absolute; z-index:4; right:12px; top:calc(40px + env(safe-area-inset-top,0px));
+    cursor:pointer; font-size:11px; letter-spacing:.08em; color:var(--ink); border:1px solid var(--line);
+    background:color-mix(in srgb,var(--paper) 85%,transparent); border-radius:100px; padding:6px 12px; }
+  .pp::before{ content:"\275A\275A  Pause"; }
+  #pause:checked ~ main .pp::before{ content:"\25B6  Play"; }
+  #pause:checked ~ main .arun :is(.A, .A .beats li){ animation-play-state: paused; }
+  #pause:checked ~ main .prog i.pA::after{ animation-play-state: paused; }
+  .prog i.pA::after{ animation: var(--k-fill) calc((var(--b) - var(--a)) * var(--f) * 1s) linear both;
+    animation-delay: calc(var(--a) * var(--f) * 1s); }
+}
+
+/* AUTO starts when first seen (and pauses when scrolled away) */
+@supports (timeline-trigger: --t view() cover 30% cover 70%) and (animation-trigger: --t play pause){
+@media (prefers-reduced-motion: no-preference){
+  .v .arun{ timeline-trigger: var(--tr) view() cover 30% cover 70%; }
+  .v .arun > .A.scene.A.A, .v .arun .A .beats li:nth-child(n), .v .prog i.pA.pA::after{ animation-trigger: var(--tr) play pause; }
+}
+}
+
+/* SCRUB (and the progress mark) need scroll-driven animations */
+@supports (animation-timeline: view()) and (animation-range: entry 0% exit 100%) and (timeline-scope: none){
+@media (prefers-reduced-motion: no-preference){
+  .H{ position:sticky; top:0; height:100vh; height:100svh; padding:clamp(40px,7vh,84px) 20px;
+    background:transparent; overflow:hidden; }
+  .H:not(.rf){ margin-top:-100vh; margin-top:-100svh; }
+  .H + .sp{ display:block; height:170vh; }
+  .H.rf:not(.rl){ animation: out linear forwards; animation-timeline: var(--tl); animation-range: exit 25% exit 85%; }
+  .H.rl:not(.rf){ animation: var(--inS) linear both; animation-timeline: var(--tl); animation-range: entry 15% entry 75%; }
+  .H:not(.rf):not(.rl){ animation: var(--inS) linear both, out linear forwards;
+    animation-timeline: var(--tl), var(--tl); animation-range: entry 15% entry 75%, exit 25% exit 85%; }
+  .H .beats li{ animation: beat linear both; animation-timeline: var(--tl); }
+  .H .beats li:nth-child(1){ animation-range: entry 40% entry 70%; }
+  .H .beats li:nth-child(2){ animation-range: entry 80% contain 20%; }
+  .H .beats li:nth-child(3){ animation-range: contain 30% contain 70%; }
+
+  .prog{ display:flex; gap:3px; position:fixed; z-index:50; pointer-events:none;
+    top:calc(8px + env(safe-area-inset-top,0px)); left:50%; transform:translateX(-50%);
+    width:min(420px, calc(100% - 32px)); padding:7px 10px; border-radius:100px;
+    background:color-mix(in srgb, var(--paper) 82%, transparent);
+    -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); }
+  .prog i{ flex:1; height:2px; border-radius:2px; overflow:hidden; background:color-mix(in srgb, var(--ink) 16%, transparent); }
+  .prog i::after{ content:""; display:block; height:100%; background:var(--mul); transform-origin:0 50%; transform:scaleX(0); }
+  .prog i.pS::after, .prog i.pH::after{ animation: fill linear both; animation-timeline: var(--tl); animation-range: entry 50% exit 50%; }
+  .prog i.pH.pf::after{ animation-range: entry 0% exit 50%; }
+  .prog i.pS.plast::after{ animation-range: entry 0% entry 100%; }
+  .prog i.pH.plast::after{ animation-range: entry 50% contain 100%; }
+  .prog i.pH.pf.plast::after{ animation-range: entry 0% contain 100%; }
+}
+}
+
+/* keyframes: base names (SCRUB) + one identical alias per speed × replay (AUTO) */
+@keyframes bloom{from{opacity:0;transform:scale(.62);filter:blur(6px);pointer-events:none}to{opacity:1;transform:none;filter:blur(0);pointer-events:auto}}
+@keyframes rise{from{opacity:0;transform:translateY(34px);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes zoom{from{opacity:0;transform:scale(1.32);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes slideL{from{opacity:0;transform:translateX(-54px);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes slideR{from{opacity:0;transform:translateX(54px);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes breathe{from{opacity:0;transform:scale(1.1);pointer-events:none}60%{opacity:1}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes blurIn{from{opacity:0;filter:blur(12px);letter-spacing:.12em;pointer-events:none}to{opacity:1;filter:blur(0);letter-spacing:normal;pointer-events:auto}}
+@keyframes pop{from{opacity:0;transform:scale(.88);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes out{from{opacity:1;transform:none;pointer-events:auto}to{opacity:0;transform:translateY(-28px) scale(.985);pointer-events:none}}
+@keyframes beat{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes fill{to{transform:scaleX(1)}}
+@keyframes bloom_slowa{from{opacity:0;transform:scale(.62);filter:blur(6px);pointer-events:none}to{opacity:1;transform:none;filter:blur(0);pointer-events:auto}}
+@keyframes rise_slowa{from{opacity:0;transform:translateY(34px);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes zoom_slowa{from{opacity:0;transform:scale(1.32);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes slideL_slowa{from{opacity:0;transform:translateX(-54px);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes slideR_slowa{from{opacity:0;transform:translateX(54px);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes breathe_slowa{from{opacity:0;transform:scale(1.1);pointer-events:none}60%{opacity:1}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes blurIn_slowa{from{opacity:0;filter:blur(12px);letter-spacing:.12em;pointer-events:none}to{opacity:1;filter:blur(0);letter-spacing:normal;pointer-events:auto}}
+@keyframes pop_slowa{from{opacity:0;transform:scale(.88);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes out_slowa{from{opacity:1;transform:none;pointer-events:auto}to{opacity:0;transform:translateY(-28px) scale(.985);pointer-events:none}}
+@keyframes beat_slowa{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes fill_slowa{to{transform:scaleX(1)}}
+@keyframes bloom_slowb{from{opacity:0;transform:scale(.62);filter:blur(6px);pointer-events:none}to{opacity:1;transform:none;filter:blur(0);pointer-events:auto}}
+@keyframes rise_slowb{from{opacity:0;transform:translateY(34px);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes zoom_slowb{from{opacity:0;transform:scale(1.32);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes slideL_slowb{from{opacity:0;transform:translateX(-54px);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes slideR_slowb{from{opacity:0;transform:translateX(54px);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes breathe_slowb{from{opacity:0;transform:scale(1.1);pointer-events:none}60%{opacity:1}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes blurIn_slowb{from{opacity:0;filter:blur(12px);letter-spacing:.12em;pointer-events:none}to{opacity:1;filter:blur(0);letter-spacing:normal;pointer-events:auto}}
+@keyframes pop_slowb{from{opacity:0;transform:scale(.88);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes out_slowb{from{opacity:1;transform:none;pointer-events:auto}to{opacity:0;transform:translateY(-28px) scale(.985);pointer-events:none}}
+@keyframes beat_slowb{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes fill_slowb{to{transform:scaleX(1)}}
+@keyframes bloom_norma{from{opacity:0;transform:scale(.62);filter:blur(6px);pointer-events:none}to{opacity:1;transform:none;filter:blur(0);pointer-events:auto}}
+@keyframes rise_norma{from{opacity:0;transform:translateY(34px);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes zoom_norma{from{opacity:0;transform:scale(1.32);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes slideL_norma{from{opacity:0;transform:translateX(-54px);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes slideR_norma{from{opacity:0;transform:translateX(54px);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes breathe_norma{from{opacity:0;transform:scale(1.1);pointer-events:none}60%{opacity:1}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes blurIn_norma{from{opacity:0;filter:blur(12px);letter-spacing:.12em;pointer-events:none}to{opacity:1;filter:blur(0);letter-spacing:normal;pointer-events:auto}}
+@keyframes pop_norma{from{opacity:0;transform:scale(.88);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes out_norma{from{opacity:1;transform:none;pointer-events:auto}to{opacity:0;transform:translateY(-28px) scale(.985);pointer-events:none}}
+@keyframes beat_norma{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes fill_norma{to{transform:scaleX(1)}}
+@keyframes bloom_normb{from{opacity:0;transform:scale(.62);filter:blur(6px);pointer-events:none}to{opacity:1;transform:none;filter:blur(0);pointer-events:auto}}
+@keyframes rise_normb{from{opacity:0;transform:translateY(34px);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes zoom_normb{from{opacity:0;transform:scale(1.32);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes slideL_normb{from{opacity:0;transform:translateX(-54px);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes slideR_normb{from{opacity:0;transform:translateX(54px);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes breathe_normb{from{opacity:0;transform:scale(1.1);pointer-events:none}60%{opacity:1}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes blurIn_normb{from{opacity:0;filter:blur(12px);letter-spacing:.12em;pointer-events:none}to{opacity:1;filter:blur(0);letter-spacing:normal;pointer-events:auto}}
+@keyframes pop_normb{from{opacity:0;transform:scale(.88);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes out_normb{from{opacity:1;transform:none;pointer-events:auto}to{opacity:0;transform:translateY(-28px) scale(.985);pointer-events:none}}
+@keyframes beat_normb{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes fill_normb{to{transform:scaleX(1)}}
+@keyframes bloom_fasta{from{opacity:0;transform:scale(.62);filter:blur(6px);pointer-events:none}to{opacity:1;transform:none;filter:blur(0);pointer-events:auto}}
+@keyframes rise_fasta{from{opacity:0;transform:translateY(34px);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes zoom_fasta{from{opacity:0;transform:scale(1.32);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes slideL_fasta{from{opacity:0;transform:translateX(-54px);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes slideR_fasta{from{opacity:0;transform:translateX(54px);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes breathe_fasta{from{opacity:0;transform:scale(1.1);pointer-events:none}60%{opacity:1}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes blurIn_fasta{from{opacity:0;filter:blur(12px);letter-spacing:.12em;pointer-events:none}to{opacity:1;filter:blur(0);letter-spacing:normal;pointer-events:auto}}
+@keyframes pop_fasta{from{opacity:0;transform:scale(.88);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes out_fasta{from{opacity:1;transform:none;pointer-events:auto}to{opacity:0;transform:translateY(-28px) scale(.985);pointer-events:none}}
+@keyframes beat_fasta{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes fill_fasta{to{transform:scaleX(1)}}
+@keyframes bloom_fastb{from{opacity:0;transform:scale(.62);filter:blur(6px);pointer-events:none}to{opacity:1;transform:none;filter:blur(0);pointer-events:auto}}
+@keyframes rise_fastb{from{opacity:0;transform:translateY(34px);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes zoom_fastb{from{opacity:0;transform:scale(1.32);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes slideL_fastb{from{opacity:0;transform:translateX(-54px);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes slideR_fastb{from{opacity:0;transform:translateX(54px);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes breathe_fastb{from{opacity:0;transform:scale(1.1);pointer-events:none}60%{opacity:1}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes blurIn_fastb{from{opacity:0;filter:blur(12px);letter-spacing:.12em;pointer-events:none}to{opacity:1;filter:blur(0);letter-spacing:normal;pointer-events:auto}}
+@keyframes pop_fastb{from{opacity:0;transform:scale(.88);pointer-events:none}to{opacity:1;transform:none;pointer-events:auto}}
+@keyframes out_fastb{from{opacity:1;transform:none;pointer-events:auto}to{opacity:0;transform:translateY(-28px) scale(.985);pointer-events:none}}
+@keyframes beat_fastb{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes fill_fastb{to{transform:scaleX(1)}}
+#sp-slow:checked ~ main{--f:1.4;--F:1.68s}
+#sp-slow:checked ~ #rp:not(:checked) ~ main{--k-bloom:bloom_slowa;--k-rise:rise_slowa;--k-zoom:zoom_slowa;--k-slideL:slideL_slowa;--k-slideR:slideR_slowa;--k-breathe:breathe_slowa;--k-blurIn:blurIn_slowa;--k-pop:pop_slowa;--k-out:out_slowa;--k-beat:beat_slowa;--k-fill:fill_slowa}
+#sp-slow:checked ~ #rp:checked ~ main{--k-bloom:bloom_slowb;--k-rise:rise_slowb;--k-zoom:zoom_slowb;--k-slideL:slideL_slowb;--k-slideR:slideR_slowb;--k-breathe:breathe_slowb;--k-blurIn:blurIn_slowb;--k-pop:pop_slowb;--k-out:out_slowb;--k-beat:beat_slowb;--k-fill:fill_slowb}
+#sp-norm:checked ~ main{--f:1.0;--F:1.20s}
+#sp-norm:checked ~ #rp:not(:checked) ~ main{--k-bloom:bloom_norma;--k-rise:rise_norma;--k-zoom:zoom_norma;--k-slideL:slideL_norma;--k-slideR:slideR_norma;--k-breathe:breathe_norma;--k-blurIn:blurIn_norma;--k-pop:pop_norma;--k-out:out_norma;--k-beat:beat_norma;--k-fill:fill_norma}
+#sp-norm:checked ~ #rp:checked ~ main{--k-bloom:bloom_normb;--k-rise:rise_normb;--k-zoom:zoom_normb;--k-slideL:slideL_normb;--k-slideR:slideR_normb;--k-breathe:breathe_normb;--k-blurIn:blurIn_normb;--k-pop:pop_normb;--k-out:out_normb;--k-beat:beat_normb;--k-fill:fill_normb}
+#sp-fast:checked ~ main{--f:0.6;--F:0.72s}
+#sp-fast:checked ~ #rp:not(:checked) ~ main{--k-bloom:bloom_fasta;--k-rise:rise_fasta;--k-zoom:zoom_fasta;--k-slideL:slideL_fasta;--k-slideR:slideR_fasta;--k-breathe:breathe_fasta;--k-blurIn:blurIn_fasta;--k-pop:pop_fasta;--k-out:out_fasta;--k-beat:beat_fasta;--k-fill:fill_fasta}
+#sp-fast:checked ~ #rp:checked ~ main{--k-bloom:bloom_fastb;--k-rise:rise_fastb;--k-zoom:zoom_fastb;--k-slideL:slideL_fastb;--k-slideR:slideR_fastb;--k-breathe:breathe_fastb;--k-blurIn:blurIn_fastb;--k-pop:pop_fastb;--k-out:out_fastb;--k-beat:beat_fastb;--k-fill:fill_fastb}
+
+@supports not ((animation-timeline: view()) and (animation-range: entry 0% exit 100%) and (timeline-scope: none)){
+  .why{ display:inline; } .why::after{ content:"scrub unsupported here: scrub shows as scroll"; }
+}
+@media (prefers-reduced-motion: reduce){
+  .why{ display:inline; } .why::after{ content:"reduced motion: everything scrolls"; }
+}
+
+/* ══ content ══ */
+.lab{ font-family:var(--disp); font-size:14px; letter-spacing:.18em; text-transform:uppercase; color:var(--gold-ink); margin:0 0 14px; }
+.mono{ width:min(56vw, 34vh, 230px); height:auto; fill:var(--mul); display:block; margin:6px auto; }
+.mono.sm{ width:min(26vw, 16vh, 96px); } .mono.xs{ width:min(18vw, 11vh, 68px); }
+.rule{ width:40px; height:1px; background:var(--mul); opacity:.4; margin:16px auto 0; }
+.nm{ font-family:var(--disp); font-weight:500; font-style:italic; font-size:clamp(42px,11vw,76px); line-height:1.02; margin:0 0 10px; letter-spacing:-.01em; }
+.nm.sm{ font-size:clamp(30px,7vw,44px); }
+.sub{ font-family:var(--disp); font-style:italic; font-size:clamp(18px,4.6vw,22px); color:var(--soft); margin:0 0 8px; }
+.sub.lg{ font-size:clamp(28px,7vw,40px); color:var(--ink); }
+.big{ font-family:var(--disp); font-weight:500; font-size:clamp(38px,10vw,68px); line-height:1.05; margin:0 0 12px; }
+.big.it{ font-style:italic; font-size:clamp(32px,8.5vw,52px); }
+.vn{ font-family:var(--disp); font-weight:500; font-size:clamp(36px,9.5vw,58px); margin:0; line-height:1.05; }
+.cal{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:22px; }
+.btn{ display:inline-block; padding:12px 20px; border-radius:100px; text-decoration:none; font-size:14px; border:1px solid var(--mul); color:var(--mul); }
+.btn.primary{ background:var(--mul); color:#FBFBFA; }
+.k{ font-size:10.5px; letter-spacing:.28em; text-transform:uppercase; color:var(--gold-ink); margin:0 0 12px; font-weight:500; }
+.h{ font-family:var(--disp); font-weight:500; font-size:clamp(34px,7vw,58px); line-height:1.06; margin:0 0 14px; text-wrap:balance; }
+.t{ font-size:clamp(15px,1.3vw,17px); line-height:1.7; color:var(--soft); font-weight:300; max-width:50ch; margin:0 auto; }
+.cards{ display:grid; gap:10px; margin-top:22px; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); }
+.card{ background:var(--card); border:1px solid var(--line); border-radius:3px; padding:13px 15px; text-align:left; }
+.card b{ display:block; font-family:var(--disp); font-weight:500; font-size:20px; }
+.card span{ font-size:13.5px; color:var(--soft); font-weight:300; }
+.invite{ max-width:420px; margin:0 auto; padding:clamp(28px,6vw,46px) clamp(20px,5vw,38px); background:var(--card);
+  border:1px solid var(--line); outline:1px solid var(--gold); outline-offset:-10px; }
+.invite .pre{ font-size:13px; color:var(--soft); font-weight:300; line-height:1.6; margin:0 0 14px; }
+.invite .nm{ font-size:clamp(40px,10vw,60px); margin:0 0 14px; }
+.invite .amp{ display:block; font-size:.5em; color:var(--gold); margin:4px 0; }
+.invite .when{ font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold-ink); margin:18px 0 0; line-height:1.9; }
+.map{ height:clamp(90px,16vh,150px); margin-top:20px; border:1px solid var(--line); border-radius:3px; position:relative;
+  background: linear-gradient(115deg, transparent 46%, color-mix(in srgb,var(--gold) 45%,transparent) 46.4%, color-mix(in srgb,var(--gold) 45%,transparent) 48%, transparent 48.4%), color-mix(in srgb, var(--mul) 6%, var(--card)); }
+.map::after{ content:""; position:absolute; left:58%; top:42%; width:14px; height:14px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); background:var(--mul); }
+.beats{ list-style:none; padding:0; margin:20px auto 0; max-width:440px; text-align:left; }
+.beats li{ display:grid; grid-template-columns:64px 1fr; gap:12px; padding:10px 0; border-top:1px solid var(--line); font-size:14.5px; color:var(--soft); font-weight:300; line-height:1.55; }
+.beats b{ font-family:var(--disp); font-weight:500; color:var(--ink); font-size:18px; }
+.tail{ padding:56px 16px 150px; text-align:center; }
+.tail p{ font-size:13px; color:var(--soft); max-width:60ch; margin:0 auto; line-height:1.7; font-weight:300; }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="mono" viewBox="0 0 1032 1024"><path d="M252.2 499.5C249.7 505.6 245.6 511 242.2 516.7C235.7 527.8 229.9 539.3 224.4 550.9C207.4 586.5 195.1 628.3 191.9 667.5C191.4 674.4 190 681.5 190 688.5L190 708.5C190 715.1 191 721.9 191.8 728.5C196.8 769.6 212.1 808 237.9 840.6C240.5 843.9 243 847.6 246 850.5L262.9 867.5C268.6 873.2 275.5 877.9 281.9 882.6C317.8 908.6 360.7 923.6 404.5 928.1C411.4 928.9 418.5 930 425.5 930L448.5 930C451.6 930 454.5 929.3 457.5 929.1C468.6 928.2 479.6 927.4 490.6 925.2C499.9 923.5 509.1 922.1 518.3 919.7C592.2 900.9 657.6 860.2 712.1 807.6C739.7 781 765.4 750.5 782.4 715.9C792.2 696 801 674.4 804.9 652.5C806.5 643.5 808.1 634.5 809 625.5C810.2 612.5 810 598.3 808.2 585.5C807.4 579.8 806.9 574.2 805.9 568.5C799.8 533.7 778.7 504.5 745.9 490.6C735 486 723.2 483 711.5 482C672 478.7 628.9 494.2 594.7 513.2C586 518.1 577.4 523.1 569.1 528.6C564.1 531.9 559.4 535.8 554 538.2L554 480.5C584.8 472.1 615.1 462.3 645.3 451.7C684.7 437.9 723.2 421.5 762.2 406.7C779 400.3 795.7 393.6 812.3 386.8C822.4 382.6 832.9 376.5 843.5 374.4C859.3 400.8 868.5 431.3 873.2 461.5C873.7 464.8 874.3 468.2 874.8 471.5C875.6 477.4 875.6 487 885.3 483.7C893 481.1 889.5 468.2 889.1 462.5C888.8 459 889.2 455.6 888.4 452.2C887.9 450 888.2 447.8 887.8 445.6C886.6 438.9 885.4 432.2 883.8 425.6C880.6 412.4 875.9 399.5 870.5 387C867.4 380.1 863.6 373.4 860.5 366.5C871.1 359.6 887.2 353.4 899 347.5C940.9 326.7 996.2 295.1 1010.7 247.3C1022.3 208.8 996.9 187.1 961.5 181.1C951.5 179.4 941.5 178.1 931.5 177.1C927.5 176.7 923.5 177.2 919.5 176.9C914.5 176.7 909.6 176 904.5 176C899.8 176 895.2 176.8 890.5 177C882.5 177.2 874.5 177.2 866.5 178.1C853.4 179.7 840.5 181.9 827.5 183.9C815.5 185.7 803.2 187.8 791.4 190.7L736.2 204.3C727 206.5 717.4 209.4 708.4 212.5C708.8 213 708.8 213.8 709.2 214.3C710.4 215.7 722.9 223.2 724.5 223.2C727.5 223.3 757.9 212.1 763.8 210.4C801.9 199.1 840.9 190.9 880.5 188C889.1 187.3 897.9 186 906.5 186L932.5 186C935.6 186 938.4 186.7 941.5 187C964.8 188.9 993.3 197.4 999.1 223.5C1001.4 233.9 999.1 244.3 994.1 253.6C990.9 259.5 986.8 265.8 982 270.5L967 285.5C963.3 289.2 959 292.3 955.1 295.5C930 316.4 902 333.8 872.7 348.2C866.7 351.1 860.8 354.5 854.5 356.7C841.9 341.3 830 325.7 816.5 311C815.1 309.4 814 307.6 812.6 306.1L790 283.5C784.9 278.3 779 273.7 773.6 268.9C751.1 249.3 727.3 231.5 702.1 215.4C690.9 208.3 679.6 200.6 667.9 194.3L629.6 173.8C626.5 172.1 622.8 170.4 619.5 168.9L588 154.4C575.9 148.9 563.3 144.3 550.9 139.6C490 116.4 427.1 101.3 362.5 95.9C354.7 95.2 345.2 94 337.5 94L305.5 94C302.5 94 299.5 94.7 296.5 94.9C285.1 95.7 273.8 96.4 262.5 97.8C188.2 107.3 112.4 135.5 60.4 191.9C31.1 223.8 9.6 263.1 10.2 307.5C10.2 313.9 11.2 320.2 11.9 326.5C13.9 344.8 20.3 363 29.6 379C62.6 435.6 139.7 471 200.7 487.8C217.7 492.5 235 495.5 252.2 499.5ZM837.3 364.5C831 367.6 824.4 369.8 817.9 372.4C800.5 379.3 782.8 385.3 765.4 391.7L608.6 450.1C602.1 452.5 595.2 454.1 588.7 456.2C577.4 459.9 565.8 464.1 554 465.6L554 314.8C549 316.9 543.9 320 539.4 323.1L499.4 350.9C495.8 353.4 471.6 371.7 470.5 373.9C469.6 375.5 470 377.8 470 379.5L470 483.5C458.6 486.1 447.1 486.7 435.5 488.1C417.3 490.3 398.9 491.9 380.5 492C369.7 492 357.5 494.8 347.1 491.5C352.8 482.3 360.4 474.2 367.5 466C374.7 457.6 381.7 448.8 389.5 441L418.5 412.1C428.6 401.9 440.1 392.8 451 383.5C497.7 343.3 549.8 309.2 603.7 279.2C623 268.5 642.7 258.5 662.7 249.2C671.2 245.2 687.4 239.8 693.9 234.5C690.9 232.4 677.3 223.3 674.5 223.2C670.6 223 642.9 233.6 637.2 235.6C606.1 246.7 575 258.6 545.1 272.5L520.5 283.9C492.7 296.8 461.3 312.9 435.5 329.4L405.4 348.7C404.8 349.1 404.1 349.6 403.5 350.1L379.5 367.2C363.5 378.6 347.8 391.6 333.5 405.1L317.6 420.3C302.9 434.3 288.9 450 276.6 466.1C271.7 472.5 267.2 479.4 261.9 485.5C234.7 482.4 207.6 476.1 181.3 468.3C111.8 447.6 42.2 411.4 35.9 330.5C35.8 328.1 35.1 325.9 35 323.5C34.7 313 37 298.5 39.8 288.4C44.7 270.7 53.4 254.5 64.4 239.9C78.3 221.3 95.8 205.5 114.7 192.1C140.6 173.9 168.8 158.7 198.8 148.4C236 135.6 274.5 130 313.5 127.9C438.5 121.3 576.3 160.2 684.6 222.9C727.6 247.7 773.4 281 805 319.4C815.7 332.3 831.1 349.1 837.3 364.5ZM470 498.4L470 615.5C470 617.3 470.3 619.5 469.7 621.3C468.6 624.6 461.5 632.3 459.1 635.7C454.1 642.7 449.3 649.9 444.6 657.1C420.2 694.1 383 768.8 432.1 801.4C437.8 805.2 444.8 806 451.5 806C475.5 806 495.3 781.4 490.8 757.6C486.7 736.4 464.2 719.4 442.9 728.4C435.5 731.6 431.5 736.8 426.5 742.8C426.7 713.3 442.4 678.8 459.4 654.9C462.8 650.2 465.6 645.6 470 641.8L470 724.1C476.1 727.6 482 731.4 486.4 737.1C504.4 760.1 495.6 793.6 470 806.5L470 892.5C470 898.5 469 904.6 468.5 910.6C497.7 906.9 527 897.4 554 885.8L554 556.5C580.1 538.4 602.4 524.5 632.1 512.6C655.3 503.2 681.4 496.4 706.5 498.1C745.6 500.7 780.2 525.2 788.8 564.6C791.6 577.5 792.1 591.3 790.9 604.5C785.6 661.7 749.2 721.5 714.6 766.1C706.8 776.1 698.9 786.5 690 795.5L675.2 810.5C625.2 861 558.5 896.2 489.4 911.8C475.2 915 460.8 916.6 446.4 918.7C443.1 919.2 439.8 918.8 436.5 919C429.5 919.5 422.6 920.3 415.5 919.9C413.1 919.7 410.9 919.1 408.5 919C343.4 915.6 292.4 882.6 263.5 824C253.6 803.7 248.6 781.7 246.1 759.5C245.8 756.5 246.1 753.5 245.9 750.5C243.1 699.6 258.8 648.3 279.8 602.3C286.7 587.2 293.7 572 302.4 557.8C306.9 550.4 330.2 510.5 335.1 507.6C336.9 506.6 339.5 507 341.5 507L380.5 507C383.9 507 387.1 506.2 390.5 506C393.8 505.9 397.2 506.2 400.5 506C402.2 505.9 403.8 505.3 405.5 505.1C408.2 504.8 410.8 505.2 413.5 504.9C422.8 504.1 432.2 503 441.5 501.9C451 500.8 460.5 498.6 470 498.4Z" fill-rule="evenodd"/><path d="M353 26.3L353 41.5C358.5 42.1 364 41.6 369.5 42.1C398.8 44.6 437.1 51.2 455.4 77.1C462 86.4 464.5 96.9 467.5 107.7C482.4 113 498.2 116.3 513.3 121.2C526.1 125.4 540.8 132 553.5 134.9C555.3 120 556 105 561.3 90.8C574.1 57 612.3 47.1 644.5 43.1C653.3 42 662.2 42.5 671 41.5L671 26.3C662.4 25.8 654 27.3 645.5 27.9C635.2 28.7 624.8 29.1 614.5 29.9C603.6 30.8 592.5 30.6 581.5 31C558.5 31.9 535.5 32.6 512.5 32.6C489.2 32.6 465.8 31.9 442.5 31C431.5 30.6 420.4 30.8 409.5 29.9C399.2 29.1 388.8 28.7 378.5 27.9C370 27.3 361.6 25.8 353 26.3Z" fill-rule="evenodd"/><path d="M353 982.5L353 997.7C361.6 998.2 370 996.7 378.5 996.1C388.8 995.3 399.2 994.9 409.5 994.1C420.4 993.2 431.5 993.4 442.5 993C465.8 992.1 489.2 991.4 512.5 991.4C535.5 991.4 558.5 992.1 581.5 993C592.5 993.4 603.6 993.2 614.5 994.1C624.8 994.9 635.2 995.3 645.5 996.1C654 996.7 662.4 998.2 671 997.7L671 982.5C662.2 981.5 653.3 982 644.5 980.9C599.6 975.4 565.4 963.3 556.4 914.5C555.4 914.5 554.5 914 553.5 914C552.1 914.1 530.1 921.7 526.3 922.7C513.9 926.1 501.1 928.7 488.4 930.8C484 931.5 465.1 932.7 462.8 934.3C462.3 934.6 454.4 948.5 452.4 950.9C445.9 958.9 436.6 964.6 427.3 968.8C409.4 977 389 980.2 369.5 981.9C364 982.4 358.5 981.9 353 982.5Z" fill-rule="evenodd"/><path d="M470 146.5L470 303.6C475.5 301.7 480.2 298.4 485.4 295.9L534.4 272C540.7 268.9 547.5 266.2 554 263.5L554 168.5C536.1 161.8 517.2 157.4 498.7 152.7C489.3 150.2 479.7 147.7 470 146.5Z" fill-rule="evenodd"/></symbol></svg>
+
+<input class="cfg" type="radio" name="st" id="st-std" checked aria-label="Save the Date">
+<input class="cfg" type="radio" name="st" id="st-inv" aria-label="Invitation">
+<input class="cfg" type="radio" name="pr" id="pr-scroll" aria-label="All scroll">
+<input class="cfg" type="radio" name="pr" id="pr-scrub" aria-label="All scrub">
+<input class="cfg" type="radio" name="pr" id="pr-auto" aria-label="All auto">
+<input class="cfg" type="radio" name="pr" id="pr-mixed" checked aria-label="Mixed">
+<input class="cfg" type="radio" name="sp" id="sp-slow" aria-label="Slow">
+<input class="cfg" type="radio" name="sp" id="sp-norm" checked aria-label="Normal">
+<input class="cfg" type="radio" name="sp" id="sp-fast" aria-label="Fast">
+<input class="cfg" type="checkbox" id="rp" aria-label="Replay">
+<input class="cfg" type="checkbox" id="pause" aria-label="Pause auto">
+<input class="cfg" type="radio" name="vp" id="vp-full" checked aria-label="Full width">
+<input class="cfg" type="radio" name="vp" id="vp-phone" aria-label="Phone width">
+<input class="cfg" type="checkbox" id="ui" aria-label="Hide controls">
+
+<div class="bar">
+  <div class="rows">
+    <div class="grp"><span>Stage</span><label class="chip" for="st-std">Save the Date</label><label class="chip" for="st-inv">Invitation</label></div>
+    <div class="grp"><span>Preset</span><label class="chip" for="pr-scroll">All scroll</label><label class="chip" for="pr-scrub">All scrub</label><label class="chip" for="pr-auto">All auto</label><label class="chip" for="pr-mixed">Mixed</label></div>
+    <div class="grp"><span>Auto speed</span><label class="chip" for="sp-slow">Slow</label><label class="chip" for="sp-norm">Normal</label><label class="chip" for="sp-fast">Fast</label><label class="chip" for="rp">&#8635; Replay</label></div>
+    <div class="grp"><span>View</span><label class="chip" for="vp-full">Full</label><label class="chip" for="vp-phone">Phone</label></div>
+    <span class="why"></span>
+  </div>
+  <label class="tog" for="ui"></label>
+</div>
+
+<main>
+<div class="v v-std-scroll" data-copy="std-scroll" style="timeline-scope:--std-scroll-0,--std-scroll-1,--std-scroll-2,--std-scroll-3,--std-scroll-4,--std-scroll-5,--std-scroll-6;trigger-scope:none"><section class="scene S s-monogram" style="view-timeline-name:--std-scroll-0" aria-label="monogram"><span class="mode-tag">Scroll</span><div class="inner"><p class="lab">Save the Date</p><svg class="mono" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><div class="rule"></div></div></section><section class="scene S s-names" style="view-timeline-name:--std-scroll-1" aria-label="names"><span class="mode-tag">Scroll</span><div class="inner"><p class="lab">Together with their families</p><h1 class="nm">Indalecio &amp; Claire</h1><p class="sub">are getting married</p></div></section><section class="scene S s-date" style="view-timeline-name:--std-scroll-2" aria-label="date"><span class="mode-tag">Scroll</span><div class="inner"><p class="lab">Mark your calendars</p><p class="big">December 18, 2026</p><p class="sub">Friday &middot; half past one in the afternoon</p></div></section><section class="scene S s-ceremony" style="view-timeline-name:--std-scroll-3" aria-label="ceremony"><span class="mode-tag">Scroll</span><div class="inner"><p class="lab">The ceremony</p><p class="sub">We&rsquo;ll exchange our vows at</p><h2 class="vn">[Your venue]</h2></div></section><section class="scene S s-sentiment" style="view-timeline-name:--std-scroll-4" aria-label="sentiment"><span class="mode-tag">Scroll</span><div class="inner"><svg class="mono sm" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><p class="big it">We can&rsquo;t wait to<br>celebrate with you</p></div></section><section class="scene S s-invitation" style="view-timeline-name:--std-scroll-5" aria-label="invitation"><span class="mode-tag">Scroll</span><div class="inner"><p class="lab">Formal invitation to follow</p><p class="sub lg">Watch your inbox</p></div></section><section class="scene S s-close" style="view-timeline-name:--std-scroll-6" aria-label="close"><span class="mode-tag">Scroll</span><div class="inner"><svg class="mono xs" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><p class="nm sm">Indalecio &amp; Claire</p><p class="lab">18 &middot; 12 &middot; 2026</p><div class="cal"><a class="btn primary" href="#gcal">Add to Google Calendar</a><a class="btn" href="#ics">Apple / Outlook</a></div></div></section></div>
+<div class="v v-std-scrub" data-copy="std-scrub" style="timeline-scope:--std-scrub-0,--std-scrub-1,--std-scrub-2,--std-scrub-3,--std-scrub-4,--std-scrub-5,--std-scrub-6;trigger-scope:none"><div class="prog" aria-hidden="true"><i class="pH pf" style="--tl:--std-scrub-0"></i><i class="pH" style="--tl:--std-scrub-1"></i><i class="pH" style="--tl:--std-scrub-2"></i><i class="pH" style="--tl:--std-scrub-3"></i><i class="pH" style="--tl:--std-scrub-4"></i><i class="pH" style="--tl:--std-scrub-5"></i><i class="pH plast" style="--tl:--std-scrub-6"></i></div><div class="srun"><section class="scene H rf  e-bloom s-monogram" style="--tl:--std-scrub-0" aria-label="monogram"><span class="mode-tag">Scrub</span><div class="inner"><p class="lab">Save the Date</p><svg class="mono" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><div class="rule"></div></div></section><i class="sp" style="view-timeline-name:--std-scrub-0" aria-hidden="true"></i><section class="scene H  e-rise s-names" style="--tl:--std-scrub-1" aria-label="names"><span class="mode-tag">Scrub</span><div class="inner"><p class="lab">Together with their families</p><h1 class="nm">Indalecio &amp; Claire</h1><p class="sub">are getting married</p></div></section><i class="sp" style="view-timeline-name:--std-scrub-1" aria-hidden="true"></i><section class="scene H  e-zoom s-date" style="--tl:--std-scrub-2" aria-label="date"><span class="mode-tag">Scrub</span><div class="inner"><p class="lab">Mark your calendars</p><p class="big">December 18, 2026</p><p class="sub">Friday &middot; half past one in the afternoon</p></div></section><i class="sp" style="view-timeline-name:--std-scrub-2" aria-hidden="true"></i><section class="scene H  e-slideL s-ceremony" style="--tl:--std-scrub-3" aria-label="ceremony"><span class="mode-tag">Scrub</span><div class="inner"><p class="lab">The ceremony</p><p class="sub">We&rsquo;ll exchange our vows at</p><h2 class="vn">[Your venue]</h2></div></section><i class="sp" style="view-timeline-name:--std-scrub-3" aria-hidden="true"></i><section class="scene H  e-breathe s-sentiment" style="--tl:--std-scrub-4" aria-label="sentiment"><span class="mode-tag">Scrub</span><div class="inner"><svg class="mono sm" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><p class="big it">We can&rsquo;t wait to<br>celebrate with you</p></div></section><i class="sp" style="view-timeline-name:--std-scrub-4" aria-hidden="true"></i><section class="scene H  e-blurIn s-invitation" style="--tl:--std-scrub-5" aria-label="invitation"><span class="mode-tag">Scrub</span><div class="inner"><p class="lab">Formal invitation to follow</p><p class="sub lg">Watch your inbox</p></div></section><i class="sp" style="view-timeline-name:--std-scrub-5" aria-hidden="true"></i><section class="scene H rl e-pop s-close" style="--tl:--std-scrub-6" aria-label="close"><span class="mode-tag">Scrub</span><div class="inner"><svg class="mono xs" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><p class="nm sm">Indalecio &amp; Claire</p><p class="lab">18 &middot; 12 &middot; 2026</p><div class="cal"><a class="btn primary" href="#gcal">Add to Google Calendar</a><a class="btn" href="#ics">Apple / Outlook</a></div></div></section><i class="sp" style="view-timeline-name:--std-scrub-6" aria-hidden="true"></i></div></div>
+<div class="v v-std-auto" data-copy="std-auto" style="timeline-scope:none;trigger-scope:--std-auto-r0"><div class="prog" aria-hidden="true"><i class="pA" style="--a:0.00;--b:4.00;--tr:--std-auto-r0"></i><i class="pA" style="--a:4.00;--b:8.20;--tr:--std-auto-r0"></i><i class="pA" style="--a:8.20;--b:13.00;--tr:--std-auto-r0"></i><i class="pA" style="--a:13.00;--b:17.20;--tr:--std-auto-r0"></i><i class="pA" style="--a:17.20;--b:21.80;--tr:--std-auto-r0"></i><i class="pA" style="--a:21.80;--b:26.20;--tr:--std-auto-r0"></i><i class="pA" style="--a:26.20;--b:29.20;--tr:--std-auto-r0"></i></div><div class="arun" style="--tr:--std-auto-r0"><label class="pp" for="pause"></label><section class="scene A rf  e-bloom s-monogram" style="--a:0.00;--b:4.00" aria-label="monogram"><span class="mode-tag">Auto</span><div class="inner"><p class="lab">Save the Date</p><svg class="mono" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><div class="rule"></div></div></section><section class="scene A  e-rise s-names" style="--a:4.00;--b:8.20" aria-label="names"><span class="mode-tag">Auto</span><div class="inner"><p class="lab">Together with their families</p><h1 class="nm">Indalecio &amp; Claire</h1><p class="sub">are getting married</p></div></section><section class="scene A  e-zoom s-date" style="--a:8.20;--b:13.00" aria-label="date"><span class="mode-tag">Auto</span><div class="inner"><p class="lab">Mark your calendars</p><p class="big">December 18, 2026</p><p class="sub">Friday &middot; half past one in the afternoon</p></div></section><section class="scene A  e-slideL s-ceremony" style="--a:13.00;--b:17.20" aria-label="ceremony"><span class="mode-tag">Auto</span><div class="inner"><p class="lab">The ceremony</p><p class="sub">We&rsquo;ll exchange our vows at</p><h2 class="vn">[Your venue]</h2></div></section><section class="scene A  e-breathe s-sentiment" style="--a:17.20;--b:21.80" aria-label="sentiment"><span class="mode-tag">Auto</span><div class="inner"><svg class="mono sm" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><p class="big it">We can&rsquo;t wait to<br>celebrate with you</p></div></section><section class="scene A  e-blurIn s-invitation" style="--a:21.80;--b:26.20" aria-label="invitation"><span class="mode-tag">Auto</span><div class="inner"><p class="lab">Formal invitation to follow</p><p class="sub lg">Watch your inbox</p></div></section><section class="scene A rl e-pop s-close" style="--a:26.20;--b:29.20" aria-label="close"><span class="mode-tag">Auto</span><div class="inner"><svg class="mono xs" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><p class="nm sm">Indalecio &amp; Claire</p><p class="lab">18 &middot; 12 &middot; 2026</p><div class="cal"><a class="btn primary" href="#gcal">Add to Google Calendar</a><a class="btn" href="#ics">Apple / Outlook</a></div></div></section></div></div>
+<div class="v v-std-mixed" data-copy="std-mixed" style="timeline-scope:--std-mixed-3,--std-mixed-4,--std-mixed-5,--std-mixed-6;trigger-scope:--std-mixed-r0"><div class="prog" aria-hidden="true"><i class="pA" style="--a:0.00;--b:4.00;--tr:--std-mixed-r0"></i><i class="pA" style="--a:4.00;--b:8.20;--tr:--std-mixed-r0"></i><i class="pA" style="--a:8.20;--b:13.00;--tr:--std-mixed-r0"></i><i class="pH pf" style="--tl:--std-mixed-3"></i><i class="pH" style="--tl:--std-mixed-4"></i><i class="pS" style="--tl:--std-mixed-5"></i><i class="pS plast" style="--tl:--std-mixed-6"></i></div><div class="arun" style="--tr:--std-mixed-r0"><label class="pp" for="pause"></label><section class="scene A rf  e-bloom s-monogram" style="--a:0.00;--b:4.00" aria-label="monogram"><span class="mode-tag">Auto</span><div class="inner"><p class="lab">Save the Date</p><svg class="mono" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><div class="rule"></div></div></section><section class="scene A  e-rise s-names" style="--a:4.00;--b:8.20" aria-label="names"><span class="mode-tag">Auto</span><div class="inner"><p class="lab">Together with their families</p><h1 class="nm">Indalecio &amp; Claire</h1><p class="sub">are getting married</p></div></section><section class="scene A rl e-zoom s-date" style="--a:8.20;--b:13.00" aria-label="date"><span class="mode-tag">Auto</span><div class="inner"><p class="lab">Mark your calendars</p><p class="big">December 18, 2026</p><p class="sub">Friday &middot; half past one in the afternoon</p></div></section></div><div class="srun"><section class="scene H rf  e-slideL s-ceremony" style="--tl:--std-mixed-3" aria-label="ceremony"><span class="mode-tag">Scrub</span><div class="inner"><p class="lab">The ceremony</p><p class="sub">We&rsquo;ll exchange our vows at</p><h2 class="vn">[Your venue]</h2></div></section><i class="sp" style="view-timeline-name:--std-mixed-3" aria-hidden="true"></i><section class="scene H rl e-breathe s-sentiment" style="--tl:--std-mixed-4" aria-label="sentiment"><span class="mode-tag">Scrub</span><div class="inner"><svg class="mono sm" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><p class="big it">We can&rsquo;t wait to<br>celebrate with you</p></div></section><i class="sp" style="view-timeline-name:--std-mixed-4" aria-hidden="true"></i></div><section class="scene S s-invitation" style="view-timeline-name:--std-mixed-5" aria-label="invitation"><span class="mode-tag">Scroll</span><div class="inner"><p class="lab">Formal invitation to follow</p><p class="sub lg">Watch your inbox</p></div></section><section class="scene S s-close" style="view-timeline-name:--std-mixed-6" aria-label="close"><span class="mode-tag">Scroll</span><div class="inner"><svg class="mono xs" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><p class="nm sm">Indalecio &amp; Claire</p><p class="lab">18 &middot; 12 &middot; 2026</p><div class="cal"><a class="btn primary" href="#gcal">Add to Google Calendar</a><a class="btn" href="#ics">Apple / Outlook</a></div></div></section></div>
+<div class="v v-inv-scroll" data-copy="inv-scroll" style="timeline-scope:--inv-scroll-0,--inv-scroll-1,--inv-scroll-2,--inv-scroll-3,--inv-scroll-4;trigger-scope:none"><section class="scene S s-card" style="view-timeline-name:--inv-scroll-0" aria-label="card"><span class="mode-tag">Scroll</span><div class="inner"><div class="invite"><p class="pre">Together with their families</p><p class="nm">Indalecio<span class="amp">&amp;</span>Claire</p><p class="pre">request the pleasure of your company</p><p class="when">Friday &middot; 18 December 2026 &middot; 1:30 PM</p></div></div></section><section class="scene S s-day" style="view-timeline-name:--inv-scroll-1" aria-label="day"><span class="mode-tag">Scroll</span><div class="inner"><p class="k">The day</p><h2 class="h">Friday, the eighteenth of December</h2><p class="t">The ceremony begins at half past one.</p><div class="cards"><div class="card"><b>1:30 PM</b><span>Ceremony</span></div><div class="card"><b>After</b><span>Reception (sample)</span></div></div></div></section><section class="scene S s-venue" style="view-timeline-name:--inv-scroll-2" aria-label="venue"><span class="mode-tag">Scroll</span><div class="inner"><p class="k">The venue</p><h2 class="h">[Your venue]</h2><p class="t">Directions and parking notes go here (sample copy).</p><div class="map" role="img" aria-label="Map pin"></div></div></section><section class="scene S s-story" style="view-timeline-name:--inv-scroll-3" aria-label="story"><span class="mode-tag">Scroll</span><div class="inner"><p class="k">Our story</p><h2 class="h">How we got here</h2><ul class="beats"><li><b>First</b><span>Where we met (sample).</span></li><li><b>Then</b><span>The long middle (sample).</span></li><li><b>Now</b><span>The question, and the yes.</span></li></ul></div></section><section class="scene S s-rsvp" style="view-timeline-name:--inv-scroll-4" aria-label="rsvp"><span class="mode-tag">Scroll</span><div class="inner"><p class="k">RSVP</p><h2 class="h">Will you join us?</h2><div class="cal"><a class="btn primary" href="#yes" id="rsvp-yes">Joyfully accept</a><a class="btn" href="#no">Regretfully decline</a></div></div></section></div>
+<div class="v v-inv-scrub" data-copy="inv-scrub" style="timeline-scope:--inv-scrub-0,--inv-scrub-1,--inv-scrub-2,--inv-scrub-3,--inv-scrub-4;trigger-scope:none"><div class="prog" aria-hidden="true"><i class="pH pf" style="--tl:--inv-scrub-0"></i><i class="pH" style="--tl:--inv-scrub-1"></i><i class="pH" style="--tl:--inv-scrub-2"></i><i class="pH" style="--tl:--inv-scrub-3"></i><i class="pH plast" style="--tl:--inv-scrub-4"></i></div><div class="srun"><section class="scene H rf  e-bloom s-card" style="--tl:--inv-scrub-0" aria-label="card"><span class="mode-tag">Scrub</span><div class="inner"><div class="invite"><p class="pre">Together with their families</p><p class="nm">Indalecio<span class="amp">&amp;</span>Claire</p><p class="pre">request the pleasure of your company</p><p class="when">Friday &middot; 18 December 2026 &middot; 1:30 PM</p></div></div></section><i class="sp" style="view-timeline-name:--inv-scrub-0" aria-hidden="true"></i><section class="scene H  e-rise s-day" style="--tl:--inv-scrub-1" aria-label="day"><span class="mode-tag">Scrub</span><div class="inner"><p class="k">The day</p><h2 class="h">Friday, the eighteenth of December</h2><p class="t">The ceremony begins at half past one.</p><div class="cards"><div class="card"><b>1:30 PM</b><span>Ceremony</span></div><div class="card"><b>After</b><span>Reception (sample)</span></div></div></div></section><i class="sp" style="view-timeline-name:--inv-scrub-1" aria-hidden="true"></i><section class="scene H  e-slideL s-venue" style="--tl:--inv-scrub-2" aria-label="venue"><span class="mode-tag">Scrub</span><div class="inner"><p class="k">The venue</p><h2 class="h">[Your venue]</h2><p class="t">Directions and parking notes go here (sample copy).</p><div class="map" role="img" aria-label="Map pin"></div></div></section><i class="sp" style="view-timeline-name:--inv-scrub-2" aria-hidden="true"></i><section class="scene H  e-rise s-story" style="--tl:--inv-scrub-3" aria-label="story"><span class="mode-tag">Scrub</span><div class="inner"><p class="k">Our story</p><h2 class="h">How we got here</h2><ul class="beats"><li><b>First</b><span>Where we met (sample).</span></li><li><b>Then</b><span>The long middle (sample).</span></li><li><b>Now</b><span>The question, and the yes.</span></li></ul></div></section><i class="sp" style="view-timeline-name:--inv-scrub-3" aria-hidden="true"></i><section class="scene H rl e-pop s-rsvp" style="--tl:--inv-scrub-4" aria-label="rsvp"><span class="mode-tag">Scrub</span><div class="inner"><p class="k">RSVP</p><h2 class="h">Will you join us?</h2><div class="cal"><a class="btn primary" href="#yes" id="rsvp-yes">Joyfully accept</a><a class="btn" href="#no">Regretfully decline</a></div></div></section><i class="sp" style="view-timeline-name:--inv-scrub-4" aria-hidden="true"></i></div></div>
+<div class="v v-inv-auto" data-copy="inv-auto" style="timeline-scope:none;trigger-scope:--inv-auto-r0"><div class="prog" aria-hidden="true"><i class="pA" style="--a:0.00;--b:4.50;--tr:--inv-auto-r0"></i><i class="pA" style="--a:4.50;--b:9.00;--tr:--inv-auto-r0"></i><i class="pA" style="--a:9.00;--b:13.50;--tr:--inv-auto-r0"></i><i class="pA" style="--a:13.50;--b:19.00;--tr:--inv-auto-r0"></i><i class="pA" style="--a:19.00;--b:22.00;--tr:--inv-auto-r0"></i></div><div class="arun" style="--tr:--inv-auto-r0"><label class="pp" for="pause"></label><section class="scene A rf  e-bloom s-card" style="--a:0.00;--b:4.50" aria-label="card"><span class="mode-tag">Auto</span><div class="inner"><div class="invite"><p class="pre">Together with their families</p><p class="nm">Indalecio<span class="amp">&amp;</span>Claire</p><p class="pre">request the pleasure of your company</p><p class="when">Friday &middot; 18 December 2026 &middot; 1:30 PM</p></div></div></section><section class="scene A  e-rise s-day" style="--a:4.50;--b:9.00" aria-label="day"><span class="mode-tag">Auto</span><div class="inner"><p class="k">The day</p><h2 class="h">Friday, the eighteenth of December</h2><p class="t">The ceremony begins at half past one.</p><div class="cards"><div class="card"><b>1:30 PM</b><span>Ceremony</span></div><div class="card"><b>After</b><span>Reception (sample)</span></div></div></div></section><section class="scene A  e-slideL s-venue" style="--a:9.00;--b:13.50" aria-label="venue"><span class="mode-tag">Auto</span><div class="inner"><p class="k">The venue</p><h2 class="h">[Your venue]</h2><p class="t">Directions and parking notes go here (sample copy).</p><div class="map" role="img" aria-label="Map pin"></div></div></section><section class="scene A  e-rise s-story" style="--a:13.50;--b:19.00" aria-label="story"><span class="mode-tag">Auto</span><div class="inner"><p class="k">Our story</p><h2 class="h">How we got here</h2><ul class="beats"><li><b>First</b><span>Where we met (sample).</span></li><li><b>Then</b><span>The long middle (sample).</span></li><li><b>Now</b><span>The question, and the yes.</span></li></ul></div></section><section class="scene A rl e-pop s-rsvp" style="--a:19.00;--b:22.00" aria-label="rsvp"><span class="mode-tag">Auto</span><div class="inner"><p class="k">RSVP</p><h2 class="h">Will you join us?</h2><div class="cal"><a class="btn primary" href="#yes" id="rsvp-yes">Joyfully accept</a><a class="btn" href="#no">Regretfully decline</a></div></div></section></div></div>
+<div class="v v-inv-mixed" data-copy="inv-mixed" style="timeline-scope:--inv-mixed-0,--inv-mixed-1,--inv-mixed-2,--inv-mixed-4;trigger-scope:--inv-mixed-r2"><div class="prog" aria-hidden="true"><i class="pS" style="--tl:--inv-mixed-0"></i><i class="pH pf" style="--tl:--inv-mixed-1"></i><i class="pH" style="--tl:--inv-mixed-2"></i><i class="pA" style="--a:0.00;--b:5.50;--tr:--inv-mixed-r2"></i><i class="pS plast" style="--tl:--inv-mixed-4"></i></div><section class="scene S s-card" style="view-timeline-name:--inv-mixed-0" aria-label="card"><span class="mode-tag">Scroll</span><div class="inner"><div class="invite"><p class="pre">Together with their families</p><p class="nm">Indalecio<span class="amp">&amp;</span>Claire</p><p class="pre">request the pleasure of your company</p><p class="when">Friday &middot; 18 December 2026 &middot; 1:30 PM</p></div></div></section><div class="srun"><section class="scene H rf  e-rise s-day" style="--tl:--inv-mixed-1" aria-label="day"><span class="mode-tag">Scrub</span><div class="inner"><p class="k">The day</p><h2 class="h">Friday, the eighteenth of December</h2><p class="t">The ceremony begins at half past one.</p><div class="cards"><div class="card"><b>1:30 PM</b><span>Ceremony</span></div><div class="card"><b>After</b><span>Reception (sample)</span></div></div></div></section><i class="sp" style="view-timeline-name:--inv-mixed-1" aria-hidden="true"></i><section class="scene H rl e-slideL s-venue" style="--tl:--inv-mixed-2" aria-label="venue"><span class="mode-tag">Scrub</span><div class="inner"><p class="k">The venue</p><h2 class="h">[Your venue]</h2><p class="t">Directions and parking notes go here (sample copy).</p><div class="map" role="img" aria-label="Map pin"></div></div></section><i class="sp" style="view-timeline-name:--inv-mixed-2" aria-hidden="true"></i></div><div class="arun" style="--tr:--inv-mixed-r2"><label class="pp" for="pause"></label><section class="scene A rf rl e-rise s-story" style="--a:0.00;--b:5.50" aria-label="story"><span class="mode-tag">Auto</span><div class="inner"><p class="k">Our story</p><h2 class="h">How we got here</h2><ul class="beats"><li><b>First</b><span>Where we met (sample).</span></li><li><b>Then</b><span>The long middle (sample).</span></li><li><b>Now</b><span>The question, and the yes.</span></li></ul></div></section></div><section class="scene S s-rsvp" style="view-timeline-name:--inv-mixed-4" aria-label="rsvp"><span class="mode-tag">Scroll</span><div class="inner"><p class="k">RSVP</p><h2 class="h">Will you join us?</h2><div class="cal"><a class="btn primary" href="#yes" id="rsvp-yes">Joyfully accept</a><a class="btn" href="#no">Regretfully decline</a></div></div></section></div>
+</main>
+
+<footer class="tail">
+  <p><b>Save the Date · Mixed</b>: an AUTO opening that plays like the film (monogram, names, date),
+    then SCRUB (the ceremony, the sentiment), then a SCROLL tail (invitation to follow, add to calendar).
+    <b>Invitation · Mixed</b>: SCROLL card, SCRUB day + venue, AUTO story, SCROLL RSVP.
+    Under reduced motion every section scrolls and nothing plays by itself.</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reveal Openings Improved</title>
+<meta name="description" content="Before/after prototype of the four rigid Save-the-Date reveals (four-flap, two-flap side, two-flap top, church doors) with themed material slots — script-free.">
+<style>
+:root{--bg:#f6f3ee;--fg:#2c2a29;--mut:#6b6560;--line:#e2ddd4;--acc:#a9834b;--card:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#17161a;--fg:#ece7df;--mut:#9a938a;--line:#2b2930;--card:#201f24}}
+:root[data-theme=dark]{--bg:#17161a;--fg:#ece7df;--mut:#9a938a;--line:#2b2930;--card:#201f24}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif}
+body{padding:0 16px 64px}
+main{max-width:1180px;margin:0 auto}
+h1{font:600 28px/1.15 "Cormorant Garamond","Playfair Display",Georgia,"Times New Roman",serif;margin:32px 0 6px}
+h2{font:600 20px/1.2 "Cormorant Garamond",Georgia,serif;margin:44px 0 6px;padding-top:24px;border-top:1px solid var(--line)}
+h3{font:600 13px/1.3 inherit;letter-spacing:.02em;text-transform:none;margin:0 0 6px;color:var(--mut)}
+p{margin:6px 0;max-width:72ch}
+.mut{color:var(--mut)}
+small,.sm{font-size:12.5px}
+code{font:12px ui-monospace,SFMono-Regular,Menlo,monospace;background:color-mix(in srgb,var(--fg) 8%,transparent);padding:1px 5px}
+table{border-collapse:collapse;width:100%;font-size:13px;margin:8px 0 0}
+th,td{text-align:left;vertical-align:top;padding:6px 8px;border-bottom:1px solid var(--line)}
+th{color:var(--mut);font-weight:600}
+.cmp{margin-top:10px}
+.cmp>input{position:absolute;opacity:0;pointer-events:none}
+.ctl{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px;align-items:center}
+.ctl label{cursor:pointer;border-radius:999px;padding:7px 14px;font-weight:600;font-size:13px;background:var(--fg);color:var(--bg);user-select:none}
+.ctl label.ghost{background:transparent;color:var(--fg);box-shadow:inset 0 0 0 1px var(--line)}
+.ctl .mat{background:transparent;color:var(--fg);box-shadow:inset 0 0 0 1px var(--line)}
+.ctl .sep{width:1px;height:22px;background:var(--line)}
+.p0:checked~.ctl label[for$="-0"],.p1:checked~.ctl label[for$="-1"],.p2:checked~.ctl label[for$="-2"]{box-shadow:0 0 0 2px var(--acc)}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,300px));gap:20px 28px;align-items:start}
+.col h3{display:flex;justify-content:space-between}
+.stage{position:relative;width:100%;aspect-ratio:9/16;container-type:size;overflow:hidden;background:#111;isolation:isolate;box-shadow:0 12px 34px -14px rgba(0,0,0,.5)}
+.stage *,.stage *::before,.stage *::after{position:absolute}
+.stage svg{position:absolute}
+.tl{font-size:12px;color:var(--mut);margin-top:8px;line-height:1.45}
+.tl b{color:var(--fg);font-weight:600}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--mut);margin:10px 0 0}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+
+/* ─────────── THE PAGE BENEATH (the invitation-card hero the reveal uncovers) */
+.hero{inset:0;background:var(--card-bg,#f5efe3);color:var(--card-ink,#5a4626);display:grid;place-items:center;text-align:center}
+.a .hero{opacity:0}
+.hero .in{position:static;display:grid;justify-items:center;gap:6px;padding:0 10%}
+.hero .in *{position:static}
+.eyebrow{font-size:9px;letter-spacing:.32em;text-transform:uppercase;opacity:.75}
+.names{font:500 clamp(18px,7cqw,26px)/1.1 "Cormorant Garamond",Georgia,serif}
+.line{font-size:11px;font-style:italic;opacity:.8}
+.date{font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+.rule{width:34px;height:1px;background:currentColor;opacity:.5}
+.mono{width:44px;height:44px;color:var(--accent,#a9834b)}
+.stage .hero svg.mono{position:static}
+
+/* ─────────── TODAY (b) */
+.b .ink{inset:0;background:#2c2a29}
+.b .paper{inset:0;background:#fff;background-image:radial-gradient(60% 45% at 50% 50%,rgba(255,255,255,0),rgba(0,0,0,.05))}
+.b .flaps{inset:0;perspective:1400px;transform-style:preserve-3d}
+.b .fl{inset:0;background:radial-gradient(circle at 50% 50%,#fff 0,#f4f3f1 45%,#e3e1de 100%);backface-visibility:hidden}
+.b .fl .fold{inset:0;background:linear-gradient(0deg,rgba(0,0,0,.0),rgba(0,0,0,.0))}
+.b .fl::after{content:"";inset:0;background:#a9834b;transform:rotateX(180deg);backface-visibility:hidden}
+.b .fl.t{clip-path:polygon(0 0,100% 0,50% 50%);transform-origin:50% 0}
+.b .fl.b{clip-path:polygon(0 100%,100% 100%,50% 50%);transform-origin:50% 100%}
+.b .fl.l{clip-path:polygon(0 0,0 100%,50% 50%);transform-origin:0 50%}
+.b .fl.r{clip-path:polygon(100% 0,100% 100%,50% 50%);transform-origin:100% 50%}
+.b .fl.l::after,.b .fl.r::after{transform:rotateY(180deg)}
+.b.tv .fl.l{clip-path:none;inset:0 50% 0 0}
+.b.tv .fl.r{clip-path:none;inset:0 0 0 50%}
+.b.th .fl.t{clip-path:none;inset:0 0 50% 0}
+.b.th .fl.b{clip-path:none;inset:50% 0 0 0}
+.b .seam-unused{inset:0;background:linear-gradient(90deg,transparent 49.6%,rgba(0,0,0,.18) 50%,transparent 50.4%),linear-gradient(0deg,transparent 49.6%,rgba(0,0,0,.14) 50%,transparent 50.4%)}
+.b.tv .seam{background:linear-gradient(90deg,transparent 49.6%,rgba(0,0,0,.18) 50%,transparent 50.4%)}
+.b.th .seam{background:linear-gradient(0deg,transparent 49.6%,rgba(0,0,0,.18) 50%,transparent 50.4%)}
+.b .seal{left:50%;top:50%;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;background:radial-gradient(40% 38% at 38% 32%,#8e5a78 0,#5c2542 46%,#3f1a2e 100%);box-shadow:inset 0 1px 2px rgba(255,255,255,.35),inset 0 -2px 5px rgba(0,0,0,.45),0 2px 6px rgba(0,0,0,.3);color:#8e5a78;display:grid;place-items:center}
+.b .seal svg{position:static;width:46px;height:46px}
+.b .cue1,.b .cue2{left:50%;transform:translateX(-50%);white-space:nowrap;border-radius:999px;background:rgba(0,0,0,.35);color:#f7f2e8;padding:7px 12px;font:10px ui-monospace,Menlo,monospace;letter-spacing:.16em;text-transform:uppercase;text-shadow:0 1px 8px rgba(0,0,0,.7);backdrop-filter:blur(2px)}
+.b .cue1{top:calc(50% + 56px)}
+.b .cue2{bottom:28px;opacity:0}
+/* today · doors */
+.b.cd .paper{background:linear-gradient(180deg,#3a1d14 0%,#6e2c1f 55%,#8a3a25 80%,#2b1b14 100%)}
+.b.cd .paper::after{content:"aisle photo (webp) pops in after load";inset:auto 0 6% 0;text-align:center;font:9px ui-monospace,Menlo,monospace;color:rgba(255,235,210,.55)}
+.b.cd .fl{background:#8b5e3c;box-shadow:inset 0 0 40px rgba(0,0,0,.25)}
+.b.cd .fl::after{background:#5c2542}
+.b.cd .fl.l,.b.cd .fl.r{clip-path:none}
+.b.cd .fl.l{inset:0 50% 0 0;border-top-right-radius:42% 30%}
+.b.cd .fl.r{inset:0 0 0 50%;border-top-left-radius:42% 30%}
+.b.cd .fl .pan{inset:9%;display:grid;gap:9%;grid-template-rows:1fr 1.4fr}
+.b.cd .fl .pan i{position:static;display:block;border-radius:6px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15),inset 0 2px 10px rgba(0,0,0,.1)}
+.b.cd .ring{width:16px;height:16px;border:3px solid #111;border-radius:50%;top:50%;margin-top:-8px}
+.b.cd .fl.l .ring{right:8%}.b.cd .fl.r .ring{left:8%}
+.b.cd .carve{top:50%;font:700 22px "Palatino Linotype",Palatino,Georgia,serif;color:rgba(0,0,0,.38);-webkit-text-stroke:.5px rgba(255,255,255,.13);transform:translateY(-50%);white-space:nowrap}
+.b.cd .fl.l .carve{right:0;transform:translate(50%,-50%);clip-path:inset(0 50% 0 0)}
+.b.cd .fl.r .carve{left:0;transform:translate(-50%,-50%);clip-path:inset(0 0 0 50%)}
+.b.cd .stone2{inset:0;background:#c0b5a5;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,0 0,22% 0,22% 100%,78% 100%,78% 34%,50% 6%,22% 34%,22% 0)}
+.b.cd .step{left:0;right:0;height:4%;bottom:0;background:#a89b8a;box-shadow:0 -2px 4px rgba(0,0,0,.25)}
+.b.cd .step2{left:0;right:0;height:3%;bottom:4%;background:#b3a696}
+.b.cd .rose{left:50%;top:5%;width:22%;aspect-ratio:1;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle,#fff6dc 0,#f1c8a0 40%,#c46b5a 70%,#5e3b6b 100%);box-shadow:0 0 18px rgba(255,239,204,.5)}
+.b .bloom{inset:0;background:#fff;opacity:0;mix-blend-mode:screen}
+.b .cut{inset:0}
+
+/* ─────────── PROPOSED (a) — material SLOTS are variables (Layer-1 theming is data) */
+.a{--paper:#f5efe3;--paper-2:#e9e0cd;--edge:rgba(255,255,255,.75);--grain:.35;--speck:none;--liner:#dccdaa;--liner-pat:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><g fill='none' stroke='%23b99a5e' stroke-width='.8' opacity='.55'><path d='M20 4c6 6 6 10 0 16-6-6-6-10 0-16zM4 20c6-6 10-6 16 0-6 6-10 6-16 0zM20 36c-6-6-6-10 0-16 6 6 6 10 0 16zM36 20c-6 6-10 6-16 0 6-6 10-6 16 0z'/></g></svg>");--seal:#b8933f;--seal-hi:#e6c777;--seal-lo:#7a5c1e;--card-bg:#f7f2e8;--card-ink:#5a4626;--accent:#a9834b;--twine:0;--petal:#d9c39a;--petal-shape:50% 50% 50% 50%;--petal-on:0;--door:#e9e2d6;--door-2:#cfc4b1;--frame:#f4efe6;--metal:#b8933f;--interior:radial-gradient(70% 60% at 50% 40%,#fff9ec 0,#e9dcc4 60%,#b8a385 100%)}
+.a.rustic{--paper:#c9a57a;--paper-2:#b08b5f;--edge:rgba(255,245,225,.55);--grain:.7;--speck:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><g fill='%235a3f24' opacity='.18'><circle cx='12' cy='30' r='1.2'/><circle cx='70' cy='12' r='.9'/><circle cx='100' cy='60' r='1.4'/><circle cx='40' cy='90' r='1'/><circle cx='85' cy='105' r='1.2'/><circle cx='55' cy='55' r='.8'/></g></svg>");--liner:#ece2cf;--liner-pat:none;--seal:#6b4a2b;--seal-hi:#a8825a;--seal-lo:#3d2916;--card-bg:#f3ead9;--card-ink:#4a3a2a;--accent:#7a5a3a;--twine:1;--petal:#cdb98f;--petal-shape:50% 50% 10% 10%/60% 60% 40% 40%;--petal-on:1;--door:#8a6a4a;--door-2:#5f452e;--frame:#6b5238;--metal:#3a3632;--interior:radial-gradient(70% 60% at 50% 40%,#fff3dc 0,#d9c19a 60%,#7f6446 100%)}
+.a.vintage{--paper:#e8dcc0;--paper-2:#d4c39e;--edge:rgba(255,255,255,.6);--grain:.5;--speck:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><g fill='%237a5a3a' opacity='.16'><circle cx='30' cy='40' r='7'/><circle cx='150' cy='30' r='4'/><circle cx='120' cy='140' r='9'/><circle cx='60' cy='170' r='5'/><circle cx='180' cy='110' r='6'/></g></svg>");--liner:#f3ecdf;--liner-pat:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36'><g fill='none' stroke='white' stroke-width='1.1' opacity='.75'><circle cx='18' cy='18' r='10'/><circle cx='18' cy='18' r='5'/><circle cx='0' cy='0' r='6'/><circle cx='36' cy='0' r='6'/><circle cx='0' cy='36' r='6'/><circle cx='36' cy='36' r='6'/></g></svg>");--seal:#7a2e3b;--seal-hi:#b76a75;--seal-lo:#3f1119;--card-bg:#f1e8d6;--card-ink:#4d3b3a;--accent:#8c6932;--twine:0;--petal:#b3606f;--petal-shape:60% 40% 55% 45%;--petal-on:1;--door:#6f4a2e;--door-2:#4a3020;--frame:#8a7150;--metal:#7d6a3c;--interior:radial-gradient(70% 60% at 50% 40%,#fff4e2 0,#e0cfae 60%,#8b7455 100%)}
+.a.regency{--paper:#e6dcec;--paper-2:#d3c5df;--edge:rgba(255,255,255,.8);--grain:.25;--speck:none;--liner:#f5f0f8;--liner-pat:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48'><g fill='%238e78b6' opacity='.5'><path d='M10 40c4-12 10-20 20-28-8 12-12 20-20 28z'/><circle cx='30' cy='12' r='2.2'/><circle cx='24' cy='20' r='2'/><circle cx='18' cy='28' r='1.8'/><circle cx='36' cy='36' r='2'/></g></svg>");--seal:#7b5ea7;--seal-hi:#b7a2d6;--seal-lo:#432e6b;--card-bg:#f7f3fa;--card-ink:#4b3a63;--accent:#9a7fc2;--twine:0;--petal:#9a7fcf;--petal-shape:50% 50% 50% 50%;--petal-on:1;--door:#e4dbee;--door-2:#c9bcdb;--frame:#efe8f5;--metal:#c9a961;--interior:radial-gradient(70% 60% at 50% 40%,#fff 0,#e9e0f2 60%,#b9a7cf 100%)}
+.a .shell{inset:0;transform-origin:50% 50%}
+.a .liner{inset:0;background:var(--liner);background-image:var(--liner-pat)}
+.a .liner::after{content:"";inset:0;background:radial-gradient(80% 70% at 50% 50%,rgba(0,0,0,0) 40%,rgba(0,0,0,.22) 100%)}
+.a .sh{inset:0;pointer-events:none;opacity:0}
+.a .sh.t{background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,0) 55%);clip-path:polygon(0 0,100% 0,50% 50%)}
+.a .sh.b{background:linear-gradient(0deg,rgba(0,0,0,.55),rgba(0,0,0,0) 55%);clip-path:polygon(0 100%,100% 100%,50% 50%)}
+.a .sh.l{background:linear-gradient(90deg,rgba(0,0,0,.55),rgba(0,0,0,0) 55%);clip-path:polygon(0 0,0 100%,50% 50%)}
+.a .sh.r{background:linear-gradient(270deg,rgba(0,0,0,.55),rgba(0,0,0,0) 55%);clip-path:polygon(100% 0,100% 100%,50% 50%)}
+.a.tv .sh.l{clip-path:none;inset:0 50% 0 0;background:linear-gradient(90deg,rgba(0,0,0,.5),rgba(0,0,0,0) 80%)}
+.a.tv .sh.r{clip-path:none;inset:0 0 0 50%;background:linear-gradient(270deg,rgba(0,0,0,.5),rgba(0,0,0,0) 80%)}
+.a.th .sh.t{clip-path:none;inset:0 0 50% 0;background:linear-gradient(180deg,rgba(0,0,0,.5),rgba(0,0,0,0) 80%)}
+.a.th .sh.b{clip-path:none;inset:50% 0 0 0;background:linear-gradient(0deg,rgba(0,0,0,.5),rgba(0,0,0,0) 80%)}
+.a .sweep{inset:-20% 0;width:38%;left:31%;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.9) 50%,rgba(255,255,255,0));opacity:0;mix-blend-mode:screen}
+/* the card inside the envelope */
+.a .card{left:50%;top:50%;width:68%;aspect-ratio:3/4.2;transform:translate(-50%,-44%) scale(.94);background:var(--card-bg);color:var(--card-ink);display:grid;place-items:center;text-align:center;transform-origin:50% 50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05)}
+.a .card .in{position:static;display:grid;justify-items:center;gap:5px;padding:0 8%}
+.a .card .in *{position:static}
+.a .card .mono{width:34px;height:34px}
+.a .card .names{font-size:clamp(14px,5.6cqw,20px)}
+.a .hero .in{transform:scale(1.47);gap:5px;padding:0 8%}
+.a .hero .in .names{font-size:clamp(14px,5.6cqw,20px)}
+.a .hero .in .mono{width:34px;height:34px}
+.a .hero .in .date{font-size:10px}
+.a .cardsh{left:50%;top:50%;width:68%;aspect-ratio:3/4.2;transform:translate(-50%,-42%) scale(.94);background:radial-gradient(60% 60% at 50% 60%,rgba(0,0,0,.7),rgba(0,0,0,0) 90%);opacity:.18}
+.a .cardfade{inset:0}
+/* flaps — paper realism is STATIC (grain · fold shading · thin edge); only transform animates */
+.a .flaps{inset:0;perspective:1200px;transform-style:preserve-3d}
+.a .fl{inset:0;background:var(--paper);backface-visibility:hidden}
+.a .fl::before{content:"";inset:0;background:var(--speck),url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .6 0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");background-size:auto,160px 160px;opacity:var(--grain);mix-blend-mode:multiply}
+.a .fl::after{content:"";inset:0;background:var(--liner);background-image:var(--liner-pat);transform:rotateX(180deg);backface-visibility:hidden}
+.a .fl.l::after,.a .fl.r::after{transform:rotateY(180deg)}
+.a .fl .fold{inset:0}
+.a .fl.t{clip-path:polygon(0 0,100% 0,50% 50%);transform-origin:50% 0}
+.a .fl.t .fold{background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0) 30%,rgba(0,0,0,.06) 70%,rgba(0,0,0,.16));box-shadow:inset 0 1px 0 var(--edge)}
+.a .fl.b{clip-path:polygon(0 100%,100% 100%,50% 50%);transform-origin:50% 100%}
+.a .fl.b .fold{background:linear-gradient(0deg,rgba(255,255,255,.45),rgba(255,255,255,0) 30%,rgba(0,0,0,.05) 70%,rgba(0,0,0,.14));box-shadow:inset 0 -1px 0 var(--edge)}
+.a .fl.l{clip-path:polygon(0 0,0 100%,50% 50%);transform-origin:0 50%}
+.a .fl.l .fold{background:linear-gradient(90deg,rgba(255,255,255,.45),rgba(255,255,255,0) 30%,rgba(0,0,0,.05) 70%,rgba(0,0,0,.14));box-shadow:inset 1px 0 0 var(--edge)}
+.a .fl.r{clip-path:polygon(100% 0,100% 100%,50% 50%);transform-origin:100% 50%}
+.a .fl.r .fold{background:linear-gradient(270deg,rgba(255,255,255,.45),rgba(255,255,255,0) 30%,rgba(0,0,0,.05) 70%,rgba(0,0,0,.14));box-shadow:inset -1px 0 0 var(--edge)}
+.a .fl .edge{inset:0;background:linear-gradient(180deg,transparent 49.5%,var(--edge) 50%,transparent 50.5%)}
+.a.tv .fl.l{clip-path:none;inset:0 50% 0 0}
+.a.tv .fl.r{clip-path:none;inset:0 0 0 50%}
+.a.th .fl.t{clip-path:none;inset:0 0 50% 0}
+.a.th .fl.b{clip-path:none;inset:50% 0 0 0}
+.a.tv .fl .fold,.a.th .fl .fold{box-shadow:none}
+.a.tv .fl.l .fold{background:linear-gradient(90deg,rgba(0,0,0,.22),rgba(0,0,0,.04) 35%,rgba(255,255,255,.2) 75%,rgba(255,255,255,.5));box-shadow:inset -1px 0 0 var(--edge)}
+.a.tv .fl.r .fold{background:linear-gradient(270deg,rgba(0,0,0,.22),rgba(0,0,0,.04) 35%,rgba(255,255,255,.2) 75%,rgba(255,255,255,.5));box-shadow:inset 1px 0 0 var(--edge)}
+.a.th .fl.t .fold{background:linear-gradient(180deg,rgba(0,0,0,.22),rgba(0,0,0,.04) 35%,rgba(255,255,255,.2) 75%,rgba(255,255,255,.5));box-shadow:inset 0 -1px 0 var(--edge)}
+.a.th .fl.b .fold{background:linear-gradient(0deg,rgba(0,0,0,.22),rgba(0,0,0,.04) 35%,rgba(255,255,255,.2) 75%,rgba(255,255,255,.5));box-shadow:inset 0 1px 0 var(--edge)}
+/* twine (Rustic) — two crossed bands over the flaps, under the seal */
+.a .twine{inset:0;opacity:var(--twine);background:linear-gradient(90deg,transparent 47.6%,#9c7a52 48%,#c7a077 49%,#8a6a45 50.2%,transparent 50.6%),linear-gradient(0deg,transparent 47.6%,#9c7a52 48%,#c7a077 49%,#8a6a45 50.2%,transparent 50.6%)}
+/* the seal: pre-split into two halves so the break is transform+opacity only */
+.a .sealwrap{left:50%;top:50%;width:76px;height:76px;margin:-38px 0 0 -38px}
+.a .sealsh{inset:-6px;border-radius:50%;background:radial-gradient(circle,rgba(0,0,0,.55),rgba(0,0,0,0) 70%);opacity:.35}
+.a .half{inset:0;border-radius:50%;background:radial-gradient(40% 38% at 38% 32%,var(--seal-hi) 0,var(--seal) 46%,var(--seal-lo) 100%);box-shadow:inset 0 1px 2px rgba(255,255,255,.4),inset 0 -2px 5px rgba(0,0,0,.45);color:color-mix(in srgb,var(--seal-hi) 70%,#fff);display:grid;place-items:center}
+.a .half svg{position:static;width:42px;height:42px;filter:drop-shadow(0 .6px 0 rgba(0,0,0,.45)) drop-shadow(0 -.6px 0 rgba(255,255,255,.35))}
+.a .sealL{clip-path:polygon(0 0,52% 0,46% 40%,55% 62%,48% 100%,0 100%)}
+.a .sealR{clip-path:polygon(52% 0,100% 0,100% 100%,48% 100%,55% 62%,46% 40%)}
+.a .crack{left:50%;top:0;width:2px;height:100%;margin-left:-1px;background:linear-gradient(180deg,rgba(255,255,255,.0),rgba(255,255,255,.9) 40%,rgba(255,255,255,.0));opacity:0;transform-origin:50% 0}
+.a .cue{left:50%;top:calc(50% + 54px);transform:translateX(-50%);white-space:nowrap;border-radius:999px;background:rgba(0,0,0,.38);color:#fbf6ec;padding:6px 12px;font:500 12px "Cormorant Garamond",Georgia,serif;text-shadow:0 1px 8px rgba(0,0,0,.7);backdrop-filter:blur(2px)}
+/* effects: 8 falling shapes */
+.a .fx{inset:0;pointer-events:none;opacity:var(--petal-on)}
+.a .petal{top:-6%;width:18px;height:11px;background:var(--petal);border-radius:var(--petal-shape);opacity:0;box-shadow:0 1px 3px rgba(0,0,0,.28)}
+/* doors proposed */
+.a.cd .interior{inset:0;background:var(--interior)}
+.a.cd .floor{left:-10%;right:-10%;bottom:-10%;height:60%;transform:scale(.4,.2);transform-origin:50% 100%;background:radial-gradient(50% 50% at 50% 100%,rgba(255,244,214,.95),rgba(255,244,214,0) 70%);opacity:0}
+.a.cd .spill{left:50%;top:-10%;width:16%;height:120%;margin-left:-8%;background:linear-gradient(90deg,rgba(255,250,235,0),rgba(255,250,235,.95),rgba(255,250,235,0));opacity:0;transform:scaleX(.02);mix-blend-mode:screen}
+.a.cd .frame{inset:0;background:var(--frame);clip-path:polygon(0 0,100% 0,100% 100%,0 100%,0 0,14% 0,14% 100%,86% 100%,86% 30%,50% 8%,14% 30%,14% 0);box-shadow:inset 0 0 40px rgba(0,0,0,.18)}
+.a.cd .frame::after{content:"";inset:0;background:linear-gradient(180deg,rgba(255,255,255,.35),rgba(0,0,0,.12));mix-blend-mode:multiply}
+.a.cd .fl{background:var(--door);box-shadow:none;backface-visibility:visible}
+.a.cd .fl::before,.a.cd .fl::after{display:none}
+.a.cd .fl.l{inset:0 50% 0 14%;transform-origin:0 50%}
+.a.cd .fl.r{inset:0 14% 0 50%;transform-origin:100% 50%}
+.a.cd .fl .fold{background:linear-gradient(90deg,rgba(0,0,0,.22),rgba(0,0,0,0) 30%,rgba(255,255,255,.18) 80%);box-shadow:none}
+.a.cd .fl.r .fold{background:linear-gradient(270deg,rgba(0,0,0,.22),rgba(0,0,0,0) 30%,rgba(255,255,255,.18) 80%)}
+.a.cd .fl .arch{inset:0;background:var(--door)}
+.a.cd .fl.l{clip-path:polygon(0 30%,100% 8%,100% 100%,0 100%)}
+.a.cd .fl.r{clip-path:polygon(0 8%,100% 30%,100% 100%,0 100%)}
+.a.cd .fl{transform-style:preserve-3d}
+.a.cd .fl .pan{inset:12% 14%;display:grid;gap:8%;grid-template-rows:1fr 1.5fr}
+.a.cd .fl .pan i{position:static;display:block;background:linear-gradient(135deg,rgba(255,255,255,.35),rgba(0,0,0,.12));box-shadow:inset 0 0 0 1px rgba(0,0,0,.18),inset 2px 2px 0 rgba(255,255,255,.35),inset -2px -2px 0 rgba(0,0,0,.18)}
+.a.cd .fl .slab{top:0;bottom:0;width:6px;background:var(--door-2);transform:rotateY(90deg) translateZ(0)}
+.a.cd .fl.l .slab{right:0;transform-origin:100% 50%;transform:rotateY(-90deg)}
+.a.cd .fl.r .slab{left:0;transform-origin:0 50%;transform:rotateY(90deg)}
+.a.cd .fl .knob{top:50%;width:11px;height:11px;margin-top:-6px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff5c8,var(--metal) 60%,#3a2c10)}
+.a.cd .fl.l .knob{right:9%}.a.cd .fl.r .knob{left:9%}
+.a.cd .fl .plate{top:50%;width:26px;height:4px;margin-top:-2px;border-radius:2px;background:var(--metal);opacity:.75}
+.a.cd .fl.l .plate{right:calc(9% - 8px)}.a.cd .fl.r .plate{left:calc(9% - 8px)}
+.a.cd .fl .monoL,.a.cd .fl .monoR{top:35%;width:34px;height:34px;color:var(--metal);opacity:.85}
+.a.cd .fl.l .monoL{right:-17px;clip-path:inset(0 50% 0 0)}
+.a.cd .fl.r .monoR{left:-17px;clip-path:inset(0 0 0 50%)}
+.a.cd .card{width:56%;aspect-ratio:3/4.2;transform:translate(-50%,-40%) scale(.78)}
+.a.cd .cardsh{display:none}
+
+/* ─────────── reduced motion: the whole island collapses to one calm 400ms fade */
+@media (prefers-reduced-motion:reduce){
+  .a .fl,.a .sh,.a .sweep,.a .sealL,.a .sealR,.a .sealsh,.a .crack,.a .petal,.a .spill,.a .floor,.a .cue,.a .cardsh{animation-duration:1ms!important}
+  .a .card{animation-duration:1ms!important}
+  .a .shell,.a .hero,.a .cardfade{animation-duration:400ms!important}
+  .b *{animation-duration:400ms!important}
+}
+
+.pair .b .seal{animation:900ms cubic-bezier(.3,.6,.4,1) 0ms both;animation-name:none}
+.p1:checked~.pair .b .seal{animation-name:b-seal}
+.p2:checked~.pair .b .seal{animation-name:b-seal-r}
+.pair .b .cue1{animation:5100ms linear 0ms both;animation-name:none}
+.p1:checked~.pair .b .cue1{animation-name:b-cue1}
+.p2:checked~.pair .b .cue1{animation-name:b-cue1-r}
+.pair .b .cue2{animation:5100ms linear 0ms both;animation-name:none}
+.p1:checked~.pair .b .cue2{animation-name:b-cue2}
+.p2:checked~.pair .b .cue2{animation-name:b-cue2-r}
+.pair .b .cut{animation:5100ms linear 0ms both;animation-name:none}
+.p1:checked~.pair .b .cut{animation-name:b-cut}
+.p2:checked~.pair .b .cut{animation-name:b-cut-r}
+.pair .b.ff .fl.t{animation:5100ms cubic-bezier(.4,0,.6,1) 0ms both;animation-name:none}
+.p1:checked~.pair .b.ff .fl.t{animation-name:b-ff-top}
+.p2:checked~.pair .b.ff .fl.t{animation-name:b-ff-top-r}
+.pair .b.ff .fl.b{animation:5100ms cubic-bezier(.4,0,.6,1) 0ms both;animation-name:none}
+.p1:checked~.pair .b.ff .fl.b{animation-name:b-ff-bot}
+.p2:checked~.pair .b.ff .fl.b{animation-name:b-ff-bot-r}
+.pair .b.ff .fl.l{animation:5100ms cubic-bezier(.4,0,.6,1) 0ms both;animation-name:none}
+.p1:checked~.pair .b.ff .fl.l{animation-name:b-ff-left}
+.p2:checked~.pair .b.ff .fl.l{animation-name:b-ff-left-r}
+.pair .b.ff .fl.r{animation:5100ms cubic-bezier(.4,0,.6,1) 0ms both;animation-name:none}
+.p1:checked~.pair .b.ff .fl.r{animation-name:b-ff-right}
+.p2:checked~.pair .b.ff .fl.r{animation-name:b-ff-right-r}
+.pair .b.tv .fl.l{animation:5100ms cubic-bezier(.4,0,.6,1) 0ms both;animation-name:none}
+.p1:checked~.pair .b.tv .fl.l{animation-name:b-tv-l}
+.p2:checked~.pair .b.tv .fl.l{animation-name:b-tv-l-r}
+.pair .b.tv .fl.r{animation:5100ms cubic-bezier(.4,0,.6,1) 0ms both;animation-name:none}
+.p1:checked~.pair .b.tv .fl.r{animation-name:b-tv-r}
+.p2:checked~.pair .b.tv .fl.r{animation-name:b-tv-r-r}
+.pair .b.th .fl.t{animation:5100ms cubic-bezier(.4,0,.6,1) 0ms both;animation-name:none}
+.p1:checked~.pair .b.th .fl.t{animation-name:b-th-t}
+.p2:checked~.pair .b.th .fl.t{animation-name:b-th-t-r}
+.pair .b.th .fl.b{animation:5100ms cubic-bezier(.4,0,.6,1) 0ms both;animation-name:none}
+.p1:checked~.pair .b.th .fl.b{animation-name:b-th-b}
+.p2:checked~.pair .b.th .fl.b{animation-name:b-th-b-r}
+.pair .b.cd .fl.l{animation:5100ms cubic-bezier(.55,0,.55,1) 0ms both;animation-name:none}
+.p1:checked~.pair .b.cd .fl.l{animation-name:b-cd-l}
+.p2:checked~.pair .b.cd .fl.l{animation-name:b-cd-l-r}
+.pair .b.cd .fl.r{animation:5100ms cubic-bezier(.55,0,.55,1) 0ms both;animation-name:none}
+.p1:checked~.pair .b.cd .fl.r{animation-name:b-cd-r}
+.p2:checked~.pair .b.cd .fl.r{animation-name:b-cd-r-r}
+.pair .b.cd .bloom{animation:5100ms linear 0ms both;animation-name:none}
+.p1:checked~.pair .b.cd .bloom{animation-name:b-bloom}
+.p2:checked~.pair .b.cd .bloom{animation-name:b-bloom-r}
+.pair .a .cue{animation:2600ms linear 0ms both;animation-name:none}
+.p1:checked~.pair .a .cue{animation-name:a-cue}
+.p2:checked~.pair .a .cue{animation-name:a-cue-r}
+.pair .a .twine{animation:2600ms cubic-bezier(.3,.7,.5,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a .twine{animation-name:a-twine}
+.p2:checked~.pair .a .twine{animation-name:a-twine-r}
+.pair .a .crack{animation:2600ms cubic-bezier(.2,.8,.2,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a .crack{animation-name:a-crack}
+.p2:checked~.pair .a .crack{animation-name:a-crack-r}
+.pair .a .sealL{animation:2600ms cubic-bezier(.3,.7,.5,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a .sealL{animation-name:a-sealL}
+.p2:checked~.pair .a .sealL{animation-name:a-sealL-r}
+.pair .a .sealR{animation:2600ms cubic-bezier(.3,.7,.5,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a .sealR{animation-name:a-sealR}
+.p2:checked~.pair .a .sealR{animation-name:a-sealR-r}
+.pair .a .sealsh{animation:2600ms ease-out 0ms both;animation-name:none}
+.p1:checked~.pair .a .sealsh{animation-name:a-sealsh}
+.p2:checked~.pair .a .sealsh{animation-name:a-sealsh-r}
+.pair .a .sweep{animation:2600ms cubic-bezier(.4,0,.6,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a .sweep{animation-name:a-sweep}
+.p2:checked~.pair .a .sweep{animation-name:a-sweep-r}
+.pair .a .shell{animation:2600ms cubic-bezier(.4,0,.2,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a .shell{animation-name:a-shell}
+.p2:checked~.pair .a .shell{animation-name:a-shell-r}
+.pair .a .hero{animation:2600ms cubic-bezier(.4,0,.2,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a .hero{animation-name:a-hero}
+.p2:checked~.pair .a .hero{animation-name:a-hero-r}
+.pair .a .cardfade{animation:2600ms linear 0ms both;animation-name:none}
+.p1:checked~.pair .a .cardfade{animation-name:a-cardfade}
+.p2:checked~.pair .a .cardfade{animation-name:a-cardfade-r}
+.pair .a .petal{animation:2600ms cubic-bezier(.3,.2,.6,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a .petal{animation-name:a-petal}
+.p2:checked~.pair .a .petal{animation-name:a-petal-r}
+.pair .a.ff .card{animation:2600ms cubic-bezier(.3,.9,.3,1.02) 0ms both;animation-name:none}
+.p1:checked~.pair .a.ff .card{animation-name:a-card}
+.p2:checked~.pair .a.ff .card{animation-name:a-card-r}
+.pair .a.tv .card{animation:2600ms cubic-bezier(.3,.9,.3,1.02) 0ms both;animation-name:none}
+.p1:checked~.pair .a.tv .card{animation-name:a-card}
+.p2:checked~.pair .a.tv .card{animation-name:a-card-r}
+.pair .a.th .card{animation:2600ms cubic-bezier(.3,.9,.3,1.02) 0ms both;animation-name:none}
+.p1:checked~.pair .a.th .card{animation-name:a-card}
+.p2:checked~.pair .a.th .card{animation-name:a-card-r}
+.pair .a .cardsh{animation:2600ms cubic-bezier(.3,.9,.3,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a .cardsh{animation-name:a-cardsh}
+.p2:checked~.pair .a .cardsh{animation-name:a-cardsh-r}
+.pair .a.ff .fl.t{animation:2600ms cubic-bezier(.34,1.1,.36,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a.ff .fl.t{animation-name:a-ff-top}
+.p2:checked~.pair .a.ff .fl.t{animation-name:a-ff-top-r}
+.pair .a.ff .fl.r{animation:2600ms cubic-bezier(.34,1.1,.36,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a.ff .fl.r{animation-name:a-ff-right}
+.p2:checked~.pair .a.ff .fl.r{animation-name:a-ff-right-r}
+.pair .a.ff .fl.l{animation:2600ms cubic-bezier(.34,1.1,.36,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a.ff .fl.l{animation-name:a-ff-left}
+.p2:checked~.pair .a.ff .fl.l{animation-name:a-ff-left-r}
+.pair .a.ff .fl.b{animation:2600ms cubic-bezier(.34,1.1,.36,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a.ff .fl.b{animation-name:a-ff-bot}
+.p2:checked~.pair .a.ff .fl.b{animation-name:a-ff-bot-r}
+.pair .a.ff .sh.t{animation:2600ms cubic-bezier(.4,0,.6,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a.ff .sh.t{animation-name:a-sh-top}
+.p2:checked~.pair .a.ff .sh.t{animation-name:a-sh-top-r}
+.pair .a.ff .sh.r{animation:2600ms cubic-bezier(.4,0,.6,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a.ff .sh.r{animation-name:a-sh-right}
+.p2:checked~.pair .a.ff .sh.r{animation-name:a-sh-right-r}
+.pair .a.ff .sh.l{animation:2600ms cubic-bezier(.4,0,.6,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a.ff .sh.l{animation-name:a-sh-left}
+.p2:checked~.pair .a.ff .sh.l{animation-name:a-sh-left-r}
+.pair .a.ff .sh.b{animation:2600ms cubic-bezier(.4,0,.6,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a.ff .sh.b{animation-name:a-sh-bot}
+.p2:checked~.pair .a.ff .sh.b{animation-name:a-sh-bot-r}
+.pair .a.tv .fl.l{animation:2600ms cubic-bezier(.34,1.1,.36,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a.tv .fl.l{animation-name:a-tv-l}
+.p2:checked~.pair .a.tv .fl.l{animation-name:a-tv-l-r}
+.pair .a.tv .fl.r{animation:2600ms cubic-bezier(.34,1.1,.36,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a.tv .fl.r{animation-name:a-tv-r}
+.p2:checked~.pair .a.tv .fl.r{animation-name:a-tv-r-r}
+.pair .a.tv .sh.l{animation:2600ms cubic-bezier(.4,0,.6,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a.tv .sh.l{animation-name:a-sh-l2}
+.p2:checked~.pair .a.tv .sh.l{animation-name:a-sh-l2-r}
+.pair .a.tv .sh.r{animation:2600ms cubic-bezier(.4,0,.6,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a.tv .sh.r{animation-name:a-sh-r2}
+.p2:checked~.pair .a.tv .sh.r{animation-name:a-sh-r2-r}
+.pair .a.th .fl.t{animation:2600ms cubic-bezier(.34,1.1,.36,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a.th .fl.t{animation-name:a-th-t}
+.p2:checked~.pair .a.th .fl.t{animation-name:a-th-t-r}
+.pair .a.th .fl.b{animation:2600ms cubic-bezier(.34,1.1,.36,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a.th .fl.b{animation-name:a-th-b}
+.p2:checked~.pair .a.th .fl.b{animation-name:a-th-b-r}
+.pair .a.th .sh.t{animation:2600ms cubic-bezier(.4,0,.6,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a.th .sh.t{animation-name:a-sh-t2}
+.p2:checked~.pair .a.th .sh.t{animation-name:a-sh-t2-r}
+.pair .a.th .sh.b{animation:2600ms cubic-bezier(.4,0,.6,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a.th .sh.b{animation-name:a-sh-b2}
+.p2:checked~.pair .a.th .sh.b{animation-name:a-sh-b2-r}
+.pair .a.cd .fl.l{animation:2600ms cubic-bezier(.5,0,.2,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a.cd .fl.l{animation-name:a-cd-l}
+.p2:checked~.pair .a.cd .fl.l{animation-name:a-cd-l-r}
+.pair .a.cd .fl.r{animation:2600ms cubic-bezier(.5,0,.2,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a.cd .fl.r{animation-name:a-cd-r}
+.p2:checked~.pair .a.cd .fl.r{animation-name:a-cd-r-r}
+.pair .a.cd .spill{animation:2600ms cubic-bezier(.4,0,.6,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a.cd .spill{animation-name:a-spill}
+.p2:checked~.pair .a.cd .spill{animation-name:a-spill-r}
+.pair .a.cd .floor{animation:2600ms cubic-bezier(.4,0,.6,1) 0ms both;animation-name:none}
+.p1:checked~.pair .a.cd .floor{animation-name:a-floor}
+.p2:checked~.pair .a.cd .floor{animation-name:a-floor-r}
+.pair .a.cd .card{animation:2600ms cubic-bezier(.3,.9,.3,1.02) 0ms both;animation-name:none}
+.p1:checked~.pair .a.cd .card{animation-name:a-cdcard}
+.p2:checked~.pair .a.cd .card{animation-name:a-cdcard-r}
+
+/* ============ TODAY (faithful: WebGL path, progress ramps 0→1 over 4200ms, smoothstep windows, HARD CUT at 98.5%) */
+@keyframes b-seal { 0%{transform:translate(0,0) rotate(0) scale(1)} 8%{transform:translate(6px,-4px) scale(1.06)} 100%{transform:translate(-320px,-260px) rotate(-220deg) scale(1.04);opacity:1} }
+@keyframes b-cue1 { 0%,6%{opacity:1} 12%,100%{opacity:0} }
+@keyframes b-cue2 { 0%,12%{opacity:0} 16%,60%{opacity:1} 66%,100%{opacity:0} }
+/* four-flap windows: top [0,.5] bottom [.2,.65] left [.3,.75] right [.1,.55] — of the 4200ms open, which starts after the 900ms seal */
+@keyframes b-ff-top   { 0%,17.6%{transform:rotateX(0)} 58.8%,100%{transform:rotateX(160deg)} }
+@keyframes b-ff-bot   { 0%,34.1%{transform:rotateX(0)} 71.2%,100%{transform:rotateX(-160deg)} }
+@keyframes b-ff-left  { 0%,42.4%{transform:rotateY(0)} 79.4%,100%{transform:rotateY(-160deg)} }
+@keyframes b-ff-right { 0%,25.9%{transform:rotateY(0)} 62.9%,100%{transform:rotateY(160deg)} }
+/* two-flap windows: A [0,.62] B [.06,.7] → 158° */
+@keyframes b-tv-l { 0%,17.6%{transform:rotateY(0)} 68.7%,100%{transform:rotateY(-158deg)} }
+@keyframes b-tv-r { 0%,22.5%{transform:rotateY(0)} 75.3%,100%{transform:rotateY(158deg)} }
+@keyframes b-th-t { 0%,17.6%{transform:rotateX(0)} 68.7%,100%{transform:rotateX(158deg)} }
+@keyframes b-th-b { 0%,22.5%{transform:rotateX(0)} 75.3%,100%{transform:rotateX(-158deg)} }
+/* doors: [0,.72] / [0,.76] → 138°, smoothstep^1.5 (slow creak start) */
+@keyframes b-cd-l { 0%,17.6%{transform:rotateY(0)} 76.9%,100%{transform:rotateY(-138deg)} }
+@keyframes b-cd-r { 0%,17.6%{transform:rotateY(0)} 80.2%,100%{transform:rotateY(138deg)} }
+@keyframes b-bloom { 0%,92%{opacity:0} 100%{opacity:.35} }
+@keyframes b-cut { 0%,98.5%{opacity:1} 98.6%,100%{opacity:0} }
+
+/* ============ PROPOSED — one self-paced island (0024 §2b), transform/opacity only */
+@keyframes a-cue { 0%{opacity:1} 8%,100%{opacity:0} }
+@keyframes a-twine { 0%,12%{opacity:var(--twine);transform:translateY(0)} 30%,100%{opacity:0;transform:translateY(6%)} }
+@keyframes a-crack { 0%{opacity:0;transform:scaleY(0)} 4%{opacity:1;transform:scaleY(1)} 22%,100%{opacity:0;transform:scaleY(1)} }
+@keyframes a-sealL { 0%,3%{transform:translate(0,0) rotate(0)} 9%{transform:translate(-3%,-6%) rotate(-6deg)} 24%{transform:translate(-38%,70%) rotate(-38deg);opacity:1} 30%,100%{transform:translate(-52%,120%) rotate(-52deg);opacity:0} }
+@keyframes a-sealR { 0%,3%{transform:translate(0,0) rotate(0)} 10%{transform:translate(3%,-5%) rotate(5deg)} 25%{transform:translate(40%,66%) rotate(34deg);opacity:1} 31%,100%{transform:translate(56%,116%) rotate(48deg);opacity:0} }
+@keyframes a-sealsh { 0%,3%{opacity:.35;transform:scale(1)} 9%{opacity:.5;transform:scale(1.12)} 24%,100%{opacity:0;transform:scale(1.4)} }
+/* flaps: anticipation (tighten −4°) → open with overshoot → settle. Δ per flap = stagger. */
+@keyframes a-ff-top   { 0%,20%{transform:rotateX(0)} 25%{transform:rotateX(-4deg)} 55%{transform:rotateX(168deg)} 64%,100%{transform:rotateX(160deg)} }
+@keyframes a-ff-right { 0%,24%{transform:rotateY(0)} 29%{transform:rotateY(-4deg)} 59%{transform:rotateY(168deg)} 68%,100%{transform:rotateY(160deg)} }
+@keyframes a-ff-left  { 0%,28%{transform:rotateY(0)} 33%{transform:rotateY(4deg)} 63%{transform:rotateY(-168deg)} 72%,100%{transform:rotateY(-160deg)} }
+@keyframes a-ff-bot   { 0%,32%{transform:rotateX(0)} 37%{transform:rotateX(4deg)} 67%{transform:rotateX(-168deg)} 76%,100%{transform:rotateX(-160deg)} }
+/* cast shadow ON THE PAPER (backplate layer, beneath every flap — 0024 §1a z-order rule) */
+@keyframes a-sh-top   { 0%,22%{opacity:0;transform:translateY(0)} 40%{opacity:.34;transform:translateY(-6%)} 60%,100%{opacity:0;transform:translateY(-40%)} }
+@keyframes a-sh-right { 0%,26%{opacity:0;transform:translateX(0)} 44%{opacity:.34;transform:translateX(6%)} 64%,100%{opacity:0;transform:translateX(40%)} }
+@keyframes a-sh-left  { 0%,30%{opacity:0;transform:translateX(0)} 48%{opacity:.34;transform:translateX(-6%)} 68%,100%{opacity:0;transform:translateX(-40%)} }
+@keyframes a-sh-bot   { 0%,34%{opacity:0;transform:translateY(0)} 52%{opacity:.34;transform:translateY(6%)} 72%,100%{opacity:0;transform:translateY(40%)} }
+@keyframes a-sweep { 0%,34%{opacity:0;transform:translateX(-130%) skewX(-18deg)} 44%{opacity:.55} 60%,100%{opacity:0;transform:translateX(130%) skewX(-18deg)} }
+/* the card: peeks, rises, scales into the page — one continuous move, no cut */
+@keyframes a-card { 0%,48%{transform:translate(-50%,-44%) scale(.94)} 62%{transform:translate(-50%,-52%) scale(1.02)} 86%,100%{transform:translate(-50%,-50%) scale(1.47)} }
+@keyframes a-cardsh { 0%,48%{opacity:.18;transform:translate(-50%,-42%) scale(.94)} 62%{opacity:.34;transform:translate(-50%,-47%) scale(1.06)} 86%,100%{opacity:0;transform:translate(-50%,-44%) scale(1.5)} }
+@keyframes a-cardfade { 0%,88%{opacity:1} 100%{opacity:0} }
+@keyframes a-shell { 0%,72%{opacity:1;transform:scale(1)} 92%,100%{opacity:0;transform:scale(1.04)} }
+@keyframes a-hero { 0%,54%{opacity:0} 72%,100%{opacity:1} }
+/* two-flap proposed */
+@keyframes a-tv-l { 0%,20%{transform:rotateY(0)} 25%{transform:rotateY(3deg)} 60%{transform:rotateY(-128deg)} 70%,100%{transform:rotateY(-122deg)} }
+@keyframes a-tv-r { 0%,24%{transform:rotateY(0)} 29%{transform:rotateY(-3deg)} 64%{transform:rotateY(128deg)} 74%,100%{transform:rotateY(122deg)} }
+@keyframes a-sh-l2 { 0%,22%{opacity:0;transform:translateX(0)} 42%{opacity:.36;transform:translateX(-8%)} 66%,100%{opacity:0;transform:translateX(-45%)} }
+@keyframes a-sh-r2 { 0%,26%{opacity:0;transform:translateX(0)} 46%{opacity:.36;transform:translateX(8%)} 70%,100%{opacity:0;transform:translateX(45%)} }
+@keyframes a-th-t { 0%,20%{transform:rotateX(0)} 25%{transform:rotateX(-3deg)} 60%{transform:rotateX(128deg)} 70%,100%{transform:rotateX(122deg)} }
+@keyframes a-th-b { 0%,24%{transform:rotateX(0)} 29%{transform:rotateX(3deg)} 64%{transform:rotateX(-128deg)} 74%,100%{transform:rotateX(-122deg)} }
+@keyframes a-sh-t2 { 0%,22%{opacity:0;transform:translateY(0)} 42%{opacity:.36;transform:translateY(-8%)} 66%,100%{opacity:0;transform:translateY(-45%)} }
+@keyframes a-sh-b2 { 0%,26%{opacity:0;transform:translateY(0)} 46%{opacity:.36;transform:translateY(8%)} 70%,100%{opacity:0;transform:translateY(45%)} }
+/* doors proposed: unlatch (−2°) → heavy swing (slow start) → settle at 104° — hinge shading + light spill */
+@keyframes a-cd-l { 0%,20%{transform:rotateY(0)} 24%{transform:rotateY(2deg)} 66%{transform:rotateY(-108deg)} 78%,100%{transform:rotateY(-104deg)} }
+@keyframes a-cd-r { 0%,23%{transform:rotateY(0)} 27%{transform:rotateY(-2deg)} 69%{transform:rotateY(108deg)} 81%,100%{transform:rotateY(104deg)} }
+@keyframes a-spill { 0%,22%{opacity:0;transform:scaleX(.02)} 40%{opacity:.9;transform:scaleX(.5)} 70%,100%{opacity:.0;transform:scaleX(2.2)} }
+@keyframes a-floor { 0%,24%{opacity:0;transform:scale(.4,.2)} 60%{opacity:.75;transform:scale(1,.9)} 86%,100%{opacity:0;transform:scale(1.4,1.2)} }
+@keyframes a-cdcard { 0%,50%{transform:translate(-50%,-40%) scale(.78)} 68%{transform:translate(-50%,-50%) scale(1)} 88%,100%{transform:translate(-50%,-50%) scale(1.47)} }
+/* petals / wisteria / pampas / roses — one shape, themed by vars; transform+opacity only */
+@keyframes a-petal { 0%,30%{opacity:0;transform:translate(0,-2cqh) rotate(0)} 36%{opacity:1} 90%{opacity:.9;transform:translate(var(--dx),110cqh) rotate(var(--rot))} 100%{opacity:0;transform:translate(var(--dx),118cqh) rotate(var(--rot))} }
+
+
+/* ============ TODAY (faithful: WebGL path, progress ramps 0→1 over 4200ms, smoothstep windows, HARD CUT at 98.5%) */
+@keyframes b-seal-r { 0%{transform:translate(0,0) rotate(0) scale(1)} 8%{transform:translate(6px,-4px) scale(1.06)} 100%{transform:translate(-320px,-260px) rotate(-220deg) scale(1.04);opacity:1} }
+@keyframes b-cue1-r { 0%,6%{opacity:1} 12%,100%{opacity:0} }
+@keyframes b-cue2-r { 0%,12%{opacity:0} 16%,60%{opacity:1} 66%,100%{opacity:0} }
+/* four-flap windows: top [0,.5] bottom [.2,.65] left [.3,.75] right [.1,.55] — of the 4200ms open, which starts after the 900ms seal */
+@keyframes b-ff-top-r   { 0%,17.6%{transform:rotateX(0)} 58.8%,100%{transform:rotateX(160deg)} }
+@keyframes b-ff-bot-r   { 0%,34.1%{transform:rotateX(0)} 71.2%,100%{transform:rotateX(-160deg)} }
+@keyframes b-ff-left-r  { 0%,42.4%{transform:rotateY(0)} 79.4%,100%{transform:rotateY(-160deg)} }
+@keyframes b-ff-right-r { 0%,25.9%{transform:rotateY(0)} 62.9%,100%{transform:rotateY(160deg)} }
+/* two-flap windows: A [0,.62] B [.06,.7] → 158° */
+@keyframes b-tv-l-r { 0%,17.6%{transform:rotateY(0)} 68.7%,100%{transform:rotateY(-158deg)} }
+@keyframes b-tv-r-r { 0%,22.5%{transform:rotateY(0)} 75.3%,100%{transform:rotateY(158deg)} }
+@keyframes b-th-t-r { 0%,17.6%{transform:rotateX(0)} 68.7%,100%{transform:rotateX(158deg)} }
+@keyframes b-th-b-r { 0%,22.5%{transform:rotateX(0)} 75.3%,100%{transform:rotateX(-158deg)} }
+/* doors: [0,.72] / [0,.76] → 138°, smoothstep^1.5 (slow creak start) */
+@keyframes b-cd-l-r { 0%,17.6%{transform:rotateY(0)} 76.9%,100%{transform:rotateY(-138deg)} }
+@keyframes b-cd-r-r { 0%,17.6%{transform:rotateY(0)} 80.2%,100%{transform:rotateY(138deg)} }
+@keyframes b-bloom-r { 0%,92%{opacity:0} 100%{opacity:.35} }
+@keyframes b-cut-r { 0%,98.5%{opacity:1} 98.6%,100%{opacity:0} }
+
+/* ============ PROPOSED — one self-paced island (0024 §2b), transform/opacity only */
+@keyframes a-cue-r { 0%{opacity:1} 8%,100%{opacity:0} }
+@keyframes a-twine-r { 0%,12%{opacity:var(--twine);transform:translateY(0)} 30%,100%{opacity:0;transform:translateY(6%)} }
+@keyframes a-crack-r { 0%{opacity:0;transform:scaleY(0)} 4%{opacity:1;transform:scaleY(1)} 22%,100%{opacity:0;transform:scaleY(1)} }
+@keyframes a-sealL-r { 0%,3%{transform:translate(0,0) rotate(0)} 9%{transform:translate(-3%,-6%) rotate(-6deg)} 24%{transform:translate(-38%,70%) rotate(-38deg);opacity:1} 30%,100%{transform:translate(-52%,120%) rotate(-52deg);opacity:0} }
+@keyframes a-sealR-r { 0%,3%{transform:translate(0,0) rotate(0)} 10%{transform:translate(3%,-5%) rotate(5deg)} 25%{transform:translate(40%,66%) rotate(34deg);opacity:1} 31%,100%{transform:translate(56%,116%) rotate(48deg);opacity:0} }
+@keyframes a-sealsh-r { 0%,3%{opacity:.35;transform:scale(1)} 9%{opacity:.5;transform:scale(1.12)} 24%,100%{opacity:0;transform:scale(1.4)} }
+/* flaps: anticipation (tighten −4°) → open with overshoot → settle. Δ per flap = stagger. */
+@keyframes a-ff-top-r   { 0%,20%{transform:rotateX(0)} 25%{transform:rotateX(-4deg)} 55%{transform:rotateX(168deg)} 64%,100%{transform:rotateX(160deg)} }
+@keyframes a-ff-right-r { 0%,24%{transform:rotateY(0)} 29%{transform:rotateY(-4deg)} 59%{transform:rotateY(168deg)} 68%,100%{transform:rotateY(160deg)} }
+@keyframes a-ff-left-r  { 0%,28%{transform:rotateY(0)} 33%{transform:rotateY(4deg)} 63%{transform:rotateY(-168deg)} 72%,100%{transform:rotateY(-160deg)} }
+@keyframes a-ff-bot-r   { 0%,32%{transform:rotateX(0)} 37%{transform:rotateX(4deg)} 67%{transform:rotateX(-168deg)} 76%,100%{transform:rotateX(-160deg)} }
+/* cast shadow ON THE PAPER (backplate layer, beneath every flap — 0024 §1a z-order rule) */
+@keyframes a-sh-top-r   { 0%,22%{opacity:0;transform:translateY(0)} 40%{opacity:.34;transform:translateY(-6%)} 60%,100%{opacity:0;transform:translateY(-40%)} }
+@keyframes a-sh-right-r { 0%,26%{opacity:0;transform:translateX(0)} 44%{opacity:.34;transform:translateX(6%)} 64%,100%{opacity:0;transform:translateX(40%)} }
+@keyframes a-sh-left-r  { 0%,30%{opacity:0;transform:translateX(0)} 48%{opacity:.34;transform:translateX(-6%)} 68%,100%{opacity:0;transform:translateX(-40%)} }
+@keyframes a-sh-bot-r   { 0%,34%{opacity:0;transform:translateY(0)} 52%{opacity:.34;transform:translateY(6%)} 72%,100%{opacity:0;transform:translateY(40%)} }
+@keyframes a-sweep-r { 0%,34%{opacity:0;transform:translateX(-130%) skewX(-18deg)} 44%{opacity:.55} 60%,100%{opacity:0;transform:translateX(130%) skewX(-18deg)} }
+/* the card: peeks, rises, scales into the page — one continuous move, no cut */
+@keyframes a-card-r { 0%,48%{transform:translate(-50%,-44%) scale(.94)} 62%{transform:translate(-50%,-52%) scale(1.02)} 86%,100%{transform:translate(-50%,-50%) scale(1.47)} }
+@keyframes a-cardsh-r { 0%,48%{opacity:.18;transform:translate(-50%,-42%) scale(.94)} 62%{opacity:.34;transform:translate(-50%,-47%) scale(1.06)} 86%,100%{opacity:0;transform:translate(-50%,-44%) scale(1.5)} }
+@keyframes a-cardfade-r { 0%,88%{opacity:1} 100%{opacity:0} }
+@keyframes a-shell-r { 0%,72%{opacity:1;transform:scale(1)} 92%,100%{opacity:0;transform:scale(1.04)} }
+@keyframes a-hero-r { 0%,54%{opacity:0} 72%,100%{opacity:1} }
+/* two-flap proposed */
+@keyframes a-tv-l-r { 0%,20%{transform:rotateY(0)} 25%{transform:rotateY(3deg)} 60%{transform:rotateY(-128deg)} 70%,100%{transform:rotateY(-122deg)} }
+@keyframes a-tv-r-r { 0%,24%{transform:rotateY(0)} 29%{transform:rotateY(-3deg)} 64%{transform:rotateY(128deg)} 74%,100%{transform:rotateY(122deg)} }
+@keyframes a-sh-l2-r { 0%,22%{opacity:0;transform:translateX(0)} 42%{opacity:.36;transform:translateX(-8%)} 66%,100%{opacity:0;transform:translateX(-45%)} }
+@keyframes a-sh-r2-r { 0%,26%{opacity:0;transform:translateX(0)} 46%{opacity:.36;transform:translateX(8%)} 70%,100%{opacity:0;transform:translateX(45%)} }
+@keyframes a-th-t-r { 0%,20%{transform:rotateX(0)} 25%{transform:rotateX(-3deg)} 60%{transform:rotateX(128deg)} 70%,100%{transform:rotateX(122deg)} }
+@keyframes a-th-b-r { 0%,24%{transform:rotateX(0)} 29%{transform:rotateX(3deg)} 64%{transform:rotateX(-128deg)} 74%,100%{transform:rotateX(-122deg)} }
+@keyframes a-sh-t2-r { 0%,22%{opacity:0;transform:translateY(0)} 42%{opacity:.36;transform:translateY(-8%)} 66%,100%{opacity:0;transform:translateY(-45%)} }
+@keyframes a-sh-b2-r { 0%,26%{opacity:0;transform:translateY(0)} 46%{opacity:.36;transform:translateY(8%)} 70%,100%{opacity:0;transform:translateY(45%)} }
+/* doors proposed: unlatch (−2°) → heavy swing (slow start) → settle at 104° — hinge shading + light spill */
+@keyframes a-cd-l-r { 0%,20%{transform:rotateY(0)} 24%{transform:rotateY(2deg)} 66%{transform:rotateY(-108deg)} 78%,100%{transform:rotateY(-104deg)} }
+@keyframes a-cd-r-r { 0%,23%{transform:rotateY(0)} 27%{transform:rotateY(-2deg)} 69%{transform:rotateY(108deg)} 81%,100%{transform:rotateY(104deg)} }
+@keyframes a-spill-r { 0%,22%{opacity:0;transform:scaleX(.02)} 40%{opacity:.9;transform:scaleX(.5)} 70%,100%{opacity:.0;transform:scaleX(2.2)} }
+@keyframes a-floor-r { 0%,24%{opacity:0;transform:scale(.4,.2)} 60%{opacity:.75;transform:scale(1,.9)} 86%,100%{opacity:0;transform:scale(1.4,1.2)} }
+@keyframes a-cdcard-r { 0%,50%{transform:translate(-50%,-40%) scale(.78)} 68%{transform:translate(-50%,-50%) scale(1)} 88%,100%{transform:translate(-50%,-50%) scale(1.47)} }
+/* petals / wisteria / pampas / roses — one shape, themed by vars; transform+opacity only */
+@keyframes a-petal-r { 0%,30%{opacity:0;transform:translate(0,-2cqh) rotate(0)} 36%{opacity:1} 90%{opacity:.9;transform:translate(var(--dx),110cqh) rotate(var(--rot))} 100%{opacity:0;transform:translate(var(--dx),118cqh) rotate(var(--rot))} }
+
+</style></head>
+<body><main>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="mono" viewBox="0 0 1032 1024"><g fill="currentColor"><path d="M252.2 499.5C249.7 505.6 245.6 511 242.2 516.7C235.7 527.8 229.9 539.3 224.4 550.9C207.4 586.5 195.1 628.3 191.9 667.5C191.4 674.4 190 681.5 190 688.5L190 708.5C190 715.1 191 721.9 191.8 728.5C196.8 769.6 212.1 808 237.9 840.6C240.5 843.9 243 847.6 246 850.5L262.9 867.5C268.6 873.2 275.5 877.9 281.9 882.6C317.8 908.6 360.7 923.6 404.5 928.1C411.4 928.9 418.5 930 425.5 930L448.5 930C451.6 930 454.5 929.3 457.5 929.1C468.6 928.2 479.6 927.4 490.6 925.2C499.9 923.5 509.1 922.1 518.3 919.7C592.2 900.9 657.6 860.2 712.1 807.6C739.7 781 765.4 750.5 782.4 715.9C792.2 696 801 674.4 804.9 652.5C806.5 643.5 808.1 634.5 809 625.5C810.2 612.5 810 598.3 808.2 585.5C807.4 579.8 806.9 574.2 805.9 568.5C799.8 533.7 778.7 504.5 745.9 490.6C735 486 723.2 483 711.5 482C672 478.7 628.9 494.2 594.7 513.2C586 518.1 577.4 523.1 569.1 528.6C564.1 531.9 559.4 535.8 554 538.2L554 480.5C584.8 472.1 615.1 462.3 645.3 451.7C684.7 437.9 723.2 421.5 762.2 406.7C779 400.3 795.7 393.6 812.3 386.8C822.4 382.6 832.9 376.5 843.5 374.4C859.3 400.8 868.5 431.3 873.2 461.5C873.7 464.8 874.3 468.2 874.8 471.5C875.6 477.4 875.6 487 885.3 483.7C893 481.1 889.5 468.2 889.1 462.5C888.8 459 889.2 455.6 888.4 452.2C887.9 450 888.2 447.8 887.8 445.6C886.6 438.9 885.4 432.2 883.8 425.6C880.6 412.4 875.9 399.5 870.5 387C867.4 380.1 863.6 373.4 860.5 366.5C871.1 359.6 887.2 353.4 899 347.5C940.9 326.7 996.2 295.1 1010.7 247.3C1022.3 208.8 996.9 187.1 961.5 181.1C951.5 179.4 941.5 178.1 931.5 177.1C927.5 176.7 923.5 177.2 919.5 176.9C914.5 176.7 909.6 176 904.5 176C899.8 176 895.2 176.8 890.5 177C882.5 177.2 874.5 177.2 866.5 178.1C853.4 179.7 840.5 181.9 827.5 183.9C815.5 185.7 803.2 187.8 791.4 190.7L736.2 204.3C727 206.5 717.4 209.4 708.4 212.5C708.8 213 708.8 213.8 709.2 214.3C710.4 215.7 722.9 223.2 724.5 223.2C727.5 223.3 757.9 212.1 763.8 210.4C801.9 199.1 840.9 190.9 880.5 188C889.1 187.3 897.9 186 906.5 186L932.5 186C935.6 186 938.4 186.7 941.5 187C964.8 188.9 993.3 197.4 999.1 223.5C1001.4 233.9 999.1 244.3 994.1 253.6C990.9 259.5 986.8 265.8 982 270.5L967 285.5C963.3 289.2 959 292.3 955.1 295.5C930 316.4 902 333.8 872.7 348.2C866.7 351.1 860.8 354.5 854.5 356.7C841.9 341.3 830 325.7 816.5 311C815.1 309.4 814 307.6 812.6 306.1L790 283.5C784.9 278.3 779 273.7 773.6 268.9C751.1 249.3 727.3 231.5 702.1 215.4C690.9 208.3 679.6 200.6 667.9 194.3L629.6 173.8C626.5 172.1 622.8 170.4 619.5 168.9L588 154.4C575.9 148.9 563.3 144.3 550.9 139.6C490 116.4 427.1 101.3 362.5 95.9C354.7 95.2 345.2 94 337.5 94L305.5 94C302.5 94 299.5 94.7 296.5 94.9C285.1 95.7 273.8 96.4 262.5 97.8C188.2 107.3 112.4 135.5 60.4 191.9C31.1 223.8 9.6 263.1 10.2 307.5C10.2 313.9 11.2 320.2 11.9 326.5C13.9 344.8 20.3 363 29.6 379C62.6 435.6 139.7 471 200.7 487.8C217.7 492.5 235 495.5 252.2 499.5ZM837.3 364.5C831 367.6 824.4 369.8 817.9 372.4C800.5 379.3 782.8 385.3 765.4 391.7L608.6 450.1C602.1 452.5 595.2 454.1 588.7 456.2C577.4 459.9 565.8 464.1 554 465.6L554 314.8C549 316.9 543.9 320 539.4 323.1L499.4 350.9C495.8 353.4 471.6 371.7 470.5 373.9C469.6 375.5 470 377.8 470 379.5L470 483.5C458.6 486.1 447.1 486.7 435.5 488.1C417.3 490.3 398.9 491.9 380.5 492C369.7 492 357.5 494.8 347.1 491.5C352.8 482.3 360.4 474.2 367.5 466C374.7 457.6 381.7 448.8 389.5 441L418.5 412.1C428.6 401.9 440.1 392.8 451 383.5C497.7 343.3 549.8 309.2 603.7 279.2C623 268.5 642.7 258.5 662.7 249.2C671.2 245.2 687.4 239.8 693.9 234.5C690.9 232.4 677.3 223.3 674.5 223.2C670.6 223 642.9 233.6 637.2 235.6C606.1 246.7 575 258.6 545.1 272.5L520.5 283.9C492.7 296.8 461.3 312.9 435.5 329.4L405.4 348.7C404.8 349.1 404.1 349.6 403.5 350.1L379.5 367.2C363.5 378.6 347.8 391.6 333.5 405.1L317.6 420.3C302.9 434.3 288.9 450 276.6 466.1C271.7 472.5 267.2 479.4 261.9 485.5C234.7 482.4 207.6 476.1 181.3 468.3C111.8 447.6 42.2 411.4 35.9 330.5C35.8 328.1 35.1 325.9 35 323.5C34.7 313 37 298.5 39.8 288.4C44.7 270.7 53.4 254.5 64.4 239.9C78.3 221.3 95.8 205.5 114.7 192.1C140.6 173.9 168.8 158.7 198.8 148.4C236 135.6 274.5 130 313.5 127.9C438.5 121.3 576.3 160.2 684.6 222.9C727.6 247.7 773.4 281 805 319.4C815.7 332.3 831.1 349.1 837.3 364.5ZM470 498.4L470 615.5C470 617.3 470.3 619.5 469.7 621.3C468.6 624.6 461.5 632.3 459.1 635.7C454.1 642.7 449.3 649.9 444.6 657.1C420.2 694.1 383 768.8 432.1 801.4C437.8 805.2 444.8 806 451.5 806C475.5 806 495.3 781.4 490.8 757.6C486.7 736.4 464.2 719.4 442.9 728.4C435.5 731.6 431.5 736.8 426.5 742.8C426.7 713.3 442.4 678.8 459.4 654.9C462.8 650.2 465.6 645.6 470 641.8L470 724.1C476.1 727.6 482 731.4 486.4 737.1C504.4 760.1 495.6 793.6 470 806.5L470 892.5C470 898.5 469 904.6 468.5 910.6C497.7 906.9 527 897.4 554 885.8L554 556.5C580.1 538.4 602.4 524.5 632.1 512.6C655.3 503.2 681.4 496.4 706.5 498.1C745.6 500.7 780.2 525.2 788.8 564.6C791.6 577.5 792.1 591.3 790.9 604.5C785.6 661.7 749.2 721.5 714.6 766.1C706.8 776.1 698.9 786.5 690 795.5L675.2 810.5C625.2 861 558.5 896.2 489.4 911.8C475.2 915 460.8 916.6 446.4 918.7C443.1 919.2 439.8 918.8 436.5 919C429.5 919.5 422.6 920.3 415.5 919.9C413.1 919.7 410.9 919.1 408.5 919C343.4 915.6 292.4 882.6 263.5 824C253.6 803.7 248.6 781.7 246.1 759.5C245.8 756.5 246.1 753.5 245.9 750.5C243.1 699.6 258.8 648.3 279.8 602.3C286.7 587.2 293.7 572 302.4 557.8C306.9 550.4 330.2 510.5 335.1 507.6C336.9 506.6 339.5 507 341.5 507L380.5 507C383.9 507 387.1 506.2 390.5 506C393.8 505.9 397.2 506.2 400.5 506C402.2 505.9 403.8 505.3 405.5 505.1C408.2 504.8 410.8 505.2 413.5 504.9C422.8 504.1 432.2 503 441.5 501.9C451 500.8 460.5 498.6 470 498.4Z" fill-rule="evenodd"/><path d="M353 26.3L353 41.5C358.5 42.1 364 41.6 369.5 42.1C398.8 44.6 437.1 51.2 455.4 77.1C462 86.4 464.5 96.9 467.5 107.7C482.4 113 498.2 116.3 513.3 121.2C526.1 125.4 540.8 132 553.5 134.9C555.3 120 556 105 561.3 90.8C574.1 57 612.3 47.1 644.5 43.1C653.3 42 662.2 42.5 671 41.5L671 26.3C662.4 25.8 654 27.3 645.5 27.9C635.2 28.7 624.8 29.1 614.5 29.9C603.6 30.8 592.5 30.6 581.5 31C558.5 31.9 535.5 32.6 512.5 32.6C489.2 32.6 465.8 31.9 442.5 31C431.5 30.6 420.4 30.8 409.5 29.9C399.2 29.1 388.8 28.7 378.5 27.9C370 27.3 361.6 25.8 353 26.3Z" fill-rule="evenodd"/><path d="M353 982.5L353 997.7C361.6 998.2 370 996.7 378.5 996.1C388.8 995.3 399.2 994.9 409.5 994.1C420.4 993.2 431.5 993.4 442.5 993C465.8 992.1 489.2 991.4 512.5 991.4C535.5 991.4 558.5 992.1 581.5 993C592.5 993.4 603.6 993.2 614.5 994.1C624.8 994.9 635.2 995.3 645.5 996.1C654 996.7 662.4 998.2 671 997.7L671 982.5C662.2 981.5 653.3 982 644.5 980.9C599.6 975.4 565.4 963.3 556.4 914.5C555.4 914.5 554.5 914 553.5 914C552.1 914.1 530.1 921.7 526.3 922.7C513.9 926.1 501.1 928.7 488.4 930.8C484 931.5 465.1 932.7 462.8 934.3C462.3 934.6 454.4 948.5 452.4 950.9C445.9 958.9 436.6 964.6 427.3 968.8C409.4 977 389 980.2 369.5 981.9C364 982.4 358.5 981.9 353 982.5Z" fill-rule="evenodd"/><path d="M470 146.5L470 303.6C475.5 301.7 480.2 298.4 485.4 295.9L534.4 272C540.7 268.9 547.5 266.2 554 263.5L554 168.5C536.1 161.8 517.2 157.4 498.7 152.7C489.3 150.2 479.7 147.7 470 146.5Z" fill-rule="evenodd"/></g></symbol></defs></svg>
+<h1>The four openings, before and after</h1>
+<p class="mut">Four-flap · two-flap side · two-flap top · church doors — the sheer veil is untouched. Left: a faithful recreation of what ships today (WebGL path: timing windows, easings, the white paper it uncovers, the hard cut). Right: the proposed opening as <b>one self-paced island</b> — seal breaks, flaps anticipate → open with stagger and settle, light sweeps, the card rises out and <b>becomes the page</b>, no cut. Press ▶ Play; ↺ Replay restarts; ■ Reset returns to sealed. No JavaScript anywhere on this page.</p>
+<div class="legend"><span><i style="background:#a9834b"></i>animated properties: <b>transform + opacity only</b></span><span><i style="background:#5c2542"></i>paper grain, fold shading, edges, patterns: static (painted once)</span><span><i style="background:#2c2a29"></i>reduced motion → 400 ms fade</span></div>
+
+
+<h2>1 · Four-flap envelope</h2>
+<p class="mut sm">Four triangular flaps hinged on the screen edges, sealed at the centre by the couple’s wax monogram.</p>
+<div class="cmp"><input type="radio" class="p0" name="ff" id="ff-0" checked><input type="radio" class="p1" name="ff" id="ff-1"><input type="radio" class="p2" name="ff" id="ff-2"><div class="ctl"><label for="ff-1">▶ Play</label><label for="ff-2">↺ Replay</label><label class="ghost" for="ff-0">■ Reset</label></div>
+<div class="pair">
+ <div class="col"><h3><span>Today · as shipped (WebGL path recreated)</span><span>4.2 s + cut</span></h3><div class="stage b ff"><div class="hero"><div class="in"><span class="eyebrow">Save the Date</span><svg class="mono" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><span class="names">Indalecio &amp; Claire</span><span class="rule"></span><span class="line">are getting married</span><span class="date">14 · 02 · 2027</span></div></div><div class="cut"><div class="ink"></div><div class="paper"></div><div class="flaps"><div class="fl t"></div><div class="fl b"></div><div class="fl l"></div><div class="fl r"></div></div><div class="seal"><svg class="m" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg></div><span class="cue1">Drag the seal away</span><span class="cue2">Swipe up to open ↑</span></div></div><div class="tl"><b>0–0.9 s</b> seal flung off (or dragged by the guest) · <b>0.9–5.1 s</b> flaps rotate 160° in overlapping smoothstep windows (top → right → bottom → left) as the guest scrubs · uncovers a plain white paper plane · <b>5.1 s</b> hard cut to the film.</div></div>
+ <div class="col"><h3><span>Proposed · one self-paced island</span><span>2.6 s, no cut</span></h3><div class="stage a ff "><div class="hero"><div class="in"><span class="eyebrow">Save the Date</span><svg class="mono" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><span class="names">Indalecio &amp; Claire</span><span class="rule"></span><span class="line">are getting married</span><span class="date">14 · 02 · 2027</span></div></div><div class="shell"><div class="cardfade"><div class="liner"></div><div class="sh t"></div><div class="sh b"></div><div class="sh l"></div><div class="sh r"></div><div class="cardsh"></div><div class="card"><div class="in"><span class="eyebrow">Save the Date</span><svg class="mono" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><span class="names">Indalecio &amp; Claire</span><span class="rule"></span><span class="line">are getting married</span><span class="date">14 · 02 · 2027</span></div></div><div class="sweep"></div><div class="flaps"><div class="fl t"><div class="fold"></div></div><div class="fl b"><div class="fold"></div></div><div class="fl l"><div class="fold"></div></div><div class="fl r"><div class="fold"></div></div></div><div class="twine"></div><div class="fx"><i class="petal" style="left:5%;--dx:18px;--rot:240deg;animation-delay:0.00s"></i><i class="petal" style="left:20%;--dx:-40px;--rot:-260deg;animation-delay:0.15s"></i><i class="petal" style="left:33%;--dx:-22px;--rot:-320deg;animation-delay:0.30s"></i><i class="petal" style="left:43%;--dx:-40px;--rot:-200deg;animation-delay:0.45s"></i><i class="petal" style="left:51%;--dx:-22px;--rot:240deg;animation-delay:0.60s"></i><i class="petal" style="left:66%;--dx:-22px;--rot:-200deg;animation-delay:0.75s"></i><i class="petal" style="left:75%;--dx:-30px;--rot:220deg;animation-delay:0.90s"></i><i class="petal" style="left:93%;--dx:-22px;--rot:-200deg;animation-delay:1.05s"></i></div><div class="sealwrap"><div class="sealsh"></div><div class="half sealL"><svg class="m" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg></div><div class="half sealR"><svg class="m" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg></div><div class="crack"></div></div><span class="cue">Drag the seal away</span></div></div></div><div class="tl"><b>0–0.6 s</b> wax cracks, two halves lift and fall (shadow lifts with it) · <b>0.5–0.7</b> flaps tighten 4° (anticipation) · <b>0.6–1.9</b> open top → right → left → bottom, 100 ms apart, overshoot 8°, settle · cast shadows slide across the paper beneath · <b>0.9–1.5</b> a light sweeps the card · <b>1.3–2.3</b> the card rises and scales into the page · <b>1.9–2.6</b> envelope recedes under it. Guest feels: paper, weight, one motion into the invitation.</div></div>
+</div></div>
+
+
+<h2>2 · Two-flap · opens sideways</h2>
+<p class="mut sm">Two half-panels hinged on the left and right edges, parting like a gatefold card.</p>
+<div class="cmp"><input type="radio" class="p0" name="tv" id="tv-0" checked><input type="radio" class="p1" name="tv" id="tv-1"><input type="radio" class="p2" name="tv" id="tv-2"><div class="ctl"><label for="tv-1">▶ Play</label><label for="tv-2">↺ Replay</label><label class="ghost" for="tv-0">■ Reset</label></div>
+<div class="pair">
+ <div class="col"><h3><span>Today · as shipped (WebGL path recreated)</span><span>4.2 s + cut</span></h3><div class="stage b tv"><div class="hero"><div class="in"><span class="eyebrow">Save the Date</span><svg class="mono" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><span class="names">Indalecio &amp; Claire</span><span class="rule"></span><span class="line">are getting married</span><span class="date">14 · 02 · 2027</span></div></div><div class="cut"><div class="ink"></div><div class="paper"></div><div class="flaps"><div class="fl l"></div><div class="fl r"></div></div><div class="seal"><svg class="m" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg></div><span class="cue1">Drag the seal away</span><span class="cue2">Swipe up to open ↑</span></div></div><div class="tl"><b>0.9–5.1 s</b> both panels rotate 158° (right lags 0.06) · the back "liner" face never appears: past 90° it is off-screen · white plane · <b>5.1 s</b> cut.</div></div>
+ <div class="col"><h3><span>Proposed · one self-paced island</span><span>2.6 s, no cut</span></h3><div class="stage a tv "><div class="hero"><div class="in"><span class="eyebrow">Save the Date</span><svg class="mono" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><span class="names">Indalecio &amp; Claire</span><span class="rule"></span><span class="line">are getting married</span><span class="date">14 · 02 · 2027</span></div></div><div class="shell"><div class="cardfade"><div class="liner"></div><div class="sh l"></div><div class="sh r"></div><div class="cardsh"></div><div class="card"><div class="in"><span class="eyebrow">Save the Date</span><svg class="mono" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><span class="names">Indalecio &amp; Claire</span><span class="rule"></span><span class="line">are getting married</span><span class="date">14 · 02 · 2027</span></div></div><div class="sweep"></div><div class="flaps"><div class="fl l"><div class="fold"></div></div><div class="fl r"><div class="fold"></div></div></div><div class="twine"></div><div class="fx"><i class="petal" style="left:5%;--dx:18px;--rot:240deg;animation-delay:0.00s"></i><i class="petal" style="left:20%;--dx:-40px;--rot:-260deg;animation-delay:0.15s"></i><i class="petal" style="left:33%;--dx:-22px;--rot:-320deg;animation-delay:0.30s"></i><i class="petal" style="left:43%;--dx:-40px;--rot:-200deg;animation-delay:0.45s"></i><i class="petal" style="left:51%;--dx:-22px;--rot:240deg;animation-delay:0.60s"></i><i class="petal" style="left:66%;--dx:-22px;--rot:-200deg;animation-delay:0.75s"></i><i class="petal" style="left:75%;--dx:-30px;--rot:220deg;animation-delay:0.90s"></i><i class="petal" style="left:93%;--dx:-22px;--rot:-200deg;animation-delay:1.05s"></i></div><div class="sealwrap"><div class="sealsh"></div><div class="half sealL"><svg class="m" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg></div><div class="half sealR"><svg class="m" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg></div><div class="crack"></div></div><span class="cue">Drag the seal away</span></div></div></div><div class="tl">Left leads by 100 ms, right follows · a 3° press-in before the swing · overshoot 6°, settle at 122° (still on-screen, so the paper edge reads) · the liner PATTERN is on the inside you now actually see · card rises from the liner · shell recedes.</div></div>
+</div></div>
+
+
+<h2>3 · Two-flap · opens up & down</h2>
+<p class="mut sm">Two half-panels hinged top and bottom, opening from the middle like a top-fold note.</p>
+<div class="cmp"><input type="radio" class="p0" name="th" id="th-0" checked><input type="radio" class="p1" name="th" id="th-1"><input type="radio" class="p2" name="th" id="th-2"><div class="ctl"><label for="th-1">▶ Play</label><label for="th-2">↺ Replay</label><label class="ghost" for="th-0">■ Reset</label></div>
+<div class="pair">
+ <div class="col"><h3><span>Today · as shipped (WebGL path recreated)</span><span>4.2 s + cut</span></h3><div class="stage b th"><div class="hero"><div class="in"><span class="eyebrow">Save the Date</span><svg class="mono" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><span class="names">Indalecio &amp; Claire</span><span class="rule"></span><span class="line">are getting married</span><span class="date">14 · 02 · 2027</span></div></div><div class="cut"><div class="ink"></div><div class="paper"></div><div class="flaps"><div class="fl t"></div><div class="fl b"></div></div><div class="seal"><svg class="m" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg></div><span class="cue1">Drag the seal away</span><span class="cue2">Swipe up to open ↑</span></div></div><div class="tl"><b>0.9–5.1 s</b> both panels rotate 158° (bottom lags 0.06) · white plane · <b>5.1 s</b> cut.</div></div>
+ <div class="col"><h3><span>Proposed · one self-paced island</span><span>2.6 s, no cut</span></h3><div class="stage a th "><div class="hero"><div class="in"><span class="eyebrow">Save the Date</span><svg class="mono" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><span class="names">Indalecio &amp; Claire</span><span class="rule"></span><span class="line">are getting married</span><span class="date">14 · 02 · 2027</span></div></div><div class="shell"><div class="cardfade"><div class="liner"></div><div class="sh t"></div><div class="sh b"></div><div class="cardsh"></div><div class="card"><div class="in"><span class="eyebrow">Save the Date</span><svg class="mono" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><span class="names">Indalecio &amp; Claire</span><span class="rule"></span><span class="line">are getting married</span><span class="date">14 · 02 · 2027</span></div></div><div class="sweep"></div><div class="flaps"><div class="fl t"><div class="fold"></div></div><div class="fl b"><div class="fold"></div></div></div><div class="twine"></div><div class="fx"><i class="petal" style="left:5%;--dx:18px;--rot:240deg;animation-delay:0.00s"></i><i class="petal" style="left:20%;--dx:-40px;--rot:-260deg;animation-delay:0.15s"></i><i class="petal" style="left:33%;--dx:-22px;--rot:-320deg;animation-delay:0.30s"></i><i class="petal" style="left:43%;--dx:-40px;--rot:-200deg;animation-delay:0.45s"></i><i class="petal" style="left:51%;--dx:-22px;--rot:240deg;animation-delay:0.60s"></i><i class="petal" style="left:66%;--dx:-22px;--rot:-200deg;animation-delay:0.75s"></i><i class="petal" style="left:75%;--dx:-30px;--rot:220deg;animation-delay:0.90s"></i><i class="petal" style="left:93%;--dx:-22px;--rot:-200deg;animation-delay:1.05s"></i></div><div class="sealwrap"><div class="sealsh"></div><div class="half sealL"><svg class="m" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg></div><div class="half sealR"><svg class="m" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg></div><div class="crack"></div></div><span class="cue">Drag the seal away</span></div></div></div><div class="tl">Top leads, bottom follows · same anticipation/overshoot/settle grammar as #2 so the family feels related · cast shadow moves with each panel · card rises · shell recedes.</div></div>
+</div></div>
+
+
+<h2>4 · Church doors</h2>
+<p class="mut sm">Two tall doors swing open from the centre — the ceremonial entrance.</p>
+<div class="cmp"><input type="radio" class="p0" name="cd" id="cd-0" checked><input type="radio" class="p1" name="cd" id="cd-1"><input type="radio" class="p2" name="cd" id="cd-2"><div class="ctl"><label for="cd-1">▶ Play</label><label for="cd-2">↺ Replay</label><label class="ghost" for="cd-0">■ Reset</label></div>
+<div class="pair">
+ <div class="col"><h3><span>Today · as shipped (WebGL path recreated)</span><span>4.2 s + cut</span></h3><div class="stage b cd"><div class="hero"><div class="in"><span class="eyebrow">Save the Date</span><svg class="mono" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><span class="names">Indalecio &amp; Claire</span><span class="rule"></span><span class="line">are getting married</span><span class="date">14 · 02 · 2027</span></div></div><div class="cut"><div class="ink"></div><div class="paper"></div><div class="flaps"><div class="fl l"><div class="pan"><i></i><i></i></div><span class="carve">I &amp; C</span><span class="ring"></span></div><div class="fl r"><div class="pan"><i></i><i></i></div><span class="carve">I &amp; C</span><span class="ring"></span></div></div><div class="stone2"></div><div class="step2"></div><div class="step"></div><div class="rose"></div><div class="bloom"></div><div class="seal"><svg class="m" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg></div><span class="cue1">Drag the seal away</span><span class="cue2">Swipe up to open ↑</span></div></div><div class="tl"><b>0.9–5.1 s</b> doors rotate 138° with a slow creak start · fixed stone arch, steps, rose window, iron rings · lettered initials carved under the wax seal · aisle photo behind (loads after mount) · exposure bloom in the last 10% · <b>5.1 s</b> cut.</div></div>
+ <div class="col"><h3><span>Proposed · one self-paced island</span><span>2.6 s, no cut</span></h3><div class="stage a cd "><div class="hero"><div class="in"><span class="eyebrow">Save the Date</span><svg class="mono" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><span class="names">Indalecio &amp; Claire</span><span class="rule"></span><span class="line">are getting married</span><span class="date">14 · 02 · 2027</span></div></div><div class="shell"><div class="cardfade"><div class="interior"></div><div class="floor"></div><div class="card"><div class="in"><span class="eyebrow">Save the Date</span><svg class="mono" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><span class="names">Indalecio &amp; Claire</span><span class="rule"></span><span class="line">are getting married</span><span class="date">14 · 02 · 2027</span></div></div><div class="spill"></div><div class="flaps"><div class="fl l"><div class="fold"></div><div class="pan"><i></i><i></i></div><span class="plate"></span><span class="knob"></span><svg class="monoL" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><div class="slab"></div></div><div class="fl r"><div class="fold"></div><div class="pan"><i></i><i></i></div><span class="plate"></span><span class="knob"></span><svg class="monoR" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><div class="slab"></div></div></div><div class="frame"></div><div class="fx"><i class="petal" style="left:5%;--dx:18px;--rot:240deg;animation-delay:0.00s"></i><i class="petal" style="left:20%;--dx:-40px;--rot:-260deg;animation-delay:0.15s"></i><i class="petal" style="left:33%;--dx:-22px;--rot:-320deg;animation-delay:0.30s"></i><i class="petal" style="left:43%;--dx:-40px;--rot:-200deg;animation-delay:0.45s"></i><i class="petal" style="left:51%;--dx:-22px;--rot:240deg;animation-delay:0.60s"></i><i class="petal" style="left:66%;--dx:-22px;--rot:-200deg;animation-delay:0.75s"></i><i class="petal" style="left:75%;--dx:-30px;--rot:220deg;animation-delay:0.90s"></i><i class="petal" style="left:93%;--dx:-22px;--rot:-200deg;animation-delay:1.05s"></i></div><div class="sealwrap"><div class="sealsh"></div><div class="half sealL"><svg class="m" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg></div><div class="half sealR"><svg class="m" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg></div><div class="crack"></div></div><span class="cue">Drag the seal away</span></div></div></div><div class="tl">Seal breaks · doors unlatch 2° then swing heavy (slow start, no bounce), left leads 80 ms, settle at 104° so the door EDGE and hinge shading stay visible · light spills through the gap and pools on the floor · the couple’s real mark on the doors, split at the seam · petals fall through the doorway · the card stands in the light, rises, becomes the page · the frame is a THEME SLOT (Classic chapel white shown; Rustic barn boards, Vintage oak, Regency lilac panelling are variables, not new code).</div></div>
+</div></div>
+
+
+<h2>Material slots — Classic · Rustic · Vintage · Regency on the SAME four-flap</h2>
+<p class="mut sm">Nothing here is a new component. Every stage is the identical proposed four-flap; only CSS variables change: <code>--paper</code> · <code>--grain</code> · <code>--speck</code> (kraft flecks / foxing) · <code>--liner</code> + <code>--liner-pat</code> (damask · lace · sprigs) · <code>--seal</code> ladder · <code>--twine</code> · <code>--petal</code> + shape (pampas · pressed roses · wisteria) · <code>--card-bg/--card-ink/--accent</code>. Doors add <code>--door</code> · <code>--frame</code> · <code>--metal</code> · <code>--interior</code>. That is Layer-1 theming as data.</p>
+<div class="cmp"><input type="radio" class="p0" name="mt" id="mt-0" checked><input type="radio" class="p1" name="mt" id="mt-1"><input type="radio" class="p2" name="mt" id="mt-2"><div class="ctl"><label for="mt-1">▶ Play</label><label for="mt-2">↺ Replay</label><label class="ghost" for="mt-0">■ Reset</label></div>
+<div class="pair" style="grid-template-columns:repeat(auto-fit,minmax(200px,240px))"><div class="col"><h3><span>Classic</span><span class="mut">same template</span></h3><div class="stage a ff classic"><div class="hero"><div class="in"><span class="eyebrow">Save the Date</span><svg class="mono" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><span class="names">Indalecio &amp; Claire</span><span class="rule"></span><span class="line">are getting married</span><span class="date">14 · 02 · 2027</span></div></div><div class="shell"><div class="cardfade"><div class="liner"></div><div class="sh t"></div><div class="sh b"></div><div class="sh l"></div><div class="sh r"></div><div class="cardsh"></div><div class="card"><div class="in"><span class="eyebrow">Save the Date</span><svg class="mono" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><span class="names">Indalecio &amp; Claire</span><span class="rule"></span><span class="line">are getting married</span><span class="date">14 · 02 · 2027</span></div></div><div class="sweep"></div><div class="flaps"><div class="fl t"><div class="fold"></div></div><div class="fl b"><div class="fold"></div></div><div class="fl l"><div class="fold"></div></div><div class="fl r"><div class="fold"></div></div></div><div class="twine"></div><div class="fx"><i class="petal" style="left:5%;--dx:18px;--rot:240deg;animation-delay:0.00s"></i><i class="petal" style="left:20%;--dx:-40px;--rot:-260deg;animation-delay:0.15s"></i><i class="petal" style="left:33%;--dx:-22px;--rot:-320deg;animation-delay:0.30s"></i><i class="petal" style="left:43%;--dx:-40px;--rot:-200deg;animation-delay:0.45s"></i><i class="petal" style="left:51%;--dx:-22px;--rot:240deg;animation-delay:0.60s"></i><i class="petal" style="left:66%;--dx:-22px;--rot:-200deg;animation-delay:0.75s"></i><i class="petal" style="left:75%;--dx:-30px;--rot:220deg;animation-delay:0.90s"></i><i class="petal" style="left:93%;--dx:-22px;--rot:-200deg;animation-delay:1.05s"></i></div><div class="sealwrap"><div class="sealsh"></div><div class="half sealL"><svg class="m" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg></div><div class="half sealR"><svg class="m" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg></div><div class="crack"></div></div><span class="cue">Drag the seal away</span></div></div></div></div><div class="col"><h3><span>Rustic</span><span class="mut">same template</span></h3><div class="stage a ff rustic"><div class="hero"><div class="in"><span class="eyebrow">Save the Date</span><svg class="mono" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><span class="names">Indalecio &amp; Claire</span><span class="rule"></span><span class="line">are getting married</span><span class="date">14 · 02 · 2027</span></div></div><div class="shell"><div class="cardfade"><div class="liner"></div><div class="sh t"></div><div class="sh b"></div><div class="sh l"></div><div class="sh r"></div><div class="cardsh"></div><div class="card"><div class="in"><span class="eyebrow">Save the Date</span><svg class="mono" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><span class="names">Indalecio &amp; Claire</span><span class="rule"></span><span class="line">are getting married</span><span class="date">14 · 02 · 2027</span></div></div><div class="sweep"></div><div class="flaps"><div class="fl t"><div class="fold"></div></div><div class="fl b"><div class="fold"></div></div><div class="fl l"><div class="fold"></div></div><div class="fl r"><div class="fold"></div></div></div><div class="twine"></div><div class="fx"><i class="petal" style="left:5%;--dx:18px;--rot:240deg;animation-delay:0.00s"></i><i class="petal" style="left:20%;--dx:-40px;--rot:-260deg;animation-delay:0.15s"></i><i class="petal" style="left:33%;--dx:-22px;--rot:-320deg;animation-delay:0.30s"></i><i class="petal" style="left:43%;--dx:-40px;--rot:-200deg;animation-delay:0.45s"></i><i class="petal" style="left:51%;--dx:-22px;--rot:240deg;animation-delay:0.60s"></i><i class="petal" style="left:66%;--dx:-22px;--rot:-200deg;animation-delay:0.75s"></i><i class="petal" style="left:75%;--dx:-30px;--rot:220deg;animation-delay:0.90s"></i><i class="petal" style="left:93%;--dx:-22px;--rot:-200deg;animation-delay:1.05s"></i></div><div class="sealwrap"><div class="sealsh"></div><div class="half sealL"><svg class="m" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg></div><div class="half sealR"><svg class="m" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg></div><div class="crack"></div></div><span class="cue">Drag the seal away</span></div></div></div></div><div class="col"><h3><span>Vintage</span><span class="mut">same template</span></h3><div class="stage a ff vintage"><div class="hero"><div class="in"><span class="eyebrow">Save the Date</span><svg class="mono" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><span class="names">Indalecio &amp; Claire</span><span class="rule"></span><span class="line">are getting married</span><span class="date">14 · 02 · 2027</span></div></div><div class="shell"><div class="cardfade"><div class="liner"></div><div class="sh t"></div><div class="sh b"></div><div class="sh l"></div><div class="sh r"></div><div class="cardsh"></div><div class="card"><div class="in"><span class="eyebrow">Save the Date</span><svg class="mono" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><span class="names">Indalecio &amp; Claire</span><span class="rule"></span><span class="line">are getting married</span><span class="date">14 · 02 · 2027</span></div></div><div class="sweep"></div><div class="flaps"><div class="fl t"><div class="fold"></div></div><div class="fl b"><div class="fold"></div></div><div class="fl l"><div class="fold"></div></div><div class="fl r"><div class="fold"></div></div></div><div class="twine"></div><div class="fx"><i class="petal" style="left:5%;--dx:18px;--rot:240deg;animation-delay:0.00s"></i><i class="petal" style="left:20%;--dx:-40px;--rot:-260deg;animation-delay:0.15s"></i><i class="petal" style="left:33%;--dx:-22px;--rot:-320deg;animation-delay:0.30s"></i><i class="petal" style="left:43%;--dx:-40px;--rot:-200deg;animation-delay:0.45s"></i><i class="petal" style="left:51%;--dx:-22px;--rot:240deg;animation-delay:0.60s"></i><i class="petal" style="left:66%;--dx:-22px;--rot:-200deg;animation-delay:0.75s"></i><i class="petal" style="left:75%;--dx:-30px;--rot:220deg;animation-delay:0.90s"></i><i class="petal" style="left:93%;--dx:-22px;--rot:-200deg;animation-delay:1.05s"></i></div><div class="sealwrap"><div class="sealsh"></div><div class="half sealL"><svg class="m" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg></div><div class="half sealR"><svg class="m" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg></div><div class="crack"></div></div><span class="cue">Drag the seal away</span></div></div></div></div><div class="col"><h3><span>Regency</span><span class="mut">same template</span></h3><div class="stage a ff regency"><div class="hero"><div class="in"><span class="eyebrow">Save the Date</span><svg class="mono" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><span class="names">Indalecio &amp; Claire</span><span class="rule"></span><span class="line">are getting married</span><span class="date">14 · 02 · 2027</span></div></div><div class="shell"><div class="cardfade"><div class="liner"></div><div class="sh t"></div><div class="sh b"></div><div class="sh l"></div><div class="sh r"></div><div class="cardsh"></div><div class="card"><div class="in"><span class="eyebrow">Save the Date</span><svg class="mono" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg><span class="names">Indalecio &amp; Claire</span><span class="rule"></span><span class="line">are getting married</span><span class="date">14 · 02 · 2027</span></div></div><div class="sweep"></div><div class="flaps"><div class="fl t"><div class="fold"></div></div><div class="fl b"><div class="fold"></div></div><div class="fl l"><div class="fold"></div></div><div class="fl r"><div class="fold"></div></div></div><div class="twine"></div><div class="fx"><i class="petal" style="left:5%;--dx:18px;--rot:240deg;animation-delay:0.00s"></i><i class="petal" style="left:20%;--dx:-40px;--rot:-260deg;animation-delay:0.15s"></i><i class="petal" style="left:33%;--dx:-22px;--rot:-320deg;animation-delay:0.30s"></i><i class="petal" style="left:43%;--dx:-40px;--rot:-200deg;animation-delay:0.45s"></i><i class="petal" style="left:51%;--dx:-22px;--rot:240deg;animation-delay:0.60s"></i><i class="petal" style="left:66%;--dx:-22px;--rot:-200deg;animation-delay:0.75s"></i><i class="petal" style="left:75%;--dx:-30px;--rot:220deg;animation-delay:0.90s"></i><i class="petal" style="left:93%;--dx:-22px;--rot:-200deg;animation-delay:1.05s"></i></div><div class="sealwrap"><div class="sealsh"></div><div class="half sealL"><svg class="m" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg></div><div class="half sealR"><svg class="m" viewBox="0 0 1032 1024" aria-hidden="true"><use href="#mono"/></svg></div><div class="crack"></div></div><span class="cue">Drag the seal away</span></div></div></div></div></div></div>
+
+<h2>What the code says today (read from <code>origin/main</code>, not run)</h2>
+<table>
+<tr><th style="width:18%">Reveal</th><th>How it is built</th><th>What a guest actually gets</th></tr>
+<tr><td>All four (rigid family)</td><td><code>rigid-stage.tsx</code> gate: drag the wax seal off (momentum fling · spring-back if weak) → then <b>raw scroll/drag scrub</b> (<code>SCRUB_WHEEL</code>/<code>SCRUB_DRAG</code>) with a 0.42 auto-complete. Flaps are three.js meshes (<code>rigid-webgl.tsx</code>: ortho camera · VSM shadows 1024² · ACES tone-map · PBR maps loaded <i>after</i> mount) with the CSS-3D flaps as fallback.</td><td>The open is only as smooth as the thumb — a fast swipe snaps it. The spec's own refinement (0024 §2b) says the open must be a <b>self-paced island, "raw scrub would wreck the timing"</b>; that is not what shipped. Textures <b>pop in</b> flat→textured after load. The hand-off is a <b>hard cut</b>: <code>onOpened</code> fires at progress 0.985 and unmounts; the 500 ms fade at 0.97 gets ~5 frames. Both cue pills are still <b>DM Mono UPPERCASE</b> — the "terminal voice" the veil dropped on 2026-08-24. No skip control; keyboard Enter on the seal opens (good). Reduced motion → no reveal at all (not a fade). Render loop runs 60 fps while the seal just sits there.</td></tr>
+<tr><td>Four-flap</td><td>WebGL: 4 triangles hinged on the screen edges, 160°, staggered windows, smoothstep. CSS fallback: triangles <b>slide</b> outward (no fold) — the two paths do not match.</td><td>Correct idea, flat feel: no anticipation, no settle, no seal break (the seal just flies off), the liner is never seen (folds go off-screen), then cut to the film.</td></tr>
+<tr><td>Two-flap · side / top</td><td>Two half-panels hinged on the outer edges, 158°, 0.06 stagger. Docblock promises a glimpse of the liner as it swings past upright.</td><td>With the hinge on the screen edge the back face is <b>off-screen the moment it passes 90°</b> — the two-sided liner mesh is dead weight (2× shadow casters). What it uncovers is a blank white paper plane, then the cut.</td></tr>
+<tr><td>Church doors</td><td>Extruded gothic doors 138°, <code>smoothstep^1.5</code> creak, stone arch, steps, rose window, iron rings, aisle photo backdrop; monogram <b>carved from the letters</b> (Palatino), not the couple's SVG mark; the DOM wax seal sits on top of that carving.</td><td>Handsome but <b>hard-coded to one church</b> — un-dressable by theme (Rustic barn, Regency salon). Seal overlaps the carved initials at the seam (verify on device). Photo + 3 PBR sets fetched after mount → visible pop. The doors open onto a photo, then cut to the film.</td></tr>
+<tr><td>Stale text</td><td colspan="2"><code>reveal-templates.ts</code> still exports <code>RIGID_FOLD_MS</code>/<code>RIGID_REVEAL_MS</code> and documents a <code>duration-[1100ms]</code> class — nothing uses either (<code>git grep</code> finds only the docblock). iOS never fires <code>deviceorientation</code> without <code>requestPermission()</code>, so tilt-parallax is inert on iPhone.</td></tr>
+</table>
+
+
+<h2>Build plan — what changes where (S / M / L)</h2>
+<table>
+<tr><th style="width:4%">#</th><th style="width:30%">Improvement</th><th>Shipped file(s)</th><th style="width:5%">Size</th></tr>
+<tr><td>1</td><td><b>Self-paced open</b>: one committed swipe (or Enter) triggers a 2.6 s island with anticipation → stagger → overshoot → settle. Scrub stays only as the <i>trigger</i>. (0024 §2b — spec-compliant, not new.)</td><td><code>rigid-stage.tsx</code> — replace the lerp-toward-target loop with a timeline (<code>t = (now-start)/2600</code>, per-flap window + easing table); <code>rigid-webgl.tsx</code> + CSS flaps read the same per-flap angle table.</td><td>M</td></tr>
+<tr><td>2</td><td><b>Continuous hand-off</b>: the invitation card rises out of the envelope and scales into the page hero; shell fades under it. Zero blank frames by construction (the page is mounted beneath from frame 0).</td><td><code>rigid-stage.tsx</code> (card layer + <code>onOpened</code> fires at island end, after the shell fade); <code>reveal-overlay.tsx</code> keep <code>std-reveal-done</code> but delay unmount until the fade completes; the card's content = <code>invitation-card.ts</code> (eyebrow · monogram · names · line · date).</td><td>M</td></tr>
+<tr><td>3</td><td><b>Seal breaks</b> before the flaps move (two halves lift, tilt, fall) instead of vanishing off-screen.</td><td><code>wax-seal.tsx</code> — render the painted canvas twice with two static <code>clip-path</code> halves; <code>rigid-stage.tsx</code> plays the break at island start.</td><td>S</td></tr>
+<tr><td>4</td><td><b>Material slots</b> (paper · grain · liner pattern · seal ladder · twine · effect shape · door/frame/metal/interior) as data keyed by <code>InviteThemeId</code>.</td><td>NEW <code>lib/reveal-materials.ts</code> (pure, like <code>reveal-config-pure.ts</code>); consumed by <code>rigid-webgl.tsx</code> (recolour role + map set + door mats), CSS flaps (vars), <code>reveal-particles.tsx</code> (shape/colour). <code>std_reveal_template</code> ids unchanged.</td><td>M</td></tr>
+<tr><td>5</td><td><b>Cast shadow on the paper</b> that moves with the flap (backplate layer, beneath flaps — §1a z-order rule); fold shading + thin edge + grain on the CSS flaps so both paths match.</td><td><code>four-flap.tsx</code> / <code>rigid-reveal.tsx</code> CSS fallbacks (fold, not slide); WebGL already has it from the light.</td><td>S</td></tr>
+<tr><td>6</td><td><b>Doors with depth</b>: hinge shading, edge slab, light spill + floor glow through the gap, themed frame instead of a fixed stone church; the couple's SVG mark on the doors, not Palatino letters.</td><td><code>rigid-webgl.tsx</code> church branch → reads slots from #4; <code>rigid-reveal.tsx</code> <code>DoorPanels</code>.</td><td>L</td></tr>
+<tr><td>7</td><td><b>Preload</b> the 3 map sets + interior before the seal is interactive; fade textures in (no flat→textured pop). Stop the render loop when nothing changes.</td><td><code>reveal-textures.ts</code> (await all, resolve once), <code>rigid-webgl.tsx</code> (render-on-demand: progress/aim dirty flag).</td><td>S</td></tr>
+<tr><td>8</td><td><b>Cues in the display face</b> (sentence case) + a small "Skip" text button; reduced motion → 400 ms fade instead of skipping the opening entirely.</td><td><code>rigid-stage.tsx</code> (two pills, one button), <code>reveal-overlay.tsx</code> (reduced-motion branch renders the fade path).</td><td>S</td></tr>
+<tr><td>9</td><td>Delete <code>RIGID_FOLD_MS</code>/<code>RIGID_REVEAL_MS</code> + the stale <code>duration-[1100ms]</code> docblock; iOS <code>requestPermission</code> for tilt from the seal's first pointerdown.</td><td><code>reveal-templates.ts</code>, <code>rigid-webgl.tsx</code>.</td><td>S</td></tr>
+</table>
+<p class="sm mut">Stays compatible: the five <code>RevealTemplateId</code>s, <code>events.std_reveal_template</code> values, <code>std_reveal_effects</code> (butterflies/petals), <code>wax_seal_config</code>, <code>reveal-once-per-visit</code>, the dashboard chooser's <code>autoPlay</code>, the <code>?reveal3d=off</code> A/B, and the <code>std-reveal-done</code> handshake. Out of scope by owner instruction: the sheer veil.</p>
+
+<h2>Owner decisions (two)</h2>
+<table>
+<tr><th style="width:4%">#</th><th style="width:48%">Question</th><th>Recommendation</th></tr>
+<tr><td>1</td><td>After the seal is dragged off, should the open be <b>scrubbed by the thumb</b> (as shipped) or <b>one committed swipe that plays a 2.6 s self-paced open</b> (as 0024 §2b wrote)?</td><td><b>Self-paced.</b> Stagger, overshoot and the card hand-off are impossible under raw scrub, and the spec already says so. Keep drag-the-seal as the gate (§1a lock) and the swipe as the trigger; Enter/Space and a small Skip remain.</td></tr>
+<tr><td>2</td><td>Do "Church doors" stay a <b>church</b> (stone arch, rose window, aisle photo) or become <b>themed doors</b> — Classic chapel white, Rustic barn, Vintage oak, Regency lilac salon — with the church as the Classic dressing?</td><td><b>Themed doors, id unchanged.</b> Today's church becomes the Classic (or a "Chapel") material set; every other theme dresses the same swing. Otherwise doors are the one reveal Layer-1 theming cannot reach.</td></tr>
+</table>
+</main></body></html>

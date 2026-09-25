@@ -1,0 +1,838 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Event Hub Controller — one editor, four stages</title>
+<meta name="description" content="Script-free prototype: the Event Hub Controller as the one editing mechanism for the couple's website — a shared base edited once, four stages, a draft with Apply · Restore · Reset, one Pro unlock. Radios + :checked only; the form's native reset button is Restore.">
+<style>
+/* ── tokens: the site's own (apps/web/app/globals.css :root), not eyeballed ── */
+:root{
+  --paper:#FBFAF7;--hair:#EDE8DE;--line:#E1DCD1;
+  --ink:#1B1A17;--ink7:#3A382F;--ink5:#6E6A62;--ink4:#8A857B;--ink3:#A09A8E;--ob:#17160F;
+  --gold1:#F3ECDF;--gold3:#CBA766;--gold5:#A9834B;--gold7:#8A6B39;--gold8:#5C4726;
+  --cta:#C24E25;--success:#5E7C52;--danger:#A6483B;
+  --glass-raised:rgba(255,255,255,.72);--blur:blur(22px) saturate(1.5);
+  --sh-tile:0 1px 2px rgba(40,34,24,.05),0 18px 40px -26px rgba(30,26,18,.4);
+  --sh-hi:0 1px 2px rgba(40,34,24,.06),0 28px 54px -30px rgba(30,26,18,.5);
+  --sh-panel:-30px 0 80px -30px rgba(30,26,18,.45);
+  --ease:cubic-bezier(.2,.7,.2,1);--ease-out:cubic-bezier(.16,1,.3,1);
+  --ctrl:200ms;--elem:320ms;--enter:640ms;
+  --r-sm:8px;--r-md:14px;--r-lg:22px;--r-full:999px;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,Menlo,monospace;
+  --fw:1440px;
+}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.45;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+h1,h2,h3,p{margin:0}
+[hidden]{display:none!important}
+input.sw{position:absolute;opacity:0;pointer-events:none;width:0;height:0}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+form{margin:0}
+.press{transition:transform var(--ctrl) var(--ease),background var(--elem) var(--ease),color var(--elem) var(--ease),box-shadow var(--elem) var(--ease),outline-color var(--elem) var(--ease);cursor:pointer;user-select:none}
+.press:active{transform:scale(.96)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+
+/* ── prototype bar (brief §6 · not part of the app) ── */
+.bar{position:sticky;top:0;z-index:60;display:flex;gap:6px 18px;flex-wrap:wrap;align-items:center;justify-content:center;padding:8px 14px;
+  background:rgba(244,242,236,.72);backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);box-shadow:0 1px 0 rgba(44,42,41,.07)}
+.bar .proto{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);font-weight:700;padding:5px 8px;border:1px dashed var(--ink3);border-radius:6px}
+.grp{display:flex;gap:2px;align-items:center;flex-wrap:wrap}
+.grp b{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink5);margin-right:6px;font-weight:700}
+.grp label{font-size:12px;padding:5px 11px;border-radius:var(--r-full)}
+.grp label:hover{background:rgba(44,42,41,.07)}
+#vp-m:checked~.bar label[for=vp-m],#vp-tp:checked~.bar label[for=vp-tp],#vp-tl:checked~.bar label[for=vp-tl],#vp-dt:checked~.bar label[for=vp-dt],
+#wh-std:checked~.bar label[for=wh-std],#wh-inv:checked~.bar label[for=wh-inv],#wh-day:checked~.bar label[for=wh-day],#wh-pe:checked~.bar label[for=wh-pe],
+#va-you:checked~.bar label[for=va-you],#va-co:checked~.bar label[for=va-co],#va-sup:checked~.bar label[for=va-sup],#va-gu:checked~.bar label[for=va-gu],#va-rep:checked~.bar label[for=va-rep],#va-str:checked~.bar label[for=va-str]{background:var(--ink);color:#fff}
+
+/* ── the viewport frame (the form IS .stage-wrap, so its native reset is Restore) ── */
+.stage-wrap{display:flex;justify-content:center;padding:22px 12px 60px;position:relative}
+.frame{width:var(--fw);max-width:100%;position:relative;transition:width var(--enter) var(--ease);background:var(--paper);box-shadow:var(--sh-hi);border-radius:var(--r-lg);overflow:clip;min-height:820px}
+#vp-tl:checked~.stage-wrap .frame{width:1024px}
+#vp-tp:checked~.stage-wrap .frame{width:768px}
+#vp-m:checked~.stage-wrap .frame{width:375px;border-radius:38px;min-height:812px}
+
+/* ── the shell ── */
+.app{display:grid;grid-template-columns:232px 1fr;grid-template-rows:56px 1fr;min-height:820px;position:relative}
+.top{grid-column:1/-1;display:flex;align-items:center;gap:14px;padding:0 22px;position:sticky;top:0;z-index:20;background:var(--glass-raised);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+.top .brand{font-family:var(--serif);font-size:19px;letter-spacing:.06em}
+.top .sw-ev{display:flex;align-items:center;gap:8px;margin-left:12px;font-size:13px;color:var(--ink5)}
+.top .sw-ev i{width:22px;height:22px;border-radius:50%;background:#9a244f;display:grid;place-items:center;color:#fff;font:italic 11px var(--serif)}
+.top .me{margin-left:auto;width:30px;height:30px;border-radius:50%;background:var(--gold1);color:var(--gold7);display:grid;place-items:center;font-size:12px;font-weight:700}
+.rail{padding:18px 12px;display:flex;flex-direction:column;gap:2px;position:sticky;top:56px;align-self:start}
+.rail a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r-md);font-size:13.5px;color:var(--ink5)}
+.rail a:hover{background:rgba(27,26,23,.05);color:var(--ink)}
+.rail a.on{background:var(--ink);color:#fff}
+.rail a i{width:18px;height:18px;border-radius:5px;background:currentColor;opacity:.25;flex:none}
+.rail .sec{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);font-weight:700;padding:14px 12px 6px}
+.bnav{display:none}
+main{padding:22px 36px 120px;min-width:0}
+#vp-tp:checked~.stage-wrap .app{grid-template-columns:64px 1fr}
+#vp-tp:checked~.stage-wrap .rail a span,#vp-tp:checked~.stage-wrap .rail .sec{display:none}
+#vp-tp:checked~.stage-wrap .rail a{justify-content:center;padding:11px}
+#vp-tp:checked~.stage-wrap main{padding:20px 22px 120px}
+#vp-m:checked~.stage-wrap .app{grid-template-columns:1fr;grid-template-rows:52px 1fr}
+#vp-m:checked~.stage-wrap .rail{display:none}
+#vp-m:checked~.stage-wrap .top{padding:0 16px}
+#vp-m:checked~.stage-wrap .top .sw-ev span{display:none}
+#vp-m:checked~.stage-wrap main{padding:14px 16px 150px}
+#vp-m:checked~.stage-wrap .bnav{display:grid;grid-template-columns:repeat(5,1fr);position:absolute;left:0;right:0;bottom:0;height:72px;padding:8px 6px 18px;background:var(--glass-raised);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:0 -1px 0 rgba(44,42,41,.06);z-index:20}
+.bnav a{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;color:var(--ink4);border-radius:var(--r-md);padding:4px 0}
+.bnav a i{width:22px;height:22px;border-radius:7px;background:currentColor;opacity:.22}
+.bnav a.on{color:var(--ink)}.bnav a.on i{opacity:.9}
+
+/* ── type & bits ── */
+.eye{font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--gold7);display:flex;align-items:center;gap:8px}
+.micro{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--ink4)}
+.soft{color:var(--ink5)}
+.info{position:relative;width:18px;height:18px;border-radius:50%;display:inline-grid;place-items:center;color:var(--ink4);border:1.5px solid var(--ink3);font:italic 500 10.5px/1 var(--serif);cursor:default;outline:none;vertical-align:middle;flex:none;transition:border-color var(--elem),color var(--elem)}
+.info:hover,.info:focus{border-color:var(--ink);color:var(--ink)}
+.tip{position:absolute;left:0;top:calc(100% + 8px);transform:translateY(-4px);width:250px;padding:10px 12px;border-radius:12px;background:rgba(27,26,23,.94);color:#fff;font:400 12px/1.5 var(--sans);font-style:normal;text-align:left;letter-spacing:0;text-transform:none;opacity:0;pointer-events:none;transition:opacity var(--ctrl) var(--ease),transform var(--ctrl) var(--ease);z-index:30}
+.info:hover .tip,.info:focus .tip{opacity:1;transform:none;pointer-events:auto}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{font-size:12.5px;font-weight:500;padding:7px 13px;border-radius:var(--r-full);color:var(--ink5);background:rgba(27,26,23,.05);position:relative;display:inline-flex;align-items:center;gap:6px}
+.chip:hover{background:rgba(27,26,23,.1);color:var(--ink)}
+.chip .dot{width:6px;height:6px;border-radius:50%;background:var(--cta);box-shadow:0 0 0 3px rgba(194,78,37,.18)}
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 18px;border-radius:var(--r-full);font-size:13.5px;font-weight:600;background:var(--ink);color:#fff}
+.btn:hover{background:#000}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}.btn.ghost:hover{background:rgba(27,26,23,.05)}
+.btn.sm{min-height:32px;padding:0 13px;font-size:12.5px}
+.btn.danger{background:transparent;color:var(--danger);box-shadow:inset 0 0 0 1px rgba(166,72,59,.35)}.btn.danger:hover{background:rgba(166,72,59,.08)}
+.glyph{width:34px;height:34px;border-radius:50%;display:inline-grid;place-items:center;color:var(--ink5);background:rgba(27,26,23,.05);font-size:13px}
+.glyph:hover{background:rgba(27,26,23,.1);color:var(--ink)}
+.switch{width:38px;height:22px;border-radius:var(--r-full);background:rgba(27,26,23,.15);position:relative;flex:none;transition:background var(--elem) var(--ease)}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform var(--elem) var(--ease)}
+.switch.on{background:var(--success)}.switch.on::after{transform:translateX(16px)}
+.tag{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--gold7);background:var(--gold1);padding:3px 7px;border-radius:var(--r-full);white-space:nowrap}
+.tag.q{color:var(--ink4);background:rgba(27,26,23,.05)}
+.tag.ok{color:var(--success);background:rgba(94,124,82,.12)}
+/* THE ONE PRO MARK — quiet, identical everywhere, and every one opens the same panel.
+   Free rows edit their facts; Pro rows still EDIT in the draft (try it on your own page) — only Apply needs Pro. */
+.lock{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--gold7);padding:3px 6px;border-radius:var(--r-full);white-space:nowrap;opacity:.85}
+.lock::before{content:"";width:6px;height:8px;border:1.5px solid currentColor;border-radius:2px 2px 1px 1px;border-top-width:3px;box-sizing:border-box;display:inline-block;position:relative;top:1px}
+.lock:hover{background:var(--gold1);opacity:1}
+.lock.big{font-size:12px;letter-spacing:.06em;text-transform:none;font-weight:600;gap:8px;padding:0;opacity:1}
+.lock.big::before{width:8px;height:10px}
+.price{font-variant-numeric:tabular-nums;font-weight:700}
+.applybar .apply-pro,.applybar .needs{display:none}
+#sim-hero:checked~.frame .applybar .apply-free,#sim-open:checked~.frame .applybar .apply-free{display:none}
+#sim-hero:checked~.frame .applybar .apply-pro,#sim-open:checked~.frame .applybar .apply-pro,#sim-hero:checked~.frame .applybar .needs,#sim-open:checked~.frame .applybar .needs{display:inline-flex}
+.applybar .needs{font-size:11.5px;color:rgba(251,250,247,.75);align-items:center;gap:6px}
+#vp-m:checked~.stage-wrap .applybar .needs{display:none!important}
+/* the Pro panel leads with what they just made */
+.made{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:4px 0 16px}
+.made .th{font-size:6px;aspect-ratio:9/12}
+.made .th .nm{font-size:8px}
+
+/* ── 1 · masthead ── */
+.mast{display:grid;grid-template-columns:132px minmax(0,1fr);gap:22px;align-items:center}
+#vp-m:checked~.stage-wrap .mast{grid-template-columns:84px minmax(0,1fr);gap:14px}
+.addr{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px}
+.addr a.url{font-family:var(--mono);font-size:clamp(14px,1.5vw,20px);font-weight:600;letter-spacing:-.01em;padding:6px 8px 6px 0;border-radius:var(--r-sm);color:var(--ink)}
+.addr a.url:hover{color:var(--cta)}
+.addr a.url small{font-weight:400;color:var(--ink4)}
+.stages{display:flex;gap:6px;flex-wrap:wrap;margin-top:16px;align-items:center}
+.stages .chip{font-size:14px;padding:10px 16px;font-weight:600}
+#vp-m:checked~.stage-wrap .stages{flex-wrap:nowrap;overflow-x:auto;margin:14px -16px 0;padding:0 16px 4px;scrollbar-width:none}
+#vp-m:checked~.stage-wrap .stages .chip{font-size:13px;padding:9px 13px;white-space:nowrap}
+/* an unapplied change marks the stages it touches */
+.stages .chip .ch{width:7px;height:7px;border-radius:50%;background:var(--gold5);display:none;margin-left:2px}
+#sim-names:checked~.frame .stages .chip .ch,#sim-hero:checked~.frame .stages .chip[for=wh-std] .ch,#sim-hero:checked~.frame .stages .chip[for=wh-inv] .ch,#sim-hero:checked~.frame .stages .chip[for=wh-day] .ch,#sim-open:checked~.frame .stages .chip[for=wh-std] .ch{display:inline-block}
+#applied:checked~.frame .stages .chip .ch{display:none!important}
+
+/* poster (approved language: collection_template_posters_add_flow_v4 · p-deep · botanical · capiz; hero photo wins → p-photo) */
+.poster{position:relative;aspect-ratio:3/4;border-radius:var(--r-md);overflow:hidden;container-type:inline-size;isolation:isolate;color:#fff;--a:#9a244f;display:block;
+  background:radial-gradient(120% 70% at 50% 22%,rgba(255,255,255,.10),rgba(255,255,255,0) 60%),linear-gradient(180deg,rgba(0,0,0,0) 42%,rgba(0,0,0,.24) 100%),var(--a);
+  box-shadow:var(--sh-tile);transition:transform var(--elem) var(--ease),box-shadow var(--elem) var(--ease)}
+.poster:hover{transform:translateY(-3px);box-shadow:var(--sh-hi)}
+.poster .pframe{position:absolute;inset:6px;border:1px solid rgba(255,255,255,.3);pointer-events:none}.poster .pframe::after{content:"";position:absolute;inset:3px;border:1px solid rgba(255,255,255,.12)}
+.capiz{position:absolute;inset:0;opacity:.9;background-image:radial-gradient(circle at 50% 50%,rgba(255,255,255,.14),rgba(255,255,255,0) 66%),linear-gradient(rgba(255,255,255,.18) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.18) 1px,transparent 1px);background-size:11cqw 11cqw;-webkit-mask-image:linear-gradient(180deg,#000 0 40%,rgba(0,0,0,0) 66%);mask-image:linear-gradient(180deg,#000 0 40%,rgba(0,0,0,0) 66%)}
+.sprig{position:absolute;width:44cqw;height:38cqw}.sprig.l{left:-3cqw;top:16cqw}.sprig.r{right:-3cqw;top:16cqw;transform:scaleX(-1)}
+.veil{position:absolute;left:50%;top:33cqw;transform:translate(-50%,-50%);width:78cqw;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 50%,var(--a) 0 36%,transparent 70%)}
+.mark{position:absolute;left:0;right:0;top:33cqw;transform:translateY(-50%);text-align:center;font-family:var(--serif);font-size:24cqw;line-height:1;letter-spacing:.02em}
+.mark i{font-style:italic;font-size:.6em;position:relative;top:-.06em;margin:0 .03em}
+.poster .txt{position:absolute;left:8cqw;right:8cqw;top:57cqw;text-align:center}
+.poster .names{font-family:var(--serif);font-weight:400;font-size:10cqw;line-height:1.06}.poster .names span{display:block}.poster .names i{font-style:italic;color:var(--gold1)}
+.poster .rule{display:block;height:1px;width:28%;background:rgba(255,255,255,.75);margin:3.4cqw auto 2.8cqw}
+.poster .wd{font-size:max(7px,2.9cqw);letter-spacing:.28em;text-transform:uppercase;font-weight:600}
+.poster .dt{font-family:var(--serif);font-size:max(9px,5.2cqw);line-height:1.15;margin-top:1cqw}
+.poster .ph{position:absolute;inset:0;display:none;background:radial-gradient(60% 45% at 68% 28%,rgba(255,214,170,.8),transparent 70%),radial-gradient(55% 40% at 22% 66%,rgba(128,84,64,.7),transparent 70%),linear-gradient(180deg,#C29A7C 0%,#7A5446 52%,#33221F 100%)}
+.poster .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(20,14,12,.74) 0,rgba(20,14,12,.36) 36%,transparent 60%)}
+#sim-hero:checked~.frame .poster .ph{display:block}
+#sim-hero:checked~.frame .poster .capiz,#sim-hero:checked~.frame .poster .sprig,#sim-hero:checked~.frame .poster .veil,#sim-hero:checked~.frame .poster .mark{display:none}
+#sim-hero:checked~.frame .poster .txt{top:auto;bottom:8cqw;text-align:left;left:8cqw}
+#sim-hero:checked~.frame .poster .rule{margin-left:0}
+
+/* ── THE DRAFT (CSS only): names · hero · STD opening are the simulated edits ── */
+.n-a,.n-b,.h-a,.h-b,.o-a,.o-b{display:contents}
+#sim-names:checked~.frame .n-a,#sim-names:not(:checked)~.frame .n-b{display:none}
+#sim-hero:checked~.frame .h-a,#sim-hero:not(:checked)~.frame .h-b{display:none}
+#sim-open:checked~.frame .o-a,#sim-open:not(:checked)~.frame .o-b{display:none}
+.try{font-size:11px;font-weight:600;color:var(--gold7);padding:4px 9px;border-radius:var(--r-full);background:rgba(203,167,102,.14);white-space:nowrap}
+.try:hover{background:var(--gold3);color:var(--ob)}
+#sim-names:checked~.frame .try[for=sim-names],#sim-hero:checked~.frame .try[for=sim-hero],#sim-open:checked~.frame .try[for=sim-open]{background:var(--ink);color:#fff}
+/* where a shared field appears: S · I · D · P (+ Poster) */
+.on4{display:inline-flex;gap:3px;flex:none;align-items:center}
+.on4 i{width:16px;height:16px;border-radius:4px;display:grid;place-items:center;font:700 8.5px/1 var(--sans);font-style:normal;color:var(--ink3);background:rgba(27,26,23,.05)}
+.on4 i.on{color:var(--gold8);background:var(--gold1)}
+.on4 i.w{width:auto;padding:0 5px;letter-spacing:.06em}
+
+/* ── THE APPLY BAR — appears only with unapplied changes; sticky to the frame's foot ── */
+.applybar{position:sticky;bottom:14px;z-index:25;margin:26px auto 0;width:max-content;max-width:calc(100% - 20px);display:none;align-items:center;gap:10px;padding:8px 8px 8px 16px;border-radius:var(--r-full);background:rgba(27,26,23,.92);color:#fff;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:var(--sh-hi);animation:rise var(--enter) var(--ease-out) both}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+#sim-names:checked~.frame .applybar,#sim-hero:checked~.frame .applybar,#sim-open:checked~.frame .applybar{display:flex}
+#applied:checked~.frame .applybar{display:none!important}
+.applybar .n{font-variant-numeric:tabular-nums;font-weight:700;font-size:15px}
+.applybar .what{display:flex;gap:4px;flex-wrap:wrap}
+.applybar .what i{display:none;font-style:normal;font-size:11px;padding:3px 8px;border-radius:var(--r-full);background:rgba(255,255,255,.12);color:rgba(251,250,247,.85)}
+#sim-names:checked~.frame .applybar i[data-c=names],#sim-hero:checked~.frame .applybar i[data-c=hero],#sim-open:checked~.frame .applybar i[data-c=open]{display:inline-block}
+.applybar .cnt::after{content:"changes"}
+.stage-wrap:has(#sim-names:checked):has(#sim-hero:checked):has(#sim-open:checked) .applybar .n::before{content:"3 "}
+.stage-wrap:has(#sim-names:checked):has(#sim-hero:checked):not(:has(#sim-open:checked)) .applybar .n::before,.stage-wrap:has(#sim-names:checked):has(#sim-open:checked):not(:has(#sim-hero:checked)) .applybar .n::before,.stage-wrap:has(#sim-hero:checked):has(#sim-open:checked):not(:has(#sim-names:checked)) .applybar .n::before{content:"2 "}
+.stage-wrap:has(#sim-names:checked):not(:has(#sim-hero:checked)):not(:has(#sim-open:checked)) .applybar .n::before,.stage-wrap:has(#sim-hero:checked):not(:has(#sim-names:checked)):not(:has(#sim-open:checked)) .applybar .n::before,.stage-wrap:has(#sim-open:checked):not(:has(#sim-names:checked)):not(:has(#sim-hero:checked)) .applybar .n::before{content:"1 "}
+.stage-wrap:has(#sim-names:checked):not(:has(#sim-hero:checked)):not(:has(#sim-open:checked)) .applybar .cnt::after,.stage-wrap:has(#sim-hero:checked):not(:has(#sim-names:checked)):not(:has(#sim-open:checked)) .applybar .cnt::after,.stage-wrap:has(#sim-open:checked):not(:has(#sim-names:checked)):not(:has(#sim-hero:checked)) .applybar .cnt::after{content:"change"}
+.applybar .btn{min-height:34px;padding:0 14px;font-size:12.5px}
+.applybar .btn.apply{background:var(--gold3);color:var(--ob)}.applybar .btn.apply:hover{background:#DCBE85}
+.applybar .btn.ghost{color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}.applybar .btn.ghost:hover{background:rgba(255,255,255,.08)}
+.applybar .sep{width:1px;height:20px;background:rgba(255,255,255,.18)}
+#vp-m:checked~.stage-wrap .applybar{bottom:84px;padding:8px 8px 8px 12px;gap:6px}
+#vp-m:checked~.stage-wrap .applybar .what,#vp-m:checked~.stage-wrap .applybar .sep{display:none}
+/* applied — a quiet confirmation, guests now see it */
+.toast{position:sticky;bottom:14px;z-index:25;margin:26px auto 0;width:max-content;display:none;align-items:center;gap:10px;padding:10px 16px;border-radius:var(--r-full);background:rgba(94,124,82,.95);color:#fff;font-size:12.5px;font-weight:600;box-shadow:var(--sh-hi);animation:rise var(--enter) var(--ease-out) both}
+#applied:checked~.frame .toast{display:flex}
+#vp-m:checked~.stage-wrap .toast{bottom:84px}
+/* the row that is changed is marked, and its Restore-this-one lives in the row */
+.row .pend{display:none;width:7px;height:7px;border-radius:50%;background:var(--gold5);flex:none}
+#sim-names:checked~.frame .row[data-f=names] .pend,#sim-hero:checked~.frame .row[data-f=hero] .pend,#sim-open:checked~.frame .row[data-f=open] .pend{display:block}
+#applied:checked~.frame .row .pend{display:none!important}
+
+/* ── 2 · the editor body ── */
+.body{display:grid;grid-template-columns:372px minmax(0,1fr) 250px;gap:26px 30px;align-items:start;margin-top:28px}
+#vp-tl:checked~.stage-wrap .body{grid-template-columns:316px minmax(0,1fr);gap:22px 24px}
+#vp-tl:checked~.stage-wrap .settings{grid-column:1/-1;order:-1}
+#vp-tp:checked~.stage-wrap .body,#vp-m:checked~.stage-wrap .body{grid-template-columns:1fr;margin-top:22px}
+#vp-tp:checked~.stage-wrap .settings,#vp-m:checked~.stage-wrap .settings{order:3}
+#vp-tp:checked~.stage-wrap .preview{order:1}#vp-tp:checked~.stage-wrap .ed-rail{order:2}
+.preview{position:sticky;top:76px;min-width:0}
+#vp-tp:checked~.stage-wrap .preview,#vp-m:checked~.stage-wrap .preview{position:static}
+.settings{position:sticky;top:76px;display:flex;flex-direction:column;gap:18px}
+#vp-tl:checked~.stage-wrap .settings{position:static;flex-direction:row;flex-wrap:wrap;align-items:flex-start;gap:14px 24px}
+#vp-tl:checked~.stage-wrap .settings .rows{flex-direction:row;flex-wrap:wrap;gap:0 18px;flex:1}
+#vp-tl:checked~.stage-wrap .settings .row{flex:1 1 200px}
+#vp-tl:checked~.stage-wrap .settings .pro{flex:0 0 300px}
+.ed-toggle{display:none}
+#vp-m:checked~.stage-wrap .ed-toggle{display:flex;margin:14px 0 6px}
+#vp-m:checked~#ed-edit:checked~.stage-wrap .preview{display:none}
+#vp-m:checked~#ed-prev:checked~.stage-wrap .ed-rail,#vp-m:checked~#ed-prev:checked~.stage-wrap .settings{display:none}
+#ed-edit:checked~.stage-wrap label[for=ed-edit],#ed-prev:checked~.stage-wrap label[for=ed-prev]{background:var(--ink);color:#fff}
+
+/* rows */
+.ed-rail{display:flex;flex-direction:column;gap:22px}
+.rows{display:flex;flex-direction:column}
+.row{display:flex;align-items:center;gap:10px;padding:10px 10px;margin:0 -10px;border-radius:var(--r-md);min-height:48px}
+a.row:hover,label.row:hover{background:rgba(27,26,23,.04)}
+.row .t{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.row .t b{font-size:13.5px;font-weight:600}
+.row .t small{font-size:12px;color:var(--ink5)}
+.row .v{font-size:13px;font-weight:600;color:var(--ink7);display:flex;align-items:center;gap:8px;white-space:nowrap}
+.row .v.on{color:var(--success)}
+.row .arrow{color:var(--ink3);font-size:16px;transition:transform var(--ctrl) var(--ease)}
+.row:hover .arrow{transform:translateX(3px)}
+.row .ico{width:30px;height:30px;border-radius:9px;background:var(--gold1);color:var(--gold7);display:grid;place-items:center;font-size:12px;flex:none}
+.steps{counter-reset:s}
+.steps .row .ico{background:transparent;color:var(--gold7);font-family:var(--serif);font-size:16px}
+.steps .row .ico::before{counter-increment:s;content:counter(s)}
+.ed-rows,.ed-eye{display:none}
+#wh-std:checked~.stage-wrap [data-when=std],#wh-inv:checked~.stage-wrap [data-when=inv],#wh-day:checked~.stage-wrap [data-when=day],#wh-pe:checked~.stage-wrap [data-when=pe]{display:flex}
+#wh-std:checked~.stage-wrap label[for=wh-std],#wh-inv:checked~.stage-wrap label[for=wh-inv],#wh-day:checked~.stage-wrap label[for=wh-day],#wh-pe:checked~.stage-wrap label[for=wh-pe],
+#va-you:checked~.stage-wrap label[for=va-you],#va-co:checked~.stage-wrap label[for=va-co],#va-sup:checked~.stage-wrap label[for=va-sup],#va-gu:checked~.stage-wrap label[for=va-gu],#va-rep:checked~.stage-wrap label[for=va-rep],#va-str:checked~.stage-wrap label[for=va-str],
+#dv-phone:checked~.stage-wrap label[for=dv-phone],#dv-desk:checked~.stage-wrap label[for=dv-desk],
+#pv-page:checked~.stage-wrap label[for=pv-page],#pv-disc:checked~.stage-wrap label[for=pv-disc]{background:var(--ink);color:#fff}
+.reset-row{display:flex;justify-content:flex-end;margin-top:4px}
+.reset-row .rs{font-size:11.5px;color:var(--ink4);padding:6px 10px;border-radius:var(--r-full)}
+.reset-row .rs:hover{color:var(--danger);background:rgba(166,72,59,.06)}
+
+/* the preview */
+.pvbar{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center}
+.pvbar .lab{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+/* the stage strip — S · I · D · P + the poster; all move on a shared edit */
+.strip4{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:14px}
+#vp-m:checked~.stage-wrap .strip4{gap:5px}
+.th{border-radius:10px;background:#fff;box-shadow:var(--sh-tile);aspect-ratio:9/13;position:relative;overflow:hidden;font-size:7px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:8px 6px;outline:2px solid transparent;outline-offset:3px}
+.th .eb{font-size:5.5px;letter-spacing:.24em;text-transform:uppercase;opacity:.55}
+.th .nm{font-family:var(--serif);font-size:9px;line-height:1.05;font-weight:300}
+.th .cap{position:absolute;left:0;right:0;bottom:0;padding:4px;font-size:6.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink4);background:rgba(251,250,247,.9)}
+.th .hero{width:100%;height:26%;border-radius:5px;background:linear-gradient(135deg,#C29A7C,#7A5446)}
+.th .hero.b{background:linear-gradient(135deg,#9DB3C4,#4E6A7A)}
+.th .cover{width:100%;height:26%;border-radius:5px;background:linear-gradient(90deg,rgba(203,167,102,.5),rgba(203,167,102,.15))}
+.th .bars{width:100%;display:flex;flex-direction:column;gap:2px}.th .bars i{display:block;height:5px;border-radius:2px;background:rgba(27,26,23,.07)}
+.th .cta{width:60%;height:7px;border-radius:999px;background:var(--cta)}
+.th.pst{background:#9a244f;color:#fff}.th.pst .eb{opacity:.75}.th.pst .cap{background:rgba(0,0,0,.35);color:#fff}
+#sim-hero:checked~.frame .th.pst{background:linear-gradient(180deg,#C29A7C 0%,#7A5446 52%,#33221F 100%)}
+#wh-std:checked~.stage-wrap .th[data-when=std],#wh-inv:checked~.stage-wrap .th[data-when=inv],#wh-day:checked~.stage-wrap .th[data-when=day],#wh-pe:checked~.stage-wrap .th[data-when=pe]{outline-color:var(--gold3)}
+.frame-wrap{margin-top:14px;position:relative;display:flex;justify-content:center;background:radial-gradient(120% 90% at 50% 0%,rgba(203,167,102,.10),transparent 60%);border-radius:var(--r-lg);padding:20px 14px 16px}
+.mini{width:100%;max-width:330px;aspect-ratio:9/16;border-radius:26px;background:#fff;box-shadow:var(--sh-hi);overflow:hidden;position:relative;transition:max-width var(--enter) var(--ease),aspect-ratio var(--enter) var(--ease);display:none;font-size:11px}
+#dv-desk:checked~.stage-wrap .mini{max-width:100%;aspect-ratio:16/10;border-radius:var(--r-md)}
+#wh-std:checked~.stage-wrap .mini[data-when=std],#wh-inv:checked~.stage-wrap .mini[data-when=inv],#wh-day:checked~.stage-wrap .mini[data-when=day],#wh-pe:checked~.stage-wrap .mini[data-when=pe]{display:block}
+#va-sup:checked~.stage-wrap .mini,#va-str:checked~.stage-wrap .mini,#pv-disc:checked~.stage-wrap .mini{display:none!important}
+.role-card{display:none;max-width:460px;padding:10px 6px}
+#va-sup:checked~#pv-page:checked~.stage-wrap .role-card[data-role=sup],#va-str:checked~#pv-page:checked~.stage-wrap .role-card[data-role=str]{display:block}
+.role-card ul{list-style:none;padding:0;margin:14px 0 0;display:flex;flex-direction:column;gap:8px;font-size:13px}
+.role-card li{display:flex;gap:10px;align-items:flex-start}.role-card li b{font-family:var(--mono);font-weight:400;color:var(--gold5);flex:none}
+.role-card .h{font-family:var(--serif);font-weight:400;font-size:22px;margin-top:6px}
+.mini .ribbon{display:none;position:absolute;left:0;right:0;top:0;padding:8px 12px;background:rgba(251,250,247,.95);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink5);border-bottom:1px solid var(--hair);z-index:2}
+#va-you:checked~.stage-wrap .mini .ribbon,#va-co:checked~.stage-wrap .mini .ribbon{display:block}
+.mini .pg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:26px 22px;text-align:center}
+.mini .eb{font-size:8px;letter-spacing:.3em;text-transform:uppercase;opacity:.6}
+.mini .nm{font-family:var(--serif);font-size:24px;line-height:1.05;font-weight:300}
+.mini .ln{font-size:10px;opacity:.75}
+.mini .hero{width:100%;height:80px;border-radius:10px;background:linear-gradient(135deg,#C29A7C,#7A5446)}
+.mini .hero.b{background:linear-gradient(135deg,#9DB3C4,#4E6A7A)}
+.mini .cover{width:100%;height:80px;border-radius:10px;background:linear-gradient(90deg,rgba(203,167,102,.5),rgba(203,167,102,.15))}
+.mini .cd{display:flex;gap:10px;margin-top:6px}.mini .cd b{display:block;font-size:20px;letter-spacing:-.02em}.mini .cd small{font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;opacity:.6}
+.mini .form{width:100%;margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.mini .form i{display:block;height:26px;border-radius:7px;background:rgba(27,26,23,.06)}
+.mini .form b{display:block;height:30px;border-radius:999px;background:var(--cta);color:#fff;font-size:10px;line-height:30px;font-weight:600}
+.mini .tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-top:8px}
+.mini .tiles i{display:grid;place-items:center;height:54px;border-radius:9px;background:rgba(27,26,23,.05);font-size:9px;font-style:normal;color:var(--ink5)}
+.mini .chapters{width:100%;display:flex;flex-direction:column;gap:6px;margin-top:8px;text-align:left}
+.mini .chapters i{display:block;height:44px;border-radius:9px;background:linear-gradient(90deg,rgba(203,167,102,.25),rgba(203,167,102,.08))}
+.mini .seat,.mini .finder,.mini .ticket{display:none;width:100%;padding:8px 10px;border-radius:9px;background:var(--gold1);color:var(--gold8);font-size:10px;text-align:left}
+#va-gu:checked~.stage-wrap .mini .finder{display:block}
+#va-rep:checked~.stage-wrap .mini .ticket,#va-rep:checked~.stage-wrap .mini .seat{display:block}
+.mini .ticket b{display:block;font-family:var(--serif);font-size:14px;font-weight:400}
+.mini[data-when=day] .seat{display:block}
+#va-gu:checked~.stage-wrap .mini[data-when=day] .seat{display:none}
+.mini .foot{position:absolute;left:0;right:0;bottom:0;padding:8px;text-align:center;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
+.under{margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.open-when{display:none}
+#wh-std:checked~.stage-wrap .open-when[data-when=std],#wh-inv:checked~.stage-wrap .open-when[data-when=inv],#wh-day:checked~.stage-wrap .open-when[data-when=day],#wh-pe:checked~.stage-wrap .open-when[data-when=pe]{display:inline-flex}
+#va-sup:checked~.stage-wrap .open-when,#va-str:checked~.stage-wrap .open-when,#pv-disc:checked~.stage-wrap .open-when{display:none!important}
+.caption-role{display:none;font-size:12px;color:var(--ink5)}
+#va-you:checked~#pv-page:checked~.stage-wrap .caption-role[data-role=you],#va-co:checked~#pv-page:checked~.stage-wrap .caption-role[data-role=co],#va-gu:checked~#pv-page:checked~.stage-wrap .caption-role[data-role=gu],#va-rep:checked~#pv-page:checked~.stage-wrap .caption-role[data-role=rep]{display:inline}
+.pv-note{font-size:11.5px;color:var(--ink4);margin-top:8px}
+/* Post Event: the second preview — as Discover shows it */
+.pv-disc-lab{display:none}#wh-pe:checked~.stage-wrap .pv-disc-lab{display:flex}
+.disc{display:none;width:100%;max-width:520px}
+#wh-pe:checked~#pv-disc:checked~.stage-wrap .disc{display:block}
+.disc .feed{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:start}
+#vp-m:checked~.stage-wrap .disc .feed{grid-template-columns:1fr 1fr}
+.disc .card{border-radius:var(--r-md);overflow:hidden;box-shadow:var(--sh-tile);background:#fff;font-size:11px;transition:transform var(--elem) var(--ease)}
+.disc .card:hover{transform:translateY(-3px)}
+.disc .card .cv{aspect-ratio:3/4;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.3)),var(--a,#6E6A62)}
+.disc .card.ghost .cv{background:rgba(27,26,23,.06)}
+.disc .card .cp{padding:8px 10px}.disc .card .cp b{display:block;font-family:var(--serif);font-weight:400;font-size:13px}.disc .card .cp small{color:var(--ink5)}
+.disc .card.you{outline:2px solid var(--gold3);outline-offset:3px}
+.disc .disc-eye{margin-bottom:10px}
+.gate{margin-top:14px;display:flex;flex-direction:column;gap:6px;font-size:12.5px}
+.gate span{display:flex;align-items:center;gap:8px}.gate b{width:16px;height:16px;border-radius:50%;display:inline-grid;place-items:center;font-size:9px;color:#fff;background:var(--success)}.gate b.no{background:var(--ink3)}
+
+/* settings column */
+.settings .row{min-height:50px}
+.pro{display:flex;flex-direction:column;gap:10px;padding:16px 18px;border-radius:var(--r-lg);color:var(--paper);background:linear-gradient(160deg,#2A2720,var(--ob));box-shadow:var(--sh-tile)}
+.pro .eye{color:var(--gold3)}
+.pro .h{font-family:var(--serif);font-weight:400;font-size:18px}
+.pro .lock{background:rgba(255,255,255,.1);color:var(--gold3);box-shadow:none}
+
+/* side panels (never a centred modal · full screen on a phone) */
+.scrim{position:absolute;inset:0;z-index:40;background:rgba(27,26,23,.28);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;visibility:hidden;transition:opacity var(--elem) var(--ease),visibility 0s var(--elem)}
+.panel{position:absolute;top:0;right:0;bottom:0;z-index:41;width:min(440px,100%);overflow:auto;background:rgba(251,250,247,.92);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:var(--sh-panel);padding:22px 28px 40px;transform:translateX(40px);opacity:0;visibility:hidden;transition:transform var(--enter) var(--ease-out),opacity var(--elem) var(--ease),visibility 0s var(--enter)}
+#p-addr:checked~.stage-wrap .scrim,#p-get:checked~.stage-wrap .scrim,#p-who:checked~.stage-wrap .scrim,#p-pro:checked~.stage-wrap .scrim{opacity:1;visibility:visible;transition-delay:0s}
+#p-addr:checked~.stage-wrap .panel[data-p=addr],#p-get:checked~.stage-wrap .panel[data-p=get],#p-who:checked~.stage-wrap .panel[data-p=who],#p-pro:checked~.stage-wrap .panel[data-p=pro]{transform:none;opacity:1;visibility:visible;transition-delay:0s}
+/* the reset confirm lives INSIDE the form so the native reset closes it too */
+#p-reset:checked~.frame .scrim,#p-reset:checked~.frame .panel[data-p=reset]{opacity:1;visibility:visible;transition-delay:0s}
+#p-reset:checked~.frame .panel[data-p=reset]{transform:none}
+#vp-m:checked~.stage-wrap .panel{width:100%;border-radius:38px;padding:18px 20px 40px}
+.panel .ph{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0 18px}
+.panel .x{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:20px;line-height:1;color:var(--ink);background:rgba(27,26,23,.05)}
+.panel .x:hover{background:rgba(27,26,23,.1)}
+.panel h1{font-family:var(--serif);font-weight:400;font-size:30px;line-height:1.1;margin-bottom:18px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
+.field .lb{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink5);display:flex;align-items:center;gap:8px}
+.field .in{display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--line);padding:8px 0;font:400 17px/1.3 var(--mono);transition:border-color var(--elem) var(--ease)}
+.field .in:hover{border-bottom-color:var(--gold5)}
+.field .in small{color:var(--ink4)}.field .in b{font-weight:600;color:var(--ink)}
+.field .ok{font-size:12px;color:var(--success);display:flex;align-items:center;gap:6px}
+.opt{display:flex;align-items:center;gap:12px;padding:12px 10px;margin:0 -10px;border-radius:var(--r-md)}
+.opt:hover{background:rgba(27,26,23,.04)}
+.opt .radio{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--ink3);flex:none;position:relative}
+.opt .radio.on{border-color:var(--ink)}.opt .radio.on::after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--ink)}
+.opt .t{display:flex;flex-direction:column}.opt .t b{font-size:14px;font-weight:600}.opt .t small{font-size:12px;color:var(--ink5)}
+.panel .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.panel .covers{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;font-size:12.5px;margin:6px 0 18px}
+.panel .covers b{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold7);margin-bottom:4px;grid-column:1/-1}
+.panel .covers span::before{content:"· ";color:var(--gold5)}
+.panel .scope{display:flex;flex-direction:column;gap:6px;font-size:13px;margin:0 0 18px}
+.panel .scope span{display:flex;gap:8px;align-items:flex-start}.panel .scope b{flex:none;font-family:var(--mono);font-weight:400;color:var(--gold5)}
+.panel .scope .keep b{color:var(--success)}
+
+/* notes */
+.notes{max-width:1180px;margin:0 auto;padding:10px 20px 80px;font-size:13.5px;line-height:1.6;color:var(--ink7)}
+.notes h2{font-family:var(--serif);font-weight:400;font-size:30px;margin:44px 0 10px;color:var(--ink)}
+.notes h3{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold7);margin:30px 0 8px}
+.notes table{width:100%;border-collapse:collapse;font-size:12.5px}
+.notes th{text-align:left;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink4);padding:8px 10px 6px;border-bottom:1px solid var(--line)}
+.notes td{padding:8px 10px;border-bottom:1px solid var(--hair);vertical-align:top}
+.notes td.g{font-weight:700;color:var(--ink);white-space:nowrap}
+.notes code{font-family:var(--mono);font-size:11.5px;background:rgba(27,26,23,.05);padding:1px 5px;border-radius:4px}
+.notes .warn{color:var(--danger);font-weight:600}
+.notes .ok{color:var(--success);font-weight:600}
+.notes ul{padding-left:18px;margin:6px 0}.notes li{margin:5px 0}
+</style></head>
+<body>
+
+<!-- ═══ state outside the form (viewport · stage · view as · panels) ═══ -->
+<input class="sw" type="radio" name="vp" id="vp-m"><input class="sw" type="radio" name="vp" id="vp-tp"><input class="sw" type="radio" name="vp" id="vp-tl"><input class="sw" type="radio" name="vp" id="vp-dt" checked>
+<input class="sw" type="radio" name="wh" id="wh-std"><input class="sw" type="radio" name="wh" id="wh-inv" checked><input class="sw" type="radio" name="wh" id="wh-day"><input class="sw" type="radio" name="wh" id="wh-pe">
+<input class="sw" type="radio" name="va" id="va-you" checked><input class="sw" type="radio" name="va" id="va-co"><input class="sw" type="radio" name="va" id="va-sup"><input class="sw" type="radio" name="va" id="va-gu"><input class="sw" type="radio" name="va" id="va-rep"><input class="sw" type="radio" name="va" id="va-str">
+<input class="sw" type="radio" name="pv" id="pv-page" checked><input class="sw" type="radio" name="pv" id="pv-disc">
+<input class="sw" type="radio" name="dv" id="dv-phone" checked><input class="sw" type="radio" name="dv" id="dv-desk">
+<input class="sw" type="radio" name="ed" id="ed-edit" checked><input class="sw" type="radio" name="ed" id="ed-prev">
+<input class="sw" type="checkbox" id="p-addr"><input class="sw" type="checkbox" id="p-get"><input class="sw" type="checkbox" id="p-who"><input class="sw" type="checkbox" id="p-pro">
+
+<div class="bar" role="toolbar" aria-label="Prototype controls">
+  <span class="proto">Prototype</span>
+  <div class="grp"><b>Viewport</b><label class="press" for="vp-m">Mobile</label><label class="press" for="vp-tp">Tablet P</label><label class="press" for="vp-tl">Tablet L</label><label class="press" for="vp-dt">Desktop</label></div>
+  <div class="grp"><b>Stage</b><label class="press" for="wh-std">Save the Date</label><label class="press" for="wh-inv">Invitation</label><label class="press" for="wh-day">On the Day</label><label class="press" for="wh-pe">Post Event</label></div>
+  <div class="grp"><b>View as</b><label class="press" for="va-you">You</label><label class="press" for="va-co">Coordinator</label><label class="press" for="va-sup">Supplier</label><label class="press" for="va-gu">Guest</label><label class="press" for="va-rep">Guest who replied</label><label class="press" for="va-str">Stranger</label></div>
+</div>
+
+<!-- ═══ THE DRAFT is a <form>: its checkboxes are the unapplied edits; a native reset button is Restore ═══ -->
+<form class="stage-wrap" action="#" onsubmit="return false">
+<input class="sw" type="checkbox" id="sim-names"><input class="sw" type="checkbox" id="sim-hero"><input class="sw" type="checkbox" id="sim-open">
+<input class="sw" type="checkbox" id="applied"><input class="sw" type="checkbox" id="p-reset">
+<div class="frame">
+<div class="app">
+
+  <header class="top">
+    <span class="brand">SETNAYAN</span>
+    <span class="sw-ev"><i>I</i><span><span class="n-a">Indalecio &amp; Claire</span><span class="n-b">Ice &amp; Claire</span></span></span>
+    <span class="me">IC</span>
+  </header>
+
+  <!-- rail labels: lib/customer-menu.ts roster (post #5943) -->
+  <nav class="rail" aria-label="Event menu">
+    <a class="press" href="#"><i></i><span>Overview</span></a>
+    <a class="press" href="#"><i></i><span>Guests</span></a>
+    <a class="press on" href="#"><i></i><span>Event Hub Controller</span></a>
+    <a class="press" href="#"><i></i><span>Schedule</span></a>
+    <a class="press" href="#"><i></i><span>Seat plan</span></a>
+    <span class="sec">Team</span>
+    <a class="press" href="#"><i></i><span>Your Team</span></a>
+    <a class="press" href="#"><i></i><span>Budget</span></a>
+    <a class="press" href="#"><i></i><span>Hosts</span></a>
+    <span class="sec">More</span>
+    <a class="press" href="#"><i></i><span>Galleries</span></a>
+    <a class="press" href="#"><i></i><span>Suite</span></a>
+  </nav>
+
+  <main>
+
+    <!-- ══ 1 · MASTHEAD — the poster (the shared hero) · the address · the four stages ══ -->
+    <section class="mast" aria-label="Your website">
+      <a class="poster press" href="#" aria-label="Your poster, as it appears on your home and public profile — it follows your hero">
+        <i class="ph"></i>
+        <i class="capiz"></i>
+        <svg class="sprig l" viewBox="0 0 150 130" aria-hidden="true"><use href="#sprig"/></svg>
+        <svg class="sprig r" viewBox="0 0 150 130" aria-hidden="true"><use href="#sprig"/></svg>
+        <i class="veil"></i><i class="pframe"></i>
+        <div class="mark">I<i>&amp;</i>C</div>
+        <div class="txt"><h2 class="names"><span class="n-a"><span>Indalecio</span><span><i>&amp;</i> Claire</span></span><span class="n-b"><span>Ice</span><span><i>&amp;</i> Claire</span></span></h2><i class="rule"></i><p class="wd">Friday</p><p class="dt">18 December 2026</p></div>
+      </a>
+      <div>
+        <p class="eye">Event Hub Controller <span class="info" tabindex="0">i<span class="tip">Where your website is made — one shared base, then Save the Date, Invitation, On the Day and Post Event — and where its address, who can view it and launch are set. Changes are a draft until you press Apply; guests keep the last applied version.</span></span></p>
+        <div class="addr">
+          <a class="url press" href="https://setnayan.com/cale-ice" target="_blank" rel="noopener" title="Opens your live page in a new tab"><small>setnayan.com/</small>cale-ice <small>↗</small></a>
+          <button class="glyph press" type="button" title="Copy link" aria-label="Copy link">⧉</button>
+          <button class="glyph press" type="button" title="QR — scan to open on a phone" aria-label="QR code">▦</button>
+          <label class="glyph press" for="p-addr" title="Change the address" aria-label="Change the address">✎</label>
+        </div>
+        <div class="stages" role="tablist" aria-label="Stage">
+          <label class="chip press" for="wh-std">Save the Date<span class="ch" title="Unapplied changes here"></span></label>
+          <label class="chip press" for="wh-inv"><span class="dot" title="Live today"></span>Invitation<span class="ch" title="Unapplied changes here"></span></label>
+          <label class="chip press" for="wh-day">On the Day<span class="ch" title="Unapplied changes here"></span></label>
+          <label class="chip press" for="wh-pe">Post Event<span class="ch" title="Unapplied changes here"></span></label>
+          <span class="info" tabindex="0">i<span class="tip">One link, four stages. Edit the shared base once and every stage takes it; each stage then adds only what is its own. The red dot marks the stage your QR opens today; a gold dot marks a stage with unapplied changes.</span></span>
+        </div>
+        <div class="chips ed-toggle"><label class="chip press" for="ed-edit">Edit</label><label class="chip press" for="ed-prev">Preview</label></div>
+      </div>
+    </section>
+
+    <!-- ══ 2 · THE EDITOR BODY ══ -->
+    <div class="body">
+
+      <div class="ed-rail">
+        <!-- ══ THE SHARED BASE — edited once, used by every stage ══ -->
+        <div>
+          <p class="eye">Shared · on every stage <span class="info" tabindex="0">i<span class="tip">Change these once and every stage takes the change. The letters say where a field appears: S Save the Date · I Invitation · D On the Day · P Post Event · Poster. Press “Try” to see the thumbnails move; a gold dot marks an unapplied change.</span></span></p>
+          <div class="rows" style="margin-top:6px">
+            <label class="row press" for="sim-names" data-f="names"><span class="ico">✎</span><span class="t"><b>Names &amp; monogram</b><small><span class="n-a">Indalecio &amp; Claire · I&amp;C</span><span class="n-b">Ice &amp; Claire · I&amp;C</span></small></span><span class="pend"></span><span class="on4"><i class="on">S</i><i class="on">I</i><i class="on">D</i><i class="on">P</i><i class="on w">Poster</i></span><span class="try press">Try</span></label>
+            <a class="row press" href="#"><span class="ico">◷</span><span class="t"><b>Date &amp; time</b><small>Friday 18 December 2026 · 1:30 PM</small></span><span class="on4"><i class="on">S</i><i class="on">I</i><i class="on">D</i><i class="on">P</i><i class="on w">Poster</i></span><span class="arrow">›</span></a>
+            <a class="row press" href="#"><span class="ico">◎</span><span class="t"><b>Venue</b><small>Name and address</small></span><span class="on4"><i class="on">S</i><i class="on">I</i><i class="on">D</i><i class="on">P</i></span><span class="arrow">›</span></a>
+            <a class="row press" href="#"><span class="ico">♥</span><span class="t"><b>Your words</b><small>How you met, the proposal · the film's story</small></span><span class="on4"><i class="on">S</i><i class="on">I</i><i>D</i><i class="on">P</i></span><span class="tag ok">Written</span><span class="arrow">›</span></a>
+            <label class="row press" for="sim-hero" data-f="hero"><span class="ico">▣</span><span class="t"><b>Hero</b><small>Your photo or film at the top — one hero, four places</small></span><span class="pend"></span><span class="on4"><i class="on">S</i><i class="on">I</i><i class="on">D</i><i>P</i><i class="on w">Poster</i></span><label class="lock press" for="p-pro">Pro</label><span class="try press">Try</span></label>
+            <a class="row press" href="#"><span class="ico">▦</span><span class="t"><b>Photos</b><small>Your gallery — the film and the page pick from it</small></span><span class="on4"><i class="on">S</i><i class="on">I</i><i class="on">D</i><i class="on">P</i></span><label class="lock press" for="p-pro">Pro</label></a>
+            <a class="row press" href="#"><span class="ico">◈</span><span class="t"><b>Theme, colours &amp; fonts</b><small>One look for every stage</small></span><span class="on4"><i class="on">S</i><i class="on">I</i><i class="on">D</i><i class="on">P</i><i class="on w">Poster</i></span><label class="lock press" for="p-pro">Pro</label></a>
+            <a class="row press" href="#"><span class="ico">♪</span><span class="t"><b>Music</b><small>One song, on the film and the page</small></span><span class="on4"><i class="on">S</i><i class="on">I</i><i class="on">D</i><i class="on">P</i></span><label class="lock press" for="p-pro">Pro</label></a>
+          </div>
+        </div>
+
+        <!-- ══ ONLY ON THIS STAGE ══ -->
+        <div class="ed-rows" data-when="std" style="flex-direction:column">
+          <p class="eye">Only on Save the Date · the film</p>
+          <div class="rows" style="margin-top:6px">
+            <label class="row press" for="sim-open" data-f="open"><span class="ico">✦</span><span class="t"><b>Opening</b><small><span class="o-a">Sheer veil</span><span class="o-b">Envelope</span></small></span><span class="pend"></span><label class="lock press" for="p-pro">Pro</label><span class="try press">Try</span></label>
+            <a class="row press" href="#"><span class="ico">◐</span><span class="t"><b>Set the mood</b><small>Auto · Lighten · Darken</small></span><span class="arrow">›</span></a>
+            <a class="row press" href="#"><span class="ico">▤</span><span class="t"><b>What your film shows</b><small>From your words; add the ceremony</small></span><span class="arrow">›</span></a>
+            <a class="row press" href="#"><span class="ico">◷</span><span class="t"><b>Invitation opens on</b><small>When the film hands over</small></span><span class="v">Not set</span><span class="arrow">›</span></a>
+            <a class="row press" href="#"><span class="ico">◉</span><span class="t"><b>Wax stamp</b><small>Your seal</small></span><span class="arrow">›</span></a>
+          </div>
+          <div class="reset-row"><label class="rs press" for="p-reset">Reset Save the Date to default…</label></div>
+        </div>
+
+        <div class="ed-rows" data-when="inv" style="flex-direction:column">
+          <p class="eye">Only on the Invitation</p>
+          <div class="rows" style="margin-top:6px">
+            <a class="row press" href="#"><span class="ico">≡</span><span class="t"><b>Details &amp; schedule</b><small>What guests need before the day</small></span><span class="tag ok">6 public</span><span class="arrow">›</span></a>
+            <a class="row press" href="#"><span class="ico">✉</span><span class="t"><b>The reply form</b><small>RSVP · seat-holder keepsake</small></span><span class="arrow">›</span></a>
+            <a class="row press" href="#"><span class="ico">◈</span><span class="t"><b>Dress code</b><small>Palette, dos and don’ts</small></span><span class="arrow">›</span></a>
+            <a class="row press" href="#"><span class="ico">✎</span><span class="t"><b>Special message</b><small>A note to your guests</small></span><span class="tag q">Not set</span><span class="arrow">›</span></a>
+            <a class="row press" href="#"><span class="ico">❖</span><span class="t"><b>What to bring</b><small>Gifts, registry, or a kind no-gift note</small></span><span class="tag q">Not set</span><span class="arrow">›</span></a>
+            <a class="row press" href="#"><span class="ico">◌</span><span class="t"><b>Invitation backdrop</b><small>A scene that moves as guests scroll</small></span><span class="tag q">Off</span><label class="lock press" for="p-pro">Pro</label></a>
+            <a class="row press" href="#"><span class="ico">⇅</span><span class="t"><b>Show, hide &amp; reorder</b><small>Sections, order, hold or move</small></span><span class="tag ok">12 showing</span><span class="arrow">›</span></a>
+          </div>
+          <div class="reset-row"><label class="rs press" for="p-reset">Reset the Invitation to default…</label></div>
+        </div>
+
+        <div class="ed-rows" data-when="day" style="flex-direction:column">
+          <p class="eye">Only on the Day <span class="info" tabindex="0">i<span class="tip">The schedule goes live, each guest finds their seat and QR, the wall and the livestream appear. Running them — going live, opening the wall, handing out cameras — is done from the Suite.</span></span></p>
+          <div class="rows" style="margin-top:6px">
+            <a class="row press" href="#"><span class="ico">≡</span><span class="t"><b>Schedule, live</b><small>The running order as it moves</small></span><span class="tag ok">6 public</span><span class="arrow">›</span></a>
+            <a class="row press" href="#"><span class="ico">▦</span><span class="t"><b>Seat &amp; QR</b><small>Each guest's table, the walk to it</small></span><span class="arrow">›</span></a>
+            <a class="row press" href="#"><span class="ico">◎</span><span class="t"><b>Camera cues</b><small>When you want guests shooting</small></span><span class="arrow">›</span></a>
+            <a class="row press" href="#"><span class="ico">▣</span><span class="t"><b>Wall &amp; livestream tiles</b><small>Appear when the Suite runs them</small></span><span class="arrow">›</span></a>
+            <a class="row press" href="#"><span class="ico">⇅</span><span class="t"><b>Show, hide &amp; reorder</b><small>The day's sections</small></span><span class="arrow">›</span></a>
+          </div>
+          <div class="reset-row"><label class="rs press" for="p-reset">Reset On the Day to default…</label></div>
+        </div>
+
+        <div class="ed-rows steps" data-when="pe" style="flex-direction:column">
+          <p class="eye">Only on Post Event · the Story Maker <span class="info" tabindex="0">i<span class="tip">The after-story your guests revisit — and what Discover shows the world. Its cover is its own (chosen from the album), not the shared hero. Today at /story, titled “Story Maker”. Not “Make my Story”, which is a Papic reel.</span></span></p>
+          <div class="rows" style="margin-top:6px">
+            <a class="row press" href="#"><span class="ico"></span><span class="t"><b>The desk</b><small>Guest columns waiting on you</small></span><span class="arrow">›</span></a>
+            <a class="row press" href="#"><span class="ico"></span><span class="t"><b>The story</b><small>Chapters and guest columns</small></span><span class="arrow">›</span></a>
+            <a class="row press" href="#"><span class="ico"></span><span class="t"><b>Cover &amp; album</b><small>Its own cover, from the day's photos</small></span><span class="arrow">›</span></a>
+            <a class="row press" href="#"><span class="ico"></span><span class="t"><b>What’s next</b></span><span class="tag q">Optional</span><span class="arrow">›</span></a>
+            <a class="row press" href="#"><span class="ico"></span><span class="t"><b>Publish</b><small>Draft · guests only · everyone · Discover</small></span><span class="tag q">Draft</span><span class="arrow">›</span></a>
+            <a class="row press" href="#" style="margin-top:8px"><span class="ico" style="background:var(--gold1);font-family:var(--sans);font-size:12px">▤</span><span class="t"><b>Supplier stories</b><small>Which of their stories appear on your page</small></span><span class="arrow">›</span></a>
+          </div>
+          <div class="reset-row"><label class="rs press" for="p-reset">Reset Post Event to default…</label></div>
+        </div>
+      </div>
+
+      <!-- the preview -->
+      <section class="preview" aria-label="Preview">
+        <div class="pvbar">
+          <div class="lab"><span class="micro">View as</span>
+            <div class="chips">
+              <label class="chip press" for="va-you">You</label>
+              <label class="chip press" for="va-co">Coordinator</label>
+              <label class="chip press" for="va-sup">Supplier</label>
+              <label class="chip press" for="va-gu">Guest</label>
+              <label class="chip press" for="va-rep">Guest who replied</label>
+              <label class="chip press" for="va-str">Stranger</label>
+            </div>
+          </div>
+          <div class="lab pv-disc-lab"><span class="micro">Show</span><div class="chips"><label class="chip press" for="pv-page">Your page</label><label class="chip press" for="pv-disc">On Discover</label></div></div>
+          <div class="lab" style="margin-left:auto"><div class="chips"><label class="chip press" for="dv-phone">Phone</label><label class="chip press" for="dv-desk">Desktop</label></div></div>
+        </div>
+
+        <!-- THE STAGE STRIP — S · I · D · P · Poster; one shared edit, five thumbnails; press one to walk the same section into that stage -->
+        <div class="strip4" aria-label="All four stages and the poster">
+          <label class="th press" for="wh-std" data-when="std"><span class="hero h-a"></span><span class="hero b h-b"></span><span class="eb">Save the date</span><span class="nm n-a">Indalecio<br>&amp; Claire</span><span class="nm n-b">Ice<br>&amp; Claire</span><span class="cap"><span class="o-a">veil</span><span class="o-b">envelope</span></span></label>
+          <label class="th press" for="wh-inv" data-when="inv"><span class="hero h-a"></span><span class="hero b h-b"></span><span class="nm n-a">Indalecio<br>&amp; Claire</span><span class="nm n-b">Ice<br>&amp; Claire</span><span class="bars"><i></i><i></i></span><span class="cta"></span><span class="cap">Invitation</span></label>
+          <label class="th press" for="wh-day" data-when="day"><span class="hero h-a"></span><span class="hero b h-b"></span><span class="nm n-a">Indalecio<br>&amp; Claire</span><span class="nm n-b">Ice<br>&amp; Claire</span><span class="bars"><i></i><i></i><i></i></span><span class="cap">On the Day</span></label>
+          <label class="th press" for="wh-pe" data-when="pe"><span class="cover"></span><span class="nm n-a">Indalecio<br>&amp; Claire</span><span class="nm n-b">Ice<br>&amp; Claire</span><span class="bars"><i></i><i></i></span><span class="cap">Post Event · own cover</span></label>
+          <span class="th pst" aria-label="The poster on home and your public profile"><span class="eb">Kasal</span><span class="nm n-a">Indalecio<br>&amp; Claire</span><span class="nm n-b">Ice<br>&amp; Claire</span><span class="eb">18 Dec 2026</span><span class="cap">Poster</span></span>
+        </div>
+
+        <div class="frame-wrap">
+          <div class="mini" data-when="std" role="img" aria-label="Save the Date, as you edit it">
+            <div class="ribbon">Draft · host view · tap a section to edit</div>
+            <div class="pg"><span class="hero h-a" style="height:60px"></span><span class="hero b h-b" style="height:60px"></span><p class="eb">Save the date</p><p class="nm"><span class="n-a">Indalecio<br>&amp; Claire</span><span class="n-b">Ice<br>&amp; Claire</span></p><p class="ln">Friday · 18 December 2026</p>
+              <div class="cd"><span><b>85</b><small>days</small></span><span><b>04</b><small>hrs</small></span><span><b>12</b><small>min</small></span></div></div>
+            <p class="foot">The film · <span class="o-a">sheer veil</span><span class="o-b">envelope</span> opening</p>
+          </div>
+          <div class="mini" data-when="inv" role="img" aria-label="Invitation, as you edit it">
+            <div class="ribbon">Draft · host view · tap a section to edit</div>
+            <div class="pg"><span class="hero h-a"></span><span class="hero b h-b"></span><p class="eb">You are invited</p><p class="nm"><span class="n-a">Indalecio<br>&amp; Claire</span><span class="n-b">Ice<br>&amp; Claire</span></p><p class="ln">Friday · 18 December 2026 · 1:30 PM</p>
+              <div class="ticket"><small>Sample seat-holder · not one of your guests</small><b>Maria Santos · Table 4</b>their QR · their seat · their photos</div>
+              <div class="form"><i></i><b>Reply</b></div></div>
+            <p class="foot">Hero · your words · details · reply</p>
+          </div>
+          <div class="mini" data-when="day" role="img" aria-label="On the Day, as you edit it">
+            <div class="ribbon">Draft · host view · tap a section to edit</div>
+            <div class="pg"><span class="hero h-a" style="height:50px"></span><span class="hero b h-b" style="height:50px"></span><p class="eb"><span class="n-a">Indalecio &amp; Claire</span><span class="n-b">Ice &amp; Claire</span> · today</p><p class="nm">1:30 PM</p>
+              <div class="seat">Your table · Table 4 · the walk to it</div>
+              <div class="finder">Find your seat — type your name</div>
+              <div class="tiles"><i>Camera</i><i>Watch live</i><i>The wall</i><i>Gifts</i></div></div>
+            <p class="foot">Schedule · seat · wall · livestream</p>
+          </div>
+          <div class="mini" data-when="pe" role="img" aria-label="Post Event, as you edit it">
+            <div class="ribbon">Draft · host view · tap a chapter to edit</div>
+            <div class="pg"><span class="cover"></span><p class="eb"><span class="n-a">Indalecio &amp; Claire</span><span class="n-b">Ice &amp; Claire</span></p><p class="nm">The day,<br>as it was told</p>
+              <div class="chapters"><i></i><i></i><i></i></div></div>
+            <p class="foot">Draft · not yet published · its own cover</p>
+          </div>
+
+          <div class="disc">
+            <p class="eye disc-eye">Discover · Real stories</p>
+            <div class="feed">
+              <div class="card you"><div class="cv" style="--a:#9a244f"></div><div class="cp"><b><span class="n-a">Indalecio &amp; Claire</span><span class="n-b">Ice &amp; Claire</span></b><small>18 December 2026 · Kasal</small></div></div>
+              <div class="card ghost"><div class="cv"></div><div class="cp"><b>Another couple</b><small>a published story</small></div></div>
+              <div class="card ghost"><div class="cv"></div><div class="cp"><b>Another couple</b><small>a published story</small></div></div>
+            </div>
+            <div class="gate">
+              <span><b class="no">·</b>Story published to everyone <span class="soft">— Publish step · today: Draft</span></span>
+              <span><b>✓</b>Website is Public <span class="soft">— Who can view</span></span>
+              <span><b class="no">·</b>Shown on Discover <span class="soft">— your opt-in, in the Publish step</span></span>
+              <span class="soft" style="font-size:11.5px">Discover lists your story only when all three are on. <span class="info" tabindex="0">i<span class="tip">Measured on origin/main: the front door reads loadPublishedShowcases — couples who opted in (users.public_summary_consent_at), whose site is Public, with an address set; chapters come from the published story.</span></span></span>
+            </div>
+          </div>
+
+          <div class="role-card" data-role="sup">
+            <p class="eye">Booked shop</p><p class="h">Their call sheet, where your guests see the invitation.</p>
+            <ul><li><b>●</b>The desk, in four states: call sheet, today, look back, quiet</li><li><b>◐</b>Sees the programme move — cannot advance it</li><li><b>○</b>No gifts page. A supplier is not a guest.</li></ul>
+            <p class="soft" style="font-size:12px;margin-top:12px">No preview: their desk is minted from a booking you do not hold. Only genuinely booked; shortlisted sees a stranger’s page.</p>
+          </div>
+          <div class="role-card" data-role="str">
+            <p class="eye">Nobody you invited</p><p class="h">What somebody who found the link sees.</p>
+            <ul><li><b>○</b>No guest list, no seats, no photos, no gifts</li><li><b>○</b>No hint that any of it exists</li><li><b>◐</b>On a public event, the same page a guest opens</li></ul>
+            <p class="soft" style="font-size:12px;margin-top:12px">Check it in a private window — a signed-in preview cannot tell you this.</p>
+          </div>
+        </div>
+
+        <div class="under">
+          <a class="btn sm press open-when" data-when="std" href="https://setnayan.com/cale-ice?phase=save_the_date" target="_blank" rel="noopener">Open full screen ↗</a>
+          <a class="btn sm press open-when" data-when="inv" href="https://setnayan.com/cale-ice?phase=rsvp" target="_blank" rel="noopener">Open full screen ↗</a>
+          <a class="btn sm press open-when" data-when="day" href="https://setnayan.com/cale-ice?phase=event" target="_blank" rel="noopener">Open full screen ↗</a>
+          <a class="btn sm press open-when" data-when="pe" href="https://setnayan.com/cale-ice?phase=editorial" target="_blank" rel="noopener">Open full screen ↗</a>
+          <span class="caption-role" data-role="you">Your ribbon rides the top — guests never see it.</span>
+          <span class="caption-role" data-role="co">Same page, same ribbon; their edit door goes to the planning desk.</span>
+          <span class="caption-role" data-role="gu">Scanned in, no seat of their own — the finder instead.</span>
+          <span class="caption-role" data-role="rep">A sample seat-holder, not one of your guests.</span>
+        </div>
+        <p class="pv-note">The preview shows your draft. Guests see the last applied version.</p>
+      </section>
+
+      <!-- website settings -->
+      <aside class="settings" aria-label="Website settings">
+        <div class="rows">
+          <p class="eye" style="margin-bottom:6px">Website settings <span class="info" tabindex="0">i<span class="tip">What guests actually get — applied the moment you save them, not part of the draft. Launch, visibility, the pinned stage and open browsing used to be split between two pages; they are here, once.</span></span></p>
+          <label class="row press" for="p-who"><span class="ico">◉</span><span class="t"><b>Who can view</b><small>Launched</small></span><span class="v on">Public</span><span class="arrow">›</span></label>
+          <label class="row press" for="p-get"><span class="ico">◷</span><span class="t"><b>Guests get</b><small>Follows your date</small></span><span class="v">Automatic</span><span class="arrow">›</span></label>
+          <label class="row press"><span class="ico">⇄</span><span class="t"><b>Open browsing</b><small>Move between stages</small></span><span class="switch" role="switch" aria-checked="false" aria-label="Open browsing"></span></label>
+        </div>
+        <label class="pro press" for="p-pro" aria-label="Event Hub Pro — one unlock">
+          <p class="eye">Event Hub Pro</p>
+          <p class="h">Change how it looks, moves and what it shows — try it now, unlock when you apply.</p>
+          <span class="lock big" style="color:var(--gold3)"><span class="price">[PRICE]</span> · one-time · all four stages</span>
+        </label>
+      </aside>
+    </div>
+
+    <!-- ══ THE APPLY BAR — only while there are unapplied changes ══ -->
+    <div class="applybar" role="status" aria-live="polite">
+      <span class="n"><span class="cnt"></span></span>
+      <span class="what"><i data-c="names">Names</i><i data-c="hero">Hero</i><i data-c="open">Opening</i></span>
+      <span class="sep"></span>
+      <span class="needs">Apply needs Event Hub Pro · <span class="price">[PRICE]</span> · one-time · all four stages</span>
+      <button class="btn ghost press" type="reset" title="Discard the draft — back to the last applied version">Restore</button>
+      <label class="btn apply press apply-free" for="applied" title="Guests see this from now on">Apply</label>
+      <label class="btn apply press apply-pro" for="p-pro" title="Unlock Event Hub Pro, then apply">Unlock and apply</label>
+    </div>
+    <div class="toast"><span>✓ Applied — guests see this now.</span><button class="btn sm ghost press" type="reset" style="color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.3)">OK</button></div>
+
+  </main>
+
+  <nav class="bnav" aria-label="Event menu">
+    <a class="press" href="#"><i></i>Overview</a><a class="press" href="#"><i></i>Guests</a><a class="press on" href="#"><i></i>Hub</a><a class="press" href="#"><i></i>Schedule</a><a class="press" href="#"><i></i>More</a>
+  </nav>
+
+  <!-- side panels — never centred; full screen on a phone -->
+  <label class="scrim" for="p-addr" aria-hidden="true"></label>
+  <aside class="panel" data-p="addr" aria-label="Change your address">
+    <div class="ph"><p class="eye">Your one link</p><label class="x press" for="p-addr" aria-label="Close">×</label></div>
+    <h1>setnayan.com/…</h1>
+    <div class="field"><span class="lb">Address <span class="info" tabindex="0">i<span class="tip">Checked live as you type against every wedding, shop and person on Setnayan — the same check the invitation page uses. A taken word offers you the nearest free ones.</span></span></span>
+      <div class="in"><small>setnayan.com/</small><b>cale-ice</b></div><span class="ok">● Yours</span></div>
+    <div class="actions"><label class="btn press" for="p-addr">Save</label><label class="btn ghost press" for="p-addr">Cancel</label></div>
+  </aside>
+  <aside class="panel" data-p="get" aria-label="Which stage guests get">
+    <div class="ph"><p class="eye">Guests get</p><label class="x press" for="p-get" aria-label="Close">×</label></div>
+    <h1>Let the date decide, or keep one up.</h1>
+    <label class="opt press"><span class="radio on"></span><span class="t"><b>Automatic</b><small>Follows your date · today: Invitation</small></span></label>
+    <label class="opt press"><span class="radio"></span><span class="t"><b>Always Save the Date</b></span></label>
+    <label class="opt press"><span class="radio"></span><span class="t"><b>Always Invitation</b></span></label>
+    <label class="opt press"><span class="radio"></span><span class="t"><b>Always On the Day</b></span></label>
+    <label class="opt press"><span class="radio"></span><span class="t"><b>Always Post Event</b><small>Replies are closed</small></span></label>
+    <div class="actions"><label class="btn press" for="p-get">Save</label></div>
+  </aside>
+  <aside class="panel" data-p="who" aria-label="Who can view">
+    <div class="ph"><p class="eye">Who can view</p><label class="x press" for="p-who" aria-label="Close">×</label></div>
+    <h1>Public since your Save the Date launched.</h1>
+    <label class="opt press"><span class="radio on"></span><span class="t"><b>Public</b><small>Anyone with the link, and search · needed for Discover</small></span></label>
+    <label class="opt press"><span class="radio"></span><span class="t"><b>Unlisted</b><small>Only people with the link</small></span></label>
+    <label class="opt press"><span class="radio"></span><span class="t"><b>Private</b><small>Only you and the guests you invited · un-launches</small></span></label>
+    <div class="actions"><label class="btn press" for="p-who">Save</label><label class="btn ghost press" for="p-who">Schedule a launch date</label></div>
+  </aside>
+  <aside class="panel" data-p="pro" aria-label="Event Hub Pro">
+    <div class="ph"><p class="eye">Event Hub Pro</p><label class="x press" for="p-pro" aria-label="Close">×</label></div>
+    <h1>What you made, on every stage.</h1>
+    <div class="made" aria-label="Your draft, all four stages and the poster">
+      <span class="th"><span class="hero h-a"></span><span class="hero b h-b"></span><span class="nm n-a">Indalecio<br>&amp; Claire</span><span class="nm n-b">Ice<br>&amp; Claire</span><span class="cap"><span class="o-a">veil</span><span class="o-b">envelope</span></span></span>
+      <span class="th"><span class="hero h-a"></span><span class="hero b h-b"></span><span class="nm n-a">Indalecio<br>&amp; Claire</span><span class="nm n-b">Ice<br>&amp; Claire</span><span class="cta"></span><span class="cap">Invitation</span></span>
+      <span class="th"><span class="hero h-a"></span><span class="hero b h-b"></span><span class="nm n-a">Indalecio<br>&amp; Claire</span><span class="nm n-b">Ice<br>&amp; Claire</span><span class="cap">On the Day</span></span>
+      <span class="th"><span class="cover"></span><span class="nm n-a">Indalecio<br>&amp; Claire</span><span class="nm n-b">Ice<br>&amp; Claire</span><span class="cap">Post Event</span></span>
+      <span class="th pst"><span class="nm n-a">Indalecio<br>&amp; Claire</span><span class="nm n-b">Ice<br>&amp; Claire</span><span class="cap">Poster</span></span>
+    </div>
+    <p style="font-size:15px;margin-bottom:16px"><span class="lock big"><span class="price">[PRICE]</span> · one-time · all four stages</span></p>
+    <div class="actions" style="margin-bottom:22px"><label class="btn press" for="applied">Unlock and apply</label><label class="btn ghost press" for="p-pro">Keep drafting</label></div>
+    <p class="eye" style="margin-bottom:8px">Also unlocks</p>
+    <div class="covers">
+      <b>Shared</b><span>Your own hero &amp; photos</span><span>Theme, colours &amp; fonts</span><span>Music</span><span>Backgrounds &amp; motion</span>
+      <b>Save the Date</b><span>Cinematic opening</span><span>Your own film</span>
+      <b>Invitation · On the Day</b><span>Invitation backdrop</span><span>Hold or move per section</span><span>Custom sections</span>
+      <b>Post Event</b><span>Editorial Pro parts</span><span>No Setnayan mark</span>
+    </div>
+    <p class="soft" style="font-size:12.5px">Free stays free: the page we write, your words and facts, the reply form, the schedule, what guests see.</p>
+    <p class="soft" style="font-size:11px;margin-top:12px">[PRICE] is read from the catalogue (<code style="font-family:var(--mono)">COUPLE_WEBSITE_PRO</code> via formatV2Sku) — never a number typed into a page. No sale language, no crossed-out price.</p>
+  </aside>
+  <!-- RESET TO DEFAULT — confirm first; the scope is explicit; the confirm button is the form's native reset -->
+  <label class="scrim" for="p-reset" aria-hidden="true"></label>
+  <aside class="panel" data-p="reset" aria-label="Reset this stage to default">
+    <div class="ph"><p class="eye">Reset to default</p><label class="x press" for="p-reset" aria-label="Close">×</label></div>
+    <h1>Back to the page we wrote for you?</h1>
+    <div class="scope">
+      <span><b>●</b>This stage's look and words go back to what we prefilled from your event details — names, date, venue, our pictures.</span>
+      <span><b>●</b>Sections you hid or reordered here come back in the default order.</span>
+      <span class="keep"><b>✓</b>Kept: your guests and their replies, the schedule, your galleries, the story, the address, who can view.</span>
+      <span class="keep"><b>✓</b>Other stages are not touched. You can Restore the last applied version afterwards.</span>
+    </div>
+    <div class="actions"><button class="btn danger press" type="reset">Reset this stage</button><label class="btn ghost press" for="p-reset">Keep my changes</label></div>
+  </aside>
+
+</div><!-- /app -->
+</div><!-- /frame -->
+</form><!-- /stage-wrap -->
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="sprig" viewBox="0 0 150 130"><defs><path id="leaf" d="M0 0 C 5 -9, 16 -13, 26 -9 C 19 -1, 9 3, 0 0 Z"/></defs><g fill="rgba(255,255,255,.16)" stroke="#fff" stroke-opacity=".8" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"><path d="M10 120 Q 50 90 130 20" fill="none"/><use href="#leaf" transform="translate(32.5 102.5) rotate(-100)"/><use href="#leaf" transform="translate(54.1 84.9) rotate(20)"/><use href="#leaf" transform="translate(78.9 64.1) rotate(-100)"/><use href="#leaf" transform="translate(106.9 40.1) rotate(20)"/><use href="#leaf" transform="translate(130 20) rotate(-40)"/></g></symbol>
+</svg>
+
+<!-- ═══ THE CONTRACT ═══ -->
+<div class="notes">
+<h2>Purpose</h2>
+<p>Owner, 2026-09-24, verbatim: <i>“event hub controller … purpose is to provide an editing mechanism to create a functional website from save the date, invitation, on the day, and story (editorial).”</i> · <i>“we want a cohesive way of editing everything … when they try to edit one, it is easier to edit the invitation, on the day and post event as well.”</i> · <i>“Unlocking Pro will unlock all advanced features … but there are freebies that can run as well.”</i> · <i>“I also want the editing process to be on this page. as the switch. but have a button to apply save. so they can restore to last state or reset back to default.”</i> · <i>“hero widget applies to save the date, invitation, on the day and the thumbnail poster.”</i></p>
+
+<h2>A · Saving today, and what a real draft needs</h2>
+<h3>Measured on origin/main</h3>
+<ul>
+<li><b>Every website-editor save is live the moment it lands.</b> The sub-actions under <code>website/*/actions.ts</code> (<code>updateOurStory</code>, <code>uploadHeroPhoto</code>, <code>updateSiteColors</code>, <code>updateOurPhotos</code>, <code>updateSiteChrome</code>, <code>updateLandingPageVisibility</code>, <code>updateDressCode</code>, <code>updatePhotoMoments</code>, <code>updateSpecialMessage</code>, <code>updateWhatToBring</code>) each <code>update</code> a column on <code>events</code> and <code>revalidatePath</code>; <code>website/widgets/actions.ts</code> writes <code>invitation_widgets</code> rows (<code>is_visible · display_order · mode · config_json</code>); the Save the Date builder's <code>studio/save-the-date/actions.ts</code> writes the <code>std_*</code> columns. <b>There is no draft anywhere for the website</b> — the schema has no draft column on <code>events</code> or <code>invitation_widgets</code>.</li>
+<li><b>The Story Maker has a draft in name only.</b> <code>event_editorial.draft_json</code> is the ONE document; <code>saveEditorial</code> writes <code>draft_json</code> and flips <code>status</code> (the audience: <code>draft · event · published · taken_back</code>), stamping <code>published_at</code>, <code>edition_no/volume</code> and freezing <code>room_snapshot</code> on first publish. There is no separate published copy — publishing makes the current draft the live one. Restore-to-last-published is therefore not possible today even there.</li>
+</ul>
+<h3>The smallest honest design</h3>
+<ul>
+<li><b>One draft document per event</b>: a new table <code>event_site_drafts (event_id PK · draft_json jsonb · applied_snapshot jsonb · updated_at · updated_by)</code>, RLS on the event's hosts (the shipped <code>current_event_ids</code> pattern). <code>draft_json</code> holds only the keys the couple changed; <code>applied_snapshot</code> is what the live columns held when the draft began (this is what Restore compares against and what "N changes" counts). <b>One migration.</b></li>
+<li><b>Apply</b> = one server action that replays <code>draft_json</code> into the real columns through the existing per-field actions (no new write paths; every gate they carry stays), then clears the draft. <b>Restore</b> = delete the draft row. <b>Reset to default</b> = write the prefilled composition into the draft — the same code that writes the page today (<code>invitationWordsDraft</code>, <code>invitationCard</code>, <code>resolveHubLook</code> defaults, the default widget order) — then the couple Applies it, so Reset is itself undoable until applied.</li>
+<li><b>Preview reads the draft, guests read the columns.</b> The public page already honours host-only params (<code>?editor=1</code>, <code>?phase=</code>); the loaders in <code>app/[slug]/_lib/loaders.ts</code> overlay <code>draft_json</code> when the viewer is a host in the editor frame. One change, in one file.</li>
+<li><b>Website settings are not part of the draft</b> (address, who can view, guests get, open browsing): a couple who launches expects it to be live now.</li>
+<li><b>Reset scope — recommendation: per stage, with per-section reset inside each section's panel.</b> The stage is the unit the switch already gives; a whole-website reset is rarely what anyone means. Reset touches only that stage's look and words and its section visibility/order; it never touches guests, replies, <code>event_schedule_blocks</code>, galleries, orders, <code>event_editorial</code>, the address or visibility. The confirm panel says so, and the destructive button is the form's native reset in this prototype.</li>
+<li>The Story Maker keeps its own <code>draft_json</code>/publish flow as the Post Event stage's draft; Apply on that stage means its Publish step.</li>
+</ul>
+
+<h2>B · One hero — and the separate hero-like compositions to fold</h2>
+<p>Owner: the hero applies to Save the Date · Invitation · On the Day · the poster. Post Event keeps its own cover.</p>
+<table>
+<tr><th>Today</th><th>Where</th><th>Plan</th></tr>
+<tr><td class="g">The page hero</td><td><code>events.landing_page_hero_image_url</code> · <code>landing_page_hero_video_r2_key</code> (written by <code>uploadHeroPhoto</code> / <code>updateSiteChrome</code>; rendered by <code>app/[slug]/_components/hero-background-media.tsx</code>)</td><td><span class="ok">The one hero.</span> Photo or film.</td></tr>
+<tr><td class="g">The invitation card</td><td><code>app/[slug]/_lib/invitation-card.ts</code> — eyebrow · monogram · names · line · date · time; since 2026-09-22 the hub hero when no photo is set</td><td>The hero's <b>default state</b> (the page we write), not a second hero. It is what Reset returns to.</td></tr>
+<tr><td class="g">Save the Date ground &amp; media</td><td><code>events.std_background</code> (the film's ground — and already the whole hub's ground via <code>hub-look.ts resolveInviteGround</code>) · <code>std_media · std_media_nsfw</code> (the film's own uploads) · <code>std_reveal_template · std_reveal_effects</code> (the opening)</td><td><span class="warn">Fold:</span> the film draws its hero from the one hero (<code>std_media</code> becomes a pick from the shared gallery, not a second store); the ground stays shared; the opening stays Save the Date's own.</td></tr>
+<tr><td class="g">The poster / collection card</td><td>Approved 2026-09-24 but not built: the card renders the invitation card, hero photo wins; the launcher already copies <code>landing_page_hero_image_url</code> (<code>ownHeroById</code>, <code>app/dashboard/(launcher)/page.tsx</code>)</td><td><span class="ok">Reads the one hero</span> — the same resolver as the page, so the two can never disagree. The prototype's poster flips to the photo when you “Try” the hero.</td></tr>
+<tr><td class="g">Post Event cover</td><td><code>event_editorial.hero_photo_id</code> (a capture) or <code>draft_json.heroUpload</code> (an upload) via <code>story/cover-actions.ts</code>, <code>lib/story-cover.ts</code></td><td><span class="ok">Its own</span>, as the owner said — chosen from the day's photos. Named “Cover &amp; album” on the Post Event stage.</td></tr>
+</table>
+
+<h2>C · The shared base — and where each stage keeps its own copy today</h2>
+<table>
+<tr><th>Shared fact</th><th>The one home</th><th>Stage copies today</th><th>Build</th></tr>
+<tr><td class="g">Names</td><td><code>events.display_name</code></td><td><span class="ok">None</span> — the film reads <code>display_name</code></td><td>Already shared</td></tr>
+<tr><td class="g">Monogram</td><td><code>events.monogram_*</code> (10 columns)</td><td><span class="ok">None</span> — <code>hub-look.ts</code>, <code>site-body.tsx</code>, <code>editorial/data.ts</code>, <code>pabuya</code> all read them</td><td>Already shared</td></tr>
+<tr><td class="g">Date &amp; time</td><td><code>events.event_date · event_end_date · timezone</code></td><td><span class="warn"><code>std_film_date</code></span> — <code>studio/save-the-date/actions.ts</code></td><td>Film reads <code>event_date</code>; drop the copy</td></tr>
+<tr><td class="g">Venue</td><td><code>events.venue_name · venue_address</code></td><td><span class="warn"><code>std_film_venue_name · std_film_venue_city</code></span></td><td>Drop both copies</td></tr>
+<tr><td class="g">Ceremony</td><td><code>events.ceremony_type · secondary_ceremony_type</code></td><td><span class="warn"><code>std_film_ceremony_name</code></span></td><td>Read <code>ceremony_type</code> through a label map</td></tr>
+<tr><td class="g">Your words</td><td><code>events.love_story</code></td><td><span class="warn"><code>std_film_story</code></span> — “Auto-filled from your love story”, then drifts</td><td>Film reads <code>love_story</code>; a per-stage <i>cut</i> only if wanted</td></tr>
+<tr><td class="g">Theme / look</td><td>⚠ no single home: <code>events.invite_theme</code> governs the hub look (<code>hub-look.ts</code>) but is written from <b>Guests → Invite</b> (<code>guests/invite/actions.ts</code>), not from any website editor</td><td><span class="warn"><code>std_theme</code></span> (film only) · <span class="warn"><code>site_font_key · site_art_direction · site_bg_color · site_button_color</code></span> · <span class="warn"><code>role_palette</code></span> · <span class="warn"><code>std_film_accent_hex</code></span> vs <code>site_button_color</code>/<code>monogram_color</code></td><td><b>The biggest one:</b> one “Theme, colours &amp; fonts” row; the invite-theme picker moves here</td></tr>
+<tr><td class="g">Background</td><td><code>std_background</code> is already the hub's ground</td><td>per-section backgrounds in <code>invitation_widgets.config_json</code></td><td>Shared ground; section overrides stay, named honestly</td></tr>
+<tr><td class="g">Music</td><td><code>site_bg_music_r2_key · site_bg_music_enabled · site_bg_music_source</code></td><td><span class="ok">None found</span> (both editors reference the same column; verify the film's writer)</td><td>One “Music” row</td></tr>
+</table>
+
+<h2>D · One Pro unlock — “try in the draft, pay to apply”</h2>
+<p><b>Owner:</b> <i>“okay 2000 it is. i just don't want us to feel cheap … free also has edit but very limited only so they want to pay for that unlock.”</i> Free editing is real but limited to their words and facts (names, date, venue, your words, the reply form, schedule, special message, what to bring, show/hide). Everything that changes how the page <i>looks, moves or what media it shows</i> is Pro. The Pro mark is one quiet glyph, identical everywhere; every one opens the same panel.</p>
+<h3>Proposed — flagged for the owner (decision 1)</h3>
+<ul>
+<li>With the draft model, a free couple <b>can try a Pro change in the draft</b> — their photo as the hero, a theme, an opening — and see it on their own page in the preview and on all five thumbnails. Only <b>Apply</b> needs Pro. The Apply bar turns into <i>“Apply needs Event Hub Pro · [PRICE] · one-time · all four stages”</i> with one button, <b>Unlock and apply</b>; the panel leads with <i>what they just made</i> (the five thumbnails in their draft state), then one confident price line, then the quiet “Also unlocks” list. Free-only drafts apply normally.</li>
+<li><b>Feasible with the design in A, and safe:</b> the draft lives in <code>event_site_drafts</code>, readable only by the event's hosts (RLS); the public page reads the live columns; the preview overlay happens only inside the host-gated editor frame (<code>?editor=1</code> is already refused for non-hosts). <b>Apply</b> replays the draft through the existing per-field actions, which already carry the Pro gate (<code>eventCoupleWebsiteProActive</code>, the grandfather rule) — so an unpaid Pro key cannot reach a live column even by calling Apply by hand; the action refuses that key and applies the rest. A screenshot of a preview is fine and costs nothing. The live page never shows unpaid Pro.</li>
+<li><b>The one real cost:</b> draft media. A free couple trying “their photo” uploads a file. Cap draft media (one hero, a small gallery) and store it under a draft prefix with a TTL (30 days, or until Apply) so unpaid uploads do not accumulate in R2. This softens the 2026-09-24 “uploads are Pro” ruling to “uploads <i>go live</i> with Pro” — say so when deciding.</li>
+</ul>
+<h3>What still sells a stage's Pro on its own</h3>
+<table>
+<tr><th>Where</th><th>Sells today</th><th>Finding</th></tr>
+<tr><td class="g"><code>studio/website-pro</code></td><td><code>COUPLE_WEBSITE_PRO</code>, priced by <code>formatV2Sku</code></td><td><span class="ok">The one unlock</span> — every lock in the prototype opens it</td></tr>
+<tr><td class="g"><code>studio/save-the-date/page.tsx</code></td><td><code>STD_PREMIUM_OPENINGS</code> <b>standalone</b> via <code>InlineCheckoutDrawer</code> when <code>openingsSellability === 'sellable'</code>; else points at website-pro</td><td><span class="warn">A second purchase for one Pro feature</span> — fold into the one unlock; mark the SKU unsellable</td></tr>
+<tr><td class="g"><code>studio/editorial-pro/page.tsx</code></td><td><code>EDITORIAL_PRO</code> with its own price; linked from the Story Maker (<code>editorialProUpgradeHref</code>)</td><td><span class="warn">Sells a thing that is free</span> — <code>lib/website-pro-items.ts</code>: <code>EDITORIAL_PRO</code> joined <code>FREE_FOR_ALL_SKUS</code> 2026-08-23, <code>NOT_SOLD_ON = ['Editorial editing']</code>; the editor's “After — your editorial” row still says <code>locked: !ownsPro</code>. Unlock the row, retire the page</td></tr>
+<tr><td class="g">Editor lock rows</td><td><b>“₱3,500” literal</b> ×3 (<code>editor-shell.tsx</code>, <code>pro-panels.tsx</code>, <code>authoring-panels.tsx</code>)</td><td><span class="warn">A price outside the catalogue</span></td></tr>
+<tr><td class="g"><code>studio/…</code></td><td><code>ANIMATED_MONOGRAM</code>, <code>KWENTO</code></td><td>Separate products; the monogram is shared-base, so its animation outside the one unlock is worth a look. <i>Flagged, not decided.</i></td></tr>
+</table>
+
+<h2>E · The dupe map (68 controls on two screens → one home each)</h2>
+<table>
+<tr><th>Group</th><th>Controls today</th><th>One home</th></tr>
+<tr><td class="g">Open the live page ×8</td><td>“Open the live page” · “Open your page” · “Open the page they open” · Right-now CTA · “View live” · “View your page” · QR · copy — all <code>/cale-ice</code></td><td>The address is the link; QR and copy beside it</td></tr>
+<tr><td class="g">Edit the page ×6</td><td>“Edit the page” · “The page itself” · “What's included” · “Set your link” · ribbon “Edit this site” · editor “Website address” (self-link). <span class="warn">Dead loop:</span> “Set your link” → editor → address row → editor; only the controller's <code>SlugField</code> edits it</td><td>Gone — this screen is the editor</td></tr>
+<tr><td class="g">Which stage ×14</td><td>Preview ×4 · editor chips ×5 · Experience · ribbon Preview ×4 · “Open the stage they are on” — all <code>?phase=</code>, <b>four vocabularies</b> (<code>PUBLIC_SITE_PAGES</code> · <code>PREVIEW_TABS</code> · <code>PHASE_LABELS</code>/<code>LAUNCH_PHASE_CHOICES</code> · <code>STAGE_FACT</code>)</td><td>The four stage chips — one list, the owner's words — and the stage strip</td></tr>
+<tr><td class="g">View as ×7</td><td>five radios · editor “RSVP'd” · seat-holder card (same <code>?as=replied</code>) · captions</td><td>View as, with “Guest who replied”</td></tr>
+<tr><td class="g">Phone/Desktop</td><td>editor toggle · controller's fixed phone frame</td><td>The preview</td></tr>
+<tr><td class="g">The story ×3</td><td>“Open the workroom” · “The story” → <code>/story</code> · “After — your editorial” → <code>/website/editorial</code> (redirects to <code>/story</code>, titled “Story Maker”)</td><td>The Post Event stage</td></tr>
+<tr><td class="g">Our story ×2</td><td>controller door → <code>/website/our-story</code> · editor panel (same <code>updateOurStory</code>)</td><td>Shared base → Your words ⚠ the door was the only link to that route (<code>lint-port-no-lost-controls</code>)</td></tr>
+<tr><td class="g">Address ×4 · Launched/Public · Guests get · Open browsing</td><td><code>SlugField</code> + editor display row + two headers · banner + “Who can view” + Launch/Schedule · editor rows</td><td>Masthead ✎ · Website settings</td></tr>
+<tr><td class="g">Save the Date ×2 · Pro price ×2</td><td>card (view) + builder row · catalogue read + ₱3,500 literal</td><td>The Save the Date stage · one unlock</td></tr>
+</table>
+<h3>Removed — and where each already lives</h3>
+<ul>
+<li><b>Right now / next step, the four facts</b> — updates and overview (owner: “no need for this”) → Overview and Guests in the menu.</li>
+<li><b>“See who” · “Guests and replies”</b> → Guests (menu). <b>“The running order”</b> → Schedule (menu). <b>Merkado · Budget</b> → Your Team · Budget (menu). <b>E-Gifts</b> → Suite tile — <span class="warn">verify a menu path survives</span>.</li>
+<li><b>Live Studio · Live Photo Wall · Papic controls</b> → Suite; the On the Day stage keeps a row for the <i>tiles</i> they put on the page. <b>Guest columns</b> → the Post Event desk. <b>Supplier stories</b> → kept, Post Event.</li>
+</ul>
+
+<h2>F · Size and the staged path</h2>
+<ul>
+<li>Website editor <b>3,347</b> lines · Save the Date builder <b>3,552</b> · Story Maker <b>9,764</b> · controller + <code>lib/event-hub-control.ts</code> ~1,900 → a true merge touches <b>~18,500 lines</b>, four route entries and every guard pinned to those paths.</li>
+<li><b>Step 1 · one shell, routed.</b> Masthead, stage chips, stage strip, preview, settings, the Apply bar. The stage chip routes: Save the Date mounts <code>StdBuilderClient</code>; Invitation / On the Day mount today's rows; Post Event mounts <code>editorial-editor</code>. Shared-base rows are today's panels re-homed plus the invite-theme picker. <code>/launch</code> becomes the shell; the three editors redirect in with <code>?stage=</code>.</li>
+<li><b>Step 2 · the draft.</b> The one table, Apply/Restore/Reset actions, the loader overlay for hosts. This is the migration.</li>
+<li><b>Step 3 · collapse the copies</b> (tables B and C): the film reads the shared columns; <code>std_film_*</code> and <code>std_media</code>-as-store are dropped after a backfill check; one theme write.</li>
+<li><b>Step 4 · one unlock</b>: every lock → website-pro; retire the standalone openings drawer and <code>editorial-pro</code>; replace the three literals.</li>
+<li>The Story Maker stays a guided flow inside the shell.</li>
+</ul>
+<h3>Scope fence</h3>
+<p><b>“Make my Story”</b> — the Papic reel — is not the Event Hub and stays out (memory <code>the-event-hub-is-not-the-story-maker.md</code>). The owner's “story maker” is the editorial editor at <code>/story</code>.</p>
+<h3>Placeholder or unverified</h3>
+<ul>
+<li><code>[PRICE]</code> — read from <code>platform_retail_catalog_v2</code> (<code>COUPLE_WEBSITE_PRO</code>) at render.</li>
+<li>Previews and thumbnails are drawings; the shipped preview frames <code>/cale-ice</code>. “Try” simulates three edits in CSS; the change count uses <code>:has()</code> and shows only the names of changes in older browsers.</li>
+<li>The poster's mark is set as “I &amp; C”; the approved prototype uses the couple's monogram file. Countdown hours/minutes illustrative; “85 days” real. Status tags are the live audit's values; “Invitation opens on” and the music column's film-side writer were not read.</li>
+<li>“Same section stays selected when you switch stage” is described, not simulated; the stage strip is the affordance.</li>
+</ul>
+<h3>Brief rules, checked</h3>
+<ul><li>No cards or borders — space and type; radius only on pressables. <b>Met.</b></li><li>No explanatory sentences — behind <code>(i)</code>. <b>Met.</b></li><li>The number is the interface — this screen reports nothing (owner). <b>Met by removal.</b></li><li>Depth, glass, one canvas. <b>Met.</b></li><li>Every pressable moves. <b>Met.</b></li><li>Four viewport states; side panels, full screen on a phone. <b>Met.</b></li></ul>
+</div>
+</body></html>
