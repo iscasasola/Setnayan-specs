@@ -223,7 +223,16 @@ Before starting, run the in-flight check
   RLS on `current_couple_event_ids()` ∪ `current_moderator_event_ids()` (not `current_event_ids()`, which admits
   guests); no `updated_by`; refused Pro keys stay in the draft; only `rsvp_backdrop` among `events` columns is
   draftable until `[slug]/layout.tsx` can overlay a draft. Writers divert on `draft=1` (`<HubDraftField />`); the
-  shell mounts `<HubDraftDock eventId stage />`.
+  Maker toolbar mounts `<HubDraftDock eventId />` in `applySlot`. ⚠ The Maker's forms do not post `draft=1` yet
+  (and `toggleWidgetVisibility` has no draft door) — until they do, Maker edits still go live.
+- **⚠ As built — the live savers (2026-09-25, `rd/maker-live-savers-into-draft`):** the Colors panel
+  (`site_bg_color` free; button · Candlelight · face · magic move Pro, try-then-pay), Text (special message ·
+  what to bring), Our story (`love_story` + `together_since`), Our Love Story's moments, Dress code and Camera
+  cues now save to the draft (`draftEventsAndReturn`). The host canvas re-wears drafted colours from the overlaid row
+  (`HostDraftLook` — the layout cannot see `?editor=1`). Apply re-asks `momentCapRefusal` and re-screens every
+  new Love Story photo. Still live, marked: address · visibility · launch phase · open browsing; gallery / music /
+  hero video (D6); a scene's own words and removal; "+ Add a scene"; the theme link; the E-Gifts thank-you message;
+  `print_details` (prints only). Known limit: turning Candlelight OFF in a draft does not preview until Apply.
 - **Browser check:** change a title → guest link unchanged → Apply → changed. Free couple: set a photo background in
   the draft → preview shows it, guest link does not → Apply bar shows the Pro line (web) / stops without a price
   (shell). Restore → preview matches the guest link again. Reset the Invitation stage → confirm text lists what it
@@ -560,6 +569,23 @@ Before starting, run the in-flight check
   materials; each new reveal passes the harness.
 - **Browser check:** upload a warm clip on Modern → buttons shift warm, text still legible; toggle off → theme
   colours return; Luxe reveal → curtains part, fringe, card rises; reduced motion → fade.
+- **⚠ As built — adaptive part (2026-09-25, `rd/maker-p10-adaptive-theme`), five deviations for the owner/controller:**
+  (1) **the "swap the loop" itself did not exist** — no Main-background own-media control or storage had shipped,
+  so this PR builds it: the Main background lives at `config_json.main` on the event's HERO row (the one row every
+  event has exactly once; no migration), beside the hero scene's `canvas`, read by `hubMainGround`, drafted as
+  `widgets.hero.main` and written by Apply (own-media Main = Pro; back to the theme's own = free); drawn by the
+  PAGE (`site-body.tsx` → `main-ground.tsx`), never the layout, so a private landing never shows couple footage;
+  over a Pro theme only (Classic is plain paper — "classic has no photo or video"). (2) **`extractPaletteFromFile`
+  is NOT used** — it drops near-black/near-white pixels and pads short palettes with fixed cream tones, which hides
+  exactly the pixels words fail over and would read a grey clip as warm; `measureFrame` (pure, in
+  `lib/adaptive-theme.ts`) reads every pixel, keeps the lightest/darkest 5 % clusters (the same method as the theme
+  loops' measured samples) and never pads. (3) **`canvas.tint` stores the MEASURED FRAME + the toggle, not tinted
+  hexes** — the tint is re-derived at render from frame × theme, so a later theme change can never leave a stale
+  colour. (4) **the scrim starts from zero, not the theme's spec scrim** (Modern's 0.86 would hide every clip),
+  rising only until body text is AA over the frame; "try a calmer clip" shows when it passes 50 %. (5) an
+  unscreened clip plays for the host only; guests see its still (`GUEST_HERO_VIDEO_PLAYBACK` is closed).
+  **Deferred:** the two-`<video>` seamless cross-fade loop (native `loop` for now) and a still picker for print
+  (the grabbed frame is stored as `poster` for it).
 
 ### Phase 11 — Tours wear the brief (small, outside the Maker)
 
