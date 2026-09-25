@@ -1,0 +1,1095 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Supplier scan — claim a guest's service by QR or NFC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<!--
+  SUPPLIER SCAN · prototype · 2026-09-25
+  Spec: DECISION_LOG.md rows dated 2026-09-25 (SUPPLIERS CLAIM … UPLOADED FILE).
+
+  ZERO JAVASCRIPT — the owner's viewer runs no script. Every flow is CSS:
+    · radios + `~` for the viewport simulator, the six screens and every sub-state
+    · :target for the two sheets (device table, tour)
+    · :hover AND :focus-within for (i) tooltips, so a TAP opens them on touch.
+  All <input> elements sit at the TOP of <body>, so `#id:checked ~ .stage …` reaches everything.
+
+  SHIPPED PIECES REPRODUCED (read from origin/main 9cb19209f, worktree wt-scan):
+    · checkin-desk.tsx / souvenir-desk.tsx — "Scan a guest's QR", "Stop scanning", the 44×44
+      viewfinder square, "That QR isn't a guest on this event's list", NFC "Listening — tap a
+      guest's tag on this phone", "Read a guest's tag".
+    · seat-scanner.tsx — camera-first-then-<video> contract; "not_this_event" answer shape.
+    · use-nfc-tag-reader.ts — Android keeps listening; iPhone reads one tag per press via the
+      system "Ready to Scan" sheet; `supported` false on iPhone browsers.
+    · lib/qr-scan.ts — BarcodeDetector → jsQR fallback (no UI).
+    · on-the-day/page.tsx — the supplier's Event Hub (vendor nav label "Event Hub"), dark
+      focal tile with couple + venue + FloorClock, "Your tools", module quick-link tiles,
+      "Day-of · live" eyebrow, Exit link.
+    · hub-shell.tsx / hub/page.tsx — guest hub: fixed no-scroll shell, header with live dot,
+      bottom toggle menu Now · Watch · Camera · Photos · Me, "Your QR · Let others scan you",
+      "Photos of you".
+    · day-of-announcement.tsx — "From the coordinator" card, role=status, not dismissible.
+  SAMPLE DATA ONLY: Indalecio & Claire · Kodakan Photo Booth · invented guests.
+-->
+<style>
+:root{
+  --ink:#171512; --ink-2:#4A453D; --ink-3:#7C756A; --ink-4:#A79F91;
+  --gold:#9A7739; --gold-2:#C4A063; --gold-wash:rgba(154,119,57,.09);
+  --cta:#BE4A22; --cta-2:#A63F1C; --ok:#4C6B45; --warn:#A9701F; --late:#AD4F31;
+  --late-wash:rgba(173,79,49,.10); --ok-wash:rgba(76,107,69,.10); --warn-wash:rgba(169,112,31,.12);
+  --paper:#FCFAF6; --cream:#F7F3EC;
+  --sans:'Hanken Grotesk',ui-sans-serif,system-ui,-apple-system,sans-serif;
+  --mono:'Space Mono',ui-monospace,Menlo,monospace;
+  --lift-1:0 1px 2px rgba(23,21,18,.04), 0 2px 8px -4px rgba(23,21,18,.10);
+  --lift-2:0 2px 6px rgba(23,21,18,.05), 0 14px 34px -18px rgba(23,21,18,.26);
+  --lift-3:0 4px 12px rgba(23,21,18,.07), 0 34px 70px -28px rgba(23,21,18,.38);
+  --ease:cubic-bezier(.22,.61,.36,1); --t:300ms;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--sans);color:var(--ink);font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;min-height:100%;
+  background:
+    radial-gradient(1200px 780px at 8% -6%, rgba(201,167,102,.13), transparent 60%),
+    radial-gradient(980px 700px at 102% 8%, rgba(190,74,34,.07), transparent 58%),
+    radial-gradient(900px 900px at 50% 118%, rgba(76,107,69,.07), transparent 62%),
+    linear-gradient(176deg,#FCFAF6 0%,#F7F3EC 52%,#F4EFE6 100%);}
+h1,h2,h3,h4{margin:0;font-weight:600;letter-spacing:-.025em;line-height:1.06}
+p{margin:0}
+a{color:inherit}
+input[type=radio],input[type=checkbox]{position:absolute;opacity:0;pointer-events:none;width:0;height:0}
+label{-webkit-tap-highlight-color:transparent}
+.k{transition:transform var(--t) var(--ease),opacity var(--t) var(--ease),color var(--t) var(--ease),background var(--t) var(--ease),box-shadow var(--t) var(--ease);cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
+.k:active{transform:scale(.97)}
+@media (prefers-reduced-motion:reduce){*{transition-duration:1ms!important;animation-duration:1ms!important}}
+.mono{font-family:var(--mono)}
+.eyebrow{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-4)}
+.eyebrow.gold{color:var(--gold)}
+.eyebrow.cta{color:var(--cta)}
+.num{font-weight:300;letter-spacing:-.05em;line-height:.9;font-variant-numeric:tabular-nums}
+.hide{display:none}
+
+/* ─── (i) tooltips: hover on desktop, tap (focus) on touch ─── */
+.tip{position:relative;display:inline-flex;vertical-align:middle}
+.tip .i{width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:700;
+  color:var(--ink-3);background:rgba(23,21,18,.06);cursor:help;outline:none;transition:background var(--t),color var(--t)}
+.tip .i:hover,.tip .i:focus{background:var(--ink);color:#fff}
+.tip .b{position:absolute;left:50%;bottom:calc(100% + 10px);transform:translate(-50%,6px);width:min(280px,78vw);padding:12px 14px;
+  background:rgba(23,21,18,.94);color:#F6F1E8;font-size:12.5px;line-height:1.45;border-radius:14px;box-shadow:var(--lift-3);
+  opacity:0;pointer-events:none;transition:opacity var(--t) var(--ease),transform var(--t) var(--ease);z-index:50;text-align:left;font-weight:400;letter-spacing:0;text-transform:none}
+.tip .b b{color:#fff}
+.tip:hover .b,.tip:focus-within .b{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.tip.left .b{left:auto;right:-6px;transform:translate(0,6px)}
+.tip.left:hover .b,.tip.left:focus-within .b{transform:translate(0,0)}
+
+/* ─── the simulator (brief §6) ─── */
+.sim{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:200;display:flex;align-items:center;gap:3px;padding:6px;
+  background:rgba(23,21,18,.78);backdrop-filter:blur(22px) saturate(1.7);-webkit-backdrop-filter:blur(22px) saturate(1.7);border-radius:999px;box-shadow:var(--lift-3);max-width:96vw;flex-wrap:wrap;justify-content:center}
+.sim .tag{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.17em;text-transform:uppercase;color:rgba(255,250,242,.42);padding:0 8px 0 10px;white-space:nowrap}
+.sim label{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 13px;border-radius:999px;font-size:12px;font-weight:500;color:rgba(255,250,242,.74);white-space:nowrap}
+.sim label:hover{color:#FFFDF9;background:rgba(255,253,250,.10)}
+.sim label .d{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.38}
+#v-mob:checked ~ .sim label[for=v-mob],#v-tp:checked ~ .sim label[for=v-tp],#v-tl:checked ~ .sim label[for=v-tl],#v-dk:checked ~ .sim label[for=v-dk]{background:#FFFDF9;color:#171512;font-weight:700}
+#v-mob:checked ~ .sim label[for=v-mob] .d,#v-tp:checked ~ .sim label[for=v-tp] .d,#v-tl:checked ~ .sim label[for=v-tl] .d,#v-dk:checked ~ .sim label[for=v-dk] .d{opacity:1;background:var(--cta)}
+
+/* ─── the flow rail (which screen) ─── */
+.wrap{max-width:1500px;margin:0 auto;padding:78px clamp(14px,3vw,34px) 120px}
+@media (max-width:560px){.wrap{padding-top:150px}}
+.lede{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 40px;margin:0 0 26px}
+.lede h1{font-size:clamp(28px,4.4vw,46px);font-weight:300;letter-spacing:-.035em;margin-top:10px}
+.lede h1 b{font-weight:700}
+.lede .sub{font-size:14px;color:var(--ink-3);margin-top:8px;max-width:58ch}
+.rail{display:flex;flex-wrap:wrap;gap:4px;padding:5px;border-radius:999px;background:rgba(23,21,18,.05);backdrop-filter:blur(10px)}
+.rail label{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 14px 0 10px;border-radius:999px;font-size:13px;font-weight:500;color:var(--ink-2)}
+.rail label .n{font-family:var(--mono);font-size:10px;font-weight:700;width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:rgba(23,21,18,.08);color:var(--ink-3)}
+.rail label:hover{background:rgba(255,255,255,.7)}
+#s1:checked ~ .wrap label[for=s1],#s2:checked ~ .wrap label[for=s2],#s3:checked ~ .wrap label[for=s3],#s4:checked ~ .wrap label[for=s4],#s5:checked ~ .wrap label[for=s5],#s6:checked ~ .wrap label[for=s6]{background:var(--ink);color:#fff;font-weight:600;box-shadow:var(--lift-2)}
+#s1:checked ~ .wrap label[for=s1] .n,#s2:checked ~ .wrap label[for=s2] .n,#s3:checked ~ .wrap label[for=s3] .n,#s4:checked ~ .wrap label[for=s4] .n,#s5:checked ~ .wrap label[for=s5] .n,#s6:checked ~ .wrap label[for=s6] .n{background:var(--cta);color:#fff}
+.screen{display:none;animation:rise .5s var(--ease)}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+#s1:checked ~ .wrap #sc1,#s2:checked ~ .wrap #sc2,#s3:checked ~ .wrap #sc3,#s4:checked ~ .wrap #sc4,#s5:checked ~ .wrap #sc5,#s6:checked ~ .wrap #sc6{display:block}
+.shead{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 18px;margin:0 0 18px}
+.shead h2{font-size:clamp(20px,2.6vw,28px);font-weight:600}
+.shead .who{font-size:13px;color:var(--ink-3)}
+.shead .who b{color:var(--ink-2);font-weight:600}
+.next{margin-left:auto;display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 6px 0 16px;border-radius:999px;background:var(--ink);color:#fff;font-size:13px;font-weight:600}
+.next i{width:24px;height:24px;border-radius:50%;background:var(--cta);display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-size:12px}
+.next:hover{background:#000}
+
+/* ─── viewport stage: the phone, the tablet, the desktop ─── */
+.stage{--w:390px;--pad:20px;margin:0 auto;width:min(100%,var(--w));transition:width .5s var(--ease)}
+#v-tp:checked ~ .wrap .stage{--w:768px}
+#v-tl:checked ~ .wrap .stage{--w:1024px}
+#v-dk:checked ~ .wrap .stage{--w:1500px}
+.device{position:relative;background:var(--paper);box-shadow:var(--lift-3);border-radius:0;overflow:hidden;min-height:640px}
+#v-mob:checked ~ .wrap .device{border-radius:44px;min-height:800px;box-shadow:0 0 0 10px #1a1815,0 0 0 12px #3a352e,var(--lift-3)}
+#v-mob:checked ~ .wrap .device::before{content:"";position:absolute;left:50%;top:10px;transform:translateX(-50%);width:110px;height:30px;border-radius:999px;background:#1a1815;z-index:5}
+#v-mob:checked ~ .wrap .device .dev-in{padding-top:52px}
+#v-tp:checked ~ .wrap .device{border-radius:28px;box-shadow:0 0 0 12px #1a1815,var(--lift-3)}
+#v-tl:checked ~ .wrap .device{border-radius:24px;box-shadow:0 0 0 12px #1a1815,var(--lift-3)}
+.dev-in{padding:14px 0 0;min-height:inherit;display:flex;flex-direction:column}
+/* app shell chrome */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px var(--pad) 10px;position:sticky;top:0;z-index:4;
+  background:rgba(252,250,246,.72);backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5)}
+.top .back{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-size:13px;font-weight:600;color:var(--ink-2);height:34px;padding:0 10px 0 6px;border-radius:999px}
+.top .back:hover{background:rgba(23,21,18,.06)}
+.top .live{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-3);display:inline-flex;align-items:center;gap:7px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--cta);animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(190,74,34,.45)}70%{box-shadow:0 0 0 8px rgba(190,74,34,0)}}
+.body{padding:8px var(--pad) 28px;flex:1}
+/* bottom nav (mobile shell) — echo of the floating frosted pill */
+.bnav{position:sticky;bottom:0;margin:auto 12px 12px;display:grid;grid-template-columns:repeat(5,1fr);gap:2px;padding:6px;border-radius:999px;
+  background:rgba(23,21,18,.84);backdrop-filter:blur(20px) saturate(1.6);-webkit-backdrop-filter:blur(20px);box-shadow:var(--lift-3);z-index:6}
+.bnav label,.bnav span.it{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:48px;border-radius:999px;color:rgba(255,250,242,.6);font-size:10px;font-weight:600;letter-spacing:.02em}
+.bnav svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.bnav .on{background:#FFFDF9;color:var(--ink)}
+.bnav label:hover{color:#fff}
+
+/* editorial primitives (no cards, no borders) */
+.big{font-size:clamp(44px,10vw,72px)}
+.line{display:flex;align-items:center;gap:14px;padding:13px 0;position:relative}
+.line .t{font-size:15px;font-weight:500}
+.line .s{font-size:12.5px;color:var(--ink-3);margin-top:1px}
+.line .v{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--ink-4);white-space:nowrap}
+.line .ic{width:34px;height:34px;border-radius:50%;background:var(--gold-wash);color:var(--gold);display:inline-flex;align-items:center;justify-content:center;flex:none}
+.line .ic svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.sect{margin-top:30px}
+.sect > .eyebrow{display:block;margin-bottom:8px}
+.dark{background:linear-gradient(160deg,#1E1B17 0%,#171512 60%,#1F1A14 100%);color:#F6F1E8;padding:22px var(--pad) 24px;margin:0 calc(-1 * var(--pad));position:relative;overflow:hidden}
+.dark::after{content:"";position:absolute;inset:auto -30% -60% auto;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(196,160,99,.22),transparent 65%);pointer-events:none}
+.dark .eyebrow{color:rgba(246,241,232,.5)}
+.dark h3{font-weight:300;font-size:26px;letter-spacing:-.03em}
+.dark .venue{font-size:13px;color:rgba(246,241,232,.6);margin-top:3px}
+.clock{display:flex;align-items:baseline;gap:10px;margin-top:16px}
+.clock .num{font-size:40px;color:#fff}
+.clock .l{font-size:12px;color:rgba(246,241,232,.62)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;height:52px;padding:0 22px;border-radius:999px;font-size:15px;font-weight:700;color:#fff;background:var(--cta);box-shadow:0 8px 24px -10px rgba(190,74,34,.6)}
+.btn:hover{background:var(--cta-2)}
+.btn.w{width:100%}
+.btn.ghost{background:rgba(23,21,18,.06);color:var(--ink);box-shadow:none}
+.btn.ghost:hover{background:rgba(23,21,18,.1)}
+.btn.ink{background:var(--ink);box-shadow:none}
+.btn.ink:hover{background:#000}
+.btn.sm{height:38px;padding:0 16px;font-size:13px}
+.btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 13px;border-radius:999px;font-size:12.5px;font-weight:500;color:var(--ink-2);background:rgba(23,21,18,.06)}
+.chip:hover{background:rgba(23,21,18,.11)}
+.chip.on{background:var(--ink);color:#fff;font-weight:600}
+.proto{margin-top:18px;padding-top:12px;border-top:1px dashed rgba(23,21,18,.14)}
+.proto .eyebrow{display:block;margin-bottom:8px;color:var(--ink-4)}
+
+/* wide layouts: phone + context pane */
+.duo{display:grid;grid-template-columns:1fr;gap:26px;align-items:start}
+#v-tl:checked ~ .wrap .duo,#v-dk:checked ~ .wrap .duo{grid-template-columns:minmax(360px,420px) 1fr}
+#v-tp:checked ~ .wrap .duo{grid-template-columns:minmax(340px,400px) 1fr}
+.duo .device{min-height:760px}
+#v-mob:checked ~ .wrap .duo .device{min-height:800px}
+.pane{padding:18px 6px}
+.pane h3{font-size:22px;font-weight:600;margin-bottom:6px}
+.pane .why{font-size:13.5px;color:var(--ink-3);max-width:52ch;line-height:1.5}
+.pane .ed{margin-top:24px}
+.pane .ed .eyebrow{display:block;margin-bottom:10px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:8px 18px;font-size:13.5px}
+.kv dt{font-family:var(--mono);font-size:11px;color:var(--ink-4);padding-top:3px}
+.kv dd{margin:0;color:var(--ink-2)}
+.kv dd b{color:var(--ink)}
+#v-mob:checked ~ .wrap .pane,#v-tp:checked ~ .wrap .pane .only-wide{display:none}
+#v-tp:checked ~ .wrap .pane{display:block}
+
+/* sheets via :target */
+.sheet{position:fixed;inset:0;z-index:300;display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
+.sheet .veil{position:absolute;inset:0;background:rgba(23,21,18,.38);backdrop-filter:blur(6px);opacity:0;transition:opacity var(--t)}
+.sheet .panel{position:relative;width:min(560px,100%);max-height:88vh;overflow:auto;background:rgba(252,250,246,.96);backdrop-filter:blur(24px);border-radius:28px 28px 0 0;padding:22px 24px 34px;box-shadow:var(--lift-3);transform:translateY(100vh);visibility:hidden;transition:transform .45s var(--ease),visibility 0s .45s}
+.sheet:target{pointer-events:auto}
+.sheet:target .veil{opacity:1}
+.sheet:target .panel{transform:none;visibility:visible;transition:transform .45s var(--ease),visibility 0s}
+@media (min-width:900px){.sheet{align-items:center}.sheet .panel{border-radius:28px}}
+.sheet .x{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:var(--ink-3);background:rgba(23,21,18,.06)}
+.sheet .x:hover{background:var(--ink);color:#fff}
+.sheet h3{font-size:22px;margin:4px 0 4px}
+.sheet .sub{font-size:13px;color:var(--ink-3)}
+table.dev{width:100%;border-collapse:collapse;margin-top:16px;font-size:13.5px}
+table.dev th{text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-4);padding:8px 0;font-weight:700}
+table.dev td{padding:11px 0;vertical-align:top}
+table.dev tr + tr td{border-top:1px solid rgba(23,21,18,.06)}
+.yes{color:var(--ok);font-weight:700}.no{color:var(--late);font-weight:700}
+.sml{font-size:12px;color:var(--ink-3)}
+</style>
+</head>
+<body>
+<!-- ALL STATE LIVES HERE. Radios first, so `~` reaches the whole page. -->
+<input type="radio" name="vp" id="v-mob" checked><input type="radio" name="vp" id="v-tp"><input type="radio" name="vp" id="v-tl"><input type="radio" name="vp" id="v-dk">
+<input type="radio" name="step" id="s1" checked><input type="radio" name="step" id="s2"><input type="radio" name="step" id="s3"><input type="radio" name="step" id="s4"><input type="radio" name="step" id="s5"><input type="radio" name="step" id="s6">
+<input type="radio" name="tour" id="t1" checked><input type="radio" name="tour" id="t2"><input type="radio" name="tour" id="t3"><input type="radio" name="tour" id="t4"><input type="radio" name="tour" id="t0">
+<input type="radio" name="mode" id="m-once"><input type="radio" name="mode" id="m-ord" checked><input type="radio" name="mode" id="m-unl"><input type="radio" name="mode" id="m-grp"><input type="radio" name="mode" id="m-roam">
+<input type="radio" name="dev" id="d-and" checked><input type="radio" name="dev" id="d-app"><input type="radio" name="dev" id="d-ios">
+<input type="radio" name="res" id="r-idle" checked><input type="radio" name="res" id="r-ok"><input type="radio" name="res" id="r-dup"><input type="radio" name="res" id="r-not"><input type="radio" name="res" id="r-nfc">
+<input type="radio" name="ord" id="o-new" checked><input type="radio" name="ord" id="o-ready"><input type="radio" name="ord" id="o-recv">
+<input type="radio" name="grp" id="g1" checked><input type="radio" name="grp" id="g2"><input type="radio" name="grp" id="g3"><input type="radio" name="grp" id="g4"><input type="radio" name="grp" id="g5">
+<input type="radio" name="gr" id="gr-grp" checked><input type="radio" name="gr" id="gr-roam">
+<input type="radio" name="prints" id="p2"><input type="radio" name="prints" id="p3" checked><input type="radio" name="prints" id="p4"><input type="radio" name="prints" id="p5">
+<input type="radio" name="up" id="u0" checked><input type="radio" name="up" id="u1">
+<input type="radio" name="hub" id="h-now" checked><input type="radio" name="hub" id="h-photos"><input type="radio" name="hub" id="h-me">
+<input type="radio" name="gs" id="gs-num" checked><input type="radio" name="gs" id="gs-ready"><input type="radio" name="gs" id="gs-recv">
+<input type="radio" name="st" id="st0" checked><input type="radio" name="st" id="st1"><input type="radio" name="st" id="st2"><input type="radio" name="st" id="st3"><input type="radio" name="st" id="st4"><input type="radio" name="st" id="st5">
+<input type="checkbox" id="rv-x">
+<input type="radio" name="co" id="c-idle" checked><input type="radio" name="co" id="c-ok"><input type="radio" name="co" id="c-dup"><input type="radio" name="co" id="c-not">
+
+<nav class="sim" aria-label="Viewport simulator">
+  <span class="tag">Viewport</span>
+  <label class="k" for="v-mob"><span class="d"></span>Mobile</label>
+  <label class="k" for="v-tp"><span class="d"></span>Tablet P</label>
+  <label class="k" for="v-tl"><span class="d"></span>Tablet L</label>
+  <label class="k" for="v-dk"><span class="d"></span>Desktop</label>
+</nav>
+
+<div class="wrap">
+  <header class="lede">
+    <div>
+      <span class="eyebrow gold">Supplier scan · prototype · 2026-09-25</span>
+      <h1>Claim a guest's service <b>by QR or NFC</b></h1>
+      <p class="sub">Kodakan Photo Booth at Indalecio &amp; Claire's wedding. Six screens, one flow — click the rail or the arrow on each screen. Sample data only.</p>
+    </div>
+    <nav class="rail" aria-label="Screens">
+      <label class="k" for="s1"><span class="n">1</span>Supplier's Event Hub</label>
+      <label class="k" for="s2"><span class="n">2</span>Tour &amp; setup</label>
+      <label class="k" for="s3"><span class="n">3</span>Scanner</label>
+      <label class="k" for="s4"><span class="n">4</span>Group &amp; Roaming</label>
+      <label class="k" for="s5"><span class="n">5</span>Guest's Event Hub</label>
+      <label class="k" for="s6"><span class="n">6</span>Coordinator</label>
+    </nav>
+  </header>
+
+<!-- ═══════════════════ SCREEN 1 · the supplier's Event Hub for this event ═══════════════════ -->
+<section class="screen" id="sc1">
+  <div class="shead">
+    <h2>The supplier's Event Hub — this event only</h2>
+    <p class="who"><b>Kodakan Photo Booth</b> · booked for Indalecio &amp; Claire · the Scan button appears here and nowhere else</p>
+    <label class="k next" for="s2">First visit → tour <i>→</i></label>
+  </div>
+  <div class="duo">
+    <div class="stage"><div class="device"><div class="dev-in">
+      <div class="top">
+        <span class="back k">‹ Exit</span>
+        <span class="live"><span class="dot"></span>Day-of · live</span>
+      </div>
+      <div class="body">
+        <div class="dark">
+          <span class="eyebrow">Event Hub · Kodakan Photo Booth</span>
+          <h3 style="margin-top:8px">Indalecio &amp; Claire</h3>
+          <p class="venue">Ilog Maria Farm · Silang, Cavite</p>
+          <div class="clock"><span class="num">18:40</span><span class="l">Reception · Cake cutting in 12 min</span></div>
+        </div>
+
+        <!-- THE DELTA: one action, one readout. Count only — never a name. -->
+        <div class="sect" style="margin-top:26px">
+          <span class="eyebrow cta">Your service tonight · Photo strip</span>
+          <div style="display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap;margin-top:6px">
+            <div><span class="num big">96</span><div class="sml" style="margin-top:6px">received of 180 guests</div></div>
+            <div style="display:flex;gap:18px;padding-bottom:6px">
+              <div><span class="num" style="font-size:26px">12</span><div class="sml">ordered</div></div>
+              <div><span class="num" style="font-size:26px;color:var(--cta)">4</span><div class="sml">ready</div></div>
+            </div>
+            <span class="tip left" style="padding-bottom:10px"><span class="i" tabindex="0">i</span><span class="b"><b>Count only.</b> You see how many, never who. The couple and a host-approved coordinator see names on their own side.</span></span>
+          </div>
+          <label class="k btn w" for="s3" style="margin-top:18px">
+            <svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="4" height="4"/><rect x="13" y="7" width="4" height="4"/><rect x="7" y="13" width="4" height="4"/><path d="M13 13h4v4"/></svg>
+            Scan a guest
+          </label>
+          <p class="sml" style="text-align:center;margin-top:10px">QR or NFC · Indalecio &amp; Claire's guests only</p>
+        </div>
+
+        <div class="sect">
+          <span class="eyebrow">Your tools</span>
+          <div class="line"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><div><div class="t">Run of show</div><div class="s">Now · Reception · next Cake cutting</div></div><span class="v">live</span></div>
+          <div class="line"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-4.5-6.2"/></svg></span><div><div class="t">Headcount</div><div class="s">attending · pulled live from RSVPs</div></div><span class="v">148 / 180</span></div>
+          <div class="line"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 8h16v12H4zM8 8V6a4 4 0 0 1 8 0v2"/></svg></span><div><div class="t">Capture for your Setnayan shop + their recap</div><div class="s">Papic · 46 points left tonight</div></div><span class="v">→</span></div>
+          <div class="line"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.3 6L12 16.4 6.6 19.4l1.3-6L3.4 9.3l6-.7z"/></svg></span><div><div class="t">Instant reviews from guests</div><div class="s">after "received" · optional for the guest</div></div><span class="v">3 new</span></div>
+        </div>
+      </div>
+      <nav class="bnav" aria-label="Menu">
+        <span class="it"><svg viewBox="0 0 24 24"><path d="M3 12l9-8 9 8M5 10v10h14V10"/></svg>Today</span>
+        <span class="it"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/></svg>Customers</span>
+        <span class="it"><svg viewBox="0 0 24 24"><path d="M4 9l1-5h14l1 5M4 9h16v11H4z"/></svg>My Shop</span>
+        <span class="it"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 15l5-5 4 4 7-7"/></svg>Performance</span>
+        <span class="it on"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="0"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Event Hub</span>
+      </nav>
+    </div></div></div>
+
+    <aside class="pane">
+      <h3>Where it lives</h3>
+      <p class="why">Vendor menu → <b>Event Hub</b> → today's booking → the live console. Scan is one button under the couple's name. On the Day (the index) gets the same button as a shortcut beside "Open the console".</p>
+      <div class="ed">
+        <span class="eyebrow">On the Day · today's booking · shortcut</span>
+        <div class="dark" style="margin:0;border-radius:0;padding:18px 20px">
+          <span class="eyebrow">Today · Fri 18 Dec</span>
+          <h3 style="font-size:20px;margin-top:6px">Indalecio &amp; Claire</h3>
+          <p class="venue">Photo strip · Ordered → Received · 96 received</p>
+          <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+            <span class="btn sm ink k" style="background:#FFFDF9;color:var(--ink)">Open the console</span>
+            <label class="btn sm k" for="s3">Scan a guest</label>
+          </div>
+        </div>
+      </div>
+      <div class="ed">
+        <span class="eyebrow">Shipped pieces this screen extends</span>
+        <dl class="kv">
+          <dt>console</dt><dd><b>on-the-day/live/[eventId]/page.tsx</b> — dark focal tile, FloorClock, "Your tools", Exit link, "Day-of · live"</dd>
+          <dt>menu</dt><dd><b>vendor-nav-destinations.ts</b> — "Event Hub" is already the fifth slot</dd>
+          <dt>new</dt><dd>the Scan block: readout + button + count-only (i)</dd>
+        </dl>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ═══════════════════ SCREEN 2 · first-visit tour + service setup ═══════════════════ -->
+<style>
+.tour{position:relative;margin:0 calc(-1 * var(--pad));padding:26px var(--pad) 22px;background:linear-gradient(160deg,#1E1B17,#171512);color:#F6F1E8;min-height:520px;display:flex;flex-direction:column}
+.slide{display:none;flex:1;animation:rise .45s var(--ease)}
+#t1:checked ~ .wrap .slide.a,#t2:checked ~ .wrap .slide.b,#t3:checked ~ .wrap .slide.c,#t4:checked ~ .wrap .slide.d{display:flex;flex-direction:column}
+.slide .art{flex:1;display:flex;align-items:center;justify-content:center;min-height:200px}
+.slide h3{font-weight:300;font-size:30px;letter-spacing:-.03em;color:#fff}
+.slide p{margin-top:10px;font-size:14px;color:rgba(246,241,232,.68);max-width:32ch}
+.tdots{display:flex;gap:6px;margin:18px 0 14px}
+.tdots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.25);transition:all var(--t)}
+#t1:checked ~ .wrap .tdots i:nth-child(1),#t2:checked ~ .wrap .tdots i:nth-child(2),#t3:checked ~ .wrap .tdots i:nth-child(3),#t4:checked ~ .wrap .tdots i:nth-child(4){background:var(--gold-2);width:22px}
+.tbtns{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.tbtns .skip{color:rgba(246,241,232,.5);font-size:13px;padding:8px 10px;border-radius:999px}
+.tbtns .skip:hover{color:#fff}
+.tour .n1,.tour .n2,.tour .n3,.tour .n4{display:none}
+#t1:checked ~ .wrap .tour .n1,#t2:checked ~ .wrap .tour .n2,#t3:checked ~ .wrap .tour .n3,#t4:checked ~ .wrap .tour .n4{display:inline-flex}
+#t0:checked ~ .wrap .tour{display:none}
+.setup{display:none}
+#t0:checked ~ .wrap .setup{display:block;animation:rise .5s var(--ease)}
+.tour-note{display:block}
+#t0:checked ~ .wrap .tour-note{display:none}
+/* mode picker: a list of pressable rows, radius on the pressable only */
+.mode{display:flex;align-items:center;gap:14px;padding:12px 14px;margin:0 -14px;border-radius:18px;transition:background var(--t)}
+.mode:hover{background:rgba(23,21,18,.045)}
+.mode .rad{width:22px;height:22px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1.5px var(--ink-4);transition:all var(--t);position:relative}
+.mode .rad::after{content:"";position:absolute;inset:6px;border-radius:50%;background:#fff;transform:scale(0);transition:transform var(--t) var(--ease)}
+.mode .t{font-size:15px;font-weight:600}
+.mode .s{font-size:12.5px;color:var(--ink-3)}
+.mode .ex{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink-4);white-space:nowrap}
+#m-once:checked ~ .wrap .mode.once,#m-ord:checked ~ .wrap .mode.ord,#m-unl:checked ~ .wrap .mode.unl,#m-grp:checked ~ .wrap .mode.grp,#m-roam:checked ~ .wrap .mode.roam{background:var(--ink);color:#fff}
+#m-once:checked ~ .wrap .mode.once .s,#m-ord:checked ~ .wrap .mode.ord .s,#m-unl:checked ~ .wrap .mode.unl .s,#m-grp:checked ~ .wrap .mode.grp .s,#m-roam:checked ~ .wrap .mode.roam .s,
+#m-once:checked ~ .wrap .mode.once .ex,#m-ord:checked ~ .wrap .mode.ord .ex,#m-unl:checked ~ .wrap .mode.unl .ex,#m-grp:checked ~ .wrap .mode.grp .ex,#m-roam:checked ~ .wrap .mode.roam .ex{color:rgba(255,255,255,.62)}
+#m-once:checked ~ .wrap .mode.once .rad,#m-ord:checked ~ .wrap .mode.ord .rad,#m-unl:checked ~ .wrap .mode.unl .rad,#m-grp:checked ~ .wrap .mode.grp .rad,#m-roam:checked ~ .wrap .mode.roam .rad{box-shadow:inset 0 0 0 7px var(--cta)}
+#m-once:checked ~ .wrap .mode.once .rad::after,#m-ord:checked ~ .wrap .mode.ord .rad::after,#m-unl:checked ~ .wrap .mode.unl .rad::after,#m-grp:checked ~ .wrap .mode.grp .rad::after,#m-roam:checked ~ .wrap .mode.roam .rad::after{transform:scale(1)}
+.field{margin-top:20px}
+.field label.l{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-4);margin-bottom:6px}
+.field input[type=text]{width:100%;font:inherit;font-size:22px;font-weight:500;letter-spacing:-.02em;color:var(--ink);background:transparent;border:0;border-bottom:1.5px solid rgba(23,21,18,.14);padding:6px 0 10px;outline:none;transition:border-color var(--t)}
+.field input[type=text]:focus{border-color:var(--cta)}
+/* mode-aware summary lines */
+.mo{display:none}
+#m-once:checked ~ .wrap .mo.once,#m-ord:checked ~ .wrap .mo.ord,#m-unl:checked ~ .wrap .mo.unl,#m-grp:checked ~ .wrap .mo.grp,#m-roam:checked ~ .wrap .mo.roam{display:inline}
+.mob{display:none}
+#m-once:checked ~ .wrap .mob.once.cc,#m-ord:checked ~ .wrap .mob.ord.cc,#m-unl:checked ~ .wrap .mob.unl.cc,#m-grp:checked ~ .wrap .mob.grp.cc,#m-roam:checked ~ .wrap .mob.roam.cc{display:contents}
+#m-once:checked ~ .wrap .mob.once.ic,#m-ord:checked ~ .wrap .mob.ord.ic,#m-unl:checked ~ .wrap .mob.unl.ic,#m-grp:checked ~ .wrap .mob.grp.ic,#m-roam:checked ~ .wrap .mob.roam.ic{display:inline}
+#m-once:checked ~ .wrap .mob.once,#m-ord:checked ~ .wrap .mob.ord,#m-unl:checked ~ .wrap .mob.unl,#m-grp:checked ~ .wrap .mob.grp,#m-roam:checked ~ .wrap .mob.roam{display:block}
+.art-qr{width:150px;height:150px;border-radius:26px;background:#fff;display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:16px;box-shadow:0 30px 60px -30px rgba(0,0,0,.8)}
+.art-qr i{background:#171512;border-radius:2px}
+.art-qr i.o{background:transparent}
+.art-nfc{width:120px;height:120px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;color:var(--gold-2)}
+.art-nfc::before,.art-nfc::after{content:"";position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(196,160,99,.5);animation:ring 2.2s infinite}
+.art-nfc::after{animation-delay:1.1s}
+@keyframes ring{0%{transform:scale(.55);opacity:.9}100%{transform:scale(1.35);opacity:0}}
+.art-num{font-family:var(--mono);font-weight:700;font-size:54px;letter-spacing:-.02em;color:#fff;text-shadow:0 20px 50px rgba(196,160,99,.4)}
+.art-num small{display:block;font-size:12px;letter-spacing:.2em;color:var(--gold-2);font-weight:400;margin-top:8px}
+</style>
+<section class="screen" id="sc2">
+  <div class="shead">
+    <h2>First visit — a four-slide tour, then set up the service</h2>
+    <p class="who">Shown once per supplier. Reopen from the ⓘ on the scanner.</p>
+    <label class="k next" for="s3">Open the scanner <i>→</i></label>
+  </div>
+  <div class="duo">
+    <div class="stage"><div class="device"><div class="dev-in">
+      <div class="top">
+        <label class="back k" for="s1">‹ Event Hub</label>
+        <span class="live">Kodakan Photo Booth</span>
+      </div>
+      <div class="body">
+        <!-- THE TOUR -->
+        <div class="tour" role="group" aria-label="First-visit tour">
+          <div class="slide a">
+            <div class="art">
+              <div class="art-qr" aria-hidden><i></i><i></i><i></i><i class="o"></i><i></i><i></i><i></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i></i><i class="o"></i><i></i><i></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i></i><i class="o"></i><i></i><i></i><i class="o"></i><i></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i></i><i></i><i></i><i class="o"></i><i></i><i></i><i></i></div>
+            </div>
+            <h3>Scan or tap</h3>
+            <p>Every guest carries the same identity twice: a QR on their Event Hub and an NFC tag. QR works on any phone. NFC on Android Chrome and in the Setnayan app.</p>
+          </div>
+          <div class="slide b">
+            <div class="art"><div class="art-nfc" aria-hidden><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 8.3a7 7 0 0 1 0 7.4M9.5 6a10.5 10.5 0 0 1 0 12M13 4a14 14 0 0 1 0 16M16.5 2.5a17.5 17.5 0 0 1 0 19"/></svg></div></div>
+            <h3>Five ways to count</h3>
+            <p>Once · Ordered → Received · Unlimited · Group session · Roaming. Pick one per service, change it any time before the event.</p>
+          </div>
+          <div class="slide c">
+            <div class="art"><div class="art-num" aria-hidden>#0231<small>PHOTO STRIP</small></div></div>
+            <h3>One shared number</h3>
+            <p>Each scan gets the next number. You see it, the guest sees it on their Event Hub. Prints find people without names.</p>
+          </div>
+          <div class="slide d">
+            <div class="art" style="flex-direction:column;gap:6px"><span class="num" style="font-size:64px;color:#fff">96</span><span class="eyebrow" style="color:var(--gold-2)">received · never who</span></div>
+            <h3>Counts, not names</h3>
+            <p>You see how many. The couple sees who. A coordinator the host approved scans with the host's view.</p>
+          </div>
+          <div class="tdots" aria-hidden><i></i><i></i><i></i><i></i></div>
+          <div class="tbtns">
+            <label class="k skip" for="t0">Skip</label>
+            <label class="k btn sm n1" for="t2" style="background:#FFFDF9;color:var(--ink);box-shadow:none">Next</label>
+            <label class="k btn sm n2" for="t3" style="background:#FFFDF9;color:var(--ink);box-shadow:none">Next</label>
+            <label class="k btn sm n3" for="t4" style="background:#FFFDF9;color:var(--ink);box-shadow:none">Next</label>
+            <label class="k btn sm n4" for="t0">Set up my service</label>
+          </div>
+        </div>
+
+        <!-- THE SETUP -->
+        <div class="setup">
+          <span class="eyebrow cta">Service setup · Indalecio &amp; Claire</span>
+          <div class="field">
+            <label class="l" for="item">What the guest receives</label>
+            <input type="text" id="item" value="Photo strip">
+          </div>
+          <div class="sect" style="margin-top:26px">
+            <span class="eyebrow" style="display:flex;align-items:center;gap:8px">How to count it
+              <span class="tip"><span class="i" tabindex="0">i</span><span class="b"><b>Per service, per event.</b> The number sequence (#0001…) is shared across every mode. Group session and Roaming both hand one number to several guests.</span></span>
+            </span>
+            <label class="k mode once" for="m-once"><span class="rad"></span><div><div class="t">Once</div><div class="s">One scan = received · repeat says "Already received"</div></div><span class="ex">souvenirs</span></label>
+            <label class="k mode ord" for="m-ord"><span class="rad"></span><div><div class="t">Ordered → Received</div><div class="s">Scan = ordered · tap Ready · scan again = received</div></div><span class="ex">prints</span></label>
+            <label class="k mode unl" for="m-unl"><span class="rad"></span><div><div class="t">Unlimited</div><div class="s">Every scan counts again, new number each time</div></div><span class="ex">open booth</span></label>
+            <label class="k mode grp" for="m-grp"><span class="rad"></span><div><div class="t">Group session</div><div class="s">Scan everyone in the shot · one number · prints –/+</div></div><span class="ex">group shots</span></label>
+            <label class="k mode roam" for="m-roam"><span class="rad"></span><div><div class="t">Roaming</div><div class="s">Tap the guests before the shot · one number per shot</div></div><span class="ex">photographer</span></label>
+          </div>
+          <label class="k btn w" for="s3" style="margin-top:22px">Save · open the scanner</label>
+          <p class="sml" style="text-align:center;margin-top:10px">
+            <span class="mo once">Counter: Received · of 180</span><span class="mo ord">Counter: Ordered · Ready · Received of 180</span><span class="mo unl">Counter: Served · unique guests</span><span class="mo grp">Counter: Sessions · Ready · Claimed</span><span class="mo roam">Counter: Shots · Ready · Claimed</span>
+          </p>
+        </div>
+      </div>
+    </div></div></div>
+
+    <aside class="pane">
+      <h3>What the tour must land</h3>
+      <p class="why">Owner: <i>"this must be explained to vendors then."</i> Four slides, one idea each, no paragraphs on the working screen afterwards. Everything else moves into ⓘ.</p>
+      <div class="ed">
+        <span class="eyebrow">Mode chosen changes the rest of the flow</span>
+        <dl class="kv">
+          <dt>once</dt><dd>✓ #n · Received — repeat: <b>Already received</b></dd>
+          <dt>ordered</dt><dd>✓ #n · Ordered → <b>Ready</b> → guest told → scan = Received</dd>
+          <dt>unlimited</dt><dd>every scan is a new number; counter shows served + unique</dd>
+          <dt>group</dt><dd>one number for all in the shot; prints default to heads</dd>
+          <dt>roaming</dt><dd>tap before the shot; one number per shot; groups too</dd>
+        </dl>
+      </div>
+      <div class="ed only-wide">
+        <span class="eyebrow">Reused</span>
+        <dl class="kv">
+          <dt>tour</dt><dd>new · same dark focal language as the console tile</dd>
+          <dt>setup</dt><dd>new · one text field + five rows; stored per service per event</dd>
+        </dl>
+      </div>
+    </aside>
+  </div>
+</section>
+<!-- ═══════════════════ SCREEN 3 · the scanner ═══════════════════ -->
+<style>
+.cam{position:relative;margin:10px calc(-1 * var(--pad)) 0;aspect-ratio:4/4.6;background:
+  radial-gradient(60% 50% at 50% 40%, #3b342c 0%, #211d19 55%, #14120f 100%);overflow:hidden;display:block;cursor:pointer}
+#v-tp:checked ~ .wrap .cam,#v-tl:checked ~ .wrap .cam,#v-dk:checked ~ .wrap .cam{aspect-ratio:4/3.4}
+.cam .vf{position:absolute;left:50%;top:46%;width:200px;height:200px;transform:translate(-50%,-50%)}
+.cam .vf i{position:absolute;width:30px;height:30px;border:2.5px solid rgba(255,255,255,.85);border-radius:0}
+.cam .vf i:nth-child(1){left:0;top:0;border-right:0;border-bottom:0;border-top-left-radius:10px}
+.cam .vf i:nth-child(2){right:0;top:0;border-left:0;border-bottom:0;border-top-right-radius:10px}
+.cam .vf i:nth-child(3){left:0;bottom:0;border-right:0;border-top:0;border-bottom-left-radius:10px}
+.cam .vf i:nth-child(4){right:0;bottom:0;border-left:0;border-top:0;border-bottom-right-radius:10px}
+.cam .laser{position:absolute;left:8%;right:8%;top:20%;height:2px;background:linear-gradient(90deg,transparent,rgba(190,74,34,.95),transparent);animation:laser 2.4s ease-in-out infinite;box-shadow:0 0 18px rgba(190,74,34,.8)}
+@keyframes laser{0%,100%{top:22%;opacity:.2}50%{top:70%;opacity:1}}
+.cam .hint{position:absolute;left:0;right:0;bottom:16px;text-align:center;font-size:12.5px;color:rgba(255,250,242,.62)}
+.cam .stop{position:absolute;top:14px;right:14px;height:32px;padding:0 12px;border-radius:999px;background:rgba(255,253,250,.14);color:#fff;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;backdrop-filter:blur(10px)}
+.cam .mode-pill{position:absolute;top:14px;left:14px;height:32px;padding:0 12px;border-radius:999px;background:rgba(255,253,250,.14);color:#fff;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;backdrop-filter:blur(10px)}
+/* the result — rises over the bottom of the camera */
+.res{margin:-34px calc(-1 * var(--pad)) 0;padding:26px var(--pad) 22px;position:relative;z-index:2;background:rgba(252,250,246,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:30px 30px 0 0;box-shadow:0 -18px 40px -30px rgba(23,21,18,.5);min-height:200px}
+.st{display:none;animation:pop .45s var(--ease)}
+@keyframes pop{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+#r-idle:checked ~ .wrap .st.idle,#r-ok:checked ~ .wrap .st.ok,#r-dup:checked ~ .wrap .st.dup,#r-not:checked ~ .wrap .st.not,#r-nfc:checked ~ .wrap .st.nfc{display:block}
+.res .hash{font-family:var(--mono);font-weight:700;font-size:56px;letter-spacing:-.03em;line-height:1;display:flex;align-items:center;gap:12px}
+.res .hash .ck{width:44px;height:44px;border-radius:50%;background:var(--ok);color:#fff;display:inline-flex;align-items:center;justify-content:center;flex:none;animation:tick .5s var(--ease)}
+@keyframes tick{from{transform:scale(.3)}to{transform:scale(1)}}
+.res .hash .ck svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.res .what{font-size:18px;font-weight:600;margin-top:10px}
+.res .sub{font-size:13px;color:var(--ink-3);margin-top:4px}
+.res .dupmark{font-size:30px;font-weight:300;letter-spacing:-.03em;color:var(--warn)}
+.res .notmark{font-size:30px;font-weight:300;letter-spacing:-.03em;color:var(--late)}
+.counter{display:flex;gap:22px;align-items:flex-end;padding:6px 0 2px;flex-wrap:wrap}
+.counter .c .num{font-size:34px}
+.counter .c .l{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-4);margin-top:4px}
+.counter .c.hot .num{color:var(--cta)}
+/* ordered sub-flow */
+.ordst{display:none}
+#o-new:checked ~ .wrap .ordst.new,#o-ready:checked ~ .wrap .ordst.ready,#o-recv:checked ~ .wrap .ordst.recv{display:block}
+/* device-dependent NFC control */
+.nfc-and,.nfc-app,.nfc-ios{display:none}
+#d-and:checked ~ .wrap .nfc-and,#d-app:checked ~ .wrap .nfc-app,#d-ios:checked ~ .wrap .nfc-ios{display:block}
+.nfcbtn{display:flex;align-items:center;justify-content:center;gap:10px;height:52px;border-radius:999px;background:rgba(23,21,18,.06);font-size:15px;font-weight:700;color:var(--ink)}
+.nfcbtn:hover{background:rgba(23,21,18,.1)}
+.nfcbtn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round}
+.iosnote{display:flex;align-items:center;gap:12px;padding:10px 0}
+.iosnote .n{font-size:14px;font-weight:500;color:var(--ink-2)}
+.iosnote .n b{display:block;font-size:12.5px;color:var(--ink-3);font-weight:400;margin-top:2px}
+.listen{display:flex;align-items:center;gap:12px;padding:10px 0}
+.listen .n{font-size:14px;font-weight:500}
+.listen .n b{display:block;font-size:12.5px;color:var(--ink-3);font-weight:400;margin-top:2px}
+.apple{margin:6px auto 0;width:min(320px,100%);background:#fff;color:#111;border-radius:26px;padding:20px 18px 18px;text-align:center;box-shadow:var(--lift-3);font-family:-apple-system,system-ui,var(--sans)}
+.apple .ttl{font-weight:700;font-size:17px}
+.apple .sub{font-size:13px;color:#6b6b6b;margin-top:4px}
+.apple .ph{width:64px;height:100px;border-radius:12px;background:#111;margin:18px auto 14px;position:relative}
+.apple .ph::before{content:"";position:absolute;left:50%;top:-14px;transform:translateX(-50%);width:44px;height:44px;border-radius:50%;border:2px solid #2e7cf6;box-shadow:0 0 0 8px rgba(46,124,246,.12)}
+.apple .cancel{display:block;margin-top:10px;background:#f0f0f0;border-radius:14px;padding:12px;font-weight:600;font-size:15px}
+.dch{display:none}
+#d-and:checked ~ .wrap .dch.and,#d-app:checked ~ .wrap .dch.app,#d-ios:checked ~ .wrap .dch.ios{display:inline}
+#d-and:checked ~ .wrap .chip[for=d-and],#d-app:checked ~ .wrap .chip[for=d-app],#d-ios:checked ~ .wrap .chip[for=d-ios],
+#r-ok:checked ~ .wrap .chip[for=r-ok],#r-dup:checked ~ .wrap .chip[for=r-dup],#r-not:checked ~ .wrap .chip[for=r-not],
+#m-once:checked ~ .wrap .chip[for=m-once],#m-ord:checked ~ .wrap .chip[for=m-ord],#m-unl:checked ~ .wrap .chip[for=m-unl],#m-grp:checked ~ .wrap .chip[for=m-grp],#m-roam:checked ~ .wrap .chip[for=m-roam]{background:var(--ink);color:#fff}
+.ilink{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:rgba(23,21,18,.06);color:var(--ink-2);text-decoration:none;font-family:var(--mono);font-size:12px;font-weight:700}
+.ilink:hover{background:var(--ink);color:#fff}
+</style>
+<section class="screen" id="sc3">
+  <div class="shead">
+    <h2>The scanner — phone first</h2>
+    <p class="who">Camera, Tap NFC, the counter, the four answers. The mode chosen in setup drives the copy.</p>
+    <label class="k next" for="s4">Group &amp; Roaming <i>→</i></label>
+  </div>
+  <div class="duo">
+    <div class="stage"><div class="device"><div class="dev-in">
+      <div class="top">
+        <label class="back k" for="s1">‹ Event Hub</label>
+        <span class="live" style="letter-spacing:.12em"><span class="mo once">Photo strip · Once</span><span class="mo ord">Photo strip · Ordered → Received</span><span class="mo unl">Photo strip · Unlimited</span><span class="mo grp">Photo strip · Group session</span><span class="mo roam">Photo strip · Roaming</span></span>
+        <a class="ilink k" href="#sheet-devices" aria-label="QR vs NFC — which devices">i</a>
+      </div>
+      <div class="body" style="padding-bottom:18px">
+        <div class="counter">
+          <div class="mob once cc"><div class="c"><span class="num">143</span><div class="l">received</div></div><div class="c"><span class="num" style="color:var(--ink-4)">180</span><div class="l">guests</div></div></div>
+          <div class="mob ord cc"><div class="c"><span class="num">12</span><div class="l">ordered</div></div><div class="c hot"><span class="num">4</span><div class="l">ready</div></div><div class="c"><span class="num">96</span><div class="l">received</div></div></div>
+          <div class="mob unl cc"><div class="c"><span class="num">231</span><div class="l">served</div></div><div class="c"><span class="num" style="color:var(--ink-4)">118</span><div class="l">guests</div></div></div>
+          <div class="mob grp cc"><div class="c"><span class="num">41</span><div class="l">sessions</div></div><div class="c hot"><span class="num">3</span><div class="l">ready</div></div><div class="c"><span class="num">118</span><div class="l">claimed</div></div></div>
+          <div class="mob roam cc"><div class="c"><span class="num">240</span><div class="l">shots</div></div><div class="c hot"><span class="num">60</span><div class="l">ready</div></div><div class="c"><span class="num">180</span><div class="l">claimed</div></div></div>
+          <span class="tip left" style="margin-left:auto;padding-bottom:12px"><span class="i" tabindex="0">i</span><span class="b"><b>Count only.</b> This screen never shows a guest's name. Numbers are the shared sequence for this service tonight.</span></span>
+        </div>
+
+        <!-- camera · tapping the frame simulates a good scan -->
+        <label class="cam k" for="r-ok" aria-label="Camera — tap to simulate a guest QR">
+          <span class="mode-pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/></svg>QR</span>
+          <span class="stop">Stop scanning</span>
+          <span class="vf" aria-hidden><i></i><i></i><i></i><i></i></span>
+          <span class="laser" aria-hidden></span>
+          <span class="hint">Point at the guest's QR</span>
+        </label>
+
+        <div class="res" role="status" aria-live="polite">
+          <!-- idle: the NFC control lives here, device-aware -->
+          <div class="st idle">
+            <div class="nfc-and"><label class="k nfcbtn" for="r-nfc"><svg viewBox="0 0 24 24"><path d="M6 8.3a7 7 0 0 1 0 7.4M9.5 6a10.5 10.5 0 0 1 0 12M13 4a14 14 0 0 1 0 16M16.5 2.5a17.5 17.5 0 0 1 0 19"/></svg>Tap NFC</label><p class="sml" style="text-align:center;margin-top:10px">Android Chrome · keeps listening until Stop</p></div>
+            <div class="nfc-app"><label class="k nfcbtn" for="r-nfc"><svg viewBox="0 0 24 24"><path d="M6 8.3a7 7 0 0 1 0 7.4M9.5 6a10.5 10.5 0 0 1 0 12M13 4a14 14 0 0 1 0 16M16.5 2.5a17.5 17.5 0 0 1 0 19"/></svg>Tap NFC</label><p class="sml" style="text-align:center;margin-top:10px">Setnayan app · one tag per press on iPhone</p></div>
+            <div class="nfc-ios"><div class="iosnote"><span class="ilink" style="background:var(--warn-wash);color:var(--warn)">!</span><p class="n">NFC works in the Setnayan app<b>Use QR here, or get the app.</b></p><span class="chip k" style="margin-left:auto">Get the app</span></div></div>
+          </div>
+
+          <!-- ✓ #0231 -->
+          <div class="st ok">
+            <div class="hash"><span class="ck"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>#0231</div>
+            <div class="mob once"><p class="what">Received</p><p class="sub">Photo strip · 18:42 · 144 of 180</p></div>
+            <div class="mob ord">
+              <div class="ordst new"><p class="what">Ordered</p><p class="sub">Tap Ready when it's printed — the guest is told on their Event Hub.</p><label class="k btn w" for="o-ready" style="margin-top:14px">Ready · tell the guest</label></div>
+              <div class="ordst ready"><p class="what" style="color:var(--cta)">Ready — the guest has been told</p><p class="sub">"#0231 is ready — claim it at the Photo Booth." Scan again when they pick it up.</p><label class="k chip" for="o-recv" style="margin-top:12px">Simulate the pickup scan</label></div>
+              <div class="ordst recv"><p class="what" style="color:var(--ok)">Received</p><p class="sub">#0231 · Photo strip · 18:51 · 97 of 180</p></div>
+            </div>
+            <div class="mob unl"><p class="what">Counted again</p><p class="sub">Photo strip · 232 served · 118 guests · next is #0232</p></div>
+            <div class="mob grp"><p class="what">Added to the session</p><p class="sub">Group session · this flow continues on screen 4.</p><label class="k chip" for="s4" style="margin-top:12px">Open the session</label></div>
+            <div class="mob roam"><p class="what">Linked to the shot</p><p class="sub">Roaming · this flow continues on screen 4.</p><label class="k chip" for="s4" style="margin-top:12px">Open the shot</label></div>
+          </div>
+
+          <div class="st dup">
+            <p class="dupmark">Already received</p>
+            <p class="sub">#0231 · Photo strip · 18:42<span class="mob unl ic"> — in Unlimited this would count again instead</span></p>
+          </div>
+          <div class="st not">
+            <p class="notmark">Not a guest of this event</p>
+            <p class="sub">Nothing was recorded. Only Indalecio &amp; Claire's guests scan here.</p>
+          </div>
+
+          <!-- NFC listening, per device -->
+          <div class="st nfc">
+            <div class="nfc-and"><div class="listen"><span class="dot" style="width:12px;height:12px"></span><p class="n">Listening — tap a guest's tag on this phone<b>Android keeps listening until you stop.</b></p><label class="k chip" for="r-idle" style="margin-left:auto">Stop</label></div><label class="k chip" for="r-ok" style="margin-top:8px">Simulate a tag</label></div>
+            <div class="nfc-app"><div class="apple"><p class="ttl">Ready to Scan</p><p class="sub">Hold the guest's tag to the top of the phone.</p><div class="ph"></div><label class="k cancel" for="r-idle">Cancel</label></div><label class="k chip" for="r-ok" style="margin-top:10px">Simulate a tag</label></div>
+            <div class="nfc-ios"><div class="iosnote"><span class="ilink" style="background:var(--warn-wash);color:var(--warn)">!</span><p class="n">NFC works in the Setnayan app<b>Use QR here, or get the app.</b></p><label class="k chip" for="r-idle" style="margin-left:auto">OK</label></div></div>
+          </div>
+        </div>
+
+        <!-- prototype controls — not part of the product -->
+        <div class="proto">
+          <span class="eyebrow">Prototype · simulate</span>
+          <div class="chips"><label class="k chip" for="r-ok">Guest QR</label><label class="k chip" for="r-dup">Same guest again</label><label class="k chip" for="r-not">Stranger's QR</label><label class="k chip" for="r-idle">Reset</label></div>
+          <span class="eyebrow" style="margin-top:12px">Device</span>
+          <div class="chips"><label class="k chip" for="d-and">Android Chrome</label><label class="k chip" for="d-app">Setnayan app</label><label class="k chip" for="d-ios">iPhone browser</label></div>
+          <span class="eyebrow" style="margin-top:12px">Mode (from setup)</span>
+          <div class="chips"><label class="k chip" for="m-once">Once</label><label class="k chip" for="m-ord">Ordered → Received</label><label class="k chip" for="m-unl">Unlimited</label><label class="k chip" for="m-grp">Group</label><label class="k chip" for="m-roam">Roaming</label></div>
+        </div>
+      </div>
+    </div></div></div>
+
+    <aside class="pane">
+      <h3>Four answers, no names</h3>
+      <p class="why">The scanner runs inside Setnayan — never the phone's camera app, which would sign the supplier in <i>as</i> the guest via /[slug]/redeem. Refusals record nothing.</p>
+      <div class="ed">
+        <span class="eyebrow">What each answer means</span>
+        <dl class="kv">
+          <dt>✓ #0231</dt><dd><b>Counted.</b> Same number shows on the guest's Event Hub.</dd>
+          <dt>already</dt><dd><b>Already received</b> — Once and Ordered→Received only. Unlimited counts again.</dd>
+          <dt>not a guest</dt><dd><b>Not a guest of this event</b> — another event's guest, a stranger, a table sign. Nothing written.</dd>
+          <dt>iPhone browser</dt><dd>Safari and Chrome on iPhone cannot read NFC — the button is replaced by the note. QR still works.</dd>
+        </dl>
+      </div>
+      <div class="ed only-wide">
+        <span class="eyebrow">Reused from the shipped desks</span>
+        <dl class="kv">
+          <dt>camera</dt><dd>checkin-desk / souvenir-desk viewfinder, "Stop scanning", `makeQrDetector` (BarcodeDetector → jsQR)</dd>
+          <dt>nfc</dt><dd>`useNfcTagReader` — Android listens until Stop; iPhone app one tag per press via Apple's sheet; iPhone browsers unsupported</dd>
+          <dt>refusal</dt><dd>seat-scanner's "not this event" shape, count-only like `floorSeatByQr`</dd>
+          <dt>new</dt><dd>the shared number, the mode-aware result, the device note, the ⓘ device table</dd>
+        </dl>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ═══════════════════ SCREEN 4 · group session & roaming ═══════════════════ -->
+<style>
+.gst{display:none;animation:rise .45s var(--ease)}
+#g1:checked ~ .wrap .gst.g1,#g2:checked ~ .wrap .gst.g2,#g3:checked ~ .wrap .gst.g3,#g4:checked ~ .wrap .gst.g4,#g5:checked ~ .wrap .gst.g5{display:block}
+.grw{display:none}
+#gr-grp:checked ~ .wrap .grw.grp,#gr-roam:checked ~ .wrap .grw.roam{display:inline}
+#gr-grp:checked ~ .wrap .chip[for=gr-grp],#gr-roam:checked ~ .wrap .chip[for=gr-roam]{background:var(--ink);color:#fff}
+.steps{display:flex;gap:6px;margin:6px 0 14px}
+.steps i{flex:1;height:3px;border-radius:2px;background:rgba(23,21,18,.1);transition:background var(--t)}
+#g1:checked ~ .wrap .steps i:nth-child(-n+1),#g2:checked ~ .wrap .steps i:nth-child(-n+2),#g3:checked ~ .wrap .steps i:nth-child(-n+3),#g4:checked ~ .wrap .steps i:nth-child(-n+4),#g5:checked ~ .wrap .steps i:nth-child(-n+5){background:var(--cta)}
+.heads{display:flex;align-items:center;margin:14px 0 4px}
+.heads span{width:52px;height:52px;border-radius:50%;background:linear-gradient(140deg,#E6D6BF,#C4A063);display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700;color:#5c4620;margin-right:-10px;box-shadow:0 0 0 3px var(--paper);animation:tick .4s var(--ease)}
+.heads span:nth-child(2){background:linear-gradient(140deg,#D9C7B2,#A79F91)}
+.heads span:nth-child(3){background:linear-gradient(140deg,#E9CDB9,#BE4A22);color:#fff}
+.heads .plus{width:52px;height:52px;border-radius:50%;background:rgba(23,21,18,.06);display:inline-flex;align-items:center;justify-content:center;margin-left:18px;font-size:22px;color:var(--ink-3)}
+.pr{display:flex;align-items:center;justify-content:center;gap:26px;margin:12px 0}
+.pr .pm{width:58px;height:58px;border-radius:50%;background:rgba(23,21,18,.06);display:inline-flex;align-items:center;justify-content:center;font-size:26px;font-weight:300;color:var(--ink)}
+.pr .pm:hover{background:rgba(23,21,18,.11)}
+.pr .pm.off{opacity:.25;pointer-events:none}
+.pr .pv .num{font-size:84px}
+.pv .n2,.pv .n3,.pv .n4,.pv .n5,.pm.m2,.pm.m3,.pm.m4,.pm.m5,.pm.a2,.pm.a3,.pm.a4,.pm.a5,.pl.l2,.pl.l3,.pl.l4,.pl.l5{display:none}
+#p2:checked ~ .wrap .pv .n2,#p3:checked ~ .wrap .pv .n3,#p4:checked ~ .wrap .pv .n4,#p5:checked ~ .wrap .pv .n5{display:block}
+#p2:checked ~ .wrap .pl.l2,#p3:checked ~ .wrap .pl.l3,#p4:checked ~ .wrap .pl.l4,#p5:checked ~ .wrap .pl.l5{display:block}
+/* minus goes to n-1, plus to n+1 */
+#p2:checked ~ .wrap .pm.m2,#p3:checked ~ .wrap .pm.m3,#p4:checked ~ .wrap .pm.m4,#p5:checked ~ .wrap .pm.m5{display:inline-flex}
+#p2:checked ~ .wrap .pm.a2,#p3:checked ~ .wrap .pm.a3,#p4:checked ~ .wrap .pm.a4,#p5:checked ~ .wrap .pm.a5{display:inline-flex}
+.upst{display:none}
+#u0:checked ~ .wrap .upst.u0,#u1:checked ~ .wrap .upst.u1{display:block}
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;height:150px;border-radius:24px;background:rgba(23,21,18,.045);color:var(--ink-2);font-size:14px;font-weight:600;background-image:repeating-linear-gradient(135deg,transparent 0 10px,rgba(23,21,18,.03) 10px 20px)}
+.drop:hover{background-color:rgba(23,21,18,.08)}
+.drop svg{width:26px;height:26px;stroke:var(--ink-3);fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.thumb{display:flex;gap:14px;align-items:center}
+.thumb .img{width:96px;height:128px;border-radius:14px;background:
+  linear-gradient(180deg,rgba(0,0,0,0) 55%,rgba(0,0,0,.35)),
+  radial-gradient(40% 30% at 35% 40%,#F0D8B0,transparent 70%),radial-gradient(40% 30% at 65% 45%,#C98F62,transparent 70%),linear-gradient(160deg,#7B5A3C,#2A2119);box-shadow:var(--lift-2);position:relative;flex:none;animation:pop .5s var(--ease)}
+.thumb .img::after{content:"#0107";position:absolute;left:8px;bottom:6px;font-family:var(--mono);font-size:9px;color:#fff;letter-spacing:.1em}
+.thumb .t{font-size:15px;font-weight:600}
+.thumb .s{font-size:12.5px;color:var(--ink-3);margin-top:3px;line-height:1.45}
+</style>
+<section class="screen" id="sc4">
+  <div class="shead">
+    <h2>Group session and Roaming — several guests, one number</h2>
+    <p class="who">Scan everyone → #0107 → prints –/+ → upload the photo or design → Ready.</p>
+    <label class="k next" for="s5">The guest's phone <i>→</i></label>
+  </div>
+  <div class="duo">
+    <div class="stage"><div class="device"><div class="dev-in">
+      <div class="top">
+        <label class="back k" for="s3">‹ Scanner</label>
+        <span class="live" style="letter-spacing:.12em"><span class="grw grp">Photo strip · Group session</span><span class="grw roam">Photo strip · Roaming</span></span>
+        <a class="ilink k" href="#sheet-devices" aria-label="QR vs NFC — which devices">i</a>
+      </div>
+      <div class="body">
+        <div class="chips" style="margin-bottom:8px"><label class="k chip" for="gr-grp">Group session</label><label class="k chip" for="gr-roam">Roaming shot</label></div>
+        <div class="counter">
+          <div class="c"><span class="num"><span class="grw grp">41</span><span class="grw roam">240</span></span><div class="l"><span class="grw grp">sessions</span><span class="grw roam">shots</span></div></div>
+          <div class="c hot"><span class="num"><span class="grw grp">3</span><span class="grw roam">60</span></span><div class="l">ready</div></div>
+          <div class="c"><span class="num"><span class="grw grp">118</span><span class="grw roam">180</span></span><div class="l">claimed</div></div>
+        </div>
+        <div class="steps" aria-hidden><i></i><i></i><i></i><i></i><i></i></div>
+
+        <!-- g1 · new -->
+        <div class="gst g1">
+          <span class="eyebrow cta"><span class="grw grp">Step 1 · new session</span><span class="grw roam">Step 1 · before the shot</span></span>
+          <p style="font-size:26px;font-weight:300;letter-spacing:-.03em;margin-top:8px"><span class="grw grp">Everyone in the shot scans in.</span><span class="grw roam">Tap or scan the guests you're about to shoot.</span></p>
+          <label class="k btn w" for="g2" style="margin-top:22px"><svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="4" height="4"/><rect x="13" y="7" width="4" height="4"/><rect x="7" y="13" width="4" height="4"/><path d="M13 13h4v4"/></svg><span class="grw grp">New session · scan the first guest</span><span class="grw roam">New shot · tap the first guest</span></label>
+          <p class="sml" style="text-align:center;margin-top:10px">QR or NFC — same as the single scanner</p>
+        </div>
+
+        <!-- g2 · heads scanned -->
+        <div class="gst g2">
+          <span class="eyebrow cta"><span class="grw grp">Step 2 · in the shot</span><span class="grw roam">Step 2 · linked to the shot</span></span>
+          <div class="hash" style="font-family:var(--mono);font-weight:700;font-size:56px;letter-spacing:-.03em;margin-top:8px">#0107</div>
+          <div class="heads"><span>G</span><span>G</span><span>G</span><label class="k plus" for="g2" aria-label="Scan another">+</label></div>
+          <p class="sub" style="font-size:13px;color:var(--ink-3)">3 guests · one shared number · <span class="grw grp">keep scanning until everyone's in</span><span class="grw roam">now take the shot</span></p>
+          <div style="display:flex;gap:8px;margin-top:18px"><label class="k btn ghost" for="g2" style="flex:1">Scan another</label><label class="k btn" for="g3" style="flex:1"><span class="grw grp">Done → prints</span><span class="grw roam">Shot taken</span></label></div>
+        </div>
+
+        <!-- g3 · prints -->
+        <div class="gst g3">
+          <span class="eyebrow cta">Step 3 · prints for #0107</span>
+          <div class="pr">
+            <label class="k pm m3" for="p2">−</label><label class="k pm m4" for="p3">−</label><label class="k pm m5" for="p4">−</label><span class="pm off m2">−</span>
+            <div class="pv" style="text-align:center"><span class="num n2">2</span><span class="num n3">3</span><span class="num n4">4</span><span class="num n5">5</span></div>
+            <label class="k pm a2" for="p3">+</label><label class="k pm a3" for="p4">+</label><label class="k pm a4" for="p5">+</label><span class="pm off a5">+</span>
+          </div>
+          <p class="sml pl l2" style="text-align:center">two prints · one guest shares</p>
+          <p class="sml pl l3" style="text-align:center">default · one each for the 3 scanned</p>
+          <p class="sml pl l4" style="text-align:center">one extra print</p>
+          <p class="sml pl l5" style="text-align:center">two extra prints</p>
+          <label class="k btn w" for="g4" style="margin-top:20px">Confirm <span class="pv" style="display:contents"><span class="n2">2</span><span class="n3">3</span><span class="n4">4</span><span class="n5">5</span></span>&nbsp;prints</label>
+        </div>
+
+        <!-- g4 · upload -->
+        <div class="gst g4">
+          <span class="eyebrow cta" style="display:flex;align-items:center;gap:8px">Step 4 · the digital copy
+            <span class="tip"><span class="i" tabindex="0">i</span><span class="b"><b>Paid from your own Papic allowance</b>, never the couple's pool. Each linked guest gets it in their Event Hub "Yours" photos and the couple's gallery. No Papic — the prints still work without it.</span></span>
+          </span>
+          <div class="upst u0" style="margin-top:12px">
+            <label class="k drop" for="u1"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>Upload the photo or rendered design to #0107</label>
+            <div style="display:flex;gap:8px;margin-top:14px"><label class="k btn ghost" for="g5" style="flex:1">Skip</label><span class="btn" style="flex:1;opacity:.35">Mark Ready</span></div>
+          </div>
+          <div class="upst u1" style="margin-top:12px">
+            <div class="thumb"><div class="img"></div><div><p class="t">Sent to 3 guests' "Yours"</p><p class="s">Compressed first · Papic −1 · 45 points left tonight · also in the couple's gallery</p></div></div>
+            <label class="k btn w" for="g5" style="margin-top:18px">Mark Ready · tell the 3 guests</label>
+          </div>
+        </div>
+
+        <!-- g5 · ready -->
+        <div class="gst g5">
+          <span class="eyebrow cta">Step 5 · ready</span>
+          <div class="hash" style="font-family:var(--mono);font-weight:700;font-size:56px;letter-spacing:-.03em;margin-top:8px;display:flex;align-items:center;gap:12px"><span class="ck" style="width:44px;height:44px;border-radius:50%;background:var(--ok);display:inline-flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>#0107</div>
+          <p class="what" style="font-size:18px;font-weight:600;margin-top:10px">Ready — 3 guests told</p>
+          <p class="sub" style="font-size:13px;color:var(--ink-3);margin-top:4px">"#0107 is ready — claim it at the Photo Booth." Each guest scans at pickup.</p>
+          <div class="counter" style="margin-top:16px"><div class="c"><span class="num">0</span><div class="l">of 3 claimed</div></div><div class="c"><span class="num"><span class="pv" style="display:contents"><span class="n2">2</span><span class="n3">3</span><span class="n4">4</span><span class="n5">5</span></span></span><div class="l">prints</div></div></div>
+          <div style="display:flex;gap:8px;margin-top:18px"><label class="k btn ghost" for="g1" style="flex:1">New session</label><label class="k btn ink" for="s5" style="flex:1">See the guest's side</label></div>
+        </div>
+
+        <div class="proto"><span class="eyebrow">Prototype · jump</span><div class="chips"><label class="k chip" for="g1">1 New</label><label class="k chip" for="g2">2 Scanned</label><label class="k chip" for="g3">3 Prints</label><label class="k chip" for="g4">4 Upload</label><label class="k chip" for="g5">5 Ready</label><label class="k chip" for="u0">reset upload</label></div></div>
+      </div>
+    </div></div></div>
+
+    <aside class="pane">
+      <h3>One number, many guests</h3>
+      <p class="why">Owner: <i>"if the photo booth has a group photo, how do we set how many prints"</i> → default = guests scanned, adjustable. Roaming was the owner's "4 and 5": pre-link before the shot, group candids included. No unlinked prints.</p>
+      <div class="ed">
+        <span class="eyebrow">Same steps, two names</span>
+        <dl class="kv">
+          <dt>group</dt><dd>booth · scan everyone <b>in</b> the shot · counter Sessions</dd>
+          <dt>roaming</dt><dd>photographer · tap everyone <b>before</b> the shot · counter Shots</dd>
+          <dt>prints</dt><dd>default heads; –/+ before confirm; never below 2 for a group, never above heads + 2 here (owner-tunable)</dd>
+          <dt>upload</dt><dd>optional · supplier's Papic · compress-first · reaches each linked guest's "Yours"</dd>
+          <dt>pickup</dt><dd>each guest's own scan marks them received: "#0107 · 1 of 3 claimed"</dd>
+        </dl>
+      </div>
+    </aside>
+  </div>
+</section>
+<!-- ═══════════════════ SCREEN 5 · the guest's Event Hub ═══════════════════ -->
+<style>
+.ghead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px var(--pad) 10px;position:sticky;top:0;z-index:4;background:rgba(252,250,246,.72);backdrop-filter:blur(18px)}
+.ghead .circ{width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:rgba(23,21,18,.06);color:var(--ink-2);font-size:13px;font-weight:700}
+.ghead .names{text-align:center;min-width:0}
+.ghead .names .n{font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:17px;letter-spacing:-.01em}
+.ghead .names .lv{font-family:var(--mono);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--cta);display:inline-flex;align-items:center;gap:6px;margin-top:2px}
+.ann{margin:10px 0 0;padding:14px 16px;border-radius:22px;background:rgba(190,74,34,.08);display:flex;gap:12px;align-items:flex-start;animation:pop .5s var(--ease);box-shadow:0 12px 30px -22px rgba(190,74,34,.6)}
+.ann .mg{width:34px;height:34px;border-radius:50%;background:rgba(190,74,34,.14);color:var(--cta);display:inline-flex;align-items:center;justify-content:center;flex:none}
+.ann .mg svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.ann .ey{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cta)}
+.ann .tx{font-size:15px;line-height:1.35;margin-top:3px}
+.ann .tx b{font-family:var(--mono);font-weight:700}
+.hp{display:none;animation:rise .4s var(--ease)}
+#h-now:checked ~ .wrap .hp.now,#h-photos:checked ~ .wrap .hp.photos,#h-me:checked ~ .wrap .hp.me{display:block}
+#h-now:checked ~ .wrap .bnav label[for=h-now],#h-photos:checked ~ .wrap .bnav label[for=h-photos],#h-me:checked ~ .wrap .bnav label[for=h-me]{background:#FFFDF9;color:var(--ink)}
+.gsx{display:none}
+#gs-num:checked ~ .wrap .gsx.num.ic,#gs-ready:checked ~ .wrap .gsx.ready.ic,#gs-recv:checked ~ .wrap .gsx.recv.ic,#gs-ready:checked ~ .wrap .gsx.readyplus.ic,#gs-recv:checked ~ .wrap .gsx.readyplus.ic{display:inline}
+#gs-ready:checked ~ .wrap .gsx.readyplus.cc,#gs-recv:checked ~ .wrap .gsx.readyplus.cc{display:contents}
+#gs-num:checked ~ .wrap .gsx.num,#gs-ready:checked ~ .wrap .gsx.ready,#gs-recv:checked ~ .wrap .gsx.recv{display:block}
+#gs-ready:checked ~ .wrap .gsx.readyplus,#gs-recv:checked ~ .wrap .gsx.readyplus{display:block}
+#gs-num:checked ~ .wrap .chip[for=gs-num],#gs-ready:checked ~ .wrap .chip[for=gs-ready],#gs-recv:checked ~ .wrap .chip[for=gs-recv]{background:var(--ink);color:#fff}
+.yournum{display:flex;align-items:baseline;gap:14px;padding:18px 0 6px}
+.yournum .h{font-family:var(--mono);font-weight:700;font-size:46px;letter-spacing:-.03em;line-height:1}
+.yournum .w{font-size:14px;color:var(--ink-3)}
+.yournum .w b{display:block;color:var(--ink);font-weight:600;font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.grid .ph{aspect-ratio:3/4;border-radius:14px;background:linear-gradient(160deg,#D9C7B2,#A79F91);box-shadow:var(--lift-1)}
+.grid .ph.b{background:linear-gradient(160deg,#E6D6BF,#C4A063)}
+.grid .ph.c{background:linear-gradient(160deg,#C9B8A3,#7C756A)}
+.grid .ph.you{background:linear-gradient(180deg,rgba(0,0,0,0) 55%,rgba(0,0,0,.35)),radial-gradient(40% 30% at 35% 40%,#F0D8B0,transparent 70%),radial-gradient(40% 30% at 65% 45%,#C98F62,transparent 70%),linear-gradient(160deg,#7B5A3C,#2A2119);position:relative;animation:pop .5s var(--ease);box-shadow:var(--lift-2)}
+.grid .ph.you::after{content:"#0231 · Photo Booth";position:absolute;left:8px;right:8px;bottom:7px;font-family:var(--mono);font-size:8px;color:#fff;letter-spacing:.08em}
+.qrbig{width:190px;height:190px;border-radius:26px;background:#fff;box-shadow:var(--lift-2);margin:16px auto 0;display:grid;grid-template-columns:repeat(9,1fr);gap:3px;padding:18px}
+.qrbig i{background:#171512;border-radius:1.5px}.qrbig i.o{background:transparent}
+.review{margin-top:20px;padding:18px 18px 16px;border-radius:24px;background:rgba(154,119,57,.09);animation:pop .55s var(--ease);position:relative}
+#rv-x:checked ~ .wrap .review{display:none}
+.review .ey{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.review h4{font-size:20px;font-weight:600;margin-top:4px}
+.review .opt{font-size:12.5px;color:var(--ink-3);margin-top:2px}
+.stars{display:flex;gap:6px;margin:14px 0 10px}
+.stars label{width:44px;height:44px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:rgba(23,21,18,.18);transition:all var(--t)}
+.stars label:hover{background:rgba(255,255,255,.7)}
+.stars svg{width:26px;height:26px;fill:currentColor;stroke:none}
+#st1:checked ~ .wrap .stars label:nth-child(-n+1),#st2:checked ~ .wrap .stars label:nth-child(-n+2),#st3:checked ~ .wrap .stars label:nth-child(-n+3),#st4:checked ~ .wrap .stars label:nth-child(-n+4),#st5:checked ~ .wrap .stars label:nth-child(-n+5){color:var(--gold)}
+.review input[type=text]{width:100%;font:inherit;font-size:15px;color:var(--ink);background:transparent;border:0;border-bottom:1.5px solid rgba(23,21,18,.14);padding:6px 0 8px;outline:none}
+.review input[type=text]:focus{border-color:var(--gold)}
+.review .acts{display:flex;gap:8px;margin-top:14px;align-items:center}
+.review .x{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:var(--ink-3);background:rgba(23,21,18,.05)}
+.review .x:hover{background:var(--ink);color:#fff}
+.sent{display:none}
+#st1:checked ~ .wrap .sent,#st2:checked ~ .wrap .sent,#st3:checked ~ .wrap .sent,#st4:checked ~ .wrap .sent,#st5:checked ~ .wrap .sent{display:inline-flex}
+#st1:checked ~ .wrap .unsent,#st2:checked ~ .wrap .unsent,#st3:checked ~ .wrap .unsent,#st4:checked ~ .wrap .unsent,#st5:checked ~ .wrap .unsent{display:none}
+</style>
+<section class="screen" id="sc5">
+  <div class="shead">
+    <h2>The guest's Event Hub — their number, the announcement, the photo, the review</h2>
+    <p class="who">Everything the supplier does reaches the guest here and nowhere else. No email, no SMS.</p>
+    <label class="k next" for="s6">Coordinator view <i>→</i></label>
+  </div>
+  <div class="duo">
+    <div class="stage"><div class="device"><div class="dev-in">
+      <div class="ghead">
+        <span class="circ k">‹</span>
+        <div class="names"><div class="n">Indalecio &amp; Claire</div><div class="lv"><span class="dot"></span>Live</div></div>
+        <span class="circ" style="background:var(--gold-wash);color:var(--gold)">MS</span>
+      </div>
+      <div class="body">
+        <!-- the ONE announcement card (DayOfAnnouncement) · not dismissible · latest wins -->
+        <div class="gsx readyplus">
+          <aside class="ann" role="status" aria-live="polite">
+            <span class="mg"><svg viewBox="0 0 24 24"><path d="M3 11l14-6v14L3 13z"/><path d="M7 13v5a2 2 0 0 0 4 0v-3"/></svg></span>
+            <div><p class="ey">From the Photo Booth</p><p class="tx"><b>#0231</b> is ready — claim it at the Photo Booth.</p></div>
+          </aside>
+        </div>
+
+        <!-- NOW -->
+        <div class="hp now">
+          <div class="sect" style="margin-top:22px">
+            <span class="eyebrow cta">Now · Reception</span>
+            <p style="font-size:28px;font-weight:300;letter-spacing:-.03em;margin-top:6px">Cake cutting in 12 minutes</p>
+          </div>
+          <div class="yournum">
+            <span class="h">#0231</span>
+            <span class="w"><b>Your number · Photo Booth</b><span class="gsx num ic">Ordered · we'll tell you here when it's ready</span><span class="gsx ready">Ready — show this at the booth</span><span class="gsx recv">Received · 18:51</span></span>
+          </div>
+          <div class="gsx recv">
+            <div class="review">
+              <label class="k x" for="rv-x" aria-label="Not now">×</label>
+              <p class="ey">Optional · one per service</p>
+              <h4>How was the Photo Booth?</h4>
+              <p class="opt">Kodakan never sees who answered.</p>
+              <div class="stars">
+                <label class="k" for="st1"><svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.7l-6.1 3.4 1.4-6.8L2.2 9.6l6.9-.8z"/></svg></label>
+                <label class="k" for="st2"><svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.7l-6.1 3.4 1.4-6.8L2.2 9.6l6.9-.8z"/></svg></label>
+                <label class="k" for="st3"><svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.7l-6.1 3.4 1.4-6.8L2.2 9.6l6.9-.8z"/></svg></label>
+                <label class="k" for="st4"><svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.7l-6.1 3.4 1.4-6.8L2.2 9.6l6.9-.8z"/></svg></label>
+                <label class="k" for="st5"><svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.7l-6.1 3.4 1.4-6.8L2.2 9.6l6.9-.8z"/></svg></label>
+              </div>
+              <input type="text" placeholder="One line, if you like">
+              <div class="acts"><label class="k btn sm ink unsent" for="st5" style="opacity:.5">Send</label><label class="k btn sm ink sent" for="rv-x">Send</label><label class="k chip" for="rv-x">Not now</label></div>
+            </div>
+          </div>
+          <div class="sect">
+            <span class="eyebrow">Tonight</span>
+            <div class="line"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 8h16v12H4zM8 8V6a4 4 0 0 1 8 0v2"/></svg></span><div><div class="t">Your seat</div><div class="s">Table 7 · Sampaguita</div></div><span class="v">→</span></div>
+            <div class="line"><span class="ic"><svg viewBox="0 0 24 24"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 22V7M12 7c-2-4-6-3-6-1s3 2 6 1M12 7c2-4 6-3 6-1s-3 2-6 1"/></svg></span><div><div class="t">Send a blessing</div><div class="s">The digital money dance — straight to the couple.</div></div><span class="v">→</span></div>
+          </div>
+        </div>
+
+        <!-- PHOTOS -->
+        <div class="hp photos">
+          <div class="sect" style="margin-top:22px">
+            <span class="eyebrow cta">Photos of you</span>
+            <p style="font-size:28px;font-weight:300;letter-spacing:-.03em;margin-top:6px">Yours</p>
+            <div class="grid">
+              <div class="gsx readyplus cc"><span class="ph you"></span></div>
+              <span class="ph"></span><span class="ph b"></span><span class="ph c"></span><span class="ph b"></span>
+            </div>
+            <p class="sml" style="margin-top:10px"><span class="gsx num ic">Your Photo Booth strip lands here the moment Kodakan uploads it.</span><span class="gsx readyplus ic">#0231 from Kodakan Photo Booth · also in the couple's gallery</span></p>
+          </div>
+        </div>
+
+        <!-- ME -->
+        <div class="hp me">
+          <div class="sect" style="margin-top:22px;text-align:center">
+            <span class="eyebrow cta">Your QR</span>
+            <p style="font-family:Georgia,serif;font-style:italic;font-size:24px;margin-top:4px">Let others scan you</p>
+            <div class="qrbig" aria-hidden><i></i><i></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i></i><i></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i></i><i class="o"></i><i class="o"></i><i></i><i></i><i class="o"></i><i></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i></i><i class="o"></i><i></i><i class="o"></i><i class="o"></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i></i><i></i><i></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i class="o"></i><i class="o"></i><i></i><i></i><i></i><i class="o"></i><i></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i></i><i class="o"></i><i></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i></div>
+            <p class="sml" style="margin-top:12px">Same identity as your NFC tag</p>
+            <div class="yournum" style="justify-content:center"><span class="h" style="font-size:34px">#0231</span><span class="w"><b>Photo Booth</b><span class="gsx num ic">ordered</span><span class="gsx ready">ready · claim it</span><span class="gsx recv">received</span></span></div>
+          </div>
+        </div>
+
+        <div class="proto"><span class="eyebrow">Prototype · what Kodakan did</span><div class="chips"><label class="k chip" for="gs-num">Scanned → #0231</label><label class="k chip" for="gs-ready">Tapped Ready</label><label class="k chip" for="gs-recv">Pickup scan → received</label></div></div>
+      </div>
+      <nav class="bnav" aria-label="Live hub sections">
+        <label class="k" for="h-now"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>Now</label>
+        <span class="it"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M5 5a10 10 0 0 0 0 14M19 5a10 10 0 0 1 0 14"/></svg>Watch</span>
+        <span class="it"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Camera</span>
+        <label class="k" for="h-photos"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14"/><path d="M3 16l5-5 4 4 3-3 6 6"/></svg>Photos</label>
+        <label class="k" for="h-me"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Me</label>
+      </nav>
+    </div></div></div>
+
+    <aside class="pane">
+      <h3>One channel, one card</h3>
+      <p class="why">Owner: <i>"all announcements go there"</i> · <i>"just event hub"</i>. The supplier's Ready notice rides the shipped coordinator announcement (DayOfAnnouncement), targeted at one guest — the eyebrow names the sender. It is not dismissible; the latest replaces it.</p>
+      <div class="ed">
+        <span class="eyebrow">What the guest sees, in order</span>
+        <dl class="kv">
+          <dt>scan</dt><dd><b>Your number #0231 · Photo Booth</b> on Now and Me</dd>
+          <dt>ready</dt><dd>the announcement card: <b>#0231 is ready — claim it at the Photo Booth</b></dd>
+          <dt>upload</dt><dd>the strip appears in Photos → <b>Yours</b>, tagged #0231</dd>
+          <dt>received</dt><dd>an optional, dismissible review: 1–5 stars + one line; one per guest per service; the supplier never sees who</dd>
+        </dl>
+      </div>
+      <div class="ed only-wide">
+        <span class="eyebrow">Reused</span>
+        <dl class="kv">
+          <dt>shell</dt><dd>hub-shell.tsx — fixed shell, live dot, Now · Watch · Camera · Photos · Me</dd>
+          <dt>me</dt><dd>hub/page.tsx — "Your QR · Let others scan you"</dd>
+          <dt>card</dt><dd>day-of-announcement.tsx — role=status, megaphone, not dismissible; lifted to every guest page</dd>
+          <dt>new</dt><dd>the number line, the "Yours" photo from a supplier, the guest review store</dd>
+        </dl>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ═══════════════════ SCREEN 6 · coordinator with the host's view ═══════════════════ -->
+<style>
+.cst{display:none;animation:pop .45s var(--ease)}
+#c-idle:checked ~ .wrap .cst.idle,#c-ok:checked ~ .wrap .cst.ok,#c-dup:checked ~ .wrap .cst.dup,#c-not:checked ~ .wrap .cst.not{display:block}
+#c-ok:checked ~ .wrap .chip[for=c-ok],#c-dup:checked ~ .wrap .chip[for=c-dup],#c-not:checked ~ .wrap .chip[for=c-not]{background:var(--ink);color:#fff}
+.guest{display:flex;align-items:center;gap:14px;margin-top:6px}
+.guest .av{width:62px;height:62px;border-radius:50%;background:linear-gradient(140deg,#E9CDB9,#BE4A22);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;flex:none;animation:tick .5s var(--ease)}
+.guest .nm{font-size:22px;font-weight:600;letter-spacing:-.02em}
+.guest .dt{font-size:13px;color:var(--ink-3);margin-top:2px}
+.pill{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:999px;background:rgba(23,21,18,.06);font-size:12.5px;font-weight:500;color:var(--ink-2)}
+.hostv{display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 11px;border-radius:999px;background:var(--ok-wash);color:var(--ok);font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.recent .line{padding:9px 0}
+.recent .av{width:34px;height:34px;border-radius:50%;background:var(--gold-wash);color:var(--gold);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none}
+</style>
+<section class="screen" id="sc6">
+  <div class="shead">
+    <h2>Coordinator — the same scan, with the host's view</h2>
+    <p class="who">Only when the host approved this coordinator (accepted, not removed). Everyone else stays count-only.</p>
+    <label class="k next" for="s1">Back to the start <i>↺</i></label>
+  </div>
+  <div class="duo">
+    <div class="stage"><div class="device"><div class="dev-in">
+      <div class="top">
+        <span class="back k">‹ Floor command</span>
+        <span class="hostv"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Host view</span>
+        <a class="ilink k" href="#sheet-devices" aria-label="QR vs NFC — which devices">i</a>
+      </div>
+      <div class="body" style="padding-bottom:18px">
+        <div class="counter">
+          <div class="c"><span class="num">12</span><div class="l">ordered</div></div><div class="c hot"><span class="num">4</span><div class="l">ready</div></div><div class="c"><span class="num">96</span><div class="l">received</div></div>
+          <span class="tip left" style="margin-left:auto;padding-bottom:12px"><span class="i" tabindex="0">i</span><span class="b"><b>Why names here.</b> Indalecio &amp; Claire approved this coordinator through the host invite (RA 10173 consent). That grants the host's read — names, table, side. Revoke it and this screen drops to counts the same minute.</span></span>
+        </div>
+        <label class="cam k" for="c-ok" aria-label="Camera — tap to simulate a guest QR" style="aspect-ratio:4/3.6">
+          <span class="mode-pill">QR · Photo strip</span>
+          <span class="stop">Stop scanning</span>
+          <span class="vf" aria-hidden><i></i><i></i><i></i><i></i></span>
+          <span class="laser" aria-hidden></span>
+          <span class="hint">Point at the guest's QR</span>
+        </label>
+        <div class="res" role="status" aria-live="polite">
+          <div class="cst idle"><label class="k nfcbtn" for="c-ok"><svg viewBox="0 0 24 24"><path d="M6 8.3a7 7 0 0 1 0 7.4M9.5 6a10.5 10.5 0 0 1 0 12M13 4a14 14 0 0 1 0 16M16.5 2.5a17.5 17.5 0 0 1 0 19"/></svg>Tap NFC</label></div>
+          <div class="cst ok">
+            <div class="guest"><span class="av">MS</span><div><p class="nm">Maria Santos</p><p class="dt">Bride's side · +1 Jose Santos</p></div></div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px"><span class="pill">Table 7 · Sampaguita</span><span class="pill">Arrived 17:58</span><span class="pill" style="background:var(--ok-wash);color:var(--ok)">✓ #0231 · Ordered</span></div>
+            <label class="k btn w" for="c-idle" style="margin-top:16px">Ready · tell Maria</label>
+          </div>
+          <div class="cst dup">
+            <p class="dupmark">Already received</p>
+            <div class="guest" style="margin-top:8px"><span class="av" style="width:44px;height:44px;font-size:14px">MS</span><div><p class="nm" style="font-size:17px">Maria Santos</p><p class="dt">#0231 · Photo strip · 18:42 · Table 7</p></div></div>
+          </div>
+          <div class="cst not">
+            <p class="notmark">Not a guest of this event</p>
+            <p class="sub" style="font-size:13px;color:var(--ink-3);margin-top:4px">Nothing was recorded. Worth checking with the couple.</p>
+          </div>
+        </div>
+        <div class="sect recent" style="margin-top:14px">
+          <span class="eyebrow">Recent · this service</span>
+          <div class="line"><span class="av">AR</span><div><div class="t">Ana Reyes</div><div class="s">Table 3 · Ilang-ilang</div></div><span class="v">#0230 · ready</span></div>
+          <div class="line"><span class="av">JD</span><div><div class="t">Joaquin dela Cruz</div><div class="s">Table 7 · Sampaguita</div></div><span class="v">#0229 · received</span></div>
+        </div>
+        <div class="proto"><span class="eyebrow">Prototype · simulate</span><div class="chips"><label class="k chip" for="c-ok">Guest QR</label><label class="k chip" for="c-dup">Same guest again</label><label class="k chip" for="c-not">Stranger's QR</label><label class="k chip" for="c-idle">Reset</label></div></div>
+      </div>
+    </div></div></div>
+
+    <aside class="pane">
+      <h3>Approval is the switch, not a flag</h3>
+      <p class="why">Owner: <i>"coordinators, if approved to see the details of the guests by the host, will give the same access to the host."</i> The detail view keys on an accepted, non-removed host invite — never on the consent-gate feature flag, which is off.</p>
+      <div class="ed">
+        <span class="eyebrow">Same scan, two renders</span>
+        <dl class="kv">
+          <dt>supplier</dt><dd>✓ #0231 · counts · never a name</dd>
+          <dt>coordinator</dt><dd>name · side · +1 · table · arrival · the same #0231</dd>
+          <dt>refused</dt><dd>identical on both: <b>Not a guest of this event</b>, nothing recorded</dd>
+          <dt>revoked</dt><dd>the coordinator's screen becomes the supplier's, immediately</dd>
+        </dl>
+      </div>
+      <div class="ed only-wide">
+        <span class="eyebrow">Reused</span>
+        <dl class="kv">
+          <dt>desk</dt><dd>checkin-desk.tsx — the arriving-guest block: avatar, name, side, +1, Table pill</dd>
+          <dt>console</dt><dd>floor-command.tsx — the coordinator's day-of specialization; "Floor command" is where this opens</dd>
+          <dt>access</dt><dd>coordinator host-invite + consent (event_moderators, /host/accept, removed_at)</dd>
+        </dl>
+      </div>
+    </aside>
+  </div>
+</section>
+
+</div><!-- /wrap -->
+
+<!-- ═══ SHEET · QR vs NFC device table (:target) ═══ -->
+<div class="sheet" id="sheet-devices" role="dialog" aria-label="QR vs NFC — which devices can do what">
+  <a class="veil" href="#_" aria-label="Close"></a>
+  <div class="panel">
+    <a class="x" href="#_" aria-label="Close">×</a>
+    <span class="eyebrow gold">QR vs NFC</span>
+    <h3>What works on which phone</h3>
+    <p class="sub">Both read the same guest identity. Use whichever your phone can.</p>
+    <table class="dev">
+      <thead><tr><th>Supplier's phone</th><th>QR</th><th>NFC tap</th></tr></thead>
+      <tbody>
+        <tr><td>Android · Chrome</td><td class="yes">Yes</td><td class="yes">Yes <span class="sml">· keeps listening</span></td></tr>
+        <tr><td>Setnayan app · Android</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+        <tr><td>Setnayan app · iPhone</td><td class="yes">Yes</td><td class="yes">Yes <span class="sml">· Apple's "Ready to Scan" sheet, one tag per press</span></td></tr>
+        <tr><td>iPhone · Safari</td><td class="yes">Yes</td><td class="no">No <span class="sml">· use QR, or the app</span></td></tr>
+        <tr><td>iPhone · Chrome</td><td class="yes">Yes</td><td class="no">No <span class="sml">· same engine as Safari</span></td></tr>
+        <tr><td>Laptop · any browser</td><td class="yes">Webcam</td><td class="no">No</td></tr>
+      </tbody>
+    </table>
+    <p class="sml" style="margin-top:16px">Always scan inside Setnayan. Opening a guest's QR with the phone's own camera signs you in as that guest.</p>
+    <div style="display:flex;gap:8px;margin-top:18px;flex-wrap:wrap">
+      <a class="btn sm ink k" href="#_" style="text-decoration:none">Got it</a>
+      <label class="chip k" for="t1" style="height:38px">Replay the tour · screen 2</label>
+    </div>
+  </div>
+</div>
+</body>
+</html>
