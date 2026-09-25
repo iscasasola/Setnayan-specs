@@ -409,6 +409,22 @@ Before starting, run the in-flight check
   four-flap → kraft envelope, twine, seal breaks, card rises into the hero, no blank frame at the hand-off; drag the
   seal weakly → spring-back; Enter opens; Skip present; reduced motion → 400 ms fade; free couple → the page opens
   directly.
+- **⚠ As built — the made-once items are PAGES (2026-09-25, `rd/maker-made-once-as-pages`; DECISION_LOG rows
+  "MAKER: DETAILS · LOGO · HERO · REVEAL · LOVE STORY OPEN AS PAGES", "WHAT EACH MADE-ONCE PAGE IS", "OWNER
+  ANSWERS — SIX CONTROLLER QUESTIONS" (2)):** picking Details, Logo, Hero, Reveal or Love Story swaps the Maker's
+  body for that item's page (`MakerPage`: the page + its controls where a stage's inspector sits — the side from
+  1024 px, an in-flow strip under the page below it); no sheet, drawer, modal or navigator. Logo = the studio
+  itself in the body (the full-screen sheet is gone; autosave unchanged). Hero = the guest page where the hero
+  leads it + the photo/card controls (+ P10's Main background row when it lands). Reveal = the stage it plays on,
+  playing in place, + openings · **Where it plays** · **Fine-tune** (butterflies / petals / veil + petal colours,
+  `std_reveal_effects` joins the draft; a changed effect is Pro at Apply, the film's music stays live-owned).
+  Love Story = Our Love Story (the scrapbook page) in the body, moments added and edited in place, "As guests see
+  it" one switch away. Details = the address + QR and The Invitation / The Finer Details cards (the Prints route)
+  as the body, the fields beside it. **Reveal stages:** new column `events.reveal_stages text[]` (NULL = the Save
+  the Date only — the 2026-09-14 rule is now the default); on the Invitation and On the Day the opening plays on
+  the hero scene only and retires once opened. **Not built, needs the owner/next build:** the hero as a full
+  template + motion scene, and "the hero is the Post Event cover and the Main background" — the guest hero
+  renderer does not read a scene canvas yet.
 
 ### Phase 7 — Love Story inside the Maker (each story is a scene)
 
