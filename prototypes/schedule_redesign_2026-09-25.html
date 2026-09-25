@@ -1,0 +1,1467 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Schedule redesign — the timeline is the page</title>
+<meta name="description" content="Zero-JS prototype (2026-09-25) for /dashboard/[eventId]/schedule. Before: today's stack of bordered cards. After: one live strip (Run of show + Next up merged), a real time rail, compact blocks that open an inspector on tap (side panel on desktop and tablet, bottom sheet on the phone), drag-to-retime with 5-minute snapping, add-by-tapping-a-gap, the eye for guest visibility, View-as as a compact switch, emcee script and host tools as quiet toolbar actions.">
+<style>
+:root{--paper:#FBFAF7;--hair:#EDE8DE;--line:#E1DCD1;--ink:#1B1A17;--ink7:#3A382F;--ink5:#6E6A62;--ink4:#8A857B;--ink3:#A09A8E;--ob:#17160F;
+--gold1:#F3ECDF;--gold3:#CBA766;--gold5:#A9834B;--gold7:#8A6B39;--cta:#C24E25;--success:#5E7C52;--danger:#A6483B;
+--glass:rgba(255,255,255,.72);--blur:blur(22px) saturate(1.5);
+--sh-tile:0 1px 2px rgba(40,34,24,.05),0 18px 40px -26px rgba(30,26,18,.4);--sh-hi:0 1px 2px rgba(40,34,24,.06),0 28px 54px -30px rgba(30,26,18,.5);
+--ease:cubic-bezier(.2,.7,.2,1);--ease-out:cubic-bezier(.16,1,.3,1);--ctrl:200ms;--elem:320ms;--enter:640ms;--r-full:999px;
+--sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;--serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;--mono:ui-monospace,Menlo,monospace;
+/* phase tints — quiet, one accent bar per block type */
+--t-pre:#D9CFBF;--t-cer:#CBA766;--t-cock:#9FB39A;--t-rec:#B98C8C;--t-prog:#D89B7B;--t-dance:#8E9BB5;--t-send:#7E8B7A;--t-custom:#C7C2B8;
+--hh:68px}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.45;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}h1,h2,h3,p{margin:0}form{margin:0}
+input.sw{position:absolute;opacity:0;pointer-events:none;width:0;height:0}
+input.sw[id^=pub-]:checked{counter-increment:vis}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+label{cursor:pointer}
+.press{transition:transform var(--ctrl) var(--ease),background var(--elem) var(--ease),color var(--elem) var(--ease),box-shadow var(--elem) var(--ease),opacity var(--elem) var(--ease);cursor:pointer;user-select:none}
+.press:active{transform:scale(.96)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.eye{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink4);font-weight:700}
+svg{display:inline-block;vertical-align:middle}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+
+/* ── prototype bar (not the app) ── */
+.bar{position:sticky;top:0;z-index:60;display:flex;gap:6px 18px;flex-wrap:wrap;align-items:center;justify-content:center;padding:8px 14px;background:rgba(244,242,236,.72);backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);box-shadow:0 1px 0 rgba(44,42,41,.07)}
+.bar .proto{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);font-weight:700;padding:5px 8px;border:1px dashed var(--ink3);border-radius:6px}
+.grp{display:flex;gap:2px;align-items:center}.grp b{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink5);margin-right:6px;font-weight:700}
+.grp label{font-size:12px;padding:5px 11px;border-radius:var(--r-full)}.grp label:hover{background:rgba(44,42,41,.07)}
+#vp-b:checked~.bar label[for=vp-b],#vp-m:checked~.bar label[for=vp-m],#vp-t:checked~.bar label[for=vp-t],#vp-d:checked~.bar label[for=vp-d],#drag:checked~.bar label[for=drag],#md-plan:checked~.bar label[for=md-plan],#md-empty:checked~.bar label[for=md-empty],#md-live:checked~.bar label[for=md-live],#ro-host:checked~.bar label[for=ro-host],#ro-coord:checked~.bar label[for=ro-coord],#ro-view:checked~.bar label[for=ro-view],#ro-sup:checked~.bar label[for=ro-sup]{background:var(--ink);color:#fff}
+
+/* ── frame ── */
+.stage-wrap{display:flex;justify-content:center;padding:0;position:relative;min-height:100dvh}
+.frame{width:100%;position:relative;transition:width var(--enter) var(--ease),height var(--enter) var(--ease);background:var(--paper);overflow:clip;height:calc(100dvh - 40px)}
+#vp-t:checked~.stage-wrap,#vp-m:checked~.stage-wrap{padding:22px 12px 60px}
+#vp-t:checked~.stage-wrap .frame,#vp-m:checked~.stage-wrap .frame{box-shadow:var(--sh-hi);border-radius:22px;height:1000px}
+#vp-t:checked~.stage-wrap .frame{width:768px;--hh:60px}
+#vp-m:checked~.stage-wrap .frame{width:375px;border-radius:38px;height:812px;--hh:64px}
+#vp-b:checked~.stage-wrap .frame{display:none}
+.before{display:none}#vp-b:checked~.stage-wrap .before{display:block}
+
+/* ══════════════════ BEFORE — today's page, faithfully ══════════════════ */
+.before{width:100%;max-width:1380px;padding:28px 20px 80px}
+.before h2{font-family:var(--serif);font-weight:400;font-size:22px;margin-bottom:4px}
+.before .lede{font-size:13px;color:var(--ink5);max-width:64ch;margin-bottom:22px}
+.before .two{display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap}
+.thumb{position:relative;overflow:hidden;box-shadow:var(--sh-hi);border-radius:26px;background:#fff}
+.thumb .cap{position:absolute;left:12px;top:10px;z-index:2;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#fff;background:rgba(27,26,23,.8);padding:4px 8px;border-radius:6px}
+.thumb.phone{width:262px;height:560px}
+.thumb.phone .old{width:375px;transform:scale(.7);transform-origin:0 0}
+.thumb.desk{width:720px;height:420px;border-radius:14px}
+.thumb.desk .old{width:1440px;transform:scale(.5);transform-origin:0 0;padding:32px calc((1440px - 720px)/2)}
+.old{background:#FBFAF7;padding:16px;color:#1B1A17;font-size:13px}
+.old .t{font-size:24px;font-weight:600;margin-bottom:6px}
+.old p.i{font-size:13px;color:#5b584f;margin-bottom:10px}
+.old .oseg{display:flex;border:1px solid #d9d4c9;border-radius:10px;overflow:hidden;margin-bottom:12px}.old .oseg span{flex:1;text-align:center;padding:9px 0;font-size:12px}.old .oseg span.on{background:#1B1A17;color:#fff}
+.old .card{border:1px solid #d9d4c9;border-radius:14px;background:#fff;padding:12px;margin-bottom:10px}
+.old .card .h{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#7a766d;margin-bottom:6px}
+.old .btn{display:inline-block;border:1px solid #cfc9bd;border-radius:8px;padding:6px 10px;font-size:11px;margin-right:6px;background:#fff}
+.old .btn.dark{background:#1B1A17;color:#fff;border-color:#1B1A17}
+.old .chip{display:inline-block;border:1px solid #cfc9bd;border-radius:999px;padding:3px 9px;font-size:11px;margin-right:4px}.old .chip.on{background:#1B1A17;color:#fff}
+.old .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.old .m{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#7a766d}
+.old .pill{font-size:9px;letter-spacing:.12em;text-transform:uppercase;border-radius:999px;padding:2px 7px;background:#e6ede2;color:#3f5c37}.old .pill.h{background:#eeece7;color:#7a766d}
+.old .bl{font-weight:600;font-size:14px}
+.old .foot{border-top:1px solid #e6e1d6;margin-top:8px;padding-top:8px;display:flex;gap:6px;align-items:center}
+.old .ico{display:inline-block;width:14px;height:14px;border:1px solid #9c978d;border-radius:3px}
+
+/* ══════════════════ AFTER — the app ══════════════════ */
+.app{display:grid;grid-template-rows:56px auto minmax(0,1fr);height:100%;position:relative;overflow:hidden}
+
+/* toolbar */
+.top{display:flex;align-items:center;gap:6px;padding:0 18px;background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);position:relative;z-index:20;min-width:0}
+.top .ttl{font-family:var(--serif);font-size:19px;letter-spacing:.01em;margin-right:6px;white-space:nowrap}
+.top .who{font-size:12px;color:var(--ink4);white-space:nowrap;margin-right:auto}
+.top .who b{color:var(--ink7);font-weight:600}
+.seg{display:inline-flex;gap:2px;padding:3px;border-radius:var(--r-full);background:rgba(27,26,23,.06);margin:0 auto}
+.seg label{font-size:13px;font-weight:600;padding:6px 14px;border-radius:var(--r-full);color:var(--ink5);display:inline-flex;gap:6px;align-items:center;white-space:nowrap}
+.seg label:hover{color:var(--ink)}
+.seg label .n{font-size:10px;font-weight:700;background:rgba(194,78,37,.14);color:var(--cta);padding:1px 6px;border-radius:var(--r-full)}
+#v-j:checked~.stage-wrap label[for=v-j],#v-p:checked~.stage-wrap label[for=v-p],#v-d:checked~.stage-wrap label[for=v-d]{background:var(--ink);color:#fff}
+#v-j:checked~.stage-wrap label[for=v-j] .n,#v-p:checked~.stage-wrap label[for=v-p] .n{background:rgba(255,255,255,.18);color:#fff}
+.tools{display:flex;align-items:center;gap:2px;margin-left:auto}
+.ib{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:var(--ink5);font-size:15px;position:relative}
+.ib:hover{background:rgba(27,26,23,.06);color:var(--ink)}
+.ib .lab,.tip .lab{position:absolute;left:50%;top:calc(100% + 6px);transform:translateX(-50%) translateY(-4px);background:rgba(27,26,23,.94);color:#fff;font-size:11px;line-height:1.4;padding:5px 9px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity var(--ctrl),transform var(--ctrl);z-index:80;font-weight:400;letter-spacing:0;text-transform:none}
+.ib:hover .lab{opacity:1;transform:translateX(-50%)}
+.ib .badge{position:absolute;top:5px;right:5px;width:14px;height:14px;border-radius:50%;background:var(--cta);color:#fff;font-size:9px;font-weight:700;display:grid;place-items:center}
+.ib.cta{display:inline-flex;align-items:center;flex-direction:row;white-space:nowrap;background:var(--ink);color:#fff;width:auto;min-width:max-content;height:38px;padding:0 14px 0 11px;gap:6px;font-size:13px;font-weight:600;margin-left:6px;border-radius:var(--r-full)}
+.ib.cta:hover{background:#000}
+#emcee:checked~.stage-wrap .tools label[for=emcee],#chap:checked~.stage-wrap .tools label[for=chap],#host:checked~.stage-wrap .tools label[for=host],#shift:checked~.stage-wrap .tools label[for=shift],#req:checked~.stage-wrap .tools label[for=req],#lens:checked~.stage-wrap .tools label[for=lens]{background:var(--ink);color:#fff}
+/* ⓘ tooltips — hover on desktop, tap (focus) on touch */
+.tip{position:relative;display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;font-size:11px;font-weight:700;color:var(--ink4);box-shadow:inset 0 0 0 1px var(--line);cursor:help;outline:none;vertical-align:middle;font-family:var(--serif);font-style:italic}
+.tip:hover,.tip:focus{color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink4)}
+.tip .lab{white-space:normal;width:max-content;max-width:240px;text-align:left}
+.tip:hover .lab,.tip:focus .lab{opacity:1;transform:translateX(-50%)}
+.tip.l .lab{left:auto;right:-6px;transform:translateY(-4px)}.tip.l:hover .lab,.tip.l:focus .lab{transform:none}
+
+/* view-as lens chip in the toolbar */
+.lenschip{display:inline-flex;align-items:center;gap:6px;padding:0 10px;height:32px;border-radius:var(--r-full);font-size:12.5px;font-weight:600;color:var(--ink7);box-shadow:inset 0 0 0 1px var(--line);margin-right:4px;position:relative}
+.lenschip:hover{background:rgba(27,26,23,.05)}
+.lenschip .cur::before{content:"Master"}
+#ln-g:checked~.stage-wrap .lenschip .cur::before{content:"Guests"}
+#ln-1:checked~.stage-wrap .lenschip .cur::before{content:"Gaia Florals"}
+#ln-2:checked~.stage-wrap .lenschip .cur::before{content:"HMUA by Kat"}
+.lensmenu{position:absolute;right:18px;top:60px;z-index:45;width:250px;padding:10px;background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-radius:16px;box-shadow:var(--sh-hi);opacity:0;pointer-events:none;transform:translateY(-6px);transition:opacity var(--elem),transform var(--elem)}
+#lens:checked~.stage-wrap .lensmenu{opacity:1;pointer-events:auto;transform:none}
+.lensmenu .h{display:flex;align-items:center;justify-content:space-between;padding:2px 6px 8px}
+.lensmenu label.o{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;border-radius:10px;font-size:13px;font-weight:500}
+.lensmenu label.o:hover{background:rgba(27,26,23,.06)}
+.lensmenu label.o small{color:var(--ink4);font-size:11px}
+.lensmenu label.o .ck{width:8px;height:8px;border-radius:50%;background:transparent;box-shadow:inset 0 0 0 1px var(--ink3)}
+#ln-all:checked~.stage-wrap label[for=ln-all] .ck,#ln-g:checked~.stage-wrap label[for=ln-g] .ck,#ln-1:checked~.stage-wrap label[for=ln-1] .ck,#ln-2:checked~.stage-wrap label[for=ln-2] .ck{background:var(--ink);box-shadow:none}
+
+/* ── the live strip: Run of show + Next up, merged ── */
+.live{display:flex;align-items:center;gap:22px;padding:14px 26px 12px;position:relative;z-index:10}
+.live .nowdot{width:8px;height:8px;border-radius:50%;background:var(--cta);box-shadow:0 0 0 4px rgba(194,78,37,.16);animation:pulse 1.8s var(--ease) infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 4px rgba(194,78,37,.16)}50%{box-shadow:0 0 0 8px rgba(194,78,37,.06)}}
+.live .col{min-width:0}
+.live .col .eye{display:flex;gap:6px;align-items:center}
+.live .col .big{font-family:var(--serif);font-size:24px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.live .col .sub{font-size:12px;color:var(--ink4);display:flex;gap:8px;align-items:center;margin-top:2px}
+.live .col .sub .m{font-family:var(--mono)}
+.live .drift{color:var(--danger);font-weight:600}
+.live .sep{width:1px;height:38px;background:var(--line)}
+.live .next .big{font-size:18px;color:var(--ink7);font-family:var(--sans);font-weight:600}
+.live .adv{margin-left:auto;display:flex;align-items:center;gap:8px}
+.live .adv .b{height:38px;padding:0 16px;border-radius:var(--r-full);background:var(--ink);color:#fff;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.live .adv .b:hover{background:#000}
+.live .prog{position:absolute;left:26px;right:26px;bottom:0;height:2px;background:var(--hair)}
+.live .prog i{position:absolute;left:0;top:0;bottom:0;width:22%;background:var(--cta);transition:width 1s}
+
+/* ── work area: rail + side ── */
+.work{display:flex;min-height:0;position:relative}
+.railwrap{flex:1;min-width:0;overflow:auto;padding:8px 26px 80px 26px;scroll-behavior:smooth}
+.railhead{display:flex;align-items:baseline;gap:14px;padding:4px 0 10px 64px;position:sticky;top:0;z-index:6;background:linear-gradient(var(--paper) 70%,rgba(251,250,247,0))}
+.railhead .d{font-family:var(--serif);font-size:16px}
+.railhead .c{font-size:12px;color:var(--ink4)}
+.rolem{display:none;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--ink5)}
+.rolem i{width:6px;height:6px;border-radius:50%;background:var(--success)}
+#ro-view:checked~.stage-wrap .rolem i{background:var(--ink3)}#ro-sup:checked~.stage-wrap .rolem i{background:var(--gold3)}
+.railhead .c b{color:var(--ink7);font-weight:600}
+.rail{position:relative;height:calc(16 * var(--hh));margin-left:64px;max-width:720px}
+.rail::before{content:"";position:absolute;left:0;top:0;bottom:0;width:1px;background:var(--line)}
+.hr{position:absolute;left:-64px;right:0;height:0;top:calc(var(--h) * var(--hh));display:flex;align-items:flex-start}
+.hr span{width:52px;text-align:right;font-family:var(--mono);font-size:11px;color:var(--ink3);transform:translateY(-8px)}
+.hr::after{content:"";width:8px;height:1px;background:var(--line);margin-left:8px;opacity:.7}
+.hr.now{z-index:7}.hr.now span{color:var(--cta);font-weight:700}.hr.now::after{flex:1;width:auto;background:var(--cta);height:1px;opacity:1;margin-left:12px}
+.hr.now::before{content:"";position:absolute;left:8px;top:-3px;width:7px;height:7px;border-radius:50%;background:var(--cta)}
+/* five-minute snap ticks show while dragging */
+.snap{display:none;position:absolute;left:14px;right:0;top:calc(6.5 * var(--hh));height:calc(3.5 * var(--hh));pointer-events:none;background:repeating-linear-gradient(to bottom,transparent 0,transparent calc(var(--hh)/12 - 1px),#E9DFCC calc(var(--hh)/12 - 1px),#E9DFCC calc(var(--hh)/12));mask:linear-gradient(to bottom,transparent,#000 15%,#000 85%,transparent);-webkit-mask:linear-gradient(to bottom,transparent,#000 15%,#000 85%,transparent);z-index:0}
+#drag:checked~.stage-wrap .snap{display:block;animation:fade var(--elem) both}
+
+/* blocks */
+.blk{position:absolute;left:14px;right:0;top:calc((var(--s) - 420) / 60 * var(--hh));height:calc((var(--e) - var(--s)) / 60 * var(--hh) - 3px);border-radius:10px;background:#fff;box-shadow:var(--sh-tile);display:flex;flex-direction:column;justify-content:flex-start;padding:10px 40px 6px 14px;overflow:hidden;transition:transform var(--elem) var(--ease),box-shadow var(--elem),opacity var(--elem),top var(--enter) var(--ease-out),height var(--enter) var(--ease-out),left var(--enter),right var(--enter)}
+.blk::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--tint,var(--t-custom))}
+.blk:hover{transform:translateX(2px);box-shadow:var(--sh-hi)}
+.blk .hit{position:absolute;inset:0;z-index:1}
+.blk .ttl{font-weight:600;font-size:14px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;z-index:0}
+.blk .ti{font-family:var(--mono);font-size:11px;color:var(--ink4);margin-top:2px;display:flex;gap:8px;align-items:center;white-space:nowrap}
+.blk .who{font-size:11px;color:var(--ink5);display:inline-flex;align-items:center;gap:4px}
+.blk .who::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold3)}
+.blk.short{flex-direction:row;align-items:center;gap:10px;padding-top:0;padding-bottom:0;justify-content:flex-start}
+.blk.short .ti{margin-top:0}
+.blk.tiny{flex-direction:row;align-items:center;gap:10px;padding-top:0;padding-bottom:0}.blk.tiny .ttl{font-size:12.5px}.blk.tiny .ti{margin-top:0}
+.blk.hid{background:#F6F4EF;box-shadow:inset 0 0 0 1px var(--hair);opacity:.78}
+.blk.hid .ttl{color:var(--ink5)}
+.blk.L{right:calc(50% + 4px)}.blk.R{left:calc(50% + 4px)}
+.blk.onair{box-shadow:0 0 0 1.5px var(--cta),var(--sh-hi)}
+.blk.onair .ttl::after{content:"NOW";font-size:9px;letter-spacing:.16em;color:var(--cta);margin-left:8px;font-weight:800;vertical-align:1px}
+.blk.done{opacity:.62}
+.blk.done .ttl::after{content:"✓";color:var(--success);margin-left:8px;font-size:12px}
+.blk .parts{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.blk .parts span{font-size:10px;padding:2px 7px;border-radius:var(--r-full);background:var(--gold1);color:var(--gold7);font-weight:600}
+.blk.staged{background:#F6F4EF;box-shadow:none;outline:1.5px dotted var(--gold5);outline-offset:-2px}
+.blk.staged .ttl{color:var(--ink5)}
+.blk.staged .ttl::after{content:"STAGED · ONLY YOU";font-size:9px;letter-spacing:.14em;color:var(--gold7);margin-left:8px;font-weight:800;vertical-align:1px}
+/* the eye — one quiet control per block, the same language as the Maker */
+.eyeb{position:absolute;right:8px;top:50%;transform:translateY(-50%);z-index:3;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--ink3)}
+.eyeb:hover{background:rgba(27,26,23,.06);color:var(--ink)}
+.eyeb svg{width:16px;height:16px}
+.eyeb .on{display:block}.eyeb .off{display:none}
+.eyeb .lab{white-space:nowrap}.eyeb:hover .lab{opacity:1;transform:translateX(-50%)}
+.eyeb .lab{position:absolute;left:50%;top:calc(100% + 4px);transform:translateX(-50%) translateY(-4px);background:rgba(27,26,23,.94);color:#fff;font-size:11px;padding:4px 8px;border-radius:6px;opacity:0;pointer-events:none;transition:opacity var(--ctrl),transform var(--ctrl);z-index:80}
+.eyeb .lab::before{content:"Shown to guests · tap to hide"}
+/* visibility state per block, driven by its pub-N checkbox */
+#pub-1:not(:checked)~.stage-wrap .b1,#pub-2:not(:checked)~.stage-wrap .b2,#pub-3:not(:checked)~.stage-wrap .b3,#pub-4:not(:checked)~.stage-wrap .b4,#pub-5:not(:checked)~.stage-wrap .b5,#pub-6:not(:checked)~.stage-wrap .b6,#pub-7:not(:checked)~.stage-wrap .b7,#pub-8:not(:checked)~.stage-wrap .b8,#pub-9:not(:checked)~.stage-wrap .b9{background:#F6F4EF;box-shadow:inset 0 0 0 1px var(--hair);opacity:.78}
+#pub-1:not(:checked)~.stage-wrap .b1 .ttl,#pub-2:not(:checked)~.stage-wrap .b2 .ttl,#pub-3:not(:checked)~.stage-wrap .b3 .ttl,#pub-4:not(:checked)~.stage-wrap .b4 .ttl,#pub-5:not(:checked)~.stage-wrap .b5 .ttl,#pub-6:not(:checked)~.stage-wrap .b6 .ttl,#pub-7:not(:checked)~.stage-wrap .b7 .ttl,#pub-8:not(:checked)~.stage-wrap .b8 .ttl,#pub-9:not(:checked)~.stage-wrap .b9 .ttl{color:var(--ink5)}
+#pub-1:not(:checked)~.stage-wrap .b1 .eyeb .on,#pub-2:not(:checked)~.stage-wrap .b2 .eyeb .on,#pub-3:not(:checked)~.stage-wrap .b3 .eyeb .on,#pub-4:not(:checked)~.stage-wrap .b4 .eyeb .on,#pub-5:not(:checked)~.stage-wrap .b5 .eyeb .on,#pub-6:not(:checked)~.stage-wrap .b6 .eyeb .on,#pub-7:not(:checked)~.stage-wrap .b7 .eyeb .on,#pub-8:not(:checked)~.stage-wrap .b8 .eyeb .on,#pub-9:not(:checked)~.stage-wrap .b9 .eyeb .on{display:none}
+#pub-1:not(:checked)~.stage-wrap .b1 .eyeb .off,#pub-2:not(:checked)~.stage-wrap .b2 .eyeb .off,#pub-3:not(:checked)~.stage-wrap .b3 .eyeb .off,#pub-4:not(:checked)~.stage-wrap .b4 .eyeb .off,#pub-5:not(:checked)~.stage-wrap .b5 .eyeb .off,#pub-6:not(:checked)~.stage-wrap .b6 .eyeb .off,#pub-7:not(:checked)~.stage-wrap .b7 .eyeb .off,#pub-8:not(:checked)~.stage-wrap .b8 .eyeb .off,#pub-9:not(:checked)~.stage-wrap .b9 .eyeb .off{display:block}
+#pub-1:not(:checked)~.stage-wrap .b1 .eyeb .lab::before,#pub-2:not(:checked)~.stage-wrap .b2 .eyeb .lab::before,#pub-3:not(:checked)~.stage-wrap .b3 .eyeb .lab::before,#pub-4:not(:checked)~.stage-wrap .b4 .eyeb .lab::before,#pub-5:not(:checked)~.stage-wrap .b5 .eyeb .lab::before,#pub-6:not(:checked)~.stage-wrap .b6 .eyeb .lab::before,#pub-7:not(:checked)~.stage-wrap .b7 .eyeb .lab::before,#pub-8:not(:checked)~.stage-wrap .b8 .eyeb .lab::before,#pub-9:not(:checked)~.stage-wrap .b9 .eyeb .lab::before{content:"Hidden from guests · tap to show"}
+/* the count in the rail head follows the eyes */
+.railhead .vis::before,.glance .vis::before{content:counter(vis)}
+/* Guests lens: hidden blocks fade to a ghost — what guests will not see */
+#ln-g:checked~#pub-1:not(:checked)~.stage-wrap .b1,#ln-g:checked~#pub-2:not(:checked)~.stage-wrap .b2,#ln-g:checked~#pub-3:not(:checked)~.stage-wrap .b3,#ln-g:checked~#pub-4:not(:checked)~.stage-wrap .b4,#ln-g:checked~#pub-5:not(:checked)~.stage-wrap .b5,#ln-g:checked~#pub-6:not(:checked)~.stage-wrap .b6,#ln-g:checked~#pub-7:not(:checked)~.stage-wrap .b7,#ln-g:checked~#pub-8:not(:checked)~.stage-wrap .b8,#ln-g:checked~#pub-9:not(:checked)~.stage-wrap .b9,#ln-g:checked~.stage-wrap .blk.staged{opacity:.14;pointer-events:none}
+/* Supplier lenses: everything not tagged to them fades */
+#ln-1:checked~.stage-wrap .blk:not(.v1),#ln-2:checked~.stage-wrap .blk:not(.v2){opacity:.14;pointer-events:none}
+.lensnote{display:none;position:absolute;left:64px;top:8px;z-index:8;font-size:12px;color:var(--ink5);background:var(--gold1);padding:6px 12px;border-radius:var(--r-full)}
+#ln-g:checked~.stage-wrap .lensnote.g,#ln-1:checked~.stage-wrap .lensnote.v1,#ln-2:checked~.stage-wrap .lensnote.v2{display:inline-flex;gap:6px;align-items:center}
+.lensnote label{font-weight:700;color:var(--ink);text-decoration:underline}
+#ln-g:checked~.stage-wrap .railhead,#ln-1:checked~.stage-wrap .railhead,#ln-2:checked~.stage-wrap .railhead{opacity:0}
+
+/* selection ring + resize handles */
+.blk .hdl{position:absolute;left:50%;transform:translateX(-50%);width:34px;height:4px;border-radius:2px;background:var(--gold5);opacity:0;transition:opacity var(--ctrl);z-index:4;cursor:ns-resize}
+.blk .hdl.up{top:2px}.blk .hdl.dn{bottom:2px}
+#sel-1:checked~.stage-wrap .b1,#sel-2:checked~.stage-wrap .b2,#sel-3:checked~.stage-wrap .b3,#sel-4:checked~.stage-wrap .b4,#sel-5:checked~.stage-wrap .b5,#sel-6:checked~.stage-wrap .b6,#sel-7:checked~.stage-wrap .b7,#sel-8:checked~.stage-wrap .b8,#sel-9:checked~.stage-wrap .b9,#sel-10:checked~.stage-wrap .b10{box-shadow:0 0 0 2px var(--gold3),var(--sh-hi);z-index:5;transform:translateX(2px)}
+#sel-1:checked~.stage-wrap .b1 .hdl,#sel-2:checked~.stage-wrap .b2 .hdl,#sel-3:checked~.stage-wrap .b3 .hdl,#sel-4:checked~.stage-wrap .b4 .hdl,#sel-5:checked~.stage-wrap .b5 .hdl,#sel-6:checked~.stage-wrap .b6 .hdl,#sel-7:checked~.stage-wrap .b7 .hdl,#sel-8:checked~.stage-wrap .b8 .hdl,#sel-9:checked~.stage-wrap .b9 .hdl,#sel-10:checked~.stage-wrap .b10 .hdl{opacity:1}
+/* tapping a selected block again deselects — the hit label swaps to sel-0 */
+.blk .hit.off{display:none}
+#sel-1:checked~.stage-wrap .b1 .hit.on,#sel-2:checked~.stage-wrap .b2 .hit.on,#sel-3:checked~.stage-wrap .b3 .hit.on,#sel-4:checked~.stage-wrap .b4 .hit.on,#sel-5:checked~.stage-wrap .b5 .hit.on,#sel-6:checked~.stage-wrap .b6 .hit.on,#sel-7:checked~.stage-wrap .b7 .hit.on,#sel-8:checked~.stage-wrap .b8 .hit.on,#sel-9:checked~.stage-wrap .b9 .hit.on,#sel-10:checked~.stage-wrap .b10 .hit.on{display:none}
+#sel-1:checked~.stage-wrap .b1 .hit.off,#sel-2:checked~.stage-wrap .b2 .hit.off,#sel-3:checked~.stage-wrap .b3 .hit.off,#sel-4:checked~.stage-wrap .b4 .hit.off,#sel-5:checked~.stage-wrap .b5 .hit.off,#sel-6:checked~.stage-wrap .b6 .hit.off,#sel-7:checked~.stage-wrap .b7 .hit.off,#sel-8:checked~.stage-wrap .b8 .hit.off,#sel-9:checked~.stage-wrap .b9 .hit.off,#sel-10:checked~.stage-wrap .b10 .hit.off{display:block}
+
+/* drag demo — Ceremony slides 30 min later; ghost stays; snap badge */
+.dragghost{display:none;position:absolute;left:14px;right:0;top:calc((840 - 420) / 60 * var(--hh));height:calc(90 / 60 * var(--hh) - 3px);border-radius:10px;border:1.5px dashed var(--gold3);opacity:.7}
+#drag:checked~.stage-wrap .dragghost{display:block}
+#drag:checked~.stage-wrap .rail .b4.b4{--s:870;--e:960;box-shadow:0 0 0 2px var(--gold3),0 30px 60px -24px rgba(30,26,18,.55);z-index:9;transform:translateX(6px) scale(1.01);cursor:grabbing}
+#drag:checked~.stage-wrap .b4 .hdl{opacity:1}
+.dragbadge{display:none;position:absolute;right:0;top:calc((870 - 420) / 60 * var(--hh) - 30px);z-index:10;background:var(--ink);color:#fff;font-family:var(--mono);font-size:11px;padding:5px 9px;border-radius:8px}
+.dragbadge b{color:var(--gold3)}
+#drag:checked~.stage-wrap .dragbadge{display:block;animation:rise var(--enter) var(--ease-out) both}
+@keyframes rise{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+#drag:checked~.stage-wrap .insp .p-4 .tv.s::before{content:"2:30 PM"}#drag:checked~.stage-wrap .insp .p-4 .tv.e::before{content:"4:00 PM"}#drag:checked~.stage-wrap .insp .p-4 .dur::before{content:"1 h 30 min"}
+#drag:checked~.stage-wrap .rail .b4 .ti .rng::before{content:"2:30 – 4:00 PM"}
+.b4 .ti .rng::before{content:"2:00 – 3:30 PM"}
+.p-4 .tv.s::before{content:"2:00 PM"}.p-4 .tv.e::before{content:"3:30 PM"}
+/* stepper on the Ceremony start time (−5 / +5) */
+#st-a:checked~.stage-wrap .p-4 .tv.s::before{content:"1:55 PM"}#st-c:checked~.stage-wrap .p-4 .tv.s::before{content:"2:05 PM"}
+#st-a:checked~.stage-wrap .b4{--s:835}#st-c:checked~.stage-wrap .b4{--s:845}
+#st-a:checked~.stage-wrap .b4 .ti .rng::before{content:"1:55 – 3:30 PM"}#st-c:checked~.stage-wrap .b4 .ti .rng::before{content:"2:05 – 3:30 PM"}
+#st-a:checked~.stage-wrap .p-4 .dur::before{content:"1 h 35 min"}#st-c:checked~.stage-wrap .p-4 .dur::before{content:"1 h 25 min"}
+.p-4 .dur::before{content:"1 h 30 min"}
+
+/* empty-slot hotspots: tap a gap to add there */
+.gap{position:absolute;left:14px;right:0;top:calc((var(--s) - 420) / 60 * var(--hh) + 2px);height:calc((var(--e) - var(--s)) / 60 * var(--hh) - 6px);border-radius:10px;display:grid;place-items:center;color:transparent;font-size:12px;font-weight:600;transition:all var(--ctrl)}
+.gap:hover{background:rgba(203,167,102,.10);color:var(--gold7);box-shadow:inset 0 0 0 1.5px var(--gold3)}
+.gap .at{font-family:var(--mono)}
+
+/* ── the side: glance (nothing selected) or inspector (selected) ── */
+.side{width:380px;flex:none;position:relative;min-height:0;display:flex;flex-direction:column;transition:width var(--enter) var(--ease-out)}
+#vp-t:checked~.stage-wrap .side{width:0}
+#vp-t:checked~#sel-1:checked~.stage-wrap .side,#vp-t:checked~#sel-2:checked~.stage-wrap .side,#vp-t:checked~#sel-3:checked~.stage-wrap .side,#vp-t:checked~#sel-4:checked~.stage-wrap .side,#vp-t:checked~#sel-5:checked~.stage-wrap .side,#vp-t:checked~#sel-6:checked~.stage-wrap .side,#vp-t:checked~#sel-7:checked~.stage-wrap .side,#vp-t:checked~#sel-8:checked~.stage-wrap .side,#vp-t:checked~#sel-9:checked~.stage-wrap .side,#vp-t:checked~#sel-10:checked~.stage-wrap .side{width:300px}
+.glance{padding:34px 34px 0 10px;display:block}
+.gl{font-family:var(--serif);font-size:21px;line-height:1.3;margin-bottom:16px;color:var(--ink7)}
+.gl b{color:var(--ink);font-weight:400}
+.gl .sub,.g-live .sub{display:block;font-family:var(--sans);font-size:12.5px;color:var(--ink4);margin-top:2px}
+.gl.late b{color:var(--danger)}
+.g-live{margin-bottom:16px}
+.gtip{font-size:12.5px;color:var(--ink4);display:flex;align-items:center;gap:8px;margin-top:26px}
+.gtip.viewonly,.gtip.suponly{display:none}
+#ro-view:checked~.stage-wrap .gtip.viewonly,#ro-sup:checked~.stage-wrap .gtip.suponly{display:flex}
+#ro-view:checked~.stage-wrap .gtip.editonly,#ro-sup:checked~.stage-wrap .gtip.editonly{display:none}
+.glance .k{font-family:var(--serif);font-size:54px;line-height:1;letter-spacing:-.01em}
+.glance .k small{font-size:14px;font-family:var(--sans);color:var(--ink4);margin-left:6px;letter-spacing:0}
+.glance .row{margin-bottom:26px}
+.glance .row .eye{margin-bottom:6px}
+.glance .hint{font-size:12.5px;color:var(--ink4);max-width:24ch;margin-top:10px;line-height:1.5}
+.glance .hint b{color:var(--ink7);font-weight:600}
+#vp-t:checked~.stage-wrap .glance{display:none}
+body:has(#sel-1:checked) .glance,body:has(#sel-2:checked) .glance,body:has(#sel-3:checked) .glance,body:has(#sel-4:checked) .glance,body:has(#sel-5:checked) .glance,body:has(#sel-6:checked) .glance,body:has(#sel-7:checked) .glance,body:has(#sel-8:checked) .glance,body:has(#sel-9:checked) .glance,body:has(#sel-10:checked) .glance{display:none}
+/* inspector — desktop/tablet: a layer sliding in from the right edge of the side column */
+.insp{position:absolute;inset:0;background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:-1px 0 0 rgba(27,26,23,.06),-30px 0 60px -40px rgba(30,26,18,.35);transform:translateX(102%);transition:transform var(--enter) var(--ease-out);display:flex;flex-direction:column;overflow:hidden;z-index:25}
+body:has(#sel-1:checked) .insp,body:has(#sel-2:checked) .insp,body:has(#sel-3:checked) .insp,body:has(#sel-4:checked) .insp,body:has(#sel-5:checked) .insp,body:has(#sel-6:checked) .insp,body:has(#sel-7:checked) .insp,body:has(#sel-8:checked) .insp,body:has(#sel-9:checked) .insp,body:has(#sel-10:checked) .insp{transform:none}
+.insp .ih{display:flex;align-items:center;gap:8px;padding:12px 12px 8px 22px;min-height:56px}
+.insp .x{width:36px;height:36px}
+.insp .ih .eye{flex:1}
+.insp .x{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;color:var(--ink4);font-size:15px}
+.insp .x:hover{background:rgba(27,26,23,.06);color:var(--ink)}
+.insp .body{flex:1;overflow:auto;padding:0 22px 28px}
+.pane{display:none}
+#sel-1:checked~.stage-wrap .p-1,#sel-2:checked~.stage-wrap .p-2,#sel-3:checked~.stage-wrap .p-3,#sel-4:checked~.stage-wrap .p-4,#sel-5:checked~.stage-wrap .p-5,#sel-6:checked~.stage-wrap .p-6,#sel-7:checked~.stage-wrap .p-7,#sel-8:checked~.stage-wrap .p-8,#sel-9:checked~.stage-wrap .p-9,#sel-10:checked~.stage-wrap .p-10{display:block;animation:fade var(--elem) both}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+/* inspector fields — no boxes; hairline underlines and typographic scale */
+.f{margin-top:18px}
+.f .l{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.f input[type=text],.f textarea,.f select{width:100%;border:0;border-bottom:1px solid var(--line);background:transparent;font:inherit;font-size:15px;padding:6px 0;color:var(--ink);outline:none;border-radius:0;transition:border-color var(--ctrl)}
+.f input:focus,.f textarea:focus,.f select:focus{border-bottom-color:var(--ink)}
+.f textarea{resize:none;font-size:13.5px;line-height:1.5}
+.f select{appearance:none;-webkit-appearance:none;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%236E6A62' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right center}
+.ttlin{font-family:var(--serif);font-size:24px!important;padding:2px 0 6px!important;line-height:1.15}
+.times{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+.tv{font-family:var(--mono);font-size:26px;letter-spacing:-.01em;line-height:1}
+.stp{display:inline-flex;align-items:center;gap:2px;margin-top:6px}
+.stp label{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font-size:15px;color:var(--ink5);box-shadow:inset 0 0 0 1px var(--line)}
+.stp label:hover{background:rgba(27,26,23,.06);color:var(--ink)}
+.stp .mid{font-size:10px;color:var(--ink3);padding:0 6px;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+#st-a:checked~.stage-wrap label[for=st-a],#st-c:checked~.stage-wrap label[for=st-c]{background:var(--ink);color:#fff;box-shadow:none}
+.durline{font-size:12.5px;color:var(--ink4);margin-top:10px;display:flex;gap:10px;align-items:center}
+.durline .dur{color:var(--ink7);font-weight:600}
+/* toggles */
+.tg{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;margin-top:6px}
+.tg .lbl{font-size:14px;font-weight:500;display:flex;align-items:center;gap:6px}
+.tg .lbl small{display:block;font-size:11.5px;color:var(--ink4);font-weight:400}
+.sw2{width:40px;height:24px;border-radius:12px;background:var(--line);position:relative;transition:background var(--elem);flex:none;display:block}
+.sw2::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform var(--elem) var(--ease-out)}
+#pub-1:checked~.stage-wrap .p-1 .sw2,#pub-2:checked~.stage-wrap .p-2 .sw2,#pub-3:checked~.stage-wrap .p-3 .sw2,#pub-4:checked~.stage-wrap .p-4 .sw2,#pub-5:checked~.stage-wrap .p-5 .sw2,#pub-6:checked~.stage-wrap .p-6 .sw2,#pub-7:checked~.stage-wrap .p-7 .sw2,#pub-8:checked~.stage-wrap .p-8 .sw2,#pub-9:checked~.stage-wrap .p-9 .sw2{background:var(--success)}
+#pub-1:checked~.stage-wrap .p-1 .sw2::after,#pub-2:checked~.stage-wrap .p-2 .sw2::after,#pub-3:checked~.stage-wrap .p-3 .sw2::after,#pub-4:checked~.stage-wrap .p-4 .sw2::after,#pub-5:checked~.stage-wrap .p-5 .sw2::after,#pub-6:checked~.stage-wrap .p-6 .sw2::after,#pub-7:checked~.stage-wrap .p-7 .sw2::after,#pub-8:checked~.stage-wrap .p-8 .sw2::after,#pub-9:checked~.stage-wrap .p-9 .sw2::after{transform:translateX(16px)}
+#addpub:checked~.stage-wrap label[for=addpub] .sw2,#addstg:checked~.stage-wrap label[for=addstg] .sw2,#incl:checked~.stage-wrap label[for=incl] .sw2{background:var(--success)}
+#addpub:checked~.stage-wrap label[for=addpub] .sw2::after,#addstg:checked~.stage-wrap label[for=addstg] .sw2::after,#incl:checked~.stage-wrap label[for=incl] .sw2::after{transform:translateX(16px)}
+/* responsible party chips */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chips label,.chips span{font-size:12px;padding:6px 10px;border-radius:var(--r-full);box-shadow:inset 0 0 0 1px var(--line);color:var(--ink5);display:inline-flex;align-items:center;gap:5px}
+.chips .on{background:var(--ink);color:#fff;box-shadow:none}
+.chips label:hover{background:rgba(27,26,23,.06)}
+.chips .on:hover{background:#000}
+/* parts */
+.parts-l{margin-top:8px}
+.parts-l div{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--hair);font-size:13.5px}
+.parts-l div span.m{color:var(--ink4);font-family:var(--mono);font-size:12px}
+.parts-l .add{color:var(--gold7);font-weight:600;font-size:12.5px;padding:8px 0;display:inline-block}
+/* inspector footer actions */
+.acts{display:flex;align-items:center;gap:8px;margin-top:26px;flex-wrap:wrap}
+.acts .a{height:36px;padding:0 14px;border-radius:var(--r-full);font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink7)}
+.acts .a:hover{background:rgba(27,26,23,.06)}
+.acts .a.danger{color:var(--danger);box-shadow:none;margin-left:auto;padding:0 8px}
+.acts .a.danger:hover{background:rgba(166,72,59,.08)}
+.acts .a.gold{background:var(--gold3);color:var(--ob);box-shadow:none}.acts .a.gold:hover{background:#DCBE85}
+.saved{font-size:12px;color:var(--ink4);margin-top:12px}
+.saved b{color:var(--success);font-weight:600}
+.staged-note{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--gold1);font-size:12.5px;color:var(--gold7);line-height:1.45}
+
+/* ── sheets & panels (add · shift · emcee · host · requests) ── */
+.scrim{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity var(--elem);z-index:40;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+#add:checked~.stage-wrap .scrim.add,#shift:checked~.stage-wrap .scrim.shift,#emcee:checked~.stage-wrap .scrim.emcee,#host:checked~.stage-wrap .scrim.host,#req:checked~.stage-wrap .scrim.req,#lens:checked~.stage-wrap .scrim.lens,#chap:checked~.stage-wrap .scrim.chap,#stp-new:checked~.stage-wrap .scrim.stps,#stp-own:checked~.stage-wrap .scrim.stps,#stp-auto:checked~.stage-wrap .scrim.stps{opacity:.45;pointer-events:auto}
+.scrim.lens{opacity:0!important;backdrop-filter:none;-webkit-backdrop-filter:none}
+.ov{position:absolute;top:0;right:0;bottom:0;width:420px;max-width:100%;background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:var(--sh-hi);transform:translateX(104%);transition:transform var(--enter) var(--ease-out);z-index:50;display:flex;flex-direction:column;overflow:hidden}
+#add:checked~.stage-wrap .ov.add,#shift:checked~.stage-wrap .ov.shift,#emcee:checked~.stage-wrap .ov.emcee,#host:checked~.stage-wrap .ov.host{transform:none}
+.ov .oh{display:flex;align-items:center;gap:4px;padding:12px 12px 8px 24px;min-height:60px;background:var(--paper)}
+.ov .oh h2{font-family:var(--serif);font-weight:400;font-size:22px;flex:1;line-height:1.2}
+.ov .oh .tip{width:36px;height:36px;border-radius:10px;box-shadow:none;font-size:13px}
+.ov .oh .tip:hover,.ov .oh .tip:focus{background:rgba(27,26,23,.06);box-shadow:none}
+.ov .oh .x{width:36px;height:36px}
+.ov .ob{flex:1;overflow:auto;padding:4px 24px 28px}
+.ov .of{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 24px 18px;box-shadow:0 -1px 0 rgba(27,26,23,.06);background:var(--paper);position:sticky;bottom:0;flex:none}
+.b{height:38px;padding:0 16px;border-radius:var(--r-full);font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.b.dark{background:var(--ink);color:#fff}.b.dark:hover{background:#000}
+.b.ghost{box-shadow:inset 0 0 0 1px var(--line);color:var(--ink7)}.b.ghost:hover{background:rgba(27,26,23,.06)}
+.b.gold{background:var(--gold3);color:var(--ob)}.b.gold:hover{background:#DCBE85}
+/* quick type chips in the add sheet */
+.types{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.types label{font-size:12.5px;padding:8px 12px;border-radius:var(--r-full);box-shadow:inset 0 0 0 1px var(--line);color:var(--ink7);display:inline-flex;align-items:center;gap:6px}
+.types label i{width:8px;height:8px;border-radius:50%;background:var(--tint)}
+.types label:hover{background:rgba(27,26,23,.06)}
+#ty-cer:checked~.stage-wrap label[for=ty-cer],#ty-cock:checked~.stage-wrap label[for=ty-cock],#ty-rec:checked~.stage-wrap label[for=ty-rec],#ty-din:checked~.stage-wrap label[for=ty-din],#ty-prog:checked~.stage-wrap label[for=ty-prog],#ty-dan:checked~.stage-wrap label[for=ty-dan],#ty-send:checked~.stage-wrap label[for=ty-send],#ty-aft:checked~.stage-wrap label[for=ty-aft],#ty-pre:checked~.stage-wrap label[for=ty-pre],#ty-cus:checked~.stage-wrap label[for=ty-cus],#ty-set:checked~.stage-wrap label[for=ty-set]{background:var(--ink);color:#fff;box-shadow:none}
+.tpl{margin-top:26px}
+.tpl .r{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--hair);opacity:.55}
+.tpl .r b{font-weight:600;font-size:13.5px;display:block}.tpl .r small{font-size:11.5px;color:var(--ink4)}
+.tpl .r .n{font-family:var(--mono);font-size:11px;color:var(--ink4);white-space:nowrap}
+/* shift sheet */
+.shiftnum{font-family:var(--mono);font-size:56px;line-height:1;margin:18px 0 6px;letter-spacing:-.02em}
+.shiftnum::before{content:"+30"}
+#sh-15:checked~.stage-wrap .shiftnum::before{content:"+15"}#sh-45:checked~.stage-wrap .shiftnum::before{content:"+45"}#sh-m15:checked~.stage-wrap .shiftnum::before{content:"−15"}
+.shiftnum small{font-size:14px;font-family:var(--sans);color:var(--ink4);margin-left:6px}
+.shiftline{font-size:13px;color:var(--ink5);margin-top:6px}
+.shiftline .endsat::before{content:"11:00 PM"}
+#sh-15:checked~.stage-wrap .shiftline .endsat::before{content:"10:45 PM"}#sh-45:checked~.stage-wrap .shiftline .endsat::before{content:"11:15 PM"}#sh-m15:checked~.stage-wrap .shiftline .endsat::before{content:"10:15 PM"}
+.stp2{display:inline-flex;gap:4px;margin-top:14px}
+.stp2 label{height:36px;padding:0 12px;border-radius:var(--r-full);display:grid;place-items:center;font-size:13px;font-weight:600;color:var(--ink5);box-shadow:inset 0 0 0 1px var(--line)}
+#sh-15:checked~.stage-wrap label[for=sh-15],#sh-30:checked~.stage-wrap label[for=sh-30],#sh-45:checked~.stage-wrap label[for=sh-45],#sh-m15:checked~.stage-wrap label[for=sh-m15]{background:var(--ink);color:#fff;box-shadow:none}
+.movelist{margin-top:18px}
+.movelist div{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--hair);font-size:13px}
+.movelist div .m{font-family:var(--mono);color:var(--ink4);font-size:12px}
+.movelist div.dim{opacity:.4}
+/* emcee panel */
+.script{font-family:var(--mono);font-size:12px;line-height:1.7;white-space:pre-wrap;color:var(--ink7);padding:12px 0}
+.script b{color:var(--ink);font-weight:700}
+/* host panel tabs */
+.htabs{display:inline-flex;gap:2px;padding:3px;border-radius:var(--r-full);background:rgba(27,26,23,.06);margin:6px 0 10px}
+.htabs label{font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:var(--r-full);color:var(--ink5)}
+#h-seg:checked~.stage-wrap label[for=h-seg],#h-q:checked~.stage-wrap label[for=h-q],#h-note:checked~.stage-wrap label[for=h-note]{background:var(--ink);color:#fff}
+.hp{display:none}
+#h-seg:checked~.stage-wrap .hp.seg,#h-q:checked~.stage-wrap .hp.q,#h-note:checked~.stage-wrap .hp.note{display:block;animation:fade var(--elem) both}
+.pick{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--hair)}
+.pick .ck{width:20px;height:20px;border-radius:6px;box-shadow:inset 0 0 0 1.5px var(--ink3);display:grid;place-items:center;color:#fff;font-size:12px;flex:none}
+.pick.on .ck{background:var(--ink);box-shadow:none}
+.pick b{font-weight:600;font-size:13.5px;display:block}.pick small{font-size:11.5px;color:var(--ink4)}
+.pick .at{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink4);white-space:nowrap}
+/* requests popover */
+.reqpop{position:absolute;right:120px;top:60px;z-index:50;width:340px;padding:16px 18px;background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-radius:18px;box-shadow:var(--sh-hi);opacity:0;pointer-events:none;transform:translateY(-6px);transition:opacity var(--elem),transform var(--elem)}
+#req:checked~.stage-wrap .reqpop{opacity:1;pointer-events:auto;transform:none}
+.reqpop p{font-size:13.5px;line-height:1.45}
+.reqpop .q{font-size:13px;color:var(--ink5);font-style:italic;margin:6px 0 10px}
+.reqpop .m{font-family:var(--mono);font-size:12px;color:var(--ink4)}
+
+/* ── Journey · Preparation views (read-only, restyled) ── */
+.view{display:none;overflow:auto;padding:18px 26px 80px;grid-row:2 / span 2}
+#v-j:checked~.stage-wrap .view.j,#v-p:checked~.stage-wrap .view.p{display:block}
+#v-j:checked~.stage-wrap .live,#v-p:checked~.stage-wrap .live,#v-j:checked~.stage-wrap .work,#v-p:checked~.stage-wrap .work{display:none}
+#v-j:checked~.stage-wrap .tools .dayonly,#v-p:checked~.stage-wrap .tools .dayonly{display:none}
+.prep{max-width:760px;margin-left:64px}
+.prep .mo{display:grid;grid-template-columns:120px 1fr;gap:22px;margin-bottom:34px}
+.prep .mo .mh{font-family:var(--serif);font-size:26px;line-height:1;position:sticky;top:0}
+.prep .mo .mh small{display:block;font-size:11px;color:var(--ink4);font-family:var(--sans);margin-top:6px;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+.prep .it{display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--hair)}
+.prep .it .d{font-family:var(--mono);font-size:13px;color:var(--ink5)}
+.prep .it .lb{font-size:14.5px;font-weight:500}
+.prep .it .lb small{display:block;font-size:12px;color:var(--ink4);font-weight:400}
+.prep .it .k{font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;padding:4px 8px;border-radius:var(--r-full);background:var(--gold1);color:var(--gold7)}
+.prep .it .k.pay{background:#EEF2EA;color:var(--success)}.prep .it .k.pap{background:#F1EEF6;color:#6B5B86}.prep .it .k.meet{background:#F7EBE3;color:var(--cta)}.prep .it .k.man{background:rgba(27,26,23,.06);color:var(--ink5)}
+.prep .it.day .lb{font-family:var(--serif);font-size:20px}
+.prep .addstep{margin:6px 0 0 66px;color:var(--gold7);font-weight:600;font-size:13px;display:inline-flex;gap:6px;align-items:center}
+.jour{max-width:820px;margin-left:64px}
+.arc{position:relative;height:120px;margin:10px 0 30px}
+.arc svg{width:100%;height:100%;overflow:visible}
+.arc .nd{position:absolute;top:70px;transform:translateX(-50%);text-align:center;font-size:12px;color:var(--ink5)}
+.arc .nd b{display:block;font-family:var(--serif);font-size:15px;color:var(--ink);font-weight:400}
+.ph{display:grid;grid-template-columns:150px 1fr;gap:22px;margin-bottom:28px}
+.ph .phh{font-family:var(--serif);font-size:22px;line-height:1.1}
+.ph .phh small{display:block;font-size:11px;font-family:var(--sans);color:var(--ink4);margin-top:6px;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+.ph .en{display:grid;grid-template-columns:90px 1fr;gap:14px;padding:9px 0;border-bottom:1px solid var(--hair);font-size:14px}
+.ph .en .d{font-family:var(--mono);font-size:12.5px;color:var(--ink5)}
+.ph .en.dim{opacity:.5}
+
+/* ── mobile bottom bar (segmented control lives at the thumb) ── */
+.mbar{display:none}
+/* the app-name bar hint for the phone */
+.phone-top{display:none}
+
+
+/* ══════════ WHEN · Planning (before the day) vs Event day (live) ══════════ */
+.who .dtg{display:none}
+#md-plan:checked~.stage-wrap .who .dtg,#md-empty:checked~.stage-wrap .who .dtg{display:inline}
+#md-plan:checked~.stage-wrap .live,#md-empty:checked~.stage-wrap .live{display:none}
+#md-plan:checked~.stage-wrap .hr.now,#md-empty:checked~.stage-wrap .hr.now{display:none}
+#md-plan:checked~.stage-wrap .blk.done,#md-empty:checked~.stage-wrap .blk.done{opacity:1}
+#md-plan:checked~.stage-wrap .blk.done .ttl::after,#md-plan:checked~.stage-wrap .blk.onair .ttl::after{content:none}
+#md-plan:checked~.stage-wrap .blk.onair{box-shadow:var(--sh-tile)}
+#md-plan:checked~#sel-4:checked~.stage-wrap .b4{box-shadow:0 0 0 2px var(--gold3),var(--sh-hi)}
+#md-plan:checked~.stage-wrap .p-4 .saved b::after{content:""}
+.g-live{display:none}#md-live:checked~.stage-wrap .g-live{display:block}#md-live:checked~.stage-wrap .g-plan{display:none}
+#md-empty:checked~.stage-wrap .g-day{display:none}
+#md-live:checked~.stage-wrap .who .dtg{display:none}
+/* the empty schedule */
+.nb::before{content:"9"}
+.empty{display:none;position:absolute;left:14px;right:0;top:calc(2.4 * var(--hh));padding:26px 30px 22px;background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-radius:18px;box-shadow:var(--sh-hi);z-index:8;max-width:520px}
+.empty .et{font-size:13.5px;color:var(--ink5);margin:6px 0 14px;max-width:38ch}
+.empty .er{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 10px;margin:0 -10px;border-radius:12px;border-bottom:1px solid var(--hair)}
+.empty .er:hover{background:rgba(27,26,23,.05)}
+.empty .er b{font-weight:600;font-size:14.5px;display:block}.empty .er small{font-size:12px;color:var(--ink4)}
+.empty .er .n{font-family:var(--mono);font-size:11px;color:var(--ink4);white-space:nowrap}
+.empty .tip{margin-top:12px}
+#md-empty:checked~.stage-wrap .empty{display:block;animation:fade var(--enter) both}
+#md-empty:checked~.stage-wrap .blk,#md-empty:checked~.stage-wrap .rq,#md-empty:checked~.stage-wrap .dragghost,#md-empty:checked~.stage-wrap .dragbadge,#md-empty:checked~.stage-wrap .g-req,#md-empty:checked~.stage-wrap .railhead .stg,#md-empty:checked~.stage-wrap .lensnote{display:none}
+#md-empty:checked~.stage-wrap .railhead .nb::before,#md-empty:checked~.stage-wrap .glance .nb::before{content:"0"}
+#md-empty:checked~.stage-wrap .glance .vis::before,#md-empty:checked~.stage-wrap .railhead .vis::before{content:"0"}
+#md-empty:checked~.stage-wrap .gap{color:var(--gold7);background:rgba(203,167,102,.06)}
+#md-empty:checked~.stage-wrap label[for=req],#md-empty:checked~.stage-wrap label[for=chap],#md-empty:checked~.stage-wrap label[for=shift],#md-empty:checked~.stage-wrap label[for=emcee],#md-empty:checked~.stage-wrap .lenschip{display:none}
+
+/* ══════════ WHO EDITS · host · approved coordinator · view only · supplier ══════════ */
+.role{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--ink5);padding:0 10px 0 8px;height:26px;border-radius:var(--r-full);background:rgba(27,26,23,.05);margin-right:auto;margin-left:-4px;white-space:nowrap}
+.role i{width:7px;height:7px;border-radius:50%;background:var(--success)}
+.rt::before{content:"You can edit"}
+.top .who{margin-right:10px}
+#ro-coord:checked~.stage-wrap .rt::before{content:"You can edit · coordinator, approved 12 Sep"}
+#ro-view:checked~.stage-wrap .rt::before{content:"View only"}
+#ro-view:checked~.stage-wrap .role i{background:var(--ink3)}
+#ro-sup:checked~.stage-wrap .rt::before{content:"Gaia Florals · your view · requests only"}
+#ro-sup:checked~.stage-wrap .role i{background:var(--gold3)}
+.watching{display:none}
+/* view only: reads everything, moves nothing */
+#ro-view:checked~.stage-wrap .editonly,#ro-view:checked~.stage-wrap .hostonly,#ro-view:checked~.stage-wrap .gap,#ro-view:checked~.stage-wrap .hdl,#ro-view:checked~.stage-wrap .acts,#ro-view:checked~.stage-wrap .stp,#ro-view:checked~.stage-wrap .rq,#ro-view:checked~.stage-wrap .g-req,#ro-view:checked~.stage-wrap .parts-l .add,#ro-view:checked~.stage-wrap .r1note,#ro-view:checked~.stage-wrap .saved,#ro-view:checked~.stage-wrap .prep .addstep{display:none!important}
+#ro-view:checked~.stage-wrap .watching{display:inline}
+#ro-view:checked~.stage-wrap .eyeb,#ro-view:checked~.stage-wrap .tg,#ro-view:checked~.stage-wrap .chips label{pointer-events:none}
+#ro-view:checked~.stage-wrap .insp input,#ro-view:checked~.stage-wrap .insp textarea,#ro-view:checked~.stage-wrap .insp select{pointer-events:none;border-bottom-color:transparent;color:var(--ink7)}
+#ro-view:checked~.stage-wrap .blk .hit{cursor:default}
+.hint.viewonly,.hint.suponly{display:none}
+#ro-view:checked~.stage-wrap .hint.viewonly,#ro-sup:checked~.stage-wrap .hint.suponly{display:block}
+#ro-view:checked~.stage-wrap .hint.editonly,#ro-sup:checked~.stage-wrap .hint.editonly{display:none}
+/* the coordinator alone sees staged blocks and may stage */
+.b10,.railhead .stg,.coordonly{display:none}
+#ro-coord:checked~.stage-wrap .b10{display:flex}#ro-coord:checked~.stage-wrap .railhead .stg{display:inline}#ro-coord:checked~.stage-wrap .coordonly{display:flex}
+/* supplier: full timeline, no editing; proposes instead */
+#ro-sup:checked~.stage-wrap .editonly,#ro-sup:checked~.stage-wrap .hostonly,#ro-sup:checked~.stage-wrap .gap:not(.sgap),#ro-sup:checked~.stage-wrap .hdl,#ro-sup:checked~.stage-wrap .eyeb,#ro-sup:checked~.stage-wrap .g-req,#ro-sup:checked~.stage-wrap .rq.r2,#ro-sup:checked~.stage-wrap .rq.r3,#ro-sup:checked~.stage-wrap .railhead .visw,#ro-sup:checked~.stage-wrap .b10,#ro-sup:checked~.stage-wrap .blk .parts,#ro-sup:checked~.stage-wrap .b8{display:none!important}
+#ro-sup:checked~.stage-wrap .watching{display:inline}
+.sgap{display:none}#ro-sup:checked~.stage-wrap .sgap{display:grid}
+#ro-sup:checked~.stage-wrap .rq.r1 .rqt{display:none}#ro-sup:checked~.stage-wrap .rq.r1 .rqt.sup{display:block}
+#ro-sup:checked~.stage-wrap .rq.r1{border-color:var(--gold5);background:rgba(203,167,102,.08);color:var(--gold7);pointer-events:none}
+.rq .rqt.sup{display:none}
+#ro-sup:checked~.stage-wrap .pane[class*=" p-"]{display:none!important}
+.sp{display:none}
+#ro-sup:checked~#sel-1:checked~.stage-wrap .sp,#ro-sup:checked~#sel-2:checked~.stage-wrap .sp,#ro-sup:checked~#sel-3:checked~.stage-wrap .sp,#ro-sup:checked~#sel-4:checked~.stage-wrap .sp,#ro-sup:checked~#sel-5:checked~.stage-wrap .sp,#ro-sup:checked~#sel-6:checked~.stage-wrap .sp,#ro-sup:checked~#sel-7:checked~.stage-wrap .sp,#ro-sup:checked~#sel-9:checked~.stage-wrap .sp{display:block;animation:fade var(--elem) both}
+.ihw::before{content:"Moment"}
+#ro-sup:checked~.stage-wrap .ihw::before{content:"Their moment · your request"}
+#ro-view:checked~.stage-wrap .ihw::before{content:"Moment · view only"}
+#sel-1:checked~.stage-wrap .sp .bn::before{content:"Hair & makeup"}#sel-1:checked~.stage-wrap .sp .bt::before{content:"8:00 AM – 12:00 PM"}#sel-1:checked~.stage-wrap .sp .bw::before{content:"Bridal suite, Peninsula Manila"}#sel-1:checked~.stage-wrap .sp .sps::before{content:"8:00 AM"}#sel-1:checked~.stage-wrap .sp .spe::before{content:"12:00 PM"}
+#sel-2:checked~.stage-wrap .sp .bn::before{content:"Vendor ingress & styling"}#sel-2:checked~.stage-wrap .sp .bt::before{content:"10:00 AM – 1:00 PM"}#sel-2:checked~.stage-wrap .sp .bw::before{content:"San Agustin Church · Grand ballroom · your slot"}#sel-2:checked~.stage-wrap .sp .sps::before{content:"9:30 AM"}#sel-2:checked~.stage-wrap .sp .spe::before{content:"1:00 PM"}
+#sel-3:checked~.stage-wrap .sp .bn::before{content:"Guests arrive"}#sel-3:checked~.stage-wrap .sp .bt::before{content:"1:30 – 2:00 PM"}#sel-3:checked~.stage-wrap .sp .bw::before{content:"San Agustin Church, Intramuros"}#sel-3:checked~.stage-wrap .sp .sps::before{content:"1:30 PM"}#sel-3:checked~.stage-wrap .sp .spe::before{content:"2:00 PM"}
+#sel-4:checked~.stage-wrap .sp .bn::before{content:"Ceremony"}#sel-4:checked~.stage-wrap .sp .bt::before{content:"2:00 – 3:30 PM"}#sel-4:checked~.stage-wrap .sp .bw::before{content:"San Agustin Church, Intramuros"}#sel-4:checked~.stage-wrap .sp .sps::before{content:"2:00 PM"}#sel-4:checked~.stage-wrap .sp .spe::before{content:"3:30 PM"}
+#sel-5:checked~.stage-wrap .sp .bn::before{content:"Cocktails"}#sel-5:checked~.stage-wrap .sp .bt::before{content:"4:00 – 5:00 PM"}#sel-5:checked~.stage-wrap .sp .bw::before{content:"Garden terrace"}#sel-5:checked~.stage-wrap .sp .sps::before{content:"4:00 PM"}#sel-5:checked~.stage-wrap .sp .spe::before{content:"5:00 PM"}
+#sel-6:checked~.stage-wrap .sp .bn::before{content:"Reception & dinner"}#sel-6:checked~.stage-wrap .sp .bt::before{content:"5:00 – 7:30 PM"}#sel-6:checked~.stage-wrap .sp .bw::before{content:"Grand ballroom"}#sel-6:checked~.stage-wrap .sp .sps::before{content:"5:00 PM"}#sel-6:checked~.stage-wrap .sp .spe::before{content:"7:30 PM"}
+#sel-7:checked~.stage-wrap .sp .bn::before{content:"Program"}#sel-7:checked~.stage-wrap .sp .bt::before{content:"7:30 – 9:00 PM"}#sel-7:checked~.stage-wrap .sp .bw::before{content:"Grand ballroom"}#sel-7:checked~.stage-wrap .sp .sps::before{content:"7:30 PM"}#sel-7:checked~.stage-wrap .sp .spe::before{content:"9:00 PM"}
+#sel-9:checked~.stage-wrap .sp .bn::before{content:"Send-off"}#sel-9:checked~.stage-wrap .sp .bt::before{content:"10:00 – 10:30 PM"}#sel-9:checked~.stage-wrap .sp .bw::before{content:"Driveway, main entrance"}#sel-9:checked~.stage-wrap .sp .sps::before{content:"10:00 PM"}#sel-9:checked~.stage-wrap .sp .spe::before{content:"10:30 PM"}
+/* supplier send states */
+.ssent{display:none}
+#ssent2:checked~.stage-wrap .sp .sform{display:none}#ssent2:checked~.stage-wrap .sp .ssent{display:block;animation:fade var(--elem) both}
+#ssent:checked~.stage-wrap .ov.sreq .sform{display:none}#ssent:checked~.stage-wrap .ov.sreq .ssent{display:block;animation:fade var(--elem) both}
+
+/* ══════════ SUPPLIER REQUESTS · ghosts on the rail + the inbox ══════════ */
+.rq{position:absolute;left:14px;right:0;top:calc((var(--s) - 420) / 60 * var(--hh));height:calc((var(--e) - var(--s)) / 60 * var(--hh) - 3px);border-radius:10px;border:1.5px dashed var(--cta);background:#FBEFE9;display:flex;align-items:center;padding:0 12px;z-index:6;color:var(--cta);font-size:11.5px;font-weight:600;white-space:nowrap;overflow:hidden;transition:background var(--elem)}
+.rq:hover{background:#F7E2D7}
+.rq.R{left:calc(50% + 4px)}
+.rq .rqt{overflow:hidden;text-overflow:ellipsis}
+.rq.r1{border-bottom-style:solid;border-bottom-color:transparent;border-radius:10px 10px 0 0}
+.rq.r3~.gap.g2,.rq.r2~.gap.g3{display:none}
+#r1-ap:checked~.stage-wrap .rq.r1,#r1-dc:checked~.stage-wrap .rq.r1,#r2-ap:checked~.stage-wrap .rq.r2,#r2-dc:checked~.stage-wrap .rq.r2,#r3-ap:checked~.stage-wrap .rq.r3,#r3-dc:checked~.stage-wrap .rq.r3{display:none}
+#r2-dc:checked~.stage-wrap .gap.g3,#r3-dc:checked~.stage-wrap .gap.g2{display:grid}
+#r1-ap:checked~.stage-wrap .r1note,#r1-dc:checked~.stage-wrap .r1note{display:none}
+/* approving applies the change to the rail */
+.b2 .rng2::before{content:"10:00 AM – 1:00 PM"}.p-2 .s2::before{content:"10:00 AM"}.p-2 .d2::before{content:"3 h"}
+#r1-ap:checked~.stage-wrap .rail .b2.b2{--s:570}#r1-ap:checked~.stage-wrap .b2 .rng2::before{content:"9:30 AM – 1:00 PM"}#r1-ap:checked~.stage-wrap .p-2 .s2::before{content:"9:30 AM"}#r1-ap:checked~.stage-wrap .p-2 .d2::before{content:"3 h 30 min"}
+.b11,.b12{display:none}
+#r3-ap:checked~.stage-wrap .b11{display:flex;animation:fade var(--enter) both}#r2-ap:checked~.stage-wrap .b12{display:flex;animation:fade var(--enter) both}
+#ro-sup:checked~.stage-wrap .b11,#ro-sup:checked~.stage-wrap .b12{display:none!important}
+/* the inbox count is a counter over the open requests */
+body{counter-reset:vis req}
+input.sw[id$=-open]:checked,input.sw[id$=-dcq]:checked{counter-increment:req}
+.rqn::before,.badge.rqb::before{content:counter(req)}
+body:not(:has(input.sw[id$=-open]:checked)):not(:has(input.sw[id$=-dcq]:checked)) .badge.rqb,body:not(:has(input.sw[id$=-open]:checked)):not(:has(input.sw[id$=-dcq]:checked)) .g-req{display:none}
+.rq-none{display:none;font-size:13.5px;color:var(--ink4);padding:20px 0}
+body:not(:has(input.sw[id$=-open]:checked)):not(:has(input.sw[id$=-dcq]:checked)) .rq-none{display:block}
+.rqi{padding:18px 0 20px;border-bottom:1px solid var(--hair)}
+.rqi h3{font-family:var(--serif);font-weight:400;font-size:21px;margin-top:4px}
+.rqi .cmp{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:end;margin-top:12px}
+.rqi .cmp .tv{font-size:18px;margin-top:2px}
+.rqi .arw{color:var(--ink3);font-size:18px;padding-bottom:2px}
+.rqi .q{font-size:13.5px;color:var(--ink5);font-style:italic;margin-top:12px}
+.rqi .pl{font-size:12.5px;color:var(--ink4);margin-top:8px}
+.rqi .rqa{margin-top:14px;display:none;gap:8px;justify-content:flex-end}
+.rqi .rqa.st-dcq div{justify-content:flex-end}
+.rqi .rqa.st-ap,.rqi .rqa.st-dc{font-size:13px;color:var(--ink5);line-height:1.5}
+.rqi .rqa.st-ap b{color:var(--success)}.rqi .rqa.st-dc b{color:var(--ink7)}
+.rqi .rqa textarea{width:100%;border:0;border-bottom:1px solid var(--line);background:transparent;font:inherit;font-size:13.5px;padding:6px 0;outline:none;resize:none}
+#r1-open:checked~.stage-wrap .r1 .st-open,#r1-dcq:checked~.stage-wrap .r1 .st-dcq,#r1-ap:checked~.stage-wrap .r1 .st-ap,#r1-dc:checked~.stage-wrap .r1 .st-dc,#r2-open:checked~.stage-wrap .r2 .st-open,#r2-dcq:checked~.stage-wrap .r2 .st-dcq,#r2-ap:checked~.stage-wrap .r2 .st-ap,#r2-dc:checked~.stage-wrap .r2 .st-dc,#r3-open:checked~.stage-wrap .r3 .st-open,#r3-dcq:checked~.stage-wrap .r3 .st-dcq,#r3-ap:checked~.stage-wrap .r3 .st-ap,#r3-dc:checked~.stage-wrap .r3 .st-dc{display:flex}
+#r1-dcq:checked~.stage-wrap .r1 .st-dcq,#r2-dcq:checked~.stage-wrap .r2 .st-dcq,#r3-dcq:checked~.stage-wrap .r3 .st-dcq{display:block}
+#r1-ap:checked~.stage-wrap .r1 .st-ap,#r1-dc:checked~.stage-wrap .r1 .st-dc,#r2-ap:checked~.stage-wrap .r2 .st-ap,#r2-dc:checked~.stage-wrap .r2 .st-dc,#r3-ap:checked~.stage-wrap .r3 .st-ap,#r3-dc:checked~.stage-wrap .r3 .st-dc{display:block}
+#req:checked~.stage-wrap .ov.req,#sreq:checked~.stage-wrap .ov.sreq{transform:none}
+#req:checked~.stage-wrap .scrim.req,#sreq:checked~.stage-wrap .scrim.sreq{opacity:.45;pointer-events:auto}
+#vp-m:checked~#req:checked~.stage-wrap .ov.req,#vp-m:checked~#sreq:checked~.stage-wrap .ov.sreq{transform:none}
+
+/* ══════════ SETUP blocks · PAPIC CHAPTER marks ══════════ */
+.setupm{position:absolute;right:8px;top:10px;z-index:3;display:inline-flex;align-items:center;gap:4px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--ink3);padding:4px 7px;border-radius:6px;cursor:help}
+.setupm:hover{background:rgba(27,26,23,.06);color:var(--ink5)}
+.setupm .lab{position:absolute;right:0;top:calc(100% + 4px);background:rgba(27,26,23,.94);color:#fff;font-size:11px;font-weight:400;letter-spacing:0;text-transform:none;padding:5px 9px;border-radius:6px;white-space:normal;width:220px;opacity:0;pointer-events:none;transition:opacity var(--ctrl);z-index:80;text-align:left;line-height:1.4}
+.setupm:hover .lab{opacity:1}
+.blk.setup{background:#F6F4EF;box-shadow:inset 0 0 0 1px var(--hair);opacity:.85}
+.blk.short .setupm{top:50%;transform:translateY(-50%)}
+.blk.setup:not(.short) .ttl{padding-right:60px}
+.blk.setup .ttl{color:var(--ink5)}
+#ln-g:checked~.stage-wrap .blk.setup,#ln-g:checked~.stage-wrap .rq{opacity:.14;pointer-events:none}
+.chm{display:inline-grid;place-items:center;width:16px;height:16px;margin-left:6px;vertical-align:-3px;color:var(--gold5);position:relative;cursor:help}
+.chm svg{width:13px;height:13px}
+.chm .lab{position:absolute;left:0;top:calc(100% + 4px);background:rgba(27,26,23,.94);color:#fff;font-size:11px;font-weight:400;padding:5px 9px;border-radius:6px;white-space:normal;width:210px;opacity:0;pointer-events:none;transition:opacity var(--ctrl);z-index:80;line-height:1.4;text-transform:none;letter-spacing:0}
+.chm:hover .lab{opacity:1}
+#pub-3:not(:checked)~.stage-wrap .c3,#pub-4:not(:checked)~.stage-wrap .c4,#pub-5:not(:checked)~.stage-wrap .c5,#pub-6:not(:checked)~.stage-wrap .c6,#pub-7:not(:checked)~.stage-wrap .c7,#pub-8:not(:checked)~.stage-wrap .c8,#pub-9:not(:checked)~.stage-wrap .c9{display:none}
+#ro-sup:checked~.stage-wrap .chm,#ro-sup:checked~.stage-wrap label[for=chap]{display:none}
+.chl .cd{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:10px 0;border-bottom:1px solid var(--hair);font-size:14px}
+.chl .cd .t{font-family:var(--mono);font-size:12px;color:var(--ink4);margin-right:10px}
+.chl .cd .m{font-family:var(--mono);font-size:11px;color:var(--ink4);white-space:nowrap}
+.chl .cd small{color:var(--ink4);font-size:12px}
+.chl .cd.dim{opacity:.55}
+/* ══════════ JOURNEY as a log ══════════ */
+.ib.cta.jonly{display:none}
+#v-j:checked~.stage-wrap .tools .ib.cta.jonly{display:inline-flex}
+#v-j:checked~.stage-wrap .tools .dayonly{display:none}
+.prep.lg .it{grid-template-columns:82px 1fr auto}
+.prep.lg .it .d small{white-space:normal;line-height:1.3}
+.lghead{display:flex;align-items:baseline;gap:14px;padding:4px 0 22px}
+.lghead .d{font-family:var(--serif);font-size:20px}
+.lghead .c{font-size:12px;color:var(--ink4)}.lghead .c b{color:var(--ink7);font-weight:600}
+.prep .it .d small{display:block;font-size:10px;color:var(--ink3);font-family:var(--sans);letter-spacing:.06em;text-transform:uppercase;font-weight:700;margin-top:2px;white-space:nowrap}
+.prep .it .lb em{font-style:italic;color:var(--ink5)}
+.prep .it .att{color:var(--gold7);font-weight:600}
+.prep .it .k.call{background:#EEF0F6;color:#5B6A8E}.prep .it .k.fit{background:#F3ECF0;color:#8E5B72}.prep .it .k.taste{background:#EEF2EA;color:var(--success)}
+.prep .it .k.req{background:rgba(194,78,37,.10);color:var(--cta)}
+.prep .it.rqrow{border:1.5px dashed var(--cta);border-radius:12px;padding:10px 12px;margin:6px -12px 0;color:var(--cta)}
+.prep .it.rqrow .lb,.prep .it.rqrow .d{color:var(--cta)}.prep .it.rqrow .lb small{color:var(--cta);opacity:.8}
+.prep .it.rqrow:hover{background:rgba(194,78,37,.06)}
+.prep .it.r4ok{display:none}
+#r4-ap:checked~.stage-wrap .rqrow.r4,#r4-dc:checked~.stage-wrap .rqrow.r4{display:none}
+#r4-ap:checked~.stage-wrap .it.r4ok{display:grid;animation:fade var(--enter) both}
+#ro-view:checked~.stage-wrap .rqrow,#ro-sup:checked~.stage-wrap .rqrow .k.req::before{content:"Pending"}
+#ro-sup:checked~.stage-wrap .rqrow{pointer-events:none;border-color:var(--gold5);color:var(--gold7)}
+#ro-sup:checked~.stage-wrap .rqrow .lb,#ro-sup:checked~.stage-wrap .rqrow .d,#ro-sup:checked~.stage-wrap .rqrow .lb small{color:var(--gold7)}
+#ro-sup:checked~.stage-wrap .rqrow .k.req{background:var(--gold1);color:var(--gold7)}
+#ro-view:checked~.stage-wrap .rqrow{display:none}
+.addstep.suponly{display:none}#ro-sup:checked~.stage-wrap .addstep.suponly{display:inline-flex}
+#ro-sup:checked~.stage-wrap .lghead .tip{display:none}
+#r4-open:checked~.stage-wrap .r4 .st-open,#r4-dcq:checked~.stage-wrap .r4 .st-dcq,#r4-ap:checked~.stage-wrap .r4 .st-ap,#r4-dc:checked~.stage-wrap .r4 .st-dc{display:flex}
+#r4-dcq:checked~.stage-wrap .r4 .st-dcq,#r4-ap:checked~.stage-wrap .r4 .st-ap,#r4-dc:checked~.stage-wrap .r4 .st-dc{display:block}
+#chap:checked~.stage-wrap .ov.chap,#stp-new:checked~.stage-wrap .ov.stps,#stp-own:checked~.stage-wrap .ov.stps,#stp-auto:checked~.stage-wrap .ov.stps{transform:none}
+#vp-m:checked~#chap:checked~.stage-wrap .ov.chap,#vp-m:checked~#stp-new:checked~.stage-wrap .ov.stps,#vp-m:checked~#stp-own:checked~.stage-wrap .ov.stps,#vp-m:checked~#stp-auto:checked~.stage-wrap .ov.stps{transform:none}
+#vp-m:checked~.stage-wrap .lghead{flex-wrap:wrap;gap:4px 10px;padding-bottom:14px}
+#vp-m:checked~.stage-wrap .tools .jonly span{display:none}
+#vp-m:checked~.stage-wrap .setupm{font-size:9px;padding:3px 5px}
+#vp-m:checked~.stage-wrap .setupm .lab,#vp-m:checked~.stage-wrap .chm .lab{display:none}
+
+/* ══════════ ADD / EDIT A STEP ══════════ */
+.sth::before{content:"Add a step"}
+#stp-own:checked~.stage-wrap .sth::before,#stp-auto:checked~.stage-wrap .sth::before{content:"Edit step"}
+#v-j:checked~#stp-new:checked~.stage-wrap .sth::before{content:"Log an entry"}
+.autonote{display:none;margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--gold1);font-size:12.5px;color:var(--gold7);line-height:1.45}
+#stp-auto:checked~.stage-wrap .autonote{display:block}
+#stp-auto:checked~.stage-wrap .ov.stps .ob .f,#stp-auto:checked~.stage-wrap .ov.stps .times{opacity:.55;pointer-events:none}
+#stp-auto:checked~.stage-wrap .ov.stps .ob .f:first-of-type{opacity:1}
+.ov.stps .of .del,.ov.stps .of .openin{display:none}
+#stp-own:checked~.stage-wrap .ov.stps .of .del{display:inline-flex}
+#stp-auto:checked~.stage-wrap .ov.stps .of .openin{display:inline-flex}#stp-auto:checked~.stage-wrap .ov.stps .of .save{display:none}
+.kinds label i{font-style:normal;font-size:13px;width:auto;height:auto;background:none;border-radius:0;line-height:1}
+#k-meet:checked~.stage-wrap label[for=k-meet],#k-call:checked~.stage-wrap label[for=k-call],#k-taste:checked~.stage-wrap label[for=k-taste],#k-fit:checked~.stage-wrap label[for=k-fit],#k-pay:checked~.stage-wrap label[for=k-pay],#k-pap:checked~.stage-wrap label[for=k-pap],#k-note:checked~.stage-wrap label[for=k-note],#vs-h:checked~.stage-wrap label[for=vs-h],#vs-hc:checked~.stage-wrap label[for=vs-hc]{background:var(--ink);color:#fff;box-shadow:none}
+.kt{border-bottom:1px solid var(--line);padding:2px 0 6px}
+.kt::before{content:"Food tasting"}
+#k-meet:checked~.stage-wrap .kt::before{content:"Meeting with Casa Catering"}#k-call:checked~.stage-wrap .kt::before{content:"Call with Casa Catering"}#k-fit:checked~.stage-wrap .kt::before{content:"Fitting"}#k-pay:checked~.stage-wrap .kt::before{content:"Payment due"}#k-pap:checked~.stage-wrap .kt::before{content:"Paperwork"}#k-note:checked~.stage-wrap .kt::before{content:"Note"}
+#stp-own:checked~.stage-wrap .kt::before{content:"Final headcount to caterer"}#stp-auto:checked~.stage-wrap .kt::before{content:"50% balance · ₱42,500"}
+.times.three{grid-template-columns:1fr 1fr .8fr}
+.times .sub{font-size:11.5px;color:var(--ink4);margin-top:4px}
+.times .eye small{font-weight:400;letter-spacing:0;text-transform:none;font-size:10px;color:var(--ink3)}
+.prep .it .src{display:inline-block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--ink3);margin-left:6px;padding:1px 6px;border-radius:var(--r-full);background:rgba(27,26,23,.05)}
+.prep .it.newstep{display:none}
+#stp-saved:checked~.stage-wrap .prep .it.newstep{display:grid;animation:arrive var(--enter) var(--ease-out) both}
+@keyframes arrive{from{opacity:0;transform:translateY(-10px);background:var(--gold1)}60%{background:var(--gold1)}to{opacity:1;transform:none;background:transparent}}
+.prep label.it{border-radius:10px}.prep label.it:hover{background:rgba(27,26,23,.035)}
+#ro-view:checked~.stage-wrap .prep label.it,#ro-sup:checked~.stage-wrap .prep label.it{pointer-events:none}
+
+/* ═════════ TABLET (768) ═════════ */
+#vp-t:checked~.stage-wrap .top{padding:0 14px}
+#vp-t:checked~.stage-wrap .top .who,#vp-t:checked~.stage-wrap .top .role,#vp-t:checked~.stage-wrap .top .tools > .tip{display:none}
+#vp-t:checked~.stage-wrap .rolem{display:inline-flex}
+#vp-t:checked~.stage-wrap .top{padding:0 12px}
+#vp-t:checked~.stage-wrap .ib.cta{width:36px;min-width:36px;height:36px;padding:0;margin-left:2px;border-radius:50%;justify-content:center}#vp-t:checked~.stage-wrap .ib.cta span{display:none}
+#vp-t:checked~.stage-wrap .ib{width:34px;height:34px}
+#vp-t:checked~.stage-wrap .seg label{padding:6px 10px;font-size:12.5px}
+#vp-t:checked~.stage-wrap .seg label .n{display:none}
+#vp-t:checked~.stage-wrap .seg label{padding:6px 11px;font-size:12.5px}
+#vp-t:checked~.stage-wrap .live{padding:12px 18px 10px;gap:16px}
+#vp-t:checked~.stage-wrap .live .prog{left:18px;right:18px}
+#vp-t:checked~.stage-wrap .live .col .big{font-size:20px}
+#vp-t:checked~.stage-wrap .railwrap{padding:8px 18px 80px}
+#vp-t:checked~.stage-wrap .rail{max-width:none}
+#vp-t:checked~.stage-wrap .ov{width:380px}
+#vp-t:checked~.stage-wrap .reqpop{right:60px}
+#vp-t:checked~.stage-wrap .lenschip .cur{display:none}
+#vp-t:checked~.stage-wrap .prep,#vp-t:checked~.stage-wrap .jour{margin-left:20px}
+
+/* ═════════ PHONE (375) ═════════ */
+@media (max-width:480px){#vp-m:checked~.stage-wrap{padding:0}#vp-m:checked~.stage-wrap .frame{width:100%;border-radius:0;height:calc(100dvh - 40px);box-shadow:none}.bar{gap:4px 10px}}
+#vp-m:checked~.stage-wrap .app{grid-template-rows:52px auto minmax(0,1fr) 64px}
+#vp-m:checked~.stage-wrap .top{padding:0 6px 0 16px;gap:0}
+#vp-m:checked~.stage-wrap .top .ttl{font-size:17px}
+#vp-m:checked~.stage-wrap .top .who{display:none}
+#vp-m:checked~.stage-wrap .role{display:none}
+#vp-m:checked~.stage-wrap .rolem{display:inline-flex}
+#vp-m:checked~.stage-wrap .railhead{flex-wrap:wrap;gap:4px 10px}
+#vp-m:checked~.stage-wrap .top .tools > .tip{display:none}
+#vp-m:checked~.stage-wrap .blk.L .ttl,#vp-m:checked~.stage-wrap .blk.R .ttl{white-space:normal;line-height:1.15}
+#vp-m:checked~.stage-wrap .blk.L .ti,#vp-m:checked~.stage-wrap .blk.R .ti{white-space:normal}
+#vp-m:checked~.stage-wrap .empty{left:10px;top:calc(1.2 * var(--hh));padding:18px 16px 16px}
+#vp-m:checked~.stage-wrap .rq{left:10px;font-size:10.5px;padding:0 8px}
+#vp-m:checked~.stage-wrap .rqi .cmp{grid-template-columns:1fr auto 1fr}
+#vp-m:checked~.stage-wrap .top .seg{display:none}
+#vp-m:checked~.stage-wrap .top .tools{gap:0}
+#vp-m:checked~.stage-wrap .ib{width:34px;height:34px}
+#vp-m:checked~.stage-wrap .ib.cta{width:36px;min-width:36px;height:36px;padding:0;margin-left:2px;border-radius:50%;justify-content:center}#vp-m:checked~.stage-wrap .ib.cta span{display:none}
+#vp-m:checked~.stage-wrap .lenschip{padding:0;width:34px;height:34px;justify-content:center;box-shadow:none;margin:0}
+#vp-m:checked~.stage-wrap .lenschip .cur,#vp-m:checked~.stage-wrap .lenschip .car{display:none}
+#vp-m:checked~.stage-wrap .ib .lab{display:none}
+#vp-m:checked~.stage-wrap .lensmenu{right:8px;left:8px;width:auto;top:56px}
+#vp-m:checked~.stage-wrap .live{flex-wrap:wrap;gap:8px 14px;padding:12px 16px 12px}
+#vp-m:checked~.stage-wrap .live .prog{left:16px;right:16px}
+#vp-m:checked~.stage-wrap .live .sep{display:none}
+#vp-m:checked~.stage-wrap .live .col.now{flex:1 1 100%;display:flex;gap:10px;align-items:center}
+#vp-m:checked~.stage-wrap .live .col.now .big{font-size:20px}
+#vp-m:checked~.stage-wrap .live .col.now .nowdot{flex:none}
+#vp-m:checked~.stage-wrap .live .nowdot.solo{display:none}
+#vp-m:checked~.stage-wrap .live .next{flex:1}
+#vp-m:checked~.stage-wrap .live .next .big{font-size:14px}
+#vp-m:checked~.stage-wrap .live .next .sub{display:none}
+#vp-m:checked~.stage-wrap .live .adv{margin-left:0}
+#vp-m:checked~.stage-wrap .live .adv .b{height:40px;font-size:12.5px;padding:0 12px}
+#vp-m:checked~.stage-wrap .live .adv .tip{display:none}
+#vp-m:checked~.stage-wrap .railwrap{padding:6px 12px 24px 10px}
+#vp-m:checked~.stage-wrap .railhead{padding-left:54px;gap:10px}
+#vp-m:checked~.stage-wrap .railhead .d{font-size:14px}
+#vp-m:checked~.stage-wrap .rail{margin-left:54px;max-width:none}
+#vp-m:checked~.stage-wrap .hr{left:-54px}#vp-m:checked~.stage-wrap .hr span{width:44px;font-size:10.5px}
+#vp-m:checked~.stage-wrap .blk{left:10px;padding:5px 36px 5px 11px;min-height:34px}
+#vp-m:checked~.stage-wrap .blk .ttl{font-size:13px}
+#vp-m:checked~.stage-wrap .blk .who{display:none}
+#vp-m:checked~.stage-wrap .blk .parts{display:none}
+#vp-m:checked~.stage-wrap .gap{left:10px}
+#vp-m:checked~.stage-wrap .dragghost{left:10px}
+#vp-m:checked~.stage-wrap .lensnote{left:54px;font-size:11px}
+#vp-m:checked~.stage-wrap .side{width:0;position:static}
+#vp-m:checked~.stage-wrap .glance{display:none}
+/* the inspector is a bottom sheet on the phone */
+#vp-m:checked~.stage-wrap .insp{position:absolute;left:0;right:0;bottom:0;top:auto;transform:none;max-height:0;border-radius:22px 22px 0 0;box-shadow:0 -20px 50px -30px rgba(30,26,18,.6);transition:max-height var(--enter) var(--ease-out);z-index:30}
+#vp-m:checked~.stage-wrap .insp::before{content:"";position:absolute;left:50%;top:8px;width:36px;height:4px;border-radius:2px;background:var(--line);transform:translateX(-50%)}
+#vp-m:checked~.stage-wrap .insp .ih{padding-top:20px}
+#vp-m:checked~.stage-wrap .work .insp{position:absolute}
+body:has(#vp-m:checked):has(#sel-1:checked) .insp,body:has(#vp-m:checked):has(#sel-2:checked) .insp,body:has(#vp-m:checked):has(#sel-3:checked) .insp,body:has(#vp-m:checked):has(#sel-4:checked) .insp,body:has(#vp-m:checked):has(#sel-5:checked) .insp,body:has(#vp-m:checked):has(#sel-6:checked) .insp,body:has(#vp-m:checked):has(#sel-7:checked) .insp,body:has(#vp-m:checked):has(#sel-8:checked) .insp,body:has(#vp-m:checked):has(#sel-9:checked) .insp,body:has(#vp-m:checked):has(#sel-10:checked) .insp{max-height:72%}
+#vp-m:checked~.stage-wrap .insp .body{padding:0 18px 24px}
+#vp-m:checked~.stage-wrap .tv{font-size:24px}
+#vp-m:checked~.stage-wrap .ttlin{font-size:21px!important}
+#vp-m:checked~.stage-wrap .stp label{width:40px;height:40px}
+#vp-m:checked~.stage-wrap .acts .a{height:40px}
+/* sheets on the phone rise from the bottom */
+#vp-m:checked~.stage-wrap .ov{top:auto;left:0;right:0;bottom:0;width:auto;max-height:84%;border-radius:22px 22px 0 0;transform:translateY(104%)}
+#vp-m:checked~#add:checked~.stage-wrap .ov.add,#vp-m:checked~#shift:checked~.stage-wrap .ov.shift,#vp-m:checked~#emcee:checked~.stage-wrap .ov.emcee,#vp-m:checked~#host:checked~.stage-wrap .ov.host{transform:none}
+#vp-m:checked~.stage-wrap .ov .oh{padding:18px 12px 4px 18px}#vp-m:checked~.stage-wrap .ov .ob{padding:4px 18px 20px}#vp-m:checked~.stage-wrap .ov .of{padding:10px 18px 16px}
+#vp-m:checked~.stage-wrap .shiftnum{font-size:48px}
+#vp-m:checked~.stage-wrap .times.three{grid-template-columns:1fr 1fr}
+/* bottom bar: the three views + the thumb */
+#vp-m:checked~.stage-wrap .mbar{display:flex;align-items:center;justify-content:center;padding:8px 14px 12px;background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:0 -1px 0 rgba(27,26,23,.06);z-index:20}
+#vp-m:checked~.stage-wrap .mbar .seg{margin:0;width:100%}
+#vp-m:checked~.stage-wrap .mbar .seg label{flex:1;justify-content:center;padding:9px 6px;font-size:12.5px}
+#vp-m:checked~.stage-wrap .view{padding:14px 16px 40px;grid-row:2 / span 2}
+#vp-m:checked~.stage-wrap .prep,#vp-m:checked~.stage-wrap .jour{margin-left:0}
+#vp-m:checked~.stage-wrap .prep .mo{grid-template-columns:1fr;gap:6px;margin-bottom:26px}
+#vp-m:checked~.stage-wrap .prep .mo .mh{position:static;font-size:20px;display:flex;align-items:baseline;gap:10px}
+#vp-m:checked~.stage-wrap .prep .mo .mh small{margin:0}
+#vp-m:checked~.stage-wrap .prep .it{grid-template-columns:40px 1fr;gap:10px}
+#vp-m:checked~.stage-wrap .prep .it .k{grid-column:2;justify-self:start}
+#vp-m:checked~.stage-wrap .prep .addstep{margin-left:50px}
+#vp-m:checked~.stage-wrap .ph{grid-template-columns:1fr;gap:8px}
+#vp-m:checked~.stage-wrap .ph .phh{font-size:18px;display:flex;align-items:baseline;gap:10px}
+#vp-m:checked~.stage-wrap .ph .phh small{margin:0}
+#vp-m:checked~.stage-wrap .arc{height:104px}
+</style></head>
+<body>
+
+<!-- ── state (all of it) — radios & checkboxes, read by :checked ── -->
+<input class="sw" type="radio" name="vp" id="vp-b">
+<input class="sw" type="radio" name="vp" id="vp-m">
+<input class="sw" type="radio" name="vp" id="vp-t">
+<input class="sw" type="radio" name="vp" id="vp-d" checked>
+<input class="sw" type="checkbox" id="drag">
+<input class="sw" type="radio" name="md" id="md-plan" checked>
+<input class="sw" type="radio" name="md" id="md-empty">
+<input class="sw" type="radio" name="md" id="md-live">
+<input class="sw" type="radio" name="ro" id="ro-host" checked>
+<input class="sw" type="radio" name="ro" id="ro-coord">
+<input class="sw" type="radio" name="ro" id="ro-view">
+<input class="sw" type="radio" name="ro" id="ro-sup">
+<input class="sw" type="radio" name="r1" id="r1-open" checked>
+<input class="sw" type="radio" name="r1" id="r1-dcq">
+<input class="sw" type="radio" name="r1" id="r1-ap">
+<input class="sw" type="radio" name="r1" id="r1-dc">
+<input class="sw" type="radio" name="r2" id="r2-open" checked>
+<input class="sw" type="radio" name="r2" id="r2-dcq">
+<input class="sw" type="radio" name="r2" id="r2-ap">
+<input class="sw" type="radio" name="r2" id="r2-dc">
+<input class="sw" type="radio" name="r3" id="r3-open" checked>
+<input class="sw" type="radio" name="r3" id="r3-dcq">
+<input class="sw" type="radio" name="r3" id="r3-ap">
+<input class="sw" type="radio" name="r3" id="r3-dc">
+<input class="sw" type="checkbox" id="chap">
+<input class="sw" type="radio" name="stp" id="stp-closed" checked>
+<input class="sw" type="radio" name="stp" id="stp-new">
+<input class="sw" type="radio" name="stp" id="stp-own">
+<input class="sw" type="radio" name="stp" id="stp-auto">
+<input class="sw" type="radio" name="stp" id="stp-saved">
+<input class="sw" type="radio" name="k" id="k-meet">
+<input class="sw" type="radio" name="k" id="k-call">
+<input class="sw" type="radio" name="k" id="k-taste" checked>
+<input class="sw" type="radio" name="k" id="k-fit">
+<input class="sw" type="radio" name="k" id="k-pay">
+<input class="sw" type="radio" name="k" id="k-pap">
+<input class="sw" type="radio" name="k" id="k-note">
+<input class="sw" type="radio" name="vs" id="vs-h" checked>
+<input class="sw" type="radio" name="vs" id="vs-hc">
+<input class="sw" type="radio" name="r4" id="r4-open" checked>
+<input class="sw" type="radio" name="r4" id="r4-dcq">
+<input class="sw" type="radio" name="r4" id="r4-ap">
+<input class="sw" type="radio" name="r4" id="r4-dc">
+<input class="sw" type="checkbox" id="addpub" checked>
+<input class="sw" type="checkbox" id="addstg">
+<input class="sw" type="checkbox" id="incl">
+<input class="sw" type="checkbox" id="sreq">
+<input class="sw" type="checkbox" id="ssent">
+<input class="sw" type="checkbox" id="ssent2">
+<input class="sw" type="radio" name="view" id="v-j">
+<input class="sw" type="radio" name="view" id="v-p">
+<input class="sw" type="radio" name="view" id="v-d" checked>
+<input class="sw" type="radio" name="lens" id="ln-all" checked>
+<input class="sw" type="radio" name="lens" id="ln-g">
+<input class="sw" type="radio" name="lens" id="ln-1">
+<input class="sw" type="radio" name="lens" id="ln-2">
+<input class="sw" type="checkbox" id="lens">
+<input class="sw" type="checkbox" id="pub-3" checked>
+<input class="sw" type="checkbox" id="pub-4" checked>
+<input class="sw" type="checkbox" id="pub-5" checked>
+<input class="sw" type="checkbox" id="pub-6" checked>
+<input class="sw" type="checkbox" id="pub-7" checked>
+<input class="sw" type="checkbox" id="pub-8">
+<input class="sw" type="checkbox" id="pub-9" checked>
+<input class="sw" type="radio" name="sel" id="sel-0" checked>
+<input class="sw" type="radio" name="sel" id="sel-1">
+<input class="sw" type="radio" name="sel" id="sel-2">
+<input class="sw" type="radio" name="sel" id="sel-3">
+<input class="sw" type="radio" name="sel" id="sel-4">
+<input class="sw" type="radio" name="sel" id="sel-5">
+<input class="sw" type="radio" name="sel" id="sel-6">
+<input class="sw" type="radio" name="sel" id="sel-7">
+<input class="sw" type="radio" name="sel" id="sel-8">
+<input class="sw" type="radio" name="sel" id="sel-9">
+<input class="sw" type="radio" name="sel" id="sel-10">
+<input class="sw" type="radio" name="st" id="st-a">
+<input class="sw" type="radio" name="st" id="st-b" checked>
+<input class="sw" type="radio" name="st" id="st-c">
+<input class="sw" type="checkbox" id="add">
+<input class="sw" type="checkbox" id="shift">
+<input class="sw" type="checkbox" id="emcee">
+<input class="sw" type="checkbox" id="host">
+<input class="sw" type="checkbox" id="req">
+<input class="sw" type="radio" name="sh" id="sh-m15">
+<input class="sw" type="radio" name="sh" id="sh-15">
+<input class="sw" type="radio" name="sh" id="sh-30" checked>
+<input class="sw" type="radio" name="sh" id="sh-45">
+<input class="sw" type="radio" name="ty" id="ty-pre">
+<input class="sw" type="radio" name="ty" id="ty-cer">
+<input class="sw" type="radio" name="ty" id="ty-cock">
+<input class="sw" type="radio" name="ty" id="ty-rec">
+<input class="sw" type="radio" name="ty" id="ty-din">
+<input class="sw" type="radio" name="ty" id="ty-prog">
+<input class="sw" type="radio" name="ty" id="ty-dan">
+<input class="sw" type="radio" name="ty" id="ty-send">
+<input class="sw" type="radio" name="ty" id="ty-aft">
+<input class="sw" type="radio" name="ty" id="ty-cus" checked>
+<input class="sw" type="radio" name="ty" id="ty-set">
+<input class="sw" type="radio" name="ht" id="h-seg" checked>
+<input class="sw" type="radio" name="ht" id="h-q">
+<input class="sw" type="radio" name="ht" id="h-note">
+
+<!-- ── prototype bar ── -->
+<div class="bar">
+  <span class="proto">Prototype · Schedule · 2026-09-25</span>
+  <div class="grp"><b>Show</b><label for="vp-b" class="press">Before</label><label for="vp-m" class="press">Mobile 375</label><label for="vp-t" class="press">Tablet 768</label><label for="vp-d" class="press">Desktop 1440</label></div>
+  <div class="grp"><b>When</b><label for="md-plan" class="press">Planning · built</label><label for="md-empty" class="press">Planning · empty</label><label for="md-live" class="press">Event day · live</label></div>
+  <div class="grp"><b>Signed in as</b><label for="ro-host" class="press">Host</label><label for="ro-coord" class="press">Coordinator (approved)</label><label for="ro-view" class="press">View only</label><label for="ro-sup" class="press">Supplier · Gaia Florals</label></div>
+  <div class="grp"><b>Demo</b><label for="drag" class="press">Drag Ceremony +30 min</label></div>
+</div>
+
+<div class="stage-wrap">
+
+  <!-- ═══════════ BEFORE ═══════════ -->
+  <div class="before">
+    <h2>Before — the shipped page, as it renders today</h2>
+    <p class="lede">A paragraph, then eight bordered cards before the timeline starts, then every block fully expanded with its own Edit time · Assign responsible party · Show to guests · delete. "Next up" appears twice. On a wide screen it is one narrow centred column.</p>
+    <div class="two">
+      <div class="thumb phone"><span class="cap">375 · phone</span>
+        <div class="old">
+          <div class="t">Schedule</div>
+          <p class="i">Build your wedding-day timeline. Public blocks show up on every guest's invitation site with a live "happening now" highlight as the day unfolds. Drafts stay private until you flip them visible.</p>
+          <div class="oseg"><span>Journey</span><span>Preparation</span><span class="on">Event Day</span></div>
+          <div class="card"><div class="h">Run of show</div><div class="row"><div><div class="m">Now</div><div class="bl">Ceremony</div></div><div><div class="m">Up next</div><div>Cocktails</div></div><span class="btn dark">Start ▸</span></div></div>
+          <div class="card"><div class="row"><span style="font-size:12px;color:#5b584f">Turn this timeline into a ready-to-read emcee / host script.</span><span class="btn">Generate emcee script</span></div></div>
+          <div class="card"><div class="h">View as</div><span class="chip on">Master</span><span class="chip">Guests</span><span class="chip">Gaia Florals</span><p class="i" style="margin:8px 0 0;font-size:11px">Every view is a live filter over this one master timeline — edit the master and each slice updates itself.</p></div>
+          <div class="card">⏱ Shift the timeline (bulk retime)</div>
+          <div class="m" style="margin:6px 0 10px">9 blocks · 6 public</div>
+          <div class="card"><div class="row"><div><div class="h">Next up</div><div class="bl">Cocktails</div><div class="m">4:00 PM – 5:00 PM</div></div></div></div>
+          <div class="card">＋ Add a block</div>
+          <div class="card"><div class="row"><div class="bl">Hair &amp; makeup / preparations</div><span class="pill h">Hidden</span></div><div class="m" style="margin-top:6px">Pre-ceremony · 8:00 AM – 12:00 PM <span class="btn">✎ Edit time</span></div><div class="m" style="margin-top:8px">👤 Assign responsible party</div><div class="foot"><span class="btn">👁 Show to guests</span><span class="ico"></span></div></div>
+          <div class="card"><div class="row"><div class="bl">Vendor ingress &amp; styling</div><span class="pill h">Hidden</span></div><div class="m" style="margin-top:6px">Pre-ceremony · 10:00 AM – 1:00 PM <span class="btn">✎ Edit time</span></div><div class="m" style="margin-top:8px">👤 Gaia Florals</div><div class="foot"><span class="btn">👁 Show to guests</span><span class="ico"></span></div></div>
+          <div class="card"><div class="row"><div class="bl">Guests arrive</div><span class="pill">Public</span></div><div class="m" style="margin-top:6px">Pre-ceremony · 1:30 PM – 2:00 PM <span class="btn">✎ Edit time</span></div><div class="m" style="margin-top:8px">👤 Assign responsible party</div><div class="foot"><span class="btn">⊘ Hide from guests</span><span class="ico"></span></div></div>
+          <div class="card"><div class="row"><div class="bl">Ceremony</div><span class="pill">Public</span></div><div class="m" style="margin-top:6px">Ceremony · 2:00 PM – 3:30 PM <span class="btn">✎ Edit time</span></div><div class="m" style="margin-top:8px">👤 Coordinator</div><div class="foot"><span class="btn">⊘ Hide from guests</span><span class="ico"></span></div></div>
+          <div class="card"><div class="row"><div class="bl">Cocktails</div><span class="pill">Public</span></div><div class="m" style="margin-top:6px">Cocktails · 4:00 PM – 5:00 PM <span class="btn">✎ Edit time</span></div></div>
+        </div>
+      </div>
+      <div class="thumb desk"><span class="cap">1440 · desktop — one narrow column</span>
+        <div class="old">
+          <div class="t">Schedule</div>
+          <p class="i">Build your wedding-day timeline. Public blocks show up on every guest's invitation site with a live "happening now" highlight as the day unfolds. Drafts stay private until you flip them visible.</p>
+          <div class="oseg"><span>Journey</span><span>Preparation</span><span class="on">Event Day</span></div>
+          <div class="card"><div class="h">Run of show</div><div class="row"><div><div class="m">Now</div><div class="bl">Ceremony</div></div><div><div class="m">Up next</div><div>Cocktails</div></div><span class="btn dark">Start ▸</span></div></div>
+          <div class="card"><div class="row"><span style="font-size:12px;color:#5b584f">Turn this timeline into a ready-to-read emcee / host script.</span><span class="btn">Generate emcee script</span></div></div>
+          <div class="card"><div class="h">View as</div><span class="chip on">Master</span><span class="chip">Guests</span><span class="chip">Gaia Florals</span><p class="i" style="margin:8px 0 0;font-size:11px">Every view is a live filter over this one master timeline — edit the master and each slice updates itself.</p></div>
+          <div class="card">⏱ Shift the timeline (bulk retime)</div>
+          <div class="m" style="margin:6px 0 10px">9 blocks · 6 public</div>
+          <div class="card"><div class="row"><div><div class="h">Next up</div><div class="bl">Cocktails</div><div class="m">4:00 PM – 5:00 PM</div></div></div></div>
+          <div class="card">＋ Add a block</div>
+          <div class="card"><div class="row"><div class="bl">Hair &amp; makeup / preparations</div><span class="pill h">Hidden</span></div><div class="m" style="margin-top:6px">Pre-ceremony · 8:00 AM – 12:00 PM <span class="btn">✎ Edit time</span></div><div class="m" style="margin-top:8px">👤 Assign responsible party</div><div class="foot"><span class="btn">👁 Show to guests</span><span class="ico"></span></div></div>
+          <div class="card"><div class="row"><div class="bl">Vendor ingress &amp; styling</div><span class="pill h">Hidden</span></div><div class="m" style="margin-top:6px">Pre-ceremony · 10:00 AM – 1:00 PM <span class="btn">✎ Edit time</span></div><div class="m" style="margin-top:8px">👤 Gaia Florals</div><div class="foot"><span class="btn">👁 Show to guests</span><span class="ico"></span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ AFTER ═══════════ -->
+  <div class="frame">
+   <div class="app">
+
+    <!-- 1 · toolbar -->
+    <header class="top">
+      <h1 class="ttl">Schedule</h1>
+      <span class="who"><b>Indalecio &amp; Claire</b> · Thu 18 Dec 2026<span class="dtg"> · <b>84</b> days to go</span></span>
+      <span class="role"><i></i><span class="rt"></span><span class="tip" tabindex="0">i<span class="lab">Hosts and co-hosts build the schedule. A coordinator edits only after a host approves them — the host invite plus your consent under the Data Privacy Act (RA 10173). Everyone else reads.</span></span></span>
+      <nav class="seg" aria-label="Schedule view">
+        <label for="v-j" class="press">Journey <span class="n">14</span></label>
+        <label for="v-p" class="press">Preparation <span class="n">8</span></label>
+        <label for="v-d" class="press">Event Day</label>
+      </nav>
+      <div class="tools">
+        <label for="lens" class="lenschip press dayonly hostonly"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 5h18M6 12h12M10 19h4"/></svg><span class="cur"></span><span class="car">▾</span></label>
+        <label for="req" class="ib press dayonly hostonly" title="Supplier requests"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v11H8l-4 4z"/></svg><span class="badge rqb"></span><span class="lab">Supplier requests</span></label>
+        <label for="host" class="ib press dayonly hostonly"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span class="lab">Host / MC · segments, questions, a note</span></label>
+        <label for="chap" class="ib press dayonly"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg><span class="lab">Papic chapters · how the day's photos group</span></label>
+        <label for="emcee" class="ib press dayonly"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg><span class="lab">Emcee script</span></label>
+        <label for="shift" class="ib press dayonly editonly"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 4v16M8 20l-3-3M8 20l3-3M16 20V4M16 4l-3 3M16 4l3 3"/></svg><span class="lab">Shift the day (running late)</span></label>
+        <span class="tip l" tabindex="0">i<span class="lab">Moments shown to guests appear on the Event Hub with a live "happening now" highlight. Hidden moments stay between you, your coordinator and the suppliers you tag.</span></span>
+        <label for="add" class="ib cta press dayonly editonly">＋<span>Add moment</span></label>
+        <label for="stp-new" class="ib cta press jonly editonly">＋<span>Log an entry</span></label>
+      </div>
+    </header>
+
+    <!-- View-as menu (a compact switch, explanation in ⓘ) -->
+    <label for="lens" class="scrim lens"></label>
+    <div class="lensmenu">
+      <div class="h"><span class="eye">View as</span><span class="tip l" tabindex="0">i<span class="lab">Every view is a live filter over this one master timeline. Edit the master; each slice follows.</span></span></div>
+      <label for="ln-all" class="o press"><span>Master <small>· everything</small></span><i class="ck"></i></label>
+      <label for="ln-g" class="o press"><span>Guests <small>· what the Event Hub shows</small></span><i class="ck"></i></label>
+      <label for="ln-1" class="o press"><span>Gaia Florals <small>· 1 moment</small></span><i class="ck"></i></label>
+      <label for="ln-2" class="o press"><span>HMUA by Kat <small>· 1 moment</small></span><i class="ck"></i></label>
+    </div>
+
+    <!-- 2 · the live strip — Run of show and Next up, merged -->
+    <section class="live" aria-label="Run of show">
+      <span class="nowdot solo"></span>
+      <div class="col now">
+        <div><span class="eye" style="color:var(--cta)">Now</span>
+        <p class="big">Ceremony</p>
+        <p class="sub"><span class="m">2:00 – 3:30 PM</span><span>started 2:12 PM</span><span class="drift">12 min behind</span></p></div>
+      </div>
+      <span class="sep"></span>
+      <div class="col next">
+        <span class="eye">Up next</span>
+        <p class="big">Cocktails</p>
+        <p class="sub"><span class="m">4:00 PM</span><span>Garden terrace</span></p>
+      </div>
+      <div class="adv">
+        <span class="tip editonly" tabindex="0">i<span class="lab">Only the coordinator — or your own account — can advance the run of show. Suppliers and guests watch it move live.</span></span>
+        <button class="b press editonly">Done — start Cocktails <span>▸</span></button><span class="watching eye">Live · watching</span>
+      </div>
+      <div class="prog"><i></i></div>
+    </section>
+
+    <!-- 3 · rail + side -->
+    <div class="work">
+      <div class="railwrap">
+        <div class="railhead"><span class="d">Thursday 18 December</span><span class="rolem"><i></i><span class="rt"></span></span><span class="c"><b class="nb"></b> moments<span class="visw"> · <b class="vis"></b> visible to guests</span><span class="stg"> · <b>1</b> staged</span></span></div>
+        <div class="lensnote g">Guest view · <label for="ln-all" class="press">back to Master</label></div>
+        <div class="lensnote v1">Gaia Florals' slice · <label for="ln-all" class="press">back to Master</label></div>
+        <div class="lensnote v2">HMUA by Kat's slice · <label for="ln-all" class="press">back to Master</label></div>
+        <div class="rail">
+          <div class="snap"></div>
+          <div class="hr" style="--h:0"><span>7 AM</span></div>
+          <div class="hr" style="--h:1"><span>8 AM</span></div>
+          <div class="hr" style="--h:2"><span>9 AM</span></div>
+          <div class="hr" style="--h:3"><span>10 AM</span></div>
+          <div class="hr" style="--h:4"><span>11 AM</span></div>
+          <div class="hr" style="--h:5"><span>12 PM</span></div>
+          <div class="hr" style="--h:6"><span>1 AM</span></div>
+          <div class="hr" style="--h:7"><span>2 AM</span></div>
+          <div class="hr now" style="--h:7.4"><span>2:24 PM</span></div>
+          <div class="hr" style="--h:8"><span>3 AM</span></div>
+          <div class="hr" style="--h:9"><span>4 AM</span></div>
+          <div class="hr" style="--h:10"><span>5 AM</span></div>
+          <div class="hr" style="--h:11"><span>6 AM</span></div>
+          <div class="hr" style="--h:12"><span>7 AM</span></div>
+          <div class="hr" style="--h:13"><span>8 AM</span></div>
+          <div class="hr" style="--h:14"><span>9 AM</span></div>
+          <div class="hr" style="--h:15"><span>10 AM</span></div>
+          <div class="hr" style="--h:16"><span>11 AM</span></div>
+
+          <!-- gaps you can tap to add -->
+          <label for="add" class="gap g1 press" style="--s:780;--e:810">＋ <span class="at">1:00 PM</span></label>
+          <label for="add" class="gap g2 press" style="--s:930;--e:960">＋ <span class="at">3:30 PM</span></label>
+          <label for="add" class="gap g3 press" style="--s:1280;--e:1320">＋ <span class="at">9:20 PM</span></label>
+          <label for="sreq" class="gap sgap press" style="--s:780;--e:810">Request a moment · <span class="at">1:00 PM</span></label>
+          <label for="sreq" class="gap sgap press" style="--s:930;--e:960">Request a moment · <span class="at">3:30 PM</span></label>
+          <label for="sreq" class="gap sgap press" style="--s:1280;--e:1320">Request a moment · <span class="at">9:20 PM</span></label>
+
+          <!-- supplier requests, as ghosts on the rail (event_schedule_suggestions · open) -->
+          <label for="req" class="rq r1 R press" style="--s:570;--e:600"><span class="rqt">Gaia Florals asks · start 9:30 AM</span><span class="rqt sup">Your request · pending</span></label>
+          <label for="req" class="rq r3 press" style="--s:930;--e:960"><span class="rqt">Lumière Photo proposes · Post-ceremony photos</span></label>
+          <label for="req" class="rq r2 press" style="--s:1280;--e:1300"><span class="rqt">Casa Catering proposes · Cake cutting</span></label>
+
+          <!-- the empty schedule: start from a template, or tap a time -->
+          <div class="empty">
+            <p class="eye">Start from a template</p>
+            <p class="et">Nothing on the rail yet. Load a skeleton, then reshape every moment — or tap a time on the rail.</p>
+            <label for="add" class="er press"><span><b>Classic wedding day</b><small>Prep through send-off</small></span><span class="n">9 moments</span></label>
+            <label for="add" class="er press"><span><b>Civil &amp; intimate</b><small>Late-morning ceremony, lunch</small></span><span class="n">5 moments</span></label>
+            <label for="add" class="er press"><span><b>Reception program</b><small>Doors to send-off</small></span><span class="n">6 moments</span></label>
+            <span class="tip" tabindex="0">i<span class="lab">A template loads into an empty schedule only — it never overwrites moments you have built.</span></span>
+          </div>
+
+          <!-- blocks -->
+          <div class="blk b1 L done v2 setup" style="--s:480;--e:720;--tint:var(--t-pre)"><label for="sel-1" class="hit on"></label><label for="sel-0" class="hit off"></label><i class="hdl up"></i><i class="hdl dn"></i>
+            <p class="ttl">Hair &amp; makeup</p><p class="ti"><span>8:00 AM – 12:00 PM</span><span class="who">HMUA by Kat</span></p>
+            <span class="setupm"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 0 0 5 5L13 18l-3-3 6.3-6.3zM4 20l5-5"/></svg>Setup<span class="lab">Listed for hosts, the coordinator and suppliers · never shown to guests · not a Papic chapter</span></span></div>
+          <div class="blk b2 R done v1 setup" style="--s:600;--e:780;--tint:var(--t-pre)"><label for="sel-2" class="hit on"></label><label for="sel-0" class="hit off"></label><i class="hdl up"></i><i class="hdl dn"></i>
+            <p class="ttl">Vendor ingress &amp; styling</p><p class="ti"><span class="rng2"></span><span class="who">Gaia Florals</span></p>
+            <span class="setupm"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 0 0 5 5L13 18l-3-3 6.3-6.3zM4 20l5-5"/></svg>Setup<span class="lab">Listed for hosts, the coordinator and suppliers · never shown to guests · not a Papic chapter</span></span></div>
+          <div class="blk b3 short done" style="--s:810;--e:840;--tint:var(--t-pre)"><label for="sel-3" class="hit on"></label><label for="sel-0" class="hit off"></label><i class="hdl up"></i><i class="hdl dn"></i>
+            <p class="ttl">Guests arrive<span class="chm c3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg><span class="lab">Papic chapter · guests' photos taken during this moment group here</span></span></p><p class="ti"><span>1:30 – 2:00 PM</span></p>
+            <label for="pub-3" class="eyeb press"><svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4.2 4.2M9.9 5.2A10.4 10.4 0 0 1 12 5c6 0 10 7 10 7a17 17 0 0 1-3.2 3.9M6.2 6.2A17 17 0 0 0 2 12s4 7 10 7c1.4 0 2.7-.3 3.9-.8"/></svg><span class="lab"></span></label></div>
+          <div class="dragghost"></div>
+          <div class="dragbadge"><b>2:30 – 4:00 PM</b> · snaps to 5 min</div>
+          <div class="blk b4 onair" style="--s:840;--e:930;--tint:var(--t-cer)"><label for="sel-4" class="hit on"></label><label for="sel-0" class="hit off"></label><i class="hdl up"></i><i class="hdl dn"></i>
+            <p class="ttl">Ceremony<span class="chm c4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg><span class="lab">Papic chapter · guests' photos taken during this moment group here</span></span></p><p class="ti"><span class="rng"></span><span class="who">Coordinator</span><span>San Agustin Church</span></p>
+            <div class="parts"><span>Procession</span><span>Vows &amp; rings</span><span>Recessional</span></div>
+            <label for="pub-4" class="eyeb press"><svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4.2 4.2M9.9 5.2A10.4 10.4 0 0 1 12 5c6 0 10 7 10 7a17 17 0 0 1-3.2 3.9M6.2 6.2A17 17 0 0 0 2 12s4 7 10 7c1.4 0 2.7-.3 3.9-.8"/></svg><span class="lab"></span></label></div>
+          <div class="blk b5" style="--s:960;--e:1020;--tint:var(--t-cock)"><label for="sel-5" class="hit on"></label><label for="sel-0" class="hit off"></label><i class="hdl up"></i><i class="hdl dn"></i>
+            <p class="ttl">Cocktails<span class="chm c5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg><span class="lab">Papic chapter · guests' photos taken during this moment group here</span></span></p><p class="ti"><span>4:00 – 5:00 PM</span><span class="who">Casa Catering</span><span>Garden terrace</span></p>
+            <label for="pub-5" class="eyeb press"><svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4.2 4.2M9.9 5.2A10.4 10.4 0 0 1 12 5c6 0 10 7 10 7a17 17 0 0 1-3.2 3.9M6.2 6.2A17 17 0 0 0 2 12s4 7 10 7c1.4 0 2.7-.3 3.9-.8"/></svg><span class="lab"></span></label></div>
+          <div class="blk b6" style="--s:1020;--e:1170;--tint:var(--t-rec)"><label for="sel-6" class="hit on"></label><label for="sel-0" class="hit off"></label><i class="hdl up"></i><i class="hdl dn"></i>
+            <p class="ttl">Reception &amp; dinner<span class="chm c6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg><span class="lab">Papic chapter · guests' photos taken during this moment group here</span></span></p><p class="ti"><span>5:00 – 7:30 PM</span><span>Grand ballroom</span></p>
+            <label for="pub-6" class="eyeb press"><svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4.2 4.2M9.9 5.2A10.4 10.4 0 0 1 12 5c6 0 10 7 10 7a17 17 0 0 1-3.2 3.9M6.2 6.2A17 17 0 0 0 2 12s4 7 10 7c1.4 0 2.7-.3 3.9-.8"/></svg><span class="lab"></span></label></div>
+          <div class="blk b7" style="--s:1170;--e:1260;--tint:var(--t-prog)"><label for="sel-7" class="hit on"></label><label for="sel-0" class="hit off"></label><i class="hdl up"></i><i class="hdl dn"></i>
+            <p class="ttl">Program<span class="chm c7"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg><span class="lab">Papic chapter · guests' photos taken during this moment group here</span></span></p><p class="ti"><span>7:30 – 9:00 PM</span><span class="who">Host / MC</span></p>
+            <label for="pub-7" class="eyeb press"><svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4.2 4.2M9.9 5.2A10.4 10.4 0 0 1 12 5c6 0 10 7 10 7a17 17 0 0 1-3.2 3.9M6.2 6.2A17 17 0 0 0 2 12s4 7 10 7c1.4 0 2.7-.3 3.9-.8"/></svg><span class="lab"></span></label></div>
+          <div class="blk b8 tiny" style="--s:1260;--e:1280;--tint:var(--t-dance)"><label for="sel-8" class="hit on"></label><label for="sel-0" class="hit off"></label><i class="hdl up"></i><i class="hdl dn"></i>
+            <p class="ttl">First dance<span class="chm c8"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg><span class="lab">Papic chapter · guests' photos taken during this moment group here</span></span></p><p class="ti"><span>9:00 – 9:20 PM</span></p>
+            <label for="pub-8" class="eyeb press"><svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4.2 4.2M9.9 5.2A10.4 10.4 0 0 1 12 5c6 0 10 7 10 7a17 17 0 0 1-3.2 3.9M6.2 6.2A17 17 0 0 0 2 12s4 7 10 7c1.4 0 2.7-.3 3.9-.8"/></svg><span class="lab"></span></label></div>
+          <div class="blk b9 short" style="--s:1320;--e:1350;--tint:var(--t-send)"><label for="sel-9" class="hit on"></label><label for="sel-0" class="hit off"></label><i class="hdl up"></i><i class="hdl dn"></i>
+            <p class="ttl">Send-off<span class="chm c9"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg><span class="lab">Papic chapter · guests' photos taken during this moment group here</span></span></p><p class="ti"><span>10:00 – 10:30 PM</span><span class="who">Coordinator</span></p>
+            <label for="pub-9" class="eyeb press"><svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4.2 4.2M9.9 5.2A10.4 10.4 0 0 1 12 5c6 0 10 7 10 7a17 17 0 0 1-3.2 3.9M6.2 6.2A17 17 0 0 0 2 12s4 7 10 7c1.4 0 2.7-.3 3.9-.8"/></svg><span class="lab"></span></label></div>
+          <div class="blk b11 short" style="--s:930;--e:960;--tint:var(--t-custom)"><label for="sel-0" class="hit on"></label><p class="ttl">Post-ceremony photos</p><p class="ti"><span>3:30 – 4:00 PM</span><span class="who">Lumière Photo</span></p><span class="eyeb" style="pointer-events:none"><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="display:block"><path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4.2 4.2M9.9 5.2A10.4 10.4 0 0 1 12 5c6 0 10 7 10 7a17 17 0 0 1-3.2 3.9M6.2 6.2A17 17 0 0 0 2 12s4 7 10 7c1.4 0 2.7-.3 3.9-.8"/></svg></span></div>
+          <div class="blk b12 tiny" style="--s:1280;--e:1300;--tint:var(--t-rec)"><label for="sel-0" class="hit on"></label><p class="ttl">Cake cutting</p><p class="ti"><span>9:20 – 9:40 PM</span><span class="who">Casa Catering</span></p></div>
+          <div class="blk b10 staged short" style="--s:1350;--e:1365;--tint:var(--t-custom)"><label for="sel-10" class="hit on"></label><label for="sel-0" class="hit off"></label>
+            <p class="ttl">Fireworks cue</p><p class="ti"><span>10:30 – 10:45 PM</span></p></div>
+        </div>
+      </div>
+
+      <aside class="side">
+        <!-- nothing selected: the day at a glance, in numbers -->
+        <div class="glance">
+          <p class="gl"><b class="nb"></b> moments · <b class="vis"></b> shown to guests</p>
+          <p class="gl g-day">Your day runs <b>8:00 AM – 10:30 PM</b><span class="sub">14½ hours</span></p>
+          <p class="gl g-plan"><b>84</b> days to go</p>
+          <div class="g-live"><p class="gl late">Running <b>12 minutes</b> late</p><p class="sub">Ceremony started at 2:12 PM, planned 2:00 PM</p></div>
+          <p class="gl g-req"><b class="rqn"></b> supplier requests<span class="sub"><label for="req" class="press" style="color:var(--gold7);font-weight:600">Review</label></span></p>
+          <p class="gtip editonly"><span class="tip" tabindex="0">i<span class="lab">Tap a moment to edit it · drag it to move · drag its edge to change the length · tap an empty time to add one.</span></span> How to edit</p>
+          <p class="gtip viewonly"><span class="tip" tabindex="0">i<span class="lab">You can see everything and change nothing. Ask a host if something needs changing.</span></span> View only</p>
+          <p class="gtip suponly"><span class="tip" tabindex="0">i<span class="lab">Tap a moment to request a change to it · tap an empty time to request a moment of your own. Indalecio &amp; Claire approve or decline and you are told.</span></span> How requests work</p>
+        </div>
+
+        <!-- inspector — one, contextual -->
+        <div class="insp">
+          <div class="ih"><span class="eye ihw"></span><label for="sel-0" class="x press">✕</label></div>
+          <div class="body">
+
+            <div class="pane p-1">
+              <div class="f"><input type="text" class="ttlin" value="Hair &amp; makeup"></div>
+              <div class="f"><div class="l"><span class="eye">Phase</span></div><select><option>Pre-ceremony</option><option>Ceremony</option><option>Cocktails</option><option>Reception</option><option>Dinner</option><option>Program</option><option>Dancing</option><option>Send-off</option><option>After-party</option><option>Custom</option></select></div>
+              <div class="times"><div><span class="eye">Starts</span><p class="tv">8:00 AM</p><div class="stp"><span class="press" style="width:30px;height:30px;border-radius:8px;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink5)">−</span><span class="mid">5 min</span><span class="press" style="width:30px;height:30px;border-radius:8px;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink5)">+</span></div></div><div><span class="eye">Ends</span><p class="tv">12:00 PM</p><div class="stp"><span class="press" style="width:30px;height:30px;border-radius:8px;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink5)">−</span><span class="mid">5 min</span><span class="press" style="width:30px;height:30px;border-radius:8px;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink5)">+</span></div></div></div>
+              <p class="durline">Runs <span class="dur">4 h</span> <span class="tip" tabindex="0">i<span class="lab">Or drag the moment on the rail: the body moves it, the top and bottom edges resize it. Everything snaps to 5 minutes.</span></span></p>
+              <div class="tg"><span class="lbl">Setup<small>Listed for you, the coordinator and suppliers. Never shown to guests; not a Papic chapter.</small></span><span class="setupm" style="position:static;transform:none"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 0 0 5 5L13 18l-3-3 6.3-6.3zM4 20l5-5"/></svg>Setup</span></div>
+              <div class="f"><div class="l"><span class="eye">Responsible</span><span class="tip" tabindex="0">i<span class="lab">Free text for family or crew. Tag a booked supplier and this moment lands on their desk and in their View-as slice.</span></span></div><input type="text" value="HMUA team" placeholder="e.g. Ninong Roberto · HMUA team"><div class="chips"><span class="on">HMUA by Kat ✕</span><label class="press">Gaia Florals</label><label class="press">Casa Catering</label></div></div>
+              <div class="f"><div class="l"><span class="eye">Where</span></div><input type="text" value="Bridal suite, Peninsula Manila"></div>
+              <div class="f"><div class="l"><span class="eye">Notes</span></div><textarea rows="2" placeholder="What only the team needs to know">Claire first, then the entourage. Mom at 10:30 AM.</textarea></div>
+              <div class="acts"><label for="shift" class="a press">⇅ Shift everything after</label><button class="a danger press">Delete</button></div>
+              <p class="saved"><b>Saved</b> · every change saves as you make it</p>
+            </div>
+
+            <div class="pane p-2">
+              <div class="f"><input type="text" class="ttlin" value="Vendor ingress &amp; styling"></div>
+              <div class="f"><div class="l"><span class="eye">Phase</span></div><select><option>Pre-ceremony</option><option>Ceremony</option><option>Cocktails</option><option>Custom</option></select></div>
+              <div class="times"><div><span class="eye">Starts</span><p class="tv s2"></p></div><div><span class="eye">Ends</span><p class="tv">1:00 PM</p></div></div>
+              <p class="durline">Runs <span class="dur d2"></span> · overlaps Hair &amp; makeup — fine, different rooms</p>
+              <div class="staged-note r1note" style="background:#F7EBE3;color:var(--cta)">Gaia Florals asked to start at 9:30 AM · <label for="req" class="press" style="font-weight:700;text-decoration:underline">review</label></div>
+              <div class="tg"><span class="lbl">Setup<small>Listed for you, the coordinator and suppliers. Never shown to guests; not a Papic chapter.</small></span><span class="setupm" style="position:static;transform:none"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 0 0 5 5L13 18l-3-3 6.3-6.3zM4 20l5-5"/></svg>Setup</span></div>
+              <div class="f"><div class="l"><span class="eye">Responsible</span></div><input type="text" value="" placeholder="e.g. Ninong Roberto · HMUA team"><div class="chips"><span class="on">Gaia Florals ✕</span><label class="press">HMUA by Kat</label><label class="press">Casa Catering</label></div></div>
+              <div class="f"><div class="l"><span class="eye">Where</span></div><input type="text" value="San Agustin Church · Grand ballroom"></div>
+              <div class="acts"><label for="shift" class="a press">⇅ Shift everything after</label><button class="a danger press">Delete</button></div>
+            </div>
+
+            <div class="pane p-3">
+              <div class="f"><input type="text" class="ttlin" value="Guests arrive"></div>
+              <div class="f"><div class="l"><span class="eye">Phase</span></div><select><option>Pre-ceremony</option><option>Custom</option></select></div>
+              <div class="times"><div><span class="eye">Starts</span><p class="tv">1:30 PM</p></div><div><span class="eye">Ends</span><p class="tv">2:00 PM</p></div></div>
+              <p class="durline">Runs <span class="dur">30 min</span></p>
+              <label for="pub-3" class="tg press"><span class="lbl">Visible to guests<small>Shows on the Event Hub</small></span><i class="sw2"></i></label>
+              <div class="f"><div class="l"><span class="eye">Responsible</span></div><input type="text" value="" placeholder="e.g. Ninong Roberto · ushers"><div class="chips"><label class="press">Gaia Florals</label><label class="press">HMUA by Kat</label><label class="press">Casa Catering</label></div></div>
+              <div class="f"><div class="l"><span class="eye">Where</span></div><input type="text" value="San Agustin Church, Intramuros"></div>
+              <div class="f"><div class="l"><span class="eye">Notes</span></div><textarea rows="2">Ushers at both doors. Programs on the pews.</textarea></div>
+              <div class="acts"><label for="shift" class="a press">⇅ Shift everything after</label><button class="a danger press">Delete</button></div>
+            </div>
+
+            <div class="pane p-4">
+              <div class="f"><input type="text" class="ttlin" value="Ceremony"></div>
+              <div class="f"><div class="l"><span class="eye">Phase</span></div><select><option>Ceremony</option><option>Pre-ceremony</option><option>Custom</option></select></div>
+              <div class="times">
+                <div><span class="eye">Starts</span><p class="tv s"></p><div class="stp"><label for="st-a" class="press">−</label><span class="mid">5 min</span><label for="st-c" class="press">+</label></div></div>
+                <div><span class="eye">Ends</span><p class="tv e"></p><div class="stp"><span class="press" style="width:30px;height:30px;border-radius:8px;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink5)">−</span><span class="mid">5 min</span><span class="press" style="width:30px;height:30px;border-radius:8px;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink5)">+</span></div></div>
+              </div>
+              <p class="durline">Runs <span class="dur"></span> <span class="tip" tabindex="0">i<span class="lab">Or drag the moment on the rail: the body moves it, the top and bottom edges resize it. Everything snaps to 5 minutes.</span></span></p>
+              <label for="pub-4" class="tg press"><span class="lbl">Visible to guests<small>Shows on the Event Hub · "happening now" is live · a Papic chapter</small></span><i class="sw2"></i></label>
+              <div class="f"><div class="l"><span class="eye">Responsible</span></div><input type="text" value="Coordinator"><div class="chips"><label class="press">Gaia Florals</label><label class="press">HMUA by Kat</label><label class="press">Casa Catering</label></div></div>
+              <div class="f"><div class="l"><span class="eye">Parts</span><span class="tip" tabindex="0">i<span class="lab">Parts sit inside this moment and move with it. They show on the guest Event Hub and in the emcee script under the moment.</span></span></div>
+                <div class="parts-l"><div><span>Procession</span><span class="m">2:00 PM</span></div><div><span>Vows &amp; rings</span><span class="m">2:25 PM</span></div><div><span>Recessional</span><span class="m">3:15 PM</span></div></div><span class="add press">＋ Add a part</span></div>
+              <div class="f"><div class="l"><span class="eye">Where</span></div><input type="text" value="San Agustin Church, Intramuros"></div>
+              <div class="f"><div class="l"><span class="eye">Notes</span></div><textarea rows="2">Unplugged ceremony — ushers remind at the door.</textarea></div>
+              <div class="acts"><label for="shift" class="a press">⇅ Shift everything after</label><button class="a danger press">Delete</button></div>
+              <p class="saved"><b>Saved</b> · 2:24 PM</p>
+            </div>
+
+            <div class="pane p-5">
+              <div class="f"><input type="text" class="ttlin" value="Cocktails"></div>
+              <div class="f"><div class="l"><span class="eye">Phase</span></div><select><option>Cocktails</option><option>Reception</option><option>Custom</option></select></div>
+              <div class="times"><div><span class="eye">Starts</span><p class="tv">4:00 PM</p></div><div><span class="eye">Ends</span><p class="tv">5:00 PM</p></div></div>
+              <p class="durline">Runs <span class="dur">1 h</span></p>
+              <label for="pub-5" class="tg press"><span class="lbl">Visible to guests<small>Shows on the Event Hub</small></span><i class="sw2"></i></label>
+              <div class="f"><div class="l"><span class="eye">Responsible</span></div><input type="text" value="Casa Catering"><div class="chips"><label class="press">Gaia Florals</label><label class="press">HMUA by Kat</label><label class="press">Casa Catering</label></div></div>
+              <div class="f"><div class="l"><span class="eye">Where</span></div><input type="text" value="Garden terrace"></div>
+              <div class="acts"><label for="shift" class="a press">⇅ Shift everything after</label><button class="a danger press">Delete</button></div>
+            </div>
+
+            <div class="pane p-6">
+              <div class="f"><input type="text" class="ttlin" value="Reception &amp; dinner"></div>
+              <div class="f"><div class="l"><span class="eye">Phase</span></div><select><option>Reception</option><option>Dinner</option><option>Custom</option></select></div>
+              <div class="times"><div><span class="eye">Starts</span><p class="tv">5:00 PM</p></div><div><span class="eye">Ends</span><p class="tv">7:30 PM</p></div></div>
+              <p class="durline">Runs <span class="dur">2 h 30 min</span></p>
+              <label for="pub-6" class="tg press"><span class="lbl">Visible to guests<small>Shows on the Event Hub</small></span><i class="sw2"></i></label>
+              <div class="f"><div class="l"><span class="eye">Responsible</span></div><input type="text" value="" placeholder="e.g. Casa Catering · Tita Mila"><div class="chips"><label class="press">Gaia Florals</label><label class="press">HMUA by Kat</label><label class="press">Casa Catering</label></div></div>
+              <div class="f"><div class="l"><span class="eye">Where</span></div><input type="text" value="Grand ballroom"></div>
+              <div class="acts"><label for="shift" class="a press">⇅ Shift everything after</label><button class="a danger press">Delete</button></div>
+            </div>
+
+            <div class="pane p-7">
+              <div class="f"><input type="text" class="ttlin" value="Program"></div>
+              <div class="f"><div class="l"><span class="eye">Phase</span></div><select><option>Program</option><option>Reception</option><option>Custom</option></select></div>
+              <div class="times"><div><span class="eye">Starts</span><p class="tv">7:30 PM</p></div><div><span class="eye">Ends</span><p class="tv">9:00 PM</p></div></div>
+              <p class="durline">Runs <span class="dur">1 h 30 min</span></p>
+              <label for="pub-7" class="tg press"><span class="lbl">Visible to guests<small>Shows on the Event Hub</small></span><i class="sw2"></i></label>
+              <div class="f"><div class="l"><span class="eye">Responsible</span></div><input type="text" value="Host / MC"></div>
+              <div class="f"><div class="l"><span class="eye">Host's segments</span><span class="tip" tabindex="0">i<span class="lab">Segments your booked host offers. Ticked ones land here in the program and in his script.</span></span></div>
+                <div class="parts-l"><div><span>Money dance</span><span class="m">8:10 PM</span></div><div><span>Shoe game</span><span class="m">8:30 PM</span></div></div><label for="host" class="add press">＋ Pick from the host's catalogue</label></div>
+              <div class="acts"><label for="shift" class="a press">⇅ Shift everything after</label><button class="a danger press">Delete</button></div>
+            </div>
+
+            <div class="pane p-8">
+              <div class="f"><input type="text" class="ttlin" value="First dance"></div>
+              <div class="f"><div class="l"><span class="eye">Phase</span></div><select><option>Dancing</option><option>Program</option><option>Custom</option></select></div>
+              <div class="times"><div><span class="eye">Starts</span><p class="tv">9:00 PM</p></div><div><span class="eye">Ends</span><p class="tv">9:20 PM</p></div></div>
+              <p class="durline">Runs <span class="dur">20 min</span></p>
+              <label for="pub-8" class="tg press"><span class="lbl">Visible to guests<small>Hidden — a surprise. Flip it after.</small></span><i class="sw2"></i></label>
+              <div class="f"><div class="l"><span class="eye">Responsible</span></div><input type="text" value="" placeholder="e.g. the band · Host / MC"></div>
+              <div class="f"><div class="l"><span class="eye">Notes</span></div><textarea rows="2">Song: "Ikaw" — band has the arrangement.</textarea></div>
+              <div class="acts"><label for="shift" class="a press">⇅ Shift everything after</label><button class="a danger press">Delete</button></div>
+            </div>
+
+            <div class="pane p-9">
+              <div class="f"><input type="text" class="ttlin" value="Send-off"></div>
+              <div class="f"><div class="l"><span class="eye">Phase</span></div><select><option>Send-off</option><option>After-party</option><option>Custom</option></select></div>
+              <div class="times"><div><span class="eye">Starts</span><p class="tv">10:00 PM</p></div><div><span class="eye">Ends</span><p class="tv">10:30 PM</p></div></div>
+              <p class="durline">Runs <span class="dur">30 min</span></p>
+              <label for="pub-9" class="tg press"><span class="lbl">Visible to guests<small>Shows on the Event Hub</small></span><i class="sw2"></i></label>
+              <div class="f"><div class="l"><span class="eye">Responsible</span></div><input type="text" value="Coordinator"></div>
+              <div class="f"><div class="l"><span class="eye">Where</span></div><input type="text" value="Driveway, main entrance"></div>
+              <div class="acts"><button class="a danger press" style="margin-left:0">Delete</button></div>
+            </div>
+
+            <!-- the supplier's inspector: the block, read-only, and "Request a change" (event_schedule_suggestions · kind=adjust) -->
+            <div class="pane sp">
+              <p class="ttlin bn" style="font-family:var(--serif);font-size:24px;line-height:1.15;border-bottom:1px solid var(--line);padding:2px 0 6px"></p>
+              <p class="durline"><span class="mono bt"></span> · <span class="bw"></span></p>
+              <div class="sform">
+                <p class="eye" style="margin-top:22px">Request a change</p>
+                <div class="times"><div><span class="eye">Proposed start</span><p class="tv sps"></p><div class="stp"><span class="press" style="width:30px;height:30px;border-radius:8px;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink5)">−</span><span class="mid">5 min</span><span class="press" style="width:30px;height:30px;border-radius:8px;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink5)">+</span></div></div><div><span class="eye">Proposed end</span><p class="tv spe"></p><div class="stp"><span class="press" style="width:30px;height:30px;border-radius:8px;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink5)">−</span><span class="mid">5 min</span><span class="press" style="width:30px;height:30px;border-radius:8px;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink5)">+</span></div></div></div>
+                <div class="f"><div class="l"><span class="eye">Place</span></div><input type="text" placeholder="Leave blank to keep it"></div>
+                <div class="f"><div class="l"><span class="eye">Why</span><span class="tip" tabindex="0">i<span class="lab">Goes to Indalecio &amp; Claire and their coordinator. They approve or decline; you are told either way. You never change the timeline directly.</span></span></div><textarea rows="2" placeholder="e.g. We need ingress 2 hours before the ceremony."></textarea></div>
+                <div class="acts"><label for="ssent2" class="a gold press">Send request</label></div>
+              </div>
+              <div class="ssent"><p class="staged-note" style="background:#EEF2EA;color:var(--success)">Sent · Indalecio &amp; Claire will see it under Requests. They were notified: "Gaia Florals suggested a timeline change."</p><div class="acts"><label for="ssent2" class="a press">Request another</label></div></div>
+            </div>
+
+            <div class="pane p-10">
+              <div class="f"><input type="text" class="ttlin" value="Fireworks cue"></div>
+              <div class="staged-note">Staged by you, the coordinator — the couple, guests and suppliers cannot see it yet. Release it when it is ready.</div>
+              <div class="times"><div><span class="eye">Starts</span><p class="tv">10:30 PM</p></div><div><span class="eye">Ends</span><p class="tv">10:45 PM</p></div></div>
+              <div class="f"><div class="l"><span class="eye">Notes</span></div><textarea rows="2">Cue the moment the car door closes.</textarea></div>
+              <div class="acts"><button class="a gold press">Release to couple</button><button class="a danger press">Delete</button></div>
+            </div>
+
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- ── Journey — the LOG of the planning: meetings, calls, tastings, fittings, notes, info (owner 2026-09-25) ── -->
+    <section class="view j">
+      <div class="prep lg">
+        <div class="lghead"><span class="d">The planning, logged</span><span class="c"><b>14</b> entries · started <b>14 Feb</b> · <b>84</b> days to go</span><span class="tip" tabindex="0">i<span class="lab">Everything that happened on the way to the day — meetings, calls, tastings, fittings, notes and info — each with when, who and where. Hosts and your approved coordinator log entries. Supplier setup is listed on the Event Day rail, not here.</span></span></div>
+        <div class="mo"><div class="mh">February<small>2026 · 2 entries</small></div><div>
+          <div class="it lgi"><span class="d">14<small>Sat</small></span><span class="lb">Event created<small>Indalecio &amp; Claire · on Setnayan</small></span><span class="k man">Info</span></div>
+          <div class="it lgi"><span class="d">27<small>Fri</small></span><span class="lb">Church and date confirmed<small>Fr. Dela Cruz · San Agustin parish office · <em>"18 Dec, 2 pm slot held."</em></small></span><span class="k meet">Meeting</span></div></div></div>
+        <div class="mo"><div class="mh">March<small>1 entry</small></div><div>
+          <div class="it lgi"><span class="d">20<small>Fri</small></span><span class="lb">Guest list opened<small>180 names · both families</small></span><span class="k man">Info</span></div></div></div>
+        <div class="mo"><div class="mh">September<small>3 entries</small></div><div>
+          <div class="it lgi"><span class="d">12<small>Sat</small></span><span class="lb">Coordinator approved<small>Tita Mila · host invite accepted · consent recorded</small></span><span class="k man">Info</span></div>
+          <div class="it lgi"><span class="d">18<small>Thu · 8:00 PM</small></span><span class="lb">Kick-off call<small>Coordinator · video · <em>"Run of show draft by October."</em></small></span><span class="k call">Call</span></div>
+          <div class="it lgi"><span class="d">24<small>Wed · 3:00 PM</small></span><span class="lb">Site visit — arch span<small>Gaia Florals · San Agustin · <span class="att">📎 arch-measurements.pdf</span></small></span><span class="k meet">Meeting</span></div></div></div>
+        <div class="mo"><div class="mh">October<small>2 entries</small></div><div>
+          <label for="stp-saved" class="it lgi newstep own press"><span class="d">02<small>Fri · 4:00 PM</small></span><span class="lb">Food tasting<small>Casa Catering · Quezon City · <em>"Three tiers, ube and pandan."</em> · <span class="att">📎 tasting-menu.pdf</span></small></span><span class="k taste">Tasting</span></label>
+          <div class="it lgi"><span class="d">03<small>Sat · 3:00 PM</small></span><span class="lb">Final fitting<small>Atelier Reyes · Makati · <em>"Hem up 2 cm; second fitting not needed."</em></small></span><span class="k fit">Fitting</span></div>
+          <div class="it lgi"><span class="d">15<small>Thu</small></span><span class="lb">50% balance paid · ₱42,500<small>Gaia Florals · GCash</small></span><span class="k pay">Payment</span></div></div></div>
+        <div class="mo"><div class="mh">November<small>2 entries</small></div><div>
+          <div class="it lgi"><span class="d">20<small>Fri · 6:30 PM</small></span><span class="lb">Menu tasting<small>Casa Catering · Quezon City · <em>"Go with the lechon belly. Skip the pasta station."</em> · <span class="att">📷 3 photos</span></small></span><span class="k taste">Tasting</span></div>
+          <div class="it lgi"><span class="d">28<small>Sat</small></span><span class="lb">Final headcount sent · 172<small>to Casa Catering</small></span><span class="k man">Note</span></div></div></div>
+        <div class="mo"><div class="mh">December<small>the day</small></div><div>
+          <div class="it lgi"><span class="d">11<small>Fri · 8:00 PM</small></span><span class="lb">Final coordination call<small>Coordinator · video</small></span><span class="k call">Call</span></div>
+          <div class="it day"><span class="d">18<small>Thu</small></span><span class="lb">The day<small>9 moments · <label for="v-d" class="press" style="color:var(--gold7);font-weight:600">open the timeline</label></small></span><span class="k">Wedding</span></div></div></div>
+        <label for="stp-new" class="addstep press editonly">＋ Log an entry</label>
+      </div>
+    </section>
+
+    <!-- ── Preparation (read-only aggregation + own steps) ── -->
+    <section class="view p">
+      <div class="prep">
+        <div class="mo"><div class="mh">October<small>2 steps</small></div><div>
+          <label for="stp-saved" class="it newstep own press"><span class="d">02</span><span class="lb">Food tasting<small>Casa Catering · 4:00 PM · Quezon City</small></span><span class="k taste">Tasting</span></label>
+          <label for="stp-auto" class="it press"><span class="d">03</span><span class="lb">Final fitting<small>Atelier Reyes · 3:00 PM <span class="src">from chat</span></small></span><span class="k fit">Fitting</span></label>
+          <label for="stp-auto" class="it press"><span class="d">15</span><span class="lb">50% balance · ₱42,500<small>Gaia Florals <span class="src">from Budget</span></small></span><span class="k pay">Payment</span></label></div></div>
+        <div class="mo"><div class="mh">November<small>3 steps</small></div><div>
+          <label for="stp-auto" class="it press"><span class="d">06</span><span class="lb">Marriage licence application<small>City Hall, Manila · 10 days before <span class="src">from Paperwork</span></small></span><span class="k pap">Paperwork</span></label>
+          <label for="stp-auto" class="it press"><span class="d">20</span><span class="lb">Menu tasting<small>Casa Catering · 6:30 PM <span class="src">from chat</span></small></span><span class="k meet">Meeting</span></label>
+          <label for="req" class="it rqrow r4 press"><span class="d">27</span><span class="lb">Site visit — final arch check<small>Gaia Florals proposes · 3:00 PM · San Agustin</small></span><span class="k req">Requested</span></label>
+          <div class="it r4ok"><span class="d">27</span><span class="lb">Site visit — final arch check<small>Gaia Florals · 3:00 PM · San Agustin</small></span><span class="k meet">Meeting</span>
+          <label for="stp-own" class="it own press"><span class="d">28</span><span class="lb">Final headcount to caterer<small>your own step</small></span><span class="k man">Note</span></label>
+          </div></div></div>
+        <div class="mo"><div class="mh">December<small>3 steps</small></div><div>
+          <label for="stp-auto" class="it press"><span class="d">04</span><span class="lb">Balance · ₱18,000<small>HMUA by Kat <span class="src">from Budget</span></small></span><span class="k pay">Payment</span></label>
+          <label for="stp-auto" class="it press"><span class="d">11</span><span class="lb">Final coordination call<small>Coordinator · 8:00 PM <span class="src">from chat</span></small></span><span class="k call">Call</span></label>
+          <div class="it day"><span class="d">18</span><span class="lb">The day<small>Indalecio &amp; Claire · <label for="v-d" class="press" style="color:var(--gold7);font-weight:600">open the timeline</label></small></span><span class="k">Wedding</span></div></div></div>
+        <label for="stp-new" class="addstep press editonly">＋ Add a step</label> <span class="tip" tabindex="0" style="font-family:var(--serif);vertical-align:middle">i<span class="lab">Payments, paperwork and supplier meetings gather here on their own from Budget, Paperwork and chat — tagged with where they came from. Steps you add carry no tag and can be deleted.</span></span>
+        <label for="sreq" class="addstep press suponly">Request a slot before the day</label>
+      </div>
+    </section>
+
+    <!-- phone: the three views at the thumb -->
+    <nav class="mbar"><div class="seg"><label for="v-j" class="press">Journey</label><label for="v-p" class="press">Preparation</label><label for="v-d" class="press">Event Day</label></div></nav>
+
+    <!-- ── REQUESTS inbox (host / coordinator) — event_schedule_suggestions, open ── -->
+    <label for="req" class="scrim req"></label>
+    <div class="ov req">
+      <div class="oh"><h2>Requests <span class="rqn mono" style="color:var(--ink4);font-size:18px"></span></h2><label for="req" class="x ib press">✕</label></div>
+      <div class="ob">
+
+        <article class="rqi r1">
+          <p class="eye">Gaia Florals · change to a moment</p>
+          <h3>Vendor ingress &amp; styling</h3>
+          <div class="cmp"><div><span class="eye">Now</span><p class="tv">10:00 AM – 1:00 PM</p></div><span class="arw">→</span><div><span class="eye">Asked</span><p class="tv" style="color:var(--cta)">9:30 AM – 1:00 PM</p></div></div>
+          <p class="q">"Need 30 more minutes for the arch." <span class="tip" tabindex="0">i<span class="lab">Booked suppliers propose; you or your approved coordinator decide. Approve applies it to the rail; Decline tells them, with your reason if you give one. They never edit the timeline themselves.</span></span></p>
+          <div class="rqa st-open"><label for="r1-dcq" class="b ghost press">Decline</label><label for="r1-ap" class="b dark press">Approve</label></div>
+          <div class="rqa st-dcq"><textarea rows="2" placeholder="Reason (optional) — they will see it">The church only opens its doors at 10:00 AM.</textarea><div style="display:flex;gap:8px;margin-top:8px"><label for="r1-open" class="b ghost press">Back</label><label for="r1-dc" class="b dark press">Send decline</label></div></div>
+          <p class="rqa st-ap"><b>Approved</b> · the moment now starts 9:30 AM · Gaia Florals notified: "Indalecio &amp; Claire accepted your timeline suggestion."</p>
+          <p class="rqa st-dc"><b>Declined</b> · Gaia Florals notified: "Indalecio &amp; Claire declined your timeline suggestion." with your reason.</p>
+        </article>
+
+        <article class="rqi r3">
+          <p class="eye">Lumière Photo · new moment</p>
+          <h3>Post-ceremony photos</h3>
+          <div class="cmp"><div><span class="eye">Now</span><p class="tv" style="color:var(--ink3)">free slot</p></div><span class="arw">→</span><div><span class="eye">Asked</span><p class="tv" style="color:var(--cta)">3:30 – 4:00 PM</p></div></div>
+          <p class="pl">Church steps, then the garden</p>
+          <p class="q">"Family portraits before cocktails, while the light is good."</p>
+          <div class="rqa st-open"><label for="r3-dcq" class="b ghost press">Decline</label><label for="r3-ap" class="b dark press">Approve</label></div>
+          <div class="rqa st-dcq"><textarea rows="2" placeholder="Reason (optional) — they will see it"></textarea><div style="display:flex;gap:8px;margin-top:8px"><label for="r3-open" class="b ghost press">Back</label><label for="r3-dc" class="b dark press">Send decline</label></div></div>
+          <p class="rqa st-ap"><b>Approved</b> · added to the rail as a hidden moment — flip the eye when guests should see it · Lumière Photo notified.</p>
+          <p class="rqa st-dc"><b>Declined</b> · Lumière Photo notified.</p>
+        </article>
+
+        <article class="rqi r2">
+          <p class="eye">Casa Catering · new moment</p>
+          <h3>Cake cutting</h3>
+          <div class="cmp"><div><span class="eye">Now</span><p class="tv" style="color:var(--ink3)">free slot</p></div><span class="arw">→</span><div><span class="eye">Asked</span><p class="tv" style="color:var(--cta)">9:20 – 9:40 PM</p></div></div>
+          <p class="q">"The cake needs 20 minutes at room temperature — right after the first dance works."</p>
+          <div class="rqa st-open"><label for="r2-dcq" class="b ghost press">Decline</label><label for="r2-ap" class="b dark press">Approve</label></div>
+          <div class="rqa st-dcq"><textarea rows="2" placeholder="Reason (optional) — they will see it"></textarea><div style="display:flex;gap:8px;margin-top:8px"><label for="r2-open" class="b ghost press">Back</label><label for="r2-dc" class="b dark press">Send decline</label></div></div>
+          <p class="rqa st-ap"><b>Approved</b> · added to the rail as a hidden moment · Casa Catering notified.</p>
+          <p class="rqa st-dc"><b>Declined</b> · Casa Catering notified.</p>
+        </article>
+
+        <article class="rqi r4">
+          <p class="eye">Gaia Florals · before the day · Preparation</p>
+          <h3>Site visit — final arch check</h3>
+          <div class="cmp"><div><span class="eye">Now</span><p class="tv" style="color:var(--ink3)">nothing that day</p></div><span class="arw">→</span><div><span class="eye">Asked</span><p class="tv" style="color:var(--cta)">Thu 27 Nov · 3:00 PM</p></div></div>
+          <p class="pl">San Agustin Church</p>
+          <p class="q">"Twenty minutes to check the arch span against the aisle."</p>
+          <div class="rqa st-open"><label for="r4-dcq" class="b ghost press">Decline</label><label for="r4-ap" class="b dark press">Approve</label></div>
+          <div class="rqa st-dcq"><textarea rows="2" placeholder="Reason (optional) — they will see it"></textarea><div style="display:flex;gap:8px;margin-top:8px"><label for="r4-open" class="b ghost press">Back</label><label for="r4-dc" class="b dark press">Send decline</label></div></div>
+          <p class="rqa st-ap"><b>Approved</b> · on your Preparation agenda as a meeting · Gaia Florals notified.</p>
+          <p class="rqa st-dc"><b>Declined</b> · Gaia Florals notified.</p>
+        </article>
+
+        <p class="rq-none">Nothing waiting. Suppliers' requests land here and as ghost moments on the rail.</p>
+      </div>
+    </div>
+
+    <!-- ── SUPPLIER · "Request a block" (event_schedule_suggestions · kind=new) ── -->
+    <label for="sreq" class="scrim sreq"></label>
+    <div class="ov sreq">
+      <div class="oh"><h2>Request a moment</h2><span class="tip l" tabindex="0">i<span class="lab">A proposal, not an edit. Indalecio &amp; Claire or their coordinator approve it onto the timeline, or decline and tell you why.</span></span><label for="sreq" class="x ib press">✕</label></div>
+      <div class="ob sform">
+        <div class="f"><input type="text" class="ttlin" placeholder="What you need the slot for" value="Arch build &amp; florals ingress"></div>
+        <div class="times"><div><span class="eye">Proposed start</span><p class="tv">1:00 PM</p></div><div><span class="eye">Proposed end</span><p class="tv">1:30 PM</p></div></div>
+        <p class="durline">30 min · the slot you tapped</p>
+        <div class="f"><div class="l"><span class="eye">Place</span></div><input type="text" value="Grand ballroom loading bay"></div>
+        <div class="f"><div class="l"><span class="eye">Why</span></div><textarea rows="2">We need the bay clear for the arch pieces before guests move indoors.</textarea></div>
+      </div>
+      <div class="ob ssent"><p class="staged-note" style="background:#EEF2EA;color:var(--success)">Sent · it shows on your timeline as pending until Indalecio &amp; Claire decide. They were notified: "Gaia Florals suggested a timeline change."</p>
+        <p class="eye" style="margin-top:22px">Your requests</p>
+        <div class="movelist"><div><span>Arch build &amp; florals ingress · 1:00 PM</span><span class="m" style="color:var(--gold7)">pending</span></div><div><span>Vendor ingress &amp; styling · start 9:30 AM</span><span class="m" style="color:var(--gold7)">pending</span></div><div class="dim"><span>Call time 8:30 AM</span><span class="m" style="color:var(--success)">accepted</span></div></div></div>
+      <div class="of"><label for="sreq" class="b ghost press">Close</label><label for="ssent" class="b gold press sform">Send request</label></div>
+    </div>
+
+    <!-- ── PAPIC CHAPTERS — how the day's guest photos will group (lib/papic-chapters: countdown to the day, then the day's blocks) ── -->
+    <label for="chap" class="scrim chap"></label>
+    <div class="ov chap">
+      <div class="oh"><h2>Papic chapters</h2><span class="tip l" tabindex="0">i<span class="lab">Guests' photos are grouped by when they were taken: months and days to go, then the day itself — where each moment guests can see becomes a chapter. Setup moments are listed for the team but never become a chapter.</span></span><label for="chap" class="x ib press">✕</label></div>
+      <div class="ob">
+        <div class="chl">
+          <div class="cd"><span class="d">3 months to go</span><span class="m">12 photos</span></div>
+          <div class="cd"><span class="d">2 months to go</span><span class="m">31 photos</span></div>
+          <div class="cd"><span class="d">1 month to go</span><span class="m">—</span></div>
+          <div class="cd"><span class="d">12 days to go</span><span class="m">—</span></div>
+          <p class="eye" style="margin:18px 0 6px">The day</p>
+          <div class="cd c3"><span class="d"><span class="t">1:30 PM</span>Guests arrive</span><span class="m">chapter</span></div>
+          <div class="cd c4"><span class="d"><span class="t">2:00 PM</span>Ceremony <small>· Procession · Vows &amp; rings · Recessional</small></span><span class="m">chapter</span></div>
+          <div class="cd c5"><span class="d"><span class="t">4:00 PM</span>Cocktails</span><span class="m">chapter</span></div>
+          <div class="cd c6"><span class="d"><span class="t">5:00 PM</span>Reception &amp; dinner</span><span class="m">chapter</span></div>
+          <div class="cd c7"><span class="d"><span class="t">7:30 PM</span>Program</span><span class="m">chapter</span></div>
+          <div class="cd c8"><span class="d"><span class="t">9:00 PM</span>First dance</span><span class="m">chapter</span></div>
+          <div class="cd c9"><span class="d"><span class="t">10:00 PM</span>Send-off</span><span class="m">chapter</span></div>
+          <div class="cd dim"><span class="d"><span class="t">8:00 AM</span>Hair &amp; makeup</span><span class="m">setup · not a chapter</span></div>
+          <div class="cd dim"><span class="d"><span class="t">10:00 AM</span>Vendor ingress &amp; styling</span><span class="m">setup · not a chapter</span></div>
+          <div class="cd"><span class="d">After the day</span><span class="m">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ADD / EDIT A STEP — one sheet for Preparation ("Add a step") and the Journey log ("Log an entry") ── -->
+    <label for="stp-closed" class="scrim stps"></label>
+    <div class="ov stps">
+      <div class="oh"><h2 class="sth"></h2><span class="tip l" tabindex="0">i<span class="lab">A dated step of the planning. Payments, paperwork and supplier meetings arrive here on their own from Budget, Paperwork and chat; what you add yourself you can also delete.</span></span><label for="stp-closed" class="x ib press">✕</label></div>
+      <div class="ob">
+        <p class="autonote">This step arrived on its own. Change its amount or date where it lives — <b>Budget</b> — and it updates here.</p>
+        <div class="f"><div class="l"><span class="eye">What kind</span></div>
+          <div class="types kinds">
+            <label for="k-meet" class="press"><i>👥</i>Meeting</label><label for="k-call" class="press"><i>📞</i>Call</label><label for="k-taste" class="press"><i>🍽</i>Tasting</label><label for="k-fit" class="press"><i>👗</i>Fitting</label><label for="k-pay" class="press"><i>₱</i>Payment</label><label for="k-pap" class="press"><i>📄</i>Paperwork</label><label for="k-note" class="press"><i>✎</i>Note</label>
+          </div></div>
+        <div class="f"><div class="l"><span class="eye">Title</span><span class="tip" tabindex="0">i<span class="lab">Filled in from the kind — change it to anything.</span></span></div><p class="ttlin kt"></p></div>
+        <div class="times three"><div><span class="eye">When</span><p class="tv">2 Oct</p><p class="sub">Friday</p></div><div><span class="eye">Time <small>optional</small></span><p class="tv">4:00 PM</p><p class="sub">notes can be date-only</p></div><div><span class="eye">Length <small>optional</small></span><p class="tv">1 h</p></div></div>
+        <div class="f"><div class="l"><span class="eye">With whom</span></div><div class="chips"><span class="on">Casa Catering ✕</span><label class="press">Gaia Florals</label><label class="press">HMUA by Kat</label><label class="press">Atelier Reyes</label><label class="press">Coordinator</label></div><input type="text" placeholder="or type a name" style="margin-top:8px"></div>
+        <div class="f"><div class="l"><span class="eye">Where <small>optional</small></span></div><input type="text" value="Casa Catering kitchen, Quezon City"></div>
+        <div class="f"><div class="l"><span class="eye">Note</span></div><textarea rows="2">Three tiers, ube and pandan. Ask about the cake stand height.</textarea></div>
+        <div class="f"><div class="l"><span class="eye">Attach</span><span class="tip" tabindex="0">i<span class="lab">A photo, a quotation, a receipt — anything you want kept with this step.</span></span></div><div class="chips"><label class="press">📷 Photo</label><label class="press">📎 File</label><span class="on">tasting-menu.pdf ✕</span></div></div>
+        <div class="f"><div class="l"><span class="eye">Who sees it</span></div><div class="chips who"><label for="vs-h" class="press">Hosts only</label><label for="vs-hc" class="press">Hosts + coordinator</label></div></div>
+      </div>
+      <div class="of"><button class="b ghost press del" style="margin-right:auto;color:var(--danger)">Delete</button><label for="stp-closed" class="b ghost press">Cancel</label><label for="stp-saved" class="b dark press save">Save step</label><label for="stp-closed" class="b dark press openin">Open in Budget</label></div>
+    </div>
+
+    <!-- ── ADD sheet ── -->
+    <label for="add" class="scrim add"></label>
+    <div class="ov add">
+      <div class="oh"><h2>Add at <span class="mono">1:00 PM</span></h2><span class="tip l" tabindex="0">i<span class="lab">You tapped a gap, so the time is filled in. From the ＋ it starts after your last moment.</span></span><label for="add" class="x ib press">✕</label></div>
+      <div class="ob">
+        <div class="f"><input type="text" class="ttlin" placeholder="What happens" value="Photos with family"></div>
+        <div class="f"><div class="l"><span class="eye">Phase</span></div>
+          <div class="types">
+            <label for="ty-pre" class="press" style="--tint:var(--t-pre)"><i></i>Pre-ceremony</label><label for="ty-cer" class="press" style="--tint:var(--t-cer)"><i></i>Ceremony</label><label for="ty-cock" class="press" style="--tint:var(--t-cock)"><i></i>Cocktails</label><label for="ty-rec" class="press" style="--tint:var(--t-rec)"><i></i>Reception</label><label for="ty-din" class="press" style="--tint:var(--t-rec)"><i></i>Dinner</label><label for="ty-prog" class="press" style="--tint:var(--t-prog)"><i></i>Program</label><label for="ty-dan" class="press" style="--tint:var(--t-dance)"><i></i>Dancing</label><label for="ty-send" class="press" style="--tint:var(--t-send)"><i></i>Send-off</label><label for="ty-aft" class="press" style="--tint:var(--t-send)"><i></i>After-party</label><label for="ty-cus" class="press" style="--tint:var(--t-custom)"><i></i>Custom</label><label for="ty-set" class="press" style="--tint:var(--t-pre)"><i></i>Setup <span class="tip" tabindex="0" style="width:16px;height:16px;font-size:10px">i<span class="lab">A supplier's ingress, styling or teardown. Listed for the team, never shown to guests, not a Papic chapter.</span></span></label>
+          </div></div>
+        <div class="times"><div><span class="eye">Starts</span><p class="tv">1:00 PM</p></div><div><span class="eye">Ends</span><p class="tv">1:30 PM</p></div></div>
+        <p class="durline">Runs <span class="dur">30 min</span> · fits the gap before Guests arrive</p>
+        <label for="addpub" class="tg press"><span class="lbl">Visible to guests<small>Shows on the Event Hub · a Papic chapter</small></span><i class="sw2"></i></label>
+        <label for="addstg" class="tg press coordonly"><span class="lbl">Start staged <small>Hidden from the couple until you release it</small></span><i class="sw2"></i></label>
+        <div class="f"><div class="l"><span class="eye">Where</span></div><input type="text" placeholder="e.g. Church steps"></div>
+        <div class="tpl">
+          <div class="l" style="display:flex;align-items:center;gap:6px"><span class="eye">Start from a template</span><span class="tip" tabindex="0">i<span class="lab">A template loads into an empty schedule only — it never overwrites moments you have built. Yours has 9.</span></span></div>
+          <div class="r"><span><b>Classic wedding day</b><small>Prep through send-off</small></span><span class="n">9 moments</span></div>
+          <div class="r"><span><b>Civil &amp; intimate</b><small>Late-morning ceremony, lunch</small></span><span class="n">5 moments</span></div>
+          <div class="r"><span><b>Reception program</b><small>Doors to send-off</small></span><span class="n">6 moments</span></div>
+        </div>
+      </div>
+      <div class="of"><label for="add" class="b ghost press">Cancel</label><label for="add" class="b dark press">Add moment</label></div>
+    </div>
+
+    <!-- ── SHIFT sheet (bulk retime) ── -->
+    <label for="shift" class="scrim shift"></label>
+    <div class="ov shift">
+      <div class="oh"><h2>Running late</h2><span class="tip l" tabindex="0">i<span class="lab">Moves the chosen moment and everything after it by the same amount. Parts travel with their moment; how long each runs is kept.</span></span><label for="shift" class="x ib press">✕</label></div>
+      <div class="ob">
+        <div class="f"><div class="l"><span class="eye">From</span></div><select><option>Ceremony · 2:00 PM</option><option>Cocktails · 4:00 PM</option><option>Reception &amp; dinner · 5:00 PM</option><option>Program · 7:30 PM</option></select></div>
+        <div class="f"><div class="l"><span class="eye">Through</span></div><select><option>End of day</option><option>Program · 7:30 PM</option><option>Send-off · 10:00 PM</option></select></div>
+        <p class="shiftnum"><small>min</small></p>
+        <div class="stp2"><label for="sh-m15" class="press">−15</label><label for="sh-15" class="press">+15</label><label for="sh-30" class="press">+30</label><label for="sh-45" class="press">+45</label></div>
+        <p class="shiftline">6 moments move · the day now ends <span class="endsat mono"></span></p>
+        <div class="movelist">
+          <div class="dim"><span>Guests arrive</span><span class="m">1:30 PM · stays</span></div>
+          <div><span>Ceremony</span><span class="m">2:00 PM → later</span></div>
+          <div><span>Cocktails</span><span class="m">4:00 PM → later</span></div>
+          <div><span>Reception &amp; dinner</span><span class="m">5:00 PM → later</span></div>
+          <div><span>Program</span><span class="m">7:30 PM → later</span></div>
+          <div><span>First dance</span><span class="m">9:00 PM → later</span></div>
+          <div><span>Send-off</span><span class="m">10:00 PM → later</span></div>
+        </div>
+      </div>
+      <div class="of"><label for="shift" class="b ghost press">Cancel</label><label for="shift" class="b dark press">Shift the day</label></div>
+    </div>
+
+    <!-- ── EMCEE panel ── -->
+    <label for="emcee" class="scrim emcee"></label>
+    <div class="ov emcee">
+      <div class="oh"><h2>Emcee script</h2><span class="tip l" tabindex="0">i<span class="lab">Compiled from this timeline and your wedding-party names. Read-only: it never changes the program.</span></span><label for="emcee" class="x ib press">✕</label></div>
+      <div class="ob">
+        <label for="incl" class="tg press" style="margin-top:0"><span class="lbl">Include hidden moments<small>Your reading copy, not the guests'</small></span><i class="sw2"></i></label>
+        <pre class="script"><b>INDALECIO &amp; CLAIRE · 18 DECEMBER 2026</b>
+<b>1:30 PM  GUESTS ARRIVE</b>
+Good afternoon and welcome, everyone. Please find your seats;
+the ceremony begins at two.
+<b>2:00 PM  CEREMONY</b>
+  Procession · Vows &amp; rings · Recessional
+Please rise for the entrance of the bride.
+<b>4:00 PM  COCKTAILS · Garden terrace</b>
+Drinks are served on the terrace while the couple takes photos.
+<b>5:00 PM  RECEPTION &amp; DINNER · Grand ballroom</b>
+Ladies and gentlemen — for the first time as husband and wife,
+Indalecio and Claire Casasola.
+<b>7:30 PM  PROGRAM</b>
+  Money dance · Shoe game
+<b>10:00 PM  SEND-OFF · Main entrance</b>
+Sparklers at the door. Thank you for celebrating with us.</pre>
+      </div>
+      <div class="of"><button class="b ghost press">Copy</button><button class="b dark press">Download .txt</button></div>
+    </div>
+
+    <!-- ── HOST / MC panel ── -->
+    <label for="host" class="scrim host"></label>
+    <div class="ov host">
+      <div class="oh"><h2>Host / MC</h2><span class="tip l" tabindex="0">i<span class="lab">Your booked host. Pick his segments onto the program, answer what he asks, and send him a line mid-service.</span></span><label for="host" class="x ib press">✕</label></div>
+      <div class="ob">
+        <div class="htabs"><label for="h-seg" class="press">Segments</label><label for="h-q" class="press">His questions <span style="color:var(--cta)">·1</span></label><label for="h-note" class="press">Note to host</label></div>
+        <div class="hp seg">
+          <div class="pick on"><i class="ck">✓</i><span><b>Money dance</b><small>8 min · a Filipino classic</small></span><span class="at">Program · 8:10 PM</span></div>
+          <div class="pick on"><i class="ck">✓</i><span><b>Shoe game</b><small>10 min · needs two chairs</small></span><span class="at">Program · 8:30 PM</span></div>
+          <div class="pick"><i class="ck"></i><span><b>Bouquet &amp; garter toss</b><small>6 min</small></span><span class="at">drop on…</span></div>
+          <div class="pick"><i class="ck"></i><span><b>Same-day edit premiere</b><small>5 min · needs the screen</small></span><span class="at">drop on…</span></div>
+        </div>
+        <div class="hp q">
+          <p style="font-size:14px;margin:8px 0 4px"><b>How do I pronounce "Casasola"?</b></p>
+          <div class="f" style="margin-top:6px"><input type="text" placeholder="Your answer" value="ka-sa-SO-la — stress on the SO"></div>
+          <div class="acts" style="margin-top:14px"><button class="a gold press">Send answer</button></div>
+        </div>
+        <div class="hp note">
+          <div class="f" style="margin-top:6px"><textarea rows="3" placeholder="e.g. Hold the toast — Papa is still parking."></textarea></div>
+          <p class="saved">Reaches him on his day-of screen in seconds <span class="tip" tabindex="0">i<span class="lab">The same people who may advance the run of show may send this: you, and your coordinator.</span></span></p>
+          <div class="acts" style="margin-top:14px"><button class="a gold press">Send</button></div>
+        </div>
+      </div>
+    </div>
+
+   </div>
+  </div>
+</div>
+</body></html>
