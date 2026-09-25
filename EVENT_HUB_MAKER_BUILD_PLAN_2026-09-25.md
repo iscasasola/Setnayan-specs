@@ -219,6 +219,11 @@ Before starting, run the in-flight check
   Unit — replay refuses each `HUB_LOOK_EVENT_COLUMNS` key without Pro and applies `site_bg_color`, words and
   mode/order; Restore leaves live columns byte-identical; Reset never emits a guest-table write (assert on the
   replay plan, not on prose).
+- **⚠ As built (2026-09-25, `rd/maker-p2-draft-apply`) — four deviations, see the DECISION_LOG row of that date:**
+  RLS on `current_couple_event_ids()` ∪ `current_moderator_event_ids()` (not `current_event_ids()`, which admits
+  guests); no `updated_by`; refused Pro keys stay in the draft; only `rsvp_backdrop` among `events` columns is
+  draftable until `[slug]/layout.tsx` can overlay a draft. Writers divert on `draft=1` (`<HubDraftField />`); the
+  shell mounts `<HubDraftDock eventId stage />`.
 - **Browser check:** change a title → guest link unchanged → Apply → changed. Free couple: set a photo background in
   the draft → preview shows it, guest link does not → Apply bar shows the Pro line (web) / stops without a price
   (shell). Restore → preview matches the guest link again. Reset the Invitation stage → confirm text lists what it
