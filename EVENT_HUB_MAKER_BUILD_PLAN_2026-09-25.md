@@ -570,12 +570,14 @@ Before starting, run the in-flight check
 - **Browser check:** upload a warm clip on Modern → buttons shift warm, text still legible; toggle off → theme
   colours return; Luxe reveal → curtains part, fringe, card rises; reduced motion → fade.
 - **⚠ As built — adaptive part (2026-09-25, `rd/maker-p10-adaptive-theme`), five deviations for the owner/controller:**
-  (1) **the "swap the loop" itself did not exist** — no Main-background own-media control or storage had shipped,
-  so this PR builds it: the Main background lives at `config_json.main` on the event's HERO row (the one row every
-  event has exactly once; no migration), beside the hero scene's `canvas`, read by `hubMainGround`, drafted as
-  `widgets.hero.main` and written by Apply (own-media Main = Pro; back to the theme's own = free); drawn by the
-  PAGE (`site-body.tsx` → `main-ground.tsx`), never the layout, so a private landing never shows couple footage;
-  over a Pro theme only (Classic is plain paper — "classic has no photo or video"). (2) **`extractPaletteFromFile`
+  (1) **the "swap the loop" itself did not exist**, and per the owner's ruling the same day (DECISION_LOG "SIX
+  CONTROLLER QUESTIONS" item 6) **the HERO is the Main background by default** — no second upload: the hero photo
+  is measured in the browser (`HeroFrameSync`, in the Main panel and beside the Hero workspace) and stored as a
+  follow `{ follow: 'hero', of, tint }` at `config_json.main` on the event's HERO row (no migration), used only
+  while `of` is the hero; an own clip/photo is an opt-in override on the same key. `resolveMainGround` over
+  `resolveHero` is the one answer; drafted as `widgets.hero.main`, written by Apply (tint / own media = Pro; plain
+  hero = free); drawn by the PAGE (`site-body.tsx` → `main-ground.tsx`), never the layout, so a private landing
+  never shows couple media; over a Pro theme only (Classic is plain paper — "classic has no photo or video"). (2) **`extractPaletteFromFile`
   is NOT used** — it drops near-black/near-white pixels and pads short palettes with fixed cream tones, which hides
   exactly the pixels words fail over and would read a grey clip as warm; `measureFrame` (pure, in
   `lib/adaptive-theme.ts`) reads every pixel, keeps the lightest/darkest 5 % clusters (the same method as the theme
