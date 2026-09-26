@@ -37,6 +37,7 @@ tab and send the owner PICTURES (his viewer runs no JavaScript). He picks; then 
 | Specific Memory | couple-written (presets: The Toast, Before & After, Behind the Scenes, What Almost Happened…) | portrait + quote · before/after · three blocks |
 | Papic Challenge | challenge questions + guest photo/text answers | Q&A cards · photo answers grid · poll results |
 | Thank You | special message / composed until written | letter · words only · photo + words |
+| Videos | YouTube links the couple pastes (SDE, prenup, highlights) — no upload; reuse `watchFilmEmbedUrl` / `creator-chapters.ts` parsing | featured film · playlist row · grid |
 | Auto extras (hide when empty) | Film (Live Studio) · Song · Were You There? · Before & After | one style each to start |
 
 **Fonts (owner 2026-09-26):** one universal Event Hub font; tapping an element lets the couple give THAT element its own font, which wins for it only, with a "↺ use the Event Hub font" reset — like Keynote/Pages. Pro. Stored with the element's slot.
