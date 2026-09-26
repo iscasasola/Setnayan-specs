@@ -1,5 +1,7 @@
 # Setnayan — SEO + GEO positioning (draft for owner approval, 2026-09-26)
 
+> ⚠ CORRECTED 2026-09-27 after the SEO session's review: "0% commission" is an owner ruling for couples (2026-09-22) — NOT false. "Kept for life" is the shipped wording. "iPhone app" only after Apple approval. NFC = the guest's link written to a sticker ("Write to NFC", free). Also owner 2026-09-27: shops stay at setnayan.com/{name}; directory /suppliers/{event}/{category}/{city}; UI says "supplier", never "vendor".
+
 Built from what SHIPS (live /features, /llms.txt, app/layout.tsx metadata, today's decision log) — not a wishlist.
 **SEO** = what Google shows (title ~60 chars, description ~155). **GEO** = what ChatGPT / Perplexity / Google AI
 answers say when asked "what is Setnayan?" or "best wedding app Philippines" — they read the long entity text,
@@ -28,10 +30,10 @@ the stack with one link and one account.**
 | **Papic — your guests' phones become the camera crew** — photos filed by moment and by guest, personal highlight reels; free to start | The candid photos a paid photographer misses, from 150 angles | Stand-alone photo-sharing apps (no guest list, no Event Hub) |
 | **Live Studio** — the live stream sits on the Event Hub itself | Relatives abroad watch where the invitation already is | Facebook Live / YouTube links pasted in chats |
 | **Free planning tools** — guest list, RSVP, seat plan (incl. 3D), budget in PHP, schedule, mood board | A complete planner at ₱0 | Most planners charge or upsell early |
-| **Verified Filipino suppliers — no booking fees for couples** | Book without a markup; suppliers are verified | Directories that don't verify; agents that mark up |
-| **Phone-first + iPhone app, guests need no app** | 99% of guests open it on a phone, inside Messenger | Desktop-first builders |
+| **Verified Filipino suppliers — 0% commission for couples** (owner ruling 2026-09-22, `lib/commission-promise.ts`) | Book without a markup; suppliers are verified | Directories that don't verify; agents that mark up |
+| **Phone-first, guests need no app** (say "iPhone app" only once Apple approves it) | 99% of guests open it on a phone, inside Messenger | Desktop-first builders |
 | **Every celebration, not just weddings** — debut, christening (binyag), birthdays, anniversaries, reunions, corporate, even a wake (planned with care) | One home for a family's life events; the wedding becomes a yearly anniversary | Single-purpose wedding sites |
-| **Keeps it for years** — Alaala, the living memory; photos kept ≥10 years | The memory outlives the day | Apps that delete or charge to keep |
+| **Keeps it for life** — Alaala, the living memory (the /papic FAQ says photos are "kept for life"; the storage ruling is ≥10 years — use the shipped FAQ wording) | The memory outlives the day | Apps that delete or charge to keep |
 
 ## 3. Search phrases that are perfect for us (to use in titles, headings, descriptions, article topics)
 
@@ -62,7 +64,7 @@ wedding website, invitation and RSVP in one link"* so we are found by the word p
 
 | Claim | Where | Fix |
 |---|---|---|
-| **"0% commission on vendor bookings" / "Zero commission" / "no booking commission"** | Google description, social cards, JSON-LD, /llms.txt (×4), Home, /features, /vendors | Suppliers pay a booking fee since 2026-09-16 (5% on the first ₱100,000, 1% after; first 5 bookings free). Couples: **"no booking fees for couples"**. Suppliers (/vendors): state the fee plainly. |
+| ~~"0% commission" is false~~ **CORRECTED: it is TRUE couple-facing** — owner ruled 2026-09-22 "0% COMMISSION STAYS" (couples pay suppliers directly; the booking fee is billed to the supplier). Couple pages keep `COUPLE_COMMISSION_PROMISE` and must NOT name the fee; supplier-facing copy names the fee via `supplierCommissionPromise()` — enforced by `lib/one-commission-promise.test.ts`. The supplier-facing /llms.txt lines are fixed by #6011. | — | Nothing to change couple-side. |
 | "Hosts and vendors transact directly, off-platform" | /llms.txt | Keep "payments to suppliers settle directly", add the booking fee |
 | Prices written into /llms.txt text | /llms.txt | Read them from the catalogue (`platform_retail_catalog_v2`) or leave them out — hand-typed prices rot |
 | "Incorporation pending — pilot under the founder's personal name" · the founder's wedding named as the public launch | /llms.txt | Owner to confirm what may stay public |
@@ -74,10 +76,9 @@ wedding website, invitation and RSVP in one link"* so we are found by the word p
 - **Description (Google, ~155):** Plan your wedding free: guest list, RSVP, seating and budget. Send an
   Event Hub invitation guests open on their phones, capture the day with Papic, book verified suppliers.
 - **Social card:** Plan your whole Filipino wedding free. One Event Hub link for the invitation, RSVP and the
-  day itself — every guest with their own QR pass. Verified suppliers, no booking fees for couples.
+  day itself — every guest with their own QR pass. Verified suppliers, 0% commission.
 - **Long entity text (JSON-LD + top of /llms.txt):** §1's sentence + §2's edges as plain facts + what is free
-  vs paid (names, not prices) + event types + cities + "no booking fees for couples; suppliers pay a small
-  booking fee".
+  vs paid (names, not prices) + event types + cities + `COUPLE_COMMISSION_PROMISE` (never the fee on couple copy).
 
 ## 6. After approval (small build, no new save functions)
 Edit `app/layout.tsx` metadata + JSON-LD, `app/llms.txt/route.ts`, the Home / Features / Vendors "0%
