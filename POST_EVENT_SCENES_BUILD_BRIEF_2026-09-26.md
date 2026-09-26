@@ -63,7 +63,7 @@ Commit `83a010547a` "Post Event is many small scenes" — 25 files, +2,351/−15
 | L2 | Replace the presets with the approved **12** (§3.1), stored as `custom_N` scenes (§3.2); picker per strategy §5 (real mini previews, padlock/diamond, ⓘ purpose, "six slots, N used"). | `lib/post-event-presets.ts`, `lib/hub-canvas.ts`, `scene-template-picker.tsx` |
 | L3 | **Event Bar after the day** = Recap · Film · Vendors · Gallery · Me/Join, empty slots hide (E1), via the changes in strategy §6.3; bar items that open an open-up layer use `openUpHash`. | the guest bar resolver (`app/[slug]/_lib/site-nav.ts`, `stage-bar.ts`) |
 | L4 | **No guest camera after the day** (E2) — guests/strangers: the Camera slot yields to Film/Vendors on `after`; the couple keeps it. | same resolver; supersedes the 2026-08-03 camera-slot ruling for `after` only |
-| L5 | Pro gate at Apply for the 12 presets (E3); reorder/hide free (E4); replace the "Editorial PRO" copy (E4). | `hub-draft-actions.ts` Apply path; `editorial-order.ts` copy |
+| L5 | Pro gate at Apply for the 12 presets (E3); reorder/hide free (E4); replace the "Editorial PRO" copy (E4). | `hub-draft-actions.ts` Apply path; `app/[slug]/_components/editorial/editorial-order.ts` copy |
 | L6 | First-visit tour mentions the presets + the bar (existing `TOURS` key, no new mechanism). | `lib/tours.ts` |
 
 **Not in this build:** retiring `/story` and the old website editor (43 controls + 8 links must move into

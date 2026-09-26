@@ -515,6 +515,24 @@ Before starting, run the in-flight check
   tap "From the Day" → gallery opens full screen with Everything · Back returns to scene 13 → as a guest link:
   Yours/Everyone's → Apply → the people of the celebration see it → Publish to Discover → consent review → Real
   Stories shows it.
+- **⚠ As built — many small scenes (2026-09-26, `rd/post-event-scenes`; DECISION_LOG 2026-09-25 "POST EVENT IS
+  MANY SMALL SCENES"):** Post Event is always its scenes. Before the day the Maker lists the SAME keys P8 compiles,
+  each `waiting` ("Not yet") with the words of what will fill it (`POST_EVENT_WAITING` in `lib/post-event-scenes.ts`);
+  after the day the compile fills them — the lazy compile still writes only after the day. The single "The story
+  after the day" tile survives only as the fallback when the scenes cannot be read. **One source of truth:** no
+  `scenes[].mode` / order was added (the plan's `{key, template, source, canvas, mode}` shape was NOT built) —
+  show/hide and order stay the story's own `sections` / `sectionOrder`, and the couple's own scenes are
+  `customColumns` rows carrying `preset` (placed by `custom:<id>` in `sectionOrder`). The Maker drafts a copy of
+  those three keys in `event_site_drafts.draft_json.editorial` (`lib/post-event-draft.ts`); the host canvas and the
+  navigator read live-with-the-draft; **Apply** writes the three keys into `event_editorial.draft_json` and never
+  touches `status` / consent / edition — so Apply changes WHAT the story shows, not WHO reads it (🔑 owner: the plan's
+  "Apply = live for the people of the celebration" is NOT wired to the audience; say if Apply should also move a
+  `draft` story to `event`). **Presets** (`lib/post-event-presets.ts`, Post Event only; the other stages keep the 25):
+  thank-you note · letter · chapter of the day · a line to remember · gallery grid · film · wishes wall · Were you
+  there? · what's next for us · in memory. **Pro:** show/hide, order and their own words free (D4); a NEW scene of
+  their own is Pro, tried in the draft and held at Apply (🔑 owner: a column written in the story workroom is still
+  free there, because Editorial PRO is free-for-all). Per-scene template swap, own photos and a theme remain as P8
+  left them. **Migrations 0 · server actions 0** (every control posts `hubDraftAction` intent=save).
 
 ### Phase 9 — Prints & Tickets (the third bar group)
 

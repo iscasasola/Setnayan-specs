@@ -115,6 +115,12 @@ All three honor `prefers-reduced-motion` (reveal renders instantly; parallax off
 | One cover plate (their hero photo) | Editorial mosaic gallery (gallery is already Pro-adjacent) + parallax on cover |
 | "Powered by Setnayan" watermark | Watermark removed (existing perk) |
 
+> **AMENDED 2026-09-22 — the Pro column gains the four invite themes, now worn by the PAGE too.**
+> `Capiz · Velvet · Galeriya · Abaca` (owner 2026-09-10, `lib/invite-themes.ts`; House is the free
+> fifth) had reached only `/[slug]/invite`. They now dress every guest page, so a couple's theme
+> covers the door AND everything behind it. **No new SKU and no new choice** — the same pick, the
+> same ₱3,500 unlock. See **§15**.
+
 Rationale: the dark direction and motion-on-media are the two flourishes that photograph as "expensive" in shares/reels — putting them behind Pro gives the upsell a visible before/after without making free look cheap. (Owner may re-slice; flagged in build doc.)
 
 ## 9. Spacing & rhythm
@@ -497,3 +503,68 @@ Verified per lane (container class = `navpill`, border-radius 999px, height 64px
 ### §14 authority rule — the host natively owns every coordinator capability (owner confirmation Q, 2026-07-25: "Bea, the owner of the event must have similar access like the coordinator? So, when they do not hire a coordinator, they can still do the tasks?" → YES, by construction)
 
 **The couple/host OWNS every coordinator capability natively; hiring a coordinator DELEGATES a guarded subset** (read-parity, propose-not-execute, money wall — consent-scoped per 2026-07-19). **No coordinator hired → the host's Run-the-day console is the full command surface:** vendor "to coordinator" requests and status updates route to the HOST's Requests inbox; broadcasts, phones-down, and the run-of-show are direct. Host differences from a hired coordinator: **no propose-chip** (she approves directly — proposals are the delegate's guardrail, not hers), **Budget open** ("yours alone"), **no Biz tab / no capture FAB** (she isn't a vendor). Demo copy placed in Bea's console header: *"No coordinator hired? This console is yours — vendor requests come straight to you."*
+
+---
+
+## 15. The page wears the door's theme (owner 2026-09-22)
+
+Owner: *"wedding websites looks gorgeous and ours just looks like plan website"* — then, correcting an answer that had told him no theme system existed: ***"we have event hub themes"***.
+
+### ⚠ The correction is the most useful part of this section
+
+He was right. `lib/invite-themes.ts` has carried five themes since **2026-09-10** — **House** (free) plus **Capiz · Velvet · Galeriya · Abaca** (Event Hub Pro), in his own words: *"elegant, classy, sophisticated, rugged, and generic… Generic is the Free. The other 4 will be the Event Hub Pro service."* **Four paid and one free, exactly as he remembered.** The session that said otherwise had measured against a checkout **2,521 commits behind `origin/main`**, where they had not landed — an accurate reading of the wrong tree. It began building a second, parallel theme system with an invented vocabulary; that work was **discarded before any commit**.
+
+🔑 **The rule this proves is §RULE 0's, in its most expensive form:** an absence is only as good as the tree you measured it in, and the owner's memory of his own product outranks a grep.
+
+### What was actually missing
+
+`invite_theme` was read by exactly three files, all under `app/[slug]/invite/`. The DOOR was themed; everything behind it — save-the-date, RSVP, event, editorial, recap, pabuya — was still the one Clean-Editorial look this document describes in §3–§5. That is what made the site read as plain beside the market, and it is narrower than "we have no themes".
+
+### The shape of the port
+
+| | carried to the page | not carried, and why |
+|---|---|---|
+| **Material** (pearl · velvet · wall · kraft, and the couple's accent mixed into each) | moved to ONE attribute-scoped block in `globals.css`, keyed `[data-invite-theme='x'], [data-hub-theme='x']` | — |
+| **Faces** (Bodoni+Jost · Schibsted · Alfa Slab+Oswald) | the same local files, loaded the same way | Capiz has none — its door sets the seal in the house Cormorant |
+| **Ornament** (grain · printed frame · rule length) | mapped onto the twelve `pahina-*` tokens, with **today's values as fallbacks** | — |
+| **Structure** (the shell lattice, the veil, the hung print, the kraft pull) | rewritten for a page that scrolls | DoorShell's `--ga-pad` / `--ab-card-pad` are its own padding written down; a page has no such card |
+
+**The material could not stay in the door's stylesheets.** The site may not import them — `themes-stay-skins.test.ts` holds that no theme reaches the shared chunk, which is worth keeping — so an attribute block neither surface owns is the only place ONE definition can sit. `DoorShell` stamps `data-invite-theme` from a new `DoorSkin.themeId`, and that stamp is **load-bearing**: without it every `var(--cz-*)` resolves to nothing and the door renders unpainted.
+
+### ⚖ Two owner decisions, this date
+
+1. **The spatial RSVP backdrop wins where it applies.** The couple chose that scene deliberately and per-phase; a theme arriving later must not overwrite it. The theme's own ground shows on every phase without one.
+2. **Every guest page, not the main phases first.** A couple whose invitation is Capiz and whose recap is Clean-Editorial reads that as a broken theme, not as a page nobody got to.
+
+### 🔴 Three ground decisions that were MEASURED, and two of them changed the design
+
+The door can afford grounds a page cannot, for one reason: the only lettering on a door's ground is a single large wordmark (AA 3:1), while a page sets chapter headings and loose editorial prose on it (AA 4.5:1).
+
+- **Capiz's milk band runs 0.82→0.62, not the door's 0.70→0.40.** The door's thinnest band holds ink at **2.65:1** over a black photo. At 0.62 it is **5.62:1**. Over a white photo the whole range sits near 15:1 and the change is invisible.
+- **Abaca's ground carries no photo at all.** A black photo multiplied into kraft at 0.22 puts ink at **3.27:1** on the gradient's lower pull — the bottom half of every page. Bare kraft clears the floor everywhere (**5.07:1** at its darkest). The couple's photo reaches the page through the hero, which is where the door prints it too: on the card, never on the wall. Galeriya reaches the same outcome for a different reason — a gallery whose wall is the picture has no wall.
+- **Velvet gained a flat 30% scrim**, the one element not in its design board. `--vl-velvet` is half the couple's own accent, so its lightness is not ours to know: a pale accent leaves the ground at **3.00:1**. The scrim takes the worst case to **5.13:1** and is invisible on any ordinary dark accent.
+
+### 🔴 VELVET SHIPPED BROKEN, AND THE GUARD WRITTEN FOR IT PASSED THE BROKEN VERSION
+
+The worst defect of this port was not caught by anything in the suite, and the correction is a design rule rather than a fix.
+
+Velvet is the one DARK theme — the door holds a bright card ON velvet, and the page does the same at length. Its first mapping gave the page velvet's **paper** (`#fbf9f6`, near-white) as the page colour and velvet's near-black **ink** as the text colour, while the skin painted the velvet behind the page. Every chapter heading and eyebrow — all the text that sits on the ground rather than on a plate — was near-black on near-black. **The plates rendered perfectly throughout**, so a thumbnail read as working.
+
+🔑 **AND "INK MUST CONTRAST WITH THE PAGE COLOUR" PASSES ON IT.** Dark ink on the light paper the token *claimed* measures 17:1. The token and the pixels described different planes, and contrast arithmetic on a token can only ever see the token. The guard was written, the broken mapping was run back through it, and it went green.
+
+**So the possibility was removed rather than watched.** Every ground now paints `rgb(var(--color-cream))` — the same variable the page computes its ink against. They cannot disagree because there is only one of them; textures, veils and scrims layer on top. A new `--color-ink-on-plate` (falling back to the page ink, so inert for every other theme) lets a dark theme hold a bright card without the card inheriting the ground's ink.
+
+| role | Velvet, corrected |
+|---|---|
+| ground / page colour | `28 22 26` — the velvet |
+| ink on the ground | `240 234 224` warm cream — 12.2:1 at the default accent, 5.1:1 in the worst case the scrim exists for |
+| plate | `--vl-paper` — the bright cotton card |
+| ink on the plate | `--vl-ink` — 17.6:1, the door skin's own measurement |
+
+⚠ **The rule for anyone adding a fifth theme:** a theme may darken the page — that is what Velvet IS — but ink and the paper it is read on are ONE decision. Move one half and you have an unreadable page that photographs correctly.
+
+### The defect class this port kept producing
+
+Every failure found here rendered as success. `bg-cream` on the shell's `<main>` is opaque and painted straight over the theme's fixed ground — attribute stamped, material resolved, every token correct, and a couple who paid for Velvet got a white page. It was found **on a screen**, not by a test. Three shipped guards went red because they were pinned to a location that legitimately moved, and a fourth because it matched theme stylesheets by **basename** — and the site's files are deliberately named after the themes they paint.
+
+`app/[slug]/_components/skins/the-site-wears-the-doors-theme.test.ts` now holds the cross-surface properties: one material, one resolver, the door still stamping the attribute its own paint depends on, and every guest `<main>` wearing the theme.
