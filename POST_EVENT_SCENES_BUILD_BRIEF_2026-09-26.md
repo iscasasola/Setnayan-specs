@@ -39,6 +39,8 @@ tab and send the owner PICTURES (his viewer runs no JavaScript). He picks; then 
 | Thank You | special message / composed until written | letter · words only · photo + words |
 | Auto extras (hide when empty) | Film (Live Studio) · Song · Were You There? · Before & After | one style each to start |
 
+**Fonts (owner 2026-09-26):** one universal Event Hub font; tapping an element lets the couple give THAT element its own font, which wins for it only, with a "↺ use the Event Hub font" reset — like Keynote/Pages. Pro. Stored with the element's slot.
+
 **Storage rule for styles:** a style is a per-scene choice stored with that scene (like `canvas.template`
 today) — no new table. Keep the "one source of truth for order" rule from §2.
 
