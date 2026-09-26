@@ -353,6 +353,16 @@ Avoid: query-string-based filters as canonical URLs (e.g., don't make `/supplier
 | 11 | FAQ page | `/help/[topic]` | Rank for question queries; FAQPage schema | 200 words per Q × 5–10 Qs |
 | 12 | Pricing/budget page | `/wedding-budget-philippines` | Rank for "wedding cost Philippines"; conversion to /apply | 1,500 words + tables + FAQ |
 
+> **2026-09-27 — templates 5–7 SHIPPED, with an EVENT level added (owner).** People search *"debut package
+> Quezon City"*, not *"package Quezon City"*, so the built shape is `/suppliers` ·
+> `/suppliers/[event]/[category]` · `/suppliers/[event]/[category]/[city]` (e.g.
+> `/suppliers/debut/coordinator/quezon-city`), built from suppliers' **service cards** with their own published
+> prices. **Gate:** a page is `index` only with ≥3 cards from ≥2 verified non-demo shops (`lib/supplier-landing.ts`
+> `SUPPLIER_PAGE_MIN_*`); below it the page renders for people but is `noindex` and left out of
+> `/sitemap-suppliers.xml`. ⚠ **Content depth is BELOW this table's 400/600/800-word minimums** — the pages carry a
+> live data summary, the card grid and a 3-question FAQ, not long-form prose. Per-category guide copy is the
+> open follow-up; the gate is what keeps thin pages out of the index meanwhile.
+
 ### 5.2 Title / meta patterns per template
 
 | Template | Title pattern | Meta pattern |
