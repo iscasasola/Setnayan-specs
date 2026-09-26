@@ -32,6 +32,10 @@ verbs. We absorb every edge case so neither side has to think.
 | **Shared phone** | "Not you? Switch" under the guest's name. |
 | **After the final-count lock, never replied, opens key on the day** | *(controller rec, owner to confirm)* inside, marked "Didn't reply", no headcount questions. The venue scanner never blocks over a missing form. |
 
+**Plus-ones:** the RSVP asks a name for EVERY plus-one seat (+1…+4); each becomes its own guest row under the one who brought them ("Maria Santos · with Ben") with its own key/QR. Today only one `plus_one_name` exists; extra seats read "TBA".
+
+**Account details win on sync:** an existing Setnayan account's name · photo · mobile · dietary are used and shown to everyone; the couple's typed label ("Tita Baby") stays visible only to the couple as "saved as".
+
 **"Who can RSVP?"** — one stored value, shown in BOTH Guest List → Invite and Maker → Details (next to "What do
 you ask your guests?"): **Only my Guest List** (default) · **Anyone, I approve**.
 
