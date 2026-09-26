@@ -40,7 +40,8 @@ tab and send the owner PICTURES (his viewer runs no JavaScript). He picks; then 
 | Videos | YouTube links the couple pastes (SDE, prenup, highlights) — no upload; reuse `watchFilmEmbedUrl` / `creator-chapters.ts` parsing | featured film · playlist row · grid |
 | Kwento | Papic photo-anchored guest messages (`photo_messages`) — a photo WITH its message; separate from Messages | photo + note card · scrapbook pairs · swipe story |
 | Clips | the couple's own uploaded clips — 15 s max (refused, not trimmed), browser-compressed, within 100 MB/event, Pro; separate from Videos | single clip · clip reel · clips beside photos |
-| Auto extras (hide when empty) | Film (Live Studio) · Song · Were You There? · Before & After | one style each to start |
+| Live Stream | the Live Studio replay (`watchFilmEmbedUrl`) — shown only if the event had Live Studio | full replay · highlights by chapter · watch-the-replay card |
+| Auto extras (hide when empty) | Song · Were You There? · Before & After | one style each to start |
 
 **Fonts (owner 2026-09-26):** one universal Event Hub font; tapping an element lets the couple give THAT element its own font, which wins for it only, with a "↺ use the Event Hub font" reset — like Keynote/Pages. Pro. Stored with the element's slot.
 
