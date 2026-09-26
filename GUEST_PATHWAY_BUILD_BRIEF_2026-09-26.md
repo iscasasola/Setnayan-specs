@@ -49,7 +49,7 @@ you ask your guests?"): **Only my Guest List** (default) · **Anyone, I approve*
    app → Apple · Android Chrome → Google) · small "Not now". Everything pre-filled from the invite + RSVP.
 4. Coming back with the key → **Pre Event** (their seat · schedule · dress code · countdown).
 
-**Last 30 days — "Your checklist"** at the top of each identified guest's page: what to wear (their role's dress code) · motif colours (Mood Board palette) · arrive by (run of show) · venue + directions · their table · what to bring (their QR + a couple line) · "Reply by <date>" first if unreplied. (Reminder emails 30/7/1 days come with the Schedule rebuild.)
+**Last 30 days — "Your checklist"** at the top of each identified guest's page: what to wear (their role's dress code) · motif colours (Mood Board palette) · arrive by (run of show) · venue + directions · their table · what to bring (their QR + a couple line) · "Reply by <date>" first if unreplied. **Interactive:** each item is a tick ("3 of 5 ready" → "You're all set ✓"), saved to the guest (not the device), private to the guest; must reuse an existing guest save action (+0 route). (Reminder emails 30/7/1 days — listing only unticked items — come with the Schedule rebuild.)
 
 **Invitation bar:** Home · Details · **RSVP** · Story · **Me** (Camera returns on The Day).
 
