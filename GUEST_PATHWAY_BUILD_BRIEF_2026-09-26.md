@@ -53,6 +53,8 @@ you ask your guests?"): **Only my Guest List** (default) · **Anyone, I approve*
 
 **Terms at sign-up (vital, moved in):** "Save to my account" via Google/Apple must record `terms_accepted_at` + `terms_version` at that step (the OAuth callback never does today); the tick sits on the RSVP/Save step, unticked + required, like `/signup`.
 
+**Owner answers 2026-09-27 (prototype `guest_pathway_2026-09-27.html`):** Terms tick on the RSVP page · "Save to my account" from the thank-you screen, the Me tab AND on the day · a stranger sees 3 tabs (Home · Details · Story) · ONE design, themed automatically (check it in 2 more themes before building) · **RSVP is its own made-once page in the Maker bar** (Details · Logo · Hero · Reveal · Love Story · RSVP): real RSVP preview + "What do you ask your guests?" (moved from Details) + "Who can RSVP?" + reply-by + Requests waiting — reuse `MakerPage` / `makerPageCanvasSrc` from #5996.
+
 **Invitation bar:** Home · Details · **RSVP** · Story · **Me** (Camera returns on The Day).
 
 ## 2. Step 0 — live walkthrough first (controller, owner approved)
