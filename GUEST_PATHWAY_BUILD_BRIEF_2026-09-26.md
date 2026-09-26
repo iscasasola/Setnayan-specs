@@ -27,7 +27,7 @@ verbs. We absorb every edge case so neither side has to think.
 | **Guest with a key** — invite link = QR = NFC (all carry the guest's `qr_token`) | Required answers missing? → **the RSVP page first**, only the missing switched-on questions, cannot be skipped → **inside** (seat · pass · Papic camera · gallery · announcements · Were You There?). A question added later is asked alone next visit. |
 | **Couple marked them Attending** (confirmed by text/call — `rsvp_status` on the guest edit form) | Gate asks only the remaining details; shows "The couple has you down as attending ✓" + "Not coming after all?" until the lock. |
 | **No key — RSVP from the general link, or signed in but not on the list** | "You're not on the guest list for this event yet" → **Ask to join** → type name (the list is NEVER shown) + RSVP + contact → "Request sent". NOT inside, and the event does NOT appear in their account/app, until the couple acts. A name match alone never admits. |
-| **The couple — Guest List → Requests (n)** | Each request: suggested match + **Link** (merge into an existing guest) · **Approve** (add) · **Decline**. Link/Approve → key issued → "Save to my account". |
+| **The couple — Guest List → Requests (n)** | Each request: suggested match + **Keep** (add to the list) · **Remove** · **Link** (merge into an existing guest) — the shipped verbs, owner 2026-09-26. Keep/Link → key issued → "Save to my account". |
 | **Swap** — "Give this spot to someone else" on a guest who has NOT replied | New person takes the same seat/table/count; new key issued (`rotate_guest_qr_token`), the old QR/link stop working; old person not notified; confirmed guests can't be swapped; allowed after the lock, up to the day. |
 | **Shared phone** | "Not you? Switch" under the guest's name. |
 | **After the final-count lock, never replied, opens key on the day** | *(controller rec, owner to confirm)* inside, marked "Didn't reply", no headcount questions. The venue scanner never blocks over a missing form. |
@@ -50,6 +50,8 @@ you ask your guests?"): **Only my Guest List** (default) · **Anyone, I approve*
 4. Coming back with the key → **Pre Event** (their seat · schedule · dress code · countdown).
 
 **Last 30 days — "Your checklist"** at the top of each identified guest's page: what to wear (their role's dress code) · motif colours (Mood Board palette) · arrive by (run of show) · venue + directions · their table · what to bring (their QR + a couple line) · "Reply by <date>" first if unreplied. **Interactive:** each item is a tick ("3 of 5 ready" → "You're all set ✓"), saved to the guest (not the device), private to the guest; must reuse an existing guest save action (+0 route). (Reminder emails 30/7/1 days — listing only unticked items — come with the Schedule rebuild.)
+
+**Terms at sign-up (vital, moved in):** "Save to my account" via Google/Apple must record `terms_accepted_at` + `terms_version` at that step (the OAuth callback never does today); the tick sits on the RSVP/Save step, unticked + required, like `/signup`.
 
 **Invitation bar:** Home · Details · **RSVP** · Story · **Me** (Camera returns on The Day).
 
