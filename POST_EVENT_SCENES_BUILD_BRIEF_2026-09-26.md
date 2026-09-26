@@ -30,7 +30,7 @@ tab and send the owner PICTURES (his viewer runs no JavaScript). He picks; then 
 | Statistics | invited/attended · Papic captures · chapters · wishes · suppliers | big numbers · receipt tally · infographic row |
 | Schedule | one per event-day block (= Papic chapter) + its photos | timeline · one chapter per screen · clock face |
 | Gallery | clean Papic captures by time · couple uploads · photo wall | grid · mosaic · film strip |
-| Messages | approved wishes (`photo_messages`) · letters (`guest_columns`) | note wall · one letter at a time · quote cards |
+| Messages | approved text wishes · letters (`guest_columns`) — NOT the photo-anchored Kwento | note wall · one letter at a time · quote cards |
 | Where Everyone Sat | final seat plan + check-ins (3D plan) — guest sees own table; stranger sees NO names | 3D room · floor plan · list by table |
 | Vendor Stories | vendors' day-of media · booked team · "would book again" · reviews | photo strip · credits roll · side by side |
 | Entourage | guest-list roles | roll call · portrait grid · family tree |
@@ -38,6 +38,8 @@ tab and send the owner PICTURES (his viewer runs no JavaScript). He picks; then 
 | Papic Challenge | challenge questions + guest photo/text answers | Q&A cards · photo answers grid · poll results |
 | Thank You | special message / composed until written | letter · words only · photo + words |
 | Videos | YouTube links the couple pastes (SDE, prenup, highlights) — no upload; reuse `watchFilmEmbedUrl` / `creator-chapters.ts` parsing | featured film · playlist row · grid |
+| Kwento | Papic photo-anchored guest messages (`photo_messages`) — a photo WITH its message; separate from Messages | photo + note card · scrapbook pairs · swipe story |
+| Clips | the couple's own uploaded clips — 15 s max (refused, not trimmed), browser-compressed, within 100 MB/event, Pro; separate from Videos | single clip · clip reel · clips beside photos |
 | Auto extras (hide when empty) | Film (Live Studio) · Song · Were You There? · Before & After | one style each to start |
 
 **Fonts (owner 2026-09-26):** one universal Event Hub font; tapping an element lets the couple give THAT element its own font, which wins for it only, with a "↺ use the Event Hub font" reset — like Keynote/Pages. Pro. Stored with the element's slot.
