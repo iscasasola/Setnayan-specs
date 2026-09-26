@@ -11,6 +11,37 @@ FABLE'S FIVE" · prototype `prototypes/post_event_scenes_strategy_2026-09-25.htm
 
 ---
 
+---
+
+## 0. ⚠ UPDATE 2026-09-26 (owner, later the same day) — DESIGN FIRST, THEN BUILD
+
+The owner expanded Post Event into **13 scene types, each with its own ~3 styles; each scene on the page
+picks one style independently; every part is tap-to-edit** (DECISION_LOG 2026-09-26 "POST EVENT: 13 SCENE
+TYPES"). This changes L2 and adds a step **before** this build:
+
+**Step A — Fable prototype (Fable · high), before any code:** all scene types × their styles at 375 px
+(and one desktop), for a real-looking event, using only data the platform compiles. Open it in a browser
+tab and send the owner PICTURES (his viewer runs no JavaScript). He picks; then Step B is this brief.
+
+| Scene type | Compiles from | Proposed styles |
+|---|---|---|
+| Front Page | hero · names · date · venue · edition stamp | magazine cover · full-bleed photo · The Card |
+| The Road to the Day | supplier bookings (dated) · finished tasks (dated) · pre-event uploads · Mood Board · *(meetings/tastings: Schedule Journey log — not built yet)* | diary · countdown timeline · scrapbook |
+| Statistics | invited/attended · Papic captures · chapters · wishes · suppliers | big numbers · receipt tally · infographic row |
+| Schedule | one per event-day block (= Papic chapter) + its photos | timeline · one chapter per screen · clock face |
+| Gallery | clean Papic captures by time · couple uploads · photo wall | grid · mosaic · film strip |
+| Messages | approved wishes (`photo_messages`) · letters (`guest_columns`) | note wall · one letter at a time · quote cards |
+| Where Everyone Sat | final seat plan + check-ins (3D plan) — guest sees own table; stranger sees NO names | 3D room · floor plan · list by table |
+| Vendor Stories | vendors' day-of media · booked team · "would book again" · reviews | photo strip · credits roll · side by side |
+| Entourage | guest-list roles | roll call · portrait grid · family tree |
+| Specific Memory | couple-written (presets: The Toast, Before & After, Behind the Scenes, What Almost Happened…) | portrait + quote · before/after · three blocks |
+| Papic Challenge | challenge questions + guest photo/text answers | Q&A cards · photo answers grid · poll results |
+| Thank You | special message / composed until written | letter · words only · photo + words |
+| Auto extras (hide when empty) | Film (Live Studio) · Song · Were You There? · Before & After | one style each to start |
+
+**Storage rule for styles:** a style is a per-scene choice stored with that scene (like `canvas.template`
+today) — no new table. Keep the "one source of truth for order" rule from §2.
+
 ## 1. What the owner decided (verbatim, do not re-ask)
 
 - *"the story on that scene 1 of post event is the whole story, what we want is to cut them into smaller
