@@ -34,6 +34,8 @@ verbs. We absorb every edge case so neither side has to think.
 
 **Plus-ones:** the RSVP asks a name for EVERY plus-one seat (+1…+4); each becomes its own guest row under the one who brought them ("Maria Santos · with Ben") with its own key/QR. Today only one `plus_one_name` exists; extra seats read "TBA".
 
+**Plus-ones get their own access:** thank-you screen → "Your guests" → one **"Send their invite"** per plus-one (native share sheet, their personal link; no SMS from us) · no-phone plus-ones (kids, elders): passes in the bringer's **Me** → "Show Lola's pass" · names unknown → "+2 TBA", fill later from Me → "Add names".
+
 **Account details win on sync:** an existing Setnayan account's name · photo · mobile · dietary are used and shown to everyone; the couple's typed label ("Tita Baby") stays visible only to the couple as "saved as".
 
 **"Who can RSVP?"** — one stored value, shown in BOTH Guest List → Invite and Maker → Details (next to "What do
