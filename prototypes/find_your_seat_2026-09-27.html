@@ -200,7 +200,7 @@ table.who td b{color:var(--fd-ink)}
   <p class="eyebrow app">Prototype · Event Hub · guest pathway · 2026-09-27</p>
   <h1>Find your seat — in the couple's theme, with your key or without</h1>
   <p class="doc-p"><b>Today</b> (<code>www.setnayan.com/cale-ice/find-seat</code>, measured on a 390 px phone): generic Setnayan chrome, a cream page, one text box, a "Back to the invitation" pill, and a lot of empty space. It does not wear Indalecio &amp; Claire's theme. Anyone with the link can type a full name and learn that person's table.</p>
-  <p class="doc-p"><b>This prototype</b> keeps the shipped machinery (the published 2D plan, the exact-name lookup, the tablemate list) and changes three things: the screen wears the couple's <b>Vintage</b> theme like every other guest screen · a guest holding their <b>key</b> (QR · NFC · invitation link · signed in) never types anything — their seat is simply there · the <b>open link</b> stays useful at the venue but reveals only a table, never other people.</p>
+  <p class="doc-p"><b>This prototype</b> keeps the shipped machinery (the published 2D plan, the exact-name lookup, the tablemate list) and changes three things: the screen wears the couple's <b>Vintage</b> theme like every other guest screen · a guest who is <b>signed in</b> (their account linked to this event) or who opened their <b>personal key</b> (QR · NFC · invitation link) never types anything — their seat is simply there, first frame below · the <b>open link</b> stays useful at the venue but reveals only a table, never other people.</p>
   <p class="doc-p muted">cale-ice as of today: 81 guests · 16 seated · 3 tables · plan published 10 July · no venue name · entrance marker off (the map falls back to the default door at the bottom). The maps below are drawn a little fuller than that so the pattern reads; the real page draws whatever the couple placed.</p>
   <div class="delta">
     <ul>
@@ -215,21 +215,24 @@ table.who td b{color:var(--fd-ink)}
 
 <!-- ────────────────────────────────────────────────────────────────────── -->
 <section class="variant">
-  <div class="vh"><span class="letter">A</span><h2>With your key — your seat is simply there</h2></div>
-  <p class="doc-p muted">Opened from the invitation link, a personal QR, an NFC tap, or signed in with the event synced. No typing. Names shown are the guest's own table only, first name and last initial, as the shipped table-sign view already does.</p>
+  <div class="vh"><span class="letter">A</span><h2>Signed in, or with your key — your seat is simply there</h2></div>
+  <p class="doc-p"><b>Owner's question: "if they are logged in, it will show the seat quickly?" Yes — this is the first frame.</b> A guest whose account is linked to this event, or who opened their personal key (QR · NFC · invitation link), lands on "Your seat" with no typing: the table big, the room with their table lit, and their own table's names. Typing exists only on the general link (section B).</p>
+  <div class="callout"><b>How the page knows who they are — the shipped mechanism, nothing new</b>
+    The event page already answers this with one resolver, <code>resolveGuestViewer</code> in <code>apps/web/lib/guest-one-path.ts</code>. It looks at two things and picks one: (1) the <b>guest session cookie</b> <code>setnayan_guest_session</code>, read by <code>readGuestSession()</code> in <code>lib/guest-session.ts</code> — minted when a key is used (<code>/[slug]/redeem</code>, <code>/[slug]/seat/claim</code>, the join flow, a QR rotation), 60-day sliding window, revoked the moment the QR is rotated; (2) the <b>signed-in account bound to a seat</b> — an <code>event_members</code> row with <code>member_type 'guest'</code> and this guest's <code>guest_id</code>, written by "Save to my account" / "Link this seat". Cookie → <i>cookie</i>, account seat → <i>seat</i>, neither → <i>anonymous</i>. The find-seat page calls the same resolver: cookie or seat → section A; anonymous → section B. No new session, no new column.
+  </div>
 
   <div class="row">
 
     <!-- A1: before the day -->
     <figure class="frame">
-      <figcaption><b>A1 · Before the day</b>The table is the biggest thing on the screen. Under it, the room with their table lit and the dotted path from the door. Below the fold: who else is at the table.<em>One button: Show at the door. "Walk the room in 3D" is a quiet link under the map.</em></figcaption>
+      <figcaption><b>A1 · Signed in — straight to your seat</b>Account linked to this event (or the personal key opened): no field, no typing. The table is the biggest thing on the screen. Under it, the room with their table lit and the dotted path from the door. Below the fold: who else is at the table.<em>One button: Show at the door. "Walk the room in 3D" is a quiet link under the map.</em></figcaption>
       <div class="phone t-vintage tall">
         <div class="bg"></div>
         <div class="status"><span>9:41</span><span class="sig">●●●● ᯤ ▮</span></div>
         <div class="fold"><span>fold — a 390×844 phone shows this much before scrolling</span></div>
         <div class="postmark">Manila<br>18 · XII<br>2026</div>
         <div class="page">
-          <header class="top"><span class="menu"><svg class="ico" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg></span><span class="word">SETNAYAN</span><span class="who">For Ana</span></header>
+          <header class="top"><span class="menu"><svg class="ico" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg></span><span class="word">SETNAYAN</span><span class="who">Signed in · Ana</span></header>
           <section class="head">
             <p class="eyebrow">✦ &nbsp;Your seat</p>
             <p class="script">you're at</p>
@@ -347,18 +350,18 @@ table.who td b{color:var(--fd-ink)}
 
     <!-- A4: keyed, not seated yet -->
     <figure class="frame">
-      <figcaption><b>A4 · With a key, table not set yet</b>The honest state for 65 of cale-ice's 81 guests today. The room is drawn faintly with no table lit. No button: there is nothing to do, and we tell them we will keep it updated.<em>This message is safe here — the key proves who is asking.</em></figcaption>
+      <figcaption><b>A4 · Signed in, table not set yet</b>The same signed-in guest before the couple seats them — the honest state for 65 of cale-ice's 81 guests today. The room is drawn faintly with no table lit. No button: there is nothing to do, and we tell them we will keep it updated.<em>This message is safe here — the account or key proves who is asking.</em></figcaption>
       <div class="phone t-vintage">
         <div class="bg"></div>
         <div class="status"><span>9:41</span><span class="sig">●●●● ᯤ ▮</span></div>
         <div class="postmark">Manila<br>18 · XII<br>2026</div>
         <div class="page">
-          <header class="top"><span class="menu"><svg class="ico" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg></span><span class="word">SETNAYAN</span><span class="who">For Ana</span></header>
+          <header class="top"><span class="menu"><svg class="ico" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg></span><span class="word">SETNAYAN</span><span class="who">Signed in · Ana</span></header>
           <section class="head">
             <p class="eyebrow">✦ &nbsp;Your seat</p>
             <p class="script">not set yet</p>
             <h1 class="h1">You're on the list, Ana.</h1>
-            <p class="sub">Indalecio &amp; Claire are still arranging the room. Once they place you, your table will be right here — no need to check back, we keep this updated.</p>
+            <p class="sub">Your table will show here once Indalecio &amp; Claire seat you. No need to check back — this updates by itself.</p>
           </section>
           <div class="lace"></div>
           <div class="map faint">
@@ -708,11 +711,11 @@ table.who td b{color:var(--fd-ink)}
   <div class="vh"><span class="letter">D</span><h2>Who sees what</h2><span class="rec">recommendation</span></div>
   <p class="doc-p">The problem today: anyone with the link can type a name and learn that the person is invited and where they sit. The database already refuses partial names (since 20 September, exact full name only, own seat only). The design finishes the job.</p>
   <table class="who">
-    <tr><th></th><th>Stranger · general link or venue QR</th><th>Guest with a key · QR, NFC, invitation link, or signed in</th><th>Host at the door</th></tr>
+    <tr><th></th><th>Stranger · general link or venue QR</th><th>Signed in (account linked to this event) · or personal key: QR, NFC, invitation link</th><th>Host at the door</th></tr>
     <tr><td><b>Typing</b></td><td>Types their exact full name once.</td><td><b>Never types.</b> The seat is there when they open the Hub.</td><td>Check-in desk finds anyone by name.</td></tr>
     <tr><td><b>Table</b></td><td>Table label + the room map with that table lit.</td><td>Table label, map, dotted path, "Walk the room in 3D".</td><td>Sees the guest's pass (A3).</td></tr>
     <tr><td><b>Names at the table</b></td><td><b>None.</b> Not even their own.</td><td><b>Own table only</b>, first name + last initial. Other tables: none, unless the couple flips that table's "show names to everyone" switch (default OFF).</td><td>Full names on the desk, as today.</td></tr>
-    <tr><td><b>Not on the list</b></td><td rowspan="2">The <b>same</b> message: "No table for that name yet" — plus the two true fixes (spell it as the couple would · open your invitation).</td><td>Cannot happen — the key is the list.</td><td>—</td></tr>
+    <tr><td><b>Not on the list</b></td><td rowspan="2">The <b>same</b> message: "No table for that name yet" — plus the two true fixes (spell it as the couple would · open your invitation).</td><td>Cannot happen — the account link or key is the list.</td><td>—</td></tr>
     <tr><td><b>On the list, not seated yet</b></td><td>"You're on the list — your table isn't set yet", with the room drawn faintly (A4).</td><td>—</td></tr>
     <tr><td><b>Plan not published</b></td><td colspan="2">"Seating isn't posted yet" in the theme (B5). No field, no count.</td><td>—</td></tr>
     <tr><td><b>On the day</b></td><td>Same search; result is the table + map.</td><td>Opens on the day-of layout (A2); one tap to the door pass (A3).</td><td>Scans the pass; the guest's chip flips to "Checked in".</td></tr>
@@ -727,7 +730,7 @@ table.who td b{color:var(--fd-ink)}
   <div class="vh"><span class="letter">E</span><h2>Questions for the owner — one recommendation each</h2></div>
   <ol class="qa">
     <li><b>Open search on the general link: keep it or require the key?</b> Today it exists and it is the venue-sign fallback. <em>Recommend: keep it, table-only, as in section D.</em></li>
-    <li><b>On the open link, should an unseated guest be told "you're on the list"?</b> It is warmer (B4) but it confirms to any stranger that a person is invited. <em>Recommend: no — one message for both cases (B3). The key holder gets the honest version (A4).</em></li>
+    <li><b>On the open link, should an unseated guest be told "you're on the list"?</b> It is warmer (B4) but it confirms to any stranger that a person is invited. <em>Recommend: no — one message for both cases (B3). The signed-in guest or key holder gets the honest version (A4).</em></li>
     <li><b>Names at your own table: first name + last initial, or full names?</b> The shipped table-sign view already uses "Ben R." <em>Recommend: first name + last initial; it is enough to recognise your table and it matches what we already show.</em></li>
     <li><b>Where does "Find a seat" live?</b> It is not one of the five bar slots. <em>Recommend: the Details scene shows "Your seat · Table 3 →" for a key holder and "Find your seat →" for a stranger; the Me panel repeats the seat; the venue QR opens the search directly. No new slot.</em></li>
     <li><b>Is the door pass (A3) free or part of the paid Custom QR seat pass (₱1,499)?</b> Today <code>/[slug]/seat</code> is gated on that purchase; the free finder has no pass. This prototype shows the pass for every key holder. <em>Recommend: the table, the map and the on-screen pass are free — they ride the free 2D plan. The paid part stays the printed, branded QR cards. This is a money decision, so it is yours, not mine.</em></li>
