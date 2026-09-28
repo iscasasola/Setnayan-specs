@@ -1,4 +1,7 @@
 # Kwento — The Narrative Infrastructure Layer
+
+> 🏷 **RENAMED 2026-09-29 — on screen this is now "Photo Notes".** Owner answer in DECISION_LOG "OWNER ANSWERS — NINE PENDING DECISIONS" (and "ONLY PAPIC KEEPS A CUSTOM NAME"). "Kwento" below is the historical/internal name: routes, tables, SKU codes and file names keep it; every word a person reads says "Photo Notes". Guarded in code by `apps/web/lib/retired-names-stay-off-screen.test.ts`.
+
 ## Monumental Upgrade Study · 2026-06-18
 
 > **Status:** Design spec · no code yet. Written against the current ~90%-shipped Kwento foundation (`photo_messages` + Kwento Magazine + Auto-Recap voices). Every proposed addition is a net-new layer on top of shipped infrastructure — nothing retracts or replaces what exists.

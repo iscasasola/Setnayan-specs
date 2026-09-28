@@ -1,5 +1,7 @@
 > ⚠ RENAMED 2026-06-29: Panood → **Live Studio**; paid multicam repriced ₱4,999 → ₱3,499/day. (Internal SKU key PANOOD_SYSTEM unchanged.) See DECISION_LOG.md 2026-06-29.
 
+> 🏷 **RENAMED 2026-09-29 — on screen this is now "Watch Live".** Owner answer in DECISION_LOG "OWNER ANSWERS — NINE PENDING DECISIONS" (and "ONLY PAPIC KEEPS A CUSTOM NAME"). "Panood" below is the historical/internal name: routes, tables, SKU codes and file names keep it; every word a person reads says "Watch Live". Guarded in code by `apps/web/lib/retired-names-stay-off-screen.test.ts`.
+
 # Panood Feature Specification
 
 > ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main)

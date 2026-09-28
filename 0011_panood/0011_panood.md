@@ -1,5 +1,7 @@
 # Iteration 0011 — Panood
 
+> 🏷 **RENAMED 2026-09-29 — on screen this is now "Watch Live".** Owner answer in DECISION_LOG "OWNER ANSWERS — NINE PENDING DECISIONS" (and "ONLY PAPIC KEEPS A CUSTOM NAME"). "Panood" below is the historical/internal name: routes, tables, SKU codes and file names keep it; every word a person reads says "Watch Live". Guarded in code by `apps/web/lib/retired-names-stay-off-screen.test.ts`.
+
 > ## 🗄 ARCHIVE — original iteration spec · NOT current truth
 >
 > This file is the **original `0011` iteration spec**, kept only for lineage. It has **drifted** from what actually shipped (prices, SKU names, retired features, flows) and **must not be used to answer "what does Setnayan do today."**
