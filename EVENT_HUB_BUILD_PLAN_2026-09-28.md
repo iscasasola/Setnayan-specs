@@ -1,3 +1,48 @@
+# ⭐ FINAL BUILD SEQUENCE — 2026-09-29 (supersedes every table below; kept for history)
+
+Rules this sequence obeys: Details is the one fill-in area; stages = look & motion; tap is a shortcut · no link-outs · ◆ not padlocks, "Unlock Pro and Apply" · free themes = Classic, Modern, Cyber Neon · the Maker never slow (≤100 ms per tap) · only Papic + Patiktok keep custom names · the event menu = Home · Guest list · Your Team · Event Hub Maker · Our Services · every Details piece is MOVED, not re-invented · nothing leaves a menu before its new home ships. Blueprint: `prototypes/event_hub_maker_blueprint_2026-09-29.html` (in progress) · Details prototype: `prototypes/details_themes_page_2026-09-28.html` · sequence: `prototypes/event_hub_sequence_2026-09-29.html`.
+
+## Stage A — finish, merge as one train, deploy (Tue 29 → Wed 30 Sep)
+| PR | Build | State |
+|---|---|---|
+| #6091 | Try Pro, pay at Apply · ◆ no padlocks · "Unlock Pro and Apply" · + Add only on stages · free-version bar | final checks |
+| #6088 | Hero link + Date + photo caption editable | ready |
+| #6089 | Rows arrive one by one (+ pinned scenes) | finishing |
+| #6087 | Scene Upload media + parallax + video (reuses Main background) | final checks |
+| — | Circle QR fills the circle (L) | final checks |
+| — | Logo centred by ink · all stage fonts · snap to centre (N) | building |
+| — | Preview "Back to the Maker" (M) | building |
+| — | Modern + Cyber Neon free (O) | building |
+| — | Maker speed: audit → fix worst → guards (P) | measuring |
+| — | Renames: Pakanta→Music Maker · Samahan→Group · Alaala→Memories · Alaga→Loved ones (Q) | building |
+→ one train, one CI, deploy, check cards.
+
+## Stage B — Thu 1 Oct: THE APPLE CHECK FIRST (owner-locked)
+Simulator + in-app webview run of the guest path and the Maker on the new account; fixes it finds go first.
+
+## Stage C — Details, in five parts (after Apple; each stacked on the previous)
+| Part | Scope | Moved vs new |
+|---|---|---|
+| 1 (K, building) | Three columns · Theme first (sample-wedding gallery, full-screen preview + Exit preview) · Address/QR · Prints & Tickets folded in (old links land on the piece) · inline text fields · tap words on the printed card | moved + small new |
+| 2 | Your event (Names · Date + "Help me choose" date finder · Venues · Parents & hosts · Wedding march incl. entourage role line on the invitation) · Words · Schedule · RSVP · Love Story words · account sync · tap a fact on a stage → same field | moved + shortcut new |
+| 3 | Look: Mood Board · Logo · Hero · Reveal move into the navigator (same editors); place menu = 4 stages + Details | moved |
+| 4 | Seat plan in three columns (place · plan · guests), door "Guests see this now" (+1 action to switch it off), faster seating; 3D free | moved + small new |
+| 5 | The guided flow (3 rounds, 19 steps, any step any time, ✓/○, Used on, What's left), round-end actions, Home "Continue" line | new (thin, reads parts 1–4) |
+
+## Stage D — the event menu (LAST, after C)
+Home · Guest list (guests, hosts, check-in) · Your Team (suppliers, budget) · Event Hub Maker · Our Services (Papic · Live Studio · Gallery incl. Editorial · Patiktok · Music Maker · SAI; Suite becomes this page) · Refer a couple → account menu. Old routes redirect.
+
+## Stage E — after that
+Per-letter styling beyond the hero (styles adapt to text edits) · "Both" view · A3 Our Story poster · STD auto-play over widget scenes · palette's illustrated person · dashboard card wears the cover · STD film replay fix · Post Event scenes · 50 new themes in batches of 10 (event types TBD).
+
+## Open owner answers
+1. Panood's plain name (recommended "Watch Live").
+2. Logo Maker menu row removal (recommended yes — Logo lives in Details).
+3. The 50 themes: all event types or weddings first.
+4. Seat plan: OK to add the one "switch the door off" action (+1 server action).
+
+---
+
 # Event Hub build plan — compiled 2026-09-28 (controller)
 
 ## The model (owner, 2026-09-28 — APPROVED: "1. yes")
