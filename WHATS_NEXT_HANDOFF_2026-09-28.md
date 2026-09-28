@@ -15,6 +15,14 @@
 **Apple check: Thursday 1 Oct 2026, on a NEW account.** Owner, 2026-09-28: *"finish all the builds for the event hub. we will do apple check on thursday on a new account"*.
 The owner's own event, **cale-ice** (Indalecio & Claire, 18 Dec 2026), is the real event everything is tested on.
 
+## 1b. Accounts and schedule
+The owner has two accounts: **account B resets Thursday 1 Oct** (it restarts the work on Apple-check day); **account A resets Sunday 4 Oct**. Both are near their weekly cap, so nothing runs before Thursday. The day-by-day estimate is in `setnayan-handoff-src/CURRENT-STATE.md` → "ESTIMATED SCHEDULE":
+- **Thu:** train 1 (items 1–3 of §4) by about noon; the Apple check; train 2 (items 4–7) by evening.
+- **Fri:** Post Event scenes · STD auto-play · per-letter styling.
+- **Sat:** the remaining Event Hub items plus Apple-check fixes.
+- **Sun (account A):** submission polish, then the after-Apple list.
+- **Budget:** keep to 3 or fewer Opus builders at once.
+
 ## 2. Production, measured 2026-09-28 05:25Z
 - Serving **`6136cd2`** = `main` (the merge of #6071). Check with `curl -sL https://setnayan.com/api/health`.
 - Migration head: **`20271250752713`**.
