@@ -48,12 +48,12 @@ Open owner answers for Lane 2: the five §2C questions in `AFTER_APPLE_BUILD_LIS
 Home · Guest list (guests, hosts, check-in) · Your Team (suppliers, budget) · Event Hub Maker · Our Services (Papic · Live Studio · Gallery incl. Editorial · Patiktok · Music Maker · SAI; Suite becomes this page) · Refer a couple → account menu. Old routes redirect.
 
 ## Stage E — after that
-Per-letter styling beyond the hero (styles adapt to text edits) · "Both" view · A3 Our Story poster · STD auto-play over widget scenes · palette's illustrated person · dashboard card wears the cover · STD film replay fix · Post Event scenes · 50 new themes in batches of 10 (event types TBD).
+Per-letter styling beyond the hero (styles adapt to text edits) · "Both" view · A3 Our Story poster · STD auto-play over widget scenes · palette's illustrated person · dashboard card wears the cover · STD film replay fix · Post Event scenes. (50 new themes: NOT scheduled — owner 2026-09-29 "no 50 themes yet".)
 
 ## Open owner answers
 1. Panood's plain name (recommended "Watch Live").
 2. Logo Maker menu row removal (recommended yes — Logo lives in Details).
-3. The 50 themes: all event types or weddings first.
+3. ~~The 50 themes~~ — not scheduled (owner: "no 50 themes yet").
 4. Seat plan: OK to add the one "switch the door off" action (+1 server action).
 
 ---
