@@ -11,7 +11,7 @@ Rules this sequence obeys: Details is the one fill-in area; stages = look & moti
 | now → Tue 29 ~10 PM | C (this week's window, stop at 98%) | Stage A deploy · C parts 1–3 · Lane 2 L1–L2 · Post Event prototype · cloud E items |
 | Tue 29 ~10 PM → Thu 1 | C (fresh window) | C parts 4–5 · E small items · Post Event build starts after the owner's style picks |
 | Thu 1 → Sat 3 | **B (fresh 100%)** — one controller at a time; hand over with `make-handoff.sh` zip on Thu morning | Post Event · D (menu) · the Apple check prep |
-| Sun 4 → Mon 5 | whichever account has room | B (the Apple check) + fixes |
+| Sun 4 → | **A (fresh 100%)** — owner: "then on sunday another 100% account"; hand over from B with the zip | B (the Apple check) + fixes · Lane 2 · anything left |
 Estimated finish: Event Hub ~Sat 3 Oct · Apple check ~Sun 4 – Mon 5 Oct. Risks: owner answers (Post Event picks, check cards), CI re-runs, new requests.
 
 ## Stage A — finish, merge as one train, deploy (Tue 29 → Wed 30 Sep)
