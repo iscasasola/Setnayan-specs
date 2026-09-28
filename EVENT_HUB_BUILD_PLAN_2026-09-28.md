@@ -57,3 +57,4 @@ Absorbed (removed as separate items): **#2 Account details win on sync** and **"
 | 3 (stacked on 1) | Logo · Hero · Reveal · Love Story layout move into the navigator (same editors); place menu = 4 stages + Details; old page links redirect | new, after K's skeleton |
 | 3b | "Easier to find everything": done / not-yet mark + "used on" per item, and what's left at a glance | with part 2 |
 | 4 | **Seat plan in Details** — three columns (place elements · plan · guests), reusing the seating editor's logic whole; prototype first | after parts 2–3 |
+| 5 | Mood Board moves into Details › Look (same editor, supplier side unchanged) · event menu drops Schedule, Mood Board, Seat plan rows (LAST, after their homes ship) · old routes → Details items | after parts 2–4 |
