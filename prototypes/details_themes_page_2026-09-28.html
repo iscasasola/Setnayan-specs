@@ -145,6 +145,17 @@
   .door input{position:absolute;opacity:0;pointer-events:none}
   .door input:checked~.sw2{background:#2f7d4f} .door input:checked~.sw2:after{transform:translateX(20px)}
   .door .small{margin:0}
+  .body.easy{padding-bottom:0}
+  .easy-in{max-width:640px;gap:14px;padding-bottom:96px}
+  .easy-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .easy-top .prog{display:flex;align-items:center;gap:10px;font:600 12px var(--mono);letter-spacing:.08em;color:var(--ink-70)}
+  .easy-top .pb{display:inline-block;width:96px;height:6px;border-radius:3px;background:rgba(42,38,34,.12);overflow:hidden} .easy-top .pb i{display:block;height:100%;background:var(--terracotta)}
+  .chip{display:inline-flex;align-items:center;min-height:32px;padding:0 12px;border-radius:999px;background:rgba(42,38,34,.07);font-size:13px;font-weight:600;color:var(--ink);text-decoration:none}
+  .easy-fields{display:flex;flex-direction:column}
+  .easy-fields .tg .sub{padding-top:0} .easy-fields .fld{font-size:16px;padding:11px 12px}
+  details.custom{border-top:1px solid var(--line);padding-top:8px} details.custom summary{cursor:pointer;font-size:13.5px;font-weight:600;color:var(--ink-70);padding:8px 0;list-style:none;display:flex;align-items:center;gap:6px} details.custom summary:before{content:"▸";font-size:11px} details.custom[open] summary:before{content:"▾"}
+  .easy-nav{position:sticky;bottom:0;display:flex;align-items:center;gap:10px;padding:12px 0 14px;background:linear-gradient(180deg,rgba(248,246,241,0),var(--cream) 30%);margin-top:6px}
+  .btn.big{padding:13px 26px;font-size:15px}
   .modal-bg{position:absolute;inset:0;z-index:40;background:rgba(42,38,34,.35);display:flex;align-items:flex-end;justify-content:center}
   .modal{width:100%;max-width:440px;background:var(--cream);border-radius:14px 14px 0 0;padding:16px 16px 22px;box-shadow:0 -14px 30px -18px rgba(0,0,0,.4)}
   @media (min-width:640px){ .modal-bg{align-items:center} .modal{border-radius:14px} }
@@ -445,7 +456,7 @@ const LN=['Reyes','Santos','Cruz','Bautista','Garcia','Mendoza','Torres','Flores
 const GUESTS = Array.from({length:44},(_,i)=>({ id:i, name:`${FN[i%FN.length]} ${LN[(i*7)%LN.length]}`, side:['bride','groom','both'][i%3], group:['Family','Friends','Work','Sponsors'][(i*5)%4], table: i<21 ? 1+Math.floor(i/4) : null, held: i%9===4, locked: i%11===2 }));
 const TABLES = Array.from({length:12},(_,i)=>({ n:i+1, name: i===0?'Sponsors 1':i===1?'Family':`Table ${i+1}`, seats:8, shape: i<2?'long':'round', x: 60+(i%4)*110, y: 120+Math.floor(i/4)*95 }));
 const ELEMENTS = [ {k:'stage',label:'Stage',sub:'6 × 3 m'}, {k:'dance',label:'Dance floor',sub:'6 × 6 m'}, {k:'buffet',label:'Buffet',sub:'Service side'}, {k:'entrance',label:'Entrance',sub:'Door · walk-through'}, {k:'service',label:'Service door'}, {k:'decor',label:'Décor',sub:'Signs 2/24 · booths 1'} ];
-const S = { seatOpen:P.get('open')==='1', seatTable:P.get('table')?Number(P.get('table')):null, seatEl:null, seatGuest:null, seatView:'2d', seatOnlyUnseated:false, seatQ:'', heroDesign:'card', reveal:'none', left:P.get('left')==='1', theme:'house', item:P.get('item')||'theme', sheet:P.get('sheet')==='open', qr:{shape:'square',pattern:'classic',ink:'#1A1A1A'}, passFmt:'calling-card', invFmt:'inv-5x7', cardFmt:'card-a5' };
+const S = { step:Math.max(1,Number(P.get('step')||1)), custom:P.get('custom')==='1', seatOpen:P.get('open')==='1', seatTable:P.get('table')?Number(P.get('table')):null, seatEl:null, seatGuest:null, seatView:'2d', seatOnlyUnseated:false, seatQ:'', heroDesign:'card', reveal:'none', left:P.get('left')==='1', theme:'house', item:P.get('item')||'theme', sheet:P.get('sheet')==='open', qr:{shape:'square',pattern:'classic',ink:'#1A1A1A'}, passFmt:'calling-card', invFmt:'inv-5x7', cardFmt:'card-a5' };
 
 function tip(label,text,right=false){ return `<span class="tip${right?' r':''}"><button type="button" aria-label="About ${label}" onclick="event.stopPropagation();this.parentNode.classList.toggle('open')">i</button><span class="pop">${text}</span></span>`; }
 const pro = ()=>`<span class="pro">Pro</span>`;
@@ -683,6 +694,63 @@ function wire(){
 function pick(id){ if(id===S.theme) return; S.theme=id; rerender(); }
 
 /* ═════════ SHELL ═════════ */
+/* ── THE EASY PATH (owner 2026-09-29: "it needs to be very easy") — one thing per screen, in order; the full navigator one tap away ── */
+const EASY = [
+  {k:'names',   title:'Your names',       shows:'Shows on your invitation, every print and every pass.'},
+  {k:'date',    title:'The date',         shows:'Shows on your invitation and the countdown.'},
+  {k:'venues',  title:'Where',            shows:'Shows on your invitation and the event card.'},
+  {k:'theme',   title:'Pick a look',      shows:'Dresses your whole Event Hub and every print. Classic is free.'},
+  {k:'logo',    title:'Your mark',        shows:'On your page, in the centre of your QR and on every print.'},
+  {k:'parents', title:'Parents & hosts',  shows:'Parents show on your invitation. Hosts are who guests reply to.'},
+  {k:'words',   title:'Your words',       shows:'On your page and on the cards.'},
+  {k:'schedule',title:'The program',      shows:'On your page and on The Finer Details card.'},
+  {k:'rsvp',    title:'How guests reply', shows:'What guests answer, and by when.'},
+  {k:'seating', title:'Seat plan',        shows:'Optional · guests find their table on the day.', optional:true},
+  {k:'ready',   title:'Ready',            shows:'Everything guests see is set. Apply puts it live.'},
+];
+const REQUIRED = EASY.filter(e=>!e.optional && e.k!=='ready').length;
+function editorInnerOf(k){ const keep=S.item; S.item=k; const h=editorHtml(); S.item=keep; const m=h.match(/<div class="scroll">([\s\S]*)<\/div><\/aside>$/); return m?m[1].replace(/<p class="ed-h">[\s\S]*?<\/p>/,''):''; }
+function easySimple(k){ const t=T[S.theme]; switch(k){
+  case 'names': return `${field('Bride',C.b)}${field('Groom',C.a)}`;
+  case 'date': return `${field('Wedding date','2026-12-18',{type:'date'})}${field('Ceremony time','15:00',{type:'time'})}`;
+  case 'venues': return `${field('Ceremony',C.venue)}${field('Reception','Seda Vertis North')}`;
+  case 'theme': return `<p><span class="sample-tag">Samples · Maria &amp; Jose</span></p><ul class="gal" aria-label="Themes">${THEMES.map(x=>`<li><button type="button" class="entry${x.id===S.theme?' picked':''}" data-pick="${x.id}" aria-pressed="${x.id===S.theme}"><div class="set"><span class="chk">✓</span>${scaled(pagePreview(x,SAMPLE),390,760,0.3)}<div class="prints">${scaled(invitePreview(x,SAMPLE),300,420,0.26)}${scaled(finerPreview(x,SAMPLE),300,420,0.26)}</div></div><span class="name">${x.name}${x.tier==='pro'?pro():''}${x.id===SUGGESTED?`<span class="sample-tag" style="margin-left:4px;padding:2px 7px;font-size:9.5px">Suggested for you</span>`:''}</span></button></li>`).join('')}</ul>`;
+  case 'logo': return `${field('Letters','IC',{tipText:'Two or three letters. Frame and colour follow your look.'})}<div class="row"><span class="l">Frame</span><span class="r"><select class="dd" aria-label="Frame"><option selected>Ring</option><option>Double ring</option><option>Open ring</option><option>Diamond</option><option>Arch</option><option>Cartouche</option><option>Scallop</option></select></span></div>`;
+  case 'parents': return `<p class="sect">Parents</p>${parentsInl()}`;
+  case 'words': return `${field('Opening line','Together with their families')}${field('Special message','We can’t wait to celebrate with you on December 18.',{rows:3,placeholder:'A heartfelt note to everyone joining you…'})}${field('Thank-you for gifts','Thank you for celebrating with us — every gift helps our new home begin.',{rows:2})}`;
+  case 'schedule': return `${[['Ceremony','15:00'],['Cocktails','18:00'],['Reception','19:00']].map(([l,v])=>field(l,v,{type:'time'})).join('')}`;
+  case 'rsvp': return `${field('Reply by','2026-11-18',{type:'date'})}<div class="row"><span class="l">Who can RSVP?</span><span class="r"><select class="dd" aria-label="Who can RSVP?"><option selected>Only my Guest List</option><option>Anyone, I approve</option></select></span></div>`;
+  case 'seating': return `<div class="stage" style="padding:10px;min-height:0">${floorSvg()}</div><p class="small" style="margin-top:8px">${unseated().length} guests still need a table. You can do this any time — even the week of.</p>`;
+  case 'ready': return `<div class="rows">${EASY.filter(e=>e.k!=='ready').map(e=>{ const it=ITEM[e.k]; const done = e.k==='words' ? true : (it?it.done:true); return `<div class="row"><span class="l">${e.title}${e.optional?' <span class="muted" style="font-size:12px;color:var(--ink-55)">optional</span>':''}</span><span class="r"><span class="muted" style="color:${done?'#2f7d4f':'var(--terracotta)'}">${done?'✓ set':'○ not yet'}</span></span></div>`; }).join('')}</div><p class="small" style="margin-top:12px">Guests see everything above once you apply. Anything not yet stays yours until you fill it.</p>`;
+  default: return ''; } }
+function easyPreview(k){ const t=T[S.theme]; switch(k){
+  case 'names': case 'date': return scaled(pagePreview(t,C),390,760,0.42);
+  case 'venues': case 'parents': return scaled(invitePreview(t,C),300,420,0.6);
+  case 'theme': return '';
+  case 'logo': return `<div style="width:150px;height:150px;background:#fff;border-radius:8px;padding:10px;box-shadow:0 8px 20px -10px rgba(0,0,0,.3)">${logoSvg(t)}</div>`;
+  case 'words': return scaled(finerPreview(t,C),300,420,0.6);
+  case 'schedule': return scaled(finerPreview(t,C),300,420,0.6);
+  case 'rsvp': return scaled(rsvpPreview(t),390,760,0.36);
+  case 'ready': return scaled(pagePreview(t,C),390,760,0.42);
+  default: return ''; } }
+function renderEasy(){ S.view='easy'; const i=Math.min(S.step,EASY.length); const e=EASY[i-1]; const reqIdx=EASY.filter((x,j)=>j<i && !x.optional && x.k!=='ready').length;
+  const prog = e.k==='ready' ? 'All set' : e.optional ? 'Optional' : `${reqIdx} of ${REQUIRED}`;
+  const canCustom = ['logo','venues','parents','schedule','rsvp','date'].includes(e.k);
+  const prev=easyPreview(e.k);
+  document.getElementById('app').innerHTML = `<div class="maker">${bar()}<div class="work"><main class="body easy" id="body"><div class="body-in easy-in">
+    <div class="easy-top"><span class="prog"><span class="pb"><i style="width:${Math.round(100*Math.min(reqIdx,REQUIRED)/REQUIRED)}%"></i></span>${prog}</span><a class="chip" href="${location.pathname}?view=page&item=${e.k==='ready'?'theme':e.k}">All items</a></div>
+    <header><p class="eyebrow">${e.optional?'Optional':e.k==='ready'?'Ready':'Step '+i}</p><p class="title">${e.title}</p><p class="lede">${e.shows}</p></header>
+    ${prev?`<div class="stage" style="min-height:0;padding:16px">${prev}</div>`:''}
+    <div class="easy-fields">${easySimple(e.k)}</div>
+    ${canCustom?`<details class="custom"${S.custom?' open':''}><summary>Customise</summary><div class="ed-in" style="padding:0">${editorInnerOf(e.k)}</div></details>`:''}
+    ${e.k==='seating'?`<div class="save"><button type="button" class="btn" data-open-seating>Arrange tables</button></div>`:''}
+    <div class="easy-nav">${i>1?`<button type="button" class="btn" data-easy="${i-1}">‹ Back</button>`:'<span></span>'}<span style="flex:1"></span>${e.k==='ready'?`<button type="button" class="btn primary big">Apply${T[S.theme].tier==='pro'?' <span style="color:var(--gold)">◆</span>':''}</button>`:`<button type="button" class="btn link" data-easy="${i+1}">Skip for now</button><button type="button" class="btn primary big" data-easy="${i+1}">Next ›</button>`}</div>
+  </div></main></div></div>`;
+  document.querySelectorAll('[data-easy]').forEach(b=>b.addEventListener('click',()=>{ S.step=Number(b.dataset.easy); renderEasy(); document.getElementById('body').scrollTop=0; }));
+  document.querySelectorAll('[data-pick]').forEach(b=>b.addEventListener('click',()=>{ S.theme=b.dataset.pick; renderEasy(); }));
+  const os=document.querySelector('[data-open-seating]'); if(os) os.addEventListener('click',()=>{ S.item='seating'; renderPage(); });
+  document.addEventListener('click',(e)=>{ if(!e.target.closest('.tip')) document.querySelectorAll('.tip.open').forEach(x=>x.classList.remove('open')); if(!e.target.closest('#place')) document.getElementById('place')?.classList.remove('open'); if(!e.target.closest('#playm')) document.getElementById('playm')?.classList.remove('open'); });
+}
 /* ── THE APPLY SHEET — what Apply publishes (the Event Hub draft). The seat plan is not in it. ── */
 function renderApplySheet(){ S.item='seating'; renderPage();
   const sheet=`<div class="modal-bg"><div class="modal"><p class="ed-h" style="padding:0 0 4px">Apply · 3 changes</p><p class="small">Guests see these once you apply.</p>
@@ -690,7 +758,7 @@ function renderApplySheet(){ S.item='seating'; renderPage();
     <div class="row"><span class="l">Hero · Design 2 · The Marquee</span><span class="r"><button type="button" class="btn" style="padding:4px 8px">×</button></span></div>
     <div class="row"><span class="l">Special message</span><span class="r"><button type="button" class="btn" style="padding:4px 8px">×</button></span></div>
     <p class="small" style="margin-top:10px;padding:8px 10px;border-radius:8px;background:rgba(42,38,34,.05)">Seat plan is not part of Apply — it saves as you work, and guests see it the moment <b>Guests see this now</b> is on.</p>
-    <div class="save"><button type="button" class="btn primary">Unlock Event Hub Pro · ₱5,000</button><button type="button" class="btn">Apply without the Pro effects</button></div></div></div>`;
+    <div class="save"><button type="button" class="btn primary big">Unlock Pro and Apply · ₱5,000</button><button type="button" class="btn link">Apply without the Pro effects</button></div></div></div>`;
   document.querySelector('.maker').insertAdjacentHTML('beforeend',sheet); }
 /* ── THE GUEST'S FIND YOUR SEAT — before and after the door ── */
 function renderFindSeat(){ const t=T[S.theme]; const open=S.seatOpen; const g=GUESTS.find(x=>x.table===2);
@@ -709,10 +777,15 @@ function renderShell(){
   const src=(item,sheet)=>`${location.pathname}?view=page&item=${item}${sheet?'&sheet=open':''}`;
   const seg=(name,val)=>`<div class="seg">${items.map(([k,l])=>`<label><input type="radio" name="${name}" value="${k}" ${k===val?'checked':''}/><span>${l}</span></label>`).join('')}</div>`;
   document.getElementById('app').innerHTML = `<div class="shell">
-    <h1>Details — everything made once, in one place · navigator, preview, editor</h1>
+    <h1>Details — very easy first, everything in one place underneath</h1>
     <p class="sub">The Maker’s own three-column pattern, now for Details (DECISION_LOG 2026-09-28 “Details is the one fill-in area; stages are look and motion; tap is a shortcut”). <b>Left</b>, a navigator grouped <b>Look</b> (Theme · Logo · Hero · Reveal) · <b>Your event</b> (Names · Date · Venues · Parents &amp; hosts) · <b>Words</b> (Special message · Thank-you · Opening line · Kindly reply) · <b>Story &amp; plans</b> (Love Story · Schedule · RSVP) · <b>Your Event Hub</b> (Address · QR code) · <b>Invitation set</b> (every print piece) · <b>For the day</b> (the free prints) · <b>Download the set</b>. <b>Body</b>, the visual of the picked item — for a fact, the places it appears (the hero, the print it feeds). <b>Right</b>, the fields. On a phone the navigator is the thumbnail strip under the body (the scene navigator’s own shape) and the editor is a bottom sheet — tap its handle. The Theme item shows each theme as a clean template on the sample wedding <b>Maria &amp; Jose</b> (page · The Invitation · The Finer Details · a pass) with <i>Suggested for you</i> on the theme the onboarding feel points at; everything else is the couple’s own (Indalecio &amp; Claire · cale-ice). The page dropdown (tap “Details ▾”) no longer lists Prints &amp; Tickets.</p>
     <div class="frames">
-      <div class="frame"><p class="cap">375 · phone</p>${seg('p375',cur.p375)}<iframe id="f375" src="${src(cur.p375)}" width="375" height="812" title="375" style="margin-top:8px"></iframe></div>
+      <div class="frame"><p class="cap">375 · Easy path — a new couple’s first open (1 of 9)</p><p class="small" style="height:36px;margin-top:8px">One thing per screen. Next · Skip for now · All items.</p><iframe src="${location.pathname}?view=easy&step=1" width="375" height="812" title="easy-1" style="margin-top:8px"></iframe></div>
+      <div class="frame"><p class="cap">390 · Easy path — Pick a look (4 of 9)</p><p class="small" style="height:36px;margin-top:8px">Samples on Maria &amp; Jose; Classic free, ◆ Pro marked.</p><iframe src="${location.pathname}?view=easy&step=4" width="390" height="844" title="easy-4" style="margin-top:8px"></iframe></div>
+      <div class="frame"><p class="cap">390 · Easy path — Your mark, Customise open</p><p class="small" style="height:36px;margin-top:8px">Medium only when customising.</p><iframe src="${location.pathname}?view=easy&step=5&custom=1" width="390" height="844" title="easy-5" style="margin-top:8px"></iframe></div>
+      <div class="frame"><p class="cap">390 · Easy path — Ready</p><p class="small" style="height:36px;margin-top:8px">The nine, ticked; Apply.</p><iframe src="${location.pathname}?view=easy&step=11" width="390" height="844" title="easy-ready" style="margin-top:8px"></iframe></div>
+      <div class="frame desk"><p class="cap">Desktop · Easy path — Your words (7 of 9)</p><p class="small" style="height:36px;margin-top:8px">Same flow, one column.</p><iframe src="${location.pathname}?view=easy&step=7" width="1280" height="820" title="easy-desk" style="margin-top:8px"></iframe></div>
+      <div class="frame"><p class="cap">375 · All items (the full navigator)</p>${seg('p375',cur.p375)}<iframe id="f375" src="${src(cur.p375)}" width="375" height="812" title="375" style="margin-top:8px"></iframe></div>
       <div class="frame"><p class="cap">390 · phone · sheet open</p>${seg('p390',cur.p390)}<iframe id="f390" src="${src(cur.p390,true)}" width="390" height="844" title="390" style="margin-top:8px"></iframe></div>
       <div class="frame"><p class="cap">390 · the shortcut — a stage, special message tapped</p><p class="small" style="height:36px;margin-top:8px">Same field, opened from the scene.</p><iframe src="${location.pathname}?view=stage" width="390" height="844" title="shortcut" style="margin-top:8px"></iframe></div>
       <div class="frame"><p class="cap">375 · What’s left filter on</p><p class="small" style="height:36px;margin-top:8px">Only the not-yet rows.</p><iframe src="${location.pathname}?view=page&item=love-story&left=1" width="375" height="812" title="whats-left" style="margin-top:8px"></iframe></div>
@@ -726,10 +799,11 @@ function renderShell(){
       <div class="frame desk"><p class="cap">Desktop · 1280</p>${seg('desk',cur.desk)}<iframe id="fdesk" src="${src(cur.desk)}" width="1280" height="820" title="desktop" style="margin-top:8px"></iframe></div>
     </div>
     <ul class="notes">
+      <li><b>The easy path is the default for a new couple</b> (owner 2026-09-29: “it needs to be very easy”): Details opens on a guided flow — one thing per screen, like the guest RSVP: the item large, its one or two fields, one big <b>Next</b> and a quiet <b>Skip for now</b>; progress reads <b>3 of 9</b>. Order: Names → Date → Venues → Pick a look → Your mark → Parents &amp; hosts → Your words → The program → How guests reply → Seat plan (optional) → <b>Ready — Apply</b>. Each screen says in plain words where the thing shows (“Shows on your invitation and every print”) — no stage or scene words. <b>Customise</b> is a fold on the screens that have more (Your mark, Where, Parents &amp; hosts, The program, How guests reply, The date) and opens the full editor in place — medium only when customising. <b>All items</b>, top-right, is the full grouped navigator, one tap away; a couple who has been through once lands there.</li>
       <li><b>Option B, maximised for findability</b>: the place menu is <b>Save the Date · Invitation · The Day · Post Event · Details</b> — nothing else; every made-once thing (Logo · Hero · Reveal · RSVP included) is a row in Details. Each row carries a <b>✓ filled in</b> or an <b>○ not yet</b> mark; the selected row (and any row hovered on desktop) shows <i>Used on · …</i> — the stages and prints it feeds. <b>What’s left · N</b> at the top of the navigator filters to the not-yet rows; tap again to see all. No back chip, no link-outs — the place menu is the way between stages and Details.</li>
       <li><b>Play</b> opens a two-item menu — <i>Play this scene</i> · <i>Preview the whole stage</i>; the preview (fourth frame) is the couple’s page with one <b>← Back to the Maker</b> control at the top-left.</li>
       <li><b>Seat plan wears the three columns</b> (Your event → Seat plan): <b>left</b> = the place’s elements — every table with its seat count, then Stage · Dance floor · Buffet · Entrance · Service door · Décor — tap selects it on the plan (‹ Details returns the list); <b>middle</b> = the floor plan with the shipped command bar kept whole — <i>+ Add</i> (New table… 13-type catalog · Entrance · Service door · Dance floor · Cocktail area · Sign · Vendor booth · Room size &amp; scale…), the gold <i>Auto Arrange</i> split (Auto Arrange · Build my seating draft · Fill around N locked · Seating policies: Auto-seating, group spill-over, Walkway width · Seating Guide · Seating Priority), <i>Share &amp; print</i> (Publish &amp; print · Mood-board colours · Blueprint · Caterer meal counts · guest photos Own table only / All guests / No photos · Walkthrough videos), and the <b>2D · 3D · List</b> switch; a selected table opens its dock (Table name · Change shape… · Edit chairs… · seats stepper · Rotate · Delete · Done); <b>right</b> = the guests — Search people…, Only unseated, <b>Unseated · N</b> first, then Bride’s side / Groom’s side / Both, held and locked marks; tap a guest then a table (in the list or on the plan) to seat them; with a table selected only its guests and empty seats show, with Unseat · Seat this whole group here. On a phone the elements are the strip and the guests are the sheet. <b>Not placed</b>: the room-size presets (Intimate … Field) sit inside Room size &amp; scale…; the per-chair delete/restore lives behind Edit chairs…; the mobile ⋯ overflow is unnecessary here because the bar wraps.</li>
-      <li><b>How the seat plan meets Apply — one model, the shipped one</b>: the seating tool already saves LIVE through its own actions under a single-editor lock, and the guest’s Find your seat is gated on ONE switch (`event_floor_plan.published_at` — a door, not a snapshot: once stamped, every later save shows to guests at once). So: <b>the seat plan is the couple’s working plan that saves as they go; guests see it only once the door is open; the door is the plan’s own switch, “Guests see this now” (Saves immediately), which is exactly what today’s Publish &amp; print stamps — printing the signs opens it too. The Maker’s Apply does not count seat-plan edits</b>, and the Apply sheet says so in one line. Why this and not “Apply publishes the seat plan”: that would move ~20 live actions, the editor lock and Undo into the hub draft, and the table signs’ QRs already point at live tables — a rebuild for no gain in clarity, since a couple arranging tables wants to see “guests: yes / not yet” right where they work, not in a sheet two taps away.</li>
+      <li><b>How the seat plan meets Apply — one model, the shipped one</b>: the seating tool already saves LIVE through its own actions under a single-editor lock, and the guest’s Find your seat is gated on ONE switch (<code>event_floor_plan.published_at</code> — a door, not a snapshot: once stamped, every later save shows to guests at once). So: <b>the seat plan is the couple’s working plan that saves as they go; guests see it only once the door is open; the door is the plan’s own switch, “Guests see this now” (Saves immediately), which is exactly what today’s Publish &amp; print stamps — printing the signs opens it too. The Maker’s Apply does not count seat-plan edits</b>, and the Apply sheet says so in one line. Why this and not “Apply publishes the seat plan”: that would move ~20 live actions, the editor lock and Undo into the hub draft, and the table signs’ QRs already point at live tables — a rebuild for no gain in clarity, since a couple arranging tables wants to see “guests: yes / not yet” right where they work, not in a sheet two taps away.</li>
       <li><b>Fewer taps to seat a guest</b>: every unseated row carries a <i>Seat at… ▾</i> dropdown (tables with free seats) — one tap, one pick; with a table selected, tapping an empty seat seats the picked guest, or the next unseated one when nobody is picked; <i>+ Seat next unseated</i> fills a table without leaving it. On the plan, tapping a table opens the guests sheet on that table.</li>
       <li><b>Download the set</b> is the last group, on its own — it is the set’s output, after every piece; nothing else in it to edit.</li>
       <li><b>No “go edit it over there” links, anywhere</b>: on The Invitation and The Finer Details each include switch that carries text shows the SAME field inline under the switch, editable in place — an empty one is a field with a placeholder (see Love Story on The Finer Details); parents are editable names; the gift line, the thank-you, the special message, the moments and the colours all sit right there. One value, several places to type it.</li>
@@ -742,7 +816,7 @@ function renderShell(){
 }
 
 window.addEventListener('error',(e)=>document.documentElement.setAttribute('data-err',`${e.message} @${e.lineno}:${e.colno}`));
-try { if(P.get('view')==='page') renderPage(); else if(P.get('view')==='stage') renderStage(); else if(P.get('view')==='preview') renderPreview(); else if(P.get('view')==='apply') renderApplySheet(); else if(P.get('view')==='findseat') renderFindSeat(); else renderShell(); document.documentElement.setAttribute('data-rendered','1'); } catch(e){ document.documentElement.setAttribute('data-err',String(e.stack||e)); }
+try { if(P.get('view')==='page') renderPage(); else if(P.get('view')==='stage') renderStage(); else if(P.get('view')==='preview') renderPreview(); else if(P.get('view')==='apply') renderApplySheet(); else if(P.get('view')==='easy') renderEasy(); else if(P.get('view')==='findseat') renderFindSeat(); else renderShell(); document.documentElement.setAttribute('data-rendered','1'); } catch(e){ document.documentElement.setAttribute('data-err',String(e.stack||e)); }
 window.addEventListener('load',()=>{ const d=document.documentElement; d.setAttribute('data-clientw',d.clientWidth); d.setAttribute('data-scrollw',d.scrollWidth); const b=document.getElementById('body'); if(b){ d.setAttribute('data-body-clientw',b.clientWidth); d.setAttribute('data-body-scrollw',b.scrollWidth); } });
 </script>
 </body>
