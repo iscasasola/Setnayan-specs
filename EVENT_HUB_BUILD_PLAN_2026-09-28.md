@@ -48,3 +48,11 @@ Absorbed (removed as separate items): **#2 Account details win on sync** and **"
 | next (independent) | Seat plan (map) scene · STD auto-play over widget scenes | stage/motion only |
 | after K | **Details part 2** — the fact groups (Your event · Words · Love Story · Schedule) move into Details, account sync, the stage tap shortcut · A3 Our Story poster (a new print item) · "Both" view | need K's navigator/canvas |
 | after Details part 2 | Per-letter styling beyond the hero (styles ADAPT to text edits) · Post Event scenes | read words from Details |
+
+## OPTION B CHOSEN (owner 2026-09-28: "B. maximize this concept…") — Details build now in THREE parts
+| Part | Scope | Builder |
+|---|---|---|
+| 1 (running) | Three-column Details · Theme gallery (sample) + full-screen preview with "Exit preview" · Address/QR · Prints & Tickets fold · inline text fields · card tap-to-edit | K |
+| 2 (stacked on 1) | Your event · Words · Schedule · RSVP settings · Love Story words · account sync · stage tap-shortcut | new, after K's skeleton |
+| 3 (stacked on 1) | Logo · Hero · Reveal · Love Story layout move into the navigator (same editors); place menu = 4 stages + Details; old page links redirect | new, after K's skeleton |
+| 3b | "Easier to find everything": done / not-yet mark + "used on" per item, and what's left at a glance | with part 2 |
