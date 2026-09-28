@@ -4,6 +4,16 @@
 
 Rules this sequence obeys: Details is the one fill-in area; stages = look & motion; tap is a shortcut · no link-outs · ◆ not padlocks, "Unlock Pro and Apply" · free themes = Classic, Modern, Cyber Neon · the Maker never slow (≤100 ms per tap) · only Papic + Patiktok keep custom names · the event menu = Home · Guest list · Your Team · Event Hub Maker · Our Services · every Details piece is MOVED, not re-invented · nothing leaves a menu before its new home ships. Blueprint: `prototypes/event_hub_maker_blueprint_2026-09-29.html` (in progress) · Details prototype: `prototypes/details_themes_page_2026-09-28.html` · sequence: `prototypes/event_hub_sequence_2026-09-29.html`.
 
+
+## Accounts and schedule (owner 2026-09-29: "on thursday, we will have another account with 100% that you can use up to saturday")
+| When (PH) | Account | Work |
+|---|---|---|
+| now → Tue 29 ~10 PM | C (this week's window, stop at 98%) | Stage A deploy · C parts 1–3 · Lane 2 L1–L2 · Post Event prototype · cloud E items |
+| Tue 29 ~10 PM → Thu 1 | C (fresh window) | C parts 4–5 · E small items · Post Event build starts after the owner's style picks |
+| Thu 1 → Sat 3 | **B (fresh 100%)** — one controller at a time; hand over with `make-handoff.sh` zip on Thu morning | Post Event · D (menu) · the Apple check prep |
+| Sun 4 → Mon 5 | whichever account has room | B (the Apple check) + fixes |
+Estimated finish: Event Hub ~Sat 3 Oct · Apple check ~Sun 4 – Mon 5 Oct. Risks: owner answers (Post Event picks, check cards), CI re-runs, new requests.
+
 ## Stage A — finish, merge as one train, deploy (Tue 29 → Wed 30 Sep)
 | PR | Build | State |
 |---|---|---|
