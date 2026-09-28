@@ -1,5 +1,7 @@
 # Alaala — the Living-Memories Pillar (canonical definition)
 
+> 🏷 **RENAMED 2026-09-29 — on screen this is now "Memories".** Owner: *"Only Papic is customized and all other namings should be generic"* (DECISION_LOG rows "PAKANTA IS RENAMED 'MUSIC MAKER'", "ONLY PAPIC KEEPS A CUSTOM NAME", "PATIKTOK KEEPS ITS NAME (WITH PAPIC); ALAGA → LOVED ONES"). "Alaala" below is the historical/internal name: routes, tables, SKU codes and file names keep it; every word a person reads says "Memories". The "gloss once per surface" rule below is retired with the name. Guarded in code by `apps/web/lib/retired-names-stay-off-screen.test.ts`.
+
 > Owner-locked 2026-06-15. **Alaala** (a·la·A·la) — Tagalog for *memory · remembrance · keepsake*. The named, customer-facing pillar that gathers ~25 Setnayan features into one promise: **your wedding, kept alive.** This doc is the source of truth for the name, voice, the role-arc, the guardrail, and where Alaala embeds across the app. Pairs with [[Living_Memories_Manifesto_2026-06-14]] (the manifesto = the *why*; Alaala = the *name*).
 
 ## The name

@@ -1,5 +1,7 @@
 # Samahan (Communities) — MINIMAL Build Plan · 2026-07-15
 
+> 🏷 **RENAMED 2026-09-29 — on screen this is now "Group" (plural "Groups".** Owner: *"Only Papic is customized and all other namings should be generic"* (DECISION_LOG rows "PAKANTA IS RENAMED 'MUSIC MAKER'", "ONLY PAPIC KEEPS A CUSTOM NAME", "PATIKTOK KEEPS ITS NAME (WITH PAPIC); ALAGA → LOVED ONES"). "Samahan" below is the historical/internal name: routes, tables, SKU codes and file names keep it; every word a person reads says "Group" (plural "Groups". Guarded in code by `apps/web/lib/retired-names-stay-off-screen.test.ts`.
+
 > **Executable build plan for Opus.** Turns the home's "Samahan · Communities — Coming soon"
 > note (`app/dashboard/(launcher)/page.tsx:777-785` in `setnayan-wt-home-polish`) into a real
 > door. Grounded in the shipped composable-event foundation (migration
