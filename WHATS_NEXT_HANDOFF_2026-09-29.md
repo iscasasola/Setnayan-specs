@@ -81,4 +81,4 @@ verify `autoMergeRequest` is null · every build reaches the owner as a CHECK CA
 
 ## 7 · Usage
 Weekly all-models 34% at 16:26Z 28 Sep (resets 29 Sep 14:00Z). Owner: zip at ~90% and ~97%;
-**STOP all builders at 98%** and hand off.
+**STOP all builders at 99%** and hand off (owner: "stop at 99%").
