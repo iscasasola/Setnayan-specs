@@ -1,5 +1,7 @@
 # ⭐ FINAL BUILD SEQUENCE — 2026-09-29 (supersedes every table below; kept for history)
 
+**ORDER (owner 2026-09-29: "Finish all Event Hub first then Apple Check · So Stage A,C,E · Then D · Then B"): A → C → E → D → B.** The Apple check is LAST, no longer Thursday. Lane 2 runs in parallel.
+
 Rules this sequence obeys: Details is the one fill-in area; stages = look & motion; tap is a shortcut · no link-outs · ◆ not padlocks, "Unlock Pro and Apply" · free themes = Classic, Modern, Cyber Neon · the Maker never slow (≤100 ms per tap) · only Papic + Patiktok keep custom names · the event menu = Home · Guest list · Your Team · Event Hub Maker · Our Services · every Details piece is MOVED, not re-invented · nothing leaves a menu before its new home ships. Blueprint: `prototypes/event_hub_maker_blueprint_2026-09-29.html` (in progress) · Details prototype: `prototypes/details_themes_page_2026-09-28.html` · sequence: `prototypes/event_hub_sequence_2026-09-29.html`.
 
 ## Stage A — finish, merge as one train, deploy (Tue 29 → Wed 30 Sep)
@@ -17,7 +19,7 @@ Rules this sequence obeys: Details is the one fill-in area; stages = look & moti
 | — | Renames: Pakanta→Music Maker · Samahan→Group · Alaala→Memories · Alaga→Loved ones (Q) | building |
 → one train, one CI, deploy, check cards.
 
-## Stage B — Thu 1 Oct: THE APPLE CHECK FIRST (owner-locked)
+## Stage B — THE APPLE CHECK — runs LAST (after A, C, E, D)
 Simulator + in-app webview run of the guest path and the Maker on the new account; fixes it finds go first.
 
 ## Stage C — Details, in five parts (after Apple; each stacked on the previous)
