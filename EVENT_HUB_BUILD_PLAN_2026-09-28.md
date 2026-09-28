@@ -56,3 +56,4 @@ Absorbed (removed as separate items): **#2 Account details win on sync** and **"
 | 2 (stacked on 1) | Your event · Words · Schedule · RSVP settings · Love Story words · account sync · stage tap-shortcut | new, after K's skeleton |
 | 3 (stacked on 1) | Logo · Hero · Reveal · Love Story layout move into the navigator (same editors); place menu = 4 stages + Details; old page links redirect | new, after K's skeleton |
 | 3b | "Easier to find everything": done / not-yet mark + "used on" per item, and what's left at a glance | with part 2 |
+| 4 | **Seat plan in Details** — three columns (place elements · plan · guests), reusing the seating editor's logic whole; prototype first | after parts 2–3 |
