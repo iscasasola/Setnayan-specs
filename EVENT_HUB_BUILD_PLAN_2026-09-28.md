@@ -1,6 +1,6 @@
 # Event Hub build plan — compiled 2026-09-28 (controller)
 
-## The model (owner, 2026-09-28 — pending his "yes")
+## The model (owner, 2026-09-28 — APPROVED: "1. yes")
 - **Details = the one fill-in area.** Every FACT a couple types lives here once: names, date, venues, parents/hosts, schedule, Love Story text, special message, thank-you, opening line, reply-by; plus theme, address, QR, and every print (Prints & Tickets folded in).
 - **Stages = look and motion only.** Which scenes, order, backgrounds, fonts, animation.
 - **Tap is a shortcut.** Tapping a fact on a stage opens the SAME Details field on the right — never a copy.
