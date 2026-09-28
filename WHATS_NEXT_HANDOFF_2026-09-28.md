@@ -17,7 +17,7 @@ The owner's own event, **cale-ice** (Indalecio & Claire, 18 Dec 2026), is the re
 
 ## 1b. Accounts and schedule
 The owner has two accounts: **account B resets Thursday 1 Oct** (it restarts the work on Apple-check day); **account A resets Sunday 4 Oct**. Both are near their weekly cap, so nothing runs before Thursday. The day-by-day estimate is in `setnayan-handoff-src/CURRENT-STATE.md` → "ESTIMATED SCHEDULE":
-- **Thu:** train 1 (items 1–3 of §4) by about noon; the Apple check; train 2 (items 4–7) by evening.
+- **Thu — THE APPLE CHECK FIRST** (owner, 2026-09-28: *"when we resume we will prioritize the apple check"*). Run it on the new account before any build starts. Then fix what it finds, together with items 1–2 of §4 (both are Apple-review risks). Items 3–7 come after, as train 2.
 - **Fri:** Post Event scenes · STD auto-play · per-letter styling.
 - **Sat:** the remaining Event Hub items plus Apple-check fixes.
 - **Sun (account A):** submission polish, then the after-Apple list.
@@ -67,7 +67,7 @@ Full list in `STATUS.md` → "The Event Hub redesign — what shipped 26–28 Se
 - **Every PR regenerates `apps/web/scripts/port-control-baseline.json`.** When a sibling merges first, the others go DIRTY, and each re-sync costs a full ~50-minute CI. Pause the siblings, or fold them into ONE merge train.
 - **Something on the shared GitHub account arms or merges PRs unasked.** After opening any PR, verify with `gh pr view <N> --json autoMergeRequest`.
 - **Internal accounts are fully Pro (§10a).** To see what a free couple sees, test on `testnayan1`.
-- **On cale-ice, never press Apply, Undo or Restore, and never type into it.** Its undo history still holds an old "M & J" logo step.
+- **On cale-ice, never press Apply, Undo or Restore, and never type into it** when testing: those change the owner's real draft. (Its undo history measured empty on 2026-09-28, so the old "M & J" step is gone.)
 - **Builders never drive the owner's signed-in Browser pane.**
 - **A bracketed test path passed alone (`app/[slug]/…`) runs zero tests.** Run the full unit suite before calling a train green.
 - **Keep one watcher only.**
