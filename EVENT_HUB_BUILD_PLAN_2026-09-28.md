@@ -61,8 +61,7 @@ Home · Guest list (guests, hosts, check-in) · Your Team (suppliers, budget) ·
 Per-letter styling beyond the hero (styles adapt to text edits) · "Both" view · A3 Our Story poster · STD auto-play over widget scenes · palette's illustrated person · dashboard card wears the cover · STD film replay fix · Post Event scenes. (50 new themes: NOT scheduled — owner 2026-09-29 "no 50 themes yet".)
 
 ## Open owner answers
-1. Panood's plain name (recommended "Watch Live").
-2. Logo Maker menu row removal (recommended yes — Logo lives in Details).
+(2026-09-29: Panood → Watch Live; Logo Maker row removed in Stage D; seat plan hide-seats switch approved; see DECISION_LOG "OWNER ANSWERS — NINE PENDING DECISIONS".)
 3. ~~The 50 themes~~ — not scheduled (owner: "no 50 themes yet").
 4. Seat plan: OK to add the one "switch the door off" action (+1 server action).
 
