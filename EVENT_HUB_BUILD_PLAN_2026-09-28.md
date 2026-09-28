@@ -29,6 +29,19 @@ Simulator + in-app webview run of the guest path and the Maker on the new accoun
 | 4 | Seat plan in three columns (place · plan · guests), door "Guests see this now" (+1 action to switch it off), faster seating; 3D free | moved + small new |
 | 5 | The guided flow (3 rounds, 19 steps, any step any time, ✓/○, Used on, What's left), round-end actions, Home "Continue" line | new (thin, reads parts 1–4) |
 
+## Lane 2 — NOT Event Hub, built in parallel (owner 2026-09-29: "there are build that is not part of the event hub. so we can build those away from the event hub")
+Separate files from the Maker, so they run beside Stages A–C (max 1–2 at a time; the Mac runs one heavy check at a time and the weekly cap applies).
+| # | Build | Why it can run now |
+|---|---|---|
+| L1 | **Our Services page** — Papic · Live Studio · Gallery (Editorial folded in) · Patiktok · Music Maker · SAI; Suite becomes this page (each card: added / add) | its own page; menu row swap waits for Stage D |
+| L2 | **Guest list absorbs Hosts + Check-in; Your Team absorbs Budget** (as tabs/parts of those pages, same screens moved) | no Maker files |
+| L3 | **People page + place headers** (prototype done) with Loved ones / Groups naming | no Maker files |
+| L4 | **Account details win on sync** (name, photo, mobile, dietary; the couple's label kept as "saved as") — its Details UI lands in Stage C part 2 | data rule first |
+| L5 | **Service cards + marketplace as ONE build** (SEO/GEO §2A) — needs the owner's §2C answers | supplier side |
+| L6 | **Supplier & coordinator toolkit · vendor readiness checklist** | supplier side |
+| L7 | SEO/GEO follow-ups (§2B) · HQ Articles only after a traffic check | marketing side |
+Open owner answers for Lane 2: the five §2C questions in `AFTER_APPLE_BUILD_LIST_2026-09-28.md` (demo shops · "vendor" in legal pages · /vendors → /for-suppliers · specs repo private? · region pages).
+
 ## Stage D — the event menu (LAST, after C)
 Home · Guest list (guests, hosts, check-in) · Your Team (suppliers, budget) · Event Hub Maker · Our Services (Papic · Live Studio · Gallery incl. Editorial · Patiktok · Music Maker · SAI; Suite becomes this page) · Refer a couple → account menu. Old routes redirect.
 
