@@ -37,3 +37,14 @@
 2. Per-letter styling when the text changes (#7).
 3. Hero-photo venue caption: drop it, or make it editable.
 4. Theme gallery "Suggested for you" label (recommended) or none.
+
+## RE-SEQUENCED after the owner's "1. yes" (2026-09-28)
+Absorbed (removed as separate items): **#2 Account details win on sync** and **"tap any fact on a stage"** → both become part of **Details part 2**.
+
+| Order | Build | Why here |
+|---|---|---|
+| running | J Try Pro / pay at Apply · H Upload media + parallax · I Rows one by one · G Hero link + Date + venue caption · L Circle QR · **K Details part 1** (three columns, theme gallery, Prints & Tickets fold, card tap-to-edit) | — |
+| next (independent, small) | Dashboard card wears the cover + STD film replay fix · Palette's illustrated person | touch nothing K touches |
+| next (independent) | Seat plan (map) scene · STD auto-play over widget scenes | stage/motion only |
+| after K | **Details part 2** — the fact groups (Your event · Words · Love Story · Schedule) move into Details, account sync, the stage tap shortcut · A3 Our Story poster (a new print item) · "Both" view | need K's navigator/canvas |
+| after Details part 2 | Per-letter styling beyond the hero (styles ADAPT to text edits) · Post Event scenes | read words from Details |
