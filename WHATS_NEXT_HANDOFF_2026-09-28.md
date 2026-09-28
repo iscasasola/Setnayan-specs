@@ -1,3 +1,5 @@
+> ⚠ **SUPERSEDED 2026-09-29 for ORDER and PLAN by `WHATS_NEXT_HANDOFF_2026-09-29.md`.** The Apple check is no longer Thursday — it runs LAST (A → C → E → D → B). Kept for history.
+
 # What's next: handoff for the new account (2026-09-28)
 
 > Supersedes `WHATS_NEXT_HANDOFF_2026-09-08.md`. Written by the Redesign Controller at the end of the Event Hub

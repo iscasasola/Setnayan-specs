@@ -1,3 +1,5 @@
+> ⚠ **SUPERSEDED 2026-09-29.** Every Event Hub item (§1) is now inside `EVENT_HUB_BUILD_PLAN_2026-09-28.md` "FINAL BUILD SEQUENCE" (Stages C/E), which runs BEFORE the Apple check. §2 (SEO/GEO, service cards + marketplace) is Lane 2 of that plan; its §2C owner questions are still open. Kept for history.
+
 # After Apple: the build list (2026-09-28)
 
 Owner, verbatim (2026-09-28, to the SEO/GEO session): *"add the things to build after apple on the redesign controller session so they can add this to the documentation"*. Nothing here starts before the Apple check. Owner, 2026-09-26: *"SEO GEO will be after apple. not now."* Every line is a candidate; re-measure it before building, because a register decays.
