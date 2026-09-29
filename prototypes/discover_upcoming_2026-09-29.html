@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Discover · Upcoming from people you follow — prototype 2026-09-29</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+<style>
+/* ─────────────────────────────────────────────────────────────────────────
+   PROTOTYPE CHROME (not product). Grey desk, labelled frames, a legend.
+   Everything INSIDE a .ph / .dk frame reproduces the shipped screen and
+   marks the delta.  EXISTING = as on origin/main today · NEW = the delta.
+   ───────────────────────────────────────────────────────────────────────── */
+:root{
+  --desk:#e9e6df; --desk-ink:#2c2a29; --desk-m:#6e6a62;
+  --new:#1f6f4a; --new-bg:#e3f3ea; --exist:#6e6a62; --exist-bg:#f0ede6; --pend:#8a4b1d; --pend-bg:#fbeedd;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--desk);color:var(--desk-ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.45}
+.desk{max-width:1500px;margin:0 auto;padding:28px 20px 80px}
+.desk h1{font-size:22px;margin:0 0 6px;letter-spacing:-.01em}
+.desk h2{font-size:16px;margin:40px 0 12px;padding-top:18px;border-top:1px solid #d5d0c5}
+.desk p.lead{margin:0 0 14px;color:var(--desk-m);max-width:78ch}
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 0}
+.tag{display:inline-block;font:700 10px/1 Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:4px 7px;border-radius:4px;vertical-align:middle}
+.tag.new{background:var(--new-bg);color:var(--new)}
+.tag.exist{background:var(--exist-bg);color:var(--exist)}
+.tag.pend{background:var(--pend-bg);color:var(--pend)}
+.frames{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
+.frame{display:flex;flex-direction:column;gap:8px}
+.frame > .cap{font-size:12px;color:var(--desk-m);max-width:390px}
+.frame > .cap b{color:var(--desk-ink)}
+.note{font-size:12px;color:var(--desk-m);max-width:390px;margin:0}
+/* callout pinned inside a frame */
+.co{position:absolute;z-index:9;background:#1f6f4a;color:#fff;font:600 10.5px/1.3 Inter,sans-serif;padding:5px 7px;border-radius:6px;max-width:190px;box-shadow:0 4px 12px rgba(0,0,0,.18)}
+.co.pend{background:#8a4b1d}
+.co.ex{background:#6e6a62}
+
+/* ── PHONE FRAME (390 × auto) ───────────────────────────────────────────── */
+.ph{position:relative;width:390px;background:#fff;border:1px solid #cfc9bd;border-radius:22px;overflow:hidden;box-shadow:0 18px 40px -22px rgba(30,26,18,.45)}
+.ph .statusbar{height:22px;display:flex;justify-content:space-between;align-items:center;padding:0 16px;font:600 11px Inter,sans-serif;color:#2c2a29}
+.dk{position:relative;width:1280px;max-width:100%;background:#fff;border:1px solid #cfc9bd;border-radius:14px;overflow:hidden;box-shadow:0 18px 40px -22px rgba(30,26,18,.45)}
+
+/* ── THE FRONT DOOR (`front-door.css`, tokens copied) ─────────────────────── */
+.fd{
+  --fd-cream:#ffffff;--fd-ink:#2c2a29;--fd-gold:#8c6932;--fd-hi:#a9834b;--fd-link:#3b4e67;
+  --fd-m1:#6e6a62;--fd-m2:#8a857b;--fd-m3:#a09a8e;--fd-line:#e1dcd1;--fd-wash:#f3ecdf;--fd-hover:#f4eee3;
+  --fd-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --fd-sys:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --fd-rail:240px;--fd-ctl:40px;--fd-bar:56px;--m-r-xs:4px;--m-r-sm:8px;--m-r-md:14px;
+  background:var(--fd-cream);color:var(--fd-ink);font-family:var(--fd-sys);
+}
+.fd-mono{font-family:var(--fd-mono);font-variant-numeric:tabular-nums}
+.fd-topbar{display:grid;grid-template-columns:1fr minmax(0,640px) 1fr;align-items:center;gap:16px;padding:8px 16px;background:var(--fd-cream)}
+.fd-topleft{display:flex;align-items:center;gap:12px}
+.fd-topright{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.fd-iconbtn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:16px;background:none;border:0;color:var(--fd-ink)}
+.fd-wordmark{font-weight:800;letter-spacing:.15em;font-size:15px;color:var(--fd-ink);text-decoration:none;padding:0 4px;text-transform:uppercase}
+.fd-btn-gold{display:inline-flex;align-items:center;min-height:36px;padding:0 15px;border-radius:999px;background:var(--fd-gold);color:#fff;font-weight:650;font-size:13px;text-decoration:none;white-space:nowrap}
+.fd-avatar{width:32px;height:32px;border-radius:50%;background:var(--fd-wash);border:1px solid var(--fd-line);display:grid;place-items:center;font:700 11px var(--fd-mono);color:var(--fd-gold)}
+.fd-bell{position:relative}
+.fd-bell i{position:absolute;top:7px;right:7px;width:8px;height:8px;border-radius:50%;background:#c24e25;border:1.5px solid #fff}
+/* the signed-in palette trigger (HomeCommandBar variant="rail") */
+.fd-searchrow{padding:0 16px 10px;background:var(--fd-cream)}
+.sn-palette{display:flex;align-items:center;gap:10px;width:100%;min-height:40px;padding:0 12px;border-radius:12px;background:rgba(255,255,255,.5);border:1px solid rgba(40,34,24,.16);box-shadow:0 1px 3px rgba(30,26,18,.06);color:#6e6a62;font-size:14px;text-align:left}
+.sn-palette svg{width:18px;height:18px;color:#95713d;flex:0 0 18px}
+.sn-palette kbd{margin-left:auto;font:11px var(--fd-mono);border:1px solid #e1dcd1;background:rgba(255,255,255,.6);border-radius:6px;padding:3px 7px;color:#8a857b}
+.fd-body{display:grid;grid-template-columns:var(--fd-rail) 1fr}
+.fd-rail{padding:10px 8px 40px;border-right:0}
+.fd-row{position:relative;display:flex;align-items:center;gap:12px;width:100%;min-height:44px;padding:0 12px;border-radius:8px;font-size:14px;color:var(--fd-ink);text-decoration:none}
+.fd-row[data-on='true']{background:var(--fd-wash);font-weight:650}
+.fd-row[data-on='true']::before{content:'';position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:0 3px 3px 0;background:var(--fd-gold)}
+.fd-gi{width:20px;flex:0 0 20px;display:flex;align-items:center;justify-content:center;color:var(--fd-m1)}
+.fd-gi svg{width:18px;height:18px}
+.fd-ct{margin-left:auto;font-size:12px;color:var(--fd-m2)}
+.fd-rdiv{height:1px;background:var(--fd-line);margin:8px 12px}
+.fd-rlabel{padding:8px 12px 4px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--fd-m1)}
+.fd-rlabel small{display:block;font-weight:400;letter-spacing:0;text-transform:none;color:var(--fd-m2);font-size:11px}
+.fd-main{padding:0 24px 60px;min-width:0}
+.fd-col{width:100%;max-width:1600px;margin:0 auto}
+.fd-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:26px}
+.fd-item{min-width:0;text-decoration:none;color:inherit;display:block;position:relative}
+.fd-thumb{aspect-ratio:16/9;border-radius:14px;position:relative;overflow:hidden;background:linear-gradient(135deg,#e7decd,#d8cdb9);display:grid;place-items:center;color:#b0a48a;font-size:10.5px;letter-spacing:.14em}
+.fd-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.fd-thumb-shop{background:var(--fd-wash)}
+.fd-shopmark{font:700 22px var(--fd-mono);color:var(--fd-gold);letter-spacing:.06em}
+.fd-dur{position:absolute;right:6px;bottom:6px;background:rgba(30,28,26,.85);color:#f5f1e8;border-radius:4px;padding:1px 5px;font-size:11.5px;font-family:var(--fd-mono)}
+.fd-imeta{display:flex;gap:12px;padding-top:11px}
+.fd-ava{width:36px;height:36px;border-radius:50%;flex:0 0 36px;background:var(--fd-wash);border:1px solid var(--fd-line);display:grid;place-items:center;font:700 11px var(--fd-mono);color:var(--fd-gold)}
+.fd-itxt{flex:1;min-width:0}
+.fd-ttl{font-size:14px;font-weight:500;line-height:1.4;margin:0 0 4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.fd-by{font-size:12px;color:var(--fd-m2);line-height:1.45;margin:0}
+.fd-chan{color:var(--fd-m1);text-decoration:none;position:relative;z-index:2}
+.fd-kindtag{display:inline-block;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;border:1px solid var(--fd-line);border-radius:4px;padding:1px 5px;margin-right:5px;color:var(--fd-m1);background:#f7f3ea}
+.fd-kindtag-w{color:#7a4a2e;border-color:#e6cdbc;background:#fbf0e9}
+.fd-sechead{display:flex;align-items:center;gap:10px;margin:6px 0 14px;flex-wrap:wrap;font-size:19px;letter-spacing:-.01em;font-weight:700}
+.fd-sechead .fd-meta{font-weight:400;letter-spacing:normal;font-size:13px;color:var(--fd-m2)}
+.fd-sechead .fd-rule{font-weight:400;letter-spacing:normal;margin-left:auto;font-size:11.5px;color:var(--fd-m3)}
+.fd-sechead-go{color:inherit;text-decoration:none}
+.fd-badge{width:22px;height:22px;border-radius:8px;background:var(--fd-gold);color:#fff;display:grid;place-items:center;font-size:12px;flex:0 0 22px}
+.fd-invite{border:1px dashed #dcd3c2;border-radius:14px;padding:20px 22px;background:#fcf8f1}
+.fd-invite h3{margin:0 0 7px;font-size:16px;font-weight:700}
+.fd-invite p{margin:0 0 13px;color:var(--fd-m1);font-size:13.5px;line-height:1.55}
+.fd-invite .fd-go,.fd-more .fd-go{font-size:13.5px;color:var(--fd-link);font-weight:650;text-decoration:none}
+.fd-invite-wide{grid-column:span 2}
+.fd-invite-full{grid-column:1/-1}
+.fd-unknown{color:var(--fd-m3);font-style:italic}
+
+/* ═══ NEW — the Upcoming shelf's event card ═══════════════════════════════
+   Same `.fd-item` grammar as every other card on this page. Only the parts
+   that a public EVENT needs are new: a date plate on the thumb, the host
+   line with the relationship, and ONE action. */
+.fd-up .fd-thumb{background:linear-gradient(160deg,#efe6d6,#dccdb4)}
+.fd-up .fd-mono-cover{font:500 34px "Cormorant Garamond",Georgia,serif;letter-spacing:.06em;color:#8c6932}
+.fd-date{position:absolute;left:6px;top:6px;background:rgba(255,255,255,.92);color:var(--fd-ink);border-radius:6px;padding:3px 7px;font:700 10.5px var(--fd-mono);letter-spacing:.06em;text-transform:uppercase;box-shadow:0 1px 4px rgba(30,26,18,.15)}
+.fd-rel{color:var(--fd-m1)}
+.fd-act{display:flex;align-items:center;gap:8px;margin-top:8px;position:relative;z-index:2}
+.fd-ask{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 14px;border-radius:999px;background:var(--fd-ink);color:#fff;font-weight:650;font-size:12.5px;border:0}
+.fd-ask.quiet{background:#f0ede6;color:var(--fd-ink);font-weight:600}
+.fd-ask.going{background:#e9eee3;color:#4f6b4a}
+.fd-act small{font-size:11px;color:var(--fd-m2)}
+.fd-kindtag-pend{color:#8a4b1d;border-color:#ecd7be;background:#fbeedd}
+
+/* ── phone breakpoint rules from front-door.css (applied inside .ph) ── */
+.ph .fd-body{grid-template-columns:1fr}
+.ph .fd-rail{display:none}
+.ph .fd-main{padding:0 16px 60px}
+.ph .fd-topbar{grid-template-columns:auto 1fr auto;gap:10px}
+.ph .fd-grid{grid-template-columns:repeat(2,1fr)}
+.ph .fd-invite-wide{grid-column:1/-1}
+.ph .fd-ttl{font-size:14.5px}
+.ph .fd-sechead{font-size:19px}
+
+/* ── APP CHROME (Tailwind classes in the repo, approximated here) ─────────
+   ink #2C2A29 · cream #FFF · mulberry #C24E25 · terracotta/gold #A9834B  */
+.app{background:#fff;color:#2c2a29;font-family:Inter,-apple-system,sans-serif;padding:16px;min-height:200px}
+.app .serif{font-family:"Cormorant Garamond",Georgia,serif}
+.app .pahina{font-family:"Cormorant Garamond",Georgia,serif}
+.app .back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:rgba(44,42,41,.6);min-height:44px;text-decoration:none}
+.app .h-big{font-size:30px;font-weight:600;letter-spacing:-.02em;margin:8px 0 0}
+.app .count{display:flex;align-items:center;gap:16px;margin-top:20px}
+.app .count b{font:400 64px/1 "Cormorant Garamond",Georgia,serif}
+.app .count p{margin:0;font-size:14px;color:rgba(44,42,41,.7)}
+.app .count .look{color:#8a4b1d}
+.app ul.req{list-style:none;margin:20px 0 0;padding:0;border-top:1px solid rgba(44,42,41,.1)}
+.app ul.req li{padding:18px 0;border-bottom:1px solid rgba(44,42,41,.1)}
+.app .nm{font-size:20px;font-weight:600;margin:0}
+.app .meta{font-size:14px;color:rgba(44,42,41,.6);margin:2px 0 0}
+.app .same{margin:8px 0 0;font-size:14px;color:#8a4b1d;display:flex;align-items:center;gap:6px}
+.app .nolike{margin:8px 0 0;font-size:14px;color:rgba(44,42,41,.55)}
+.app .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.pill{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 20px;border-radius:999px;font-size:14px;font-weight:600;border:0;text-decoration:none}
+.pill.ink{background:#2c2a29;color:#fff}
+.pill.soft{background:rgba(44,42,41,.06);color:#2c2a29}
+.pill.sm{min-height:36px;padding:0 14px;font-size:13px}
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;height:44px;min-height:52px;width:100%;border-radius:6px;background:#c24e25;color:#fff;font-size:14px;font-weight:500;border:0;text-decoration:none}
+.btn-secondary{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:6px;border:1px solid rgba(44,42,41,.2);background:#fff;color:#2c2a29;font-size:14px;font-weight:500;text-decoration:none}
+.app .foot{margin-top:24px;font-size:14px;color:rgba(44,42,41,.55)}
+.chk{width:18px;height:18px;border:1.5px solid rgba(44,42,41,.4);border-radius:4px;display:inline-grid;place-items:center;font-size:12px;flex:0 0 18px}
+.chk.on{background:#2c2a29;border-color:#2c2a29;color:#fff}
+/* join door */
+.door{padding:22px 20px 28px}
+.door .ev{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:rgba(44,42,41,.6);text-align:center;margin:0}
+.door .evn{font:500 24px/1.15 "Cormorant Garamond",Georgia,serif;text-align:center;margin:6px 0 0}
+.door .evd{font-size:13px;color:rgba(44,42,41,.65);text-align:center;margin:4px 0 22px}
+.door .t{font:400 24px/1.2 "Cormorant Garamond",Georgia,serif;margin:0 0 8px}
+.door .s{font-size:14px;color:rgba(44,42,41,.7);margin:0 0 22px}
+.lab{display:block;font-size:14px;font-weight:500;margin:0 0 6px}
+.field{width:100%;min-height:44px;border:1px solid rgba(44,42,41,.2);border-radius:6px;padding:0 12px;display:flex;align-items:center;font-size:14px;background:#fff;color:#2c2a29}
+.field.ro{background:#faf8f3;border-style:dashed;justify-content:space-between}
+.field.ro small{color:rgba(44,42,41,.55);font-size:12px}
+.radio{display:flex;align-items:center;gap:12px;min-height:44px;padding:0 16px;border-radius:999px;background:rgba(44,42,41,.04);font-size:14px;margin-bottom:8px}
+.radio.on{background:#2c2a29;color:#fff}
+.radio i{width:14px;height:14px;border-radius:50%;border:1.5px solid currentColor;display:inline-block}
+.radio.on i{background:#fff;border-color:#fff;box-shadow:inset 0 0 0 3px #2c2a29}
+.sel{display:flex;align-items:center;justify-content:space-between}
+.terms{display:flex;gap:12px;align-items:flex-start;font-size:14px;color:rgba(44,42,41,.8);margin:18px 0}
+.terms u{text-underline-offset:2px}
+.gap{height:18px}
+/* PickMenu trigger (pick-menu.tsx) */
+.pick{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 12px;border-radius:999px;background:rgba(255,255,255,.7);border:1px solid rgba(40,34,24,.12);font-size:13px;font-weight:600;color:#2c2a29;white-space:nowrap}
+.pick .dot{width:6px;height:6px;border-radius:50%;background:#a9834b}
+.pick svg{width:14px;height:14px}
+.pick-menu{margin-top:6px;width:250px;border-radius:16px;padding:6px;background:rgba(255,255,255,.92);box-shadow:0 18px 40px -18px rgba(30,26,18,.45);border:1px solid rgba(40,34,24,.1)}
+.pick-menu div{display:flex;align-items:center;justify-content:space-between;min-height:40px;padding:0 12px;border-radius:10px;font-size:13.5px}
+.pick-menu div.on{background:rgba(44,42,41,.06);font-weight:600}
+.pick-menu div small{color:rgba(44,42,41,.5);font-size:11px}
+/* collection card (Events page) */
+.ccard{background:rgba(255,255,255,.5);border:1px solid rgba(40,34,24,.16);border-radius:16px;overflow:hidden;min-height:196px;display:flex;flex-direction:column;box-shadow:0 8px 24px -16px rgba(30,26,18,.35)}
+.ccard .cov{position:relative;height:128px;background:linear-gradient(135deg,#3b3a37,#6d5a3c)}
+.ccard .kick{position:absolute;left:12px;top:10px;display:flex;gap:6px}
+.kchip{display:inline-flex;align-items:center;border-radius:999px;background:rgba(255,255,255,.85);padding:4px 8px;font:400 9px var(--fd-mono, ui-monospace);letter-spacing:.12em;text-transform:uppercase;color:#8a6b39}
+.kchip.stance{font:700 9.5px Inter,sans-serif;letter-spacing:.08em;background:rgba(194,78,37,.14);color:#c24e25}
+.ccard .ttl{position:absolute;left:12px;right:76px;bottom:10px;color:#fff;font-weight:800;font-size:15px;text-shadow:0 1px 6px rgba(23,22,15,.6)}
+.ccard .body{padding:20px 16px 16px;font-size:12.5px;color:#6e6a62}
+.ccard .mono{position:absolute;right:12px;bottom:10px;width:48px;height:48px;border-radius:10px;background:rgba(255,255,255,.9);display:grid;place-items:center;font:500 20px "Cormorant Garamond",serif;color:#8c6932}
+/* public event page (Pahina masthead) */
+.pah{padding:26px 20px 30px;text-align:center;background:#fff}
+.pah .eye{font-size:11px;letter-spacing:.36em;text-transform:uppercase;color:rgba(44,42,41,.6);margin:0}
+.pah .mark{display:flex;align-items:center;justify-content:center;gap:16px;margin:18px 0}
+.pah .mark i{height:1px;width:56px;background:rgba(169,131,75,.6)}
+.pah .mark b{font:500 30px "Cormorant Garamond",serif;color:#8c6932;letter-spacing:.05em}
+.pah h1{font:400 38px/1.05 "Cormorant Garamond",Georgia,serif;margin:0;letter-spacing:-.01em}
+.pah .date{font:400 26px/1.2 "Cormorant Garamond",serif;margin:12px 0 0}
+.pah .venue{font-size:15px;color:rgba(44,42,41,.7);margin:6px 0 0}
+.pah .going{margin:16px auto 0;display:inline-flex;align-items:center;gap:8px;font-size:13px;color:#4f6b4a;background:#e9eee3;border-radius:999px;padding:6px 12px}
+.pah .going b{font-family:ui-monospace,Menlo,monospace;font-size:13px}
+.pah .ask{margin:26px auto 0;max-width:340px;text-align:center}
+.pah .ask h2{font:400 24px/1.25 "Cormorant Garamond",serif;margin:0 0 8px}
+.pah .ask p{font-size:14px;color:rgba(44,42,41,.7);margin:0 0 14px}
+.pah .tix{margin:20px auto 0;max-width:340px;border-top:1px solid rgba(44,42,41,.1);padding-top:16px;font-size:14px}
+.pah .tix a{color:#c24e25;text-decoration:none;font-weight:600}
+.pah .tix small{display:block;color:rgba(44,42,41,.5);font-size:12px;margin-top:4px}
+/* visibility page */
+.vis .mh{font:400 26px/1.15 "Cormorant Garamond",serif;margin:0 0 14px}
+.vcard{display:flex;gap:14px;padding:16px;border:1px solid #e1dcd1;border-radius:14px;background:#fff;margin-bottom:10px}
+.vcard.on{border-color:#a9834b;box-shadow:0 0 0 2px #a9834b}
+.vcard .ic{width:20px;height:20px;flex:0 0 20px;color:#a9834b}
+.vcard .ic svg{width:20px;height:20px}
+.vcard b{font-size:15px;display:flex;align-items:center;gap:8px}
+.vcard .cur{display:inline-flex;align-items:center;gap:4px;border-radius:999px;background:rgba(169,131,75,.15);padding:2px 8px;font:500 10px Inter,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#8a6b39}
+.vcard p{margin:6px 0 0;font-size:13px;color:rgba(44,42,41,.7)}
+.vcard p.newline{color:#1f6f4a;background:#e3f3ea;border-radius:8px;padding:8px 10px;margin-top:10px;font-weight:500}
+.maker-sec{border:1px solid #e1dcd1;border-radius:14px;padding:16px;background:#fff}
+.maker-sec .h{font-size:14px;font-weight:600;margin:0 0 8px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;border-radius:999px;background:rgba(44,42,41,.05);padding:4px}
+.seg span{min-height:44px;display:grid;place-items:center;border-radius:999px;font-size:13px;font-weight:600;color:rgba(44,42,41,.6)}
+.seg span.on{background:#fff;color:#2c2a29;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+/* confirm sheet */
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:20px 20px 0 0;padding:18px 20px 26px;box-shadow:0 -12px 40px rgba(30,26,18,.25);border-top:1px solid rgba(40,34,24,.1)}
+.scrim{position:absolute;inset:0;background:rgba(44,42,41,.32);backdrop-filter:blur(4px)}
+.sheet h3{font:400 22px/1.2 "Cormorant Garamond",serif;margin:0 0 6px}
+.sheet p{font-size:14px;color:rgba(44,42,41,.7);margin:0 0 16px}
+/* tour */
+.tour{position:absolute;inset:0;background:rgba(44,42,41,.3);backdrop-filter:blur(3px);display:grid;place-items:center;padding:16px}
+.tour .card{width:100%;max-width:340px;background:rgba(255,255,255,.92);border-radius:24px;padding:24px;box-shadow:0 30px 60px -30px rgba(30,26,18,.5);position:relative}
+.tour .x{position:absolute;right:12px;top:12px;width:36px;height:36px;border-radius:50%;background:rgba(44,42,41,.05);display:grid;place-items:center;color:rgba(44,42,41,.6)}
+.tour .ico{width:48px;height:48px;border-radius:50%;background:rgba(169,131,75,.1);color:#a9834b;display:grid;place-items:center;margin-bottom:14px}
+.tour h2{font:400 24px/1.2 "Cormorant Garamond",serif;margin:0 0 8px;border:0;padding:0}
+.tour p{font-size:15px;line-height:1.55;color:rgba(44,42,41,.75);margin:0 0 14px}
+.tour .dots{display:flex;gap:6px;margin-bottom:14px}
+.tour .dots i{height:4px;width:18px;border-radius:2px;background:rgba(44,42,41,.15)}
+.tour .dots i.on{background:#c24e25}
+.tour .acts{display:flex;justify-content:space-between;align-items:center}
+.tour .skip{font-size:12px;color:rgba(44,42,41,.55)}
+.tour .next{display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0 20px;border-radius:999px;background:#c24e25;color:#fff;font-weight:600;font-size:14px}
+/* state table */
+table.states{border-collapse:collapse;font-size:13px;background:#fff;border:1px solid #d5d0c5;border-radius:10px;overflow:hidden}
+table.states th,table.states td{padding:9px 12px;border-bottom:1px solid #e6e2d8;text-align:left;vertical-align:top}
+table.states th{background:#f3f0e9;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#6e6a62}
+</style>
+</head>
+<body>
+<div class="desk">
+  <h1>Discover · “Upcoming from people you follow” — one new shelf, one existing door</h1>
+  <p class="lead">Owner 2026-09-29: <i>“a public event where people can come in and join… on the discover, we can show what events are upcoming from the people they followed”</i> → joining is <b>host approves</b>. Tickets (same day): <i>“they have to purchase their tickets directly to the vendor. not us. we just manage the count of their guests they approve.”</i> Everything below is drawn on the real screens from <code>origin/main</code>; the delta is marked.</p>
+  <div class="legend">
+    <span class="tag exist">Existing</span> <span class="note" style="display:inline">as it renders today</span>
+    <span class="tag new">New</span> <span class="note" style="display:inline">the delta to build</span>
+    <span class="tag pend">New type · pending owner</span> <span class="note" style="display:inline">Concert · Competition (extends Tournament) · Open house · Grand opening — none exists in <code>HOST_ROLES_BY_EVENT_TYPE</code> today</span>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <h2>1 · Discover, signed in, on a phone (390) — the new shelf sits first</h2>
+  <p class="lead">Top bar, palette row, “The first shops”, New uploads, Trending are byte-for-byte the shipped <code>front-door-feed.tsx</code>. The shelf is signed-in only (a stranger follows nobody), PUBLIC events only (<code>listablePublicly()</code>), soonest first. The card is the page’s own <code>.fd-item</code> grammar with a date plate, a host line and exactly one action.</p>
+  <div class="frames">
+
+    <!-- ── Frame 1A: the feed ─────────────────────────────────────────── -->
+    <div class="frame">
+      <div class="ph fd">
+        <div class="statusbar"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+        <header class="fd-topbar">
+          <div class="fd-topleft"><span class="fd-iconbtn">☰</span><a class="fd-wordmark" href="#">Setnayan</a></div>
+          <div></div>
+          <div class="fd-topright">
+            <a class="fd-btn-gold" href="#">+ Create event</a>
+            <span class="fd-iconbtn fd-bell">🔔<i></i></span>
+            <span class="fd-avatar">MS</span>
+          </div>
+        </header>
+        <div class="fd-searchrow">
+          <div class="sn-palette"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Search</span><kbd>⌘K</kbd></div>
+        </div>
+        <div class="fd-body">
+          <main class="fd-main"><div class="fd-col">
+
+            <!-- ═ NEW SHELF ═ -->
+            <span class="co" style="right:12px;top:-6px">NEW shelf · signed-in only · PUBLIC only</span>
+            <h2 class="fd-sechead" style="position:relative">
+              <span class="fd-badge">◷</span>
+              <a class="fd-sechead-go" href="#">Upcoming from people you follow</a>
+              <span class="fd-meta">6 events · soonest first</span>
+            </h2>
+            <div class="fd-grid fd-up">
+
+              <div class="fd-item">
+                <div class="fd-thumb"><span class="fd-mono-cover">A</span><span class="fd-date">Sat 17 Oct</span></div>
+                <div class="fd-imeta"><span class="fd-ava">AR</span>
+                  <div class="fd-itxt">
+                    <p class="fd-ttl">Ana turns 30</p>
+                    <p class="fd-by"><span class="fd-kindtag fd-kindtag-w">Kaarawan</span><a class="fd-chan" href="#">Ana Reyes</a></p>
+                    <p class="fd-by fd-rel">You follow Ana · Quezon City</p>
+                    <div class="fd-act"><button class="fd-ask">Ask to join</button></div>
+                  </div></div>
+              </div>
+
+              <div class="fd-item">
+                <div class="fd-thumb" style="background:linear-gradient(160deg,#2f2a2a,#6b4b3a)"><span class="fd-mono-cover" style="color:#f1e6d3">TK</span><span class="fd-date">Fri 23 Oct</span></div>
+                <div class="fd-imeta"><span class="fd-ava">TK</span>
+                  <div class="fd-itxt">
+                    <p class="fd-ttl">Harana sa Parke · live set</p>
+                    <p class="fd-by"><span class="fd-kindtag fd-kindtag-pend">Concert</span><a class="fd-chan" href="#">Tunog Kolektibo</a></p>
+                    <p class="fd-by fd-rel">Connected · Marikina</p>
+                    <div class="fd-act"><button class="fd-ask quiet">Requested</button><small>They’ll let you know</small></div>
+                  </div></div>
+              </div>
+
+              <div class="fd-item">
+                <div class="fd-thumb" style="background:linear-gradient(160deg,#dfe7dc,#b9c9b0)"><span class="fd-mono-cover" style="color:#4f6b4a">3×3</span><span class="fd-date">Sun 1 Nov</span></div>
+                <div class="fd-imeta"><span class="fd-ava">BC</span>
+                  <div class="fd-itxt">
+                    <p class="fd-ttl">Barangay 3×3 Open</p>
+                    <p class="fd-by"><span class="fd-kindtag fd-kindtag-pend">Competition</span><a class="fd-chan" href="#">Brgy. Concepcion Sports</a></p>
+                    <p class="fd-by fd-rel">You follow them · Covered court</p>
+                    <div class="fd-act"><span class="fd-ask going">You’re going</span></div>
+                  </div></div>
+              </div>
+
+              <div class="fd-item">
+                <div class="fd-thumb" style="background:linear-gradient(160deg,#f2e9dc,#d9c7a8)"><span class="fd-mono-cover">CB</span><span class="fd-date">Sat 7 Nov</span></div>
+                <div class="fd-imeta"><span class="fd-ava">CB</span>
+                  <div class="fd-itxt">
+                    <p class="fd-ttl">Casa Buan Studio · open house</p>
+                    <p class="fd-by"><span class="fd-kindtag fd-kindtag-pend">Open house</span><a class="fd-chan" href="#">Casa Buan Studio</a></p>
+                    <p class="fd-by fd-rel">You follow them · Pasig</p>
+                    <div class="fd-act"><button class="fd-ask">Ask to join</button></div>
+                  </div></div>
+              </div>
+
+              <div class="fd-item">
+                <div class="fd-thumb" style="background:linear-gradient(160deg,#3d2f26,#8c6932)"><span class="fd-mono-cover" style="color:#f5e9d2">KL</span><span class="fd-date">Sat 14 Nov</span></div>
+                <div class="fd-imeta"><span class="fd-ava">KL</span>
+                  <div class="fd-itxt">
+                    <p class="fd-ttl">Kape ni Lola · grand opening</p>
+                    <p class="fd-by"><span class="fd-kindtag fd-kindtag-pend">Grand opening</span><a class="fd-chan" href="#">Kape ni Lola</a></p>
+                    <p class="fd-by fd-rel">You follow them · Antipolo</p>
+                    <div class="fd-act"><button class="fd-ask">Ask to join</button></div>
+                  </div></div>
+              </div>
+
+              <div class="fd-item">
+                <div class="fd-thumb"><span class="fd-mono-cover">’14</span><span class="fd-date">Sat 12 Dec</span></div>
+                <div class="fd-imeta"><span class="fd-ava">JS</span>
+                  <div class="fd-itxt">
+                    <p class="fd-ttl">Batch ’14 reunion</p>
+                    <p class="fd-by"><span class="fd-kindtag">Reunion</span><a class="fd-chan" href="#">Jun Santos</a></p>
+                    <p class="fd-by fd-rel">Connected · you co-host</p>
+                    <div class="fd-act"><span class="fd-ask quiet">You organise this</span></div>
+                  </div></div>
+              </div>
+            </div>
+
+            <!-- ═ EXISTING: SHOPS ═ -->
+            <span class="co ex" style="right:12px;margin-top:-4px">EXISTING from here down</span>
+            <h2 class="fd-sechead"><span>The first shops</span><span class="fd-rule">not “trending” — one shop cannot trend</span></h2>
+            <div class="fd-grid">
+              <a class="fd-item" href="#"><div class="fd-thumb fd-thumb-shop"><span class="fd-shopmark">LF</span></div>
+                <div class="fd-imeta"><span class="fd-ava">LF</span><div class="fd-itxt"><p class="fd-ttl">Lumina Films</p><p class="fd-by">Photo &amp; video · verified</p><p class="fd-by">Makati</p></div></div></a>
+              <a class="fd-item" href="#"><div class="fd-thumb fd-thumb-shop"><span class="fd-shopmark">CB</span></div>
+                <div class="fd-imeta"><span class="fd-ava">CB</span><div class="fd-itxt"><p class="fd-ttl">Casa Buan Studio</p><p class="fd-by">Venues</p><p class="fd-by">Pasig</p></div></div></a>
+              <div class="fd-invite fd-invite-wide">
+                <h3>Open your shop — free while we’re new.</h3>
+                <p>Couples pay you directly — we never take a cut of it. No booking fee while we’re new. Your own web address, a calendar couples can see, and enquiries that arrive as real messages.</p>
+                <a class="fd-go" href="#">Open your shop →</a>
+              </div>
+            </div>
+
+            <!-- ═ EXISTING: NEW UPLOADS ═ -->
+            <div class="fd-grid">
+              <a class="fd-item" href="#"><div class="fd-thumb"><span>ARTICLE</span><span class="fd-dur">6 min</span></div>
+                <div class="fd-imeta"><span class="fd-ava">SN</span><div class="fd-itxt"><p class="fd-ttl">How a guest list becomes a seat plan</p><p class="fd-by"><span class="fd-kindtag">Article</span> Setnayan</p><p class="fd-by">Planning</p></div></div></a>
+              <a class="fd-item" href="#"><div class="fd-thumb"><span>ARTICLE</span><span class="fd-dur">4 min</span></div>
+                <div class="fd-imeta"><span class="fd-ava">SN</span><div class="fd-itxt"><p class="fd-ttl">What a Ninong actually does</p><p class="fd-by"><span class="fd-kindtag">Article</span> Setnayan</p><p class="fd-by">Roles</p></div></div></a>
+            </div>
+            <h2 class="fd-sechead"><span class="fd-badge">◎</span><a class="fd-sechead-go" href="#">New uploads</a><span class="fd-meta"><span class="fd-mono">12</span> ours · <span class="fd-mono">0</span> theirs — some with video, some without</span></h2>
+            <div class="fd-grid"><div class="fd-invite fd-invite-full">
+              <h3>The first real weddings will land right here, beside the reading.</h3>
+              <p>When a couple decides to share their day it joins this same shelf — their photos, their suppliers, their timeline, in their own words. Nothing is staged, and nothing appears without them saying yes.</p>
+              <a class="fd-go" href="#">See how sharing works →</a></div></div>
+
+            <!-- ═ EXISTING: TRENDING ═ -->
+            <h2 class="fd-sechead"><span>Trending</span><span class="fd-rule">earned, never sold</span></h2>
+            <div class="fd-grid"><div class="fd-invite fd-invite-full">
+              <h3>No story has earned a spot yet.</h3>
+              <p>Trending ranks stories by real views from real readers — it is never seeded, padded, or sold. The first story to earn its place will appear here on its own; until then, this room stays honest.</p>
+              <a class="fd-go" href="#">Browse all stories →</a></div></div>
+          </div></main>
+        </div>
+      </div>
+      <p class="cap"><b>1A · Discover, signed in.</b> Shelf placement: first, above the shops — a signed-in person’s own people before our supply (the stranger still gets shops first; the shelf never mounts for them). <span class="tag new">New</span> shelf + cards. Everything from “The first shops” down is <span class="tag exist">Existing</span>. Card title is the press target (opens the public event page, <code>/{slug}</code>); the host name is the second door (<code>/u/{slug}</code>, sibling anchor — never nested); the action is raised above the title’s stretch, same stacking rule as <code>.fd-chan</code>.</p>
+    </div>
+
+    <!-- ── Frame 1B: empty / refused ──────────────────────────────────── -->
+    <div class="frame">
+      <div class="ph fd">
+        <div class="statusbar"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+        <div class="fd-body"><main class="fd-main" style="padding-top:12px"><div class="fd-col">
+          <h2 class="fd-sechead"><span class="fd-badge">◷</span><a class="fd-sechead-go" href="#">Upcoming from people you follow</a></h2>
+          <div class="fd-grid"><div class="fd-invite fd-invite-full">
+            <h3>Public events from your people land here.</h3>
+            <p>Follow the people and groups whose events you’d turn up for. When one of them announces a public event — a birthday, a concert, a grand opening — it appears on this shelf, soonest first, with one button to ask to join.</p>
+            <a class="fd-go" href="#">Find people to follow →</a>
+          </div></div>
+
+          <div class="gap"></div>
+          <h2 class="fd-sechead"><span class="fd-badge">◷</span><a class="fd-sechead-go" href="#">Upcoming from people you follow</a><span class="fd-meta"><span class="fd-unknown">couldn’t load</span></span></h2>
+          <div class="fd-grid"><div class="fd-invite fd-invite-full">
+            <h3>We couldn’t check who you follow just now.</h3>
+            <p>This does not mean nothing is coming up. Pull to refresh in a moment — the shelf shows public events from people you follow or are connected to, soonest first.</p>
+            <a class="fd-go" href="#">Try again →</a>
+          </div></div>
+        </div></main></div>
+      </div>
+      <p class="cap"><b>1B · Empty and refused, two different sentences.</b> Empty says what the shelf is FOR (never “you have none”). Refused says “couldn’t load” in the heading meta and in the card — the page’s own <code>CountText</code> rule (“an unknown is not a nought”). <span class="tag new">New</span> Copy follows <code>.fd-invite</code>, the shape every empty rail on this page already takes.</p>
+    </div>
+
+    <!-- ── Frame 1C: the first-visit tour ─────────────────────────────── -->
+    <div class="frame">
+      <div class="ph fd" style="min-height:560px">
+        <div class="statusbar"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+        <div style="padding:10px 16px;opacity:.45">
+          <h2 class="fd-sechead"><span class="fd-badge">◷</span>Upcoming from people you follow</h2>
+          <div class="fd-grid fd-up"><div class="fd-item"><div class="fd-thumb"></div></div><div class="fd-item"><div class="fd-thumb"></div></div></div>
+        </div>
+        <div class="tour"><div class="card">
+          <span class="x">✕</span>
+          <div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+          <h2>Your people’s public events</h2>
+          <p>When someone you follow announces a public event, it shows here — soonest first. Tap <b>Ask to join</b>; the host approves, and you’ll hear by email the moment you’re in.</p>
+          <div class="dots"><i class="on"></i><i></i></div>
+          <div class="acts"><span class="skip">Skip</span><span class="next">Next →</span></div>
+        </div></div>
+      </div>
+      <p class="cap"><b>1C · First-visit tour.</b> <span class="tag new">New</span> tour key <code>discover_upcoming_v1</code> in <code>lib/tours.ts</code>, mounted with the shipped <code>&lt;MiniTour tourKey=…/&gt;</code> (renders <code>GuidedTour</code>, shown above as it ships: glass card, serif title, dots, Skip / Next / Got it). Two slides: this one, then “Tickets are the organiser’s — Setnayan only keeps the count the host approves.” No new mechanism.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <h2>2 · “Ask to join” — the existing request door, then the host approves</h2>
+  <p class="lead">Tapping the card’s button lands on the shipped <code>/join/[eventId]</code> door (<code>join-flow.tsx</code> → <code>RequestForm</code>). The only delta on the requester’s side: a signed-in person’s name comes from the account and is not retyped. The host’s side is the shipped Guest List → Requests page (<code>guests/claims/page.tsx</code>) — Keep · Remove · Link — scaled up for a big public event.</p>
+  <div class="frames">
+
+    <!-- 2A join door -->
+    <div class="frame">
+      <div class="ph app door">
+        <div class="statusbar" style="margin:-22px -20px 12px"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+        <p class="ev">Ana Reyes</p>
+        <p class="evn">Ana turns 30</p>
+        <p class="evd">Saturday 17 October 2026 · The Garden Room, Quezon City</p>
+        <p class="t">You’re not on the guest list for this event yet</p>
+        <p class="s">Ask to join. If Ana has you down under another name or on a family member’s invite, they will link you. You’ll hear by email the moment you’re in.</p>
+
+        <span class="co" style="right:14px;margin-top:-10px">NEW · name from the account, read-only</span>
+        <label class="lab">Your name</label>
+        <div class="field ro"><span>Maria Santos</span><small>from your account</small></div>
+        <div class="gap"></div>
+
+        <label class="lab">Will you be there?</label>
+        <div class="radio on"><i></i>Joyfully accepts</div>
+        <div class="radio"><i></i>Undecided, for now</div>
+        <div class="radio"><i></i>Regretfully declines</div>
+        <div class="gap"></div>
+
+        <label class="lab">How many of you?</label>
+        <div class="field sel"><span>Just me</span><span>▾</span></div>
+
+        <div class="terms"><span class="chk on">✓</span><span>I agree to the <u>Terms</u> and the <u>Privacy Notice</u></span></div>
+        <a class="btn-primary" href="#">Send request</a>
+      </div>
+      <p class="cap"><b>2A · The request door.</b> <span class="tag exist">Existing</span> <code>AskToJoinIntro</code> + <code>RequestForm</code>, shown with the host’s switched-on questions only (plus-ones on, meal/dietary/note off; email is skipped because the account has one — already how it ships). <span class="tag new">New</span> the “Your name” field becomes a read-only line for a signed-in requester (<code>defaultName</code> is already prefilled today; the delta is that it is no longer editable, so the host approves the account, not a typed string). ⚠ “Will you be there?” is a shipped radio list; the owner’s standing rule is one dropdown (PickMenu) for any set of choices — flagged for the builder to swap when this form is touched, not a reason to redraw the form here.</p>
+    </div>
+
+    <!-- 2B request sent + card state -->
+    <div class="frame">
+      <div class="ph app door" style="min-height:420px">
+        <div class="statusbar" style="margin:-22px -20px 12px"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+        <p class="ev">Ana Reyes</p>
+        <p class="evn">Ana turns 30</p>
+        <p class="evd">Saturday 17 October 2026</p>
+        <p class="t" style="font-size:30px">Request sent</p>
+        <p class="s" style="font-size:16px">Ana will check their list. You’ll get an email the moment you’re in.</p>
+        <a class="btn-secondary" href="#">Back to the details</a>
+        <div class="gap"></div><div class="gap"></div>
+        <div class="fd fd-up" style="border-top:1px dashed #e1dcd1;padding-top:14px">
+          <span class="co" style="right:0;margin-top:-30px">NEW · the shelf card after sending</span>
+          <p class="note" style="margin:0 0 8px">…and back on Discover the card now reads:</p>
+          <div class="fd-item" style="max-width:200px">
+            <div class="fd-thumb"><span class="fd-mono-cover">A</span><span class="fd-date">Sat 17 Oct</span></div>
+            <div class="fd-imeta"><span class="fd-ava">AR</span><div class="fd-itxt">
+              <p class="fd-ttl">Ana turns 30</p>
+              <p class="fd-by"><span class="fd-kindtag fd-kindtag-w">Kaarawan</span>Ana Reyes</p>
+              <div class="fd-act"><span class="fd-ask quiet">Requested</span><small>Ana will let you know</small></div>
+            </div></div>
+          </div>
+        </div>
+      </div>
+      <p class="cap"><b>2B · Request sent.</b> <span class="tag exist">Existing</span> <code>RequestSentScreen</code>, verbatim. <span class="tag new">New</span> the card state “Requested — {host} will let you know”, read from the requester’s own pending <code>guests</code> row (their account e-mail on a request for that event), never from a new column.</p>
+    </div>
+
+    <!-- 2C host requests — existing small -->
+    <div class="frame">
+      <div class="ph app">
+        <div class="statusbar" style="margin:-16px -16px 8px"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+        <a class="back" href="#">← Guest List</a>
+        <p class="h-big">Requests</p>
+        <div class="count"><b>3</b><div><p>asked to join</p><p class="look">1 looks like someone already on your list</p></div></div>
+        <ul class="req">
+          <li><p class="nm">Maria Santos</p><p class="meta">Joyfully accepts · Just me · maria.s@…</p><p class="nolike">No one like this on your list</p>
+            <div class="acts"><span class="pill ink">Keep</span><span class="pill soft">Remove</span></div></li>
+          <li><p class="nm">Jose Dela Cruz</p><p class="meta">Joyfully accepts · 2 — me and 1 more</p><p class="same">⇄ Same as <b style="color:#2c2a29">Jo Dela Cruz</b></p>
+            <div class="acts"><span class="pill soft">Keep</span><span class="pill soft">Remove</span><span class="pill ink">Link</span></div></li>
+          <li><p class="nm">Bea Lim</p><p class="meta">Undecided, for now · Just me</p><p class="nolike">No one like this on your list</p>
+            <div class="acts"><span class="pill ink">Keep</span><span class="pill soft">Remove</span></div></li>
+        </ul>
+        <p class="foot">Keep or Link sends them their invitation, with “Save to my account” waiting on it. Remove tells them nothing.</p>
+      </div>
+      <p class="cap"><b>2C · The host’s Requests page — Ana’s birthday.</b> <span class="tag exist">Existing</span> <code>/dashboard/[eventId]/guests/claims</code>, verbatim: serif count, “asked to join”, look-alike line, per-row Keep · Remove · Link. Nothing changes for a small event.</p>
+    </div>
+
+    <!-- 2D host requests — scaled up NEW -->
+    <div class="frame">
+      <div class="ph app" style="min-height:760px">
+        <div class="statusbar" style="margin:-16px -16px 8px"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+        <a class="back" href="#">← Guest List</a>
+        <p class="h-big">Requests</p>
+        <span class="co" style="right:14px;margin-top:6px">NEW · approved count beside the waiting count</span>
+        <div class="count"><b>14</b><div><p>waiting</p><p style="color:#4f6b4a"><b style="font:600 14px ui-monospace,Menlo,monospace">128</b> approved so far</p></div></div>
+
+        <span class="co" style="left:14px;margin-top:8px">NEW · one tap for the whole queue, asks once</span>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:22px;padding:10px 12px;border:1px solid #e1dcd1;border-radius:12px;background:#faf8f3">
+          <span class="chk on">✓</span><span style="font-size:14px;flex:1">All 14 selected</span>
+          <span class="pill ink sm">Keep all 14</span><span class="pill soft sm">Remove</span>
+        </div>
+
+        <ul class="req">
+          <li style="display:flex;gap:12px;align-items:flex-start"><span class="chk on" style="margin-top:5px">✓</span><div style="flex:1"><p class="nm" style="font-size:17px">Maria Santos</p><p class="meta">Joyfully accepts · Just me</p><div class="acts" style="margin-top:8px"><span class="pill ink sm">Keep</span><span class="pill soft sm">Remove</span></div></div></li>
+          <li style="display:flex;gap:12px;align-items:flex-start"><span class="chk on" style="margin-top:5px">✓</span><div style="flex:1"><p class="nm" style="font-size:17px">Jose Dela Cruz</p><p class="meta">Joyfully accepts · 2 — me and 1 more</p><p class="same">⇄ Same as <b style="color:#2c2a29">Jo Dela Cruz</b></p><div class="acts" style="margin-top:8px"><span class="pill soft sm">Keep</span><span class="pill soft sm">Remove</span><span class="pill ink sm">Link</span></div></div></li>
+          <li style="display:flex;gap:12px;align-items:flex-start"><span class="chk on" style="margin-top:5px">✓</span><div style="flex:1"><p class="nm" style="font-size:17px">Bea Lim</p><p class="meta">Undecided, for now · Just me</p><div class="acts" style="margin-top:8px"><span class="pill ink sm">Keep</span><span class="pill soft sm">Remove</span></div></div></li>
+          <li style="display:flex;gap:12px;align-items:flex-start"><span class="chk on" style="margin-top:5px">✓</span><div style="flex:1"><p class="nm" style="font-size:17px">Ramon Tan</p><p class="meta">Joyfully accepts · 3 — me and 2 more</p><div class="acts" style="margin-top:8px"><span class="pill ink sm">Keep</span><span class="pill soft sm">Remove</span></div></div></li>
+          <li style="opacity:.5"><p class="nm" style="font-size:17px">… 10 more</p></li>
+        </ul>
+        <div class="scrim"></div>
+        <div class="sheet">
+          <h3>Keep all 14?</h3>
+          <p>Each of them gets their invitation and pass, and counts toward your approved guests (142 after this). You can still remove anyone later from the Guest List.</p>
+          <div style="display:flex;gap:10px"><span class="pill ink" style="flex:1">Keep all 14</span><span class="pill soft" style="flex:1">Not now</span></div>
+        </div>
+      </div>
+      <p class="cap"><b>2D · The same page for a big public event — Harana sa Parke.</b> <span class="tag new">New</span> (a) “128 approved so far” beside the waiting count — the count the owner said Setnayan keeps; (b) a select-all row with <b>Keep all N</b> that asks ONCE (the sheet), plus Remove for the selection; (c) per-row buttons drop to the small size at 4+ rows. Approval stays the host’s hand: no auto-accept, no timer. The verbs stay <b>Keep · Remove · Link</b> — owner-locked 2026-09-26 and one word per concept; “approve” is what the owner calls it in conversation, “Keep” is the button (see owner Q2). Keep on a PUBLIC event skips the quick-add line (role/group) — one tap; the guest lands as a plain guest.</p>
+    </div>
+
+    <!-- 2E after Keep: requester's events -->
+    <div class="frame">
+      <div class="ph app" style="min-height:420px">
+        <div class="statusbar" style="margin:-16px -16px 8px"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+        <p style="font-size:16px;font-weight:800;letter-spacing:-.015em;margin:8px 0 12px">Coming up</p>
+        <div class="ccard">
+          <div class="cov">
+            <div class="kick"><span class="kchip">Kaarawan</span><span class="kchip stance">You’re invited</span></div>
+            <div class="ttl">Ana turns 30</div>
+            <div class="mono">A</div>
+          </div>
+          <div class="body">Kaarawan, You’re invited · Sat 17 Oct</div>
+        </div>
+        <div class="gap"></div>
+        <div class="fd fd-up" style="border-top:1px dashed #e1dcd1;padding-top:14px">
+          <p class="note" style="margin:0 0 8px">…and on Discover the card now reads:</p>
+          <div class="fd-item" style="max-width:200px">
+            <div class="fd-thumb"><span class="fd-mono-cover">A</span><span class="fd-date">Sat 17 Oct</span></div>
+            <div class="fd-imeta"><span class="fd-ava">AR</span><div class="fd-itxt">
+              <p class="fd-ttl">Ana turns 30</p>
+              <p class="fd-by"><span class="fd-kindtag fd-kindtag-w">Kaarawan</span>Ana Reyes</p>
+              <div class="fd-act"><span class="fd-ask going">You’re going</span></div>
+            </div></div>
+          </div>
+        </div>
+      </div>
+      <p class="cap"><b>2E · After Keep, on the requester’s side.</b> <span class="tag exist">Existing</span> Keep issues the key and the invitation e-mail (“Save to my account” waiting on it); the event then appears on their Events page as the shipped <code>GlassEventCard</code> with the <b>You’re invited</b> stance chip. <span class="tag new">New</span> the shelf card flips to <b>You’re going</b> (they already answered “Joyfully accepts” when they asked). ⚠ PR B’s <b>Incoming requests</b> (“You are invited to … Yes / No”) is NOT reused here on purpose — it re-asks a question the requester already answered. It stays for host-initiated invites.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <h2>3 · The public event page — the approved count, and where tickets come from</h2>
+  <div class="frames">
+    <div class="frame">
+      <div class="ph app" style="padding:0">
+        <div class="statusbar"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+        <div class="pah">
+          <p class="eye">Tunog Kolektibo presents</p>
+          <div class="mark"><i></i><b>TK</b><i></i></div>
+          <h1>Harana sa Parke</h1>
+          <p class="date">Friday 23 October 2026</p>
+          <p class="venue">Marikina Riverbanks Amphitheatre</p>
+          <span class="co" style="right:16px;margin-top:8px">NEW · the count Setnayan keeps</span>
+          <div class="going"><b>128</b> going · the host approves each request</div>
+          <div class="ask">
+            <h2>You’re not on the guest list for this event yet</h2>
+            <p>Ask Tunog Kolektibo — once they add you, your invitation opens here.</p>
+            <a class="btn-primary" href="#">Ask to join</a>
+          </div>
+          <span class="co pend" style="left:16px;margin-top:4px">NEW · recommended, pending owner</span>
+          <div class="tix">Where to get tickets → <a href="#">tickets.tunogkolektibo.ph</a><small>The organiser sells tickets on their own page. Setnayan sells nothing here — it only keeps the count of who’s approved.</small></div>
+        </div>
+      </div>
+      <p class="cap"><b>3 · Public event page (a stranger who is signed in).</b> <span class="tag exist">Existing</span> <code>PahinaMasthead</code> (eyebrow, monogram between gild rules, serif name, date, venue) and the <code>GetInside</code> ask section, verbatim. <span class="tag new">New</span> “128 going” — the count of accepted guests on the list (not requests), shown only on PUBLIC events. <span class="tag pend">Pending owner</span> one optional host-set line “Where to get tickets → {their link}” — a plain outbound link, no price, no checkout, no receipt, ever. Stored as <code>events.print_details.tickets_url</code> (Details › Words jsonb, no new column — same home as the invite message).</p>
+    </div>
+
+    <!-- state table -->
+    <div class="frame">
+      <table class="states">
+        <tr><th>Card action</th><th>When</th><th>Read from</th></tr>
+        <tr><td><span class="fd-ask" style="display:inline-flex;min-height:30px;font-size:12px">Ask to join</span></td><td>Public event · host chose “Anyone, I approve” · no request from this account</td><td><code>rsvp_ask_config.whoCanRsvp = 'anyone'</code> (<code>anyoneMayAskToJoin</code>)</td></tr>
+        <tr><td><span class="fd-ask quiet" style="display:inline-flex;min-height:30px;font-size:12px">Requested</span></td><td>This account has a pending request on the event</td><td>own <code>guests</code> row, request status</td></tr>
+        <tr><td><span class="fd-ask going" style="display:inline-flex;min-height:30px;font-size:12px">You’re going</span></td><td>Kept / linked, reply is attending (or maybe)</td><td>own <code>event_members</code> / kept <code>guests</code> row</td></tr>
+        <tr><td><span class="fd-ask quiet" style="display:inline-flex;min-height:30px;font-size:12px">You organise this</span></td><td>Viewer is a host or co-host</td><td><code>event_members.member_type = 'couple'</code></td></tr>
+        <tr><td><i style="color:#8a857b">no button · “Guest list only”</i></td><td>Public page, but host kept “Only my Guest List” — the card still lists (it is public) and opens the page; nothing to press</td><td><code>whoCanRsvp = 'guest_list'</code></td></tr>
+      </table>
+      <p class="cap" style="max-width:520px"><b>Card states.</b> One button, one word per state. The last row matters: <b>Public</b> (who may SEE the page) and <b>Anyone, I approve</b> (who may ASK) are two shipped switches; the shelf lists on the first and offers the button on the second. Never merged into one.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <h2>4 · The host’s side — where Public is set, and one new line saying what Public now does</h2>
+  <p class="lead">The audience lives on the shipped <code>/dashboard/[eventId]/website/privacy</code> (“Set who can see your … page”, nav label “Who can view”). Measured on <code>origin/main</code>: it is reached ONLY from the Story editor — the Event Hub Maker at <code>/launch</code> has no door to it and no audience control of its own. So frame 4B adds a door beside the Maker’s existing “Who can RSVP?”.</p>
+  <div class="frames">
+
+    <div class="frame">
+      <div class="ph app vis">
+        <div class="statusbar" style="margin:-16px -16px 8px"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+        <p class="mh">Set who can see your birthday page</p>
+        <div class="vcard on"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span>
+          <div><b>Public <span class="cur">✓ Current</span></b>
+            <p>Anyone with your birthday’s URL can view your landing page — and join. One shared link admits anyone who has it: they get your event hub and a camera for the day, and they land on your guest list for you to keep or remove…</p>
+            <span class="co" style="right:14px;margin-top:-4px">NEW · one line</span>
+            <p class="newline">Public events also show on Discover for people who follow you or are connected to you — soonest first, until the day. Nobody gets in without your Keep.</p>
+          </div></div>
+        <div class="vcard"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.1A10 10 0 0 1 21 12a10.5 10.5 0 0 1-2.2 3.2M6.5 6.5A10.5 10.5 0 0 0 3 12s3.5 6 9 6a9.4 9.4 0 0 0 3.5-.7"/></svg></span>
+          <div><b>Unlisted</b><p>The URL works for anyone you share it with — to view your page and to join… Your landing page won’t be indexed by search engines or surfaced on Setnayan’s public pages…</p></div></div>
+        <div class="vcard"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-4-6"/></svg></span>
+          <div><b>Only guests with a Setnayan account</b><p>People on your guest list who are signed in to Setnayan can view it. Anyone else — including someone you send the link to — sees the locked screen…</p></div></div>
+        <div class="vcard"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+          <div><b>Private</b><p>Only your guests (in your guest list) and your event moderators can view. Anyone else opening the URL sees a polite locked screen. This is also the only setting that closes your join link…</p></div></div>
+        <div style="display:flex;gap:10px;margin-top:6px"><span class="btn-primary" style="width:auto;min-height:44px;padding:0 24px">Save changes</span><span class="btn-secondary">Back</span></div>
+      </div>
+      <p class="cap"><b>4A · “Who can view”, as it ships.</b> <span class="tag exist">Existing</span> four <code>VisibilityCard</code>s, blurbs verbatim (trimmed here with …). <span class="tag new">New</span> exactly one line under Public. The owner’s three words map to the shipped four: “public” = Public · “private” = Only guests with a Setnayan account · “only me” = Private. Unlisted stays (link only, never listed — and never on the shelf).</p>
+    </div>
+
+    <div class="frame">
+      <div class="ph app">
+        <div class="statusbar" style="margin:-16px -16px 8px"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+        <p class="note" style="margin:6px 0 10px">Event Hub Maker › RSVP settings (<code>maker-rsvp-ask.tsx</code>)</p>
+        <div class="maker-sec">
+          <p class="h">Who can RSVP? <span style="color:#8a857b;font-weight:400">ⓘ</span></p>
+          <div class="seg"><span>Only my Guest List</span><span class="on">Anyone, I approve</span></div>
+          <p class="note" style="margin:8px 0 0;font-size:12px">“Anyone, I approve” lets people without a key ask to join. They wait in Requests until you Keep, Link or Remove them — nobody gets inside on a name alone.</p>
+        </div>
+        <div class="gap"></div>
+        <span class="co" style="right:14px;margin-top:-6px">NEW · a door the Maker lacked (PickMenu)</span>
+        <div class="maker-sec">
+          <p class="h">Who can see this page</p>
+          <div class="pick"><span class="dot"></span><span>Public</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></div>
+          <div class="pick-menu">
+            <div class="on"><span>Public</span><small>listed on Discover</small></div>
+            <div><span>Unlisted</span><small>link only</small></div>
+            <div><span>Only guests with a Setnayan account</span></div>
+            <div><span>Private</span><small>only you</small></div>
+          </div>
+          <p class="note" style="margin:8px 0 0;font-size:12px">Public events show on Discover for people who follow you. <a href="#" style="color:#c24e25;text-decoration:none;font-weight:600">More about who can view →</a></p>
+        </div>
+        <div class="gap"></div>
+        <div class="maker-sec" style="opacity:.75">
+          <p class="h">Requests waiting</p>
+          <div style="display:flex;align-items:center;gap:12px"><span class="serif" style="font-size:36px;line-height:1">14</span><span style="flex:1;font-size:14px;color:rgba(44,42,41,.7)">people asked to join</span><span class="pill ink sm">Open Requests ›</span></div>
+        </div>
+      </div>
+      <p class="cap"><b>4B · The Maker gets a door.</b> <span class="tag exist">Existing</span> “Who can RSVP?” (two-way switch, its tip verbatim) and “Requests waiting”. <span class="tag new">New</span> “Who can see this page” as one <code>PickMenu</code> writing the same <code>events.landing_page_visibility</code> the Privacy page writes (one column, one action <code>updateLandingPageVisibility</code>, two doors) — sits directly above “Requests waiting” so the three switches that make a public event joinable read top to bottom. ⚠ Owner rule: the existing two-button “Who can RSVP?” is a pill row; flagged, not redrawn.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <h2>5 · Desktop (1280) — the same shelf, four across, rail visible</h2>
+  <div class="dk fd">
+    <header class="fd-topbar">
+      <div class="fd-topleft"><a class="fd-wordmark" href="#">Setnayan</a></div>
+      <div><div class="sn-palette"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Search Setnayan</span><kbd>⌘K</kbd></div></div>
+      <div class="fd-topright"><a class="fd-btn-gold" href="#">+ Create event</a><span class="fd-iconbtn fd-bell">🔔<i></i></span><span class="fd-avatar">MS</span></div>
+    </header>
+    <div class="fd-body">
+      <nav class="fd-rail">
+        <a class="fd-row" data-on="true" href="#"><span class="fd-gi">⌂</span>Discover</a>
+        <a class="fd-row" href="#"><span class="fd-gi">⌕</span>Find suppliers</a>
+        <div class="fd-rdiv"></div>
+        <div class="fd-rlabel">My Home</div>
+        <a class="fd-row" href="#"><span class="fd-gi">▦</span>Events<span class="fd-ct fd-mono">2</span></a>
+        <a class="fd-row" href="#"><span class="fd-gi">✦</span>Memories<span class="fd-ct fd-mono">0</span></a>
+        <a class="fd-row" href="#"><span class="fd-gi">◔</span>People</a>
+        <div class="fd-rdiv"></div>
+        <div class="fd-rlabel">Planner <small>things you plan with</small></div>
+        <a class="fd-row" href="#"><span class="fd-gi">·</span>Marketplace</a>
+        <a class="fd-row" href="#"><span class="fd-gi">·</span>Guest list</a>
+        <a class="fd-row" href="#"><span class="fd-gi">·</span>Seat plan</a>
+        <a class="fd-row" href="#"><span class="fd-gi">·</span>Budget</a>
+        <a class="fd-row" href="#"><span class="fd-gi">·</span>Schedule</a>
+        <div class="fd-rdiv"></div>
+        <div class="fd-rlabel">Together <small>things you do with people</small></div>
+        <a class="fd-row" href="#"><span class="fd-gi">·</span>Groups</a>
+        <a class="fd-row" href="#"><span class="fd-gi">·</span>Group Stories</a>
+        <div class="fd-rdiv"></div>
+        <div class="fd-rlabel">Studio <small>the things you make</small></div>
+        <a class="fd-row" href="#"><span class="fd-gi">·</span>Event Hub</a>
+        <a class="fd-row" href="#"><span class="fd-gi">·</span>Papic</a>
+        <a class="fd-row" href="#"><span class="fd-gi">·</span>Live Studio</a>
+        <a class="fd-row" href="#"><span class="fd-gi">·</span>Mood Board</a>
+      </nav>
+      <main class="fd-main"><div class="fd-col">
+        <span class="co" style="right:24px;margin-top:2px">NEW shelf</span>
+        <h2 class="fd-sechead" style="margin-top:14px"><span class="fd-badge">◷</span><a class="fd-sechead-go" href="#">Upcoming from people you follow</a><span class="fd-meta">6 events · soonest first</span><span class="fd-rule">public events only · the host approves who joins</span></h2>
+        <div class="fd-grid fd-up">
+          <div class="fd-item"><div class="fd-thumb"><span class="fd-mono-cover">A</span><span class="fd-date">Sat 17 Oct</span></div><div class="fd-imeta"><span class="fd-ava">AR</span><div class="fd-itxt"><p class="fd-ttl">Ana turns 30</p><p class="fd-by"><span class="fd-kindtag fd-kindtag-w">Kaarawan</span><a class="fd-chan" href="#">Ana Reyes</a></p><p class="fd-by fd-rel">You follow Ana · Quezon City</p><div class="fd-act"><button class="fd-ask">Ask to join</button></div></div></div></div>
+          <div class="fd-item"><div class="fd-thumb" style="background:linear-gradient(160deg,#2f2a2a,#6b4b3a)"><span class="fd-mono-cover" style="color:#f1e6d3">TK</span><span class="fd-date">Fri 23 Oct</span></div><div class="fd-imeta"><span class="fd-ava">TK</span><div class="fd-itxt"><p class="fd-ttl">Harana sa Parke · live set</p><p class="fd-by"><span class="fd-kindtag fd-kindtag-pend">Concert</span><a class="fd-chan" href="#">Tunog Kolektibo</a></p><p class="fd-by fd-rel">Connected · Marikina</p><div class="fd-act"><span class="fd-ask quiet">Requested</span><small>They’ll let you know</small></div></div></div></div>
+          <div class="fd-item"><div class="fd-thumb" style="background:linear-gradient(160deg,#dfe7dc,#b9c9b0)"><span class="fd-mono-cover" style="color:#4f6b4a">3×3</span><span class="fd-date">Sun 1 Nov</span></div><div class="fd-imeta"><span class="fd-ava">BC</span><div class="fd-itxt"><p class="fd-ttl">Barangay 3×3 Open</p><p class="fd-by"><span class="fd-kindtag fd-kindtag-pend">Competition</span><a class="fd-chan" href="#">Brgy. Concepcion Sports</a></p><p class="fd-by fd-rel">You follow them · Covered court</p><div class="fd-act"><span class="fd-ask going">You’re going</span></div></div></div></div>
+          <div class="fd-item"><div class="fd-thumb" style="background:linear-gradient(160deg,#f2e9dc,#d9c7a8)"><span class="fd-mono-cover">CB</span><span class="fd-date">Sat 7 Nov</span></div><div class="fd-imeta"><span class="fd-ava">CB</span><div class="fd-itxt"><p class="fd-ttl">Casa Buan Studio · open house</p><p class="fd-by"><span class="fd-kindtag fd-kindtag-pend">Open house</span><a class="fd-chan" href="#">Casa Buan Studio</a></p><p class="fd-by fd-rel">You follow them · Pasig</p><div class="fd-act"><button class="fd-ask">Ask to join</button></div></div></div></div>
+        </div>
+        <h2 class="fd-sechead"><span>The first shops</span><span class="fd-rule">not “trending” — one shop cannot trend</span></h2>
+        <div class="fd-grid">
+          <a class="fd-item" href="#"><div class="fd-thumb fd-thumb-shop"><span class="fd-shopmark">LF</span></div><div class="fd-imeta"><span class="fd-ava">LF</span><div class="fd-itxt"><p class="fd-ttl">Lumina Films</p><p class="fd-by">Photo &amp; video · verified</p><p class="fd-by">Makati</p></div></div></a>
+          <a class="fd-item" href="#"><div class="fd-thumb fd-thumb-shop"><span class="fd-shopmark">CB</span></div><div class="fd-imeta"><span class="fd-ava">CB</span><div class="fd-itxt"><p class="fd-ttl">Casa Buan Studio</p><p class="fd-by">Venues</p><p class="fd-by">Pasig</p></div></div></a>
+          <div class="fd-invite fd-invite-wide"><h3>Open your shop — free while we’re new.</h3><p>Couples pay you directly — we never take a cut of it. No booking fee while we’re new. Your own web address, a calendar couples can see, and enquiries that arrive as real messages.</p><a class="fd-go" href="#">Open your shop →</a></div>
+        </div>
+      </div></main>
+    </div>
+  </div>
+  <p class="note" style="max-width:none;margin-top:10px"><b>Desktop.</b> Rail rows are the shipped signed-in rail (Discover · Find suppliers · My Home · Planner doorways · Together · Studio); the shelf is the only delta. The heading’s right-hand rule carries the one-line contract, the way “earned, never sold” does on Trending.</p>
+</div>
+</body>
+</html>
