@@ -2,6 +2,9 @@
 
 Source of truth for every ruling: `DECISION_LOG.md` rows dated 2026-09-30 ("THE MAKER RE-PLAN — SPEED FIRST…", "THE MAKER EDITS HOW IT LOOKS…", "ADDS TO THE MAKER RE-PLAN — QUICK SETUP + SEARCH", "RE-PLAN REVISIONS…", "RSVP ANSWERS…", "OUTFIT STYLE IS ONE SETTING…", "IN YOUR COLOURS…"). Design: `prototypes/maker_replan_2026-09-30.html` (v2 being redrawn).
 
+## ✂ CUT BY THE OWNER — 2026-09-30 (read before anything below)
+Owner, verbatim, removing these from the re-plan: Search · Quick setup · five presets for every element (keep only the real designs we already have — never invent to reach five) · Opening strips · "apply to your other hero pages" · the full Mood Board rebuild · the Logo Maker extras · palette animation · fashion figures · the Prints tab reorganisation. **Lane D and Lane E are cancelled; the Prints tab stays where it is today.** What remains: instant editing · type in place + Wording ▾ + Format ▾ · the top menu + slim Details · the RSVP stage · one font dropdown · Theme sets background + fonts + colours. Order = the order guests see it (RSVP → Invitation → The Day → Post Event), each stage live + phone walk-through before the next; at most 2 Maker builders at once. Anything struck below is NOT to be built.
+
 ## The rule for "done"
 A piece is done only when a phone walk-through on a TEST event (never the owner's) passes timed tasks — e.g. "type a new opening line", "tap the logo + five times", "rename the bridesmaids", "change the date format" — each visible in under a second, nothing hidden, nothing confusing, pictures attached. Green CI alone is not done.
 
