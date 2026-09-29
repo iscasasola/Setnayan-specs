@@ -19,6 +19,8 @@ One release that carries ONLY RSVP + guest Invitation work. Everything else is h
 | 9 | Best Woman · either-or honour attendants · rename roles (Bride's Crew / Groom's Crew) | `rd/best-woman-matron` (building) |
 | 11 | Maker: **Page ▾ Home · Details · Story · Me** dropdown at the top of the navigator (jumps, never filters) so the couple fixes each guest page — Maker only, guests unchanged | `rd/maker-page-dropdown` (building) |
 | 12 | Venues: name/address/buttons readable (≥4.5:1); venue photo from the booked supplier's own photos (couple picks, cover by default), manual upload if none; address already from the supplier | `rd/venue-cards-readable-with-photos` (building) |
+| 13 | Custom QR: a round QR sits in a ROUND slot on every print + ticket (never a square frame round a round QR) | `rd/round-qr-round-slot` (building) |
+| 14 | Every guest's QR ready: every guest row has a token; ticket QR uses the event's QR look and decodes to that guest | in `rd/hub-shows-the-ticket` |
 | 10 | Invitation text fixes from the guest-side audit (list: scratchpad `invite-audit/REPORT.md`, "blocks sending" + "should fix" only) | one small PR after the audit |
 
 ## Held until after the release
@@ -32,3 +34,9 @@ Train n #6166 (event menu + scene styles/Post Event) · #6160 font dropdown · #
 5. Owner sends. Freeze.
 
 Target: live ~10:00 AM 30 Sep PHT; hard limit before 1 Oct.
+
+## After the release (in this order)
+1. **Profile** — a guest row linked to an account shows that account's profile (read-only); one tap copies the event's formal name into the person's profile; a first account made from an invitation starts with its profile filled.
+2. **Themes** — theme sets background + fonts + colours (Lane C) · one font dropdown #6160 · palette styles · venue styles (3: Photo card · Full photo · The journey — prototype first).
+3. **Maker core** — Lane A structure + Lane B stage editing (instant by design), then Invitation → The Day → Post Event stages.
+4. **Mood Board** — supplier can alter every detail (extend MB16 grants beyond colour).
