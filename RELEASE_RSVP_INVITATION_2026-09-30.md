@@ -21,6 +21,7 @@ One release that carries ONLY RSVP + guest Invitation work. Everything else is h
 | 12 | Venues: name/address/buttons readable (≥4.5:1); venue photo from the booked supplier's own photos (couple picks, cover by default), manual upload if none; address already from the supplier | `rd/venue-cards-readable-with-photos` (building) |
 | 13 | Custom QR: a round QR sits in a ROUND slot on every print + ticket (never a square frame round a round QR) | `rd/round-qr-round-slot` (building) |
 | 14 | Every guest's QR ready: every guest row has a token; ticket QR uses the event's QR look and decodes to that guest | in `rd/hub-shows-the-ticket` |
+| 15 | Invitation **Home** = the guest's own page: their Mood Board look · Reminders (couple-set) · E-Gifts shown now | `rd/invitation-home-is-personal` (building) |
 | 10 | Invitation text fixes from the guest-side audit (list: scratchpad `invite-audit/REPORT.md`, "blocks sending" + "should fix" only) | one small PR after the audit |
 
 ## Held until after the release
