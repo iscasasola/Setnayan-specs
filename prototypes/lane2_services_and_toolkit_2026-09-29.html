@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lane 2 — service cards + marketplace · supplier toolkit — 2026-09-29</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cormorant+SC:wght@500;600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<!--
+  LANE 2 PROTOTYPE · 2026-09-29 · STATIC HTML, ZERO JAVASCRIPT (the owner's viewer runs no script).
+  CSS reused from prototypes/guest_pathway_2026-09-27.html (tokens, phone shell, app chrome, desktop frame).
+  Every price on this page is a placeholder. Nothing here is clickable.
+
+  RULE 0 — read before drawing (origin/main at d7c1f0c-era, never ~):
+    apps/web/app/_components/service-card-view.tsx · lib/service-card-view-model.ts
+    apps/web/app/(shell)/explore/page.tsx · explore/_components/vendor-card.tsx · save-vendor-button.tsx · explore/compare/page.tsx
+    apps/web/app/dashboard/[eventId]/vendors/_components/bench-vendor-actions.tsx · contact-shortlist-vendor-button.tsx · lib/supplier-standing.ts
+    apps/web/app/vendor-dashboard/_components/vendor-bottom-nav.tsx · vendor-nav-destinations.ts · overview-sections.tsx · on-the-day/page.tsx
+    corpus: DECISION_LOG rows 2026-09-09 (two destinations · bench sentence) · 2026-09-10 (integrate, not talk outside) · 2026-09-25 (ONE SUPPLIER TOOLKIT)
+            · 2026-09-26 (READINESS CHECKLIST) · 2026-09-29 (AS BUILT — STAGE D) · AFTER_APPLE_BUILD_LIST_2026-09-28.md §2A/§2C
+            · prototypes/service_card_wizard_2026-08-28.html · vendor_dashboard_redesign_2026-09-22.html · quote_maker_FINAL_2026-09-22.html
+-->
+<style>
+:root {
+  --paper: #f6f1e7; --surface: #ffffff; --ink: #2b241c; --muted: #6f665a; --gold: #b8934a; --gold-deep: #8a6a2b;
+  --line: rgba(43,36,28,.12); --wash: rgba(184,147,74,.12);
+  --serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --body: 'EB Garamond', Georgia, serif;
+  --sc: 'Cormorant SC', 'Cormorant Garamond', Georgia, serif;
+  --fd-cream: #ffffff; --fd-ink: #2c2a29; --fd-gold: #8c6932; --fd-m1: #6e6a62; --fd-m2: #8a857b; --fd-line: #e1dcd1; --fd-wash: #f3ecdf; --fd-hover: #f4eee3;
+  --terra: #b5562f; --mulb: #8f2f45; --ok: #4f6b4a;
+  --sys: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --ease: cubic-bezier(.2,.7,.2,1);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: #efe9dd; color: var(--fd-ink); font-family: var(--sys); -webkit-font-smoothing: antialiased; }
+u { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(43,36,28,.35); }
+
+.doc { max-width: 1100px; padding: 44px 32px 8px; }
+.doc h1 { font-size: 32px; letter-spacing: -0.02em; margin: 6px 0 12px; }
+.doc h2 { font-size: 20px; margin: 0 0 10px; }
+.doc-p { font-size: 15px; line-height: 1.55; max-width: 800px; margin: 0 0 10px; }
+.muted { color: var(--fd-m1); }
+.eyebrow.app { font-family: var(--sys); font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--fd-m2); margin: 0 0 4px; }
+code { font-family: var(--mono); font-size: 12.5px; background: #fff; padding: 1px 5px; border-radius: 4px; }
+.dia { color: var(--fd-gold); font-weight: 700; }
+
+/* rule-0 ledger */
+.ledger { max-width: 1100px; margin: 18px 32px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.lcard { background: #fff; border-radius: 16px; padding: 18px 20px; box-shadow: 0 0 0 1px rgba(44,42,41,.06); }
+.lcard h3 { margin: 0 0 8px; font-size: 16px; }
+.lcard h4 { margin: 12px 0 4px; font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--fd-m2); }
+.lcard h4.ok { color: var(--ok); } .lcard h4.gap { color: var(--terra); } .lcard h4.delta { color: var(--fd-gold); }
+.lcard ul { margin: 0; padding-left: 18px; font-size: 13.5px; line-height: 1.5; }
+.lcard li { margin-bottom: 4px; }
+.lcard p { font-size: 13.5px; line-height: 1.5; margin: 0; }
+
+.cols { display: flex; gap: 40px; padding: 8px 32px 0; align-items: flex-start; flex-wrap: wrap; }
+.colh { font-size: 14px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--fd-m1); margin: 30px 0 0 24px; }
+.colh.couple { color: var(--fd-gold); }
+.frames { display: flex; flex-wrap: wrap; gap: 30px 24px; padding: 20px 24px; align-items: flex-start; }
+.widecol { padding: 0 56px 20px; }
+.frame { margin: 0; }
+.frame figcaption { font-size: 13px; color: var(--fd-m1); margin: 0 0 10px 4px; max-width: 390px; line-height: 1.4; }
+.frame figcaption b { display: block; color: var(--fd-ink); margin-bottom: 2px; font-size: 14px; }
+.frame.wide figcaption { max-width: 1000px; }
+
+/* ── phone shell 390×844 ──────────────────────────────────────────────── */
+.phone { position: relative; width: 390px; height: 844px; overflow: hidden; border-radius: 44px; box-shadow: 0 30px 60px -30px rgba(44,42,41,.4), 0 0 0 1px rgba(44,42,41,.06); }
+.phone.tall { height: 1180px; }
+.phone.app { background: var(--fd-cream); color: var(--fd-ink); font-family: var(--sys); font-size: 14px; }
+.status { position: absolute; top: 0; left: 0; right: 0; height: 48px; display: flex; justify-content: space-between; align-items: flex-end; padding: 0 30px 6px; font-family: var(--sys); font-size: 14px; font-weight: 600; z-index: 6; }
+.sig { font-size: 11px; letter-spacing: 1px; }
+.homebar { position: absolute; bottom: 8px; left: 50%; width: 134px; height: 5px; margin-left: -67px; border-radius: 3px; background: rgba(44,42,41,.25); z-index: 9; }
+.page { position: absolute; inset: 0; padding: 48px 0 110px; display: flex; flex-direction: column; overflow: hidden; }
+.foot { margin-top: auto; padding: 18px 20px 6px; }
+
+/* app chrome */
+.apptop { height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; }
+.menu { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 999px; color: var(--fd-ink); font-size: 18px; }
+.apph { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
+.av { width: 34px; height: 34px; border-radius: 999px; display: grid; place-items: center; background: var(--fd-wash); color: var(--fd-gold); font-size: 12px; font-weight: 800; }
+.hd { padding: 6px 20px 0; }
+.h1 { font-family: var(--serif); font-weight: 500; font-size: 34px; line-height: 1; letter-spacing: -0.01em; margin: 2px 0 4px; }
+.sum { font-size: 13.5px; color: var(--fd-m1); margin: 6px 0 0; }
+.sum b { color: var(--fd-ink); font-weight: 600; }
+.sc { font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--fd-m2); margin: 0 0 8px; }
+
+/* the one dropdown */
+.dd { display: inline-flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 44px; padding: 0 14px 0 16px; border-radius: 14px; background: var(--fd-hover); font-size: 15px; font-weight: 600; }
+.dd small { font-size: 12px; font-weight: 500; color: var(--fd-m1); }
+.dd i { font-style: normal; font-size: 12px; color: var(--fd-m1); }
+.dd.wide { width: 100%; }
+.ddrow { display: flex; gap: 8px; padding: 12px 20px 0; }
+.ddopen { margin: 6px 20px 0; padding: 6px; border-radius: 14px; background: #fff; box-shadow: 0 18px 40px -18px rgba(0,0,0,.35), 0 0 0 1px rgba(44,42,41,.06); }
+.ddopen span { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: 9px; font-size: 14.5px; }
+.ddopen span.on { background: var(--fd-wash); font-weight: 600; }
+.ddopen span em { font-style: normal; font-family: var(--mono); font-size: 11.5px; color: var(--fd-m2); }
+
+/* THE service card — service-card-view.tsx reproduced */
+.cards { padding: 14px 16px 0; display: flex; flex-direction: column; gap: 12px; }
+.card { position: relative; border-radius: 14px; padding: 14px; background: #fff; box-shadow: 0 0 0 1px rgba(44,42,41,.1); }
+.shop { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.logo { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; background: rgba(181,86,47,.1); color: var(--terra); font-size: 11px; font-weight: 700; }
+.shopn { display: flex; flex-direction: column; line-height: 1.15; }
+.shopn b { font-size: 12px; font-weight: 500; }
+.shopn small { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--fd-m2); }
+.save { margin-left: auto; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--fd-hover); color: var(--fd-ink); }
+.save.on { background: var(--fd-ink); color: #fff; }
+.titl { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.titl b { font-size: 16px; font-weight: 600; }
+.price { font-family: var(--mono); font-size: 13px; white-space: nowrap; }
+.pdet { text-align: right; font-family: var(--mono); font-size: 11px; color: rgba(44,42,41,.5); margin: 1px 0 0; }
+.disc { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 500; background: rgba(181,86,47,.1); color: var(--terra); box-shadow: inset 0 0 0 1px rgba(181,86,47,.3); }
+.photos { display: flex; gap: 6px; margin-top: 10px; }
+.photos i { width: 64px; height: 64px; border-radius: 8px; background: linear-gradient(135deg, #e6dccb, #cdbfa8); }
+.photos i:nth-child(2) { background: linear-gradient(135deg, #d9cbb4, #b8a789); }
+.photos i:nth-child(3) { background: linear-gradient(135deg, #ece3d3, #d3c4aa); }
+.inc { margin: 10px 0 0; padding: 0; list-style: none; }
+.inc li { display: flex; gap: 6px; font-size: 12px; color: rgba(44,42,41,.75); line-height: 1.5; }
+.inc li::before { content: '✓'; color: var(--mulb); font-weight: 700; }
+.inc li.more { color: rgba(44,42,41,.45); padding-left: 16px; } .inc li.more::before { content: ''; }
+.meta { font-size: 12px; color: rgba(44,42,41,.6); margin: 8px 0 0; }
+.notinc { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.notinc span { padding: 2px 8px; border-radius: 999px; font-size: 11px; background: rgba(44,42,41,.05); color: rgba(44,42,41,.6); }
+.gift { margin: 8px 0 0; font-size: 11px; font-weight: 500; color: var(--terra); }
+.serves { margin: 6px 0 0; font-size: 11px; color: rgba(44,42,41,.5); }
+.record { margin: 8px 0 0; font-size: 11.5px; color: var(--fd-m1); }
+.record b { color: var(--fd-ink); font-weight: 600; }
+.view { margin: 10px 0 0; font-family: var(--mono); font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--terra); }
+
+/* verbs + CTA */
+.verbs { display: flex; gap: 8px; margin-top: 12px; }
+.verb { padding: 10px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--fd-ink); background: var(--fd-hover); }
+.verb.pri { background: var(--fd-ink); color: #fff; }
+.verb.wide { flex: 1; text-align: center; }
+.cta { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 56px; padding: 10px 18px; border-radius: 18px; background: var(--fd-ink); color: #fff; text-align: center; box-shadow: 0 16px 30px -18px rgba(43,36,28,.7); }
+.cta b { font-size: 17px; font-weight: 700; }
+.cta small { font-size: 11.5px; opacity: .78; margin-top: 3px; }
+.cta.quiet { background: transparent; color: var(--fd-ink); box-shadow: inset 0 0 0 1px var(--fd-line); }
+.under { text-align: center; font-size: 12.5px; color: var(--fd-m1); margin: 12px 0 0; line-height: 1.4; }
+
+/* rows / lists (Today room, picks, requests) */
+.req { padding: 14px 20px; }
+.req + .req { box-shadow: inset 0 1px 0 var(--fd-line); }
+.reqh { display: flex; flex-direction: column; line-height: 1.25; }
+.reqh b { font-size: 16px; }
+.reqh small { font-size: 12.5px; color: var(--fd-m1); margin-top: 2px; }
+.stand { display: flex; align-items: center; gap: 6px; margin: 8px 0 0; font-size: 13px; color: var(--fd-gold); }
+.stand b { color: var(--fd-ink); font-weight: 600; }
+.stand.quiet { color: var(--fd-m2); }
+.stand.need { color: var(--terra); }
+.roll { margin: 10px 20px 0; padding: 10px 14px; border-radius: 12px; background: var(--fd-wash); font-size: 13px; }
+.roll b { font-weight: 600; }
+.sect { display: flex; align-items: baseline; justify-content: space-between; padding: 18px 20px 6px; }
+.sect b { font-size: 15px; font-weight: 700; }
+.sect em { font-style: normal; font-family: var(--mono); font-size: 12px; color: var(--fd-m2); }
+.count { display: flex; align-items: flex-end; gap: 12px; padding: 14px 20px 0; }
+.count b { font-family: var(--mono); font-size: 56px; font-weight: 800; letter-spacing: -0.05em; line-height: .85; }
+.count span { font-size: 13px; line-height: 1.3; color: var(--fd-m1); padding-bottom: 3px; }
+.count em { font-style: normal; color: var(--fd-gold); }
+
+/* checklist */
+.ck { display: flex; align-items: center; gap: 12px; min-height: 54px; padding: 6px 20px; box-shadow: inset 0 -1px 0 var(--fd-line); }
+.box { flex: 0 0 24px; width: 24px; height: 24px; border-radius: 7px; box-shadow: inset 0 0 0 1.5px rgba(43,36,28,.35); display: grid; place-items: center; font-size: 14px; }
+.box.on { background: var(--fd-ink); color: #fff; box-shadow: none; }
+.ckt { display: flex; flex-direction: column; line-height: 1.2; }
+.ckt b { font-size: 15px; font-weight: 600; }
+.ckt small { font-size: 12px; color: var(--fd-m1); margin-top: 3px; }
+.ck.on .ckt b { color: var(--fd-m1); font-weight: 500; }
+
+/* timeline */
+.tl { padding: 8px 20px 0; }
+.tlr { display: grid; grid-template-columns: 70px 1fr; gap: 10px; min-height: 44px; align-items: center; box-shadow: inset 0 -1px 0 var(--fd-line); font-size: 14px; }
+.tlr b { font-family: var(--mono); font-size: 12.5px; font-weight: 600; }
+.tlr.mine { background: var(--fd-wash); margin: 0 -20px; padding: 0 20px; border-radius: 0; }
+.tlr small { display: block; font-size: 12px; color: var(--fd-m1); }
+.live { display: flex; align-items: center; gap: 8px; margin: 12px 20px 0; padding: 10px 14px; border-radius: 12px; background: var(--fd-ink); color: #fff; font-size: 13px; }
+.live i { width: 8px; height: 8px; border-radius: 999px; background: #e0b35a; }
+
+/* form fields */
+.f { display: block; margin: 0 0 12px; padding: 0 20px; }
+.fl { display: block; font-size: 12px; font-weight: 600; color: var(--fd-m1); margin: 0 0 4px; }
+.fi { display: block; min-height: 42px; padding: 9px 0 8px; font-size: 16px; border-bottom: 1px solid rgba(43,36,28,.25); }
+.fi.ph { color: rgba(111,102,90,.6); font-style: italic; }
+.keep { font-size: 13px; color: var(--fd-m1); margin: 2px 20px 8px; line-height: 1.45; }
+.keep b { color: var(--fd-ink); }
+.drawer { margin: 8px 12px 0; padding: 16px 0 14px; border-radius: 18px; background: #fff; box-shadow: 0 24px 50px -26px rgba(44,42,41,.5), 0 0 0 1px rgba(44,42,41,.05); }
+.dl { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; margin: 0 20px 10px; }
+.tg { display: flex; align-items: center; justify-content: space-between; min-height: 46px; margin: 0 20px; font-size: 15px; box-shadow: inset 0 -1px 0 var(--fd-line); }
+.tg small { font-size: 12px; color: var(--fd-m2); display: block; }
+.sw { width: 44px; height: 26px; border-radius: 999px; background: #d9d4ca; position: relative; }
+.sw i { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 999px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,.2); }
+.sw.on { background: var(--fd-gold); } .sw.on i { left: 21px; }
+
+/* bottom bar — the couple's Stage D bar / the supplier's shipped five */
+.bar { position: absolute; left: 14px; right: 14px; bottom: 22px; height: 62px; display: flex; justify-content: space-around; align-items: center; padding: 0 6px; border-radius: 22px; background: rgba(255,255,255,.86); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); box-shadow: 0 18px 40px -22px rgba(43,36,28,.5), 0 0 0 1px rgba(43,36,28,.06); z-index: 8; }
+.slot { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 56px; padding: 6px 4px; border-radius: 14px; font-size: 10.5px; font-weight: 600; letter-spacing: .02em; color: var(--fd-m1); position: relative; }
+.slot i { font-style: normal; font-size: 19px; line-height: 1; }
+.slot.on { color: var(--fd-ink); background: var(--fd-wash); }
+.slot em { position: absolute; top: 2px; right: 6px; font-style: normal; font-family: var(--mono); font-size: 9.5px; font-weight: 700; background: var(--terra); color: #fff; border-radius: 999px; padding: 0 5px; line-height: 15px; }
+
+/* ── desktop 1280×760 ─────────────────────────────────────────────────── */
+.desk { width: 1280px; height: 760px; display: grid; grid-template-columns: 240px 1fr 460px; background: var(--fd-cream); border-radius: 22px; overflow: hidden; box-shadow: 0 30px 60px -30px rgba(44,42,41,.4), 0 0 0 1px rgba(44,42,41,.06); font-family: var(--sys); color: var(--fd-ink); }
+.rail { padding: 22px 10px; background: rgba(243,236,223,.45); }
+.acct { display: flex; align-items: center; gap: 10px; padding: 4px 12px 16px; }
+.acctt { display: flex; flex-direction: column; line-height: 1.2; } .acctt b { font-size: 14px; } .acctt small { font-size: 11.5px; color: var(--fd-m2); }
+.rrow { position: relative; display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-radius: 8px; font-size: 14px; }
+.rrow.on { background: var(--fd-wash); font-weight: 650; color: var(--fd-ink); }
+.rrow.on::before { content: ''; position: absolute; left: 0; top: 9px; bottom: 9px; width: 3px; border-radius: 0 3px 3px 0; background: var(--fd-gold); }
+.rrow em { margin-left: auto; font-style: normal; font-family: var(--mono); font-size: 12px; color: var(--fd-m2); }
+.rrow i { font-style: normal; width: 18px; text-align: center; color: var(--fd-m1); }
+.grp { font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--fd-m2); padding: 14px 12px 6px; }
+.dmain { padding: 32px 32px; overflow: hidden; }
+.dh { font-size: 28px; letter-spacing: -0.02em; margin: 0 0 6px; display: flex; align-items: baseline; gap: 12px; }
+.dsub { font-size: 13.5px; color: var(--fd-m1); margin: 0 0 16px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.dlist { display: flex; flex-direction: column; }
+.ditem { display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; padding: 14px 16px; border-radius: 14px; }
+.ditem b { font-size: 16px; } .ditem small { font-size: 12.5px; color: var(--fd-m1); grid-column: 1; }
+.ditem em { grid-column: 2; grid-row: 1 / span 2; align-self: center; font-style: normal; font-size: 13px; color: var(--fd-gold); }
+.ditem em.none { color: var(--fd-m2); }
+.ditem.on { background: var(--fd-wash); }
+.dpane { padding: 32px 32px; background: #fff; box-shadow: -30px 0 60px -40px rgba(44,42,41,.35); overflow: hidden; }
+.dpane .card { box-shadow: none; padding: 0; }
+.dpane .ck { padding: 6px 0; }
+.dpane .tl, .dpane .live, .dpane .count { padding-left: 0; padding-right: 0; margin-left: 0; margin-right: 0; }
+.dpane .tlr.mine { margin: 0; padding: 0 8px; border-radius: 8px; }
+
+/* questions */
+.qs { max-width: 1100px; margin: 10px 32px 60px; }
+.qs h2 { font-size: 22px; margin: 30px 0 14px; }
+.qrow { display: grid; grid-template-columns: 34px 1fr; gap: 12px; padding: 14px 0; border-top: 1px solid rgba(44,42,41,.12); }
+.qn { font-family: var(--serif); font-size: 30px; line-height: .9; color: var(--gold-deep); }
+.qrow p { margin: 0 0 6px; font-size: 14.5px; line-height: 1.5; max-width: 860px; }
+.qrow .rec { color: var(--fd-ink); }
+.qrow .rec b { color: var(--ok); }
+.qrow .src { font-size: 12.5px; color: var(--fd-m2); }
+</style>
+</head>
+<body>
+
+<div class="doc">
+  <p class="eyebrow app">Prototype · Lane 2 · L5 + L6 · 2026-09-29</p>
+  <h1>Service cards + marketplace · Supplier toolkit</h1>
+  <p class="doc-p">Two builds that run beside the Event Hub stages (<code>EVENT_HUB_BUILD_PLAN_2026-09-28.md</code> Lane 2, rows L5 and L6). Each is drawn as the DELTA on what already ships. Static pictures — nothing here is clickable. Every ₱ is a placeholder: a card's price is the supplier's own <code>vendor_services.starting_price_php</code>; every <span class="dia">◆</span> Setnayan item is priced by <code>platform_retail_catalog_v2</code> / <code>vendor_billing_catalog</code> and is written here as "₱ from the catalogue".</p>
+  <p class="doc-p muted">Already shipped from the same Lane-2 list and NOT redrawn (verified on <code>origin/main</code>): Our Services page (L1), Guest list takes Hosts + Check-in and Your Team takes Budget (L2, DECISION_LOG "AS BUILT — STAGE D", PR #6153). Owner rules applied: FREE very easy · one dropdown for any choice · no link-outs · phone first · <span class="dia">◆</span> marks paid, never a padlock.</p>
+</div>
+
+<div class="ledger">
+  <div class="lcard">
+    <h3>1 · Service cards + marketplace — what exists · what's missing · the delta</h3>
+    <h4 class="ok">Exists (origin/main)</h4>
+    <ul>
+      <li><b>THE card</b> — <code>app/_components/service-card-view.tsx</code> + <code>lib/service-card-view-model.ts</code>: shop logo row (logo opens the shop), title, "from ₱X" + pricing-basis line, best discount pill, ≤5 showcase photos, ✓ inclusions "+N more included", not-included pills, the Setnayan gift line, "Serves:", the card record, "View details" (body opens the service — owner 2026-09-09, built 2026-09-10).</li>
+      <li><b>The marketplace</b> — <code>app/(shell)/explore/page.tsx</code>: <code>?category=</code> + <code>?event_type=</code> filters, search hero, category tiles, service-radius gate, <code>SaveVendorButton</code> (shortlist = "picks"), <code>CompareShortlistBanner</code> → <code>explore/compare</code> (cap 2, owner-locked 2026-05-24); the SEO directory <code>/suppliers/{event}/{category}/{city}</code> (#6013).</li>
+      <li><b>The shortlist</b> — the bench <code>dashboard/[eventId]/vendors/</code>: folders per category, <b>Connect · Add to build · Lock this</b>, "Inquire" (<code>contact-shortlist-vendor-button.tsx</code>), one standing sentence per supplier (<code>lib/supplier-standing.ts</code>: "Quoted ₱… · waiting on you" · "Replied yesterday" · "No reply · 12 days") and the roll-up.</li>
+      <li><b>The supplier's side</b> — Quote Maker (approved 2026-09-22, "the quote is the card"), the two-answer card wizard drawing (<code>service_card_wizard_2026-08-28.html</code>).</li>
+    </ul>
+    <h4 class="gap">Missing (AFTER_APPLE_BUILD_LIST §2A, measured on prod 2026-09-27)</h4>
+    <ul>
+      <li>Any <code>?event_type=</code> (always on for a signed-in couple) still renders the old per-VENDOR card (<code>explore/_components/vendor-card.tsx</code>): photo/title not tappable, "View vendor" opens a new tab, one card per shop so a second service is invisible.</li>
+      <li>1920w photo into a 230px box · "crew meal" said twice · "Booked 2×" counts test bookings · phone header account button clipped · card creation flow redesigned like the Maker (supplier side; research to redo — not drawn here).</li>
+    </ul>
+    <h4 class="delta">The delta drawn below</h4>
+    <p>The couple's path for ONE service, using the shipped card everywhere: pick the service (one dropdown) → cards → details → <b>Save</b> → <b>Ask for a quote</b> (pre-filled from the event; no typing needed) → the picks folder with the standing sentence. No new table, no new price, no new card.</p>
+  </div>
+  <div class="lcard">
+    <h3>2 · Supplier toolkit — what exists · what's missing · the delta</h3>
+    <h4 class="ok">Exists (origin/main)</h4>
+    <ul>
+      <li><b>The five rooms and the phone bar of five already ship</b> — <code>vendor-dashboard/_components/vendor-bottom-nav.tsx</code>: <b>Today · Customers · Shop · Insights · Event Hub</b>; keys owner-locked 2026-07-12, re-cut 2026-08-26 ("yes i agree"), FAB deleted 2026-09-22. This IS "the daily tools in one place with one bottom bar" — it is not redrawn.</li>
+      <li><b>Today</b> — <code>overview-sections.tsx</code>: "Needs your answer" (oldest first) · "Nothing to answer" · "Ongoing" · "Upcoming schedules". <b>Customers</b> holds bookings, calendar, messages, proposals (quotes), contracts, earnings. <b>Shop</b> holds the service cards (<code>services/_components/services-manager.tsx</code>, "Your services"). </li>
+      <li><b>Event Hub room</b> — <code>on-the-day/page.tsx</code>: today's booking tile, "Run the floor · Final headcount &amp; meal splits · Your setlist · Your event brief", live page, recap/photos. Scan prototype approved (<code>supplier_scan_2026-09-25.html</code>).</li>
+    </ul>
+    <h4 class="gap">Missing (DECISION_LOG 2026-09-25 "ONE SUPPLIER TOOLKIT" · 2026-09-26 "READINESS CHECKLIST")</h4>
+    <ul>
+      <li>Per booked event, the same desk for every supplier except the coordinator: <b>Schedule</b> (full timeline, requests, live strip; payments &amp; meetings on it) · <b>Counts</b> (RSVP totals, locked final count, given-vs-planned) · <b>Scan</b> (five modes) · <b>Uploads</b> (own Papic allowance). Category sets the first tool opened (caterer → Counts + meal choices; photo/video → requests + Uploads; souvenirs → Scan "Once").</li>
+      <li>The readiness checklist, last 30 days, seven items, VISIBLE to the couple as "Your Team: 7 of 9 ready".</li>
+    </ul>
+    <h4 class="delta">The delta drawn below</h4>
+    <p>Inside the shipped <b>Event Hub</b> slot: one event's desk with ONE dropdown for the four tools, the category default pre-chosen, and the readiness checklist at the top of the desk. The Today room is shown as-is with the toolkit's new lines (setup to confirm, count received) landing in "Needs your answer". The bar stays the shipped five.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 1 · COUPLE ══════════════════════════ -->
+<h2 class="colh couple" style="margin-left:56px">1 · Service cards + marketplace — the couple finds a caterer</h2>
+<div class="cols">
+  <div class="frames">
+
+<figure class="frame" id="c1">
+  <figcaption><b>1 · Find a caterer — the marketplace, one dropdown</b><span>The shipped card, used for every card (fix §2A-1). The event's date and type are already on. One dropdown picks the service; no pill row.</span></figcaption>
+  <div class="phone app tall">
+    <div class="status"><span>9:41</span><span class="sig">●●●● ᯤ ▮</span></div>
+    <div class="page">
+      <header class="apptop"><span class="menu">☰</span><span class="apph">Find suppliers</span><span class="av">IC</span></header>
+      <div class="hd"><p class="h1">Caterers</p><p class="sum">For <b>Indalecio &amp; Claire</b> · 18 Dec 2026 · Manila · 180 guests</p></div>
+      <div class="ddrow"><span class="dd wide"><span>Catering <small>· 12 in Metro Manila</small></span><i>▾</i></span></div>
+      <div class="cards">
+        <div class="card">
+          <div class="shop"><span class="logo">KK</span><span class="shopn"><b>Kusina ni Kiko</b><small>Quezon City · 9 km</small></span><span class="save">♡ Save</span></div>
+          <div class="titl"><b>Wedding buffet, 150 to 250</b><span class="price">from ₱ —</span></div>
+          <p class="pdet">₱ — / guest · min 150</p>
+          <span class="disc">% 10% off · early booking</span>
+          <div class="photos"><i></i><i></i><i></i></div>
+          <ul class="inc"><li>Five-course buffet · dessert bar</li><li>Tables, chairs, linens for 200</li><li>Waiters for 6 hours</li><li class="more">+3 more included</li></ul>
+          <div class="notinc"><span>Feed the crew: not included</span><span>Corkage: not included</span></div>
+          <p class="gift">◆ Gives a Setnayan gift with the booking</p>
+          <p class="serves">Serves: weddings · debuts · corporate</p>
+          <p class="record"><b>Booked 4× on Setnayan</b> · 4.8 from 3 couples</p>
+          <p class="view">View details ›</p>
+        </div>
+        <div class="card">
+          <div class="shop"><span class="logo">SB</span><span class="shopn"><b>Saysay Bites</b><small>Makati · 4 km</small></span><span class="save on">✓ Saved</span></div>
+          <div class="titl"><b>Plated dinner, 100 to 200</b><span class="price">from ₱ —</span></div>
+          <p class="pdet">₱ — / guest · min 100</p>
+          <div class="photos"><i></i><i></i></div>
+          <ul class="inc"><li>Three-course plated dinner</li><li>Cake table styling</li><li class="more">+4 more included</li></ul>
+          <div class="notinc"><span>Feed the crew: included</span></div>
+          <p class="serves">Serves: weddings</p>
+          <p class="record"><b>New to Setnayan</b></p>
+          <p class="view">View details ›</p>
+        </div>
+      </div>
+      <p class="under">2 saved · <b>Compare the two</b> · show 3 farther away (travel fee likely)</p>
+    </div>
+    <nav class="bar"><a class="slot"><i>⌂</i><span>Home</span></a><a class="slot"><i>☺</i><span>Guest list</span></a><a class="slot on"><i>✦</i><span>Your Team</span></a><a class="slot"><i>▣</i><span>Maker</span></a><a class="slot"><i>✧</i><span>Services</span></a></nav>
+    <div class="homebar"></div>
+  </div>
+</figure>
+
+<figure class="frame" id="c2">
+  <figcaption><b>2 · The dropdown, open</b><span>Every service the couple's event type can hire, with how many cards are near them. Empty kinds say so instead of hiding.</span></figcaption>
+  <div class="phone app">
+    <div class="status"><span>9:41</span><span class="sig">●●●● ᯤ ▮</span></div>
+    <div class="page">
+      <header class="apptop"><span class="menu">☰</span><span class="apph">Find suppliers</span><span class="av">IC</span></header>
+      <div class="hd"><p class="h1">Caterers</p><p class="sum">For <b>Indalecio &amp; Claire</b> · 18 Dec 2026 · Manila</p></div>
+      <div class="ddrow"><span class="dd wide"><span>Catering</span><i>▴</i></span></div>
+      <div class="ddopen">
+        <span class="on">Catering <em>12</em></span>
+        <span>Photography <em>9</em></span>
+        <span>Videography <em>6</em></span>
+        <span>Coordinators <em>5</em></span>
+        <span>Hair &amp; makeup <em>4</em></span>
+        <span>Host / emcee <em>2</em></span>
+        <span>Live band <em>2</em></span>
+        <span>Cake <em>1</em></span>
+        <span>Florist <em>none near you yet</em></span>
+        <span>Lights &amp; sound <em>none near you yet</em></span>
+      </div>
+      <p class="under">Search a name or a kind instead</p>
+    </div>
+    <nav class="bar"><a class="slot"><i>⌂</i><span>Home</span></a><a class="slot"><i>☺</i><span>Guest list</span></a><a class="slot on"><i>✦</i><span>Your Team</span></a><a class="slot"><i>▣</i><span>Maker</span></a><a class="slot"><i>✧</i><span>Services</span></a></nav>
+    <div class="homebar"></div>
+  </div>
+</figure>
+
+<figure class="frame" id="c3">
+  <figcaption><b>3 · The card's details — body tap</b><span>Same card, everything shown. Two verbs: Save, or Ask for a quote. The shop name opens the shop inside the app (owner 2026-09-10: no doors out).</span></figcaption>
+  <div class="phone app tall">
+    <div class="status"><span>9:41</span><span class="sig">●●●● ᯤ ▮</span></div>
+    <div class="page">
+      <header class="apptop"><span class="menu">‹</span><span class="apph">Kusina ni Kiko</span><span class="av">KK</span></header>
+      <div class="cards">
+        <div class="card" style="box-shadow:none;padding:6px 4px 0">
+          <div class="titl"><b style="font-size:22px;font-family:var(--serif);font-weight:600">Wedding buffet, 150 to 250</b></div>
+          <div class="titl"><span class="price" style="font-size:15px">from ₱ —</span><span class="pdet" style="margin:0">₱ — / guest · min 150</span></div>
+          <span class="disc">% 10% off · early booking — your date qualifies</span>
+          <div class="photos"><i></i><i></i><i></i><i style="background:linear-gradient(135deg,#dccdb6,#c0ae92)"></i></div>
+          <p class="sc" style="margin:14px 0 6px">What's included</p>
+          <ul class="inc" style="margin:0"><li>Five-course buffet · dessert bar</li><li>Tables, chairs, linens for 200</li><li>Waiters for 6 hours</li><li>Tasting for 4, before you book</li><li>Buffet styling · signage</li><li>Ice, water, utensils</li></ul>
+          <p class="sc" style="margin:14px 0 6px">Not included</p>
+          <div class="notinc" style="margin:0"><span>Feed the crew</span><span>Corkage</span><span>Overtime after 6 hours</span></div>
+          <p class="sc" style="margin:14px 0 6px">Good to know</p>
+          <p class="meta" style="margin:0">Books 1 per day · needs 3 hours to set up · 2 hours to pack down · travels 50 km from Quezon City</p>
+          <p class="gift">◆ Gives a Setnayan gift with the booking — it lands in your event, not in your hand</p>
+          <p class="sc" style="margin:14px 0 6px">Their record</p>
+          <p class="record" style="margin:0"><b>Booked 4× on Setnayan</b> · 4.8 from 3 couples · replies in about a day</p>
+          <p class="serves">Serves: weddings · debuts · corporate</p>
+        </div>
+      </div>
+      <section class="foot">
+        <div class="cta"><b>Ask for a quote</b><small>We send your date, place and headcount. Free.</small></div>
+        <div class="cta quiet" style="margin-top:8px"><b>Save for later</b></div>
+        <p class="under">Their reply lands in your Setnayan inbox.</p>
+      </section>
+    </div>
+    <div class="homebar"></div>
+  </div>
+</figure>
+
+<figure class="frame" id="c4">
+  <figcaption><b>4 · Ask for a quote — nothing to type</b><span>The event fills the form (the stage-1 brief the supplier sees, DECISION_LOG 2026-09-20). One dropdown only if the couple has more than one event. One button.</span></figcaption>
+  <div class="phone app">
+    <div class="status"><span>9:41</span><span class="sig">●●●● ᯤ ▮</span></div>
+    <div class="page">
+      <header class="apptop"><span class="menu">‹</span><span class="apph">Ask for a quote</span><span class="av">IC</span></header>
+      <div class="hd"><p class="h1">Kusina ni Kiko</p><p class="sum">Wedding buffet, 150 to 250 · from ₱ —</p></div>
+      <div class="drawer">
+        <p class="dl">What they will get</p>
+        <label class="f"><span class="fl">For which event</span><span class="dd wide"><span>Indalecio &amp; Claire · 18 Dec 2026</span><i>▾</i></span></label>
+        <label class="f"><span class="fl">Where</span><span class="fi">Manila · exact venue after they say yes</span></label>
+        <label class="f"><span class="fl">How many</span><span class="fi">180 invited · 150 planned to sit</span></label>
+        <label class="f"><span class="fl">Budget band</span><span class="fi">From your Budget page · shown as a band</span></label>
+        <label class="f"><span class="fl">A note (optional)</span><span class="fi ph">Anything they should know — halal, kids' meals…</span></label>
+        <p class="keep">Your name and number stay with us until you book. <b>They reply in your inbox, and the card is saved to your picks.</b></p>
+      </div>
+      <section class="foot">
+        <div class="cta"><b>Send</b><small>Free · one tap</small></div>
+      </section>
+    </div>
+    <div class="homebar"></div>
+  </div>
+</figure>
+
+<figure class="frame" id="c5">
+  <figcaption><b>5 · Your picks — the Catering folder on the bench</b><span>Shipped verbs (Connect · Add to build · Lock this) and the shipped standing sentence. Delta: the picks folder is where "Save" lands, and it says what each one is waiting on.</span></figcaption>
+  <div class="phone app">
+    <div class="status"><span>9:41</span><span class="sig">●●●● ᯤ ▮</span></div>
+    <div class="page">
+      <header class="apptop"><span class="menu">☰</span><span class="apph">Your Team</span><span class="av">IC</span></header>
+      <div class="hd"><p class="h1">Catering</p><p class="sum">3 picked · <b>1 quote waiting on you</b></p></div>
+      <div class="ddrow"><span class="dd wide"><span>Catering <small>· 3 picks</small></span><i>▾</i></span></div>
+      <div class="roll"><b>2 suppliers replied</b> — one sent a quote. Kusina ni Kiko hasn't replied in 2 days.</div>
+      <div class="req" style="margin-top:8px">
+        <div class="reqh"><b>Saysay Bites</b><small>Plated dinner, 100 to 200 · Makati</small></div>
+        <p class="stand need">Quoted <b>₱ —</b> · waiting on you</p>
+        <div class="verbs"><span class="verb pri">Open conversation</span><span class="verb">Add to build</span><span class="verb">Lock this</span></div>
+      </div>
+      <div class="req">
+        <div class="reqh"><b>Manila Feast Co.</b><small>Buffet for 200 · Pasig</small></div>
+        <p class="stand">They replied yesterday</p>
+        <div class="verbs"><span class="verb pri">Open conversation</span><span class="verb">Add to build</span></div>
+      </div>
+      <div class="req">
+        <div class="reqh"><b>Kusina ni Kiko</b><small>Wedding buffet, 150 to 250 · Quezon City</small></div>
+        <p class="stand quiet">No reply · 2 days</p>
+        <div class="verbs"><span class="verb pri">Open conversation</span><span class="verb">Add to build</span></div>
+      </div>
+      <p class="under">Pick two and <b>Compare</b> side by side</p>
+    </div>
+    <nav class="bar"><a class="slot"><i>⌂</i><span>Home</span></a><a class="slot"><i>☺</i><span>Guest list</span></a><a class="slot on"><i>✦</i><span>Your Team</span></a><a class="slot"><i>▣</i><span>Maker</span></a><a class="slot"><i>✧</i><span>Services</span></a></nav>
+    <div class="homebar"></div>
+  </div>
+</figure>
+
+  </div>
+</div>
+
+<div class="widecol">
+<figure class="frame wide" id="cd">
+  <figcaption><b>6 · Desktop — the same three things side by side</b><span>Left: the Stage D five. Middle: the cards for the chosen service (one dropdown). Right: the selected card's details with the same two verbs. Nothing extra appears on desktop.</span></figcaption>
+  <div class="desk">
+    <aside class="rail">
+      <div class="acct"><span class="av">IC</span><span class="acctt"><b>Indalecio &amp; Claire</b><small>18 Dec 2026 · Manila</small></span></div>
+      <div class="rrow"><i>⌂</i>Home</div>
+      <div class="rrow"><i>☺</i>Guest list<em>142 yes</em></div>
+      <div class="rrow on"><i>✦</i>Your Team<em>1 quote</em></div>
+      <div class="rrow"><i>▣</i>Event Hub Maker</div>
+      <div class="rrow"><i>✧</i>Our Services</div>
+      <div class="grp">Your Team</div>
+      <div class="rrow" style="padding-left:30px;font-size:13.5px;color:var(--fd-m1)">Find suppliers</div>
+      <div class="rrow" style="padding-left:30px;font-size:13.5px;color:var(--fd-m1)">Your picks<em>7</em></div>
+      <div class="rrow" style="padding-left:30px;font-size:13.5px;color:var(--fd-m1)">Budget</div>
+    </aside>
+    <main class="dmain">
+      <h1 class="dh">Caterers</h1>
+      <p class="dsub">12 near Manila who serve weddings on 18 Dec 2026 · 3 more farther away</p>
+      <div class="ddrow" style="padding:0 0 14px"><span class="dd"><span>Catering <small>· 12</small></span><i>▾</i></span><span class="dd" style="background:transparent;box-shadow:inset 0 0 0 1px var(--fd-line)"><span>Within 20 km</span><i>▾</i></span></div>
+      <div class="grid2">
+        <div class="card" style="box-shadow:0 0 0 2px var(--fd-gold)">
+          <div class="shop"><span class="logo">KK</span><span class="shopn"><b>Kusina ni Kiko</b><small>Quezon City · 9 km</small></span><span class="save">♡ Save</span></div>
+          <div class="titl"><b>Wedding buffet, 150 to 250</b><span class="price">from ₱ —</span></div>
+          <p class="pdet">₱ — / guest · min 150</p>
+          <ul class="inc"><li>Five-course buffet · dessert bar</li><li>Tables, chairs, linens for 200</li><li class="more">+4 more included</li></ul>
+          <div class="notinc"><span>Feed the crew: not included</span></div>
+          <p class="record"><b>Booked 4× on Setnayan</b> · 4.8</p>
+          <p class="view">View details ›</p>
+        </div>
+        <div class="card">
+          <div class="shop"><span class="logo">SB</span><span class="shopn"><b>Saysay Bites</b><small>Makati · 4 km</small></span><span class="save on">✓ Saved</span></div>
+          <div class="titl"><b>Plated dinner, 100 to 200</b><span class="price">from ₱ —</span></div>
+          <p class="pdet">₱ — / guest · min 100</p>
+          <ul class="inc"><li>Three-course plated dinner</li><li>Cake table styling</li><li class="more">+4 more included</li></ul>
+          <div class="notinc"><span>Feed the crew: included</span></div>
+          <p class="record"><b>New to Setnayan</b></p>
+          <p class="view">View details ›</p>
+        </div>
+        <div class="card">
+          <div class="shop"><span class="logo">MF</span><span class="shopn"><b>Manila Feast Co.</b><small>Pasig · 11 km</small></span><span class="save on">✓ Saved</span></div>
+          <div class="titl"><b>Buffet for 200</b><span class="price">from ₱ —</span></div>
+          <ul class="inc"><li>Buffet · 4 mains · 2 desserts</li><li class="more">+2 more included</li></ul>
+          <p class="record"><b>Booked 1× on Setnayan</b></p>
+          <p class="view">View details ›</p>
+        </div>
+        <div class="card">
+          <div class="shop"><span class="logo">LT</span><span class="shopn"><b>Lola Tess Catering</b><small>Marikina · 14 km</small></span><span class="save">♡ Save</span></div>
+          <div class="titl"><b>Filipino fiesta buffet</b><span class="price">from ₱ —</span></div>
+          <ul class="inc"><li>Lechon · 5 mains · kakanin bar</li><li class="more">+3 more included</li></ul>
+          <p class="record"><b>New to Setnayan</b></p>
+          <p class="view">View details ›</p>
+        </div>
+      </div>
+    </main>
+    <aside class="dpane">
+      <p class="sc">Kusina ni Kiko · Quezon City</p>
+      <div class="card">
+        <div class="titl"><b style="font-size:22px;font-family:var(--serif);font-weight:600">Wedding buffet, 150 to 250</b></div>
+        <div class="titl"><span class="price" style="font-size:15px">from ₱ —</span><span class="pdet" style="margin:0">₱ — / guest · min 150</span></div>
+        <span class="disc">% 10% off · early booking — your date qualifies</span>
+        <div class="photos"><i></i><i></i><i></i></div>
+        <p class="sc" style="margin:14px 0 6px">What's included</p>
+        <ul class="inc" style="margin:0"><li>Five-course buffet · dessert bar</li><li>Tables, chairs, linens for 200</li><li>Waiters for 6 hours</li><li>Tasting for 4, before you book</li><li>Buffet styling · signage</li><li>Ice, water, utensils</li></ul>
+        <p class="sc" style="margin:14px 0 6px">Not included</p>
+        <div class="notinc" style="margin:0"><span>Feed the crew</span><span>Corkage</span><span>Overtime after 6 hours</span></div>
+        <p class="meta">Books 1 per day · 3 hours to set up · travels 50 km</p>
+        <p class="gift">◆ Gives a Setnayan gift with the booking</p>
+        <p class="record"><b>Booked 4× on Setnayan</b> · 4.8 from 3 couples</p>
+      </div>
+      <div class="verbs" style="margin-top:18px"><span class="verb pri wide">Ask for a quote</span><span class="verb wide">Save for later</span></div>
+      <p class="under" style="text-align:left">Their reply lands in your Setnayan inbox. Free.</p>
+    </aside>
+  </div>
+</figure>
+</div>
+
+<!-- ══════════════════════════ SECTION 2 · SUPPLIER ══════════════════════════ -->
+<h2 class="colh" style="margin-left:56px">2 · Supplier toolkit — one booked event's desk, inside the shipped Event Hub slot</h2>
+<div class="cols">
+  <div class="frames">
+
+<figure class="frame" id="s1">
+  <figcaption><b>7 · Today — the shipped room, with the toolkit's lines landing in it</b><span>Shipped: "Needs your answer", oldest first, and the bar of five. Delta: "Confirm your setup time" and "Final count received" are answers too — they come from the desk, not a new inbox.</span></figcaption>
+  <div class="phone app">
+    <div class="status"><span>9:41</span><span class="sig">●●●● ᯤ ▮</span></div>
+    <div class="page">
+      <header class="apptop"><span class="menu">☰</span><span class="apph">Saysay Bites</span><span class="av">SB</span></header>
+      <div class="count"><b>5</b><span>things need <em>your answer</em><br>oldest first</span></div>
+      <div class="ddrow"><span class="dd wide"><span>Everything</span><i>▾</i></span></div>
+      <div class="req" style="margin-top:6px">
+        <div class="reqh"><b>New ask · Indalecio &amp; Claire</b><small>Plated dinner · 18 Dec 2026 · Manila · 150 to sit</small></div>
+        <p class="stand need">Sent today · they see your reply in their inbox</p>
+        <div class="verbs"><span class="verb pri">Reply</span><span class="verb">Send a quote</span></div>
+      </div>
+      <div class="req">
+        <div class="reqh"><b>Confirm your setup time · Bea &amp; Marco</b><small>The couple's schedule has you at 2:00–4:00 PM · 11 Oct</small></div>
+        <p class="stand">From their Event Hub schedule</p>
+        <div class="verbs"><span class="verb pri">Confirm</span><span class="verb">Ask for another time</span></div>
+      </div>
+      <div class="req">
+        <div class="reqh"><b>Lock to answer · Ana &amp; Paolo</b><small>Buffet for 200 · 3 Nov 2026 · Tagaytay</small></div>
+        <p class="stand need">They pressed Lock · 1 day ago</p>
+        <div class="verbs"><span class="verb pri">Yes, I'm free</span><span class="verb">Not on that date</span></div>
+      </div>
+      <div class="sect"><b>Nothing to answer</b><em>3</em></div>
+      <div class="req" style="padding-top:6px"><div class="reqh"><b>Final count received · Bea &amp; Marco</b><small>Locked at 150 by the couple · was 160</small></div></div>
+    </div>
+    <nav class="bar"><a class="slot on"><i>⌂</i><span>Today</span><em>5</em></a><a class="slot"><i>☺</i><span>Customers</span></a><a class="slot"><i>▤</i><span>Shop</span></a><a class="slot"><i>◷</i><span>Insights</span></a><a class="slot"><i>◈</i><span>Event Hub</span></a></nav>
+    <div class="homebar"></div>
+  </div>
+</figure>
+
+<figure class="frame" id="s2">
+  <figcaption><b>8 · Event Hub → one event's desk · Schedule</b><span>Delta. One dropdown for the four tools. Readiness sits on top. Payments and meetings are ON the schedule (2026-09-25), not a fifth tool.</span></figcaption>
+  <div class="phone app tall">
+    <div class="status"><span>9:41</span><span class="sig">●●●● ᯤ ▮</span></div>
+    <div class="page">
+      <header class="apptop"><span class="menu">‹</span><span class="apph">Event Hub</span><span class="av">SB</span></header>
+      <div class="hd"><p class="h1">Bea &amp; Marco</p><p class="sum"><b>11 Oct 2026</b> · Blue Leaf, Taguig · in 12 days · plated dinner for 150</p></div>
+      <div class="roll" style="display:flex;justify-content:space-between;align-items:center"><span><b>Ready for the day · 5 of 7</b><br><small style="color:var(--fd-m1)">The couple sees this on Your Team</small></span><span class="verb" style="padding:8px 12px">See the 2 left</span></div>
+      <div class="ddrow"><span class="dd wide"><span>Schedule <small>· 1 request</small></span><i>▾</i></span></div>
+      <div class="live"><i></i>Not live yet — this strip goes live on the day, with the coordinator's calls</div>
+      <div class="tl">
+        <div class="tlr"><b>12:00</b><span>Venue opens to suppliers<small>Loading dock: Gate 2, Bayani St · ask for Jun</small></span></div>
+        <div class="tlr mine"><b>2:00 PM</b><span><b style="font-family:var(--sys);font-size:14px">Your setup · 2:00–4:00 PM</b><small>Confirm it, or ask for another time</small></span></div>
+        <div class="tlr"><b>4:30 PM</b><span>Ceremony</span></div>
+        <div class="tlr"><b>6:00 PM</b><span>Dinner service begins<small>150 plated · beef 61 · fish 52 · veg 37</small></span></div>
+        <div class="tlr"><b>6:45 PM</b><span>Cake cutting · <em style="font-style:normal;color:var(--terra)">request: move to 7:15?</em><small>From the couple, yesterday</small></span></div>
+        <div class="tlr"><b>9:30 PM</b><span>Pack down<small>Balance due at the event · ₱ —</small></span></div>
+      </div>
+      <div class="sect"><b>Meetings &amp; payments</b><em>on this schedule</em></div>
+      <div class="req" style="padding-top:4px"><div class="reqh"><b>Tasting · 4 Oct, 3:00 PM</b><small>Confirmed · at your kitchen</small></div></div>
+      <div class="req"><div class="reqh"><b>Deposit paid · balance due 11 Oct</b><small>Their Budget page and your Earnings agree</small></div></div>
+      <section class="foot"><div class="cta"><b>Confirm setup · 2:00–4:00 PM</b><small>Or ask for another time</small></div></section>
+    </div>
+    <nav class="bar"><a class="slot"><i>⌂</i><span>Today</span><em>5</em></a><a class="slot"><i>☺</i><span>Customers</span></a><a class="slot"><i>▤</i><span>Shop</span></a><a class="slot"><i>◷</i><span>Insights</span></a><a class="slot on"><i>◈</i><span>Event Hub</span></a></nav>
+    <div class="homebar"></div>
+  </div>
+</figure>
+
+<figure class="frame" id="s3">
+  <figcaption><b>9 · The tool dropdown, open — and Counts (a caterer's first tool)</b><span>Category sets the default: caterer opens on Counts with meal choices; photo/video on requests + Uploads; souvenirs on Scan. Suppliers ask the couple to lock; they never lock.</span></figcaption>
+  <div class="phone app tall">
+    <div class="status"><span>9:41</span><span class="sig">●●●● ᯤ ▮</span></div>
+    <div class="page">
+      <header class="apptop"><span class="menu">‹</span><span class="apph">Event Hub</span><span class="av">SB</span></header>
+      <div class="hd"><p class="h1">Bea &amp; Marco</p><p class="sum"><b>11 Oct 2026</b> · in 12 days</p></div>
+      <div class="ddrow"><span class="dd wide"><span>Counts</span><i>▴</i></span></div>
+      <div class="ddopen">
+        <span>Schedule <em>1 request</em></span>
+        <span class="on">Counts <em>opens first for caterers</em></span>
+        <span>Scan <em>on the day</em></span>
+        <span>Uploads <em>◆ 40 Papic points left</em></span>
+      </div>
+      <div class="count"><b>150</b><span><em>final count</em> · locked by the couple 4 Oct<br>was 160 planned</span></div>
+      <div class="tl">
+        <div class="tlr"><b>180</b><span>invited</span></div>
+        <div class="tlr"><b>142</b><span>said yes · 21 no · 17 no reply yet</span></div>
+        <div class="tlr"><b>150</b><span>planned to sit · locked</span></div>
+        <div class="tlr"><b>—</b><span>came through the door<small>fills in on the day from Check-in</small></span></div>
+      </div>
+      <div class="sect"><b>Meal choices</b><em>from RSVPs</em></div>
+      <div class="tl" style="padding-top:0">
+        <div class="tlr"><b>61</b><span>beef</span></div>
+        <div class="tlr"><b>52</b><span>fish</span></div>
+        <div class="tlr"><b>37</b><span>vegetarian <small>incl. 6 halal · 2 no-nut</small></span></div>
+        <div class="tlr"><b>8</b><span>kids' meals</span></div>
+      </div>
+      <section class="foot"><div class="cta quiet"><b>Ask the couple to re-lock the count</b><small>If your contract needs it 7 days before</small></div></section>
+    </div>
+    <nav class="bar"><a class="slot"><i>⌂</i><span>Today</span><em>5</em></a><a class="slot"><i>☺</i><span>Customers</span></a><a class="slot"><i>▤</i><span>Shop</span></a><a class="slot"><i>◷</i><span>Insights</span></a><a class="slot on"><i>◈</i><span>Event Hub</span></a></nav>
+    <div class="homebar"></div>
+  </div>
+</figure>
+
+<figure class="frame" id="s4">
+  <figcaption><b>10 · Ready for the day — the readiness checklist</b><span>Seven items from DECISION_LOG 2026-09-26, last 30 days. Five fill themselves; two are taps. The couple sees the same count on Your Team.</span></figcaption>
+  <div class="phone app">
+    <div class="status"><span>9:41</span><span class="sig">●●●● ᯤ ▮</span></div>
+    <div class="page">
+      <header class="apptop"><span class="menu">‹</span><span class="apph">Event Hub</span><span class="av">SB</span></header>
+      <div class="count"><b>5<span style="font-size:28px;letter-spacing:0;color:var(--fd-m2);padding:0">/7</span></b><span><em>ready for the day</em><br>Bea &amp; Marco · 11 Oct</span></div>
+      <div style="height:10px"></div>
+      <div class="ck on"><span class="box on">✓</span><span class="ckt"><b>Brief read</b><small>Their event brief · opened 20 Sep</small></span></div>
+      <div class="ck on"><span class="box on">✓</span><span class="ckt"><b>Final headcount received</b><small>150 · locked by the couple 4 Oct</small></span></div>
+      <div class="ck"><span class="box"></span><span class="ckt"><b>Setup time confirmed</b><small>2:00–4:00 PM on their schedule · confirm on Schedule</small></span></div>
+      <div class="ck on"><span class="box on">✓</span><span class="ckt"><b>Venue and loading directions</b><small>Blue Leaf, Taguig · Gate 2 · saved</small></span></div>
+      <div class="ck on"><span class="box on">✓</span><span class="ckt"><b>Coordinator saved</b><small>Liza · reach her in the event chat</small></span></div>
+      <div class="ck on"><span class="box on">✓</span><span class="ckt"><b>Payment</b><small>Deposit paid · balance ₱ — due at the event</small></span></div>
+      <div class="ck"><span class="box"></span><span class="ckt"><b>Our team and equipment are ready</b><small>Tap when true · the couple will see it</small></span></div>
+      <section class="foot"><p class="under">The couple's Your Team reads: <b>Your Team · 7 of 9 ready</b>, with what each one is missing.</p></section>
+    </div>
+    <nav class="bar"><a class="slot"><i>⌂</i><span>Today</span><em>5</em></a><a class="slot"><i>☺</i><span>Customers</span></a><a class="slot"><i>▤</i><span>Shop</span></a><a class="slot"><i>◷</i><span>Insights</span></a><a class="slot on"><i>◈</i><span>Event Hub</span></a></nav>
+    <div class="homebar"></div>
+  </div>
+</figure>
+
+  </div>
+</div>
+
+<div class="widecol">
+<figure class="frame wide" id="sd">
+  <figcaption><b>11 · Desktop — the shop's five rooms, the booked events, one event's desk</b><span>Left: the shipped five (labels from <code>vendor-nav-destinations.ts</code>). Middle: booked events with their readiness. Right: the desk with the same one dropdown. Same DOM as the phone, two layouts.</span></figcaption>
+  <div class="desk">
+    <aside class="rail">
+      <div class="acct"><span class="av">SB</span><span class="acctt"><b>Saysay Bites</b><small>Makati · Solo</small></span></div>
+      <div class="rrow"><i>⌂</i>Today<em>5</em></div>
+      <div class="rrow"><i>☺</i>My Customers<em>7</em></div>
+      <div class="rrow"><i>▤</i>My Shop</div>
+      <div class="rrow"><i>◷</i>My Performance</div>
+      <div class="rrow on"><i>◈</i>Event Hub<em>3</em></div>
+      <div class="grp">Booked events</div>
+      <div class="rrow" style="padding-left:30px;font-size:13.5px;color:var(--fd-m1)">Next 30 days<em>1</em></div>
+      <div class="rrow" style="padding-left:30px;font-size:13.5px;color:var(--fd-m1)">Later<em>2</em></div>
+      <div class="rrow" style="padding-left:30px;font-size:13.5px;color:var(--fd-m1)">Done</div>
+    </aside>
+    <main class="dmain">
+      <h1 class="dh">Event Hub</h1>
+      <p class="dsub">Your desk for each booked event. Opens on the tool your kind of shop needs first.</p>
+      <div class="dlist">
+        <div class="ditem on"><b>Bea &amp; Marco · 11 Oct 2026</b><small>Blue Leaf, Taguig · plated dinner for 150 · in 12 days</small><em>Ready 5 of 7 · 1 request</em></div>
+        <div class="ditem"><b>Ana &amp; Paolo · 3 Nov 2026</b><small>Tagaytay · buffet for 200 · lock to answer</small><em class="none">Not booked yet</em></div>
+        <div class="ditem"><b>Indalecio &amp; Claire · 18 Dec 2026</b><small>Manila · plated dinner · quote sent</small><em class="none">Not booked yet</em></div>
+        <div class="ditem"><b>Mia's 18th · 24 Jan 2027</b><small>Alabang · buffet for 120</small><em>Ready 1 of 7</em></div>
+      </div>
+      <p class="dsub" style="margin-top:22px">A desk opens the day they book you and closes 30 days after the event. Nothing else lives here.</p>
+    </main>
+    <aside class="dpane">
+      <p class="sc">Bea &amp; Marco · 11 Oct · in 12 days</p>
+      <div class="roll" style="margin:0 0 12px;display:flex;justify-content:space-between;align-items:center"><span><b>Ready for the day · 5 of 7</b></span><span class="verb" style="padding:8px 12px">See the 2 left</span></div>
+      <div class="ddrow" style="padding:0"><span class="dd wide"><span>Schedule <small>· 1 request</small></span><i>▾</i></span></div>
+      <div class="tl" style="padding-top:10px">
+        <div class="tlr"><b>12:00</b><span>Venue opens to suppliers<small>Gate 2 · ask for Jun</small></span></div>
+        <div class="tlr mine"><b>2:00 PM</b><span><b style="font-family:var(--sys);font-size:14px">Your setup · 2:00–4:00 PM</b><small>Confirm, or ask for another time</small></span></div>
+        <div class="tlr"><b>4:30 PM</b><span>Ceremony</span></div>
+        <div class="tlr"><b>6:00 PM</b><span>Dinner service<small>150 plated · beef 61 · fish 52 · veg 37</small></span></div>
+        <div class="tlr"><b>6:45 PM</b><span>Cake cutting · <em style="font-style:normal;color:var(--terra)">request: 7:15?</em></span></div>
+        <div class="tlr"><b>9:30 PM</b><span>Pack down<small>Balance due at the event · ₱ —</small></span></div>
+      </div>
+      <div class="verbs" style="margin-top:18px"><span class="verb pri wide">Confirm setup 2:00–4:00 PM</span><span class="verb wide">Another time</span></div>
+    </aside>
+  </div>
+</figure>
+</div>
+
+<!-- ══════════════════════════ OPEN QUESTIONS ══════════════════════════ -->
+<div class="qs">
+  <h2>Open questions for the owner — only the ones the corpus does not answer</h2>
+  <p class="doc-p muted">Not asked again: the compare cap of 2 (locked 2026-05-24) · the five shop rooms and their keys (2026-07-12, re-cut 2026-08-26) · no FAB (2026-09-22) · the toolkit applies to every booked supplier except the coordinator (2026-09-25) · the seven readiness items and that the couple sees them (2026-09-26) · the quote is the card (2026-09-22) · the §2C five (demo shops · "vendor" in legal pages · /vendors address · specs repo · region pages) are already on the owner's list and are not repeated here.</p>
+
+  <div class="qrow"><span class="qn">1</span><div>
+    <p>The couple's word. Today the bench button says <b>"Inquire"</b> (<code>contact-shortlist-vendor-button.tsx</code>), the couple's workspace says <b>"Proposals from …"</b>, and the supplier's tool is the <b>Quote Maker</b>. One word per concept: may the couple's button read <b>"Ask for a quote"</b> and the reply be a <b>quote</b> everywhere the couple looks?</p>
+    <p class="rec"><b>Recommended: yes.</b> "Inquire" is a form word; "quote" is what they want back, and the supplier's side already says it. Code names stay frozen (copy only, like the "supplier, never vendor" phases).</p>
+    <p class="src">Source of the gap: DECISION_LOG 2026-09-09 (bench relabel) and 2026-09-22 (Quote Maker) name the two ends differently; no row names the couple's verb.</p>
+  </div></div>
+
+  <div class="qrow"><span class="qn">2</span><div>
+    <p>When the couple has more than one event, which one does "Ask for a quote" attach to? Today it lands silently on the PRIMARY event (measured, DECISION_LOG 2026-09-10 "add this shop to my event already happens — as a side effect").</p>
+    <p class="rec"><b>Recommended: one dropdown on the ask sheet (frame 4), pre-set to the event whose type matches what they searched;</b> hidden entirely when there is one event. No new screen.</p>
+    <p class="src">The 2026-09-10 row flags the silent default and does not rule.</p>
+  </div></div>
+
+  <div class="qrow"><span class="qn">3</span><div>
+    <p>The final count: locked only by the host (or a coordinator with that permission), with suppliers able to <b>request</b> a re-lock and never lock it themselves?</p>
+    <p class="rec"><b>Recommended: yes — suppliers request, hosts lock</b> (frame 9's quiet button). One number, one owner of it; a caterer who could lock would be sizing their own bill.</p>
+    <p class="src">DECISION_LOG 2026-09-25 "ONE SUPPLIER TOOLKIT" ends: "Pending owner: final count locked by host/approved coordinator; suppliers only request (recommended)."</p>
+  </div></div>
+
+  <div class="qrow"><span class="qn">4</span><div>
+    <p>The first tool a desk opens on: the 2026-09-25 row gives three examples (caterer → Counts + meal choices · photo/video → requests + Uploads · souvenirs → Scan "Once"). Every other kind of shop (florist, band, host, lights, cake…) — <b>Schedule</b> first?</p>
+    <p class="rec"><b>Recommended: Schedule for everyone not named,</b> because the setup time is the one line every supplier must confirm (readiness item 3). The dropdown is always one tap away, so the default only saves a tap.</p>
+    <p class="src">The row names three kinds and says "the rest one tap away" without naming the rest's default.</p>
+  </div></div>
+
+  <div class="qrow"><span class="qn">5</span><div>
+    <p>Who may tick "Our team and equipment are ready" — the shop owner only, or any teammate given that event?</p>
+    <p class="rec"><b>Recommended: any teammate given that event,</b> extending the 2026-08-26 ruling "a teammate reaches only the events they were given". The tick records who and when, so the couple's "7 of 9 ready" names a person.</p>
+    <p class="src">DECISION_LOG 2026-09-26 lists the item; no row says who ticks it.</p>
+  </div></div>
+
+  <div class="qrow"><span class="qn">6</span><div>
+    <p>The supplier's Uploads tool spends the shop's own Papic allowance (2026-09-25). When the allowance is at zero, is the tool shown with <span class="dia">◆</span> and the catalogue price to top up, or hidden?</p>
+    <p class="rec"><b>Recommended: shown, with "◆ Top up · ₱ from the catalogue" on the row</b> — a hidden tool reads as missing (the disease of 2026-08-20, "a failure that renders like emptiness"). Never a padlock.</p>
+    <p class="src">The 2026-09-25 row names the allowance; nothing says what an empty one looks like.</p>
+  </div></div>
+</div>
+
+</body>
+</html>
