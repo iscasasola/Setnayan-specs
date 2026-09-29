@@ -56,6 +56,7 @@ Open owner answers for Lane 2: the five §2C questions in `AFTER_APPLE_BUILD_LIS
 
 ## Stage D — the event menu (LAST, after C)
 Home · Guest list (guests, hosts, check-in) · Your Team (suppliers, budget) · Event Hub Maker · Our Services (Papic · Live Studio · Gallery incl. Editorial · Patiktok · Music Maker · SAI; Suite becomes this page) · Refer a couple → account menu. Old routes redirect.
+**AS BUILT 2026-09-29 — PR #6153 (`rd/stage-d-event-menu`, held):** five rows on rail + ☰ + ONE phone bar (sub nav retired), same in every phase; Seat plan kept as one interim row until Details part 4 (#6138) lands — then drop `'seat'` from `INTERIM_ROWS` in `lib/customer-menu.ts`. See DECISION_LOG "AS BUILT — STAGE D".
 
 ## Stage E — after that
 Per-letter styling beyond the hero (styles adapt to text edits) · "Both" view · A3 Our Story poster · STD auto-play over widget scenes · palette's illustrated person · dashboard card wears the cover · STD film replay fix · Post Event scenes. (50 new themes: NOT scheduled — owner 2026-09-29 "no 50 themes yet".)
