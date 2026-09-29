@@ -1,7 +1,7 @@
 # RSVP + Invitation release — live before Oct 1 (plan, 2026-09-30)
 
 > **OWNER DATES (2026-09-30, verbatim): "Oct 1 release of RSVP and INVITATION · Oct 3 THE DAY and POST EVENT".**
-> Oct 1 = everything in the table below. Oct 3 = each tab its own full page (Invitation + The Day, reusing hub-shell) · The Day menu Live · Welcome · Camera · Gallery · Me · Post Event (train n #6166 / #6156 scene styles + Post Event, fixed and re-checked). Profile and Name style ride alongside when they don't risk Oct 3. **Mon 5 Oct (owner: "until Monday to finish everything"): everything else below + the held PRs.** Then Stage B (Apple check).
+> Oct 1 = everything in the table below. Oct 3 = each tab its own full page (Invitation + The Day, reusing hub-shell) · The Day menu Live · Welcome · Camera · Gallery · Me · Post Event (train n #6166 / #6156 scene styles + Post Event, fixed and re-checked). Profile and Name style ride alongside when they don't risk Oct 3. **Sequence to Tue 6 Oct (owner): RSVP + Invitation (Oct 1) → The Day + Post Event (Oct 3) → the rest of the Event Hub (Mon 5) → the rest of the site (Tue 6) → Apple check (last).**
 
 
 Owner, verbatim: *"we really need to release RSVP before Oct1"* · *"our build needs to be safe for releasing RSVP"* · *"this means we need to fix both RSVP and Invitation"*.
