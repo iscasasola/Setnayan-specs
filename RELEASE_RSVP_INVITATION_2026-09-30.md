@@ -1,5 +1,9 @@
 # RSVP + Invitation release — live before Oct 1 (plan, 2026-09-30)
 
+> **OWNER DATES (2026-09-30, verbatim): "Oct 1 release of RSVP and INVITATION · Oct 3 THE DAY and POST EVENT".**
+> Oct 1 = everything in the table below. Oct 3 = each tab its own full page (Invitation + The Day, reusing hub-shell) · The Day menu Live · Welcome · Camera · Gallery · Me · Post Event (train n #6166 / #6156 scene styles + Post Event, fixed and re-checked). Profile and Name style ride alongside when they don't risk Oct 3. Maker core (Lane A/B) + Themes follow (target Mon 5 Oct).
+
+
 Owner, verbatim: *"we really need to release RSVP before Oct1"* · *"our build needs to be safe for releasing RSVP"* · *"this means we need to fix both RSVP and Invitation"*.
 
 ## The rule
