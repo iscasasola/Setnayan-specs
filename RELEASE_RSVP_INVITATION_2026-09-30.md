@@ -37,6 +37,7 @@ Target: live ~10:00 AM 30 Sep PHT; hard limit before 1 Oct.
 
 ## After the release (in this order)
 1. **Profile** — a guest row linked to an account shows that account's profile (read-only); one tap copies the event's formal name into the person's profile; a first account made from an invitation starts with its profile filled.
-2. **Themes** — theme sets background + fonts + colours (Lane C) · one font dropdown #6160 · palette styles · venue styles (3: Photo card · Full photo · The journey — prototype first).
-3. **Maker core** — Lane A structure + Lane B stage editing (instant by design), then Invitation → The Day → Post Event stages.
-4. **Mood Board** — supplier can alter every detail (extend MB16 grants beyond colour).
+2. **Name style ▾** — Full · Middle initial · Surname first (DECISION_LOG "THE COUPLE PICKS A NAME STYLE").
+3. **Themes** — theme sets background + fonts + colours (Lane C) · one font dropdown #6160 · palette styles · venue styles (3: Photo card · Full photo · The journey — prototype first).
+4. **Maker core** — Lane A structure + Lane B stage editing (instant by design), then Invitation → The Day → Post Event stages.
+5. **Mood Board** — supplier can alter every detail (extend MB16 grants beyond colour).
