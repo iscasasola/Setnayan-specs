@@ -42,3 +42,4 @@ Target: live ~10:00 AM 30 Sep PHT; hard limit before 1 Oct.
 3. **Themes** — theme sets background + fonts + colours (Lane C) · one font dropdown #6160 · palette styles · venue styles (3: Photo card · Full photo · The journey — prototype first).
 4. **Maker core** — Lane A structure + Lane B stage editing (instant by design), then Invitation → The Day → Post Event stages.
 5. **Mood Board** — supplier can alter every detail (extend MB16 grants beyond colour).
+6. **The Day menu** — Live · Welcome (their table, look, reminders, E-Gifts) · Camera · Gallery · Me (DECISION_LOG "THE DAY'S MENU HAS FIVE").
