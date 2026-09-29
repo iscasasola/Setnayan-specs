@@ -96,7 +96,7 @@ Per-letter styling beyond the hero (styles adapt to text edits) · "Both" view �
 | 5 | Seat plan (map) scene | Yes | Stage scene reading the seat plan |
 | 6 | STD auto-play over widget scenes | Yes | Motion |
 | 7 | Per-letter styling beyond the hero | **Needs a rule** | Letter styles are stored by character position; when the words change in Details the styled letters can shift. Decide: keep styles on a word match, or clear them when the text changes |
-| 8 | "Both" view | Yes | After K (canvas) |
+| 8 | "Both" view | Yes | After K (canvas) — **BUILT 2026-09-29, PR #6132** (Hero · Reveal · Love Story pages stay single-frame) |
 | 9 | Post Event scenes | Yes | Its thank-you / recap words read from Details |
 | + | New: tap any fact on any stage → edits the Details field | **New build** | After K; one mechanism for every scene |
 | + | STD stage: back from Find your seat replays the film | Small fix | Batch with #1 |
