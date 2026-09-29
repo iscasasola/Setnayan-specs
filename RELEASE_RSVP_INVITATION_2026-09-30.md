@@ -43,3 +43,4 @@ Target: live ~10:00 AM 30 Sep PHT; hard limit before 1 Oct.
 4. **Maker core** — Lane A structure + Lane B stage editing (instant by design), then Invitation → The Day → Post Event stages.
 5. **Mood Board** — supplier can alter every detail (extend MB16 grants beyond colour).
 6. **The Day menu** — Live · Welcome (their table, look, reminders, E-Gifts) · Camera · Gallery · Me (DECISION_LOG "THE DAY'S MENU HAS FIVE").
+0. **FIRST after the release — each menu tab is its own full page** (Invitation + The Day), reusing `hub-shell.tsx` (DECISION_LOG "EACH MENU TAB IS ITS OWN FULL PAGE").
