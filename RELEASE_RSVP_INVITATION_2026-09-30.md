@@ -18,6 +18,7 @@ One release that carries ONLY RSVP + guest Invitation work. Everything else is h
 | 8 | Dress code: couple can hide the outfit figure; Do's & Don'ts editable in place | `rd/dress-code-figure-toggle` (building) |
 | 9 | Best Woman · either-or honour attendants · rename roles (Bride's Crew / Groom's Crew) | `rd/best-woman-matron` (building) |
 | 11 | Maker: **Page ▾ Home · Details · Story · Me** dropdown at the top of the navigator (jumps, never filters) so the couple fixes each guest page — Maker only, guests unchanged | `rd/maker-page-dropdown` (building) |
+| 12 | Venues: name/address/buttons readable (≥4.5:1); venue photo from the booked supplier's own photos (couple picks, cover by default), manual upload if none; address already from the supplier | `rd/venue-cards-readable-with-photos` (building) |
 | 10 | Invitation text fixes from the guest-side audit (list: scratchpad `invite-audit/REPORT.md`, "blocks sending" + "should fix" only) | one small PR after the audit |
 
 ## Held until after the release
