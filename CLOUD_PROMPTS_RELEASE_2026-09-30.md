@@ -9,7 +9,8 @@ How: Claude app → New session → **Cloud** → repo **iscasasola/setnayan-pla
 ```
 Model: Opus · effort medium. You are a builder in iscasasola/setnayan-platform (Next.js monorepo, apps/web). Read CLAUDE.md first and obey it.
 RULES: never merge, never `gh pr merge`, never --admin, never arm auto-merge. ONE PR to main with `gh pr create --label do-not-auto-merge`; confirm `gh pr view --json autoMergeRequest` is null. No production migrations, no deploys. Plain English; never "website"/"site" (it is the Event Hub); "supplier" never "vendor" in UI. Phone first (390 px). Changelog fragment `changelog.d/<branch-slug>.md` only. From apps/web run install, typecheck, lint, every CI guard script in .github/workflows/ci.yml, nearby tests (escape `[[]slug]`). Guards per fix, sabotage once.
-TASK — guest-side text fixes found by an audit of origin/main (verify each first). Branch rd/invitation-text-fixes.
+BASE: branch `rd/invitation-text-fixes` FROM `origin/rd/train-2026-09-30-release` (the Oct 1 release train), NOT main; open the PR with `--base rd/train-2026-09-30-release`. The train already contains the Welcome page, no-maybe, sponsor names, seats-on-the-day and more — verify each item below ON THE TRAIN BRANCH and skip what is already fixed.
+TASK — guest-side text fixes found by an audit (verify each first).
 1 Programme (`app/[slug]/_components/schedule-widget.tsx`, `lib/schedule.ts`): "YOUR TIME" only when the viewer's timezone differs from the event's, once; "UP NEXT" only on the event day; hide the raw "CUSTOM" label; hide the small kicker when it equals the title.
 2 Hero shows the first schedule time (guests-arrive): label it "Guests arrive 2:30 PM" (from data), never an unlabeled time.
 3 `get-inside.tsx`: button offers only what exists ("Upload your QR · Sign in"), no "Scan · Tap NFC".
