@@ -33,3 +33,22 @@ SPEC: DECISION_LOG "LANE 2 §2C — ALL FIVE OWNER QUESTIONS ANSWERED". BUILD: (
 ```
 SPEC: same rows as G1 + the concept's K (wake, solemn skin) and C1 (corporate). BUILD on the merged engine: Wake (who we are remembering; quiet tone everywhere — no confetti/emoji, abuloy/condolences instead of gifts, no RSVP pressure, sensitive photo defaults), Corporate (company name + logo; an event FOR a business pre-fills from the shop), then Reveal · Birthday variants (debut court) · Celebration · Travel · Tournament · Anniversary · Graduation · Reunion · Gala; roles + default groups per type; sweep event-type wording across Hub/Guest list/Your Team. Branch rd/onboarding-types.
 ```
+
+## G6 — Admin: open an event + reopen its guest list (this account, ~$20 credit)
+```
+Model: Opus · effort: medium. Repo iscasasola/setnayan-platform, base origin/main, branch rd/admin-event-page. Read CLAUDE.md first. Credit is small (~$20): commit + push WIP early and often so nothing is lost if the session stops.
+
+WHY: the owner cannot open an event or reopen a finalized guest list from admin — today he had to run SQL by hand to unlock one. Build ONE admin event page.
+
+BUILD
+1. Page /admin/events/[eventId] (accept the public id S89E-… and the internal id). Shows: name, type, date, hosts (names + emails, linked to /admin/users/<id>), guest counts (total / replied yes / declined), whether the guest list is finalized (events.guest_count_locked_at, events.final_pax, events.guest_list_edit_deadline), Papic face tagging (events.papic_face_mode AND events.face_tagging_declined_by_couple — show "On (couple declined)" when declined; resolveFaceMode in lib/papic-face-mode.ts is the truth), and a per-guest face list (read guest_face_enrollments + guests.face_recognition_excluded; name · enrolled yes/no · excluded yes/no). Every read binds its error and shows "Couldn't load" instead of an empty/zero state — copy the pattern in apps/web/lib/guests-read-is-honest.test.ts.
+2. "Reopen guest list" button (ConfirmForm). It must clear guest_count_locked_at AND final_pax AND move guest_list_edit_deadline forward (null it, or +14 days — read lib/guest-list-closed.ts and lib/pax.ts ensureFinalized first; if you only clear the stamp, ensureFinalized re-stamps it on the next visit). Check the row actually updated (.select() the row), redirect with ?saved= / ?error=, write the existing admin audit log. Respect the trigger guard_guest_edits_when_locked (migration 20261215000000).
+3. Make setEventFaceMode (app/admin/events/actions.ts) honest: .select() the updated row, redirect with ?error= / ?saved= instead of silently returning.
+4. Link to the new page: the event row in app/admin/accounts/_surfaces/events-surface.tsx (name → the page), and the event links on app/admin/users/[userId]/page.tsx.
+
+LIMITS: server actions are AT THE CEILING (1225) — do NOT add a new exported action; add the reopen as a new branch of an existing action in app/admin/events/actions.ts (e.g. one action taking an intent field), or replace one. Shared client bundle has ~0 bytes spare — server components only, no new client code. A new admin page must join four registries or CI fails: ConsoleTable + its CONVERTED list (admin-console-is-one-table.test.ts), regenerate `pnpm admin:map && pnpm admin:jobs` from apps/web and commit the generated files, add ADMIN_NAV_DESCRIPTIONS + ADMIN_NAV_ALIASES, and raise MODEL_CHOICE_CAP in rank-choices.test.ts by what the test says. Word is "supplier", never "vendor", in UI copy. No migration (if you truly need one, stop and say why).
+
+TESTS: a guard test proving (a) reopen clears all three columns, (b) every read on the page has an error branch; sabotage-check it. Run typecheck + the CI guards + unit tests from apps/web. Add changelog.d/rd-admin-event-page.md (SPEC IMPACT: None).
+
+PR: gh pr create --base main; then immediately `gh pr edit <n> --add-label do-not-auto-merge` and `gh pr merge <n> --disable-auto`. Never merge, never --admin. Report the PR number + a 3-step check card.
+```
