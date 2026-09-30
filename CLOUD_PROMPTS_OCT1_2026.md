@@ -52,3 +52,20 @@ TESTS: a guard test proving (a) reopen clears all three columns, (b) every read 
 
 PR: gh pr create --base main; then immediately `gh pr edit <n> --add-label do-not-auto-merge` and `gh pr merge <n> --disable-auto`. Never merge, never --admin. Report the PR number + a 3-step check card.
 ```
+
+## G7 — Maker first-load diet (~3 KB) so #6205 + #6209 fit (this account, ~$16 credit)
+```
+Model: Opus · effort: medium. Repo iscasasola/setnayan-platform. Read CLAUDE.md first. Credit is small (~$16): commit + push WIP early and often.
+
+BASE: first run `gh pr view 6211 --json state`. If MERGED → branch rd/maker-diet from origin/main. If not merged yet → branch from origin/rd/train-2026-09-30-midnight (the train; it carries #6207, the Maker's latest +2.3 KB) and say so in the PR body.
+
+WHY: the Maker's first-load JS is at ~504.4 KB of its 505 KB ceiling (apps/web/scripts/check-maker-js-budget.mjs, run in CI after the production build). Two finished PRs can't ship until room is found: #6205 (More Services + phone bar, +1.6 KB) and #6209 (tap-to-type, +0.6 KB). NEVER raise the ceiling.
+
+GOAL: cut the Maker route's first-load JS by ≥ 3 KB (target ≤ 501.4 KB) with NO behaviour change. Also do not grow the shared bundle (≤ 206,848 B, apps/web/scripts/check-bundle-size.mjs — it is at the limit) and do not add server actions (at 1225 ceiling).
+
+HOW: `pnpm build` in apps/web (needs a lot of memory — NODE_OPTIONS as the repo's build script sets), then run check-maker-js-budget.mjs to see the chunk list. Find what the Maker page loads on open that it doesn't need until a tap: sheets/panels/dialogs/pickers imported eagerly → next/dynamic or React.lazy at the tap point; big constant tables/data that can move server-side or into a lazy chunk; duplicate helpers pulled in twice; dev-only code. Measure before/after on the same machine and paste both numbers per change. Each change keeps every existing test green (run the Maker-related tests + typecheck + CI guards from apps/web). Watch for guards pinned to file paths when moving code (grep the test tree for the symbol before moving it).
+
+TESTS: add a small guard only if it protects a lazy boundary you created (e.g. "X is not imported statically by the Maker page"); sabotage-check it. Add changelog.d/rd-maker-diet.md (SPEC IMPACT: None).
+
+PR: gh pr create --base main --draft; then `gh pr edit <n> --add-label do-not-auto-merge`, `gh pr ready <n>`, `gh pr merge <n> --disable-auto`. Never merge, never --admin. Report: PR number, before/after Maker KB, shared bundle bytes, what moved.
+```
