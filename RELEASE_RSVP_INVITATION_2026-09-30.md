@@ -48,3 +48,4 @@ Target: live ~10:00 AM 30 Sep PHT; hard limit before 1 Oct.
 5. **Mood Board** — supplier can alter every detail (extend MB16 grants beyond colour).
 6. **The Day menu** — Live · Welcome (their table, look, reminders, E-Gifts) · Camera · Gallery · Me (DECISION_LOG "THE DAY'S MENU HAS FIVE").
 0. **FIRST after the release — each menu tab is its own full page** (Invitation + The Day), reusing `hub-shell.tsx` (DECISION_LOG "EACH MENU TAB IS ITS OWN FULL PAGE").
+7. **Before the Apple check:** Google + Apple sign-in in the iOS/Android apps (native Apple sheet; Google via system browser + app link). "Save it to your account" on Me offers Google/Apple one-tap.
