@@ -6,6 +6,42 @@
 
 Owner, verbatim: *"we really need to release RSVP before Oct1"* · *"our build needs to be safe for releasing RSVP"* · *"this means we need to fix both RSVP and Invitation"*.
 
+## ✅ CHECKLIST BY STEP (updated 2026-09-30 evening — the one list to read)
+
+**Step 1 · RSVP + Invitation (+ the parts they depend on)**
+- [x] Oct 1 release (#6181): tickets, no email, no maybe, venues, dress code, seats on the day, Best Woman/renames, wrong-account fix, round QR, RSVP stage, Page ▾ — LIVE
+- [x] Text fixes #6183 · Invite column (sends the Digital Ticket) #6185 · "We found you!" generic QR #6184 — LIVE
+- [x] A · guest landing page (Fable) #6186 — in ABC train #6193, deploying
+- [x] Pairing fix #6189 — in #6193
+- [ ] Name style + Prefix dropdown + Live Studio #6194 (owner picks applied) — next batch
+- [ ] Face tagging rules (Papic-only, selfie on the day, erase on log out / Papic close, end-of-event rescan, account reuse switch) — building here
+- [ ] #6191 Access column + Hosts out of the menu — being brought up to main
+- [ ] E · Guest card + Guest list redesign (full width, header dropdowns, Access/Check-in) — building in the cloud
+- [ ] F1 · Hosts pieces outside E's files — building here · [ ] F2 · top-bar guest search, Hosts onto the card, parts row removed — after E merges
+- [ ] Reply heading wording aligned ("Will you celebrate with us?")
+
+**Step 2 · The Day + Post Event (Oct 3)**
+- [x] B · auto-seat #6188 — in #6193, deploying
+- [x] C · Post Event + scene styles #6187 — in #6193, deploying
+- [ ] D · each tab its own page + The Day menu + Welcome on the day — building here
+- [ ] Ticket seat on the day + "ticket updated" pop-up — in A ✅ (verify on the day rule)
+
+**Step 3 · The rest of the Event Hub incl. speed**
+- [ ] Maker core part 1: instant editing + faster Love Story & Programme editors — next slot
+- [ ] Maker core part 2: tap-to-type + Wording ▾ + Format ▾
+- [ ] Maker core part 3: simple top menu + one-pick theme
+- [ ] Rebase + ship: font dropdown #6160 · Both view #6164 · palette styles (paused branch)
+- [ ] Venue styles (3; Fable draws first) · Mood Board supplier edits beyond colour · Profile (linked profile, first account filled) · Try first, pay at Apply
+
+**Step 4 · The rest of the site incl. suppliers + purchases**
+- [ ] Ship held: #6179 dead ends · #6175 dropdowns + tours · #6180 supplier paywalls (owner OK'd) · #6162 Partner · #6161 Patiktok · #6159 Discover
+- [ ] Lane 2: demo shops is_demo (migration) · /vendors → /for-suppliers · region supplier pages
+- [ ] Purchases / checkout review
+
+**Step 5 · Admin fixes** — [ ] audit first
+**Step 6 · Every event type + religion** — [ ] audit first · [ ] Google + Apple sign-in in the apps
+**Step 7 · Apple check** — owner + iPhone
+
 ## The rule
 One release that carries ONLY RSVP + guest Invitation work. Everything else is held (label `do-not-auto-merge`, auto-merge off) until this is live and walked through. After it is live: **freeze the guest pages** while friends reply — new findings go on a list, not into prod.
 
