@@ -6,6 +6,22 @@
 
 Owner, verbatim: *"we really need to release RSVP before Oct1"* · *"our build needs to be safe for releasing RSVP"* · *"this means we need to fix both RSVP and Invitation"*.
 
+## 🗓 BUILD SEQUENCE ACROSS THE THREE ACCOUNTS (owner, 2026-09-30: three 20x accounts — resets Thu 2 AM, Sun 2 AM, and this one [usage page: Tue 6 Oct 10 PM; owner said Wed 10 PM])
+ONE controller at a time. Switch at ~97% or at the reset; hand off with make-handoff.sh + this file + CURRENT-STATE.md.
+
+| When | Account | Work |
+|---|---|---|
+| Wed 30 Sep → Thu 1 Oct 2 AM | **this one** (39% left) | Midnight batch (#6191 #6194 #6195 #6196 #6197 #6198 #6199 #6201 #6202 + E/F1/More Services if green) · Maker core 1–2 progress · handoff 1:17 AM |
+| Thu 1 Oct | **Thu-2AM account (fresh)** | Finish step 1: E #6192 → F2 (search, Hosts fold, first-visit "Who can reply?") · Profile (cloud) · face tagging + rescan if not shipped · ship Maker core 1 (instant) · Try first, pay at Apply · #6159 public events |
+| Fri 2 Oct | Thu account | Maker core 2 (tap-to-type) + 3 (simpler layout) · event onboarding part 1: engine + Wedding + simple types (Birthday · Hangout · Date · Get-together) + roles/groups per type |
+| Sat 3 Oct | Thu account | **Step 2 due:** The Day + Post Event walk-through on a test event · onboarding part 2: Wake + Corporate · venue styles (Fable → build) · rebase + ship font dropdown #6160 · Both view #6164 · palette styles · Mood Board supplier edits |
+| Sun 4 Oct | **Sun-2AM account (fresh)** | Onboarding part 3: the remaining types · "Finish your Event Hub" fallback card · wording/tone sweep per type · step 3 wrap-up |
+| Mon 5 Oct | Sun account | **Step 4:** ship held PRs (#6175 dropdowns+tours · #6179 dead ends · #6180 supplier paywalls · #6162 Partner · #6161 Patiktok) · Lane 2 (demo shops migration · /vendors → /for-suppliers · region pages) · purchases/checkout review |
+| Tue 6 Oct | Sun account | **Step 5** admin audit + fixes · **Step 6** every event type + religion audit · Google + Apple sign-in in the iOS/Android apps · final walk-through |
+| Tue 6 Oct evening → Wed 7 Oct | this account (fresh after its reset) | Buffer for anything that slipped · **Step 7 Apple check** (owner + iPhone) |
+
+Rules: ≤3–4 builders at once (16 GB Mac, one heavy lock) · merge only through green CI + auto-merge · deploy database changes in quiet hours · each day ends with a batch + a phone walk-through · cloud credit (~$56) only for self-contained builds.
+
 ## ✅ CHECKLIST BY STEP (updated 2026-09-30 evening — the one list to read)
 
 **Step 1 · RSVP + Invitation (+ the parts they depend on)**
