@@ -1,0 +1,810 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Event onboarding — one engine, steps by event type — Setnayan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FAF7F2;--paper2:#F3EEE6;--page:#EDE7DE;--ink:#1E2229;--ink2:#3B3F46;--mute:#76736D;
+  --gild:#B08A5B;--gild-soft:#E9DEC9;--gild-wash:#F7F1E6;--wine:#6E2A3A;--wine-wash:#F6ECEE;
+  --line:#E5DED3;--ok:#2F6B4F;--okbg:#E7F1EA;--warn:#8A5A00;--warnbg:#FBF0D8;
+  --serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --sans:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--page);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1264px;margin:0 auto;padding:32px 24px 40px}
+
+/* ---------- page furniture (owner-facing) ---------- */
+.doc-brand{font-size:10.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--gild);font-weight:600}
+h1{font-family:var(--serif);font-weight:500;font-size:40px;line-height:1.1;margin:8px 0 10px;letter-spacing:-.01em}
+.lead{color:var(--ink2);font-size:14.5px;line-height:1.6;max-width:1000px;margin:0 0 8px}
+.lead b{font-weight:600;color:var(--ink)}
+h2.sec{display:flex;align-items:center;gap:14px;font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink2);font-weight:600;margin:44px 0 16px}
+h2.sec .n{font-family:var(--serif);font-size:22px;font-weight:500;color:var(--gild);letter-spacing:0}
+h2.sec:after{content:"";flex:1;height:1px;background:var(--line)}
+.notes{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 20px 10px;position:relative}
+.notes:before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:3px;background:var(--gild);border-radius:0 3px 3px 0}
+.notes h4{margin:0 0 8px;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gild);font-weight:600;display:flex;align-items:baseline;gap:8px}
+.notes h4 .k{font-family:var(--serif);font-size:24px;font-weight:500;letter-spacing:0;color:var(--gild);line-height:1}
+.notes ul{margin:0;padding-left:15px;font-size:12px;line-height:1.5;color:var(--ink2);columns:2;column-gap:36px}
+.notes li{margin-bottom:7px;break-inside:avoid}
+.notes li b{color:var(--ink);font-weight:600}
+.notes .q{font-family:var(--serif);font-style:italic;font-size:13px;color:var(--ink)}
+.notes.one ul{columns:1}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.cols .notes ul{columns:1}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;border-radius:999px;padding:3px 9px;letter-spacing:.01em;white-space:nowrap}
+.pill.ok{background:var(--okbg);color:var(--ok)}
+.pill.warn{background:var(--warnbg);color:var(--warn)}
+.pill.soft{background:var(--paper2);color:var(--ink2);box-shadow:inset 0 0 0 1px var(--line)}
+
+/* ---------- the type × steps matrix ---------- */
+.mx{width:100%;table-layout:fixed;border-collapse:collapse;font-size:11.5px;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.mx th{text-align:left;white-space:normal;font-weight:600;color:var(--ink2);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;padding:9px 8px;border-bottom:1px solid var(--line);background:var(--paper2);vertical-align:bottom}
+.mx th .pill{white-space:normal;display:inline;padding:1px 6px;line-height:1.6}
+.mx th small{display:block;white-space:normal;text-transform:none;letter-spacing:0;font-weight:500;color:var(--mute);font-size:10.5px;margin-top:3px;line-height:1.3}
+.mx td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.35}
+.mx tr:last-child td{border-bottom:0}
+.mx td.t{font-family:var(--serif);font-size:15px;font-weight:500;white-space:nowrap}
+.mx td.t small{display:block;font-family:var(--sans);font-size:10px;color:var(--mute);font-weight:400}
+.mx td.c{text-align:center;font-size:14px;white-space:nowrap}
+.mx td.c.on{color:var(--gild)}
+.mx td.c.pa{color:var(--mute)}
+.mx td.c .w{display:block;font-size:9.5px;color:var(--ink2);white-space:normal;line-height:1.25;margin-top:1px}
+.mx td.x{color:var(--ink2)}
+.mx td.x b{color:var(--ink);font-weight:600}
+.mx td.x i{font-style:normal;color:var(--mute)}
+.mx tr.solemn td{background:#F5F3EF}
+.key{display:flex;gap:18px;flex-wrap:wrap;font-size:11.5px;color:var(--ink2);margin:10px 0 0}
+.key span b{color:var(--gild);font-weight:600;margin-right:4px}
+.key span b.m{color:var(--mute)}
+
+/* ---------- phone frame ---------- */
+.phone{width:390px;flex:none;background:var(--paper);border:9px solid #14161A;border-radius:48px;position:relative;overflow:hidden;
+  box-shadow:0 0 0 1px #2E3238,0 40px 70px -30px rgba(30,34,41,.45),0 16px 30px -18px rgba(30,34,41,.25)}
+.phone .island{position:absolute;left:50%;top:11px;transform:translateX(-50%);width:118px;height:33px;background:#14161A;border-radius:20px;z-index:9}
+.phone .status{height:52px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 30px 8px;font-size:14px;font-weight:600;letter-spacing:-.01em}
+.phone .status .sig{display:flex;gap:6px;align-items:center;font-size:11px;letter-spacing:.06em}
+.phone .status .bat{width:24px;height:11px;border:1.5px solid var(--ink);border-radius:4px;position:relative;opacity:.9}
+.phone .status .bat:after{content:"";position:absolute;left:2px;top:2px;bottom:2px;right:5px;background:var(--ink);border-radius:1px}
+.phone.fx{height:680px}
+.phone.solemn{--gild:#8A847C;--gild-soft:#DDD8D0;--gild-wash:#F1EEE9;--wine:#4B4F57;--ok:#4B4F57;--okbg:#ECEBE7}
+/* the strip of small phones */
+.strip{display:grid;grid-template-columns:repeat(3,1fr);gap:18px 20px;margin-top:6px}
+.mini{width:100%;position:relative}
+.mini .cap{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--ink2);margin:0 0 8px;font-weight:500}
+.mini .cap b{font-family:var(--serif);font-size:17px;font-weight:500;color:var(--gild);margin-right:6px}
+.mini .hold{height:544px;position:relative}
+.mini .phone{transform:scale(.8);transform-origin:0 0;position:absolute;left:0;top:0}
+.strip.two{grid-template-columns:repeat(2,1fr)}
+
+/* ---------- atoms ---------- */
+.eyebrow{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--gild);font-weight:600}
+.gname{font-family:var(--serif);font-weight:500;font-size:27px;line-height:1.1;margin:4px 0 4px;letter-spacing:-.005em}
+.sub{font-size:12.5px;color:var(--mute);line-height:1.45;margin:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border-radius:999px;font-size:13px;font-weight:500;border:1.5px solid var(--ink);background:#fff;color:var(--ink);white-space:nowrap;line-height:1}
+.btn.fill{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.ghost{border:1.5px solid var(--line);background:#fff;color:var(--ink);font-size:13px}
+.link{color:var(--wine);text-decoration:underline;text-underline-offset:3px;font-size:13px;font-weight:500}
+.i{font-size:9.5px;color:var(--gild);border:1px solid var(--gild);border-radius:50%;width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;margin-left:8px;font-family:var(--serif);font-style:italic;font-weight:600;letter-spacing:0;text-transform:none;vertical-align:3px;flex:none}
+.search{display:flex;align-items:center;gap:8px;border:1.5px solid var(--ink);border-radius:999px;padding:12px 16px 12px 14px;font-size:14px;color:var(--mute);background:#fff}
+.search:before{content:"";width:11px;height:11px;border:1.5px solid var(--ink2);border-radius:50%;box-shadow:4px 4px 0 -2px var(--ink2);flex:none}
+.search b{color:var(--ink);font-weight:500}
+.dd{border:1.5px solid var(--ink);border-radius:14px;background:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.dd small,.field small{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-weight:500;margin-bottom:1px}
+.dd b,.field b{font-weight:500;font-size:14.5px}
+.dd b.empty,.field b.empty{color:#A6A29B;font-weight:400}
+.dd i{font-style:normal;color:var(--gild);font-size:12px}
+.dd .row{display:flex;align-items:center}
+.dd .th{width:34px;height:24px;border-radius:5px;flex:none;margin-right:8px}
+.dd.soft{border-color:var(--line)}
+.field{border:1.5px solid var(--ink);border-radius:14px;background:#fff;padding:9px 14px}
+.field.soft{border-color:var(--line)}
+.field+.field,.field+.dd,.dd+.field,.dd+.dd,.search+.dd,.dd+.search{margin-top:8px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.two .btn{padding:13px 8px;font-size:13px}
+.names{display:grid;grid-template-columns:1fr 54px 1fr;gap:6px;align-items:stretch}
+.names .dd{padding:8px 6px;justify-content:center;border-color:var(--line)}
+.names .dd b{font-family:var(--serif);font-size:20px}
+.choice{display:block;border:1.5px solid var(--line);border-radius:14px;padding:11px 14px;background:#fff}
+.choice+.choice{margin-top:8px}
+.choice b{display:block;font-size:14.5px;font-weight:500;line-height:1.3}
+.choice span{display:block;font-size:12px;color:var(--mute);margin-top:1px}
+.choice.on{border-color:var(--ink)}
+.opts{margin-top:6px;border:1px solid var(--line);border-radius:14px;background:#fff;padding:6px;box-shadow:0 22px 44px -18px rgba(30,34,41,.35),0 4px 12px -6px rgba(30,34,41,.15)}
+.opts div{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;font-size:14px;font-weight:500;color:var(--ink)}
+.opts div i{font-style:normal;width:18px;text-align:center;color:var(--gild);font-size:13px}
+.opts div.on{background:var(--gild-wash)}
+.opts div.on:after{content:"✓";margin-left:auto;color:var(--gild);font-size:12px}
+.opts div small{color:var(--mute);font-weight:400;font-size:12px;margin-left:auto}
+.opts div.more{color:var(--wine);font-size:13px;justify-content:center;border-top:1px solid var(--line);border-radius:0;margin-top:4px;padding-top:10px}
+.opts .th{width:44px;height:30px;border-radius:6px;flex:none}
+.th.velvet{background:linear-gradient(135deg,#3B1F2B,#7A2E45 55%,#C9A24A)}
+.th.vintage{background:linear-gradient(135deg,#F3E8D3,#D9C39C 55%,#8C6A3F)}
+.th.regency{background:linear-gradient(135deg,#EEF0F4,#B9C3D6 55%,#3E4E6E)}
+.th.cinder{background:linear-gradient(135deg,#EAF2FB,#9FBDE0 55%,#4C6FA6)}
+.th.whims{background:linear-gradient(135deg,#FFF3D6,#F7C97B 55%,#5E8F5A)}
+.th.gatsby{background:linear-gradient(135deg,#14161A,#3A3324 55%,#D6B25E)}
+.th.abaca{background:linear-gradient(135deg,#F6E6CF,#E0A972 55%,#8C4A2F)}
+.th.cyber{background:linear-gradient(135deg,#12081F,#5B1FA6 55%,#22D3EE)}
+.th.house{background:linear-gradient(135deg,#FAF7F2,#E9DEC9 55%,#B08A5B)}
+.th.plain{background:linear-gradient(135deg,#fff,#F3EEE6);box-shadow:inset 0 0 0 1px var(--line)}
+.th.capiz{background:linear-gradient(135deg,#F7F5F0,#E3DDD2 55%,#A7A096)}
+.th.lily{background:linear-gradient(135deg,#FFFFFF,#EEF0EA 55%,#7C8A76)}
+.th.corp{background:linear-gradient(135deg,#F4F6F8,#C9D3DD 55%,#1F3A5F)}
+.hubtop{border-radius:14px;overflow:hidden;border:1px solid var(--line);margin:0 0 12px;background:#fff}
+.hubtop .cov{height:104px;background:linear-gradient(135deg,#EFE6D6,#DCCBAE 60%,#C9AC7F);position:relative;display:flex;align-items:flex-end;padding:10px 14px}
+.hubtop .cov:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent 0 9px,rgba(255,255,255,.22) 9px 10px)}
+.hubtop.solemn .cov{background:linear-gradient(135deg,#ECEAE5,#D8D4CC 60%,#B9B3A9)}
+.hubtop .cov .ph{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#7A6446;font-weight:600;white-space:nowrap}
+.hubtop.solemn .cov .ph{color:#5E5A55}
+.hubtop .cov .nm{position:relative;font-family:var(--serif);font-size:19px;font-weight:500;color:var(--ink);line-height:1.1}
+.hubtop .cov .nm small{display:block;font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);font-weight:600;margin-top:3px}
+.hubtop .strip2{display:flex;gap:6px;padding:8px 12px}
+.hubtop .strip2 span{height:6px;border-radius:3px;background:var(--paper2);flex:1}
+.hubtop .strip2 span:first-child{flex:.6;background:var(--gild-soft)}
+.pre{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
+.pre .pill{padding:4px 10px}
+.pre .pill:before{content:"✓";font-size:10px;color:var(--gild)}
+
+
+/* ---------- per-type skins: the onboarding looks like the event ---------- */
+.phone.bday{--paper:#FFF8EE;--paper2:#FDEBD9;--gild:#E4572E;--gild-soft:#FBD2C2;--gild-wash:#FFEFE6;--wine:#1F7A8C;--ink:#2B1D16;--ink2:#4A3A31;--line:#F1DCCB}
+.phone.bday .btn.fill{background:#E4572E;border-color:#E4572E;color:#fff}
+.phone.bday .field,.phone.bday .dd,.phone.bday .search,.phone.bday .choice{border-radius:18px}
+.phone.bday .prog .bar i.now{background:#1F7A8C}
+.phone.bday .toast{background:#E4572E}
+.phone.corp{--paper:#F7F9FB;--paper2:#EDF1F5;--gild:#1F3A5F;--gild-soft:#CFD9E6;--gild-wash:#EAF0F7;--wine:#1F3A5F;--ink:#141C26;--ink2:#3A4756;--line:#DCE3EA;--serif:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif}
+.phone.corp .ob h3{font-size:22px;font-weight:600;letter-spacing:-.01em}
+.phone.corp .field,.phone.corp .dd,.phone.corp .search,.phone.corp .choice,.phone.corp .hubtop{border-radius:8px}
+.phone.corp .btn{border-radius:8px}
+.phone.corp .btn.fill{background:#1F3A5F;border-color:#1F3A5F}
+.phone.hang{--paper:#F2FAF6;--paper2:#E3F2EB;--gild:#2A8C7A;--gild-soft:#BFE3D8;--gild-wash:#E4F4EE;--wine:#2A8C7A;--ink:#17302A;--ink2:#3C5A51;--line:#D3E8DF;--serif:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif}
+.phone.hang .ob h3{font-size:23px;font-weight:600;letter-spacing:-.01em}
+.phone.hang .btn.fill{background:#2A8C7A;border-color:#2A8C7A}
+.phone.hang .pre .pill{background:#fff}
+.phone.solemn .ob h3{font-weight:400}
+.phone.solemn .btn.fill{background:#3B3F46;border-color:#3B3F46}
+/* the "what it turns on" matrix */
+.mx2 td{font-size:11px;line-height:1.4}
+.mx2 td.x b{font-weight:600}
+.mx2 .on{color:var(--gild);font-weight:700}
+.mx2 .nw{color:var(--warn);font-weight:700}
+.mx2 .off{color:#B9B3A9}
+
+/* ---------- the onboarding screen ---------- */
+.ob{padding:6px 20px 0;position:absolute;left:0;right:0;top:52px;bottom:0}
+.ob .top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.ob .top .back{font-size:22px;color:var(--ink2);line-height:1;width:18px}
+.prog{display:flex;align-items:center;gap:10px;flex:1}
+.prog .bar{flex:1;display:flex;gap:3px}
+.prog .bar i{flex:1;height:4px;border-radius:2px;background:var(--line)}
+.prog .bar i.on{background:var(--gild)}
+.prog .bar i.now{background:var(--ink)}
+.prog small{font-size:11px;color:var(--mute);font-weight:500;white-space:nowrap}
+.ob h3{font-family:var(--serif);font-weight:500;font-size:27px;line-height:1.1;margin:0 0 6px;letter-spacing:-.005em;color:var(--ink);display:flex;align-items:center}
+.ob p.line{margin:0 0 14px;font-size:13.5px;line-height:1.5;color:var(--ink2)}
+.ob .alts{display:flex;justify-content:center;gap:18px;margin-top:12px}
+.anytime{font-size:11.5px;color:var(--mute);text-align:center;margin:12px 0 0}
+.ob .foot{position:absolute;left:20px;right:20px;bottom:46px}
+.ob .foot .btn{width:100%;padding:14px;font-size:14px}
+.ob .foot .anytime{margin-top:10px}
+.ob .btn.big{width:100%;padding:14px;font-size:14px}
+.ob .btn.big+.btn.big{margin-top:8px}
+.ob .two .btn{width:100%}
+.info{background:var(--gild-wash);border:1px solid var(--gild-soft);border-radius:10px;padding:8px 11px;font-size:12px;color:var(--ink2);margin:-4px 0 12px;line-height:1.45}
+.info b{color:var(--ink);font-weight:600}
+.orow{border-top:1px solid var(--line);padding:11px 0 12px}
+.orow:first-of-type{border-top:0;padding-top:0}
+.orow h5{font-family:var(--serif);font-weight:500;font-size:19px;line-height:1.15;margin:0 0 2px;display:flex;align-items:center}
+.orow p{margin:0 0 8px;font-size:12.5px;color:var(--mute)}
+.orow .two .btn{padding:10px 8px;font-size:12.5px}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--ok);background:var(--okbg);border-radius:999px;padding:4px 10px;font-weight:500;margin-top:10px}
+.home{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:var(--ink);opacity:.85}
+/* dashboard (end) */
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.tile{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 12px 10px}
+.tile small{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);font-weight:600}
+.tile b{display:block;font-family:var(--serif);font-size:24px;font-weight:500;line-height:1.1;margin-top:4px}
+.tile span{font-size:11px;color:var(--mute)}
+.tile.dark{background:var(--ink);color:var(--paper);border-color:var(--ink);grid-column:1/-1;display:flex;justify-content:space-between;align-items:center}
+.tile.dark small{color:var(--gild-soft)}
+.tile.dark span{color:#B9B3A9}
+.scr{padding:44px 20px 8px}
+.toast{position:absolute;left:50%;top:60px;transform:translateX(-50%);background:var(--ink);color:var(--paper);border-radius:999px;padding:10px 18px;font-size:13.5px;font-weight:500;z-index:9;white-space:nowrap;box-shadow:0 14px 28px -12px rgba(0,0,0,.55)}
+.toast b{color:#9BD1B2;font-weight:600;margin-left:4px}
+.bnav{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:9px 6px 30px;font-size:9.5px;color:var(--mute);z-index:4}
+.bnav span{display:flex;flex-direction:column;align-items:center;gap:4px;width:60px}
+.bnav i{width:20px;height:20px;border-radius:6px;background:var(--paper2);display:block;box-shadow:inset 0 0 0 1px var(--line)}
+.bnav span.on{color:var(--wine);font-weight:600}
+.bnav span.on i{background:var(--wine-wash);box-shadow:inset 0 0 0 1px var(--wine)}
+.bnav:after{content:"";position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:var(--ink);opacity:.85}
+.endrow{display:flex;gap:24px;align-items:flex-start}
+.endrow .notes{flex:1}
+.endrow .notes ul{columns:1}
+</style>
+</head>
+<body><div class="wrap">
+
+<div class="doc-brand">Setnayan · Create event · Onboarding</div>
+<h1>Event onboarding — one engine, steps by event type</h1>
+<p class="lead">Owner, 2026-09-30: the setup lives at the <b>end of creating the event</b>, the theme is asked too, and every event style gets what it needs. This is <b>one engine</b>: seven <b>shared essentials</b> every type answers (name · when · where · cover photo · look · who can reply · guests), <b>0–2 type steps</b> only where the type needs them, and <b>one Yes/No list</b> at the end. Every card needs an answer, none is work (<span class="q" style="font-family:var(--serif);font-style:italic">Not decided yet · Use a theme picture for now · I'll add them later</span>), every answer changes later, no Skip, no Later, no confirm dialogs. Drawn end-to-end for three contrasting types — <b>Wedding · Birthday · Wake</b> — plus one frame each for Corporate and Hangout. <b>Each type's onboarding looks like the event</b> — wedding: serif, gold and wine on paper · birthday: coral and sunflower, rounder · wake: grey, no gold, no emoji · corporate: navy, sans, square · hangout: teal, sans, casual — one skin per profile, never one generic skin. Each frame is marked <span class="pill ok">exists</span> (the screen or its data is in the tree today) or <span class="pill warn">new</span>.</p>
+
+<h2 class="sec"><span class="n">A</span>What exists today, and what the engine keeps</h2>
+<div class="cols">
+<div class="notes"><h4>Today's three doors (read from origin/main)</h4><ul>
+ <li><b>Wedding wizard</b> (<code>/onboarding/wedding</code>, 17 screens): welcome · role · kind · faith · name · date · region · pax · budget · picker · prefs · account · find · congrats · plan · services · services_summary.</li>
+ <li><b>Generic wizard</b> (<code>/onboarding/[type]</code>, flag-gated): welcome · name · honoree (debut · christening · birthday · graduation · reveal · corporate · gala) · anchor (anniversary) · date · recurs (tournament · reunion · gala) · pax · region · type questions · specialty · 5 quiz axes · persona reveal · services (Papic + AI) · congrats.</li>
+ <li><b>Simple Event</b> (<code>/onboarding/simple</code>): one form — name + date, Papic card under it.</li>
+ <li><b>Already per type in the tree:</b> <code>event_type_profiles</code> terminology (couple / celebrant / graduate / organizer / family; wedding / debut / trip / wake), the <b>solemn register</b> (wake: no countdown, no "celebrate", solemn quiz copy in code), <code>specialty-catalog.ts</code> signature fields for 14 types, the honoree link, forced yearly repeat (birthday · anniversary), multi-day (travel · wake), <code>MINOR_HEAVY</code> face opt-in (christening · debut).</li>
+ <li><b>Already in the Maker, not in onboarding:</b> Theme (10 looks: House · Galeriya · Velvet · Vintage · Regency · Abaca · Cinderella · Gatsby · Whimsical · Cyber), First screen (the cover), Logo Maker, RSVP questions, <b>Who can reply</b> (<code>rsvp-ask.ts</code>: Only my Guest List / Anyone, I approve), Guests, Papic, Gifts.</li>
+</ul></div>
+<div class="notes"><h4>The engine — five rules</h4><ul>
+ <li><b>One sequence, built from the type's profile.</b> <span class="q">shared essentials</span> + <span class="q">type steps</span> (from the profile: honoree · couple · anchor · multi-day · solemn) + <span class="q">the Yes/No list</span>. The same screen component draws every card; only the words and the control change.</li>
+ <li><b>Every card is answered, nothing is work.</b> A quick answer is a real answer: <span class="q">Not decided yet</span> · <span class="q">Use a theme picture for now</span> · <span class="q">I'll add them later</span>. Each card says <span class="q">You can change this anytime</span> and each answer lives in its real home (Details · Look · RSVP · Guests).</li>
+ <li><b>Pre-answered where the type is light.</b> Date · Hangout · Get-together open with the House look, a theme picture and "Only my list" already set; those cards don't show, the chips do (frame H1). FREE stays very easy.</li>
+ <li><b>The words follow the type</b> (EventWords / profile): couple · celebrant · graduate · organizer · family; guests · attendees · travellers; gifts · abuloy. A wake never sees a logo card, a confetti toast or a questions card.</li>
+ <li><b>What leaves onboarding — an owner call:</b> pax · region-only · budget · the 5 quiz axes · the persona reveal · the vendor picker · congrats/plan. Proposal: they become the first thing <b>Setnayan AI</b> asks on the dashboard ("Plan with me"), so the hub is ready in ~8 answers and the plan is a second, optional sitting. Old events keep the slim Overview card (<code>finish_your_event_hub_2026-09-30_fable.html</code>).</li>
+</ul></div>
+</div>
+
+<h2 class="sec"><span class="n">B</span>Type × steps — what each type answers</h2>
+<table class="mx">
+ <colgroup><col style="width:118px"><col style="width:74px"><col style="width:74px"><col style="width:96px"><col style="width:64px"><col style="width:74px"><col style="width:82px"><col style="width:80px"><col style="width:236px"><col></colgroup>
+ <tr>
+  <th>Event type<small>picker label · key</small></th>
+  <th>Name<small><span class="pill ok">exists</span> name screen</small></th>
+  <th>When<small><span class="pill ok">date</span> <span class="pill warn">time</span></small></th>
+  <th>Where<small><span class="pill ok">wedding venues · region</span> <span class="pill warn">venue search for all</span></small></th>
+  <th>Photo<small><span class="pill warn">new here</span> Maker First screen</small></th>
+  <th>Look<small><span class="pill warn">new here</span> Maker Theme, 10 looks</small></th>
+  <th>Who can reply<small><span class="pill warn">new here</span> rsvp-ask</small></th>
+  <th>Guests<small><span class="pill warn">new here</span> Guests</small></th>
+  <th>Type steps (0–2)<small>from the profile + specialty catalog</small></th>
+  <th>Yes/No list at the end<small><span class="pill ok">Papic</span> <span class="pill warn">logo · questions · gifts</span></small></th>
+ </tr>
+ <tr><td class="t">Wedding<small>wedding</small></td><td class="c on">●<span class="w">the couple's names + joiner</span></td><td class="c on">●</td><td class="c on">●<span class="w">ceremony + reception</span></td><td class="c on">●</td><td class="c on">●<span class="w">wedding set</span></td><td class="c on">●</td><td class="c on">●<span class="w">sides asked as you add</span></td><td class="x"><b>Kind of wedding</b> — church · civil · nikah · other <i>(exists: kind/faith)</i></td><td class="x">logo · questions (meal · +1 · message) · Papic · E-Gifts</td></tr>
+ <tr><td class="t">Birthday<small>birthday</small></td><td class="c on">●<span class="w">written for you, editable</span></td><td class="c on">●<span class="w">yearly, automatic</span></td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="x"><b>Whose birthday? + turning…</b> mine / someone else; 1st · 7th · 18th · 21st · 30th · 50th · 60th… <i>(exists: honoree, celebrant_age, self age)</i></td><td class="x">logo · questions · Papic · gifts</td></tr>
+ <tr><td class="t">Debut<small>debut · "show all"</small></td><td class="c on">●<span class="w">"Sofia's 18th"</span></td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="x"><b>Who's the debutante?</b> <i>(exists: honoree)</i> — 18 roses · candles · court stay in Details</td><td class="x">logo · questions · Papic <i>(face tagging opt-in, MINOR_HEAVY)</i> · gifts</td></tr>
+ <tr><td class="t">Christening<small>christening · "show all"</small></td><td class="c on">●<span class="w">"Baptism of Lucas"</span></td><td class="c on">●</td><td class="c on">●<span class="w">parish + reception</span></td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="x"><b>The child's name</b> <i>(exists: honoree, child_name)</i> — godparents later, in Hosts</td><td class="x">logo · questions · Papic <i>(opt-in)</i> · gifts</td></tr>
+ <tr><td class="t">Reveal<small>gender_reveal</small></td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="x"><b>Parents-to-be + due date</b> <i>(exists: specialty)</i></td><td class="x">logo · questions · Papic · gifts</td></tr>
+ <tr><td class="t">Graduation<small>graduation</small></td><td class="c on">●<span class="w">"Mia's graduation"</span></td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="x"><b>The graduate + school / level</b> <i>(exists: honoree, specialty)</i></td><td class="x">logo · questions · Papic · gifts</td></tr>
+ <tr><td class="t">Anniversary<small>anniversary</small></td><td class="c on">●</td><td class="c on">●<span class="w">yearly, automatic</span></td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="x"><b>The day you're marking</b> — original date, years <i>(exists: anchor)</i></td><td class="x">logo · questions · Papic · gifts</td></tr>
+ <tr><td class="t">Celebration<small>celebration</small></td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="x"><b>What are we celebrating?</b> <i>(exists: occasion_reason)</i></td><td class="x">logo · questions · Papic · gifts</td></tr>
+ <tr><td class="t">Reunion<small>reunion</small></td><td class="c on">●</td><td class="c on">●<span class="w">"Yearly?" toggle</span></td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="x"><b>Clan · batch · alma mater</b> <i>(exists: group_identity, recurs)</i></td><td class="x">logo · questions · Papic · gifts (ambag)</td></tr>
+ <tr><td class="t">Corporate<small>corporate</small></td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●<span class="w">corporate set</span></td><td class="c on">●</td><td class="c on">●<span class="w">"attendees"</span></td><td class="x"><b>The company + its logo</b> <i>(exists: company_name; Logo Maker)</i> — frame C1</td><td class="x">questions · Papic <i>(no logo row — already asked; no gifts)</i></td></tr>
+ <tr><td class="t">Gala night<small>gala_night</small></td><td class="c on">●</td><td class="c on">●<span class="w">"Yearly?" toggle</span></td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="x"><b>Purpose / beneficiary</b> <i>(exists: gala_purpose, honoree)</i></td><td class="x">logo · questions · Papic · gifts → "Donations"</td></tr>
+ <tr><td class="t">Tournament<small>tournament</small></td><td class="c on">●</td><td class="c on">●<span class="w">first–last day</span></td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c pa">◐<span class="w">Anyone, I approve (registration)</span></td><td class="c on">●<span class="w">teams / players</span></td><td class="x"><b>Sport + format</b> <i>(exists: specialty)</i></td><td class="x">logo · questions → registration · Papic <i>(no gifts)</i></td></tr>
+ <tr><td class="t">Travel<small>travel</small></td><td class="c on">●</td><td class="c on">●<span class="w">first–last day (multi-day)</span></td><td class="c on">●<span class="w">destination(s)</span></td><td class="c on">●</td><td class="c on">●</td><td class="c pa">◐<span class="w">Only my list</span></td><td class="c on">●<span class="w">travellers</span></td><td class="x"><b>Trip type</b> <i>(exists: specialty)</i></td><td class="x">questions → ambag per head · Papic <i>(no logo, no gifts)</i></td></tr>
+ <tr><td class="t">Date<small>date</small></td><td class="c pa">◐<span class="w">"Date night"</span></td><td class="c on">●</td><td class="c on">●</td><td class="c pa">◐</td><td class="c pa">◐<span class="w">House</span></td><td class="c pa">◐<span class="w">Only my list</span></td><td class="c on">●<span class="w">one person</span></td><td class="x">—</td><td class="x">Papic only</td></tr>
+ <tr><td class="t">Hangout<small>hangout</small></td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c pa">◐</td><td class="c pa">◐<span class="w">House</span></td><td class="c pa">◐<span class="w">Only my list</span></td><td class="c on">●</td><td class="x">— (frame H1)</td><td class="x">Papic only</td></tr>
+ <tr><td class="t">Get-together<small>simple_event ⚠ label guessed</small></td><td class="c on">●</td><td class="c on">●</td><td class="c on">●</td><td class="c pa">◐</td><td class="c pa">◐<span class="w">House</span></td><td class="c pa">◐<span class="w">Only my list</span></td><td class="c on">●</td><td class="x">—</td><td class="x">Papic only <i>(exists: Papic card under the form)</i></td></tr>
+ <tr class="solemn"><td class="t">Wake<small>wake · solemn register</small></td><td class="c on">●<span class="w">"Lamay for Lola Remedios", written for you</span></td><td class="c on">●<span class="w">first night · last night</span></td><td class="c on">●<span class="w">chapel · home · parish</span></td><td class="c on">●<span class="w">"A photograph of them"</span></td><td class="c on">●<span class="w">solemn set only</span></td><td class="c on">●<span class="w">"who may leave a message"</span></td><td class="c on">●<span class="w">"Who should be told?"</span></td><td class="x"><b>Who we are remembering</b> — name, born, passed <i>(exists: specialty)</i>; tone automatic <i>(exists: register)</i></td><td class="x">Photographs for the family (Papic, quiet) · Abuloy <i>(no logo, no questions, no confetti)</i></td></tr>
+</table>
+<div class="key"><span><b>●</b> asked as a card</span><span><b class="m">◐</b> pre-answered — the chip shows, the card doesn't; change anytime</span><span><b class="m">—</b> not asked</span><span>Wedding 9 cards · most types 8 · Hangout 4 · Wake 8 (two Yes/No rows)</span></div>
+
+<!-- ============================ WEDDING ============================ -->
+<h2 class="sec"><span class="n">W</span>Wedding — Ana &amp; Miguel, end to end (9 cards)</h2>
+<div class="strip">
+
+<div class="mini"><div class="cap"><span><b>W1</b>Who's getting married?</span><span class="pill ok">exists · name + partners</span></div><div class="hold"><div class="phone fx">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="now"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><small>1 of 9</small></div></div>
+  <h3>Who's getting married?<span class="i">i</span></h3>
+  <p class="line">Your names, the way you want them written.</p>
+  <div class="names"><div class="field"><small>First name</small><b>Ana</b></div><div class="dd"><b>&amp;</b></div><div class="field"><small>First name</small><b>Miguel</b></div></div>
+  <div class="dd soft" style="margin-top:8px"><div><small>The joiner</small><b>&amp; · <span style="color:var(--mute);font-weight:400">and · + · with</span></b></div><i>▾</i></div>
+  <div class="foot"><span class="btn fill">Next</span><p class="anytime">You can change this anytime</p></div>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>W2</b>What kind of wedding?</span><span class="pill ok">exists · kind + faith</span></div><div class="hold"><div class="phone fx">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="on"></i><i class="now"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><small>2 of 9</small></div></div>
+  <h3>What kind of wedding?<span class="i">i</span></h3>
+  <p class="line">It shapes the paperwork and the programme.</p>
+  <div class="dd"><div><small>Ceremony</small><b class="empty">Pick one</b></div><i>▴</i></div>
+  <div class="opts">
+   <div><i>✝</i>Church wedding<small>Catholic · Christian · INC</small></div>
+   <div><i>⚖</i>Civil wedding</div>
+   <div><i>☪</i>Nikah</div>
+   <div><i>❀</i>Garden or other</div>
+   <div><i>◷</i>Not decided yet</div>
+  </div>
+  <p class="anytime" style="margin-top:16px">You can change this anytime</p>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>W3</b>When is it?</span><span class="pill ok">exists · date</span> </div><div class="hold"><div class="phone fx">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="on"></i><i class="on"></i><i class="now"></i><i></i><i></i><i></i><i></i><i></i><i></i></div><small>3 of 9</small></div></div>
+  <h3>When is it?<span class="i">i</span></h3>
+  <p class="line">The date on every invite and the countdown.</p>
+  <div class="field"><small>Date</small><b>Saturday, March 13, 2027</b></div>
+  <div class="field"><small>Ceremony starts</small><b>2:30 PM</b></div>
+  <div class="alts"><span class="link">Not decided yet</span></div>
+  <div class="foot"><span class="btn fill">Next</span><p class="anytime">You can change this anytime</p></div>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>W4</b>Where is it?</span><span class="pill ok">exists · venues</span></div><div class="hold"><div class="phone fx">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="now"></i><i></i><i></i><i></i><i></i><i></i></div><small>4 of 9</small></div></div>
+  <h3>Where is it?<span class="i">i</span></h3>
+  <p class="line">Guests get directions to both from your hub.</p>
+  <div class="dd"><div><small>Ceremony</small><b>San Agustin Church, Intramuros</b></div><i>✓</i></div>
+  <div class="search"><span>Search the reception venue</span></div>
+  <div class="alts"><span class="link">Same place</span><span class="link">Enter your own</span><span class="link">Not decided yet</span></div>
+  <div class="foot"><span class="btn fill">Next</span><p class="anytime">You can change this anytime</p></div>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>W5</b>Add a cover photo</span><span class="pill warn">new here · Maker First screen</span></div><div class="hold"><div class="phone fx">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="now"></i><i></i><i></i><i></i><i></i></div><small>5 of 9</small></div></div>
+  <h3>Add a cover photo<span class="i">i</span></h3>
+  <p class="line">It sits at the top of your Event Hub.</p>
+  <div class="hubtop"><div class="cov"><span class="ph">Your photo goes here</span><div class="nm">Ana &amp; Miguel<small>March 13, 2027</small></div></div><div class="strip2"><span></span><span></span><span></span></div></div>
+  <span class="btn fill big">Upload a photo</span>
+  <span class="btn ghost big">Use a theme picture for now</span>
+  <p class="anytime">You can change this anytime</p>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>W6</b>Pick a look</span><span class="pill warn">new here · Maker Theme</span></div><div class="hold"><div class="phone fx">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="now"></i><i></i><i></i><i></i></div><small>6 of 9</small></div></div>
+  <h3>Pick a look<span class="i">i</span></h3>
+  <p class="line">One pick sets the background, fonts and colours.</p>
+  <div class="dd"><div class="row"><span class="th velvet"></span><b>Velvet</b></div><i>▴</i></div>
+  <div class="opts">
+   <div class="on"><span class="th velvet"></span>Velvet<small>luxe chandeliers</small></div>
+   <div><span class="th vintage"></span>Vintage<small>capiz light</small></div>
+   <div><span class="th regency"></span>Regency<small>ballroom</small></div>
+   <div><span class="th cinder"></span>Cinderella<small>moonlit frost</small></div>
+   <div class="more">More looks (6) ›</div>
+  </div>
+  <p class="anytime" style="margin-top:14px">You can change this anytime</p>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>W7</b>Who can reply?</span><span class="pill warn">new here · rsvp-ask</span></div><div class="hold"><div class="phone fx">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="now"></i><i></i><i></i></div><small>7 of 9</small></div></div>
+  <h3>Who can reply?<span class="i" style="background:var(--gild);color:#fff">i</span></h3>
+  <p class="line">Who can RSVP through your Event Hub.</p>
+  <div class="info"><b>Only my list:</b> names you add can reply; nobody else. <b>Anyone:</b> a stranger with the link asks first — you say yes or no. Same setting as the Guest list's first-visit question.</div>
+  <span class="choice"><b>Only people on my list</b><span>Names you add. Nobody else.</span></span>
+  <span class="choice"><b>Anyone, I approve</b><span>Anyone with the link can ask. You say yes.</span></span>
+  <p class="anytime">You can change this anytime</p>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>W8</b>Add your guests</span><span class="pill warn">new here · Guests</span></div><div class="hold"><div class="phone fx">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="now"></i><i></i></div><small>8 of 9</small></div></div>
+  <h3>Add your guests<span class="i">i</span></h3>
+  <p class="line">We'll ask whose side as you add them.</p>
+  <div class="dd"><div><small>How do you want to add them?</small><b class="empty">Pick one</b></div><i>▴</i></div>
+  <div class="opts">
+   <div><i>☺</i>From your people<small>contacts you've used</small></div>
+   <div><i>✎</i>Type names</div>
+   <div><i>⇪</i>Import a list<small>CSV · Sheets</small></div>
+   <div><i>◷</i>I'll add them later</div>
+  </div>
+  <p class="anytime" style="margin-top:16px">You can change this anytime</p>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>W9</b>A few more, quick</span><span class="pill ok">Papic exists</span> <span class="pill warn">logo · questions · gifts</span></div><div class="hold"><div class="phone fx">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="now"></i></div><small>9 of 9</small></div></div>
+  <div class="orow"><h5>Do you want a logo?<span class="i">i</span></h5><p>For invites and the hub top.</p><div class="two"><span class="btn fill">Yes, make one</span><span class="btn ghost">No, use our names</span></div></div>
+  <div class="orow"><h5>What to ask guests<span class="i">i</span></h5><p>Meal · plus-one · a message.</p><div class="two"><span class="btn fill">Use the defaults ✓</span><span class="btn ghost">Change</span></div></div>
+  <div class="orow"><h5>Photos from your guests?<span class="i">i</span></h5><p>Papic — they shoot, tagging comes with it.</p><div class="two"><span class="btn fill">Yes</span><span class="btn ghost">No</span></div></div>
+  <div class="orow"><h5>Accept gifts?<span class="i">i</span></h5><p>GCash or bank, right on the hub.</p><div class="two"><span class="btn fill">Yes</span><span class="btn ghost">No</span></div></div>
+  <div class="foot"><span class="btn fill">Done</span><p class="anytime">You can change any of these anytime</p></div>
+ </div><div class="home"></div>
+</div></div></div>
+
+</div>
+<div class="notes" style="margin-top:18px"><h4><span class="k">W</span>Wedding notes</h4><ul>
+ <li><b>W1</b> replaces today's <span class="q">name</span> screen and the <span class="q">partner_1 / partner_2</span> specialty fields with one card: two first names and the joiner (<b>&amp;</b> · and · + · with) in one dropdown. The event name (<span class="q">Ana &amp; Miguel</span>) is written from it.</li>
+ <li><b>W2</b> is today's <span class="q">kind</span> + <span class="q">faith</span> screens as one dropdown — church · civil · nikah · garden/other · not decided yet. Nikah keeps its statutory paperwork pack; it is the same answer, asked once.</li>
+ <li><b>W3</b> adds the ceremony time to the date (new). <span class="q">Not decided yet</span> commits <code>event_date = NULL</code> — the date-as-output rule is unchanged; the Set-date nudge still does its job.</li>
+ <li><b>W4</b> is two rows on one card: ceremony (drawn answered) then reception, with <span class="q">Same place</span> as the quick answer. The search is the shipped venue search; <span class="q">Enter your own</span> is a typed address.</li>
+ <li><b>W6</b> lists the wedding set first — Velvet · Vintage · Regency · Cinderella — then <span class="q">More looks (6)</span> for the rest of the 10. The theme sets background, fonts and colours in one go (owner: "we also ask the theme"). A Pro look shows its price on the row; Free ones are first.</li>
+ <li><b>W8</b> is the same guests card as every type, one line different: <span class="q">We'll ask whose side as you add them</span> — the two sides are asked inside the picker, never as a separate card.</li>
+ <li><b>W9</b> is one list, four Yes/No rows, <b>Done</b>. Then the toast <span class="q">Your Event Hub is ready ✓</span> on the Overview (frame E). Role (bride / groom / planner), pax, region, budget, the picker and the persona quiz are the parts that leave — see section A.</li>
+</ul></div>
+
+<!-- ============================ BIRTHDAY ============================ -->
+<h2 class="sec"><span class="n">B</span>Birthday — Birthday Salubong ni Ate, end to end (8 cards)</h2>
+<div class="strip">
+
+<div class="mini"><div class="cap"><span><b>B1</b>Whose birthday?</span><span class="pill ok">exists · honoree + turning</span></div><div class="hold"><div class="phone fx bday">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="now"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><small>1 of 8</small></div></div>
+  <h3>Whose birthday?<span class="i">i</span></h3>
+  <p class="line">We'll write the name on everything.</p>
+  <span class="choice"><b>Mine</b><span>Mariel · turning 32 on June 4</span></span>
+  <span class="choice on"><b>Someone else</b><span>Ate, Nanay, a friend, a kid…</span></span>
+  <div class="field" style="margin-top:8px"><small>Their name</small><b>Ate Mariel</b></div>
+  <div class="dd"><div><small>Turning…</small><b>30th</b></div><i>▾</i></div>
+  <div class="foot"><span class="btn fill">Next</span><p class="anytime">You can change this anytime</p></div>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>B2</b>When is it?</span><span class="pill ok">exists · date, yearly</span></div><div class="hold"><div class="phone fx bday">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="on"></i><i class="now"></i><i></i><i></i><i></i><i></i><i></i><i></i></div><small>2 of 8</small></div></div>
+  <h3>When is it?<span class="i">i</span></h3>
+  <p class="line">The party, not the birthday itself.</p>
+  <div class="field"><small>Date</small><b>Saturday, November 14, 2026</b></div>
+  <div class="field"><small>Starts</small><b>6:00 PM</b></div>
+  <span class="chip">↻ Comes back every year</span>
+  <div class="alts" style="margin-top:14px"><span class="link">Not decided yet</span></div>
+  <div class="foot"><span class="btn fill">Next</span><p class="anytime">You can change this anytime</p></div>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>B3</b>Where is it?</span><span class="pill ok">region exists</span> <span class="pill warn">venue search</span></div><div class="hold"><div class="phone fx bday">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="on"></i><i class="on"></i><i class="now"></i><i></i><i></i><i></i><i></i><i></i></div><small>3 of 8</small></div></div>
+  <h3>Where is it?<span class="i">i</span></h3>
+  <p class="line">The place your guests will go.</p>
+  <div class="search">Search a venue or restaurant</div>
+  <div class="alts"><span class="link">At home</span><span class="link">Enter your own</span><span class="link">Not decided yet</span></div>
+  <div class="foot"><span class="btn fill">Next</span><p class="anytime">You can change this anytime</p></div>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>B4</b>Add a cover photo</span><span class="pill warn">new here</span></div><div class="hold"><div class="phone fx bday">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="now"></i><i></i><i></i><i></i><i></i></div><small>4 of 8</small></div></div>
+  <h3>Add a cover photo<span class="i">i</span></h3>
+  <p class="line">It sits at the top of your Event Hub.</p>
+  <div class="hubtop"><div class="cov"><span class="ph">Your photo goes here</span><div class="nm">Birthday Salubong ni Ate<small>November 14, 2026</small></div></div><div class="strip2"><span></span><span></span><span></span></div></div>
+  <span class="btn fill big">Upload a photo</span>
+  <span class="btn ghost big">Use a theme picture for now</span>
+  <p class="anytime">You can change this anytime</p>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>B5</b>Pick a look</span><span class="pill warn">new here</span></div><div class="hold"><div class="phone fx bday">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="now"></i><i></i><i></i><i></i></div><small>5 of 8</small></div></div>
+  <h3>Pick a look<span class="i">i</span></h3>
+  <p class="line">One pick sets the background, fonts and colours.</p>
+  <div class="dd"><div class="row"><span class="th whims"></span><b>Whimsical</b></div><i>▴</i></div>
+  <div class="opts">
+   <div class="on"><span class="th whims"></span>Whimsical<small>lantern meadow</small></div>
+   <div><span class="th abaca"></span>Abaca<small>rustic sunset</small></div>
+   <div><span class="th gatsby"></span>Gatsby<small>champagne deco</small></div>
+   <div><span class="th cyber"></span>Cyber<small>neon street</small></div>
+   <div class="more">More looks (6) ›</div>
+  </div>
+  <p class="anytime" style="margin-top:14px">You can change this anytime</p>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>B6</b>Who can reply?</span><span class="pill warn">new here</span></div><div class="hold"><div class="phone fx bday">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="now"></i><i></i><i></i></div><small>6 of 8</small></div></div>
+  <h3>Who can reply?<span class="i">i</span></h3>
+  <p class="line">Who can RSVP through your Event Hub.</p>
+  <span class="choice"><b>Only people on my list</b><span>Names you add. Nobody else.</span></span>
+  <span class="choice"><b>Anyone, I approve</b><span>Anyone with the link can ask. You say yes.</span></span>
+  <p class="anytime">You can change this anytime</p>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>B7</b>Add your guests</span><span class="pill warn">new here</span></div><div class="hold"><div class="phone fx bday">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="now"></i><i></i></div><small>7 of 8</small></div></div>
+  <h3>Add your guests<span class="i">i</span></h3>
+  <p class="line">Your list makes the invites and the replies.</p>
+  <div class="dd"><div><small>How do you want to add them?</small><b class="empty">Pick one</b></div><i>▴</i></div>
+  <div class="opts">
+   <div><i>☺</i>From your people<small>contacts you've used</small></div>
+   <div><i>✎</i>Type names</div>
+   <div><i>⇪</i>Import a list<small>CSV · Sheets</small></div>
+   <div><i>◷</i>I'll add them later</div>
+  </div>
+  <p class="anytime" style="margin-top:16px">You can change this anytime</p>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>B8</b>A few more, quick</span><span class="pill ok">Papic exists</span> <span class="pill warn">logo · questions · gifts</span></div><div class="hold"><div class="phone fx bday">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="now"></i></div><small>8 of 8</small></div></div>
+  <div class="orow"><h5>Do you want a logo?<span class="i">i</span></h5><p>For invites and the hub top.</p><div class="two"><span class="btn fill">Yes, make one</span><span class="btn ghost">No, use the name</span></div></div>
+  <div class="orow"><h5>What to ask guests<span class="i">i</span></h5><p>Coming? · How many? · A message.</p><div class="two"><span class="btn fill">Use the defaults ✓</span><span class="btn ghost">Change</span></div></div>
+  <div class="orow"><h5>Photos from your guests?<span class="i">i</span></h5><p>Papic — they shoot, tagging comes with it.</p><div class="two"><span class="btn fill">Yes</span><span class="btn ghost">No</span></div></div>
+  <div class="orow"><h5>Accept gifts?<span class="i">i</span></h5><p>GCash or bank, right on the hub.</p><div class="two"><span class="btn fill">Yes</span><span class="btn ghost">No</span></div></div>
+  <div class="foot"><span class="btn fill">Done</span><p class="anytime">You can change any of these anytime</p></div>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>E</b>Done → the Overview</span><span class="pill ok">Overview exists</span></div><div class="hold"><div class="phone fx bday">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="toast">Your Event Hub is ready<b>✓</b></div>
+ <div class="scr">
+  <div class="eyebrow">Event Hub · Birthday</div>
+  <div class="gname">Birthday Salubong ni Ate</div>
+  <p class="sub">Saturday, November 14, 2026 · 6:00 PM · Casa Marikina</p>
+  <div class="tiles">
+   <div class="tile dark"><div><small>Today</small><b style="font-size:19px">Send the first invites</b></div><span>32 to send</span></div>
+   <div class="tile"><small>Guests</small><b>32</b><span>0 replied</span></div>
+   <div class="tile"><small>Replies</small><b>Open</b><span>only my list</span></div>
+   <div class="tile"><small>Look</small><b style="font-size:19px">Whimsical</b><span>theme picture</span></div>
+   <div class="tile"><small>Budget</small><b>—</b><span>set a target</span></div>
+  </div>
+ </div>
+ <div class="bnav"><span class="on"><i></i>Home</span><span><i></i>Guest list</span><span><i></i>Your Team</span><span><i></i>Maker</span><span><i></i>Services</span></div>
+</div></div></div>
+
+</div>
+<div class="notes" style="margin-top:18px"><h4><span class="k">B</span>Birthday notes</h4><ul>
+ <li><b>B1</b> is today's <span class="q">honoree</span> screen plus the <span class="q">celebrant_age / milestone</span> fields as one card: <b>Mine</b> is pre-filled from the profile (the shipped self-age derivation), <b>Someone else</b> opens a name field and a <b>Turning…</b> dropdown (1st · 7th · 18th · 21st · 30th · 40th · 50th · 60th · other). Picking <b>18th</b> offers <span class="q">Make it a Debut?</span> inline — Debut is its own type with its own steps.</li>
+ <li>The event name is written from B1 (<span class="q">Birthday Salubong ni Ate</span> — the host can edit it right there). No separate "name" card for a birthday.</li>
+ <li><b>B2</b> shows <span class="q">Comes back every year</span> as a chip, not a question — the yearly repeat is forced for birthday and anniversary today.</li>
+ <li><b>B3</b> gains <span class="q">At home</span> as a quick answer — most salubong are. Everything else, B4–B8, is the shared card in birthday words: <span class="q">No, use the name</span> · <span class="q">Coming? · How many? · A message</span>.</li>
+ <li><b>E</b> — Done closes the flow onto the Overview with the toast; the Look tile shows what was picked. Answering <span class="q">I'll add them later</span> instead lands on the same Overview with the slim <span class="q">Finish your Event Hub — 4 of 5</span> card from the other prototype.</li>
+</ul></div>
+
+<!-- ============================ WAKE ============================ -->
+<h2 class="sec"><span class="n">K</span>Wake — Lola Remedios, end to end (8 cards, solemn)</h2>
+<div class="strip">
+
+<div class="mini"><div class="cap"><span><b>K1</b>Who are we remembering?</span><span class="pill ok">exists · specialty + register</span></div><div class="hold"><div class="phone fx solemn">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="now"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><small>1 of 8</small></div></div>
+  <h3>Who are we remembering?<span class="i">i</span></h3>
+  <p class="line">Their name, as the family says it.</p>
+  <div class="field"><small>Name</small><b>Lola Remedios Santos</b></div>
+  <div class="two" style="margin-top:8px"><div class="field soft"><small>Born</small><b>May 2, 1941</b></div><div class="field soft"><small>Passed away</small><b>Sep 29, 2026</b></div></div>
+  <div class="foot"><span class="btn fill">Next</span><p class="anytime">You can change this anytime</p></div>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>K2</b>When is the wake?</span><span class="pill ok">exists · multi-day</span></div><div class="hold"><div class="phone fx solemn">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="on"></i><i class="now"></i><i></i><i></i><i></i><i></i><i></i><i></i></div><small>2 of 8</small></div></div>
+  <h3>When is the wake?<span class="i">i</span></h3>
+  <p class="line">The nights of lamay. The service can come later.</p>
+  <div class="field"><small>First night</small><b>Friday, October 2, 2026</b></div>
+  <div class="field"><small>Last night</small><b class="empty">Not settled yet</b></div>
+  <div class="alts"><span class="link">Not settled yet</span></div>
+  <div class="foot"><span class="btn fill">Next</span><p class="anytime">You can change this anytime</p></div>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>K3</b>Where is it held?</span><span class="pill ok">exists · wake_place</span></div><div class="hold"><div class="phone fx solemn">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="on"></i><i class="on"></i><i class="now"></i><i></i><i></i><i></i><i></i><i></i></div><small>3 of 8</small></div></div>
+  <h3>Where is it held?<span class="i">i</span></h3>
+  <p class="line">A chapel, the family home, or a parish.</p>
+  <div class="search">Search a funeral chapel or parish</div>
+  <div class="alts"><span class="link">At home</span><span class="link">Enter your own</span><span class="link">Not settled yet</span></div>
+  <div class="foot"><span class="btn fill">Next</span><p class="anytime">You can change this anytime</p></div>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>K4</b>Add a photograph</span><span class="pill warn">new here</span></div><div class="hold"><div class="phone fx solemn">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="now"></i><i></i><i></i><i></i><i></i></div><small>4 of 8</small></div></div>
+  <h3>Add a photograph<span class="i">i</span></h3>
+  <p class="line">A photograph of them, at the top of the notice.</p>
+  <div class="hubtop solemn"><div class="cov"><span class="ph">Their photograph</span><div class="nm">Remedios Santos<small>1941 – 2026</small></div></div><div class="strip2"><span></span><span></span><span></span></div></div>
+  <span class="btn fill big">Choose a photograph</span>
+  <span class="btn ghost big">A plain notice for now</span>
+  <p class="anytime">You can change this anytime</p>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>K5</b>Pick a look</span><span class="pill warn">new here · solemn set</span></div><div class="hold"><div class="phone fx solemn">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="now"></i><i></i><i></i><i></i></div><small>5 of 8</small></div></div>
+  <h3>Pick a look<span class="i">i</span></h3>
+  <p class="line">Quiet looks only. One pick sets the whole notice.</p>
+  <div class="dd"><div class="row"><span class="th capiz"></span><b>Capiz light</b></div><i>▴</i></div>
+  <div class="opts">
+   <div class="on"><span class="th capiz"></span>Capiz light<small>Vintage, muted</small></div>
+   <div><span class="th lily"></span>White lilies</div>
+   <div><span class="th plain"></span>Plain &amp; clean<small>Galeriya</small></div>
+  </div>
+  <p class="anytime" style="margin-top:14px">You can change this anytime</p>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>K6</b>Who can reply?</span><span class="pill warn">new here · solemn words</span></div><div class="hold"><div class="phone fx solemn">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="now"></i><i></i><i></i></div><small>6 of 8</small></div></div>
+  <h3>Who can reply?<span class="i">i</span></h3>
+  <p class="line">Who may leave a message of sympathy.</p>
+  <span class="choice"><b>Only people on my list</b><span>Names you add. Nobody else.</span></span>
+  <span class="choice"><b>Anyone, I approve</b><span>Anyone with the link can ask. You say yes.</span></span>
+  <p class="anytime">You can change this anytime</p>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>K7</b>Who should be told?</span><span class="pill warn">new here</span></div><div class="hold"><div class="phone fx solemn">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="now"></i><i></i></div><small>7 of 8</small></div></div>
+  <h3>Who should be told?<span class="i">i</span></h3>
+  <p class="line">The people the notice reaches.</p>
+  <div class="dd"><div><small>How do you want to add them?</small><b class="empty">Pick one</b></div><i>▴</i></div>
+  <div class="opts">
+   <div><i>☺</i>From your people<small>contacts you've used</small></div>
+   <div><i>✎</i>Type names</div>
+   <div><i>⇪</i>Import a list<small>CSV · Sheets</small></div>
+   <div><i>◷</i>Later</div>
+  </div>
+  <p class="anytime" style="margin-top:16px">You can change this anytime</p>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>K8</b>Two more, when you're ready</span><span class="pill ok">Papic exists</span> <span class="pill warn">abuloy</span></div><div class="hold"><div class="phone fx solemn">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="now"></i></div><small>8 of 8</small></div></div>
+  <div class="orow"><h5>Photographs for the family?<span class="i">i</span></h5><p>Those who come can add theirs, quietly. Never shown before you say so.</p><div class="two"><span class="btn fill">Yes</span><span class="btn ghost">No</span></div></div>
+  <div class="orow"><h5>Accept abuloy?<span class="i">i</span></h5><p>A gift of sympathy — GCash or bank, on the notice.</p><div class="two"><span class="btn fill">Yes</span><span class="btn ghost">No</span></div></div>
+  <div class="foot"><span class="btn fill">Done</span><p class="anytime">You can change any of these anytime</p></div>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>K9</b>Done → the notice</span><span class="pill ok">solemn Overview exists</span></div><div class="hold"><div class="phone fx solemn">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="toast">Your notice is ready<b style="color:#C9CFC7">✓</b></div>
+ <div class="scr">
+  <div class="eyebrow">Wake</div>
+  <div class="gname">Remedios Santos</div>
+  <p class="sub">1941 – 2026 · Lamay from Friday, October 2 · St. Peter Chapels, Quezon Ave.</p>
+  <div class="tiles">
+   <div class="tile dark"><div><small>Now</small><b style="font-size:19px">Share the news</b></div><span>48 to reach</span></div>
+   <div class="tile"><small>Family &amp; friends</small><b>48</b><span>told: 0</span></div>
+   <div class="tile"><small>Messages</small><b>—</b><span>none yet</span></div>
+   <div class="tile"><small>The service</small><b>—</b><span>not settled yet</span></div>
+   <div class="tile"><small>Abuloy</small><b>On</b><span>GCash</span></div>
+  </div>
+ </div>
+ <div class="bnav"><span class="on"><i></i>Home</span><span><i></i>Family &amp; friends</span><span><i></i>Your Team</span><span><i></i>Maker</span><span><i></i>Services</span></div>
+</div></div></div>
+
+</div>
+<div class="notes" style="margin-top:18px"><h4><span class="k">K</span>Wake notes — the tone is automatic</h4><ul>
+ <li>Everything solemn here is already decided by the profile's <b>register</b>: no gold, no emoji, no confetti, no countdown, <span class="q">gathering</span> not celebration. The engine reads the register and swaps the words and the accent; nothing is a wake-only screen except the words on it.</li>
+ <li><b>K1</b> is the catalog's <span class="q">departed_name · born_on · passed_on</span> as one card. The event name is written from it (<span class="q">Lamay for Lola Remedios</span>) — the family never types a "title". The rite, the resting place, the pasiyam, those carrying and speaking stay in Details, unrequired, as the catalog says: <span class="q">in the first days most answers are honestly "not yet"</span>.</li>
+ <li><b>K2</b> is first night · last night (multi-day is already true for a wake); <span class="q">Not settled yet</span> everywhere instead of "Not decided". <b>K3</b> adds <span class="q">At home</span>.</li>
+ <li><b>K4</b> asks for <span class="q">a photograph of them</span>, with <span class="q">A plain notice for now</span> as the quiet answer. <b>K5</b> shows only the muted looks — Capiz light (Vintage) · White lilies · Plain &amp; clean (Galeriya) — and no "More looks".</li>
+ <li><b>K6</b> is the same two answers with a solemn line: <span class="q">Who may leave a message of sympathy</span>. No RSVP pressure — the guest side never asks "are you coming?" on a wake. <b>K7</b>'s quick answer is simply <span class="q">Later</span>.</li>
+ <li><b>K8</b> has two rows only — no logo, no questions. Papic is worded as <span class="q">Photographs for the family</span> and defaults to family-only review; E-Gifts is renamed <span class="q">Abuloy</span>. <b>K9</b>: the toast says <span class="q">Your notice is ready</span> (the solemn rounds already say "Share the news"), and the tiles speak in People · Messages · The service · Abuloy.</li>
+</ul></div>
+
+<!-- ============================ CORPORATE + HANGOUT ============================ -->
+<h2 class="sec"><span class="n">C · H</span>One frame each — Corporate and Hangout</h2>
+<div class="strip">
+
+<div class="mini"><div class="cap"><span><b>C1</b>Corporate · What's the company?</span><span class="pill ok">company exists</span> <span class="pill warn">logo here</span></div><div class="hold"><div class="phone fx corp">
+ <div class="island"></div><div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="on"></i><i class="now"></i><i></i><i></i><i></i><i></i><i></i><i></i></div><small>2 of 8</small></div></div>
+  <h3>What's the company?<span class="i">i</span></h3>
+  <p class="line">Its name and logo go on everything.</p>
+  <div class="field"><small>Company or organisation</small><b>Kalinga Foods Corp.</b></div>
+  <div class="hubtop" style="margin-top:8px"><div class="cov" style="height:78px;background:linear-gradient(135deg,#F4F6F8,#C9D3DD 60%,#1F3A5F)"><span class="ph" style="color:#1F3A5F;top:26%">Logo goes here</span><div class="nm" style="color:#fff;font-size:16px">Kalinga Foods<small style="color:#DDE4EC">Year-end party · Dec 12, 2026</small></div></div></div>
+  <span class="btn fill big">Upload the logo</span>
+  <span class="btn ghost big">Use the name for now</span>
+  <p class="anytime">You can change this anytime</p>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="mini"><div class="cap"><span><b>H1</b>Hangout · Who's coming?</span><span class="pill warn">pre-answered chips</span></div><div class="hold"><div class="phone fx hang">
+ <div class="island"></div><div class="status">
+ <span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ob">
+  <div class="top"><span class="back">‹</span><div class="prog"><div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="now"></i></div><small>4 of 4</small></div></div>
+  <h3>Who's coming?<span class="i">i</span></h3>
+  <p class="line">Friday movie night · Oct 9, 7 PM · at Migs' place.</p>
+  <div class="pre"><span class="pill soft">House look</span><span class="pill soft">Theme picture</span><span class="pill soft">Only my list</span></div>
+  <div class="dd"><div><small>How do you want to add them?</small><b class="empty">Pick one</b></div><i>▴</i></div>
+  <div class="opts">
+   <div><i>☺</i>From your people<small>contacts you've used</small></div>
+   <div><i>✎</i>Type names</div>
+   <div><i>◷</i>I'll add them later</div>
+  </div>
+  <p class="anytime" style="margin-top:16px">Tap a chip to change it — anytime</p>
+ </div><div class="home"></div>
+</div></div></div>
+
+<div class="notes one" style="align-self:start"><h4><span class="k">C · H</span>Notes</h4><ul>
+ <li><b>C1</b> is the corporate type step: the catalog's <span class="q">company_name</span> plus the logo — the Logo Maker's upload, shown on the hub-top preview at once. Because the logo is asked here, the Yes/No list at the end has no logo row for a corporate event. Its guests card says <span class="q">attendees</span>; today's EventWords has no guest word, so <b>guestWord</b> is one new field on the profile (guests · attendees · travellers · players).</li>
+ <li><b>H1</b> — a hangout answers four cards: name, when, where, who. Cover, look and reply are <b>pre-answered</b> and shown as chips (House look · Theme picture · Only my list); tapping a chip opens that card. Date and Get-together work the same way. This is how FREE stays very easy: the engine never removes a question, it answers it and says so.</li>
+ <li>Import is dropped from a hangout's list — three ways, not four; still one dropdown.</li>
+</ul></div>
+
+</div>
+
+
+<h2 class="sec"><span class="n">M</span>Type × what it turns on — Event Hub · Guest list · Your Team · switches</h2>
+<p class="lead" style="margin-bottom:12px">Owner: <span class="q" style="font-family:var(--serif);font-style:italic">"the design fits the type of event. This will also decide what the event hub, guestlist, and your team should have."</span> Everything marked <b class="mx2" style="color:var(--gild)">●</b> is already decided by <b>one registry today</b> — <code>event_type_profiles</code> (terminology · enabled_surfaces · role_set_key · multi_day · layer_mode · marketplace_enabled), <code>service_categories.applicable_event_types</code>, <code>STAGE_BAR</code>, <code>wedding-only-parts</code>, <code>MINOR_HEAVY_EVENT_TYPES</code>. Everything marked <b style="color:var(--warn)">△</b> is new and goes on <b>the same profile row</b>, never a second table: five fields — <b>guest_word</b> (guests · attendees · travellers · players · family &amp; friends), <b>gifts_mode</b> (gifts · donations · abuloy · none), <b>team_first</b> (the ordered first suggestions), <b>look_set</b> (the type's themes), <b>camera_default</b> (on · quiet · off) — plus one new surface, <b>gifts</b>.</p>
+<table class="mx mx2">
+ <colgroup><col style="width:112px"><col style="width:190px"><col style="width:230px"><col style="width:206px"><col style="width:236px"><col></colgroup>
+ <tr>
+  <th>Event type</th>
+  <th>Event Hub · stages<small>enabled_surfaces → STAGE_BAR</small></th>
+  <th>Guest pages &amp; scenes<small>the bottom bar + what's on the page</small></th>
+  <th>Guest list<small>personA/B · role_set_key · day_of · rsvp</small></th>
+  <th>Your Team · first suggestions<small>applicable_event_types · type-questions adds</small></th>
+  <th>Switched by onboarding<small>the answer → what it turns on</small></th>
+ </tr>
+ <tr><td class="t">Wedding<small>ALL surfaces</small></td><td class="x"><span class="on">●</span> Save the Date · RSVP · Invitation · The Day · Post Event — all five</td><td class="x"><span class="on">●</span> Home · Details · <b>Story</b> · Me → Schedule · Watch · Camera · Gallery → Film · Suppliers. <span class="nw">△</span> Gifts scene</td><td class="x"><span class="on">●</span> sides (bride / groom) · wedding role set (sponsors · entourage · bearers) · +1 · check-in · RSVP</td><td class="x"><span class="on">●</span> the full set — ceremony · reception · catering · photo/video · coordinator · florist · stylist · HMUA · cake…</td><td class="x">Kind → <span class="on">●</span> nikah pack / muslim roles · Look → <span class="on">●</span> theme · Logo → <span class="on">●</span> monogram · Papic → <span class="on">●</span> Camera + tagging · Gifts → <span class="nw">△</span> Gifts scene</td></tr>
+ <tr><td class="t">Birthday</td><td class="x"><span class="on">●</span> RSVP · Invitation · The Day · Post Event. <span class="on">●</span> no Save the Date (profile omits it)</td><td class="x"><span class="on">●</span> Home · Details · Me → Schedule · Watch · Camera · Gallery. <span class="on">●</span> no Story (wedding-only-parts) · <span class="nw">△</span> Gifts</td><td class="x"><span class="on">●</span> no sides · generic roles (celebrant · host · family · VIP · helper) · +1 · check-in · RSVP · "Guests of honor" tier</td><td class="x"><span class="on">●</span> reach: cake · catering · host/MC · photo booth · games · mobile bar · dessert · stylist. <span class="nw">△</span> first three: cake · host · venue</td><td class="x">Turning 7th/kids → <span class="nw">△</span> Camera quiet + face opt-in · yearly → <span class="on">●</span> repeats · Gifts → <span class="nw">△</span></td></tr>
+ <tr><td class="t">Debut</td><td class="x"><span class="on">●</span> as Birthday</td><td class="x"><span class="on">●</span> as Birthday; <span class="nw">△</span> a "Court" scene (18 roses · candles · treasures) from Details</td><td class="x"><span class="on">●</span> generic roles · "Court of honor" tier. <span class="nw">△</span> court roles (rose · candle · treasure)</td><td class="x"><span class="on">●</span> HMUA · choreographer · host/MC · photo/video · stylist · performers</td><td class="x">Papic → <span class="on">●</span> face tagging is a deliberate opt-in (MINOR_HEAVY)</td></tr>
+ <tr><td class="t">Christening</td><td class="x"><span class="on">●</span> as Birthday</td><td class="x"><span class="on">●</span> Home · Details · Me → Camera · Gallery</td><td class="x"><span class="on">●</span> generic roles · "Godparents" tier · +1 · RSVP. <span class="nw">△</span> godparent roles</td><td class="x"><span class="on">●</span> catering · cake · photo/video · printing · stylist</td><td class="x">Papic → <span class="on">●</span> face opt-in (MINOR_HEAVY)</td></tr>
+ <tr><td class="t">Reveal</td><td class="x"><span class="on">●</span> RSVP · Invitation · The Day · Post Event</td><td class="x"><span class="on">●</span> Home · Details · Me → Camera · Gallery · Watch (family abroad)</td><td class="x"><span class="on">●</span> generic roles · +1 · RSVP</td><td class="x"><span class="on">●</span> cake · fireworks/smoke · stylist · photo/video · mocktail bar</td><td class="x">Papic → <span class="on">●</span> Camera · Watch → <span class="on">●</span> livestream</td></tr>
+ <tr><td class="t">Graduation</td><td class="x"><span class="on">●</span> as Reveal</td><td class="x"><span class="on">●</span> Home · Details · Me → Schedule · Camera · Gallery</td><td class="x"><span class="on">●</span> generic roles (graduate) · +1 · RSVP</td><td class="x"><span class="on">●</span> catering · venue · photo/video · cake</td><td class="x">Gifts → <span class="nw">△</span> Gifts scene</td></tr>
+ <tr><td class="t">Anniversary</td><td class="x"><span class="on">●</span> as Reveal</td><td class="x"><span class="on">●</span> Home · Details · Me → Schedule · Camera · Gallery. <span class="nw">△</span> Story for a renewal of vows (couple-shaped → allowed)</td><td class="x"><span class="on">●</span> generic roles · +1 · RSVP · yearly</td><td class="x"><span class="on">●</span> catering · florist · photo/video · venue · live band</td><td class="x">Anchor → <span class="on">●</span> years counted · renewal → <span class="nw">△</span> Story</td></tr>
+ <tr><td class="t">Celebration</td><td class="x"><span class="on">●</span> as Reveal</td><td class="x"><span class="on">●</span> Home · Details · Me → Camera · Gallery</td><td class="x"><span class="on">●</span> generic roles · +1 · RSVP</td><td class="x"><span class="on">●</span> catering · venue · host/MC · photo booth</td><td class="x">Gifts → <span class="nw">△</span></td></tr>
+ <tr><td class="t">Reunion</td><td class="x"><span class="on">●</span> as Reveal</td><td class="x"><span class="on">●</span> Home · Details · Me → Schedule · Camera · Gallery. <span class="nw">△</span> In-memoriam scene</td><td class="x"><span class="on">●</span> generic roles · +1 · RSVP · yearly toggle. <span class="nw">△</span> batch / generation groups</td><td class="x"><span class="on">●</span> venue · catering · printing (shirts) · photo booth · guest shuttle</td><td class="x">Gifts → <span class="nw">△</span> ambag (donations)</td></tr>
+ <tr><td class="t">Corporate</td><td class="x"><span class="on">●</span> RSVP · Invitation · The Day · Post Event</td><td class="x"><span class="on">●</span> Home · Details · Me → Schedule · Watch · Camera · Gallery. <span class="on">●</span> no Gifts (never asked)</td><td class="x"><span class="on">●</span> no sides · generic roles · check-in · RSVP. <span class="nw">△</span> guest_word = attendees · department groups</td><td class="x"><span class="on">●</span> venue · catering · lights &amp; sound · host/MC · photo/video · printing</td><td class="x">Logo → <span class="on">●</span> hero + monogram slot · questions → <span class="nw">△</span> registration fields</td></tr>
+ <tr><td class="t">Gala night</td><td class="x"><span class="on">●</span> as Corporate</td><td class="x"><span class="on">●</span> Home · Details · Me → Schedule · Watch · Camera · Gallery. <span class="nw">△</span> Programme / awardees scene</td><td class="x"><span class="on">●</span> generic roles · "VIP" tier · check-in · RSVP · yearly toggle. <span class="nw">△</span> table sponsors</td><td class="x"><span class="on">●</span> venue · catering · lights &amp; sound · performers · host · florist</td><td class="x">Gifts → <span class="nw">△</span> gifts_mode = donations</td></tr>
+ <tr><td class="t">Tournament</td><td class="x"><span class="on">●</span> RSVP · Invitation · The Days (multi-day) · Post Event</td><td class="x"><span class="on">●</span> Home · Schedule · Watch · Camera · Gallery · Me. <span class="nw">△</span> Brackets scene</td><td class="x"><span class="on">●</span> generic roles · check-in · seasonal repeat. <span class="nw">△</span> guest_word = players · teams as groups · RSVP → registration</td><td class="x"><span class="on">●</span> venue · lights &amp; sound · printing · catering. <span class="nw">△</span> trophies / awards leaf</td><td class="x">Reply → <span class="nw">△</span> "Anyone, I approve" = registration open · Gifts → <span class="on">●</span> none</td></tr>
+ <tr><td class="t">Travel</td><td class="x"><span class="on">●</span> RSVP · The Days (multi-day) · Post Event. <span class="on">●</span> no Watch · no seat plan · no song (profile)</td><td class="x"><span class="on">●</span> Home · Details · Me → Schedule (itinerary) · Camera · Gallery</td><td class="x"><span class="on">●</span> generic roles · RSVP. <span class="nw">△</span> guest_word = travellers</td><td class="x"><span class="on">●</span> roaming: restaurant reservations · transport · photo/video</td><td class="x">Trip type → <span class="on">●</span> layer_mode roaming · ambag → <span class="nw">△</span> gifts_mode = ambag</td></tr>
+ <tr><td class="t">Date</td><td class="x"><span class="on">●</span> RSVP · The Day · Post Event</td><td class="x"><span class="on">●</span> Home · Details · Me → Camera · Gallery</td><td class="x"><span class="on">●</span> generic roles · one person</td><td class="x"><span class="on">●</span> restaurant reservation · photo/video · performers</td><td class="x">Papic → <span class="on">●</span> Camera</td></tr>
+ <tr><td class="t">Hangout</td><td class="x"><span class="on">●</span> RSVP · The Day · Post Event. <span class="nw">△</span> Save the Date never offered</td><td class="x"><span class="on">●</span> Home · Details · Me → Camera · Gallery</td><td class="x"><span class="on">●</span> generic roles · +1 · RSVP (Only my list)</td><td class="x"><span class="on">●</span> restaurant reservation · photo/video · performers</td><td class="x">Papic → <span class="on">●</span> Camera</td></tr>
+ <tr><td class="t">Get-together<small>simple_event</small></td><td class="x"><span class="on">●</span> Invitation · The Day · Post Event. <span class="on">●</span> no RSVP surface · no budget (profile)</td><td class="x"><span class="on">●</span> Home · Me → Watch · Camera · Gallery</td><td class="x"><span class="on">●</span> simple role set (guest only) · RSVP off</td><td class="x"><span class="on">●</span> none — marketplace off; Setnayan services only</td><td class="x">Papic → <span class="on">●</span> Camera</td></tr>
+ <tr class="solemn"><td class="t">Wake<small>solemn</small></td><td class="x"><span class="on">●</span> Share the news (STD → RSVP, solemnAdjustedPhase) · Service details · The Day · Post Event. <span class="on">●</span> no countdown</td><td class="x"><span class="on">●</span> Home · Details · Me → Schedule (pasiyam) · Watch · Gallery. <span class="on">●</span> no Story · <span class="nw">△</span> Camera quiet (family review) · Abuloy scene · no confetti anywhere</td><td class="x"><span class="on">●</span> no sides · generic roles → family · "Immediate family" tier · check-in. <span class="nw">△</span> guest_word = family &amp; friends · RSVP = "will attend the service", no pressure · guest book</td><td class="x"><span class="on">●</span> catering · florist · photo/video · printing · choir · guest shuttle · coordinator. <span class="on">●</span> no funeral-home leaf yet (owner-visible add)</td><td class="x">Photographs → <span class="nw">△</span> camera_default = quiet · Abuloy → <span class="nw">△</span> gifts_mode = abuloy · Rite → <span class="on">●</span> schedule seed</td></tr>
+</table>
+<div class="key"><span><b>●</b> already in the profile / taxonomy today</span><span><b style="color:var(--warn)">△</b> new — a field on the same profile row, or a scene it turns on</span></div>
+
+<h2 class="sec"><span class="n">D</span>Decisions this needs from the owner</h2>
+<div class="cols">
+<div class="notes"><h4>Settled by the engine (no question)</h4><ul>
+ <li><b>The theme is essential</b> — one dropdown, the type's set first, <span class="q">More looks</span> after; the default pre-selected is an answer.</li>
+ <li><b>Every card is answered, none is work</b>; no Skip, no Later, no confirm dialogs; a toast at the end.</li>
+ <li><b>Type steps are 0–2</b>, always names-and-dates — every other signature field stays in Details, unrequired.</li>
+ <li><b>Wake:</b> solemn set, two-row list, abuloy, no logo, no questions — all from the existing register.</li>
+ <li><b>The look follows the type</b> — one skin per profile (wedding serif/gold · birthday coral · wake grey · corporate navy/sans · hangout teal/sans), read from the same row as the words; never one generic onboarding skin.</li>
+</ul></div>
+<div class="notes"><h4>Open — say yes or no</h4><ul>
+ <li><b>Does the experience quiz leave onboarding?</b> pax · region · budget · 5 axes · persona reveal · vendor picker → proposed as Setnayan AI's first sitting on the dashboard. If it stays, it goes AFTER the Yes/No list, as its own "Plan with me" screen — never between the essentials.</li>
+ <li><b>Get-together = simple_event?</b> The picker label was read from the coordinator's list, not the DB; the key is a guess.</li>
+ <li><b>Pro looks in the dropdown:</b> show with a price on the row (drawn), or Free only until the hub is made?</li>
+ <li><b>Tournament "Who can reply"</b> pre-answered as <span class="q">Anyone, I approve</span> (registration) — or asked like every other type?</li>
+</ul></div>
+</div>
+
+</div></body></html>

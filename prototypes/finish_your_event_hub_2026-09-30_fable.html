@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finish your Event Hub — five quick answers — Setnayan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FAF7F2;--paper2:#F3EEE6;--page:#EDE7DE;--ink:#1E2229;--ink2:#3B3F46;--mute:#76736D;
+  --gild:#B08A5B;--gild-soft:#E9DEC9;--gild-wash:#F7F1E6;--wine:#6E2A3A;--wine-wash:#F6ECEE;
+  --line:#E5DED3;--ok:#2F6B4F;--okbg:#E7F1EA;--warn:#8A5A00;--warnbg:#FBF0D8;
+  --serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --sans:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--page);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1264px;margin:0 auto;padding:32px 24px 40px}
+
+/* ---------- page furniture (owner-facing) ---------- */
+.doc-brand{font-size:10.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--gild);font-weight:600}
+h1{font-family:var(--serif);font-weight:500;font-size:40px;line-height:1.1;margin:8px 0 10px;letter-spacing:-.01em}
+.lead{color:var(--ink2);font-size:14.5px;line-height:1.6;max-width:980px;margin:0 0 8px}
+.lead b{font-weight:600;color:var(--ink)}
+.notes{flex:1;min-width:300px;max-width:520px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 20px 16px;position:relative}
+.notes:before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:3px;background:var(--gild);border-radius:0 3px 3px 0}
+.notes h4{margin:0 0 10px;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gild);font-weight:600}
+.notes ul{margin:0;padding-left:18px;font-size:12.5px;line-height:1.55;color:var(--ink2)}
+.notes li{margin-bottom:6px}
+.notes li b{color:var(--ink);font-weight:600}
+.notes .q{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--ink)}
+
+/* ---------- phone frame ---------- */
+.phone{width:390px;flex:none;background:var(--paper);border:9px solid #14161A;border-radius:48px;position:relative;overflow:hidden;
+  box-shadow:0 0 0 1px #2E3238,0 40px 70px -30px rgba(30,34,41,.45),0 16px 30px -18px rgba(30,34,41,.25)}
+.phone .island{position:absolute;left:50%;top:11px;transform:translateX(-50%);width:118px;height:33px;background:#14161A;border-radius:20px;z-index:9}
+.phone .status{height:52px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 30px 8px;font-size:14px;font-weight:600;letter-spacing:-.01em}
+.phone .status .sig{display:flex;gap:6px;align-items:center;font-size:11px;letter-spacing:.06em}
+.phone .status .bat{width:24px;height:11px;border:1.5px solid var(--ink);border-radius:4px;position:relative;opacity:.9}
+.phone .status .bat:after{content:"";position:absolute;left:2px;top:2px;bottom:2px;right:5px;background:var(--ink);border-radius:1px}
+.scr{padding:4px 20px 8px}
+.phone .home{height:30px;position:relative}
+.phone .home:after{content:"";position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:var(--ink);opacity:.85}
+.topnav{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--wine);font-weight:500;margin:2px 0 14px}
+.topnav .dots{color:var(--mute);letter-spacing:.1em;font-weight:600}
+.phone.fx{height:660px}
+
+/* ---------- type + atoms ---------- */
+.eyebrow{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--gild);font-weight:600}
+.gname{font-family:var(--serif);font-weight:500;font-size:29px;line-height:1.1;margin:5px 0 8px;letter-spacing:-.005em}
+.sub{font-size:12.5px;color:var(--mute);line-height:1.45}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;border-radius:999px;padding:4px 10px;letter-spacing:.01em;white-space:nowrap}
+.pill.ok{background:var(--okbg);color:var(--ok)}
+.pill.soft{background:var(--paper2);color:var(--ink2);box-shadow:inset 0 0 0 1px var(--line)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border-radius:999px;font-size:13px;font-weight:500;border:1.5px solid var(--ink);background:#fff;color:var(--ink);white-space:nowrap;line-height:1}
+.btn.fill{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.sm{padding:7px 12px;font-size:12px;border-width:1px}
+.btn.ghost{border:1.5px solid var(--line);background:#fff;color:var(--ink);font-size:13px}
+.btn.wine{background:var(--wine);color:#fff;border-color:var(--wine)}
+.link{color:var(--wine);text-decoration:underline;text-underline-offset:3px;font-size:13px;font-weight:500}
+.i{font-size:9.5px;color:var(--gild);border:1px solid var(--gild);border-radius:50%;width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;margin-left:8px;font-family:var(--serif);font-style:italic;font-weight:600;letter-spacing:0;text-transform:none;vertical-align:3px}
+.search{display:flex;align-items:center;gap:8px;border:1.5px solid var(--ink);border-radius:999px;padding:12px 16px 12px 14px;font-size:14px;color:var(--mute);background:#fff}
+.search:before{content:"";width:11px;height:11px;border:1.5px solid var(--ink2);border-radius:50%;box-shadow:4px 4px 0 -2px var(--ink2);flex:none}
+.dd{border:1.5px solid var(--ink);border-radius:14px;background:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.dd small{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-weight:500;margin-bottom:1px}
+.dd b{font-weight:500;font-size:14px}
+.dd b.empty{color:#A6A29B;font-weight:400}
+.dd i{font-style:normal;color:var(--gild);font-size:12px}
+.dd .th{width:34px;height:24px;border-radius:5px;flex:none;margin-right:6px}
+.dd .row{display:flex;align-items:center}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.two .btn{padding:12px 8px;font-size:13px}
+
+/* ---------- the dashboard behind (Overview, phone) ---------- */
+.hero .eyebrow{margin-top:2px}
+.hero .gname{font-size:27px;margin:4px 0 4px}
+.hero .sub{margin:0}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.tile{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 12px 10px}
+.tile small{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);font-weight:600}
+.tile b{display:block;font-family:var(--serif);font-size:24px;font-weight:500;line-height:1.1;margin-top:4px}
+.tile span{font-size:11px;color:var(--mute)}
+.tile.dark{background:var(--ink);color:var(--paper);border-color:var(--ink);grid-column:1/-1;display:flex;justify-content:space-between;align-items:center}
+.tile.dark small{color:var(--gild-soft)}
+.tile.dark span{color:#B9B3A9}
+.bnav{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:9px 6px 30px;font-size:9.5px;color:var(--mute);z-index:4}
+.bnav span{display:flex;flex-direction:column;align-items:center;gap:4px;width:60px}
+.bnav i{width:20px;height:20px;border-radius:6px;background:var(--paper2);display:block;box-shadow:inset 0 0 0 1px var(--line)}
+.bnav span.on{color:var(--wine);font-weight:600}
+.bnav span.on i{background:var(--wine-wash);box-shadow:inset 0 0 0 1px var(--wine)}
+.bnav:after{content:"";position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:var(--ink);opacity:.85}
+
+/* ---------- the slim Overview card + Ready chip ---------- */
+.slim{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--gild-soft);border-radius:14px;padding:11px 12px 11px 14px;margin-top:12px;box-shadow:0 10px 24px -20px rgba(30,34,41,.3)}
+.slim .t{flex:1;min-width:0}
+.slim .t b{display:block;font-size:14px;font-weight:600;line-height:1.25}
+.slim .t small{display:block;font-size:11.5px;color:var(--mute);margin-top:2px}
+.slim .mini{display:flex;gap:3px;margin-top:7px;max-width:150px}
+.slim .mini i{flex:1;height:3px;border-radius:2px;background:var(--line)}
+.slim .mini i.on{background:var(--gild)}
+.slim .btn{flex:none;padding:9px 14px;font-size:12.5px}
+.readyrow{display:flex;align-items:center;gap:8px;margin-top:2px}
+
+/* ---------- the question sheet ---------- */
+.dim{position:absolute;inset:0;background:rgba(20,22,26,.42);z-index:6}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--paper);border-radius:22px 22px 0 0;padding:12px 20px 0;z-index:7}
+.sheet .grab{width:36px;height:5px;border-radius:3px;background:#D6CFC4;margin:0 auto 12px}
+.sheet .hbar{height:30px;position:relative;margin-top:6px}
+.sheet .hbar:after{content:"";position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:var(--ink);opacity:.85}
+.sheet h3{font-family:var(--serif);font-weight:500;font-size:26px;line-height:1.1;margin:4px 0 6px;letter-spacing:-.005em;color:var(--ink);display:flex;align-items:center}
+.sheet p{margin:0 0 14px;font-size:13.5px;line-height:1.5;color:var(--ink2)}
+.sheet .btn{width:100%;padding:14px 16px;font-size:14px}
+.sheet .btn+.btn{margin-top:8px}
+.sheet .two .btn+.btn{margin-top:0}
+.anytime{font-size:11.5px;color:var(--mute);text-align:center;margin:12px 0 0}
+.prog{display:flex;align-items:center;gap:10px;margin:0 0 14px}
+.prog .bar{flex:1;display:flex;gap:4px}
+.prog .bar i{flex:1;height:4px;border-radius:2px;background:var(--line)}
+.prog .bar i.on{background:var(--gild)}
+.prog .bar i.now{background:var(--ink)}
+.prog small{font-size:11px;color:var(--mute);font-weight:500;white-space:nowrap}
+.alts{display:flex;justify-content:center;gap:18px;margin-top:12px}
+.choice{display:block;border:1.5px solid var(--line);border-radius:14px;padding:11px 14px;background:#fff}
+.choice+.choice{margin-top:8px}
+.choice b{display:block;font-size:14.5px;font-weight:500;line-height:1.3}
+.choice span{display:block;font-size:12px;color:var(--mute);margin-top:1px}
+.choice.on{border-color:var(--ink)}
+.info{background:var(--gild-wash);border:1px solid var(--gild-soft);border-radius:10px;padding:8px 11px;font-size:12px;color:var(--ink2);margin:-4px 0 12px;line-height:1.45}
+.info b{color:var(--ink);font-weight:600}
+.opts{margin-top:6px;border:1px solid var(--line);border-radius:14px;background:#fff;padding:6px;box-shadow:0 22px 44px -18px rgba(30,34,41,.35),0 4px 12px -6px rgba(30,34,41,.15)}
+.opts div{display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:9px;font-size:14px;font-weight:500;color:var(--ink)}
+.opts div i{font-style:normal;width:18px;text-align:center;color:var(--gild);font-size:13px}
+.opts div.on{background:var(--gild-wash)}
+.opts+.anytime{margin-top:16px}
+.opts div.on:after{content:"✓";margin-left:auto;color:var(--gild);font-size:12px}
+.opts div small{color:var(--mute);font-weight:400;font-size:12px;margin-left:auto}
+.opts .th{width:44px;height:30px;border-radius:6px;flex:none}
+.th.gold{background:linear-gradient(135deg,#F7F1E6,#E9DEC9 55%,#B08A5B)}
+.th.fiesta{background:linear-gradient(135deg,#FFD166,#EF476F 55%,#118AB2)}
+.th.plain{background:linear-gradient(135deg,#fff,#F3EEE6);box-shadow:inset 0 0 0 1px var(--line)}
+/* hub-top preview inside the cover card */
+.hubtop{border-radius:14px;overflow:hidden;border:1px solid var(--line);margin:0 0 12px;background:#fff}
+.hubtop .cov{height:104px;background:linear-gradient(135deg,#EFE6D6,#DCCBAE 60%,#C9AC7F);position:relative;display:flex;align-items:flex-end;padding:10px 14px}
+.hubtop .cov:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent 0 9px,rgba(255,255,255,.22) 9px 10px)}
+.hubtop .cov .ph{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#7A6446;font-weight:600;white-space:nowrap}
+.hubtop .cov .nm{position:relative;font-family:var(--serif);font-size:19px;font-weight:500;color:var(--ink);line-height:1.1}
+.hubtop .cov .nm small{display:block;font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);font-weight:600;margin-top:3px}
+.hubtop .strip{display:flex;gap:6px;padding:8px 12px}
+.hubtop .strip span{height:6px;border-radius:3px;background:var(--paper2);flex:1}
+.hubtop .strip span:first-child{flex:.6;background:var(--gild-soft)}
+/* the optional list — five rows in one sheet */
+.sheet.tall{top:74px;padding-top:12px}
+.orow{border-top:1px solid var(--line);padding:11px 0 12px}
+.orow:first-of-type{border-top:0;padding-top:2px}
+.orow h5{font-family:var(--serif);font-weight:500;font-size:19px;line-height:1.15;margin:0 0 2px;display:flex;align-items:center}
+.orow p{margin:0 0 8px;font-size:12.5px;color:var(--mute)}
+.orow .two .btn{padding:10px 8px;font-size:12.5px}
+.orow .dd{padding:8px 12px}
+.sheet .btn.done{margin-top:6px}
+/* toast */
+.toast{position:absolute;left:50%;top:60px;transform:translateX(-50%);background:var(--ink);color:var(--paper);border-radius:999px;padding:10px 18px;font-size:13.5px;font-weight:500;z-index:9;white-space:nowrap;box-shadow:0 14px 28px -12px rgba(0,0,0,.55)}
+.toast b{color:#9BD1B2;font-weight:600;margin-left:4px}
+
+/* ---------- desktop ---------- */
+.desk{width:100%;max-width:1216px;background:var(--paper);border:1px solid #D8D0C4;border-radius:16px;overflow:hidden;box-shadow:0 40px 70px -40px rgba(30,34,41,.4),0 10px 24px -18px rgba(30,34,41,.2)}
+.desk.crop{height:380px}
+.shell{display:grid;grid-template-columns:212px 1fr;height:100%}
+.sidenav{border-right:1px solid var(--line);padding:18px 14px;background:#fff}
+.sidenav .brand{font-size:10.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--gild);font-weight:600;padding:0 8px 14px}
+.sidenav .ev{font-family:var(--serif);font-size:17px;font-weight:500;line-height:1.15;padding:0 8px 14px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.sidenav div.n{padding:8px 10px;border-radius:9px;font-size:13px;color:var(--ink2)}
+.sidenav div.n.on{background:var(--gild-wash);color:var(--ink);font-weight:600}
+.sidenav .g{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);font-weight:600;padding:14px 10px 6px}
+.main{padding:22px 26px}
+.main .gname{font-size:32px;margin:4px 0 4px}
+.main .slim{max-width:640px;margin-top:16px;padding:12px 14px 12px 18px}
+.main .slim .t b{font-size:15px}
+.main .slim .mini{max-width:220px}
+.dtiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+.dtiles .tile.dark{grid-column:auto}
+
+/* ---------- two-column frame grid ---------- */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px 24px;margin-top:20px}
+.frame{display:flex;gap:14px;align-items:flex-start;min-width:0}
+.frame .notes{flex:1;min-width:0;max-width:none;padding:14px 14px 10px 17px}
+.frame .notes h4{display:flex;align-items:baseline;gap:8px;margin-bottom:8px;letter-spacing:.18em}
+.frame .notes h4 .k{font-family:var(--serif);font-size:24px;font-weight:500;letter-spacing:0;color:var(--gild);line-height:1}
+.frame .notes ul{padding-left:15px;font-size:12px;line-height:1.5}
+.frame .notes li{margin-bottom:7px}
+.frame .notes .q{font-size:13px}
+.frame.wide{grid-column:1/-1;flex-direction:column;gap:16px}
+.frame.wide .notes{width:100%;max-width:1216px;padding:14px 20px 10px}
+.frame.wide .notes ul{columns:2;column-gap:36px}
+.frame.wide .notes li{break-inside:avoid}
+h2.sec{display:flex;align-items:center;gap:14px;font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink2);font-weight:600;margin:44px 0 4px}
+h2.sec .n{font-family:var(--serif);font-size:22px;font-weight:500;color:var(--gild);letter-spacing:0}
+h2.sec:after{content:"";flex:1;height:1px;background:var(--line)}
+</style>
+</head>
+<body><div class="wrap">
+
+<div class="doc-brand">Setnayan · Event Hub · Overview</div>
+<h1>Finish your Event Hub — five quick answers</h1>
+<p class="lead">Opens by itself <b>once</b>, the first time the host enters a newly created event. One question per card, one control, and an answer that is never work — <b>"Not decided yet"</b>, <b>"Use a theme picture for now"</b> and <b>"I'll add them later"</b> all count as answers. No Skip, no Later, no confirm dialogs; every card says <span style="font-style:italic">You can change this anytime</span>. When the five essentials have real answers: a toast, <b>Your Event Hub is ready ✓</b>. Sample: a birthday — <b>Birthday Salubong ni Ate</b> · Saturday, November 14, 2026 · 6:00 PM. Name, date and time were given when the event was created, so that card never shows here (it is card 1 of 5, already ✓).</p>
+
+<h2 class="sec"><span class="n">1–4</span>The essentials, one card each</h2>
+<div class="grid">
+
+<!-- ============================ 1 · WHERE IS IT? ============================ -->
+<div class="frame">
+<div class="phone fx">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr hero">
+  <div class="topnav"><span>‹ My events</span><span class="dots">···</span></div>
+  <div class="eyebrow">Event Hub · Birthday</div>
+  <div class="gname">Birthday Salubong ni Ate</div>
+  <p class="sub">Saturday, November 14, 2026 · 6:00 PM</p>
+  <div class="tiles">
+   <div class="tile dark"><div><small>Today</small><b style="font-size:19px">Finish your Event Hub</b></div><span>1 of 5</span></div>
+   <div class="tile"><small>Guests</small><b>0</b><span>none yet</span></div>
+   <div class="tile"><small>Replies</small><b>—</b><span>not open</span></div>
+  </div>
+ </div>
+ <div class="bnav"><span class="on"><i></i>Home</span><span><i></i>Guest list</span><span><i></i>Your Team</span><span><i></i>Maker</span><span><i></i>Services</span></div>
+ <div class="dim"></div>
+ <div class="sheet">
+  <div class="grab"></div>
+  <div class="prog"><div class="bar"><i class="on"></i><i class="now"></i><i></i><i></i><i></i></div><small>2 of 5</small></div>
+  <h3>Where is it?<span class="i">i</span></h3>
+  <p>The place your guests will go.</p>
+  <div class="search">Search a venue or restaurant</div>
+  <div class="alts"><span class="link">Enter your own</span><span class="link">Not decided yet</span></div>
+  <p class="anytime">You can change this anytime</p>
+  <div class="hbar"></div>
+ </div>
+</div>
+<div class="notes"><h4><span class="k">1</span>First entry · Where is it?</h4><ul>
+ <li>Rises by itself <b>only once</b> — the first time the host opens a <b>newly created</b> event. Existing events never get this.</li>
+ <li>The bar has five ticks. <b>Name &amp; date</b> is already gold: it was answered when the event was made, so the first card you see is the second tick.</li>
+ <li>One control: the venue search (the same supplier search as Marketplace). Under it two quick answers: <span class="q">Enter your own</span> (a typed address) · <span class="q">Not decided yet</span>.</li>
+ <li>No Skip, no Later — the sheet can be pulled down, and comes back as the slim card (frame 7).</li>
+ <li><b>ⓘ</b> holds the detail: <span class="q">Guests see the place and get directions on your hub.</span></li>
+</ul></div>
+</div>
+
+<!-- ============================ 2 · COVER PHOTO ============================ -->
+<div class="frame">
+<div class="phone fx">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr hero">
+  <div class="topnav"><span>‹ My events</span><span class="dots">···</span></div>
+  <div class="eyebrow">Event Hub · Birthday</div>
+  <div class="gname">Birthday Salubong ni Ate</div>
+  <p class="sub">Saturday, November 14, 2026 · 6:00 PM</p>
+ </div>
+ <div class="dim"></div>
+ <div class="sheet">
+  <div class="grab"></div>
+  <div class="prog"><div class="bar"><i class="on"></i><i class="on"></i><i class="now"></i><i></i><i></i></div><small>3 of 5</small></div>
+  <h3>Add a cover photo<span class="i">i</span></h3>
+  <p>It sits at the top of your Event Hub.</p>
+  <div class="hubtop">
+   <div class="cov"><span class="ph">Your photo goes here</span><div class="nm">Birthday Salubong ni Ate<small>November 14, 2026</small></div></div>
+   <div class="strip"><span></span><span></span><span></span></div>
+  </div>
+  <span class="btn fill">Upload a photo</span>
+  <span class="btn ghost">Use a theme picture for now</span>
+  <p class="anytime">You can change this anytime</p>
+  <div class="hbar"></div>
+ </div>
+</div>
+<div class="notes"><h4><span class="k">2</span>Add a cover photo</h4><ul>
+ <li>The preview is the real hub top, small: the photo, the event name over it, the date. Upload replaces the striped area right here — no page change.</li>
+ <li>Two-way choice, so two buttons: <b>Upload a photo</b> (the phone's picker; the same FileUpload that compresses in the browser) · <b>Use a theme picture for now</b>.</li>
+ <li>The theme picture counts as an answer; the tick goes gold. The host can swap it from the Maker any day.</li>
+ <li><b>ⓘ</b>: <span class="q">Landscape works best. We crop it for the phone and the invite.</span></li>
+</ul></div>
+</div>
+
+<!-- ============================ 3 · WHO CAN REPLY? ============================ -->
+<div class="frame">
+<div class="phone fx">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr hero">
+  <div class="topnav"><span>‹ My events</span><span class="dots">···</span></div>
+  <div class="eyebrow">Event Hub · Birthday</div>
+  <div class="gname">Birthday Salubong ni Ate</div>
+  <p class="sub">Saturday, November 14, 2026 · 6:00 PM</p>
+ </div>
+ <div class="dim"></div>
+ <div class="sheet">
+  <div class="grab"></div>
+  <div class="prog"><div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="now"></i><i></i></div><small>4 of 5</small></div>
+  <h3>Who can reply?<span class="i" style="background:var(--gild);color:#fff">i</span></h3>
+  <p>Who can RSVP through your Event Hub.</p>
+  <div class="info"><b>Only my list:</b> names you add can reply; nobody else. <b>Anyone:</b> a stranger with the link asks first — you say yes or no. Same setting as the Guest list's first-visit question.</div>
+  <span class="choice"><b>Only people on my list</b><span>Names you add. Nobody else.</span></span>
+  <span class="choice"><b>Anyone, I approve</b><span>Anyone with the link can ask. You say yes.</span></span>
+  <p class="anytime">You can change this anytime</p>
+  <div class="hbar"></div>
+ </div>
+</div>
+<div class="notes"><h4><span class="k">3</span>Who can reply?</h4><ul>
+ <li>Two answers, one line each: <span class="q">Only people on my list — Names you add. Nobody else.</span> · <span class="q">Anyone, I approve — Anyone with the link can ask. You say yes.</span> Tapping one answers and moves on.</li>
+ <li>Drawn with <b>ⓘ</b> open (the filled gold circle): a small gold note under the line, nothing more. Tap ⓘ again to close it.</li>
+ <li>This is the <b>same setting</b> as the Guest list's first-visit pop-up — answering here answers there, and the other way round.</li>
+ <li>No default is pre-picked here: the rule changes who gets in, so the host must choose one.</li>
+</ul></div>
+</div>
+
+<!-- ============================ 4 · ADD YOUR GUESTS ============================ -->
+<div class="frame">
+<div class="phone fx">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr hero">
+  <div class="topnav"><span>‹ My events</span><span class="dots">···</span></div>
+  <div class="eyebrow">Event Hub · Birthday</div>
+  <div class="gname">Birthday Salubong ni Ate</div>
+ </div>
+ <div class="dim"></div>
+ <div class="sheet">
+  <div class="grab"></div>
+  <div class="prog"><div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="now"></i></div><small>5 of 5</small></div>
+  <h3>Add your guests<span class="i">i</span></h3>
+  <p>Your list makes the invites and the replies.</p>
+  <div class="dd"><div><small>How do you want to add them?</small><b class="empty">Pick one</b></div><i>▴</i></div>
+  <div class="opts">
+   <div><i>☺</i>From your people<small>contacts you've used</small></div>
+   <div><i>✎</i>Type names</div>
+   <div><i>⇪</i>Import a list<small>CSV · Sheets</small></div>
+   <div><i>◷</i>I'll add them later</div>
+  </div>
+  <p class="anytime">You can change this anytime</p>
+  <div class="hbar"></div>
+ </div>
+</div>
+<div class="notes"><h4><span class="k">4</span>Add your guests</h4><ul>
+ <li>Four ways, so <b>one dropdown</b>, never a row of pills — drawn open: <b>From your people · Type names · Import a list · I'll add them later</b>.</li>
+ <li>The first three open the matching Guest-list door right here (the people picker, the name box, the import sheet) and come back to this sheet when done.</li>
+ <li><span class="q">I'll add them later</span> <b>is an answer</b> — the sheet closes — but the tick stays grey until at least one guest exists, so the slim card (frame 7) still counts it as left.</li>
+ <li><b>ⓘ</b>: <span class="q">You can add more any time from Guests.</span></li>
+</ul></div>
+</div>
+
+</div>
+
+<h2 class="sec"><span class="n">5–6</span>Ready, then five more — quick</h2>
+<div class="grid">
+
+<!-- ============================ 5 · DONE · TOAST ============================ -->
+<div class="frame">
+<div class="phone fx">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="toast">Your Event Hub is ready<b>✓</b></div>
+ <div class="scr hero" style="padding-top:54px">
+  <div class="eyebrow">Event Hub · Birthday</div>
+  <div class="gname">Birthday Salubong ni Ate</div>
+  <p class="sub">Saturday, November 14, 2026 · 6:00 PM · Casa Marikina</p>
+  <div class="tiles">
+   <div class="tile dark"><div><small>Today</small><b style="font-size:19px">Send the first invites</b></div><span>32 to send</span></div>
+   <div class="tile"><small>Guests</small><b>32</b><span>0 replied</span></div>
+   <div class="tile"><small>Replies</small><b>Open</b><span>only my list</span></div>
+   <div class="tile"><small>Budget</small><b>—</b><span>set a target</span></div>
+   <div class="tile"><small>Schedule</small><b>1</b><span>the day itself</span></div>
+  </div>
+ </div>
+ <div class="bnav"><span class="on"><i></i>Home</span><span><i></i>Guest list</span><span><i></i>Your Team</span><span><i></i>Maker</span><span><i></i>Services</span></div>
+</div>
+<div class="notes"><h4><span class="k">5</span>Done · the toast</h4><ul>
+ <li>The moment the fifth tick goes gold (here: 32 guests just came in from Import), the sheet closes and a small toast says <span class="q">Your Event Hub is ready ✓</span>. It fades on its own — nothing to tap, no dialog.</li>
+ <li>Behind it: the ordinary Overview. The dark <b>Today</b> tile already moves on to the next real job, <span class="q">Send the first invites</span>.</li>
+ <li>If the host answered <span class="q">Not decided yet</span> or <span class="q">I'll add them later</span>, there is no toast yet — the slim card (frame 7) takes over instead.</li>
+</ul></div>
+</div>
+
+<!-- ============================ 6 · THE OPTIONAL FIVE, ONE LIST ============================ -->
+<div class="frame">
+<div class="phone fx" style="height:790px">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr hero">
+  <div class="eyebrow">Event Hub · Birthday</div>
+  <div class="gname">Birthday Salubong ni Ate</div>
+ </div>
+ <div class="dim"></div>
+ <div class="sheet tall">
+  <div class="grab"></div>
+  <div class="eyebrow" style="margin-bottom:10px">Five more · quick</div>
+  <div class="orow"><h5>Do you want a logo?<span class="i">i</span></h5><p>For invites and the hub top.</p>
+   <div class="two"><span class="btn fill">Yes, make one</span><span class="btn ghost">No, use the name</span></div></div>
+  <div class="orow"><h5>Pick a look<span class="i">i</span></h5><p>Colours and type for the whole hub.</p>
+   <div class="dd"><div class="row"><span class="th gold"></span><b>Salubong Gold</b></div><i>▾</i></div></div>
+  <div class="orow"><h5>What to ask guests<span class="i">i</span></h5><p>Coming? · How many? · A message.</p>
+   <div class="two"><span class="btn fill">Use the defaults ✓</span><span class="btn ghost">Change</span></div></div>
+  <div class="orow"><h5>Photos from your guests?<span class="i">i</span></h5><p>Papic — they shoot, tagging comes with it.</p>
+   <div class="two"><span class="btn fill">Yes</span><span class="btn ghost">No</span></div></div>
+  <div class="orow"><h5>Accept gifts?<span class="i">i</span></h5><p>GCash or bank, right on the hub.</p>
+   <div class="two"><span class="btn fill">Yes</span><span class="btn ghost">No</span></div></div>
+  <span class="btn fill done">Done</span>
+  <p class="anytime">You can change any of these anytime</p>
+  <div class="hbar"></div>
+ </div>
+</div>
+<div class="notes"><h4><span class="k">6</span>Five more, as one list</h4><ul>
+ <li>Rises right after the toast, once, as <b>one sheet</b> — not five cards. Each row: title, one line, its control. Every row needs an answer; none is work.</li>
+ <li><b>Logo</b> — <span class="q">Yes, make one</span> opens the Logo Maker and comes back; <span class="q">No, use the name</span> writes the event name where the logo would sit. (A wedding reads <span class="q">No, use our names</span> — EventWords.)</li>
+ <li><b>Pick a look</b> — one dropdown, the default look pre-selected <b>is</b> the answer; frame 6b shows it open.</li>
+ <li><b>What to ask guests</b> — the defaults are shown in the line; <span class="q">Change</span> opens the questions right here (no "edit elsewhere" link).</li>
+ <li><b>Papic</b> and <b>Gifts</b> — Yes / No. A Yes on Papic turns tagging on with it; a Yes on Gifts asks for GCash or bank details on the next line, in place.</li>
+ <li><b>Done</b> closes the list. Nothing here blocks the toast or the hub.</li>
+</ul></div>
+</div>
+
+<!-- ============================ 6b · PICK A LOOK, OPEN ============================ -->
+<div class="frame">
+<div class="phone fx" style="height:600px">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr hero">
+  <div class="eyebrow">Event Hub · Birthday</div>
+  <div class="gname">Birthday Salubong ni Ate</div>
+ </div>
+ <div class="dim"></div>
+ <div class="sheet">
+  <div class="grab"></div>
+  <div class="eyebrow" style="margin-bottom:10px">Five more · quick</div>
+  <div class="orow"><h5>Pick a look<span class="i">i</span></h5><p>Colours and type for the whole hub.</p>
+   <div class="dd"><div class="row"><span class="th gold"></span><b>Salubong Gold</b></div><i>▴</i></div>
+   <div class="opts">
+    <div class="on"><span class="th gold"></span>Salubong Gold</div>
+    <div><span class="th fiesta"></span>Fiesta Bright</div>
+    <div><span class="th plain"></span>Plain &amp; Clean</div>
+   </div></div>
+  <div class="orow"><h5>What to ask guests<span class="i">i</span></h5><p>Coming? · How many? · A message.</p>
+   <div class="two"><span class="btn fill">Use the defaults ✓</span><span class="btn ghost">Change</span></div></div>
+  <p class="anytime">You can change any of these anytime</p>
+  <div class="hbar"></div>
+ </div>
+</div>
+<div class="notes"><h4><span class="k">6b</span>Pick a look, open</h4><ul>
+ <li>The dropdown lists <b>three looks with a thumbnail each</b> — for a birthday: <span class="q">Salubong Gold</span> (pre-selected ✓) · <span class="q">Fiesta Bright</span> · <span class="q">Plain &amp; Clean</span>. The three come from the event type's theme set.</li>
+ <li>Picking one recolours the hub-top preview and the invite at once. Closing it with the default still selected is an answer.</li>
+ <li>Same PickMenu as everywhere else — one list, never a pill row.</li>
+</ul></div>
+</div>
+
+</div>
+
+<h2 class="sec"><span class="n">7–8</span>Later visits · the slim card, then the chip</h2>
+<div class="grid">
+
+<!-- ============================ 7 · OVERVIEW, DESKTOP ============================ -->
+<div class="frame wide">
+<div class="desk crop">
+ <div class="shell">
+  <div class="sidenav">
+   <div class="brand">Setnayan</div>
+   <div class="ev">Birthday Salubong ni Ate</div>
+   <div class="n on">Overview</div><div class="n">Guests</div><div class="n">Marketplace</div><div class="n">Suite</div>
+   <div class="g">Also in this event</div>
+   <div class="n">Schedule</div><div class="n">Seat plan</div><div class="n">Budget</div><div class="n">Hosts</div>
+  </div>
+  <div class="main">
+   <div class="eyebrow">Event Hub · Birthday</div>
+   <div class="gname">Birthday Salubong ni Ate</div>
+   <p class="sub">Saturday, November 14, 2026 · 6:00 PM · Casa Marikina</p>
+   <div class="slim">
+    <div class="t"><b>Finish your Event Hub — 3 of 5</b><small>Next: Who can reply? · then Add your guests</small>
+     <div class="mini"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div></div>
+    <span class="btn fill">Continue</span>
+   </div>
+   <div class="dtiles">
+    <div class="tile dark"><div><small>Today</small><b style="font-size:19px">Lock the venue</b></div></div>
+    <div class="tile"><small>Guests</small><b>0</b><span>none yet</span></div>
+    <div class="tile"><small>Replies</small><b>—</b><span>not open</span></div>
+    <div class="tile"><small>Budget</small><b>—</b><span>set a target</span></div>
+   </div>
+  </div>
+ </div>
+</div>
+<div class="notes"><h4><span class="k">7</span>Later visit · Overview, computer</h4><ul>
+ <li>If the sheet was pulled down, or an answer was <span class="q">Not decided yet</span> / <span class="q">I'll add them later</span>, the Overview carries <b>one slim card</b> under the name: <span class="q">Finish your Event Hub — 3 of 5</span>, the next two items, a hairline bar, <b>Continue</b>.</li>
+ <li><b>Continue</b> re-opens the same sheet at the first grey tick — here <span class="q">Who can reply?</span> — and runs to the end. It never opens by itself again.</li>
+ <li>The card sits where the Set-date nudge sits today: above the At-a-glance tiles, never blocking them. Nothing else on the Overview changes.</li>
+ <li>The count is what is really in place, not what was answered: <span class="q">I'll add them later</span> keeps its tick grey until a guest exists.</li>
+</ul></div>
+</div>
+
+<!-- ============================ 7b · OVERVIEW, PHONE ============================ -->
+<div class="frame">
+<div class="phone fx" style="height:560px">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr hero">
+  <div class="topnav"><span>‹ My events</span><span class="dots">···</span></div>
+  <div class="eyebrow">Event Hub · Birthday</div>
+  <div class="gname">Birthday Salubong ni Ate</div>
+  <p class="sub">Saturday, November 14, 2026 · 6:00 PM · Casa Marikina</p>
+  <div class="slim">
+   <div class="t"><b>Finish your Event Hub — 3 of 5</b><small>Next: Who can reply?</small>
+    <div class="mini"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div></div>
+   <span class="btn fill">Continue</span>
+  </div>
+  <div class="tiles">
+   <div class="tile dark"><div><small>Today</small><b style="font-size:19px">Lock the venue</b></div></div>
+   <div class="tile"><small>Guests</small><b>0</b><span>none yet</span></div>
+   <div class="tile"><small>Replies</small><b>—</b><span>not open</span></div>
+  </div>
+ </div>
+ <div class="bnav"><span class="on"><i></i>Home</span><span><i></i>Guest list</span><span><i></i>Your Team</span><span><i></i>Maker</span><span><i></i>Services</span></div>
+</div>
+<div class="notes"><h4><span class="k">7b</span>The same card, phone</h4><ul>
+ <li>One line, one count, one button. <b>Continue</b> rises the sheet from the bottom, exactly as on first entry, at the first grey tick.</li>
+ <li>It is one card, never a banner: the tiles keep their place under it.</li>
+</ul></div>
+</div>
+
+<!-- ============================ 8 · ALL DONE · READY CHIP ============================ -->
+<div class="frame">
+<div class="phone fx" style="height:560px">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr hero">
+  <div class="topnav"><span>‹ My events</span><span class="dots">···</span></div>
+  <div class="readyrow"><span class="eyebrow">Event Hub · Birthday</span><span class="pill ok">Ready ✓</span></div>
+  <div class="gname">Birthday Salubong ni Ate</div>
+  <p class="sub">Saturday, November 14, 2026 · 6:00 PM · Casa Marikina</p>
+  <div class="tiles">
+   <div class="tile dark"><div><small>Today</small><b style="font-size:19px">Send the first invites</b></div><span>32 to send</span></div>
+   <div class="tile"><small>Guests</small><b>32</b><span>0 replied</span></div>
+   <div class="tile"><small>Replies</small><b>Open</b><span>only my list</span></div>
+   <div class="tile"><small>Budget</small><b>—</b><span>set a target</span></div>
+   <div class="tile"><small>Schedule</small><b>1</b><span>the day itself</span></div>
+  </div>
+ </div>
+ <div class="bnav"><span class="on"><i></i>Home</span><span><i></i>Guest list</span><span><i></i>Your Team</span><span><i></i>Maker</span><span><i></i>Services</span></div>
+</div>
+<div class="notes"><h4><span class="k">8</span>All done · the chip</h4><ul>
+ <li>The slim card is gone. In its place a tiny <b>Ready ✓</b> chip beside the eyebrow — nothing bigger.</li>
+ <li>Tapping the chip re-opens the <b>Five more</b> list (frame 6), so the optional answers stay reachable without a menu entry.</li>
+ <li>Every answer from the sheet lives in its real home too — Details, Guests, Look, Papic, Gifts — and changing it there changes it here.</li>
+</ul></div>
+</div>
+
+</div>
+</div></body></html>
