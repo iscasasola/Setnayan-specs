@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guest card + Guest list — Setnayan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FAF7F2;--paper2:#F3EEE6;--page:#EDE7DE;--ink:#1E2229;--ink2:#3B3F46;--mute:#76736D;
+  --gild:#B08A5B;--gild-soft:#E9DEC9;--gild-wash:#F7F1E6;--wine:#6E2A3A;--wine-wash:#F6ECEE;
+  --line:#E5DED3;--ok:#2F6B4F;--okbg:#E7F1EA;--warn:#8A5A00;--warnbg:#FBF0D8;
+  --serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --sans:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--page);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1264px;margin:0 auto;padding:40px 24px 72px}
+
+/* ---------- page furniture (owner-facing) ---------- */
+.doc-brand{font-size:10.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--gild);font-weight:600}
+h1{font-family:var(--serif);font-weight:500;font-size:40px;line-height:1.1;margin:8px 0 10px;letter-spacing:-.01em}
+.lead{color:var(--ink2);font-size:14.5px;line-height:1.6;max-width:820px;margin:0 0 8px}
+.lead b{font-weight:600;color:var(--ink)}
+h2.sec{display:flex;align-items:center;gap:14px;font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink2);font-weight:600;margin:52px 0 20px}
+h2.sec .n{font-family:var(--serif);font-size:22px;font-weight:500;color:var(--gild);letter-spacing:0}
+h2.sec:after{content:"";flex:1;height:1px;background:var(--line)}
+.row{display:flex;gap:36px;flex-wrap:wrap;align-items:flex-start}
+.notes{flex:1;min-width:300px;max-width:520px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 20px 16px;position:relative}
+.notes:before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:3px;background:var(--gild);border-radius:0 3px 3px 0}
+.notes h4{margin:0 0 10px;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gild);font-weight:600}
+.notes ul{margin:0;padding-left:18px;font-size:12.5px;line-height:1.55;color:var(--ink2)}
+.notes li{margin-bottom:6px}
+.notes li b{color:var(--ink);font-weight:600}
+.notes .q{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--ink)}
+
+/* ---------- phone frame ---------- */
+.phone{width:390px;flex:none;background:var(--paper);border:9px solid #14161A;border-radius:48px;position:relative;overflow:hidden;
+  box-shadow:0 0 0 1px #2E3238,0 40px 70px -30px rgba(30,34,41,.45),0 16px 30px -18px rgba(30,34,41,.25)}
+.phone .island{position:absolute;left:50%;top:11px;transform:translateX(-50%);width:118px;height:33px;background:#14161A;border-radius:20px;z-index:5}
+.phone .status{height:52px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 30px 8px;font-size:14px;font-weight:600;letter-spacing:-.01em}
+.phone .status .sig{display:flex;gap:6px;align-items:center;font-size:11px;letter-spacing:.06em}
+.phone .status .bat{width:24px;height:11px;border:1.5px solid var(--ink);border-radius:4px;position:relative;opacity:.9}
+.phone .status .bat:after{content:"";position:absolute;left:2px;top:2px;bottom:2px;right:5px;background:var(--ink);border-radius:1px}
+.scr{padding:4px 20px 8px}
+.phone .home{height:30px;position:relative}
+.phone .home:after{content:"";position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:var(--ink);opacity:.85}
+.topnav{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--wine);font-weight:500;margin:2px 0 14px}
+.topnav .dots{color:var(--mute);letter-spacing:.1em;font-weight:600}
+
+/* ---------- type + atoms ---------- */
+.eyebrow{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--gild);font-weight:600}
+.gname{font-family:var(--serif);font-weight:500;font-size:29px;line-height:1.1;margin:5px 0 8px;letter-spacing:-.005em}
+.sub{font-size:12.5px;color:var(--mute);line-height:1.45}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;border-radius:999px;padding:4px 10px;letter-spacing:.01em;white-space:nowrap}
+.pill.ok{background:var(--okbg);color:var(--ok)}
+.pill.warn{background:var(--warnbg);color:var(--warn)}
+.pill.soft{background:var(--paper2);color:var(--ink2);box-shadow:inset 0 0 0 1px var(--line)}
+.linked{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--okbg);border-radius:12px;padding:10px 13px;font-size:12.5px;color:var(--ok);margin-top:12px}
+.linked .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ok);margin-right:8px;vertical-align:1px}
+.linked a{color:var(--wine);text-decoration:underline;text-underline-offset:3px;font-weight:500;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border-radius:999px;font-size:13px;font-weight:500;border:1.5px solid var(--ink);background:#fff;color:var(--ink);white-space:nowrap;line-height:1}
+.btn.fill{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.sm{padding:7px 12px;font-size:12px;border-width:1px}
+.btn.dd{border:1px solid var(--line);background:#fff;color:var(--ink2);padding:7px 11px 7px 13px;font-size:12px;gap:8px}
+.btn.dd i{font-style:normal;color:var(--gild);font-size:10px}
+.btn.ghost{border:1px solid var(--line);background:#fff;color:var(--ink2);font-size:12px;padding:7px 12px}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:16px;box-shadow:0 10px 24px -20px rgba(30,34,41,.25)}
+.label{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink2);font-weight:600;margin:22px 0 8px}
+.label.sm{margin-top:12px;color:var(--mute);letter-spacing:.2em;font-size:10px}
+.list{border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden}
+.li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 14px;border-top:1px solid var(--line)}
+.li:first-child{border-top:0}
+.li small{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin-bottom:2px;font-weight:500}
+.li b{font-weight:500;font-size:14px;color:var(--ink);line-height:1.3}
+.li b.empty{color:#A6A29B;font-weight:400}
+.li .hint{color:var(--mute);font-weight:400;font-size:12.5px}
+.li i{font-style:normal;color:#B9B3A9;font-size:20px;line-height:1;flex:none}
+.li .link{flex:none}
+.link{color:var(--wine);text-decoration:underline;text-underline-offset:3px;font-size:13px;font-weight:500}
+.dd{border:1px solid var(--line);border-radius:14px;background:#fff;padding:9px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px}
+.dd small{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-weight:500;margin-bottom:1px}
+.dd b{font-weight:500;font-size:14px}
+.dd b.empty{color:#A6A29B;font-weight:400}
+.dd i{font-style:normal;color:var(--gild);font-size:12px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips span{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--gild);color:#6B5230;border-radius:999px;padding:6px 12px;font-size:12px;background:var(--gild-wash);font-weight:500}
+.chips span:before{content:"✓";font-size:10px;color:var(--gild)}
+.chips span.off{border-color:var(--line);color:#A6A29B;background:#fff;font-weight:400}
+.chips span.off:before{content:"";width:8px;height:8px;border-radius:50%;border:1px solid var(--line)}
+
+/* ---------- the Digital ticket (identical everywhere) ---------- */
+.tkt{width:260px;aspect-ratio:3/4;background:#fff;border-radius:18px;padding:18px 18px 15px;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;
+  box-shadow:0 0 0 1px var(--line),0 24px 48px -26px rgba(30,34,41,.45),0 6px 14px -10px rgba(30,34,41,.2)}
+.tkt:before{content:"";position:absolute;inset:7px;border:1px solid var(--gild-soft);border-radius:12px;pointer-events:none}
+.tkt .mono{width:42px;height:42px;border-radius:50%;border:1px solid var(--gild);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:500;font-size:19px;color:var(--gild);letter-spacing:.08em;padding-left:.08em}
+.tkt .couple{font-family:var(--serif);font-style:italic;font-weight:500;font-size:16px;letter-spacing:.03em;color:var(--wine);margin-top:7px;line-height:1}
+.tkt .rule{width:100%;display:flex;align-items:center;gap:8px;margin:11px 0 9px;color:var(--gild);font-size:7px}
+.tkt .rule:before,.tkt .rule:after{content:"";flex:1;height:1px;background:var(--gild-soft)}
+.tkt .guest{font-family:var(--serif);font-weight:500;font-size:20px;line-height:1.15;color:var(--ink);letter-spacing:-.005em}
+.tkt .gsub{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);font-weight:500;margin-top:5px}
+.tkt .gsub.seat{color:var(--wine);font-weight:600;background:var(--wine-wash);border-radius:999px;padding:4px 11px;margin-top:6px;letter-spacing:.16em}
+.tkt .slot{width:122px;height:122px;border-radius:50%;background:var(--paper);margin:auto 0;display:flex;align-items:center;justify-content:center;
+  box-shadow:inset 0 2px 7px rgba(30,34,41,.14),inset 0 -1px 0 #fff,0 0 0 1px var(--line)}
+.qr{width:104px;height:104px;border-radius:50%;position:relative;overflow:hidden;border:7px solid #fff;outline:1px solid var(--gild);
+  background:
+   conic-gradient(var(--ink) 25%,#fff 0 50%,var(--ink) 0 75%,#fff 0) 0 0/8px 8px,
+   conic-gradient(var(--ink) 25%,#fff 0 50%,var(--ink) 0 75%,#fff 0) 3px 5px/14px 14px,
+   conic-gradient(var(--ink) 25%,#fff 0 50%,var(--ink) 0 75%,#fff 0) 7px 2px/22px 22px;
+  background-blend-mode:difference,difference,normal}
+.qr i{position:absolute;width:20px;height:20px;border:3px solid var(--ink);padding:3px;background:var(--ink);background-clip:content-box;box-shadow:0 0 0 2px #fff;border-radius:2px}
+.qr i:nth-child(1){left:12px;top:12px}
+.qr i:nth-child(2){right:12px;top:12px}
+.qr i:nth-child(3){left:12px;bottom:12px}
+.tkt .meta{display:flex;justify-content:space-between;width:100%;border-top:1px solid var(--line);padding-top:9px;margin-top:10px;text-align:left}
+.tkt .meta div+div{text-align:right}
+.tkt .meta small{display:block;font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gild);font-weight:600}
+.tkt .meta b{font-family:var(--serif);font-weight:500;font-size:14px;color:var(--ink);line-height:1.2}
+/* thumbnail = the same ticket, scaled */
+.tkt-thumb{width:109px;height:146px;flex:none;position:relative}
+.tkt-thumb .tkt{position:absolute;left:0;top:0;transform:scale(.42);transform-origin:0 0}
+
+/* ticket card on the guest card */
+.tcard .trow{display:flex;gap:14px;align-items:center}
+.tcard .trow p{margin:5px 0 0}
+.btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px}
+.btns .btn{padding:11px 6px;font-size:12.5px}
+.more{font-size:12px;color:var(--mute);margin-top:12px;line-height:1.5;display:flex;gap:8px;align-items:baseline}
+.more b{font-weight:600;color:var(--ink2);white-space:nowrap}
+.more b:after{content:" ▾";color:var(--gild)}
+
+/* ---------- desktop ---------- */
+.desk{width:100%;max-width:1216px;background:var(--paper);border:1px solid #D8D0C4;border-radius:16px;overflow:hidden;box-shadow:0 40px 70px -40px rgba(30,34,41,.4),0 10px 24px -18px rgba(30,34,41,.2)}
+.bar{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--line);gap:12px;flex-wrap:wrap;background:#fff}
+.bar .t{font-family:var(--serif);font-size:26px;font-weight:500;letter-spacing:-.005em}
+.bar .f{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.search{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:7px 14px 7px 12px;font-size:12px;color:var(--mute);background:var(--paper);min-width:150px}
+.search:before{content:"";width:10px;height:10px;border:1.5px solid var(--mute);border-radius:50%;box-shadow:4px 4px 0 -2px var(--mute)}
+.stats{display:flex;gap:0;padding:0 22px;font-size:12px;color:var(--ink2);border-bottom:1px solid var(--line);flex-wrap:wrap;background:var(--paper)}
+.stats span{padding:12px 22px 12px 0;margin-right:22px;border-right:1px solid var(--line)}
+.stats span:last-child{border-right:0}
+.stats b{font-family:var(--serif);font-size:22px;font-weight:500;color:var(--ink);margin-right:6px;line-height:1}
+.stats span.hi b{color:var(--wine)}
+table{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff}
+th{text-align:left;font-weight:600;color:var(--ink2);font-size:10px;letter-spacing:.16em;text-transform:uppercase;padding:11px 12px;border-bottom:1px solid var(--line);background:var(--paper2);white-space:nowrap}
+td{padding:12px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tr.sel td{background:var(--gild-wash)}
+tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--gild)}
+.nm b{display:block;font-family:var(--serif);font-size:17px;font-weight:500;line-height:1.15;letter-spacing:-.005em}
+.nm small{color:var(--mute);font-size:11.5px}
+td .n{color:var(--ink);font-weight:500}
+td .n small{display:block;color:var(--mute);font-weight:400}
+.inv{display:flex;gap:6px;align-items:center}
+.inv small{display:block;font-size:11px;color:var(--mute);margin-top:5px}
+.i{font-size:9.5px;color:var(--gild);border:1px solid var(--gild);border-radius:50%;width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;margin-left:6px;position:relative;cursor:help;font-family:var(--serif);font-style:italic;font-weight:600;letter-spacing:0;text-transform:none;vertical-align:1px}
+.i:hover:after{content:attr(data-tip);position:absolute;right:0;top:20px;width:260px;background:var(--ink);color:var(--paper);font-family:var(--sans);font-style:normal;font-weight:400;font-size:11.5px;letter-spacing:0;text-transform:none;line-height:1.45;padding:10px 12px;border-radius:10px;z-index:9;text-align:left}
+.split{display:grid;grid-template-columns:1fr 396px}
+.side{border-left:1px solid var(--line);padding:20px 20px 24px;background:var(--paper)}
+.side .gname{font-size:24px}
+.side .card{padding:14px}
+.side .tcol{display:flex;flex-direction:column;gap:7px;flex:1}
+.side .tcol .btn{width:100%;padding:9px 10px;font-size:12.5px}
+.side .label{margin-top:16px}
+.side .li{padding:9px 12px}
+.side .li b{font-size:13px}
+.side .dd{padding:7px 12px}
+.side .dd b{font-size:13px}
+.scroll{overflow-x:auto}
+
+/* ---------- phone list ---------- */
+.lhead{display:flex;justify-content:space-between;align-items:center;margin-top:2px}
+.lhead .t{font-family:var(--serif);font-size:28px;font-weight:500;letter-spacing:-.005em}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.counts{font-size:12.5px;color:var(--mute);margin:12px 0 2px}
+.counts b{color:var(--wine);font-weight:600}
+.gcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 14px 12px;margin-top:10px;box-shadow:0 10px 24px -22px rgba(30,34,41,.3)}
+.gcard .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.gcard .top b{display:block;font-family:var(--serif);font-size:19px;font-weight:500;line-height:1.15;letter-spacing:-.005em}
+.gcard .top .sub{margin-top:3px}
+.gcard .act{display:flex;gap:6px;align-items:center;margin-top:12px;padding-top:11px;border-top:1px dashed var(--line)}
+.gcard .act .sub{margin-left:auto;font-size:11.5px;text-align:right}
+</style>
+</head>
+<body><div class="wrap">
+
+<div class="doc-brand">Setnayan · Event Hub · Guests</div>
+<h1>Guest card + Guest list</h1>
+<p class="lead">Sample: Mr. Manuel Cortez Casasola (+1). What changes: the card leads with the guest's <b>Digital ticket</b> and <b>Invite</b>; account status + <b>Unlink</b> sit at the top; no email; no duplicate QR buttons; the name is the five parts; +N and Meal are dropdowns; the table gets an <b>Invite</b> column and a Linked mark.</p>
+
+<!-- ============================ 1 · GUEST CARD — PHONE ============================ -->
+<h2 class="sec"><span class="n">1</span>The guest card — phone</h2>
+<div class="row">
+<div class="phone">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="topnav"><span>‹ Guest list</span><span class="dots">···</span></div>
+  <div class="eyebrow">Guest · Groom's side</div>
+  <div class="gname">Mr. Manuel Cortez Casasola</div>
+  <div class="pills"><span class="pill ok">✓ Attending</span><span class="pill soft">+1</span><span class="pill soft">Invite sent · Sep 30</span></div>
+  <div class="linked"><span><i class="dot"></i>Linked to manuel@email.com</span><a>Unlink</a></div>
+
+  <div class="card tcard">
+   <div class="trow">
+    <div class="tkt-thumb"><div class="tkt">
+     <div class="mono">AM</div><div class="couple">Ana &amp; Miguel</div><div class="rule">◆</div>
+     <div class="guest">Mr. Manuel Cortez Casasola</div><div class="gsub">and 1 guest</div>
+     <div class="slot"><div class="qr"><i></i><i></i><i></i></div></div>
+     <div class="meta"><div><small>Date</small><b>March 13, 2027</b></div><div><small>Arrive</small><b>2:30 PM</b></div></div>
+    </div></div>
+    <div><div class="eyebrow">Their ticket</div><p class="sub">What they see on Me. No table until the day.</p></div>
+   </div>
+   <div class="btns"><span class="btn fill">Invite</span><span class="btn">Copy message</span><span class="btn">Copy QR</span></div>
+   <div class="more"><b>More</b><span>Download ticket · Download QR · Write to NFC · QR look</span></div>
+  </div>
+
+  <div class="label">Name</div>
+  <div class="list">
+   <div class="li"><div><small>Prefix · First · Middle · Last · Suffix</small><b>Mr. · Manuel · Cortez · Casasola · —</b></div><i>›</i></div>
+   <div class="li"><div><small>Mobile</small><b>0917 ••• 4821</b></div><i>›</i></div>
+   <div class="li"><div><small>Private note</small><b class="empty">None</b></div><i>›</i></div>
+  </div>
+
+  <div class="label">RSVP</div>
+  <div class="dd" style="margin-top:0"><div><small>Reply</small><b>Attending</b></div><i>▾</i></div>
+  <div class="label sm">Invited to</div>
+  <div class="chips"><span>Ceremony</span><span>Reception</span><span class="off">After-party</span></div>
+  <div class="two">
+   <div class="dd"><div><small>Meal</small><b>Beef</b></div><i>▾</i></div>
+   <div class="dd"><div><small>Extra seats</small><b>+1</b></div><i>▾</i></div>
+  </div>
+  <div class="dd"><div><small>Diet</small><b class="empty">none</b></div></div>
+
+  <div class="label">Their guests</div>
+  <div class="list"><div class="li"><div><small>+1</small><b>Ms. Bea L. Santos</b></div><span class="link">Invite</span></div></div>
+
+  <div class="label">Seat</div>
+  <div class="list"><div class="li"><div><small>Table</small><b>Table 7 <span class="hint">· guests see it on the day</span></b></div><i>›</i></div></div>
+ </div>
+ <div class="home"></div>
+</div>
+
+<div class="notes"><h4>Notes for the owner</h4><ul>
+ <li><b>Top:</b> name, status pills, and the account line (<span class="q">Linked to … · Unlink</span>, or <span class="q">Not linked</span>).</li>
+ <li><b>Ticket first:</b> the real Digital ticket thumbnail, then <b>Invite</b> (phone share sheet: message + link + QR) · <b>Copy message</b> · <b>Copy QR</b>.</li>
+ <li>Download ticket / Download QR / NFC / QR look move into one <b>More ▾</b> — no duplicates.</li>
+ <li><b>Removed:</b> "Email a sign-in link" (no email to guests); the second Download QR; the second "Customize guest QRs".</li>
+ <li><b>Name</b> = the five parts, one row. Email row gone; mobile stays (used for the generic-QR last-4 check).</li>
+ <li><b>RSVP</b> and <b>Extra seats</b> are dropdowns (None · +1 · +2 · +3 · +4). "Invited to" stays as on/off chips (several can be on).</li>
+ <li><b>Their guests:</b> each named +1 with its own Invite.</li>
+ <li>Bride/groom rows: RSVP shows "Attending · always"; no Invite (they are the hosts).</li>
+</ul></div>
+</div>
+
+<!-- ============================ 2 · GUEST LIST — DESKTOP ============================ -->
+<h2 class="sec"><span class="n">2</span>The Guest list — desktop (table + the card on the side)</h2>
+<div class="desk">
+ <div class="bar"><span class="t">Guest list</span>
+  <div class="f">
+   <span class="btn dd">Side <i>▾</i></span><span class="btn dd">RSVP <i>▾</i></span><span class="btn dd">Role <i>▾</i></span><span class="btn dd">Group <i>▾</i></span>
+   <span class="search">Search</span>
+   <span class="btn sm fill">+ Add guest</span>
+  </div></div>
+ <div class="stats"><span><b>142</b>guests</span><span><b>96</b>attending</span><span><b>11</b>not coming</span><span><b>35</b>no reply</span><span class="hi"><b>58</b>to invite</span><span class="hi"><b>3</b>requests</span></div>
+ <div class="split">
+ <div class="scroll"><table>
+  <tr><th>Name</th><th>Side · Role</th><th>RSVP</th><th>+N</th><th>Table</th><th>Account</th><th>Invite <span class="i" data-tip="Each guest has their own QR. Invite sends the message, their link and QR together. On a computer: Copy message, then Copy QR.">i</span></th></tr>
+  <tr class="sel"><td class="nm"><b>Mr. Manuel Cortez Casasola</b><small>Family</small></td><td class="n">Groom <small>Guest</small></td><td><span class="pill ok">Attending</span></td><td>+1</td><td>7</td><td><span class="pill ok">Linked</span></td><td><div class="inv"><span class="btn sm fill">Invite</span><span class="btn sm">Copy</span></div><small>Sent Sep 30</small></td></tr>
+  <tr><td class="nm"><b>Ms. Claire Estoras Buanhog</b><small>Bride</small></td><td class="n">Bride <small>Bride</small></td><td><span class="pill ok">Always</span></td><td>—</td><td>1</td><td><span class="pill ok">Linked</span></td><td><small style="color:var(--mute)">Host</small></td></tr>
+  <tr><td class="nm"><b>Hon. Ricardo &amp; Mrs. Jessica Villahermosa</b><small>Principal sponsors</small></td><td class="n">Both <small>Ninong/Ninang</small></td><td><span class="pill warn">No reply</span></td><td>—</td><td>2</td><td><span class="pill soft">Not linked</span></td><td><div class="inv"><span class="btn sm fill">Invite</span><span class="btn sm">Copy</span></div><small>Not sent</small></td></tr>
+  <tr><td class="nm"><b>Mr. Felix Tumbali</b><small>Bride's Crew</small></td><td class="n">Bride <small>Bride's Crew</small></td><td><span class="pill ok">Attending</span></td><td>+2</td><td>4</td><td><span class="pill soft">Not linked</span></td><td><div class="inv"><span class="btn sm fill">Invite</span><span class="btn sm">Copy</span></div><small>Sent Sep 30</small></td></tr>
+  <tr><td class="nm"><b>Ms. Bea Lopez Santos</b><small>+1 of Manuel C. Casasola</small></td><td class="n">Groom <small>Guest</small></td><td><span class="pill ok">Attending</span></td><td>—</td><td>7</td><td><span class="pill soft">Not linked</span></td><td><div class="inv"><span class="btn sm fill">Invite</span><span class="btn sm">Copy</span></div><small>Not sent</small></td></tr>
+ </table></div>
+
+ <div class="side">
+  <div class="eyebrow">Guest · Groom's side</div>
+  <div class="gname">Mr. Manuel Cortez Casasola</div>
+  <div class="pills"><span class="pill ok">✓ Attending</span><span class="pill soft">+1</span><span class="pill soft">Invite sent · Sep 30</span></div>
+  <div class="linked"><span><i class="dot"></i>Linked to manuel@email.com</span><a>Unlink</a></div>
+  <div class="card tcard">
+   <div class="trow">
+    <div class="tkt-thumb"><div class="tkt">
+     <div class="mono">AM</div><div class="couple">Ana &amp; Miguel</div><div class="rule">◆</div>
+     <div class="guest">Mr. Manuel Cortez Casasola</div><div class="gsub">and 1 guest</div>
+     <div class="slot"><div class="qr"><i></i><i></i><i></i></div></div>
+     <div class="meta"><div><small>Date</small><b>March 13, 2027</b></div><div><small>Arrive</small><b>2:30 PM</b></div></div>
+    </div></div>
+    <div class="tcol"><span class="btn fill">Invite</span><span class="btn">Copy message</span><span class="btn">Copy QR</span></div>
+   </div>
+   <div class="more"><b>More</b><span>Download ticket · Download QR · Write to NFC · QR look</span></div>
+  </div>
+  <div class="label">Name</div>
+  <div class="list">
+   <div class="li"><div><small>Prefix · First · Middle · Last · Suffix</small><b>Mr. · Manuel · Cortez · Casasola · —</b></div><i>›</i></div>
+   <div class="li"><div><small>Mobile</small><b>0917 ••• 4821</b></div><i>›</i></div>
+   <div class="li"><div><small>Private note</small><b class="empty">None</b></div><i>›</i></div>
+  </div>
+  <div class="label">RSVP</div>
+  <div class="dd" style="margin-top:0"><div><small>Reply</small><b>Attending</b></div><i>▾</i></div>
+  <div class="label sm">Invited to</div>
+  <div class="chips"><span>Ceremony</span><span>Reception</span><span class="off">After-party</span></div>
+  <div class="two"><div class="dd"><div><small>Meal</small><b>Beef</b></div><i>▾</i></div><div class="dd"><div><small>Extra seats</small><b>+1</b></div><i>▾</i></div></div>
+  <div class="dd"><div><small>Diet</small><b class="empty">none</b></div></div>
+  <div class="label">Their guests</div>
+  <div class="list"><div class="li"><div><small>+1</small><b>Ms. Bea L. Santos</b></div><span class="link">Invite</span></div></div>
+  <div class="label">Seat</div>
+  <div class="list"><div class="li"><div><small>Table</small><b>Table 7 <span class="hint">· guests see it on the day</span></b></div><i>›</i></div></div>
+ </div>
+ </div>
+</div>
+<div class="notes" style="max-width:1216px;margin-top:20px"><h4>Notes for the owner</h4><ul>
+ <li><b>New columns:</b> Account (Linked / Not linked) and <b>Invite</b> (Invite · Copy, and "Sent Sep 30 / Not sent"). ⓘ on the header (hover it): <span class="q">"Each guest has their own QR. Invite sends the message, their link and QR together. On a computer: Copy message, then Copy QR."</span></li>
+ <li>Filters are dropdowns (Side · RSVP · Role · Group). The counts row ends with <b>to invite</b> and <b>requests</b>.</li>
+ <li>Names show in the couple's Name style; pairs (sponsors) on one line.</li>
+ <li>Clicking a row opens the same card on the right — no page change. The side panel is the phone card, unchanged: ticket · Invite · Name · RSVP · Their guests · Seat.</li>
+</ul></div>
+
+<!-- ============================ 3 · GUEST LIST — PHONE ============================ -->
+<h2 class="sec"><span class="n">3</span>The Guest list — phone</h2>
+<div class="row">
+<div class="phone">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="lhead"><span class="t">Guest list</span><span class="btn sm fill">+ Add</span></div>
+  <div class="search" style="display:flex;margin-top:12px;padding:9px 14px">Search a guest</div>
+  <div class="filters" style="margin-top:8px"><span class="btn dd">RSVP <i>▾</i></span><span class="btn dd">Side <i>▾</i></span><span class="btn dd">Role <i>▾</i></span><span class="btn dd">Group <i>▾</i></span></div>
+  <p class="counts">96 attending · 35 no reply · <b>58 to invite</b></p>
+
+  <div class="gcard">
+   <div class="top"><div><b>Mr. Manuel Cortez Casasola</b><div class="sub">Groom's side · +1 · Table 7</div></div><span class="pill ok">Attending</span></div>
+   <div class="act"><span class="btn sm fill">Invite</span><span class="btn sm">Copy</span><span class="sub">Sent Sep 30 · Linked</span></div>
+  </div>
+  <div class="gcard">
+   <div class="top"><div><b>Hon. Ricardo &amp; Mrs. Jessica Villahermosa</b><div class="sub">Principal sponsors · Table 2</div></div><span class="pill warn">No reply</span></div>
+   <div class="act"><span class="btn sm fill">Invite</span><span class="btn sm">Copy</span><span class="sub">Not sent</span></div>
+  </div>
+  <div class="gcard">
+   <div class="top"><div><b>Mr. Felix Tumbali</b><div class="sub">Bride's Crew · +2 · Table 4</div></div><span class="pill ok">Attending</span></div>
+   <div class="act"><span class="btn sm fill">Invite</span><span class="btn sm">Copy</span><span class="sub">Sent Sep 30</span></div>
+  </div>
+  <div class="gcard">
+   <div class="top"><div><b>Ms. Bea Lopez Santos</b><div class="sub">+1 of Manuel C. Casasola · Table 7</div></div><span class="pill ok">Attending</span></div>
+   <div class="act"><span class="btn sm fill">Invite</span><span class="btn sm">Copy</span><span class="sub">Not sent</span></div>
+  </div>
+ </div>
+ <div class="home"></div>
+</div>
+
+<div class="notes"><h4>Notes for the owner</h4><ul>
+ <li>Each row is a small card: name, side/role, +N, table, status — and <b>Invite</b> right on it (one tap → share sheet with message + link + QR).</li>
+ <li>Tap the card for the full guest card (section 1).</li>
+ <li>First visit: a 4-slide tour — <span class="q">"Each guest has their own QR"</span> · <span class="q">"Tap Invite to send it"</span> · <span class="q">"On a computer: copy message, then QR"</span> · <span class="q">"Replies and tickets update here by themselves"</span>.</li>
+ <li>Filters are the same dropdowns as the desktop (RSVP · Side · Role · Group) plus Search.</li>
+</ul></div>
+</div>
+
+</div></body></html>
