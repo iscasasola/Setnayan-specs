@@ -69,3 +69,13 @@ TESTS: add a small guard only if it protects a lazy boundary you created (e.g. "
 
 PR: gh pr create --base main --draft; then `gh pr edit <n> --add-label do-not-auto-merge`, `gh pr ready <n>`, `gh pr merge <n> --disable-auto`. Never merge, never --admin. Report: PR number, before/after Maker KB, shared bundle bytes, what moved.
 ```
+
+## G8 — Face tagging on by default for every type + two wake leaks (this account, ~$9 credit — SMALL)
+```
+Model: Opus · effort: medium. Repo iscasasola/setnayan-platform, base origin/main, branch rd/face-on-every-type. Read CLAUDE.md. Credit is tiny (~$9): stay strictly in scope, push early.
+
+1. OWNER 2026-10-01 (DECISION_LOG "ELEVEN OWNER ANSWERS" #8): "Face Tagging is on by default but they can always turn it off." Today apps/web/lib/papic-face-mode.ts keeps christening + debut OFF until an admin turns them on (MINOR_HEAVY_EVENT_TYPES, eventTypeNeedsDeliberateFaceOptIn, the 🔒 EXCEPT branch in resolveFaceMode). Change: with Papic active, face tagging resolves ON for EVERY event type, christening and debut included; the host's own off-switch (face_tagging_declined_by_couple) still wins; consent + selfie-erase rules unchanged. Keep MINOR_HEAVY_EVENT_TYPES only if something else still needs it (e.g. the admin confirm copy) — otherwise retire it cleanly (a retired helper must be gone, not merely uncalled; update the guards/tests that pin the old rule, citing this decision in the test comment).
+2. Two wake leaks: apps/web/app/[slug]/seat/_components/arrival-bloom.tsx says "So glad you made it!" at a wake → solemn line ("Thank you for being here.") with no bloom animation, using the shipped words.solemn / register==='solemn' pattern; extend the-wake-never-celebrates guard.
+LIMITS: no new server actions (1225), no client bundle growth, no migrations, don't touch the Maker. Tests: sabotage-check; typecheck + CI guards + touched tests from apps/web (bracketed paths file by file). changelog.d/rd-face-on-every-type.md (SPEC IMPACT: None — decision already logged).
+PR: gh pr create --base main --draft; gh pr edit <n> --add-label do-not-auto-merge; gh pr ready <n>; confirm auto-merge off. Never merge. Report PR + 3-step check card.
+```
