@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guest RSVP Flow</title>
+<style>
+:root{--paper:#FAF7F2;--deep:#F1ECE4;--ink:#1E2229;--mute:#6b6b6b;--gild:#B08A5B;--wine:#6E2A3A;--line:#e3dcd2;--ok:#2f6b4f}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#FAF7F2}}
+*{box-sizing:border-box}
+body{margin:0;background:#e9e4dc;color:var(--ink);font-family:-apple-system,"Helvetica Neue",Arial,sans-serif}
+header.top{max-width:1200px;margin:0 auto;padding:28px 16px 8px}
+header.top h1{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:28px;margin:0 0 6px}
+header.top p{margin:0;color:#555;font-size:14px;line-height:1.5;max-width:760px}
+.grid{max-width:1200px;margin:0 auto;padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:28px}
+.step{display:flex;flex-direction:column;gap:10px}
+.step h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#7a6a55;margin:0}
+.step .note{font-size:12.5px;color:#555;line-height:1.45;margin:0}
+.phone{width:300px;height:600px;background:var(--paper);border:10px solid #1b1b1b;border-radius:34px;overflow:hidden;position:relative;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.screen{position:absolute;inset:0;bottom:54px;overflow:hidden;padding:18px 18px 0}
+.bar{position:absolute;left:0;right:0;bottom:0;height:54px;border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:center;background:var(--paper);font-size:10.5px;color:var(--mute)}
+.bar span{display:flex;flex-direction:column;align-items:center;gap:3px}
+.bar span i{display:block;width:16px;height:16px;border:1.5px solid currentColor;border-radius:4px}
+.bar .on{color:var(--ink);font-weight:600}
+.serif{font-family:Georgia,"Times New Roman",serif}
+.eyebrow{font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--gild)}
+.names{font-family:Georgia,serif;font-size:30px;text-align:center;margin:6px 0 0;line-height:1.05}
+.and{display:block;font-style:italic;color:var(--gild);font-size:17px}
+.date{text-align:center;font-family:Georgia,serif;font-size:14px;margin:8px 0 14px}
+.btns{display:flex;gap:8px}
+.btn{flex:1;text-align:center;padding:11px 6px;border-radius:999px;font-size:13px;border:1.5px solid var(--ink)}
+.btn.fill{background:var(--ink);color:var(--paper)}
+.btn.gild{background:var(--wine);color:#fff;border-color:var(--wine)}
+.card{background:var(--deep);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.card h4{margin:0 0 6px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gild);font-weight:600}
+.small{font-size:12px;color:#555;line-height:1.45;margin:0}
+.chips{display:flex;gap:6px;margin-top:6px}
+.chip{width:26px;height:26px;border-radius:50%;border:1px solid #0002}
+.field{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 10px;font-size:12.5px;margin-top:6px;color:#333}
+.field small{display:block;font-size:10px;color:var(--mute);margin-bottom:2px;letter-spacing:.06em;text-transform:uppercase}
+.seg{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin-top:6px;font-size:11.5px}
+.seg span{flex:1;text-align:center;padding:7px 2px}
+.seg .on{background:var(--ink);color:var(--paper)}
+.toggle{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:8px 0;border-bottom:1px solid var(--line)}
+.sw{width:32px;height:18px;border-radius:9px;background:var(--ok);position:relative}
+.sw:after{content:"";position:absolute;right:2px;top:2px;width:14px;height:14px;border-radius:50%;background:#fff}
+.ticket{margin:8px auto 0;width:210px;height:280px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px;text-align:center;position:relative}
+.ticket .t-n{font-family:Georgia,serif;font-size:15px;margin:6px 0 2px}
+.ticket .t-e{font-size:10px;color:var(--mute)}
+.qr{width:112px;height:112px;margin:10px auto 6px;border-radius:50%;background:
+ repeating-linear-gradient(0deg,#111 0 6px,transparent 6px 12px),
+ repeating-linear-gradient(90deg,#111 0 6px,transparent 6px 12px);
+ opacity:.85;border:8px solid #fff;outline:1.5px solid var(--gild)}
+.ticket.pending .qr{opacity:.25}
+.stamp{position:absolute;top:118px;left:22px;right:22px;border:2px solid var(--wine);color:var(--wine);font-size:11px;letter-spacing:.2em;text-transform:uppercase;padding:6px;transform:rotate(-8deg);background:#fffc}
+.center{text-align:center}
+.link{color:var(--wine);text-decoration:underline;font-size:12px}
+.dim{color:var(--mute)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:18px 18px 0 0;padding:16px;box-shadow:0 -6px 20px rgba(0,0,0,.12)}
+.shade{position:absolute;inset:0;background:rgba(0,0,0,.25)}
+.flag{display:inline-block;font-size:10px;background:#fff3cd;color:#7a5b00;border-radius:6px;padding:2px 6px;margin-left:4px}
+footer{max-width:1200px;margin:0 auto;padding:10px 16px 40px;font-size:12.5px;color:#555;line-height:1.5}
+@media (max-width:420px){.phone{width:100%;max-width:300px}}
+</style>
+</head>
+<body>
+<header class="top">
+<h1>What your guest sees — RSVP to ticket</h1>
+<p>The Oct 1 release, drawn at phone size with sample names (Ana &amp; Miguel · guest Mr. Manuel C. Casasola). Menu: <b>Welcome · Details · Our Love Story · Me</b>. No email is ever sent; the link and QR you paste into Messenger/Viber do everything. Every word you see on the Yes/No, thank-you and decline screens can be changed in the Maker's RSVP stage.</p>
+</header>
+
+<div class="grid">
+
+<!-- 1 -->
+<div class="step">
+<h2>1 · They open your link</h2>
+<div class="phone"><div class="screen">
+ <div class="eyebrow center">Together with their families</div>
+ <p class="names">Ana <span class="and">and</span> Miguel</p>
+ <p class="date">March 13, 2027 · Guests arrive 2:30 PM</p>
+ <p class="small center" style="margin-bottom:10px">Mr. Manuel C. Casasola, will you celebrate with us?</p>
+ <div class="btns"><span class="btn fill">Joyfully accepts</span><span class="btn">Regretfully declines</span></div>
+ <p class="small center dim" style="margin-top:8px;font-size:11px">Please reply by February 13, 2027</p>
+ <div class="card"><h4>Reminders</h4><p class="small">Arrive by 2:30 · Bring your ticket</p></div>
+</div>
+<div class="bar"><span class="on"><i></i>Welcome</span><span><i></i>Details</span><span><i></i>Our Love Story</span><span><i></i>Me</span></div></div>
+<p class="note">Welcome opens first. The two answers are yours to word. No "maybe".</p>
+</div>
+
+<!-- 2 -->
+<div class="step">
+<h2>2 · Yes → a few questions</h2>
+<div class="phone"><div class="screen">
+ <div class="eyebrow">Your reply</div>
+ <p class="serif" style="font-size:20px;margin:6px 0 8px">Joyfully accepts</p>
+ <div class="seg"><span class="on">You</span><span>+1</span></div>
+ <div class="field"><small>Name</small>Mr. Manuel C. Casasola</div>
+ <div class="field"><small>Meal</small>Beef ▾</div>
+ <div class="field"><small>Food allergies</small>None</div>
+ <p class="small dim" style="margin-top:8px">Tap <b>+1</b> to type your guest's name — only if the couple gave you one.</p>
+ <div style="margin-top:14px" class="btns"><span class="btn fill">Send my reply</span></div>
+</div>
+<div class="bar"><span class="on"><i></i>Welcome</span><span><i></i>Details</span><span><i></i>Our Love Story</span><span><i></i>Me</span></div></div>
+<p class="note">Only the questions you switched on. With "one question at a time" on, each is its own screen.</p>
+</div>
+
+<!-- 3 -->
+<div class="step">
+<h2>3 · Thank you + their ticket</h2>
+<div class="phone"><div class="screen center">
+ <div class="eyebrow">See you there</div>
+ <p class="serif" style="font-size:19px;margin:6px 0 2px">Thank you — your place is kept.</p>
+ <p class="small dim">Your ticket is below and always on <b>Me</b>.</p>
+ <div class="ticket"><div class="eyebrow">Ana &amp; Miguel</div><p class="t-n">Mr. Manuel C. Casasola</p><p class="t-e">and 1 guest</p><div class="qr"></div><p class="t-e">March 13, 2027 · Arrive 2:30 PM</p></div>
+ <div class="btns" style="margin-top:10px"><span class="btn fill">Save my ticket</span><span class="btn">Copy link</span></div>
+</div>
+<div class="bar"><span><i></i>Welcome</span><span><i></i>Details</span><span><i></i>Our Love Story</span><span class="on"><i></i>Me</span></div></div>
+<p class="note">Your chosen ticket style and QR look (round QR sits in a round slot). No table before the day.</p>
+</div>
+
+<!-- 4 -->
+<div class="step">
+<h2>4 · Me — the ticket, any time</h2>
+<div class="phone"><div class="screen center">
+ <div class="eyebrow">Your ticket</div>
+ <div class="ticket"><div class="eyebrow">Ana &amp; Miguel</div><p class="t-n">Mr. Manuel C. Casasola</p><p class="t-e">and 1 guest</p><div class="qr"></div><p class="t-e">March 13, 2027 · Arrive 2:30 PM</p></div>
+ <p class="serif" style="margin:10px 0 6px">Show this at the door.</p>
+ <div class="btns"><span class="btn fill">Save my ticket</span><span class="btn">Copy link</span></div>
+ <p class="small" style="margin-top:10px"><span class="link">Save it to your account</span></p>
+</div>
+<div class="bar"><span><i></i>Welcome</span><span><i></i>Details</span><span><i></i>Our Love Story</span><span class="on"><i></i>Me</span></div></div>
+<p class="note">Saved picture = what's on screen. On the event day, Welcome also shows their table.</p>
+</div>
+
+<!-- 5 -->
+<div class="step">
+<h2>5 · Save it to their account (optional)</h2>
+<div class="phone"><div class="screen">
+ <div class="eyebrow center">Your ticket</div>
+ <div class="ticket" style="height:200px"><div class="eyebrow">Ana &amp; Miguel</div><p class="t-n">Mr. Manuel C. Casasola</p><div class="qr" style="width:80px;height:80px"></div></div>
+ <div class="shade"></div>
+ <div class="sheet">
+  <p class="serif" style="font-size:16px;margin:0 0 6px">This invitation is for Mr. Manuel C. Casasola.</p>
+  <p class="small">Save it to <b>manuel@email.com</b>?</p>
+  <div class="btns" style="margin-top:12px"><span class="btn fill">Yes, save it</span><span class="btn">Not me</span></div>
+ </div>
+</div>
+<div class="bar"><span><i></i>Welcome</span><span><i></i>Details</span><span><i></i>Our Love Story</span><span class="on"><i></i>Me</span></div></div>
+<p class="note">Nothing links by accident — only this "Yes". Signing in or out never grabs someone else's seat.</p>
+</div>
+
+<!-- 6 -->
+<div class="step">
+<h2>6 · No → your decline screen</h2>
+<div class="phone"><div class="screen center">
+ <div class="eyebrow">Thank you for letting us know</div>
+ <p class="serif" style="font-size:19px;margin:8px 0 6px">We'll miss you.</p>
+ <p class="small dim">Your words here — set in the Maker's RSVP stage.</p>
+ <p class="small" style="margin-top:18px"><span class="link">Changed your plans?</span></p>
+ <p class="small dim" style="margin-top:28px">No ticket is made for a guest who can't come.</p>
+</div>
+<div class="bar"><span class="on"><i></i>Welcome</span><span><i></i>Details</span><span><i></i>Our Love Story</span><span><i></i>Me</span></div></div>
+<p class="note">They can still change their answer later.</p>
+</div>
+
+<!-- 7 -->
+<div class="step">
+<h2>7 · Not on your list → Request pending</h2>
+<div class="phone"><div class="screen center">
+ <div class="eyebrow">Request sent</div>
+ <p class="serif" style="font-size:18px;margin:6px 0 2px">Ana &amp; Miguel will look at your request.</p>
+ <p class="small dim">Keep this — it becomes your ticket once they accept.</p>
+ <div class="ticket pending"><div class="eyebrow">Ana &amp; Miguel</div><p class="t-n">Ms. Bea Santos</p><div class="qr"></div><div class="stamp">Request pending</div></div>
+ <div class="btns" style="margin-top:10px"><span class="btn fill">Save my ticket</span></div>
+</div>
+<div class="bar"><span><i></i>Welcome</span><span><i></i>Details</span><span><i></i>Our Love Story</span><span class="on"><i></i>Me</span></div></div>
+<p class="note">From a general link. It shows up in your Guest list › Requests; accept → a real ticket.</p>
+</div>
+
+<!-- 8 -->
+<div class="step">
+<h2>8 · Before replying — the menu <span class="flag">your call</span></h2>
+<div class="phone"><div class="screen">
+ <div class="eyebrow center">Together with their families</div>
+ <p class="names">Ana <span class="and">and</span> Miguel</p>
+ <p class="date">March 13, 2027</p>
+ <div class="btns"><span class="btn fill">Joyfully accepts</span><span class="btn">Regretfully declines</span></div>
+ <div class="card"><h4>Today</h4><p class="small">A guest who hasn't replied sees a 5th item, <b>RSVP</b>, in the menu. It jumps to the buttons above. Recommendation: remove it and keep your four.</p></div>
+</div>
+<div class="bar" style="font-size:9.5px"><span class="on"><i></i>Welcome</span><span><i></i>Details</span><span><i></i>Love Story</span><span style="color:var(--wine)"><i></i>RSVP</span><span><i></i>Me</span></div></div>
+<p class="note">Remove or keep the extra RSVP item?</p>
+</div>
+
+</div>
+<footer>Sample names and words only. Colours and fonts follow the couple's theme on the real page. Seat and table appear only on the event day.</footer>
+</body>
+</html>

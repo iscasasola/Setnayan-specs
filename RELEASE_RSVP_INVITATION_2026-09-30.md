@@ -50,3 +50,4 @@ Target: live ~10:00 AM 30 Sep PHT; hard limit before 1 Oct.
 0. **FIRST after the release — each menu tab is its own full page** (Invitation + The Day), reusing `hub-shell.tsx` (DECISION_LOG "EACH MENU TAB IS ITS OWN FULL PAGE").
 7. **Before the Apple check:** Google + Apple sign-in in the iOS/Android apps (native Apple sheet; Google via system browser + app link). "Save it to your account" on Me offers Google/Apple one-tap.
 8. **Oct 3 (The Day):** ticket shows the seat from the event day; a new/changed ticket pops up first with Save my ticket (DECISION_LOG "THE TICKET GAINS THE SEAT ON THE DAY").
+9. **Right after the release (first):** the guest landing page (DECISION_LOG "THE PERSONAL LINK OPENS THE GUEST'S OWN LANDING PAGE"), then generic-QR "We found you" + last 4, then the Guest list Invite column + tour.
