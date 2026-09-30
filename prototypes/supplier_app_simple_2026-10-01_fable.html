@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The supplier app, simple — Setnayan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ===== tokens — identical to guest_list_rows_2026-09-30_fable.html ===== */
+:root{
+  --paper:#FAF7F2;--paper2:#F3EEE6;--page:#EDE7DE;--ink:#1E2229;--ink2:#3B3F46;--mute:#76736D;
+  --gild:#B08A5B;--gild-soft:#E9DEC9;--gild-wash:#F7F1E6;--wine:#6E2A3A;--wine-wash:#F6ECEE;
+  --line:#E5DED3;--ok:#2F6B4F;--okbg:#E7F1EA;--warn:#8A5A00;--warnbg:#FBF0D8;--no:#7A3B3B;--nobg:#F3E4E4;
+  --serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --sans:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--page);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:2560px;margin:0 auto;padding:32px 28px 56px}
+
+/* ---------- page furniture ---------- */
+.doc-brand{font-size:10.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--gild);font-weight:600}
+h1{font-family:var(--serif);font-weight:500;font-size:40px;line-height:1.1;margin:8px 0 10px;letter-spacing:-.01em}
+.lead{color:var(--ink2);font-size:14.5px;line-height:1.6;max-width:980px;margin:0 0 8px}
+.lead b{font-weight:600;color:var(--ink)}
+.lead .q{font-family:var(--serif);font-style:italic;font-size:15.5px;color:var(--ink)}
+h2.sec{display:flex;align-items:center;gap:14px;font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink2);font-weight:600;margin:40px 0 18px}
+h2.sec .n{font-family:var(--serif);font-size:22px;font-weight:500;color:var(--gild);letter-spacing:0}
+h2.sec:after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* ---------- before → after strip ---------- */
+.strip{display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap}
+.sketch{width:206px;flex:none}
+.sketch .lbl{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gild);font-weight:600;margin-bottom:8px}
+.mini{width:206px;height:436px;background:var(--paper);border:5px solid #14161A;border-radius:28px;position:relative;overflow:hidden;box-shadow:0 0 0 1px #2E3238,0 24px 40px -24px rgba(30,34,41,.4)}
+.mini .isl{position:absolute;left:50%;top:6px;transform:translateX(-50%);width:60px;height:16px;background:#14161A;border-radius:10px}
+.mini .st{height:28px}
+.mini .lay{margin:3px 8px 0;border-radius:6px;background:#E3DCD0;border:1px solid #D3CBBD;font-size:8.5px;color:var(--ink2);padding:0 7px;display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .lay.h{background:#D8CFC0}
+.mini .first{margin:3px 8px 0;border-radius:6px;background:#fff;border:1px solid var(--gild);font-size:8.5px;color:var(--ink);padding:0 7px;display:flex;align-items:center;font-family:var(--serif);font-size:11px;font-weight:500}
+.mini .fold{position:absolute;left:0;right:0;border-top:1.5px dashed var(--wine);font-size:8px;color:var(--wine);text-align:right;padding:1px 6px 0;font-weight:600;letter-spacing:.06em}
+.mini .bar{position:absolute;left:0;right:0;bottom:0;height:34px;background:#fff;border-top:1px solid var(--line)}
+.mini .bar:after{content:"";position:absolute;left:50%;bottom:4px;transform:translateX(-50%);width:66px;height:3px;border-radius:2px;background:var(--ink);opacity:.85}
+.arrow{align-self:center;font-family:var(--serif);font-size:44px;color:var(--gild);padding:0 4px;margin-top:20px}
+.strip .notes{max-width:520px}
+.notes{flex:1;min-width:300px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px 18px 12px;position:relative}
+.notes:before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:3px;background:var(--gild);border-radius:0 3px 3px 0}
+.notes h4{margin:0 0 8px;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gild);font-weight:600}
+.notes ul{margin:0;padding-left:16px;font-size:12.5px;line-height:1.55;color:var(--ink2)}
+.notes li{margin-bottom:6px}
+.notes li b{color:var(--ink);font-weight:600}
+.notes .q{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--ink)}
+.est{display:inline-block;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--warn);background:var(--warnbg);border-radius:999px;padding:2px 8px;vertical-align:middle;margin-left:4px}
+.big{font-family:var(--serif);font-size:30px;font-weight:500;color:var(--ink);line-height:1.1}
+.big b{color:var(--wine);font-weight:500}
+
+/* ---------- the five frames ---------- */
+.row5{display:grid;grid-template-columns:repeat(auto-fit,408px);gap:26px 28px;justify-content:start;margin-top:6px}
+.fr{width:408px}
+.cap{margin-top:12px;padding:0 6px}
+.cap .k{font-family:var(--serif);font-size:22px;font-weight:500;color:var(--gild);line-height:1;margin-right:8px}
+.cap b{font-size:13.5px;font-weight:600;color:var(--ink)}
+.cap p{margin:4px 0 0;font-size:12.5px;color:var(--ink2);line-height:1.5}
+.cap p .q{font-family:var(--serif);font-style:italic;font-size:13.5px;color:var(--ink)}
+.side{margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px 10px}
+.side .lbl{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gild);font-weight:600;margin-bottom:6px}
+.side .it{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:7px 0;border-top:1px dashed var(--line);color:var(--ink)}
+.side .it:first-of-type{border-top:0}
+.side .it i{font-style:normal;color:var(--mute);font-size:11.5px}
+.side .it .btn.dd{padding:5px 9px 5px 11px;font-size:11.5px}
+
+/* ---------- phone frame — screen is exactly 390 × 844 inside a 9 px bezel ---------- */
+.phone{width:408px;height:862px;flex:none;background:var(--paper);border:9px solid #14161A;border-radius:48px;position:relative;overflow:hidden;
+  box-shadow:0 0 0 1px #2E3238,0 40px 70px -30px rgba(30,34,41,.45),0 16px 30px -18px rgba(30,34,41,.25)}
+.phone .island{position:absolute;left:50%;top:11px;transform:translateX(-50%);width:118px;height:33px;background:#14161A;border-radius:20px;z-index:9}
+.phone .status{height:52px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 30px 8px;font-size:14px;font-weight:600;letter-spacing:-.01em}
+.phone .status .sig{display:flex;gap:6px;align-items:center;font-size:11px;letter-spacing:.06em}
+.phone .status .bat{width:24px;height:11px;border:1.5px solid var(--ink);border-radius:4px;position:relative;opacity:.9}
+.phone .status .bat:after{content:"";position:absolute;left:2px;top:2px;bottom:2px;right:5px;background:var(--ink);border-radius:1px}
+.scr{padding:4px 20px 110px}
+/* bottom bar — the same four words as the desktop side menu */
+.bnav{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:9px 6px 30px;font-size:10.5px;color:var(--mute);z-index:6;font-weight:500}
+.bnav span{display:flex;flex-direction:column;align-items:center;gap:4px;width:74px}
+.bnav svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.bnav span.on{color:var(--wine);font-weight:600}
+.bnav:after{content:"";position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:var(--ink);opacity:.85}
+.hplus{width:36px;height:36px;border-radius:50%;background:var(--ink);color:var(--paper);display:inline-flex;align-items:center;justify-content:center;font-size:22px;font-weight:300;line-height:1}
+.fr{position:relative}
+.foldline{position:absolute;right:0;width:16px;top:calc(9px + 281px);border-top:1.5px dashed var(--wine);z-index:8;pointer-events:none}
+.foldline i{position:absolute;left:12px;top:-8px;transform:rotate(90deg);transform-origin:0 0;font-style:normal;font-size:9px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--wine);white-space:nowrap}
+.foldlbl{position:absolute;left:412px;top:calc(9px + 284px);transform:rotate(90deg);transform-origin:0 0;font-size:9px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--wine);white-space:nowrap}
+.dim{position:absolute;inset:0;background:rgba(30,34,41,.38);z-index:10}
+
+/* ---------- atoms (from the approved card and rows) ---------- */
+.eyebrow{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--gild);font-weight:600}
+.gname{font-family:var(--serif);font-weight:500;font-size:29px;line-height:1.1;margin:5px 0 8px;letter-spacing:-.005em}
+.sub{font-size:12.5px;color:var(--mute);line-height:1.45}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;border-radius:999px;padding:4px 10px;letter-spacing:.01em;white-space:nowrap;line-height:1.3}
+.pill.ok{background:var(--okbg);color:var(--ok)}
+.pill.warn{background:var(--warnbg);color:var(--warn)}
+.pill.no{background:var(--nobg);color:var(--no)}
+.pill.soft{background:var(--paper2);color:var(--ink2);box-shadow:inset 0 0 0 1px var(--line)}
+.pill.gild{background:var(--gild-wash);color:#6B5230;box-shadow:inset 0 0 0 1px var(--gild-soft)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border-radius:999px;font-size:13px;font-weight:500;border:1.5px solid var(--ink);background:#fff;color:var(--ink);white-space:nowrap;line-height:1}
+.btn.fill{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.sm{padding:7px 12px;font-size:12px;border-width:1px}
+.btn.dd{border:1px solid var(--line);background:#fff;color:var(--ink2);padding:7px 11px 7px 13px;font-size:12px;gap:8px}
+.btn.dd i{font-style:normal;color:var(--gild);font-size:10px}
+.btn.wine{background:var(--wine);color:#fff;border-color:var(--wine)}
+.btn.more{padding:11px 0;width:46px;flex:none;font-size:17px;letter-spacing:.04em;border:1.5px solid var(--line);color:var(--ink2);background:#fff;font-weight:600}
+.btn.sm.more{width:36px;padding:7px 0;font-size:14px;border-width:1px}
+.btn.big{width:100%;padding:15px 16px;font-size:14.5px}
+.stat{font-size:12px;color:var(--mute);line-height:1.4}
+.stat b{color:var(--ok);font-weight:600}
+.stat .sep{color:#C9C2B6;margin:0 5px}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:16px;box-shadow:0 10px 24px -20px rgba(30,34,41,.25)}
+.topnav{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--wine);font-weight:500;margin:2px 0 14px}
+.topnav .dots{color:var(--mute);letter-spacing:.1em;font-weight:600}
+
+/* ---------- phone list head (approved) ---------- */
+.lhead{display:flex;justify-content:space-between;align-items:center;margin-top:2px}
+.lhead .t{font-family:var(--serif);font-size:28px;font-weight:500;letter-spacing:-.005em}
+.lhead .r{display:flex;gap:10px;align-items:center}
+.search{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:9px 14px 9px 12px;font-size:12.5px;color:var(--mute);background:#fff;margin-top:12px;flex:1;min-width:0}
+.srow{display:flex;gap:6px;align-items:center;margin-top:12px}
+.srow .search{margin-top:0}
+.srow .btn.dd{padding:9px 10px 9px 12px}
+.search:before{content:"";width:10px;height:10px;border:1.5px solid var(--mute);border-radius:50%;box-shadow:4px 4px 0 -2px var(--mute);flex:none}
+.counts{font-size:12.5px;color:var(--mute);margin:12px 0 2px;line-height:1.5}
+.counts b{color:var(--wine);font-weight:600}
+
+/* ---------- the ROW as a compact card (approved) ---------- */
+.gcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 12px 10px;margin-top:8px;box-shadow:0 10px 24px -22px rgba(30,34,41,.3);position:relative}
+.gcard .top{display:flex;align-items:flex-start;gap:10px}
+.av{width:40px;height:40px;border-radius:50%;flex:none;background:var(--gild-wash);border:1px solid var(--gild-soft);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:500;font-size:15px;color:#8A6A42;letter-spacing:.04em;padding-left:.04em;margin-top:1px;position:relative;overflow:hidden}
+.av.ph{border-color:#C9B18F;background:
+  radial-gradient(circle at 50% 36%,#D9B28E 0 8px,transparent 9px),
+  radial-gradient(ellipse 15px 11px at 50% 100%,#8F6B4A 0 100%,transparent 101%),
+  linear-gradient(180deg,#EADFCB,#CDB99A);color:transparent}
+.av.pair{background:none;border:0;width:46px;overflow:visible}
+.av.pair i{position:absolute;width:27px;height:27px;border-radius:50%;background:var(--gild-wash);border:1px solid var(--gild-soft);display:flex;align-items:center;justify-content:center;font-style:normal;font-size:12px;color:#8A6A42}
+.av.pair i:first-child{left:0;top:0}
+.av.pair i:last-child{left:19px;top:14px;background:#fff;box-shadow:0 0 0 2px #fff}
+.av.host{background:var(--wine-wash);border-color:#E3C9CF;color:var(--wine)}
+.av.logo{border-radius:12px;background:#fff;border-color:var(--line);font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.02em;color:var(--ink2);padding:0}
+.gcard .who{flex:1;min-width:0}
+.gcard .who b{display:block;font-family:var(--serif);font-size:18px;font-weight:500;line-height:1.15;letter-spacing:-.005em}
+.gcard .who .sub{margin-top:3px;font-size:12px}
+.gcard .top .pill{flex:none;margin-top:2px}
+.gcard .act{display:flex;gap:6px;align-items:center;margin-top:10px;padding-top:9px;border-top:1px dashed var(--line)}
+.gcard .act .stat{margin:0 0 0 auto;font-size:11.5px;text-align:right}
+.gcard .act .host{font-size:12px;color:var(--mute);padding:7px 0}
+.gcard .act .next{font-size:12px;color:var(--ink2);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gcard .act .next b{color:var(--wine);font-weight:600}
+.gcard .act .go{color:var(--wine);font-weight:600;font-size:12.5px;white-space:nowrap}
+.gcard .act .go:after{content:" ›"}
+
+/* ---------- the Digital ticket (identical everywhere) ---------- */
+.tkt{width:260px;aspect-ratio:3/4;background:#fff;border-radius:18px;padding:18px 18px 15px;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;
+  box-shadow:0 0 0 1px var(--line),0 24px 48px -26px rgba(30,34,41,.45),0 6px 14px -10px rgba(30,34,41,.2)}
+.tkt:before{content:"";position:absolute;inset:7px;border:1px solid var(--gild-soft);border-radius:12px;pointer-events:none}
+.tkt .mono{width:42px;height:42px;border-radius:50%;border:1px solid var(--gild);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:500;font-size:19px;color:var(--gild);letter-spacing:.08em;padding-left:.08em}
+.tkt .couple{font-family:var(--serif);font-style:italic;font-weight:500;font-size:16px;letter-spacing:.03em;color:var(--wine);margin-top:7px;line-height:1}
+.tkt .rule{width:100%;display:flex;align-items:center;gap:8px;margin:11px 0 9px;color:var(--gild);font-size:7px}
+.tkt .rule:before,.tkt .rule:after{content:"";flex:1;height:1px;background:var(--gild-soft)}
+.tkt .guest{font-family:var(--serif);font-weight:500;font-size:20px;line-height:1.15;color:var(--ink);letter-spacing:-.005em}
+.tkt .gsub{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);font-weight:500;margin-top:5px}
+.tkt .slot{width:122px;height:122px;border-radius:50%;background:var(--paper);margin:auto 0;display:flex;align-items:center;justify-content:center;
+  box-shadow:inset 0 2px 7px rgba(30,34,41,.14),inset 0 -1px 0 #fff,0 0 0 1px var(--line)}
+.qr{width:104px;height:104px;border-radius:50%;position:relative;overflow:hidden;border:7px solid #fff;outline:1px solid var(--gild);
+  background:
+   conic-gradient(var(--ink) 25%,#fff 0 50%,var(--ink) 0 75%,#fff 0) 0 0/8px 8px,
+   conic-gradient(var(--ink) 25%,#fff 0 50%,var(--ink) 0 75%,#fff 0) 3px 5px/14px 14px,
+   conic-gradient(var(--ink) 25%,#fff 0 50%,var(--ink) 0 75%,#fff 0) 7px 2px/22px 22px;
+  background-blend-mode:difference,difference,normal}
+.qr i{position:absolute;width:20px;height:20px;border:3px solid var(--ink);padding:3px;background:var(--ink);background-clip:content-box;box-shadow:0 0 0 2px #fff;border-radius:2px}
+.qr i:nth-child(1){left:12px;top:12px}
+.qr i:nth-child(2){right:12px;top:12px}
+.qr i:nth-child(3){left:12px;bottom:12px}
+.tkt .meta{display:flex;justify-content:space-between;width:100%;border-top:1px solid var(--line);padding-top:9px;margin-top:10px;text-align:left}
+.tkt .meta div+div{text-align:right}
+.tkt .meta small{display:block;font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gild);font-weight:600}
+.tkt .meta b{font-family:var(--serif);font-weight:500;font-size:14px;color:var(--ink);line-height:1.2}
+.tkt-thumb{width:109px;height:146px;flex:none;position:relative}
+.tkt-thumb .tkt{position:absolute;left:0;top:0;transform:scale(.42);transform-origin:0 0}
+.tcard2{position:relative;z-index:3}
+.tcard2 .trow{display:flex;gap:16px;align-items:center}
+.tthumb{flex:none;width:109px;text-align:center}
+.tthumb .cap{font-size:11px;color:var(--wine);font-weight:500;margin-top:6px;letter-spacing:.01em;padding:0}
+.tright{flex:1;min-width:0;position:relative}
+.tright .sub{margin:3px 0 0}
+.actrow{display:flex;gap:8px;margin-top:12px;position:relative}
+.actrow .btn.fill{flex:1;padding:12px 10px}
+/* collapsed details under the ticket */
+.dl{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.dl .r{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-top:1px solid var(--line);font-size:13.5px}
+.dl .r:first-child{border-top:0}
+.dl .r span{color:var(--ink);font-weight:500}
+.dl .r i{font-style:normal;color:var(--mute);font-size:12.5px}
+.dl .r i:after{content:"  ›";color:var(--gild)}
+
+/* ---------- Home ---------- */
+.cover{height:92px;margin:6px -20px 0;background:
+  radial-gradient(ellipse 60% 80% at 20% 100%,#C9A27A 0,transparent 60%),
+  radial-gradient(ellipse 50% 70% at 85% 20%,#8C4A5C 0,transparent 55%),
+  linear-gradient(180deg,#3B2A31,#6E2A3A);position:relative}
+.cover .ev{position:absolute;left:20px;bottom:12px;color:#fff}
+.cover .ev .eyebrow{color:#EAD7BC}
+.cover .ev b{display:block;font-family:var(--serif);font-weight:500;font-size:24px;line-height:1.05;letter-spacing:-.005em;margin-top:3px}
+.nextcard{margin-top:16px;padding:16px 16px 14px;border-color:var(--gild-soft);background:var(--gild-wash)}
+.nextcard .eyebrow{color:#6B5230}
+.nextcard h3{font-family:var(--serif);font-weight:500;font-size:26px;line-height:1.1;margin:6px 0 4px;letter-spacing:-.005em}
+.nextcard p{margin:0 0 12px;font-size:12.5px;color:var(--ink2)}
+.hub{margin-top:12px;position:relative}
+.hub .rec{position:absolute;right:14px;top:-9px;font-size:9px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:#6B5230;background:var(--gild-wash);border:1px solid var(--gild-soft);border-radius:999px;padding:2px 8px}
+.facts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px}
+.fact{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 10px 10px;text-align:center}
+.fact b{display:block;font-family:var(--serif);font-weight:500;font-size:26px;line-height:1;color:var(--ink)}
+.fact b.w{color:var(--wine)}
+.fact small{display:block;font-size:10.5px;color:var(--mute);margin-top:5px;letter-spacing:.01em}
+.money{display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:8px}
+.money .l{font-size:12px;color:var(--mute)}
+.money .l b{display:block;font-family:var(--serif);font-weight:500;font-size:22px;color:var(--ink);line-height:1.1;margin-top:2px}
+.money .r{text-align:right}
+.money .r b{color:var(--wine)}
+
+/* ---------- More — the chooser sheet ---------- */
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:26px 26px 0 0;padding:10px 20px 30px;z-index:11;box-shadow:0 -24px 48px -24px rgba(30,34,41,.5)}
+.sheet .grab{width:38px;height:4px;border-radius:2px;background:#D3CBBD;margin:0 auto 12px}
+.sheet .t{font-family:var(--serif);font-size:24px;font-weight:500;margin-bottom:6px}
+.svc{display:flex;align-items:center;gap:12px;padding:12px 2px;border-top:1px solid var(--line)}
+.svc:first-of-type{border-top:0}
+.svc .ic{width:40px;height:40px;border-radius:12px;flex:none;background:var(--gild-wash);border:1px solid var(--gild-soft);display:flex;align-items:center;justify-content:center}
+.svc .ic svg{width:20px;height:20px;stroke:#8A6A42;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.svc .ic.g{background:var(--wine-wash);border-color:#E3C9CF}
+.svc .ic.g svg{stroke:var(--wine)}
+.svc .tx{flex:1;min-width:0}
+.svc .tx b{display:block;font-family:var(--serif);font-size:18px;font-weight:500;line-height:1.15}
+.svc .tx span{display:block;font-size:12px;color:var(--mute);margin-top:2px}
+.svc .ch{color:var(--gild);font-size:16px}
+.sheet:after{content:"";position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:var(--ink);opacity:.85}
+
+/* ---------- Your Team ---------- */
+.find{margin-top:14px}
+
+/* ---------- supplier-only additions ---------- */
+.sw{width:38px;height:22px;border-radius:999px;background:var(--ok);position:relative;flex:none;display:inline-block}
+.sw:after{content:"";position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.sw.off{background:#D3CBBD}
+.sw.off:after{right:auto;left:2px}
+.cu{margin-top:14px}
+.cu .lbl{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gild);font-weight:600;margin-bottom:4px}
+.cu .r{display:flex;align-items:center;gap:12px;padding:9px 0;border-top:1px dashed var(--line);font-size:13px}
+.cu .r:first-of-type{border-top:0}
+.cu .d{width:44px;flex:none;text-align:center;line-height:1}
+.cu .d b{display:block;font-family:var(--serif);font-size:20px;font-weight:500;color:var(--wine)}
+.cu .d small{display:block;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-top:2px}
+.cu .w{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cu .w b{display:block;font-family:var(--serif);font-size:16px;font-weight:500;line-height:1.15}
+.cu .w span{font-size:11.5px;color:var(--mute)}
+.cu .go{color:var(--gild);font-size:16px}
+.kf{margin-top:14px;padding:4px 16px 6px}
+.kf .r{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-top:1px dashed var(--line);font-size:13px}
+.kf .r:first-child{border-top:0}
+.kf .r span{color:var(--mute)}
+.kf .r b{font-weight:500;color:var(--ink);text-align:right}
+.kf .r b.w{color:var(--wine);font-weight:600}
+.kf .r b.m{font-family:var(--serif);font-size:18px}
+.mainact{margin-top:14px}
+.mainact .btn{width:100%;padding:15px;font-size:14.5px}
+.mainact .stat{text-align:center;margin-top:8px}
+.gcard .act .col{margin-left:auto;font-size:12.5px;color:var(--ink);font-weight:500;white-space:nowrap}
+.gcard .act .col b{color:var(--wine);font-weight:600}
+.gcard .price{margin-left:auto;font-family:var(--serif);font-size:18px;font-weight:500;white-space:nowrap}
+.shead{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gild);font-weight:600;margin:16px 2px 0}
+.counts .btn.dd{margin-left:8px;padding:4px 8px 4px 10px;font-size:11.5px;vertical-align:middle}
+.adminnote{margin-top:28px;background:var(--gild-wash);border:1px solid var(--gild-soft);border-radius:14px;padding:14px 18px;font-size:13px;color:var(--ink2);max-width:980px}
+.adminnote b{color:var(--ink);font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="doc-brand">Setnayan · Supplier dashboard · Phone</div>
+<h1>The supplier app, simple</h1>
+<p class="lead">Owner, 2026-10-01: <span class="q">"the user event dashboard has now been properly transformed. Question is, how can we do this for the vendors and admin?"</span> Same method as the host app: <b>one thing per screen, the first customer in the top third, four words in the bar.</b> Every shipped function is kept — what is not needed right now moves one tap away. Reused as approved: the row card, the Next card, the four-row bar, the More sheet. Sample shop: Lumina Studio · Photo &amp; video.</p>
+
+<!-- ============================ 0 · BEFORE → AFTER ============================ -->
+<h2 class="sec"><span class="n">0</span>Before → after — Today</h2>
+<div class="strip">
+ <div class="sketch">
+  <div class="lbl">Today (shipped page.tsx)</div>
+  <div class="mini">
+   <div class="isl"></div><div class="st"></div>
+   <div class="lay h" style="height:26px">Today · masthead</div>
+   <div class="lay" style="height:30px">First steps rail (until verified)</div>
+   <div class="lay" style="height:64px">"Today at Lumina" — obsidian tile · leads waiting · earned</div>
+   <div class="lay" style="height:44px">KPI bento: inquiries · tasks · upcoming · money</div>
+   <div class="lay" style="height:22px">Spotlight award banner</div>
+   <div class="lay" style="height:22px">Lock / deposit answer notes</div>
+   <div class="lay" style="height:22px">Payout method nudge</div>
+   <div class="lay" style="height:22px">Booking fee bills</div>
+   <div class="lay" style="height:22px">"Answering is free" note</div>
+   <div class="fold" style="top:394px">fold</div>
+   <div class="first" style="height:26px">Needs your answer · Ana &amp; Miguel</div>
+   <div class="lay" style="height:22px">Nothing to answer · Ongoing · Upcoming</div>
+   <div class="bar"></div>
+  </div>
+ </div>
+ <div class="arrow">→</div>
+ <div class="sketch">
+  <div class="lbl">New</div>
+  <div class="mini">
+   <div class="isl"></div><div class="st"></div>
+   <div class="lay h" style="height:26px">Lumina Studio · Photo &amp; video</div>
+   <div class="first" style="height:60px">Next: Reply to Ana &amp; Miguel · [Reply]</div>
+   <div class="lay" style="height:30px">3 new · 2 this week · ₱48k owed</div>
+   <div class="lay" style="height:14px">Coming up</div>
+   <div class="lay" style="height:22px">Sat 3 · Reyes debut · Tagaytay</div>
+   <div class="lay" style="height:22px">Sun 4 · Cruz wedding · Makati</div>
+   <div class="lay" style="height:22px">Oct 10 · Bautista christening</div>
+   <div class="fold" style="top:394px">fold</div>
+   <div class="bar"></div>
+  </div>
+ </div>
+ <div class="notes">
+  <h4>First thing to answer</h4>
+  <div class="big">~900 px <b>→ ~150 px</b> <span class="est">estimate</span></div>
+  <ul style="margin-top:10px">
+   <li><b>Today</b> — the shipped page renders, in order: masthead · first-steps rail · the "Today at" tile · KPI bento · award banner · lock/deposit notes · payout nudge · fee bills · the free-to-answer note · <b>then</b> the Needs-your-answer feed. On an 844 px screen the first inquiry lands under the fold — <b>~900 px is read off the component order, not measured on a device.</b></li>
+   <li><b>New</b> — the shop line, then ONE Next card with the most urgent answer and its one button. Three numbers and the next three events under it. The first thing to do starts at about 150 px. Measured on frame 1 below.</li>
+   <li>Nothing was removed. Feed cards → the Next card, one at a time · KPI bento → three numbers · award, nudges, fee bills, notes → the queue behind Next, or Shop/More.</li>
+  </ul>
+ </div>
+</div>
+
+<!-- ============================ 1–5 · THE FRAMES ============================ -->
+<h2 class="sec"><span class="n">1–5</span>The five screens · 390 × 844 · the same bar on every one</h2>
+<div class="row5">
+
+<!-- ---------- 1 · TODAY ---------- -->
+<div class="fr">
+<div class="phone">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="cover"><div class="ev"><div class="eyebrow">Photo &amp; video · Live</div><b>Lumina Studio</b></div></div>
+
+  <div class="card nextcard">
+   <div class="eyebrow">Next</div>
+   <h3>Reply to Ana &amp; Miguel</h3>
+   <p>New inquiry · Wedding · Mar 13, 2027 · Tagaytay · 180 guests. Waiting 2 hours.</p>
+   <span class="btn fill" style="width:100%;padding:14px">Reply</span>
+  </div>
+
+  <div class="facts">
+   <div class="fact"><b class="w">3</b><small>new inquiries</small></div>
+   <div class="fact"><b>2</b><small>events this week</small></div>
+   <div class="fact"><b>₱48k</b><small>owed to you</small></div>
+  </div>
+
+  <div class="card cu" style="padding:12px 16px 6px">
+   <div class="lbl">Coming up</div>
+   <div class="r"><div class="d"><b>3</b><small>Sat</small></div><div class="w"><b>Reyes debut</b><span>Tagaytay · 2:00 PM · Full-day</span></div><span class="go">›</span></div>
+   <div class="r"><div class="d"><b>4</b><small>Sun</small></div><div class="w"><b>Cruz wedding</b><span>Makati · 1:00 PM · Wedding Classic</span></div><span class="go">›</span></div>
+   <div class="r"><div class="d"><b>10</b><small>Sat</small></div><div class="w"><b>Bautista christening</b><span>Quezon City · 9:00 AM · Half-day</span></div><span class="go">›</span></div>
+  </div>
+ </div>
+ <div class="foldline"></div><div class="foldlbl">top third · 281 px</div>
+ <div class="bnav">
+  <span class="on"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Today</span>
+  <span><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 15.5a5 5 0 0 1 5.5 4.5"/></svg>Customers</span>
+  <span><svg viewBox="0 0 24 24"><path d="M5 8h14l1 12H4z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>Shop</span>
+  <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="12" r=".8"/><circle cx="12" cy="12" r=".8"/><circle cx="16" cy="12" r=".8"/></svg>More</span>
+ </div>
+</div>
+<div class="cap"><span class="k">1</span><b>Today</b><p>One card, one tap: the most urgent thing wins (<span class="q">Reply · Send quote · Agree to this booking · Event tomorrow · Payday</span>); the rest queue behind it. Then three numbers and the next three events. Nothing else above the fold.</p></div>
+<div class="side">
+ <div class="lbl">Queued behind Next (was the feed)</div>
+ <div class="it">Agree to Mendoza's booking <i>asked yesterday</i></div>
+ <div class="it">Confirm Ocampo's deposit <i>₱30,000 logged</i></div>
+ <div class="it">Meeting request <i>Thu 4 PM</i></div>
+ <div class="it">Booking fee due <i>₱1,200 by Oct 8</i></div>
+ <div class="it">Set how clients pay you <i>once</i></div>
+</div>
+</div>
+
+<!-- ---------- 2 · CUSTOMERS ---------- -->
+<div class="fr">
+<div class="phone">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="lhead"><span class="t">Customers</span><span class="r"><span class="hplus">+</span><span class="btn sm more">⋯</span></span></div>
+  <div class="srow"><div class="search">Search a customer</div><span class="btn dd">Filter <i>▾</i></span></div>
+  <p class="counts"><b>3 waiting</b> · 5 quoted · 12 booked <span class="btn dd">Show: Next step <i>▾</i></span></p>
+
+  <div class="gcard">
+   <div class="top"><span class="av host">AM</span><div class="who"><b>Ana &amp; Miguel</b><div class="sub">Wedding · Mar 13, 2027 · Tagaytay</div></div><span class="pill warn">Inquiry</span></div>
+   <div class="act"><span class="btn sm fill">Reply</span><span class="col">Waiting <b>2 h</b></span></div>
+  </div>
+  <div class="gcard">
+   <div class="top"><span class="av host">RC</span><div class="who"><b>Rolando &amp; Carmen Mendoza</b><div class="sub">Wedding · Nov 21, 2026 · Makati</div></div><span class="pill gild">Quoted</span></div>
+   <div class="act"><span class="btn sm fill">Agree</span><span class="col">Asked to <b>lock</b></span></div>
+  </div>
+  <div class="gcard">
+   <div class="top"><span class="av">KO</span><div class="who"><b>Katrina Ocampo</b><div class="sub">Debut · Oct 3, 2026 · Tagaytay</div></div><span class="pill ok">Booked</span></div>
+   <div class="act"><span class="btn sm">See the day</span><span class="col">Deposit <b>to confirm</b></span></div>
+  </div>
+  <div class="gcard">
+   <div class="top"><span class="av host">JC</span><div class="who"><b>Jun &amp; Liza Cruz</b><div class="sub">Wedding · Oct 4, 2026 · Makati</div></div><span class="pill ok">Booked</span></div>
+   <div class="act"><span class="btn sm">See the day</span><span class="col">Balance <b>₱42,000</b> due Oct 3</span></div>
+  </div>
+  <div class="gcard">
+   <div class="top"><span class="av">LB</span><div class="who"><b>Lourdes Bautista</b><div class="sub">Christening · Oct 10, 2026 · QC</div></div><span class="pill ok">Booked</span></div>
+   <div class="act"><span class="btn sm">See the day</span><span class="col">Nothing — all set</span></div>
+  </div>
+  <div class="gcard">
+   <div class="top"><span class="av host">PV</span><div class="who"><b>Paolo &amp; Nina Villanueva</b><div class="sub">Wedding · Aug 15, 2026 · Cebu</div></div><span class="pill soft">Done</span></div>
+   <div class="act"><span class="btn sm">Ask for a review</span><span class="col">Delivered</span></div>
+  </div>
+ </div>
+ <div class="foldline"></div><div class="foldlbl">top third · 281 px</div>
+ <div class="bnav">
+  <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Today</span>
+  <span class="on"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 15.5a5 5 0 0 1 5.5 4.5"/></svg>Customers</span>
+  <span><svg viewBox="0 0 24 24"><path d="M5 8h14l1 12H4z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>Shop</span>
+  <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="12" r=".8"/><circle cx="12" cy="12" r=".8"/><circle cx="16" cy="12" r=".8"/></svg>More</span>
+ </div>
+</div>
+<div class="cap"><span class="k">2</span><b>Customers</b><p>One customer per row: name · event · date · stage, and the row's own one-tap action. Waiting first (as shipped). <b>Filter ▾</b> = Inquiry · Quoted · Booked · Done. <b>Show ▾</b> picks one column for the right side. The round <b>+</b> (top right) adds an outside client (shipped: <span class="q">Import an outside client · free</span>).</p></div>
+<div class="side">
+ <div class="lbl">Behind ⋯ (was three dropdowns + five folds)</div>
+ <div class="it">Sort by <span class="btn dd">Waiting first <i>▾</i></span></div>
+ <div class="it">Event type · Service · Agent <i>the shipped filters</i></div>
+ <div class="it">Availability &amp; capacity <i>limits, blocked dates, waitlist</i></div>
+ <div class="it">Proposal templates</div>
+ <div class="it">Contracts</div>
+</div>
+</div>
+
+<!-- ---------- 3 · A CUSTOMER ---------- -->
+<div class="fr">
+<div class="phone">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="topnav"><span>‹ Customers</span><span class="dots">···</span></div>
+  <div class="eyebrow">Customer · Wedding</div>
+  <div class="gname">Rolando &amp; Carmen Mendoza</div>
+  <div class="pills"><span class="pill gild">Quoted</span><span class="pill soft">Nov 21, 2026</span><span class="pill soft">Makati</span></div>
+
+  <div class="card kf">
+   <div class="r"><span>Event</span><b>Wedding · 150 guests · Makati</b></div>
+   <div class="r"><span>Date</span><b>Sat, Nov 21, 2026 · 3:00 PM</b></div>
+   <div class="r"><span>Stage</span><b class="w">Quoted — they asked to lock</b></div>
+   <div class="r"><span>Your quote</span><b class="m">₱96,000</b></div>
+   <div class="r"><span>Owed to you</span><b class="m">₱0 <span style="font-family:var(--sans);font-size:11.5px;color:var(--mute);font-weight:400">· deposit after you agree</span></b></div>
+  </div>
+
+  <div class="mainact"><span class="btn fill">Agree to this booking</span><div class="stat">Nov 21 is open on your calendar</div></div>
+
+  <div class="dl">
+   <div class="r"><span>Messages</span><i>2 unread</i></div>
+   <div class="r"><span>Quote &amp; payments</span><i>₱96,000</i></div>
+   <div class="r"><span>Files</span><i>Contract draft</i></div>
+   <div class="r"><span>Schedule</span><i>3 parts</i></div>
+   <div class="r"><span>Activity</span><i>Quote sent Sep 28</i></div>
+   <div class="r"><span>Notes</span><i>Team only</i></div>
+  </div>
+ </div>
+ <div class="bnav">
+  <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Today</span>
+  <span class="on"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 15.5a5 5 0 0 1 5.5 4.5"/></svg>Customers</span>
+  <span><svg viewBox="0 0 24 24"><path d="M5 8h14l1 12H4z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>Shop</span>
+  <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="12" r=".8"/><circle cx="12" cy="12" r=".8"/><circle cx="16" cy="12" r=".8"/></svg>More</span>
+ </div>
+</div>
+<div class="cap"><span class="k">3</span><b>A customer</b><p>The key facts on top, then ONE main button for the stage — Inquiry: <span class="q">Reply</span> · Quoted: <span class="q">Send quote</span> or <span class="q">Agree to this booking</span> (the shipped words) · Booked: <span class="q">See the day</span>. The card's six tabs become closed rows; Script shows only for emcees (as shipped).</p></div>
+<div class="side">
+ <div class="lbl">Behind ··· (top right)</div>
+ <div class="it">Decline <i>asks once</i></div>
+ <div class="it">Hand to a teammate</div>
+ <div class="it">Ask for a review <i>after the day</i></div>
+</div>
+</div>
+
+<!-- ---------- 4 · SHOP ---------- -->
+<div class="fr">
+<div class="phone">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="lhead"><span class="t">Shop</span><span class="r"><span class="hplus">+</span><span class="btn sm more">⋯</span></span></div>
+  <p class="counts" style="margin-top:8px"><b>Live</b> · 3 services · 2 packages · 4.8 ★ from 31 reviews</p>
+
+  <div class="shead">Services</div>
+  <div class="gcard">
+   <div class="top"><span class="av logo">FD</span><div class="who"><b>Full-day wedding coverage</b><div class="sub">Photo + video · 12 hours</div></div><span class="sw"></span></div>
+   <div class="act"><span class="next">Booked <b>9×</b> this year</span><span class="price">₱85,000</span></div>
+  </div>
+  <div class="gcard">
+   <div class="top"><span class="av logo">HD</span><div class="who"><b>Half-day coverage</b><div class="sub">Photo + video · 6 hours</div></div><span class="sw"></span></div>
+   <div class="act"><span class="next">Booked <b>5×</b> this year</span><span class="price">₱45,000</span></div>
+  </div>
+  <div class="gcard">
+   <div class="top"><span class="av logo">SD</span><div class="who"><b>Same-day edit</b><div class="sub">Add-on · 3-minute film</div></div><span class="sw off"></span></div>
+   <div class="act"><span class="next">Off — couples can't book it</span><span class="price">₱15,000</span></div>
+  </div>
+
+  <div class="shead">Packages</div>
+  <div class="gcard">
+   <div class="top"><span class="av logo">WC</span><div class="who"><b>Wedding Classic</b><div class="sub">Full-day + album + same-day edit</div></div><span class="sw"></span></div>
+   <div class="act"><span class="next">Live</span><span class="price">₱120,000</span></div>
+  </div>
+  <div class="gcard">
+   <div class="top"><span class="av logo">DE</span><div class="who"><b>Debut Essentials</b><div class="sub">Half-day + 18 roses reel</div></div><span class="sw off"></span></div>
+   <div class="act"><span class="next">Draft</span><span class="price">₱60,000</span></div>
+  </div>
+ </div>
+ <div class="bnav">
+  <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Today</span>
+  <span><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 15.5a5 5 0 0 1 5.5 4.5"/></svg>Customers</span>
+  <span class="on"><svg viewBox="0 0 24 24"><path d="M5 8h14l1 12H4z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>Shop</span>
+  <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="12" r=".8"/><circle cx="12" cy="12" r=".8"/><circle cx="16" cy="12" r=".8"/></svg>More</span>
+ </div>
+</div>
+<div class="cap"><span class="k">4</span><b>Shop</b><p>What you sell, one row each: name · price · on/off switch (shipped <span class="q">is_active</span> · Live/Draft). Tap a row to edit it in place. The round <b>+</b> (top right) adds a service or package (one sheet asks which). Everything about the shop itself is in ⋯.</p></div>
+<div class="side">
+ <div class="lbl">Behind ⋯ (was My Shop's ~20 cards + tool shelves)</div>
+ <div class="it">Shop profile &amp; photos <i>name, cover, about, area</i></div>
+ <div class="it">Get verified <i>done</i></div>
+ <div class="it">How clients pay you <i>GCash · BDO</i></div>
+ <div class="it">Reviews · Track record · Stories · Recaps</div>
+ <div class="it">Team · Manpower · Branches</div>
+ <div class="it">Availability &amp; radius · Auto-reply · Segments</div>
+ <div class="it">More tools <i>Attributes · Recommend · Partnerships · Creators · Moodboard · Repertoire · Disputes · Theft Watch · Plan</i></div>
+</div>
+</div>
+
+<!-- ---------- 5 · MORE ---------- -->
+<div class="fr">
+<div class="phone">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="cover"><div class="ev"><div class="eyebrow">Photo &amp; video · Live</div><b>Lumina Studio</b></div></div>
+  <div class="card nextcard">
+   <div class="eyebrow">Next</div>
+   <h3>Reply to Ana &amp; Miguel</h3>
+   <p>New inquiry · Wedding · Mar 13, 2027 · Tagaytay · 180 guests. Waiting 2 hours.</p>
+   <span class="btn fill" style="width:100%;padding:14px">Reply</span>
+  </div>
+  <div class="facts">
+   <div class="fact"><b class="w">3</b><small>new inquiries</small></div>
+   <div class="fact"><b>2</b><small>events this week</small></div>
+   <div class="fact"><b>₱48k</b><small>owed to you</small></div>
+  </div>
+ </div>
+ <div class="dim"></div>
+ <div class="sheet">
+  <div class="grab"></div>
+  <div class="t">More</div>
+  <div class="svc"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span><div class="tx"><b>Calendar</b><span>Your dates, blocked days and who holds them.</span></div><span class="ch">›</span></div>
+  <div class="svc"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M3 10h2M19 14h2"/></svg></span><div class="tx"><b>Earnings &amp; payday</b><span>What came in, what's due, when it lands.</span></div><span class="ch">›</span></div>
+  <div class="svc"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg></span><div class="tx"><b>Messages</b><span>Every conversation in one inbox.</span></div><span class="ch">›</span></div>
+  <div class="svc"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg></span><div class="tx"><b>Insights</b><span>How you're doing, and where the demand is.</span></div><span class="ch">›</span></div>
+  <div class="svc"><span class="ic g"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M9 15l2 2 4-4"/></svg></span><div class="tx"><b>Event Hub</b><span>Run the day: schedule, shot list, headcount.</span></div><span class="ch">›</span></div>
+  <div class="svc"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span><div class="tx"><b>Settings</b><span>Notifications, plan, team, sign out.</span></div><span class="ch">›</span></div>
+ </div>
+ <div class="bnav">
+  <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Today</span>
+  <span><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 15.5a5 5 0 0 1 5.5 4.5"/></svg>Customers</span>
+  <span><svg viewBox="0 0 24 24"><path d="M5 8h14l1 12H4z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>Shop</span>
+  <span class="on"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="12" r=".8"/><circle cx="12" cy="12" r=".8"/><circle cx="16" cy="12" r=".8"/></svg>More</span>
+ </div>
+</div>
+<div class="cap"><span class="k">5</span><b>More</b><p>A small sheet, one line each: Calendar · Earnings &amp; payday · Messages · Insights · Event Hub · Settings. Tap one to open it; swipe down to close.</p></div>
+<div class="side">
+ <div class="lbl">The bar, on every screen</div>
+ <div class="it">Today · Customers · Shop · More <i>was Today · Customers · Shop · Insights · Event Hub</i></div>
+ <div class="it">Insights and Event Hub <i>→ More</i></div>
+ <div class="it">Round + <i>top-right beside ⋯ on Customers and Shop — nothing floats over the bar</i></div>
+ <div class="it">Unread badge <i>stays on Customers</i></div>
+</div>
+</div>
+
+</div>
+
+<h2 class="sec"><span class="n">✓</span>What moved where</h2>
+<div class="strip">
+ <div class="notes" style="max-width:none">
+  <ul style="columns:2;column-gap:36px">
+   <li><b>Today:</b> the "Today at" tile, the KPI bento and the Needs-your-answer feed collapse into <b>one</b> Next card — the most urgent answer wins; the rest queue behind it, one at a time. Award banner, payout nudge, fee bills, lock/deposit notes → that same queue. Ongoing + Upcoming → <span class="q">Coming up</span> (three rows).</li>
+   <li><b>Bar:</b> five → four. <b>Insights</b> and <b>Event Hub</b> move into More; the shipped keys (<span class="q">overview · customers · shop · performance · on-the-day</span>) do not change — only what the phone bar shows. The unread/inquiry badge stays on Customers.</li>
+   <li><b>Customers:</b> the pipeline month-grid, the three dropdowns (type · service · agent) and the five folds (Messages · Clients · Availability · Proposals · Contracts) → one <b>Filter ▾</b> (stage), one <b>Show ▾</b> (column), and <b>⋯</b>. Rows stay "waiting first" as shipped. The round <b>+</b> is the shipped <span class="q">Import an outside client</span>.</li>
+   <li><b>A customer:</b> the six tabs (Overview · Quote &amp; Payments · Files · Schedule · Script · Activity) → key facts + one stage button + closed rows. Same words as the tabs. The lock handshake stays couple-asks, supplier-agrees.</li>
+   <li><b>Shop:</b> services and packages become rows with a price and an on/off switch; profile, verification, payouts, reviews, team, the tool shelves (What couples see · Working with others · Protection) → <b>⋯</b>. One round <b>+</b> adds.</li>
+   <li><b>More:</b> Calendar, Earnings &amp; payday, Messages, Insights (Performance + Demand), Event Hub (On the Day), Settings (Notifications · Plan · Team · sign out) — one line each. <span class="q">/more</span> today redirects to Today; the sheet replaces it.</li>
+   <li><b>Desktop</b> shows the same screens with more columns and the rows' panels open — never a different screen. The five-key side rail stays as is.</li>
+  </ul>
+ </div>
+</div>
+
+<div class="adminnote"><b>Admin next — same method.</b> One Next card on Today (the oldest thing waiting on an admin), lists first with one search + one Filter ▾ + one Show ▾, one round + where adding exists, a bar of four with the rest in More. Not drawn here.</div>
+
+</div>
+</body>
+</html>

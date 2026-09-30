@@ -79,3 +79,15 @@ Model: Opus · effort: medium. Repo iscasasola/setnayan-platform, base origin/ma
 LIMITS: no new server actions (1225), no client bundle growth, no migrations, don't touch the Maker. Tests: sabotage-check; typecheck + CI guards + touched tests from apps/web (bracketed paths file by file). changelog.d/rd-face-on-every-type.md (SPEC IMPACT: None — decision already logged).
 PR: gh pr create --base main --draft; gh pr edit <n> --add-label do-not-auto-merge; gh pr ready <n>; confirm auto-merge off. Never merge. Report PR + 3-step check card.
 ```
+
+## G9 — "Your Team" becomes "Suppliers" everywhere (this account, ~$9 credit)
+```
+Model: Opus · effort: medium. Repo iscasasola/setnayan-platform, base origin/main, branch rd/your-team-is-suppliers. Read CLAUDE.md. Credit is small (~$9): mechanical sweep, push early and often.
+
+OWNER 2026-10-01 (DECISION_LOG "THE BOTTOM BAR IS HOME · GUESTS · SUPPLIERS · HUB · MORE"): the host's "Your Team" is renamed **Suppliers**. PR #6205 (open) already changes the bar, sidebar and ☰ drawer — DO NOT touch the files it owns (see `gh pr view 6205 --json files`: bottom-nav.tsx, nav/types.ts, customer-bottom-nav.tsx, customer-nav-config.ts, customer-nav-fab.tsx, event-rail-*.ts(x), more-services-sheet.tsx, [eventId]/layout.tsx, suite/*, customer-menu*, and the tests it lists).
+
+DO: every OTHER user-visible "Your Team" / "your team" meaning the host's supplier list → "Suppliers" / "your suppliers" (page titles, headings, tour copy in lib/tours.ts, empty states, buttons like "Add to your team" → "Add to your suppliers", emails/notifications copy). Find them: `git grep -n -i "your team" -- apps/web/app apps/web/lib`. Leave alone: code identifiers/route paths (don't rename the /vendors route or variables), legal text, the supplier's OWN staff/"team members" pages under vendor-dashboard (that "team" means their employees), and tests that pin other decisions — update tests that pin the old words, citing this decision.
+Word rules: "supplier" never "vendor"; "Event Hub" never "website". Add ONE guard: no user-visible "Your Team" string remains in host-facing app code (allow-list the supplier-staff pages), sabotage-check it.
+LIMITS: no new server actions, no client-bundle growth, no migrations, don't touch the Maker. Run typecheck + every CI guard + touched tests from apps/web (bracketed paths file by file). changelog.d/rd-your-team-is-suppliers.md (SPEC IMPACT: None — decision logged).
+PR: gh pr create --base main --draft; gh pr edit <n> --add-label do-not-auto-merge; gh pr ready <n>; confirm auto-merge off. Never merge. Report PR + a list of every string changed.
+```
