@@ -32,3 +32,8 @@ Owner, verbatim (2026-09-30): *"how we ask questions for them to fill up, how we
 - The event-type profile decides stages, pages, scenes, guest-list parts, suggested suppliers and which questions appear.
 - Defaults are chosen for them (the best one pre-selected); rules resolve silently (seats on the day, tagging only with Papic, no sides for a birthday).
 - Every builder prompt links this file; a PR that adds a pill row, a confirm dialog, a second place for the same setting or a question we already know the answer to is a regression.
+
+## 7 · Two looks, never mixed up
+- **Setnayan look** (the host's tools — dashboard, Guest list, Your Team, the Maker's controls, onboarding's frame): warm paper, ink, gold + wine accents, serif for names/headings, sans for controls. Same everywhere. The dashboard may carry the event's cover + one accent colour at the top, nothing more.
+- **The event's own theme** (everything a guest sees — the Event Hub, the landing page, RSVP, tickets, prints, guest emails): the couple's theme (background, fonts, colours, logo); tone follows the event type (a wake is quiet).
+- **Where they meet:** the Maker's centre is the event's theme, its controls are the Setnayan look; onboarding starts in the Setnayan look and takes on the chosen event type's style once the type is picked.
