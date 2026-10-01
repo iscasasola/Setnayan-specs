@@ -159,3 +159,5 @@ BUILD in slices (one PR each): (a) signed-out sidebar = Discover · Find supplie
 ```
 
 > P10 addendum (owner 2026-10-01): keep and grow `/blog` (Setnayan Articles) — guides per event type, per faith/rite (from lib/wedding-traditions.ts + lib/faith-registry.ts), and how-tos per feature; Tagalog twins; link articles ↔ feature pages; fix the blog's wedding-only title; owner reviews faith articles before they go live.
+
+> P10 addendum: articles leave Discover; they live under Features (per-feature Guides + an "All guides" page = /blog regrouped by event type · faith · feature); old /blog URLs keep working.
