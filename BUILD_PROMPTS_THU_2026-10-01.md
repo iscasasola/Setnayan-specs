@@ -163,3 +163,5 @@ BUILD in slices (one PR each): (a) signed-out sidebar = Discover · Find supplie
 > P10 addendum: articles leave Discover; they live under Features (per-feature Guides + an "All guides" page = /blog regrouped by event type · faith · feature); old /blog URLs keep working.
 
 > P10 addendum (owner 2026-10-01, DECISION_LOG "EVERY FEATURE PAGE, ARTICLE… CARRY FULL SEARCH + AI-SEARCH TAGGING"): title/description/canonical · hreflang en↔tl + x-default · OG/Twitter image · JSON-LD (Organization, BreadcrumbList, SoftwareApplication+Offer from the catalogue, FAQPage, HowTo, Article/BlogPosting) · semantic headings + alt · sitemap-features.xml with lastmod · llms.txt lists every feature + guide · AI answer engines stay allowed in app/robots.ts · Try-it pages noindex · ONE guard test walking all these routes.
+
+> P10 addendum: each feature page adds "What makes it different" (3–5 true, shipped advantages; no competitor names) + "Works with the rest of Setnayan" (the ecosystem chain with links); the /features hub shows the whole ecosystem as one connected map. Feed both into JSON-LD/llms.txt.
