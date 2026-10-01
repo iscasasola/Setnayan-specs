@@ -57,7 +57,7 @@ Rules: ≤3–4 builders at once (16 GB Mac, one heavy lock) · merge only throu
 
 **Step 5 · Admin fixes** — [x] audit first → `ADMIN_AUDIT_2026-09-30.md` (46 rows · 12 blocks · 3-PR build order)
 **Step 6 · Every event type + religion** — [ ] audit first · [ ] Google + Apple sign-in in the apps
-**Step 7 · Apple check** — owner + iPhone · [ ] iPhone build adds App-Bound Domains (WKAppBoundDomains: setnayan.com, www, Supabase auth domain, checkout host — test sign-in/checkout/external links on a device) so the service-worker code cache works in the app (DECISION_LOG 2026-10-02)
+**Step 7 · Apple check** — owner + iPhone · (App-Bound Domains for the iPhone app comes AFTER the Apple check — DECISION_LOG 2026-10-02)
 
 ## The rule
 One release that carries ONLY RSVP + guest Invitation work. Everything else is held (label `do-not-auto-merge`, auto-merge off) until this is live and walked through. After it is live: **freeze the guest pages** while friends reply — new findings go on a list, not into prod.

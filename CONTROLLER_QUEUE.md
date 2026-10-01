@@ -59,6 +59,9 @@ Rules: newest at the top of each section · one item per line or block · a buil
 - Next when a Maker slot frees (max 2 Maker builders): the simplified Event Hub Maker — `prototypes/maker_in_four_2026-09-30_fable.html`, DECISION_LOG "THE MAKER RE-PLAN IS CUT TO ITS CORE" + "THE MAKER IN 4 IS A DIRECTION, NOT A COUNT".
 - Desk §1 items (a)(b)(c)(d) taken by the controller 2026-10-01 15:00.
 
+## 5 · After the Apple check (controller adds)
+- iPhone app: App-Bound Domains (WKAppBoundDomains) so the service-worker code cache works inside the app — DECISION_LOG 2026-10-02 (two rows). List every in-app domain (setnayan.com, www, Supabase auth, checkout host); test sign-in, checkout, external links on a device.
+
 ## 4 · Done (controller, with PR + live SHA)
 - 2026-10-01 · LIVE af966d2: #6160 one font dropdown · #6227 More Services sub-menu + monogram fits · #6232 desktop Home shows each thing once.
 - 2026-10-01 16:00 PHT · LIVE cb885ee: #6225 guest import from a file (+ Google Sheets links, template header fix) · #6228 export privacy fix (face-tag + godparent rows) · #6226 five palette styles.
