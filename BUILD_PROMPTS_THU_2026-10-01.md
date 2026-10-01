@@ -60,7 +60,7 @@ TESTS: a non-wedding event's Find a supplier lists no category outside its scope
 PR ROUTINE as in COMMON RULES. changelog.d/rd-supplier-inbox-and-find.md — SPEC IMPACT: None.
 ```
 
-## P4 — The supplier phone app (Today · Customers · Shop · More) — ⏸ WAITS FOR OWNER APPROVAL
+## P4 — The supplier phone app (Today · Customers · Shop · More) — ✅ APPROVED 2026-10-01 (Messages in More · "Run the day" Next card · + adds an outside client)
 ```
 ⏸ DO NOT START until DECISION_LOG carries an "APPROVED" row for prototypes/supplier_app_simple_2026-10-01_fable.html and the owner's three answers (Messages in More? · "Run the day" Next card? · + adds an outside client?). Paste those answers into this prompt first.
 Model: Opus · effort: medium. Branch rd/supplier-app-simple, base origin/main.
