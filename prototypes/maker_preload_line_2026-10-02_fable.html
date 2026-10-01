@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Maker's tool-preload line — Setnayan</title>
+<style>
+/* Self-contained: no fonts fetched, no scripts loaded. The palette is the Setnayan look
+   (INTERACTION_RULES §7) as drawn in prototypes/maker_in_four_2026-09-30_fable.html. */
+:root{
+  --paper:#FAF7F2;--paper2:#F3EEE6;--page:#EDE7DE;--ink:#1E2229;--ink2:#3B3F46;--mute:#76736D;
+  --gild:#B08A5B;--gild-soft:#E9DEC9;--gild-wash:#F7F1E6;--wine:#6E2A3A;
+  --line:#E5DED3;
+  --serif:"Cormorant Garamond","Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--page);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1328px;margin:0 auto;padding:32px 24px 40px}
+
+/* ---------- page furniture (owner-facing) ---------- */
+.doc-brand{font-size:10.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--gild);font-weight:600}
+h1{font-family:var(--serif);font-weight:500;font-size:40px;line-height:1.1;margin:8px 0 10px;letter-spacing:-.01em}
+.lead{color:var(--ink2);font-size:14.5px;line-height:1.6;max-width:980px;margin:0 0 8px}
+.lead b{font-weight:600;color:var(--ink)}
+.lead .q{font-family:var(--serif);font-style:italic;font-size:16px;color:var(--ink)}
+h2.sec{display:flex;align-items:center;gap:14px;font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink2);font-weight:600;margin:48px 0 20px}
+h2.sec .n{font-family:var(--serif);font-size:22px;font-weight:500;color:var(--gild);letter-spacing:0}
+h2.sec:after{content:"";flex:1;height:1px;background:var(--line)}
+.rule{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0 6px}
+.rule div{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.rule b{display:block;font-family:var(--serif);font-size:22px;font-weight:500;line-height:1.1;margin-bottom:4px}
+.rule b i{font-style:normal;color:var(--gild);margin-right:6px}
+.rule p{margin:0;font-size:12px;color:var(--ink2);line-height:1.5}
+.notes{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px 14px 8px 17px;position:relative;width:100%}
+.notes:before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;background:var(--gild);border-radius:0 3px 3px 0}
+.notes h4{display:flex;align-items:baseline;gap:8px;margin:0 0 6px;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gild);font-weight:600}
+.notes h4 .k{font-family:var(--serif);font-size:24px;font-weight:500;letter-spacing:0;color:var(--gild);line-height:1}
+.notes p{margin:0 0 6px;font-size:12px;line-height:1.5;color:var(--ink2)}
+.notes p b{color:var(--ink);font-weight:600}
+.pgrid{display:grid;grid-template-columns:repeat(3,390px);gap:28px 23px;justify-content:start}
+.frame{display:flex;flex-direction:column;gap:14px;min-width:0}
+.frame.ph{width:390px}
+.frame.wide{width:100%}
+.sheet-wrap{padding:4px 0 8px}
+
+/* ---------- shared atoms ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:7px 12px;border-radius:999px;font-size:12.5px;font-weight:500;border:1px solid var(--line);background:#fff;color:var(--ink);white-space:nowrap;line-height:1}
+.btn.fill{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn .n{background:var(--gild);color:#fff;border-radius:999px;font-size:10px;padding:2px 6px;font-weight:600;margin-left:2px}
+/* a Keynote-style labelled tool: icon over its word (the shipped MAKER_TOOL_BUTTON) */
+.tool{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:44px;height:44px;padding:0 6px;border-radius:10px;color:var(--ink2);font-size:9.5px;font-weight:500;letter-spacing:.02em}
+.tool i{font-style:normal;font-size:15px;line-height:1;color:var(--ink)}
+.tool.dd i:after{content:" ▾";font-size:10px;color:var(--gild);vertical-align:2px}
+.vdiv{width:1px;height:28px;background:rgba(30,34,41,.15);margin:0 6px;flex:none}
+/* the stages — the shipped bar's pills: one filled with ink, the rest ink/70 */
+.stages{display:flex;align-items:center;gap:2px;flex:1;justify-content:center;min-width:0}
+.stages>span{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 13px;border-radius:999px;font-size:13.5px;font-weight:600;color:rgba(30,34,41,.7);white-space:nowrap}
+.stages>span.on{background:var(--ink);color:var(--paper)}
+.stages span.dot{width:6px;height:6px;border-radius:50%;background:var(--gild);display:inline-block;flex:none}
+.stages>span.div{width:1px;height:20px;padding:0;border-radius:0;background:rgba(30,34,41,.15);margin:0 6px}
+/* the compact bar on a phone — ONE picker */
+.pick{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 12px 0 13px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13.5px;font-weight:600;color:var(--ink);white-space:nowrap}
+.pick .dot{width:6px;height:6px;border-radius:50%;background:var(--gild)}
+.pick i{font-style:normal;font-size:10px;color:var(--gild)}
+
+/* ══════════ THE LINE ══════════
+   2 px · the gold accent · full width · directly under the bar · no track.
+   It is one element that scales from the left; nothing is drawn behind it. */
+.preload{position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--gild);transform-origin:left center;transform:scaleX(0);
+  pointer-events:none;z-index:30;transition:transform .35s cubic-bezier(.2,.7,.2,1),opacity .5s ease}
+.preload.gone{opacity:0}
+@media (prefers-reduced-motion:reduce){.preload{transition:none}}
+.no-motion .preload{transition:none}
+
+/* ---------- THE MAKER (desktop, 1280) ---------- */
+.mk{width:1280px;height:700px;background:var(--page);border:1px solid #D8D0C4;border-radius:16px;overflow:hidden;position:relative;display:flex;flex-direction:column;
+  box-shadow:0 40px 70px -40px rgba(30,34,41,.4),0 10px 24px -18px rgba(30,34,41,.2)}
+.top{height:56px;flex:none;background:rgba(255,255,255,.92);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:2px;padding:0 10px;position:relative;z-index:15}
+.top .grp{display:flex;align-items:center;flex:none}
+.body{flex:1;display:flex;min-height:0}
+.scenes{width:168px;flex:none;background:#fff;border-right:1px solid var(--line);padding:14px 12px}
+.scenes .lab{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--mute);font-weight:600;margin-bottom:8px}
+.scenes .sc-row{height:46px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:var(--paper);display:flex;align-items:center;padding:0 10px;font-size:11.5px;color:var(--ink2);gap:8px}
+.scenes .sc-row b{font-family:var(--serif);font-size:14px;color:var(--gild);font-weight:500;width:14px}
+.scenes .sc-row.on{border-color:var(--gild);background:var(--gild-wash)}
+.canvas{flex:1;min-width:0;position:relative;overflow:hidden;padding:26px 0 0;display:flex;justify-content:center}
+.canvas .stagebar{position:absolute;top:0;left:0;right:0;height:26px;display:flex;justify-content:center;align-items:center;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);font-weight:600}
+.canvas .stagebar b{color:var(--gild);font-weight:600;margin-left:6px}
+/* the hub as guests see it */
+.hub{width:760px;background:var(--paper);border:1px solid var(--line);border-bottom:0;border-radius:16px 16px 0 0;box-shadow:0 30px 60px -36px rgba(30,34,41,.45);position:relative;overflow:hidden;display:flex;flex-direction:column}
+.hub .sc{position:relative;padding:44px 60px 40px;text-align:center;border-bottom:1px solid var(--line)}
+.hub .sc.hero{min-height:470px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(120% 90% at 50% 0%,#fff 0%,var(--paper) 60%,var(--paper2) 100%)}
+.hub .sc.hero:before{content:"";position:absolute;inset:14px;border:1px solid var(--gild-soft);border-radius:10px;pointer-events:none}
+.hub .line1{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--gild);font-weight:600}
+.hub .mark{width:56px;height:56px;border-radius:50%;border:1px solid var(--gild);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:500;font-size:24px;color:var(--gild);letter-spacing:.08em;padding-left:.08em;margin:18px auto 14px}
+.hub .names{font-family:var(--serif);font-weight:500;font-size:64px;line-height:1;letter-spacing:-.01em;color:var(--ink)}
+.hub .names .j{font-style:italic;font-weight:400;color:var(--wine);font-size:48px;margin:0 10px}
+.hub .invl{font-family:var(--serif);font-style:italic;font-size:21px;color:var(--ink2);margin-top:16px}
+.hub .date{font-size:13px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink);font-weight:600;margin-top:22px}
+.hub .time{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:500;margin-top:6px}
+.hub .dlink{display:inline-block;margin-top:24px;color:var(--wine);text-decoration:underline;text-underline-offset:4px;font-size:13px;font-weight:500}
+.hub .sc.greet{padding:36px 60px 38px;text-align:left}
+.hub .sc.greet .eyebrow{display:block;margin-bottom:8px;font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--gild);font-weight:600}
+.hub .sc.greet p{font-family:var(--serif);font-size:22px;line-height:1.35;margin:0;color:var(--ink);max-width:560px}
+.hub .sc.greet p .from{display:block;font-style:italic;color:var(--wine);font-size:18px;margin-top:8px}
+.gbar{position:absolute;left:0;right:0;bottom:0;height:52px;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:center;padding:0 40px;font-size:12px;color:var(--mute);font-weight:500;z-index:3}
+.gbar span{display:flex;flex-direction:column;align-items:center;gap:3px}
+.gbar span i{font-style:normal;font-size:14px;line-height:1}
+.gbar span.on{color:var(--wine)}
+.gbar span.on:after{content:"";width:18px;height:2px;background:var(--wine);border-radius:2px;margin-top:1px}
+
+/* ---------- phone frame (390) ---------- */
+.phone{width:390px;flex:none;height:844px;background:var(--paper);border:9px solid #14161A;border-radius:48px;position:relative;overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:0 0 0 1px #2E3238,0 40px 70px -30px rgba(30,34,41,.45),0 16px 30px -18px rgba(30,34,41,.25)}
+.phone .island{position:absolute;left:50%;top:11px;transform:translateX(-50%);width:118px;height:33px;background:#14161A;border-radius:20px;z-index:9}
+.phone .status{height:52px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 30px 8px;font-size:14px;font-weight:600;letter-spacing:-.01em;background:#fff}
+.phone .status .sig{display:flex;gap:6px;align-items:center;font-size:11px;letter-spacing:.06em}
+.phone .status .bat{width:24px;height:11px;border:1.5px solid var(--ink);border-radius:4px;position:relative;opacity:.9}
+.phone .status .bat:after{content:"";position:absolute;left:2px;top:2px;bottom:2px;right:5px;background:var(--ink);border-radius:1px}
+.ptop{height:52px;flex:none;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:4px;padding:0 6px;position:relative;z-index:8}
+.ptop .mid{flex:1;display:flex;justify-content:center;min-width:0}
+.pv{flex:1;min-height:0;position:relative;overflow:hidden;background:var(--paper)}
+.pv .hub{width:100%;border:0;border-radius:0;box-shadow:none;position:absolute;left:0;top:0}
+.pv .hub .sc{padding:30px 22px 26px}
+.pv .hub .sc.hero{min-height:560px}
+.pv .hub .sc.hero:before{inset:10px}
+.pv .hub .names{font-size:46px}
+.pv .hub .names .j{font-size:34px;margin:0 6px}
+.pv .hub .invl{font-size:18px}
+.pv .hub .mark{width:48px;height:48px;font-size:20px}
+.pv .hub .sc.greet{padding:26px 22px}
+.pv .hub .sc.greet p{font-size:18px}
+.pbar{height:66px;flex:none;background:#fff;border-top:1px solid var(--line);display:flex;align-items:center;gap:6px;padding:0 10px 8px;position:relative;z-index:8}
+.pbar .btn{padding:10px 11px;font-size:12.5px}
+.pbar .btn.pg{flex:1;justify-content:space-between;font-family:var(--serif);font-size:15px;min-width:0;overflow:hidden}
+.pbar .btn.pg small{font-family:var(--sans);font-size:10px;color:var(--mute);letter-spacing:.06em;text-transform:uppercase;margin-right:4px}
+.pbar .btn.pg i{font-style:normal;color:var(--gild);font-size:10px}
+.phone .home{height:22px;flex:none;position:relative;background:#fff}
+.phone .home:after{content:"";position:absolute;left:50%;bottom:7px;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:var(--ink);opacity:.85}
+
+/* ---------- live replay ---------- */
+.replay{display:flex;gap:22px;align-items:flex-start}
+.replay .side{flex:1;min-width:280px}
+.replay .side .notes{margin-bottom:12px}
+a.go{display:inline-flex;align-items:center;gap:8px;font-family:var(--serif);font-size:19px;font-weight:500;color:var(--wine);text-decoration:underline;text-underline-offset:5px;cursor:pointer}
+a.go:hover{color:var(--ink)}
+.tools{list-style:none;margin:14px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-size:12px;color:var(--mute)}
+.tools li{display:flex;align-items:center;gap:7px;transition:color .3s}
+.tools li:before{content:"";width:6px;height:6px;border-radius:50%;border:1px solid var(--gild-soft);background:#fff;flex:none}
+.tools li.in{color:var(--ink)}
+.tools li.in:before{background:var(--gild);border-color:var(--gild)}
+.tools .hint{grid-column:1/-1;font-size:11px;color:var(--mute);margin-top:4px;font-style:italic}
+label.rm{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2);margin-top:12px;cursor:pointer}
+footer{max-width:1328px;margin:0 auto;padding:36px 24px 40px;font-size:12.5px;color:var(--mute);line-height:1.5;border-top:1px solid var(--line)}
+</style>
+</head>
+<body><div class="wrap">
+
+<div class="doc-brand">Setnayan · Event Hub · The Maker</div>
+<h1>The tool-preload line — a thin gold line under the bar</h1>
+<p class="lead">DECISION_LOG 2026-10-02: the Maker <b>downloads all its tools right after it opens</b> (<span class="q">“can you download the whole maker once it loads?”</span>), and the download <b>shows as a thin line under the top bar</b> (<span class="q">“can we show the download progress?” — “yes”</span>). The line fills 0 → 100% while the tools land in the background, then fades out. <b>No text, no percent, nothing to tap</b> — the Maker is usable the whole time. Nothing else in the Maker changes; the bar below is today's bar (stages │ Details · Prints; one picker on a phone). Sample: Ana &amp; Miguel · March 13, 2027.</p>
+
+<div class="rule">
+ <div><b><i>1</i>Where</b><p>Directly under the Maker's top bar, full width, 2 px, the gold accent. No track or background behind it — only the filled part is drawn.</p></div>
+ <div><b><i>2</i>When</b><p>Appears as soon as the Maker is on screen and starts preloading. Each tool that lands moves it; it is never a guess.</p></div>
+ <div><b><i>3</i>Then</b><p>At 100% it holds a beat and fades. Gone means every tool opens with no download. Hidden entirely when Save-Data skips the preload.</p></div>
+ <div><b><i>4</i>Never</b><p>No words, no number, no spinner, no tap target, no dimming. Reduced motion: it appears and disappears without animating.</p></div>
+</div>
+
+<div id="sheet" class="sheet-wrap">
+<h2 class="sec"><span class="n">1 · 2 · 3</span>Phone, 390 px — just opened · nearly there · done</h2>
+<div class="pgrid">
+
+<!-- ============================ 1 · PHONE, JUST OPENED (~35%) ============================ -->
+<div class="frame ph">
+<div class="phone">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ptop">
+  <span class="tool"><i>✕</i>Exit</span>
+  <span class="mid"><span class="pick"><span class="dot"></span>Invitation <i>▾</i></span></span>
+  <span class="tool dd"><i>⋯</i>More</span>
+  <span class="btn fill">Apply</span>
+  <div class="preload" style="transform:scaleX(.35)"></div>
+ </div>
+ <div class="pv">
+  <div class="hub">
+   <div class="sc hero">
+    <span class="line1">Together with their families</span>
+    <div class="mark">AM</div>
+    <div class="names">Ana<span class="j">&amp;</span>Miguel</div>
+    <span class="invl">invite you to celebrate their wedding</span>
+    <span class="date">March 13, 2027</span>
+    <span class="time">Two-thirty in the afternoon</span>
+    <span class="dlink">See the details ›</span>
+   </div>
+   <div class="sc greet"><span class="eyebrow">A note from us</span><p>Dear Mr. Manuel Cortez Casasola, we'd be so happy to have you with us on the day.<span class="from">— Ana &amp; Miguel</span></p></div>
+  </div>
+ </div>
+ <div class="pbar"><span class="btn pg"><span><small>Page</small>Welcome</span><i>▾</i></span><span class="btn">Look</span><span class="btn">Details</span></div>
+ <div class="home"></div>
+</div>
+<div class="notes"><h4><span class="k">1</span>Just opened — about a third in</h4>
+ <p><b>The Maker is already usable.</b> The hub is on screen, the picker works, Apply works. The line under the bar is the only sign that tools are still landing — a 2 px gold line from the left edge to about a third across, nothing drawn to its right.</p>
+ <p>Tapping Details now still opens it (it loads on tap, as today); once the line has passed it, it opens at once.</p>
+</div>
+</div>
+
+<!-- ============================ 2 · PHONE, NEARLY THERE (~85%) ============================ -->
+<div class="frame ph">
+<div class="phone">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ptop">
+  <span class="tool"><i>✕</i>Exit</span>
+  <span class="mid"><span class="pick"><span class="dot"></span>Invitation <i>▾</i></span></span>
+  <span class="tool dd"><i>⋯</i>More</span>
+  <span class="btn fill">Apply</span>
+  <div class="preload" style="transform:scaleX(.85)"></div>
+ </div>
+ <div class="pv">
+  <div class="hub">
+   <div class="sc hero">
+    <span class="line1">Together with their families</span>
+    <div class="mark">AM</div>
+    <div class="names">Ana<span class="j">&amp;</span>Miguel</div>
+    <span class="invl">invite you to celebrate their wedding</span>
+    <span class="date">March 13, 2027</span>
+    <span class="time">Two-thirty in the afternoon</span>
+    <span class="dlink">See the details ›</span>
+   </div>
+   <div class="sc greet"><span class="eyebrow">A note from us</span><p>Dear Mr. Manuel Cortez Casasola, we'd be so happy to have you with us on the day.<span class="from">— Ana &amp; Miguel</span></p></div>
+  </div>
+ </div>
+ <div class="pbar"><span class="btn pg"><span><small>Page</small>Welcome</span><i>▾</i></span><span class="btn">Look</span><span class="btn">Details</span></div>
+ <div class="home"></div>
+</div>
+<div class="notes"><h4><span class="k">2</span>Nearly there — most tools in</h4>
+ <p><b>Same screen, the line further along.</b> It only ever moves right, in steps, as each tool panel finishes — never a smooth fake. Nothing else has changed: no toast, no count, no “loading…”.</p>
+ <p>The couple may have scrolled, typed, or opened Look in the meantime; the line kept going underneath.</p>
+</div>
+</div>
+
+<!-- ============================ 3 · PHONE, DONE (line gone) ============================ -->
+<div class="frame ph">
+<div class="phone">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ptop">
+  <span class="tool"><i>✕</i>Exit</span>
+  <span class="mid"><span class="pick"><span class="dot"></span>Invitation <i>▾</i></span></span>
+  <span class="tool dd"><i>⋯</i>More</span>
+  <span class="btn fill">Apply</span>
+ </div>
+ <div class="pv">
+  <div class="hub">
+   <div class="sc hero">
+    <span class="line1">Together with their families</span>
+    <div class="mark">AM</div>
+    <div class="names">Ana<span class="j">&amp;</span>Miguel</div>
+    <span class="invl">invite you to celebrate their wedding</span>
+    <span class="date">March 13, 2027</span>
+    <span class="time">Two-thirty in the afternoon</span>
+    <span class="dlink">See the details ›</span>
+   </div>
+   <div class="sc greet"><span class="eyebrow">A note from us</span><p>Dear Mr. Manuel Cortez Casasola, we'd be so happy to have you with us on the day.<span class="from">— Ana &amp; Miguel</span></p></div>
+  </div>
+ </div>
+ <div class="pbar"><span class="btn pg"><span><small>Page</small>Welcome</span><i>▾</i></span><span class="btn">Look</span><span class="btn">Details</span></div>
+ <div class="home"></div>
+</div>
+<div class="notes"><h4><span class="k">3</span>Done — the line has faded</h4>
+ <p><b>This is the Maker as it is today.</b> The line reached the right edge, held about a third of a second, and faded out over half a second. Nothing is left behind — no checkmark, no “ready”. Every tool now opens in under 100 ms.</p>
+ <p>This is also what a phone with <b>Save-Data</b> on sees from the start: the preload is skipped, so no line is ever drawn.</p>
+</div>
+</div>
+
+</div>
+
+<!-- ============================ 4 · DESKTOP 1280 (~50%) ============================ -->
+<h2 class="sec"><span class="n">4</span>Desktop, 1280 px — halfway</h2>
+<div class="frame wide">
+<div class="mk">
+ <div class="top">
+  <span class="grp">
+   <span class="tool"><i>✕</i>Exit</span>
+   <span class="tool dd"><i>▶</i>Play</span>
+   <span class="tool"><i>＋</i>Add</span>
+  </span>
+  <span class="vdiv"></span>
+  <span class="stages">
+   <span>Save the Date</span><span>RSVP</span><span class="on"><span class="dot"></span>Invitation</span><span>On the Day</span><span>Post Event</span>
+   <span class="div"></span>
+   <span>Details</span><span>Prints</span>
+  </span>
+  <span class="vdiv"></span>
+  <span class="grp">
+   <span class="tool"><i>▯</i>Scenes</span>
+   <span class="tool dd"><i>▭</i>View</span>
+   <span class="tool dd"><i>⋯</i>More</span>
+   <span class="vdiv"></span>
+   <span class="tool"><i>↶</i>Undo</span>
+   <span class="btn fill" style="margin-left:4px">Apply <span class="n">3</span></span>
+  </span>
+  <div class="preload" style="transform:scaleX(.5)"></div>
+ </div>
+ <div class="body">
+  <div class="scenes">
+   <div class="lab">Scenes</div>
+   <div class="sc-row on"><b>1</b>Welcome</div>
+   <div class="sc-row"><b>2</b>A note from us</div>
+   <div class="sc-row"><b>3</b>Your pass</div>
+   <div class="sc-row"><b>4</b>The details</div>
+  </div>
+  <div class="canvas">
+   <div class="stagebar">Invitation <b>· as a guest sees it</b></div>
+   <div class="hub">
+    <div class="sc hero">
+     <span class="line1">Together with their families</span>
+     <div class="mark">AM</div>
+     <div class="names">Ana<span class="j">&amp;</span>Miguel</div>
+     <span class="invl">invite you to celebrate their wedding</span>
+     <span class="date">March 13, 2027</span>
+     <span class="time">Two-thirty in the afternoon</span>
+     <span class="dlink">See the details ›</span>
+    </div>
+    <div class="sc greet"><span class="eyebrow">A note from us</span><p>Dear Mr. Manuel Cortez Casasola, we'd be so happy to have you with us on the day. It wouldn't be the same without you.<span class="from">— Ana &amp; Miguel</span></p></div>
+    <div class="gbar"><span class="on"><i>⌂</i>Welcome</span><span><i>◷</i>Details</span><span><i>♡</i>Our Love Story</span><span><i>◯</i>Me</span></div>
+   </div>
+  </div>
+ </div>
+</div>
+<div class="notes"><h4><span class="k">4</span>Desktop — the same line, the full bar</h4>
+ <p><b>Today's bar, untouched:</b> Exit · Play · Add │ Save the Date · RSVP · Invitation · On the Day · Post Event │ Details · Prints │ Scenes · View ▾ · More ▾ · Undo · Apply. The line runs the bar's full width directly under its bottom edge — here halfway — and stops at the right edge of the window, not at any button.</p>
+ <p>It sits on top of the bar's hairline, so at 100% it reads as the hairline turned gold for a moment, then the hairline is back.</p>
+</div>
+</div>
+</div><!-- /sheet -->
+
+<!-- ============================ LIVE REPLAY ============================ -->
+<h2 class="sec"><span class="n">↻</span>Live — watch it once</h2>
+<div class="replay">
+<div class="phone">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ptop">
+  <span class="tool"><i>✕</i>Exit</span>
+  <span class="mid"><span class="pick"><span class="dot"></span>Invitation <i>▾</i></span></span>
+  <span class="tool dd"><i>⋯</i>More</span>
+  <span class="btn fill">Apply</span>
+  <div class="preload gone" id="live" style="transform:scaleX(0)"></div>
+ </div>
+ <div class="pv">
+  <div class="hub">
+   <div class="sc hero">
+    <span class="line1">Together with their families</span>
+    <div class="mark">AM</div>
+    <div class="names">Ana<span class="j">&amp;</span>Miguel</div>
+    <span class="invl">invite you to celebrate their wedding</span>
+    <span class="date">March 13, 2027</span>
+    <span class="time">Two-thirty in the afternoon</span>
+    <span class="dlink">See the details ›</span>
+   </div>
+   <div class="sc greet"><span class="eyebrow">A note from us</span><p>Dear Mr. Manuel Cortez Casasola, we'd be so happy to have you with us on the day.<span class="from">— Ana &amp; Miguel</span></p></div>
+  </div>
+ </div>
+ <div class="pbar"><span class="btn pg"><span><small>Page</small>Welcome</span><i>▾</i></span><span class="btn">Look</span><span class="btn">Details</span></div>
+ <div class="home"></div>
+</div>
+<div class="side">
+ <div class="notes"><h4><span class="k">↻</span>Replay the preload</h4>
+  <p>About three seconds, the way it would go on a phone: nine tool panels land one after another, the line steps right with each, holds a beat at the edge, then fades. The list below only shows what the line is reacting to — <b>nothing from this list is drawn in the Maker</b>.</p>
+  <p>If your system prefers reduced motion, the line appears at each step and disappears without animating. The checkbox forces that here, for the owner to see both.</p>
+ </div>
+ <a class="go" id="go" href="#" role="button">Replay ↻</a>
+ <label class="rm"><input type="checkbox" id="rm"> Show it as reduced motion</label>
+ <ul class="tools" id="tools">
+  <li>Details · Your info</li><li>Theme</li><li>Fonts</li><li>Prints</li><li>Scene inspectors</li><li>Love Story</li><li>Programme</li><li>Logo</li><li>Mood Board</li>
+  <li class="hint">For reference only — the Maker shows no list, no names, no count.</li>
+ </ul>
+</div>
+</div>
+
+</div>
+<footer>Prototype for the owner, 2026-10-02 · Fable. Decision rows: DECISION_LOG 2026-10-02 “THE MAKER DOWNLOADS ALL ITS TOOLS RIGHT AFTER IT OPENS” and “THE MAKER'S TOOL PRELOAD SHOWS AS A THIN LINE UNDER THE TOP BAR”. The bar drawn here is the shipped one (<code>maker-bar.ts</code> · <code>MakerBar</code> in <code>maker-shell.tsx</code>); the frame is <code>maker_in_four_2026-09-30_fable.html</code>. Only the line is new.</footer>
+
+<script>
+(function(){
+  var line=document.getElementById('live'), go=document.getElementById('go'), rm=document.getElementById('rm');
+  var items=Array.prototype.slice.call(document.querySelectorAll('#tools li:not(.hint)'));
+  var timers=[], running=false;
+  function reduced(){ return rm.checked || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+  function clearAll(){ timers.forEach(clearTimeout); timers=[]; }
+  function at(ms,fn){ timers.push(setTimeout(fn,ms)); }
+  function replay(){
+    clearAll(); running=true;
+    var slow=reduced();
+    document.body.classList.toggle('no-motion', slow);
+    items.forEach(function(li){ li.classList.remove('in'); });
+    // reset without a transition: snap to 0, visible
+    line.style.transition='none';
+    line.classList.remove('gone');
+    line.style.transform='scaleX(0)';
+    void line.offsetWidth;            // flush
+    line.style.transition='';
+    // nine panels land over ~3 s — uneven, like a real network
+    var landing=[260,520,700,1060,1300,1720,2050,2500,2900];
+    var n=landing.length;
+    landing.forEach(function(ms,i){
+      at(ms,function(){
+        items[i].classList.add('in');
+        line.style.transform='scaleX('+((i+1)/n)+')';
+      });
+    });
+    var last=landing[n-1];
+    // hold a beat at the edge, then fade (no-motion: just disappear)
+    at(last+ (slow?0:350), function(){ line.classList.add('gone'); });
+    at(last+1000, function(){ running=false; });
+  }
+  go.addEventListener('click', function(e){ e.preventDefault(); replay(); });
+  // play once on open, after the page has drawn
+  at(600, replay);
+})();
+</script>
+</body>
+</html>
