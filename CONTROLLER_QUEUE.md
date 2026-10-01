@@ -47,6 +47,7 @@ Rules: newest at the top of each section · one item per line or block · a buil
 - Desk §1 items (a)(b)(c)(d) taken by the controller 2026-10-01 15:00.
 
 ## 4 · Done (controller, with PR + live SHA)
+- 2026-10-01 16:00 PHT · LIVE cb885ee: #6225 guest import from a file (+ Google Sheets links, template header fix) · #6228 export privacy fix (face-tag + godparent rows) · #6226 five palette styles.
 
 ## 5 · After the Apple check (parked — nothing here starts before step 7)
 <!-- Desk adds owner-decided work that is explicitly post-Apple. The controller promotes an item to §1 once the Apple check is done. -->
