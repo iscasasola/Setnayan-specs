@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The admin app, simple — Setnayan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ===== tokens — identical to phone_app_simple / supplier_app_simple (2026-10-01) ===== */
+:root{
+  --paper:#FAF7F2;--paper2:#F3EEE6;--page:#EDE7DE;--ink:#1E2229;--ink2:#3B3F46;--mute:#76736D;
+  --gild:#B08A5B;--gild-soft:#E9DEC9;--gild-wash:#F7F1E6;--wine:#6E2A3A;--wine-wash:#F6ECEE;
+  --line:#E5DED3;--ok:#2F6B4F;--okbg:#E7F1EA;--warn:#8A5A00;--warnbg:#FBF0D8;--no:#7A3B3B;--nobg:#F3E4E4;
+  --serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --sans:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--page);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:2660px;margin:0 auto;padding:32px 22px 56px}
+
+/* ---------- page furniture ---------- */
+.doc-brand{font-size:10.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--gild);font-weight:600}
+h1{font-family:var(--serif);font-weight:500;font-size:40px;line-height:1.1;margin:8px 0 10px;letter-spacing:-.01em}
+.lead{color:var(--ink2);font-size:14.5px;line-height:1.6;max-width:980px;margin:0 0 8px}
+.lead b{font-weight:600;color:var(--ink)}
+.lead .q{font-family:var(--serif);font-style:italic;font-size:15.5px;color:var(--ink)}
+h2.sec{display:flex;align-items:center;gap:14px;font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink2);font-weight:600;margin:40px 0 18px}
+h2.sec .n{font-family:var(--serif);font-size:22px;font-weight:500;color:var(--gild);letter-spacing:0}
+h2.sec:after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* ---------- before → after strip ---------- */
+.strip{display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap}
+.sketch{width:206px;flex:none}
+.sketch .lbl{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gild);font-weight:600;margin-bottom:8px}
+.mini{width:206px;height:436px;background:var(--paper);border:5px solid #14161A;border-radius:28px;position:relative;overflow:hidden;box-shadow:0 0 0 1px #2E3238,0 24px 40px -24px rgba(30,34,41,.4)}
+.mini .isl{position:absolute;left:50%;top:6px;transform:translateX(-50%);width:60px;height:16px;background:#14161A;border-radius:10px}
+.mini .st{height:28px}
+.mini .lay{margin:3px 8px 0;border-radius:6px;background:#E3DCD0;border:1px solid #D3CBBD;font-size:8.5px;color:var(--ink2);padding:0 7px;display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .lay.h{background:#D8CFC0}
+.mini .first{margin:3px 8px 0;border-radius:6px;background:#fff;border:1px solid var(--gild);color:var(--ink);padding:0 7px;display:flex;align-items:center;font-family:var(--serif);font-size:11px;font-weight:500}
+.mini .fold{position:absolute;left:0;right:0;border-top:1.5px dashed var(--wine);font-size:8px;color:var(--wine);text-align:right;padding:1px 6px 0;font-weight:600;letter-spacing:.06em}
+.mini .bar{position:absolute;left:0;right:0;bottom:0;height:34px;background:#fff;border-top:1px solid var(--line)}
+.mini .bar:after{content:"";position:absolute;left:50%;bottom:4px;transform:translateX(-50%);width:66px;height:3px;border-radius:2px;background:var(--ink);opacity:.85}
+.arrow{align-self:center;font-family:var(--serif);font-size:44px;color:var(--gild);padding:0 4px;margin-top:20px}
+.strip .notes{max-width:560px}
+.notes{flex:1;min-width:300px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px 18px 12px;position:relative}
+.notes:before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:3px;background:var(--gild);border-radius:0 3px 3px 0}
+.notes h4{margin:0 0 8px;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gild);font-weight:600}
+.notes ul{margin:0;padding-left:16px;font-size:12.5px;line-height:1.55;color:var(--ink2)}
+.notes li{margin-bottom:6px}
+.notes li b{color:var(--ink);font-weight:600}
+.notes .q{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--ink)}
+.est{display:inline-block;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--warn);background:var(--warnbg);border-radius:999px;padding:2px 8px;vertical-align:middle;margin-left:4px}
+.big{font-family:var(--serif);font-size:30px;font-weight:500;color:var(--ink);line-height:1.1}
+.big b{color:var(--wine);font-weight:500}
+
+/* ---------- the six frames ---------- */
+.row6{display:grid;grid-template-columns:repeat(auto-fit,408px);gap:26px 22px;justify-content:start;margin-top:6px}
+.fr{width:408px;position:relative}
+.cap{margin-top:12px;padding:0 6px}
+.cap .k{font-family:var(--serif);font-size:22px;font-weight:500;color:var(--gild);line-height:1;margin-right:8px}
+.cap b{font-size:13.5px;font-weight:600;color:var(--ink)}
+.cap p{margin:4px 0 0;font-size:12.5px;color:var(--ink2);line-height:1.5}
+.cap p .q{font-family:var(--serif);font-style:italic;font-size:13.5px;color:var(--ink)}
+.side{margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px 10px}
+.side .lbl{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gild);font-weight:600;margin-bottom:6px}
+.side .it{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12.5px;padding:7px 0;border-top:1px dashed var(--line);color:var(--ink)}
+.side .it:first-of-type{border-top:0}
+.side .it i{font-style:normal;color:var(--mute);font-size:11.5px;text-align:right}
+
+/* ---------- phone frame — screen is exactly 390 × 844 inside a 9 px bezel ---------- */
+.phone{width:408px;height:862px;flex:none;background:var(--paper);border:9px solid #14161A;border-radius:48px;position:relative;overflow:hidden;
+  box-shadow:0 0 0 1px #2E3238,0 40px 70px -30px rgba(30,34,41,.45),0 16px 30px -18px rgba(30,34,41,.25)}
+.phone .island{position:absolute;left:50%;top:11px;transform:translateX(-50%);width:118px;height:33px;background:#14161A;border-radius:20px;z-index:9}
+.phone .status{height:52px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 30px 8px;font-size:14px;font-weight:600;letter-spacing:-.01em}
+.phone .status .sig{display:flex;gap:6px;align-items:center;font-size:11px;letter-spacing:.06em}
+.phone .status .bat{width:24px;height:11px;border:1.5px solid var(--ink);border-radius:4px;position:relative;opacity:.9}
+.phone .status .bat:after{content:"";position:absolute;left:2px;top:2px;bottom:2px;right:5px;background:var(--ink);border-radius:1px}
+.scr{padding:4px 20px 110px}
+.bnav{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:9px 6px 30px;font-size:10.5px;color:var(--mute);z-index:6;font-weight:500}
+.bnav span{display:flex;flex-direction:column;align-items:center;gap:4px;width:74px;position:relative}
+.bnav svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.bnav span.on{color:var(--wine);font-weight:600}
+.bnav .bdg{position:absolute;top:-4px;right:18px;min-width:16px;height:16px;border-radius:8px;background:var(--wine);color:#fff;font-size:9.5px;font-weight:600;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.bnav:after{content:"";position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:var(--ink);opacity:.85}
+.hplus{width:36px;height:36px;border-radius:50%;background:var(--ink);color:var(--paper);display:inline-flex;align-items:center;justify-content:center;font-size:22px;font-weight:300;line-height:1}
+.foldline{position:absolute;right:0;width:16px;top:calc(9px + 281px);border-top:1.5px dashed var(--wine);z-index:8;pointer-events:none}
+.foldlbl{position:absolute;left:412px;top:calc(9px + 284px);transform:rotate(90deg);transform-origin:0 0;font-size:9px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--wine);white-space:nowrap}
+.dim{position:absolute;inset:0;background:rgba(30,34,41,.38);z-index:10}
+
+/* ---------- atoms (approved) ---------- */
+.eyebrow{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--gild);font-weight:600}
+.gname{font-family:var(--serif);font-weight:500;font-size:29px;line-height:1.1;margin:5px 0 8px;letter-spacing:-.005em}
+.sub{font-size:12.5px;color:var(--mute);line-height:1.45}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;border-radius:999px;padding:4px 10px;letter-spacing:.01em;white-space:nowrap;line-height:1.3}
+.pill.ok{background:var(--okbg);color:var(--ok)}
+.pill.warn{background:var(--warnbg);color:var(--warn)}
+.pill.no{background:var(--nobg);color:var(--no)}
+.pill.soft{background:var(--paper2);color:var(--ink2);box-shadow:inset 0 0 0 1px var(--line)}
+.pill.gild{background:var(--gild-wash);color:#6B5230;box-shadow:inset 0 0 0 1px var(--gild-soft)}
+.pill.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:.04em}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border-radius:999px;font-size:13px;font-weight:500;border:1.5px solid var(--ink);background:#fff;color:var(--ink);white-space:nowrap;line-height:1}
+.btn.fill{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.sm{padding:7px 12px;font-size:12px;border-width:1px}
+.btn.dd{border:1px solid var(--line);background:#fff;color:var(--ink2);padding:7px 11px 7px 13px;font-size:12px;gap:8px}
+.btn.dd i{font-style:normal;color:var(--gild);font-size:10px}
+.btn.wine{background:var(--wine);color:#fff;border-color:var(--wine)}
+.btn.ghost{border-color:var(--line);color:var(--ink2)}
+.btn.ghost.no{color:var(--no)}
+.btn.more{padding:11px 0;width:46px;flex:none;font-size:17px;letter-spacing:.04em;border:1.5px solid var(--line);color:var(--ink2);background:#fff;font-weight:600}
+.btn.sm.more{width:36px;padding:7px 0;font-size:14px;border-width:1px}
+.stat{font-size:12px;color:var(--mute);line-height:1.4}
+.stat b{color:var(--ok);font-weight:600}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:16px;box-shadow:0 10px 24px -20px rgba(30,34,41,.25)}
+.topnav{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--wine);font-weight:500;margin:2px 0 14px}
+.topnav .dots{color:var(--mute);letter-spacing:.1em;font-weight:600}
+
+/* ---------- list head (approved) ---------- */
+.lhead{display:flex;justify-content:space-between;align-items:center;margin-top:2px}
+.lhead .t{font-family:var(--serif);font-size:28px;font-weight:500;letter-spacing:-.005em}
+.lhead .r{display:flex;gap:10px;align-items:center}
+.search{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:9px 14px 9px 12px;font-size:12.5px;color:var(--mute);background:#fff;margin-top:12px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.srow{display:flex;gap:6px;align-items:center;margin-top:12px}
+.srow .search{margin-top:0}
+.srow .btn.dd{padding:9px 10px 9px 12px}
+.search:before{content:"";width:10px;height:10px;border:1.5px solid var(--mute);border-radius:50%;box-shadow:4px 4px 0 -2px var(--mute);flex:none}
+.counts{font-size:12.5px;color:var(--mute);margin:12px 0 2px;line-height:1.5}
+.counts b{color:var(--wine);font-weight:600}
+.counts .btn.dd{margin-left:8px;padding:4px 8px 4px 10px;font-size:11.5px;vertical-align:middle}
+.counts .unk{color:var(--no);font-weight:600}
+
+/* ---------- the ROW as a compact card (approved) ---------- */
+.gcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 12px 10px;margin-top:8px;box-shadow:0 10px 24px -22px rgba(30,34,41,.3);position:relative}
+.gcard .top{display:flex;align-items:flex-start;gap:10px}
+.av{width:40px;height:40px;border-radius:50%;flex:none;background:var(--gild-wash);border:1px solid var(--gild-soft);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:500;font-size:15px;color:#8A6A42;letter-spacing:.04em;padding-left:.04em;margin-top:1px;position:relative;overflow:hidden}
+.av.host{background:var(--wine-wash);border-color:#E3C9CF;color:var(--wine)}
+.av.logo{border-radius:12px;background:#fff;border-color:var(--line);font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.02em;color:var(--ink2);padding:0}
+.av.demo{border-style:dashed;background:var(--paper2);color:var(--mute)}
+.gcard .who{flex:1;min-width:0}
+.gcard .who b{display:block;font-family:var(--serif);font-size:18px;font-weight:500;line-height:1.15;letter-spacing:-.005em}
+.gcard .who .sub{margin-top:3px;font-size:12px}
+.gcard .top .pill{flex:none;margin-top:2px}
+.gcard .act{display:flex;gap:6px;align-items:center;margin-top:10px;padding-top:9px;border-top:1px dashed var(--line)}
+.gcard .act .next{font-size:12px;color:var(--ink2);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gcard .act .next b{color:var(--wine);font-weight:600}
+.gcard .act .go{color:var(--wine);font-weight:600;font-size:12.5px;white-space:nowrap}
+.gcard .act .go:after{content:" ›"}
+.gcard .act .col{margin-left:auto;font-size:12.5px;color:var(--ink);font-weight:500;white-space:nowrap}
+.gcard .act .col b{color:var(--wine);font-weight:600}
+.gcard .act .col .m{font-family:var(--serif);font-size:17px}
+
+/* ---------- closed rows (approved) ---------- */
+.dl{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.dl .r{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border-top:1px solid var(--line);font-size:13.5px}
+.dl .r:first-child{border-top:0}
+.dl .r span{color:var(--ink);font-weight:500}
+.dl .r i{font-style:normal;color:var(--mute);font-size:12.5px;text-align:right}
+.dl .r i:after{content:"  ›";color:var(--gild)}
+
+/* ---------- Next card (approved) ---------- */
+.nextcard{margin-top:14px;padding:16px 16px 14px;border-color:var(--gild-soft);background:var(--gild-wash)}
+.nextcard .eyebrow{color:#6B5230;display:flex;justify-content:space-between}
+.nextcard .eyebrow i{font-style:normal;color:var(--warn)}
+.nextcard h3{font-family:var(--serif);font-weight:500;font-size:24px;line-height:1.1;margin:6px 0 4px;letter-spacing:-.005em}
+.nextcard p{margin:0 0 12px;font-size:12.5px;color:var(--ink2)}
+.nextcard .stat{text-align:center;margin-top:8px}
+.facts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px}
+.fact{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 10px 10px;text-align:center}
+.fact b{display:block;font-family:var(--serif);font-weight:500;font-size:24px;line-height:1;color:var(--ink)}
+.fact b.w{color:var(--wine)}
+.fact b.u{color:var(--no)}
+.fact small{display:block;font-size:10.5px;color:var(--mute);margin-top:5px;letter-spacing:.01em}
+
+/* ---------- key facts (approved, supplier) ---------- */
+.kf{margin-top:14px;padding:4px 16px 6px}
+.kf .r{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 0;border-top:1px dashed var(--line);font-size:13px}
+.kf .r:first-child{border-top:0}
+.kf .r span{color:var(--mute);flex:none}
+.kf .r b{font-weight:500;color:var(--ink);text-align:right}
+.kf .r b.w{color:var(--wine);font-weight:600}
+.kf .r b.m{font-family:var(--serif);font-size:18px}
+.kf .r b.lnk{color:var(--wine)}
+.kf .r b.lnk:after{content:" ›";color:var(--gild)}
+.mainact{margin-top:14px}
+.mainact .btn{width:100%;padding:15px;font-size:14.5px}
+.mainact .stat{text-align:center;margin-top:8px}
+.tworow{display:flex;gap:8px;margin-top:8px}
+.tworow .btn{flex:1;padding:12px 10px;font-size:13px}
+.shead{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gild);font-weight:600;margin:16px 2px 0}
+
+/* ---------- More — the chooser sheet (approved) ---------- */
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:26px 26px 0 0;padding:10px 20px 30px;z-index:11;box-shadow:0 -24px 48px -24px rgba(30,34,41,.5)}
+.sheet .grab{width:38px;height:4px;border-radius:2px;background:#D3CBBD;margin:0 auto 12px}
+.sheet .t{font-family:var(--serif);font-size:24px;font-weight:500;margin-bottom:6px}
+.sheet .search{margin:4px 0 6px}
+.svc{display:flex;align-items:center;gap:12px;padding:10px 2px;border-top:1px solid var(--line)}
+.svc.first{border-top:0}
+.svc .ic{width:40px;height:40px;border-radius:12px;flex:none;background:var(--gild-wash);border:1px solid var(--gild-soft);display:flex;align-items:center;justify-content:center}
+.svc .ic svg{width:20px;height:20px;stroke:#8A6A42;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.svc .ic.g{background:var(--wine-wash);border-color:#E3C9CF}
+.svc .ic.g svg{stroke:var(--wine)}
+.svc .tx{flex:1;min-width:0}
+.svc .tx b{display:block;font-family:var(--serif);font-size:18px;font-weight:500;line-height:1.15}
+.svc .tx span{display:block;font-size:11.5px;color:var(--mute);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.svc .n{font-size:11px;color:var(--mute);flex:none}
+.svc .ch{color:var(--gild);font-size:16px}
+.sheet:after{content:"";position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:var(--ink);opacity:.85}
+
+/* ---------- admin-only additions ---------- */
+/* a queue row: name · oldest · count */
+.qrow{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:11px 14px;margin-top:8px;box-shadow:0 10px 24px -22px rgba(30,34,41,.3)}
+.qrow .w{flex:1;min-width:0}
+.qrow .w b{display:block;font-family:var(--serif);font-size:17.5px;font-weight:500;line-height:1.15}
+.qrow .w span{display:block;font-size:11.5px;color:var(--mute);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qrow .w span.late{color:var(--warn)}
+.qrow .w span.unk{color:var(--no)}
+.qrow .c{font-family:var(--serif);font-size:24px;font-weight:500;line-height:1;color:var(--ink);min-width:28px;text-align:right}
+.qrow .c.w{color:var(--wine)}
+.qrow .c.z{color:var(--mute)}
+.qrow .c.u{color:var(--no)}
+.qrow .ch{color:var(--gild);font-size:16px}
+/* the GCash screenshot thumbnail */
+.shot{margin-top:14px;display:flex;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px 12px}
+.shot .img{width:62px;height:84px;border-radius:8px;flex:none;position:relative;overflow:hidden;background:linear-gradient(180deg,#1B63D6 0 26px,#F4F6FA 26px);box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.shot .img:before{content:"";position:absolute;left:10px;right:10px;top:34px;height:5px;border-radius:3px;background:#C9D0DB;box-shadow:0 10px 0 #DDE2EA,0 20px 0 #DDE2EA,0 30px 0 #DDE2EA}
+.shot .img:after{content:"₱2,499";position:absolute;left:0;right:0;top:4px;text-align:center;color:#fff;font-size:9px;font-weight:600;letter-spacing:.02em}
+.shot .tx{flex:1;min-width:0}
+.shot .tx b{display:block;font-size:13px;font-weight:600}
+.shot .tx span{display:block;font-size:11.5px;color:var(--mute);margin-top:2px}
+.shot .tx .ok{color:var(--ok);font-weight:500}
+/* a switch row (approved supplier .sw) */
+.sw{width:38px;height:22px;border-radius:999px;background:var(--ok);position:relative;flex:none;display:inline-block}
+.sw:after{content:"";position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.sw.off{background:#D3CBBD}
+.sw.off:after{right:auto;left:2px}
+.swrow{display:flex;align-items:center;gap:12px;padding:12px 14px}
+.swrow .w{flex:1;min-width:0}
+.swrow .w b{display:block;font-size:13.5px;font-weight:500}
+.swrow .w span{display:block;font-size:11.5px;color:var(--mute);margin-top:2px}
+.swrow .w span.unk{color:var(--no)}
+.mapnote{margin-top:28px;background:var(--gild-wash);border:1px solid var(--gild-soft);border-radius:14px;padding:14px 18px;font-size:13px;color:var(--ink2);max-width:980px}
+.mapnote b{color:var(--ink);font-weight:600}
+.qs{margin-top:16px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 18px;max-width:980px}
+.qs h4{margin:0 0 8px;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--wine);font-weight:600}
+.qs ol{margin:0;padding-left:18px;font-size:12.5px;color:var(--ink2);line-height:1.55}
+.qs li{margin-bottom:6px}
+.qs li b{color:var(--ink);font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="doc-brand">Setnayan · Admin console · Phone</div>
+<h1>The admin app, simple</h1>
+<p class="lead">Owner, 2026-10-01: <span class="q">"how can we do this for the vendors and admin?"</span> The admin is the owner's own console — he runs the business from his phone. Same method as the approved host app and supplier app: <b>one Next card, lists first, four words in the bar, nothing floats over the bar.</b> Every one of the 113 shipped admin pages keeps a home — what is not needed right now moves one tap away. One new rule for admin, from the 2026-09-30 audit: <b>a read that failed shows "—" and "couldn't load", never "all clear".</b> Words: supplier, never vendor.</p>
+
+<!-- ============================ 0 · BEFORE → AFTER ============================ -->
+<h2 class="sec"><span class="n">0</span>Before → after — Work</h2>
+<div class="strip">
+ <div class="sketch">
+  <div class="lbl">Today + All work (shipped)</div>
+  <div class="mini">
+   <div class="isl"></div><div class="st"></div>
+   <div class="lay h" style="height:24px">Today · masthead</div>
+   <div class="lay" style="height:18px">Apple secret reminder</div>
+   <div class="lay" style="height:18px">Email delivery strip</div>
+   <div class="lay" style="height:40px">KPI cards: users · couples · suppliers · events · threads</div>
+   <div class="lay" style="height:40px">"N items need you" · ring · % queues cleared</div>
+   <div class="lay" style="height:30px">Trust &amp; supply · 5 tiles</div>
+   <div class="lay" style="height:30px">Money to reconcile · 4 tiles</div>
+   <div class="lay" style="height:48px">Recourse · 10 tiles</div>
+   <div class="lay" style="height:30px">Approvals &amp; support · 3 tiles</div>
+   <div class="lay" style="height:22px">What you change · Editing is on the computer</div>
+   <div class="fold" style="top:394px">fold</div>
+   <div class="first" style="height:22px">All work · ranked feed (a 2nd page)</div>
+   <div class="bar"></div>
+  </div>
+ </div>
+ <div class="arrow">→</div>
+ <div class="sketch">
+  <div class="lbl">New · Work</div>
+  <div class="mini">
+   <div class="isl"></div><div class="st"></div>
+   <div class="lay h" style="height:24px">Work</div>
+   <div class="first" style="height:62px">Next: Confirm ₱2,499 · Cale &amp; Ice · [Confirm]</div>
+   <div class="lay" style="height:14px">7 waiting · 2 late · 1 couldn't load</div>
+   <div class="lay" style="height:22px">Payments to confirm · 3</div>
+   <div class="lay" style="height:22px">Suppliers to verify · 2</div>
+   <div class="lay" style="height:22px">Deletions due · 1 · 24 h</div>
+   <div class="lay" style="height:22px">Reports · 1</div>
+   <div class="lay" style="height:22px">Approvals · — couldn't load</div>
+   <div class="lay" style="height:22px">Help · 0 · all clear</div>
+   <div class="fold" style="top:394px">fold</div>
+   <div class="bar"></div>
+  </div>
+ </div>
+ <div class="notes">
+  <h4>What changes <span class="est">estimate</span></h4>
+  <div class="big">22 tiles + a second page → <b>1 card + 6 rows</b></div>
+  <ul style="margin-top:10px">
+   <li><b>Two pages become one.</b> The shipped Today (KPI cards, the ring, 4 lanes × 22 tiles) and All work (the ranked feed) fold into <b>Work</b>: the feed's #1 item IS the Next card; the lanes become rows with a count.</li>
+   <li><b>The rows ARE the shipped queues</b> (<span class="q">lib/admin/queue-counts.ts</span>, one source for the badges, the digest and the feed). Nothing is re-counted on the phone.</li>
+   <li><b>"—" replaces 0 when a read fails.</b> Today's <span class="q">digest[key]?.count ?? 0</span> and Work's <span class="q">"All queues clear."</span> (audit rows 5, 33) are the lie this screen refuses to tell.</li>
+   <li><b>The KPI cards</b> (users · couples · suppliers · events · threads) go to <b>People</b> as the counts line; the Apple reminder and the email strip go to Work's ⋯ as plain rows.</li>
+   <li>Next card above the top third; first queue row at ≈330 px <span class="est">est.</span>.</li>
+  </ul>
+ </div>
+</div>
+
+<!-- ============================ 1–6 · THE SIX FRAMES ============================ -->
+<h2 class="sec"><span class="n">1–6</span>The six screens · 390 × 844 · the same bar on every one</h2>
+<div class="row6">
+
+<!-- ---------- 1 · WORK ---------- -->
+<div class="fr">
+<div class="phone">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="lhead"><span class="t">Work</span><span class="r"><span class="btn sm more">⋯</span></span></div>
+
+  <div class="card nextcard">
+   <div class="eyebrow"><span>Next</span><i>Waiting 3 h</i></div>
+   <h3>Confirm ₱2,499 from Cale &amp; Ice</h3>
+   <p>GCash · Papic add-on, Thank-you film · ref ···6789 · screenshot read: amount matches.</p>
+   <span class="btn fill" style="width:100%;padding:14px">Confirm</span>
+   <div class="stat">Tap the card to see the screenshot first</div>
+  </div>
+
+  <p class="counts"><b>7 waiting</b> · 2 late · <span class="unk">1 couldn't load</span></p>
+
+  <div class="qrow"><div class="w"><b>Payments to confirm</b><span class="late">Oldest 3 h · due in 21 h</span></div><span class="c w">3</span><span class="ch">›</span></div>
+  <div class="qrow"><div class="w"><b>Suppliers to verify</b><span>Oldest yesterday · Lumina Studio</span></div><span class="c">2</span><span class="ch">›</span></div>
+  <div class="qrow"><div class="w"><b>Deletions due</b><span class="late">Account · 24-h rule · 6 h left</span></div><span class="c w">1</span><span class="ch">›</span></div>
+  <div class="qrow"><div class="w"><b>Reports</b><span>A gallery photo · Reyes debut</span></div><span class="c">1</span><span class="ch">›</span></div>
+  <div class="qrow"><div class="w"><b>Approvals</b><span class="unk">Couldn't load · not "none"</span></div><span class="c u">—</span><span class="ch">›</span></div>
+  <div class="qrow"><div class="w"><b>Help tickets</b><span>All clear · read went through</span></div><span class="c z">0</span><span class="ch">›</span></div>
+ </div>
+ <div class="foldline"></div><div class="foldlbl">top third · 281 px</div>
+ <div class="bnav">
+  <span class="on"><svg viewBox="0 0 24 24"><path d="M4 6h10M4 12h10M4 18h10"/><path d="M17 12l2 2 4-4"/></svg>Work<span class="bdg">7</span></span>
+  <span><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M3 10h2M19 14h2"/></svg>Money</span>
+  <span><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 15.5a5 5 0 0 1 5.5 4.5"/></svg>People</span>
+  <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="12" r=".8"/><circle cx="12" cy="12" r=".8"/><circle cx="16" cy="12" r=".8"/></svg>More</span>
+ </div>
+</div>
+<div class="cap"><span class="k">1</span><b>Work</b><p>ONE Next card = the #1 item of the shipped ranked feed (<span class="q">/admin/work</span>), with its one button. Under it, every queue as a row: name · oldest/clock · count. Late queues read in wine. A queue whose read failed shows <b>—</b> and <span class="q">couldn't load</span>; "all clear" appears only when the read went through and found 0.</p></div>
+<div class="side">
+ <div class="lbl">Behind ⋯ (was Today's chrome)</div>
+ <div class="it">Sort by <i>Most urgent first (shipped)</i></div>
+ <div class="it">Lane <i>Money · Trust · Growth · Support</i></div>
+ <div class="it">Email delivery · 7 days <i>honest log, as shipped</i></div>
+ <div class="it">Apple secret <i>reminder, when due</i></div>
+ <div class="it">Recent admin actions <i>audit log</i></div>
+</div>
+</div>
+
+<!-- ---------- 2 · MONEY ---------- -->
+<div class="fr">
+<div class="phone">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="lhead"><span class="t">Money</span><span class="r"><span class="hplus">+</span><span class="btn sm more">⋯</span></span></div>
+  <div class="facts" style="margin-top:12px">
+   <div class="fact"><b>₱5,594</b><small>received this week</small></div>
+   <div class="fact"><b class="w">₱6,897</b><small>to confirm · 3</small></div>
+   <div class="fact"><b>₱0</b><small>refunds · read ok</small></div>
+  </div>
+  <div class="srow"><div class="search">Search a name, order or reference</div><span class="btn dd">To confirm <i>▾</i></span></div>
+  <p class="counts"><b>3 to confirm</b> · 4 received · 2 cancelled <span class="btn dd">Show: Channel <i>▾</i></span></p>
+
+  <div class="gcard">
+   <div class="top"><span class="av host">CI</span><div class="who"><b>Cale &amp; Ice</b><div class="sub">Wedding · Papic add-on, Thank-you film</div></div><span class="pill warn">3 h</span></div>
+   <div class="act"><span class="btn sm fill">Confirm</span><span class="col"><span class="m">₱2,499</span> · GCash</span></div>
+  </div>
+  <div class="gcard">
+   <div class="top"><span class="av host">RC</span><div class="who"><b>Rolando &amp; Carmen Mendoza</b><div class="sub">Wedding · Guest list Pro</div></div><span class="pill warn">1 h</span></div>
+   <div class="act"><span class="btn sm fill">Confirm</span><span class="col"><span class="m">₱2,899</span> · GCash</span></div>
+  </div>
+  <div class="gcard">
+   <div class="top"><span class="av logo">LS</span><div class="who"><b>Lumina Studio</b><div class="sub">Supplier · Pro plan · October</div></div><span class="pill warn">20 min</span></div>
+   <div class="act"><span class="btn sm fill">Confirm</span><span class="col"><span class="m">₱1,499</span> · BDO</span></div>
+  </div>
+  <div class="gcard">
+   <div class="top"><span class="av">KO</span><div class="who"><b>Katrina Ocampo</b><div class="sub">Debut · Save-the-date</div></div><span class="pill ok">Received</span></div>
+   <div class="act"><span class="next">Receipt sent · Sep 29</span><span class="col"><span class="m">₱147</span> · GCash</span></div>
+  </div>
+  <div class="gcard">
+   <div class="top"><span class="av host">JC</span><div class="who"><b>Jun &amp; Liza Cruz</b><div class="sub">Wedding · Papic top-up</div></div><span class="pill ok">Received</span></div>
+   <div class="act"><span class="next">Receipt sent · Sep 29</span><span class="col"><span class="m">₱49</span> · BDO</span></div>
+  </div>
+ </div>
+ <div class="foldline"></div><div class="foldlbl">top third · 281 px</div>
+ <div class="bnav">
+  <span><svg viewBox="0 0 24 24"><path d="M4 6h10M4 12h10M4 18h10"/><path d="M17 12l2 2 4-4"/></svg>Work<span class="bdg">7</span></span>
+  <span class="on"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M3 10h2M19 14h2"/></svg>Money</span>
+  <span><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 15.5a5 5 0 0 1 5.5 4.5"/></svg>People</span>
+  <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="12" r=".8"/><circle cx="12" cy="12" r=".8"/><circle cx="16" cy="12" r=".8"/></svg>More</span>
+ </div>
+</div>
+<div class="cap"><span class="k">2</span><b>Money</b><p>Three numbers for the week, then the shipped payments desk as rows: who · event · what · ₱ · channel, waiting-longest first, one <span class="q">Confirm</span> per row (shipped <span class="q">approvePayment</span>). <b>Filter ▾</b> = To confirm · Received · Cancelled · Needs a quote. <b>Show ▾</b> picks the right column (Channel · Platform · Reference). The round <b>+</b> = <span class="q">Record a payment received</span> — a workflow the audit found missing (§3.5).</p></div>
+<div class="side">
+ <div class="lbl">Behind ⋯ (was 13 menu links)</div>
+ <div class="it">Fees owed · Payouts · Subscriptions</div>
+ <div class="it">Payment options <i>supplier bank/QR to screen</i></div>
+ <div class="it">Receipts · Refunds</div>
+ <div class="it">Our bank details <i>BDO · GCash · Save off until read</i></div>
+ <div class="it">Pricing · Discount codes <i>→ More</i></div>
+</div>
+</div>
+
+<!-- ---------- 3 · A PAYMENT ---------- -->
+<div class="fr">
+<div class="phone">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="topnav"><span>‹ Money</span><span class="dots">···</span></div>
+  <div class="eyebrow">Payment · To confirm</div>
+  <div class="gname">Cale &amp; Ice</div>
+  <div class="pills"><span class="pill warn">Waiting 3 h</span><span class="pill soft">GCash</span><span class="pill soft">Web</span></div>
+
+  <div class="card kf">
+   <div class="r"><span>For</span><b>Papic add-on · Thank-you film</b></div>
+   <div class="r"><span>Event</span><b class="lnk">Cale &amp; Ice wedding · Dec 12</b></div>
+   <div class="r"><span>They sent</span><b class="m">₱2,499</b></div>
+   <div class="r"><span>Price</span><b>₱2,499 · <span style="color:var(--ok)">matches</span></b></div>
+   <div class="r"><span>Reference</span><b style="font-family:ui-monospace,Menlo,monospace;font-size:12px">7001 2345 6789</b></div>
+   <div class="r"><span>Paid</span><b>Oct 1, 9:12 AM</b></div>
+  </div>
+
+  <div class="shot"><div class="img"></div><div class="tx"><b>GCash receipt</b><span>Read by Setnayan AI · <span class="ok">amount and reference match</span></span><span>Tap to zoom · Read it again</span></div><span class="ch" style="color:var(--gild)">›</span></div>
+
+  <div class="mainact"><span class="btn fill">Confirm payment</span><div class="stat">Unlocks the Thank-you film · sends their receipt</div></div>
+  <div class="tworow"><span class="btn ghost">Ask to resend</span><span class="btn ghost no">Reject</span></div>
+
+  <div class="dl">
+   <div class="r"><span>Buyer</span><i>Cale Casasola · account</i></div>
+   <div class="r"><span>Order</span><i>S89O-7K2M9Q4XZ1</i></div>
+   <div class="r"><span>History</span><i>Logged Oct 1 · nobody reviewed yet</i></div>
+  </div>
+ </div>
+ <div class="bnav">
+  <span><svg viewBox="0 0 24 24"><path d="M4 6h10M4 12h10M4 18h10"/><path d="M17 12l2 2 4-4"/></svg>Work<span class="bdg">7</span></span>
+  <span class="on"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M3 10h2M19 14h2"/></svg>Money</span>
+  <span><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 15.5a5 5 0 0 1 5.5 4.5"/></svg>People</span>
+  <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="12" r=".8"/><circle cx="12" cy="12" r=".8"/><circle cx="16" cy="12" r=".8"/></svg>More</span>
+ </div>
+</div>
+<div class="cap"><span class="k">3</span><b>A payment</b><p>The facts, the screenshot, then the three shipped choices in plain words: <span class="q">Confirm payment</span> (<span class="q">approvePayment</span>) · <span class="q">Ask to resend</span> (<span class="q">requestPaymentResubmit</span>) · <span class="q">Reject</span> (<span class="q">rejectPayment</span>, asks once — it cancels the order). The event line opens frame 5. Arriving from the payment email lands here, not on a filtered list.</p></div>
+<div class="side">
+ <div class="lbl">Behind ··· (top right)</div>
+ <div class="it">Record a refund <i>shipped refundOrder</i></div>
+ <div class="it">Confirm the order total <i>quote path</i></div>
+ <div class="it">Read the screenshot again <i>shipped</i></div>
+ <div class="it">Open the buyer's account</div>
+</div>
+</div>
+
+<!-- ---------- 4 · PEOPLE ---------- -->
+<div class="fr">
+<div class="phone">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="lhead"><span class="t">People</span><span class="r"><span class="btn sm more">⋯</span></span></div>
+  <div class="srow"><div class="search">Search users, suppliers, events</div><span class="btn dd">Everything <i>▾</i></span></div>
+  <p class="counts"><b>9</b> users · <b>2</b> suppliers · <b>8</b> events <span class="btn dd">Show: Last seen <i>▾</i></span></p>
+
+  <div class="gcard">
+   <div class="top"><span class="av host">CI</span><div class="who"><b>Cale &amp; Ice</b><div class="sub">Wedding · Dec 12, 2026 · 180 guests</div></div><span class="pill gild">Event</span></div>
+   <div class="act"><span class="next">Guest list <b>Finalized</b> · face tagging On</span><span class="go">Open</span></div>
+  </div>
+  <div class="gcard">
+   <div class="top"><span class="av logo">LS</span><div class="who"><b>Lumina Studio</b><div class="sub">Photo &amp; video · Published · Pro</div></div><span class="pill gild">Supplier</span></div>
+   <div class="act"><span class="next">Verified Sep 12 · 3 services · 2 packages</span><span class="go">Open</span></div>
+  </div>
+  <div class="gcard">
+   <div class="top"><span class="av">CC</span><div class="who"><b>Cale Casasola</b><div class="sub">Host · seen today · Web + iPhone</div></div><span class="pill gild">User</span></div>
+   <div class="act"><span class="next">2 events · 2 payments · 0 tickets</span><span class="go">Open</span></div>
+  </div>
+  <div class="gcard">
+   <div class="top"><span class="av host">RC</span><div class="who"><b>Rolando &amp; Carmen Mendoza</b><div class="sub">Wedding · Nov 21, 2026 · 150 guests</div></div><span class="pill gild">Event</span></div>
+   <div class="act"><span class="next">Guest list <b>Open</b> · reply-by Oct 30</span><span class="go">Open</span></div>
+  </div>
+  <div class="gcard">
+   <div class="top"><span class="av demo">AB</span><div class="who"><b>Aurora Blooms</b><div class="sub">Demo supplier · Flowers · hidden from couples</div></div><span class="pill soft">Demo</span></div>
+   <div class="act"><span class="next">Seeded Sep 20 · 0 inquiries</span><span class="go">Open</span></div>
+  </div>
+  <div class="gcard">
+   <div class="top"><span class="av">KO</span><div class="who"><b>Katrina Ocampo</b><div class="sub">Host · seen Sep 29 · Android</div></div><span class="pill gild">User</span></div>
+   <div class="act"><span class="next">1 event · 1 payment</span><span class="go">Open</span></div>
+  </div>
+ </div>
+ <div class="foldline"></div><div class="foldlbl">top third · 281 px</div>
+ <div class="bnav">
+  <span><svg viewBox="0 0 24 24"><path d="M4 6h10M4 12h10M4 18h10"/><path d="M17 12l2 2 4-4"/></svg>Work<span class="bdg">7</span></span>
+  <span><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M3 10h2M19 14h2"/></svg>Money</span>
+  <span class="on"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 15.5a5 5 0 0 1 5.5 4.5"/></svg>People</span>
+  <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="12" r=".8"/><circle cx="12" cy="12" r=".8"/><circle cx="16" cy="12" r=".8"/></svg>More</span>
+ </div>
+</div>
+<div class="cap"><span class="k">4</span><b>People</b><p>One search across the shipped Accounts tabs (Users · Suppliers · Demo suppliers · Events · Venues). <b>Filter ▾</b> = Everything · Users · Suppliers · Events · Venues · Demo. Each row says what it is (pill) and its one fact; <b>Show ▾</b> picks that fact. The counts line carries Today's old KPI cards. Tap an event → frame 5; a user → the shipped user card; a supplier → its shop (claimed shops included — audit row 26).</p></div>
+<div class="side">
+ <div class="lbl">Behind ⋯ (was People &amp; shops · 9 links)</div>
+ <div class="it">Verify queue · ID documents <i>also on Work</i></div>
+ <div class="it">Founder seats · Gifts</div>
+ <div class="it">Venues</div>
+ <div class="it">Demo suppliers <i>seed · regenerate · hide one</i></div>
+ <div class="it">Partnerships <i>claims to verify</i></div>
+</div>
+</div>
+
+<!-- ---------- 5 · AN EVENT ---------- -->
+<div class="fr">
+<div class="phone">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="topnav"><span>‹ People</span><span class="dots">···</span></div>
+  <div class="eyebrow">Event · Wedding</div>
+  <div class="gname">Cale &amp; Ice</div>
+  <div class="pills"><span class="pill ok">Active</span><span class="pill soft">Dec 12, 2026</span><span class="pill soft mono">S89E-7K2M9Q4XZ1</span></div>
+
+  <div class="card kf">
+   <div class="r"><span>Hosts</span><b class="lnk">Cale Casasola · Ice Casasola</b></div>
+   <div class="r"><span>Guests</span><b>180 · 112 yes · 9 declined</b></div>
+   <div class="r"><span>Guest list</span><b class="w">Finalized · Sep 28 · final count 121</b></div>
+   <div class="r"><span>Reply-by</span><b>Nov 28, 2026</b></div>
+  </div>
+
+  <div class="mainact"><span class="btn">Reopen guest list</span><div class="stat">Asks once · the hosts can edit again until they press Finalize</div></div>
+
+  <div class="dl">
+   <div class="swrow"><div class="w"><b>Papic face tagging</b><span>On · running on this event: yes</span></div><span class="sw"></span></div>
+   <div class="r"><span>Enrolled</span><i>38 of 180 guests</i></div>
+   <div class="r"><span>Excluded by host</span><i>2</i></div>
+   <div class="r"><span>Couple declined</span><i>No</i></div>
+  </div>
+
+  <div class="dl">
+   <div class="r"><span>Payments</span><i>2 received · ₱2,548</i></div>
+   <div class="r"><span>Suppliers</span><i>4 booked</i></div>
+   <div class="r"><span>Event Hub</span><i>Published</i></div>
+   <div class="r"><span>Audit log</span><i>Last: face tagging On · Sep 12</i></div>
+  </div>
+ </div>
+ <div class="bnav">
+  <span><svg viewBox="0 0 24 24"><path d="M4 6h10M4 12h10M4 18h10"/><path d="M17 12l2 2 4-4"/></svg>Work<span class="bdg">7</span></span>
+  <span><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M3 10h2M19 14h2"/></svg>Money</span>
+  <span class="on"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 15.5a5 5 0 0 1 5.5 4.5"/></svg>People</span>
+  <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="12" r=".8"/><circle cx="12" cy="12" r=".8"/><circle cx="16" cy="12" r=".8"/></svg>More</span>
+ </div>
+</div>
+<div class="cap"><span class="k">5</span><b>An event</b><p>The new admin event page (<span class="q">/admin/events/[eventId]</span>, #6213) at phone size, same sections in the same order: the event · hosts (tap → user card) · guest list with its <span class="q">Reopen guest list</span> (shows only when Finalized; asks once, as shipped) · <span class="q">Papic face tagging</span> as a switch (the shipped Turn on/Turn off, asks once) with the enrolment facts. Any read that failed shows <span class="q">couldn't load</span> in its own cell, as the shipped page already does.</p></div>
+<div class="side">
+ <div class="lbl">Behind ··· (top right)</div>
+ <div class="it">Guests and face enrolment <i>per guest · Enrolled · Excluded</i></div>
+ <div class="it">Remove this celebration <i>the shipped queue</i></div>
+ <div class="it">Archive</div>
+ <div class="it">Open the Event Hub <i>as a guest sees it</i></div>
+</div>
+</div>
+
+<!-- ---------- 6 · MORE ---------- -->
+<div class="fr">
+<div class="phone">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="lhead"><span class="t">Work</span><span class="r"><span class="btn sm more">⋯</span></span></div>
+  <div class="card nextcard">
+   <div class="eyebrow"><span>Next</span><i>Waiting 3 h</i></div>
+   <h3>Confirm ₱2,499 from Cale &amp; Ice</h3>
+   <p>GCash · Papic add-on, Thank-you film · ref ···6789 · screenshot read: amount matches.</p>
+   <span class="btn fill" style="width:100%;padding:14px">Confirm</span>
+  </div>
+ </div>
+ <div class="dim"></div>
+ <div class="sheet">
+  <div class="grab"></div>
+  <div class="t">More</div>
+  <div class="search">Find any admin page</div>
+  <div class="svc first"><span class="ic"><svg viewBox="0 0 24 24"><path d="M20 12l-8 8-8-8V4h8z"/><circle cx="8.5" cy="8.5" r="1.5"/></svg></span><div class="tx"><b>Pricing</b><span>Catalogue · plans · discount codes · referrals</span></div><span class="n">7</span><span class="ch">›</span></div>
+  <div class="svc"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M8 5l2 4M14 5l2 4"/></svg></span><div class="tx"><b>Studio</b><span>Event Hub media · Live Watch · Stories · Songs · Social</span></div><span class="n">14</span><span class="ch">›</span></div>
+  <div class="svc"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg></span><div class="tx"><b>Settings</b><span>Compliance · Notifications · Integrations · Secrets · Demo mode</span></div><span class="n">8</span><span class="ch">›</span></div>
+  <div class="svc"><span class="ic g"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span><div class="tx"><b>Privacy</b><span>Data Privacy &amp; NPC filing · deletions · reports · Papic storage</span></div><span class="n">6</span><span class="ch">›</span></div>
+  <div class="svc"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg></span><div class="tx"><b>Numbers</b><span>Growth · Demand · SEO · Funnels · Connection logs</span></div><span class="n">10</span><span class="ch">›</span></div>
+  <div class="svc"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M12 7v5M12 12l-6 5M12 12l6 5"/></svg></span><div class="tx"><b>Ugat</b><span>Taxonomy · onboarding · traditions · AI brain · menus · entity map</span></div><span class="n">9</span><span class="ch">›</span></div>
+  <div class="svc"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><div class="tx"><b>My account</b><span>Who I am · sign out · the desktop console</span></div><span class="ch">›</span></div>
+ </div>
+ <div class="bnav">
+  <span><svg viewBox="0 0 24 24"><path d="M4 6h10M4 12h10M4 18h10"/><path d="M17 12l2 2 4-4"/></svg>Work<span class="bdg">7</span></span>
+  <span><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M3 10h2M19 14h2"/></svg>Money</span>
+  <span><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 15.5a5 5 0 0 1 5.5 4.5"/></svg>People</span>
+  <span class="on"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="12" r=".8"/><circle cx="12" cy="12" r=".8"/><circle cx="16" cy="12" r=".8"/></svg>More</span>
+ </div>
+</div>
+<div class="cap"><span class="k">6</span><b>More</b><p>One search, <span class="q">Find any admin page</span> (the shipped <span class="q">/admin/more</span> grid, re-worded — audit row 45), then seven plain headings with a page count. Tap a heading → its pages as rows. Every one of the 113 pages is under exactly one heading; nothing is deleted.</p></div>
+<div class="side">
+ <div class="lbl">The bar, on every screen</div>
+ <div class="it">Work · Money · People · More <i>was a 6-group side menu · 83 links</i></div>
+ <div class="it">Badge <i>stays on Work — the shipped digest total</i></div>
+ <div class="it">Round + <i>Money only · nothing floats over the bar</i></div>
+ <div class="it">Desktop <i>same four words, as the side rail's top level</i></div>
+</div>
+</div>
+
+</div>
+
+<h2 class="sec"><span class="n">✓</span>What moved where</h2>
+<div class="strip">
+ <div class="notes" style="max-width:none">
+  <ul style="columns:2;column-gap:36px">
+   <li><b>Work</b> ← <span class="q">Today</span> (/admin) + <span class="q">All work</span> (/admin/work) + the 21 queue links of the shipped "Today" menu group (Disputes · Pax changes · Force majeure · Completions · Reviews · AI abuse · Account deletions · Celebration removals · User reports · Chat flags · Repost watch · Corrections · Integrity watch · Fraud · Approvals · Music Maker · Editorial review · Help …). Each is a row; each row opens the shipped page. <span class="q">Data Privacy &amp; NPC Filing</span> is not a queue — it goes to More › Privacy.</li>
+   <li><b>Money</b> ← the shipped "Money" group's desk: Payments · Fees owed · Payouts · Subscriptions · Payment options · Receipts · Payment methods (our BDO/GCash). The list IS /admin/payments; the rest sit in ⋯. Pricing · Custom plans · Price bands · Discount codes · Referrals · Supplier recommendations → More › Pricing.</li>
+   <li><b>People</b> ← the shipped "People &amp; shops" group and /admin/accounts' five tabs (Users · Suppliers · Demo suppliers · Events · Venues) as ONE search with Filter ▾. Verify · ID documents · Partnerships · Founder seats · Gifts → ⋯. The user card, the new event page and the shop pages are unchanged underneath.</li>
+   <li><b>More</b> ← Studio (14) · Set up/Ugat (9) · Settings (8) · Numbers (10) · Pricing (7) · Privacy (6, pulled out of the queue group and Settings because the owner is the DPO) · My account. Counts are from the shipped <span class="q">admin-nav-groups.tsx</span> <span class="est">est.</span>; re-measure with <span class="q">grep -c "label:" _components/admin-nav-groups.tsx</span>.</li>
+   <li><b>Words:</b> "Vendors" → <b>Suppliers</b> everywhere the owner can see it (audit row 43 · ~220 strings). "Vendors to verify" → <span class="q">Suppliers to verify</span>; "Demo vendors" → <span class="q">Demo suppliers</span>; "Vendor recommendations" → <span class="q">Supplier recommendations</span>. The shipped nav keys do not change.</li>
+   <li><b>Honesty:</b> every count on Work and Money, and every cell on an event, is one of three things — a number the read returned, <b>—</b> with <span class="q">couldn't load</span>, or <span class="q">all clear</span> only after a read that went through. The pattern to copy is in the repo (<span class="q">reads-are-honest.test.ts</span>, <span class="q">guests-read-is-honest.test.ts</span>, and the new event page itself).</li>
+   <li><b>Desktop</b> shows the same four screens with more columns and the rows' panels open — never a different screen. The six-group side rail becomes the same four words with the groups under More.</li>
+  </ul>
+ </div>
+</div>
+
+<div class="mapnote"><b>What is drawn but not shipped (needs a build, in this order):</b> the Work rows reading "—" instead of 0 when a queue fails (audit rows 5 · 33) · the Money list's "couldn't read" state (rows 1 · 2 · 14) · <span class="q">Record a payment received</span> behind Money's + (§3.5) · one People search across the five Accounts tabs · the event page's face switch as a switch (it is two confirm buttons today) · the More sheet. Everything else on these screens exists on <span class="q">origin/main</span> at #6213 and is only re-laid for a phone.</div>
+
+<div class="qs">
+ <h4>Owner questions</h4>
+ <ol>
+  <li><b>Bar words.</b> Work · Money · People · More — or should the first word be <span class="q">Today</span>, the same word the host and supplier apps use? (Recommendation: <b>Work</b> — the admin's home is a queue, not a day.)</li>
+  <li><b>Confirm from the Next card.</b> Frame 1 lets you confirm a payment without opening the screenshot. Keep the one-tap Confirm (fast), or make the Next card's button <span class="q">Open</span> so the screenshot is always seen first? (Recommendation: one-tap only when Setnayan AI read the receipt and both amount and reference match; otherwise the button says <span class="q">Open</span>.)</li>
+  <li><b>Reopen a guest list</b> stays an admin-only door, asked once (as shipped 2026-09-30). Fine on the phone, or desktop-only like the Maker's editing?</li>
+  <li><b>Privacy as its own heading</b> in More (Data Privacy &amp; NPC filing · deletions · reports · Papic storage) — because you are the DPO — or keep it inside Settings as shipped?</li>
+  <li><b>Money's + = "Record a payment received".</b> This does not exist yet (audit §3.5). Build it with this phone work, or leave the + off until it does?</li>
+ </ol>
+</div>
+
+</div>
+</body>
+</html>

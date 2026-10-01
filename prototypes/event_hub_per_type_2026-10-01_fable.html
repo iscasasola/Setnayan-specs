@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Event Hub per event type — Setnayan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FAF7F2;--paper2:#F3EEE6;--page:#EDE7DE;--ink:#1E2229;--ink2:#3B3F46;--mute:#76736D;
+  --gild:#B08A5B;--gild-soft:#E9DEC9;--wine:#6E2A3A;--wine-wash:#F6ECEE;--line:#E5DED3;--ok:#2F6B4F;--okbg:#E7F1EA;
+  --serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --sans:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--page);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:2140px;margin:0 auto;padding:40px 30px 50px}
+
+/* ---------- page furniture (Setnayan look, owner-facing) ---------- */
+.doc-brand{font-size:10.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--gild);font-weight:600}
+h1{font-family:var(--serif);font-weight:500;font-size:40px;line-height:1.1;margin:8px 0 10px;letter-spacing:-.01em}
+.lead{color:var(--ink2);font-size:14.5px;line-height:1.6;max-width:1100px;margin:0 0 14px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 10px;margin:0 0 34px;font-size:12px;color:var(--ink2)}
+.legend span{background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+.legend span.fx{text-decoration:line-through;color:var(--mute)}
+.legend span.fx:after{content:" ✓";text-decoration:none;color:var(--ok);font-weight:600}
+.legend b{color:var(--ink);font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(5,390px);gap:30px;justify-content:start}
+.col h2{display:flex;align-items:baseline;gap:10px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink2);font-weight:600;margin:0 0 14px}
+.col h2 .n{font-family:var(--serif);font-size:22px;font-weight:500;color:var(--gild);letter-spacing:0;line-height:1}
+.col h2 small{margin-left:auto;font-size:10px;letter-spacing:.14em;color:var(--mute);font-weight:500}
+.col .phone+.phone{margin-top:22px}
+.fr{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);font-weight:600;margin:0 0 8px}
+.phone+.fr{margin-top:22px}
+.note{font-size:12.5px;color:var(--ink2);line-height:1.55;margin:16px 0 0;padding:12px 14px 12px 16px;background:var(--paper);border:1px solid var(--line);border-radius:12px;position:relative}
+.note:before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;background:var(--gild);border-radius:0 3px 3px 0}
+.note b{color:var(--ink);font-weight:600}
+.note ol{margin:0;padding-left:18px}
+.note li+li{margin-top:4px}
+.note li::marker{color:var(--gild);font-family:var(--serif);font-weight:600}
+footer{max-width:2140px;margin:0 auto;padding:30px 30px 30px;font-size:12.5px;color:var(--mute);line-height:1.6;border-top:1px solid var(--line)}
+footer code{font-size:11.5px;color:var(--ink2)}
+
+/* ---------- phone frame (same as the approved guest pages) ---------- */
+.phone{width:390px;height:844px;background:var(--bg,var(--paper));color:var(--fg,var(--ink));border:9px solid #14161A;border-radius:48px;position:relative;overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:0 0 0 1px #2E3238,0 40px 70px -30px rgba(30,34,41,.45),0 16px 30px -18px rgba(30,34,41,.25);font-family:var(--ui,var(--sans))}
+.phone .island{position:absolute;left:50%;top:11px;transform:translateX(-50%);width:118px;height:33px;background:#14161A;border-radius:20px;z-index:5}
+.phone .status{height:52px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 30px 8px;font-size:14px;font-weight:600;letter-spacing:-.01em}
+.phone .status .sig{display:flex;gap:6px;align-items:center;font-size:11px;letter-spacing:.06em}
+.phone .status .bat{width:24px;height:11px;border:1.5px solid currentColor;border-radius:4px;position:relative;opacity:.9}
+.phone .status .bat:after{content:"";position:absolute;left:2px;top:2px;bottom:2px;right:5px;background:currentColor;border-radius:1px}
+.scr{flex:1;padding:4px 22px 8px;display:flex;flex-direction:column;min-height:0}
+.phone .home{height:28px;flex:none;position:relative}
+.phone .home:after{content:"";position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:currentColor;opacity:.85}
+.grow{flex:1}
+/* bottom menu — the Invitation's own, as approved in venue_styles */
+.nav{flex:none;display:flex;justify-content:space-around;border-top:1px solid var(--ln);padding:10px 10px 4px;font-size:11px;letter-spacing:.06em;color:var(--mt);font-weight:500}
+.nav span{padding:2px 0 4px}
+.nav span.on{color:var(--ac);border-bottom:1.5px solid var(--ac)}
+
+/* ---------- guest-page atoms, themed by variables ---------- */
+.brand{text-align:center;font-size:9.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--ac);font-weight:600;margin:6px 0 10px}
+.eyebrow{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--ac);font-weight:600}
+.center{text-align:center}
+.mast{text-align:center;margin:4px 0 0}
+.mast .pre{font-family:var(--hd);font-style:italic;font-size:17px;color:var(--ac);line-height:1.2}
+.mast .name{font-family:var(--hd);font-weight:500;font-size:34px;line-height:1.05;letter-spacing:-.01em;margin:4px 0 0}
+.mast .name small{display:block;font-size:17px;font-weight:400;font-style:italic;color:var(--ac);margin-top:4px;letter-spacing:0}
+.mast .date{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mt);font-weight:500;margin-top:8px}
+.mast .line{font-family:var(--hd);font-style:italic;font-size:15px;color:var(--fg2);margin-top:6px}
+.msg{background:var(--card);border:1px solid var(--ln);border-radius:18px;padding:13px 16px;font-size:13.5px;line-height:1.5;color:var(--fg);box-shadow:0 10px 24px -22px rgba(0,0,0,.3);margin-top:12px}
+.msg .from{font-family:var(--hd);font-style:italic;font-size:14.5px;color:var(--ac);margin-top:6px}
+.btn{display:block;text-align:center;padding:12px 12px;border-radius:999px;font-size:13.5px;font-weight:500;border:1.5px solid var(--fg);color:var(--fg);margin-top:8px;background:var(--card);line-height:1.2}
+.btn.fill{background:var(--fg);color:var(--bg)}
+.yn{display:flex;gap:8px;margin-top:8px}
+.yn .btn{flex:1;margin:0;padding:11px 8px;font-size:13px}
+.hint{font-size:11.5px;color:var(--mt);text-align:center;margin:8px 0 0}
+.q{font-family:var(--hd);font-size:22px;font-weight:500;line-height:1.15;margin:14px 0 0;text-align:center}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:16px;padding:12px 14px;margin-top:10px;box-shadow:0 10px 24px -22px rgba(0,0,0,.25)}
+.card .eyebrow{display:block;margin-bottom:4px}
+.card .big{font-family:var(--hd);font-size:20px;font-weight:500;line-height:1.15}
+.card .sub{font-size:12.5px;color:var(--mt);margin-top:2px;line-height:1.4}
+.card .sub.fg{color:var(--fg2)}
+.door{display:flex;align-items:center;gap:12px}
+.door .ic{width:34px;height:34px;border-radius:50%;border:1px solid var(--ln);display:flex;align-items:center;justify-content:center;font-size:15px;flex:none;color:var(--ac);background:var(--bg)}
+.door .big{font-size:16px}
+.door .go{margin-left:auto;color:var(--ac);font-size:16px}
+.pill{display:inline-block;border-radius:999px;padding:4px 11px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:var(--ac);background:var(--acw);margin-top:4px}
+.you{display:flex;align-items:center;gap:12px}
+.you .av{width:40px;height:40px;border-radius:50%;background:var(--acw);color:var(--ac);display:flex;align-items:center;justify-content:center;font-family:var(--hd);font-weight:600;font-size:17px;flex:none;border:1px solid var(--ln)}
+.you .big{font-size:17px}
+/* countdown — four tiles, the shipped shape */
+.cd{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:12px}
+.cd div{background:var(--card);border:1px solid var(--ln);border-radius:12px;padding:8px 4px;text-align:center}
+.cd b{display:block;font-family:var(--hd);font-size:24px;font-weight:500;line-height:1}
+.cd small{display:block;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--mt);margin-top:4px;font-weight:600}
+.cd-line{font-size:11.5px;color:var(--mt);text-align:center;margin-top:6px;font-style:italic;font-family:var(--hd);font-size:14px}
+/* rows (Details) */
+.drow{display:grid;grid-template-columns:22px 1fr;column-gap:10px;padding:9px 0;border-top:1px solid var(--ln)}
+.drow:first-child{border-top:0;padding-top:4px}
+.drow .ico{width:18px;height:18px;color:var(--ac);margin-top:4px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.drow .k{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--ac);font-weight:600}
+.drow h4{font-family:var(--hd);font-weight:500;font-size:19px;line-height:1.15;margin:2px 0 0}
+.drow p{margin:2px 0 0;font-size:12.5px;color:var(--mt);line-height:1.4}
+.sched{margin-top:4px}
+.sched .r{display:grid;grid-template-columns:62px 1fr;column-gap:10px;padding:5px 0;font-size:13px;align-items:baseline}
+.sched .r .t{font-family:var(--hd);font-weight:600;font-size:15px;white-space:nowrap}
+.sched .r .w{color:var(--fg)}
+.sched .r .w small{display:block;color:var(--mt);font-size:11.5px}
+.roles{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.roles span{border:1px solid var(--ln);background:var(--card);border-radius:999px;padding:5px 10px;font-size:11.5px;color:var(--fg2);font-weight:500}
+.roles span b{color:var(--ac);font-weight:600;margin-right:4px}
+.sect{margin-top:12px}
+.sect .eyebrow{display:block;margin-bottom:4px}
+.names{font-size:12.5px;line-height:1.5;color:var(--fg2);margin:2px 0 0}
+.names b{font-weight:600;color:var(--fg)}
+.swatch{display:flex;gap:6px;margin-top:6px}
+.swatch i{width:22px;height:22px;border-radius:50%;border:1px solid rgba(0,0,0,.12)}
+/* shared QR (one QR for everyone) */
+.slot{width:124px;height:124px;border-radius:50%;background:var(--bg);margin:10px auto 0;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 2px 7px rgba(0,0,0,.14),inset 0 -1px 0 #fff,0 0 0 1px var(--ln)}
+.qr{width:104px;height:104px;border-radius:50%;position:relative;overflow:hidden;border:7px solid #fff;outline:1px solid var(--ac);
+  background:
+   conic-gradient(var(--ink) 25%,#fff 0 50%,var(--ink) 0 75%,#fff 0) 0 0/8px 8px,
+   conic-gradient(var(--ink) 25%,#fff 0 50%,var(--ink) 0 75%,#fff 0) 3px 5px/14px 14px,
+   conic-gradient(var(--ink) 25%,#fff 0 50%,var(--ink) 0 75%,#fff 0) 7px 2px/22px 22px;
+  background-blend-mode:difference,difference,normal}
+.qr i{position:absolute;width:20px;height:20px;border:3px solid var(--ink);padding:3px;background:var(--ink);background-clip:content-box;box-shadow:0 0 0 2px #fff;border-radius:2px}
+.qr i:nth-child(1){left:12px;top:12px}.qr i:nth-child(2){right:12px;top:12px}.qr i:nth-child(3){left:12px;bottom:12px}
+/* corporate logo block */
+.logo{display:flex;align-items:center;justify-content:center;gap:10px;margin:6px 0 2px}
+.logo i{width:28px;height:28px;border-radius:6px;background:var(--ac);display:inline-block;position:relative}
+.logo i:after{content:"";position:absolute;left:7px;top:7px;width:14px;height:14px;border:2.5px solid #fff;border-radius:50% 50% 50% 0}
+.logo b{font-size:13px;letter-spacing:.22em;text-transform:uppercase;font-weight:700;color:var(--fg)}
+/* small confetti dots for the birthday only */
+.dots{position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:
+   radial-gradient(circle at 12% 18%,#F6B26B 0 4px,transparent 5px),
+   radial-gradient(circle at 88% 14%,#7FB7E8 0 3px,transparent 4px),
+   radial-gradient(circle at 76% 32%,#F28B82 0 3px,transparent 4px),
+   radial-gradient(circle at 20% 40%,#9CD39B 0 3px,transparent 4px),
+   radial-gradient(circle at 92% 58%,#F6B26B 0 3px,transparent 4px),
+   radial-gradient(circle at 8% 70%,#7FB7E8 0 4px,transparent 5px)}
+.phone .scr{position:relative;z-index:1}
+
+/* ================= THEMES — the guest page wears the event's own look ================= */
+/* 1 · WAKE — quiet greys, no gold, nothing moves */
+.t-wake{--bg:#F1F1EE;--card:#FAFAF8;--fg:#22252A;--fg2:#44484F;--mt:#7A7D83;--ac:#5A5F6B;--acw:#E6E7EA;--ln:#DADBD7;--hd:var(--serif);--ui:var(--sans)}
+/* 2 · DEBUT — blush & champagne, italic serif */
+.t-debut{--bg:#FBF3F2;--card:#FFFFFF;--fg:#3A2A2E;--fg2:#5B474C;--mt:#8E7A7E;--ac:#B2566A;--acw:#F7E3E6;--ln:#EBD9DA;--hd:var(--serif);--ui:var(--sans)}
+/* debut Details fits 844 */
+.t-debut .sched .r{padding:3px 0}
+.t-debut .sect{margin-top:9px}
+/* 3 · CHRISTENING — cream & sky */
+.t-chr{--bg:#F4F7FA;--card:#FFFFFF;--fg:#26313D;--fg2:#4A5663;--mt:#7E8A96;--ac:#4C7FA6;--acw:#E3EEF6;--ln:#DCE4EB;--hd:var(--serif);--ui:var(--sans)}
+/* 4 · CORPORATE — clean, sans everywhere, the company's colour */
+.t-corp{--bg:#FFFFFF;--card:#F6F7F9;--fg:#111827;--fg2:#374151;--mt:#6B7280;--ac:#1F4E8C;--acw:#E6EEF8;--ln:#E5E7EB;--hd:var(--sans);--ui:var(--sans)}
+.t-corp .mast .name{font-weight:700;font-size:28px;letter-spacing:-.02em}
+.t-corp .mast .pre,.t-corp .mast .line,.t-corp .msg .from,.t-corp .cd-line{font-style:normal;font-size:13px}
+.t-corp .drow h4,.t-corp .card .big{font-weight:600;font-size:16px}
+.t-corp .sched .r .t{font-weight:600;font-size:13px}
+.t-corp .cd b{font-weight:700;font-size:22px}
+/* 5 · BIRTHDAY — warm, rounded, playful */
+.t-bday{--bg:#FFF8EC;--card:#FFFFFF;--fg:#3B2F2A;--fg2:#5C4D46;--mt:#8F7F77;--ac:#E0703C;--acw:#FCE8DC;--ln:#F1E3D2;--hd:"Nunito",var(--sans);--ui:"Nunito",var(--sans)}
+.t-bday .mast .name{font-weight:800;font-size:32px}
+.t-bday .mast .pre,.t-bday .mast .line,.t-bday .msg .from,.t-bday .cd-line{font-style:normal;font-weight:700}
+.t-bday .btn{border-radius:18px}
+.t-bday .card,.t-bday .msg{border-radius:20px}
+</style>
+</head>
+<body><div class="wrap">
+
+<div class="doc-brand">Setnayan · Event Hub · Step 6 — adaptation to every event</div>
+<h1>The guest's Invitation, per event type — Welcome and Details</h1>
+<p class="lead">Five event types, same two pages, one profile deciding the words and the parts. The menu is <b>Welcome · Details · Our Love Story · Me</b> — <b>Our Love Story only when the event has two people at its centre</b> (<code>twoPeople</code>), so none of these five has it. Each page wears the event's own theme (Interaction rules § 7). Sample names only.</p>
+<div class="legend"><b>Wedding leaks these frames fix:</b> <span class="fx">· Both sides</span> <span class="fx">The digital money dance</span> <span class="fx">The celebration of</span> <span class="fx">🎉 So glad you made it</span> <span class="fx">invites you to celebrate (corporate)</span> <span class="fx">Officiant group</span> <span class="fx">Our Love Story (one person)</span> <span class="fx">wedding countdown line</span> <span class="fx">Celebrant role at a wake</span></div>
+
+<div class="grid">
+
+<!-- ===================== 1 · WAKE ===================== -->
+<div class="col"><h2><span class="n">1</span>Wake<small>register · solemn</small></h2>
+<p class="fr">Welcome</p>
+<div class="phone t-wake">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="brand">The Santos family</div>
+  <div class="mast">
+   <p class="pre">In loving memory of</p>
+   <p class="name">Amado R. Santos<small>1946 – 2026</small></p>
+   <p class="date">Vigil · 3 – 9 October 2026</p>
+  </div>
+  <div class="msg">We are keeping vigil for Papa at St. Peter Chapels. Come when you can — a short prayer with us is more than enough.<div class="from">— Nena, Jun and the family</div></div>
+  <p class="q">Will you be with us?</p>
+  <div class="yn"><span class="btn fill">Will be there</span><span class="btn">Unable to come</span></div>
+  <div class="card center">
+   <span class="eyebrow">Getting in</span>
+   <div class="big">One QR for everyone</div>
+   <div class="sub">Show this at the chapel. Pass the link to anyone who wishes to come.</div>
+   <div class="slot" style="width:96px;height:96px"><div class="qr" style="width:80px;height:80px;border-width:5px"><i></i><i></i><i></i></div></div>
+  </div>
+  <div class="card door"><span class="ic">♡</span><div><div class="big">A gift of sympathy</div><div class="sub">Abuloy — straight to the family.</div></div><span class="go">›</span></div>
+  <div class="grow"></div>
+  <div class="nav"><span class="on">Welcome</span><span>Details</span><span>Me</span></div>
+ </div>
+ <div class="home"></div>
+</div>
+<p class="fr">Details</p>
+<div class="phone t-wake">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="brand">Amado R. Santos</div>
+  <p class="eyebrow center">The details</p>
+  <div class="card" style="padding-top:6px">
+   <div class="drow"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><div><p class="k">Vigil</p><h4>Friday 3 – Thursday 9 October</h4><p>Chapel open 8:00 AM – 11:00 PM daily</p></div></div>
+   <div class="drow"><svg class="ico" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><div><p class="k">Chapel</p><h4>St. Peter Chapels · Chapel 2</h4><p>Quezon Ave, Quezon City</p></div></div>
+   <div class="drow"><svg class="ico" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><div><p class="k">Interment</p><h4>Loyola Memorial Park</h4><p>Marikina · Friday 10 October, 9:00 AM</p></div></div>
+  </div>
+  <div class="sect"><span class="eyebrow">Pasiyam — nine nights of prayer</span>
+   <div class="sched">
+    <div class="r"><span class="t">Nightly</span><span class="w">Rosary and prayers · 7:00 PM<small>3 – 11 October</small></span></div>
+    <div class="r"><span class="t">Sun 5</span><span class="w">Holy Mass at the chapel · 10:00 AM<small>Fr. Dennis Ocampo</small></span></div>
+    <div class="r"><span class="t">Fri 10</span><span class="w">Funeral Mass, then interment · 7:30 AM</span></div>
+    <div class="r"><span class="t">Sat 11</span><span class="w">Ninth night · 7:00 PM<small>Closing prayers, at home</small></span></div>
+   </div>
+  </div>
+  <div class="sect"><span class="eyebrow">What to wear</span><p class="names">Dark or muted colours. White is also customary.</p><div class="swatch"><i style="background:#22252A"></i><i style="background:#5A5F6B"></i><i style="background:#F1F1EE"></i></div></div>
+  <div class="sect"><span class="eyebrow">The family</span><p class="names"><b>Nena Santos</b> · <b>Jun</b>, <b>Marites</b> and <b>Boyet Santos</b><br>Pallbearers to be named by the family</p></div>
+  <div class="grow"></div>
+  <div class="nav"><span>Welcome</span><span class="on">Details</span><span>Me</span></div>
+ </div>
+ <div class="home"></div>
+</div>
+<p class="note"><b>vs a wedding</b><ol>
+<li>No eyebrow, no countdown, no confetti, no invitation card — "In loving memory of" leads; the reply is "Will you be with us?"</li>
+<li>One QR for everyone, no guest list, no sides, no Celebrant — the family and pallbearers are the only roles.</li>
+<li>Gifts read "A gift of sympathy" (abuloy); Details carries the rite — vigil, Mass, interment, the Pasiyam — and a sober dress line.</li></ol></p>
+</div>
+
+<!-- ===================== 2 · DEBUT ===================== -->
+<div class="col"><h2><span class="n">2</span>Debut<small>one celebrant · court</small></h2>
+<p class="fr">Welcome</p>
+<div class="phone t-debut">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="brand">Sofia's 18th</div>
+  <div class="mast">
+   <p class="eyebrow">You are invited</p>
+   <p class="name">Sofia Isabelle Reyes<small>turns eighteen</small></p>
+   <p class="date">Saturday · 14 November 2026</p>
+   <p class="line">invites you to celebrate</p>
+  </div>
+  <div class="cd"><div><b>44</b><small>Days</small></div><div><b>09</b><small>Hours</small></div><div><b>12</b><small>Mins</small></div><div><b>58</b><small>Secs</small></div></div>
+  <p class="cd-line">Until the day</p>
+  <div class="msg">Hi Tita Ana! You've watched me grow up — please be one of my 18 Roses. It wouldn't be the same night without you.<div class="from">— Sofia, with Mama and Papa</div></div>
+  <div class="card you"><span class="av">A</span><div><div class="big">Ana Reyes</div><div class="sub fg">You're joining us as</div><span class="pill">7th of the 18 Roses</span></div></div>
+  <p class="q">Will you celebrate with us?</p>
+  <div class="yn"><span class="btn fill">Joyfully accepts</span><span class="btn">Regretfully declines</span></div>
+  <div class="card door"><span class="ic">🎁</span><div><div class="big">E-Gifts</div><div class="sub">Send E-Gifts straight to the celebrant.</div></div><span class="go">›</span></div>
+  <div class="grow"></div>
+  <div class="nav"><span class="on">Welcome</span><span>Details</span><span>Me</span></div>
+ </div>
+ <div class="home"></div>
+</div>
+<p class="fr">Details</p>
+<div class="phone t-debut">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="brand">Sofia's 18th</div>
+  <p class="eyebrow center">The details</p>
+  <div class="card" style="padding-top:6px">
+   <div class="drow"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><div><p class="k">When</p><h4>Saturday, 14 November · 6:00 PM</h4><p>Guests arrive 5:30 PM</p></div></div>
+   <div class="drow"><svg class="ico" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><div><p class="k">Venue</p><h4>Blue Leaf Filipinas · Banyan Hall</h4><p>McKinley Hill, Taguig</p></div></div>
+  </div>
+  <div class="sect"><span class="eyebrow">The program</span>
+   <div class="sched">
+    <div class="r"><span class="t">6:00</span><span class="w">Grand entrance · Sofia and her Escort</span></div>
+    <div class="r"><span class="t">6:30</span><span class="w">18 Roses<small>a dance with each of the eighteen</small></span></div>
+    <div class="r"><span class="t">8:30</span><span class="w">18 Candles<small>eighteen wishes</small></span></div>
+    <div class="r"><span class="t">9:15</span><span class="w">18 Treasures</span></div>
+   </div>
+  </div>
+  <div class="sect"><span class="eyebrow">The court</span>
+   <div class="roles"><span><b>Escort</b>Miguel Tan</span><span><b>18 Roses</b>Papa · Kuya Leo · Tito Ben · Tita Ana ⋯</span><span><b>18 Candles</b>Mama · Ate Bea · Nicole ⋯</span><span><b>18 Treasures</b>Lola Fe · Ninang Cora ⋯</span></div>
+  </div>
+  <div class="sect"><span class="eyebrow">Dress code</span><p class="names">Cocktail · blush, champagne and ivory.</p><div class="swatch"><i style="background:#E8B4BC"></i><i style="background:#EBD6B2"></i><i style="background:#FBF3F2"></i></div></div>
+  <div class="grow"></div>
+  <div class="nav"><span>Welcome</span><span class="on">Details</span><span>Me</span></div>
+ </div>
+ <div class="home"></div>
+</div>
+<p class="note"><b>vs a wedding</b><ol>
+<li>One name, "turns eighteen", "invites you to celebrate" (singular) — no two-line masthead, no Our Love Story.</li>
+<li>The court replaces the entourage: Escort · 18 Roses · 18 Candles · 18 Treasures are roles; "You're joining us as · 7th of the 18 Roses" — no "· Both sides".</li>
+<li>Gifts say "Send E-Gifts straight to the celebrant." — never the money dance; the program lists the three eighteens as moments.</li></ol></p>
+</div>
+
+<!-- ===================== 3 · CHRISTENING ===================== -->
+<div class="col"><h2><span class="n">3</span>Christening<small>infant · godparents</small></h2>
+<p class="fr">Welcome</p>
+<div class="phone t-chr">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="brand">Mateo's christening</div>
+  <div class="mast">
+   <p class="eyebrow">You are invited</p>
+   <p class="name">Mateo Andrés Cruz<small>receives the Sacrament of Baptism</small></p>
+   <p class="date">Sunday · 15 November 2026</p>
+   <p class="line">Rina &amp; Paolo invite you to celebrate</p>
+  </div>
+  <div class="cd"><div><b>45</b><small>Days</small></div><div><b>14</b><small>Hours</small></div><div><b>02</b><small>Mins</small></div><div><b>31</b><small>Secs</small></div></div>
+  <p class="cd-line">Until the day</p>
+  <div class="msg">Hi Ate Joy! We would love for you to stand as Mateo's Ninang. Mass at ten, lunch at the house after.<div class="from">— Rina &amp; Paolo</div></div>
+  <div class="card you"><span class="av">J</span><div><div class="big">Joy Dela Cruz</div><div class="sub fg">You're joining us as</div><span class="pill">Ninang</span></div></div>
+  <p class="q">Will you celebrate with us?</p>
+  <div class="yn"><span class="btn fill">Joyfully accepts</span><span class="btn">Regretfully declines</span></div>
+  <div class="card door"><span class="ic">🎁</span><div><div class="big">E-Gifts</div><div class="sub">Send E-Gifts straight to the host.</div></div><span class="go">›</span></div>
+  <div class="grow"></div>
+  <div class="nav"><span class="on">Welcome</span><span>Details</span><span>Me</span></div>
+ </div>
+ <div class="home"></div>
+</div>
+<p class="fr">Details</p>
+<div class="phone t-chr">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="brand">Mateo's christening</div>
+  <p class="eyebrow center">The details</p>
+  <div class="card" style="padding-top:6px">
+   <div class="drow"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><div><p class="k">When</p><h4>Sunday, 15 November · 10:00 AM</h4><p>Please be seated by 9:45</p></div></div>
+   <div class="drow"><svg class="ico" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><div><p class="k">Parish</p><h4>San Antonio de Padua Parish</h4><p>Pila, Laguna · Fr. Ramon Villar</p></div></div>
+   <div class="drow"><svg class="ico" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><div><p class="k">Lunch after</p><h4>The Cruz home</h4><p>Brgy. Santa Clara, Pila · 12:00 NN</p></div></div>
+  </div>
+  <div class="sect"><span class="eyebrow">Godparents</span>
+   <div class="roles"><span><b>Ninong</b>Carlo Reyes</span><span><b>Ninong</b>Dennis Lim</span><span><b>Ninong</b>Arvin Cruz</span><span><b>Ninang</b>Joy Dela Cruz</span><span><b>Ninang</b>Mia Santos</span><span><b>Ninang</b>Pia Reyes</span></div>
+   <p class="names" style="margin-top:8px">Godparents please arrive by 9:30 for the sacristan's briefing.</p>
+  </div>
+  <div class="sect"><span class="eyebrow">Dress code</span><p class="names">Sunday best · soft blues, cream and white. Shoulders covered inside the church.</p><div class="swatch"><i style="background:#A9C8E2"></i><i style="background:#F4F0E6"></i><i style="background:#FFFFFF"></i></div></div>
+  <div class="grow"></div>
+  <div class="nav"><span>Welcome</span><span class="on">Details</span><span>Me</span></div>
+ </div>
+ <div class="home"></div>
+</div>
+<p class="note"><b>vs a wedding</b><ol>
+<li>The infant's name leads; the parents sign the line — "Rina &amp; Paolo invite you to celebrate" — no Our Love Story, no sides.</li>
+<li>Godparents are the roles: Ninong · Ninang, listed as a group on Details; "You're joining us as · Ninang".</li>
+<li>The parish is a venue role (Parish, not Ceremony); the checklist behind it follows the rite (Catholic baptism ≠ infant dedication).</li></ol></p>
+</div>
+
+<!-- ===================== 4 · CORPORATE ===================== -->
+<div class="col"><h2><span class="n">4</span>Corporate<small>attendees · gifts off</small></h2>
+<p class="fr">Welcome</p>
+<div class="phone t-corp">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="logo"><i></i><b>Ayala &amp; Partners</b></div>
+  <div class="mast">
+   <p class="eyebrow">You are invited</p>
+   <p class="name">Year-End Summit 2026</p>
+   <p class="date">Friday · 11 December 2026 · Grand Hyatt Manila</p>
+   <p class="line">Ayala &amp; Partners invites you to join us</p>
+  </div>
+  <div class="cd"><div><b>71</b><small>Days</small></div><div><b>03</b><small>Hours</small></div><div><b>40</b><small>Mins</small></div><div><b>12</b><small>Secs</small></div></div>
+  <p class="cd-line">Until the day</p>
+  <div class="msg">Hello Dr. Lim — thank you for opening the day for us. Registration is from 8:00; the green room is ready from 8:30.<div class="from">— The Events Team</div></div>
+  <div class="card you"><span class="av">M</span><div><div class="big">Dr. Maria Lim</div><div class="sub fg">You're joining us as</div><span class="pill">Speaker</span></div></div>
+  <p class="q">Will you join us?</p>
+  <div class="yn"><span class="btn fill">Attending</span><span class="btn">Unable to attend</span></div>
+  <p class="hint">240 attendees expected · reply by 4 December</p>
+  <div class="grow"></div>
+  <div class="nav"><span class="on">Welcome</span><span>Details</span><span>Me</span></div>
+ </div>
+ <div class="home"></div>
+</div>
+<p class="fr">Details</p>
+<div class="phone t-corp">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="logo" style="margin-top:0"><i style="width:20px;height:20px"></i><b style="font-size:11px">Ayala &amp; Partners</b></div>
+  <p class="eyebrow center">The details</p>
+  <div class="card" style="padding-top:6px">
+   <div class="drow"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><div><p class="k">When</p><h4>Friday, 11 December · 9:00 AM – 7:00 PM</h4><p>Registration 8:00 AM</p></div></div>
+   <div class="drow"><svg class="ico" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><div><p class="k">Venue</p><h4>Grand Hyatt Manila · Grand Ballroom</h4><p>8th Ave, Bonifacio Global City · Parking at B2</p></div></div>
+  </div>
+  <div class="sect"><span class="eyebrow">Program</span>
+   <div class="sched">
+    <div class="r"><span class="t">8:00</span><span class="w">Registration and coffee</span></div>
+    <div class="r"><span class="t">9:00</span><span class="w">Opening keynote<small>Dr. Maria Lim, CEO</small></span></div>
+    <div class="r"><span class="t">10:30</span><span class="w">Panel — The year in review<small>Partners R. Ong · J. Tan · A. Villegas</small></span></div>
+    <div class="r"><span class="t">12:00</span><span class="w">Lunch</span></div>
+    <div class="r"><span class="t">2:00</span><span class="w">Breakouts — by team</span></div>
+    <div class="r"><span class="t">6:00</span><span class="w">Awards dinner</span></div>
+   </div>
+  </div>
+  <div class="sect"><span class="eyebrow">Speakers</span>
+   <div class="roles"><span><b>Keynote</b>Dr. Maria Lim</span><span><b>Panel</b>Ricardo Ong</span><span><b>Panel</b>Jenna Tan</span><span><b>Panel</b>Ana Villegas</span><span><b>Host</b>Paolo Reyes</span></div>
+  </div>
+  <div class="sect"><span class="eyebrow">Dress code</span><p class="names">Business attire. Company ID for the ballroom.</p></div>
+  <div class="grow"></div>
+  <div class="nav"><span>Welcome</span><span class="on">Details</span><span>Me</span></div>
+ </div>
+ <div class="home"></div>
+</div>
+<p class="note"><b>vs a wedding</b><ol>
+<li>The company's logo and name lead; "Year-End Summit 2026" is ONE line — never split on "&amp;" into a couple.</li>
+<li>Attendees, not guests: roles host · speaker · VIP · staff · attendee; groups Team · Client · Partner · Press; no sides, no story, no entourage.</li>
+<li>Gifts off — no E-Gifts door anywhere; "invites you to join us" / "Will you join us?" replace "celebrate".</li></ol></p>
+</div>
+
+<!-- ===================== 5 · BIRTHDAY ===================== -->
+<div class="col"><h2><span class="n">5</span>Birthday<small>one celebrant · one QR</small></h2>
+<p class="fr">Welcome</p>
+<div class="phone t-bday">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="dots"></div>
+ <div class="scr">
+  <div class="brand">Lia turns 7</div>
+  <div class="mast">
+   <p class="eyebrow">You are invited</p>
+   <p class="name">Lia turns 7!<small>a rainbow party</small></p>
+   <p class="date">Saturday · 21 November 2026 · 3:00 PM</p>
+   <p class="line">Lia invites you to celebrate</p>
+  </div>
+  <div class="cd"><div><b>51</b><small>Days</small></div><div><b>06</b><small>Hours</small></div><div><b>20</b><small>Mins</small></div><div><b>05</b><small>Secs</small></div></div>
+  <p class="cd-line">Until the day</p>
+  <div class="msg">Games, a magic show and a lot of cake. Bring a swimsuit — the pool is open!<div class="from">— Mommy Cess &amp; Daddy Mark</div></div>
+  <div class="card center">
+   <span class="eyebrow">Getting in</span>
+   <div class="big">One QR for everyone</div>
+   <div class="sub">Show this at the gate. No reply needed — just come!</div>
+   <div class="slot" style="width:96px;height:96px"><div class="qr" style="width:80px;height:80px;border-width:5px"><i></i><i></i><i></i></div></div>
+  </div>
+  <div class="card door"><span class="ic">🎁</span><div><div class="big">E-Gifts</div><div class="sub">Send E-Gifts straight to the celebrant.</div></div><span class="go">›</span></div>
+  <div class="grow"></div>
+  <div class="nav"><span class="on">Welcome</span><span>Details</span><span>Me</span></div>
+ </div>
+ <div class="home"></div>
+</div>
+<p class="fr">Details</p>
+<div class="phone t-bday">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="dots"></div>
+ <div class="scr">
+  <div class="brand">Lia turns 7</div>
+  <p class="eyebrow center">The details</p>
+  <div class="card" style="padding-top:6px">
+   <div class="drow"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><div><p class="k">When</p><h4>Saturday, 21 November · 3:00 PM</h4><p>Until about 7:00 PM</p></div></div>
+   <div class="drow"><svg class="ico" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><div><p class="k">Where</p><h4>The Reyes home</h4><p>12 Aguirre Ave, BF Homes, Parañaque · gate 2</p></div></div>
+  </div>
+  <div class="sect"><span class="eyebrow">What's happening</span>
+   <div class="sched">
+    <div class="r"><span class="t">3:00</span><span class="w">Pool and games</span></div>
+    <div class="r"><span class="t">4:30</span><span class="w">Magic show<small>Mr. Bubbles</small></span></div>
+    <div class="r"><span class="t">5:30</span><span class="w">Cake and candles</span></div>
+    <div class="r"><span class="t">6:00</span><span class="w">Loot bags and goodbyes</span></div>
+   </div>
+  </div>
+  <div class="sect"><span class="eyebrow">What to wear</span><p class="names">Rainbow colours — come as your favourite character!</p><div class="swatch"><i style="background:#F28B82"></i><i style="background:#F6B26B"></i><i style="background:#9CD39B"></i><i style="background:#7FB7E8"></i></div></div>
+  <div class="sect"><span class="eyebrow">Reminders</span><p class="names">Swimsuit and towel · sunblock · parents welcome to stay</p></div>
+  <div class="grow"></div>
+  <div class="nav"><span>Welcome</span><span class="on">Details</span><span>Me</span></div>
+ </div>
+ <div class="home"></div>
+</div>
+<p class="note"><b>vs a wedding</b><ol>
+<li>One celebrant ("Lia invites you to celebrate"); no Our Love Story, no sides, no entourage — roles are celebrant · host · family · guest.</li>
+<li>Default is No reply · One QR for everyone (owner 2026-10-01 #5): the reply buttons give way to the shared QR; the host can switch to a guest list.</li>
+<li>Gifts say "Send E-Gifts straight to the celebrant." — never the money dance; groups Family · Friends · Classmates · Work · Other.</li></ol></p>
+</div>
+
+</div><!-- /grid -->
+</div>
+
+<footer>Sources read 2026-10-01 — words from <code>origin/main</code> (fresh worktree): <code>app/[slug]/_lib/event-words.ts</code> (<code>solemn</code>, <code>twoPeople</code>, <code>giftIsMoneyDance</code>), <code>lib/event-type-profile.ts</code> (<code>WAKE_PROFILE</code> family · gathering · solemn), <code>rsvp-widget.tsx</code> ("Will you be with us?" / "Will be there" · "Unable to come"), <code>invitation-card.ts</code> ("invites you to celebrate", null for solemn), <code>guest-doorway-strip.tsx</code> ("A gift of sympathy — straight to the family."), <code>print-set.server.ts</code> ("In loving memory of"), <code>lib/role-sets.ts</code>, <code>lib/host-roles.ts</code>. Decisions: DECISION_LOG 2026-09-30 "EVENT TYPE SHAPES EVERYTHING" · "ROLES AND GROUPS FOLLOW THE EVENT TYPE" · 2026-10-01 "ELEVEN OWNER ANSWERS" (#4 wake one QR · #5 birthday default · #7 court and godparent names · #10 no party at a wake); EVENT_TYPE_RELIGION_AUDIT_2026-09-30 (the leaks); INTERACTION_RULES § 7. Proposed, not decided: corporate reply words "Attending / Unable to attend", "invites you to join us"; the wake's and one-QR birthday's "Me" tab; the Pasiyam rendered as schedule rows; "Parish" as a venue role.</footer>
+</body>
+</html>
