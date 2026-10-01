@@ -2,7 +2,7 @@
 
 **Why this file:** the builders the controller started at ~14:10 PHT ran on the owner's Mac, not in the cloud (the Agent tool's "remote" option ran them locally). Each one pushed its work-in-progress to a branch with a `docs/PROGRESS_*.md` note. These prompts continue those branches in **real cloud sessions** (Claude app → New session → Cloud → repo iscasasola/setnayan-platform → pick the model shown → paste ONE block).
 
-Credit plan: 6 sessions (C1–C5, C7) ≈ the $250. Model per session is chosen to spend Opus only where it pays (database, money, Maker, multi-file features).
+Credit plan: 5 sessions (C1–C5) ≈ the $250. Model per session is chosen to spend Opus only where it pays (database, money, Maker, multi-file features).
 
 ## §0 · COMMON RULES (every cloud builder reads this section first)
 You are a builder in iscasasola/setnayan-platform (Next.js monorepo, apps/web). Read CLAUDE.md at the repo root and obey it. Clone iscasasola/Setnayan-specs and read INTERACTION_RULES.md (one way to ask/choose/navigate/search/do; two looks) plus every DECISION_LOG row named in your prompt before coding. Install node_modules before trusting tsc/tests (a tree without them "passes" while resolving nothing).
@@ -43,7 +43,5 @@ Read §0 of Setnayan-specs/CLOUD_PROMPTS_CONTROLLER_2026-10-01.md and obey it. C
 ## C6 · Font dropdown (#6160) — NOT NEEDED as a cloud session
 The merge with main was finished before the stop; the controller pushed it to #6160 (a343bdc9e) and GitHub CI is the gate. Only if CI fails will it need a session.
 
-## C7 · Five palette styles up to date with main — model **Sonnet**
-```
-Read §0 of Setnayan-specs/CLOUD_PROMPTS_CONTROLLER_2026-10-01.md and obey it. Continue branch rd/palette-styles-merge (origin/main being merged into rd/palette-styles; read docs/PROGRESS_palette-styles.md). Spec: DECISION_LOG 2026-09-29 "APPROVED — FIVE PALETTE STYLES, PICKED ON THE TOOLBAR" + 2026-09-30 "AS BUILT — FIVE PALETTE STYLES…" (canvas.palette beside canvas.style; absent/unknown = Tags = today's markup; NO motion; all FREE; "Palette ▾" under "Style ▾" in the Dress code panel). Keep #6137's palette person following the same colours. Don't touch font pickers or type-in-place.tsx. Open the PR from rd/palette-styles-merge against main.
-```
+## C7 · Palette styles — NOT NEEDED as a cloud session
+Merge with main finished before the stop; the controller opened draft PR #6226 from rd/palette-styles-merge and GitHub CI is the gate.
