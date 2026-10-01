@@ -46,3 +46,13 @@ The merge with main was finished before the stop; the controller pushed it to #6
 
 ## C7 · Palette styles — NOT NEEDED as a cloud session
 Merge with main finished before the stop; the controller opened draft PR #6226 from rd/palette-styles-merge and GitHub CI is the gate.
+
+## C8 · Venue styles (3 looks for the venue scene) — model **Opus**
+```
+Read §0 of https://raw.githubusercontent.com/iscasasola/Setnayan-specs/main/CLOUD_PROMPTS_CONTROLLER_2026-10-01.md (curl it) and obey it. New branch rd/venue-styles off origin/main. Spec: DECISION_LOG 2026-09-30 "VENUE STYLES APPROVED" (read in full) + design prototypes/venue_styles_2026-09-30_fable.html (+ .png): three looks for the venue scene — Photo card (default = today's look, so live pages don't change) · Full photo · The journey — picked with the scene's existing Style ▾ (the shipped scene-styles registry from #6156/#6187; never a second picker). Extend the shipped venue cards (#6185-era "venue cards readable with photos": venue photo from the booked supplier's photos, ≥4.5:1 text). Maker budget ~514 KB / 517,120 B with other Maker PRs in flight — styles are CSS + server-rendered markup; find bytes at the source if over. The ten THEMES are frozen until after the Apple check — don't change any theme. Don't touch type-in-place.tsx or font pickers (other PRs). One PR, PR routine per §0.
+```
+
+## C9 · Pro themes open to every event type (still Pro) — model **Sonnet**
+```
+Read §0 of https://raw.githubusercontent.com/iscasasola/Setnayan-specs/main/CLOUD_PROMPTS_CONTROLLER_2026-10-01.md (curl it) and obey it. New branch rd/pro-themes-every-type off origin/main. Spec: DECISION_LOG 2026-10-01 "PRO THEMES OPEN TO EVERY EVENT TYPE (STILL PRO) · ONBOARDING PRE-SELECTS A FREE THEME" — do part (1) only: today the Pro themes are offered to weddings only; offer them to every event type, still Pro (◆, never blocking trying; Apply asks to pay). Find the wedding-only gate first (grep lib/invite-themes.ts, lib/hub-look-pro.ts, the theme picker and any event-type filter) and flip it — no theme itself changes (the ten themes are frozen until after the Apple check). Part (2), onboarding pre-selecting a free theme, is in the onboarding PR (C1) — don't do it. Guard: a birthday / hangout / wake can pick every Pro theme; sabotage-check. One PR, PR routine per §0.
+```
