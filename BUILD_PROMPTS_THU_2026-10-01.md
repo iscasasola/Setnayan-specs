@@ -148,3 +148,5 @@ LIMITS + PR routine as COMMON RULES.
 
 > P5a addendum (owner 2026-10-01): (a) **Setnayan receiving accounts become a list** — admin can add/edit/remove any bank or e-wallet (Maribank, UNO, BDO, GCash…: name · account name · number · QR via the shipped EMV QR reader `lib/emv-qr.ts`), shown to customers at checkout in the order set; migrate today's fixed BDO/GCash fields into the list once. (b) **Record a payment received** (Money +). (c) Every admin page/permission name simple and direct.
 > P6 addendum: event-hub-per-type answers in DECISION_LOG "ADMIN APP + EVENT HUB PER TYPE — OWNER ANSWERS".
+
+> P9 addendum (owner 2026-10-01, DECISION_LOG "THE EVENT HUB IS FULL SCREEN WITH ONE EXIT…"): the app bottom bar hides inside every Event Hub stage; one × top-left exits to the app. Camera exit → Live; camera thumbnail = all the guest's own shots; Gallery = own shots + tagged photos, ALL photos only when the event's "share the whole gallery" option is on (reuse the shipped Papic gallery-visibility setting if one exists — grep before adding).
