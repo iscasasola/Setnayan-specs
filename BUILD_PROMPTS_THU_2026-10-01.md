@@ -145,3 +145,6 @@ LIMITS + PR routine as COMMON RULES.
 ```
 
 > P5b addendum (owner 2026-10-01): the admin label **"Ugat" shows as "Setup"** everywhere a person reads it (nav, More sheet, page titles); code names/routes unchanged.
+
+> P5a addendum (owner 2026-10-01): (a) **Setnayan receiving accounts become a list** — admin can add/edit/remove any bank or e-wallet (Maribank, UNO, BDO, GCash…: name · account name · number · QR via the shipped EMV QR reader `lib/emv-qr.ts`), shown to customers at checkout in the order set; migrate today's fixed BDO/GCash fields into the list once. (b) **Record a payment received** (Money +). (c) Every admin page/permission name simple and direct.
+> P6 addendum: event-hub-per-type answers in DECISION_LOG "ADMIN APP + EVENT HUB PER TYPE — OWNER ANSWERS".
