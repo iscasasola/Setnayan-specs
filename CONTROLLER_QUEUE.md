@@ -25,6 +25,8 @@ Rules: newest at the top of each section · one item per line or block · a buil
 
 ## 2 · Needs the owner (controller → desk)
 <!-- Questions with a recommendation, owner actions (sign in, approve a design, check a phone card). -->
+- [ ] 2026-10-01 · Q5 (from #6230) — picking a Name style (Full · Middle initial · Surname first) still goes live at once (same as Details' Name style ▾) while typed names wait for Apply. Controller recommends: YES, the style waits for Apply too (small follow-up).
+- [ ] 2026-10-01 · Q6 (from #6230) — with a supplier already booked, a date picked under "Help me choose" goes into the draft and is refused only at Apply. Controller recommends: refuse right at the pick, same reason.
 - [ ] 2026-10-01 · Q4 (from #6228's audit) — two export reads are scoped to the COUPLE, not the person, by earlier decisions: either partner's "Download my data" includes both partners' birth data (events_host) and payments the other partner logged (event_vendor_payments). Controller recommends: keep it (the couple is one data subject for their shared event).
   - desk: OWNER ANSWERED "Yes" → DECISION_LOG row.
 - [ ] 2026-10-01 · Q1 PRIVACY — the self-serve data export (app/api/profile/export) gives a couple the face-tagging RECORDS (not face data) of every guest at their events. Controller recommends: fix now as its own small PR — export only the person's own face-tag rows.
