@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sidebar collapse + Features page · Fable prototype · 2026-10-01</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+/* ── Tokens copied from shipped front-door.css (origin/main 49693bf3c) ── */
+:root{
+  --fd-cream:#ffffff;--fd-ink:#2c2a29;--fd-gold:#8c6932;--fd-hi:#a9834b;--fd-link:#3b4e67;
+  --fd-m1:#6e6a62;--fd-m2:#8a857b;--fd-m3:#a09a8e;--fd-line:#e1dcd1;--fd-wash:#f3ecdf;--fd-hover:#f4eee3;
+  --fd-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --fd-sys:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --fd-rail:240px;--fd-rail-min:72px;--fd-ctl:40px;--fd-bar:56px;--m-r-sm:8px;
+  --mark:#cb9e4b;
+  --dur:220ms;--ease:cubic-bezier(.2,.7,.2,1);
+}
+*{box-sizing:border-box}
+body{margin:0;background:#ece7dd;color:var(--fd-ink);font-family:var(--fd-sys);padding:28px 32px 60px}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:var(--fd-m1);font-size:13px;margin:0 0 26px;max-width:1500px;line-height:1.5}
+.sub b{color:var(--fd-ink)}
+h2{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--fd-m1);margin:36px 0 10px;font-weight:700}
+h2 span{color:var(--fd-gold);margin-right:8px}
+.note{font-size:12.5px;color:var(--fd-m1);line-height:1.55;max-width:760px;margin:8px 0 0}
+.note code{font-family:var(--fd-mono);font-size:11.5px;background:#fff;border:1px solid var(--fd-line);padding:1px 5px;border-radius:4px}
+.row{display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap}
+.cap{font-size:12px;color:var(--fd-m2);margin-top:8px;font-family:var(--fd-mono)}
+
+/* ── Desktop frame 1440×900, scaled to fit ── */
+.frame{width:1440px;height:900px;background:var(--fd-cream);border:1px solid #d6cfc2;border-radius:10px;overflow:hidden;position:relative;box-shadow:0 8px 30px rgba(44,42,41,.08)}
+.scale{width:720px;height:450px;position:relative}
+.scale .frame{transform:scale(.5);transform-origin:top left}
+.scale.s65{width:936px;height:585px}.scale.s65 .frame{transform:scale(.65)}
+
+/* ── Shell (reproduces fd-topbar / fd-body / fd-rail / fd-row) ── */
+.fd-topbar{height:var(--fd-bar);display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid var(--fd-line);background:var(--fd-cream)}
+.fd-topleft{display:flex;align-items:center;gap:8px;min-width:var(--fd-rail)}
+.fd-brand{display:flex;align-items:center;height:var(--fd-ctl);padding:0 4px;border:0;background:none;cursor:pointer;position:relative;text-decoration:none;color:var(--fd-ink);border-radius:var(--m-r-sm)}
+.fd-brand:hover{background:var(--fd-hover)}
+.fd-wordmark{font-weight:800;letter-spacing:.15em;font-size:15px;text-transform:uppercase;white-space:nowrap;display:inline-block}
+.fd-markicon{width:28px;height:28px;display:inline-block;position:absolute;left:6px;top:6px;opacity:0;transform:scale(.8)}
+.fd-markicon svg{width:28px;height:28px;display:block}
+.fd-search{flex:1;max-width:620px;height:var(--fd-ctl);border:1px solid var(--fd-line);border-radius:999px;display:flex;align-items:center;padding:0 14px;color:var(--fd-m2);font-size:14px;gap:10px;margin:0 24px}
+.fd-topright{display:flex;gap:8px;align-items:center}
+.fd-btn-quiet{height:var(--fd-ctl);padding:0 15px;border:1px solid var(--fd-line);border-radius:999px;background:#fff;font-size:14px;font-weight:600;display:flex;align-items:center}
+.fd-btn-gold{height:var(--fd-ctl);padding:0 15px;border:0;border-radius:999px;background:var(--fd-gold);color:#fff;font-size:14px;font-weight:650;display:flex;align-items:center;white-space:nowrap}
+.fd-body{display:grid;grid-template-columns:var(--fd-rail) 1fr;height:calc(900px - var(--fd-bar))}
+.fd-rail{padding:10px 8px 40px;border-right:1px solid transparent;overflow:hidden;position:relative}
+.fd-row{position:relative;display:flex;align-items:center;gap:12px;width:100%;min-height:44px;padding:0 12px;border-radius:var(--m-r-sm);font-size:14px;color:var(--fd-ink);text-decoration:none;white-space:nowrap}
+.fd-row:hover{background:var(--fd-hover)}
+.fd-row[data-on='true']{background:var(--fd-wash);font-weight:650}
+.fd-row[data-on='true']::before{content:'';position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:0 3px 3px 0;background:var(--fd-gold)}
+.fd-gi{width:20px;flex:0 0 20px;display:flex;align-items:center;justify-content:center;color:var(--fd-m1)}
+.fd-gi svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.fd-label-text{display:inline-block}
+.fd-rdiv{height:1px;background:var(--fd-line);margin:10px 12px}
+.fd-signin-prompt{padding:10px 12px}
+.fd-signin-prompt p{font-size:12.5px;color:var(--fd-m1);line-height:1.5;margin:0 0 10px}
+.fd-main{padding:28px 40px;overflow:hidden}
+.fd-main h3{font-size:26px;margin:0 0 6px;letter-spacing:-.01em}
+.fd-main p.lead{color:var(--fd-m1);margin:0 0 22px;font-size:15px}
+.feed{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.card{border:1px solid var(--fd-line);border-radius:12px;overflow:hidden;background:#fff}
+.card .ph{aspect-ratio:4/3;background:linear-gradient(135deg,#f3ecdf,#e6dccb)}
+.card .t{padding:10px 12px;font-size:13px;font-weight:600}
+.card .s{padding:0 12px 12px;font-size:12px;color:var(--fd-m2)}
+
+/* ── Collapsed state (what the toggle produces) ── */
+.collapsed{--fd-rail:var(--fd-rail-min)}
+.collapsed .fd-rail{padding:10px 4px 40px}
+.collapsed .fd-row{flex-direction:column;gap:4px;padding:8px 2px;font-size:10px;min-height:60px;justify-content:center;text-align:center}
+.collapsed .fd-row[data-on='true']::before{top:14px;bottom:14px}
+.collapsed .fd-label-text{display:none}
+.collapsed .fd-icon-caption{display:block;font-size:10px;line-height:1.2;color:var(--fd-m1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.fd-icon-caption{display:none}
+.collapsed .fd-wordmark{opacity:0;transform:translateX(-10px);position:absolute}
+.collapsed .fd-brand{width:var(--fd-ctl)}
+.collapsed .fd-markicon{opacity:1;transform:scale(1)}
+.collapsed .fd-signin-prompt p,.collapsed .fd-rdiv{display:none}
+.collapsed .fd-signin-prompt{padding:8px 2px}
+.collapsed .fd-signin-prompt .fd-btn-gold{width:100%;height:auto;padding:6px 4px;font-size:11px;justify-content:center;border-radius:8px}
+
+/* Tooltip (frame C) */
+.tip{position:absolute;left:84px;top:118px;background:var(--fd-ink);color:#fff;font-size:12px;padding:6px 10px;border-radius:6px;white-space:nowrap;z-index:5}
+.tip::before{content:'';position:absolute;left:-5px;top:50%;margin-top:-5px;border:5px solid transparent;border-right-color:var(--fd-ink);border-left:0}
+.tip2{left:60px;top:8px}
+
+/* ── Frame B · mid-motion stills: rail-only crops ── */
+.still{width:260px;height:420px;background:#fff;border:1px solid #d6cfc2;border-radius:10px;overflow:hidden;position:relative}
+.still .fd-body{height:364px}
+.still .fd-topbar{padding:0 8px}
+.mid{--fd-rail:156px}
+.mid .fd-label-text{opacity:.45;transform:translateX(-5px)}
+.mid .fd-wordmark{opacity:.45;transform:translateX(-5px);letter-spacing:.1em}
+.mid .fd-markicon{opacity:.55;transform:scale(.9)}
+.mid .fd-row{padding:0 8px}
+.pct{position:absolute;right:8px;top:62px;font-family:var(--fd-mono);font-size:11px;color:var(--fd-gold);background:var(--fd-wash);padding:2px 6px;border-radius:4px}
+.timeline{margin-top:10px;width:836px;height:38px;position:relative;border-top:1px solid #c9c1b2}
+.timeline i{position:absolute;top:-4px;width:7px;height:7px;border-radius:50%;background:var(--fd-gold)}
+.timeline b{position:absolute;top:8px;font-size:11px;color:var(--fd-m1);font-family:var(--fd-mono);transform:translateX(-50%)}
+
+/* ── Frame D · looping CSS demo (no JS) ── */
+.demo{width:480px;height:300px;background:#fff;border:1px solid #d6cfc2;border-radius:10px;overflow:hidden;position:relative}
+.demo .fd-body{height:244px}
+.demo .fd-topleft{min-width:0}
+.demo .fd-rail{width:var(--fd-rail)}
+.demo .fd-body{grid-template-columns:var(--fd-rail) 1fr}
+.demo .fd-main{padding:16px}
+.demo .feed{grid-template-columns:1fr 1fr;gap:10px}
+.demo .card .ph{aspect-ratio:16/9}
+.demo .card .t{font-size:11px;padding:6px 8px}.demo .card .s{display:none}
+/* animate: expanded 1.4s · collapse .22s · hold 1.4s · expand .22s  → 3.24s loop */
+.demo .fd-body{animation:railw 3.24s var(--ease) infinite}
+.demo .fd-label-text{animation:lab 3.24s var(--ease) infinite}
+.demo .fd-wordmark{animation:wm 3.24s var(--ease) infinite}
+.demo .fd-markicon{animation:mk 3.24s var(--ease) infinite}
+.demo .fd-row{animation:rowpad 3.24s var(--ease) infinite}
+.demo .fd-icon-caption{display:block;animation:capf 3.24s var(--ease) infinite;position:absolute;left:0;right:0;bottom:4px;text-align:center;font-size:9.5px;color:var(--fd-m1)}
+.demo .fd-row{min-height:50px}
+@keyframes railw{0%,43.2%{grid-template-columns:240px 1fr}50%,93.2%{grid-template-columns:72px 1fr}100%{grid-template-columns:240px 1fr}}
+@keyframes lab{0%,43.2%{opacity:1;transform:none}48%,93.2%{opacity:0;transform:translateX(-10px)}100%{opacity:1;transform:none}}
+@keyframes wm{0%,43.2%{opacity:1;transform:none}48%,93.2%{opacity:0;transform:translateX(-10px)}100%{opacity:1;transform:none}}
+@keyframes mk{0%,45%{opacity:0;transform:scale(.8)}50%,93.2%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.8)}}
+@keyframes capf{0%,46%{opacity:0}50%,93.2%{opacity:1}100%{opacity:0}}
+@keyframes rowpad{0%,43.2%{padding-left:12px;justify-content:flex-start}50%,93.2%{padding-left:0;justify-content:center}100%{padding-left:12px;justify-content:flex-start}}
+.demo .fd-row{position:relative}
+.demo .fd-gi{flex:0 0 20px}
+@media (prefers-reduced-motion:reduce){.demo *{animation-duration:0s!important}}
+.badge{position:absolute;right:8px;bottom:8px;font-family:var(--fd-mono);font-size:10px;color:var(--fd-m2);background:var(--fd-wash);padding:2px 6px;border-radius:4px}
+
+/* ── Frame E · phone 390×844 ── */
+.phone{width:390px;height:844px;background:#fff;border:1px solid #d6cfc2;border-radius:28px;overflow:hidden;position:relative;box-shadow:0 8px 30px rgba(44,42,41,.08)}
+.ptop{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid var(--fd-line)}
+.ptop .ham{width:24px;height:16px;display:flex;flex-direction:column;justify-content:space-between}
+.ptop .ham i{height:2px;background:var(--fd-ink);border-radius:1px;display:block}
+.pbody{padding:16px 16px 0}
+.pbody h3{font-size:24px;margin:4px 0 6px;letter-spacing:-.01em;line-height:1.15}
+.pbody .lead{font-size:14px;color:var(--fd-m1);margin:0 0 14px;line-height:1.45}
+.groups{display:flex;gap:6px;overflow:hidden;margin:0 -16px 16px;padding:0 16px}
+.groups span{flex:0 0 auto;font-size:12px;padding:6px 10px;border:1px solid var(--fd-line);border-radius:999px;color:var(--fd-m1);white-space:nowrap}
+.groups span.on{background:var(--fd-wash);color:var(--fd-ink);border-color:var(--fd-wash);font-weight:650}
+.grp{margin:0 0 18px}
+.grp h4{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--fd-m1);margin:0 0 8px;font-weight:700;display:flex;align-items:center;gap:8px}
+.grp h4::after{content:'';flex:1;height:1px;background:var(--fd-line)}
+.feat{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #efeae0}
+.feat:last-child{border-bottom:0}
+.feat .media{width:96px;height:72px;border-radius:10px;background:linear-gradient(135deg,#f3ecdf,#e3d8c4);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.feat .media svg{width:26px;height:26px;stroke:var(--fd-gold);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.feat .media.clip::after{content:'▶';position:absolute;right:6px;bottom:4px;font-size:9px;color:#fff;background:rgba(44,42,41,.65);border-radius:999px;width:16px;height:16px;display:flex;align-items:center;justify-content:center;padding-left:1px}
+.feat .nm{font-size:15px;font-weight:650;margin:0 0 2px}
+.feat .ln{font-size:12.5px;color:var(--fd-m1);line-height:1.4;margin:0 0 7px}
+.feat .act{display:flex;align-items:center;gap:8px}
+.try{font-size:12px;font-weight:650;padding:6px 12px;border-radius:999px;background:var(--fd-gold);color:#fff}
+.price{font-size:12px;color:var(--fd-m1)}
+.price.free{color:#3f7a4e;font-weight:650}
+.pfoot{position:absolute;left:0;right:0;bottom:0;height:40px;background:linear-gradient(transparent,#fff 60%)}
+.scrollhint{position:absolute;right:14px;top:62px;font-family:var(--fd-mono);font-size:10px;color:var(--fd-m2)}
+
+.legend{display:grid;grid-template-columns:repeat(2,minmax(300px,480px));gap:10px 40px;font-size:12.5px;color:var(--fd-m1);line-height:1.5;margin-top:10px}
+.legend b{color:var(--fd-ink)}
+</style>
+</head>
+<body>
+
+<h1>Press SETNAYAN to collapse the sidebar · the short signed-out rail · the /features page</h1>
+<p class="sub">Fable design, 2026-10-01 · for the two DECISION_LOG rows of the same date. Draws only the <b>delta</b> on the shipped front-door shell (<code>front-door-shell.tsx</code> + <code>front-door.css</code>): the <code>fd-icon-caption</code> 72&nbsp;px icon strip that already exists at 1024–1279 becomes a <b>user toggle</b> at every desktop width, and the signed-out rail drops its Planner · Together · Studio feature groups for one <b>Features</b> row. Words: "supplier", "Event Hub". No JavaScript in this file; frame D is pure CSS keyframes.</p>
+
+<!-- ─────────────────────────── A ─────────────────────────── -->
+<h2><span>A</span>Signed-out sidebar, expanded (1440×900) — five rows, nothing else</h2>
+<div class="row">
+<div class="scale s65"><div class="frame">
+  <div class="fd-topbar">
+    <div class="fd-topleft">
+      <a class="fd-brand" href="#"><span class="fd-wordmark">Setnayan</span><span class="fd-markicon"><svg viewBox="0 0 5333.3335 5333.3335"><use href="#i-mark"/></svg></span></a>
+    </div>
+    <div class="fd-search">⌕ &nbsp;Search suppliers, venues, ideas…</div>
+    <div class="fd-topright"><span class="fd-btn-quiet">Sign in</span><span class="fd-btn-gold">Create account</span></div>
+  </div>
+  <div class="fd-body">
+    <nav class="fd-rail">
+      <a class="fd-row" data-on="true" href="#"><span class="fd-gi"><svg viewBox="0 0 24 24"><use href="#i-telescope"/></svg></span><span class="fd-label-text">Discover</span><span class="fd-icon-caption">Discover</span></a>
+      <a class="fd-row" href="#"><span class="fd-gi"><svg viewBox="0 0 24 24"><use href="#i-compass"/></svg></span><span class="fd-label-text">Find suppliers</span><span class="fd-icon-caption">Suppliers</span></a>
+      <a class="fd-row" href="#"><span class="fd-gi"><svg viewBox="0 0 24 24"><use href="#i-grid"/></svg></span><span class="fd-label-text">Features</span><span class="fd-icon-caption">Features</span></a>
+      <a class="fd-row" href="#"><span class="fd-gi"><svg viewBox="0 0 24 24"><use href="#i-help"/></svg></span><span class="fd-label-text">How it works</span><span class="fd-icon-caption">How it works</span></a>
+      <div class="fd-rdiv"></div>
+      <div class="fd-signin-prompt"><p>Sign in to save suppliers, plan your event, and keep your memories.</p><span class="fd-btn-gold" style="display:inline-flex">Sign in</span></div>
+    </nav>
+    <main class="fd-main">
+      <h3>Discover</h3><p class="lead">Real weddings, debuts and birthdays — and the suppliers who made them.</p>
+      <div class="feed">
+        <div class="card"><div class="ph"></div><div class="t">Garden wedding · Tagaytay</div><div class="s">Photo · Lumina Studios</div></div>
+        <div class="card"><div class="ph"></div><div class="t">18th debut · Quezon City</div><div class="s">Styling · Ate Bing Events</div></div>
+        <div class="card"><div class="ph"></div><div class="t">Beach vows · La Union</div><div class="s">Video · Reel Love</div></div>
+        <div class="card"><div class="ph"></div><div class="t">Church + hotel · Makati</div><div class="s">Coordination · Plan A</div></div>
+        <div class="card"><div class="ph"></div><div class="t">Intimate 20 · Baguio</div><div class="s">Catering · Hapag</div></div>
+        <div class="card"><div class="ph"></div><div class="t">70th · Pampanga</div><div class="s">Live Watch · hosted</div></div>
+        <div class="card"><div class="ph"></div><div class="t">Civil + brunch · BGC</div><div class="s">Papic · 312 guest photos</div></div>
+        <div class="card"><div class="ph"></div><div class="t">Rustic barn · Bulacan</div><div class="s">Flowers · Bloom PH</div></div>
+      </div>
+    </main>
+  </div>
+</div></div>
+<div>
+  <p class="note" style="max-width:420px"><b>What changed vs. live:</b> the rail used to continue below "How it works" with Planner · Together · Studio groups (Marketplace, Guest list, Seat plan, Budget, Schedule, Groups, Setnayan AI, Event Hub, Papic, Live Watch, Patiktok, 3D Plan, Mood Board…), each with a one-line description. All of that is gone; <b>Features</b> is the one row that leads to them (frame E).</p>
+  <p class="note" style="max-width:420px">Pressing the <b>SETNAYAN</b> wordmark no longer goes to <code>/</code> — it collapses the rail (frame B/C). <b>Discover</b>, first row, is the way to the front page. Phone is untouched: no sidebar there, hamburger drawer as shipped.</p>
+  <p class="note" style="max-width:420px">Signed-in rail: same toggle, same animation; its rows are not redrawn here.</p>
+</div>
+</div>
+
+<!-- ─────────────────────────── B ─────────────────────────── -->
+<h2><span>B</span>The collapse in motion — 0% · 50% · 100% · ~220 ms ease-out</h2>
+<div class="row">
+  <div class="still">
+    <div class="fd-topbar"><div class="fd-topleft" style="min-width:0"><a class="fd-brand" href="#"><span class="fd-wordmark">Setnayan</span><span class="fd-markicon"><svg viewBox="0 0 5333.3335 5333.3335"><use href="#i-mark"/></svg></span></a></div></div>
+    <div class="fd-body" style="grid-template-columns:240px 0"><nav class="fd-rail">
+      <a class="fd-row" data-on="true" href="#"><span class="fd-gi"><svg viewBox="0 0 24 24"><use href="#i-telescope"/></svg></span><span class="fd-label-text">Discover</span></a>
+      <a class="fd-row" href="#"><span class="fd-gi"><svg viewBox="0 0 24 24"><use href="#i-compass"/></svg></span><span class="fd-label-text">Find suppliers</span></a>
+      <a class="fd-row" href="#"><span class="fd-gi"><svg viewBox="0 0 24 24"><use href="#i-grid"/></svg></span><span class="fd-label-text">Features</span></a>
+      <a class="fd-row" href="#"><span class="fd-gi"><svg viewBox="0 0 24 24"><use href="#i-help"/></svg></span><span class="fd-label-text">How it works</span></a>
+      <div class="fd-rdiv"></div>
+      <div class="fd-signin-prompt"><p>Sign in to save suppliers, plan your event, and keep your memories.</p><span class="fd-btn-gold" style="display:inline-flex">Sign in</span></div>
+    </nav></div>
+    <span class="pct">t = 0 ms · 240 px</span>
+  </div>
+  <div class="still mid">
+    <div class="fd-topbar"><div class="fd-topleft" style="min-width:0"><a class="fd-brand" href="#"><span class="fd-wordmark">Setnayan</span><span class="fd-markicon"><svg viewBox="0 0 5333.3335 5333.3335"><use href="#i-mark"/></svg></span></a></div></div>
+    <div class="fd-body" style="grid-template-columns:156px 0"><nav class="fd-rail">
+      <a class="fd-row" data-on="true" href="#"><span class="fd-gi"><svg viewBox="0 0 24 24"><use href="#i-telescope"/></svg></span><span class="fd-label-text">Discover</span></a>
+      <a class="fd-row" href="#"><span class="fd-gi"><svg viewBox="0 0 24 24"><use href="#i-compass"/></svg></span><span class="fd-label-text">Find suppliers</span></a>
+      <a class="fd-row" href="#"><span class="fd-gi"><svg viewBox="0 0 24 24"><use href="#i-grid"/></svg></span><span class="fd-label-text">Features</span></a>
+      <a class="fd-row" href="#"><span class="fd-gi"><svg viewBox="0 0 24 24"><use href="#i-help"/></svg></span><span class="fd-label-text">How it works</span></a>
+      <div class="fd-rdiv"></div>
+      <div class="fd-signin-prompt"><p style="opacity:.4">Sign in to save suppliers, plan your event…</p><span class="fd-btn-gold" style="display:inline-flex">Sign in</span></div>
+    </nav></div>
+    <span class="pct">t ≈ 110 ms · 156 px</span>
+  </div>
+  <div class="still collapsed">
+    <div class="fd-topbar"><div class="fd-topleft" style="min-width:0"><a class="fd-brand" href="#"><span class="fd-wordmark">Setnayan</span><span class="fd-markicon"><svg viewBox="0 0 5333.3335 5333.3335"><use href="#i-mark"/></svg></span></a></div></div>
+    <div class="fd-body" style="grid-template-columns:72px 0"><nav class="fd-rail">
+      <a class="fd-row" data-on="true" href="#"><span class="fd-gi"><svg viewBox="0 0 24 24"><use href="#i-telescope"/></svg></span><span class="fd-label-text">Discover</span><span class="fd-icon-caption">Discover</span></a>
+      <a class="fd-row" href="#"><span class="fd-gi"><svg viewBox="0 0 24 24"><use href="#i-compass"/></svg></span><span class="fd-label-text">Find suppliers</span><span class="fd-icon-caption">Suppliers</span></a>
+      <a class="fd-row" href="#"><span class="fd-gi"><svg viewBox="0 0 24 24"><use href="#i-grid"/></svg></span><span class="fd-label-text">Features</span><span class="fd-icon-caption">Features</span></a>
+      <a class="fd-row" href="#"><span class="fd-gi"><svg viewBox="0 0 24 24"><use href="#i-help"/></svg></span><span class="fd-label-text">How it works</span><span class="fd-icon-caption">How it works</span></a>
+      <div class="fd-rdiv"></div>
+      <div class="fd-signin-prompt"><p>Sign in</p><span class="fd-btn-gold">Sign in</span></div>
+    </nav></div>
+    <span class="pct">t = 220 ms · 72 px</span>
+  </div>
+  <div style="max-width:420px">
+    <p class="note"><b>One motion, four things move together</b> (all on the same 220 ms <code>cubic-bezier(.2,.7,.2,1)</code> ease-out):</p>
+    <p class="note">1 · <code>--fd-rail</code> 240 → 72 px — the grid column, so the main page reflows with it, no jump.<br>
+    2 · Labels: <code>opacity 1→0</code> + <code>translateX(−10px)</code>; they finish fading by ~60% so nothing wraps as the column narrows. <code>fd-icon-caption</code> fades in over the last 40%.<br>
+    3 · Wordmark: letters fade + slide left exactly as the labels do; the gold <b>mark</b> fades in at the same spot, <code>scale .8→1</code>. Both live inside the same 40 px <code>.fd-brand</code> button, so the hit target never moves.<br>
+    4 · Rows go column-stacked (icon over caption), <code>min-height 60px</code> — the shipped 1279 icon-strip rule, now class-driven.</p>
+    <p class="note"><b>Reduced motion:</b> <code>@media (prefers-reduced-motion: reduce)</code> → duration 0, state swaps instantly. <b>Remembered</b> per person in <code>localStorage</code>; default expanded.</p>
+  </div>
+</div>
+<div class="timeline">
+  <i style="left:0"></i><b style="left:0">0 ms press</b>
+  <i style="left:50%"></i><b style="left:50%">~110 ms · labels gone, mark half in</b>
+  <i style="left:100%"></i><b style="left:100%;transform:translateX(-100%);white-space:nowrap">220 ms · 72 px</b>
+</div>
+
+<!-- ─────────────────────────── C ─────────────────────────── -->
+<h2><span>C</span>Collapsed (1440×900) — icons only, the mark on top, tooltip on hover</h2>
+<div class="row">
+<div class="scale s65"><div class="frame collapsed">
+  <div class="fd-topbar">
+    <div class="fd-topleft" style="min-width:72px">
+      <a class="fd-brand" href="#" style="position:relative"><span class="fd-wordmark">Setnayan</span><span class="fd-markicon"><svg viewBox="0 0 5333.3335 5333.3335"><use href="#i-mark"/></svg></span></a>
+      <span class="tip tip2" style="position:absolute;left:62px;top:12px">Expand sidebar</span>
+    </div>
+    <div class="fd-search">⌕ &nbsp;Search suppliers, venues, ideas…</div>
+    <div class="fd-topright"><span class="fd-btn-quiet">Sign in</span><span class="fd-btn-gold">Create account</span></div>
+  </div>
+  <div class="fd-body">
+    <nav class="fd-rail">
+      <a class="fd-row" data-on="true" href="#"><span class="fd-gi"><svg viewBox="0 0 24 24"><use href="#i-telescope"/></svg></span><span class="fd-label-text">Discover</span><span class="fd-icon-caption">Discover</span></a>
+      <a class="fd-row" href="#" style="background:var(--fd-hover)"><span class="fd-gi"><svg viewBox="0 0 24 24"><use href="#i-compass"/></svg></span><span class="fd-label-text">Find suppliers</span><span class="fd-icon-caption">Suppliers</span></a>
+      <a class="fd-row" href="#"><span class="fd-gi"><svg viewBox="0 0 24 24"><use href="#i-grid"/></svg></span><span class="fd-label-text">Features</span><span class="fd-icon-caption">Features</span></a>
+      <a class="fd-row" href="#"><span class="fd-gi"><svg viewBox="0 0 24 24"><use href="#i-help"/></svg></span><span class="fd-label-text">How it works</span><span class="fd-icon-caption">How it works</span></a>
+      <div class="fd-rdiv"></div>
+      <div class="fd-signin-prompt"><p>Sign in</p><span class="fd-btn-gold">Sign in</span></div>
+    </nav>
+    <span class="tip" style="left:84px;top:96px">Find suppliers</span>
+    <main class="fd-main">
+      <h3 style="margin-top:34px">Discover</h3><p class="lead">Real weddings, debuts and birthdays — and the suppliers who made them.</p>
+      <div class="feed" style="grid-template-columns:repeat(5,1fr)">
+        <div class="card"><div class="ph"></div><div class="t">Garden wedding · Tagaytay</div><div class="s">Photo · Lumina Studios</div></div>
+        <div class="card"><div class="ph"></div><div class="t">18th debut · Quezon City</div><div class="s">Styling · Ate Bing Events</div></div>
+        <div class="card"><div class="ph"></div><div class="t">Beach vows · La Union</div><div class="s">Video · Reel Love</div></div>
+        <div class="card"><div class="ph"></div><div class="t">Church + hotel · Makati</div><div class="s">Coordination · Plan A</div></div>
+        <div class="card"><div class="ph"></div><div class="t">Intimate 20 · Baguio</div><div class="s">Catering · Hapag</div></div>
+        <div class="card"><div class="ph"></div><div class="t">70th · Pampanga</div><div class="s">Live Watch · hosted</div></div>
+        <div class="card"><div class="ph"></div><div class="t">Civil + brunch · BGC</div><div class="s">Papic · 312 guest photos</div></div>
+        <div class="card"><div class="ph"></div><div class="t">Rustic barn · Bulacan</div><div class="s">Flowers · Bloom PH</div></div>
+        <div class="card"><div class="ph"></div><div class="t">Poolside · Antipolo</div><div class="s">DJ · Beat Manila</div></div>
+        <div class="card"><div class="ph"></div><div class="t">Golden 50th · Cebu</div><div class="s">Event Hub · 180 guests</div></div>
+      </div>
+    </main>
+  </div>
+</div></div>
+<div style="max-width:420px">
+  <p class="note"><b>Press the mark to expand.</b> The gold mark sits in the same 40×40 button where the wordmark was; its tooltip reads "Expand sidebar", and the button carries <code>aria-expanded</code> + <code>aria-label="Setnayan — expand sidebar"</code> (collapsed) / <code>"…collapse sidebar"</code> (expanded). The crawler and screen reader still read "Setnayan" — the markup is unchanged, only its presentation flips.</p>
+  <p class="note">Each icon keeps its tiny caption (<code>fd-icon-caption</code>, 10 px, <code>--fd-m1</code>) exactly as the 1024–1279 strip ships today, so the collapsed rail is never a mystery row of glyphs. Hovering a row additionally shows the full label as a tooltip at 14 px — "Find suppliers" here — because captions truncate.</p>
+  <p class="note">The main page gains 168 px; the feed reflows 4-up → 5-up.</p>
+</div>
+</div>
+
+<!-- ─────────────────────────── D ─────────────────────────── -->
+<h2><span>D</span>Looping demo — collapse ↔ expand, pure CSS (no JS)</h2>
+<div class="row">
+<div class="demo">
+  <div class="fd-topbar">
+    <div class="fd-topleft"><a class="fd-brand" href="#"><span class="fd-wordmark">Setnayan</span><span class="fd-markicon"><svg viewBox="0 0 5333.3335 5333.3335"><use href="#i-mark"/></svg></span></a></div>
+    <div class="fd-search" style="margin:0 10px;font-size:12px;height:32px">⌕ Search</div>
+  </div>
+  <div class="fd-body">
+    <nav class="fd-rail">
+      <a class="fd-row" data-on="true" href="#"><span class="fd-gi"><svg viewBox="0 0 24 24"><use href="#i-telescope"/></svg></span><span class="fd-label-text">Discover</span><span class="fd-icon-caption">Discover</span></a>
+      <a class="fd-row" href="#"><span class="fd-gi"><svg viewBox="0 0 24 24"><use href="#i-compass"/></svg></span><span class="fd-label-text">Find suppliers</span><span class="fd-icon-caption">Suppliers</span></a>
+      <a class="fd-row" href="#"><span class="fd-gi"><svg viewBox="0 0 24 24"><use href="#i-grid"/></svg></span><span class="fd-label-text">Features</span><span class="fd-icon-caption">Features</span></a>
+      <a class="fd-row" href="#"><span class="fd-gi"><svg viewBox="0 0 24 24"><use href="#i-help"/></svg></span><span class="fd-label-text">How it works</span><span class="fd-icon-caption">How it works</span></a>
+    </nav>
+    <main class="fd-main"><div class="feed">
+      <div class="card"><div class="ph"></div><div class="t">Garden wedding</div></div>
+      <div class="card"><div class="ph"></div><div class="t">18th debut</div></div>
+      <div class="card"><div class="ph"></div><div class="t">Beach vows</div></div>
+      <div class="card"><div class="ph"></div><div class="t">Church + hotel</div></div>
+    </div></main>
+  </div>
+  <span class="badge">loop · 1.4 s hold · 220 ms · 1.4 s hold · 220 ms</span>
+</div>
+<div style="max-width:420px">
+  <p class="note">The demo animates <code>grid-template-columns</code> on <code>.fd-body</code> plus the label/wordmark/mark opacity + transform with one shared timing — the same four properties the build will transition on a <code>[data-rail="collapsed"]</code> attribute. Under <code>prefers-reduced-motion</code> this box stops moving too.</p>
+  <p class="note"><b>Build note (no new mechanism):</b> promote the existing <code>@media (max-width:1279.98px)</code> icon-strip block to a <code>.fd[data-rail="collapsed"]</code> selector (keep the media query as the automatic fallback), add <code>transition: grid-template-columns var(--dur) var(--ease)</code> on <code>.fd-body</code> and <code>opacity, transform</code> on <code>.fd-label-text</code>/<code>.fd-wordmark</code>/the mark. The 2026-08-13 "wordmark is the way out" lock in <code>front-door-shell.tsx</code> and its guard get updated, per the decision row.</p>
+</div>
+</div>
+
+<!-- ─────────────────────────── E ─────────────────────────── -->
+<h2><span>E</span>/features at phone width (390×844) — five plain groups, every feature one line + Try it + Free/price</h2>
+<div class="row">
+<div class="phone">
+  <div class="ptop"><span class="ham"><i></i><i></i><i></i></span><span class="fd-wordmark" style="font-size:14px">Setnayan</span><span style="width:24px"></span></div>
+  <div class="pbody">
+    <h3>Everything Setnayan does, in one place.</h3>
+    <p class="lead">Plan, invite, celebrate, remember — and for suppliers, get booked. Tap any one to try it.</p>
+    <div class="groups"><span class="on">Plan it</span><span>Invite &amp; gather</span><span>On the day</span><span>Keep the memories</span><span>For suppliers</span></div>
+
+    <div class="grp"><h4>Plan it</h4>
+      <div class="feat"><div class="media"><svg viewBox="0 0 24 24"><use href="#i-budget"/></svg></div><div><p class="nm">Budget</p><p class="ln">Every supplier, every payment, one ledger — in PHP.</p><div class="act"><span class="try">Try it</span><span class="price free">Free</span></div></div></div>
+      <div class="feat"><div class="media"><svg viewBox="0 0 24 24"><use href="#i-guests"/></svg></div><div><p class="nm">Guest list</p><p class="ln">Names, plus-ones, RSVPs and who still owes a reply.</p><div class="act"><span class="try">Try it</span><span class="price free">Free</span></div></div></div>
+      <div class="feat"><div class="media"><svg viewBox="0 0 24 24"><use href="#i-seat"/></svg></div><div><p class="nm">Seat plan</p><p class="ln">Drag guests to tables; the day rearranges with you.</p><div class="act"><span class="try">Try it</span><span class="price free">Free</span></div></div></div>
+      <div class="feat"><div class="media clip"><svg viewBox="0 0 24 24"><use href="#i-ai"/></svg></div><div><p class="nm">Setnayan AI</p><p class="ln">Ask for suppliers, timelines, budgets — it answers from your event.</p><div class="act"><span class="try">Try it</span><span class="price free">Free</span></div></div></div>
+      <div class="feat"><div class="media clip"><svg viewBox="0 0 24 24"><use href="#i-cube"/></svg></div><div><p class="nm">3D Plan</p><p class="ln">Walk the venue layout before the chairs arrive.</p><div class="act"><span class="try">Try it</span><span class="price free">Free</span></div></div></div>
+      <div class="feat"><div class="media"><svg viewBox="0 0 24 24"><use href="#i-shop"/></svg></div><div><p class="nm">Marketplace</p><p class="ln">Find suppliers by what they do, where, and for how much.</p><div class="act"><span class="try">Try it</span><span class="price free">Free</span></div></div></div>
+    </div>
+
+    <div class="grp"><h4>Invite &amp; gather</h4>
+      <div class="feat"><div class="media clip"><svg viewBox="0 0 24 24"><use href="#i-hub"/></svg></div><div><p class="nm">Event Hub</p><p class="ln">One link replaces every group chat — invite, RSVP, directions, the day's plan.</p><div class="act"><span class="try">Try it</span><span class="price free">Free</span></div></div></div>
+    </div>
+  </div>
+  <span class="scrollhint">1 / 2 · scrolls</span>
+  <div class="pfoot"></div>
+</div>
+
+<div class="phone">
+  <div class="ptop"><span class="ham"><i></i><i></i><i></i></span><span class="fd-wordmark" style="font-size:14px">Setnayan</span><span style="width:24px"></span></div>
+  <div class="pbody" style="padding-top:12px">
+    <div class="grp"><h4>Invite &amp; gather · continued</h4>
+      <div class="feat"><div class="media clip"><svg viewBox="0 0 24 24"><use href="#i-music"/></svg></div><div><p class="nm">Music Maker</p><p class="ln">Pick the songs for each moment; guests can suggest theirs.</p><div class="act"><span class="try">Try it</span><span class="price free">Free</span></div></div></div>
+    </div>
+    <div class="grp"><h4>On the day</h4>
+      <div class="feat"><div class="media clip"><svg viewBox="0 0 24 24"><use href="#i-cam"/></svg></div><div><p class="nm">Papic</p><p class="ln">Guests' phones become your photographers — one live gallery, no app.</p><div class="act"><span class="try">Try it</span><span class="price">Add-on · price from catalogue</span></div></div></div>
+      <div class="feat"><div class="media clip"><svg viewBox="0 0 24 24"><use href="#i-live"/></svg></div><div><p class="nm">Live Watch</p><p class="ln">Family abroad watches the ceremony live, from the Event Hub.</p><div class="act"><span class="try">Try it</span><span class="price">Unlock · price from catalogue</span></div></div></div>
+      <div class="feat"><div class="media clip"><svg viewBox="0 0 24 24"><use href="#i-tiktok"/></svg></div><div><p class="nm">Patiktok</p><p class="ln">A booth that turns guests' clips into one shareable reel.</p><div class="act"><span class="try">Try it</span><span class="price">Add-on · price from catalogue</span></div></div></div>
+    </div>
+    <div class="grp"><h4>Keep the memories</h4>
+      <div class="feat"><div class="media"><svg viewBox="0 0 24 24"><use href="#i-album"/></svg></div><div><p class="nm">Alaala · the memory album</p><p class="ln">Every photo, clip and message from the day, kept in one place.</p><div class="act"><span class="try">Try it</span><span class="price free">Free</span></div></div></div>
+    </div>
+    <div class="grp"><h4>For suppliers</h4>
+      <div class="feat"><div class="media"><svg viewBox="0 0 24 24"><use href="#i-shopfront"/></svg></div><div><p class="nm">Your shop</p><p class="ln">A page, a catalogue, quotes and bookings — 0% commission.</p><div class="act"><span class="try">Open a shop</span><span class="price free">Free to start</span></div></div></div>
+    </div>
+  </div>
+  <span class="scrollhint">2 / 2</span>
+</div>
+
+<div style="max-width:420px">
+  <p class="note"><b>Only what ships.</b> The list is Budget · Guest list · Seat plan · Setnayan AI · 3D Plan · Marketplace · Event Hub · Music Maker · Papic · Live Watch · Patiktok · Alaala · supplier shop. Mood Board, Schedule, Groups are left off this drawing until the build confirms each against <code>features-page-says-what-ships.test.ts</code>; add a row only when its Try page exists.</p>
+  <p class="note"><b>Prices are not drawn.</b> Papic, Live Watch and Patiktok show "price from catalogue" on purpose — the build reads <code>platform_retail_catalog_v2</code> at render, never a number from a design file (CLAUDE.md lock). "Free" rows are the planning tools the live page already calls "All your planning, free".</p>
+  <p class="note"><b>Try it</b> goes to the existing try pages (<code>/papic</code>, <code>/panood</code> for Live Watch, <code>/pa3d</code>, …) — no new pages. The group chips at the top are anchors into the same scroll; on desktop they become a left rail. The media slot is 96×72, a still or a looping short (▶ badge); the build fills it from the existing feature shots.</p>
+  <p class="note">This page replaces nothing in the URL space: it is the existing <code>/features</code> (+ <code>/tl/features</code>) rewritten into these five groups.</p>
+</div>
+</div>
+
+<div class="legend">
+  <div><b>Open questions for the owner (yes/no):</b> 1 · collapsed by default for returning visitors, or expanded? (drawn: expanded, remembered after first press). 2 · keep the tiny captions under icons when collapsed (drawn: yes, as the shipped strip does)?</div>
+  <div><b>Not in this drawing:</b> the signed-in rail's rows, the Tagalog twin, the desktop /features layout. Same mechanics apply.</div>
+</div>
+
+<!-- ── inline glyphs ── -->
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-telescope" viewBox="0 0 24 24"><path d="m10.065 12.493-6.18 1.318a.934.934 0 0 1-1.108-.702l-.537-2.15a1.07 1.07 0 0 1 .691-1.265l13.504-4.44"/><path d="m13.56 11.747 4.332-.924"/><path d="m16 21-3.105-6.21"/><path d="M16.485 5.94a2 2 0 0 1 1.455-2.425l1.09-.272a1 1 0 0 1 1.212.727l1.515 6.06a1 1 0 0 1-.727 1.213l-1.09.272a2 2 0 0 1-2.425-1.455z"/><path d="m6.158 8.633 1.114 4.456"/><path d="m8 21 3.105-6.21"/><circle cx="12" cy="13" r="2"/></symbol>
+  <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-2.12 6.36-6.36 2.12 2.12-6.36z"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-mark" viewBox="0 0 5333.3335 5333.3335"><path fill="#cb9e4b" transform="matrix(1.3333333,0,0,-1.3333333,0,5333.3333)" d="M 1859.526,3749.781 C 1458.028,3717.757 1065.454,3548.554 758.3406,3241.44 451.2286,2934.328 282.2397,2541.742 250.2195,2140.255 l 1326.8215,1.536 V 661.7647 C 1368.543,727.4195 1172.067,841.5416 1006.804,1006.804 768.3191,1245.29 633.8543,1548.261 602.7217,1859.526 H 250 C 282.024,1458.028 451.2265,1065.455 758.3406,758.3406 1065.453,451.2287 1458.039,282.2396 1859.526,250.2195 V 2422.739 H 661.7647 c 65.6549,208.498 179.7773,404.975 345.0393,570.237 238.486,238.486 541.457,372.95 852.722,404.083 z m 280.948,0 1.537,-1609.307 h 280.948 v 1197.761 c 208.498,-65.655 404.974,-179.776 570.237,-345.039 238.485,-238.486 372.95,-541.457 404.082,-852.722 H 3750 c -32.024,401.498 -201.226,794.071 -508.341,1101.185 -307.112,307.112 -699.697,476.101 -1101.185,508.122 z m 0,-1890.255 c 32.025,-401.498 201.227,-794.073 508.341,-1101.1854 0.658,-0.6584 1.316,-1.3173 1.975,-1.9754 -80.395,-42.041 -163.892,-76.0428 -249.331,-101.7389 -85.439,-25.696 -172.821,-43.0864 -260.985,-51.9046 V 250.2195 c 401.497,32.0253 794.073,201.0094 1101.185,508.1211 307.114,307.1134 476.317,699.6874 508.341,1101.1854 h -352.722 c -31.132,-311.265 -165.597,-614.236 -404.082,-852.722 -15.719,-15.7189 -32.464,-29.741 -48.727,-44.5564 -15.975,14.4789 -31.774,29.1397 -47.191,44.5564 -238.485,238.486 -372.95,541.457 -404.082,852.722 z"/></symbol>
+  <!-- feature media glyphs -->
+  <symbol id="i-budget" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></symbol>
+  <symbol id="i-guests" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-seat" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><circle cx="12" cy="3" r="1.5"/><circle cx="12" cy="21" r="1.5"/><circle cx="3" cy="12" r="1.5"/><circle cx="21" cy="12" r="1.5"/><circle cx="5.6" cy="5.6" r="1.5"/><circle cx="18.4" cy="18.4" r="1.5"/><circle cx="18.4" cy="5.6" r="1.5"/><circle cx="5.6" cy="18.4" r="1.5"/></symbol>
+  <symbol id="i-ai" viewBox="0 0 24 24"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></symbol>
+  <symbol id="i-cube" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></symbol>
+  <symbol id="i-shop" viewBox="0 0 24 24"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z"/><path d="M5 13v8h14v-8"/><path d="M10 21v-5h4v5"/></symbol>
+  <symbol id="i-hub" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+  <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
+  <symbol id="i-cam" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/></symbol>
+  <symbol id="i-live" viewBox="0 0 24 24"><path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="6" width="14" height="12" rx="2"/></symbol>
+  <symbol id="i-tiktok" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="m10 9 5 3-5 3z"/></symbol>
+  <symbol id="i-album" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></symbol>
+  <symbol id="i-shopfront" viewBox="0 0 24 24"><path d="M2 7h20"/><path d="M4 7l1-4h14l1 4"/><path d="M4 7v13h16V7"/><path d="M9 20v-6h6v6"/></symbol>
+</svg>
+</body>
+</html>
