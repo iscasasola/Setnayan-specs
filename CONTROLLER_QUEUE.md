@@ -48,7 +48,7 @@ Rules: newest at the top of each section · one item per line or block · a buil
   - desk 2026-10-01: owner says signed in ("3 of 3 opened now").
 
 ## 3 · In progress (controller)
-- 2026-10-01 15:00 · CLOUD (owner-started, Thursday credit): C1 P2 onboarding (Opus) · C2 P5a admin money + -2 (Opus) · C3 P3 supplier inbox + find (Opus) · C4 P4 supplier app (Opus) · C5 P10 /features (Sonnet) · C8 venue styles (Opus) · C9 Pro themes every type (Sonnet) — prompts in CLOUD_PROMPTS_CONTROLLER_2026-10-01.md.
+- 2026-10-01 15:00 · CLOUD (owner-started, Thursday credit): C1 P2 onboarding (Opus) · C2 P5a admin money + -2 (Opus) · C3 P3 supplier inbox + find (Opus) · C4 P4 supplier app (Opus) · C5 P10 /features (Sonnet) · C8 venue styles (Opus) · C9 Pro themes every type (Sonnet) · C10 simplified Maker (Opus) · C11 wedding onboarding lanes 1→2 (Opus) — prompts in CLOUD_PROMPTS_CONTROLLER_2026-10-01.md.
 - MAC: held step-4 PRs catch-up #6179 → #6175 → #6180 → #6162 → #6161 (Sonnet).
 - MAC: P7 Maker names/date wait for Apply (Opus) · #6225 CI fix + Google Sheets links + template row-1 bug (Sonnet) · desk items (a) Home each thing once + (b)(c) rail More Services sub-menu + monogram (Sonnet, two PRs).
 - Next when a Maker slot frees (max 2 Maker builders): the simplified Event Hub Maker — `prototypes/maker_in_four_2026-09-30_fable.html`, DECISION_LOG "THE MAKER RE-PLAN IS CUT TO ITS CORE" + "THE MAKER IN 4 IS A DIRECTION, NOT A COUNT".
