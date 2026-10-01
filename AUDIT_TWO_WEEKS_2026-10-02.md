@@ -52,3 +52,16 @@ Most "missed" items in C/F were already scheduled (front-door sidebar, wake/corp
 **B · Missed on paper, handled elsewhere and working** — slim Details (owner kept it → "Your info") · top-bar order (stages │ Details · Prints; "Maker in 4 is a direction") · Name style (Details + Wording ▾, one setting) · Messages in More (row exists; landing fix in A) · services scoping (category-level, inherited) · Stories consent on the account card · supplier region pages (by design, ≥3 real shops) · Booth Studio / NFC write (flag-off by design) · admin "Money +" (with the phone admin app).
 **C · No longer fits → rejected, left alone** — five signature reveals · foil Pro text effect elsewhere · Post Event "Clips" scene · snap-grid switch / free placement · confirm on Exit · drive time (distance only; don't guess) · a second Reply button inside the venue scene (one-button rule) · arena/movie ticket sizes.
 **Waiting for after the Apple check (owner rulings, not rejected)** — supplier toolkit (scan-to-claim, readiness checklist…), help chatbot, theme library, Mood Board supplier edits, 5 onboarding monograms, App-Bound Domains.
+
+## June → 16 Sep audit (finished 2026-10-02 ~03:30 PHT) — current decisions only
+| Window | Current rulings | Done | Needed (fix list) | Owner |
+|---|---|---|---|---|
+| 1–15 Jun | ~31 | 25 | names title-case as you type | d4 "Plan it myself" |
+| 16–30 Jun | ~200 | ~155 | stale-event rule (queue + resume email) | d11 auto-delete; DPO approvals |
+| 1–15 Jul | 55 | 28 of 38 checked | — | d10 calls paid/free |
+| 16–31 Jul | ~95 | 54 of 65 | found-you attribution (revenue) · "parish" copy | d6–d9 switches |
+| 1–15 Aug | ~55 | ~48 | auto-tagger 20 cap · "Journal" label | Bing sitemap; DPO paperwork |
+| 16–31 Aug | ~190 | 36 of 62 checked | wall replay · weather note | Supabase Pro; d5 |
+| 1–8 Sep | ~48 | ~38 | "Accept to see who" copy · shared live channel entitlement | — |
+| 9–16 Sep | 88 | 76 | Download my data completeness · specialisations follow 31 Dec | privacy calls (decided) |
+Every needed item is on the tracker's Fixing list; every owner question is a card on its Decide page. May is audited after the Apple check.
