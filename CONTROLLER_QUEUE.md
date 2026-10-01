@@ -19,6 +19,9 @@ Rules: newest at the top of each section · one item per line or block · a buil
 
 ## 2 · Needs the owner (controller → desk)
 <!-- Questions with a recommendation, owner actions (sign in, approve a design, check a phone card). -->
+- [ ] 2026-10-01 · Q1 PRIVACY — the self-serve data export (app/api/profile/export) gives a couple the face-tagging RECORDS (not face data) of every guest at their events. Controller recommends: fix now as its own small PR — export only the person's own face-tag rows.
+- [ ] 2026-10-01 · Q2 "Confirm only when Setnayan AI matched amount + reference" — an existing guard forbids the AI's screenshot reading from deciding approval on the payments desk, so the builder applied the rule only to the phone app's quick-Confirm button; "Record a payment received" (admin checked the bank) confirms at once. Controller recommends: accept that reading.
+- FYI owner: builders started as "cloud" actually ran on the Mac; controller stopped them (work pushed) and asks the owner to start real cloud sessions from CLOUD_PROMPTS_CONTROLLER_2026-10-01.md.
 - [ ] 2026-10-01 · Create the view-only Google Sheets guest-import template in Setnayan's Drive and share its link (for the "Open in Google Sheets" button, #6225 follow-up).
   - desk 2026-10-01: MADE (two sheets, links in §1). Owner still to set both to "Anyone with the link · Viewer".
 - [ ] 2026-10-01 · Review the per-event-type starter supplier categories in Admin › Event type › Scope categories once P3 lands.
