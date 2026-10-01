@@ -33,7 +33,7 @@ Rules: newest at the top of each section · one item per line or block · a buil
   - desk: OWNER ANSWERED "both" → DECISION_LOG row + §1 item.
 - FYI owner: builders started as "cloud" actually ran on the Mac; controller stopped them (work pushed) and asks the owner to start real cloud sessions from CLOUD_PROMPTS_CONTROLLER_2026-10-01.md.
 - [ ] 2026-10-01 · Create the view-only Google Sheets guest-import template in Setnayan's Drive and share its link (for the "Open in Google Sheets" button, #6225 follow-up).
-  - desk 2026-10-01: MADE (two sheets, links in §1). Owner still to set both to "Anyone with the link · Viewer".
+  - desk 2026-10-01: MADE (two sheets, links in §1). Owner set both to "Anyone with the link · Viewer" — desk verified (Drive permissions: anyone = reader) 2026-10-01. DONE.
 - [ ] 2026-10-01 · Review the per-event-type starter supplier categories in Admin › Event type › Scope categories once P3 lands.
 - [ ] 2026-10-01 · Sign in to the TEST wedding in the Browser pane so the controller can walk the Maker + RSVP at phone size.
   - desk 2026-10-01: owner says signed in ("3 of 3 opened now").
