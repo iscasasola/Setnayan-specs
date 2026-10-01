@@ -28,6 +28,9 @@ Rules: newest at the top of each section · one item per line or block · a buil
 
 ## 2 · Needs the owner (controller → desk)
 <!-- Questions with a recommendation, owner actions (sign in, approve a design, check a phone card). -->
+- [ ] 2026-10-01 · Q7 (from #6241) — the guest's digital pass LOOK (pass card style) still goes live at once. Make it wait for Apply? Trade-off: the ticket zip / phone-card print shows the old look until Apply. Controller recommends: YES (nothing in the Maker takes effect until Apply).
+- [ ] 2026-10-01 · Q8 (from #6241) — a NEW date every booked supplier CAN do is still held back at Apply by the old "a booked supplier's date can't move" rule. Controller recommends: a fitting date applies at Apply and each booked supplier gets a plain notice "The date moved to <date>"; only a clashing date goes to them for Move/Unlock (into the supplier-side Opus build).
+- FYI owner (from #6241's sweep): 8 Maker controls still save live (venues, reply-by date, address, prints words/menu, E-Gifts thank-you…); owner-locked exceptions stay live (who can view, go-live). Controller queues a follow-up to move the rest through Apply unless the owner objects.
 - [ ] 2026-10-01 · Q5 (from #6230) — picking a Name style (Full · Middle initial · Surname first) still goes live at once (same as Details' Name style ▾) while typed names wait for Apply. Controller recommends: YES, the style waits for Apply too (small follow-up).
   - desk: OWNER ANSWERED "yes — in the Event Hub Maker everything takes effect only when Apply is pressed" → DECISION_LOG row + §1 item. DONE.
 - [ ] 2026-10-01 · Q6 (from #6230) — with a supplier already booked, a date picked under "Help me choose" goes into the draft and is refused only at Apply. Controller recommends: refuse right at the pick, same reason.
