@@ -81,3 +81,18 @@ Budget is for tracking, never limiting (DECISION_LOG) — budget never hides or 
 curl -sL https://raw.githubusercontent.com/iscasasola/Setnayan-specs/main/CLOUD_PROMPTS_CONTROLLER_2026-10-01.md — read §0 and obey it. Then read IN FULL: WEDDING_ONBOARDING_HUB_SETUP_EVENT_DETAILS_BUILD_SPEC_2026-10-01.md (sections THE MAP, Behaviour "C = information only", Small calls) + design prototypes/event_details_one_page_2026-10-01_fable.html (+ .png). Branch rd/event-details-one-page.
 Replace the shipped /dashboard/[eventId]/details ("Personalization") with the ONE information-only sheet: every collected fact from THE MAP's "Event Details row" column; one quiet "Open … ›" link per section to the page that handles it (the deliberate exception to no-link-out); no suggestions; empty = "Not set yet"; locked rows 🔒; a button "Event Details" beside the event name on Event Home. Fix its live bugs: Ceremony venue "Not set" while booked; Reception shows the setting type; the word "vendors". Small calls (owner-approved): rename the Maker's "Details" tab to "Your info" (label only — keep the diff to the label); Key dates shows the next 2 supplier payments; a refused coordinator sees "Hidden by the couple" under Budget; the lock sheet keeps "Contact support"; "Open Services ›" → the More sheet's services rows, "Open Purchases ›" → the orders list. Read every fact from its existing home (no copy, no new table). Server components; shared bundle has ~0 headroom; no new server actions. Guard: every MAP row with an Event Details column renders on the page (count); sabotage-check. PR routine per §0; phone check card on a TEST event.
 ```
+
+## C13 · Admin plain English (P5b) — model **Sonnet**
+```
+curl -sL https://raw.githubusercontent.com/iscasasola/Setnayan-specs/main/CLOUD_PROMPTS_CONTROLLER_2026-10-01.md — read §0 and obey it. Then curl BUILD_PROMPTS_THU_2026-10-01.md and do section "P5 — Admin step 5" part **P5b** only, plus the "P5b addendum" at the bottom (the admin label "Ugat" shows as "Setup" everywhere a person reads it; code names/routes unchanged). Source: ADMIN_AUDIT_2026-09-30.md. P5a already merged (#6235, #6238 pending) — merge origin/main first and don't redo it. Branch rd/admin-plain-english. Never change identifiers, routes, DB keys or legal text.
+```
+
+## C14 · Event types Tier 1a — sides · wording · wedding religion (P6a) — model **Opus**
+```
+curl -sL https://raw.githubusercontent.com/iscasasola/Setnayan-specs/main/CLOUD_PROMPTS_CONTROLLER_2026-10-01.md — read §0 and obey it. Then curl BUILD_PROMPTS_THU_2026-10-01.md and do section "P6 — Event types, Tier 1" part **P6a** only (+ the P6 addendum), branch rd/event-types-tier-1a. P2 (onboarding engine) is MERGED (#6233, #6240) — read its profile fields on main. Source: EVENT_TYPE_RELIGION_AUDIT_2026-09-30.md. Ownership tonight: lib/print-seating-pack.ts belongs to P1b (not started — leave it), the plan-groups files were changed by P3 (#6234) — don't touch them; app/onboarding/** belongs to C11 — don't touch it. The ten themes are frozen.
+```
+
+## C15 · The wedding march is its own table (P1a, database) — model **Opus**
+```
+curl -sL https://raw.githubusercontent.com/iscasasola/Setnayan-specs/main/CLOUD_PROMPTS_CONTROLLER_2026-10-01.md — read §0 and obey it. Then curl BUILD_PROMPTS_THU_2026-10-01.md and do section "P1a — The wedding march is its own table" exactly (migration first via pnpm migration:new, RLS at CREATE TABLE, Ugat node + claims, one-time data migration, retire setWalkingPairCouple for −1 server action). Branch rd/march-is-its-own-table. The db tests (PGlite replay) run in CI's "typecheck + lint" job — run the touched db tests locally too. Never apply a migration to prod; the pipeline does.
+```
