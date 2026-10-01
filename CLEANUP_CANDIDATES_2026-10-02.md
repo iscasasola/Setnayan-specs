@@ -98,3 +98,219 @@ Method: for all 602 `page.tsx|route.ts`, tail-path search (static run after the 
 Note on dev labs: if the Vercel route cap is the pressure, the 5 `/dev/*` pages are the cheapest 5 routes to remove from the production build (e.g. move behind `pageExtensions` or delete once the owner has no drive left) — owner call.
 
 Slice C1 (11) + D1 + D2 + D3 + D4 (+ B6 counted once) = **15 routes** freeable with proof; C2 would add 17; clusters 2; dev labs 5.
+
+---
+
+## SLICE E — unused lib/component exports (bytes + noise only; frees no routes and no server actions — the server-action cases are in Slice A)
+
+Method: knip, tests counted as entries (so an export used only by a test is NOT here). Of 1,366 unused export names (625 files), **1,094 are used inside their own file** (drop the `export` keyword only — zero behaviour change, no byte change; skipped, regenerate with `npx knip --fix` if wanted) and **272 are not referenced even in their own file**; 127 of those names sit in EXCLUDE files and are dropped here, leaving **256 genuinely dead exports in 146 files** (none in EXCLUDE). A second pass searched every dead name as a whole word across app/lib/components/scripts/packages (non-comment lines, other files):
+- **E1 — 144 names with zero textual hit anywhere** → delete the declaration. Risk low. Several clusters are whole retired features (wizard — retired 2026-06-13; Concierge pricing — scrubbed 2026-05-28; token-era `vendor-tier-caps`; planner step resolver). List below.
+- **E2 — 112 names with some textual hit elsewhere** (a same-named local, a type, a comment-as-code string, or a re-export barrel such as `app/_components/plan3d/kit/index.ts` — 12 names). Needs a human glance per name; list shortened to files.
+
+### E1 (delete)
+
+- `app/[slug]/_components/editorial/living-moments.tsx`: LivingMoments
+- `app/[slug]/_components/reveal/veil-shared.ts`: makeVeilMaterial
+- `app/_components/event-monogram.tsx`: EmptyEventMonogram
+- `app/_components/plan3d/kit/blocky-parts.ts`: RIG_PART_KEYS
+- `app/_components/theme-provider.tsx`: THEME_MODES, isThemeMode
+- `app/_components/verification/verification-status-card.tsx`: VerificationStatusCard
+- `app/dashboard/(account)/create-event/_components/event-types.ts`: EVENT_TYPE_PHOTO_FALLBACK
+- `lib/account-face-profile.ts`: refineAccountProfileFromConfirmedTag
+- `lib/add-on-state.ts`: isEventExpired
+- `lib/api-keys.ts`: maskKey
+- `lib/background-videos.ts`: fetchPublishedBackgroundVideos
+- `lib/bespoke-monogram-shared.ts`: MAX_BESPOKE_ROUNDS_PER_EVENT, CANDIDATES_PER_ROUND
+- `lib/booking-fee.ts`: BOOKING_FEE_TAIL_RATE, BOOKING_FEE_TIER1_LIMIT_PHP
+- `lib/booth-poster.ts`: POSTER_MOBILE_W, POSTER_MOBILE_H
+- `lib/build-3state.ts`: isBuildState
+- `lib/checklist-state.ts`: CATEGORY_STATE_PROMPTS
+- `lib/closed-shop-slug.ts`: closedEventSlugHeldUntil
+- `lib/colour-access.ts`: domainLabelOf
+- `lib/concierge.ts`: CONCIERGE_PRICE_CENTAVOS, CONCIERGE_PRICE_PHP, CONCIERGE_STATUS_LABEL, CONCIERGE_STATUS_TONE
+- `lib/cookie-consent.ts`: hasDecidedConsent
+- `lib/coverage-allowed-events.ts`: isRestricted
+- `lib/creator-offers.ts`: fetchActiveCreatorCollabs
+- `lib/dangling-trade-keys.ts`: reportedHolders
+- `lib/demo-mode.ts`: isDemoModeFromRequest
+- `lib/dependency-graph.ts`: MUTUAL_PAIRS
+- `lib/details-bound.ts`: isDetailsFact
+- `lib/element-style.ts`: HUB_ELEMENT_MIN_CONTRAST (es)
+- `lib/email-verification.ts`: postSignupMessage
+- `lib/event-hero.ts`: HERO_ALSO_ON, HERO_STARTS
+- `lib/event-moderators.ts`: ROLE_SUBTYPE_HINT, isCurrentEventHost
+- `lib/event-noun.ts`: eventNounCap
+- `lib/event-poster.ts`: WHITE_TYPE_MIN_CONTRAST, whiteContrastOn
+- `lib/face-embed-core.ts`: FACE_EMBED_INPUT_SIZE
+- `lib/feel-palettes.ts`: seedPaletteFromFeel
+- `lib/fraud-detection-runner.ts`: maybeRunNightlyFraudScoring
+- `lib/fraud-enforcement.ts`: FRAUD_ENFORCEMENT_ACTIONS
+- `lib/gate-writers.ts`: isMentioned
+- `lib/geo.ts`: googleMapsSearchUrl
+- `lib/guest-journey.ts`: buildGuestJourney, activeJourneyKey, isGuestJourneyPath
+- `lib/guest-side-question.ts`: SIDELESS_GROUP_CATEGORY
+- `lib/hiring-guide/emails.ts`: sendHiringWeeklyDigestEmail
+- `lib/indoor-blueprint.ts`: wayfindingDefaultGrid
+- `lib/integration-config.ts`: getSecretPresenceMap
+- `lib/loader-config.ts`: LOADER_VARIANTS
+- `lib/logo-layers.ts`: penTime, logoTimeline
+- `lib/maker-media-limits.ts`: readCoupleMediaBytes
+- `lib/match-criteria.ts`: ALLOWED_REGIONS
+- `lib/monogram-studio-shared.ts`: STUDIO_INKS
+- `lib/monogram.ts`: compositeMonogram
+- `lib/moodboard-finalization.ts`: FINALIZABLE_PARTS
+- `lib/moodboard-slots.ts`: MOODBOARD_MAX_PHOTOS_PER_SLOT
+- `lib/oauth-token-vault.ts`: sealTokenOrNull
+- `lib/onboarding/solemn-content.ts`: baseAxesFor
+- `lib/papic-challenge-sql.ts`: CHALLENGE_SEED_MIGRATION
+- `lib/papic-one.ts`: papicOnePointsForSku, fetchPapicOneDedicatedPoints
+- `lib/papic-pass-tiers.ts`: isPapicPassSku
+- `lib/payment-channels.ts`: usesAccountList
+- `lib/payment-destination.ts`: describeDestinationChange, ACCOUNT_RAIL_CONTROLS
+- `lib/people-roster.ts`: EMPTY_ROSTER
+- `lib/person-life-stories.ts`: MEDIA_STORY_ORIGINS
+- `lib/planner.ts`: fetchManualStepCompletions, resolveStepStatuses, plannerProgress
+- `lib/post-event-styles.ts`: SUPPLIERS_LABEL
+- `lib/print-pieces.ts`: EMPTY_PRINT_DETAILS
+- `lib/provisional-approval.ts`: REVIEW_TZ_OFFSET
+- `lib/ranking-lenses.ts`: lensWeights
+- `lib/real-weddings.ts`: relatedRealWeddings, eventTypesInUse, weddingCeremonyTypesInUse, weddingCitiesInUse
+- `lib/region-source.ts`: regionByPsgc, regionDescriptor, regionCentroid, regionBurnBand
+- `lib/reveal-stages.ts`: revealStagesSentence
+- `lib/role-group-dress-code.ts`: groupRoleCount
+- `lib/role-names.ts`: hasRoleNames
+- `lib/roster-arrangement.ts`: arrangeLabel, serializeGrouping
+- `lib/rsvp-ask.ts`: rsvpAskConfigFits
+- `lib/rsvp-stage.ts`: isRsvpStageScene
+- `lib/scene-templates.ts`: sceneTemplateNeedsMedia
+- `lib/schedule-rail.ts`: pxToMinutes
+- `lib/security/kwento-moderation-authz.ts`: KWENTO_MODERATOR_MEMBER_TYPES
+- `lib/service-card-record.ts`: fetchServiceCardRecord
+- `lib/side-colors.ts`: SIDE_RING, SIDE_CHIP_SOFT, SIDE_CHIP
+- `lib/sku-catalog.ts`: RETIRED_SKU_CODES, BIR_MARKETPLACE_WITHHOLDING_PCT
+- `lib/spotlight-awards.ts`: fetchHomepageSpotlight
+- `lib/stories-templates.ts`: STORIES_ASPECT
+- `lib/taxonomy.ts`: MEGA_MENU_COLUMN_LABEL
+- `lib/theme-text-intent-model.ts`: clearThemeIntentModelCache, themeIntentModelCacheSize
+- `lib/turnstile.ts`: turnstileConfigured
+- `lib/two-admin-promise.ts`: compNeedsTwoAdmins
+- `lib/vendor-category-taxonomy.ts`: isExemptVendorCategory
+- `lib/vendor-counts.ts`: findTopVendorsByTile
+- `lib/vendor-day-of.ts`: servicesMatchConsoleKind, DAY_OF_CONSOLE_META
+- `lib/vendor-dayof-flags.ts`: isVendorGuestDeliveryEnabled
+- `lib/vendor-dayof-modules.ts`: getModule
+- `lib/vendor-event-fee-access.server.ts`: resolveEventFeeGates
+- `lib/vendor-invites.ts`: INVITE_PILL_COPY, INVITE_PILL_TONE, pillVariantFor, daysLeftFor
+- `lib/vendor-microsite.ts`: youTubeThumb
+- `lib/vendor-tier-caps.ts`: canAcceptInAppInquiries, vendorWhitelistPerDate, canUseWaitlist
+- `lib/vendors-plan-budget.ts`: formatPesoPrecise
+- `lib/venue-recommendations.ts`: PAIRED_VENUE_CONFIG, isCombinedVenue, formatVenueDayRate, formatVenueCapacity
+- `lib/vouchers/calculate.ts`: formatCentavosPeso
+- `lib/wedding-essentials.ts`: getWeddingEssential, isEssentialPlanGroup
+- `lib/wedding-roadmap.ts`: countRoadmapDone, ROADMAP_TOTAL, ROADMAP_ITEM_KEYS
+- `lib/wizard-recommendations.ts`: VENDOR_PICK_TASK_CANONICAL_SERVICES, fetchBookedMarketplaceVendorIdsForDate
+- `lib/wizard.ts`: getFirstUnmetPrereq, listInFlightTaskIds, countCompletedTasks
+
+### E2 (check each)
+
+- `app/[slug]/_components/reveal/veil-shared.ts`: markUrl
+- `app/[slug]/_components/story/spine-data.ts`: minutesForDay
+- `app/[slug]/print/keepsake-layout.ts`: editionVolume, toRoman, fmtCount
+- `app/_components/frontdoor/command-data.ts`: EVENT_TYPE_BADGE, EVENT_TYPE_TERMS
+- `app/_components/frontdoor/rail-data.ts`: RAIL_TOOLS
+- `app/_components/plan3d/kit/emotes.tsx`: EMOTE_STANDING_Y
+- `app/_components/plan3d/kit/figure.tsx`: WalkingFigure
+- `app/_components/plan3d/kit/index.ts`: resolveFigureLook, standPose, walkCyclePose, runCyclePose, jellySquash, sitPose, idleSway, staffIdle, STAFF_IDLE_KINDS, overlayPose, damp, JOINTS, SKIN_TONES, HAIR_COLORS, HAIR_STYLE_COUNT, FACE_VARIANT_COUNT, outfitMaterial, BoothChassis, CHASSIS_SPECS, BoothProp, BoothTextSign, BOOTH_TEMPLATES, BOOTH_TEMPLATE_KEYS, boothTemplateFor, boothChassisSpec, boothHitVolume, GENERIC_BOOTH_HIT, templateBoothObstacles, coldSparkFrame, coldSparkObstacles, coldSparkPathNodes, coldSparkProgress, coldSparkIntensity, COLD_SPARK_LENGTH_M, COLD_SPARK_CLIMAX_T, EMOTE_STANDING_Y, ActiveChair, useSitController, stringLightStrandCount, stringLightBulbColor, buildSitBakedLocals, instanceColorFor, SIT_PART_KEYS
+- `app/vendor-dashboard/bookings/surface.tsx`: metadata
+- `app/vendor-dashboard/calendar/surface.tsx`: metadata
+- `app/vendor-dashboard/clients/surface.tsx`: metadata
+- `app/vendor-dashboard/contracts/surface.tsx`: metadata
+- `app/vendor-dashboard/earnings/surface.tsx`: metadata
+- `app/vendor-dashboard/messages/surface.tsx`: metadata
+- `app/vendor-dashboard/payday/surface.tsx`: metadata
+- `app/vendor-dashboard/payment-options/surface.tsx`: metadata
+- `app/vendor-dashboard/proposals/surface.tsx`: metadata
+- `lib/anniversary-emails.ts`: ANNIVERSARY_SUPPORT_EMAIL
+- `lib/color-vocabulary.generated.ts`: SETNAYAN_PALETTES, SETNAYAN_ANCHORS
+- `lib/creator-public.ts`: fetchPublishedChapters
+- `lib/creator-teaser.ts`: TEASER_FOOTER, TEASER_PALETTE
+- `lib/event-accepts-captures.ts`: EVENT_PUT_AWAY_CAPTURE_COPY
+- `lib/event-moderators.ts`: HOST_ROLES_BY_EVENT_TYPE, hostRolesForEventType
+- `lib/event-preload.ts`: eventBundleQueryKeys
+- `lib/event-viewer.server.ts`: viewerAreaLevel
+- `lib/export-completeness.ts`: exportedTables
+- `lib/ghost-listing-detector.ts`: GHOST_LISTING_REASON_LABEL
+- `lib/guest-claim.ts`: CONFIDENT_MATCH, UNAMBIGUOUS_MARGIN, MAX_NAME_LENGTH, normalizeName, nameSimilarity, classifyClaimMatch
+- `lib/integrations/registry.ts`: projectNumberFromClientId
+- `lib/live-studio-readiness-server.ts`: resolveLiveStudioReadiness
+- `lib/monogram-studio-fonts.ts`: STUDIO_FONTS, studioFontUrl
+- `lib/monogram-studio-shared.ts`: STUDIO_FONTS, studioFontUrl
+- `lib/moodboard-gallery-upload.ts`: HIT_SEVERITY, blockingHits, flaggedHits, parseScreenFindings, rejectionSentence
+- `lib/package-choice-tree.ts`: EMPTY_SELECTION
+- `lib/papic-limited.ts`: PAPIC_CAMERAS_ORDER_KEY
+- `lib/patiktok-tiktok.ts`: publishPatiktokCompilation
+- `lib/patiktok.ts`: categoryLabel
+- `lib/periodic-jobs.ts`: PERIODIC_JOBS, PERIODIC_JOB_KEYS, RETENTION_JOB_KEYS
+- `lib/plausibility-scanner.ts`: PLAUSIBILITY_REASON_LABEL
+- `lib/qr-monogram-raster.ts`: compositeMonogramOntoQrPng
+- `lib/review-fraud-screener.ts`: REVIEW_FRAUD_REASON_LABEL
+- `lib/save-the-date-emails.ts`: fanOutInvitationEmails
+- `lib/seating-3d.ts`: effectiveCapacity
+- `lib/site-search.ts`: READ_SOURCE_NOUNS
+- `lib/story-sheet.ts`: sheetAspect
+- `lib/studio-rail.ts`: RAIL_TOOLS
+- `lib/thank-you-video.ts`: THANK_YOU_FOOTER, THANK_YOU_MIN_PHOTOS, THANK_YOU_PALETTE
+- `lib/type-in-place.ts`: isHubTypePart
+- `lib/vendor-microsite.ts`: youTubeEmbedUrl
+
+Special cases inside E: the nine `app/vendor-dashboard/*/surface.tsx` files each export an unused `metadata` (Next ignores metadata outside page/layout — safe, one line each). `lib/color-vocabulary.generated.ts` and `lib/papic-challenge-sql.ts` are generated — fix the generator, not the file. Test-only exports (used by a test but no production code) were deliberately NOT listed: ~430 more names; leave them, the tests pin behaviour.
+
+---
+
+## SLICE F — libs that only their own test imports (built + tested, never mounted)
+
+Knip with tests ignored lists 53 more files whose only importer is a `*.test.ts`. 32 of them are **test infrastructure** (guards and scanners — `lib/security/*`, `lib/ugat/*`, `*-scan.ts`, `raw-number-scan`, `retired-names-scan`, `rsc-function-props`, `lingering-transform`, `probe-logging-rule`, `visibility-caller-rule`, `render-settled.test-helper`, `seating-golden-room.fixture`, `export-completeness`, `dangling-trade-keys`, `taxonomy-merge-holders`, `subprocessors`, `color-vocabulary.generated`, `papic-challenge-sql`) — KEEP, they are the guards. The rest are **features that were built and tested but nothing mounts them** — this is "unfinished or parked", not provably retired, so under the 2026-10-02 never-resurrect and simplification rules they go to the owner as a yes/no, never auto-removed:
+`lib/dependent-moments.ts` (2026-07-31) · `lib/faith-rites.ts` (07-12) · `lib/life-story-summary-line.ts` (09-27) · `lib/merkado-build-options.ts` (07-10) · `lib/papic-pool-learning.ts` (09-22) · `lib/papic-pool-sizing.ts` (09-23) — both RECENT, likely in-flight · `lib/paid-placement-disclosure.ts` (09-22, backs a guard promise) · `lib/rsvp-projection.ts` (09-21) · `lib/self-comp-authority.ts` · `lib/self-purchase.ts` (self-purchase confirm, token era? — unverified) · `lib/setnayan-ai-pricing.ts` (07-02) · `lib/slot-seat-reservations.ts` + `-flag.ts` (parked, allow-listed) · `lib/vendor-free-tier-booking-cap.ts`, `lib/vendor-launch-free-window.ts` + `-flag.ts` (parked, allow-listed) · `lib/vendor-profile-tips.ts` (07-01) · `lib/wedding-essentials.ts` (08-27, "7-card free DIY surface") · `lib/render/recap-ffmpeg.ts` + `recap-select.ts` ("Group B prototype · Oracle Always-Free", 2026-06-28) · `lib/bespoke-monogram-engine.ts` · `lib/hub-fonts-most-used.ts` · `lib/encoder/{audio-mixer,audio-tap.worklet,backpressure-ring}.ts` + `lib/live-studio-encoder-bitrate.ts` (encoder S-series — ACTIVE build, do not touch) · `lib/recraft.ts` (used by scripts + secrets registry — keep).
+Strongest by age + prototype self-label: `lib/render/recap-*.ts` (2 files + 2 tests), `lib/wedding-essentials.ts`. Not proposed — owner decision.
+
+## SLICE G — retired features: what the code search found
+
+Searched the retirement rows named in the brief:
+- **Token wallet, token balance, Pabati** — 0 hits in app/lib/components outside tests: already cleaned (token retirement 2026-08-07; Pabati→Papic 2026-08-23). Residue is only B1 (`OfflineSyncProvider`, the Pabati-era offline mount) and B2 (`lib/supplies`) above, and the payment chain B6.
+- **Old monogram templates** — no `MONOGRAM_TEMPLATES` / `monogram_template` in code; the only leftover is `lib/calligraphy.ts` (B3).
+- **"Your year"** — the page is a redirect stub (`/dashboard/year`, keep: digest email CTA). **Clusters** (`/dashboard/clusters`, `[clusterId]`, 19 KB, 2 routes) — shipped 2026-09-02 as Item 7 and NOT retired by any row I found, but nothing links to it (no nav entry, no card). It may be a build waiting for its door rather than a shell. Owner: wire it or retire it.
+- **Padlocks → diamonds, Pakulay** — remaining hits are visible COPY, not dead code (`Pakulay mood board` strings in `app/page.tsx`, `app/features/page.tsx`, `app/tl/features/page.tsx`, `lib/help.ts`; `Lock` icons are real lock affordances in admin). `lib/retired-names-scan.ts` lists the retired names (Pakanta, Samahan, Alaala, Alaga, Panood, Kwento) as renames — identifiers are deliberately kept per DECISION_LOG "ONLY PAPIC KEEPS A CUSTOM NAME", so nothing there is removable. Whether "Pakulay" is also a retired display name is for the owner (it is in public marketing copy).
+- **Old onboarding screens replaced by the setup engine** — `/onboarding/wedding`, `/onboarding/[type]`, `/onboarding/simple` are all linked or current and receive today's work (10-01 "finish the event onboarding engine"). Nothing to remove yet.
+
+## SLICE I — flags permanently off with code behind them (item 4)
+Cannot be proven from code: every flag is an env var whose value lives only in Vercel (46 `lib/*-flag.ts` files; only 3 have zero importers, all in B-hold as allow-listed "built ahead of consumer"). To finish this item, pull the prod env into the scratchpad (per memory "Read a Setnayan prod flag value"), then any flag that is unset/false AND whose feature a DECISION_LOG row retired is a candidate. Most likely sets: `chat-negotiation-flag` (the change-request half is dead — Slice A3), `public-api-flag` (locked "plumb the gateway only"), `onboarding-v2-brief-flag`. Not proposed without the values.
+
+## SLICE H — public/ images (deploy size, not bundle)
+662 of 994 files (32.8 MB of 120 MB) are not named by any code string. Most live in directories addressed by a slug built at run time or stored in the database (onboarding refinements/prefs/cities/picker, demo/*, reveal/textures) — **do not remove on this evidence**. Directories with ZERO textual reference of any kind, the only ones worth a run-time check against DB paths: `public/hero/variants` (5 files, 0.63 MB), `public/bir-forms/2307-2018-ENCS.pdf` (0.34 MB — BIR 2307 retired 2026-05-29), `public/cipher/{strokes,glyphs}` (15 files, 0.55 MB — Cipher Studio assets), `public/taxonomy/tiles` (11 files, 0.8 MB), `public/onboarding/{budget,pax}` (42 files, 1.65 MB). The BIR form is the one with a retiring row (V2 publisher posture, 2026-05-29).
+
+---
+
+## SUMMARY (counts are tool-proven and outside the EXCLUDE list)
+| Slice | What | Files | Routes freed | Server actions freed | Approx source bytes |
+|---|---|---|---|---|---|
+| A | zero-caller actions (delete 12, un-export 4) | 6 edited | 0 | 16 | ~25 KB |
+| B | files nothing imports (B1-B6) | 19 deleted + route | 1 (initialize-maya) | 4 (verify actions) | ~121 KB |
+| C1 | redirect stubs, no in-app link | 11 | 11 | 0 | ~10 KB |
+| C2 | stubs still in nav registries | 17 | 17 | 0 | ~15 KB (owner call) |
+| D | unreachable pages/routes (D1 check-email, D2 mesh-call chain, D3 sync-device) | 8 | 3 (+1 counted in B6) | 0 | ~50 KB |
+| E | dead exports (E1 144 / E2 112 to eyeball) | 146 edited | 0 | 0 | ~30 KB est. |
+| F | tested-but-unmounted libs | owner list | 0 | 0 | — |
+| G/I/H | retired features, flags, public images | see text | clusters 2 (owner) | 0 | public/ up to ~3.5 MB |
+
+Routes freeable with proof today: **15** (C1 11 + D1 + D2 + D3 + B6's route). Cap is 2,057 vs 2,048 = 9 over, so C1 alone clears it. Server actions freed: **20** (A 16 + B5 4).
+
+## HOW EACH SLICE SHOULD BE REMOVED (one small PR each, in this order)
+1. A (actions) — pure deletions + regenerate `admin-jobs.generated.ts`; fix `the-change-marker-is-retired.test.ts`.
+2. B2 + B3 + B4 + B1 (no guards read them except baseline rows).
+3. C1 (+ drop the 3 registry-array entries it names).
+4. D1/D2.
+5. B5, B6, D3 (guard tests that read the files by path need re-anchoring; payments/crew files want the controller's eye).
+6. E1.
+Everything else waits for the owner.
+
+Method caveats (what I could NOT see): already-sent emails, DB-stored URLs (notification `relatedUrl`, `nav_slot_override`), Vercel env flag values, bookmarks. Static `import()` strings, `.bind`, `next/dynamic` and string route references were all searched. Knip ran with `@/` alias resolved; unresolved/generated imports could hide a user (Slice E2 flags them).
