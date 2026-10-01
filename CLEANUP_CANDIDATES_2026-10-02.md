@@ -263,7 +263,7 @@ Method: knip, tests counted as entries (so an export used only by a test is NOT 
 - `lib/type-in-place.ts`: isHubTypePart
 - `lib/vendor-microsite.ts`: youTubeEmbedUrl
 
-Special cases inside E: the nine `app/vendor-dashboard/*/surface.tsx` files each export an unused `metadata` (Next ignores metadata outside page/layout — safe, one line each). `lib/color-vocabulary.generated.ts` and `lib/papic-challenge-sql.ts` are generated — fix the generator, not the file. Test-only exports (used by a test but no production code) were deliberately NOT listed: ~430 more names; leave them, the tests pin behaviour.
+Special cases inside E: the nine `app/vendor-dashboard/*/surface.tsx` files each export an unused `metadata` (Next ignores metadata outside page/layout — safe, one line each). `lib/color-vocabulary.generated.ts` and `lib/papic-challenge-sql.ts` are generated — fix the generator, not the file. Test-only exports (used by a test but no production code) were deliberately NOT listed: ~1,700 more names; leave them, the tests pin behaviour.
 
 ---
 
