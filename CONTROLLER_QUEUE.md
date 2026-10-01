@@ -46,3 +46,7 @@ Rules: newest at the top of each section · one item per line or block · a buil
 - Desk §1 items (a)(b)(c)(d) taken by the controller 2026-10-01 15:00.
 
 ## 4 · Done (controller, with PR + live SHA)
+
+## 5 · After the Apple check (parked — nothing here starts before step 7)
+<!-- Desk adds owner-decided work that is explicitly post-Apple. The controller promotes an item to §1 once the Apple check is done. -->
+- [ ] 2026-10-01 · **Theme library upgrade** · DECISION_LOG "THE THEME LIBRARY UPGRADE WAITS UNTIL AFTER THE APPLE CHECK…" + "NEW THEMES COME TWO WAYS: BUILT IN CLAUDE CODE, OR MADE IN AN ADMIN THEME GENERATOR" · extends lib/invite-themes.ts (today 10 hand-coded themes), app/[slug]/_components/skins/site-skin.tsx (fonts), app/dashboard/[eventId]/launch/_components/maker-theme-picker.tsx, the profile's `look_set` (P2), the /themes pages (P10 slice f) · needs a Fable design first (the picker at 100 themes + the admin Theme generator) · **Opus** (schema + Maker). Parts: (1) every theme tagged "every event" or "recommended for <types>"; (2) dedicated themes per type (first three suggested: wake/memorial · kids' birthday · debut); (3) picker built for 100 — Recommended for your event, then All themes, one Filter ▾ + search; (4) themes move to ONE list in the database that both code-built themes and an admin **Theme generator** (palette · font library · ornament · loop/poster · motion · events · Free/Pro · live preview · contrast check · publish) write to; the ten shipped themes migrate unchanged.
