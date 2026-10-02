@@ -1,6 +1,6 @@
-# Ugat map — first run of Screens · Doors (2026-10-02)
+# Root map — first run of Screens · Doors (2026-10-02)
 
-Generated from code by `pnpm --filter @setnayan/web ugat:screens --report` (setnayan-platform, `apps/web/scripts/gen-ugat-screens.ts`). Owner rulings: DECISION_LOG 2026-10-02 "ONE MAP OF THE APP", its amendment "THE APP MAP STARTS FRIDAY" and "THE UGAT MAP IS ALSO THE APP'S OWN DEFINITION OF WHAT IT DOES". Live view: Admin › Set up › Screens. This is the FIX LIST the first run was asked to produce.
+Generated from code by `pnpm --filter @setnayan/web ugat:screens --report` (setnayan-platform, `apps/web/scripts/gen-ugat-screens.ts`). Owner rulings: DECISION_LOG 2026-10-02 "ONE MAP OF THE APP", its amendment "THE APP MAP STARTS FRIDAY" and "THE UGAT MAP IS ALSO THE APP'S OWN DEFINITION OF WHAT IT DOES". Root map is the owner's name for the Ugat map (DECISION_LOG 2026-10-02); code paths keep `ugat`. Live view: Admin › Root map › Screens. This is the FIX LIST the first run was asked to produce.
 
 ## The numbers
 
@@ -11,7 +11,7 @@ Generated from code by `pnpm --filter @setnayan/web ugat:screens --report` (setn
 | **Not connected — no way in** | **24** |
 | Legacy stubs — old addresses that only forward somewhere else | 38 |
 | **Doors to nowhere — a link to an address nothing answers** | **1** |
-| Unmapped — no Ugat node (the page reads no mapped table) | 33 |
+| Unmapped — no Root map node (the page reads no mapped table) | 33 |
 
 ## 1 · Not connected (no door)
 
@@ -124,7 +124,7 @@ Plus these next.config.ts redirects (old public addresses kept alive for bookmar
 - `/weddings/:slug` → `/realstories/:slug`
 - `/why-setnayan` → `/features`
 
-## 4 · Screens with no Ugat node (unmapped)
+## 4 · Screens with no Root map node (unmapped)
 
 Most are content pages (legal, about, help) that read no data and need no node. The ones that DO hold product data are the gaps: the map cannot say what they are about.
 
@@ -137,7 +137,7 @@ Most are content pages (legal, about, help) that read no data and need no node. 
 
 ## 5 · Every screen, by area
 
-| screen | status | doors | Ugat node(s) |
+| screen | status | doors | Root map node(s) |
 |---|---|---|---|
 | **Host app** | | | |
 | `/dashboard` | connected | 73 | Events, Guests, Orders & activations, Papic, Person, Proposal, Run of Show, Group, Threads, Users, Vendors |
@@ -479,5 +479,5 @@ Most are content pages (legal, about, help) that read no data and need no node. 
 - **A screen** is a `page.tsx` outside `app/admin` (the admin map already covers the console). Intercepting modal routes are a second view of an existing screen and are not counted.
 - **A door** is an address written where it will be followed: an `href`, a `router.push`, a `redirect()`, a `routes.…()` builder, a menu-registry slot (`lib/nav-registry-defaults.ts`, which also says phone vs desktop), an email or notification link, a URL helper's return value or a named address constant. A link from a page to itself does not count, and neither do doors from the admin console, sitemaps, next.config redirects or dev pages — they do not bring the person the screen is for.
 - **It cannot see** an address assembled entirely at run time (`${base}/${key}` from a list of keys), or a link that arrives from outside the code (a QR printed on paper, an address typed from a poster). So "no door" means "no door in the code" — check before deleting.
-- **A Ugat node** comes from the tables the page reads (in the page and two imports deep), through the same table → node binding the concept-coverage check uses. No table, no node; nothing is guessed.
+- **A Root map node** comes from the tables the page reads (in the page and two imports deep), through the same table → node binding the concept-coverage check uses. No table, no node; nothing is guessed.
 - **Next (Saturday, slice 2):** the FIELDS layer (every input → the one table.column it saves to), the "this fact already lives in X" check, and switching the CI check from report mode to failing on a NEW no-door screen (today's list is the baseline it ratchets from).
