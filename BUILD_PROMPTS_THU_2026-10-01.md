@@ -5,6 +5,20 @@ Written by the planner (Fable) 2026-10-01 from: `DECISION_LOG.md` rows dated 202
 How: Claude app → New session → Cloud (or a Mac worktree where the table says MAC) → repo **iscasasola/setnayan-platform** → paste COMMON RULES + ONE prompt. The controller merges, batches, deploys. **Before starting any prompt:** `gh pr list --state open --limit 40` and `git branch -r | grep rd/` — if a branch/PR for it already exists (G1 `rd/onboarding-engine`, G4 `rd/lane-2`, #6225 guest import), continue it; never start a second copy (CLAUDE.md Rule 0 · rule 8).
 
 ## COMMON RULES (paste first, every time)
+
+> ⚠️ **CHANGED SINCE THESE PROMPTS WERE WRITTEN (2026-10-02) — every upcoming build reads this first and adjusts; where a prompt below disagrees, THIS wins.**
+> 1. **Names:** "Event Details" everywhere ("Your info" retired) · "Suppliers" everywhere ("Your Team"/"vendor" retired in UI) · plain names first, brand small under ("Guest photos · Papic", "Video booth · Patiktok", "Music · Pakanta", "Live stream · Live Watch"). Pending owner (tracker d19–d25): "book" not "lock", "Saved" not "bench", "quote" not "proposal", one supplier money word, no "Who can reply?" pop-up, no QR card in sign-up, "The Day" vs "On the Day" — read the answers before writing copy.
+> 2. **One home per fact:** every answer about an event lives in Event Details; other screens SHOW it, never set it (DECISION_LOG "ONE HOME, MAPPED"). Never add a second store for a fact.
+> 3. **Maker in 4** (#6291): toolbar is Exit · Page ▾ · Look · Event Details · Undo · Phone · Apply · ⋯ — no build adds a top-level Maker button; new things go in ⋯ or inside a panel. Nothing in the Maker takes effect until Apply.
+> 4. **Removed pages (do not link or rebuild):** full-page More Services (`/suite`, `/studio` index) → the More menu (`studioHubHref`); Taxonomy Studio / aliases / per-type event-type pages / Traditions tab → Admin › Categories & event types; `/details/change` → Event Details › Event settings. Old addresses forward via `lib/legacy-redirects.ts`.
+> 5. **Root map ratchet is STRICT:** a build may not add a screen with no way in, a broken link, a fact in two homes, a field filled but not saved, a typed live-looking number, or the same fact shown twice; a fixed finding must leave its baseline. Run `root-map` before opening the PR.
+> 6. **Pro unlocks the EVENT** (every host): entitlement reads go through `eventEntitlementClient`. Prices only from `platform_retail_catalog_v2`. Sign-up discount = 40% from one admin setting.
+> 7. **Last-seen data** (#6288): host pages may cache their last view; money is never cached; a page you add to it must mark money parts.
+> 8. **Problems** (#6281): failures are recorded centrally — don't add per-screen logging.
+> 9. **Budgets:** shared bundle has <1 KB spare — new client code must lazy-load. Server actions ≤1225, Maker ≤517,120 B, routes ≤2000.
+> 10. **Tours are the LAST build before the Apple check** (spotlight style approved) — don't add tours in feature builds now.
+> 11. **Every build:** design MATCHES/DIFFERS list, REACHABLE trace, replace means remove, a phone check card.
+
 ```
 Model: Opus · effort: medium. You are a builder in iscasasola/setnayan-platform (Next.js monorepo, apps/web). Read CLAUDE.md at the repo root and obey it. Clone iscasasola/Setnayan-specs and read INTERACTION_RULES.md (one way to ask/choose/navigate/search/do; two looks) plus every DECISION_LOG row named in the prompt before coding. Work from a fresh worktree of origin/main (never ~); install node_modules there (a fresh worktree "passes" tsc/tests while resolving nothing).
 RULE 0: find and extend what exists — the prompt names the shipped files; open them first; never a second registry, resolver or mechanism; a flag/filter flip beats new schema. Plain English; "Event Hub" never "website"; "supplier" never "vendor" in UI copy; no casual greetings on guest pages; 3+ choices = ONE PickMenu dropdown, never a pill row; no "edit elsewhere ↗"; Pro is ◆ and never blocks trying; no confirm dialogs unless destructive. Phone first (390 px): title ≤5 words + one line ≤12 words, details behind ⓘ, first real thing in the top third.
