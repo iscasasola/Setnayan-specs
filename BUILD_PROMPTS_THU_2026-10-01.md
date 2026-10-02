@@ -18,6 +18,7 @@ How: Claude app → New session → Cloud (or a Mac worktree where the table say
 > 9. **Budgets:** shared bundle has <1 KB spare — new client code must lazy-load. Server actions ≤1225, Maker ≤517,120 B, routes ≤2000.
 > 10. **Tours are the LAST build before the Apple check** (spotlight style approved) — don't add tours in feature builds now.
 > 11. **Every build:** design MATCHES/DIFFERS list, REACHABLE trace, replace means remove, a phone check card.
+> 12. **Build so the app can grow past events** (owner 2026-10-02, DECISION_LOG "FUTURE DIRECTION … BEYOND EVENTS"): next come car/house maintenance ("My things"), "nearest" services (vulcanizing, EV charging by connector type) and shops listing items in stock. Where it costs nothing, don't hard-code "event"/"wedding" into shared pieces — shops, categories (grouped by type of need), location pins/radius, chat, quotes, booking, payments, reviews stay usable for a non-event anchor. Never build those features now; just don't close the door.
 
 ```
 Model: Opus · effort: medium. You are a builder in iscasasola/setnayan-platform (Next.js monorepo, apps/web). Read CLAUDE.md at the repo root and obey it. Clone iscasasola/Setnayan-specs and read INTERACTION_RULES.md (one way to ask/choose/navigate/search/do; two looks) plus every DECISION_LOG row named in the prompt before coding. Work from a fresh worktree of origin/main (never ~); install node_modules there (a fresh worktree "passes" tsc/tests while resolving nothing).
