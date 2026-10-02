@@ -8,94 +8,181 @@
 <style>
   :root{--ink:#1e2229;--muted:#6b6f76;--bg:#f7f4ef;--card:#fff;--gold:#b8934a;--wine:#6e2a3a;--line:#e8e2d8}
   *{box-sizing:border-box}
-  body{margin:0;background:#e9e5de;font-family:"Hanken Grotesk",system-ui,sans-serif;color:var(--ink);display:flex;flex-wrap:wrap;gap:32px;justify-content:center;padding:32px 16px}
-  .col{display:flex;flex-direction:column;gap:12px;align-items:center;max-width:420px}
-  .note{font-size:13px;color:var(--muted);max-width:390px;text-align:center;line-height:1.45}
+  body{margin:0;background:#e9e5de;font-family:"Hanken Grotesk",system-ui,sans-serif;color:var(--ink);display:flex;justify-content:center;padding:28px 16px}
+  .col{display:flex;flex-direction:column;gap:12px;align-items:center}
+  .note{font-size:13px;color:var(--muted);max-width:390px;text-align:center;line-height:1.45;margin:0}
   .phone{position:relative;width:390px;height:780px;background:var(--bg);border-radius:44px;border:10px solid #15171b;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.18)}
-  .scr{position:absolute;inset:0;padding:54px 18px 96px;overflow:hidden}
-  .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-  .ev{font-family:"Cormorant Garamond",serif;font-size:28px;font-weight:600}
+  .screen{position:absolute;inset:0;padding:54px 18px 96px;transition:transform .45s cubic-bezier(.2,.8,.2,1),opacity .35s}
+  .screen.off{opacity:0;transform:translateX(40px);pointer-events:none}
   .eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:2px}
-  .btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:999px;font-weight:600;font-size:14px;border:1px solid var(--ink);background:transparent;color:var(--ink)}
+  .h{font-family:"Cormorant Garamond",serif;font-size:28px;font-weight:600;margin:0 0 14px}
+  .top{display:flex;justify-content:space-between;align-items:flex-start}
+  .btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:999px;font-weight:600;font-size:14px;border:1px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer;user-select:none}
   .btn.fill{background:var(--ink);color:#fff}
-  .next{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px}
-  .next h3{margin:4px 0 6px;font-size:18px}
-  .next p{margin:0 0 12px;color:var(--muted);font-size:14px}
-  .edit{width:100%;margin-bottom:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px}
+  .card h3{margin:4px 0 6px;font-size:18px}
+  .card p{margin:0 0 12px;color:var(--muted);font-size:14px}
+  .wide{width:100%;margin-bottom:14px}
   .nums{display:flex;gap:10px;margin-bottom:14px}
   .num{flex:1;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
-  .num b{display:block;font-size:22px}
+  .num b{display:block;font-size:22px;transition:transform .3s}
   .num span{font-size:12px;color:var(--muted)}
-  .money{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;justify-content:space-between;font-size:14px}
-  .bar{position:absolute;left:0;right:0;bottom:0;height:84px;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding-top:10px}
-  .tab{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--muted);width:76px}
+  .bump{animation:bump .5s}
+  @keyframes bump{40%{transform:scale(1.35);color:var(--wine)}}
+  .bar{position:absolute;left:0;right:0;bottom:0;height:84px;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding-top:10px;z-index:2}
+  .tab{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--muted);width:76px;cursor:pointer}
   .tab.on{color:var(--wine);font-weight:600}
   .ico{width:24px;height:24px;border-radius:7px;border:2px solid currentColor}
+  /* maker */
+  .hub{background:linear-gradient(160deg,#3b2a33,#6e2a3a 60%,#b8934a);border-radius:20px;height:360px;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;margin-bottom:14px}
+  .hub .names{font-family:"Cormorant Garamond",serif;font-size:40px;font-weight:600;padding:2px 8px;border-radius:8px;cursor:text}
+  .hub .names.editing{background:rgba(255,255,255,.15);outline:2px dashed rgba(255,255,255,.7)}
+  .caret{display:inline-block;width:2px;height:34px;background:#fff;vertical-align:middle;animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .mbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .pill{font-size:13px;color:var(--muted)}
+  /* lists */
+  .row{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:8px;font-size:14px}
+  .av{width:34px;height:34px;border-radius:50%;background:#e8dfd2;display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--wine)}
+  .row small{color:var(--muted);display:block}
+  .slidein{animation:slidein .45s cubic-bezier(.2,.8,.2,1)}
+  @keyframes slidein{from{opacity:0;transform:translateY(-14px) scale(.97)}}
+  .bubble{align-self:flex-end;background:var(--ink);color:#fff;border-radius:16px 16px 4px 16px;padding:10px 14px;font-size:14px;max-width:80%;margin:6px 0 6px auto;width:fit-content}
+  .bubble.them{background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:16px 16px 16px 4px;margin-left:0}
+  .typing{display:inline-flex;gap:4px}
+  .typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:dot 1s infinite}
+  .typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+  @keyframes dot{50%{transform:translateY(-4px);opacity:.4}}
+  .toast{position:absolute;left:50%;top:60px;transform:translate(-50%,-30px);opacity:0;background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;z-index:9;transition:all .4s cubic-bezier(.2,.8,.2,1)}
+  .toast.show{transform:translate(-50%,0);opacity:1}
   /* ── the spotlight ── */
-  .dim{position:absolute;inset:0;z-index:5;pointer-events:auto}
-  .ring{position:absolute;z-index:6;border-radius:999px;box-shadow:0 0 0 9999px rgba(15,17,21,.62);outline:3px solid #fff;outline-offset:4px;transition:all .35s ease;pointer-events:none}
-  .ring::after{content:"";position:absolute;inset:-10px;border-radius:inherit;border:2px solid rgba(255,255,255,.55);animation:pulse 1.6s ease-out infinite}
-  @keyframes pulse{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.18)}}
-  @media (prefers-reduced-motion:reduce){.ring,.tip{transition:none}.ring::after{animation:none}}
-  .tip{position:absolute;z-index:7;left:16px;right:16px;background:#fff;border-radius:16px;padding:14px 16px;box-shadow:0 10px 30px rgba(0,0,0,.25);transition:top .35s ease}
-  .tip h4{margin:0 0 4px;font-size:16px}
+  .ring{position:absolute;z-index:6;border-radius:999px;box-shadow:0 0 0 9999px rgba(15,17,21,.64);outline:3px solid #fff;outline-offset:4px;transition:all .55s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+  .ring::after{content:"";position:absolute;inset:-10px;border-radius:inherit;border:2px solid rgba(255,255,255,.6);animation:pulse 1.6s ease-out infinite}
+  @keyframes pulse{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.2)}}
+  .blocker{position:absolute;inset:0;z-index:5}
+  .hole{position:absolute;z-index:7;cursor:pointer;border-radius:999px}
+  .tip{position:absolute;z-index:8;left:16px;right:16px;background:#fff;border-radius:18px;padding:14px 16px;box-shadow:0 14px 36px rgba(0,0,0,.28);transition:top .5s cubic-bezier(.2,.8,.2,1)}
+  .tip.pop{animation:pop .45s cubic-bezier(.2,1.4,.4,1)}
+  @keyframes pop{from{opacity:0;transform:translateY(10px) scale(.94)}}
+  .tip .step{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:2px}
+  .tip h4{margin:0 0 4px;font-size:17px}
   .tip p{margin:0 0 12px;font-size:14px;color:#3a3e45;line-height:1.4}
-  .tip .row{display:flex;justify-content:space-between;align-items:center}
-  .dots{display:flex;gap:5px}
-  .dots i{width:6px;height:6px;border-radius:50%;background:#d9d3c8}
-  .dots i.on{background:var(--wine)}
-  .skip{background:none;border:0;color:var(--muted);font:inherit;font-size:14px;min-height:44px;padding:0 8px}
-  .tip .btn{min-height:40px}
-  .done{position:absolute;inset:0;z-index:8;display:none;align-items:center;justify-content:center;background:rgba(15,17,21,.62)}
+  .tip .hint{font-size:13px;color:var(--wine);font-weight:600;margin:-6px 0 10px}
+  .tip .rowb{display:flex;justify-content:space-between;align-items:center}
+  .prog{height:4px;border-radius:4px;background:#efe9df;flex:1;margin:0 12px;overflow:hidden}
+  .prog i{display:block;height:100%;background:var(--wine);transition:width .5s}
+  .skip{background:none;border:0;color:var(--muted);font:inherit;font-size:14px;min-height:44px;padding:0 4px;cursor:pointer}
+  .finger{position:absolute;z-index:9;width:34px;height:34px;pointer-events:none;opacity:0;transition:left .8s cubic-bezier(.2,.8,.2,1),top .8s cubic-bezier(.2,.8,.2,1),opacity .3s}
+  .finger.tap{animation:tap .9s ease-in-out infinite}
+  @keyframes tap{50%{transform:scale(.8)}}
+  .done{position:absolute;inset:0;z-index:10;display:none;align-items:center;justify-content:center;background:rgba(15,17,21,.6)}
   .done .tip{position:static;margin:0 16px;text-align:center}
+  .confetti{position:absolute;inset:0;z-index:11;pointer-events:none;overflow:hidden}
+  .confetti i{position:absolute;top:-12px;width:8px;height:12px;border-radius:2px;animation:fall 1.8s ease-in forwards}
+  @keyframes fall{to{transform:translateY(820px) rotate(540deg);opacity:.2}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <div class="col">
-  <div class="phone" id="phone">
-    <div class="scr">
-      <div class="top"><div><div class="eyebrow">Wedding · 30 Oct</div><div class="ev">Rosa &amp; Ben</div></div><span class="btn" data-tour="details" style="min-height:36px;font-size:13px">Event Details</span></div>
-      <div class="next" data-tour="next"><div class="eyebrow">Next</div><h3>Finish your Event Hub</h3><p>3 things left: your photo, your look, your RSVP questions.</p><span class="btn fill">Continue</span></div>
-      <span class="btn edit" data-tour="edit">Edit your Event Hub</span>
-      <div class="nums" data-tour="nums"><div class="num"><b>28</b><span>days to go</span></div><div class="num"><b>2</b><span>coming</span></div><div class="num"><b>3</b><span>no reply</span></div></div>
-      <div class="money"><span>Paid ₱0</span><span>Still owing ₱0</span></div>
-    </div>
-    <div class="bar">
-      <div class="tab on"><div class="ico"></div>Home</div>
-      <div class="tab" data-tour="guests"><div class="ico"></div>Guests</div>
-      <div class="tab" data-tour="team"><div class="ico"></div>Your Team</div>
-      <div class="tab" data-tour="more"><div class="ico"></div>More</div>
-    </div>
-    <div class="ring" id="ring"></div>
-    <div class="tip" id="tip"><h4 id="t"></h4><p id="b"></p><div class="row"><button class="skip" id="skip">Skip tour</button><div class="dots" id="dots"></div><span class="btn fill" id="go">Next</span></div></div>
-    <div class="done" id="done"><div class="tip"><h4>You're set</h4><p>Tap <b>Continue</b> on the Next card any time — it always shows the one thing to do next, with a "Show me".</p><span class="btn fill" id="again">Show me again</span></div></div>
+<div class="phone" id="phone">
+
+  <!-- HOME -->
+  <div class="screen" id="s-home">
+    <div class="top"><div><div class="eyebrow">Wedding · 30 Oct</div><div class="h">Rosa &amp; Ben</div></div><span class="btn" style="min-height:36px;font-size:13px">Event Details</span></div>
+    <div class="card" id="nextcard"><div class="eyebrow">Next</div><h3 id="nexttitle">Make your Event Hub yours</h3><p id="nextline">Start with your names on the first screen.</p><span class="btn fill" data-k="continue" id="continue">Continue</span></div>
+    <span class="btn wide">Edit your Event Hub</span>
+    <div class="nums"><div class="num"><b>28</b><span>days to go</span></div><div class="num"><b id="coming">2</b><span>coming</span></div><div class="num"><b id="noreply">3</b><span>no reply</span></div></div>
   </div>
-  <p class="note">Sample only (sample names and numbers). Tap <b>Next</b>. The screen dims, a ring circles the real button, one line explains it. On the real app the tour continues onto the next page and resumes if you stop.</p>
+
+  <!-- MAKER -->
+  <div class="screen off" id="s-maker">
+    <div class="mbar"><span class="pill">✕ Event Hub Maker</span><span class="btn fill" data-k="apply" style="min-height:38px">Apply</span></div>
+    <div class="hub"><div class="eyebrow" style="color:#f1d9a7">Together with their families</div><div class="names" data-k="names" id="names">Rosa &amp; Ben</div><div style="opacity:.85;margin-top:8px">Friday · 30 October 2026</div></div>
+    <div class="pill">Tap any words to type. Nothing goes live until Apply.</div>
+  </div>
+
+  <!-- GUESTS -->
+  <div class="screen off" id="s-guests">
+    <div class="top"><div class="h">Guests</div><span class="btn fill" data-k="addguest" style="min-height:38px">+ Add guest</span></div>
+    <div id="glist">
+      <div class="row"><div class="av">LD</div><div>Lorna Dimaculangan<small>No reply yet</small></div></div>
+      <div class="row"><div class="av">JM</div><div>Jun Mendoza<small>Coming</small></div></div>
+    </div>
+  </div>
+
+  <!-- TEAM -->
+  <div class="screen off" id="s-team">
+    <div class="h">Your Team</div>
+    <div class="row" data-k="chat" id="supplier"><div class="av">LS</div><div style="flex:1">Lumina Studio<small>Photo &amp; video · Tagaytay</small></div><span class="btn" style="min-height:36px">Chat</span></div>
+    <div id="chat" style="display:none;flex-direction:column;margin-top:10px"></div>
+  </div>
+
+  <div class="bar">
+    <div class="tab on" data-tab="home"><div class="ico"></div>Home</div>
+    <div class="tab" data-tab="guests" data-k="guests"><div class="ico"></div>Guests</div>
+    <div class="tab" data-tab="team" data-k="team"><div class="ico"></div>Your Team</div>
+    <div class="tab"><div class="ico"></div>More</div>
+  </div>
+
+  <div class="blocker" id="blocker"></div>
+  <div class="ring" id="ring"></div>
+  <div class="hole" id="hole" title="Tap it"></div>
+  <svg class="finger" id="finger" viewBox="0 0 24 24"><path fill="#fff" stroke="#1e2229" stroke-width="1.2" d="M9 11V5.5a1.5 1.5 0 0 1 3 0V10l.5-.1a1.5 1.5 0 0 1 2 1.2l.1.4a1.5 1.5 0 0 1 2.4.9V13a1.4 1.4 0 0 1 2.5.9v2.6c0 3-2.4 5.5-5.4 5.5h-1.4a5.5 5.5 0 0 1-4.6-2.5L5.4 15a1.4 1.4 0 0 1 2.2-1.8L9 14.6"/></svg>
+  <div class="tip" id="tip"><div class="step" id="stepn"></div><h4 id="t"></h4><p id="b"></p><div class="hint" id="hint">Tap it yourself — or press Next</div><div class="rowb"><button class="skip" id="skip">Skip</button><div class="prog"><i id="bar"></i></div><span class="btn fill" id="go" style="min-height:40px">Next</span></div></div>
+  <div class="toast" id="toast"></div>
+  <div class="done" id="done"><div class="tip"><div class="step">Done</div><h4>You're set 🎉</h4><p>Whenever you're unsure, the <b>Next</b> card on Home shows the one thing to do — tap <b>Show me</b> and we'll walk you there.</p><span class="btn fill" id="again">Play again</span></div></div>
+  <div class="confetti" id="confetti"></div>
+</div>
+<p class="note">Interactive sample (sample names). The screen dims, the ring glides to the real button and a hand shows where to tap. <b>Tap the lit button yourself</b> — it does the real thing (opens the Maker, types your names, applies, adds a guest, starts a chat) — or press Next.</p>
 </div>
 <script>
+const $=id=>document.getElementById(id), phone=$('phone');
 const steps=[
- {k:'next',t:'Start here, every time',b:'This card always shows the one next thing to do. Tap Continue and we take you there.'},
- {k:'edit',t:'Your Event Hub',b:'Your invitation, RSVP and event page. Tap to design it — nothing goes live until you press Apply.'},
- {k:'guests',t:'Guests',b:'Add your guests, send invitations and see who replied.'},
- {k:'team',t:'Your Team',b:'Find suppliers, chat with them, and book. Everything you agree on lands here.'},
- {k:'details',t:'Event Details',b:'Names, date, venue and every answer about your event live here — change them any time.'},
- {k:'more',t:'More',b:'Papic, music, live stream and the rest of your services.'}
+ {k:'continue',scr:'home',t:'Start here, every time',b:'The Next card always shows the one thing to do next.'},
+ {k:'names',scr:'maker',t:'Tap any words to type',b:'Your Event Hub is the editor — tap your names and type right there.'},
+ {k:'apply',scr:'maker',t:'Apply when you’re happy',b:'Nothing goes live for guests until you press Apply.'},
+ {k:'guests',scr:'home',t:'Your guests',b:'Add guests, send invitations, see who replied.'},
+ {k:'addguest',scr:'guests',t:'Add your first guest',b:'One tap — type a name and they get their own invitation and QR.'},
+ {k:'team',scr:'guests',t:'Your Team',b:'Find suppliers, chat, book — all in one place.'},
+ {k:'chat',scr:'team',t:'Chat with a supplier',b:'Ask anything. What you agree on is saved here for you.'}
 ];
-let i=0;const phone=document.getElementById('phone'),ring=document.getElementById('ring'),tip=document.getElementById('tip');
-const dots=document.getElementById('dots');steps.forEach(()=>dots.appendChild(document.createElement('i')));
-function show(){
- const el=phone.querySelector('[data-tour="'+steps[i].k+'"]');const p=phone.getBoundingClientRect(),r=el.getBoundingClientRect();
- const pad=8,x=r.left-p.left-10-pad,y=r.top-p.top-10-pad,w=r.width+pad*2,h=r.height+pad*2;
- Object.assign(ring.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px',borderRadius:(h>70?'22px':'999px')});
- document.getElementById('t').textContent=steps[i].t;document.getElementById('b').textContent=steps[i].b;
- [...dots.children].forEach((d,n)=>d.className=n===i?'on':'');
- const below=y+h+18;tip.style.top=(below+150<760?below:Math.max(20,y-170))+'px';
- document.getElementById('go').textContent=i===steps.length-1?'Done':'Next';
+let i=0,busy=false;
+function screen(name){['home','maker','guests','team'].forEach(n=>$('s-'+n).classList.toggle('off',n!==name));
+ document.querySelectorAll('.tab[data-tab]').forEach(t=>t.classList.toggle('on',t.dataset.tab===name||(name==='maker'&&t.dataset.tab==='home')));}
+function target(){return phone.querySelector('[data-k="'+steps[i].k+'"]')}
+function place(){
+ const el=target(),p=phone.getBoundingClientRect(),r=el.getBoundingClientRect(),pad=8;
+ const x=r.left-p.left-10-pad,y=r.top-p.top-10-pad,w=r.width+pad*2,h=r.height+pad*2,rad=h>70?'22px':'999px';
+ Object.assign($('ring').style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px',borderRadius:rad});
+ Object.assign($('hole').style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px',borderRadius:rad});
+ const tip=$('tip');const below=y+h+20;tip.style.top=(below+190<770?below:Math.max(16,y-205))+'px';
+ tip.classList.remove('pop');void tip.offsetWidth;tip.classList.add('pop');
+ $('stepn').textContent='Step '+(i+1)+' of '+steps.length;$('t').textContent=steps[i].t;$('b').textContent=steps[i].b;
+ $('bar').style.width=((i+1)/steps.length*100)+'%';$('go').textContent=i===steps.length-1?'Finish':'Next';
+ const f=$('finger');f.classList.remove('tap');f.style.opacity=0;f.style.left=(x+w+30)+'px';f.style.top=(y+h+40)+'px';
+ setTimeout(()=>{f.style.opacity=1;f.style.left=(x+w/2-6)+'px';f.style.top=(y+h/2-4)+'px';setTimeout(()=>f.classList.add('tap'),800)},700);
 }
-function end(){ring.style.display='none';tip.style.display='none';document.getElementById('done').style.display='flex'}
-document.getElementById('go').onclick=()=>{i<steps.length-1?(i++,show()):end()};
-document.getElementById('skip').onclick=end;
-document.getElementById('again').onclick=()=>{i=0;ring.style.display='';tip.style.display='';document.getElementById('done').style.display='none';show()};
+function show(){screen(steps[i].scr);setTimeout(place,steps[i].scr?260:0)}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600)}
+function act(k,then){
+ if(k==='continue'){screen('maker');then(450)}
+ else if(k==='names'){const n=$('names');n.classList.add('editing');n.innerHTML='<span class="caret"></span>';const s='Rosa & Benjamin';let j=0;
+   const tick=setInterval(()=>{j++;n.innerHTML=s.slice(0,j).replace('&','&amp;')+'<span class="caret"></span>';if(j>=s.length){clearInterval(tick);setTimeout(()=>{n.classList.remove('editing');n.textContent=s;then(200)},500)}},70)}
+ else if(k==='apply'){toast('Applied ✓ — guests see it now');setTimeout(()=>{screen('home');$('nexttitle').textContent='Add your guests';$('nextline').textContent='Your Event Hub is ready.';then(450)},900)}
+ else if(k==='guests'){screen('guests');then(450)}
+ else if(k==='addguest'){const d=document.createElement('div');d.className='row slidein';d.innerHTML='<div class="av">AR</div><div>Ana Reyes<small>Invitation ready · QR made</small></div>';$('glist').prepend(d);toast('Ana Reyes added');then(900)}
+ else if(k==='team'){screen('team');then(450)}
+ else if(k==='chat'){const c=$('chat');c.style.display='flex';c.innerHTML='<div class="bubble slidein">Hi! Are you free on 30 Oct?</div><div class="bubble them slidein"><span class="typing"><i></i><i></i><i></i></span></div>';
+   setTimeout(()=>{c.lastChild.innerHTML='Yes, we are! Here’s our package 📷';then(900)},1300)}
+}
+function advance(){if(busy)return;busy=true;$('finger').style.opacity=0;$('ring').style.opacity=.0001;$('tip').style.opacity=0;
+ act(steps[i].k,(wait)=>setTimeout(()=>{busy=false;$('ring').style.opacity=1;$('tip').style.opacity=1;i<steps.length-1?(i++,show()):finish()},wait))}
+function finish(){['ring','tip','hole','blocker','finger'].forEach(id=>$(id).style.display='none');$('done').style.display='flex';
+ const c=$('confetti');c.innerHTML='';const cols=['#b8934a','#6e2a3a','#fff','#e8c88a','#c97b8d'];
+ for(let n=0;n<70;n++){const e=document.createElement('i');e.style.left=Math.random()*100+'%';e.style.background=cols[n%5];e.style.animationDelay=(Math.random()*.6)+'s';e.style.animationDuration=(1.4+Math.random())+'s';c.appendChild(e)}}
+$('go').onclick=advance;$('hole').onclick=advance;$('skip').onclick=finish;
+$('again').onclick=()=>location.reload();
 window.addEventListener('load',show);
 </script>
 </body>
