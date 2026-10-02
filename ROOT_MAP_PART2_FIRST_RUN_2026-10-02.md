@@ -2,7 +2,7 @@
 
 Generated from code by `pnpm --filter @setnayan/web root-map --report` (setnayan-platform, `apps/web/scripts/root-map.ts`). Owner rulings: DECISION_LOG 2026-10-02 "ONE MAP OF THE APP", "EVERY ANSWER ABOUT AN EVENT LIVES IN EVENT DETAILS — ONE HOME, MAPPED", "THE ROOT MAP ALSO CATCHES 'PRESSED BUT WENT TO THE WRONG PLACE' AND 'FILLED IN BUT NOT SAVED'", "…A NUMBER THAT LOOKS LIVE BUT IS TYPED IN", "TWO MORE THINGS EVERY BUILD IS CHECKED FOR" and "THE ROOT MAP IS A BACKEND THING". Part 1 (Screens · Doors) is in `UGAT_MAP_FIRST_RUN_2026-10-02.md`. Root map is the owner's name for the Ugat map; code keeps `lib/ugat`.
 
-**What changed today:** every one of these checks now runs in CI on every pull request. Today's findings are written down as the starting list (the "baseline"), so CI is green today — and anything NEW of a kind marked "fails CI" below stops the build (the six the owner named: no way in, doors to nowhere, one home, filled-but-not-saved, typed-in numbers, and the same fact shown twice). The list can only get shorter.
+**What changed today:** every one of these checks now runs in CI on every pull request. Today's findings are written down as the starting list (the "baseline"), so CI is green today — anything NEW of a kind marked "fails CI" below stops the build (the six the owner named: no way in, doors to nowhere, one home, filled-but-not-saved, typed-in numbers, and the same fact shown twice). It is strict both ways: when one of those is FIXED, the same pull request must also remove its line from the list, or CI fails — so a fixed problem cannot quietly come back. The list can only get shorter.
 
 ## The numbers
 
