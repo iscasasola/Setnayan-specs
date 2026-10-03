@@ -4,6 +4,16 @@ Copied from the local handoff CURRENT-STATE.md (top blocks only). Newest block f
 
 **The plan + checklist:** corpus `RELEASE_RSVP_INVITATION_2026-09-30.md` (top: build sequence across 3 accounts; checklist by step 1–7; items 1–18 — **#18 = Thursday FIRST**). Rules: `INTERACTION_RULES.md`. Rulings: `DECISION_LOG.md` (2026-09-30 + 2026-10-01 rows). Cloud prompts: `CLOUD_PROMPTS_OCT1_2026.md` (G1–G7) + `CLOUD_PROMPTS_OCT3_2026-09-30.md` (A–F).
 
+## ▶ STATE Sun 4 Oct ~02:20 PHT — CLOUD CONTROLLER · BUILDERS STOPPED BY THE WEEKLY LIMIT (newest)
+- At ~11:30 UTC 3 Oct all four running builders died on "You've hit your weekly limit · resets 6pm (UTC)". LIVE is unchanged: **777cf8f** (train b).
+- SAVED: C2 People with access — rd/people-with-access @ 35afc47 (2 commits: feat + merge of main; 43 files, migration 20271262573732_an_area_set_to_off_is_closed.sql). PUSHED by the controller, NO PR yet, local checks NOT confirmed complete → next session: open draft PR, run full checks, watch CI. Worktree /home/user/wt-c2.
+- NOT STARTED (died during Rule 0, nothing committed): rd/train-b-follow-ups (restore hardening · /nikah return path · flaky session-budget test) and the Fable Follow + Add-to-event plan → re-launch.
+- ⛔ ON HOLD, DO NOT REBUILD AS BRIEFED: the "Story tab" move (owner #5). Controller found the Story tab exists only in Save the Date + Invitation (stage-bar.ts); corrected proposal sent to owner (column → Camera on the day + Recap after; 3D → Welcome on the day; keepsake reel → Recap; remove "Everything else") — AWAITING owner "yes". DECISION_LOG row "GUEST COLUMNS + 3D ROOM + KEEPSAKE REEL MOVE INTO THE GUEST'S STORY TAB" needs amending once he answers.
+- GREEN DRAFTS for train c: #6308 event-hub-calm @ eb68ea89 (owner approved 1A) · #6310 Discover card @ 1fda1411 (C8 session; was asked to cut / JS +15.7 KB — check its reply).
+- Owner answers logged 03 Oct: 1A #6308 · 3 = one host approval setting for ALL supplier requests · 4 = default "I check and approve / reject" · supplier page Follow + Add to an event (direction). Owner action pending: GUEST_COLUMNS_ENABLED=true in Vercel.
+- QUEUE after C2: host approval setting (Event Details › Privacy) + S1 supplier schedule/card fixes · S2 scan · S3 Papic→supplier page · S4 supplier page "Their work" · Follow + Add to event (after Fable plan + owner yes).
+- TRAP: every NON-draft PR gets auto-merge re-armed → keep drafts; ENV_RULES.md in the cloud scratchpad says so (re-create it in a new session — scratchpad does not travel).
+
 ## ▶ STATE Sat 3 Oct ~19:05 PHT — SUNDAY ACCOUNT CLOUD CONTROLLER (newest)
 - LIVE: **777cf8f** = train b #6314 (#6312 DELETE…WHERE · #6307 slim top bar · #6295 guest flow · #6311 guest list · #6306 Home). deploy-prod run 37117729658 success; Vercel prod deployment READY on 777cf8f; migration 20271261953500 in prod ledger. Sonnet audit: no blockers.
 - FOLLOW-UPS from the audit (next train): restoreDeletedGuests must only restore really-deleted guests + server-side decided_by/decided_at (song-request attribution forge, own event only) · /nikah redirect('/login') without return path · plan-phase Home no longer shows set-date / Papic-ready nudges, "Plan next year", tea-ceremony tile (owner told) · flaky unit test suspect lib/supabase/session-budget.test.ts.
