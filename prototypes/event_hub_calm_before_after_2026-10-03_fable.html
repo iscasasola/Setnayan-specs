@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Event Hub calm — before / after #6308 — Setnayan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FAF7F2;--paper2:#F3EEE6;--page:#EDE7DE;--ink:#1E2229;--ink2:#3B3F46;--mute:#76736D;
+  --gild:#B08A5B;--gild-soft:#E9DEC9;--gild-wash:#F7F1E6;--wine:#6E2A3A;--wine-wash:#F6ECEE;
+  --line:#E5DED3;--ok:#2F6B4F;--okbg:#E7F1EA;
+  --serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --sans:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--page);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:36px 24px 40px}
+
+/* ---------- page furniture (owner-facing) ---------- */
+.doc-brand{font-size:10.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--gild);font-weight:600}
+h1{font-family:var(--serif);font-weight:500;font-size:38px;line-height:1.1;margin:8px 0 10px;letter-spacing:-.01em}
+.lead{color:var(--ink2);font-size:14.5px;line-height:1.6;max-width:900px;margin:0 0 22px}
+.head{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:0 0 40px}
+.box{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px 18px;font-size:13px;color:var(--ink2);line-height:1.55}
+.box h3{font-family:var(--serif);font-size:20px;font-weight:500;margin:0 0 8px;color:var(--ink)}
+.box ul{margin:0;padding-left:18px}
+.box li{margin:4px 0}
+.box b{color:var(--ink);font-weight:600}
+.box .q{font-family:var(--serif);font-style:italic;font-size:14.5px;color:var(--ink)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--ink2);align-items:center}
+
+.screen{margin:0 0 54px}
+.screen h2{display:flex;align-items:baseline;gap:12px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink2);font-weight:600;margin:0 0 6px}
+.screen h2 .n{font-family:var(--serif);font-size:24px;font-weight:500;color:var(--gild);letter-spacing:0;line-height:1}
+.what{font-family:var(--serif);font-size:21px;font-weight:500;color:var(--ink);margin:0 0 16px;letter-spacing:-.01em}
+.what b{color:var(--wine);font-weight:600}
+.pair{display:grid;grid-template-columns:375px 375px;gap:28px 56px;justify-content:start}
+.col .cap{font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.col .cap i{font-style:normal;display:inline-block;width:9px;height:9px;border-radius:50%}
+.col.before .cap{color:var(--ink2)} .col.before .cap i{background:var(--ink2)}
+.col.after .cap{color:var(--ok)} .col.after .cap i{background:var(--ok)}
+.foot{font-size:12.5px;color:var(--mute);margin:14px 0 0;max-width:806px;line-height:1.55}
+@media (max-width:860px){.pair{grid-template-columns:375px}.head{grid-template-columns:1fr}.wrap{padding:24px 16px}}
+
+/* ---------- phone frame (375 wide, as tall as its content) ---------- */
+.phone{width:375px;background:var(--paper);border:8px solid #14161A;border-radius:44px;position:relative;overflow:hidden;display:flex;flex-direction:column;min-height:700px;
+  box-shadow:0 0 0 1px #2E3238,0 36px 60px -30px rgba(30,34,41,.45),0 14px 26px -18px rgba(30,34,41,.25)}
+.phone .island{position:absolute;left:50%;top:10px;transform:translateX(-50%);width:112px;height:31px;background:#14161A;border-radius:20px;z-index:5}
+.phone .status{height:50px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 8px;font-size:13.5px;font-weight:600;position:relative;z-index:3}
+.phone .status .sig{display:flex;gap:6px;align-items:center;font-size:11px;letter-spacing:.06em}
+.phone .status .bat{width:24px;height:11px;border:1.5px solid var(--ink);border-radius:4px;position:relative;opacity:.9}
+.phone .status .bat:after{content:"";position:absolute;left:2px;top:2px;bottom:2px;right:5px;background:var(--ink);border-radius:1px}
+.scr{flex:1;padding:2px 18px 18px;display:flex;flex-direction:column;min-height:0;position:relative}
+.homebar{height:28px;flex:none;position:relative}
+.homebar:after{content:"";position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.85}
+
+/* the guest's own bottom bar (the shipped menu's items) */
+.bnav{background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:9px 6px 28px;font-size:10.5px;color:var(--mute);font-weight:500;flex:none;position:relative}
+.bnav span{display:flex;flex-direction:column;align-items:center;gap:4px;width:64px}
+.bnav svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.bnav span.on{color:var(--wine);font-weight:600}
+.bnav:after{content:"";position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.85}
+
+/* ---------- type + atoms (Classic look, from the approved landing page) ---------- */
+.brand{text-align:center;font-size:9.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--gild);font-weight:600;margin:6px 0 10px}
+.eyebrow{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--gild);font-weight:600}
+.h{font-family:var(--serif);font-size:26px;font-weight:500;line-height:1.1;margin:4px 0 6px;letter-spacing:-.01em;color:var(--ink)}
+.sub{font-size:13px;color:var(--ink2);margin:0;line-height:1.45}
+.btn{display:block;text-align:center;padding:13px 12px;border-radius:999px;font-size:14px;font-weight:500;border:1.5px solid var(--ink);color:var(--ink);margin-top:10px;background:#fff;line-height:1.2}
+.btn.fill{background:var(--ink);color:var(--paper)}
+.btn.soft{border:1px solid var(--line);background:#fff;color:var(--ink2)}
+.btn.mul{background:var(--wine);border-color:var(--wine);color:#fff;border-radius:10px}
+.link{display:block;text-align:center;color:var(--wine);text-decoration:underline;text-underline-offset:3px;font-size:13px;font-weight:500;margin-top:12px}
+.hint{font-size:12px;color:var(--mute);text-align:center;margin:8px 0 0}
+.center{text-align:center}
+.done{display:inline-block;background:var(--okbg);color:var(--ok);font-weight:600;font-size:12.5px;border-radius:999px;padding:5px 12px;margin:2px 0 8px}
+.fld{border:1px solid var(--line);background:#fff;border-radius:14px;padding:8px 14px;font-size:14px;margin-top:8px;color:var(--ink);display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:500;min-height:48px;position:relative}
+.fld small{display:block;font-size:10px;color:var(--mute);letter-spacing:.12em;text-transform:uppercase;margin-bottom:1px;font-weight:500}
+.fld i{font-style:normal;color:var(--gild);font-size:13px;flex:none}
+.fld .v{font-weight:500}
+.fld .v .on{color:var(--ok);font-weight:600}
+.fld .lft{display:flex;align-items:center;gap:10px}
+.sect{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;position:relative}
+.sect .eyebrow{color:var(--ink2);letter-spacing:.22em}
+.sect p{margin:6px 0 0;font-size:13.5px;color:var(--ink)}
+.sect ol{margin:6px 0 0;padding-left:18px;font-size:13.5px;color:var(--ink)}
+.sect ol li{margin:2px 0}
+.sect .link{display:inline;margin:0}
+.av{width:30px;height:30px;border-radius:50%;flex:none;overflow:hidden;
+  background:radial-gradient(circle at 50% 36%,#E9C7A9 0 24%,transparent 25%),radial-gradient(ellipse 28px 18px at 50% 100%,#6E2A3A 0 56%,transparent 57%),linear-gradient(160deg,#D9C7B0,#B89C7C)}
+.grow{flex:1}
+.name{font-family:var(--serif);font-size:24px;line-height:1.15;color:var(--ink);margin:6px 0 10px}
+.pos{position:relative}
+
+/* the Digital ticket (Classic card, 3 : 4) */
+.tkwrap{display:flex;justify-content:center;margin-top:6px}
+.tkt{width:228px;background:#fff;border:1px solid var(--gild-soft);border-radius:12px;padding:14px 14px 12px;text-align:center;box-shadow:0 14px 28px -22px rgba(30,34,41,.45);position:relative}
+.tkt .mono{font-family:var(--serif);font-size:20px;letter-spacing:.14em;color:var(--gild);font-weight:600}
+.tkt .couple{font-family:var(--serif);font-size:17px;color:var(--ink);margin-top:2px}
+.tkt .rule{color:var(--gild);font-size:9px;margin:4px 0}
+.tkt .guest{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--ink);line-height:1.15}
+.tkt .gsub{font-size:11px;color:var(--mute);margin-top:2px}
+.tkt .gsub.seat{color:var(--wine);font-weight:600}
+.tkt .slot{display:flex;justify-content:center;margin:10px 0 8px}
+.qr{width:104px;height:104px;border-radius:50%;border:1px solid var(--gild-soft);display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(9,1fr);padding:14px;gap:1.5px;overflow:hidden;background:#fff}
+.qr b{background:var(--ink);border-radius:1px}
+.qr b.o{background:transparent}
+.tkt .meta{display:flex;justify-content:space-between;padding-top:8px;border-top:1px dashed var(--line);font-size:11px;text-align:left}
+.tkt .meta small{display:block;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.tkt .meta b{font-weight:600;color:var(--ink)}
+.tkt.sm{width:190px;padding:10px 12px}
+.tkt.sm .qr{width:84px;height:84px;padding:11px}
+
+/* the link pill (frame A) · the Save CTA (frame A) */
+.linkrow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 8px 8px 14px;font-size:12px;color:var(--ink2);position:relative}
+.linkrow .url{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.linkrow .url b{color:var(--ink);font-weight:600}
+.linkrow .act{flex:none;background:var(--ink);color:#fff;border-radius:999px;padding:7px 11px;font-weight:500}
+.cta{background:var(--wine);color:#fff;border-radius:12px;padding:12px 14px;margin-top:12px;text-align:center;position:relative}
+.cta b{display:block;font-size:15px;font-weight:600}
+.cta small{display:block;font-size:11.5px;opacity:.85;margin-top:2px}
+.cta.quiet{background:#fff;color:var(--ink);border:1.5px solid var(--ink)}
+.cta.quiet small{color:var(--mute);opacity:1}
+.grey{font-size:12px;color:var(--mute);text-align:center;margin:6px 0 0}
+.quiet-line{margin-top:14px;font-size:12px;color:var(--ink2);border-top:1px solid var(--line);padding-top:10px;line-height:1.5}
+.quiet-line b{font-weight:600;color:var(--ink)}
+
+/* Welcome */
+.markrow{text-align:center;margin-top:4px}
+.mark{font-family:var(--serif);font-size:34px;letter-spacing:.12em;color:var(--gild);font-weight:500;line-height:1}
+.names{font-family:var(--serif);font-size:28px;line-height:1.1;margin:6px 0 2px}
+.when{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2)}
+.arrive{display:flex;justify-content:center;align-items:center;gap:14px;margin-top:14px;position:relative}
+.arrive .main{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 28px;background:var(--wine);color:#FAF7F2;border-radius:10px;font-size:14px;font-weight:600;letter-spacing:.02em}
+.arrive .chg{border-bottom:1px solid rgba(30,34,41,.35);padding-bottom:1px;font-size:13.5px;color:var(--ink2)}
+.acct{margin-top:16px;border-left:2px solid rgba(176,138,91,.5);background:rgba(176,138,91,.07);padding:12px 14px;position:relative}
+.acct h4{margin:0;font-size:15px;font-weight:600;color:var(--ink)}
+.acct p{margin:4px 0 0;font-size:12.5px;color:var(--ink2)}
+.rem{margin-top:16px;position:relative}
+.rem .eyebrow{display:block;color:var(--ink2);letter-spacing:.22em;margin-bottom:6px}
+.chk{display:flex;gap:10px;align-items:center;font-size:13.5px;padding:7px 0;border-top:1px solid var(--line)}
+.chk:first-of-type{border-top:0}
+.chk span.b{width:16px;height:16px;border:1.5px solid var(--ink2);border-radius:4px;flex:none}
+.chk span.b.on{background:var(--ok);border-color:var(--ok)}
+.door{margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;position:relative}
+.door b{display:block;font-size:14.5px;font-weight:600}
+.door small{display:block;font-size:12px;color:var(--mute)}
+.door i{font-style:normal;color:var(--gild)}
+.door.gift{background:var(--gild-wash);border-color:var(--gild-soft)}
+.ee{margin-top:14px;display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--ink);padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);position:relative}
+.ee i{font-style:normal;color:var(--mute)}
+.pfoot{display:flex;justify-content:center;gap:18px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-top:12px}
+
+/* the Everything-else sheet */
+.phone.sheeted{height:620px;min-height:0}
+.phone.sheeted .scr{opacity:.35;filter:saturate(.6)}
+.shade{position:absolute;inset:0;background:rgba(30,34,41,.28);z-index:7}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--paper);border-radius:22px 22px 0 0;padding:12px 18px 34px;z-index:8;box-shadow:0 -20px 40px -24px rgba(30,34,41,.5)}
+.sheet .grip{width:38px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 12px}
+.sheet h5{margin:0 0 4px;font-family:var(--serif);font-size:22px;font-weight:500}
+.sheet .grp{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink2);font-weight:600;margin:12px 0 2px}
+.row{display:flex;justify-content:space-between;align-items:center;min-height:44px;padding:8px 0;border-top:1px solid var(--line);font-size:15px;position:relative}
+.row .b{font-size:12px;color:rgba(30,34,41,.55)}
+.row i{font-style:normal;color:var(--gild)}
+
+/* ---------- the comparison tags (owner-facing, allowed on this page) ---------- */
+.tag{position:absolute;right:-6px;top:-9px;font-size:9.5px;letter-spacing:.06em;font-weight:600;border-radius:999px;padding:3px 8px;line-height:1.2;z-index:4;white-space:nowrap;box-shadow:0 2px 6px -2px rgba(0,0,0,.35);font-family:var(--sans);text-transform:none}
+.tag.w{background:var(--wine);color:#fff}
+.tag.g{background:var(--gild);color:#fff}
+.tag.k{background:#fff;color:var(--ink2);border:1px solid var(--line);box-shadow:none}
+.cut{outline:1.5px dashed var(--wine);outline-offset:3px;border-radius:12px}
+.in{outline:1.5px dashed var(--gild);outline-offset:3px;border-radius:12px}
+.arrive .chg.cut{outline-offset:5px;border-radius:4px}
+.linkrow.cut,.cta.cut,.cta.in{outline-offset:4px}
+footer{max-width:1180px;margin:0 auto;padding:24px;font-size:12.5px;color:var(--mute);line-height:1.5;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="doc-brand">Setnayan · Event Hub · for the owner's yes</div>
+<h1>The guest's Event Hub, calm — before and after PR #6308</h1>
+<p class="lead">Two phones per screen, 375 px, in the event's Classic look as a guest sees it. Left is the approved design the pages were built to; right is what <b>#6308</b> (<code>rd/event-hub-calm</code>) builds. Sample event Ana &amp; Miguel · March 13, 2027; guest Mr. Manuel Cortez Casasola with a +1, Ms. Bea L. Santos. Every label is the one in the code.</p>
+
+<div class="head">
+ <div class="box"><h3>What this shows</h3>
+  <ul>
+   <li><b>Difference 1 — the thank-you.</b> The approved after-reply screen carried <span class="q">Your guests · Send their invite</span>, <span class="q">Copy my link</span> and <span class="q">Save to my account</span>. #6308 keeps the ticket · <b>Save my ticket</b> · How to use it · Open the invitation · Change my reply; the other three live on <b>Me</b> only.</li>
+   <li><b>Difference 2 — Me before the day.</b> The approved Me always showed <span class="q">Your reply · Change</span>. #6308 shows <b>Change your reply</b> on Me only on the day and after; before the day the Welcome's <b>You're going</b> is the one door to the reply.</li>
+   <li><b>Also drawn:</b> the Welcome before the day (one button under the mark, no account box) and the <span class="q">Everything else</span> sheet (seven rows → two).</li>
+  </ul>
+  <div class="legend"><span class="tag w" style="position:static">moves to Me</span><span class="tag w" style="position:static">removed (duplicate)</span> = taken off this screen · <span class="tag g" style="position:static">moved here</span> = its one place now</div>
+ </div>
+ <div class="box"><h3>Rulings it follows</h3>
+  <ul>
+   <li><b>Owner, 2026-10-03</b>, on the live guest Event Hub: <span class="q">"the places of the different information is still not fixed. too many buttons. too much going on."</span> → one main action per guest page, no duplicate buttons, each piece of information in one place, every guest action still reachable (PR #6308 body).</li>
+   <li><b>DECISION_LOG 2026-10-02</b> "Simplify first, then tour": <span class="q">one main action per screen · one name and one place per thing</span> — owner: <span class="q">"Yes fix them first"</span>.</li>
+   <li><b>DECISION_LOG 2026-10-03</b> "Guests get one quiet shortcut line, only after they reply" (#6301, already on main — drawn on the right, not a #6308 change).</li>
+   <li><b>What the left side is built from:</b> 2026-09-29 "Tickets on the thank-you screen" + approved <code>guest_ticket_flow_2026-09-29.html</code> frame A · 2026-09-30 approved <code>guest_landing_page_2026-09-30_fable.html</code> frame 3 · 2026-10-01 <code>the_day_guest_phone_2026-10-01_fable.html</code> frame 5 (Me) · 2026-09-30 "The guest's pass is the Digital ticket, and it lives on Me".</li>
+  </ul>
+ </div>
+</div>
+
+<!-- ============ 1 · THANK-YOU ============ -->
+<div class="screen">
+ <h2><span class="n">1</span>Thank-you, right after replying Yes — <code>/invite/enter</code></h2>
+ <p class="what">What changes: <b>Your guests, Copy my link and Save to my account leave; they live on Me.</b></p>
+ <div class="pair">
+  <div class="col before"><p class="cap"><i></i>Approved design</p>
+   <div class="phone">
+    <div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="scr">
+     <div class="brand">Ana &amp; Miguel</div>
+     <div class="center"><span class="done">✓ You replied — see you there</span></div>
+     <div class="tkwrap"><div class="tkt">
+      <div class="mono">AM</div><div class="couple">Ana &amp; Miguel</div><div class="rule">◆</div>
+      <div class="guest">Mr. Manuel Cortez Casasola</div><div class="gsub">and 1 guest</div>
+      <div class="slot"><div class="qr" data-qr></div></div>
+      <div class="meta"><div><small>Date</small><b>March 13, 2027</b></div><div><small>Arrive</small><b>2:30 PM</b></div></div>
+     </div></div>
+     <span class="btn fill">Save my ticket</span>
+     <div class="sect cut"><span class="tag w">moves to Me</span><div class="eyebrow">Your guests</div><p>+1 · Ms. Bea L. Santos — <span class="link">Send their invite</span></p></div>
+     <div class="sect"><div class="eyebrow">How to use it</div><ol><li>Save it to your photos.</li><li>Show it at the door.</li><li>On March 13 it will also show your seat.</li></ol></div>
+     <span class="btn soft">Open the invitation</span>
+     <span class="link">Change my reply</span>
+     <div class="linkrow cut"><span class="tag w">moves to Me</span><span class="url">setnayan.com/i/<b>S89G-7K3MQ2XR8B</b></span><span class="act">Copy my link</span></div>
+     <div class="cta cut"><span class="tag w">moves to Me</span><b>Save to my account</b><small>with Apple · nothing to type — your name, mobile, meal and your guests come along</small></div>
+     <div class="grow"></div>
+    </div>
+    <div class="homebar"></div>
+   </div>
+  </div>
+  <div class="col after"><p class="cap"><i></i>#6308 builds</p>
+   <div class="phone">
+    <div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="scr">
+     <div class="brand">Ana &amp; Miguel</div>
+     <div class="center"><span class="done">✓ You replied — see you there</span></div>
+     <div class="tkwrap"><div class="tkt">
+      <div class="mono">AM</div><div class="couple">Ana &amp; Miguel</div><div class="rule">◆</div>
+      <div class="guest">Mr. Manuel Cortez Casasola</div><div class="gsub">and 1 guest</div>
+      <div class="slot"><div class="qr" data-qr></div></div>
+      <div class="meta"><div><small>Date</small><b>March 13, 2027</b></div><div><small>Arrive</small><b>2:30 PM</b></div></div>
+     </div></div>
+     <span class="btn fill">Save my ticket</span>
+     <div class="sect"><div class="eyebrow">How to use it</div><ol><li>Save it to your photos.</li><li>Show it at the door.</li><li>On March 13 it will also show your seat.</li></ol></div>
+     <span class="btn soft">Open the invitation</span>
+     <span class="link">Change my reply</span>
+     <div class="quiet-line pos"><span class="tag k">#6301 · already on main</span><b>Keep it handy</b> — add this event to your home screen: Share → Add to Home Screen.</div>
+     <div class="grow"></div>
+    </div>
+    <div class="homebar"></div>
+   </div>
+  </div>
+ </div>
+ <p class="foot">The guest loses nothing they could do; the +1's invite, their own link and the account save are one tap further, on Me (screen 2). "Save to my account" returns here only to finish a press that came back for the Terms tick (<code>?keep=terms</code>).</p>
+</div>
+
+<!-- ============ 2 · ME, BEFORE THE DAY ============ -->
+<div class="screen">
+ <h2><span class="n">2</span>Me, before the event day — the Invitation's Me tab</h2>
+ <p class="what">What changes: <b>Change your reply waits for the day; the three thank-you items land here.</b></p>
+ <div class="pair">
+  <div class="col before"><p class="cap"><i></i>Approved design</p>
+   <div class="phone">
+    <div class="island"></div>
+    <div class="status"><span>5:40</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="scr">
+     <div class="brand">Ana &amp; Miguel</div>
+     <div class="tkwrap"><div class="tkt sm">
+      <div class="mono">AM</div><div class="couple">Ana &amp; Miguel</div><div class="rule">◆</div>
+      <div class="guest">Mr. Manuel Cortez Casasola</div><div class="gsub">and 1 guest</div>
+      <div class="slot"><div class="qr" data-qr></div></div>
+      <div class="meta"><div><small>Date</small><b>March 13, 2027</b></div><div><small>Arrive</small><b>2:30 PM</b></div></div>
+     </div></div>
+     <p class="hint">Show this at the door. <span style="color:var(--wine);text-decoration:underline;text-underline-offset:3px">Save my ticket</span></p>
+     <div class="fld"><div><small>Your guests</small><span class="v">+1 · Ms. Bea L. Santos</span></div><i>›</i></div>
+     <div class="fld cut"><span class="tag w">before the day: Welcome's "You're going" is the door</span><div><small>Your reply</small><span class="v">Joyfully accepts</span></div><i>Change</i></div>
+     <div class="fld"><div class="lft"><span class="av"></span><div><small>Face tagging</small><span class="v"><span class="on">On</span> · erased when you sign out</span></div></div><i>›</i></div>
+     <div class="fld"><div><small>Language</small><span class="v">English</span></div><i>▾</i></div>
+     <div class="fld"><div><small>Signed in as</small><span class="v">Mr. Manuel Cortez Casasola</span></div><i style="color:var(--wine)">Sign out</i></div>
+     <p class="hint" style="margin-top:6px;font-size:11.5px">Signing out erases your face-tagging selfie. Tags stay.</p>
+     <div class="grow"></div>
+    </div>
+    <div class="bnav"><span><svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/></svg>Welcome</span><span><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Details</span><span><svg viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h12"/></svg>Story</span><span class="on"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Me</span></div>
+   </div>
+  </div>
+  <div class="col after"><p class="cap"><i></i>#6308 builds</p>
+   <div class="phone">
+    <div class="island"></div>
+    <div class="status"><span>5:40</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="scr">
+     <div class="brand">Ana &amp; Miguel</div>
+     <div class="name">Mr. Manuel Cortez Casasola</div>
+     <div class="tkwrap"><div class="tkt sm">
+      <div class="mono">AM</div><div class="couple">Ana &amp; Miguel</div><div class="rule">◆</div>
+      <div class="guest">Mr. Manuel Cortez Casasola</div><div class="gsub">and 1 guest</div>
+      <div class="slot"><div class="qr" data-qr></div></div>
+      <div class="meta"><div><small>Date</small><b>March 13, 2027</b></div><div><small>Arrive</small><b>2:30 PM</b></div></div>
+     </div></div>
+     <p class="hint">Show this at the door.</p>
+     <div class="pos" style="display:flex;gap:8px;margin-top:8px"><span class="btn soft" style="flex:1;margin:0">Save my ticket</span><span class="btn soft in" style="flex:1;margin:0;position:relative"><span class="tag g">now the one place</span>Copy link</span></div>
+     <div class="sect in"><span class="tag g">moved here</span><div class="eyebrow">Your guests</div><p>+1 · Ms. Bea L. Santos — <span class="link">Send their invite</span></p></div>
+     <div class="fld"><div class="lft"><span class="av"></span><div><small>Face tagging</small><span class="v"><span class="on">On</span> · erased when you sign out</span></div></div><i>›</i></div>
+     <div class="cta in"><span class="tag g">moved here · the one main action</span><b>Save to my account</b><small>with Apple · nothing to type</small></div>
+     <p class="grey">Keeps the photos of you, and opens this invitation on any phone.</p>
+     <div class="grow"></div>
+     <span class="link in pos" style="display:block;margin-top:18px"><span class="tag g">the one sign-out</span>Sign out of this invitation</span>
+    </div>
+    <div class="bnav"><span><svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/></svg>Welcome</span><span><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Details</span><span><svg viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h12"/></svg>Story</span><span class="on"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Me</span></div>
+   </div>
+  </div>
+ </div>
+ <p class="foot">On the day and after, the right phone also shows <b>Change your reply</b> under the ticket (the Welcome's button then says "Show your ticket" / "See the photos", so Me carries the reply). "Not you? Switch" is gone; "Sign out of this invitation" is the one way off a shared phone. The grey line under Save is <code>save-to-account.tsx</code>'s and is not this PR's. "Your seat →" appears on both sides once seats are published.</p>
+</div>
+
+<!-- ============ 3 · WELCOME, BEFORE THE DAY ============ -->
+<div class="screen">
+ <h2><span class="n">3</span>Welcome, before the day — the guest replied Yes</h2>
+ <p class="what">What changes: <b>One button under the mark; the account box and the 3D card go.</b></p>
+ <div class="pair">
+  <div class="col before"><p class="cap"><i></i>Approved design</p>
+   <div class="phone">
+    <div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="scr">
+     <div class="brand">Ana &amp; Miguel</div>
+     <div class="markrow"><div class="mark">A&nbsp;M</div><div class="names">Ana &amp; Miguel</div><div class="when">March 13, 2027 · Tagaytay</div></div>
+     <div class="arrive"><span class="main">You're going</span><span class="chg cut pos"><span class="tag w" style="top:-22px">removed (duplicate)</span>Change</span></div>
+     <div class="acct cut"><span class="tag w">moves to Me</span><h4>This is me — keep this invitation in my account</h4><p>Open it again on any phone — your reply, your table, your photos. No password needed.</p><div class="cta" style="margin-top:10px;padding:10px"><b>Save to my account</b></div></div>
+     <div class="rem"><span class="eyebrow">Reminders</span>
+      <div class="chk"><span class="b on"></span>Reply to the invitation</div>
+      <div class="chk"><span class="b"></span>Pick your meal</div>
+      <div class="chk"><span class="b"></span>Add the date to your calendar</div></div>
+     <div class="door gift"><div><b>E-Gifts</b><small>A gift for Ana &amp; Miguel</small></div><i>›</i></div>
+     <div class="door cut"><span class="tag w">moves to Everything else</span><div><b>Walk the room in 3D</b><small>Look around the reception and find your table.</small></div><i>›</i></div>
+     <div class="ee cut"><span class="tag w">7 rows → 2 (screen 4)</span><span>Everything else</span><i>▾</i></div>
+     <div class="pfoot"><span>Share</span><span>Report</span></div>
+     <div class="grow"></div>
+    </div>
+    <div class="bnav"><span class="on"><svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/></svg>Welcome</span><span><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Details</span><span><svg viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h12"/></svg>Story</span><span><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Me</span></div>
+   </div>
+  </div>
+  <div class="col after"><p class="cap"><i></i>#6308 builds</p>
+   <div class="phone">
+    <div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="scr">
+     <div class="brand">Ana &amp; Miguel</div>
+     <div class="markrow"><div class="mark">A&nbsp;M</div><div class="names">Ana &amp; Miguel</div><div class="when">March 13, 2027 · Tagaytay</div></div>
+     <div class="arrive"><span class="main in pos"><span class="tag g">the one door to the reply</span>You're going</span></div>
+     <div class="rem"><span class="eyebrow">Reminders</span>
+      <div class="chk"><span class="b on"></span>Reply to the invitation</div>
+      <div class="chk"><span class="b"></span>Pick your meal</div>
+      <div class="chk"><span class="b"></span>Add the date to your calendar</div></div>
+     <div class="door gift"><div><b>E-Gifts</b><small>A gift for Ana &amp; Miguel</small></div><i>›</i></div>
+     <div class="ee"><span>Everything else</span><i>▾</i></div>
+     <div class="pfoot"><span>Share</span><span>Report</span></div>
+     <div class="grow"></div>
+    </div>
+    <div class="bnav"><span class="on"><svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/></svg>Welcome</span><span><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Details</span><span><svg viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h12"/></svg>Story</span><span><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Me</span></div>
+   </div>
+  </div>
+ </div>
+ <p class="foot">"You're going" and "Change" both opened the same reply sheet; the status button stands alone and is the door. A guest who has not replied sees <b>RSVP</b> alone. The Reminders list, E-Gifts, Share and Report are untouched. Selfie guests' face-data controls (blur · receipt · remove) sit beside Face tagging on Me.</p>
+</div>
+
+<!-- ============ 4 · EVERYTHING ELSE ============ -->
+<div class="screen">
+ <h2><span class="n">4</span>The "Everything else" sheet (small)</h2>
+ <p class="what">What changes: <b>Only what has no other home stays — the 3D room and the keepsake reel.</b></p>
+ <div class="pair">
+  <div class="col before"><p class="cap"><i></i>Approved design</p>
+   <div class="phone sheeted">
+    <div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="scr"><div class="brand">Ana &amp; Miguel</div><div class="markrow"><div class="mark">A&nbsp;M</div><div class="names">Ana &amp; Miguel</div></div><div class="arrive"><span class="main">You're going</span></div></div>
+    <div class="shade"></div>
+    <div class="sheet">
+     <div class="grip"></div><h5>Everything else</h5>
+     <div class="grp">The Day</div>
+     <div class="row cut"><span class="tag w">removed (duplicate · Camera in the bar)</span><span>Camera, selfie cam and challenges</span><span class="b">March 13</span></div>
+     <div class="row cut"><span class="tag w">removed (duplicate · Live)</span><span>Watch the livestream</span><span class="b">March 13</span></div>
+     <div class="grp">Anytime</div>
+     <div class="row cut"><span class="tag w">removed (duplicate · Your seat on Welcome)</span><span>Find my table</span><i>›</i></div>
+     <div class="row"><span>Walk the room in 3D</span><i>›</i></div>
+     <div class="row cut"><span class="tag w">removed (opened nothing)</span><span>Your keepsake reel</span><span class="b">After</span></div>
+     <div class="row cut"><span class="tag w">removed (duplicate · Print the keepsake)</span><span>Print this invitation</span><i>›</i></div>
+     <div class="row cut"><span class="tag w">removed (duplicate · Share in the footer)</span><span>Share with family</span><i>›</i></div>
+    </div>
+   </div>
+  </div>
+  <div class="col after"><p class="cap"><i></i>#6308 builds</p>
+   <div class="phone sheeted">
+    <div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="scr"><div class="brand">Ana &amp; Miguel</div><div class="markrow"><div class="mark">A&nbsp;M</div><div class="names">Ana &amp; Miguel</div></div><div class="arrive"><span class="main">You're going</span></div></div>
+    <div class="shade"></div>
+    <div class="sheet">
+     <div class="grip"></div><h5>Everything else</h5>
+     <div class="grp">Anytime</div>
+     <div class="row in"><span class="tag g">moved here from the Welcome card</span><span>Walk the room in 3D</span><i>›</i></div>
+     <div class="row"><span>Your keepsake reel</span><i>›</i></div>
+    </div>
+   </div>
+  </div>
+ </div>
+ <p class="foot">A row is drawn only when it opens something: the 3D room once seats are published, the keepsake reel once the album is. With neither, the "Everything else" line itself is not drawn. Camera and Live are in the guest's bar on the day; Print the keepsake is at the foot of Post Event; Share is in the page footer.</p>
+</div>
+
+</div>
+<footer>Drawn to show layout and order only — the real pages use the couple's theme and words. Left phones redraw the approved frames (<code>guest_landing_page_2026-09-30_fable</code> 3 · <code>guest_ticket_flow_2026-09-29</code> A · <code>the_day_guest_phone_2026-10-01_fable</code> 5) and the live Welcome; right phones follow <code>rd/event-hub-calm</code> at eb68ea89 (<code>invite/enter/page.tsx</code> · <code>guest-me.tsx</code> · <code>site-body.tsx</code> · <code>arrival-action.ts</code> · <code>everything-else-rows.ts</code>). The bottom bar's items are the shipped Invitation menu's. Fable, 2026-10-03.</footer>
+<script>
+// one deterministic QR-ish pattern for every ticket
+(function(){var seed=7;function r(){seed=(seed*9301+49297)%233280;return seed/233280}
+document.querySelectorAll('[data-qr]').forEach(function(q){seed=7;for(var i=0;i<81;i++){var b=document.createElement('b');var x=i%9,y=Math.floor(i/9);var eye=(x<3&&y<3)||(x>5&&y<3)||(x<3&&y>5);if(eye){if(!((x==1||x==7)&&(y==1||y==7))&&!((x==0||x==2||x==6||x==8)&&(y==0||y==2||y==6||y==8)))b.className='o'}else if(r()>.55)b.className='o';q.appendChild(b)}})})();
+</script>
+</body>
+</html>
