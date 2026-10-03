@@ -37,3 +37,9 @@ Owner, verbatim (2026-09-30): *"how we ask questions for them to fill up, how we
 - **Setnayan look** (the host's tools — dashboard, Guest list, Your Team, the Maker's controls, onboarding's frame): warm paper, ink, gold + wine accents, serif for names/headings, sans for controls. Same everywhere. The dashboard may carry the event's cover + one accent colour at the top, nothing more.
 - **The event's own theme** (everything a guest sees — the Event Hub, the landing page, RSVP, tickets, prints, guest emails): the couple's theme (background, fonts, colours, logo); tone follows the event type (a wake is quiet).
 - **Where they meet:** the Maker's centre is the event's theme, its controls are the Setnayan look; onboarding starts in the Setnayan look and takes on the chosen event type's style once the type is picked.
+
+## 8 · Phone editing: calm, full width, live preview, Apply publishes (owner, 2026-10-04)
+Owner, verbatim: *"Remember our rules. 1. prevent to crowded presentation on mobile. 2. always maximize full width for body for easier editing. 3. Realtime effects for seeing what will change but always need to press apply to publish to the actual event hub"*
+- **Not crowded on a phone:** one main thing per screen; few controls visible at once; the rest behind ONE dropdown or a sheet; no side-by-side panels at 375 px.
+- **The body is full width:** the content being edited (the page, the form, the list) uses the screen's full width; controls go in slim top/bottom bars or a sheet over the page, never a column that narrows the body.
+- **Live preview, Apply publishes:** every change shows on the page at once (realtime), and saves to the DRAFT only; guests see nothing until **Apply**. Opening a panel never writes.
