@@ -1,0 +1,894 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maker calm — the Maker edits the Event Hub itself — before / after — Setnayan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ───────── tokens (light) ───────── */
+.wrap{
+  --paper:#FAF7F2;--paper2:#F3EEE6;--page:#EDE7DE;--ink:#1E2229;--ink2:#3B3F46;--mute:#76736D;
+  --gild:#B08A5B;--gild-soft:#E9DEC9;--gild-wash:#F7F1E6;--wine:#6E2A3A;--wine-wash:#F6ECEE;
+  --line:#E5DED3;--ok:#2F6B4F;--okbg:#E7F1EA;--white:#FFFFFF;--bezel:#14161A;--bezel2:#2E3238;
+  --scrim:rgba(30,34,41,.40);--shadow:rgba(30,34,41,.45);
+  --serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --sans:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif;
+  background:var(--page);color:var(--ink);
+}
+/* dark — the CSS-only switch (no script): the radios sit before .wrap */
+#m-dark:checked ~ .wrap{
+  --paper:#1B1D22;--paper2:#22252B;--page:#121417;--ink:#F1ECE4;--ink2:#CFC8BE;--mute:#9B958C;
+  --gild:#CBA66F;--gild-soft:#4A3F2E;--gild-wash:#2A2620;--wine:#C9788A;--wine-wash:#33222A;
+  --line:#33373E;--ok:#7BBF9A;--okbg:#1F3028;--white:#262A31;--bezel:#000;--bezel2:#3A3F47;
+  --scrim:rgba(0,0,0,.55);--shadow:rgba(0,0,0,.7);
+}
+@media (prefers-color-scheme: dark){
+  #m-auto:checked ~ .wrap{
+    --paper:#1B1D22;--paper2:#22252B;--page:#121417;--ink:#F1ECE4;--ink2:#CFC8BE;--mute:#9B958C;
+    --gild:#CBA66F;--gild-soft:#4A3F2E;--gild-wash:#2A2620;--wine:#C9788A;--wine-wash:#33222A;
+    --line:#33373E;--ok:#7BBF9A;--okbg:#1F3028;--white:#262A31;--bezel:#000;--bezel2:#3A3F47;
+    --scrim:rgba(0,0,0,.55);--shadow:rgba(0,0,0,.7);
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#EDE7DE}
+body{font-family:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{font-family:var(--sans);padding:0 0 40px;min-height:100vh}
+.inner{max-width:1180px;margin:0 auto;padding:36px 24px 0}
+.mode{display:none}
+
+/* ───────── page furniture (owner-facing) ───────── */
+.doc-brand{font-size:10.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--gild);font-weight:600}
+h1{font-family:var(--serif);font-weight:500;font-size:38px;line-height:1.1;margin:8px 0 10px;letter-spacing:-.01em}
+.lead{color:var(--ink2);font-size:14.5px;line-height:1.6;max-width:920px;margin:0 0 18px}
+.lead b{color:var(--ink);font-weight:600}
+.modes{display:flex;gap:8px;align-items:center;margin:0 0 22px;font-size:12px;color:var(--mute)}
+.modes label{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 12px;color:var(--ink2);cursor:pointer;font-weight:500}
+#m-auto:checked ~ .wrap label[for="m-auto"],#m-light:checked ~ .wrap label[for="m-light"],#m-dark:checked ~ .wrap label[for="m-dark"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.head{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:0 0 30px}
+.box{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px 18px;font-size:13px;color:var(--ink2);line-height:1.55}
+.box h3{font-family:var(--serif);font-size:20px;font-weight:500;margin:0 0 8px;color:var(--ink)}
+.box ul,.box ol{margin:0;padding-left:18px}
+.box li{margin:4px 0}
+.box b{color:var(--ink);font-weight:600}
+.box .q{font-family:var(--serif);font-style:italic;font-size:14.5px;color:var(--ink)}
+.box code,.foot code,.lead code{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;background:var(--paper2);border:1px solid var(--line);border-radius:4px;padding:0 4px;color:var(--ink)}
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--ink2);align-items:center}
+.toc{display:flex;flex-wrap:wrap;gap:6px 10px;margin:0 0 34px;font-size:12px}
+.toc a{color:var(--wine);text-decoration:none;border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:4px 10px}
+.toc a b{color:var(--gild);font-family:var(--serif);font-size:14px;margin-right:4px}
+
+.screen{margin:0 0 54px}
+.screen h2{display:flex;align-items:baseline;gap:12px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink2);font-weight:600;margin:0 0 6px}
+.screen h2 .n{font-family:var(--serif);font-size:24px;font-weight:500;color:var(--gild);letter-spacing:0;line-height:1}
+.what{font-family:var(--serif);font-size:21px;font-weight:500;color:var(--ink);margin:0 0 16px;letter-spacing:-.01em}
+.what b{color:var(--wine);font-weight:600}
+.pair{display:grid;grid-template-columns:375px 375px;gap:28px 56px;justify-content:start}
+.col .cap{font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.col .cap i{font-style:normal;display:inline-block;width:9px;height:9px;border-radius:50%}
+.col.before .cap{color:var(--ink2)} .col.before .cap i{background:var(--ink2)}
+.col.after .cap{color:var(--ok)} .col.after .cap i{background:var(--ok)}
+.foot{font-size:12.5px;color:var(--mute);margin:14px 0 0;max-width:806px;line-height:1.55}
+.foot b{color:var(--ink2);font-weight:600}
+@media (max-width:860px){.pair{grid-template-columns:375px}.head{grid-template-columns:1fr}.inner{padding:24px 16px 0}}
+
+/* ───────── phone frame (375 wide) ───────── */
+.phone{width:375px;background:var(--paper);border:8px solid var(--bezel);border-radius:44px;position:relative;overflow:hidden;display:flex;flex-direction:column;height:800px;
+  box-shadow:0 0 0 1px var(--bezel2),0 36px 60px -30px var(--shadow),0 14px 26px -18px var(--shadow)}
+.phone .island{position:absolute;left:50%;top:10px;transform:translateX(-50%);width:112px;height:31px;background:var(--bezel);border-radius:20px;z-index:9}
+.phone .status{height:50px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 6px;font-size:13.5px;font-weight:600;position:relative;z-index:3;color:var(--ink)}
+.phone .status .sig{display:flex;gap:6px;align-items:center;font-size:11px;letter-spacing:.06em}
+.phone .status .bat{width:24px;height:11px;border:1.5px solid var(--ink);border-radius:4px;position:relative;opacity:.9}
+.phone .status .bat:after{content:"";position:absolute;left:2px;top:2px;bottom:2px;right:5px;background:var(--ink);border-radius:1px}
+.homebar{height:26px;flex:none;position:relative;background:var(--paper)}
+.homebar:after{content:"";position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.85}
+
+/* the Maker's two phone bars — the approved frame G (Setnayan look) */
+.mbar{height:52px;flex:none;display:flex;align-items:center;gap:4px;padding:0 8px;background:var(--paper);border-bottom:1px solid var(--line);font-size:13px;color:var(--ink);position:relative;z-index:4}
+.mbar .exit{width:68px;display:flex;align-items:center;gap:4px;font-weight:600}
+.mbar .stage{flex:1;text-align:center;font-weight:600;color:var(--ink2);font-size:13px}
+.mbar .stage small{display:block;font-size:10px;font-weight:500;color:var(--mute);letter-spacing:.04em}
+.mbar .ic{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:10px;color:var(--ink2);font-size:18px}
+.mbot{height:52px;flex:none;display:flex;align-items:center;gap:4px;padding:0 8px;background:var(--paper);border-top:1px solid var(--line);font-size:13px;position:relative;z-index:20}
+.mbot .pg{min-width:100px;flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 10px;border-radius:999px;background:var(--white);border:1px solid var(--line);height:40px;line-height:1.1}
+.mbot .pg small{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:600}
+.mbot .pg b{font-weight:600;color:var(--ink);font-size:13px}
+.mbot .pg b i{font-style:normal;color:var(--gild);margin-left:3px}
+.mbot .door{height:40px;display:flex;align-items:center;justify-content:center;padding:0 10px;border-radius:999px;font-weight:600;color:var(--ink);background:var(--white);border:1px solid var(--line);white-space:nowrap}
+.mbot .door.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.mbot .apply{height:40px;display:flex;align-items:center;justify-content:center;padding:0 12px;border-radius:999px;font-weight:600;background:var(--wine);color:#fff;white-space:nowrap}
+.mbot .apply.off{background:var(--paper2);color:var(--mute)}
+
+/* the canvas — the guest's page in the event's Classic look */
+.canvas{flex:1;min-height:0;position:relative;overflow:hidden;background:var(--paper);padding:10px 16px 0;display:flex;flex-direction:column}
+.canvas.dim:after{content:"";position:absolute;inset:0;background:var(--scrim);z-index:5}
+.brand{text-align:center;font-size:9px;letter-spacing:.34em;text-transform:uppercase;color:var(--gild);font-weight:600;margin:2px 0 8px}
+.mark{font-family:var(--serif);font-size:30px;letter-spacing:.12em;color:var(--gild);font-weight:500;line-height:1;text-align:center}
+.names{font-family:var(--serif);font-size:26px;line-height:1.1;margin:4px 0 2px;text-align:center;color:var(--ink)}
+.when{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);text-align:center}
+.arrive{display:flex;justify-content:center;margin-top:10px}
+.arrive .main{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 24px;background:var(--wine);color:#FAF7F2;border-radius:10px;font-size:13px;font-weight:600}
+.eyebrow{font-size:9.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--gild);font-weight:600}
+.sect{margin-top:10px;border-top:1px solid var(--line);padding-top:8px;position:relative}
+.sect .eyebrow{color:var(--ink2);letter-spacing:.22em}
+.sect p{margin:4px 0 0;font-size:12.5px;color:var(--ink);line-height:1.45}
+.sect p.serif{font-family:var(--serif);font-size:15px;line-height:1.35}
+.chk{display:flex;gap:8px;align-items:center;font-size:12.5px;padding:5px 0;border-top:1px solid var(--line)}
+.chk:first-of-type{border-top:0}
+.chk span.b{width:14px;height:14px;border:1.5px solid var(--ink2);border-radius:4px;flex:none}
+.chk span.b.on{background:var(--ok);border-color:var(--ok)}
+.door-g{margin-top:10px;background:var(--gild-wash);border:1px solid var(--gild-soft);border-radius:14px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;font-size:13px}
+.door-g b{display:block;font-weight:600;color:var(--ink)}
+.door-g small{display:block;font-size:11px;color:var(--mute)}
+.door-g i{font-style:normal;color:var(--gild)}
+.ee{margin-top:10px;display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink);padding:9px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.ee i{font-style:normal;color:var(--mute)}
+.ph{position:relative;border:1px dashed var(--gild);border-radius:12px;padding:8px 10px;margin-top:10px;font-size:11.5px;color:var(--mute);background:var(--gild-wash)}
+.ph b{display:block;color:var(--ink);font-weight:600;font-size:12.5px}
+.bnav{background:var(--white);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:7px 6px 6px;font-size:10px;color:var(--mute);font-weight:500;flex:none;margin:auto -16px 0}
+.bnav span{display:flex;flex-direction:column;align-items:center;gap:3px;width:60px}
+.bnav span.on{color:var(--wine);font-weight:600}
+.bnav span:before{content:"";width:18px;height:18px;border:1.6px solid currentColor;border-radius:5px;opacity:.85}
+.film{margin:0 -16px;height:200px;background:linear-gradient(160deg,#3a2f2a,#6E2A3A 60%,#B08A5B);position:relative;display:flex;align-items:flex-end;padding:14px 18px;color:#FAF7F2}
+.film .t{font-family:var(--serif);font-size:24px;line-height:1.05}
+.film .t small{display:block;font-family:var(--sans);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.8;margin-top:4px}
+.film .play{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;border:2px solid rgba(255,255,255,.85)}
+.film .play:after{content:"";position:absolute;left:17px;top:12px;border-left:14px solid #fff;border-top:9px solid transparent;border-bottom:9px solid transparent}
+.beat{display:flex;gap:8px;margin-top:10px}
+.beat span{flex:1;text-align:center;border:1.5px solid var(--ink);border-radius:999px;padding:9px 6px;font-size:12.5px;font-weight:500;color:var(--ink)}
+.scene{margin-top:12px;border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:var(--white);position:relative}
+.scene .eyebrow{display:block;margin-bottom:2px}
+.scene h4{margin:0;font-family:var(--serif);font-size:18px;font-weight:500;color:var(--ink)}
+.scene p{margin:3px 0 0;font-size:12px;color:var(--ink2);line-height:1.4}
+.scene.sel{outline:2px solid var(--wine);outline-offset:2px}
+.mom{display:flex;gap:10px;font-size:12.5px;padding:5px 0;border-top:1px solid var(--line)}
+.mom:first-of-type{border-top:0}
+.mom b{font-weight:600;color:var(--ink);min-width:58px}
+.ticket{width:200px;margin:8px auto 0;background:var(--white);border:1px solid var(--gild-soft);border-radius:12px;padding:10px 12px;text-align:center}
+.ticket .mono{font-family:var(--serif);font-size:18px;letter-spacing:.14em;color:var(--gild);font-weight:600}
+.ticket .g{font-family:var(--serif);font-size:15px;font-weight:600;color:var(--ink);margin-top:4px}
+.ticket .qr{width:78px;height:78px;border-radius:50%;border:1px solid var(--gild-soft);margin:8px auto;background:
+  repeating-linear-gradient(0deg,var(--ink) 0 3px,transparent 3px 7px),repeating-linear-gradient(90deg,var(--ink) 0 3px,transparent 3px 7px);background-blend-mode:multiply;opacity:.8}
+.ticket .meta{display:flex;justify-content:space-between;border-top:1px dashed var(--line);padding-top:6px;font-size:10px;text-align:left}
+.ticket .meta small{display:block;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.fld{border:1px solid var(--line);background:var(--white);border-radius:12px;padding:7px 12px;font-size:12.5px;margin-top:8px;color:var(--ink);display:flex;justify-content:space-between;align-items:center;min-height:42px;position:relative}
+.fld small{display:block;font-size:9.5px;color:var(--mute);letter-spacing:.12em;text-transform:uppercase;font-weight:500}
+.fld i{font-style:normal;color:var(--gild)}
+.btn{display:block;text-align:center;padding:10px 12px;border-radius:999px;font-size:13px;font-weight:500;border:1.5px solid var(--ink);color:var(--ink);margin-top:8px;background:var(--white)}
+.btn.fill{background:var(--ink);color:var(--paper)}
+.sample{position:absolute;right:12px;top:8px;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;background:var(--ink);color:var(--paper);border-radius:999px;padding:3px 8px;font-weight:600;z-index:3}
+.form{margin-top:8px}
+.q{font-family:var(--serif);font-size:18px;color:var(--ink);margin:10px 0 6px}
+.ans{display:flex;gap:8px}
+.ans span{flex:1;text-align:center;border:1.5px solid var(--ink);border-radius:999px;padding:9px 6px;font-size:12.5px;color:var(--ink);position:relative}
+.ans span.on{background:var(--ink);color:var(--paper)}
+.caret{position:relative}
+.caret:after{content:"";position:absolute;right:-2px;top:12%;height:76%;border-left:2px solid var(--wine)}
+.greymsg{margin:auto 0;text-align:center;font-size:12.5px;color:var(--mute);padding:0 10px;line-height:1.5}
+.greymsg b{display:block;color:var(--ink);font-weight:600;margin-bottom:4px}
+.pageframe{margin:8px 0 0;border:1px solid var(--line);border-radius:10px;background:var(--white);padding:8px;position:relative}
+.pageframe .mini{transform:scale(.72);transform-origin:top center;height:160px}
+.pageframe .lab{position:absolute;left:10px;top:6px;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:600}
+.strip{display:flex;gap:6px;overflow:visible;margin-top:8px;padding-bottom:2px;position:relative}
+.strip .tag{top:-14px}
+.sheet>.tag{top:8px;right:14px}
+.strip span{flex:none;font-size:11px;border:1px solid var(--line);background:var(--white);border-radius:999px;padding:5px 10px;color:var(--ink2);white-space:nowrap}
+.strip span.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+/* the type bar over typed words */
+.typebar{position:absolute;left:16px;right:16px;top:118px;z-index:6;display:flex;gap:6px;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:6px 8px;font-size:12px;box-shadow:0 10px 24px -14px var(--shadow)}
+.typebar span{flex:1;text-align:center;font-weight:600;color:var(--ink)}
+.typebar span i{font-style:normal;color:var(--gild)}
+.typebar span.done{color:var(--wine)}
+
+/* the bottom sheet */
+.sheet{position:absolute;left:0;right:0;bottom:78px;background:var(--paper);border-radius:22px 22px 0 0;padding:6px 16px 10px;z-index:8;box-shadow:0 -20px 40px -24px var(--shadow);max-height:64%;overflow:hidden}
+.sheet .grip{width:40px;height:4px;border-radius:2px;background:var(--line);margin:4px auto 8px}
+.sheet h5{margin:0 0 2px;font-family:var(--serif);font-size:20px;font-weight:500;color:var(--ink)}
+.sheet h5 small{font-family:var(--sans);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);display:block;font-weight:600;margin-bottom:2px}
+.tabs{display:flex;gap:4px;margin:8px 0 4px;background:var(--paper2);border-radius:999px;padding:3px;position:relative}
+.tabs span{flex:1;text-align:center;font-size:11.5px;font-weight:600;padding:6px 0;border-radius:999px;color:var(--ink2)}
+.tabs span.on{background:var(--white);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.row{display:flex;justify-content:space-between;align-items:center;min-height:42px;padding:6px 0;border-top:1px solid var(--line);font-size:13.5px;color:var(--ink);position:relative}
+.row:first-of-type{border-top:0}
+.row .v{font-size:12.5px;color:var(--ink2);display:flex;align-items:center;gap:6px}
+.row .v i{font-style:normal;color:var(--gild)}
+.row .b{font-size:11.5px;color:var(--mute)}
+.row.sub{padding-left:14px;font-size:12.5px;color:var(--ink2)}
+.sw{width:34px;height:20px;border-radius:999px;background:var(--line);position:relative;flex:none}
+.sw:after{content:"";position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:var(--white)}
+.sw.on{background:var(--ok)} .sw.on:after{left:16px}
+.pm{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--white);border-radius:999px;padding:5px 10px;font-size:12px;font-weight:500;color:var(--ink)}
+.pm i{font-style:normal;color:var(--gild)}
+.pro{display:inline-block;font-size:9px;color:var(--gild);font-weight:700;margin-left:4px}
+.mm{position:absolute;right:10px;top:60px;z-index:8;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:6px 0;width:230px;box-shadow:0 18px 40px -20px var(--shadow)}
+.mm .mi{padding:8px 14px;font-size:13px;color:var(--ink);border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;position:relative}
+.mm .mi:first-child{border-top:0}
+.mm .mh{padding:8px 14px 2px;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);font-weight:600;border-top:1px solid var(--line)}
+.mm .mi i{font-style:normal;color:var(--gild);font-size:11px}
+.tb{position:absolute;left:16px;right:16px;bottom:88px;z-index:8;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:8px 12px;font-size:12px;color:var(--ink2);box-shadow:0 14px 30px -18px var(--shadow)}
+.tb b{color:var(--ink)}
+
+/* the comparison tags (owner-facing) */
+.tag{position:absolute;right:-6px;top:-9px;font-size:9.5px;letter-spacing:.06em;font-weight:600;border-radius:999px;padding:3px 8px;line-height:1.2;z-index:12;white-space:nowrap;box-shadow:0 2px 6px -2px rgba(0,0,0,.35);font-family:var(--sans);text-transform:none}
+.tag.w{background:var(--wine);color:#fff}
+.tag.g{background:var(--gild);color:#fff}
+.tag.k{background:var(--white);color:var(--ink2);border:1px solid var(--line);box-shadow:none}
+.tag.l{right:auto;left:-6px}
+.cut{outline:1.5px dashed var(--wine);outline-offset:3px;border-radius:12px}
+.in{outline:1.5px dashed var(--gild);outline-offset:3px;border-radius:12px}
+
+/* desktop frame (secondary) */
+.desk{width:100%;max-width:1100px;background:var(--paper);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 30px 60px -40px var(--shadow)}
+.desk .dbar{height:52px;display:flex;align-items:center;gap:10px;padding:0 14px;border-bottom:1px solid var(--line);font-size:13px;color:var(--ink)}
+.desk .dbar span{padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--white);font-weight:600}
+.desk .dbar span.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.desk .dbar span.ap{background:var(--wine);color:#fff;border-color:var(--wine);margin-left:auto}
+.desk .dbody{display:grid;grid-template-columns:200px 1fr 300px;min-height:360px}
+.desk .dnav,.desk .dpanel{padding:12px 14px;font-size:12.5px;color:var(--ink2)}
+.desk .dnav{border-right:1px solid var(--line)} .desk .dpanel{border-left:1px solid var(--line)}
+.desk .dnav div,.desk .dpanel .row{padding:6px 0}
+.desk .dnav .on{color:var(--ink);font-weight:600}
+.desk .dcanvas{background:var(--page);display:flex;align-items:center;justify-content:center;position:relative;padding:18px}
+.desk .dcanvas .pageframe{width:420px;margin:0}
+.desk .dcanvas .pageframe .mini{height:230px;transform:scale(.95)}
+.desk h6{margin:0 0 6px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);font-weight:600}
+
+/* the "what moved where" table */
+table{width:100%;border-collapse:collapse;font-size:12.5px;background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+th,td{text-align:left;padding:9px 12px;border-top:1px solid var(--line);vertical-align:top;color:var(--ink2)}
+th{background:var(--paper2);color:var(--ink);font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;border-top:0}
+td b{color:var(--ink);font-weight:600}
+td.ok{color:var(--ok)}
+.qs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.qs .box{position:relative}
+.qs .box .n{font-family:var(--serif);font-size:22px;color:var(--gild);margin-right:6px}
+.qs .box .rec{display:inline-block;background:var(--okbg);color:var(--ok);font-weight:600;font-size:11px;border-radius:999px;padding:2px 8px;margin-right:4px}
+@media (max-width:860px){.qs{grid-template-columns:1fr}}
+footer{max-width:1180px;margin:0 auto;padding:24px;font-size:12.5px;color:var(--mute);line-height:1.5;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<input class="mode" type="radio" name="mode" id="m-auto" checked>
+<input class="mode" type="radio" name="mode" id="m-light">
+<input class="mode" type="radio" name="mode" id="m-dark">
+<div class="wrap">
+<div class="inner">
+<div class="doc-brand">Setnayan · Event Hub Maker · for the owner's yes</div>
+<h1>The Maker edits the Event Hub itself — before and after</h1>
+<p class="lead">Two phones per screen, 375 px. <b>Left</b> is the Maker on <code>main</code> today (every label is the one in the code); <b>right</b> is the proposed calm Maker: <b>one canvas (the real guest page), one place per part, the Hub's own words, one sheet shape.</b> The approved bars stay exactly as they are — Exit · Page ▾ · Look · Event Details · Undo · Apply · ⋯. Sample event Ana &amp; Miguel · March 13, 2027. The Setnayan look frames the page; the page itself wears the event's Classic theme.</p>
+<div class="modes">Appearance: <label for="m-auto">Auto</label><label for="m-light">Light</label><label for="m-dark">Dark</label></div>
+
+<div class="head">
+ <div class="box"><h3>What this shows</h3>
+  <ul>
+   <li><b>Today the Maker has three places to look:</b> the real page (the stage canvas), a <i>second</i> copy of the page under Look (Theme · Hero), and still pictures with forms under Event Details. <b>Proposed:</b> one canvas; Look, Event Details and Prints are sheets over it.</li>
+   <li><b>Today one part has up to four doors</b> (the names: tap · Event Details › Names · Event Details › Date · Look › Hero; the RSVP form: the RSVP stage <i>and</i> Event Details › RSVP on a 4th copy). <b>Proposed:</b> the part on the page is the one place; Event Details keeps only what the page cannot draw.</li>
+   <li><b>Today the Maker's words differ from the Hub's</b> ("Our story" / "Our love story" / "Love Story" for the guest's <i>Our Love Story</i>; "Guest's ticket" for the <i>Digital ticket</i>; "The story after the day" for <i>Recap</i>; "Edit this site"). <b>Proposed:</b> the Maker prints the guest page's word for every part.</li>
+   <li><b>Today Me is never drawn</b> ("It can't be shown on this canvas yet"). <b>Proposed:</b> Me is drawn for a sample guest, ticket and Face tagging edited right there.</li>
+  </ul>
+  <div class="legend"><span class="tag w" style="position:static">today · breaks calm</span> <span class="tag g" style="position:static">proposed · the one place</span> <span class="tag k" style="position:static">unchanged</span></div>
+ </div>
+ <div class="box"><h3>Rulings it follows</h3>
+  <ul>
+   <li><b>Owner, 2026-10-04:</b> <span class="q">"a proper integration between Event Hub and Event Hub Maker. and how the Maker also calmly edits the Event Hub itself. Same concept. same task."</span></li>
+   <li><b>#6308 "Event Hub calm", approved 2026-10-03:</b> one main action per page · one place per control · nothing drawn twice.</li>
+   <li><b>Approved re-plan 2026-09-30</b> (<code>MAKER_REPLAN_PLAN_2026-09-30.md</code>): <span class="q">"Details slims … Removed from Details: Words, Hero, Reveal, RSVP, Prints"</span> — not yet done in the code (<code>DETAILS_ITEM_GROUPS</code>). Nothing the owner cut is brought back.</li>
+   <li><b>The Maker in 4</b> (frame G bars, #6297) · <b>Look = Theme · Background · Font · Colours</b> · <b>tap to type</b> · <b>Apply publishes, nothing writes on open</b> (2026-10-01) · <b>any set of choices is one dropdown</b> · <b>no "Edit in X ↗"</b> · plain English: supplier, book, Event Hub.</li>
+  </ul>
+ </div>
+</div>
+
+<div class="toc">
+ <a href="#s1"><b>1</b>Tap a scene</a><a href="#s2"><b>2</b>Save the Date</a><a href="#s3"><b>3</b>RSVP</a><a href="#s4"><b>4</b>Invitation · Welcome</a><a href="#s5"><b>5</b>Invitation · Details</a><a href="#s6"><b>6</b>Me</a><a href="#s7"><b>7</b>The Day · Live</a><a href="#s8"><b>8</b>Post Event · Recap</a><a href="#s9"><b>9</b>Look</a><a href="#s10"><b>10</b>Event Details</a><a href="#s11"><b>11</b>The ⋯ menu</a><a href="#s12"><b>12</b>Desktop</a><a href="#moved"><b>↦</b>What moved where</a><a href="#qs"><b>?</b>Owner questions</a>
+</div>
+
+<!-- ═══════════ 1 · TAP A SCENE ═══════════ -->
+<div class="screen" id="s1">
+ <h2><span class="n">1</span>Tap a scene — Invitation › Details, the love story</h2>
+ <p class="what">What changes: <b>one sheet shape, in the Hub's words — no tab row.</b></p>
+ <div class="pair">
+  <div class="col before"><p class="cap"><i></i>Today (main)</p>
+   <div class="phone"><div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="mbar"><span class="exit">‹ Exit</span><span class="stage">Invitation<small>as a guest sees it</small></span><span class="ic">↶</span><span class="ic">⋯</span></div>
+    <div class="canvas dim">
+     <div class="brand">Ana &amp; Miguel</div>
+     <div class="scene"><span class="eyebrow">Our love story</span><h4>How we met</h4><p>A rainy Tuesday in Tagaytay, two umbrellas, one jeepney…</p></div>
+     <div class="scene sel"><span class="eyebrow">When &amp; where</span><h4>Ceremony · 2:30 PM</h4><p>Our Lady of Lourdes Parish, Tagaytay</p></div>
+     <div class="scene"><span class="eyebrow">Schedule</span><h4>The day</h4><p>2:30 Ceremony · 4:00 Cocktails · 6:00 Reception</p></div>
+    </div>
+    <div class="sheet"><div class="grip"></div>
+     <h5><small>Scene</small>Our story</h5>
+     <div class="tabs cut"><span class="tag w">a row of 4 — a pill row</span><span class="on">Format</span><span>Animate</span><span>Arrange</span><span>Content</span></div>
+     <div class="row"><span>Background</span><span class="pm">The theme's <i>▾</i></span></div>
+     <div class="row"><span>Layout</span><span class="pm">Letter <i>▾</i></span></div>
+     <div class="row sub cut"><span class="tag w l" style="top:-12px">three names for one part</span><span class="b">Tile “Our story” · scene “Our love story” · Details “Love Story” · guest tab “Our Love Story”</span></div>
+    </div>
+    <div class="mbot"><span class="pg"><small>Page</small><b>Details<i>▾</i></b></span><span class="door">Look</span><span class="door">Event Details</span><span class="apply">Apply (3)</span></div>
+    <div class="homebar"></div>
+   </div>
+  </div>
+  <div class="col after"><p class="cap"><i></i>Proposed</p>
+   <div class="phone"><div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="mbar"><span class="exit">‹ Exit</span><span class="stage">Invitation<small>as a guest sees it</small></span><span class="ic">↶</span><span class="ic">⋯</span></div>
+    <div class="canvas dim">
+     <div class="brand">Ana &amp; Miguel</div>
+     <div class="scene sel"><span class="eyebrow">Our Love Story</span><h4>How we met</h4><p>A rainy Tuesday in Tagaytay, two umbrellas, one jeepney…</p></div>
+     <div class="scene"><span class="eyebrow">When &amp; where</span><h4>Ceremony · 2:30 PM</h4><p>Our Lady of Lourdes Parish, Tagaytay</p></div>
+    </div>
+    <div class="sheet"><div class="grip"></div>
+     <h5 class="in" style="display:inline-block;position:relative"><span class="tag g">the guest's word</span><small>Scene</small>Our Love Story</h5>
+     <div class="row"><span>Words</span><span class="b">Tap them on the page to type</span></div>
+     <div class="row in"><span class="tag g">the real designs, one dropdown</span><span>Style</span><span class="pm">Letter <i>▾</i></span></div>
+     <div class="row"><span>Background</span><span class="pm">The theme's <i>▾</i></span></div>
+     <div class="row"><span>Motion</span><span class="pm">Calm <i>▾</i></span></div>
+     <div class="row"><span>Shown</span><span class="sw on"></span></div>
+     <div class="row"><span>Move</span><span class="v"><span class="pm">▲</span><span class="pm">▼</span></span></div>
+    </div>
+    <div class="mbot"><span class="pg"><small>Page</small><b>Details<i>▾</i></b></span><span class="door">Look</span><span class="door">Event Details</span><span class="apply">Apply (3)</span></div>
+    <div class="homebar"></div>
+   </div>
+  </div>
+ </div>
+ <p class="foot">Today's scene inspector (<code>scene-inspector.tsx</code>) is Keynote's four tabs; on a phone a row of four is the pill row the owner's rule forbids. Proposed: one scrolling sheet of rows — Style ▾ (the shipped designs) · Background ▾ · Motion ▾ (the transition into the next scene folded under it) · Shown · Move · Remove… (a scene of their own). Nothing is lost: every row exists today under a tab. The desktop keeps the four tabs in its right column (approved 2026-09-27). The sheet's title is the guest page's own word for the part (<code>lib/hub-part-names.ts</code>, new).</p>
+</div>
+
+<!-- ═══════════ 2 · SAVE THE DATE ═══════════ -->
+<div class="screen" id="s2">
+ <h2><span class="n">2</span>Save the Date — the film leads the page</h2>
+ <p class="what">What changes: <b>the film's sheet says "Film", the guest's word, and leads with the one choice.</b></p>
+ <div class="pair">
+  <div class="col before"><p class="cap"><i></i>Today (main)</p>
+   <div class="phone"><div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="mbar"><span class="exit">‹ Exit</span><span class="stage">Save the Date<small>as a guest sees it</small></span><span class="ic">↶</span><span class="ic">⋯</span></div>
+    <div class="canvas dim">
+     <div class="film"><div class="play"></div><div class="t">Ana &amp; Miguel<small>Save the date · March 13, 2027</small></div></div>
+     <div class="beat"><span>See our page</span><span>Add to calendar</span></div>
+     <div class="scene"><span class="eyebrow">Countdown</span><h4>160 days</h4></div>
+    </div>
+    <div class="sheet"><div class="grip"></div>
+     <h5 class="cut" style="display:inline-block;position:relative"><span class="tag w">tile word ≠ the guest's "Film"</span><small>Fixed</small>Save-the-Date film</h5>
+     <div class="row"><span>Upload the film</span><span class="pm">Choose… <span class="pro">◆</span></span></div>
+     <div class="row"><span>Poster frame</span><span class="pm">From the film <i>▾</i></span></div>
+     <div class="row cut"><span class="tag w">a second place: the Photos scene's row</span><span class="b">Film or photos? — picked on “Photos you add”, not here</span></div>
+    </div>
+    <div class="mbot"><span class="pg"><small>Page</small><b>Home<i>▾</i></b></span><span class="door">Look</span><span class="door">Event Details</span><span class="apply off">Apply</span></div>
+    <div class="homebar"></div>
+   </div>
+  </div>
+  <div class="col after"><p class="cap"><i></i>Proposed</p>
+   <div class="phone"><div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="mbar"><span class="exit">‹ Exit</span><span class="stage">Save the Date<small>as a guest sees it</small></span><span class="ic">↶</span><span class="ic">⋯</span></div>
+    <div class="canvas dim">
+     <div class="film"><div class="play"></div><div class="t">Ana &amp; Miguel<small>Save the date · March 13, 2027</small></div></div>
+     <div class="beat"><span>See our page</span><span>Add to calendar</span></div>
+     <div class="scene"><span class="eyebrow">Countdown</span><h4>160 days</h4></div>
+    </div>
+    <div class="sheet"><div class="grip"></div>
+     <h5><small>Save the Date</small>Film</h5>
+     <div class="row in"><span class="tag g">the one choice, here</span><span>Leads with</span><span class="pm">The film <i>▾</i></span></div>
+     <div class="row"><span>The film</span><span class="pm">Choose… <span class="pro">◆</span></span></div>
+     <div class="row"><span>Poster frame</span><span class="pm">From the film <i>▾</i></span></div>
+     <div class="row"><span>Closing buttons</span><span class="b">See our page · Add to calendar — Setnayan's</span></div>
+    </div>
+    <div class="mbot"><span class="pg"><small>Page</small><b>Home<i>▾</i></b></span><span class="door">Look</span><span class="door">Event Details</span><span class="apply off">Apply</span></div>
+    <div class="homebar"></div>
+   </div>
+  </div>
+ </div>
+ <p class="foot">"Leads with" is the shipped <code>std_lead</code> pick (film · photos), today saved on the <code>our_photos</code> row's panel; it moves onto the thing it decides. The closing beat already has one of each button after #6308; the sheet names it as Setnayan's so the host does not look for a control that does not exist.</p>
+</div>
+
+<!-- ═══════════ 3 · RSVP ═══════════ -->
+<div class="screen" id="s3">
+ <h2><span class="n">3</span>RSVP — the reply form</h2>
+ <p class="what">What changes: <b>one door (Page ▾ › RSVP), one canvas; the answers are typed on the form.</b></p>
+ <div class="pair">
+  <div class="col before"><p class="cap"><i></i>Today (main)</p>
+   <div class="phone"><div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="mbar"><span class="exit">‹ Exit</span><span class="stage">RSVP<small>as a guest sees it</small></span><span class="ic">↶</span><span class="ic">⋯</span></div>
+    <div class="canvas dim">
+     <div class="brand">Ana &amp; Miguel</div>
+     <div class="form"><div class="q">Will you be there?</div>
+      <div class="ans"><span class="on">Joyfully accepts</span><span>Regretfully declines</span></div>
+      <div class="q">How many are coming?</div><div class="fld"><span>2</span><i>▾</i></div>
+     </div>
+    </div>
+    <div class="sheet"><div class="grip"></div>
+     <h5><small>Page ▾ · RSVP ›</small>Reply</h5>
+     <div class="strip"><span class="on">What you ask</span><span>Who can reply</span><span>Reply by</span><span>Requests</span></div>
+     <div class="row"><span>Yes answer</span><span class="pm">Joyfully accepts</span></div>
+     <div class="row"><span>No answer</span><span class="pm">Regretfully declines</span></div>
+     <div class="row cut"><span class="tag w">the same settings, a 2nd door, a 4th copy of the form</span><span class="b">Also at Event Details › Story &amp; plans › RSVP</span></div>
+    </div>
+    <div class="mbot"><span class="pg"><small>Page</small><b>Reply<i>▾</i></b></span><span class="door">Look</span><span class="door">Event Details</span><span class="apply">Apply (1)</span></div>
+    <div class="homebar"></div>
+   </div>
+  </div>
+  <div class="col after"><p class="cap"><i></i>Proposed</p>
+   <div class="phone"><div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="mbar"><span class="exit">‹ Exit</span><span class="stage">RSVP<small>as a guest sees it</small></span><span class="ic">↶</span><span class="ic">⋯</span></div>
+    <div class="canvas">
+     <div class="brand">Ana &amp; Miguel</div>
+     <div class="typebar in" style="top:162px"><span class="tag g">typed on the form</span><span>Wording <i>▾</i></span><span>Style <i>▾</i></span><span>Hide</span><span class="done">Done</span></div>
+     <div class="form"><div class="q">Will you be there?</div>
+      <div class="ans"><span class="on caret">Joyfully accepts</span><span>Regretfully declines</span></div>
+      <div class="q">How many are coming?</div><div class="fld"><span>2</span><i>▾</i></div>
+      <div class="q">Any song requests?</div><div class="fld"><span class="b" style="color:var(--mute)">Type a song…</span></div>
+     </div>
+    </div>
+    <div class="tb"><b>Page ▾ lists the RSVP's three pages in the guest's words:</b> RSVP · Thank-you · Declined. Tap a question → its sheet: Ask it (switch) · Required · Who can reply ▾ · Reply by. One door; Event Details lists no RSVP.</div>
+    <div class="mbot"><span class="pg"><small>Page</small><b>RSVP<i>▾</i></b></span><span class="door">Look</span><span class="door">Event Details</span><span class="apply">Apply (1)</span></div>
+    <div class="homebar"></div>
+   </div>
+  </div>
+ </div>
+ <p class="foot">Today the RSVP settings component is drawn twice: in the RSVP stage (<code>MakerRsvpStage</code>, three real pages) and again as Event Details › Story &amp; plans › RSVP beside a fourth iframe of the form (<code>launch/page.tsx</code> <code>makerPageCanvasSrc(rsvpHome, 'rsvp-page', 'rsvp')</code>). Proposed: the stage is the one place; the Yes/No wording is typed in place (owner 2026-09-30: the couple renames the answers), the per-question settings open from the question. The thank-you's "How to use it" lines stay Setnayan's.</p>
+</div>
+
+<!-- ═══════════ 4 · INVITATION · WELCOME ═══════════ -->
+<div class="screen" id="s4">
+ <h2><span class="n">4</span>Invitation › Welcome — the names and date</h2>
+ <p class="what">What changes: <b>the names have one place (the page); the host can see the replied Welcome.</b></p>
+ <div class="pair">
+  <div class="col before"><p class="cap"><i></i>Today (main)</p>
+   <div class="phone"><div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="mbar"><span class="exit">‹ Exit</span><span class="stage">Invitation<small>as a guest sees it</small></span><span class="ic">↶</span><span class="ic">⋯</span></div>
+    <div class="canvas">
+     <div class="brand">Ana &amp; Miguel</div>
+     <div class="mark">A&nbsp;M</div>
+     <div class="names caret cut" style="display:inline-block;position:relative;left:50%;transform:translateX(-50%)"><span class="tag w">also at Event Details › Names · Event Details › Date · Look › Hero</span>Ana &amp; Miguel</div>
+     <div class="when">March 13, 2027 · Tagaytay</div>
+     <div class="typebar" style="top:150px"><span>Wording <i>▾</i></span><span>Format <i>▾</i></span><span>Style <i>▾</i></span><span>Hide</span><span class="done">Done</span></div>
+     <div class="arrive" style="margin-top:86px"><span class="main cut" style="position:relative"><span class="tag w" style="top:auto;bottom:-24px">the replied state is never seen</span>RSVP</span></div>
+     <div class="ph"><b>Guest's look</b>Each guest sees what they wear — their role, their colours.</div>
+     <div class="sect"><span class="eyebrow">Reminders</span><div class="chk"><span class="b"></span>Arrive by 2:30</div><div class="chk"><span class="b"></span>Bring your ticket</div></div>
+     <div class="door-g"><div><b>E-Gifts</b><small>A gift for Ana &amp; Miguel</small></div><i>›</i></div>
+    </div>
+    <div class="mbot"><span class="pg"><small>Page</small><b>Welcome<i>▾</i></b></span><span class="door">Look</span><span class="door">Event Details</span><span class="apply">Apply (2)</span></div>
+    <div class="homebar"></div>
+   </div>
+  </div>
+  <div class="col after"><p class="cap"><i></i>Proposed</p>
+   <div class="phone"><div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="mbar"><span class="exit">‹ Exit</span><span class="stage">Invitation<small>as a guest who replied</small></span><span class="ic">↶</span><span class="ic">⋯</span></div>
+    <div class="canvas">
+     <div class="brand">Ana &amp; Miguel</div>
+     <div class="mark">A&nbsp;M</div>
+     <div class="names caret in" style="display:inline-block;position:relative;left:50%;transform:translateX(-50%)"><span class="tag g">the one place · typed here · waits for Apply</span>Ana &amp; Miguel</div>
+     <div class="when">March 13, 2027 · Tagaytay</div>
+     <div class="typebar" style="top:150px"><span>Wording <i>▾</i></span><span>Format <i>▾</i></span><span>Style <i>▾</i></span><span>Hide</span><span class="done">Done</span></div>
+     <div class="arrive" style="margin-top:86px"><span class="main in" style="position:relative"><span class="tag g" style="top:auto;bottom:-24px">⋯ › See it as… › a guest who replied</span>You're going</span></div>
+     <div class="sect"><span class="eyebrow">Your look</span><p>Principal sponsor · Barong, champagne · Our colours</p></div>
+     <div class="sect"><span class="eyebrow">Reminders</span><div class="chk"><span class="b"></span>Arrive by 2:30</div><div class="chk"><span class="b"></span>Bring your ticket</div></div>
+     <div class="door-g"><div><b>E-Gifts</b><small>A gift for Ana &amp; Miguel</small></div><i>›</i></div>
+    </div>
+    <div class="mbot"><span class="pg"><small>Page</small><b>Welcome<i>▾</i></b></span><span class="door">Look</span><span class="door">Event Details</span><span class="apply">Apply (2)</span></div>
+    <div class="homebar"></div>
+   </div>
+  </div>
+ </div>
+ <p class="foot">Tap to type already writes the names into the draft (owner 2026-10-01 "wait for apply"). What goes: the Names and Date items in Event Details and the Hero item in Look — the hero's <b>Design ▾</b> (1–4) and <b>Photo</b> become the mark's own sheet when it is tapped (<code>heroParts</code> is already the same element sheet). "See it as… › a guest who replied" is the shipped sample-guest preview (<code>lib/simulated-guest-preview.ts</code>, <code>?as=replied</code>) added beside the roles, so #6308's one "You're going" door is seen where it lives. The Welcome's words already match the guest's (Reminders, E-Gifts); "Guest's look" becomes <b>Your look</b>, the page's own heading.</p>
+</div>
+
+<!-- ═══════════ 5 · INVITATION · DETAILS ═══════════ -->
+<div class="screen" id="s5">
+ <h2><span class="n">5</span>Invitation › Details — the special message and the schedule</h2>
+ <p class="what">What changes: <b>the message has one door (the page), the schedule's moments open on the schedule.</b></p>
+ <div class="pair">
+  <div class="col before"><p class="cap"><i></i>Today (main)</p>
+   <div class="phone"><div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="mbar"><span class="exit">‹ Exit</span><span class="stage">Invitation<small>as a guest sees it</small></span><span class="ic">↶</span><span class="ic">⋯</span></div>
+    <div class="canvas dim">
+     <div class="brand">Ana &amp; Miguel</div>
+     <div class="scene sel"><span class="eyebrow">Special message</span><p class="serif" style="font-family:var(--serif);font-size:15px">We'd love nothing more than to celebrate with you.</p></div>
+     <div class="scene"><span class="eyebrow">Schedule</span><div class="mom"><b>2:30 PM</b>Ceremony</div><div class="mom"><b>4:00 PM</b>Cocktails</div></div>
+    </div>
+    <div class="sheet"><div class="grip"></div>
+     <h5><small>Scene</small>Special message</h5>
+     <div class="tabs"><span>Format</span><span>Animate</span><span>Arrange</span><span class="on">Content</span></div>
+     <div class="fld cut" style="min-height:58px;align-items:flex-start;flex-direction:column;justify-content:center"><span class="tag w">a box beside the page — 3 doors to this field</span><small>Your message</small><span>We'd love nothing more than to celebrate with you.</span></div>
+     <div class="row"><span class="b">Also: Event Details › Words › Special message · the Finer Details print switch</span></div>
+     <div class="row cut"><span class="tag w">a schedule tap opens “Event details”, not the Schedule editor</span><span class="b">Event Details › Story &amp; plans › Schedule is the full editor</span></div>
+    </div>
+    <div class="mbot"><span class="pg"><small>Page</small><b>Details<i>▾</i></b></span><span class="door">Look</span><span class="door">Event Details</span><span class="apply">Apply (3)</span></div>
+    <div class="homebar"></div>
+   </div>
+  </div>
+  <div class="col after"><p class="cap"><i></i>Proposed</p>
+   <div class="phone"><div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="mbar"><span class="exit">‹ Exit</span><span class="stage">Invitation<small>as a guest sees it</small></span><span class="ic">↶</span><span class="ic">⋯</span></div>
+    <div class="canvas dim">
+     <div class="brand">Ana &amp; Miguel</div>
+     <div class="scene in" style="position:relative"><span class="tag g">typed on the page — the one door</span><span class="eyebrow">Special message</span><p class="serif caret" style="font-family:var(--serif);font-size:15px;display:inline">We'd love nothing more than to celebrate with you.</p></div>
+     <div class="scene sel"><span class="eyebrow">Schedule</span><div class="mom"><b>2:30 PM</b>Ceremony</div><div class="mom"><b>4:00 PM</b>Cocktails</div></div>
+    </div>
+    <div class="sheet"><div class="grip"></div>
+     <h5 class="in" style="display:inline-block;position:relative"><span class="tag g" style="top:-18px">the Schedule editor, on the schedule</span><small>Scene</small>Schedule</h5>
+     <div class="row"><span>Moments</span><span class="b">tap one on the page to edit it</span></div>
+     <div class="row sub"><span>2:30 PM · Ceremony</span><i style="color:var(--gild)">›</i></div>
+     <div class="row sub"><span>4:00 PM · Cocktails</span><i style="color:var(--gild)">›</i></div>
+     <div class="row sub"><span>+ Add a moment</span></div>
+     <div class="row"><span>Announcements</span><span class="sw"></span></div>
+     <div class="row"><span>Style</span><span class="pm">Rail <i>▾</i></span></div>
+    </div>
+    <div class="mbot"><span class="pg"><small>Page</small><b>Details<i>▾</i></b></span><span class="door">Look</span><span class="door">Event Details</span><span class="apply">Apply (3)</span></div>
+    <div class="homebar"></div>
+   </div>
+  </div>
+ </div>
+ <p class="foot">Today <code>SpecialMessageField</code> is one component behind three doors (the scene's Content tab, Event Details › Words, the Finer Details switch); tapping the Schedule scene opens the generic "Event details" box (<code>CONTENT_ROW_FOR_TYPE.schedule = 'details'</code>) while the real editor (moments · Announce, <code>schedulePieces</code>) sits under Event Details. Proposed: the message is typed on the page like any words; the schedule's own editor is its sheet; the Finer Details print keeps READING the same column with no second field. Words that only print (Opening line · Kindly reply) move to Prints.</p>
+</div>
+
+<!-- ═══════════ 6 · ME ═══════════ -->
+<div class="screen" id="s6">
+ <h2><span class="n">6</span>Me — the guest's own page</h2>
+ <p class="what">What changes: <b>Me is drawn for a sample guest; the ticket and Face tagging are edited right there.</b></p>
+ <div class="pair">
+  <div class="col before"><p class="cap"><i></i>Today (main)</p>
+   <div class="phone"><div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="mbar"><span class="exit">‹ Exit</span><span class="stage">Invitation<small>as a guest sees it</small></span><span class="ic">↶</span><span class="ic">⋯</span></div>
+    <div class="canvas">
+     <div class="greymsg cut" style="position:relative;padding:14px 10px"><span class="tag w">a page the Maker cannot show</span><b>Me is each guest's own page</b>Each guest's Me holds their name, their own QR and the guests they bring — made from your guest list, so every guest sees their own. It can't be shown on this canvas yet; the canvas stays where it was.</div>
+     <div class="sect" style="margin-top:auto"><span class="eyebrow">Where its parts are edited today</span><p>Digital ticket look → ⋯ › Prints › Digital ticket<br>Face tagging → Event Details › Your event › Photos from your guests?<br>Copy link → ⋯ › Your Event Hub address</p></div>
+    </div>
+    <div class="mbot"><span class="pg"><small>Page</small><b>Me<i>▾</i></b></span><span class="door">Look</span><span class="door">Event Details</span><span class="apply off">Apply</span></div>
+    <div class="homebar"></div>
+   </div>
+  </div>
+  <div class="col after"><p class="cap"><i></i>Proposed</p>
+   <div class="phone"><div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="mbar"><span class="exit">‹ Exit</span><span class="stage">Invitation<small>as a sample guest sees it</small></span><span class="ic">↶</span><span class="ic">⋯</span></div>
+    <div class="canvas dim">
+     <span class="sample">Sample guest</span>
+     <div class="brand">Ana &amp; Miguel</div>
+     <div class="names" style="font-size:20px;text-align:left;margin-top:14px">Sample Guest</div>
+     <div class="ticket in" style="position:relative"><span class="tag g">tap → Style ▾</span><div class="mono">AM</div><div class="g">Sample Guest</div><div class="qr"></div><div class="meta"><div><small>Date</small><b>March 13, 2027</b></div><div><small>Arrive</small><b>2:30 PM</b></div></div></div>
+     <div style="display:flex;gap:8px;margin-top:8px"><span class="btn" style="flex:1;margin:0">Save my ticket</span><span class="btn" style="flex:1;margin:0">Copy link</span></div>
+     <div class="fld in" style="position:relative"><span class="tag g">tap → the switch</span><div><small>Face tagging</small><span>On · erased when they sign out</span></div><i>›</i></div>
+    </div>
+    <div class="sheet"><div class="grip"></div>
+     <h5><small>Me</small>Digital ticket</h5>
+     <div class="row"><span>Style</span><span class="pm">Classic card <i>▾</i></span></div>
+     <div class="row"><span>Photos from your guests</span><span class="sw on"></span></div>
+     <div class="row"><span class="b">Save my ticket · Copy link · Your guests · Save to my account · Sign out are each guest's own — nothing to set.</span></div>
+    </div>
+    <div class="mbot"><span class="pg"><small>Page</small><b>Me<i>▾</i></b></span><span class="door">Look</span><span class="door">Event Details</span><span class="apply">Apply (1)</span></div>
+    <div class="homebar"></div>
+   </div>
+  </div>
+ </div>
+ <p class="foot">Today <code>ME_NOT_ON_CANVAS</code> (<code>lib/maker-guest-pages.ts</code>) tells the host Me cannot be shown. The sample-guest render already ships for "View as" (<code>lib/simulated-guest-preview.ts</code>); no real guest is read or written. The ticket's Style ▾ is the shipped pass-card picker (drafted, owner 2026-10-02 Q7); the switch is the shipped <code>papic_on</code> answer. The <b>Change your reply</b> row #6308 shows on the day is drawn when the sample is previewed on The Day.</p>
+</div>
+
+<!-- ═══════════ 7 · THE DAY · LIVE ═══════════ -->
+<div class="screen" id="s7">
+ <h2><span class="n">7</span>The Day › Live</h2>
+ <p class="what">What changes: <b>the parts wear the bar's words — Live · Camera · Gallery — not the Maker's.</b></p>
+ <div class="pair">
+  <div class="col before"><p class="cap"><i></i>Today (main)</p>
+   <div class="phone"><div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="mbar"><span class="exit">‹ Exit</span><span class="stage">The Day<small>as a guest sees it</small></span><span class="ic">↶</span><span class="ic">⋯</span></div>
+    <div class="canvas dim">
+     <div class="brand">Ana &amp; Miguel</div>
+     <div class="ph cut" style="margin-top:4px"><span class="tag w">“Live hub” — the guest's tab says Live</span><b>Live hub</b>Your live stream and live photo wall, when you have them on the day.</div>
+     <div class="scene"><span class="eyebrow">Schedule</span><div class="mom"><b>Now</b>Cocktails</div><div class="mom"><b>6:00 PM</b>Reception</div></div>
+     <div class="ph cut"><span class="tag w">“Camera cues” — the guest's tab says Camera</span><b>Camera cues</b>Tips for the shots you want from guests.</div>
+     <div class="ph cut"><span class="tag w">“Each guest's own photos” — the guest's tab says Gallery</span><b>Each guest's own photos</b></div>
+    </div>
+    <div class="sheet"><div class="grip"></div>
+     <h5><small>Fixed</small>Live hub</h5>
+     <div class="row"><span>Style</span><span class="pm">Wall first <i>▾</i></span></div>
+    </div>
+    <div class="mbot"><span class="pg"><small>Page</small><b>Live<i>▾</i></b></span><span class="door">Look</span><span class="door">Event Details</span><span class="apply off">Apply</span></div>
+    <div class="homebar"></div>
+   </div>
+  </div>
+  <div class="col after"><p class="cap"><i></i>Proposed</p>
+   <div class="phone"><div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="mbar"><span class="exit">‹ Exit</span><span class="stage">The Day<small>as a guest sees it</small></span><span class="ic">↶</span><span class="ic">⋯</span></div>
+    <div class="canvas dim">
+     <div class="brand">Ana &amp; Miguel</div>
+     <div class="ph in" style="margin-top:4px;position:relative"><span class="tag g">the bar's word</span><b>Live</b>Your live stream and photo wall, on the day.</div>
+     <div class="scene"><span class="eyebrow">Schedule</span><div class="mom"><b>Now</b>Cocktails</div><div class="mom"><b>6:00 PM</b>Reception</div></div>
+     <div class="ph"><b>Camera</b>What you ask guests to shoot.</div>
+     <div class="ph"><b>Gallery</b>Each guest's own photos, as they are taken.</div>
+    </div>
+    <div class="sheet"><div class="grip"></div>
+     <h5><small>The Day</small>Live</h5>
+     <div class="row"><span>Style</span><span class="pm">Wall first <i>▾</i></span></div>
+     <div class="row"><span>Directions on top until it starts</span><span class="sw on"></span></div>
+     <div class="row"><span class="b">Announcements are sent from Live Watch; they appear here when you send one.</span></div>
+    </div>
+    <div class="mbot"><span class="pg"><small>Page</small><b>Live<i>▾</i></b></span><span class="door">Look</span><span class="door">Event Details</span><span class="apply off">Apply</span></div>
+    <div class="homebar"></div>
+   </div>
+  </div>
+ </div>
+ <p class="foot">The Day's bar is Live · Welcome · Camera · Gallery · Me (<code>STAGE_BAR.event</code>); the Maker's tiles for the same parts read "Live hub", "Camera cues", "Each guest's own photos" (<code>MAKER_FIXED_LABEL</code>, <code>WIDGET_CATALOG</code>). One table of names (<code>lib/hub-part-names.ts</code>) fixes every stage at once. Nothing else moves: The Day's Style controls already live on their parts.</p>
+</div>
+
+<!-- ═══════════ 8 · POST EVENT · RECAP ═══════════ -->
+<div class="screen" id="s8">
+ <h2><span class="n">8</span>Post Event › Recap</h2>
+ <p class="what">What changes: <b>only the words — the Post Event sheet is already the calm shape.</b></p>
+ <div class="pair">
+  <div class="col before"><p class="cap"><i></i>Today (main)</p>
+   <div class="phone"><div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="mbar"><span class="exit">‹ Exit</span><span class="stage">Post Event<small>as a guest sees it</small></span><span class="ic">↶</span><span class="ic">⋯</span></div>
+    <div class="canvas dim">
+     <div class="brand">Ana &amp; Miguel</div>
+     <div class="scene sel"><span class="eyebrow cut" style="position:relative;display:inline-block"><span class="tag w l" style="left:0;top:-20px">tile “The story after the day” — the guest's tab says Recap</span>The story after the day · 1</span><h4>The first dance</h4><p>Filled from your photos and the schedule.</p></div>
+     <div class="scene"><span class="eyebrow">Scene 2</span><h4>The vows</h4></div>
+     <div class="beat"><span>The Day (Live)</span><span>Watch the Film</span></div>
+    </div>
+    <div class="sheet"><div class="grip"></div>
+     <h5><small>Post Event scene</small>The first dance</h5>
+     <div class="row"><span>Style</span><span class="pm">Editorial <i>▾</i></span></div>
+     <div class="row"><span>Shown</span><span class="sw on"></span></div>
+     <div class="row"><span>Order</span><span class="v"><span class="pm">▲ Earlier</span><span class="pm">▼ Later</span></span></div>
+     <div class="row"><span>Filled from</span><span class="b">Your photos · the schedule</span></div>
+    </div>
+    <div class="mbot"><span class="pg"><small>Page</small><b>Recap<i>▾</i></b></span><span class="door">Look</span><span class="door">Event Details</span><span class="apply off">Apply</span></div>
+    <div class="homebar"></div>
+   </div>
+  </div>
+  <div class="col after"><p class="cap"><i></i>Proposed</p>
+   <div class="phone"><div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="mbar"><span class="exit">‹ Exit</span><span class="stage">Post Event<small>as a guest sees it</small></span><span class="ic">↶</span><span class="ic">⋯</span></div>
+    <div class="canvas dim">
+     <div class="brand">Ana &amp; Miguel</div>
+     <div class="scene sel"><span class="eyebrow in" style="position:relative;display:inline-block"><span class="tag g l" style="left:0;top:-20px">the guest's word</span>Recap · 1</span><h4>The first dance</h4><p>Filled from your photos and the schedule.</p></div>
+     <div class="scene"><span class="eyebrow">Recap · 2</span><h4>The vows</h4></div>
+     <div class="beat"><span>The Day (Live)</span><span>Watch the Film</span></div>
+    </div>
+    <div class="sheet"><div class="grip"></div>
+     <h5 class="in" style="display:inline-block;position:relative"><span class="tag k">unchanged · already one sheet of rows</span><small>Recap</small>The first dance</h5>
+     <div class="row"><span>Style</span><span class="pm">Editorial <i>▾</i></span></div>
+     <div class="row"><span>Shown</span><span class="sw on"></span></div>
+     <div class="row"><span>Move</span><span class="v"><span class="pm">▲</span><span class="pm">▼</span></span></div>
+     <div class="row"><span>Filled from</span><span class="b">Your photos · the schedule</span></div>
+    </div>
+    <div class="mbot"><span class="pg"><small>Page</small><b>Recap<i>▾</i></b></span><span class="door">Look</span><span class="door">Event Details</span><span class="apply off">Apply</span></div>
+    <div class="homebar"></div>
+   </div>
+  </div>
+ </div>
+ <p class="foot">Post Event (<code>post-event-scene-panel.tsx</code>) is already the shape every other sheet should take: Style ▾ · Shown · Order · Filled from, parts edited in place, no link-outs. It becomes the model; only its words change ("Recap", "Move" like the other sheets). The footer (The Day · Watch the Film · Print the keepsake, #6308) is Setnayan's.</p>
+</div>
+
+<!-- ═══════════ 9 · LOOK ═══════════ -->
+<div class="screen" id="s9">
+ <h2><span class="n">9</span>Look</h2>
+ <p class="what">What changes: <b>Look is a sheet over the one canvas — not a second page with a second copy of the Hub.</b></p>
+ <div class="pair">
+  <div class="col before"><p class="cap"><i></i>Today (main)</p>
+   <div class="phone"><div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="mbar"><span class="exit">‹ Exit</span><span class="stage">Look<small>Theme</small></span><span class="ic">↶</span><span class="ic">⋯</span></div>
+    <div class="canvas dim" style="padding-top:6px">
+     <div class="pageframe cut"><span class="tag w" style="top:4px;right:6px">a 2nd iframe of the page, under a list</span><span class="lab">Your page</span><div class="mini"><div class="brand">Ana &amp; Miguel</div><div class="mark">A&nbsp;M</div><div class="names">Ana &amp; Miguel</div><div class="when">March 13, 2027 · Tagaytay</div><div class="arrive"><span class="main">RSVP</span></div></div></div>
+     <div class="strip cut"><span class="tag w">a sideways strip of 5 — items, not Look</span><span class="on">Theme</span><span>Mood Board</span><span>Logo</span><span>Hero</span><span>Reveal</span></div>
+    </div>
+    <div class="sheet"><div class="grip"></div>
+     <h5><small>Edit ▴</small>Theme</h5>
+     <div class="row"><span>Theme</span><span class="pm">Classic <i>▾</i></span></div>
+     <div class="row"><span>Background</span><span class="pm">The theme's <i>▾</i></span></div>
+     <div class="row"><span>Font</span><span class="pm">Cormorant <span class="pro">◆</span> <i>▾</i></span></div>
+     <div class="row"><span>Colours</span><span class="v"><span class="pm" style="background:#1E2229;color:#fff">Page</span><span class="pm" style="background:#6E2A3A;color:#fff">Button</span></span></div>
+    </div>
+    <div class="mbot"><span class="pg"><small>Page</small><b>Look</b></span><span class="door on">Look</span><span class="door">Event Details</span><span class="apply off">Apply</span></div>
+    <div class="homebar"></div>
+   </div>
+  </div>
+  <div class="col after"><p class="cap"><i></i>Proposed</p>
+   <div class="phone"><div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="mbar"><span class="exit">‹ Exit</span><span class="stage">Invitation<small>as a guest sees it</small></span><span class="ic">↶</span><span class="ic">⋯</span></div>
+    <div class="canvas dim">
+     <div class="brand">Ana &amp; Miguel</div>
+     <div class="mark">A&nbsp;M</div>
+     <div class="names">Ana &amp; Miguel</div>
+     <div class="when">March 13, 2027 · Tagaytay</div>
+     <div class="arrive"><span class="main">RSVP</span></div>
+    </div>
+    <div class="sheet in" style="outline-offset:-3px"><span class="tag g">one sheet, over the same page</span><div class="grip"></div>
+     <h5>Look</h5>
+     <div class="row"><span>Theme</span><span class="pm">Classic <i>▾</i></span></div>
+     <div class="row"><span>Background</span><span class="pm">The theme's <i>▾</i></span></div>
+     <div class="row"><span>Font</span><span class="pm">Cormorant <span class="pro">◆</span> <i>▾</i></span></div>
+     <div class="row"><span>Colours</span><span class="v"><span class="pm" style="background:#1E2229;color:#fff">Page</span><span class="pm" style="background:#6E2A3A;color:#fff">Button</span></span></div>
+     <div class="row in" style="position:relative"><span class="tag g">the Reveal, as a Look</span><span>Opening</span><span class="pm">Veil <i>▾</i></span></div>
+     <div class="row"><span>Logo</span><i style="color:var(--gild)">›</i></div>
+     <div class="row"><span>Mood Board</span><i style="color:var(--gild)">›</i></div>
+    </div>
+    <div class="mbot"><span class="pg"><small>Page</small><b>Welcome<i>▾</i></b></span><span class="door on">Look</span><span class="door">Event Details</span><span class="apply off">Apply</span></div>
+    <div class="homebar"></div>
+   </div>
+  </div>
+ </div>
+ <p class="foot">Today the Look door opens the Details PAGE on its Look items (<code>maker-bar.ts</code> "three doors, one page"); for Theme and Hero the page's body is a second iframe (<code>details-look-pages.tsx</code>, <code>?phase=…&amp;editor=1</code>). Proposed: Look is the shipped one panel (<code>LOOK_SECTIONS</code>) drawn as a sheet over the stage canvas, which previews through the bridge it already has (<code>sceneBg</code>, <code>elStyle</code>). Two rows join it: <b>Opening ▾</b> (the shipped Reveal — veil · seal · none — per stage) and the two studios (Logo · Mood Board) opening in place, as today. Hero leaves Look: the mark is tapped on the page (screen 4).</p>
+</div>
+
+<!-- ═══════════ 10 · EVENT DETAILS ═══════════ -->
+<div class="screen" id="s10">
+ <h2><span class="n">10</span>Event Details (in the Maker)</h2>
+ <p class="what">What changes: <b>it lists only what the page cannot draw — everything else is tapped on the page.</b></p>
+ <div class="pair">
+  <div class="col before"><p class="cap"><i></i>Today (main)</p>
+   <div class="phone"><div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="mbar"><span class="exit">‹ Exit</span><span class="stage">Event Details<small>Names</small></span><span class="ic">↶</span><span class="ic">⋯</span></div>
+    <div class="canvas dim" style="padding-top:6px">
+     <div class="pageframe"><span class="lab">Picture</span><div class="mini"><div class="brand">Ana &amp; Miguel</div><div class="mark">A&nbsp;M</div><div class="names">Ana &amp; Miguel</div><div class="when">March 13, 2027</div></div></div>
+     <div class="strip cut"><span class="tag w">8 groups · 30+ items — a second editor of the page</span><span>Look</span><span class="on">Your event</span><span>Words</span><span>Story &amp; plans</span><span>Your Event Hub</span><span>+3</span></div>
+    </div>
+    <div class="sheet"><div class="grip"></div>
+     <h5><small>Edit ▴</small>Names</h5>
+     <div class="fld cut" style="flex-direction:column;align-items:flex-start;justify-content:center"><span class="tag w">the same names the hero types</span><small>Bride</small><span>Ana Reyes</span></div>
+     <div class="fld" style="flex-direction:column;align-items:flex-start;justify-content:center"><small>Groom</small><span>Miguel Santos</span></div>
+     <div class="row"><span>Name style</span><span class="pm">Full <i>▾</i></span></div>
+     <div class="row"><span class="b">Next: Date · Venues (saves LIVE) · Parents &amp; hosts · March · Photos from your guests · Accept gifts · Plan it myself · Seat plan</span></div>
+    </div>
+    <div class="mbot"><span class="pg"><small>Page</small><b>Event Details</b></span><span class="door">Look</span><span class="door on">Event Details</span><span class="apply off">Apply</span></div>
+    <div class="homebar"></div>
+   </div>
+  </div>
+  <div class="col after"><p class="cap"><i></i>Proposed</p>
+   <div class="phone"><div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="mbar"><span class="exit">‹ Exit</span><span class="stage">Invitation<small>as a guest sees it</small></span><span class="ic">↶</span><span class="ic">⋯</span></div>
+    <div class="canvas dim">
+     <div class="brand">Ana &amp; Miguel</div>
+     <div class="mark">A&nbsp;M</div>
+     <div class="names">Ana &amp; Miguel</div>
+     <div class="when">March 13, 2027 · Tagaytay</div>
+     <div class="arrive"><span class="main">RSVP</span></div>
+    </div>
+    <div class="sheet in" style="outline-offset:-3px"><span class="tag g">what the page cannot draw — nothing twice</span><div class="grip"></div>
+     <h5>Event Details</h5>
+     <div class="row"><span>Address</span><span class="v">setnayan.com/<b>ana-and-miguel</b></span></div>
+     <div class="row"><span>QR for the Event Hub</span><i style="color:var(--gild)">›</i></div>
+     <div class="row"><span>Who can view</span><span class="pm">Guests with a link <i>▾</i></span></div>
+     <div class="row"><span>Photos from your guests</span><span class="sw on"></span></div>
+     <div class="row"><span>Accept gifts</span><span class="sw on"></span></div>
+     <div class="row"><span>Plan it myself</span><span class="sw"></span></div>
+     <div class="row"><span>Seat plan</span><i style="color:var(--gild)">›</i></div>
+     <div class="row"><span>What's left</span><span class="v">3 to finish <i>›</i></span></div>
+    </div>
+    <div class="mbot"><span class="pg"><small>Page</small><b>Welcome<i>▾</i></b></span><span class="door">Look</span><span class="door on">Event Details</span><span class="apply off">Apply</span></div>
+    <div class="homebar"></div>
+   </div>
+  </div>
+ </div>
+ <p class="foot">Today's <code>DETAILS_ITEM_GROUPS</code>: Look · Your event · Words · Story &amp; plans · Your Event Hub · Invitation set · For the day · Download. The re-plan the owner approved on 2026-09-30 says "Details slims … Removed: Words, Hero, Reveal, RSVP, Prints". Proposed groups: Address · QR · Who can view (today split between here and two ⋯ rows) · the three answers · Seat plan (a tool) · What's left (the guide). Names, Date, Venues, Parents &amp; hosts, the March, the Words, Love Story, Schedule and RSVP are reached by tapping the part on the page — the same editors, moved onto the thing they edit. The Invitation set · For the day · Download are Prints (⋯ › Prints, unchanged).</p>
+</div>
+
+<!-- ═══════════ 11 · THE ⋯ MENU ═══════════ -->
+<div class="screen" id="s11">
+ <h2><span class="n">11</span>The ⋯ menu</h2>
+ <p class="what">What changes: <b>two settings rows leave — they are Event Details rows.</b></p>
+ <div class="pair">
+  <div class="col before"><p class="cap"><i></i>Today (main)</p>
+   <div class="phone"><div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="mbar"><span class="exit">‹ Exit</span><span class="stage">Invitation<small>as a guest sees it</small></span><span class="ic">↶</span><span class="ic" style="background:var(--paper2);border-radius:10px">⋯</span></div>
+    <div class="canvas dim"><div class="brand">Ana &amp; Miguel</div><div class="mark">A&nbsp;M</div><div class="names">Ana &amp; Miguel</div></div>
+    <div class="mm">
+     <div class="mi">Desktop</div><div class="mi">Add a scene</div><div class="mi">Play this scene</div><div class="mi">Phone and desktop</div>
+     <div class="mh">See it as…</div><div class="mi">You (the host) <i>✓</i></div><div class="mi">Principal sponsor</div>
+     <div class="mi">Prints</div><div class="mi">Restore</div><div class="mi">Reset this stage…</div>
+     <div class="mi cut"><span class="tag w">also in Event Details › Your Event Hub</span>Your Event Hub address</div>
+     <div class="mi cut"><span class="tag w">a setting, not a Maker action</span>Who can view</div>
+     <div class="mi">About the Maker</div>
+    </div>
+    <div class="mbot"><span class="pg"><small>Page</small><b>Welcome<i>▾</i></b></span><span class="door">Look</span><span class="door">Event Details</span><span class="apply off">Apply</span></div>
+    <div class="homebar"></div>
+   </div>
+  </div>
+  <div class="col after"><p class="cap"><i></i>Proposed</p>
+   <div class="phone"><div class="island"></div>
+    <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+    <div class="mbar"><span class="exit">‹ Exit</span><span class="stage">Invitation<small>as a guest sees it</small></span><span class="ic">↶</span><span class="ic" style="background:var(--paper2);border-radius:10px">⋯</span></div>
+    <div class="canvas dim"><div class="brand">Ana &amp; Miguel</div><div class="mark">A&nbsp;M</div><div class="names">Ana &amp; Miguel</div></div>
+    <div class="mm">
+     <div class="mi">Desktop</div><div class="mi">Add a scene</div><div class="mi">Play this scene</div><div class="mi">Phone and desktop</div>
+     <div class="mh">See it as…</div><div class="mi">You (the host) <i>✓</i></div><div class="mi in" style="outline-offset:-2px"><span class="tag g">new row · the shipped sample guest</span>A guest who replied</div><div class="mi">Principal sponsor</div>
+     <div class="mi">Prints</div><div class="mi">Restore</div><div class="mi">Reset this stage…</div>
+     <div class="mi">About the Maker</div>
+    </div>
+    <div class="mbot"><span class="pg"><small>Page</small><b>Welcome<i>▾</i></b></span><span class="door">Look</span><span class="door">Event Details</span><span class="apply off">Apply</span></div>
+    <div class="homebar"></div>
+   </div>
+  </div>
+ </div>
+ <p class="foot">Today's rows are read from <code>maker-shell.tsx</code> (<code>grep -n "&lt;MenuItem"</code>). "Your Event Hub address" and "Who can view" open the old settings sheet (<code>moreOpen</code>) while Event Details › Your Event Hub carries Address · QR — two places. "Scenes" shows on the desktop only (not drawn here).</p>
+</div>
+
+<!-- ═══════════ 12 · DESKTOP ═══════════ -->
+<div class="screen" id="s12">
+ <h2><span class="n">12</span>Desktop (secondary) — the same idea in three columns</h2>
+ <p class="what">What changes: <b>the right column is the tapped part's sheet; Look / Event Details fill the same column; one canvas.</b></p>
+ <div class="desk">
+  <div class="dbar"><span>‹ Exit</span><span>Invitation › Welcome ▾</span><span>Look</span><span>Event Details</span><span>↶ Undo</span><span class="on">Phone</span><span class="ap">Apply (3)</span><span>⋯</span></div>
+  <div class="dbody">
+   <div class="dnav"><h6>Scenes · Welcome</h6><div class="on">Names &amp; date — the mark</div><div>Your look</div><div>Reminders</div><div>E-Gifts</div><h6 style="margin-top:14px">Details</h6><div>Countdown</div><div>Special message</div><div>Our Love Story</div><div>When &amp; where</div><div>Schedule</div><div>Venues</div><div>Dress code</div><div>The entourage</div></div>
+   <div class="dcanvas"><div class="pageframe in" style="position:relative"><span class="tag g">the one canvas — the real page</span><span class="lab">setnayan.com/ana-and-miguel</span><div class="mini"><div class="brand">Ana &amp; Miguel</div><div class="mark">A&nbsp;M</div><div class="names">Ana &amp; Miguel</div><div class="when">March 13, 2027 · Tagaytay</div><div class="arrive"><span class="main">RSVP</span></div></div></div></div>
+   <div class="dpanel"><h6>Names &amp; date — the mark</h6>
+    <div class="row"><span>Words</span><span class="b">tap them on the page</span></div>
+    <div class="row"><span>Design</span><span class="pm">1 <i>▾</i></span></div>
+    <div class="row"><span>Photo</span><span class="pm">Choose…</span></div>
+    <div class="row"><span>Name style</span><span class="pm">Full <i>▾</i></span></div>
+    <div class="row"><span>Date</span><span class="pm">March 13, 2027 <i>▾</i></span></div>
+    <div class="row sub"><span class="b">Help me choose — only dates every booked supplier can do</span></div>
+    <div class="row"><span>Shown</span><span class="sw on"></span></div>
+   </div>
+  </div>
+ </div>
+ <p class="foot">The desktop keeps its three columns (scenes · canvas · the part's panel) and may keep Keynote's four tabs in the panel. The Date row is the shipped governed date (clash-safe, drafted) moved from Event Details › Date onto the mark it prints on.</p>
+</div>
+
+<!-- ═══════════ WHAT MOVED WHERE ═══════════ -->
+<div class="screen" id="moved">
+ <h2><span class="n">↦</span>What moved where — nothing is lost</h2>
+ <table>
+  <tr><th>Control</th><th>Today (places)</th><th>Proposed (the one place)</th></tr>
+  <tr><td><b>Names · Name style</b></td><td>tap the mark · Event Details › Names · Look › Hero (3)</td><td class="ok">tap the mark (Wording ▾ = name style)</td></tr>
+  <tr><td><b>Date · Help me choose</b></td><td>tap the date (Format ▾) · Event Details › Date (2)</td><td class="ok">tap the date → its sheet (Format ▾ · the governed date · Help me choose)</td></tr>
+  <tr><td><b>Hero design · photo</b></td><td>Look › Hero · <code>/website/hero-photo</code> "Save photo" (2)</td><td class="ok">tap the mark → Design ▾ · Photo; the old page redirects</td></tr>
+  <tr><td><b>Venues</b></td><td>Event Details › Venues (saves live) · venue card Style ▾ (2)</td><td class="ok">tap the venue card → Style ▾ · Photo (drafted); the venue follows the booking; "Enter your own" on Event Details outside the Maker</td></tr>
+  <tr><td><b>Parents &amp; hosts · the March</b></td><td>Event Details › Your event (1, a picture)</td><td class="ok">tap the entourage → the same editors</td></tr>
+  <tr><td><b>Special message</b></td><td>tap → Content box · Words › Special message · Finer Details switch (3)</td><td class="ok">typed on the page; the print reads the same column</td></tr>
+  <tr><td><b>Thank-you message</b></td><td>Words › Thank-you</td><td class="ok">on the E-Gifts page's part</td></tr>
+  <tr><td><b>Opening line · Kindly reply</b></td><td>Words (print-only lines beside Hub words)</td><td class="ok">Prints (⋯ › Prints)</td></tr>
+  <tr><td><b>Our Love Story</b></td><td>Event Details › Story &amp; plans · tap → same (2 doors)</td><td class="ok">tap the story → the scrapbook sheet</td></tr>
+  <tr><td><b>Schedule · Announce</b></td><td>Event Details › Schedule · tap → "Event details" box (2, different)</td><td class="ok">tap the schedule → moments · Announce</td></tr>
+  <tr><td><b>RSVP settings</b></td><td>Page ▾ › RSVP · Event Details › RSVP on a 4th iframe (2)</td><td class="ok">Page ▾ › RSVP; answers typed on the form; per-question sheet</td></tr>
+  <tr><td><b>Theme · Background · Font · Colours</b></td><td>Look → the Details page (2nd iframe)</td><td class="ok">Look sheet over the one canvas</td></tr>
+  <tr><td><b>Reveal</b></td><td>Look › Reveal (a Details item)</td><td class="ok">Look › Opening ▾</td></tr>
+  <tr><td><b>Logo · Mood Board</b></td><td>Look › items (whole studios)</td><td class="ok">Look › Logo › · Mood Board › (open in place, unchanged)</td></tr>
+  <tr><td><b>Address · QR · Who can view</b></td><td>Event Details › Your Event Hub · ⋯ ×2 (3)</td><td class="ok">Event Details</td></tr>
+  <tr><td><b>Photos from your guests · Accept gifts · Plan it myself · Seat plan</b></td><td>Event Details › Your event</td><td class="ok">Event Details (unchanged); the Papic switch also reachable from Me's Face tagging</td></tr>
+  <tr><td><b>Digital ticket look</b></td><td>⋯ › Prints › Digital ticket (Me never drawn)</td><td class="ok">tap the ticket on Me (sample guest) → Style ▾; Prints still prints it</td></tr>
+  <tr><td><b>Show / hide a scene</b></td><td>Arrange › Show · the scenes column's eye · <code>/website/widgets</code> (3)</td><td class="ok">the sheet's Shown switch (the eye stays on the desktop column); the old page redirects</td></tr>
+  <tr><td><b>Scene tabs Format · Animate · Arrange · Content</b></td><td>a tab row in the phone sheet</td><td class="ok">rows: Style ▾ · Background ▾ · Motion ▾ · Shown · Move · Remove… (desktop keeps tabs)</td></tr>
+  <tr><td><b>The Maker's words</b></td><td>Our story / Our love story / Love Story · Guest's ticket · The story after the day · Camera cues · Each guest's own photos · "Edit this site"</td><td class="ok">the guest page's own words, one table; the ribbon says "Edit your Event Hub"</td></tr>
+ </table>
+</div>
+
+<!-- ═══════════ OWNER QUESTIONS ═══════════ -->
+<div class="screen" id="qs">
+ <h2><span class="n">?</span>Five questions for the owner — recommendation first</h2>
+ <div class="qs">
+  <div class="box"><span class="n">1</span><b>Event Details inside the Maker.</b><br><span class="rec">Recommend</span> slim it to what the page cannot draw (screen 10); every fact that is on the page is edited by tapping it. <span class="q">Alternative:</span> keep it as a full index where tapping a fact opens the same sheet the part opens.</div>
+  <div class="box"><span class="n">2</span><b>The Reveal (veil · seal).</b><br><span class="rec">Recommend</span> it becomes Look › Opening ▾, per stage (screen 9). <span class="q">Alternative:</span> leave it as a Look item on its own page.</div>
+  <div class="box"><span class="n">3</span><b>Venues in the Maker.</b><br><span class="rec">Recommend</span> the Hub follows the booked venue (your 2026-10-01 ruling); the Maker edits the card's Style ▾ and Photo, drafted; "Enter your own" is an Event Details / Your Team fact outside the Maker. <span class="q">Alternative:</span> keep typing venues in the Maker, drafted.</div>
+  <div class="box"><span class="n">4</span><b>The phone sheet.</b><br><span class="rec">Recommend</span> fold Format · Animate · Arrange · Content into one scrolling sheet of rows on the phone (screen 1); the desktop keeps the tabs. <span class="q">Alternative:</span> keep the tabs on the phone.</div>
+  <div class="box"><span class="n">5</span><b>Me on the canvas.</b><br><span class="rec">Recommend</span> draw Me for a sample guest (the shipped preview; no real guest read or written) so the ticket and Face tagging are set where guests see them (screen 6). <span class="q">Alternative:</span> keep Me off the canvas; the ticket stays under Prints.</div>
+ </div>
+</div>
+
+</div><!-- /inner -->
+<footer>Fable · 2026-10-04 · Script-free: every frame is in the HTML; Auto / Light / Dark is a CSS switch. Measured on <code>origin/main</code> 777cf8f070 and <code>origin/rd/event-hub-calm</code> (#6308). Audit + plan: <code>MAKER_CALM_AUDIT_AND_PLAN_2026-10-04_fable.md</code>. Labels on the left are the ones in the code; the right side draws only the delta — the approved bars, Look's four rows, tap to type and the RSVP stage are kept as built.</footer>
+</div><!-- /wrap -->
+</body>
+</html>
