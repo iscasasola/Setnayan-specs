@@ -4,14 +4,13 @@ Copied from the local handoff CURRENT-STATE.md (top blocks only). Newest block f
 
 **The plan + checklist:** corpus `RELEASE_RSVP_INVITATION_2026-09-30.md` (top: build sequence across 3 accounts; checklist by step 1–7; items 1–18 — **#18 = Thursday FIRST**). Rules: `INTERACTION_RULES.md`. Rulings: `DECISION_LOG.md` (2026-09-30 + 2026-10-01 rows). Cloud prompts: `CLOUD_PROMPTS_OCT1_2026.md` (G1–G7) + `CLOUD_PROMPTS_OCT3_2026-09-30.md` (A–F).
 
-## ▶ STATE Sat 3 Oct ~15:00 PHT — SUNDAY ACCOUNT CLOUD CONTROLLER (newest)
-- Controller = cloud session. `gh` CLI unauthenticated → GitHub MCP tools; setnayan.com + *.vercel.app egress-blocked → deploys verified via Vercel MCP (prod = 74ff0be).
-- TRAIN rd/train-2026-10-03-b FOLDING (Opus agent): #6312 C1 DELETE…WHERE · #6307 C5 top bar · #6295 guest flow · #6311 C4 guest list (green after ONE re-run — flaky unit test, follow-up queued) · #6306 Home (+ #6308 event-hub-calm only if green in time). Then: independent Sonnet audit → merge only on all-green → deploy-prod → Vercel check → owner check cards.
-- RUNNING: C2 rd/people-with-access (Opus) · C6 #6308 CI. #6310 Discover card being redone by session_01Hh1HXxFvpBvv5BcYe63RkS (owner: paper invitation card for Classic + custom main background shows) → next train.
-- QUEUED after C2: S1 supplier schedule/card fixes (SUPPLIER_SIDE_REPORT) · S2 scan (prototype approved) · S3 Papic→supplier page (prototype (b): auto-public after 7-day guest notice) · S4 supplier page "Their work" by event (SUPPLIER_PAGE_REVIEW + prototype; after S3).
-- Owner rulings today (all in DECISION_LOG 2026-10-03): supplier scan 5 modes · console+desk shortcut · supplier photo sources = own (auto after 7-day guest notice, no couple Allow) + Challenge shares (public when tap says so) · untagged → every guest one line · never the couple's gallery · Discover Classic = paper invitation card + custom background · supplier page Their work (type·venue·month, uploads last, one list).
-- Artifacts for the owner: scan REnPMEGjGpp2fAwaogjhpc · Papic V3u4FnBgVCdnhZ2j5nY9rC (v2) · supplier page WeVBx7LtmgEVZqYfkXrsbj.
-- TRAP re-seen: marking a PR ready RE-ARMS auto-merge → disable again right after ready, re-read.
+## ▶ STATE Sat 3 Oct ~19:05 PHT — SUNDAY ACCOUNT CLOUD CONTROLLER (newest)
+- LIVE: **777cf8f** = train b #6314 (#6312 DELETE…WHERE · #6307 slim top bar · #6295 guest flow · #6311 guest list · #6306 Home). deploy-prod run 37117729658 success; Vercel prod deployment READY on 777cf8f; migration 20271261953500 in prod ledger. Sonnet audit: no blockers.
+- FOLLOW-UPS from the audit (next train): restoreDeletedGuests must only restore really-deleted guests + server-side decided_by/decided_at (song-request attribution forge, own event only) · /nikah redirect('/login') without return path · plan-phase Home no longer shows set-date / Papic-ready nudges, "Plan next year", tea-ceremony tile (owner told) · flaky unit test suspect lib/supabase/session-budget.test.ts.
+- GREEN DRAFTS for train c: #6308 event-hub-calm (needs owner Q1 — before/after artifact 97CzwxpNXKHzVZoZuP1B2q) · #6310 Discover card (blocked: / JS +15.7 KB — C8 session fixing) · C2 rd/people-with-access (running).
+- OPEN OWNER QUESTIONS (asked 03 Oct, plain text): 1 #6308 two design diffs · 2 "Plan with Setnayan" on supplier page → quiet link · 3 one host approval setting scope (challenges only vs all supplier requests) · 4 its default · 5 move "Write a column" card + 3D/keepsake into the guest Story tab. Owner action: set GUEST_COLUMNS_ENABLED=true in Vercel (d6 approved 02 Oct; 0 columns ever; cloud cannot read Vercel env — 403).
+- TRAP (new, measured): every NON-draft PR gets auto-merge re-armed (5/5) despite label + disable → builders keep PRs DRAFT; controller converts to ready only to merge a train.
+- QUEUED: S1 supplier schedule/card fixes · S2 scan · S3 Papic→supplier page (7-day guest notice) · S4 supplier page "Their work".
 
 ## ▶ STATE Sat 3 Oct ~06:40 PHT — THURSDAY ACCOUNT DONE (weekly ~97%) — READ THIS FIRST
 - LIVE: **74ff0be** = batch 7 train #6309 (deploy-prod success: migrations → deploy; /api/health version 74ff0be). Independent Sonnet audit: SHIP (migrations safe, 760 files = union of the 12 members, every new control mounted, Maker bars = approved frame G).
