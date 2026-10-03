@@ -4,6 +4,11 @@ Copied from the local handoff CURRENT-STATE.md (top blocks only). Newest block f
 
 **The plan + checklist:** corpus `RELEASE_RSVP_INVITATION_2026-09-30.md` (top: build sequence across 3 accounts; checklist by step 1–7; items 1–18 — **#18 = Thursday FIRST**). Rules: `INTERACTION_RULES.md`. Rulings: `DECISION_LOG.md` (2026-09-30 + 2026-10-01 rows). Cloud prompts: `CLOUD_PROMPTS_OCT1_2026.md` (G1–G7) + `CLOUD_PROMPTS_OCT3_2026-09-30.md` (A–F).
 
+## ▶ STATE Sat 3 Oct — SUNDAY ACCOUNT CLOUD CONTROLLER STARTED (newest)
+- Controller = cloud session (claude/gifted-hopper-tcqajz). `gh` CLI unauthenticated in the cloud → GitHub MCP tools; setnayan.com is egress-blocked from the cloud container → deploys verified via Vercel MCP (prod deployment = 74ff0be confirmed).
+- Wave 1 RUNNING (Opus subagents, own worktrees /home/user/wt-*): C1 rd/delete-needs-a-where · C4 rd/guest-list-search-and-fold · C5 #6307 slim top bar. Queue after: C7 (#6306 + #6295) · C3 report · C6 #6308 · C2 people with access.
+- Problems log since 74ff0be: only refresh_demand_radar_rollups (C1). Pre-batch-7 (5666406) open items worth a look: /api/guest/pass-card BUTTON_TIMEOUT ×6 + an HTTP error on the guests page; GET events "invalid input syntax for uuid" ×2; rage taps on "More for <name>" = the clipped ⋯ menu (C4).
+
 ## ▶ STATE Sat 3 Oct ~06:40 PHT — THURSDAY ACCOUNT DONE (weekly ~97%) — READ THIS FIRST
 - LIVE: **74ff0be** = batch 7 train #6309 (deploy-prod success: migrations → deploy; /api/health version 74ff0be). Independent Sonnet audit: SHIP (migrations safe, 760 files = union of the 12 members, every new control mounted, Maker bars = approved frame G).
 - IN batch 7: #6292 simplicity 1 · #6294 guest entry grouped · #6299 Look · #6296 root map waves 2+3 · #6302 deleted guest unlinks (+repair) · #6304 guests live-test fixes · #6305 tip popups off · #6300 Google-only set password · #6303 Suppliers "Your planning" · #6297 Maker phone (frame G) · #6298 simplicity 2 (book/Saved/quote/payment/Money in/The Day; Who-can-reply pop-up + sign-up guest-entry card removed per d23/d24) · #6301 invite page live fixes.
