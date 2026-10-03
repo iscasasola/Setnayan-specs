@@ -43,3 +43,4 @@ Owner, verbatim: *"Remember our rules. 1. prevent to crowded presentation on mob
 - **Not crowded on a phone:** one main thing per screen; few controls visible at once; the rest behind ONE dropdown or a sheet; no side-by-side panels at 375 px.
 - **The body is full width:** the content being edited (the page, the form, the list) uses the screen's full width; controls go in slim top/bottom bars or a sheet over the page, never a column that narrows the body.
 - **Live preview, Apply publishes:** every change shows on the page at once (realtime), and saves to the DRAFT only; guests see nothing until **Apply**. Opening a panel never writes.
+- **One open at a time (auto-collapse):** opening a dropdown, ⋯ menu, popover or fold closes any other one open on the screen (owner 2026-10-04, verbatim: *"when a dropdown opens, the other dropdown collapses"* → *"auto collapse"*).
