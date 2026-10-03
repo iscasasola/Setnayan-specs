@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Maker venues pin + ceremony time — design check (B4)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FAF7F2;--paper2:#F3EEE6;--page:#EDE7DE;--ink:#1E2229;--ink2:#3B3F46;--mute:#76736D;
+  --gild:#B08A5B;--gild-soft:#E9DEC9;--gild-wash:#F7F1E6;--wine:#6E2A3A;
+  --line:#E5DED3;--ok:#2F6B4F;--okbg:#E7F1EA;--cta:#C24E25;
+  --serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --sans:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--page);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1264px;margin:0 auto;padding:28px 20px 10px}
+.doc-brand{font-size:10.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--gild);font-weight:600}
+h1{font-family:var(--serif);font-weight:500;font-size:36px;line-height:1.1;margin:8px 0 10px;letter-spacing:-.01em}
+.lead{color:var(--ink2);font-size:14px;line-height:1.6;max-width:900px;margin:0 0 6px}
+.lead b{font-weight:600;color:var(--ink)}
+h2.sec{display:flex;align-items:center;gap:14px;font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink2);font-weight:600;margin:40px 0 18px}
+h2.sec:after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* frames row */
+.frames{display:flex;flex-wrap:wrap;gap:26px;align-items:flex-start;justify-content:flex-start}
+.frame{width:375px;display:flex;flex-direction:column;gap:12px}
+.notes{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px 14px 8px 17px;position:relative}
+.notes:before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;background:var(--gild);border-radius:0 3px 3px 0}
+.notes h4{display:flex;align-items:baseline;gap:8px;margin:0 0 6px;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gild);font-weight:600}
+.notes h4 .k{font-family:var(--serif);font-size:22px;font-weight:500;letter-spacing:0;line-height:1}
+.notes ul{margin:0;padding-left:15px;font-size:12px;line-height:1.5;color:var(--ink2)}
+.notes li{margin-bottom:4px}
+.notes li b{color:var(--ink);font-weight:600}
+.q{font-family:var(--serif);font-style:italic;font-size:13.5px;color:var(--ink)}
+
+/* ---------- phone (375 × 812) ---------- */
+.phone{width:375px;height:812px;flex:none;background:var(--paper);border:8px solid #14161A;border-radius:44px;position:relative;overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:0 0 0 1px #2E3238,0 40px 70px -30px rgba(30,34,41,.45),0 16px 30px -18px rgba(30,34,41,.25)}
+.island{position:absolute;left:50%;top:10px;transform:translateX(-50%);width:112px;height:31px;background:#14161A;border-radius:20px;z-index:9}
+.status{height:48px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 7px;font-size:13.5px;font-weight:600;background:#fff}
+.status .sig{display:flex;gap:6px;align-items:center;font-size:11px}
+.bat{width:23px;height:11px;border:1.5px solid var(--ink);border-radius:4px;position:relative;opacity:.9}
+.bat:after{content:"";position:absolute;left:2px;top:2px;bottom:2px;right:5px;background:var(--ink);border-radius:1px}
+/* approved bars (frame G, as shipped): top × · Page ▾ · Apply — bottom Look · Event Details · Undo · ⋯ */
+.ptop{height:48px;flex:none;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;padding:0 10px;position:relative;z-index:8}
+.pbar{height:60px;flex:none;background:#fff;border-top:1px solid var(--line);display:flex;align-items:center;gap:6px;padding:0 10px 4px;position:relative;z-index:8}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:999px;font-size:12.5px;font-weight:600;border:1px solid var(--line);background:#fff;color:var(--ink);white-space:nowrap;line-height:1}
+.btn.fill{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.icn{width:34px;padding:8px 0;color:var(--ink2);font-size:14px;font-weight:500}
+.btn.pg{flex:1;justify-content:space-between;font-family:var(--serif);font-size:15px;font-weight:500;padding:7px 11px 7px 13px}
+.btn.pg small{font-family:var(--sans);font-size:10px;color:var(--mute);letter-spacing:.06em;text-transform:uppercase;margin-right:4px;font-weight:600}
+.btn .c{font-style:normal;color:var(--gild);font-size:10px}
+.btn .n{background:var(--gild);color:#fff;border-radius:999px;font-size:10px;padding:2px 6px;font-weight:600}
+.btn.on{background:var(--gild-wash);border-color:var(--gild)}
+.pbar .btn{flex:1;padding:10px 6px;font-size:12.5px}
+.pbar .btn.icn{flex:none}
+.home{height:20px;flex:none;position:relative;background:#fff}
+.home:after{content:"";position:absolute;left:50%;bottom:6px;transform:translateX(-50%);width:128px;height:5px;border-radius:3px;background:var(--ink);opacity:.85}
+
+/* the page under the sheet */
+.pv{flex:1;min-height:0;position:relative;overflow:hidden;background:var(--paper)}
+.hub{position:absolute;left:0;top:0;width:100%;padding:24px 22px 26px;text-align:center}
+.hub .p{display:block}
+.hub .line1{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--ink2)}
+.hub .mark{width:40px;height:40px;border-radius:50%;border:1px solid var(--gild);color:var(--gild);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:17px;margin:10px auto 8px}
+.hub .names{font-family:var(--serif);font-size:38px;line-height:1.05;font-weight:500}
+.hub .names .j{font-style:italic;font-size:28px;margin:0 6px;color:var(--gild)}
+.hub .invl{font-family:var(--serif);font-size:16px;margin-top:6px;color:var(--ink2)}
+.hub .date{font-size:11px;letter-spacing:.22em;text-transform:uppercase;margin-top:14px;font-weight:600}
+.hub .time{font-family:var(--serif);font-size:15px;margin-top:4px}
+.hub .venue{font-size:11.5px;color:var(--ink2);margin-top:12px;line-height:1.45}
+.hub .venue b{font-weight:600;color:var(--ink)}
+.hub .hl{background:linear-gradient(transparent 55%,var(--gild-soft) 55%)}
+.dim{position:absolute;inset:0;background:rgba(30,34,41,.28);z-index:10}
+
+/* ---------- the Details sheet (editor) ---------- */
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:22px 22px 0 0;padding:8px 14px 12px;z-index:12;box-shadow:0 -20px 40px -24px rgba(30,34,41,.4);display:flex;flex-direction:column;gap:8px}
+.grab{width:36px;height:5px;border-radius:3px;background:#D6CFC4;margin:0 auto 2px}
+.sh{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.sh .x{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--ink2);flex:none}
+.sh .used{font-size:11px;color:var(--mute);flex:1;text-align:right;padding-right:6px}
+.dd{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:8px 11px 8px 13px;font-size:13px;font-weight:600;background:#fff;white-space:nowrap;max-width:100%;overflow:hidden}
+.dd.big{font-family:var(--serif);font-size:19px;font-weight:500}
+.dd .c{color:var(--gild);font-size:10px;font-style:normal}
+.dd .v{font-weight:500;color:var(--ink);overflow:hidden;text-overflow:ellipsis}
+.dd small{font-size:10px;color:var(--mute);letter-spacing:.06em;text-transform:uppercase;font-weight:600;margin-right:2px}
+.eyebrow{font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);font-weight:500}
+.card{display:flex;flex-direction:column;gap:6px}
+.fld{min-height:38px;border:1px solid rgba(30,34,41,.15);border-radius:8px;background:#fff;padding:0 11px;display:flex;align-items:center;font-size:15px;color:var(--ink);gap:8px}
+.fld .ph{color:#A6A29B}
+.fld.sm{min-height:38px;font-size:14px}
+.fld .lab{font-size:11px;color:var(--mute);margin-right:auto;font-weight:500}
+.fld .val{font-weight:500}
+.fld .caret{display:inline-block;width:1.5px;height:17px;background:var(--ink);margin-left:1px;vertical-align:-3px}
+.fld .ic{color:var(--mute);font-size:12px}
+.row2{display:flex;gap:6px;align-items:center}
+.row2 .fld{flex:1}
+.find{height:38px;flex:none;border:1px solid rgba(30,34,41,.15);border-radius:8px;padding:0 11px;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--ink2);background:var(--paper)}
+.booked{background:rgba(30,34,41,.03);border-radius:8px;padding:7px 10px;display:flex;gap:10px;align-items:flex-start}
+.booked .t{font-size:14px;font-weight:600}
+.booked .a{font-size:12px;color:var(--ink2)}
+.booked .f{font-size:11px;color:var(--mute);margin-top:3px}
+.thumb{width:50px;height:50px;border-radius:8px;flex:none;position:relative;overflow:hidden;border:1px solid var(--line);background:#EFEADF}
+/* a sketched OSM-style map, no tiles */
+.map{position:relative;height:92px;border-radius:8px;border:1px solid rgba(30,34,41,.15);overflow:hidden;
+  background:
+    linear-gradient(90deg,transparent 48%,#fff 48%,#fff 56%,transparent 56%),
+    linear-gradient(0deg,transparent 60%,#fff 60%,#fff 66%,transparent 66%),
+    linear-gradient(28deg,transparent 46%,#fff 46%,#fff 50%,transparent 50%),
+    linear-gradient(0deg,transparent 28%,#fff 28%,#fff 31%,transparent 31%),
+    linear-gradient(90deg,transparent 18%,#fff 18%,#fff 21%,transparent 21%),
+    linear-gradient(90deg,transparent 78%,#fff 78%,#fff 81%,transparent 81%),
+    #EFEADF}
+.map .blk{position:absolute;background:#E4DECF;border-radius:2px}
+.map .grn{position:absolute;background:#D9E4CF;border-radius:6px}
+.map .wtr{position:absolute;background:#CFE0EA}
+.thumb .blk,.thumb .grn{position:absolute;border-radius:2px}
+.thumb .blk{background:#E4DECF}.thumb .grn{background:#D9E4CF}
+.pin{position:absolute;left:50%;top:50%;width:22px;height:22px;transform:translate(-50%,-100%);}
+.pin:before{content:"";position:absolute;inset:0;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--cta);box-shadow:0 2px 4px rgba(0,0,0,.25)}
+.pin:after{content:"";position:absolute;left:7px;top:7px;width:8px;height:8px;border-radius:50%;background:#fff}
+.pin.s{width:16px;height:16px}.pin.s:after{left:5px;top:5px;width:6px;height:6px}
+.cross:before,.cross:after{content:"";position:absolute;left:50%;top:50%;background:rgba(30,34,41,.35)}
+.cross:before{width:1px;height:28px;transform:translate(-50%,-50%)}
+.cross:after{width:28px;height:1px;transform:translate(-50%,-50%)}
+.zoom{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:4px}
+.zoom span{width:26px;height:26px;background:#fff;border:1px solid var(--line);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--ink2)}
+.osm{position:absolute;right:6px;bottom:4px;font-size:8.5px;color:var(--mute);background:rgba(255,255,255,.7);padding:1px 4px;border-radius:3px}
+.pinned{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink2)}
+.pinned i{color:var(--cta);font-style:normal;font-size:12px}
+.photo{display:flex;gap:8px;align-items:center}
+.photo .pic{width:56px;height:34px;border-radius:6px;background:linear-gradient(135deg,#C9B38A,#8A6B39 60%,#5A4426);border:1px solid var(--line);flex:none}
+.saverow{display:flex;align-items:center;gap:10px;padding-top:6px;border-top:1px solid var(--line);margin-top:2px}
+.save{background:var(--cta);color:#FDFBF7;border-radius:8px;padding:10px 16px;font-size:13.5px;font-weight:600}
+.saved{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--ok)}
+.strike{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--mute)}
+.strike s{text-decoration-color:var(--cta)}
+.gap{height:2px}
+
+/* city pick list (onboarding's) */
+.search{display:flex;gap:6px}
+.search .fld{flex:1}
+.near{height:38px;flex:none;border:1px solid var(--gild);background:var(--gild-wash);border-radius:999px;padding:0 12px;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--ink)}
+.lhead{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);font-weight:600;padding:4px 2px 0}
+.list{display:flex;flex-direction:column}
+.list .r{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px;padding:6px 8px;border-bottom:1px solid var(--line)}
+.list .r:last-child{border-bottom:0}
+.list .r .n{font-size:14.5px;font-weight:600}
+.list .r .n small{font-weight:500;color:var(--mute);font-size:12px;margin-left:6px}
+.list .r .reg{font-size:11.5px;color:var(--mute)}
+.list .r.sel{background:var(--gild-wash);border-radius:8px}
+.list .r .ck{width:22px;height:22px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;flex:none}
+.list .r.sel .ck{background:var(--gild);border-color:var(--gild)}
+
+/* date frame */
+.dline{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.dline .l{font-size:14px}
+.lab2{font-size:12px;font-weight:500;color:var(--ink2)}
+.new{display:inline-block;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--cta);font-weight:600;border:1px solid rgba(194,78,37,.4);border-radius:999px;padding:1px 6px;margin-left:6px;vertical-align:1px}
+
+/* questions */
+.qs{display:flex;flex-direction:column;gap:12px;max-width:900px}
+.qs .qa{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.qs .qa b.t{display:block;font-family:var(--serif);font-size:19px;font-weight:500;line-height:1.2;margin-bottom:6px}
+.qs .qa b.t i{font-style:normal;color:var(--gild);margin-right:6px}
+.qs .qa p{margin:0;font-size:13px;color:var(--ink2);line-height:1.55}
+.qs .qa p.rec{color:var(--ink)}
+.qs .qa p.rec b{color:var(--ok)}
+footer{max-width:1264px;margin:0 auto;padding:30px 20px 36px;font-size:12px;color:var(--mute);line-height:1.5;border-top:1px solid var(--line)}
+@media (max-width:420px){.wrap{padding:20px 12px}.frames{gap:28px}.frame{width:100%;max-width:375px}}
+</style>
+</head>
+<body><div class="wrap">
+
+<div class="doc-brand">Setnayan · Event Hub Maker · Details › Your event</div>
+<h1>Venues get a pin and a picked city; Date gets the ceremony time</h1>
+<p class="lead"><b>Three small changes inside the Details sheet you already approved</b> (frame G bars: top × · Page ▾ · Apply, bottom Look · Event Details · Undo · ⋯). Nothing new is drawn — the pin field is the one on “Add a supplier yourself”, the city list is the one from onboarding, the time is the Schedule’s ceremony time typed here. <b>Venues now wait for Apply like everything else in the Maker.</b> Sample: Ana &amp; Miguel · March 13, 2027.</p>
+
+<h2 class="sec">Three frames · 375 px</h2>
+<div class="frames">
+
+<!-- ============================ 1 · VENUES ============================ -->
+<div class="frame">
+<div class="phone">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ptop"><span class="btn icn">×</span><span class="btn pg"><span><small>Page</small>Invitation</span><i class="c">▾</i></span><span class="btn fill">Apply <span class="n">4</span></span></div>
+ <div class="pv">
+  <div class="hub">
+   <span class="p line1">Together with their families</span>
+   <div class="mark">AM</div>
+   <div class="names">Ana<span class="j">&amp;</span>Miguel</div>
+   <span class="p invl">invite you to celebrate their wedding</span>
+   <span class="p date">March 13, 2027</span>
+   <span class="p time">Ceremony at 3:00 PM</span>
+   <span class="p venue"><b>San Agustín Church</b> · Intramuros, Manila<br><span class="hl"><b>Blackbird at the Nielson Tower</b> · Makati</span></span>
+  </div>
+  <div class="dim"></div>
+  <div class="sheet" style="top:44px">
+   <div class="grab"></div>
+   <div class="sh"><span class="dd big"><span class="v">Venues</span><i class="c">▾</i></span><span class="used">Used on The Day · Every print</span><span class="x">×</span></div>
+
+   <div class="card">
+    <div class="dline"><span class="eyebrow">Ceremony</span><span class="dd"><span class="v">Use the supplier’s details</span><i class="c">▾</i></span></div>
+    <div class="booked">
+     <div class="thumb"><span class="blk" style="left:5px;top:6px;width:16px;height:12px"></span><span class="blk" style="left:28px;top:8px;width:17px;height:14px"></span><span class="grn" style="left:6px;top:30px;width:18px;height:14px"></span><span class="blk" style="left:30px;top:32px;width:14px;height:12px"></span><span class="pin s"></span></div>
+     <div><div class="t">San Agustín Church</div><div class="a">General Luna St, Intramuros, Manila</div><div class="f">Booked · follows the booking</div></div>
+    </div>
+   </div>
+
+   <div class="card">
+    <span class="eyebrow">Reception</span>
+    <div class="fld"><span class="val">Blackbird at the Nielson Tower</span></div>
+    <div class="row2"><div class="fld"><span class="val">Ayala Triangle Gardens, Makati<span class="caret"></span></span></div><span class="find">⌕ Find</span></div>
+    <div class="map cross">
+     <span class="blk" style="left:14px;top:18px;width:54px;height:30px"></span><span class="blk" style="left:14px;top:72px;width:40px;height:24px"></span>
+     <span class="grn" style="left:118px;top:28px;width:120px;height:48px"></span>
+     <span class="blk" style="left:262px;top:14px;width:70px;height:36px"></span><span class="blk" style="left:270px;top:70px;width:62px;height:26px"></span>
+     <span class="wtr" style="left:0;top:0;width:6px;height:92px"></span>
+     <span class="pin"></span>
+     <div class="zoom"><span>+</span><span>−</span></div>
+     <span class="osm">© OpenStreetMap</span>
+    </div>
+    <div class="pinned"><i>⌖</i>Pinned at 14.55412, 121.02451 — drag the map to adjust</div>
+    <div class="photo"><span class="pic"></span><span class="dd"><span class="v">Your photo</span><i class="c">▾</i></span></div>
+   </div>
+
+   <div class="dline"><span class="eyebrow">City or area</span><span class="dd"><span class="v">Makati · Metro Manila</span><i class="c">▾</i></span></div>
+
+   <div class="saverow"><span class="save">Save</span><span class="saved">✓ Saved — guests see it when you Apply</span></div>
+  </div>
+ </div>
+ <div class="pbar"><span class="btn">Look</span><span class="btn on">Event Details</span><span class="btn icn">↶</span><span class="btn icn">⋯</span></div>
+ <div class="home"></div>
+</div>
+<div class="notes"><h4><span class="k">1</span>Venues — a real pin, a picked city, saved to the draft</h4><ul>
+ <li><b>Booked first.</b> The ceremony is booked through Your Team, so its card shows the supplier’s name, address and pin and follows the booking. The one dropdown still offers <span class="q">Enter your own</span>.</li>
+ <li><b>Enter your own = the “Add a supplier yourself” pin field</b>, unchanged: name · exact address with <b>Find</b> · the crosshair map you drag · the <span class="q">Pinned at …</span> line. The pin is optional to save, as on suppliers. Guests’ <b>Directions</b> opens this pin.</li>
+ <li><b>City or area is one dropdown</b> — the same list as onboarding, so it matches supplier coverage. Never typed. Frame 2 shows it open.</li>
+ <li><b>Save → the draft.</b> <span class="q">Saved — guests see it when you Apply</span>, exactly like Names and Date. The old <s>Saves immediately</s> line is gone; Apply counts it (4).</li>
+ <li>The reception pin also moves the event’s own location anchor (distance to suppliers, in km only).</li>
+</ul></div>
+</div>
+
+<!-- ============================ 2 · CITY PICK ============================ -->
+<div class="frame">
+<div class="phone">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ptop"><span class="btn icn">×</span><span class="btn pg"><span><small>Page</small>Invitation</span><i class="c">▾</i></span><span class="btn fill">Apply <span class="n">4</span></span></div>
+ <div class="pv">
+  <div class="hub">
+   <span class="p line1">Together with their families</span>
+   <div class="mark">AM</div>
+   <div class="names">Ana<span class="j">&amp;</span>Miguel</div>
+   <span class="p invl">invite you to celebrate their wedding</span>
+   <span class="p date">March 13, 2027</span>
+   <span class="p time">Ceremony at 3:00 PM</span>
+  </div>
+  <div class="dim"></div>
+  <div class="sheet" style="top:130px">
+   <div class="grab"></div>
+   <div class="sh"><span class="dd big"><span class="v">City or area</span><i class="c">▾</i></span><span class="used"></span><span class="x">×</span></div>
+   <div class="search"><div class="fld"><span class="ic">⌕</span><span class="ph">Search a city or place…</span></div><span class="near">◎ Near me</span></div>
+   <div class="lhead">Nearest to you</div>
+   <div class="list">
+    <div class="r sel"><div><div class="n">Makati<small>· 1 km</small></div><div class="reg">Metro Manila · NCR</div></div><span class="ck">✓</span></div>
+    <div class="r"><div><div class="n">Mandaluyong<small>· 3 km</small></div><div class="reg">Metro Manila · NCR</div></div><span class="ck"></span></div>
+    <div class="r"><div><div class="n">Pasay<small>· 4 km</small></div><div class="reg">Metro Manila · NCR</div></div><span class="ck"></span></div>
+    <div class="r"><div><div class="n">Manila<small>· 5 km</small></div><div class="reg">Metro Manila · NCR</div></div><span class="ck"></span></div>
+    <div class="r"><div><div class="n">Taguig · BGC<small>· 5 km</small></div><div class="reg">Metro Manila · NCR</div></div><span class="ck"></span></div>
+    <div class="r"><div><div class="n">Pasig<small>· 6 km</small></div><div class="reg">Metro Manila · NCR</div></div><span class="ck"></span></div>
+   </div>
+  </div>
+ </div>
+ <div class="pbar"><span class="btn">Look</span><span class="btn on">Event Details</span><span class="btn icn">↶</span><span class="btn icn">⋯</span></div>
+ <div class="home"></div>
+</div>
+<div class="notes"><h4><span class="k">2</span>City or area — the onboarding list, opened from the dropdown</h4><ul>
+ <li><b>The same three ways to find a place as onboarding:</b> type (every PH city and municipality), <b>Near me</b>, or the Top 30 when nothing is typed.</li>
+ <li><b>Distance in km only</b> — no drive-time guess (owner, Lane 2).</li>
+ <li>One tap picks it and the sheet goes back to Venues with <span class="q">Makati · Metro Manila</span> in the dropdown. One city per event, as today (see question 1).</li>
+ <li>Because it is the same list suppliers set their coverage from, a venue in Makati matches suppliers who serve Makati — a typed “Makati City” never did.</li>
+</ul></div>
+</div>
+
+<!-- ============================ 3 · DATE + TIME ============================ -->
+<div class="frame">
+<div class="phone">
+ <div class="island"></div>
+ <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="ptop"><span class="btn icn">×</span><span class="btn pg"><span><small>Page</small>Invitation</span><i class="c">▾</i></span><span class="btn fill">Apply <span class="n">5</span></span></div>
+ <div class="pv">
+  <div class="hub">
+   <span class="p line1">Together with their families</span>
+   <div class="mark">AM</div>
+   <div class="names">Ana<span class="j">&amp;</span>Miguel</div>
+   <span class="p invl">invite you to celebrate their wedding</span>
+   <span class="p date">March 13, 2027</span>
+   <span class="p time"><span class="hl">Ceremony at 3:00 PM</span></span>
+   <span class="p venue"><b>San Agustín Church</b> · Intramuros, Manila</span>
+  </div>
+  <div class="dim"></div>
+  <div class="sheet" style="top:300px">
+   <div class="grab"></div>
+   <div class="sh"><span class="dd big"><span class="v">Date</span><i class="c">▾</i></span><span class="used">Used on The hero · The countdown · Every print</span><span class="x">×</span></div>
+   <div class="dline"><span class="l">Your date</span><span class="dd"><span class="v">I have a date</span><i class="c">▾</i></span></div>
+   <div class="card">
+    <span class="lab2">Wedding date</span>
+    <div class="fld"><span class="val">March 13, 2027</span><span class="ic" style="margin-left:auto">▦</span></div>
+   </div>
+   <div class="card">
+    <span class="lab2">Ceremony time<span class="new">new</span></span>
+    <div class="fld"><span class="val">3:00 PM<span class="caret"></span></span><span class="ic" style="margin-left:auto">◷</span></div>
+   </div>
+   <div class="saverow"><span class="save">Save</span><span class="saved">✓ Saved — guests see it when you Apply</span></div>
+  </div>
+ </div>
+ <div class="pbar"><span class="btn">Look</span><span class="btn on">Event Details</span><span class="btn icn">↶</span><span class="btn icn">⋯</span></div>
+ <div class="home"></div>
+</div>
+<div class="notes"><h4><span class="k">3</span>Date — the ceremony time, typed in place</h4><ul>
+ <li><b>One new line under the date: Ceremony time.</b> It is the Schedule’s Ceremony start, the very value the invitation prints as <span class="q">Ceremony at 3:00 PM</span>. One source, two doors — changing it here changes the Schedule.</li>
+ <li>The phone’s own time picker (the ◷ field), no custom control.</li>
+ <li><b>Waits for Apply</b> like the date above it; the preview above shows the new time at once.</li>
+ <li>Everything else on this item is unchanged: the <span class="q">Your date ▾</span> dropdown (I have a date · Help me choose), the booked-supplier check on the day.</li>
+</ul></div>
+</div>
+
+</div>
+
+<h2 class="sec">Owner questions — recommended answer first</h2>
+<div class="qs">
+ <div class="qa"><b class="t"><i>1</i>City or area: one for the event, or one per venue card?</b>
+  <p class="rec"><b>Recommend: one, the reception’s, as today</b> — it is what the Save-the-Date prints and what supplier matching uses. When the couple drops the reception pin, the dropdown pre-fills with the nearest city on the list (by km); they can change it.</p>
+  <p>The other way: a city under Ceremony and another under Reception. Two more taps for every couple, and the Save-the-Date and supplier search still have to pick one.</p></div>
+ <div class="qa"><b class="t"><i>2</i>No ceremony in the Schedule yet — does typing a time here create it?</b>
+  <p class="rec"><b>Recommend: yes.</b> On Apply, a “Ceremony” block is made on the event date at that time if none exists; if one exists, its time moves. If the date later moves, the ceremony moves with it (it already does in the Schedule).</p>
+  <p>The other way: show the line only when the Schedule already has a ceremony. Then a brand-new couple sees nothing here and the invitation prints no time until they find the Schedule.</p></div>
+ <div class="qa"><b class="t"><i>3</i>Reception time too?</b>
+  <p class="rec"><b>Recommend: not in this build</b> — the invitation prints only the ceremony time on its face; the reception time is on the Finer Details card and in the Schedule. Add it later as one more line if couples ask.</p>
+  <p>The other way: a second line, <span class="q">Reception time</span>, right under the ceremony’s, same door. Cheap, but the Date item grows past what the invitation shows.</p></div>
+</div>
+
+</div>
+<footer>Design check for B4 (INVITATION_RSVP_GUEST_FLOW_REMAINING_2026-10-04 § B4). HTML + CSS only, no script; states are separate frames. Bars are the approved frame-G bars (DECISION_LOG 2026-10-03). Reused as-is: AddressPinField (address · Find · crosshair map · Pinned-at line), the onboarding place list (search · Near me · km), PickMenu dropdowns, the Date item’s dropdown and date row, the Maker’s Save → draft → Apply. Builder note: AddressPinField’s two small hint lines under the field are not drawn here (the Maker has no captions under controls) — hide them with a prop, do not fork the component.</footer>
+</body></html>
