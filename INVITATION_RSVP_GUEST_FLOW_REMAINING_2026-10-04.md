@@ -126,6 +126,7 @@ Order: what blocks or shapes the test first. **∥** = can run in parallel (no s
   - the invitation reads "Ceremony at 3:00 PM" after Apply.
 
 ### B5 · Theme fonts: all four roles wired (heading · body · labels/buttons · script) on all 10 themes. ∥ (`app/globals.css` theme blocks, `lib/invite-themes.ts` `fonts`, `app/[slug]/_components/skins/site-skin.tsx`)
+- **Status (2026-10-04):** BUILT on `rd/look-fonts-and-buttons` (draft PR, with Look › Buttons). Ten spec faces not in the repo are worn through shipped stand-ins pending the owner — DECISION_LOG 2026-10-04 "LOOK › BUTTONS + B5 THEME FONTS — BUILT".
 - **Rulings:** handoff §1 "THEME FONTS ARE ONLY HALF WIRED"; spec row A-Hub "Fonts: Header ▾ · Text ▾ · Accent ▾".
 - **Watch:** the shared bundle (~0 B spare). Fonts load per theme, never in the shared chunk. Measure `check-bundle-size` before and after.
 - **Verify:**
