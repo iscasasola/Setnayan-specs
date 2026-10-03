@@ -4,10 +4,13 @@ Copied from the local handoff CURRENT-STATE.md (top blocks only). Newest block f
 
 **The plan + checklist:** corpus `RELEASE_RSVP_INVITATION_2026-09-30.md` (top: build sequence across 3 accounts; checklist by step 1–7; items 1–18 — **#18 = Thursday FIRST**). Rules: `INTERACTION_RULES.md`. Rulings: `DECISION_LOG.md` (2026-09-30 + 2026-10-01 rows). Cloud prompts: `CLOUD_PROMPTS_OCT1_2026.md` (G1–G7) + `CLOUD_PROMPTS_OCT3_2026-09-30.md` (A–F).
 
-## ▶ STATE Sat 3 Oct — SUNDAY ACCOUNT CLOUD CONTROLLER STARTED (newest)
-- Controller = cloud session (claude/gifted-hopper-tcqajz). `gh` CLI unauthenticated in the cloud → GitHub MCP tools; setnayan.com is egress-blocked from the cloud container → deploys verified via Vercel MCP (prod deployment = 74ff0be confirmed).
-- Wave 1 RUNNING (Opus subagents, own worktrees /home/user/wt-*): C1 rd/delete-needs-a-where · C4 rd/guest-list-search-and-fold · C5 #6307 slim top bar. Queue after: C7 (#6306 + #6295) · C3 report · C6 #6308 · C2 people with access.
-- Problems log since 74ff0be: only refresh_demand_radar_rollups (C1). Pre-batch-7 (5666406) open items worth a look: /api/guest/pass-card BUTTON_TIMEOUT ×6 + an HTTP error on the guests page; GET events "invalid input syntax for uuid" ×2; rage taps on "More for <name>" = the clipped ⋯ menu (C4).
+## ▶ STATE Sat 3 Oct ~13:00 PHT — SUNDAY ACCOUNT CLOUD CONTROLLER (newest)
+- Controller = cloud session. `gh` CLI unauthenticated in the cloud → GitHub MCP tools; setnayan.com egress-blocked → deploys verified via Vercel MCP (prod = 74ff0be).
+- GREEN, held for train rd/train-2026-10-03-b (all label do-not-auto-merge, auto-merge confirmed null): #6312 C1 DELETE…WHERE true (3 functions + db guard) · #6307 C5 slim top bar (+HQ phone fix) · #6310 Discover card wears the cover (another session; CI green).
+- RUNNING: C4 #6311 guest list (typecheck+lint red → builder fixing) · C7 #6306 Home + #6295 guest flow · C6 #6308 event-hub-calm. NEXT: C2 People with access, then S1 supplier schedule/card fixes.
+- TRAP re-seen: marking a PR ready RE-ARMS auto-merge (repo workflow) → disable again right after ready, re-read.
+- C3 report → `SUPPLIER_SIDE_REPORT_2026-10-03.md`; owner answered 4 supplier questions (DECISION_LOG 2026-10-03 "SUPPLIER SCAN = ALL FIVE MODES…"). Prototypes `prototypes/supplier_scan_2026-10-03_fable.html` + `papic_to_supplier_page_2026-10-03_fable.html` SENT to owner — awaiting yes/no.
+- Problems log pre-batch-7 leftovers to re-check after next deploy: /api/guest/pass-card BUTTON_TIMEOUT ×6; GET events invalid uuid ×2.
 
 ## ▶ STATE Sat 3 Oct ~06:40 PHT — THURSDAY ACCOUNT DONE (weekly ~97%) — READ THIS FIRST
 - LIVE: **74ff0be** = batch 7 train #6309 (deploy-prod success: migrations → deploy; /api/health version 74ff0be). Independent Sonnet audit: SHIP (migrations safe, 760 files = union of the 12 members, every new control mounted, Maker bars = approved frame G).
