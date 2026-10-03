@@ -4,13 +4,14 @@ Copied from the local handoff CURRENT-STATE.md (top blocks only). Newest block f
 
 **The plan + checklist:** corpus `RELEASE_RSVP_INVITATION_2026-09-30.md` (top: build sequence across 3 accounts; checklist by step 1–7; items 1–18 — **#18 = Thursday FIRST**). Rules: `INTERACTION_RULES.md`. Rulings: `DECISION_LOG.md` (2026-09-30 + 2026-10-01 rows). Cloud prompts: `CLOUD_PROMPTS_OCT1_2026.md` (G1–G7) + `CLOUD_PROMPTS_OCT3_2026-09-30.md` (A–F).
 
-## ▶ STATE Sat 3 Oct ~13:00 PHT — SUNDAY ACCOUNT CLOUD CONTROLLER (newest)
-- Controller = cloud session. `gh` CLI unauthenticated in the cloud → GitHub MCP tools; setnayan.com egress-blocked → deploys verified via Vercel MCP (prod = 74ff0be).
-- GREEN, held for train rd/train-2026-10-03-b (all label do-not-auto-merge, auto-merge confirmed null): #6312 C1 DELETE…WHERE true (3 functions + db guard) · #6307 C5 slim top bar (+HQ phone fix) · #6310 Discover card wears the cover (another session; CI green).
-- RUNNING: C4 #6311 guest list (typecheck+lint red → builder fixing) · C7 #6306 Home + #6295 guest flow · C6 #6308 event-hub-calm. NEXT: C2 People with access, then S1 supplier schedule/card fixes.
-- TRAP re-seen: marking a PR ready RE-ARMS auto-merge (repo workflow) → disable again right after ready, re-read.
-- C3 report → `SUPPLIER_SIDE_REPORT_2026-10-03.md`; owner answered 4 supplier questions (DECISION_LOG 2026-10-03 "SUPPLIER SCAN = ALL FIVE MODES…"). Prototypes `prototypes/supplier_scan_2026-10-03_fable.html` + `papic_to_supplier_page_2026-10-03_fable.html` SENT to owner — awaiting yes/no.
-- Problems log pre-batch-7 leftovers to re-check after next deploy: /api/guest/pass-card BUTTON_TIMEOUT ×6; GET events invalid uuid ×2.
+## ▶ STATE Sat 3 Oct ~15:00 PHT — SUNDAY ACCOUNT CLOUD CONTROLLER (newest)
+- Controller = cloud session. `gh` CLI unauthenticated → GitHub MCP tools; setnayan.com + *.vercel.app egress-blocked → deploys verified via Vercel MCP (prod = 74ff0be).
+- TRAIN rd/train-2026-10-03-b FOLDING (Opus agent): #6312 C1 DELETE…WHERE · #6307 C5 top bar · #6295 guest flow · #6311 C4 guest list (green after ONE re-run — flaky unit test, follow-up queued) · #6306 Home (+ #6308 event-hub-calm only if green in time). Then: independent Sonnet audit → merge only on all-green → deploy-prod → Vercel check → owner check cards.
+- RUNNING: C2 rd/people-with-access (Opus) · C6 #6308 CI. #6310 Discover card being redone by session_01Hh1HXxFvpBvv5BcYe63RkS (owner: paper invitation card for Classic + custom main background shows) → next train.
+- QUEUED after C2: S1 supplier schedule/card fixes (SUPPLIER_SIDE_REPORT) · S2 scan (prototype approved) · S3 Papic→supplier page (prototype (b): auto-public after 7-day guest notice) · S4 supplier page "Their work" by event (SUPPLIER_PAGE_REVIEW + prototype; after S3).
+- Owner rulings today (all in DECISION_LOG 2026-10-03): supplier scan 5 modes · console+desk shortcut · supplier photo sources = own (auto after 7-day guest notice, no couple Allow) + Challenge shares (public when tap says so) · untagged → every guest one line · never the couple's gallery · Discover Classic = paper invitation card + custom background · supplier page Their work (type·venue·month, uploads last, one list).
+- Artifacts for the owner: scan REnPMEGjGpp2fAwaogjhpc · Papic V3u4FnBgVCdnhZ2j5nY9rC (v2) · supplier page WeVBx7LtmgEVZqYfkXrsbj.
+- TRAP re-seen: marking a PR ready RE-ARMS auto-merge → disable again right after ready, re-read.
 
 ## ▶ STATE Sat 3 Oct ~06:40 PHT — THURSDAY ACCOUNT DONE (weekly ~97%) — READ THIS FIRST
 - LIVE: **74ff0be** = batch 7 train #6309 (deploy-prod success: migrations → deploy; /api/health version 74ff0be). Independent Sonnet audit: SHIP (migrations safe, 760 files = union of the 12 members, every new control mounted, Maker bars = approved frame G).
