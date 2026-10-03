@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Supplier scan — five modes, one number — Setnayan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<!--
+  SUPPLIER SCAN · phone prototype · 2026-10-03 · Fable
+  Brief: DECISION_LOG.md 2026-10-03 "SUPPLIER SCAN = ALL FIVE MODES · ON THE CONSOLE + A DESK SHORTCUT".
+  Modes (2026-09-25 rows): Once · Ordered → Received · Unlimited · Group session · Roaming.
+  Rules: INTERACTION_RULES.md — 3+ choices = ONE PickMenu dropdown · no tip popups · no ⓘ captions ·
+  title ≤5 words · one line ≤12 words · count only, never a guest's name (RA 10173) · Setnayan look for
+  the supplier's tools, the event's own theme for what the guest sees.
+
+  SHIPPED PIECES REPRODUCED (read from origin/main 74ff0bec, worktree wt-fable-read):
+    · on-the-day/live/[eventId]/page.tsx — "Exit" · "Day-of · live" · the dark focal tile (couple, place,
+      FloorClock) · "Your tools" · "Headcount … attending · pulled live from RSVPs" · the tool tiles.
+    · lib/vendor-dayof-modules.ts — tile labels "Run of show & countdown", "Shot list", "Papic capture",
+      "Hand over to the couple", "Who's received theirs" (its tile is replaced by Scan).
+    · app/[slug]/_components/vendor-doorway.tsx + supplier-desk.tsx — "You are booked here" ·
+      "Open your tools for this event as <supplier>" · "Your tools" · "Open your day-of console".
+    · website/editor/_components/pick-menu.tsx — the PickMenu pill + its rounded list.
+    · the_day_guest_phone_2026-10-01_fable.html — the guest's bar Live · Welcome · Camera · Gallery · Me.
+  Old 2026-09-25 prototype — KEPT: the shared #0001 number, many guests under one number, "Your numbers",
+  "Not on this event's list", the guest's "Your number + photo". DROPPED: first-visit tour, five-row
+  chooser, ⓘ captions, grey captions, the fifth-slot menu place.
+-->
+<style>
+:root{
+  --paper:#FAF7F2;--paper2:#F3EEE6;--page:#EDE7DE;--ink:#1E2229;--ink2:#3B3F46;--mute:#76736D;
+  --gild:#B08A5B;--gild-soft:#E9DEC9;--gild-wash:#F7F1E6;--wine:#6E2A3A;--wine-wash:#F6ECEE;
+  --line:#E5DED3;--ok:#2F6B4F;--okbg:#E7F1EA;--warn:#8A5A00;--warnbg:#FBF0D8;--no:#7A3B3B;--nobg:#F3E4E4;
+  --serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --sans:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--page);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.wrap{max-width:2400px;margin:0 auto;padding:28px 24px 56px}
+
+/* ---------- page furniture (for the owner, not the supplier) ---------- */
+.doc-brand{font-size:10.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--gild);font-weight:600}
+h1{font-family:var(--serif);font-weight:500;font-size:36px;line-height:1.1;margin:8px 0 10px;letter-spacing:-.01em}
+.moved{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;max-width:980px;position:relative;font-size:13px;line-height:1.55;color:var(--ink2)}
+.moved:before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;background:var(--gild);border-radius:0 3px 3px 0}
+.moved b{color:var(--ink);font-weight:600}
+.moved .k{display:inline-block;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gild);font-weight:600;margin-right:6px}
+.moved p{margin:0}.moved p+p{margin-top:6px}
+.moved code{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;background:var(--paper2);padding:1px 5px;border-radius:5px}
+h2.sec{display:flex;align-items:center;gap:14px;font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink2);font-weight:600;margin:36px 0 16px}
+h2.sec .n{font-family:var(--serif);font-size:22px;font-weight:500;color:var(--gild);letter-spacing:0}
+h2.sec:after{content:"";flex:1;height:1px;background:var(--line)}
+.row{display:flex;flex-wrap:wrap;gap:28px 26px;align-items:flex-start}
+.fr{width:375px;max-width:100%}
+.cap{margin-top:12px;padding:0 4px}
+.cap .k{font-family:var(--serif);font-size:22px;font-weight:500;color:var(--gild);line-height:1;margin-right:8px}
+.cap b{font-size:13.5px;font-weight:600;color:var(--ink)}
+.cap p{margin:4px 0 0;font-size:12.5px;color:var(--ink2);line-height:1.5}
+.cap .q{font-family:var(--serif);font-style:italic;font-size:13.5px;color:var(--ink)}
+
+/* ---------- phone frame — screen 375 wide; bezel outside the 375 ---------- */
+.phone{width:375px;max-width:100%;height:812px;background:var(--paper);position:relative;overflow:hidden;
+  outline:8px solid #14161A;outline-offset:0;border-radius:40px;margin:8px;
+  box-shadow:0 0 0 9px #2E3238,0 40px 70px -30px rgba(30,34,41,.45)}
+.phone.short{height:560px}
+.phone .island{position:absolute;left:50%;top:10px;transform:translateX(-50%);width:112px;height:30px;background:#14161A;border-radius:20px;z-index:9}
+.phone .status{height:50px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 8px;font-size:14px;font-weight:600;letter-spacing:-.01em;position:relative;z-index:3}
+.phone .status .sig{display:flex;gap:6px;align-items:center;font-size:11px;letter-spacing:.06em}
+.phone .status .bat{width:24px;height:11px;border:1.5px solid var(--ink);border-radius:4px;position:relative;opacity:.9}
+.phone .status .bat:after{content:"";position:absolute;left:2px;top:2px;bottom:2px;right:5px;background:var(--ink);border-radius:1px}
+.scr{padding:2px 18px 100px;position:relative}
+.bnav{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:9px 6px 28px;font-size:10.5px;color:var(--mute);z-index:6;font-weight:500}
+.bnav span{display:flex;flex-direction:column;align-items:center;gap:4px;width:66px}
+.bnav svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.bnav span.on{color:var(--wine);font-weight:600}
+.bnav:after{content:"";position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.85}
+.home{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.85;z-index:7}
+.phone.dark .home{background:#fff}
+@media (max-width:420px){
+  .wrap{padding:20px 0 40px}
+  .moved,.cap,h1,.doc-brand,h2.sec{margin-left:16px;margin-right:16px}
+  .row{gap:28px 0}
+  .phone{margin:0;outline:0;border-radius:0;box-shadow:none;width:100%}
+}
+
+/* ---------- atoms (approved supplier look) ---------- */
+.eyebrow{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--gild);font-weight:600}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border-radius:999px;font-size:13px;font-weight:500;border:1.5px solid var(--ink);background:#fff;color:var(--ink);white-space:nowrap;line-height:1}
+.btn.fill{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.wine{background:var(--wine);color:#fff;border-color:var(--wine)}
+.btn.big{width:100%;padding:15px 16px;font-size:14.5px}
+.btn.sm{padding:7px 12px;font-size:12px;border-width:1px}
+.btn.soft{border:1px solid var(--line);color:var(--ink2)}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;border-radius:999px;padding:4px 10px;white-space:nowrap;line-height:1.3}
+.pill.ok{background:var(--okbg);color:var(--ok)}
+.pill.warn{background:var(--warnbg);color:var(--warn)}
+.pill.no{background:var(--nobg);color:var(--no)}
+.pill.soft{background:var(--paper2);color:var(--ink2);box-shadow:inset 0 0 0 1px var(--line)}
+.topnav{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--ink2);font-weight:500;margin:2px 0 12px}
+.topnav .mono{font-family:ui-monospace,Menlo,monospace;font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--mute)}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin-top:12px;box-shadow:0 10px 24px -22px rgba(30,34,41,.3)}
+.t{font-family:var(--serif);font-size:28px;font-weight:500;line-height:1.1;letter-spacing:-.005em;margin:0}
+.sub{font-size:12.5px;color:var(--mute);line-height:1.45;margin:3px 0 0}
+
+/* the shipped dark focal tile */
+.focal{margin-top:4px;background:#1E2229;color:var(--paper);padding:18px 18px 16px;position:relative;border-top:3px solid var(--gild-soft)}
+.focal:before{content:"";position:absolute;inset:8px;border:1px solid rgba(176,138,91,.35);pointer-events:none}
+.focal .cn{font-family:var(--serif);font-size:24px;font-weight:400;line-height:1.15;letter-spacing:-.005em}
+.focal .pl{font-size:12.5px;color:rgba(250,247,242,.6);margin-top:2px}
+.focal .clk{display:flex;justify-content:space-between;align-items:baseline;margin-top:14px;padding-top:10px;border-top:1px solid rgba(250,247,242,.14)}
+.focal .clk b{font-family:var(--serif);font-size:19px;font-weight:500}
+.focal .clk small{display:block;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#D9BC8E;font-weight:600}
+.focal .clk .r{text-align:right;font-size:12px;color:rgba(250,247,242,.7)}
+.focal .clk .r b{font-size:16px;color:var(--paper);display:block}
+
+/* the shipped tool tiles */
+.plate{margin-top:10px;border:1px solid var(--line);background:#fff;padding:12px 14px;border-radius:12px}
+.plate .h{display:flex;align-items:center;gap:8px;font-family:var(--serif);font-size:17px;font-weight:500}
+.plate .h svg{width:16px;height:16px;stroke:var(--gild);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.plate .n{display:flex;align-items:baseline;gap:8px;margin-top:2px}
+.plate .n b{font-family:ui-monospace,Menlo,monospace;font-size:22px}
+.plate .n span{font-size:12.5px;color:var(--ink2)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.tile{position:relative;border:1px solid var(--line);background:var(--paper2);padding:12px 12px 11px;border-radius:12px;min-height:84px;display:flex;flex-direction:column;justify-content:space-between;gap:6px}
+.tile:before{content:"";position:absolute;inset:5px;border:1px solid rgba(30,34,41,.07);border-radius:8px;pointer-events:none}
+.tile b{font-family:var(--serif);font-size:17px;font-weight:500;line-height:1.15;display:block}
+.tile span{font-size:11px;color:var(--ink2);line-height:1.35;display:block}
+.tile .ar{position:absolute;right:10px;top:10px;color:var(--mute);font-size:14px}
+.tile.new{border-color:var(--gild);background:var(--gild-wash)}
+.tile.new .ar{color:var(--gild)}
+.tile.wide{grid-column:1/-1;min-height:0;flex-direction:row;align-items:center}
+.tile.wide b{font-size:18px}
+
+/* doorway strip + desk (on the couple's page) */
+.evhead{margin:4px -18px 0;padding:22px 18px 16px;text-align:center;background:linear-gradient(180deg,#FBF4EA,#F3E9DB);border-bottom:1px solid #E6D9C3}
+.evhead .mono{width:40px;height:40px;border-radius:50%;border:1px solid var(--gild);display:inline-flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:18px;color:var(--gild);letter-spacing:.08em;padding-left:.08em}
+.evhead .cn{font-family:var(--serif);font-style:italic;font-size:26px;font-weight:500;color:var(--wine);margin-top:8px;line-height:1.1}
+.evhead .d{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--mute);margin-top:5px;font-weight:500}
+.door{margin-top:12px;border:1px solid rgba(110,42,58,.28);background:rgba(110,42,58,.04);border-radius:16px;padding:11px 14px;display:flex;align-items:center;gap:10px}
+.door .ic{width:34px;height:34px;border-radius:50%;background:var(--wine-wash);color:var(--wine);display:flex;align-items:center;justify-content:center;flex:none}
+.door .ic svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.door .tx{flex:1;min-width:0}
+.door .tx small{display:block;font-family:ui-monospace,Menlo,monospace;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--wine)}
+.door .tx span{display:block;font-size:12.5px;color:var(--ink2);line-height:1.35}
+.door .tx span b{color:var(--ink);font-weight:600}
+.desk{margin-top:10px;border:1px solid var(--line);background:var(--paper);border-radius:16px;padding:12px 14px 14px}
+.desk .eyebrow{display:block;margin-bottom:2px}
+
+/* ---------- the PickMenu (shipped look: pill + rounded glass list) ---------- */
+.pm{display:inline-flex;align-items:center;gap:7px;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1px var(--line);padding:0 12px;min-height:40px;font-size:13px;font-weight:600;color:var(--ink)}
+.pm i{font-style:normal;font-size:10px;color:var(--ink2);transform:translateY(1px)}
+.pm.open i{transform:rotate(180deg)}
+.pmlist{margin-top:6px;background:rgba(255,255,255,.96);border-radius:16px;padding:6px;box-shadow:0 18px 40px -18px rgba(30,26,18,.45),0 0 0 1px rgba(30,34,41,.06);width:236px}
+.pmlist div{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:11px;font-size:13.5px;font-weight:500;color:var(--ink)}
+.pmlist div.on{background:var(--paper2);font-weight:600}
+.pmlist div.on:after{content:"✓";color:var(--wine);font-weight:600}
+.field{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:16px}
+.field label{font-size:13.5px;font-weight:500}
+.ghost{opacity:.28;pointer-events:none}
+
+/* ---------- camera ---------- */
+.phone.dark{background:#17141A}
+.phone.dark .status{color:#fff}.phone.dark .status .bat{border-color:#fff}.phone.dark .status .bat:after{background:#fff}
+.view{position:absolute;inset:0;z-index:1;overflow:hidden;background:linear-gradient(180deg,#221C24 0,#3A2E35 45%,#5B4B46 100%)}
+.view:before{content:"";position:absolute;inset:0;filter:blur(2px);
+  background:radial-gradient(ellipse 150px 60px at 50% 80%,#E6D2B5 0 40%,transparent 100%),radial-gradient(ellipse 36px 56px at 30% 62%,#D9B8A2 0 40%,transparent 100%),radial-gradient(ellipse 38px 58px at 66% 60%,#C7A08C 0 40%,transparent 100%),radial-gradient(ellipse 220px 120px at 50% 20%,rgba(255,220,170,.25),transparent 70%)}
+.view:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(18,14,18,.5),transparent 30%,transparent 55%,rgba(18,14,18,.72))}
+.cue{position:absolute;left:14px;right:14px;top:58px;z-index:3;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.chip{background:rgba(20,16,20,.55);color:#fff;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:600;letter-spacing:.01em;backdrop-filter:blur(6px);white-space:nowrap}
+.chip.x{width:34px;height:34px;padding:0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:400}
+.finder{position:absolute;left:50%;top:44%;width:216px;height:216px;transform:translate(-50%,-50%);z-index:2}
+.finder i{position:absolute;width:30px;height:30px;border:3px solid #fff;border-radius:3px}
+.finder i:nth-child(1){left:0;top:0;border-right:0;border-bottom:0}
+.finder i:nth-child(2){right:0;top:0;border-left:0;border-bottom:0}
+.finder i:nth-child(3){left:0;bottom:0;border-right:0;border-top:0}
+.finder i:nth-child(4){right:0;bottom:0;border-left:0;border-top:0}
+.toast{position:absolute;left:18px;right:18px;top:484px;z-index:4;background:rgba(250,247,242,.96);border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 14px 30px -18px rgba(0,0,0,.5);font-size:13.5px;font-weight:600;color:var(--no)}
+.toast i{width:22px;height:22px;border-radius:50%;background:var(--nobg);color:var(--no);display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-size:13px;flex:none}
+.toast.ok{color:var(--ok)}.toast.ok i{background:var(--okbg);color:var(--ok)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--paper);border-radius:26px 26px 0 0;padding:12px 18px 34px;z-index:6;box-shadow:0 -24px 50px -22px rgba(0,0,0,.5)}
+.sheet:before{content:"";display:block;width:38px;height:5px;border-radius:3px;background:#CFC8BD;margin:0 auto 12px}
+.num{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.num .big{font-family:var(--serif);font-size:44px;font-weight:500;line-height:1;letter-spacing:-.01em}
+.num .big small{font-size:18px;color:var(--mute);font-weight:400;margin-left:6px}
+.num .st{text-align:right;font-size:12px;color:var(--mute);line-height:1.4}
+.num .st b{display:block;font-family:var(--serif);font-size:20px;color:var(--ink);font-weight:500}
+.dots{display:flex;gap:6px;margin-top:10px}
+.dots i{width:30px;height:30px;border-radius:50%;background:var(--okbg);color:var(--ok);display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-size:13px;font-weight:600}
+.dots i.add{background:#fff;box-shadow:inset 0 0 0 1.5px var(--line);color:var(--mute);font-size:18px;font-weight:300}
+.acts{display:flex;gap:8px;margin-top:14px}
+.acts .btn{flex:1}
+
+/* ---------- Your numbers ---------- */
+.nrow{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+.nrow:first-of-type{border-top:0}
+.nrow .no{font-family:var(--serif);font-size:22px;font-weight:500;width:76px;flex:none;letter-spacing:-.005em}
+.nrow .w{flex:1;min-width:0;font-size:12.5px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nrow .w b{display:block;font-size:13px;color:var(--ink);font-weight:500}
+.nrow .th{width:34px;height:34px;border-radius:8px;flex:none;background:linear-gradient(160deg,#D9C7B0,#B89C7C)}
+.nrow .ch{color:var(--gild);font-size:16px;flex:none}
+.open{margin:6px -2px 2px;background:var(--paper2);border:1px solid var(--line);border-radius:14px;padding:12px}
+.open .ph{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.open .ph div{aspect-ratio:1;border-radius:9px}
+.p1{background:linear-gradient(160deg,#D9C7B0,#B89C7C)}.p2{background:linear-gradient(160deg,#D8B6B6,#8E5A66)}.p3{background:linear-gradient(160deg,#C9CFC2,#7E8A78)}
+.p4{background:linear-gradient(160deg,#E7D4A8,#B59A5A)}.p5{background:linear-gradient(160deg,#B7B0A6,#5E5750)}.p6{background:linear-gradient(160deg,#C5CFD9,#6C7F96)}
+.open .ph .add{border:1.5px dashed var(--gild);background:#fff;display:flex;align-items:center;justify-content:center;color:var(--gild);font-size:24px;font-weight:300}
+.open .btn{margin-top:10px;width:100%}
+.steps{display:flex;align-items:center;gap:8px;margin-top:8px}
+.steps .s{flex:1;border-radius:12px;padding:9px 10px;font-size:12px;line-height:1.3;background:#fff;box-shadow:inset 0 0 0 1px var(--line)}
+.steps .s b{display:block;font-size:13px;font-weight:600}
+.steps .s.done{background:var(--okbg);box-shadow:none;color:var(--ok)}
+.steps .s.done b{color:var(--ok)}
+.steps .s.wait{color:var(--mute)}
+.steps .ar{color:var(--gild);font-size:16px;flex:none}
+
+/* ---------- the guest's Event Hub (event theme — Ana & Miguel, Classic) ---------- */
+.phone.guest{background:#FBF6EE;--line:#E6D9C3;--mute:#8A7F72}
+.brand{text-align:center;font-size:9.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--gild);font-weight:600;margin:6px 0 12px}
+.brand i{font-style:normal;color:var(--wine)}
+.now{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px 16px 12px;margin-top:10px;position:relative;overflow:hidden}
+.now:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--wine)}
+.now .eyebrow{color:var(--wine)}
+.now .h{font-family:var(--serif);font-size:26px;font-weight:500;line-height:1.1;margin:3px 0 1px}
+.now .where{font-size:12.5px;color:var(--mute)}
+.mine{margin-top:10px;background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.mine .img{height:190px;background:linear-gradient(160deg,#E4C6B3 0,#A77A69 60%,#6E4A42 100%);position:relative}
+.mine .img:after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 120px 80px at 50% 70%,rgba(255,235,210,.35),transparent 70%)}
+.mine .tx{padding:12px 14px 13px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.mine .tx b{font-family:var(--serif);font-size:22px;font-weight:500;line-height:1.1;display:block}
+.mine .tx span{font-size:12px;color:var(--mute);display:block;margin-top:2px}
+.mine .tx .sv{color:var(--wine);font-size:12.5px;font-weight:600;white-space:nowrap}
+.sched{list-style:none;margin:8px 0 0;padding:0}
+.sched li{display:grid;grid-template-columns:62px 1fr;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:13.5px}
+.sched .tm{font-family:var(--serif);font-size:17px;font-weight:600}
+.sched li.done{color:var(--mute)}.sched li.done .tm{color:var(--mute);font-weight:500}
+
+/* ---------- mini mode strip ---------- */
+.minis{display:flex;flex-wrap:wrap;gap:12px}
+.mini{width:176px;height:236px;background:#2A2229;border-radius:18px;position:relative;overflow:hidden;color:#fff;box-shadow:0 0 0 1px #2E3238}
+.mini .view{background:linear-gradient(180deg,#221C24 0,#3A2E35 45%,#5B4B46 100%)}
+.mini .chip{position:absolute;left:10px;top:10px;z-index:3;font-size:10.5px;padding:5px 9px}
+.mini .fd{position:absolute;left:50%;top:40%;width:70px;height:70px;transform:translate(-50%,-50%);border:2px dashed rgba(255,255,255,.7);border-radius:8px;z-index:2}
+.mini .res{position:absolute;left:10px;right:10px;bottom:10px;z-index:3;background:rgba(250,247,242,.96);border-radius:11px;padding:8px 10px;font-size:11.5px;font-weight:600;color:var(--ink);line-height:1.3}
+.mini .res small{display:block;font-weight:500;color:var(--mute);font-size:10.5px}
+.mini .res.no{color:var(--no)}.mini .res.ok{color:var(--ok)}
+.mini .res.ok small,.mini .res.no small{color:var(--mute)}
+</style>
+</head>
+<body><div class="wrap">
+
+<div class="doc-brand">Setnayan · prototype · 2026-10-03 · Fable</div>
+<h1>Supplier scan — five modes, one number</h1>
+<div class="moved">
+  <p><span class="k">Moved / extends</span><b>On the day console</b> (<code>vendor-dashboard/on-the-day/live/[eventId]</code>: Exit · Day-of · live · the dark tile · Your tools · Headcount · the tool tiles) · the <b>supplier desk on the couple's page</b> (<code>vendor-doorway.tsx</code> "You are booked here" → <code>supplier-desk.tsx</code> Your tools) · the shipped <b>PickMenu</b> · the guest's <b>Event Hub</b> bar (Live · Welcome · Camera · Gallery · Me) · the 2026-09-25 ideas kept: shared #0001 numbers, many guests under one number, "Your numbers", refusal of guests not on this list, the guest's "Your number + photo".</p>
+  <p><span class="k">New</span>a <b>Scan</b> tile (replaces the padlocked "Who's received theirs") · the scan page with ONE <b>Mode</b> dropdown · the scanner that adds guests to the current number · <b>Add photo</b> on a number · the guest's quiet <b>Your number</b> card · the two-step <b>Ordered → Received</b> state. Dropped from 2026-09-25: the tour, the five-row chooser, ⓘ and grey captions, the fifth-slot menu place.</p>
+</div>
+
+<h2 class="sec"><span class="n">A</span>Where Scan lives — the console, and the desk on the couple's page</h2>
+<div class="row">
+
+<!-- A1 · the On the day console with the Scan tile -->
+<div class="fr">
+<div class="phone">
+ <div class="island"></div>
+ <div class="status"><span>7:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="topnav"><span>‹ Exit</span><span class="mono">Day-of · live</span></div>
+  <div class="focal">
+   <div class="cn">Ana &amp; Miguel</div>
+   <div class="pl">Alta Veranda · Tagaytay</div>
+   <div class="clk"><div><small>Now</small><b>Dinner is served</b></div><div class="r">Next in<b>19 min</b>First dance</div></div>
+  </div>
+  <div class="eyebrow" style="margin-top:16px">Your tools</div>
+  <div class="plate">
+   <div class="h"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 15.5a5 5 0 0 1 5.5 4.5"/></svg>Headcount</div>
+   <div class="n"><b>164</b><span>attending · pulled live from RSVPs</span></div>
+  </div>
+  <div class="tiles">
+   <div class="tile new wide"><div><b>Scan</b><span>Photo booth · Group session · 41 numbers tonight</span></div><span class="ar">›</span></div>
+   <div class="tile"><b>Run of show &amp; countdown</b><span>The couple's live timeline.</span><span class="ar">›</span></div>
+   <div class="tile"><b>Papic capture</b><span>Shoot into the couple's gallery.</span><span class="ar">›</span></div>
+   <div class="tile"><b>Shot list</b><span>Your must-get shots.</span><span class="ar">›</span></div>
+   <div class="tile"><b>Hand over to the couple</b><span>Mark your deliverable done.</span><span class="ar">›</span></div>
+  </div>
+ </div>
+ <div class="home"></div>
+</div>
+<div class="cap"><span class="k">A1</span><b>The console</b><p>The shipped page, one tile added. <span class="q">Scan</span> sits first in "Your tools" and shows the service, the mode and tonight's count; it replaces the always-padlocked <span class="q">Who's received theirs</span>. Everything else is as shipped.</p></div>
+</div>
+
+<!-- A2 · the desk shortcut on the couple's page -->
+<div class="fr">
+<div class="phone short">
+ <div class="island"></div>
+ <div class="status"><span>7:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="evhead"><div class="mono">A·M</div><div class="cn">Ana &amp; Miguel</div><div class="d">Today · Alta Veranda</div></div>
+  <div class="door">
+   <span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>
+   <div class="tx"><small>You are booked here</small><span>Open your tools for this event as <b>Lumina Studio</b></span></div>
+   <span style="color:var(--wine)">›</span>
+  </div>
+  <div class="desk">
+   <span class="eyebrow">Your tools</span>
+   <div class="tiles" style="margin-top:6px">
+    <div class="tile new wide"><div><b>Scan</b><span>Photo booth · 41 numbers tonight</span></div><span class="ar">›</span></div>
+    <div class="tile wide"><div><b>Open your day-of console</b><span>The floor tools you switched on for this booking.</span></div><span class="ar">›</span></div>
+   </div>
+  </div>
+ </div>
+ <div class="home"></div>
+</div>
+<div class="cap"><span class="k">A2</span><b>The desk on the couple's page</b><p>The shipped doorway strip and desk, with the same <span class="q">Scan</span> tile as a shortcut above <span class="q">Open your day-of console</span>. One Scan, two doors; both open the same screen.</p></div>
+</div>
+
+</div>
+
+<h2 class="sec"><span class="n">B–C</span>Choose the mode · scan</h2>
+<div class="row">
+
+<!-- B · choose the mode -->
+<div class="fr">
+<div class="phone">
+ <div class="island"></div>
+ <div class="status"><span>7:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="topnav"><span>‹ Event Hub</span><span class="mono">Day-of · live</span></div>
+  <h2 class="t">Scan</h2>
+  <p class="sub">Photo booth · Ana &amp; Miguel</p>
+  <div class="field"><label>Mode</label><span class="pm open">Group session <i>▼</i></span></div>
+  <div style="display:flex;justify-content:flex-end">
+   <div class="pmlist">
+    <div>Once</div>
+    <div>Ordered → Received</div>
+    <div>Unlimited</div>
+    <div class="on">Group session</div>
+    <div>Roaming</div>
+   </div>
+  </div>
+  <div class="ghost">
+   <div class="card" style="margin-top:14px"><div class="num"><div class="big">#0041<small>last</small></div><div class="st"><b>118</b>guests served</div></div></div>
+   <span class="btn fill big" style="margin-top:14px">Start scanning</span>
+   <div class="card" style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center"><b style="font-family:var(--serif);font-size:18px;font-weight:500">Your numbers</b><span style="color:var(--gild)">›</span></div>
+  </div>
+ </div>
+ <div class="home"></div>
+</div>
+<div class="cap"><span class="k">B</span><b>Mode — one dropdown</b><p>Per service, per event. The shipped PickMenu, open: Once · Ordered → Received · Unlimited · Group session · Roaming, one line each, nothing under the control. Closed, the page is just the last number, <span class="q">Start scanning</span> and <span class="q">Your numbers</span>.</p></div>
+</div>
+
+<!-- C · scanning -->
+<div class="fr">
+<div class="phone dark">
+ <div class="island"></div>
+ <div class="status"><span>7:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="view"></div>
+ <div class="cue"><span class="chip x">×</span><span class="chip">Photo booth · Group session</span><span class="chip">NFC on</span></div>
+ <div class="finder"><i></i><i></i><i></i><i></i></div>
+ <div class="toast"><i>!</i>Not on this event's list</div>
+ <div class="sheet">
+  <div class="num"><div class="big">#0042<small>3 guests</small></div><div class="st"><b>118</b>guests tonight</div></div>
+  <div class="dots"><i>✓</i><i>✓</i><i>✓</i><i class="add">+</i></div>
+  <div class="acts"><span class="btn fill">Done</span></div>
+ </div>
+</div>
+<div class="cap"><span class="k">C</span><b>Scanning</b><p>Camera on, the mode in the chip, NFC listening where the phone can. Each guest's QR or tag adds a tick to <span class="q">#0042</span>; a QR that is not on this event's list gets the plain reason and nothing is written. The supplier sees counts, never a name. <span class="q">Done</span> closes the number and announces it to those three guests.</p></div>
+</div>
+
+</div>
+
+<h2 class="sec"><span class="n">C′</span>Where the modes differ on the camera — the same screen, a different answer</h2>
+<div class="minis">
+ <div class="mini"><div class="view"></div><span class="chip">Once</span><div class="fd"></div><div class="res no">Already received · #0017<small>Same guest, second scan</small></div></div>
+ <div class="mini"><div class="view"></div><span class="chip">Unlimited</span><div class="fd"></div><div class="res ok">✓ #0043<small>Same guest, new number</small></div></div>
+ <div class="mini"><div class="view"></div><span class="chip">Group session</span><div class="fd"></div><div class="res ok">#0042 · 3 guests<small>One number, many guests</small></div></div>
+ <div class="mini"><div class="view"></div><span class="chip">Roaming</span><div class="fd"></div><div class="res ok">#0231 · 2 guests · shoot<small>No station · scan, then shoot</small></div></div>
+ <div class="mini"><div class="view"></div><span class="chip">Ordered → Received</span><div class="fd"></div><div class="res ok">✓ Ordered · #0042<small>Scan again to hand over</small></div></div>
+</div>
+<div class="cap" style="max-width:940px"><span class="k">C′</span><b>Five answers, one scanner</b><p>Nothing on the screen changes but the result line. Once refuses a second scan of the same guest; Unlimited counts it again with a new number; Group session and Roaming put many guests on one number (Roaming has no station — scan the guests in frame, then shoot); Ordered → Received keeps the number through two scans.</p></div>
+
+<h2 class="sec"><span class="n">D–F</span>Your numbers · the guest's Event Hub · Ordered → Received</h2>
+<div class="row">
+
+<!-- D · Your numbers → #0042 → Add photo -->
+<div class="fr">
+<div class="phone">
+ <div class="island"></div>
+ <div class="status"><span>8:12</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="topnav"><span>‹ Scan</span><span class="mono">Day-of · live</span></div>
+  <h2 class="t">Your numbers</h2>
+  <p class="sub">41 tonight · 118 guests</p>
+  <div class="card" style="padding:4px 16px 2px">
+   <div class="nrow"><span class="no">#0043</span><div class="w"><b>1 guest · 8:05 PM</b>No photo yet</div><span class="ch">›</span></div>
+   <div class="nrow" style="border-top:1px solid var(--line)"><span class="no">#0042</span><div class="w"><b>3 guests · 7:41 PM</b>1 photo</div><span class="ch" style="transform:rotate(90deg)">›</span></div>
+   <div class="open">
+    <div class="ph"><div class="p1"></div><div class="add">+</div></div>
+    <span class="btn fill">Add photo</span>
+   </div>
+   <div class="nrow"><span class="no">#0041</span><div class="w"><b>2 guests · 7:36 PM</b>1 photo</div><span class="th"></span><span class="ch">›</span></div>
+   <div class="nrow"><span class="no">#0040</span><div class="w"><b>1 guest · 7:30 PM</b>1 photo</div><span class="th" style="background:linear-gradient(160deg,#D8B6B6,#8E5A66)"></span><span class="ch">›</span></div>
+   <div class="nrow"><span class="no">#0039</span><div class="w"><b>4 guests · 7:28 PM</b>2 photos</div><span class="th" style="background:linear-gradient(160deg,#C9CFC2,#7E8A78)"></span><span class="ch">›</span></div>
+  </div>
+ </div>
+ <div class="home"></div>
+</div>
+<div class="cap"><span class="k">D</span><b>Your numbers → Add photo</b><p>Newest first. Tap a number and it opens in place; <span class="q">Add photo</span> takes the booth strip, the print or the rendered design. The photo reaches every guest on that number, paid from the supplier's own Papic allowance (2026-09-25).</p></div>
+</div>
+
+<!-- E · the guest's Event Hub -->
+<div class="fr">
+<div class="phone guest">
+ <div class="island"></div>
+ <div class="status"><span>8:14</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="brand">Ana &amp; Miguel <i>· Today</i></div>
+  <div class="now"><span class="eyebrow">Now</span><div class="h">First dance</div><div class="where">The garden · 8:00 PM</div></div>
+  <div class="mine">
+   <div class="img"></div>
+   <div class="tx"><div><b>Your number #0042</b><span>Photo booth · Lumina Studio</span></div><span class="sv">Save</span></div>
+  </div>
+  <ul class="sched">
+   <li class="done"><span class="tm">7:00</span><span>Dinner</span></li>
+   <li><span class="tm">8:00</span><span>First dance</span></li>
+   <li><span class="tm">8:30</span><span>Toasts</span></li>
+  </ul>
+ </div>
+ <div class="bnav"><span class="on"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8"/><path d="M10 9.5v4l3.5-2z"/></svg>Live</span><span><svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/></svg>Welcome</span><span><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7l1.5-3h5L16 7"/><circle cx="12" cy="13.5" r="3.5"/></svg>Camera</span><span><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="16" cy="9" r="1.5"/></svg>Gallery</span><span><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Me</span></div>
+</div>
+<div class="cap"><span class="k">E</span><b>The guest's Event Hub</b><p>In the couple's theme, on Live: one quiet card under Now — <span class="q">Your number #0042</span> with the photo and Save. No popup, no banner. The same card is in Me and the photo is in Gallery.</p></div>
+</div>
+
+<!-- F · Ordered → Received -->
+<div class="fr">
+<div class="phone">
+ <div class="island"></div>
+ <div class="status"><span>8:12</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="topnav"><span>‹ Scan</span><span class="mono">Day-of · live</span></div>
+  <h2 class="t">Your numbers</h2>
+  <p class="sub">Prints · Ordered → Received · 38 tonight</p>
+  <div class="card" style="padding:4px 16px 2px">
+   <div class="nrow"><span class="no">#0042</span><div class="w"><b>1 guest · 7:41 PM</b>Printing</div><span class="ch" style="transform:rotate(90deg)">›</span></div>
+   <div class="open">
+    <div class="steps">
+     <div class="s done"><b>✓ Ordered</b>7:41 PM</div>
+     <span class="ar">›</span>
+     <div class="s wait"><b>Received</b>—</div>
+    </div>
+    <span class="btn fill">Ready</span>
+   </div>
+   <div class="nrow"><span class="no">#0041</span><div class="w"><b>2 guests · 7:36 PM</b>Ready · waiting</div><span class="pill warn">Ready</span></div>
+   <div class="nrow"><span class="no">#0040</span><div class="w"><b>1 guest · 7:30 PM</b>Received 7:58 PM</div><span class="pill ok">✓ Received</span></div>
+   <div class="nrow"><span class="no">#0039</span><div class="w"><b>4 guests · 7:28 PM</b>Received 7:51 PM</div><span class="pill ok">✓ Received</span></div>
+  </div>
+ </div>
+ <div class="home"></div>
+</div>
+<div class="cap"><span class="k">F</span><b>Ordered → Received</b><p>The same list, two steps on each number. The first scan ordered <span class="q">#0042</span>; <span class="q">Ready</span> tells its guest on their Event Hub (<span class="q">#0042 is ready</span>); the guest's second scan marks it Received. Repeat = <span class="q">Already received</span>.</p></div>
+</div>
+
+</div>
+</div></body></html>
