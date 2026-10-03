@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Supplier page — Follow + Add to an event</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<!--
+  SUPPLIER PAGE · "Plan with Setnayan" → FOLLOW + ADD TO AN EVENT · phone 375 · 2026-10-04 · Fable
+  Owner ruling (DECISION_LOG 2026-10-03): "following … so you see their update like follow users on discover ·
+  creates a marking that this is a vendor you follow when searching · we sync them to an event we pick from
+  their events or add a new event". Inquire stays the one main action.
+
+  NO JAVASCRIPT. The owner's phone viewer runs none, so every state is in the HTML and switched by CSS only
+  (hidden radio inputs + <label for=…> on the buttons). Each phone keeps its own state. Every TODAY label is
+  the shipped one.
+
+  Sits inside the approved supplier page (prototypes/supplier_page_2026-10-03_fable.html, frame 3: calling
+  card · Services & pricing · Their work · About · Details · Reviews · Inquire). Only the DELTA is drawn in
+  full: the card's second row, the sign-in sheet, the event dropdown, the Following marks.
+
+  Extends what ships on origin/main 777cf8f07:
+    Follow  = vendor_follows (lib/follow-actions.ts followVendor/unfollowVendor) — per PERSON, no event
+    Add     = saveVendorToPicks(event_id) → event_vendors 'considering' → Suppliers › Saved (the shipped Save)
+    Picker  = add-shop-to-event-data.ts resolveAddShopToEvent (your events, ongoing + upcoming), drawn as ONE
+              PickMenu dropdown (INTERACTION_RULES §2: 3+ options → one dropdown)
+    Sign-in = useSignInPanel (sign-in-here.tsx) over the page, then the press runs itself (save-vendor-button.tsx)
+    No event= /dashboard/create-event?next=/v/{slug}?add=1 (create-event's shipped `next` carry-through)
+-->
+<style>
+:root{
+  --paper:#FAF7F2;--paper2:#F3EEE6;--page:#EDE7DE;--scr:#FBF8F3;--ink:#1E2229;--ink2:#3B3F46;--mute:#76736D;
+  --gild:#B08A5B;--gild-soft:#E9DEC9;--gild-wash:#F7F1E6;--wine:#6E2A3A;--wine-wash:#F6ECEE;
+  --line:#E5DED3;--ok:#2F6B4F;--okbg:#E7F1EA;--warn:#8A5A00;--warnbg:#FBF0D8;
+  --terra:#B5553D;--terra-wash:#F6E6E0;--violet:#4C3A78;--violet-wash:#EEEAF6;--link:#2E5C8A;
+  --btn:#1E2229;--btn-ink:#FBF8F3;--white:#FFFFFF;--shade:rgba(30,34,41,.35);
+  --serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --sans:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#1C1F24;--paper2:#23272D;--page:#14161A;--scr:#1A1D22;--ink:#F1ECE3;--ink2:#CFC8BC;--mute:#948D82;
+    --gild:#C9A471;--gild-soft:#4A3F2E;--gild-wash:#2A251D;--wine:#D28A9B;--wine-wash:#33222A;
+    --line:#333841;--ok:#7FC3A0;--okbg:#1F3129;--warn:#E3B45C;--warnbg:#332A17;
+    --terra:#E08A72;--terra-wash:#3A2A26;--violet:#B9A8E6;--violet-wash:#2B2640;--link:#8FB6DD;
+    --btn:#F1ECE3;--btn-ink:#1A1D22;--white:#23272D;--shade:rgba(0,0,0,.55);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#1C1F24;--paper2:#23272D;--page:#14161A;--scr:#1A1D22;--ink:#F1ECE3;--ink2:#CFC8BC;--mute:#948D82;
+  --gild:#C9A471;--gild-soft:#4A3F2E;--gild-wash:#2A251D;--wine:#D28A9B;--wine-wash:#33222A;
+  --line:#333841;--ok:#7FC3A0;--okbg:#1F3129;--warn:#E3B45C;--warnbg:#332A17;
+  --terra:#E08A72;--terra-wash:#3A2A26;--violet:#B9A8E6;--violet-wash:#2B2640;--link:#8FB6DD;
+  --btn:#F1ECE3;--btn-ink:#1A1D22;--white:#23272D;--shade:rgba(0,0,0,.55);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--page);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.wrap{max-width:1700px;margin:0 auto;padding:28px 16px 56px}
+.doc-brand{font-size:10.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--gild);font-weight:600}
+h1{font-family:var(--serif);font-weight:500;font-size:34px;line-height:1.1;margin:8px 0 10px;letter-spacing:-.01em}
+.moved{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;max-width:1100px;position:relative;font-size:13px;line-height:1.55;color:var(--ink2)}
+.moved:before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;background:var(--gild);border-radius:0 3px 3px 0}
+.moved b{color:var(--ink);font-weight:600}
+.moved .k{display:inline-block;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gild);font-weight:600;margin-right:6px}
+.moved p{margin:0}.moved p+p{margin-top:6px}
+code{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;background:var(--paper2);padding:1px 5px;border-radius:5px}
+h2.sec{display:flex;align-items:center;gap:14px;font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink2);font-weight:600;margin:36px 0 16px}
+h2.sec .n{font-family:var(--serif);font-size:22px;font-weight:500;color:var(--gild);letter-spacing:0}
+h2.sec:after{content:"";flex:1;height:1px;background:var(--line)}
+.row{display:flex;flex-wrap:wrap;gap:28px 30px;align-items:flex-start}
+.fr{width:375px;max-width:100%;position:relative}
+.fr>input{display:none}
+.cap{margin-top:12px;padding:0 4px}
+.cap .k{font-family:var(--serif);font-size:22px;font-weight:500;color:var(--gild);line-height:1;margin-right:8px}
+.cap b{font-size:13.5px;font-weight:600;color:var(--ink)}
+.cap p{margin:4px 0 0;font-size:12.5px;color:var(--ink2);line-height:1.5}
+.cap .q{font-family:var(--serif);font-style:italic;font-size:13.5px;color:var(--ink)}
+label{cursor:pointer}
+
+/* ---------- phone frame ---------- */
+.phone{width:375px;max-width:100%;background:var(--scr);position:relative;overflow:hidden;
+  outline:8px solid #14161A;border-radius:40px;margin:8px;box-shadow:0 0 0 9px #2E3238,0 40px 70px -30px rgba(0,0,0,.45)}
+.phone .island{position:absolute;left:50%;top:10px;transform:translateX(-50%);width:112px;height:30px;background:#14161A;border-radius:20px;z-index:9}
+.phone .status{height:50px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 8px;font-size:14px;font-weight:600;letter-spacing:-.01em}
+.phone .status .sig{font-size:11px;letter-spacing:.06em}
+.scr{padding:0 16px 40px;position:relative}
+.hdr{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid var(--line)}
+.wm{font-family:var(--serif);font-weight:600;font-size:18px;letter-spacing:.08em}
+.hdr .lnk{font-size:13px;color:var(--ink2);font-weight:500}
+.art{padding:20px 0 0}
+
+/* ---------- the shipped page's atoms ---------- */
+.b1,.b2{display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:500;line-height:1;border:0;font-family:inherit;user-select:none}
+.b1{background:var(--btn);color:var(--btn-ink)}
+.b2{background:var(--white);border:1px solid var(--line);color:var(--ink)}
+section.s{padding:28px 0;border-bottom:1px solid var(--line)}
+section.s.last{border-bottom:0}
+.h2{font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);margin:0 0 12px}
+.h2 small{font-family:var(--sans);letter-spacing:0;text-transform:none;font-size:12px;color:var(--mute);margin-left:6px}
+.sub{font-size:13px;color:var(--ink2);margin:-6px 0 14px}
+.cards{display:grid;gap:8px}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--scr);padding:14px}
+.card .t{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.card .t b{font-weight:500}
+.card .t span{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--ink2)}
+.card .srv{font-size:12px;color:var(--mute);margin-top:8px}
+.fold{border:1px dashed var(--line);border-radius:12px;padding:10px 14px;font-size:12px;color:var(--mute);margin-top:8px;text-align:center}
+.inq p{font-size:13px;color:var(--ink2);margin:0 0 14px}
+.inq p b{color:var(--ink);font-weight:500}
+.field{border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--mute);background:var(--white);margin-top:8px;display:flex;justify-content:space-between}
+.field.ta{height:64px;align-items:flex-start}
+.lbl{font-size:12px;font-weight:500;margin-top:12px}
+.btm{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap}
+.foot{margin-top:28px;border-top:1px solid var(--line);padding-top:20px;font-size:12px;color:var(--mute);display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+.flag{position:absolute;right:-6px;top:-10px;background:var(--terra);color:#fff;font-size:10px;font-weight:600;border-radius:999px;padding:2px 8px;letter-spacing:.04em}
+
+/* ---------- the approved calling card ---------- */
+.cc{border:1px solid var(--line);border-radius:18px;background:var(--paper);padding:18px 18px 16px;position:relative;box-shadow:0 14px 30px -26px rgba(0,0,0,.4)}
+.cc:before{content:"";position:absolute;left:18px;right:18px;top:0;height:3px;background:var(--gild);border-radius:0 0 3px 3px}
+.cc .top{display:flex;gap:14px;align-items:center}
+.cc .mk{width:64px;height:64px;border-radius:14px;background:var(--white);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:22px;font-weight:600;color:var(--wine);flex:none}
+.cc .nm{font-family:var(--serif);font-size:30px;line-height:1.05;letter-spacing:-.02em;margin:0}
+.cc .what{font-size:12.5px;color:var(--ink2);margin-top:3px}
+.cc .fact{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px;font-size:12px;color:var(--ink2)}
+.cc .fact b{color:var(--ink);font-weight:600}
+.cc .fact .ok{color:var(--ok);font-weight:600}
+.cc .acts{display:flex;gap:8px;margin-top:14px}
+.cc .acts .b1,.cc .acts .b2{flex:1;border-radius:999px;padding:12px 14px;min-height:44px}
+.cc .acts.keep{margin-top:8px;position:relative}
+.cc .where{display:flex;gap:12px;font-size:12px;color:var(--mute);margin-top:12px;align-items:center}
+.b2.following{border-color:var(--wine);background:var(--wine-wash);color:var(--wine)}
+.b2.saved{border-color:var(--ok);background:var(--okbg);color:var(--ok);cursor:default}
+.b2 .trunc{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.b2 .car{opacity:.6;font-size:11px;margin-left:2px}
+
+/* ---------- PickMenu list (pick-menu.tsx look) ---------- */
+.pm{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:6px;z-index:20;box-shadow:0 18px 40px -20px rgba(0,0,0,.45);display:none}
+.pm .grp{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);padding:8px 10px 4px}
+.pm label{display:flex;width:100%;align-items:center;gap:10px;border-radius:10px;padding:10px;text-align:left;color:var(--ink)}
+.pm label:hover{background:var(--paper2)}
+.pm .ttl{font-size:14px;font-weight:500;flex:1;min-width:0}
+.pm .ttl small{display:block;font-size:11.5px;color:var(--mute);font-weight:400}
+.pm .dt{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--mute);letter-spacing:.04em;white-space:nowrap}
+.pm .plus{width:30px;height:30px;border-radius:9px;border:1px solid var(--gild);background:var(--gild-wash);color:var(--gild);display:grid;place-items:center;font-weight:600;flex:none}
+.pm hr{border:0;border-top:1px solid var(--line);margin:4px 6px}
+.pmback{position:absolute;inset:0;z-index:15;display:none}
+
+/* ---------- sign-in sheet (sign-in-here-panel over the page) ----------
+   the phone frame is as tall as its page, so the sheet is pinned near the card (on a real phone it rises
+   from the bottom of the screen — same sheet, same words) */
+.ovl{position:absolute;inset:0;background:var(--shade);z-index:30;display:none;align-items:flex-start;padding:150px 12px 0;border-radius:32px}
+.sheet{width:100%;background:var(--paper);border-radius:22px;padding:18px 18px 22px;box-shadow:0 20px 40px -20px rgba(0,0,0,.5);position:relative}
+.sheet .grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 14px}
+.sheet h3{font-family:var(--serif);font-weight:500;font-size:22px;margin:0 0 2px}
+.sheet p{margin:0 0 12px;font-size:13px;color:var(--ink2)}
+.sheet .field{margin-top:8px}
+.sheet .b1,.sheet .b2{width:100%;border-radius:12px;padding:12px;margin-top:8px;min-height:44px}
+.sheet .x{position:absolute;right:14px;top:10px;font-size:20px;color:var(--mute);padding:4px 8px}
+
+/* ---------- create-event (the shipped page, condensed) ---------- */
+.create{display:none;flex-direction:column}
+.create h3{font-family:var(--serif);font-weight:500;font-size:26px;margin:0 0 4px}
+.create .pick{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px;background:var(--white);font-size:14px}
+.create .pick .car{opacity:.6}
+.create .b1{width:100%;border-radius:12px;padding:13px;margin-top:16px;min-height:46px}
+.create .back{font-size:13px;color:var(--mute);margin:14px 0 0;display:block}
+
+/* toasts (success = a small toast; drawn static here) */
+.toast{position:absolute;left:16px;right:16px;bottom:18px;background:var(--btn);color:var(--btn-ink);border-radius:12px;padding:10px 14px;font-size:13px;z-index:40;display:none;align-items:center;gap:8px}
+.toast.t2{bottom:66px}
+.toast b{font-weight:600}
+
+/* ---------- state variants: hidden until a radio says so ---------- */
+.v{display:none}
+
+/* ===== frame A · signed out ===== follow group af0..af3 · add group aa0..aa4 */
+#af0:checked ~ .stage .af0,#af1:checked ~ .stage .af1,#af2:checked ~ .stage .af2,#af3:checked ~ .stage .af3{display:inline-flex}
+#af1:checked ~ .stage .ovl-af1{display:flex}
+#af2:checked ~ .stage .toast-af2{display:flex}
+#aa0:checked ~ .stage .aa0,#aa4:checked ~ .stage .aa4,#aa3:checked ~ .stage .aa3{display:inline-flex}
+#aa1:checked ~ .stage .ovl-aa1{display:flex}
+#aa2:checked ~ .stage .page-a{display:none}
+#aa2:checked ~ .stage .create-a{display:flex}
+#aa3:checked ~ .stage .toast-aa3{display:flex}
+/* signed in through Follow first → Add no longer asks to sign in */
+#af2:checked ~ #aa0:checked ~ .stage .aa0,#af3:checked ~ #aa0:checked ~ .stage .aa0{display:none}
+#af2:checked ~ #aa0:checked ~ .stage .aa0in,#af3:checked ~ #aa0:checked ~ .stage .aa0in{display:inline-flex}
+/* signed in through Add first → Follow no longer asks to sign in */
+#af0:checked ~ #aa3:checked ~ .stage .af0,#af0:checked ~ #aa4:checked ~ .stage .af0,#af0:checked ~ #aa2:checked ~ .stage .af0{display:none}
+#af0:checked ~ #aa3:checked ~ .stage .af0in,#af0:checked ~ #aa4:checked ~ .stage .af0in,#af0:checked ~ #aa2:checked ~ .stage .af0in{display:inline-flex}
+/* header link */
+.h-in{display:none}
+#af2:checked ~ .stage .h-out,#af3:checked ~ .stage .h-out,#aa2:checked ~ .stage .h-out,#aa3:checked ~ .stage .h-out,#aa4:checked ~ .stage .h-out{display:none}
+#af2:checked ~ .stage .h-in,#af3:checked ~ .stage .h-in,#aa2:checked ~ .stage .h-in,#aa3:checked ~ .stage .h-in,#aa4:checked ~ .stage .h-in{display:inline}
+/* composer button */
+.c-in{display:none}
+#af2:checked ~ .stage .c-out,#af3:checked ~ .stage .c-out,#aa3:checked ~ .stage .c-out,#aa4:checked ~ .stage .c-out{display:none}
+#af2:checked ~ .stage .c-in,#af3:checked ~ .stage .c-in,#aa3:checked ~ .stage .c-in,#aa4:checked ~ .stage .c-in{display:inline-flex}
+
+/* ===== frame B · one event ===== bf0/bf1 · ba0/ba1 */
+#bf0:checked ~ .stage .bf0,#bf1:checked ~ .stage .bf1,#ba0:checked ~ .stage .ba0,#ba1:checked ~ .stage .ba1{display:inline-flex}
+#bf1:checked ~ .stage .toast-bf1{display:flex}
+#ba1:checked ~ .stage .toast-ba1{display:flex}
+
+/* ===== frame C · several events ===== cf0 (following) / cf1 · ca0 idle · ca1 list · ca2/ca3/ca5 saved · ca6 create · ca7 saved new */
+#cf0:checked ~ .stage .cf0,#cf1:checked ~ .stage .cf1{display:inline-flex}
+#ca0:checked ~ .stage .ca0,#ca1:checked ~ .stage .ca1,#ca2:checked ~ .stage .ca2,#ca3:checked ~ .stage .ca3,#ca5:checked ~ .stage .ca5,#ca7:checked ~ .stage .ca7{display:inline-flex}
+#ca1:checked ~ .stage .pm-c{display:block}
+#ca1:checked ~ .stage .pmback-c{display:block}
+#ca6:checked ~ .stage .page-c{display:none}
+#ca6:checked ~ .stage .create-c{display:flex}
+#ca2:checked ~ .stage .toast-ca2,#ca3:checked ~ .stage .toast-ca3,#ca5:checked ~ .stage .toast-ca5,#ca7:checked ~ .stage .toast-ca7{display:flex}
+
+/* ---------- section 3: where Following shows ---------- */
+.ex{border:1px solid var(--line);border-radius:16px;background:var(--scr);padding:12px;margin-top:8px}
+.ex .hero{height:90px;border-radius:10px;background:linear-gradient(160deg,#D9C7B0,#B89C7C);position:relative}
+.ex .hero .fl{position:absolute;left:8px;top:8px;background:var(--wine-wash);color:var(--wine);border:1px solid var(--wine);font-size:11px;font-weight:600;border-radius:999px;padding:2px 9px}
+.ex .nm2{font-family:var(--serif);font-size:19px;margin:10px 0 0}
+.ex .ln{font-size:12px;color:var(--mute)}
+.ex .acts2{display:flex;gap:8px;margin-top:10px}
+.ex .acts2 .b2,.ex .acts2 .b1{flex:1;padding:9px 10px;border-radius:8px;font-size:12.5px}
+.lib{border:1px solid var(--line);border-radius:16px;background:var(--scr);padding:14px}
+.lib .rowi{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.lib .rowi:first-of-type{border-top:0}
+.lib .mk2{width:34px;height:34px;border-radius:9px;background:var(--white);border:1px solid var(--line);display:grid;place-items:center;font-family:var(--serif);font-weight:600;color:var(--wine);font-size:14px}
+.lib .rowi b{font-weight:500;font-size:13.5px;display:block}
+.lib .rowi small{font-size:11.5px;color:var(--mute)}
+.lib .rowi>div:nth-child(2){min-width:0}
+.lib .rowi .b2{margin-left:auto;padding:6px 10px;font-size:12px;border-radius:8px;white-space:nowrap;flex:none}
+.ghost{border:1.5px dashed var(--gild);border-radius:16px;padding:14px;color:var(--mute);font-size:12px;line-height:1.5;background:transparent;margin-top:8px}
+.ghost b{display:block;color:var(--gild);font-size:10px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:6px}
+.ghost .ev{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px dashed var(--line);color:var(--ink2)}
+.ghost .ev:first-of-type{border-top:0}
+.ghost .ev .d{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:var(--mute);width:58px;flex:none}
+.ghost .ev span b{display:inline;color:var(--ink);font-size:12.5px;letter-spacing:0;text-transform:none;margin:0}
+.srhdr{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.srhdr .q2{flex:1;border:1px solid var(--line);border-radius:999px;padding:8px 12px;font-size:12.5px;color:var(--mute);background:var(--white)}
+.srhdr .f{border:1px solid var(--line);border-radius:999px;padding:8px 12px;font-size:12.5px;color:var(--ink2);background:var(--paper)}
+.sm{font-size:11.5px;color:var(--mute);margin-top:6px}
+
+/* export helper: open …html#only-a (one frame alone) or #x-a-sheet / #x-b-done / #x-c-list (one frame in a
+   named state) — used for the PNGs, harmless otherwise */
+body:has(.fr:target) .wrap>*:not(.row),body:has(.fr:target) .fr:not(:target),
+body:has(.fr .xa:target) .wrap>*:not(.row),body:has(.fr .xa:target) .fr:not(:has(.xa:target)){display:none}
+body:has(.fr:target) .wrap,body:has(.fr .xa:target) .wrap{padding:8px}
+.xa{position:absolute;width:0;height:0}
+#x-a-sheet:target ~ .stage .ovl-af1{display:flex}
+#x-b-done:target ~ .stage .bf0,#x-b-done:target ~ .stage .ba0{display:none}
+#x-b-done:target ~ .stage .bf1,#x-b-done:target ~ .stage .ba1,#x-b-done:target ~ .stage .toast-bf1,#x-b-done:target ~ .stage .toast-ba1{display:inline-flex}
+#x-c-list:target ~ .stage .pm-c{display:block}
+#x-c-list:target ~ .stage .ca0{display:none}
+#x-c-list:target ~ .stage .ca1{display:inline-flex}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="doc-brand">Setnayan · supplier page · design for a yes</div>
+  <h1>"Plan with Setnayan" becomes Follow + Add to an event</h1>
+  <div class="moved">
+    <p><span class="k">Owner, 2026-10-03</span><b>"following … so you see their update like follow users on discover · creates a marking that this is a vendor you follow when searching · we sync them to an event we pick from their events or add a new event."</b> Inquire stays the one main action.</p>
+    <p><span class="k">Extends</span> the approved page (<code>supplier_page_2026-10-03_fable.html</code> frame 3) · the shipped <b>Follow</b> relation (<code>vendor_follows</code>, <code>lib/follow-actions.ts</code>) · the shipped <b>Save</b> (<code>saveVendorToPicks</code> → <code>event_vendors</code> → Suppliers › Saved) · the shipped event list for a shop (<code>add-shop-to-event-data.ts</code>) drawn as ONE PickMenu dropdown · the shipped sign-in sheet over the page (<code>useSignInPanel</code>) · <code>create-event?next=</code>.</p>
+    <p><span class="k">Two buttons, two facts, nothing new in the database.</span> <b>Follow</b> = "keep me posted on this supplier" (mine, no event). <b>Add to an event</b> = the shipped Save with the event question asked out loud; it lands where Save lands: that event's <b>Suppliers › Saved</b>. Tap the buttons — each phone keeps its own state.</p>
+  </div>
+
+  <!-- ===================================================== 1 · TODAY ===================================================== -->
+  <h2 class="sec"><span class="n">1</span> Today · as shipped · the bottom of the Inquire fold, signed out</h2>
+  <div class="row">
+    <div class="fr" id="only-today">
+      <div class="phone"><div class="island"></div>
+        <div class="status"><span>9:41</span><span class="sig">●●●● ᯤ ▮</span></div>
+        <div class="scr">
+          <div class="hdr"><span class="wm">SETNAYAN</span><span class="lnk" style="opacity:.35">Plan with Setnayan</span></div>
+          <div class="art">
+            <div class="fold">… calling card · Services &amp; pricing · Their work · About · Details · Reviews …</div>
+            <section class="s last inq"><p class="h2">Inquire</p>
+              <p>Send <b>Lumina Studio</b> an inquiry below — they'll reply in your Setnayan inbox, and the conversation stays with your event.</p>
+              <div class="lbl">Service</div><div class="field"><span>Choose one…</span><span>▾</span></div>
+              <div class="lbl">Your email</div><div class="field"><span>you@email.com</span></div>
+              <div class="lbl">Message</div><div class="field ta"><span>What do you need?</span></div>
+              <div class="btm"><span class="b1" style="width:100%">Log in free to see your conversation</span></div>
+              <div class="btm" style="position:relative"><span class="b1">Plan with Setnayan</span><span class="b2">Back to home</span><span class="flag">same look as Inquire</span></div>
+            </section>
+            <div class="foot"><span>Powered by <b>SETNAYAN</b></span><span>Supplier ID · <span class="mono">S89V-7K2M4QX9RB</span></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="cap"><span class="k">1</span><b>Two dark buttons, one meaning each — and the second one leaves the shop.</b>
+        <p>"Plan with Setnayan" (<code>button-primary</code>, → <code>/signup</code>) wears exactly the class Inquire and the composer button wear. It sits twice on the page: here and as a desktop-only header link (hidden on a phone: <code>hidden sm:inline</code>). Signed in, this button still shows and still goes to sign-up. "Back to home" was already dropped by the approved page.</p></div>
+    </div>
+  </div>
+
+  <!-- ===================================================== 2 · PROPOSED ===================================================== -->
+  <h2 class="sec"><span class="n">2</span> Proposed · the calling card's second row · three visitors</h2>
+  <div class="row">
+
+    <!-- 2a · signed out -->
+    <div class="fr" id="only-a">
+      <input type="radio" name="af" id="af0" checked><input type="radio" name="af" id="af1"><input type="radio" name="af" id="af2"><input type="radio" name="af" id="af3">
+      <input type="radio" name="aa" id="aa0" checked><input type="radio" name="aa" id="aa1"><input type="radio" name="aa" id="aa2"><input type="radio" name="aa" id="aa3"><input type="radio" name="aa" id="aa4">
+      <span class="xa" id="x-a-sheet"></span>
+      <div class="stage">
+      <div class="phone"><div class="island"></div>
+        <div class="status"><span>9:41</span><span class="sig">●●●● ᯤ ▮</span></div>
+        <div class="scr">
+          <div class="hdr"><span class="wm">SETNAYAN</span><span class="lnk"><span class="h-out">Sign in</span><span class="h-in">Return to Dashboard</span></span></div>
+          <div class="art page-a">
+            <div class="cc">
+              <div class="top"><div class="mk">LS</div><div><p class="nm">Lumina Studio</p><div class="what">Photo &amp; video · Tagaytay</div></div></div>
+              <div class="fact"><span class="ok">✓ Papers checked · Sep 2026</span><span><b>3</b> events through Setnayan</span></div>
+              <div class="acts"><span class="b1">➤ Inquire</span><span class="b2">Share</span></div>
+              <div class="acts keep">
+                <!-- Follow pill · one element per state -->
+                <label for="af1" class="b2 v af0">♡ Follow</label>
+                <label for="af2" class="b2 v af0in">♡ Follow</label>
+                <label for="af0" class="b2 v af1">♡ Follow</label>
+                <label for="af3" class="b2 v af2 following">♥ Following</label>
+                <label for="af2" class="b2 v af3">♡ Follow</label>
+                <!-- Add pill · one element per state -->
+                <label for="aa1" class="b2 v aa0"><span class="trunc">＋ Add to an event</span></label>
+                <label for="aa2" class="b2 v aa0in"><span class="trunc">＋ Add to an event</span></label>
+                <label for="aa2" class="b2 v aa4"><span class="trunc">＋ Add to an event</span></label>
+                <span class="b2 v aa3 saved"><span class="trunc">✓ Saved to Lola's 80th</span></span>
+              </div>
+              <div class="where"><span>💬 Replies in your Setnayan inbox</span><span>📍 Map ›</span></div>
+            </div>
+            <section class="s"><p class="h2">Services &amp; pricing</p>
+              <p class="sub">Starting prices set by Lumina Studio. Final quotes happen in chat.</p>
+              <div class="cards"><div class="card"><div class="t"><b>Full-day wedding photo</b><span>from ₱45,000</span></div><div class="srv">Serves: Weddings · Debuts</div></div></div>
+            </section>
+            <div class="fold">… Their work · About · Details · Reviews …</div>
+            <section class="s last inq"><p class="h2">Inquire</p>
+              <p>Send <b>Lumina Studio</b> an inquiry below — they'll reply in your Setnayan inbox, and the conversation stays with your event.</p>
+              <div class="lbl">Service</div><div class="field"><span>Choose one…</span><span>▾</span></div>
+              <div class="lbl">Message</div><div class="field ta"><span>What do you need?</span></div>
+              <div class="btm"><span class="b1 c-out" style="width:100%">Log in free to see your conversation</span><span class="b1 c-in" style="width:100%">➤ Send inquiry</span></div>
+            </section>
+            <div class="foot"><span>Powered by <b>SETNAYAN</b></span><span>Supplier ID · <span class="mono">S89V-7K2M4QX9RB</span></span></div>
+          </div>
+
+          <!-- create-event, condensed (the shipped page; the shop rides in ?next=) -->
+          <div class="art create create-a">
+            <h3>Start a new celebration</h3>
+            <p class="sub" style="margin:0">Lumina Studio will be saved to it.</p>
+            <div class="lbl">What kind of event</div>
+            <div class="pick"><span>Birthday</span><span class="car">▾</span></div>
+            <div class="lbl">Name it</div><div class="field"><span>Lola's 80th</span></div>
+            <div class="lbl">When</div><div class="field"><span>2 Dec 2026</span><span>📅</span></div>
+            <label for="aa3" class="b1">Create</label>
+            <label for="aa4" class="back">‹ Back to Lumina Studio</label>
+          </div>
+
+          <div class="toast toast-af2 t2"><b>Following Lumina Studio</b>&nbsp;· Library › Suppliers</div>
+          <div class="toast toast-aa3"><b>Saved to Lola's 80th</b>&nbsp;· Suppliers › Saved</div>
+        </div>
+        <!-- sign-in sheet · for Follow -->
+        <div class="ovl ovl-af1">
+          <div class="sheet">
+            <div class="grab"></div>
+            <label for="af0" class="x" aria-label="Close">×</label>
+            <h3>Sign in to follow Lumina Studio</h3>
+            <p>Free. The page stays where it is.</p>
+            <div class="field"><span>you@email.com</span></div>
+            <label for="af2" class="b1">Continue</label>
+            <label for="af2" class="b2">Continue with Google</label>
+          </div>
+        </div>
+        <!-- sign-in sheet · for Add -->
+        <div class="ovl ovl-aa1">
+          <div class="sheet">
+            <div class="grab"></div>
+            <label for="aa0" class="x" aria-label="Close">×</label>
+            <h3>Sign in to add Lumina Studio to an event</h3>
+            <p>Free. The page stays where it is.</p>
+            <div class="field"><span>you@email.com</span></div>
+            <label for="aa2" class="b1">Continue</label>
+            <label for="aa2" class="b2">Continue with Google</label>
+          </div>
+        </div>
+      </div>
+      </div>
+      <div class="cap"><span class="k">2a</span><b>Signed out — the buttons show; the press waits for the sign-in, then runs itself.</b>
+        <p>Tap <b>Follow</b> → the shipped sign-in sheet opens <i>over</i> the page (no trip to /login) → Continue → ♥ Following. Tap <b>Add to an event</b> → same sheet → a new account has no event, so the shop rides into <b>Start a new celebration</b> (<code>create-event?next=/v/lumina-studio?add=1</code>) and is saved to it the moment it exists. Header: "Plan with Setnayan" → a quiet <b>Sign in</b>. The page itself is the same signed out and signed in apart from these states.</p></div>
+    </div>
+
+    <!-- 2b · signed in · one event -->
+    <div class="fr" id="only-b">
+      <input type="radio" name="bf" id="bf0" checked><input type="radio" name="bf" id="bf1">
+      <input type="radio" name="ba" id="ba0" checked><input type="radio" name="ba" id="ba1">
+      <span class="xa" id="x-b-done"></span>
+      <div class="stage">
+      <div class="phone"><div class="island"></div>
+        <div class="status"><span>9:41</span><span class="sig">●●●● ᯤ ▮</span></div>
+        <div class="scr">
+          <div class="hdr"><span class="wm">SETNAYAN</span><span class="lnk">Return to Dashboard</span></div>
+          <div class="art">
+            <div class="cc">
+              <div class="top"><div class="mk">LS</div><div><p class="nm">Lumina Studio</p><div class="what">Photo &amp; video · Tagaytay</div></div></div>
+              <div class="fact"><span class="ok">✓ Papers checked · Sep 2026</span><span><b>3</b> events through Setnayan</span></div>
+              <div class="acts"><span class="b1">➤ Inquire</span><span class="b2">Share</span></div>
+              <div class="acts keep">
+                <label for="bf1" class="b2 v bf0">♡ Follow</label>
+                <label for="bf0" class="b2 v bf1 following">♥ Following</label>
+                <label for="ba1" class="b2 v ba0"><span class="trunc">＋ Add to Maria &amp; Jose</span></label>
+                <span class="b2 v ba1 saved"><span class="trunc">✓ Saved to Maria &amp; Jose</span></span>
+              </div>
+              <div class="where"><span>💬 Replies in your Setnayan inbox</span><span>📍 Map ›</span></div>
+            </div>
+            <section class="s"><p class="h2">Services &amp; pricing</p>
+              <p class="sub">Starting prices set by Lumina Studio. Final quotes happen in chat.</p>
+              <div class="cards"><div class="card"><div class="t"><b>Full-day wedding photo</b><span>from ₱45,000</span></div><div class="srv">Serves: Weddings · Debuts</div></div></div>
+            </section>
+            <div class="fold">… Their work · About · Details · Reviews …</div>
+            <section class="s last inq"><p class="h2">Inquire</p>
+              <p>Send <b>Lumina Studio</b> an inquiry for <b>Maria &amp; Jose</b> — they'll reply in your Setnayan inbox.</p>
+              <div class="lbl">Service</div><div class="field"><span>Full-day wedding photo</span><span>▾</span></div>
+              <div class="lbl">Message</div><div class="field ta"><span>What do you need?</span></div>
+              <div class="btm"><span class="b1" style="width:100%">➤ Send inquiry</span></div>
+            </section>
+            <div class="foot"><span>Powered by <b>SETNAYAN</b></span><span>Supplier ID · <span class="mono">S89V-7K2M4QX9RB</span></span></div>
+          </div>
+          <div class="toast toast-bf1 t2"><b>Following Lumina Studio</b>&nbsp;· Library › Suppliers</div>
+          <div class="toast toast-ba1"><b>Saved to Maria &amp; Jose</b>&nbsp;· Suppliers › Saved</div>
+        </div>
+      </div>
+      </div>
+      <div class="cap"><span class="k">2b</span><b>One celebration — no question with one answer; the button names it instead.</b>
+        <p><b>Add to Maria &amp; Jose</b> saves straight into the only event (the D1 rule: a couple with one celebration is never made to choose) and becomes <b>✓ Saved to Maria &amp; Jose</b> — the shipped Save button's own done state, naming the list it landed in. A toast says where: <span class="q">Saved · Suppliers › Saved</span>. Tap Follow again to unfollow — a toggle, no "Are you sure?".</p></div>
+    </div>
+
+    <!-- 2c · signed in · several events -->
+    <div class="fr" id="only-c">
+      <input type="radio" name="cf" id="cf0" checked><input type="radio" name="cf" id="cf1">
+      <input type="radio" name="ca" id="ca0" checked><input type="radio" name="ca" id="ca1"><input type="radio" name="ca" id="ca2"><input type="radio" name="ca" id="ca3"><input type="radio" name="ca" id="ca5"><input type="radio" name="ca" id="ca6"><input type="radio" name="ca" id="ca7">
+      <span class="xa" id="x-c-list"></span>
+      <div class="stage">
+      <div class="phone"><div class="island"></div>
+        <div class="status"><span>9:41</span><span class="sig">●●●● ᯤ ▮</span></div>
+        <div class="scr">
+          <label for="ca0" class="pmback pmback-c" aria-label="Close"></label>
+          <div class="hdr"><span class="wm">SETNAYAN</span><span class="lnk">Return to Dashboard</span></div>
+          <div class="art page-c">
+            <div class="cc">
+              <div class="top"><div class="mk">LS</div><div><p class="nm">Lumina Studio</p><div class="what">Photo &amp; video · Tagaytay</div></div></div>
+              <div class="fact"><span class="ok">✓ Papers checked · Sep 2026</span><span><b>3</b> events through Setnayan</span></div>
+              <div class="acts"><span class="b1">➤ Inquire</span><span class="b2">Share</span></div>
+              <div class="acts keep">
+                <label for="cf1" class="b2 v cf0 following">♥ Following</label>
+                <label for="cf0" class="b2 v cf1">♡ Follow</label>
+                <label for="ca1" class="b2 v ca0"><span class="trunc">＋ Add to an event</span><span class="car">▾</span></label>
+                <label for="ca0" class="b2 v ca1"><span class="trunc">＋ Add to an event</span><span class="car">▴</span></label>
+                <span class="b2 v ca2 saved"><span class="trunc">✓ Saved to Maria &amp; Jose</span></span>
+                <span class="b2 v ca3 saved"><span class="trunc">✓ Saved to Lola's 80th</span></span>
+                <span class="b2 v ca5 saved"><span class="trunc">✓ Saved to Year-end party</span></span>
+                <span class="b2 v ca7 saved"><span class="trunc">✓ Saved to Ate Bea's debut</span></span>
+                <div class="pm pm-c" role="listbox">
+                  <div class="grp">Your celebrations</div>
+                  <label for="ca2"><span class="ttl">Maria &amp; Jose<small>Wedding</small></span><span class="dt">14 MAR 2027</span></label>
+                  <label for="ca3"><span class="ttl">Lola's 80th<small>Birthday</small></span><span class="dt">2 DEC 2026</span></label>
+                  <label for="ca5"><span class="ttl">Year-end party<small>Corporate</small></span><span class="dt">19 DEC 2026</span></label>
+                  <hr>
+                  <label for="ca6"><span class="plus">+</span><span class="ttl">Start a new celebration</span></label>
+                </div>
+              </div>
+              <div class="where"><span>💬 Replies in your Setnayan inbox</span><span>📍 Map ›</span></div>
+            </div>
+            <section class="s"><p class="h2">Services &amp; pricing</p>
+              <p class="sub">Starting prices set by Lumina Studio. Final quotes happen in chat.</p>
+              <div class="cards"><div class="card"><div class="t"><b>Full-day wedding photo</b><span>from ₱45,000</span></div><div class="srv">Serves: Weddings · Debuts</div></div></div>
+            </section>
+            <div class="fold">… Their work · About · Details · Reviews …</div>
+            <section class="s last inq"><p class="h2">Inquire</p>
+              <p>Send <b>Lumina Studio</b> an inquiry — they'll reply in your Setnayan inbox.</p>
+              <div class="lbl">For which celebration</div><div class="field"><span>Maria &amp; Jose · Wedding</span><span>▾</span></div>
+              <div class="lbl">Service</div><div class="field"><span>Full-day wedding photo</span><span>▾</span></div>
+              <div class="btm"><span class="b1" style="width:100%">➤ Send inquiry</span></div>
+            </section>
+            <div class="foot"><span>Powered by <b>SETNAYAN</b></span><span>Supplier ID · <span class="mono">S89V-7K2M4QX9RB</span></span></div>
+          </div>
+          <div class="art create create-c">
+            <h3>Start a new celebration</h3>
+            <p class="sub" style="margin:0">Lumina Studio will be saved to it.</p>
+            <div class="lbl">What kind of event</div>
+            <div class="pick"><span>Debut</span><span class="car">▾</span></div>
+            <div class="lbl">Name it</div><div class="field"><span>Ate Bea's debut</span></div>
+            <div class="lbl">When</div><div class="field"><span>Pick a date</span><span>📅</span></div>
+            <label for="ca7" class="b1">Create</label>
+            <label for="ca0" class="back">‹ Back to Lumina Studio</label>
+          </div>
+          <div class="toast toast-ca2"><b>Saved to Maria &amp; Jose</b>&nbsp;· Suppliers › Saved</div>
+          <div class="toast toast-ca3"><b>Saved to Lola's 80th</b>&nbsp;· Suppliers › Saved</div>
+          <div class="toast toast-ca5"><b>Saved to Year-end party</b>&nbsp;· Suppliers › Saved</div>
+          <div class="toast toast-ca7"><b>Saved to Ate Bea's debut</b>&nbsp;· Suppliers › Saved</div>
+        </div>
+      </div>
+      </div>
+      <div class="cap"><span class="k">2c</span><b>Several celebrations — ONE dropdown: your ongoing and upcoming ones, newest first, plus "Start a new celebration".</b>
+        <p>The list is the shipped <code>resolveAddShopToEvent</code> (yours to organise · not finished yet), drawn as a <b>PickMenu</b> (INTERACTION_RULES §2: 3+ options → one dropdown, never a dialog or pill row). Picking one writes the Save for that event and the button becomes <b>✓ Saved to Lola's 80th</b>. The Inquire fold's own "For which celebration" dropdown is the same list — same words, same order (it replaces the shipped <code>AddToEvent</code> dialog there, the one place on this page that still opens a dialog for a 3+ choice).</p></div>
+    </div>
+  </div>
+
+  <!-- ===================================================== 3 · WHERE FOLLOWING SHOWS ===================================================== -->
+  <h2 class="sec"><span class="n">3</span> Where "Following" shows up · the owner's items 1 and 2</h2>
+  <div class="row">
+    <div class="fr" id="only-d">
+      <div class="phone"><div class="island"></div>
+        <div class="status"><span>9:41</span><span class="sig">●●●● ᯤ ▮</span></div>
+        <div class="scr">
+          <div class="art" style="padding-top:14px">
+            <p class="h2">Find a supplier <small>Photo &amp; video · Tagaytay</small></p>
+            <div class="srhdr"><span class="q2">🔍 Search suppliers</span><span class="f">Following ▾</span></div>
+            <div class="ex">
+              <div class="hero"><span class="fl">♥ Following</span></div>
+              <p class="nm2">Lumina Studio</p><div class="ln">Photo &amp; video · Tagaytay · from ₱45,000</div>
+              <div class="acts2"><span class="b1">View</span><span class="b2">＋ Add to an event</span></div>
+            </div>
+            <div class="ex" style="opacity:.75">
+              <div class="hero" style="background:linear-gradient(160deg,#C9CFC2,#7E8A78)"></div>
+              <p class="nm2">Saysay Live Band</p><div class="ln">Live band · Host / MC · from ₱35,000</div>
+              <div class="acts2"><span class="b1">View</span><span class="b2">＋ Add to an event</span></div>
+            </div>
+            <p class="sm">The mark and the filter read the follow set the search page already loads (<code>followedSet</code> → <code>isFollowing</code>); today the card swallows it.</p>
+          </div>
+        </div>
+      </div>
+      <div class="cap"><span class="k">3a</span><b>Supplier search: a ♥ Following mark on the card, and "Following" as one choice in the existing filter dropdown.</b>
+        <p>The owner's item 2. The data is already on the page (<code>explore/page.tsx</code> computes <code>followedSet</code> and hands it to every card); only the mark is new. The card's "Save" button takes the same word as the shop page: <b>Add to an event</b> (one word per concept; it is the same <code>SaveVendorButton</code>).</p></div>
+    </div>
+
+    <div class="fr" id="only-e">
+      <div class="phone"><div class="island"></div>
+        <div class="status"><span>9:41</span><span class="sig">●●●● ᯤ ▮</span></div>
+        <div class="scr">
+          <div class="art" style="padding-top:14px">
+            <p class="h2">Library · Suppliers</p>
+            <div class="lib">
+              <p class="h2" style="margin-bottom:4px">Following <small>2</small></p>
+              <div class="rowi"><div class="mk2">LS</div><div><b>Lumina Studio</b><small>Photo &amp; video · Tagaytay</small></div><span class="b2">＋ Add to an event</span></div>
+              <div class="rowi"><div class="mk2">G</div><div><b>Gusto Catering</b><small>Catering · Quezon City</small></div><span class="b2">＋ Add to an event</span></div>
+            </div>
+            <div class="lib" style="margin-top:10px">
+              <p class="h2" style="margin-bottom:4px">Saved <small>Maria &amp; Jose · 3</small></p>
+              <div class="rowi"><div class="mk2">LS</div><div><b>Lumina Studio</b><small>Photo &amp; video</small></div></div>
+              <div class="rowi"><div class="mk2">T</div><div><b>The Garden Pavilion</b><small>Venue</small></div></div>
+            </div>
+            <div class="ghost">
+              <b>Later · after "Their work" ships · Discover</b>
+              New from suppliers you follow
+              <div class="ev"><span class="d">TODAY</span><span><b>Lumina Studio</b> added an album · Wedding · Tagaytay · Mar 2027</span></div>
+              <div class="ev"><span class="d">3 DAYS</span><span><b>Gusto Catering</b> new card · Grazing table · from ₱18,000</span></div>
+              <div class="ev"><span class="d">1 WK</span><span><b>Lumina Studio</b> new deal · −10% for dates before June</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cap"><span class="k">3b</span><b>A follow you can see, and the updates it earns — later.</b>
+        <p>A row nobody can look at is a write nobody made: <b>Library › Suppliers</b> gains a <b>Following</b> group above the Saved one (that page already merges two sources; this is a third). The owner's item 1 — <span class="q">see their update like follow users on discover</span> — is the dashed shelf: today a supplier posts nothing to follow (Discover's "people you follow" shelf reads <code>user_follows</code> only, and there is no supplier-posts table). The honest updates already exist as rows: a new "Their work" album (S3), a new service card, a new deal. The shelf is built from those, after S3 — never a new posting tool.</p></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
