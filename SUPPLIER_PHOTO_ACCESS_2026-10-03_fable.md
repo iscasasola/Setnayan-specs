@@ -1,18 +1,22 @@
 # Supplier photo access — what a supplier may receive and may show · 2026-10-03 · Fable
 
-**Verdict:** a guest's Challenge "Share" today covers **receiving the photo privately only** — the tap never says "page", so it cannot carry publication. Recommend **(b): the supplier may also show it on their Setnayan page, but only after the guest's tap names that purpose** (one wording change, restoring the spec's own line) **and the couple taps Allow** (the same card the approved prototype already draws). No second ask to the guest.
+**Ruled (owner, DECISION_LOG 2026-10-03, last three rows):** a supplier receives only (a) what it shot itself and (b) Challenge photos a guest tapped Share on — never the couple's gallery (c). **(a) goes on the supplier's Setnayan page by itself after a 7-day guest notice — no couple Allow.** (b) goes on the page when the guest's Share tap says *"They may show it on their Setnayan page."*; anyone else pictured gets the same 7-day notice. When face recognition tags nobody, every guest of the event gets one line with the count and *See them*. Remove / takedown pull a photo from the page at any time (TD-1); the couple's existing Hide stays.
 
-Owner ruling 2026-10-03 (confirmed): suppliers receive **only** (a) what they shot themselves and (b) Challenge photos a guest explicitly shared — never the couple's gallery (c).
+Why the Share tap needed a line: today it covers **private receipt only** (see "What the guest is told today", below).
 
 ## The three sources
 
 | Source | Supplier may RECEIVE? | May show on their PUBLIC page? | Who must say yes | Ships today? |
 |---|---|---|---|---|
-| **(a) Photos the supplier took** — live Papic shots + their private imported album | Yes — it is their own work | Yes, by reference, per ask | **Couple** (Allow · Decline). A guest takedown still reaches it (TD-1, 2026-09-14) | Receive: yes (`own-captures-strip.tsx`, `portfolio-album-section.tsx`). Show on page: **not yet** — approved prototype `papic_to_supplier_page_2026-10-03_fable.html`, Opus builds after C2 |
-| **(b) Papic Challenge photos** — a guest's shot for a challenge this supplier sponsored, guest tapped Share | Yes — already gated | **Not today** (nothing moves one to the page, and the tap does not say "page"). Recommended: yes, same path as (a) | **Both** — the guest's informed tap + the couple's Allow | Receive: yes (`vendor-dashboard/clients/[eventId]/challenge-photos/page.tsx` → RPC `papic_vendor_challenge_photos`, `consent_to_share = true`, flag `NEXT_PUBLIC_PAPIC_GAMES_V1`). Show on page: **no** |
+| **(a) Photos the supplier took** — live Papic shots + private imported album | Yes — it is their own work | Yes, by reference, **automatically after a 7-day notice** | **Nobody has to say yes; each pictured guest may say no** (one quiet line on Me + email · Remove). Nobody tagged → every guest gets one line · See them → Remove per photo. Couple's Hide stays | Receive: yes (`own-captures-strip.tsx`, `portfolio-album-section.tsx`). Page + notice: **not yet** — prototype `papic_to_supplier_page_2026-10-03b_fable.html`, Opus builds after C2 |
+| **(b) Papic Challenge photos** — a guest's shot for a challenge this supplier sponsored, guest tapped Share | Yes — already gated | Yes, once the tap carries the page line (not today: the shipped tap says nothing about a page) | **The taker's tap** (now informed) · other pictured guests: the same 7-day notice | Receive: yes (`vendor-dashboard/clients/[eventId]/challenge-photos/page.tsx` → RPC `papic_vendor_challenge_photos`, `consent_to_share = true`, flag `NEXT_PUBLIC_PAPIC_GAMES_V1`). Page: **no** — frame D |
 | **(c) The couple shares from THEIR gallery** | **No** | No | — | Ruled out, owner 2026-10-03: each guest's own consent is required before their photo reaches a business |
 
 (c): no "safe version" is proposed — the owner has ruled it out; the only safe shape is already (b).
+
+## Where the notice lives (the code decided)
+
+The guest's Event Hub has no notification tray; the one place a guest already looks at photos of themselves is **Photos of you** on **Me** (`app/[slug]/_components/photos-of-you-gallery.tsx`, mounted by `guest-me.tsx`), and each tile there already carries the shipped takedown **Take it down** (`askToTakeMyPhotoDown`). So the quiet line sits above that grid, **Remove is that same button** (relabelled for the window, same action), and the "See them" list opens in place on Me. Email: the same words, one message per guest — it must be put on the email allowlist in the same PR, or it reaches nobody (the 2026-08-20 lesson).
 
 ## What the guest is told today, word for word
 

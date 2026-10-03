@@ -8,25 +8,31 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <!--
-  PAPIC → THE SUPPLIER'S SETNAYAN PAGE · phone prototype · 2026-10-03 · Fable
-  Brief: DECISION_LOG.md 2026-10-03 "SUPPLIER PAPIC SHOTS ARE LOCKED PER EVENT · THEY REACH THE SUPPLIER'S
-  SETNAYAN PAGE ONLY WITH THE COUPLE'S OK" + "PAPIC TO THE SUPPLIER'S PAGE = LIVE SHOTS AND THE IMPORTED
-  ALBUM, EACH WITH THE COUPLE'S ALLOW". 2 options = two buttons (INTERACTION_RULES § 2).
+  PAPIC → THE SUPPLIER'S SETNAYAN PAGE · phone prototype · 2026-10-03 (b) · Fable
+  Supersedes papic_to_supplier_page_2026-10-03_fable.html frames A and B.
+  Brief: DECISION_LOG.md 2026-10-03 rows "A SUPPLIER'S OWN PAPIC PHOTOS GO ON ITS PORTFOLIO AUTOMATICALLY
+  AFTER A 7-DAY GUEST NOTICE — NO COUPLE ALLOW" and "CHALLENGE PHOTOS MAY GO ON THE SPONSOR'S PAGE WHEN THE
+  GUEST'S SHARE TAP SAYS SO · WITH NO RECOGNISED FACES, EVERY GUEST GETS THE ONE-LINE 7-DAY NOTICE".
+  2 options = two buttons (INTERACTION_RULES § 2); no popup; no captions on tiles.
 
-  SHIPPED PIECES REPRODUCED (origin/main 74ff0bec, worktree wt-fable-read):
+  SHIPPED PIECES REPRODUCED (origin/main 74ff0bec):
     · on-the-day/live/[eventId]/_components/own-captures-strip.tsx — "What you've shot".
-    · …/portfolio-album-section.tsx — "Your private portfolio" · "Only you can see this — never the
-      couple, never their guests." · 3-column grid.
-    · dashboard/[eventId]/studio/papic/_components/vendor-media-controls.tsx — "Suppliers' photos" ·
-      "In your gallery" / "Hide" · "Show again".
-    · app/v/[slug]/page.tsx — the public page's "Portfolio" grid (2 columns, 4:3, no captions, no
-      credits — so no credit line is drawn here).
+    · …/portfolio-album-section.tsx — "Your private portfolio".
+    · vendor-dashboard/clients/[eventId]/challenge-photos/page.tsx — "Challenge photos".
+    · app/[slug]/_components/photos-of-you-gallery.tsx — the guest's "Photos of you" on Me, obsidian
+      surface, one tile = photo + "Not me" + "Take it down" (the shipped takedown; "Remove" here IS it).
+    · app/[slug]/_components/guest-me.tsx — the guest's Me tab (Invitation bar Home · Details · RSVP ·
+      Story · Me) — the quiet line is mounted INTO Me, never a second Me.
+    · app/v/[slug]/page.tsx — the public "Portfolio" grid (2 columns, 4:3, no captions, no credits).
+    · dashboard/[eventId]/studio/papic/_components/vendor-media-controls.tsx — the couple's "Suppliers'
+      photos" Hide stays as shipped (not redrawn: unchanged).
 -->
 <style>
 :root{
   --paper:#FAF7F2;--paper2:#F3EEE6;--page:#EDE7DE;--ink:#1E2229;--ink2:#3B3F46;--mute:#76736D;
   --gild:#B08A5B;--gild-soft:#E9DEC9;--gild-wash:#F7F1E6;--wine:#6E2A3A;--wine-wash:#F6ECEE;
   --line:#E5DED3;--ok:#2F6B4F;--okbg:#E7F1EA;--warn:#8A5A00;--warnbg:#FBF0D8;--no:#7A3B3B;--nobg:#F3E4E4;
+  --ob:#15161A;--ob2:#1F2126;--obtx:#F4EFE6;--obmute:rgba(244,239,230,.6);--obline:rgba(244,239,230,.14);
   --serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;
   --sans:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif;
 }
@@ -41,7 +47,7 @@ h1{font-family:var(--serif);font-weight:500;font-size:36px;line-height:1.1;margi
 .moved b{color:var(--ink);font-weight:600}
 .moved .k{display:inline-block;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gild);font-weight:600;margin-right:6px}
 .moved p{margin:0}.moved p+p{margin-top:6px}
-.moved code{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;background:var(--paper2);padding:1px 5px;border-radius:5px}
+.moved code,.cap code{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;background:var(--paper2);padding:1px 5px;border-radius:5px}
 h2.sec{display:flex;align-items:center;gap:14px;font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink2);font-weight:600;margin:36px 0 16px}
 h2.sec .n{font-family:var(--serif);font-size:22px;font-weight:500;color:var(--gild);letter-spacing:0}
 h2.sec:after{content:"";flex:1;height:1px;background:var(--line)}
@@ -63,6 +69,11 @@ h2.sec:after{content:"";flex:1;height:1px;background:var(--line)}
 .phone .status .bat:after{content:"";position:absolute;left:2px;top:2px;bottom:2px;right:5px;background:var(--ink);border-radius:1px}
 .scr{padding:2px 18px 100px;position:relative}
 .home{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.85;z-index:7}
+.phone.dark{background:var(--ob);color:var(--obtx)}
+.phone.dark .status{color:var(--obtx)}.phone.dark .status .bat{border-color:var(--obtx)}.phone.dark .status .bat:after{background:var(--obtx)}
+.phone.dark .home{background:var(--obtx)}
+.phone.dark .topnav{color:rgba(244,239,230,.8)}.phone.dark .topnav .mono{color:var(--obmute)}
+.phone.dark .t{color:var(--obtx)}.phone.dark .sub{color:var(--obmute)}
 @media (max-width:420px){
   .wrap{padding:20px 0 40px}
   .moved,.cap,h1,.doc-brand,h2.sec{margin-left:16px;margin-right:16px}
@@ -78,9 +89,6 @@ h2.sec:after{content:"";flex:1;height:1px;background:var(--line)}
 .sub{font-size:12.5px;color:var(--mute);line-height:1.45;margin:3px 0 0}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border-radius:999px;font-size:13px;font-weight:500;border:1.5px solid var(--ink);background:#fff;color:var(--ink);white-space:nowrap;line-height:1}
 .btn.fill{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.btn.big{width:100%;padding:15px 16px;font-size:14.5px}
-.btn.soft{border:1px solid var(--line);color:var(--ink2)}
-.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin-top:12px;box-shadow:0 10px 24px -22px rgba(30,34,41,.3)}
 .sect{margin-top:18px;border-top:1px solid var(--line);padding-top:12px}
 .sect .hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 .sect .hd .mono{color:var(--ink2)}
@@ -94,37 +102,47 @@ h2.sec:after{content:"";flex:1;height:1px;background:var(--line)}
 .p1{background:linear-gradient(160deg,#D9C7B0,#B89C7C)}.p2{background:linear-gradient(160deg,#D8B6B6,#8E5A66)}.p3{background:linear-gradient(160deg,#C9CFC2,#7E8A78)}
 .p4{background:linear-gradient(160deg,#E7D4A8,#B59A5A)}.p5{background:linear-gradient(160deg,#B7B0A6,#5E5750)}.p6{background:linear-gradient(160deg,#C5CFD9,#6C7F96)}
 .p7{background:linear-gradient(160deg,#E4C6B3,#A77A69)}.p8{background:linear-gradient(160deg,#DBD2C2,#8F7F66)}.p9{background:linear-gradient(160deg,#C7B8D1,#6E5D80)}
-.grid div.on{outline:2.5px solid var(--wine);outline-offset:-2.5px}
-.grid div.on:after{content:"✓";position:absolute;right:6px;top:6px;width:22px;height:22px;border-radius:50%;background:var(--wine);color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px #fff}
-.grid div.sent:after{content:"Asked";position:absolute;left:6px;bottom:6px;background:rgba(250,247,242,.95);color:var(--ink2);font-size:10px;font-weight:600;border-radius:999px;padding:3px 8px}
-.grid div.pub:after{content:"On your page";position:absolute;left:6px;bottom:6px;background:rgba(250,247,242,.95);color:var(--ok);font-size:10px;font-weight:600;border-radius:999px;padding:3px 8px}
-.ask{position:absolute;left:0;right:0;bottom:0;background:rgba(250,247,242,.97);border-top:1px solid var(--line);padding:12px 18px 34px;z-index:6;display:flex;align-items:center;gap:12px}
-.ask .n{font-family:var(--serif);font-size:20px;font-weight:500;white-space:nowrap}
-.ask .n small{display:block;font-family:var(--sans);font-size:11px;color:var(--mute);font-weight:500}
-.ask .btn{flex:1}
+/* one small state label per tile (supplier side) */
+.grid div[data-s]:after{content:attr(data-s);position:absolute;left:5px;right:5px;bottom:5px;background:rgba(250,247,242,.94);color:var(--ink2);font-size:9.5px;font-weight:600;border-radius:7px;padding:3px 6px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grid div[data-s="On your page"]:after{color:var(--ok)}
+.grid div[data-s="Removed"]:after{color:var(--no)}
+.grid div.off{opacity:.45}
 
-/* the couple's side (Setnayan look, dashboard) */
-.ctile{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin-top:12px}
-.ctile h3{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:600;margin:0;letter-spacing:-.01em}
-.ctile h3 svg{width:18px;height:18px;stroke:var(--mute);fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
-.req{margin-top:12px;border:1px solid var(--gild);background:var(--gild-wash);border-radius:16px;padding:12px 14px 14px}
-.req .who{display:flex;align-items:center;gap:10px}
-.req .logo{width:38px;height:38px;border-radius:11px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--ink2);flex:none}
-.req .who b{font-family:var(--serif);font-size:19px;font-weight:500;line-height:1.15;display:block}
-.req .who span{font-size:12px;color:var(--ink2);display:block}
-.req .grid{margin-top:10px}
+/* the guest's Me (event theme — the obsidian "Photos of you" surface) */
+.mebar{display:flex;gap:4px;margin:0 -18px;padding:0 18px 10px;border-bottom:1px solid var(--obline)}
+.mebar span{flex:1;text-align:center;font-size:12px;color:var(--obmute);padding:8px 0}
+.mebar span.on{color:var(--obtx);font-weight:600;border-bottom:2px solid var(--gild)}
+.mename{font-family:var(--serif);font-size:30px;font-weight:500;margin-top:12px;line-height:1.05}
+.mesub{font-size:12px;color:var(--obmute)}
+.ob-sect{margin-top:16px;border-top:1px solid var(--obline);padding-top:12px}
+.ob-sect .hd{display:flex;justify-content:space-between;align-items:baseline}
+.ob-sect .hd .mono{color:var(--obmute)}
+.note{display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px 12px;background:var(--ob2);border:1px solid var(--obline);border-radius:14px}
+.note .ic{width:32px;height:32px;border-radius:9px;background:#fff;color:var(--ink2);font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none}
+.note .w{flex:1;min-width:0;font-size:12.5px;line-height:1.35;color:var(--obtx)}
+.note .w b{font-weight:600}
+.note .w small{display:block;font-size:11px;color:var(--obmute);margin-top:1px}
+.note .btn{border-color:rgba(244,239,230,.45);background:transparent;color:var(--obtx);padding:8px 12px;font-size:12px;flex:none}
+.pol{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.pol .tile{background:var(--ob2);border:1px solid var(--obline);border-radius:12px;padding:6px 6px 8px}
+.pol .tile .ph{aspect-ratio:1;border-radius:8px}
+.pol .tile .acts{display:flex;gap:6px;margin-top:7px}
+.pol .tile .acts span{flex:1;text-align:center;font-size:10.5px;color:var(--obmute);padding:6px 0;border:1px solid var(--obline);border-radius:999px}
+.pol .tile .acts span.go{color:var(--obtx)}
+.pol .tile .st{font-size:10px;color:var(--obmute);margin-top:6px;text-align:center}
+.pol .tile.gone .ph{opacity:.35}
+.list{margin-top:8px}
+.lrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--obline)}
+.lrow:first-child{border-top:0}
+.lrow .ph{width:56px;height:56px;border-radius:9px;flex:none}
+.lrow .w{flex:1;min-width:0;font-size:12px;color:var(--obmute)}
+.lrow .w b{display:block;color:var(--obtx);font-weight:500;font-size:13px}
+.lrow .btn{border-color:rgba(244,239,230,.45);background:transparent;color:var(--obtx);padding:8px 12px;font-size:12px;flex:none}
+.lrow.gone .ph{opacity:.35}.lrow.gone .btn{opacity:.5}
 .two{display:flex;gap:8px;margin-top:12px}
 .two .btn{flex:1;padding:12px 10px}
-.vrow{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--line)}
-.vrow:first-of-type{border-top:0}
-.vrow .w{flex:1;min-width:0}
-.vrow .w b{display:block;font-size:13.5px;font-weight:500}
-.vrow .w span{font-size:11.5px;color:var(--mute)}
-.vrow .btn{padding:7px 12px;font-size:12px;border:0;background:var(--paper2);color:var(--ink2)}
 
-.phone.dark{background:#15161A;color:#F4EFE6}
-.phone.dark .status{color:#F4EFE6}.phone.dark .status .bat{border-color:#F4EFE6}.phone.dark .status .bat:after{background:#F4EFE6}
-.phone.dark .home{background:#F4EFE6}
+/* the guest camera (Challenge share tap) */
 .view{margin:4px -18px 0;height:300px;background:
   radial-gradient(ellipse 70% 60% at 30% 70%,#C9A27A 0,transparent 60%),
   radial-gradient(ellipse 60% 70% at 80% 20%,#8C4A5C 0,transparent 55%),
@@ -136,11 +154,11 @@ h2.sec:after{content:"";flex:1;height:1px;background:var(--line)}
 .share .q1{font-size:15px;font-weight:500;line-height:1.3}
 .share .q1 b{font-weight:600}
 .share .q2{font-size:12.5px;color:rgba(244,239,230,.72);margin-top:3px}
-.share .two{margin-top:12px}
 .share .btn{border-color:rgba(244,239,230,.4);background:transparent;color:#F4EFE6}
 .share .btn.fill{background:#6E2A3A;border-color:#6E2A3A;color:#F4EFE6}
 .share .fn{font-size:11px;color:rgba(244,239,230,.5);margin-top:8px}
 .gift{margin-top:12px;font-size:13px;color:rgba(244,239,230,.85)}
+
 /* the supplier's public page (/v/[slug]) */
 .hero{margin:4px -18px 0;height:150px;background:
   radial-gradient(ellipse 60% 80% at 20% 100%,#C9A27A 0,transparent 60%),
@@ -160,14 +178,14 @@ h2.sec:after{content:"";flex:1;height:1px;background:var(--line)}
 <div class="doc-brand">Setnayan · prototype · 2026-10-03 (b) · Fable</div>
 <h1>Papic to the supplier's page</h1>
 <div class="moved">
-  <p><span class="k">Moved / extends</span>the supplier's <b>What you've shot</b> strip (<code>own-captures-strip.tsx</code>) and <b>Your private portfolio</b> album (<code>portfolio-album-section.tsx</code>) on the On the day console · the couple's <b>Suppliers' photos</b> control on their Papic page (<code>vendor-media-controls.tsx</code>: In your gallery · Hide · Show again) · the supplier's public page <b>Portfolio</b> grid (<code>app/v/[slug]/page.tsx</code>).</p>
-  <p><span class="k">New</span>select photos in either section → one action <b>Ask to show on my page</b> · one card for the couple with the photos and two buttons <b>Allow · Decline</b> · allowed photos appear in the public Portfolio <b>by reference</b> (a guest takedown still removes them; never into another event). The shipped Portfolio grid has no captions or credits, so none are drawn.</p>
+  <p><span class="k">Moved / extends</span>the supplier's <b>What you've shot</b> strip (<code>own-captures-strip.tsx</code>), <b>Your private portfolio</b> album (<code>portfolio-album-section.tsx</code>) and <b>Challenge photos</b> page (<code>challenge-photos/page.tsx</code>) · the guest's <b>Photos of you</b> on Me (<code>photos-of-you-gallery.tsx</code>, whose <b>Take it down</b> is the Remove here) · the supplier's public <b>Portfolio</b> grid (<code>app/v/[slug]/page.tsx</code>) · the guest's Challenge share tap (<code>papic-challenge-panel.tsx</code>). The couple's <b>Suppliers' photos · Hide</b> (<code>vendor-media-controls.tsx</code>) stays exactly as shipped.</p>
+  <p><span class="k">New</span>no asking, no couple's Allow: a supplier's own Papic photos go on its page <b>by themselves after a 7-day notice</b>. Each pictured (face-tagged) guest gets <b>one quiet line on Me · Remove</b> (+ email); when nobody is tagged, every guest gets <b>one line · See them</b> → a list with Remove on each. No Remove in 7 days → public <b>by reference</b>; Remove and takedown keep working after. On the supplier's side each tile carries <b>one small state label</b>. A Challenge photo goes the same way once the guest's Share tap says <i>They may show it on their Setnayan page</i>.</p>
 </div>
 
-<h2 class="sec"><span class="n">A–C</span>Ask · Allow · shown</h2>
+<h2 class="sec"><span class="n">A</span>Supplier — what each photo is doing</h2>
 <div class="row">
 
-<!-- A · supplier: select + Ask -->
+<!-- A · supplier: states on tiles, nothing to ask -->
 <div class="fr">
 <div class="phone">
  <div class="island"></div>
@@ -180,8 +198,8 @@ h2.sec:after{content:"";flex:1;height:1px;background:var(--line)}
   <div class="sect">
    <div class="hd"><span class="mono">What you've shot</span><small>46 today · in the couple's gallery</small></div>
    <div class="grid">
-    <div class="p7 on"></div><div class="p1"></div><div class="p2 on"></div>
-    <div class="p3"></div><div class="p4 pub"></div><div class="p5"></div>
+    <div class="p7" data-s="In 6 days"></div><div class="p1" data-s="In 6 days"></div><div class="p2 off" data-s="Removed"></div>
+    <div class="p3" data-s="In 6 days"></div><div class="p4" data-s="On your page"></div><div class="p5" data-s="In 6 days"></div>
    </div>
   </div>
 
@@ -189,49 +207,109 @@ h2.sec:after{content:"";flex:1;height:1px;background:var(--line)}
    <div class="hd"><span class="mono">Your private portfolio</span><small>12 imported</small></div>
    <div class="lock"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Only you can see this — never the couple, never their guests.</div>
    <div class="grid">
-    <div class="p6 on"></div><div class="p8 sent"></div><div class="p9"></div>
-    <div class="p1"></div><div class="p3"></div><div class="p7"></div>
+    <div class="p6" data-s="In 6 days"></div><div class="p8" data-s="On your page"></div><div class="p9" data-s="In 6 days"></div>
+   </div>
+  </div>
+
+  <div class="sect">
+   <div class="hd"><span class="mono">Challenge photos</span><small>Yours to keep</small></div>
+   <div class="grid">
+    <div class="p2" data-s="In 6 days"></div><div class="p4" data-s="On your page"></div><div class="p5" data-s="Kept private"></div>
    </div>
   </div>
  </div>
- <div class="ask"><div class="n">3 selected<small>2 shots · 1 imported</small></div><span class="btn fill">Ask to show on my page</span></div>
  <div class="home"></div>
 </div>
-<div class="cap"><span class="k">A</span><b>Supplier — select, then one action</b><p>Both shipped sections on the console, now selectable. Tap photos in either; one bar at the bottom: <span class="q">Ask to show on my page</span>. A photo already asked reads <span class="q">Asked</span>; one allowed reads <span class="q">On your page</span>. Shots stay locked to this event.</p></div>
+<div class="cap"><span class="k">A</span><b>Supplier — nothing to ask; each tile says its state</b><p>The three shipped sections, each tile with one small label: <span class="q">In 6 days</span> (counts down to the page) · <span class="q">On your page</span> · <span class="q">Removed</span> (a guest removed it; tile dimmed). A Challenge photo reads <span class="q">Kept private</span> when the guest's tap did not share it. No captions; shots stay locked to this event.</p></div>
 </div>
 
-<!-- B · couple: Allow / Decline -->
+</div>
+
+<h2 class="sec"><span class="n">B1–B3</span>Guests — the 7-day notice</h2>
+<div class="row">
+
+<!-- B1 · tagged guest: one quiet line on Me, Remove on the tile -->
 <div class="fr">
-<div class="phone">
+<div class="phone dark">
  <div class="island"></div>
  <div class="status"><span>9:52</span><span class="sig">●●●● <span class="bat"></span></span></div>
  <div class="scr">
-  <div class="topnav"><span>‹ Papic</span><span class="mono">Ana &amp; Miguel</span></div>
-  <h2 class="t">Gallery</h2>
-  <p class="sub">312 photos · 46 from suppliers</p>
+  <div class="topnav"><span class="mono">Ana &amp; Miguel</span><span>Your pass</span></div>
+  <div class="mebar"><span>Home</span><span>Details</span><span>RSVP</span><span>Story</span><span class="on">Me</span></div>
+  <div class="mename">Carla Reyes</div>
+  <div class="mesub">Not you? Switch</div>
 
-  <div class="ctile">
-   <h3><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7l1.5-3h5L16 7"/><circle cx="12" cy="13.5" r="3.5"/></svg>Suppliers' photos</h3>
-   <div class="req">
-    <div class="who"><span class="logo">LS</span><div><b>Lumina Studio wants to show 3 photos</b><span>On their Setnayan page</span></div></div>
-    <div class="grid"><div class="p7"></div><div class="p2"></div><div class="p6"></div></div>
-    <div class="two"><span class="btn fill">Allow</span><span class="btn">Decline</span></div>
+  <div class="ob-sect">
+   <div class="hd"><span class="mono">Photos of you</span><span class="mesub">14</span></div>
+   <div class="note"><span class="ic">LS</span><div class="w"><b>Lumina Studio</b> will show 2 photos of you on their page<small>In 6 days unless you remove them</small></div></div>
+   <div class="pol">
+    <div class="tile"><div class="ph p7"></div><div class="acts"><span>Not me</span><span class="go">Remove</span></div><div class="st">On their page in 6 days</div></div>
+    <div class="tile gone"><div class="ph p2"></div><div class="acts"><span>Not me</span><span>Removed</span></div><div class="st">Won't be shown</div></div>
+    <div class="tile"><div class="ph p1"></div><div class="acts"><span>Not me</span><span class="go">Take it down</span></div></div>
+    <div class="tile"><div class="ph p4"></div><div class="acts"><span>Not me</span><span class="go">Take it down</span></div></div>
    </div>
-   <div style="margin-top:8px">
-    <div class="vrow"><div class="w"><b>Lumina Studio</b><span>In your gallery · 3 on their page</span></div><span class="btn">Hide</span></div>
-    <div class="vrow"><div class="w"><b>Booth &amp; Co</b><span>In your gallery</span></div><span class="btn">Hide</span></div>
-   </div>
-  </div>
-
-  <div class="grid" style="margin-top:14px">
-   <div class="p1"></div><div class="p4"></div><div class="p3"></div>
-   <div class="p8"></div><div class="p5"></div><div class="p9"></div>
   </div>
  </div>
  <div class="home"></div>
 </div>
-<div class="cap"><span class="k">B</span><b>Couple — one card, two buttons</b><p>In the shipped <span class="q">Suppliers' photos</span> control on their Papic gallery (and the same card in their notifications): the supplier, the photos, <span class="q">Allow · Decline</span>. Allow is per ask; Hide still pulls a supplier's photos from their gallery as shipped.</p></div>
+<div class="cap"><span class="k">B1</span><b>Tagged guest — one line on Me, Remove on the tile</b><p>Face recognition found Carla in two of the supplier's photos. One quiet line sits above the shipped <span class="q">Photos of you</span>; those tiles read <span class="q">On Lumina Studio's page in 6 days</span> and their shipped <span class="q">Take it down</span> reads <span class="q">Remove</span> for the window — same action, one button. The same words go out as one email. Nothing else to do: silence = shown.</p></div>
 </div>
+
+<!-- B2 · nobody tagged: every guest, one line -->
+<div class="fr">
+<div class="phone dark">
+ <div class="island"></div>
+ <div class="status"><span>9:52</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="topnav"><span class="mono">Ana &amp; Miguel</span><span>Your pass</span></div>
+  <div class="mebar"><span>Home</span><span>Details</span><span>RSVP</span><span>Story</span><span class="on">Me</span></div>
+  <div class="mename">Carla Reyes</div>
+  <div class="mesub">Not you? Switch</div>
+
+  <div class="ob-sect">
+   <div class="hd"><span class="mono">Photos of you</span><span class="mesub">14</span></div>
+   <div class="note"><span class="ic">LS</span><div class="w"><b>Lumina Studio</b> will show 46 photos from today on their page<small>In 6 days unless someone removes one</small></div><span class="btn">See them</span></div>
+   <div class="pol">
+    <div class="tile"><div class="ph p1"></div><div class="acts"><span>Not me</span><span class="go">Take it down</span></div></div>
+    <div class="tile"><div class="ph p4"></div><div class="acts"><span>Not me</span><span class="go">Take it down</span></div></div>
+    <div class="tile"><div class="ph p3"></div><div class="acts"><span>Not me</span><span class="go">Take it down</span></div></div>
+    <div class="tile"><div class="ph p8"></div><div class="acts"><span>Not me</span><span class="go">Take it down</span></div></div>
+   </div>
+  </div>
+ </div>
+ <div class="home"></div>
+</div>
+<div class="cap"><span class="k">B2</span><b>Nobody tagged — every guest, one line</b><p>When face recognition tags no one, the same line goes to every guest of the event, with the count and <span class="q">See them</span>. Same place, same shape; one email each. Their own <span class="q">Photos of you</span> below is unchanged.</p></div>
+</div>
+
+<!-- B3 · See them: the list, Remove on each -->
+<div class="fr">
+<div class="phone dark">
+ <div class="island"></div>
+ <div class="status"><span>9:53</span><span class="sig">●●●● <span class="bat"></span></span></div>
+ <div class="scr">
+  <div class="topnav"><span>‹ Me</span><span class="mono">Ana &amp; Miguel</span></div>
+  <h2 class="t">Lumina Studio's photos</h2>
+  <p class="sub">46 from today · on their page in 6 days</p>
+  <div class="list">
+   <div class="lrow"><div class="ph p7"></div><div class="w"><b>6:12 pm</b>In 6 days</div><span class="btn">Remove</span></div>
+   <div class="lrow gone"><div class="ph p2"></div><div class="w"><b>6:40 pm</b>Removed by a guest</div><span class="btn">Removed</span></div>
+   <div class="lrow"><div class="ph p1"></div><div class="w"><b>7:40 pm</b>In 6 days</div><span class="btn">Remove</span></div>
+   <div class="lrow"><div class="ph p4"></div><div class="w"><b>5:05 pm</b>In 6 days</div><span class="btn">Remove</span></div>
+   <div class="lrow"><div class="ph p3"></div><div class="w"><b>8:02 pm</b>In 6 days</div><span class="btn">Remove</span></div>
+   <div class="lrow"><div class="ph p8"></div><div class="w"><b>5:30 pm</b>In 6 days</div><span class="btn">Remove</span></div>
+   <div class="lrow"><div class="ph p5"></div><div class="w"><b>9:48 pm</b>In 6 days</div><span class="btn">Remove</span></div>
+  </div>
+ </div>
+ <div class="home"></div>
+</div>
+<div class="cap"><span class="k">B3</span><b>See them — a list, Remove on each</b><p>Opens in place on Me, no popup. One row per photo, one button: <span class="q">Remove</span>. A removed row stays, dimmed, reading <span class="q">Removed by a guest</span>, so two guests don't both wonder. Remove is the shipped takedown (<code>askToTakeMyPhotoDown</code>), so it reaches the supplier's copy and the public page after the window too.</p></div>
+</div>
+
+</div>
+
+<h2 class="sec"><span class="n">C</span>Result — the supplier's page (unchanged)</h2>
+<div class="row">
 
 <!-- C · the supplier's public page -->
 <div class="fr">
@@ -245,20 +323,20 @@ h2.sec:after{content:"";flex:1;height:1px;background:var(--line)}
   <div class="sect">
    <div class="hd"><span class="mono">Portfolio</span></div>
    <div class="grid gal">
-    <div class="p7"></div><div class="p2"></div>
-    <div class="p6"></div><div class="p4"></div>
+    <div class="p7"></div><div class="p4"></div>
+    <div class="p6"></div><div class="p8"></div>
     <div class="p1"></div><div class="p9"></div>
    </div>
   </div>
  </div>
  <div class="home"></div>
 </div>
-<div class="cap"><span class="k">C</span><b>Result — the supplier's Setnayan page</b><p>The shipped <span class="q">Portfolio</span> grid, with the three allowed photos in it by reference. No caption and no credit line, because the shipped page carries none. If the couple hides, or a guest asks for a takedown, the photo leaves here too.</p></div>
+<div class="cap"><span class="k">C</span><b>Result — the supplier's Setnayan page</b><p>The shipped <span class="q">Portfolio</span> grid, the photos in it by reference after the window. No caption and no credit line, because the shipped page carries none. A guest's Remove, a takedown, or the couple's Hide pulls a photo from here too.</p></div>
 </div>
 
 </div>
 
-<h2 class="sec"><span class="n">D</span>Delta — the guest's tap says where it may go</h2>
+<h2 class="sec"><span class="n">D</span>Challenge — the guest's tap says where it may go</h2>
 <div class="row">
 
 <!-- D · guest: the completion card, one new line -->
@@ -267,7 +345,7 @@ h2.sec:after{content:"";flex:1;height:1px;background:var(--line)}
  <div class="island"></div>
  <div class="status"><span>9:41</span><span class="sig">●●●● <span class="bat"></span></span></div>
  <div class="scr">
-  <div class="topnav" style="color:rgba(244,239,230,.8)"><span>‹ Camera</span><span class="mono" style="color:rgba(244,239,230,.6)">Ana &amp; Miguel · Papic</span></div>
+  <div class="topnav"><span>‹ Camera</span><span class="mono">Ana &amp; Miguel · Papic</span></div>
   <div class="view"></div>
   <div class="done"><span class="ok">✓</span><b>Your photo is in — challenge complete!</b></div>
   <div class="share">
@@ -280,7 +358,7 @@ h2.sec:after{content:"";flex:1;height:1px;background:var(--line)}
  </div>
  <div class="home"></div>
 </div>
-<div class="cap"><span class="k">D</span><b>Guest — one line added, same two buttons</b><p>The shipped tap in <code style="font-family:ui-monospace,Menlo,monospace;font-size:11px">papic-challenge-panel.tsx</code> gains one line: <span class="q">They may show it on their Setnayan page.</span> (the spec's §4.1 "feature it" line, dropped when it shipped). Everything else stays: Share ⇄ Keep private anytime. A shared Challenge photo then rides frames A → B → C like the supplier's own shots: select on the Challenge photos page, the couple's Allow, the Portfolio by reference.</p></div>
+<div class="cap"><span class="k">D</span><b>Guest — one line added, same two buttons</b><p>The shipped tap in <code>papic-challenge-panel.tsx</code> gains one line: <span class="q">They may show it on their Setnayan page.</span> That tap is the taker's consent; anyone else pictured gets the B1/B2 notice. Share ⇄ Keep private anytime, and Keep private pulls it from the page.</p></div>
 </div>
 
 </div>
