@@ -114,6 +114,7 @@ Order: what blocks or shapes the test first. **∥** = can run in parallel (no s
   - an invitation saved with Google on Safari then opens in the app under the same account.
 
 ### B4 · Maker › Your event: venues get a real pin + a picked city, venues wait for Apply, Date shows the time. ∥ (one file family: `launch/_components/details-your-event*.tsx`)
+- **Status (2026-10-04):** BUILT on `rd/maker-venues-pin-and-time` (draft PR #6327) — DECISION_LOG 2026-10-04 "B4 BUILT — VENUES GET A PIN AND A PICKED CITY…". Waits on checks + owner merge.
 - **Rulings:** DECISION_LOG 2026-10-01 "THE MAKER'S VENUES GET A REAL PIN AND A PICKED CITY", 2026-10-02 "LANE 2 (VENUES & LOCKS) — THE OWNER'S ANSWERS" (km only, contact optional, locked first then typed name), 2026-10-01 "NOTHING TAKES EFFECT UNTIL APPLY".
 - **Reuse:** `AddressPinField` (`dashboard/[eventId]/_components/address-pin-field.tsx`) and the onboarding place pick (`onboarding/wedding/_components/location-step.tsx`, `_data/wedding-cities` `resolvePick`); no new geocoder or map.
 - **Venues → hub draft:** extend the `HubDraftEvents` allow-list narrowly; remove `HubSavesImmediately` from the venue row.
