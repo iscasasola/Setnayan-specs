@@ -106,6 +106,7 @@ Order: what blocks or shapes the test first. **∥** = can run in parallel (no s
 - **Verify:** a render guard that the row is a control that opens `maker-rsvp-ask`; no new DEAD_TAP row in `app_fault_issues` after a tap.
 
 ### B3 · Native app sign-in: Sign in with Apple (native sheet) + Google through the system browser, returning by app link. ∥ (Mac; touches `apps/mobile`, `app/auth/*`, `lib/request-platform.ts`, `app/login/_components/login-data.ts`, `app/_components/native-bridge.tsx`)
+- **Status (2026-10-04):** BUILT on `rd/native-apple-google-sign-in` (draft PR #6330) — DECISION_LOG 2026-10-04 "B3 BUILT — SIGN IN WITH APPLE (NATIVE) + GOOGLE IN THE SYSTEM BROWSER". Works end to end only after the owner setup steps in that row + a new app build.
 - **Ruling:** DECISION_LOG 2026-09-30 "…GOOGLE + APPLE SIGN-IN COME TO THE PHONE APPS BEFORE THE APPLE CHECK". Apple guideline 4.8: offering Google requires Sign in with Apple.
 - **Blocks the test** only if "opens in the app" means the native app (owner decision 1).
 - **Verify:**
