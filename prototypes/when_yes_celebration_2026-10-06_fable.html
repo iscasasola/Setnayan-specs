@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>When yes — a celebration (Pro) — Setnayan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/*
+  "WHEN YES" GETS A CELEBRATION (PRO) — DECISION_LOG 2026-10-06.
+  Two views (Guest · Maker) × two sizes (Phone 375 · Desktop 1440). One canvas engine (no libraries):
+  Confetti · Fireworks · Petals · Sparklers · None — plays ONCE (~2–3 s) as the thank-you appears, in the
+  Mood Board colours, then clears itself. prefers-reduced-motion (real or simulated) = one calm wash.
+  Visual language: maker_lower_third_interactive_2026-10-05_fable.html + guest_rsvp_flow_2026-09-30.html.
+  Guest-facing words never say "celebration" or "website"; "Celebration" is the Maker's label only.
+  Script API for checks: window.proto  (see the bottom of the file).
+*/
+:root{--paper:#FFFFFF;--page:#F3F0EA;--ink:#2C2A29;--ink2:#5A5755;--mute:#8A8580;--gold:#A9834B;--gold-soft:#E6D8BE;--gold-wash:#F8F3E9;--cta:#C24E25;--cta-wash:#FBEDE6;--line:#E6E1D8;--line2:#D9D3C8;--ok:#2F6B4F;--bad:#B3261E;--pill:#F1EEE8;--pill-on:#D8D3CA;--bezel:#14161A;--shadow:rgba(44,42,41,.45);
+ --serif:"Cormorant Garamond",Georgia,serif;--sans:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif;
+ --in:cubic-bezier(.16,1,.3,1);--out:cubic-bezier(.4,0,1,1);--t:.24s;
+ --btn:#5B1A22; /* Look › Buttons colour = the palette's first colour */
+ --c1:#5B1A22;--c2:#6B7A3A;--c3:#E0A52B;--c4:#8E2E3C;--c5:#F2C8C2}
+@media (prefers-reduced-motion:reduce){:root{--t:0s}}
+html.rm{--t:0s}
+*{box-sizing:border-box}
+html,body{margin:0;background:#EDE8DF}
+body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;font-size:14px;line-height:1.45}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.i{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block;pointer-events:none}
+.i.s{width:16px;height:16px}
+
+/* ═══════ THE RIG (not product UI) ═══════ */
+.rig{max-width:1440px;margin:0 auto;padding:14px 16px 10px}
+.brand{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);font-weight:600}
+h1{font-family:var(--serif);font-weight:500;font-size:26px;line-height:1.1;margin:6px 0 4px}
+.lead{font-size:13px;color:var(--ink2);margin:0 0 10px;line-height:1.5;max-width:860px}
+.lead b{color:var(--ink)}
+.ctl{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.ctl .lab{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);font-weight:600;margin-right:-6px}
+.tg{display:inline-flex;background:rgba(44,42,41,.06);border-radius:10px;padding:2px}
+.tg button{min-height:34px;padding:0 12px;border-radius:8px;font-size:13px;font-weight:600;color:var(--ink2);transition:background var(--t),color var(--t)}
+.tg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.pals{display:inline-flex;gap:8px}
+.pal{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 10px 0 6px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12px;font-weight:500;color:var(--ink2)}
+.pal[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.pal .sw5{display:inline-flex}.pal .sw5 i{width:14px;height:22px;display:block}.pal .sw5 i:first-child{border-radius:6px 0 0 6px}.pal .sw5 i:last-child{border-radius:0 6px 6px 0}
+.rmw{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink2)}
+.sw{width:44px;height:26px;border-radius:999px;background:#D9D3C8;position:relative;flex:none;transition:background var(--t)}
+.sw:after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:left var(--t)}
+.sw[aria-checked="true"]{background:var(--ok)}.sw[aria-checked="true"]:after{left:21px}
+.howto{font-size:12.5px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:10px 0 0;line-height:1.5;max-width:860px}
+.howto b{color:var(--ink)}
+html.norig .rig,html.norig .note{display:none}html.norig .stage{margin-top:0;padding-bottom:0}
+@media (max-width:560px){.rig{padding:10px 12px 6px}h1{font-size:21px}.lead,.howto{display:none}.pal{padding:0 6px}.pal .nm{display:none}.ctl{gap:8px 10px}.ctl .lab{display:none}}
+
+/* ═══════ THE STAGE ═══════ */
+.stage{max-width:1440px;margin:12px auto 0;padding:0 16px 40px;position:relative}
+.frame{display:none}.frame.on{display:block}
+.deskwrap{width:1440px;transform-origin:top left;position:relative}
+.deskwrap .desk{width:1440px;height:860px;background:var(--page);border:1px solid var(--line2);border-radius:14px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 30px 50px -30px var(--shadow)}
+
+/* ── THE PHONE ── */
+.phone{width:375px;max-width:100%;height:812px;margin:0 auto;background:var(--page);border:6px solid var(--bezel);border-radius:40px;position:relative;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 50px -30px var(--shadow)}
+@media (max-width:420px){.stage{padding:0 0 30px}.phone{border-width:0;border-radius:0;width:100%;height:calc(100svh - 8px);min-height:640px}}
+.status{height:46px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 5px;font-size:13px;font-weight:600;background:var(--paper)}
+.status .bat{width:24px;height:11px;border:1.5px solid var(--ink);border-radius:4px;position:relative}
+.status .bat:after{content:"";position:absolute;left:2px;top:2px;bottom:2px;right:5px;background:var(--ink);border-radius:1px}
+.home{flex:none;height:26px;background:var(--paper);position:relative}
+.home:after{content:"";position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.85}
+
+/* ═══════ THE GUEST'S PAGE (the Event Hub as a guest sees it) ═══════ */
+.hub{flex:1;min-height:0;display:flex;flex-direction:column;background:#FBF9F5;position:relative;overflow:hidden}
+.gtop{display:flex;justify-content:space-between;align-items:center;padding:10px 16px 8px;font-size:9.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);font-weight:600;border-bottom:1px solid var(--line);flex:none;position:relative;z-index:3;background:#FBF9F5}
+.gtop .lg{display:flex;align-items:center;gap:6px}.gtop .lg i{width:14px;height:14px;border:2px solid var(--gold);border-radius:50%;display:inline-block}
+.gtop .dnav{display:none;gap:22px;font-size:11px;letter-spacing:.08em;text-transform:none;color:var(--ink2);font-weight:500}
+.gtop .dnav b{color:var(--cta);font-weight:600}
+.gwrap{flex:1;min-height:0;position:relative;overflow:hidden}
+canvas.fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+canvas.fx.front{z-index:4}
+.gcol{position:absolute;inset:0;z-index:2;overflow:hidden;padding:8px 20px 0;text-align:left}
+.scr{display:none;animation:none}
+.scr.on{display:block}
+.scr.on.appear{animation:appear .5s var(--in) both}
+@keyframes appear{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+html.rm .scr.on.appear{animation-duration:.01s}
+.eb{font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.scr h3{margin:2px 0 0;font-size:18px;font-weight:600;font-family:var(--sans)}
+.scr .d{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);margin-top:2px}
+.scr .g{font-size:13px;margin-top:12px}
+.scr .q{font-family:var(--serif);font-size:23px;line-height:1.15;margin-top:4px}
+.ans{display:flex;gap:8px;margin-top:10px}
+.ab{flex:1;text-align:center;border:1.5px solid var(--ink);border-radius:999px;padding:9px 6px;font-size:13px;font-weight:500;color:var(--ink);background:transparent;transition:background var(--t),color var(--t),border-color var(--t)}
+.ab.on{background:var(--btn);border-color:var(--btn);color:#fff}
+.ab.off{border-color:var(--line2);color:var(--ink2);background:transparent}
+.more{display:none;margin-top:10px}.more.on{display:block}
+.fld{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:9px 12px;font-size:12.5px;margin-top:6px;min-height:40px}
+.fld small{font-size:10px;color:var(--mute);letter-spacing:.06em;text-transform:uppercase}
+.fld .v{font-weight:500}.fld .v:after{content:" ▾";color:var(--gold)}
+.fld.ta{align-items:flex-start;min-height:52px;color:var(--mute)}
+.send{display:block;width:100%;margin-top:12px;border-radius:999px;padding:11px 10px;font-size:13px;font-weight:600;color:#fff;background:var(--btn);transition:opacity var(--t)}
+.send[disabled]{opacity:.35;cursor:default}
+.tiny{font-size:10.5px;color:var(--mute);margin:8px 0 0;text-align:center}
+.tk{margin:12px auto 0;width:200px;background:#fff;border:1px dashed var(--gold);border-radius:10px;padding:10px;text-align:center}
+.tk .who{font-family:var(--serif);font-size:19px;font-weight:500}.tk .role{font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink2);margin-top:2px}
+.tk .qr{width:64px;height:64px;margin:8px auto 0;background:repeating-linear-gradient(0deg,#2C2A29 0 3px,transparent 3px 6px),repeating-linear-gradient(90deg,#2C2A29 0 3px,transparent 3px 6px);opacity:.8}
+.tk .scan{font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);margin-top:6px}
+.soft{font-family:var(--serif);font-style:italic;font-size:16px;color:var(--ink2);margin:28px 10px;text-align:center}
+.link{color:var(--cta);text-decoration:underline;font-size:12px}
+.gname{display:inline-block;position:relative;padding:0 2px}
+.gnav{flex:none;border-top:1px solid var(--line);background:#fff;display:flex;justify-content:space-around;padding:7px 6px;font-size:10px;color:var(--mute);font-weight:500;position:relative;z-index:3}
+.gnav span{display:flex;flex-direction:column;align-items:center;gap:3px;width:64px}.gnav span.on{color:var(--cta);font-weight:600}.gnav span .i{width:18px;height:18px}
+/* the guest page at desktop size */
+.hub.desk{height:100%}
+.hub.desk .gtop{padding:16px 40px;font-size:11px}
+.hub.desk .gtop .dnav{display:flex}
+.hub.desk .gnav{display:none}
+.hub.desk .gcol{padding:48px 0 0;display:flex;justify-content:center;align-items:flex-start}
+.hub.desk .scr{width:520px}
+.hub.desk .scr h3{font-size:24px}.hub.desk .scr .q{font-size:34px}.hub.desk .scr .d{font-size:12px}.hub.desk .scr .g{font-size:15px}
+.hub.desk .ab{padding:13px 10px;font-size:15px}.hub.desk .send{padding:14px;font-size:15px}
+.hub.desk .fld{font-size:14px;min-height:46px}
+.hub.desk .tk{width:260px;padding:16px}.hub.desk .tk .who{font-size:24px}.hub.desk .tk .qr{width:92px;height:92px}
+.hub.desk .soft{font-size:20px}
+
+/* ═══════ THE MAKER ═══════ */
+.topnav{height:56px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;background:var(--paper);border-bottom:1px solid var(--line);position:relative;z-index:20}
+.exitx{width:46px;height:46px;border-radius:50%;background:var(--bad);color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+.applyg{width:46px;height:46px;border-radius:50%;background:var(--ok);color:#fff;display:flex;align-items:center;justify-content:center;position:relative;flex:none}
+.applyg .n{position:absolute;right:-3px;top:-3px;min-width:19px;height:19px;border-radius:10px;background:var(--ink);color:#fff;font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid var(--paper)}
+.applyg .dia{position:absolute;left:-4px;bottom:-4px;width:19px;height:19px;border-radius:50%;background:var(--gold);color:#fff;font-size:10px;display:none;align-items:center;justify-content:center;border:2px solid var(--paper)}
+.applyg.pro .dia{display:flex}
+.hubname{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.1}
+.hubname b{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hubname small{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{display:inline-flex;align-items:center;background:var(--pill);border:1px solid var(--line);border-radius:999px;padding:2px;height:48px;flex:none}
+.pill .ic{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--ink)}
+.pill .dv{width:1px;height:22px;background:var(--line2);margin:0 2px}
+.ws{flex:1;min-height:0;position:relative;overflow:hidden;background:var(--page);display:flex;flex-direction:column}
+/* lower third */
+.lt{flex:none;height:270px;background:var(--page);border-top:1px solid var(--line);padding:8px 4px 0;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.ltrow{display:flex;gap:8px;flex:1;min-height:0}
+.navwrap{width:100%;min-width:0;position:relative;transition:width var(--t) var(--in);flex:none}
+.lt.open .navwrap{width:52px}
+.navin{display:flex;flex-direction:column;gap:8px;height:100%;opacity:1;transition:opacity .18s var(--out)}
+.lt.open .navin{opacity:0;pointer-events:none}
+.where{height:44px;flex:none;display:flex;align-items:center;gap:8px;padding:0 4px}
+.menu{height:44px;display:inline-flex;align-items:center;gap:6px;padding:0 12px 0 10px;border-radius:999px;background:var(--pill);border:1px solid var(--line);font-size:13px;font-weight:600;white-space:nowrap}
+.menu .i{width:18px;height:18px}.menu .c{width:14px;height:14px;color:var(--gold)}
+.cur{flex:1;min-width:0;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:4px}
+.cur small{font-weight:400;color:var(--mute)}
+.navs{flex:1;min-height:0;position:relative}
+.nav{position:absolute;inset:0;display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.th{flex:none;width:96px;border:1px solid var(--line);border-radius:14px;background:#FBF9F5;overflow:hidden;font-size:12px;color:var(--ink2);text-align:center;display:flex;flex-direction:column;transition:box-shadow var(--t),border-color var(--t)}
+.th .p{flex:1;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:13px;color:var(--ink);border-bottom:1px solid var(--line);background:#fff;padding:6px;line-height:1.15;white-space:normal}
+.th span{display:block;padding:6px 4px 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.th.part2{background:var(--gold-wash);border-color:var(--gold-soft)}.th.part2 .p{background:var(--gold-wash);font-family:var(--sans);font-weight:600;font-size:12px}
+.th.on{border-color:var(--cta);box-shadow:0 0 0 1.5px var(--cta)}
+.vdv{width:1px;flex:none;background:var(--line2);margin:16px 0}
+.th.add{border-style:dashed;background:transparent;justify-content:center;align-items:center;color:var(--ink2);gap:4px;width:64px}
+.elcol{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;gap:4px;border-radius:14px;background:var(--pill);border:1px solid var(--line);padding:6px 3px 4px;opacity:0;pointer-events:none;transition:opacity .18s var(--out)}
+.lt.open .elcol{opacity:1;pointer-events:auto;transition:opacity .2s var(--in) .08s}
+.elcol .pv{width:42px;height:42px;border-radius:10px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:9px;line-height:1.1;text-align:center;color:var(--ink)}
+.elcol .nm{font-size:10.5px;font-weight:600;text-align:center;line-height:1.1;max-width:52px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.elcol .st{display:flex;gap:2px}
+.elcol .sb{width:24px;height:30px;display:flex;align-items:center;justify-content:center;color:var(--ink2)}
+.elcol .xx{margin-top:auto;width:44px;height:44px;border-radius:50%;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center}
+.tools{flex:1;min-width:0;opacity:0;transform:translateX(28px);pointer-events:none;transition:opacity .2s var(--out),transform .2s var(--out);position:relative;overflow:hidden}
+.lt.open .tools{opacity:1;transform:none;pointer-events:auto;transition:opacity .24s var(--in) .1s,transform .26s var(--in) .1s}
+.tools .sc{height:100%;overflow-y:auto;scrollbar-width:none;padding-bottom:8px}.tools .sc::-webkit-scrollbar{display:none}
+.grp{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.grp .r{display:flex;align-items:center;gap:10px;min-height:44px;padding:4px 12px;border-top:1px solid var(--line);font-size:15px}
+.grp .r:first-child{border-top:0}.grp .r .l{flex:1;min-width:0}
+.pron{font-size:11.5px;color:var(--ink2);margin:8px 4px 0;line-height:1.45}
+.pron b{color:var(--gold)}
+.again{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12.5px;font-weight:600;margin:8px 4px 0}
+.again .i{width:14px;height:14px;color:var(--cta)}
+
+/* ── the one dropdown (PickMenu) ── */
+.dd{position:relative}
+.dd .sum{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px;padding:0 12px;font-size:15px;text-align:left}
+.dd .sum .l{color:var(--ink2)}
+.dd .sum .v{font-weight:500;margin-left:auto;display:inline-flex;align-items:center;gap:6px}
+.dd .sum .v:after{content:"▾";color:var(--gold);font-size:13px}
+.dd.open .sum .v:after{content:"▴"}
+.dd .list{display:none;border-top:1px solid var(--line);background:#fff}
+.dd.open .list{display:block}
+.opt{width:100%;display:flex;align-items:center;gap:10px;min-height:38px;padding:0 12px;font-size:14px;border-top:1px solid var(--line);text-align:left}
+.opt:first-child{border-top:0}
+.opt:hover{background:var(--page)}
+.opt .mini{width:44px;height:30px;border-radius:7px;background:#FBF9F5;border:1px solid var(--line);flex:none;display:block}
+.opt .nm{flex:1;min-width:0}
+.opt .pro{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.opt .pro:before{content:"◆ "}
+.opt .free{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);font-weight:600}
+.opt .ck{color:var(--cta);visibility:hidden;width:16px}
+.opt[aria-selected="true"]{background:var(--cta-wash);font-weight:600}
+.opt[aria-selected="true"] .ck{visibility:visible}
+.vpro{font-size:11px;color:var(--gold);font-weight:700}
+
+/* ── the Maker at desktop ── */
+.dbar{height:60px;flex:none;display:flex;align-items:center;gap:10px;padding:0 16px;background:var(--paper);border-bottom:1px solid var(--line)}
+.dbar .exitx,.dbar .applyg{width:40px;height:40px}
+.dbar .hubname b{font-size:15px}
+.dbar .pill{height:44px}.dbar .pill .ic{width:38px;height:38px}
+.dbar .dp{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 14px;border-radius:999px;background:var(--pill);border:1px solid var(--line);font-size:13px;font-weight:600}
+.dbar .dp .c{width:14px;height:14px;color:var(--gold)}
+.dbody{flex:1;min-height:0;display:flex}
+.dws{flex:1;min-width:0;position:relative;background:var(--page);display:flex;flex-direction:column}
+.dws .hubbox{flex:1;min-height:0;margin:20px 20px 0;border:1px solid var(--line2);border-radius:14px 14px 0 0;overflow:hidden;background:#FBF9F5;position:relative;display:flex;flex-direction:column}
+.dws .hub.desk .gcol{padding-top:40px}
+.dstrip{flex:none;height:118px;border-top:1px solid var(--line);background:var(--page);display:flex;align-items:center;gap:10px;padding:0 20px;overflow-x:auto}
+.dstrip .th{height:92px}
+.dpanel{width:380px;flex:none;border-left:1px solid var(--line);background:var(--paper);display:flex;flex-direction:column}
+.dpanel .ph{padding:16px 18px 10px;border-bottom:1px solid var(--line)}
+.dpanel .ph .eb{font-size:10px}
+.dpanel .ph h4{margin:4px 0 0;font-size:17px;font-weight:600}
+.dpanel .ph small{display:block;color:var(--mute);font-size:12px;margin-top:2px}
+.dpanel .pb{padding:14px 18px;overflow-y:auto}
+.dpanel .grp .r{min-height:48px}
+.dpanel .dd .sum{min-height:48px}
+.dpanel .opt{min-height:46px;font-size:14.5px}
+
+/* ── a note under the stage ── */
+.note{font-size:12px;color:var(--mute);margin:14px 0 0;line-height:1.5;max-width:860px}
+.note b{color:var(--ink2)}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+ <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+ <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></symbol>
+ <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol>
+ <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+ <symbol id="i-list" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+ <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+ <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+ <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+ <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+ <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></symbol>
+ <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10H3z"/></symbol>
+ <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+ <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5h7v14H4zM13 5h7v14h-7z"/></symbol>
+ <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+</svg>
+
+<header class="rig">
+ <div class="brand">Setnayan · Event Hub · RSVP stage · When yes · 2026-10-06 · Fable</div>
+ <h1>When yes — a celebration, once, in the couple's colours</h1>
+ <p class="lead"><b>Guest:</b> tap an answer (it fills with the Look › Buttons colour; the other goes plain), send, and the thank-you appears while the chosen effect plays once (~2–3 s) and clears itself. <b>Maker:</b> the RSVP stage's <b>When yes</b> scene, with one <b>Celebration ▾</b> dropdown — the owner's word, Maker-side only; guests never read it. Four are <b>Event Hub Pro ◆</b>; None is free. Reduced motion = one calm wash.</p>
+ <div class="ctl" role="toolbar" aria-label="Prototype rig">
+  <span class="lab">View</span>
+  <span class="tg" id="tg-view"><button type="button" data-view="guest" aria-pressed="true">Guest</button><button type="button" data-view="maker" aria-pressed="false">Maker</button></span>
+  <span class="lab">Size</span>
+  <span class="tg" id="tg-size"><button type="button" data-size="phone" aria-pressed="true">Phone · 375</button><button type="button" data-size="desktop" aria-pressed="false">Desktop · 1440</button></span>
+  <span class="lab">Mood Board</span>
+  <span class="pals" id="pals"></span>
+  <span class="rmw"><button type="button" class="sw" id="rm" role="switch" aria-checked="false" aria-label="Simulate reduced motion"></button>Reduced motion <small id="rm-real" style="color:var(--mute)"></small></span>
+ </div>
+ <p class="howto"><b>Try:</b> Guest → tap <b>Yes, with joy</b> → <b>Send my reply</b>. Then Maker → <b>Celebration ▾</b> → pick another; it replays on the page above. Switch the Mood Board; everything recolours. Flip Reduced motion and send again.</p>
+</header>
+
+<main class="stage" id="stage">
+
+ <!-- ═══ GUEST · PHONE ═══ -->
+ <section class="frame on" id="f-guest-phone">
+  <div class="phone">
+   <div class="status"><span>9:41</span><span class="bat"></span></div>
+   <div class="hub" data-hub="guest"></div>
+   <div class="home"></div>
+  </div>
+ </section>
+
+ <!-- ═══ GUEST · DESKTOP ═══ -->
+ <section class="frame" id="f-guest-desktop">
+  <div class="deskwrap"><div class="desk"><div class="hub desk" data-hub="guest"></div></div></div>
+ </section>
+
+ <!-- ═══ MAKER · PHONE ═══ -->
+ <section class="frame" id="f-maker-phone">
+  <div class="phone">
+   <div class="status"><span>9:41</span><span class="bat"></span></div>
+   <div class="topnav">
+    <span class="exitx" aria-label="Exit"><svg class="i"><use href="#i-x"/></svg></span>
+    <span class="hubname"><b>RSVP · <span class="scenename">After they submit</span></b><small>Event Hub · Maria &amp; Jose</small></span>
+    <span class="pill"><span class="ic"><svg class="i"><use href="#i-undo"/></svg></span><span class="dv"></span><span class="ic"><svg class="i"><use href="#i-eye"/></svg></span></span>
+    <span class="applyg" data-apply><svg class="i"><use href="#i-check"/></svg><span class="n">1</span><span class="dia">◆</span></span>
+   </div>
+   <div class="ws"><div class="hub" data-hub="maker"></div></div>
+   <div class="lt open" data-lt>
+    <div class="ltrow">
+     <div class="navwrap">
+      <div class="navin">
+       <div class="where">
+        <span class="menu"><svg class="i"><use href="#i-list"/></svg>RSVP<svg class="i c"><use href="#i-down"/></svg></span>
+        <span class="cur"><span class="scenename">After they submit</span> <small>· the thank-you</small></span>
+       </div>
+       <div class="navs">
+        <div class="nav">
+         <button type="button" class="th part2" data-scene="form"><span class="p">RSVP form</span><span>The form</span></button>
+         <button type="button" class="th part2 on" data-scene="yes"><span class="p">After they submit</span><span>When yes</span></button>
+         <button type="button" class="th part2" data-scene="no"><span class="p">When they decline</span><span>When no</span></button>
+         <span class="vdv"></span>
+         <span class="th"><span class="p">67 days</span><span>Countdown</span></span><span class="th"><span class="p">A note…</span><span>Special message</span></span><span class="th"><span class="p">How we met</span><span>Our Love Story</span></span><span class="th add"><svg class="i"><use href="#i-plus"/></svg>Add</span>
+        </div>
+       </div>
+      </div>
+      <div class="elcol">
+       <span class="pv">Thank<br>you</span>
+       <span class="nm">When yes</span>
+       <span class="st"><button type="button" class="sb" data-scene="form" aria-label="Previous scene"><svg class="i s"><use href="#i-left"/></svg></button><button type="button" class="sb" data-scene="no" aria-label="Next scene"><svg class="i s"><use href="#i-right"/></svg></button></span>
+       <button type="button" class="xx" data-close aria-label="Back to the scenes"><svg class="i"><use href="#i-x"/></svg></button>
+      </div>
+     </div>
+     <div class="tools"><div class="sc" data-tools></div></div>
+    </div>
+    <div class="home"></div>
+   </div>
+  </div>
+ </section>
+
+ <!-- ═══ MAKER · DESKTOP ═══ -->
+ <section class="frame" id="f-maker-desktop">
+  <div class="deskwrap"><div class="desk">
+   <div class="dbar">
+    <span class="exitx" aria-label="Exit"><svg class="i"><use href="#i-x"/></svg></span>
+    <span class="hubname"><b>Maria &amp; Jose · Event Hub</b><small>RSVP · <span class="scenename">After they submit</span></small></span>
+    <span class="dp"><svg class="i s"><use href="#i-list"/></svg>RSVP · <span class="scenename">After they submit</span><svg class="i c"><use href="#i-down"/></svg></span>
+    <span style="flex:1"></span>
+    <span class="pill"><span class="ic"><svg class="i"><use href="#i-undo"/></svg></span><span class="dv"></span><span class="ic"><svg class="i"><use href="#i-eye"/></svg></span></span>
+    <span class="applyg" data-apply><svg class="i"><use href="#i-check"/></svg><span class="n">1</span><span class="dia">◆</span></span>
+   </div>
+   <div class="dbody">
+    <div class="dws">
+     <div class="hubbox"><div class="hub desk" data-hub="maker"></div></div>
+     <div class="dstrip">
+      <button type="button" class="th part2" data-scene="form"><span class="p">RSVP form</span><span>The form</span></button>
+      <button type="button" class="th part2 on" data-scene="yes"><span class="p">After they submit</span><span>When yes</span></button>
+      <button type="button" class="th part2" data-scene="no"><span class="p">When they decline</span><span>When no</span></button>
+      <span class="vdv"></span>
+      <span class="th"><span class="p">67 days</span><span>Countdown</span></span><span class="th"><span class="p">A note…</span><span>Special message</span></span><span class="th"><span class="p">How we met</span><span>Our Love Story</span></span><span class="th"><span class="p">Dec 12</span><span>Details</span></span><span class="th add"><svg class="i"><use href="#i-plus"/></svg>Add</span>
+     </div>
+    </div>
+    <aside class="dpanel">
+     <div class="ph"><div class="eb">This scene</div><h4>When yes <small style="display:inline;font-size:13px;font-weight:400;color:var(--mute)">· the thank-you</small></h4><small>What a guest sees the moment they say yes.</small></div>
+     <div class="pb" data-tools></div>
+    </aside>
+   </div>
+  </div></div>
+ </section>
+
+ <p class="note"><b>Rules kept:</b> one dropdown for the set of choices (never a pill row) · the pick is a draft until <b>✓ Apply</b>, which shows <b>◆</b> when a Pro effect is drafted and names it (2026-09-28: a free couple may try every Pro effect in the Maker) · guest copy says <i>event</i>, never <i>celebration</i> or <i>website</i> · phone first · canvas only, no library · the effect clears itself when done, so nothing sits over the ticket.</p>
+</main>
+
+<script>
+/* ═══════════════════════════ DATA ═══════════════════════════ */
+const PALETTES = {
+ oxblood:{name:'Oxblood & olive', cols:['#5B1A22','#6B7A3A','#E0A52B','#8E2E3C','#F2C8C2']},
+ sea:    {name:'Sea & sand',      cols:['#1F3A5F','#2F8F83','#D9B779','#E07A5F','#F4E9D8']},
+ garden: {name:'Garden',          cols:['#2E5339','#9BB59A','#D96C8A','#F2D479','#5A2E59']},
+};
+const FX = [
+ {id:'confetti',  name:'Confetti',  pro:true,  tip:'A burst from the top, falls, fades'},
+ {id:'fireworks', name:'Fireworks', pro:true,  tip:'Three or four bursts behind the thank-you'},
+ {id:'petals',    name:'Petals',    pro:true,  tip:'Flower petals drift down'},
+ {id:'sparklers', name:'Sparklers', pro:true,  tip:'A short shimmer around the guest\'s name'},
+ {id:'none',      name:'None',      pro:false, tip:'The thank-you simply appears'},
+];
+const S = { view:'guest', size:'phone', palette:'oxblood', fx:'confetti', rmSim:false, scene:'yes' };
+const mq = matchMedia('(prefers-reduced-motion: reduce)');
+const reduced = () => S.rmSim || mq.matches;
+const cols = () => PALETTES[S.palette].cols;
+const TAU = Math.PI*2, rnd=(a,b)=>a+Math.random()*(b-a), pick=a=>a[Math.floor(Math.random()*a.length)], clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+/* ═══════════════════════════ THE ENGINE ═══════════════════════════ */
+/* Each system: {duration, behind, step(t,dt), draw(ctx,t)}; t in seconds from the start. */
+function sysConfetti(w,h,c,s){
+ const n = clamp(Math.round(150*s*s), 18, 320);
+ const ps = Array.from({length:n},()=>({x:w*rnd(.3,.7), y:-rnd(.02,.1)*h, vx:rnd(-1,1)*230*s, vy:rnd(40,260)*s, w:rnd(6,10)*s, h:rnd(10,16)*s, rot:rnd(0,TAU), vr:rnd(-7,7), col:pick(c), ph:rnd(0,TAU), delay:rnd(0,.3)}));
+ const D=2.7;
+ return {duration:D, behind:false,
+  step(t,dt){ for(const p of ps){ if(t<p.delay) continue; p.vy += 520*s*dt; p.vy *= Math.pow(.985, dt*60); p.vx *= Math.pow(.985, dt*60); p.vx += Math.sin(t*4+p.ph)*60*s*dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.rot+=p.vr*dt; } },
+  draw(ctx,t){ const fade = t>2.0 ? clamp(1-(t-2.0)/.7,0,1) : 1; for(const p of ps){ if(t<p.delay) continue; ctx.globalAlpha=fade; ctx.fillStyle=p.col; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.scale(Math.max(.15,Math.abs(Math.cos(t*6+p.ph))),1); ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore(); } ctx.globalAlpha=1; } };
+}
+function sysFireworks(w,h,c,s){
+ const bursts=[0,.45,.95,1.4].map((t0,i)=>({t0, x:w*rnd(.22,.78), y:h*rnd(.14,.42), a:c[i%c.length], b:c[(i+2)%c.length], ps:null}));
+ const D=3.0, drag=.97;
+ return {duration:D, behind:true,
+  step(t,dt){ for(const b of bursts){ if(t>=b.t0 && !b.ps){ const n=clamp(Math.round(70*s),16,140); b.ps=Array.from({length:n},()=>{const a=rnd(0,TAU), v=rnd(50,210)*s; return {x:b.x,y:b.y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:rnd(.9,1.5),col:Math.random()<.55?b.a:b.b,r:rnd(1.4,3)*s};}); }
+   if(b.ps) for(const p of b.ps){ p.vx*=Math.pow(drag,dt*60); p.vy=p.vy*Math.pow(drag,dt*60)+95*s*dt; p.x+=p.vx*dt; p.y+=p.vy*dt; } } },
+  draw(ctx,t){ const fadeAll = t>2.4 ? clamp(1-(t-2.4)/.6,0,1) : 1;
+   for(const b of bursts){ if(!b.ps) continue; const age=t-b.t0;
+    if(age<.16){ ctx.globalAlpha=(1-age/.16)*.5*fadeAll; ctx.strokeStyle=b.a; ctx.lineWidth=2*s; ctx.beginPath(); ctx.arc(b.x,b.y,age*260*s,0,TAU); ctx.stroke(); }
+    for(const p of b.ps){ const a=clamp(1-age/p.life,0,1); if(a<=0) continue; ctx.globalAlpha=a*fadeAll; ctx.strokeStyle=p.col; ctx.fillStyle=p.col; ctx.lineWidth=p.r; ctx.beginPath(); ctx.moveTo(p.x-p.vx*.045,p.y-p.vy*.045); ctx.lineTo(p.x,p.y); ctx.stroke(); ctx.beginPath(); ctx.arc(p.x,p.y,p.r*.8,0,TAU); ctx.fill(); } }
+   ctx.globalAlpha=1; } };
+}
+function sysPetals(w,h,c,s){
+ const n=clamp(Math.round(40*s*s),10,90);
+ const ps=Array.from({length:n},()=>({x:rnd(0,w), y:-rnd(.02,.25)*h, delay:rnd(0,1.1), vy:rnd(70,135)*s, sway:rnd(30,70)*s, swf:rnd(1.2,2.6), ph:rnd(0,TAU), rot:rnd(0,TAU), vr:rnd(-2.2,2.2), size:rnd(7,12)*s, col:pick(c)}));
+ const D=3.0;
+ return {duration:D, behind:false,
+  step(t,dt){ for(const p of ps){ if(t<p.delay) continue; const a=t-p.delay; p.y+=p.vy*dt; p.x+=Math.cos(a*p.swf+p.ph)*p.sway*dt; p.rot+=p.vr*dt; } },
+  draw(ctx,t){ const fade = t>2.2 ? clamp(1-(t-2.2)/.8,0,1) : 1;
+   for(const p of ps){ if(t<p.delay) continue; const tumble=.55+.45*Math.abs(Math.cos((t-p.delay)*p.swf*1.3+p.ph)); ctx.globalAlpha=.92*fade; ctx.fillStyle=p.col; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.scale(tumble,1); const z=p.size; ctx.beginPath(); ctx.moveTo(0,-z); ctx.bezierCurveTo(z*.95,-z*.55,z*.9,z*.5,0,z); ctx.bezierCurveTo(-z*.9,z*.5,-z*.95,-z*.55,0,-z); ctx.fill(); ctx.restore(); }
+   ctx.globalAlpha=1; } };
+}
+function sysSparklers(w,h,c,s,rect){
+ const R = rect || {x:w*.3,y:h*.3,w:w*.4,h:h*.14};
+ const pad=6*s, ps=[]; let acc=0;
+ const D=2.3, EMIT=1.7;
+ const perim=()=>{ const x0=R.x-pad,y0=R.y-pad,x1=R.x+R.w+pad,y1=R.y+R.h+pad; const side=Math.random(); if(side<.4) return [rnd(x0,x1),y0]; if(side<.8) return [rnd(x0,x1),y1]; if(side<.9) return [x0,rnd(y0,y1)]; return [x1,rnd(y0,y1)]; };
+ return {duration:D, behind:false,
+  step(t,dt){ const rate = t<EMIT ? 300*Math.max(s,.5)*(1-t/EMIT) : 0; acc+=rate*dt;
+   while(acc>=1){ acc--; const [x,y]=perim(); ps.push({x,y,vx:rnd(-1,1)*70*s,vy:rnd(-1,.6)*70*s,life:rnd(.22,.55),born:t,col:pick(c),r:rnd(.9,2.1)*s,star:Math.random()<.28}); }
+   for(let i=ps.length-1;i>=0;i--){ const p=ps[i]; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=55*s*dt; if(t-p.born>p.life) ps.splice(i,1); } },
+  draw(ctx,t){ for(const p of ps){ const a=clamp(1-(t-p.born)/p.life,0,1); ctx.globalAlpha=a; ctx.strokeStyle=p.col; ctx.fillStyle=p.col;
+    if(p.star){ const L=p.r*4.5*a+1; ctx.lineWidth=Math.max(.6,p.r*.5); ctx.beginPath(); ctx.moveTo(p.x-L,p.y); ctx.lineTo(p.x+L,p.y); ctx.moveTo(p.x,p.y-L); ctx.lineTo(p.x,p.y+L); ctx.stroke(); }
+    else { ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,TAU); ctx.fill(); } }
+   ctx.globalAlpha=1; } };
+}
+function sysCalm(w,h,c,s){ /* reduced motion: one soft wash behind the words, in and out.
+ The gradient is painted ONCE on a small offscreen canvas and stretched each frame — a full-size
+ radial fill per frame cost ~500 ms in a software-rasterised (hidden) tab. */
+ const D=1.6, W=96, H=Math.max(8,Math.round(96*h/w));
+ const off=document.createElement('canvas'); off.width=W; off.height=H; const o=off.getContext('2d');
+ const g=o.createRadialGradient(W*.5,H*.3,0,W*.5,H*.3,Math.max(W,H)*.7); g.addColorStop(0,c[4]); g.addColorStop(.55,c[2]); g.addColorStop(1,'rgba(0,0,0,0)'); o.fillStyle=g; o.fillRect(0,0,W,H);
+ return {duration:D, behind:true, step(){}, draw(ctx,t){ const a=Math.sin(Math.PI*clamp(t/D,0,1))*.28; ctx.globalAlpha=a; ctx.imageSmoothingEnabled=true; ctx.drawImage(off,0,0,w,h); ctx.globalAlpha=1; } };
+}
+const SYS = {confetti:sysConfetti, fireworks:sysFireworks, petals:sysPetals, sparklers:sysSparklers};
+
+class Fx {
+ constructor(canvas){ this.c=canvas; this.ctx=canvas.getContext('2d'); this.playing=false; this.kind='none'; this.raf=0; this.frames=0; this.loop=false; this.c.dataset.state='idle'; }
+ fit(){ const r=this.c.getBoundingClientRect(); const dpr=Math.min(2,window.devicePixelRatio||1); this.w=Math.max(1,r.width); this.h=Math.max(1,r.height); this.c.width=Math.round(this.w*dpr); this.c.height=Math.round(this.h*dpr); this.ctx.setTransform(dpr,0,0,dpr,0,0); }
+ build(kind,o){ const s = o.scale ?? clamp(this.w/375,.35,1.8); /* particle size/speed scale — capped so a 1440 page is not a 4× phone */ if(kind==='none') return null; if(o.reduced) return sysCalm(this.w,this.h,o.cols,s); return SYS[kind](this.w,this.h,o.cols,s,o.rect); }
+ play(kind,o={}){
+  this.stop(); this.fit(); this.kind=kind; this.frames=0; this.loop=!!o.loop; this.opts=o;
+  const sys=this.build(kind,o); this.sys=sys;
+  if(!sys){ this.c.dataset.state='idle'; return Promise.resolve({kind,frames:0,seconds:0}); }
+  this.c.classList.toggle('front',!sys.behind);
+  this.playing=true; this.c.dataset.state='playing';
+  if(o.freezeAt!=null){ /* one still frame for a screenshot */ let t=0; const dt=1/60; while(t<o.freezeAt){ sys.step(t,dt); t+=dt; } this.ctx.clearRect(0,0,this.w,this.h); sys.draw(this.ctx,t); this.frames=1; this.playing=false; this.c.dataset.state='frozen'; return Promise.resolve({kind,frames:1,seconds:t}); }
+  return new Promise(res=>{
+   const t0=performance.now(); let last=t0;
+   /* watchdog: the effect ENDS on the clock even if frames stop (tab hidden, app switched) — a guest
+      who comes back never finds it still going, and nothing can sit over the ticket. */
+   this.wd=setTimeout(()=>{ if(this.playing&&this.sys===sys){ this.finish(); res({kind,frames:this.frames,seconds:(performance.now()-t0)/1000,watchdog:true}); } },(sys.duration+.4)*1000);
+   const tick=now=>{ const t=(now-t0)/1000, dt=Math.min(.05,(now-last)/1000); last=now;
+    sys.step(t,dt); this.ctx.clearRect(0,0,this.w,this.h); sys.draw(this.ctx,t); this.frames++;
+    if(t>=sys.duration){ if(this.loop){ this.sys=this.build(kind,o); this.ctx.clearRect(0,0,this.w,this.h); setTimeout(()=>{ if(this.playing&&this.loop){ this.play(kind,o); } },350); this.playing=false; return; }
+     this.finish(); res({kind,frames:this.frames,seconds:t}); return; }
+    this.raf=requestAnimationFrame(tick); };
+   this.raf=requestAnimationFrame(tick);
+  });
+ }
+ finish(){ cancelAnimationFrame(this.raf); clearTimeout(this.wd); this.playing=false; this.ctx.clearRect(0,0,this.w||1,this.h||1); this.c.dataset.state='idle'; }
+ stop(){ this.loop=false; this.finish(); }
+ cleared(){ const d=this.ctx.getImageData(0,0,this.c.width,this.c.height).data; for(let i=3;i<d.length;i+=4) if(d[i]) return false; return true; }
+}
+
+/* ═══════════════════════════ THE GUEST'S PAGE ═══════════════════════════ */
+function guestHTML(mode){ /* mode: 'guest' (interactive form) | 'maker' (the scene shown) */
+ return `
+ <div class="gtop"><span class="lg"><i></i>Setnayan</span><span class="dnav"><b>Welcome</b><span>Details</span><span>Our Love Story</span><span>Me</span></span><span>Invitation</span></div>
+ <div class="gwrap">
+  <canvas class="fx" aria-hidden="true"></canvas>
+  <div class="gcol">
+   <section class="scr s-form" data-scr="form">
+    <div class="eb">You're invited</div><h3>Maria &amp; Jose</h3><div class="d">Saturday, December 12, 2026</div>
+    <div class="g">Ramon Aquino</div>
+    <div class="eb" style="margin-top:10px">Your reply</div><div class="q">Ramon, will you be with us?</div>
+    <div class="ans"><button type="button" class="ab" data-ans="yes">Yes, with joy</button><button type="button" class="ab" data-ans="no">Sadly, no</button></div>
+    <div class="more more-yes"><div class="fld"><small>Meal</small><span class="v">Beef</span></div><div class="fld"><small>Food allergies</small><span class="v">None</span></div></div>
+    <div class="more more-no"><div class="fld ta"><small>A note for Maria &amp; Jose</small><span style="font-size:12px">optional</span></div></div>
+    <button type="button" class="send" data-send disabled>Send my reply</button>
+    <p class="tiny">Please reply by November 12, 2026</p>
+   </section>
+   <section class="scr s-yes" data-scr="yes">
+    <div class="eb">Thank you</div><h3>See you there, <span class="gname">Ramon</span></h3><div class="d">Saturday, December 12, 2026</div>
+    <div class="tk"><div class="who">Ramon Aquino</div><div class="role">Guest · Bride's side</div><div class="qr"></div><div class="scan">Scans once at the door</div></div>
+    <p class="tiny">Your ticket is here and always on <b>Me</b>.</p>
+    ${mode==='guest' ? '<p class="tiny" style="margin-top:14px"><button type="button" class="link" data-again>Changed your plans? Update your reply</button></p>' : ''}
+   </section>
+   <section class="scr s-no" data-scr="no">
+    <div class="eb">Sorry you can't come</div><h3>We'll miss you, Ramon</h3><div class="d">Saturday, December 12, 2026</div>
+    <p class="soft">Changed your plans? Update your reply and your ticket will appear.</p>
+    ${mode==='guest' ? '<p class="tiny"><button type="button" class="link" data-again>Update my reply</button></p>' : ''}
+   </section>
+  </div>
+ </div>
+ <div class="gnav"><span class="on"><svg class="i"><use href="#i-home"/></svg>Welcome</span><span><svg class="i"><use href="#i-info"/></svg>Details</span><span><svg class="i"><use href="#i-book"/></svg>Our Love Story</span><span><svg class="i"><use href="#i-user"/></svg>Me</span></div>`;
+}
+
+const hubs = []; /* {el, mode, fx, show(scr,{celebrate})} */
+document.querySelectorAll('.hub').forEach(el=>{
+ const mode=el.dataset.hub; el.innerHTML=guestHTML(mode);
+ const fx=new Fx(el.querySelector('canvas.fx'));
+ const hub={el,mode,fx,answer:null,scr:'form'};
+ hub.show=(scr,{celebrate=false,appear=true}={})=>{
+  hub.scr=scr; fx.stop();
+  el.querySelectorAll('.scr').forEach(x=>{ x.classList.toggle('on',x.dataset.scr===scr); x.classList.toggle('appear',appear&&x.dataset.scr===scr); });
+  if(scr==='yes' && celebrate) return hub.celebrate();
+  return Promise.resolve({kind:'none',frames:0});
+ };
+ hub.rect=()=>{ const n=el.querySelector('.s-yes .gname'); const c=fx.c.getBoundingClientRect(), r=n.getBoundingClientRect(); const k=c.width/ (fx.c.offsetWidth||c.width); return {x:(r.left-c.left),y:(r.top-c.top),w:r.width,h:r.height}; };
+ hub.celebrate=(kind=S.fx,extra={})=>{ fx.fit(); return fx.play(kind,{cols:cols(),reduced:reduced(),rect:hub.rect(),...extra}); };
+ if(mode==='guest'){
+  el.addEventListener('click',e=>{
+   const ab=e.target.closest('.ab'); if(ab){ hub.answer=ab.dataset.ans; el.querySelectorAll('.ab').forEach(b=>{ b.classList.toggle('on',b===ab); b.classList.toggle('off',b!==ab); }); el.querySelector('.more-yes').classList.toggle('on',hub.answer==='yes'); el.querySelector('.more-no').classList.toggle('on',hub.answer==='no'); el.querySelector('[data-send]').disabled=false; return; }
+   if(e.target.closest('[data-send]')){ if(!hub.answer) return; hub.show(hub.answer,{celebrate:hub.answer==='yes'}); return; }
+   if(e.target.closest('[data-again]')){ hub.answer=null; el.querySelectorAll('.ab').forEach(b=>b.classList.remove('on','off')); el.querySelectorAll('.more').forEach(m=>m.classList.remove('on')); el.querySelector('[data-send]').disabled=true; hub.show('form',{appear:false}); }
+  });
+  hub.show('form',{appear:false});
+ } else {
+  hub.show('yes',{appear:false});
+ }
+ hubs.push(hub);
+});
+const activeHub=()=>{ const f=document.querySelector('.frame.on'); return hubs.find(h=>f.contains(h.el)); };
+
+/* ═══════════════════════════ THE MAKER'S TOOLS ═══════════════════════════ */
+const minis=[]; /* looping previews, alive only while a list is open */
+function toolsHTML(){
+ const cur=FX.find(f=>f.id===S.fx);
+ return `
+ <div class="grp">
+  <div class="dd" data-dd>
+   <button type="button" class="sum" aria-haspopup="listbox" aria-expanded="false"><span class="l">Celebration</span><span class="v">${cur.name}${cur.pro?' <span class="vpro">◆</span>':''}</span></button>
+   <div class="list" role="listbox" aria-label="Celebration">
+    ${FX.map(f=>`<button type="button" class="opt" role="option" data-fx="${f.id}" aria-selected="${f.id===S.fx}"><canvas class="mini" data-mini="${f.id}" aria-hidden="true"></canvas><span class="nm">${f.name}</span>${f.pro?'<span class="pro">Pro</span>':'<span class="free">Free</span>'}<svg class="i s ck"><use href="#i-check"/></svg></button>`).join('')}
+   </div>
+  </div>
+ </div>
+ <p class="pron">${cur.pro?`<b>◆ Event Hub Pro.</b> Try it now — it plays once as the thank-you appears. Apply names it.`:`Free. The thank-you simply appears.`} ${reduced()?'<br>Reduced motion is on: a calm wash instead.':''}</p>
+ <button type="button" class="again" data-again-mk><svg class="i"><use href="#i-play"/></svg>Play it again</button>`;
+}
+function renderTools(){
+ stopMinis();
+ document.querySelectorAll('[data-tools]').forEach(t=>{ t.innerHTML=toolsHTML(); });
+ document.querySelectorAll('[data-apply]').forEach(a=>a.classList.toggle('pro',FX.find(f=>f.id===S.fx).pro));
+}
+function stopMinis(){ while(minis.length){ minis.pop().stop(); } }
+function startMinis(list){ list.querySelectorAll('canvas.mini').forEach(c=>{ const fx=new Fx(c); minis.push(fx); fx.fit(); fx.play(c.dataset.mini,{cols:cols(),reduced:reduced(),loop:true,scale:.42,rect:{x:fx.w*.22,y:fx.h*.3,w:fx.w*.56,h:fx.h*.4}}); }); }
+document.addEventListener('click',e=>{
+ const sum=e.target.closest('.dd .sum');
+ if(sum){ const dd=sum.closest('.dd'); const open=!dd.classList.contains('open'); document.querySelectorAll('.dd.open').forEach(d=>{ d.classList.remove('open'); d.querySelector('.sum').setAttribute('aria-expanded','false'); }); stopMinis(); if(open){ dd.classList.add('open'); sum.setAttribute('aria-expanded','true'); startMinis(dd.querySelector('.list')); } return; }
+ const opt=e.target.closest('.opt');
+ if(opt){ setFx(opt.dataset.fx); const h=activeHub(); if(h&&h.mode==='maker'){ h.show('yes',{celebrate:true}); } return; }
+ if(e.target.closest('[data-again-mk]')){ const h=activeHub(); if(h) h.show('yes',{celebrate:true}); return; }
+ const sc=e.target.closest('[data-scene]');
+ if(sc){ setScene(sc.dataset.scene); return; }
+ if(e.target.closest('[data-close]')){ document.querySelectorAll('[data-lt]').forEach(l=>l.classList.remove('open')); return; }
+ if(!e.target.closest('.dd')){ document.querySelectorAll('.dd.open').forEach(d=>{ d.classList.remove('open'); d.querySelector('.sum').setAttribute('aria-expanded','false'); }); stopMinis(); }
+});
+function setFx(id){ S.fx=id; renderTools(); }
+const SCENE_WORDS={form:'RSVP form',yes:'After they submit',no:'When they decline'};
+function setScene(id){
+ S.scene=id;
+ document.querySelectorAll('[data-scene].th').forEach(t=>t.classList.toggle('on',t.dataset.scene===id));
+ document.querySelectorAll('.scenename').forEach(n=>n.textContent=SCENE_WORDS[id]);
+ document.querySelectorAll('[data-lt]').forEach(l=>l.classList.toggle('open',id==='yes'));
+ hubs.filter(h=>h.mode==='maker').forEach(h=>h.show(id,{celebrate:false,appear:false}));
+ if(id==='yes'){ const h=activeHub(); if(h&&h.mode==='maker') h.show('yes',{celebrate:true}); }
+}
+
+/* ═══════════════════════════ THE RIG ═══════════════════════════ */
+function applyPalette(){ const c=cols(); const r=document.documentElement.style; c.forEach((x,i)=>r.setProperty('--c'+(i+1),x)); r.setProperty('--btn',c[0]); document.querySelectorAll('#pals .pal').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.pal===S.palette))); }
+function setPalette(id){ S.palette=id; applyPalette(); const h=activeHub(); if(h&&h.mode==='maker') h.show('yes',{celebrate:true}); renderTools(); }
+function setView(v){ S.view=v; showFrame(); }
+function setSize(sz){ S.size=sz; showFrame(); }
+function showFrame(){
+ document.querySelectorAll('.frame').forEach(f=>f.classList.toggle('on',f.id===`f-${S.view}-${S.size}`));
+ document.querySelectorAll('#tg-view button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===S.view)));
+ document.querySelectorAll('#tg-size button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.size===S.size)));
+ stopMinis(); document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));
+ fitDesk(); hubs.forEach(h=>h.fx.stop());
+ const h=activeHub(); if(h&&h.mode==='maker'){ setScene('yes'); }
+}
+function fitDesk(){ const avail=Math.max(320,document.documentElement.clientWidth-32); const s=Math.min(1,avail/1440); document.querySelectorAll('.deskwrap').forEach(d=>{ d.style.transform=`scale(${s})`; d.style.height=(860*s)+'px'; }); }
+addEventListener('resize',fitDesk);
+function setReduced(on){ S.rmSim=on; document.getElementById('rm').setAttribute('aria-checked',String(on)); document.documentElement.classList.toggle('rm',reduced()); renderTools(); }
+mq.addEventListener?.('change',()=>{ document.documentElement.classList.toggle('rm',reduced()); document.getElementById('rm-real').textContent=mq.matches?'(your system asks for it)':''; renderTools(); });
+document.getElementById('rm-real').textContent=mq.matches?'(your system asks for it)':'';
+document.getElementById('rm').addEventListener('click',()=>setReduced(!S.rmSim));
+document.getElementById('tg-view').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setView(b.dataset.view); });
+document.getElementById('tg-size').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setSize(b.dataset.size); });
+document.getElementById('pals').innerHTML=Object.entries(PALETTES).map(([id,p])=>`<button type="button" class="pal" data-pal="${id}" aria-pressed="false"><span class="sw5">${p.cols.map(c=>`<i style="background:${c}"></i>`).join('')}</span><span class="nm">${p.name}</span></button>`).join('');
+document.getElementById('pals').addEventListener('click',e=>{ const b=e.target.closest('.pal'); if(b) setPalette(b.dataset.pal); });
+
+/* URL presets (for screenshots): ?view=guest|maker&size=phone|desktop&fx=confetti&pal=sea&rm=1&shot=1&t=0.9 */
+const Q=new URLSearchParams(location.search);
+if(Q.get('pal')&&PALETTES[Q.get('pal')]) S.palette=Q.get('pal');
+if(Q.get('fx')&&FX.some(f=>f.id===Q.get('fx'))) S.fx=Q.get('fx');
+if(Q.get('view')) S.view=Q.get('view'); if(Q.get('size')) S.size=Q.get('size');
+if(Q.get('rm')==='1') S.rmSim=true;
+if(Q.get('rig')==='0') document.documentElement.classList.add('norig');
+applyPalette(); setReduced(S.rmSim); renderTools(); showFrame();
+if(Q.get('shot')){ const t=parseFloat(Q.get('t')||'0.9'); requestAnimationFrame(()=>{ const h=activeHub(); if(!h) return; if(h.mode==='guest'){ h.el.querySelector('.ab[data-ans="yes"]').click(); } h.show('yes',{appear:false}); h.fx.fit(); h.fx.play(S.fx,{cols:cols(),reduced:reduced(),rect:h.rect(),freezeAt:t}); if(Q.get('open')==='1'){ const s=document.querySelector('.frame.on .dd .sum'); if(s) s.click(); } }); }
+
+/* ═══════════════════════════ SCRIPT API (checks) ═══════════════════════════ */
+window.proto = {
+ S, FX, hubs, setView, setSize, setPalette, setReduced, setFx, activeHub,
+ /* play one effect on the active hub and resolve when it has stopped and cleared */
+ async play(kind){ const h=activeHub(); if(h.mode==='guest'){ h.el.querySelector('.ab[data-ans="yes"]').click(); } setFx(kind); const res=await h.show('yes',{celebrate:true}); return {...res, playing:h.fx.playing, cleared:h.fx.cleared(), state:h.fx.c.dataset.state}; },
+ /* every option, at the current view/size; a result is honest only if playing=false AND cleared=true afterwards */
+ async test(){ const out=[]; for(const f of FX){ const t0=performance.now(); const r=await this.play(f.id); out.push({fx:f.id, frames:r.frames, seconds:+r.seconds.toFixed(2), wall:+((performance.now()-t0)/1000).toFixed(2), stopped:!r.playing, cleared:r.cleared, state:r.state}); } return out; }
+};
+</script>
+</body>
+</html>
