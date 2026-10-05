@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Maker lower third — interactive — Setnayan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/*
+  THE MAKER'S LOWER THIRD — interactive, CSS ONLY (no script; the owner's viewer runs none).
+  Three zones: TOP NAV (the whole Event Hub) · WORKSPACE (the page, full width) · the LOWER THIRD
+  (every editing tool). State = hidden radios before .app, read with ~ and :checked.
+    nav  : n-rsvp n-inv n-theme n-settings n-details n-std n-day n-post   — the pick
+           m-*  (one per pick) — the same pick WITH the menu sheet open
+    rp   : RSVP's parts (form · yes · no)      ip : Invitation's pages      tp : Theme's parts
+    el   : the picked element on the Invitation page (none · mark · names · line · date)
+    tab  : the element tools' section (Text · Motion · Arrange — the shipped ISegmented)
+  Motion: 200–280 ms, ease-out in / ease-in out; prefers-reduced-motion → instant.
+  Words: the shipped ones (RSVP_STAGE_SCENES, stage-scenes.ts, MAKER_PAGE_STAGES, HUB_ELEMENT_LABEL).
+*/
+:root{--paper:#FFFFFF;--page:#F3F0EA;--ink:#2C2A29;--ink2:#5A5755;--mute:#8A8580;--gold:#A9834B;--gold-soft:#E6D8BE;--gold-wash:#F8F3E9;--cta:#C24E25;--cta-wash:#FBEDE6;--line:#E6E1D8;--line2:#D9D3C8;--ok:#2F6B4F;--bad:#B3261E;--pill:#F1EEE8;--pill-on:#D8D3CA;--bezel:#14161A;--shadow:rgba(44,42,41,.45);
+ --serif:"Cormorant Garamond",Georgia,serif;--sans:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif;
+ --in:cubic-bezier(.16,1,.3,1);--out:cubic-bezier(.4,0,1,1);--t:.24s}
+@media (prefers-reduced-motion:reduce){:root{--t:0s}}
+*{box-sizing:border-box}
+html,body{margin:0;background:#EDE8DF}
+body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;font-size:14px;line-height:1.45}
+input.st{position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0}
+label{cursor:pointer;user-select:none;-webkit-user-select:none}
+.i{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block;pointer-events:none}
+.i.s{width:16px;height:16px}
+
+/* page furniture */
+.wrap{max-width:420px;margin:0 auto;padding:16px 10px 40px}
+@media (max-width:420px){.wrap{padding:12px 0 40px}.phone{border-width:0;border-radius:0;width:100%;max-width:none;height:calc(100svh - 8px)}.demo,.howto,.note,.lead,h1,.brand{margin-left:10px;margin-right:10px}}
+.brand{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);font-weight:600}
+h1{font-family:var(--serif);font-weight:500;font-size:26px;line-height:1.1;margin:6px 0 6px}
+.lead{font-size:13px;color:var(--ink2);margin:0 0 12px;line-height:1.5}
+.lead b{color:var(--ink)}
+.howto{font-size:12.5px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:12px 0 0;line-height:1.5}
+.howto b{color:var(--ink)}
+
+/* ═══════ THE PHONE ═══════ */
+.phone{width:375px;max-width:100%;height:min(812px,calc(100svh - 24px));min-height:600px;margin:0 auto;background:var(--page);border:6px solid var(--bezel);border-radius:40px;position:relative;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 50px -30px var(--shadow)}
+.status{height:46px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 5px;font-size:13px;font-weight:600;background:var(--paper)}
+.status .bat{width:24px;height:11px;border:1.5px solid var(--ink);border-radius:4px;position:relative}
+.status .bat:after{content:"";position:absolute;left:2px;top:2px;bottom:2px;right:5px;background:var(--ink);border-radius:1px}
+
+/* ── TOP NAV — the whole Event Hub ── */
+.topnav{height:56px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;background:var(--paper);border-bottom:1px solid var(--line);position:relative;z-index:20}
+.exitx{width:46px;height:46px;border-radius:50%;background:var(--bad);color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+.applyg{width:46px;height:46px;border-radius:50%;background:var(--ok);color:#fff;display:flex;align-items:center;justify-content:center;position:relative;flex:none}
+.applyg .n{position:absolute;right:-3px;top:-3px;min-width:19px;height:19px;border-radius:10px;background:var(--ink);color:#fff;font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid var(--paper)}
+.hub{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.1}
+.hub b{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hub small{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{display:inline-flex;align-items:center;background:var(--pill);border:1px solid var(--line);border-radius:999px;padding:2px;height:48px;flex:none}
+.pill .ic{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--ink)}
+.pill .dv{width:1px;height:22px;background:var(--line2);margin:0 2px}
+.lbl span{display:none}
+
+/* ── WORKSPACE — the page ── */
+.ws{flex:1;min-height:0;position:relative;overflow:hidden;background:var(--page)}
+.pg{position:absolute;inset:0;background:#FBF9F5;display:none;flex-direction:column;overflow:hidden}
+.gtop{display:flex;justify-content:space-between;align-items:center;padding:10px 16px 8px;font-size:9.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);font-weight:600;border-bottom:1px solid var(--line);flex:none}
+.gtop .lg{display:flex;align-items:center;gap:6px}.gtop .lg i{width:14px;height:14px;border:2px solid var(--gold);border-radius:50%;display:inline-block}
+.gbody{flex:1;min-height:0;padding:12px 16px 0;text-align:center;position:relative;display:flex;flex-direction:column;align-items:center}
+.gnav{margin-top:auto;border-top:1px solid var(--line);background:#fff;display:flex;justify-content:space-around;padding:7px 6px;font-size:10px;color:var(--mute);font-weight:500;flex:none}
+.gnav span{display:flex;flex-direction:column;align-items:center;gap:3px;width:64px}.gnav span.on{color:var(--cta);font-weight:600}.gnav span .i{width:18px;height:18px}
+/* the Invitation's parts — each a label for its el radio */
+.part{position:relative;display:inline-block;border-radius:3px;outline:1.5px solid transparent;outline-offset:5px;transition:outline-color var(--t)}
+.part .h{position:absolute;display:block;font-size:0;line-height:0;width:10px;height:10px;border-radius:50%;background:var(--cta);border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.35);opacity:0;transform:scale(.3);transition:opacity var(--t) var(--in),transform var(--t) var(--in);pointer-events:none}
+.part .h.tl{left:-10px;top:-10px}.part .h.tc{left:50%;top:-10px;margin-left:-5px}.part .h.tr{right:-10px;top:-10px}
+.part .h.ml{left:-10px;top:50%;margin-top:-5px}.part .h.mrow{right:-10px;top:50%;margin-top:-5px}
+.part .h.bl{left:-10px;bottom:-10px}.part .h.bc{left:50%;bottom:-10px;margin-left:-5px}.part .h.br{right:-10px;bottom:-10px}
+.part.on{outline-color:var(--cta)}.part.on .h{opacity:1;transform:scale(1)}
+.eyebrow{font-size:9px;letter-spacing:.26em;text-transform:uppercase;color:var(--mute);font-weight:600;padding:4px 6px}
+.mono{width:66px;height:66px;border-radius:50%;border:1.5px solid var(--gold);margin:8px 0 4px;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-style:italic;font-weight:600;font-size:18px;color:var(--cta)}
+.names{font-family:var(--serif);font-size:30px;line-height:1.02;color:var(--ink);font-weight:500;padding:2px 10px}
+.names .and{display:block;font-style:italic;font-size:17px;color:var(--gold);line-height:1.3}
+.invite{font-size:11px;color:var(--ink2);margin-top:6px;padding:2px 6px}
+.when{font-family:var(--serif);font-size:17px;color:var(--ink);margin-top:2px;padding:2px 6px}
+.bgtap{position:absolute;inset:0;z-index:0}
+.gbody > *:not(.bgtap){position:relative;z-index:1}
+/* RSVP pages */
+.band{height:52px;background:linear-gradient(180deg,#D9CFE0,#C9B9D2);display:flex;align-items:center;padding:0 16px;font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--ink);font-weight:700;flex:none}
+.mk{width:38px;height:38px;border-radius:50%;background:#fff;margin:-19px auto 0;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-style:italic;font-size:12px;color:var(--cta);border:1px solid var(--line);flex:none}
+.rb{padding:8px 20px 0;overflow:hidden}
+.eb{font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.rb h3{margin:2px 0 0;font-size:18px;font-weight:600}
+.rb .d{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);margin-top:2px}
+.rb .g{font-size:13px;margin-top:12px}
+.rb .q{font-family:var(--serif);font-size:23px;line-height:1.15;margin-top:4px}
+.ans{display:flex;gap:8px;margin-top:10px}.ans span{flex:1;text-align:center;border:1.5px solid var(--ink);border-radius:999px;padding:9px 6px;font-size:13px;font-weight:500}.ans span.on{background:var(--ink);color:var(--paper)}
+.tk{margin:12px auto 0;width:200px;background:#fff;border:1px dashed var(--gold);border-radius:10px;padding:10px;text-align:center}
+.tk .who{font-family:var(--serif);font-size:19px;font-weight:500}.tk .role{font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink2);margin-top:2px}
+.tk .qr{width:64px;height:64px;margin:8px auto 0;background:repeating-linear-gradient(0deg,#2C2A29 0 3px,transparent 3px 6px),repeating-linear-gradient(90deg,#2C2A29 0 3px,transparent 3px 6px);opacity:.8}
+.tk .scan{font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);margin-top:6px}
+.soft{font-family:var(--serif);font-style:italic;font-size:16px;color:var(--ink2);margin:40px 20px;text-align:center}
+
+/* ── THE LOWER THIRD ── */
+.lt{flex:none;height:245px;background:var(--page);border-top:1px solid var(--line);padding:8px 4px 0;position:relative;overflow:hidden}
+.ltrow{display:flex;gap:8px;height:100%;padding-bottom:26px}
+.navwrap{width:100%;min-width:0;position:relative;transition:width var(--t) var(--in)}
+.navin{display:flex;flex-direction:column;gap:8px;height:100%;opacity:1;transition:opacity .18s var(--out)}
+.where{height:44px;flex:none;display:flex;align-items:center;gap:8px;padding:0 4px}
+.menu{height:44px;display:inline-flex;align-items:center;gap:6px;padding:0 12px 0 10px;border-radius:999px;background:var(--pill);border:1px solid var(--line);font-size:13px;font-weight:600;white-space:nowrap}
+.menu .i{width:18px;height:18px}.menu .c{width:14px;height:14px;color:var(--gold)}
+.cur{flex:1;min-width:0;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:4px}
+.cur small{font-weight:400;color:var(--mute)}
+.navs{flex:1;min-height:0;position:relative}
+.nav{position:absolute;inset:0;display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;opacity:0;pointer-events:none;transition:opacity .22s var(--out)}
+.nav::-webkit-scrollbar{display:none}
+.nav.on{opacity:1;pointer-events:auto;transition:opacity .22s var(--in)}
+.th{flex:none;width:96px;border:1px solid var(--line);border-radius:14px;background:#FBF9F5;overflow:hidden;font-size:12px;color:var(--ink2);text-align:center;display:flex;flex-direction:column;transition:box-shadow var(--t),border-color var(--t)}
+.th .p{flex:1;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:13px;color:var(--ink);border-bottom:1px solid var(--line);background:#fff;padding:6px;line-height:1.15}
+.th span{display:block;padding:6px 4px 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.th .p{white-space:normal}
+.th.part2{background:var(--gold-wash);border-color:var(--gold-soft)}.th.part2 .p{background:var(--gold-wash);font-family:var(--sans);font-weight:600;font-size:12px}
+.th.on{border-color:var(--cta);box-shadow:0 0 0 1.5px var(--cta)}
+.vdv{width:1px;flex:none;background:var(--line2);margin:16px 0}
+.th.add{border-style:dashed;background:transparent;justify-content:center;align-items:center;color:var(--ink2);gap:4px;width:64px}
+/* the element column (collapsed navigator) */
+.elcol{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;gap:4px;border-radius:14px;background:var(--pill);border:1px solid var(--line);padding:6px 3px 4px;opacity:0;pointer-events:none;transition:opacity .18s var(--out)}
+.elcol .pv{width:42px;height:42px;border-radius:10px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:9px;line-height:1.1;text-align:center;color:var(--ink)}
+.elcol .nm{font-size:10.5px;font-weight:600;text-align:center;line-height:1.1;max-width:52px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.elcol .st{display:flex;gap:2px}
+.elcol .sb{width:24px;height:30px;display:flex;align-items:center;justify-content:center;color:var(--ink2)}
+.elcol .xx{margin-top:auto;width:44px;height:44px;border-radius:50%;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center}
+.elcol .pvw span,.elcol .nmw span{display:none}
+/* the tools */
+.tools{flex:1;min-width:0;opacity:0;transform:translateX(28px);pointer-events:none;transition:opacity .2s var(--out),transform .2s var(--out);position:relative;overflow:hidden}
+.tools .sc{height:100%;overflow-y:auto;scrollbar-width:none;padding-bottom:8px}.tools .sc::-webkit-scrollbar{display:none}
+.seg{display:flex;gap:2px;background:rgba(44,42,41,.06);border-radius:10px;padding:2px}
+.seg label{flex:1;display:flex;align-items:center;justify-content:center;min-height:40px;border-radius:8px;font-size:13px;font-weight:600;color:var(--ink2);transition:background var(--t),color var(--t)}
+.grp{margin-top:8px;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.grp .r{display:flex;align-items:center;gap:10px;min-height:44px;padding:4px 12px;border-top:1px solid var(--line);font-size:15px}
+.grp .r:first-child{border-top:0}.grp .r .l{flex:1;min-width:0}
+.pm{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:0 10px 0 12px;height:38px;font-size:13px;font-weight:500}
+.pm .i{width:16px;height:16px;color:var(--gold)}
+.slider{flex:1;height:4px;border-radius:2px;background:#D9D3C8;position:relative;margin:0 12px 0 10px}
+.slider:before{content:"";position:absolute;left:0;top:0;bottom:0;width:62%;background:var(--cta);border-radius:2px}
+.slider:after{content:"";position:absolute;left:62%;top:50%;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.val{min-width:44px;text-align:center;border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 0;font-size:13px}
+.sw{width:44px;height:26px;border-radius:999px;background:#D9D3C8;position:relative;flex:none}
+.sw:after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.sw.on{background:var(--ok)}.sw.on:after{left:21px}
+.swatches{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 0;max-width:190px;margin-left:auto;flex:none}.swatches::-webkit-scrollbar{display:none}
+.swatches i{width:36px;height:36px;border-radius:50%;flex:none;border:1px solid var(--line)}.swatches i.on{outline:2px solid var(--cta);outline-offset:2px}
+.tabp{display:none}
+/* the menu sheet — inside the lower third */
+.msheet{position:absolute;inset:0;background:var(--paper);border-top:1px solid var(--line);padding:4px 10px 0;z-index:25;transform:translateY(104%);transition:transform .22s var(--out);overflow:hidden}
+.msheet.on{transform:translateY(0);transition:transform .26s var(--in)}
+.msheet:after{content:"";position:absolute;left:0;right:0;bottom:0;height:22px;background:linear-gradient(rgba(255,255,255,0),#fff);pointer-events:none}
+.msheet .sc{height:100%;overflow-y:auto;scrollbar-width:none;padding-bottom:30px}.msheet .sc::-webkit-scrollbar{display:none}
+.grip{width:38px;height:4px;border-radius:2px;background:var(--line2);margin:6px auto 8px}
+.cols{display:grid;grid-template-columns:1fr 1.1fr;gap:12px}
+.msheet .cols{margin-top:30px}
+.gh{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);font-weight:600;padding:0 6px 4px}
+.mrow{display:flex;align-items:center;gap:8px;height:44px;padding:0 10px;border-radius:12px;font-size:15px}
+.mrow .i{width:20px;height:20px;color:var(--ink2);flex:none}.mrow .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex:none}
+.mrow .ck{margin-left:auto;color:var(--cta);opacity:0}
+.mrow.on{background:var(--cta-wash);font-weight:600}.mrow.on .ck{opacity:1}
+.mclose{position:absolute;right:8px;top:4px;width:44px;height:44px;border-radius:50%;background:#F3F0EA;display:none;align-items:center;justify-content:center;z-index:2}
+.home{position:absolute;left:0;right:0;bottom:0;height:26px;background:var(--paper)}
+.home:after{content:"";position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.85}
+
+/* ═══════ STATE WIRING ═══════ */
+/* which pick is on (either n-X or m-X) */
+#n-rsvp:checked~.app .pg-rsvp,#m-rsvp:checked~.app .pg-rsvp,
+#n-inv:checked~.app .pg-inv,#m-inv:checked~.app .pg-inv,
+#n-theme:checked~.app .pg-inv,#m-theme:checked~.app .pg-inv,
+#n-settings:checked~.app .pg-inv,#m-settings:checked~.app .pg-inv,
+#n-details:checked~.app .pg-inv,#m-details:checked~.app .pg-inv,
+#n-std:checked~.app .pg-std,#m-std:checked~.app .pg-std,
+#n-day:checked~.app .pg-day,#m-day:checked~.app .pg-day,
+#n-post:checked~.app .pg-post,#m-post:checked~.app .pg-post{display:flex}
+/* navigator per pick */
+#n-rsvp:checked~.app .nav-rsvp,#m-rsvp:checked~.app .nav-rsvp,
+#n-inv:checked~.app .nav-inv,#m-inv:checked~.app .nav-inv,
+#n-theme:checked~.app .nav-theme,#m-theme:checked~.app .nav-theme,
+#n-settings:checked~.app .nav-settings,#m-settings:checked~.app .nav-settings,
+#n-details:checked~.app .nav-details,#m-details:checked~.app .nav-details,
+#n-std:checked~.app .nav-std,#m-std:checked~.app .nav-std,
+#n-day:checked~.app .nav-day,#m-day:checked~.app .nav-day,
+#n-post:checked~.app .nav-post,#m-post:checked~.app .nav-post{opacity:1;pointer-events:auto;transition:opacity .22s var(--in)}
+/* the menu button: one label per pick (the twin m-X) */
+.menu span{display:none}.menu label{display:none;align-items:center;gap:6px;height:44px;padding:0 12px 0 10px;margin:0 -12px 0 -10px}
+#n-rsvp:checked~.app .mb-rsvp,#n-inv:checked~.app .mb-inv,#n-theme:checked~.app .mb-theme,#n-settings:checked~.app .mb-settings,#n-details:checked~.app .mb-details,#n-std:checked~.app .mb-std,#n-day:checked~.app .mb-day,#n-post:checked~.app .mb-post{display:inline-flex}
+#m-rsvp:checked~.app .mb-rsvp,#m-inv:checked~.app .mb-inv,#m-theme:checked~.app .mb-theme,#m-settings:checked~.app .mb-settings,#m-details:checked~.app .mb-details,#m-std:checked~.app .mb-std,#m-day:checked~.app .mb-day,#m-post:checked~.app .mb-post{display:inline-flex}
+/* the sheet opens on any m-X; its × returns to the matching n-X */
+#m-rsvp:checked~.app .msheet,#m-inv:checked~.app .msheet,#m-theme:checked~.app .msheet,#m-settings:checked~.app .msheet,#m-details:checked~.app .msheet,#m-std:checked~.app .msheet,#m-day:checked~.app .msheet,#m-post:checked~.app .msheet{transform:translateY(0);transition:transform .26s var(--in)}
+#m-rsvp:checked~.app .mc-rsvp,#m-inv:checked~.app .mc-inv,#m-theme:checked~.app .mc-theme,#m-settings:checked~.app .mc-settings,#m-details:checked~.app .mc-details,#m-std:checked~.app .mc-std,#m-day:checked~.app .mc-day,#m-post:checked~.app .mc-post{display:flex}
+#m-rsvp:checked~.app .menu,#m-inv:checked~.app .menu,#m-theme:checked~.app .menu,#m-settings:checked~.app .menu,#m-details:checked~.app .menu,#m-std:checked~.app .menu,#m-day:checked~.app .menu,#m-post:checked~.app .menu{background:var(--ink);color:var(--paper)}
+/* the sheet's current row */
+#m-rsvp:checked~.app .mr-rsvp,#m-inv:checked~.app .mr-inv,#m-theme:checked~.app .mr-theme,#m-settings:checked~.app .mr-settings,#m-details:checked~.app .mr-details,#m-std:checked~.app .mr-std,#m-day:checked~.app .mr-day,#m-post:checked~.app .mr-post{background:var(--cta-wash);font-weight:600}
+#m-rsvp:checked~.app .mr-rsvp .ck,#m-inv:checked~.app .mr-inv .ck,#m-theme:checked~.app .mr-theme .ck,#m-settings:checked~.app .mr-settings .ck,#m-details:checked~.app .mr-details .ck,#m-std:checked~.app .mr-std .ck,#m-day:checked~.app .mr-day .ck,#m-post:checked~.app .mr-post .ck{opacity:1}
+/* top-nav label + "where you are" words */
+#n-rsvp:checked~.app .lb-rsvp,#m-rsvp:checked~.app .lb-rsvp,#n-inv:checked~.app .lb-inv,#m-inv:checked~.app .lb-inv,#n-theme:checked~.app .lb-theme,#m-theme:checked~.app .lb-theme,#n-settings:checked~.app .lb-settings,#m-settings:checked~.app .lb-settings,#n-details:checked~.app .lb-details,#m-details:checked~.app .lb-details,#n-std:checked~.app .lb-std,#m-std:checked~.app .lb-std,#n-day:checked~.app .lb-day,#m-day:checked~.app .lb-day,#n-post:checked~.app .lb-post,#m-post:checked~.app .lb-post{display:inline}
+/* RSVP parts */
+.pg-rsvp .rp{display:none}
+#rp-form:checked~.app .rp-form,#rp-yes:checked~.app .rp-yes,#rp-no:checked~.app .rp-no{display:block}
+#rp-form:checked~.app .t-form,#rp-yes:checked~.app .t-yes,#rp-no:checked~.app .t-no{border-color:var(--cta);box-shadow:0 0 0 1.5px var(--cta)}
+#rp-form:checked~.app .w-form,#rp-yes:checked~.app .w-yes,#rp-no:checked~.app .w-no{display:inline}
+/* Invitation pages */
+.pg-inv .ip{display:none;flex:1;min-height:0;flex-direction:column}
+#ip-welcome:checked~.app .ip-welcome,#ip-details:checked~.app .ip-details,#ip-story:checked~.app .ip-story,#ip-me:checked~.app .ip-me{display:flex}
+#ip-welcome:checked~.app .t-welcome,#ip-details:checked~.app .t-details,#ip-story:checked~.app .t-story,#ip-me:checked~.app .t-me{border-color:var(--cta);box-shadow:0 0 0 1.5px var(--cta)}
+#ip-welcome:checked~.app .w-welcome,#ip-details:checked~.app .w-details,#ip-story:checked~.app .w-story,#ip-me:checked~.app .w-me{display:inline}
+#ip-welcome:checked~.app .gn-welcome,#ip-details:checked~.app .gn-details,#ip-story:checked~.app .gn-story,#ip-me:checked~.app .gn-me{color:var(--cta);font-weight:600}
+/* Theme parts */
+#tp-look:checked~.app .t-look,#tp-fonts:checked~.app .t-fonts,#tp-colours:checked~.app .t-colours{border-color:var(--cta);box-shadow:0 0 0 1.5px var(--cta)}
+#tp-look:checked~.app .w-look,#tp-fonts:checked~.app .w-fonts,#tp-colours:checked~.app .w-colours{display:inline}
+/* ── THE ELEMENT PICKED (Invitation · Welcome only) ── */
+#n-inv:checked~#ip-welcome:checked~#el-mark:checked~.app .p-mark,
+#n-inv:checked~#ip-welcome:checked~#el-names:checked~.app .p-names,
+#n-inv:checked~#ip-welcome:checked~#el-line:checked~.app .p-line,
+#n-inv:checked~#ip-welcome:checked~#el-date:checked~.app .p-date{outline-color:var(--cta)}
+#n-inv:checked~#ip-welcome:checked~#el-mark:checked~.app .p-mark .h,
+#n-inv:checked~#ip-welcome:checked~#el-names:checked~.app .p-names .h,
+#n-inv:checked~#ip-welcome:checked~#el-line:checked~.app .p-line .h,
+#n-inv:checked~#ip-welcome:checked~#el-date:checked~.app .p-date .h{opacity:1;transform:scale(1)}
+/* collapse sideways, tools slide in */
+#n-inv:checked~#ip-welcome:checked~.el:checked~.app .navwrap{width:52px}
+#n-inv:checked~#ip-welcome:checked~.el:checked~.app .navin{opacity:0;pointer-events:none}
+#n-inv:checked~#ip-welcome:checked~.el:checked~.app .elcol{opacity:1;pointer-events:auto;transition:opacity .2s var(--in) .08s}
+#n-inv:checked~#ip-welcome:checked~.el:checked~.app .tools{opacity:1;transform:none;pointer-events:auto;transition:opacity .24s var(--in) .1s,transform .26s var(--in) .1s}
+#n-inv:checked~#ip-welcome:checked~.el:checked~.app .applyg .n2{display:flex}
+#n-inv:checked~#ip-welcome:checked~.el:checked~.app .applyg .n1{display:none}
+.applyg .n2{display:none}
+/* the column's picture, name and ‹ › per element */
+#el-mark:checked~.app .pvw .v-mark,#el-names:checked~.app .pvw .v-names,#el-line:checked~.app .pvw .v-line,#el-date:checked~.app .pvw .v-date,
+#el-mark:checked~.app .nmw .v-mark,#el-names:checked~.app .nmw .v-names,#el-line:checked~.app .nmw .v-line,#el-date:checked~.app .nmw .v-date{display:inline}
+.elcol .st label{display:none}
+#el-mark:checked~.app .st .s-mark,#el-names:checked~.app .st .s-names,#el-line:checked~.app .st .s-line,#el-date:checked~.app .st .s-date{display:flex}
+/* the tools' sections */
+#t-text:checked~.app .seg .sg-text,#t-motion:checked~.app .seg .sg-motion,#t-arrange:checked~.app .seg .sg-arrange{background:var(--cta);color:#fff}
+#t-text:checked~.app .tp-text,#t-motion:checked~.app .tp-motion,#t-arrange:checked~.app .tp-arrange{display:block}
+/* the sheet covers the tools' state: one open at a time */
+#m-inv:checked~.app .tools,#m-inv:checked~.app .elcol{pointer-events:none}
+
+/* ═══════ THE AUTO DEMO (pure keyframes, 14 s loop) ═══════ */
+.demo{margin:0 0 14px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:10px 10px 8px}
+.demo .cap{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink2);font-weight:600;margin:0 0 8px;display:flex;justify-content:space-between}
+.demo .cap i{font-style:normal;color:var(--ok)}
+.dstage{width:355px;max-width:100%;height:150px;margin:0 auto;position:relative;overflow:hidden;border-radius:12px;background:var(--page);border:1px solid var(--line)}
+.dpage{height:56px;background:#FBF9F5;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:20px;position:relative}
+.dpage .nm{position:relative;padding:2px 10px;outline:1.5px solid transparent;outline-offset:4px;border-radius:2px;animation:d-outline 14s infinite}
+.dpage .nm b{position:absolute;width:8px;height:8px;border-radius:50%;background:var(--cta);border:2px solid #fff;opacity:0;animation:d-h 14s infinite}
+.dpage .nm b.a{left:-8px;top:-8px}.dpage .nm b.b{right:-8px;top:-8px}.dpage .nm b.c{left:-8px;bottom:-8px}.dpage .nm b.d{right:-8px;bottom:-8px}
+.dlt{position:absolute;left:0;right:0;top:56px;bottom:0;padding:6px 8px;overflow:hidden}
+.drow{display:flex;gap:6px;height:100%}
+.dnav{width:100%;position:relative;animation:d-collapse 14s infinite}
+.dnavin{display:flex;flex-direction:column;gap:5px;height:100%;animation:d-fade-out 14s infinite}
+.dwhere{height:24px;display:flex;align-items:center;gap:6px;font-size:10px;font-weight:600}
+.dwhere .m{height:24px;padding:0 8px;border-radius:999px;background:var(--pill);border:1px solid var(--line);display:inline-flex;align-items:center;gap:4px;animation:d-menu-on 14s infinite}
+.dwhere .m span{display:inline-block;animation:d-word 14s infinite}
+.dwhere .m span.b{position:absolute;animation:d-word2 14s infinite}
+.dtiles{flex:1;position:relative}
+.dtiles div{position:absolute;inset:0;display:flex;gap:6px}
+.dtiles div i{flex:none;width:52px;border-radius:8px;border:1px solid var(--line);background:#fff;font-style:normal;font-size:8px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:3px;color:var(--ink2)}
+.dtiles div i.g{background:var(--gold-wash);border-color:var(--gold-soft)}
+.dtiles .n1{animation:d-nav1 14s infinite}.dtiles .n2{opacity:0;animation:d-nav2 14s infinite}
+.dcol{position:absolute;inset:0;border-radius:10px;background:var(--pill);border:1px solid var(--line);opacity:0;display:flex;flex-direction:column;align-items:center;padding:5px 2px;gap:3px;font-size:8px;font-weight:600;animation:d-fade-in 14s infinite}
+.dcol i{width:30px;height:30px;border-radius:6px;background:#fff;border:1px solid var(--line);font-family:var(--serif);font-style:normal;font-size:7px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1}
+.dcol b{margin-top:auto;width:22px;height:22px;border-radius:50%;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center}
+.dtools{flex:1;min-width:0;opacity:0;transform:translateX(24px);animation:d-tools 14s infinite}
+.dseg{display:flex;gap:2px;background:rgba(44,42,41,.06);border-radius:7px;padding:2px;font-size:9px;font-weight:600}
+.dseg span{flex:1;text-align:center;padding:4px 0;border-radius:5px;color:var(--ink2)}.dseg span.on{background:var(--cta);color:#fff}
+.dgrp{margin-top:5px;background:#fff;border:1px solid var(--line);border-radius:8px;font-size:9.5px}
+.dgrp div{display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-top:1px solid var(--line)}.dgrp div:first-child{border-top:0}
+.dgrp em{font-style:normal;border:1px solid var(--line);border-radius:999px;padding:1px 7px;font-size:8.5px}
+.dsheet{position:absolute;left:0;right:0;top:0;bottom:0;background:var(--paper);border-top:1px solid var(--line);padding:6px 8px;transform:translateY(104%);animation:d-sheet 14s infinite;font-size:9.5px}
+.dsheet .cols{gap:8px}.dsheet .gh{font-size:7.5px;padding:0 4px 2px}
+.dsheet .mrow{height:17px;font-size:9px;padding:0 6px;border-radius:6px;gap:4px}
+.dsheet .mr.hi{animation:d-row 14s infinite}
+.dtap{position:absolute;width:26px;height:26px;border-radius:50%;background:rgba(194,78,37,.35);border:2px solid var(--cta);opacity:0;pointer-events:none;animation:d-tap 14s infinite}
+.dtap.t1{left:30px;top:66px}.dtap.t2{left:110px;top:80px}.dtap.t3{left:164px;top:14px}.dtap.t4{left:10px;top:120px}
+.dcapt{position:absolute;left:8px;right:8px;top:62px;height:20px;pointer-events:none}
+.dcapt span{position:absolute;right:0;top:0;font-size:9px;font-weight:600;color:#fff;background:var(--ink);border-radius:999px;padding:3px 8px;opacity:0;white-space:nowrap}
+@keyframes d-tap{0%,6%{opacity:0;transform:scale(.6)}7%{opacity:1;transform:scale(1)}10%{opacity:0;transform:scale(1.4)}100%{opacity:0}}
+.dtap.t2{animation-delay:2.6s}.dtap.t3{animation-delay:5.2s}.dtap.t4{animation-delay:10.2s}
+@keyframes d-sheet{0%,7%{transform:translateY(104%)}10%,24%{transform:translateY(0)}27%,100%{transform:translateY(104%)}}
+@keyframes d-row{0%,18%{background:transparent}20%,27%{background:var(--cta-wash)}28%,100%{background:transparent}}
+@keyframes d-menu-on{0%,7%{background:var(--pill);color:var(--ink)}8%,26%{background:var(--ink);color:#fff}27%,100%{background:var(--pill);color:var(--ink)}}
+@keyframes d-word{0%,26%{opacity:1}27%,100%{opacity:0}}
+@keyframes d-word2{0%,26%{opacity:0}27%,100%{opacity:1}}
+@keyframes d-nav1{0%,26%{opacity:1}29%,100%{opacity:0}}
+@keyframes d-nav2{0%,27%{opacity:0}30%,100%{opacity:1}}
+@keyframes d-outline{0%,44%{outline-color:transparent}46%,76%{outline-color:var(--cta)}78%,100%{outline-color:transparent}}
+@keyframes d-h{0%,44%{opacity:0;transform:scale(.3)}46%,76%{opacity:1;transform:scale(1)}78%,100%{opacity:0;transform:scale(.3)}}
+@keyframes d-collapse{0%,45%{width:100%}47%,77%{width:48px}79%,100%{width:100%}}
+@keyframes d-fade-out{0%,45%{opacity:1}46.5%,78%{opacity:0}80%,100%{opacity:1}}
+@keyframes d-fade-in{0%,46%{opacity:0}48%,77%{opacity:1}78.5%,100%{opacity:0}}
+@keyframes d-tools{0%,46%{opacity:0;transform:translateX(24px)}49%,76%{opacity:1;transform:none}78%,100%{opacity:0;transform:translateX(24px)}}
+@keyframes d-capt{0%,6%{opacity:0}8%,24%{opacity:1}27%{opacity:0}29%,42%{opacity:1}44%{opacity:0}47%,74%{opacity:1}77%{opacity:0}80%,94%{opacity:1}97%,100%{opacity:0}}
+.dcapt .c1{animation:d-c1 14s infinite}.dcapt .c2{animation:d-c2 14s infinite}.dcapt .c3{animation:d-c3 14s infinite}.dcapt .c4{animation:d-c4 14s infinite}
+@keyframes d-c1{0%,7%{opacity:0}9%,25%{opacity:1}27%,100%{opacity:0}}
+@keyframes d-c2{0%,28%{opacity:0}30%,43%{opacity:1}45%,100%{opacity:0}}
+@keyframes d-c3{0%,46%{opacity:0}48%,76%{opacity:1}78%,100%{opacity:0}}
+@keyframes d-c4{0%,79%{opacity:0}81%,95%{opacity:1}97%,100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.demo *{animation-duration:0s!important}}
+
+.note{font-size:12px;color:var(--mute);margin:14px 0 0;line-height:1.5}
+.note b{color:var(--ink2)}
+</style>
+</head>
+<body>
+<!-- ═══ STATE ═══ -->
+<input class="st" type="radio" name="nav" id="n-rsvp" checked><input class="st" type="radio" name="nav" id="m-rsvp">
+<input class="st" type="radio" name="nav" id="n-inv"><input class="st" type="radio" name="nav" id="m-inv">
+<input class="st" type="radio" name="nav" id="n-theme"><input class="st" type="radio" name="nav" id="m-theme">
+<input class="st" type="radio" name="nav" id="n-settings"><input class="st" type="radio" name="nav" id="m-settings">
+<input class="st" type="radio" name="nav" id="n-details"><input class="st" type="radio" name="nav" id="m-details">
+<input class="st" type="radio" name="nav" id="n-std"><input class="st" type="radio" name="nav" id="m-std">
+<input class="st" type="radio" name="nav" id="n-day"><input class="st" type="radio" name="nav" id="m-day">
+<input class="st" type="radio" name="nav" id="n-post"><input class="st" type="radio" name="nav" id="m-post">
+<input class="st" type="radio" name="rp" id="rp-form" checked><input class="st" type="radio" name="rp" id="rp-yes"><input class="st" type="radio" name="rp" id="rp-no">
+<input class="st" type="radio" name="ip" id="ip-welcome" checked><input class="st" type="radio" name="ip" id="ip-details"><input class="st" type="radio" name="ip" id="ip-story"><input class="st" type="radio" name="ip" id="ip-me">
+<input class="st" type="radio" name="tp" id="tp-look" checked><input class="st" type="radio" name="tp" id="tp-fonts"><input class="st" type="radio" name="tp" id="tp-colours">
+<input class="st" type="radio" name="el" id="el-none" checked><input class="st el" type="radio" name="el" id="el-mark"><input class="st el" type="radio" name="el" id="el-names"><input class="st el" type="radio" name="el" id="el-line"><input class="st el" type="radio" name="el" id="el-date">
+<input class="st" type="radio" name="tab" id="t-text" checked><input class="st" type="radio" name="tab" id="t-motion"><input class="st" type="radio" name="tab" id="t-arrange">
+
+<div class="app">
+<div class="wrap">
+<div class="brand">Setnayan · Event Hub Maker · interactive · 2026-10-05</div>
+<h1>The lower third — tap it</h1>
+<p class="lead"><b>Top nav</b> = the whole Event Hub (✕ exit · where you are · undo · preview · ✓ Apply). <b>Workspace</b> = the page. <b>Lower third</b> = every editing tool: the menu (Global settings · Stages), the navigator (the pick's parts, then its scenes), and — when you tap a part of the page — that element's tools. Nothing opens over the page. No script: it is all CSS.</p>
+
+<!-- ═══ AUTO DEMO ═══ -->
+<div class="demo"><p class="cap"><span>Auto demo · menu → RSVP → tap the names → tools → ×</span><i>loops</i></p>
+ <div class="dstage">
+  <div class="dpage"><span class="nm">Maria <i style="color:var(--gold);font-size:12px">and</i> Jose<b class="a"></b><b class="b"></b><b class="c"></b><b class="d"></b></span></div>
+  <div class="dlt"><div class="drow">
+   <div class="dnav">
+    <div class="dnavin">
+     <div class="dwhere"><span class="m" style="position:relative">☰ <span>Invitation</span><span class="b" style="left:22px">RSVP</span> ▾</span></div>
+     <div class="dtiles"><div class="n1"><i class="g">Welcome</i><i class="g">Details</i><i class="g">Story</i><i>Names</i><i>Greeting</i></div><div class="n2"><i class="g">RSVP form</i><i class="g">When yes</i><i class="g">When no</i><i>Countdown</i><i>Message</i></div></div>
+    </div>
+    <div class="dcol"><i>Maria<br>&amp; Jose</i>Names<b>×</b></div>
+   </div>
+   <div class="dtools"><div class="dseg"><span class="on">Text</span><span>Motion</span><span>Arrange</span></div><div class="dgrp"><div>Font<em>Cormorant ▾</em></div><div>Size<em>34</em></div></div></div>
+  </div>
+  <div class="dsheet"><div class="cols"><div><div class="gh">Global settings</div><div class="mrow">Theme</div><div class="mrow">Settings</div><div class="mrow">Details</div></div><div><div class="gh">Stages</div><div class="mrow">Save the Date</div><div class="mrow hi">RSVP</div><div class="mrow">Invitation</div><div class="mrow">The Day</div></div></div></div>
+  </div>
+  <span class="dtap t1"></span><span class="dtap t2"></span><span class="dtap t3"></span><span class="dtap t4"></span>
+  <span class="dcapt"><span class="c1">1 · the menu opens inside the lower third</span><span class="c2">2 · RSVP picked — the navigator refills</span><span class="c3">3 · tap the names — collapse left, tools slide in</span><span class="c4">4 · × — the navigator returns</span></span>
+ </div>
+</div>
+
+<!-- ═══ THE PHONE ═══ -->
+<div class="phone">
+ <div class="status"><span>9:41</span><span class="bat"></span></div>
+
+ <div class="topnav">
+  <span class="exitx"><svg class="i"><use href="#i-x"/></svg></span>
+  <span class="hub"><b class="lbl">
+    <span class="lb-rsvp">RSVP · <span class="w-form">RSVP form</span><span class="w-yes">After they submit</span><span class="w-no">When they decline</span></span>
+    <span class="lb-inv">Invitation · <span class="w-welcome">Welcome</span><span class="w-details">Details</span><span class="w-story">Our Love Story</span><span class="w-me">Me</span></span>
+    <span class="lb-theme">Theme · <span class="w-look">Look</span><span class="w-fonts">Fonts</span><span class="w-colours">Colours</span></span>
+    <span class="lb-settings">Settings · Event Bar</span><span class="lb-details">Details · Names</span>
+    <span class="lb-std">Save the Date · Names &amp; date</span><span class="lb-day">The Day · Live</span><span class="lb-post">Post Event · Recap</span>
+   </b><small>Event Hub · Maria &amp; Jose</small></span>
+  <span class="pill"><span class="ic"><svg class="i"><use href="#i-undo"/></svg></span><span class="dv"></span><span class="ic"><svg class="i"><use href="#i-eye"/></svg></span></span>
+  <span class="applyg"><svg class="i"><use href="#i-check"/></svg><span class="n n1">1</span><span class="n n2">2</span></span>
+ </div>
+
+ <!-- ═══ WORKSPACE ═══ -->
+ <div class="ws">
+  <!-- RSVP stage: its three screens -->
+  <div class="pg pg-rsvp">
+   <div class="band">Setnayan</div><div class="mk">M &amp; J</div>
+   <div class="rb rp rp-form"><div class="eb">You're invited</div><h3>Maria &amp; Jose</h3><div class="d">Saturday, December 12, 2026</div><div class="g">Ramon Aquino</div><div class="eb" style="margin-top:10px">Your reply</div><div class="q">Will you celebrate with us?</div><div class="ans"><span class="on">Yes, with joy</span><span>Sadly, no</span></div></div>
+   <div class="rb rp rp-yes"><div class="eb">Thank you</div><h3>See you there, Ramon</h3><div class="d">Saturday, December 12, 2026</div><div class="tk"><div class="who">Ramon Aquino</div><div class="role">Guest · Bride's side</div><div class="qr"></div><div class="scan">Scans once at the door</div></div></div>
+   <div class="rb rp rp-no"><div class="eb">Sorry you can't come</div><h3>We'll miss you, Ramon</h3><div class="d">Saturday, December 12, 2026</div><p class="soft">Changed your plans? Update your reply and your ticket will appear.</p></div>
+  </div>
+  <!-- Invitation (also the page under Theme · Settings · Details) -->
+  <div class="pg pg-inv">
+   <div class="gtop"><span class="lg"><i></i>Setnayan</span><span>Invitation</span></div>
+   <div class="ip ip-welcome">
+    <div class="gbody">
+     <label class="bgtap" for="el-none" title="Tap empty page to finish"></label>
+     <span class="eyebrow" style="margin-top:4px">Together with their families</span>
+     <label class="part p-mark" for="el-mark"><span class="mono">M &amp; J</span><b class="h tl"></b><b class="h tr"></b><b class="h bl"></b><b class="h br"></b></label>
+     <label class="part p-names" for="el-names"><span class="names" style="display:block">Maria<span class="and">and</span>Jose</span><b class="h tl"></b><b class="h tc"></b><b class="h tr"></b><b class="h ml"></b><b class="h mr"></b><b class="h bl"></b><b class="h bc"></b><b class="h br"></b></label>
+     <label class="part p-line" for="el-line"><span class="invite" style="display:block">invite you to celebrate their wedding</span><b class="h tl"></b><b class="h tr"></b><b class="h bl"></b><b class="h br"></b></label>
+     <label class="part p-date" for="el-date"><span class="when" style="display:block">December 12, 2026</span><b class="h tl"></b><b class="h tr"></b><b class="h bl"></b><b class="h br"></b></label>
+    </div>
+    <div class="gnav"><span class="gn-welcome"><svg class="i"><use href="#i-home"/></svg>Welcome</span><span class="gn-details"><svg class="i"><use href="#i-info"/></svg>Details</span><span class="gn-story"><svg class="i"><use href="#i-book"/></svg>Our Love Story</span><span class="gn-me"><svg class="i"><use href="#i-user"/></svg>Me</span></div>
+   </div>
+   <div class="ip ip-details"><div class="rb"><div class="eb">The details</div><h3>December 12, 2026</h3><div class="d">Until we say "I do"</div><div class="ans" style="margin-top:14px"><span>67 days</span><span>12 hrs</span><span>42 min</span></div><div class="eb" style="margin-top:16px">Dress code</div><div class="q">Dress with us</div></div><div class="gnav"><span class="gn-welcome"><svg class="i"><use href="#i-home"/></svg>Welcome</span><span class="gn-details"><svg class="i"><use href="#i-info"/></svg>Details</span><span class="gn-story"><svg class="i"><use href="#i-book"/></svg>Our Love Story</span><span class="gn-me"><svg class="i"><use href="#i-user"/></svg>Me</span></div></div>
+   <div class="ip ip-story"><p class="soft">Our Love Story — how we met, a rainy Tuesday in Tagaytay…</p><div class="gnav"><span class="gn-welcome"><svg class="i"><use href="#i-home"/></svg>Welcome</span><span class="gn-details"><svg class="i"><use href="#i-info"/></svg>Details</span><span class="gn-story"><svg class="i"><use href="#i-book"/></svg>Our Love Story</span><span class="gn-me"><svg class="i"><use href="#i-user"/></svg>Me</span></div></div>
+   <div class="ip ip-me"><div class="rb"><div class="eb">Your ticket</div><div class="tk"><div class="who">Daniel Ramos</div><div class="role">Best Man · Groom's side</div><div class="qr"></div><div class="scan">Scans once at the door</div></div></div><div class="gnav"><span class="gn-welcome"><svg class="i"><use href="#i-home"/></svg>Welcome</span><span class="gn-details"><svg class="i"><use href="#i-info"/></svg>Details</span><span class="gn-story"><svg class="i"><use href="#i-book"/></svg>Our Love Story</span><span class="gn-me"><svg class="i"><use href="#i-user"/></svg>Me</span></div></div>
+  </div>
+  <div class="pg pg-std"><div class="gtop"><span class="lg"><i></i>Setnayan</span><span>Save the Date</span></div><div class="gbody"><span class="eyebrow">Save the date</span><span class="mono">M &amp; J</span><span class="names">Maria<span class="and">and</span>Jose</span><span class="when">December 12, 2026</span></div></div>
+  <div class="pg pg-day"><div class="gtop"><span class="lg"><i></i>Setnayan</span><span>The Day</span></div><div class="rb"><div class="eb">Happening now</div><div class="q">Watch the event live</div><div class="eb" style="margin-top:16px">The program</div><div class="q">The run of show</div></div></div>
+  <div class="pg pg-post"><div class="gtop"><span class="lg"><i></i>Setnayan</span><span>Post Event</span></div><p class="soft">Recap — the story after the day.</p></div>
+ </div>
+
+ <!-- ═══ LOWER THIRD ═══ -->
+ <div class="lt">
+  <div class="ltrow">
+   <div class="navwrap">
+    <div class="navin">
+     <div class="where">
+      <span class="menu">
+       <label class="mb-rsvp" for="m-rsvp"><svg class="i"><use href="#i-list"/></svg>RSVP<svg class="i c"><use href="#i-down"/></svg></label>
+       <label class="mb-inv" for="m-inv"><svg class="i"><use href="#i-list"/></svg>Invitation<svg class="i c"><use href="#i-down"/></svg></label>
+       <label class="mb-theme" for="m-theme"><svg class="i"><use href="#i-list"/></svg>Theme<svg class="i c"><use href="#i-down"/></svg></label>
+       <label class="mb-settings" for="m-settings"><svg class="i"><use href="#i-list"/></svg>Settings<svg class="i c"><use href="#i-down"/></svg></label>
+       <label class="mb-details" for="m-details"><svg class="i"><use href="#i-list"/></svg>Details<svg class="i c"><use href="#i-down"/></svg></label>
+       <label class="mb-std" for="m-std"><svg class="i"><use href="#i-list"/></svg>Save the Date<svg class="i c"><use href="#i-down"/></svg></label>
+       <label class="mb-day" for="m-day"><svg class="i"><use href="#i-list"/></svg>The Day<svg class="i c"><use href="#i-down"/></svg></label>
+       <label class="mb-post" for="m-post"><svg class="i"><use href="#i-list"/></svg>Post Event<svg class="i c"><use href="#i-down"/></svg></label>
+      </span>
+      <span class="cur lbl">
+       <span class="lb-rsvp"><span class="w-form">RSVP form <small>· the form your guests fill in</small></span><span class="w-yes">After they submit <small>· the thank-you</small></span><span class="w-no">When they decline</span></span>
+       <span class="lb-inv"><span class="w-welcome">Welcome</span><span class="w-details">Details</span><span class="w-story">Our Love Story</span><span class="w-me">Me</span> <small>· a guest page</small></span>
+       <span class="lb-theme"><span class="w-look">Look</span><span class="w-fonts">Fonts</span><span class="w-colours">Colours</span> <small>· the whole hub</small></span>
+       <span class="lb-settings">Event Bar <small>· show / hide</small></span><span class="lb-details">Names <small>· the event's facts</small></span>
+       <span class="lb-std">Names &amp; date</span><span class="lb-day">Live</span><span class="lb-post">Recap</span>
+      </span>
+     </div>
+     <div class="navs">
+      <div class="nav nav-rsvp">
+       <label class="th part2 t-form" for="rp-form"><span class="p">RSVP form</span><span>The form</span></label>
+       <label class="th part2 t-yes" for="rp-yes"><span class="p">After they submit</span><span>When yes</span></label>
+       <label class="th part2 t-no" for="rp-no"><span class="p">When they decline</span><span>When no</span></label>
+       <span class="vdv"></span>
+       <span class="th"><span class="p">67 days</span><span>Countdown</span></span><span class="th"><span class="p">A note…</span><span>Special message</span></span><span class="th"><span class="p">How we met</span><span>Our Love Story</span></span><span class="th"><span class="p">Dec 12</span><span>Details</span></span><span class="th"><span class="p">2:30 PM</span><span>Schedule</span></span><span class="th"><span class="p">Tagaytay</span><span>Venue map</span></span><span class="th"><span class="p">Dress with us</span><span>Dress code</span></span><span class="th add"><svg class="i"><use href="#i-plus"/></svg>Add</span>
+      </div>
+      <div class="nav nav-inv">
+       <label class="th part2 t-welcome" for="ip-welcome"><span class="p">Welcome</span><span>Page</span></label>
+       <label class="th part2 t-details" for="ip-details"><span class="p">Details</span><span>Page</span></label>
+       <label class="th part2 t-story" for="ip-story"><span class="p">Our Love Story</span><span>Page</span></label>
+       <label class="th part2 t-me" for="ip-me"><span class="p">Me</span><span>Page</span></label>
+       <span class="vdv"></span>
+       <label class="th" for="el-names"><span class="p">Maria &amp; Jose</span><span>Names &amp; date</span></label><span class="th"><span class="p">Hello, Daniel</span><span>Personal greeting</span></span><span class="th"><span class="p">Daniel's ticket</span><span>Guest's ticket</span></span><span class="th add"><svg class="i"><use href="#i-plus"/></svg>Add</span>
+      </div>
+      <div class="nav nav-theme">
+       <label class="th part2 t-look" for="tp-look"><span class="p">Look</span><span>Classic</span></label>
+       <label class="th part2 t-fonts" for="tp-fonts"><span class="p" style="font-family:var(--serif);font-size:15px">Aa</span><span>Fonts</span></label>
+       <label class="th part2 t-colours" for="tp-colours"><span class="p"><i style="width:14px;height:14px;border-radius:50%;background:var(--cta);display:inline-block"></i>&nbsp;<i style="width:14px;height:14px;border-radius:50%;background:var(--gold);display:inline-block"></i></span><span>Colours</span></label>
+       <span class="vdv"></span>
+       <span class="th"><span class="p">The theme's</span><span>Background</span></span><span class="th"><span class="p">12 looks</span><span>Mood Board</span></span><span class="th"><span class="p">M &amp; J</span><span>Logo</span></span>
+      </div>
+      <div class="nav nav-settings">
+       <span class="th part2 on"><span class="p">Event Bar</span><span>Show / hide</span></span><span class="th part2"><span class="p">Who can view</span><span>Guests only</span></span><span class="th part2"><span class="p">Prints</span><span>Tickets · menus</span></span><span class="vdv"></span><span class="th"><span class="p">setnayan.com/…</span><span>Address</span></span><span class="th"><span class="p">Restore</span><span>What guests see</span></span>
+      </div>
+      <div class="nav nav-details">
+       <span class="th part2 on"><span class="p">Maria &amp; Jose</span><span>Names</span></span><span class="th part2"><span class="p">Dec 12, 2026</span><span>Date</span></span><span class="th part2"><span class="p">Tagaytay</span><span>Venues</span></span><span class="vdv"></span><span class="th"><span class="p">Parents</span><span>Parents &amp; hosts</span></span><span class="th"><span class="p">2:30 PM</span><span>Schedule</span></span><span class="th"><span class="p">Dress with us</span><span>What to wear</span></span>
+      </div>
+      <div class="nav nav-std">
+       <span class="th part2 on"><span class="p">Save the Date</span><span>The page</span></span><span class="vdv"></span><span class="th"><span class="p">Maria &amp; Jose</span><span>Names &amp; date</span></span><span class="th"><span class="p">M &amp; J</span><span>Your logo</span></span><span class="th"><span class="p">Photo</span><span>Cover photo</span></span><span class="th"><span class="p">How we met</span><span>Our Love Story</span></span>
+      </div>
+      <div class="nav nav-day">
+       <span class="th part2 on"><span class="p">Live</span><span>Watch live</span></span><span class="th part2"><span class="p">Camera</span><span>Guest photos</span></span><span class="th part2"><span class="p">Me</span><span>Guest's ticket</span></span><span class="vdv"></span><span class="th"><span class="p">The program</span><span>Run of show</span></span><span class="th"><span class="p">Table 4</span><span>Find your seat</span></span>
+      </div>
+      <div class="nav nav-post">
+       <span class="th part2 on"><span class="p">Recap</span><span>The story after</span></span><span class="vdv"></span><span class="th"><span class="p">How we met</span><span>Our Love Story</span></span><span class="th"><span class="p">312 photos</span><span>Our photos</span></span><span class="th"><span class="p">Thank you</span><span>Special message</span></span>
+      </div>
+     </div>
+    </div>
+    <!-- the collapsed column -->
+    <div class="elcol">
+     <label class="pv pvw" for="el-none" title="Back to the navigator"><span class="v-mark">M &amp; J</span><span class="v-names">Maria<br>&amp; Jose</span><span class="v-line">invite<br>you…</span><span class="v-date">Dec 12</span></label>
+     <span class="nm nmw"><span class="v-mark">Your mark</span><span class="v-names">Names</span><span class="v-line">Invitation line</span><span class="v-date">Date</span></span>
+     <span class="st">
+      <label class="sb s-mark" for="el-date"><svg class="i s"><use href="#i-left"/></svg></label><label class="sb s-mark" for="el-names"><svg class="i s"><use href="#i-right"/></svg></label>
+      <label class="sb s-names" for="el-mark"><svg class="i s"><use href="#i-left"/></svg></label><label class="sb s-names" for="el-line"><svg class="i s"><use href="#i-right"/></svg></label>
+      <label class="sb s-line" for="el-names"><svg class="i s"><use href="#i-left"/></svg></label><label class="sb s-line" for="el-date"><svg class="i s"><use href="#i-right"/></svg></label>
+      <label class="sb s-date" for="el-line"><svg class="i s"><use href="#i-left"/></svg></label><label class="sb s-date" for="el-mark"><svg class="i s"><use href="#i-right"/></svg></label>
+     </span>
+     <label class="xx" for="el-none"><svg class="i"><use href="#i-x"/></svg></label>
+    </div>
+   </div>
+   <!-- the element's tools -->
+   <div class="tools"><div class="sc">
+    <div class="seg"><label class="sg-text" for="t-text">Text</label><label class="sg-motion" for="t-motion">Motion</label><label class="sg-arrange" for="t-arrange">Arrange</label></div>
+    <div class="tabp tp-text">
+     <div class="grp">
+      <div class="r"><span class="l">Font</span><span class="pm">Cormorant <svg class="i"><use href="#i-down"/></svg></span></div>
+      <div class="r"><span class="l">Size</span><span class="slider"></span><span class="val">34</span></div>
+      <div class="r"><span class="l">Colour</span><span class="swatches"><i class="on" style="background:#2C2A29"></i><i style="background:#C24E25"></i><i style="background:#A9834B"></i><i style="background:#6E2A3A"></i><i style="background:#2F6B4F"></i><i style="background:#4B5C8A"></i><i style="background:#fff"></i></span></div>
+      <div class="r"><span class="l">Letter spacing</span><span class="slider"></span><span class="val">2%</span></div>
+      <div class="r"><span class="l">Shown</span><span class="sw on"></span></div>
+     </div>
+    </div>
+    <div class="tabp tp-motion">
+     <div class="grp">
+      <div class="r"><span class="l">Arrives</span><span class="pm">Fade in <svg class="i"><use href="#i-down"/></svg></span></div>
+      <div class="r"><span class="l">Speed</span><span class="slider"></span><span class="val">Calm</span></div>
+      <div class="r"><span class="l">Shimmer</span><span class="sw"></span></div>
+      <div class="r"><span class="l">Play</span><span class="pm"><svg class="i" style="color:var(--ink)"><use href="#i-play"/></svg>This scene</span></div>
+     </div>
+    </div>
+    <div class="tabp tp-arrange">
+     <div class="grp">
+      <div class="r"><span class="l">Order</span><span class="pm">Second <svg class="i"><use href="#i-down"/></svg></span></div>
+      <div class="r"><span class="l">Space above</span><span class="slider"></span><span class="val">16</span></div>
+      <div class="r"><span class="l">Space below</span><span class="slider"></span><span class="val">8</span></div>
+      <div class="r"><span class="l">Align</span><span class="pm">Centre <svg class="i"><use href="#i-down"/></svg></span></div>
+     </div>
+    </div>
+   </div></div>
+  </div>
+
+  <!-- the menu sheet -->
+  <div class="msheet">
+   <label class="mclose mc-rsvp" for="n-rsvp"><svg class="i"><use href="#i-x"/></svg></label><label class="mclose mc-inv" for="n-inv"><svg class="i"><use href="#i-x"/></svg></label><label class="mclose mc-theme" for="n-theme"><svg class="i"><use href="#i-x"/></svg></label><label class="mclose mc-settings" for="n-settings"><svg class="i"><use href="#i-x"/></svg></label><label class="mclose mc-details" for="n-details"><svg class="i"><use href="#i-x"/></svg></label><label class="mclose mc-std" for="n-std"><svg class="i"><use href="#i-x"/></svg></label><label class="mclose mc-day" for="n-day"><svg class="i"><use href="#i-x"/></svg></label><label class="mclose mc-post" for="n-post"><svg class="i"><use href="#i-x"/></svg></label>
+   <div class="sc">
+    <div class="grip"></div>
+    <div class="cols">
+     <div><div class="gh">Global settings</div>
+      <label class="mrow mr-theme" for="n-theme"><svg class="i"><use href="#i-palette"/></svg>Theme<span class="ck"><svg class="i s"><use href="#i-check"/></svg></span></label>
+      <label class="mrow mr-settings" for="n-settings"><svg class="i"><use href="#i-bar"/></svg>Settings<span class="ck"><svg class="i s"><use href="#i-check"/></svg></span></label>
+      <label class="mrow mr-details" for="n-details"><svg class="i"><use href="#i-list"/></svg>Details<span class="ck"><svg class="i s"><use href="#i-check"/></svg></span></label>
+     </div>
+     <div><div class="gh">Stages</div>
+      <label class="mrow mr-std" for="n-std"><span class="dot"></span>Save the Date<span class="ck"><svg class="i s"><use href="#i-check"/></svg></span></label>
+      <label class="mrow mr-rsvp" for="n-rsvp">RSVP<span class="ck"><svg class="i s"><use href="#i-check"/></svg></span></label>
+      <label class="mrow mr-inv" for="n-inv">Invitation<span class="ck"><svg class="i s"><use href="#i-check"/></svg></span></label>
+      <label class="mrow mr-day" for="n-day">The Day<span class="ck"><svg class="i s"><use href="#i-check"/></svg></span></label>
+      <label class="mrow mr-post" for="n-post">Post Event<span class="ck"><svg class="i s"><use href="#i-check"/></svg></span></label>
+     </div>
+    </div>
+   </div>
+  </div>
+  <div class="home"></div>
+ </div>
+</div>
+
+<div class="howto"><b>Try:</b> tap <b>RSVP ▾</b> → pick <b>Invitation</b> → tap the names on the page (or the "Names &amp; date" tile) → the navigator collapses into the left column and the tools slide in; switch <b>Text · Motion · Arrange</b>; ‹ › step to the next part; tap the little picture or × (or empty page) to come back. Pick <b>Theme</b> to see its parts (Look · Fonts · Colours). Undo · Preview · Apply are drawn only.</div>
+<p class="note"><b>Words from the code:</b> RSVP's three screens = <code>RSVP_STAGE_SCENES</code> (lib/rsvp-stage.ts); scenes = <code>stage-scenes.ts</code>; stages = <code>MAKER_PAGE_STAGES</code>; parts = <code>HUB_ELEMENT_LABEL</code> (Your mark · Names · Invitation line · Date); sections = the shipped <code>ISegmented</code> Text · Motion · Arrange (DECISION_LOG 2026-09-27). Layout: top nav 56 px · lower third 245 px · the page takes the rest. Motion 200–280 ms; instant under "Reduce Motion".</p>
+</div>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+ <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></symbol>
+ <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"/></symbol>
+ <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+ <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+ <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+ <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+ <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+ <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+ <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+ <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+ <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+ <symbol id="i-book" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+ <symbol id="i-bar" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></symbol>
+ <symbol id="i-palette" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r=".8" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".8" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".8" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".8" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></symbol>
+ <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></symbol>
+ <symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></symbol>
+</svg>
+</body>
+</html>
