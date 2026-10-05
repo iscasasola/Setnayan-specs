@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wedding March — drag maker — Setnayan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/*
+  THE WEDDING MARCH — a drag-and-drop march maker (DECISION_LOG 2026-10-06).
+  Owner: "wedding should be the 2 columns that can drag names on both sides." — every walk is a row: LEFT slot · RIGHT slot.
+  Owner: "the wedding march should just be the drag drop swap, add, walk alone wedding march maker."
+         "no need to the toolbar. we can just drag the names"   "i don't need this to expand the names"
+  So: the navigator shows ONE item — Wedding March. Opening it shows the walks in order, by section,
+  one or two people side by side. Everything is a drag of a NAME:
+    name → another name            they trade places
+    name → the gap between walks   it becomes its own walk there (a partner left behind walks alone)
+    name → the empty half of a alone walk   they walk together
+    name → the "Not walking" tray  out of the march      tray → anywhere above   into the march
+  No toolbar, no buttons, no ↑↓. Pairs are NOT couples ("A WALK AND A COUPLE ARE INDEPENDENT", 2026-10-01).
+  Visual language = maker_lower_third_interactive_2026-10-05 (tokens, radii, pills) + the walk rows of
+  seat_plan_and_walking_order_2026-10-01. Phone-first: 375 in the Maker (workspace + lower third); 1440 Maker.
+  Touch: long-press 250 ms lifts a name, so a plain swipe still scrolls. Auto-scroll near the edges.
+*/
+:root{--paper:#FFFFFF;--page:#F3F0EA;--ink:#2C2A29;--ink2:#5A5755;--mute:#8A8580;--gold:#A9834B;--gold-soft:#E6D8BE;--gold-wash:#F8F3E9;--cta:#C24E25;--cta-wash:#FBEDE6;--line:#E6E1D8;--line2:#D9D3C8;--ok:#2F6B4F;--bad:#B3261E;--pill:#F1EEE8;--pill-on:#D8D3CA;--bezel:#14161A;--shadow:rgba(44,42,41,.45);
+ --serif:"Cormorant Garamond",Georgia,serif;--sans:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif;
+ --in:cubic-bezier(.16,1,.3,1);--out:cubic-bezier(.4,0,1,1);--t:.24s}
+@media (prefers-reduced-motion:reduce){:root{--t:0s}}
+*{box-sizing:border-box}
+html,body{margin:0;background:#EDE8DF}
+body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;font-size:14px;line-height:1.45}
+.i{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block;pointer-events:none}
+.i.s{width:16px;height:16px}
+
+/* ═══════ page furniture ═══════ */
+.wrap{max-width:1500px;margin:0 auto;padding:16px 16px 60px}
+.brand{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);font-weight:600}
+h1{font-family:var(--serif);font-weight:500;font-size:28px;line-height:1.1;margin:6px 0 6px}
+.lead{font-size:13px;color:var(--ink2);margin:0 0 12px;line-height:1.5;max-width:860px}
+.lead b{color:var(--ink)}.lead .q{font-family:var(--serif);font-style:italic;font-size:14.5px;color:var(--ink)}
+.bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0 16px}
+.seg{display:inline-flex;gap:2px;background:rgba(44,42,41,.08);border-radius:12px;padding:3px;border:1px solid var(--line2)}
+.seg button{appearance:none;border:0;background:transparent;min-height:44px;padding:0 18px;border-radius:8px;font:inherit;font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer;transition:background var(--t),color var(--t)}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.howto{font-size:12.5px;color:var(--ink2);background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 12px;line-height:1.5;flex:1;min-width:260px}
+.howto b{color:var(--ink)}
+.frames{display:flex;gap:28px;align-items:flex-start;justify-content:center;flex-wrap:wrap}
+.frame{display:none}.frame.on{display:block}
+.frame h2{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--mute);font-weight:600;margin:0 0 8px;text-align:center}
+@media (max-width:420px){.wrap{padding:12px 0 40px}h1,.lead,.bar,.brand{margin-left:12px;margin-right:12px}.phone{border-width:0;border-radius:0;width:100%;height:calc(100svh - 8px)}.frames{gap:16px}}
+
+/* ═══════ THE PHONE ═══════ */
+.phone{width:375px;max-width:100%;height:812px;margin:0 auto;background:var(--page);border:6px solid var(--bezel);border-radius:40px;position:relative;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 50px -30px var(--shadow)}
+.status{height:46px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 5px;font-size:13px;font-weight:600;background:var(--paper)}
+.status .bat{width:24px;height:11px;border:1.5px solid var(--ink);border-radius:4px;position:relative}
+.status .bat:after{content:"";position:absolute;left:2px;top:2px;bottom:2px;right:5px;background:var(--ink);border-radius:1px}
+.topnav{height:56px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;background:var(--paper);border-bottom:1px solid var(--line);position:relative;z-index:20}
+.exitx{width:46px;height:46px;border-radius:50%;background:var(--bad);color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+.applyg{width:46px;height:46px;border-radius:50%;background:var(--ok);color:#fff;display:flex;align-items:center;justify-content:center;position:relative;flex:none}
+.applyg .n{position:absolute;right:-3px;top:-3px;min-width:19px;height:19px;border-radius:10px;background:var(--ink);color:#fff;font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid var(--paper)}
+.hub{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.1}
+.hub b{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hub small{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* WORKSPACE — the march maker is the page */
+.ws{flex:1;min-height:0;position:relative;overflow:hidden;background:#FBF9F5}
+.scroll{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.scroll::-webkit-scrollbar{display:none}
+.mhead{padding:14px 16px 4px}
+.eyebrow{font-size:9px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);font-weight:600}
+.mhead h3{font-family:var(--serif);font-weight:500;font-size:26px;line-height:1.05;margin:2px 0 0}
+.mhead .sum{font-size:12px;color:var(--mute);margin-top:2px}
+.march{padding:4px 12px 24px}
+.sh{display:flex;align-items:baseline;gap:8px;margin:14px 4px 0;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink2);font-weight:600}
+.sh small{letter-spacing:0;text-transform:none;color:var(--mute);font-weight:500;font-size:11px}
+.sh:first-child{margin-top:6px}
+.gap{height:12px;position:relative;margin:0 4px;border-radius:6px;transition:height var(--t) var(--in)}
+.sh{grid-column:1/-1}
+.gap:after{content:"";position:absolute;left:30px;right:calc(50% + 3px);top:50%;height:2px;margin-top:-1px;border-radius:1px;background:var(--gold);opacity:0;transform:scaleX(.6);transition:opacity .16s,transform .2s var(--in)}
+.gap.r:after{left:calc(50% + 17px);right:6px}
+.gap:before{content:"";position:absolute;left:14px;top:50%;width:10px;height:10px;margin-top:-5px;border-radius:50%;background:var(--gold);opacity:0;transform:scale(.4);transition:opacity .16s,transform .2s var(--in)}
+.gap.r:before{left:calc(50% + 2px)}
+.gap.on{height:22px}.gap.on:after,.gap.on:before{opacity:1;transform:none}
+.colhead{display:grid;grid-template-columns:30px 1fr 1fr;gap:6px;padding:4px 12px 0 14px;font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:600;text-align:center}
+.colhead span:first-child{text-align:left}
+.walk{display:flex;align-items:stretch;gap:8px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:7px 8px 7px 10px;position:relative}
+.walk .num{font-family:var(--serif);font-size:20px;font-weight:500;color:var(--gold);width:22px;flex:none;line-height:1;padding-top:9px}
+.slots{flex:1;min-width:0;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.chip{position:relative;display:flex;flex-direction:column;justify-content:center;min-height:44px;padding:7px 10px;border-radius:12px;background:var(--gold-wash);border:1px solid var(--gold-soft);cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:pan-y;transition:box-shadow .16s,border-color .16s,background .16s,opacity .16s,transform .16s}
+.chip .nm{font-family:var(--serif);font-size:15.5px;font-weight:500;line-height:1.12;color:var(--ink);letter-spacing:-.005em;overflow-wrap:anywhere}
+.chip .rl{font-size:10px;color:var(--mute);margin-top:2px;line-height:1.2}
+.chip.star{border-color:var(--gold);background:#fff}
+.chip.star .rl{color:var(--gold);font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:9px}
+.chip.lifting{opacity:.28;border-style:dashed;background:transparent}
+.chip.tgt{box-shadow:0 0 0 2.5px var(--gold);border-color:var(--gold);background:#fff}
+.slot.empty{min-height:44px;border-radius:12px;border:1.5px dashed var(--line2);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--mute);text-align:center;padding:4px 8px;line-height:1.25;transition:box-shadow .16s,border-color .16s,background .16s,color .16s}
+.slot.empty i{font-style:normal}
+.slot.empty .alt{display:none}
+.dragging .slot.empty{border-color:var(--gold-soft);color:var(--gold)}
+.dragging .slot.empty .alt{display:inline}.dragging .slot.empty .def{display:none}
+.slot.empty.tgt{box-shadow:0 0 0 2.5px var(--gold);border-color:var(--gold);border-style:solid;background:var(--gold-wash);color:var(--ink)}
+/* the ghost that follows the finger */
+.ghost{position:fixed;left:0;top:0;z-index:9999;pointer-events:none;box-shadow:0 18px 34px -14px rgba(44,42,41,.55),0 0 0 2px var(--gold);background:#fff;transform-origin:center;will-change:transform;cursor:grabbing}
+.ghost.lift{animation:lift .2s var(--in)}
+@keyframes lift{from{transform:scale(1)}to{transform:scale(1.04)}}
+
+/* LOWER THIRD — the collapsed navigator (ONE item) + the tray as the tools */
+.lt{flex:none;height:245px;background:var(--page);border-top:1px solid var(--line);padding:8px 4px 0;position:relative;overflow:hidden}
+.ltrow{display:flex;flex-direction:column;gap:8px;height:100%;padding-bottom:26px}
+.where{height:44px;flex:none;display:flex;align-items:center;gap:8px;padding:0 4px}
+.menu{height:44px;display:inline-flex;align-items:center;gap:6px;padding:0 12px 0 10px;border-radius:999px;background:var(--pill);border:1px solid var(--line);font-size:13px;font-weight:600;white-space:nowrap}
+.menu .i{width:18px;height:18px}.menu .c{width:14px;height:14px;color:var(--gold)}
+.cur{flex:1;min-width:0;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:4px}
+.cur small{font-weight:400;color:var(--mute)}
+.ltbody{flex:1;min-height:0;display:flex;gap:8px}
+/* state A — the navigator row (when Wedding March is not opened) */
+.nav{flex:1;display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;align-items:stretch}
+.nav::-webkit-scrollbar{display:none}
+.th{flex:none;width:96px;border:1px solid var(--line);border-radius:14px;background:#FBF9F5;overflow:hidden;font-size:12px;color:var(--ink2);text-align:center;display:flex;flex-direction:column;transition:box-shadow var(--t),border-color var(--t);cursor:pointer}
+.th .p{flex:1;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:13px;color:var(--ink);border-bottom:1px solid var(--line);background:#fff;padding:6px;line-height:1.15}
+.th span{display:block;padding:6px 4px 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.th.part2{background:var(--gold-wash);border-color:var(--gold-soft)}.th.part2 .p{background:var(--gold-wash);font-family:var(--sans);font-weight:600;font-size:12px}
+.th.on{border-color:var(--cta);box-shadow:0 0 0 1.5px var(--cta)}
+.vdv{width:1px;flex:none;background:var(--line2);margin:16px 0}
+/* state B — the collapsed column + the tray */
+.elcol{width:66px;flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;border-radius:14px;background:var(--pill);border:1px solid var(--line);padding:6px 3px 4px}
+.elcol .pv{width:42px;height:42px;border-radius:10px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--gold)}
+.elcol .nm{font-size:10.5px;font-weight:600;text-align:center;line-height:1.1;max-width:58px}
+.elcol .ct{font-size:9.5px;color:var(--mute);text-align:center}
+.elcol .xx{margin-top:auto;width:44px;height:44px;border-radius:50%;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.tools{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+.tray{flex:1;min-height:0;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px 10px 6px;display:flex;flex-direction:column;transition:box-shadow .16s,border-color .16s,background .16s}
+.tray .lbl{display:flex;justify-content:space-between;align-items:baseline;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);font-weight:600;flex:none}
+.tray .lbl small{letter-spacing:0;text-transform:none;font-weight:500;font-size:10.5px}
+.tray .list{flex:1;min-height:0;overflow-y:auto;scrollbar-width:none;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;padding:6px 0 2px;position:relative}
+.tray .list::-webkit-scrollbar{display:none}
+.tray .chip{min-height:40px;padding:5px 10px;flex:0 1 auto;max-width:100%}
+.tray .chip .nm{font-size:14px}
+.tray .hint{font-size:11px;color:var(--mute);width:100%;text-align:center;padding:10px 6px;border:1.5px dashed var(--line2);border-radius:10px;display:none}
+.tray.vacant .hint{display:block}
+.tray.tgt{box-shadow:0 0 0 2.5px var(--gold);border-color:var(--gold);background:var(--gold-wash)}
+.phone .ltb-nav{display:none}.phone .ltb-el{display:flex}
+.phone.navmode .ltb-nav{display:flex}.phone.navmode .ltb-el{display:none}
+.home{position:absolute;left:0;right:0;bottom:0;height:26px;background:var(--paper)}
+.home:after{content:"";position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.85}
+
+/* toast */
+.toast{position:absolute;left:12px;right:12px;bottom:12px;z-index:50;display:flex;align-items:center;gap:10px;background:var(--ink);color:var(--paper);border-radius:14px;padding:10px 12px 10px 14px;font-size:13px;line-height:1.35;box-shadow:0 14px 30px -14px rgba(0,0,0,.6);transform:translateY(16px);opacity:0;pointer-events:none;transition:transform .22s var(--out),opacity .18s var(--out)}
+.toast.on{transform:none;opacity:1;pointer-events:auto;transition:transform .26s var(--in),opacity .2s var(--in)}
+.toast .msg{flex:1;min-width:0}
+.toast .undo{appearance:none;border:0;background:rgba(255,255,255,.12);color:#fff;font:inherit;font-weight:600;font-size:13px;border-radius:999px;padding:8px 14px;min-height:36px;cursor:pointer;flex:none}
+.toast .undo:active{background:rgba(255,255,255,.22)}
+
+/* ═══════ THE DESKTOP ═══════ */
+.desk{width:1440px;max-width:100%;height:880px;margin:0 auto;background:var(--page);border:1px solid var(--line2);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;position:relative;box-shadow:0 30px 50px -30px var(--shadow)}
+.dtop{height:56px;flex:none;display:flex;align-items:center;gap:12px;padding:0 12px;background:var(--paper);border-bottom:1px solid var(--line);z-index:20}
+.dtop .hub{flex:1}
+.dtop .hub b{font-size:15px}
+.dcols{flex:1;min-height:0;display:flex}
+.dnav{width:260px;flex:none;background:var(--paper);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:12px 10px}
+.dnav .gh{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);font-weight:600;padding:4px 10px 8px}
+.dnav .menu{align-self:flex-start;margin:0 0 10px}
+.mrow{display:flex;align-items:center;gap:10px;height:44px;padding:0 12px;border-radius:12px;font-size:14.5px;cursor:default}
+.mrow .i{width:18px;height:18px;color:var(--ink2);flex:none}
+.mrow .sub{margin-left:auto;font-size:11.5px;color:var(--mute);font-weight:400}
+.mrow.on{background:var(--cta-wash);font-weight:600}
+.mrow.on .sub{color:var(--cta)}
+.dnav .note{margin-top:auto;font-size:11.5px;color:var(--mute);line-height:1.45;padding:10px 10px 0;border-top:1px dashed var(--line)}
+.dnav .note b{color:var(--ink2)}
+.dws{flex:1;min-width:0;position:relative;background:#FBF9F5}
+.dws .scroll{padding:18px 0 40px}
+.dpage{width:720px;max-width:calc(100% - 40px);margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 22px 24px;box-shadow:0 20px 40px -32px rgba(44,42,41,.4)}
+.dpage .mhead{padding:0 6px 6px}
+.dpage .march{padding:0 0 8px}
+.dpage .walk{padding:8px 10px 8px 12px}
+.dpage .chip{min-height:48px}
+.dpage .chip .nm{font-size:16.5px}
+.dpanel{width:340px;flex:none;background:var(--paper);border-left:1px solid var(--line);display:flex;flex-direction:column;padding:12px 12px 14px;gap:10px}
+.dpanel .tray{flex:1}
+.dpanel .tray .list{align-content:flex-start;flex-direction:column;flex-wrap:nowrap}
+.dpanel .tray .chip{width:100%;min-height:48px}
+.dpanel .legend{background:var(--pill);border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:12px;color:var(--ink2);line-height:1.5;flex:none}
+.dpanel .legend b{display:block;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);font-weight:600;margin-bottom:4px}
+.dpanel .legend div{display:flex;gap:8px;padding:2px 0}
+.dpanel .legend i{font-style:normal;color:var(--gold);flex:none;width:14px;text-align:center}
+.desk .toast{left:auto;right:352px;bottom:16px;width:420px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+ <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+ <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+ <symbol id="i-list" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></symbol>
+ <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+ <symbol id="i-walk" viewBox="0 0 24 24"><circle cx="13" cy="4.5" r="1.8"/><path d="M10 21l2.4-6.2M12.6 9.4L9.5 12.2l-1.3 4.3M12.6 9.4l2.6 3.1 3.1 1.3M12.6 9.4L15 7.6l1.7 3.1"/></symbol>
+ <symbol id="i-type" viewBox="0 0 24 24"><path d="M5 5h14M12 5v14M9 19h6"/></symbol>
+ <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+ <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></symbol>
+ <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.3c2.9.2 5 2.6 5 5.7"/></symbol>
+ <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+ <symbol id="i-shirt" viewBox="0 0 24 24"><path d="M8 4l4 2 4-2 4 4-2.5 2.5L16 9v11H8V9l-1.5 1.5L4 8z"/></symbol>
+</svg>
+
+<div class="wrap">
+ <div class="brand">Setnayan · Event Hub Maker · prototype</div>
+ <h1>Wedding March — drag the names</h1>
+ <p class="lead">The navigator holds <b>one item, "Wedding March"</b> — it never opens into names. The maker is the walks in order, by section — <b>two columns, the left and the right of the aisle</b>; every walk is one row with a left slot and a right slot, and an empty slot means that person walks alone. <b>Every edit is a drag of a name</b> — <span class="q">"no need to the toolbar. we can just drag the names."</span> Walking together says nothing about being a couple.</p>
+ <div class="bar">
+  <div class="seg" role="tablist" aria-label="Frame">
+   <button class="on" data-view="phone">Phone · 375</button><button data-view="desk">Desktop · 1440</button><button data-view="both">Side by side</button>
+  </div>
+  <div class="howto"><b>Try it:</b> drag a name onto another name → they trade places · into the line between walks → its own walk · into the line right above or below its own pair → the pair splits into two rows, one after the other (both walk alone) · onto an empty slot beside a alone walker → they walk together (names move within and across both columns) · down to <b>Not walking</b> → out of the march, and back up → into it. On a phone, <b>hold a name ~¼ s</b> to lift it; a plain swipe still scrolls.</div>
+ </div>
+
+ <div class="frames">
+  <!-- ═══ PHONE ═══ -->
+  <div class="frame on" data-frame="phone">
+   <h2>Phone · the Maker · Details › Wedding March</h2>
+   <div class="phone" id="phone">
+    <div class="status"><span>9:41</span><span class="bat"></span></div>
+    <div class="topnav">
+     <span class="exitx" title="Exit the Maker"><svg class="i"><use href="#i-x"/></svg></span>
+     <span class="hub"><b>Maria &amp; Jose</b><small>Event Hub · Maker</small></span>
+     <span class="applyg" title="Apply — publishes"><svg class="i"><use href="#i-check"/></svg><span class="n" data-count>0</span></span>
+    </div>
+    <div class="ws">
+     <div class="scroll" data-scroll>
+      <div class="mhead"><div class="eyebrow">Details</div><h3>Wedding March</h3><div class="sum" data-sum></div></div>
+      <div class="march" data-march></div>
+     </div>
+     <div class="toast" data-toast><span class="msg"></span><button class="undo" type="button">Undo</button></div>
+    </div>
+    <div class="lt">
+     <div class="ltrow">
+      <div class="where">
+       <span class="menu"><svg class="i"><use href="#i-list"/></svg>Details<svg class="i c"><use href="#i-down"/></svg></span>
+       <span class="cur">Wedding March <small>· drag the names</small></span>
+      </div>
+      <div class="ltbody ltb-el">
+       <div class="elcol">
+        <span class="pv"><svg class="i"><use href="#i-walk"/></svg></span>
+        <span class="nm">Wedding March</span>
+        <span class="ct" data-ct></span>
+        <span class="xx" data-close title="Back to the Details navigator"><svg class="i"><use href="#i-x"/></svg></span>
+       </div>
+       <div class="tools">
+        <div class="tray" data-tray>
+         <div class="lbl"><span>Not walking</span><small data-traycount></small></div>
+         <div class="list" data-traylist><div class="hint">Everyone with a role is in the march. Drag a name down here to take them out.</div></div>
+        </div>
+       </div>
+      </div>
+      <div class="ltbody ltb-nav">
+       <div class="nav">
+        <span class="th part2"><span class="p">Maria &amp; Jose</span><span>Names</span></span><span class="th part2"><span class="p">Dec 12, 2026</span><span>Date</span></span><span class="th part2"><span class="p">Tagaytay</span><span>Venues</span></span><span class="vdv"></span><span class="th"><span class="p">Parents</span><span>Parents &amp; hosts</span></span><span class="th"><span class="p">2:30 PM</span><span>Schedule</span></span><span class="th"><span class="p">Dress with us</span><span>What to wear</span></span><span class="th on" data-open><span class="p" data-ct2></span><span>Wedding March</span></span>
+       </div>
+      </div>
+     </div>
+     <div class="home"></div>
+    </div>
+   </div>
+  </div>
+
+  <!-- ═══ DESKTOP ═══ -->
+  <div class="frame" data-frame="desk">
+   <h2>Desktop · the Maker · Details › Wedding March</h2>
+   <div class="desk" id="desk">
+    <div class="dtop">
+     <span class="exitx" title="Exit the Maker"><svg class="i"><use href="#i-x"/></svg></span>
+     <span class="hub"><b>Maria &amp; Jose</b><small>Event Hub · Maker · Details</small></span>
+     <span class="applyg" title="Apply — publishes"><svg class="i"><use href="#i-check"/></svg><span class="n" data-count>0</span></span>
+    </div>
+    <div class="dcols">
+     <div class="dnav">
+      <span class="menu"><svg class="i"><use href="#i-list"/></svg>Details<svg class="i c"><use href="#i-down"/></svg></span>
+      <div class="gh">The event's facts</div>
+      <div class="mrow"><svg class="i"><use href="#i-type"/></svg>Names</div>
+      <div class="mrow"><svg class="i"><use href="#i-cal"/></svg>Date</div>
+      <div class="mrow"><svg class="i"><use href="#i-pin"/></svg>Venues</div>
+      <div class="mrow"><svg class="i"><use href="#i-users"/></svg>Parents &amp; hosts</div>
+      <div class="mrow"><svg class="i"><use href="#i-clock"/></svg>Schedule</div>
+      <div class="mrow"><svg class="i"><use href="#i-shirt"/></svg>What to wear</div>
+      <div class="mrow on"><svg class="i"><use href="#i-walk"/></svg>Wedding March<span class="sub" data-ct></span></div>
+      <div class="note"><b>One item.</b> Wedding March never expands into its names here — the names live in the maker, where you drag them.</div>
+     </div>
+     <div class="dws">
+      <div class="scroll" data-scroll>
+       <div class="dpage">
+        <div class="mhead"><div class="eyebrow">Details</div><h3>Wedding March</h3><div class="sum" data-sum></div></div>
+        <div class="march" data-march></div>
+       </div>
+      </div>
+      <div class="toast" data-toast><span class="msg"></span><button class="undo" type="button">Undo</button></div>
+     </div>
+     <div class="dpanel">
+      <div class="tray" data-tray>
+       <div class="lbl"><span>Not walking</span><small data-traycount></small></div>
+       <div class="list" data-traylist><div class="hint">Everyone with a role is in the march. Drag a name here to take them out.</div></div>
+      </div>
+      <div class="legend"><b>Drag a name</b>
+       <div><i>⇄</i>onto another name — they trade places</div>
+       <div><i>—</i>into the line between walks — its own walk</div>
+       <div><i>▢</i>onto an empty slot — they walk together</div>
+       <div><i>⇆</i>across the aisle too — left and right are both yours</div>
+       <div><i>↓</i>into Not walking — out of the march · and back</div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+/* ───────── the data — people are their own rows; a walk is one or two people ───────── */
+const PEOPLE = {
+ p1:['Mr. Peregrino Buanhog','Groom’s father'], p2:['Mrs. Milagros Buanhog','Groom’s mother'],
+ p3:['Dr. Eduardo Bautista','Bride’s father'], p4:['Mrs. Lourdes Reyes Bautista','Bride’s mother'],
+ p5:['Mr. Fidel Bautista','Bride’s brother'], p6:['Ms. Carmen Reyes','Bride’s cousin'],
+ p7:['Mr. Noel Buanhog','Groom’s brother'], p8:['Mrs. Cely Tan','Groom’s aunt'], p9:['Mr. Mark Tan','Groom’s uncle'],
+ p10:['Ms. Ana Reyes Dela Cruz','Maid of Honor'], p11:['Mr. Daniel Ramos','Best Man'],
+ p12:['Hon. Ricardo Villahermosa','Principal sponsor'], p13:['Mrs. Jessica Villahermosa','Principal sponsor'],
+ p14:['Atty. Cesar Lim','Principal sponsor'], p15:['Mrs. Pilar Lim','Principal sponsor'],
+ p16:['USec. Rolando Mendoza','Principal sponsor'], p17:['Mrs. Nora Mendoza','Principal sponsor'],
+ p18:['Dr. Ben Ocampo','Principal sponsor'], p19:['Dr. Amy Ocampo','Principal sponsor'],
+ p20:['Engr. Lito Mendoza','Principal sponsor'], p21:['Ms. Fe Mendoza','Principal sponsor'],
+ p22:['Hon. Teodoro Santos','Principal sponsor'], p23:['Atty. Eufrocina Magsaysay','Principal sponsor'],
+ p24:['Mr. Paolo Tan','Candle sponsor'], p25:['Ms. Ivy Tan','Candle sponsor'],
+ p26:['Mr. Karl Lim','Veil sponsor'], p27:['Ms. Rina Chua','Veil sponsor'],
+ p28:['Mr. Ryan Gomez','Cord sponsor'], p29:['Ms. Liza Gomez','Cord sponsor'],
+ p30:['Joaquin Buanhog','Ring bearer'], p31:['Enzo Bautista','Coin bearer'], p32:['Lucas Dela Cruz','Bible bearer'],
+ p33:['Sofia Reyes','Flower girl'], p34:['Amara Lim','Flower girl'], p35:['Isabel Ocampo','Flower girl'],
+ /* with roles, not yet in the march */
+ p36:['Mr. Dennis Alvarez','Groomsman'], p37:['Ms. Joy Alvarez','Bridesmaid'], p38:['Mr. Vince Ong','Groomsman'],
+ p39:['Ms. Gia Aquino','Bridesmaid'], p40:['Mrs. Dolly Ong','Veil sponsor'],
+ /* the groom and the bride walk too — "wedding march handles everyone including the groom and the bride" */
+ g1:['Jose Buanhog','The groom'], b1:['Maria Bautista','The bride']
+};
+/* a walk = one row of the aisle: a LEFT slot and a RIGHT slot; an empty slot = that person walks alone */
+const W = (l, r) => ({l: l || null, r: r || null});
+const INITIAL = {
+ sections:[
+  {id:'groom',name:'The Groom & his parents',walks:[W('p1','p2'),W('g1',null)]},
+  {id:'family',name:'Immediate Family',walks:[W('p5','p6'),W('p7',null),W('p8','p9')]},
+  {id:'honor',name:'Maid of Honor & Best Man',walks:[W('p11','p10')]},
+  {id:'principal',name:'Principal Sponsors',walks:[W('p12','p13'),W('p14','p15'),W('p16','p17'),W('p18','p19'),W('p20','p21'),W('p22','p23')]},
+  {id:'secondary',name:'Secondary Sponsors',walks:[W('p24','p25'),W('p26','p27'),W('p28','p29')]},
+  {id:'bearers',name:'Bearers',walks:[W('p30',null),W(null,'p31'),W('p32',null)]},
+  {id:'flowers',name:'Flower Girls',walks:[W('p33','p34'),W(null,'p35')]},
+  {id:'bride',name:'The Bride & her parents',walks:[W('p4',null),W('p3','b1')]}
+ ],
+ tray:['p36','p37','p38','p39','p40']
+};
+const clone = o => JSON.parse(JSON.stringify(o));
+const name = id => PEOPLE[id][0];
+const SIDE = {l:'left', r:'right'};
+const other = side => side === 'l' ? 'r' : 'l';
+const count = w => (w.l ? 1 : 0) + (w.r ? 1 : 0);
+const role = id => PEOPLE[id][1];
+const EASE = 'cubic-bezier(.16,1,.3,1)';
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const DUR = REDUCED ? 0 : 260;
+
+/* ───────── one maker per frame ───────── */
+class Maker {
+ constructor(root){
+  this.root = root;
+  this.marchEl = root.querySelector('[data-march]');
+  this.trayEl = root.querySelector('[data-tray]');
+  this.trayList = root.querySelector('[data-traylist]');
+  this.scrollEl = root.querySelector('[data-scroll]');
+  this.toastEl = root.querySelector('[data-toast]');
+  this.state = clone(INITIAL);
+  this.undoState = null; this.changes = 0;
+  this.render();
+  this.bindDrag();
+  this.toastEl.querySelector('.undo').addEventListener('click', () => this.undo());
+  const close = root.querySelector('[data-close]'); if (close) close.addEventListener('click', () => root.classList.add('navmode'));
+  const open = root.querySelector('[data-open]'); if (open) open.addEventListener('click', () => root.classList.remove('navmode'));
+ }
+ /* ── where is a person? ── */
+ locate(id){
+  const t = this.state.tray.indexOf(id); if (t >= 0) return {tray:true, idx:t};
+  for (const s of this.state.sections) for (let w = 0; w < s.walks.length; w++){
+   if (s.walks[w].l === id) return {sec:s, w, side:'l'};
+   if (s.walks[w].r === id) return {sec:s, w, side:'r'};
+  }
+  return null;
+ }
+ /* remove a person from wherever they are; returns the partner left walking alone (if any) */
+ pull(id){
+  const at = this.locate(id); if (!at) return null;
+  if (at.tray){ this.state.tray.splice(at.idx,1); return null; }
+  const walk = at.sec.walks[at.w];
+  walk[at.side] = null;
+  if (count(walk) === 0){ at.sec.walks.splice(at.w,1); return null; }
+  return walk[other(at.side)];
+ }
+ stepOf(sec, w){ let n = 0; for (const s of this.state.sections){ if (s === sec) return n + w + 1; n += s.walks.length; } return n; }
+ totals(){ let walks = 0, people = 0; for (const s of this.state.sections){ walks += s.walks.length; for (const w of s.walks) people += count(w); } return {walks, people}; }
+
+ /* ── the moves — each is one drag of a name ── */
+ snapshot(){ this.undoState = clone(this.state); }
+ commit(msg){ this.changes++; this.renderFlip(); this.toast(msg); }
+ swap(a, b){
+  if (a === b) return;
+  const A = this.locate(a), B = this.locate(b); if (!A || !B) return;
+  this.snapshot();
+  if (A.tray && B.tray) return;
+  if (A.tray){ B.sec.walks[B.w][B.side] = a; this.state.tray[A.idx] = b; this.commit(`${name(a)} takes ${name(b)}’s place · ${name(b)} is not walking`); return; }
+  if (B.tray){ A.sec.walks[A.w][A.side] = b; this.state.tray[B.idx] = a; this.commit(`${name(b)} takes ${name(a)}’s place · ${name(a)} is not walking`); return; }
+  A.sec.walks[A.w][A.side] = b; B.sec.walks[B.w][B.side] = a;
+  this.commit(`${name(a)} and ${name(b)} traded places`);
+ }
+ moveToGap(id, secId, idx, side){
+  const sec = this.state.sections.find(s => s.id === secId); if (!sec) return;
+  const at = this.locate(id); if (!at) return;
+  if (!at.tray && at.sec === sec && count(at.sec.walks[at.w]) === 1 && at.side === side && (at.w === idx || at.w + 1 === idx)) return; /* same spot */
+  this.snapshot();
+  const fromTray = !!at.tray;
+  /* "walk alone will separate the 2 guests": out of its own pair into the gap right above or below = two rows, one after the other */
+  const split = !fromTray && at.sec === sec && count(at.sec.walks[at.w]) === 2 && (at.w === idx || at.w + 1 === idx);
+  /* if removing a lone walk above the target in the same section, the target index shifts up */
+  if (!fromTray && at.sec === sec && count(at.sec.walks[at.w]) === 1 && at.w < idx) idx--;
+  const partner = this.pull(id);
+  sec.walks.splice(idx, 0, W(side === 'l' ? id : null, side === 'r' ? id : null));
+  const step = this.stepOf(sec, idx);
+  const where = `step ${step}, ${SIDE[side]}`;
+  let msg = fromTray ? `${name(id)} added · walks alone at ${where}`
+          : split ? `${name(id)} and ${name(partner)} now walk alone`
+          : partner ? `${name(id)} moved to ${where} · ${name(partner)} now walks alone`
+          : `${name(id)} moved to ${where}`;
+  this.commit(msg);
+ }
+ join(id, secId, w, side){
+  const sec = this.state.sections.find(s => s.id === secId); if (!sec) return;
+  const target = sec.walks[w]; if (!target || target[side] || !target[other(side)] || target[other(side)] === id) return;
+  const mate = target[other(side)];
+  const at = this.locate(id); if (!at) return;
+  this.snapshot();
+  const fromTray = !!at.tray;
+  /* pulling a lone walk above the target in the same section shifts the target — so find it again by its walker */
+  const partner = this.pull(id);
+  const tgt = sec.walks.find(x => x[other(side)] === mate); if (!tgt) return;
+  tgt[side] = id;
+  let msg = `${name(id)} and ${name(mate)} walk together`;
+  if (fromTray) msg = `${name(id)} added · walks with ${name(mate)}`;
+  else if (partner) msg += ` · ${name(partner)} now walks alone`;
+  this.commit(msg);
+ }
+ toTray(id){
+  const at = this.locate(id); if (!at || at.tray) return;
+  this.snapshot();
+  const partner = this.pull(id);
+  this.state.tray.unshift(id);
+  this.commit(`${name(id)} is not walking` + (partner ? ` · ${name(partner)} now walks alone` : ''));
+ }
+ undo(){
+  if (!this.undoState) return;
+  this.state = this.undoState; this.undoState = null; this.changes = Math.max(0, this.changes - 1);
+  this.renderFlip(); this.hideToast();
+ }
+
+ /* ── render ── */
+ chip(id, withRole){
+  const el = document.createElement('div'); el.className = 'chip'; el.dataset.id = id;
+  const star = id === 'g1' || id === 'b1';
+  el.innerHTML = `<span class="nm">${name(id)}</span>` + (withRole || star ? `<span class="rl">${role(id)}</span>` : '');
+  if (star) el.classList.add('star');
+  return el;
+ }
+ render(){
+  const m = this.marchEl; m.innerHTML = '<div class="colhead"><span></span><span>Left</span><span>Right</span></div>';
+  let step = 0;
+  for (const s of this.state.sections){
+   const h = document.createElement('div'); h.className = 'sh';
+   h.innerHTML = `${s.name}<small>${s.walks.length ? s.walks.length + (s.walks.length === 1 ? ' walk' : ' walks') : 'no one yet'}</small>`;
+   m.appendChild(h);
+   const gap0 = document.createElement('div'); gap0.className = 'gap'; gap0.dataset.sec = s.id; gap0.dataset.idx = 0; m.appendChild(gap0);
+   s.walks.forEach((walk, w) => {
+    step++;
+    const row = document.createElement('div'); row.className = 'walk'; row.dataset.sec = s.id; row.dataset.w = w;
+    row.innerHTML = `<span class="num">${step}</span>`;
+    const slots = document.createElement('div'); slots.className = 'slots';
+    for (const side of ['l','r']){
+     if (walk[side]) slots.appendChild(this.chip(walk[side]));
+     else { const e = document.createElement('div'); e.className = 'slot empty'; e.dataset.sec = s.id; e.dataset.w = w; e.dataset.side = side; e.innerHTML = `<i class="def">walks alone</i><i class="alt">drop here to walk together</i>`; slots.appendChild(e); }
+    }
+    row.appendChild(slots); m.appendChild(row);
+    const g = document.createElement('div'); g.className = 'gap'; g.dataset.sec = s.id; g.dataset.idx = w + 1; m.appendChild(g);
+   });
+  }
+  /* tray */
+  const hint = this.trayList.querySelector('.hint');
+  this.trayList.innerHTML = ''; this.trayList.appendChild(hint);
+  for (const id of this.state.tray) this.trayList.appendChild(this.chip(id, true));
+  this.trayEl.classList.toggle('vacant', this.state.tray.length === 0);
+  /* counts */
+  const t = this.totals();
+  this.root.querySelectorAll('[data-sum]').forEach(e => e.textContent = `${t.walks} walks · ${t.people} walking · ${this.state.tray.length} not walking`);
+  this.root.querySelectorAll('[data-ct],[data-ct2]').forEach(e => e.textContent = `${t.walks} walks`);
+  this.root.querySelectorAll('[data-traycount]').forEach(e => e.textContent = this.state.tray.length ? `${this.state.tray.length} with a role` : '');
+  this.root.querySelectorAll('[data-count]').forEach(e => e.textContent = this.changes);
+ }
+ rects(){ const map = new Map(); this.root.querySelectorAll('.chip').forEach(c => map.set(c.dataset.id, c.getBoundingClientRect())); return map; }
+ renderFlip(){
+  const before = this.rects();
+  this.render();
+  if (!DUR) return;
+  this.root.querySelectorAll('.chip').forEach(c => {
+   const b = before.get(c.dataset.id); if (!b) { c.animate([{opacity:0, transform:'scale(.9)'},{opacity:1, transform:'none'}], {duration:DUR, easing:EASE}); return; }
+   const a = c.getBoundingClientRect(); const dx = b.left - a.left, dy = b.top - a.top;
+   if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+   c.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:'none'}], {duration:DUR, easing:EASE});
+  });
+ }
+ toast(msg){
+  clearTimeout(this.toastT);
+  this.toastEl.querySelector('.msg').textContent = msg;
+  this.toastEl.classList.add('on');
+  this.toastT = setTimeout(() => this.hideToast(), 4200);
+ }
+ hideToast(){ this.toastEl.classList.remove('on'); }
+
+ /* ── drag — pointer events; long-press to lift on touch so scrolling still works ── */
+ bindDrag(){
+  const root = this.root;
+  let pending = null, drag = null, raf = 0;
+  const onDown = e => {
+   if (e.button !== undefined && e.button !== 0) return;
+   const chip = e.target.closest('.chip'); if (!chip || !root.contains(chip)) return;
+   pending = {chip, id: chip.dataset.id, x: e.clientX, y: e.clientY, pid: e.pointerId, touch: e.pointerType !== 'mouse'};
+   if (pending.touch) pending.timer = setTimeout(() => lift(e.clientX, e.clientY), 250);
+   window.addEventListener('pointermove', onMove, {passive:false});
+   window.addEventListener('pointerup', onUp); window.addEventListener('pointercancel', onCancel);
+  };
+  const lift = (x, y) => {
+   if (!pending || drag) return;
+   const {chip, id} = pending; const r = chip.getBoundingClientRect();
+   const ghost = chip.cloneNode(true); ghost.classList.remove('lifting'); ghost.classList.add('ghost','lift');
+   ghost.style.width = r.width + 'px'; ghost.style.height = r.height + 'px'; ghost.style.transform = `translate(${r.left}px,${r.top}px)`;
+   document.body.appendChild(ghost);
+   chip.classList.add('lifting'); root.classList.add('dragging');
+   drag = {id, chip, ghost, ox: x - r.left, oy: y - r.top, x, y, target:null, scrollDir:0, pid: pending.pid};
+   ghost.style.transform = `translate(${x - drag.ox}px,${y - drag.oy}px)`;
+   if (navigator.vibrate) try { navigator.vibrate(10); } catch(_){}
+   document.addEventListener('touchmove', block, {passive:false});
+   pending.lifted = true;
+   loop();
+  };
+  const block = e => { if (drag) e.preventDefault(); };
+  const onMove = e => {
+   if (!pending) return;
+   if (!drag){
+    const d = Math.hypot(e.clientX - pending.x, e.clientY - pending.y);
+    if (pending.touch){ if (d > 8){ clearTimeout(pending.timer); cleanup(); } return; } /* a swipe — let it scroll */
+    if (d > 4) lift(e.clientX, e.clientY);
+    if (!drag) return;
+   }
+   e.preventDefault();
+   drag.x = e.clientX; drag.y = e.clientY;
+   drag.ghost.style.transform = `translate(${drag.x - drag.ox}px,${drag.y - drag.oy}px)`;
+   this.hitTest(drag);
+   const sr = this.scrollEl.getBoundingClientRect(); const edge = 56;
+   drag.scrollDir = (drag.y < sr.top + edge && drag.y > sr.top - 40) ? -1 : (drag.y > sr.bottom - edge && drag.y < sr.bottom + 40) ? 1 : 0;
+   if (drag.y > sr.bottom + 40 || drag.y < sr.top - 40) drag.scrollDir = 0;
+  };
+  const loop = () => {
+   if (!drag) return;
+   if (drag.scrollDir){
+    const sr = this.scrollEl.getBoundingClientRect();
+    const dist = drag.scrollDir < 0 ? (sr.top + 56 - drag.y) : (drag.y - (sr.bottom - 56));
+    this.scrollEl.scrollTop += drag.scrollDir * Math.min(18, 4 + dist / 4);
+    this.hitTest(drag);
+   }
+   raf = requestAnimationFrame(loop);
+  };
+  const onUp = () => {
+   if (!pending) return;
+   if (!drag){ cleanup(); return; }
+   const d = drag, t = d.target;
+   this.clearTargets();
+   cleanup();
+   if (t){
+    if (t.kind === 'swap') this.swap(d.id, t.id);
+    else if (t.kind === 'gap') this.moveToGap(d.id, t.sec, t.idx, t.side);
+    else if (t.kind === 'join') this.join(d.id, t.sec, t.w, t.side);
+    else if (t.kind === 'tray') this.toTray(d.id);
+   }
+   /* the ghost settles onto the name's place (new or old) — the chip stays faint until it lands */
+   const home = root.querySelector(`.chip[data-id="${d.id}"]`);
+   const ghost = d.ghost;
+   let done = false;
+   const land = () => { if (done) return; done = true; ghost.remove(); if (home) home.classList.remove('lifting'); };
+   if (home && DUR){
+    const r = home.getBoundingClientRect();
+    home.classList.add('lifting');
+    const anim = ghost.animate([{transform: ghost.style.transform, boxShadow: getComputedStyle(ghost).boxShadow},{transform:`translate(${r.left}px,${r.top}px)`, boxShadow:'0 0 0 0 rgba(0,0,0,0)'}], {duration: 220, easing: EASE, fill:'forwards'});
+    anim.onfinish = land; setTimeout(land, 300); /* belt and braces — a hidden tab may not fire onfinish */
+   } else land();
+  };
+  const onCancel = () => {
+   if (drag){ this.clearTargets(); drag.ghost.remove(); drag.chip.classList.remove('lifting'); }
+   cleanup();
+  };
+  const cleanup = () => {
+   if (pending && pending.timer) clearTimeout(pending.timer);
+   root.classList.remove('dragging');
+   cancelAnimationFrame(raf); drag = null; pending = null;
+   window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); window.removeEventListener('pointercancel', onCancel);
+   document.removeEventListener('touchmove', block);
+  };
+  root.addEventListener('pointerdown', onDown);
+  root.addEventListener('contextmenu', e => { if (e.target.closest('.chip')) e.preventDefault(); });
+  root.addEventListener('dragstart', e => e.preventDefault());
+  this._drag = () => drag;
+ }
+ clearTargets(){ this.root.querySelectorAll('.tgt,.gap.on').forEach(e => e.classList.remove('tgt','on','l','r')); }
+ hitTest(d){
+  const els = document.elementsFromPoint(d.x, d.y).filter(e => this.root.contains(e));
+  let t = null;
+  const fromTray = this.state.tray.includes(d.id);
+  for (const e of els){
+   if (e.classList.contains('chip') && e.dataset.id !== d.id){
+    const inTray = !!e.closest('.tray');
+    if (inTray){ if (!fromTray) t = {kind:'tray', el:this.trayEl}; break; } /* anywhere on the tray — even on a name there — means "not walking" */
+    t = {kind:'swap', id:e.dataset.id, el:e}; break;
+   }
+   if (e.classList.contains('empty')){ t = {kind:'join', sec:e.dataset.sec, w:+e.dataset.w, side:e.dataset.side, el:e}; break; }
+   if (e.classList.contains('gap')){ t = this.gapTarget(e, d.id, d.x); break; }
+   if (e.classList.contains('tray')){ if (!fromTray) t = {kind:'tray', el:e}; break; }
+   if (e.classList.contains('walk') || e.classList.contains('slots') || e.classList.contains('num') || e.classList.contains('sh') || e.classList.contains('march')){
+    /* in the list but not on a name — snap to the nearest line between walks */
+    let best = null, bd = 28;
+    this.marchEl.querySelectorAll('.gap').forEach(g => { const r = g.getBoundingClientRect(); const dy = Math.abs(d.y - (r.top + r.height / 2)); if (dy < bd){ bd = dy; best = g; } });
+    if (best) t = this.gapTarget(best, d.id, d.x);
+    break;
+   }
+  }
+  const prev = d.target;
+  const same = prev && t && prev.kind === t.kind && prev.el === t.el && prev.side === t.side;
+  if (same) return;
+  this.clearTargets();
+  d.target = t;
+  if (t){ t.el.classList.add('tgt'); if (t.kind === 'gap') t.el.classList.add('on', t.side); }
+ }
+ /* which half of the aisle is the finger over? the slots start after the step number */
+ sideAt(x){ const r = this.marchEl.getBoundingClientRect(); const left = r.left + 34; return x < left + (r.right - 8 - left) / 2 ? 'l' : 'r'; }
+ gapTarget(g, id, x){
+  const sec = g.dataset.sec, idx = +g.dataset.idx, side = this.sideAt(x);
+  const at = this.locate(id);
+  if (at && !at.tray && at.sec.id === sec && count(at.sec.walks[at.w]) === 1 && at.side === side && (at.w === idx || at.w + 1 === idx)) return null; /* already here */
+  return {kind:'gap', sec, idx, side, el:g};
+ }
+}
+
+const makers = {};
+document.querySelectorAll('#phone, #desk').forEach(r => makers[r.id] = new Maker(r));
+window.__march = makers; /* for the verification script */
+
+/* frame toggle */
+const frames = document.querySelectorAll('.frame'), segs = document.querySelectorAll('.seg button');
+function setView(v){
+ segs.forEach(b => b.classList.toggle('on', b.dataset.view === v));
+ frames.forEach(f => f.classList.toggle('on', v === 'both' || f.dataset.frame === v));
+
+}
+segs.forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
+/* defaults to Phone; ?view=desk opens the desktop frame */
+setView(new URLSearchParams(location.search).get('view') || 'phone');
+})();
+</script>
+</body>
+</html>
