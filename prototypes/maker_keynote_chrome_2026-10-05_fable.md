@@ -61,3 +61,19 @@ From Keynote's toolbar (the owner's reference `24.png`): a lone control gets its
 ## Not drawn (frame budget: "finish fast")
 
 Look sheet open · part sheet open · Event Bar on — all follow the same rule (a sheet in the workspace's lower third; the blue scene block stays) and the 2026-09-27 designs.
+
+## Round 2 (same day) — the lower third, re-ruled by the owner · frames 6–9
+
+**Owner, verbatim gist:** "top nav handles the overall like apply, what screen we are working on. On the bottom third, the menu on the left part will have Global Settings (Theme · Settings · Details) and Stages (Save the Date · RSVP · Invitation · The Day · Post Event). Then on the navigator, the first part will be what specific part of the menu picked — e.g. on RSVP there is the RSVP, when yes, when no — then the different scenes." · "when we pick on an element, the scenes will then become a slim toolbar? and the functions on the element chosen will show?" → then: "instead of showing a slim version, just collapse it on the left" · "we are only working on the lower third for all editing on mobile view" · "make sure it doesn't feel too cramped" · "find the best approach for this".
+
+**What changed vs round 1:** the bottom nav (Look · Details · Event Bar) is gone — those are now rows of ONE menu. The top nav's label is the screen you are on ("RSVP · RSVP form"). Everything editable lives in the lower third; nothing opens upward over the page, not even the menu.
+
+**Two arrangements tried at 375 × 667 (frame 9):**
+- A · menu button (72 px) beside the strip: 3 tiles of 76 px, labels 9.5 px — runner-up.
+- **B · a "where you are" row (menu ▾ + current pick, 44 px) above full-width 96 px tiles, 3½ showing — winner** (calm: bigger tiles, readable labels; reach: everything in two thumb rows; clarity: one line of words says where you are).
+
+**The element-picked state (frame 8, 375 × 667) — the owner's left-collapse, chosen:** menu + navigator collapse sideways into a ≈ 56–60 px left column (the element's mini-picture, its short name, ‹ › to step, × to finish; tap the picture = back to the navigator); the tools take the rest (≥ 285–300 px): shipped `Text · Motion · Arrange` segments + grouped rows (label left, dropdown/toggle right; sliders span; wide pickers scroll sideways inside); ~3 rows at rest without scrolling. The slim-bar variant (frame 9, lower pair) is the runner-up: full width for the tools but the bar eats 52 px, so only 2 rows at rest on a 667 phone.
+
+**Shipped sources for the new rows:** RSVP parts = `RSVP_STAGE_SCENES` (`lib/rsvp-stage.ts`: RSVP · After they submit · When they decline = the owner's "RSVP · when yes · when no"); RSVP scenes = `stage-scenes.ts` `rsvp:` list; stages = `MAKER_PAGE_STAGES` (maker-bar.ts); Theme = the Look door; Settings = the Event Bar switch (editor-shell.tsx) + "Who can view" + Prints (makerPageActions); Details = the Event Details door.
+
+**Interactive prototype (CSS only, animated):** `maker_lower_third_interactive_2026-10-05_fable.html` — see its own notes at the top of the file.
