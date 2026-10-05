@@ -1,5 +1,7 @@
 # Maker chrome — top nav · workspace · bottom nav (2026-10-05, Fable)
 
+> **✅ BUILT 2026-10-05** — round 2 (the lower third, frames 6–9 + `maker_lower_third_interactive_2026-10-05_fable.html`) and the round-1 top nav, in setnayan-platform `rd/maker-three-zones` (DECISION_LOG 2026-10-05 "BUILT — THE MAKER'S THREE ZONES"). Round 1's bottom nav (Look · Details · Event Bar items) was superseded by round 2 before it was built.
+
 Prototype: `maker_keynote_chrome_2026-10-05_fable.html` (CSS only, no script) · JPGs `-1` … `-5` (≤ 900 px wide, ≤ 2,500 px tall, ≤ 600 KB each).
 Extends `maker_toolbars_keynote_pages_2026-09-27.html` — does not contradict it: the part sheet's Text · Motion · Arrange sections (DECISION_LOG 2026-09-27) stay; "one picker, Stages + Pages" (2026-09-27) becomes the bottom nav's first item.
 
