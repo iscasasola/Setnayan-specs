@@ -1,3 +1,5 @@
+> ⛔ 2026-10-06: every **Maker** item in this plan is superseded by `EVENT_HUB_MAKER_STAGES_STUDIO_BUILD_PLAN_2026-10-06.md` (Stages | Studio, six PRs). The Apple check (Stage B) still runs LAST and is unaffected.
+
 # ⭐ FINAL BUILD SEQUENCE — 2026-09-29 (supersedes every table below; kept for history)
 
 **ORDER (owner 2026-09-29: "Finish all Event Hub first then Apple Check · So Stage A,C,E · Then D · Then B"): A → C → E → D → B.** The Apple check is LAST, no longer Thursday. Lane 2 runs in parallel.

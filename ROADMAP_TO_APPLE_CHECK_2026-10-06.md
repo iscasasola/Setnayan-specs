@@ -46,7 +46,7 @@ BUILD_PROMPTS P1a, P1b, P2, P3, P4, P5, P6a, P7, P9. Stage C was replaced by the
 
 Order = as listed. Each one goes into a train the usual way (draft PR + `do-not-auto-merge` → fold → every check green → deploy).
 
-### 2.1 Wedding March edits wait for Apply  ·  M
+### 2.1 Wedding March edits wait for Apply  ·  M  ·  🔗 VITAL TO THE NEW MAKER ("Apply publishes") — folded into the Stages | Studio build as PR 4b (Lane B, after PR 4).
 - **What:** every march step, including "walking / not walking", becomes a hub-draft entry; Apply replays the steps through
   the shipped actions. Remove `HubSavesImmediately` and `data-writes-live` from `details-march.tsx`, and lower the
   opt-in count in guard (22).
@@ -59,7 +59,7 @@ Order = as listed. Each one goes into a train the usual way (draft PR + `do-not-
 - **Owner question open:** a sponsor taken out of a pair prints **alone at the end of their section**. Their role still
   prints; the pairing doesn't. OK?
 
-### 2.2 Event Details rebuild — the leftovers of #6377  ·  L
+### 2.2 Event Details rebuild — the leftovers of #6377  ·  L  ·  ⛔ SUPERSEDED 2026-10-06 by the Stages | Studio build (`EVENT_HUB_MAKER_STAGES_STUDIO_BUILD_PLAN_2026-10-06.md`: Reveal → PR 3, cover/background + Kindly reply/RSVP → PR 4). Do not build separately.
 Notes: `build-sessions/EVENT-DETAILS-REBUILD-PROGRESS.md` on `rd/event-details-rebuild` ("NEXT SESSION" + "Controller sweep").
 - **Step 4 · cover:** the frame is removed; the cover wears the Global Background; Darker ↔ Lighter (Darker · Dark ·
   As is · Light · Lighter) with text that stays above the contrast floor, the page header included
@@ -106,6 +106,9 @@ Notes: `build-sessions/EVENT-DETAILS-REBUILD-PROGRESS.md` on `rd/event-details-r
 ---
 
 ## 3 · AFTER THE OWNER APPROVES THE STAGES | STUDIO PROTOTYPE — one build of the new Maker
+
+> ⛔ **SUPERSEDED 2026-10-06 — this whole section IS the Stages | Studio build now running** (`EVENT_HUB_MAKER_STAGES_STUDIO_BUILD_PLAN_2026-10-06.md`, six PRs). Two rows below are BUGS, not design, and were carried into PR 2's prompt so they are not lost: *Animate effects play in Preview/Play* and *Every style reachable in place*. Nothing here is built separately.
+
 
 **Status: PLANNING ONLY. Nothing here builds until the owner says "approve".**
 Prototype: `prototypes/maker_two_dropdowns_owner_wireframe_2026-10-06_fable.html`, plus sibling studies
@@ -218,7 +221,7 @@ Owner: *"wait after the test"*. All reuse shipped code. Batch by area.
 **5.4 Small fixes  ·  S each**
 - **People › Remove:** `withdrawConnection` should match either side and refuse honestly on 0 rows.
 - **Desktop rail event mark** `.fd-rctx-mark`: draw the real logo scaled to fit, with "MJ" as the fallback.
-- **Attire defaults by role**, venue extras, and the linked/"yours" colour behaviour. DECISION_LOG 2026-10-05 "THE 5 MAIN
+- ⛔ SUPERSEDED 2026-10-06 (Mood Board redraw row: each role told its own outfit, **no default**; lanes + "follows until set" → Maker PR 5). Was: **Attire defaults by role**, venue extras, and the linked/"yours" colour behaviour. DECISION_LOG 2026-10-05 "THE 5 MAIN
   COLOURS": *"right after test #2"*.
 - **Date change moves the whole schedule**, and the Apply sheet names each change. Owner yes, 4 Oct. Re-measure: may be
   partly shipped.

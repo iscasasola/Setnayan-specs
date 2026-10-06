@@ -1,3 +1,5 @@
+> ⛔ 2026-10-06: **P7 (Maker typing stays draft until Apply)** is superseded by `EVENT_HUB_MAKER_STAGES_STUDIO_BUILD_PLAN_2026-10-06.md` PR 2 (typing on the page waits for Apply). Every other P-item here is not Maker work and is unaffected.
+
 # Build prompts — Thu 1 Oct 2026 → Tue 6 Oct (Thursday + Sunday accounts)
 
 Written by the planner (Fable) 2026-10-01 from: `DECISION_LOG.md` rows dated 2026-09-30 and 2026-10-01 · `RELEASE_RSVP_INVITATION_2026-09-30.md` (7 steps) · `EVENT_TYPE_RELIGION_AUDIT_2026-09-30.md` · `ADMIN_AUDIT_2026-09-30.md` · `INTERACTION_RULES.md` · `CLOUD_PROMPTS_OCT1_2026.md` (G1–G9) · `setnayan-handoff-src/CURRENT-STATE.md` (live = `49693bf`). File paths were read from a detached worktree of `origin/main` at `49693bf3c`, never from `~`.
