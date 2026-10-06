@@ -96,7 +96,7 @@ Common to every PR: everything new sits behind `makerStagesStudioEnabled()`; wit
 - **Tests/guards:** passcode asked ONLY on the plain address — a request carrying `invite=`/a QR token never sees it, on every page incl. the Reply card (sabotage: ask it for `?invite=` → red) · Welcome never asks · the code is never stored or logged in clear (grep guard: no `passcode` column of type text without `_hash`) · hosts on their own personal link skip it · four per-guest parts render only when How guests get in = List only · Guests reply AND the guest row carries the fact; a visitor / approved request / open-QR guest sees none (one test per part) · Camera: the tab opens the camera page full screen with ✕ and no bar/footer (`hub-tabs.ts` already treats Camera as its own page); the three looks are a draft field named at Apply; Classic draws no logo and neutral corners · Reply card never renders Yes/No buttons.
 - **Check card:** Studio › Info › Your Event Hub › Passcode after Welcome ON, code 1234 → open the plain address in a private tab: Welcome opens, Details asks the code → open a guest's personal link: no code → The Day › Camera → the camera fills the screen, ✕ returns → Invitation › Me as a listed guest with a role: Your role · What to wear · Arrive by · Coming with you.
 
-**Open question the controller carries to the owner before PR 6 starts:** the single shared QR of the Accept/Open rules — plain address (asks) or QR (skips)? Default in the prompt: it SKIPS (it is a QR), flagged.
+**ANSWERED 2026-10-06 (owner: "yes to both defaults"): the shared QR SKIPS the passcode, and the phone remembers the code (httpOnly cookie). Was:** the single shared QR of the Accept/Open rules — plain address (asks) or QR (skips)? Default in the prompt: it SKIPS (it is a QR), flagged.
 
 ---
 
@@ -331,3 +331,9 @@ You are Builder S6 for the Setnayan platform (Next.js monorepo, apps/web).
 6. **Schedule "For ▾" and Mood Board's six new slots rely on shipped fields that must carry a role / a taxonomy category.** `lib/schedule-ros.ts` has `audience`; the slots must map to existing categories (2026-09-03). The prompts say STOP and report rather than add a column or a category — so PR 4/5 may come back with one deviation each instead of a silent invention.
 
 Out of scope and untouched: the seat plan editor (`seat-plan-phone.tsx`, `seating-editor.tsx`, `lib/seating.ts`) — the Studio tile opens it as shipped; the native camera (after the Apple check); Weight/B/I/U/spacing (retired); desktop layout (unchanged this round).
+
+
+---
+
+## 6 · After launch — PR 7 · `rd/retire-the-guided-setup` (owner 2026-10-06: *"retire the guided setup"*)
+Only after the flag is ON for every couple: delete `details-guide.tsx`, `details-guided-progress.ts`, `lib/details-guided-flow.ts` and their tests/guards (follow every guard that names them — `git grep` the file names across `apps/web` incl. baselines; regenerate generated baselines, never hand-edit), and redirect any `?guide=` address to the Studio home. No migration. Before launch: PRs 1–6 give it no door in the new Studio and leave the flag-off Maker untouched.
