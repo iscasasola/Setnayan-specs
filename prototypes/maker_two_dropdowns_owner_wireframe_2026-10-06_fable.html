@@ -510,6 +510,18 @@ body.shot .phone{border:0;border-radius:0;box-shadow:none;width:375px;height:812
 /* ONE ROW HEIGHT for the whole toolbar (owner 2026-10-06: "keep all rows consistent in height") —
    the top row, the tab bars, Edit in Studio, every dropdown / switch / slider row: --row, scaled by the phone */
 .phone{--row:44px}
+/* STUDIO — home tiles · slim "‹ Studio · Tool ▾" head · Seat plan + Wedding March take the whole screen */
+.shome-b{padding:12px 12px 24px!important}
+.shome-h{display:flex;align-items:baseline;justify-content:space-between;padding:4px 4px 12px}.shome-h b{font-family:var(--serif);font-size:26px;font-weight:500;color:var(--ink)}.shome-h span{font-size:12.5px;font-weight:600;color:var(--ok)}
+.shome{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.stile{min-height:112px;display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:12px 12px 12px 14px;border-radius:16px;background:#fff;border:1px solid var(--line);text-align:left;position:relative}
+.stile .st-top{width:100%;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}.stile .st-top .i{width:22px;height:22px;color:var(--gold)}
+.st-b{font-size:10.5px;font-weight:700;border-radius:999px;padding:3px 8px}.st-b.ok{background:#E8F1EA;color:var(--ok)}.st-b.miss{background:var(--cta-wash);color:var(--cta)}
+.stile b{font-size:15px;font-weight:600;color:var(--ink);line-height:1.2}.stile small{font-size:12px;color:var(--ink2);line-height:1.35}
+.stile.miss{border-color:#F0D3C7}.st-full{position:absolute;right:10px;bottom:9px;font-style:normal;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);font-weight:700}
+.sback{height:36px;display:flex;align-items:center;gap:2px;padding:0 10px 0 4px;border-radius:999px;font-size:13px;font-weight:600;color:var(--ink);flex:none}.sback .i{width:18px;height:18px}.sback.sm{width:44px;height:var(--row);justify-content:center;padding:0;border:1px solid var(--line);background:var(--pill)}
+.sdone{height:36px;display:flex;align-items:center;gap:5px;padding:0 14px;border-radius:999px;background:var(--ok);color:#fff;font-size:13px;font-weight:700;flex:none}.sdone .i{width:15px;height:15px}
+.phone.immersive .topnav{display:none}
 .ann{display:flex;gap:10px;padding:.5em 0;border-top:1px solid var(--line);text-align:left}.ann:first-of-type{border-top:0}.ann b{font-family:var(--serif);color:var(--cta);font-weight:500;flex:none;width:4.4em}.ann span{color:var(--ink)}.ann.old b,.ann.old span{color:var(--mute)}
 .rem{margin:0;padding-left:1.1em;text-align:left;color:var(--ink2);line-height:1.6}
 .nums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.nums b{display:block;font-family:var(--serif);font-size:2em;color:var(--dominant);font-weight:500;line-height:1}.nums span{font-size:.8em;color:var(--ink2)}
@@ -947,7 +959,7 @@ const EXTRA={venue:['Map',['Shown','Hidden']],dress:['Palette look',['Tags','Fab
 const LOOKOPT={bg:['Moving background','Still photo','Plain colour','Pattern'],tint:['Darker','As is','Lighter'],buttons:['Dominant','Accent','Ink'],font:FONTS.map(f=>f[0]),headings:['Same font','Serif headings','Script headings'],song:['Perfect — Ed Sheeran','Can\'t Help Falling in Love','Ikaw — Yeng Constantino','Upload a song…'],plays:['Tap to play','On open (muted until tap)','Never']};
 
 /* ───────── state ───────── */
-const S={side:'stages',stage:'std',sitem:'look',look:'background',sel:null,tool:'style',open:false,playing:false,menu:null,acc:null,returnTo:null,tab:{std:0,rsvpstage:0,inv:0,day:0,post:0},ltH:268,count:0,toast:null,confirm:false,focus:null,
+const S={side:'stages',stage:'std',sitem:'home',look:'background',sel:null,tool:'style',open:false,playing:false,menu:null,acc:null,returnTo:null,tab:{std:0,rsvpstage:0,inv:0,day:0,post:0},ltH:268,count:0,toast:null,confirm:false,focus:null,
  el:{}, items:{logo:true,mood:true,march:true,story:true,schedule:false,seats:true,gifts:false,rsvp:true},
  lookv:{bg:0,tint:1,buttons:0,font:0,headings:0,music:true,song:0,plays:0},
  info:{name:'Maria & Jose',note:'',opening:'Together with our families, we invite you to our wedding.',bring:'',who:'Anyone with the link',addr:'maria-and-jose',qr:true},
@@ -963,6 +975,7 @@ const undo=[];
 const page=$('#page');
 const elems=()=>$$('.el',page).filter(e=>pageElems().includes(e.dataset.el)).map(e=>e.dataset.el); /* this page's parts, DOM order — Arrange can reorder */
 const fullOn=()=>S.side==='studio'&&S.sitem!=='look';
+const immersiveOn=()=>S.side==='studio'&&IMMERSIVE.includes(S.sitem);
 const ready=k=>S.items[k];
 
 /* ───────── paint the page (static DOM, imperative) ───────── */
@@ -1088,7 +1101,7 @@ const tpill=()=>`<span class="tpill" role="tablist">${[['style','i-brush','Style
 const eye=()=>`<button class="rnd eyeb playb ${S.playing?'on':''}" data-act="play" aria-label="${S.sel?'Play this part':'Play the stage as guests see it'}" title="Play">${svg('i-play')}</button>`;
 function row1HTML(){
  if(S.side==='stages') return `<div class="row1">${ddp('item',SHORT[S.stage])}${tpill()}${eye()}</div>`;
- return `<div class="row1">${ddp('item',SHORT[S.sitem])}${ddp('look',LOOKS.find(l=>l[0]===S.look)[1],'sm')}${eye()}</div>`;
+ return `<div class="row1"><button class="sback sm" data-act="studiohome" aria-label="Studio home">${svg('i-left')}</button>${ddp('item',SHORT[S.sitem])}${ddp('look',LOOKS.find(l=>l[0]===S.look)[1],'sm')}${eye()}</div>`;
 }
 /* Stages — the tool's controls for the picked part */
 const strip=(on,tag)=>on.map(e=>{const el=$(`.el[data-el="${e}"]`,page);const d=ELS[e];return `<button class="th" data-act="pick:el:${e}"><span class="p"${tag?' style="font-size:11px"':''}>${tag?tag(e):svg(ICON[(d.jump||'').split(':')[1]]||(d.kind==='tool'?'i-brush':'i-form'))}</span><span>${el.dataset.name}</span>${!tag&&(d.jump||d.sup)?`<small>${d.sup?'Suppliers':d.jump.startsWith('info')?'Info':'Studio'}</small>`:''}</button>`;}).join('');
@@ -1217,9 +1230,20 @@ function infoForm(){
   <div class="quiet"><span><b>About</b> · Event Hub Pro ◆ · Made with Setnayan</span><span style="font-size:11px">v1</span></div>`;
 }
 let lastFull=null;
+/* STUDIO HOME — ten tiles, ordered the way an event gets made, each with its live status (owner 2026-10-06: "tiles") */
+const IMMERSIVE=['seats','march']; /* the two screen-hungry tools hide the top nav; ✓ Done returns (owner 2026-10-06: "yes for those 2") */
+const SHOME=['info','look','logo','mood','schedule','story','march','seats','gifts','rsvp'];
+function studioStatus(k){ const g=S.gifts;
+ return {info:`${esc(S.info.name)} · 12 June 2027`,look:`${LOOKOPT.bg[S.lookv.bg]} · ${FONTS[S.lookv.font][0]} · music ${S.lookv.music?'on':'off'}`,logo:'Monogram · M&amp;J',mood:'5 colours · outfits for 3 roles',schedule:`${S.sched.length} moments`,story:'3 moments',march:'18 walking · 3 not walking',seats:'12 guests not seated yet',gifts:[['gcash','GCash'],['maya','Maya'],['bank','Bank'],['paypal','PayPal']].filter(x=>g[x[0]]).map(x=>x[1]).join(' · ')||'No gift method yet',rsvp:`4 questions · by ${esc(S.rsvp.by)}`}[k]; }
+const sReady=k=>k==='schedule'?S.sched.length>0:k==='gifts'?['gcash','maya','bank','paypal'].some(x=>S.gifts[x]):!(k in S.items)||S.items[k]; /* ✓ / Missing follows the content itself */
+function studioHome(){ const done=SHOME.filter(sReady).length;
+ return `<div class="shome-h"><b>Studio</b><span>${done} of 10 ready</span></div><div class="shome">${SHOME.map(k=>{ const ok=sReady(k); const big=IMMERSIVE.includes(k);
+  return `<button class="stile ${ok?'':'miss'}" data-act="pick:studio:${k}"><span class="st-top">${svg(ICON[k])}<span class="st-b ${ok?'ok':'miss'}">${ok?'✓':'Missing'}</span></span><b>${esc(FULL[k])}</b><small>${studioStatus(k)}</small>${big?'<i class="st-full">Full screen</i>':''}</button>`; }).join('')}</div>`; }
 function fullHTML(){
  const k=S.sitem, isInfo=k==='info', anim=lastFull!==k; lastFull=k;
- const head=`<div class="fhead">${S.returnTo?`<button class="nb" data-act="backstage" aria-label="Back to the stage" style="width:40px">${svg('i-left')}</button>`:''}${ddp('item',SHORT[k])}<span class="fright saved" id="saveind">${svg('i-check')} Saved</span></div>`;
+  if(k==='home') return `<div class="full ${anim?'in':''}"><div class="fbody shome-b">${studioHome()}</div></div>`;
+ const imm=IMMERSIVE.includes(k);
+ const head=`<div class="fhead">${S.returnTo?`<button class="nb" data-act="backstage" aria-label="Back to the stage" style="width:40px">${svg('i-left')}</button>`:`<button class="sback" data-act="studiohome">${svg('i-left')}Studio</button>`}${ddp('item',SHORT[k])}${imm?`<button class="sdone" data-act="studiohome">${svg('i-check')}Done</button>`:`<span class="fright saved" id="saveind">${svg('i-check')} Saved</span>`}</div>`;
  if(isInfo) return `<div class="full ${anim?'in':''}">${head}<div class="fbody">${infoForm()}</div></div>`;
  const [body,bot]=EDITORS[k]();
  return `<div class="full ${anim?'in':''}">${head}<div class="fbody">${body}</div><div class="ebot">${bot}</div></div>`;
@@ -1256,6 +1280,7 @@ function renderPhone(){
  $('#ptop').innerHTML=topHTML('topnav');
  if(page.parentNode!==$('#pscroll')) $('#pscroll').appendChild(page);
  { const tabs=TABS[S.stage], t=S.tab[S.stage], g=$('#gtabs'); g.hidden=fullOn(); g.innerHTML=`<div class="cap">You're editing · <b>${esc(FULL[S.stage])}${tabs.length>1?' › '+esc(tabs[t][0]):''}</b></div>${tabs.length>1?`<div class="gbar">${tabs.map((x,i)=>`<button class="${i===t?'on':''} ${S.info.lock&&i>0&&S.stage!=='rsvpstage'?'lk':''}" data-act="gtab:${i}">${esc(x[0])}</button>`).join('')}</div>`:''}`; }
+ $('#phone').classList.toggle('immersive',immersiveOn());
  const lt=$('#plt'); lt.hidden=fullOn(); lt.innerHTML=ltHTML(); requestAnimationFrame(fillLayouts);
  const collapsed=S.side==='stages'&&!S.open; lt.classList.toggle('min',collapsed); const scr=$('#phone').clientHeight, k=1; /* owner 2026-10-06: 44 everywhere — sizes no longer scale with the phone */ S.ltH=Math.round(scr*0.5); $('#phone').style.setProperty('--k',k.toFixed(3)); lt.style.height=collapsed?Math.round(62*k)+'px':S.ltH+'px';
  { const h=$('#pfull'), st=h.querySelector('.fbody')?.scrollTop||0; h.innerHTML=fullOn()?fullHTML():''; const b=h.querySelector('.fbody'); if(b&&!S.focus) b.scrollTop=st; if(!fullOn()) lastFull=null; }
@@ -1394,6 +1419,7 @@ document.addEventListener('click',e=>{
   case 'sphase': S.sphase=a; paint(); break;
   case 'aphase': S.aphase=a; paint(); break;
   case 'typedone': endTyping(); break;
+  case 'studiohome': S.sitem='home'; S.menu=null; S.returnTo=null; S.focus=null; paint(); break;
   case 'camv': if(a==='tag'){ S.camView=3; paint(); break; } openSheet('Preview as',CAMV,S.camView,i=>{S.camView=i;paint();}); break;
   case 'camexit': S.tab[S.stage]=0; S.sel=null; S.open=false; paint(); toast('Camera closed — back to where they were'); break;
   case 'rcv': openSheet('Preview as',['Not replied yet','Replied yes','Replied no'],S.rcView,i=>{S.rcView=i;paint();}); break;
