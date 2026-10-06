@@ -510,6 +510,8 @@ body.shot .phone{border:0;border-radius:0;box-shadow:none;width:375px;height:812
 /* ONE ROW HEIGHT for the whole toolbar (owner 2026-10-06: "keep all rows consistent in height") —
    the top row, the tab bars, Edit in Studio, every dropdown / switch / slider row: --row, scaled by the phone */
 .phone{--row:44px}
+.sguide{width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;margin:0 0 12px;border-radius:16px;background:var(--ink);color:#fff;text-align:left}.sguide .sg-i{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;flex:none}.sguide .i{width:20px;height:20px}.sg-t{flex:1;display:flex;flex-direction:column}.sg-t b{font-size:15px}.sg-t small{font-size:12px;opacity:.75}
+.gbarx{flex:none;height:44px;display:flex;align-items:center;gap:8px;padding:0 10px;background:var(--ink);color:#fff}.gb-l{flex:1;text-align:left;color:rgba(255,255,255,.8);font-size:13px}.gb-l b{color:#fff}.gb-s{height:32px;padding:0 12px;border-radius:999px;color:rgba(255,255,255,.85);font-size:13px;font-weight:600}.gb-n{height:32px;padding:0 16px;border-radius:999px;background:#fff;color:var(--ink);font-size:13px;font-weight:700}
 /* STUDIO TOOLS — E-Gifts + RSVP: preview first, one card per thing, nothing sideways (owner 2026-10-06 "start with the smaller ones") */
 .gx-prev{margin:2px 0 14px}.gx-prev small{display:block;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);font-weight:700;margin:0 4px 6px}
 .gx-card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px;text-align:center}.gx-card b{font-family:var(--serif);font-size:22px;font-weight:500;color:var(--dominant)}.gx-card p{font-size:13.5px;color:var(--ink2);line-height:1.5;margin:6px 0 10px}
@@ -1260,17 +1262,23 @@ const SHOME=['info','look','logo','mood','schedule','story','march','seats','gif
 function studioStatus(k){ const g=S.gifts;
  return {info:`${esc(S.info.name)} · 12 June 2027`,look:`${LOOKOPT.bg[S.lookv.bg]} · ${FONTS[S.lookv.font][0]} · music ${S.lookv.music?'on':'off'}`,logo:'Monogram · M&amp;J',mood:'5 colours · outfits for 3 roles',schedule:`${S.sched.length} moments`,story:'3 moments',march:'18 walking · 3 not walking',seats:'12 guests not seated yet',gifts:[['gcash','GCash'],['maya','Maya'],['bank','Bank'],['paypal','PayPal']].filter(x=>g[x[0]]).map(x=>x[1]).join(' · ')||'No gift method yet',rsvp:`4 questions · by ${esc(S.rsvp.by)}`}[k]; }
 const sReady=k=>k==='schedule'?S.sched.length>0:k==='gifts'?['gcash','maya','bank','paypal'].some(x=>S.gifts[x]):!(k in S.items)||S.items[k]; /* ✓ / Missing follows the content itself */
+/* ONE BY ONE — the approved guided walk (DECISION_LOG 2026-09-29 "THE GUIDED FLOW IS APPROVED — AND ANY STEP CAN BE PICKED ANY TIME"): Next = the next unfinished, Skip keeps it, the label opens every step */
+const GUIDE=()=>{ const left=SHOME.filter(k=>k!=='look'&&!sReady(k)); return left.length?left:SHOME.filter(k=>k!=='look'); };
+function guideBar(){ const g=GUIDE(), i=Math.max(0,g.indexOf(S.sitem)), last=i>=g.length-1;
+ return `<div class="gbarx"><button class="gb-l" data-act="studiohome">One by one · <b>${i+1} of ${g.length}</b></button><button class="gb-s" data-act="guide:skip">Skip</button><button class="gb-n" data-act="guide:${last?'end':'next'}">${last?'Finish':'Next'} ›</button></div>`; }
 function studioHome(){ const done=SHOME.filter(sReady).length;
- return `<div class="shome-h"><b>Studio</b><span>${done} of 10 ready</span></div><div class="shome">${SHOME.map(k=>{ const ok=sReady(k); const big=IMMERSIVE.includes(k);
+ const left=SHOME.filter(k=>!sReady(k));
+ return `<div class="shome-h"><b>Studio</b><span>${done} of 10 ready</span></div><button class="sguide" data-act="guide:start"><span class="sg-i">${svg('i-walk')}</span><span class="sg-t"><b>${left.length?'Ask me one by one':'Go through it one by one'}</b><small>${left.length?left.length+' left — the next one opens, Skip keeps it for later':'All ten are ready — check each, one at a time'}</small></span>${svg('i-right')}</button><div class="shome">${SHOME.map(k=>{ const ok=sReady(k); const big=IMMERSIVE.includes(k);
   return `<button class="stile ${ok?'':'miss'}" data-act="pick:studio:${k}"><span class="st-top">${svg(ICON[k])}<span class="st-b ${ok?'ok':'miss'}">${ok?'✓':'Missing'}</span></span><b>${esc(FULL[k])}</b><small>${studioStatus(k)}</small>${big?'<i class="st-full">Full screen</i>':''}</button>`; }).join('')}</div>`; }
 function fullHTML(){
  const k=S.sitem, isInfo=k==='info', anim=lastFull!==k; lastFull=k;
   if(k==='home') return `<div class="full ${anim?'in':''}"><div class="fbody shome-b">${studioHome()}</div></div>`;
  const imm=IMMERSIVE.includes(k);
  const head=`<div class="fhead">${S.returnTo?`<button class="nb" data-act="backstage" aria-label="Back to the stage" style="width:40px">${svg('i-left')}</button>`:`<button class="sback" data-act="studiohome">${svg('i-left')}Studio</button>`}${ddp('item',SHORT[k])}${imm?`<button class="sdone" data-act="studiohome">${svg('i-check')}Done</button>`:`<span class="fright saved" id="saveind">${svg('i-check')} Saved</span>`}</div>`;
- if(isInfo) return `<div class="full ${anim?'in':''}">${head}<div class="fbody">${infoForm()}</div></div>`;
+ const gb=S.guide!=null?guideBar():'';
+ if(isInfo) return `<div class="full ${anim?'in':''}">${head}${gb}<div class="fbody">${infoForm()}</div></div>`;
  const [body,bot]=EDITORS[k]();
- return `<div class="full ${anim?'in':''}">${head}<div class="fbody">${body}</div><div class="ebot">${bot}</div></div>`;
+ return `<div class="full ${anim?'in':''}">${head}${gb}<div class="fbody">${body}</div><div class="ebot">${bot}</div></div>`;
 }
 /* ───────── menus (pop-over sheets) ───────── */
 function menuHTML(){
@@ -1444,7 +1452,8 @@ document.addEventListener('click',e=>{
   case 'aphase': S.aphase=a; paint(); break;
   case 'typedone': endTyping(); break;
   case 'rsvppreview': S.returnTo=null; S.side='stages'; S.stage='rsvpstage'; S.tab.rsvpstage=0; S.sel=null; S.open=false; paint(); toast('The RSVP form, as guests see it'); break;
-  case 'studiohome': S.sitem='home'; S.menu=null; S.returnTo=null; S.focus=null; paint(); break;
+  case 'guide': { const g=GUIDE(); if(a==='start'){ S.guide=0; S.sitem=g[0]; } else if(a==='end'){ S.guide=null; S.sitem='home'; toast('That was every step — Apply when you are ready'); } else { const i=g.indexOf(S.sitem); S.sitem=g[Math.min(g.length-1,i+1)]; } S.menu=null; paint(); } break;
+  case 'studiohome': S.guide=null; S.sitem='home'; S.menu=null; S.returnTo=null; S.focus=null; paint(); break;
   case 'camv': if(a==='tag'){ S.camView=3; paint(); break; } openSheet('Preview as',CAMV,S.camView,i=>{S.camView=i;paint();}); break;
   case 'camexit': S.tab[S.stage]=0; S.sel=null; S.open=false; paint(); toast('Camera closed — back to where they were'); break;
   case 'rcv': openSheet('Preview as',['Not replied yet','Replied yes','Replied no'],S.rcView,i=>{S.rcView=i;paint();}); break;
