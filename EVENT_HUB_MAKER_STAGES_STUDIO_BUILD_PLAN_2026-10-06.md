@@ -45,6 +45,8 @@ We rebuild the Event Hub Maker to the approved phone prototype in **six PRs, one
 
 ## 3 · Build sequence
 
+> **RUN ORDER CHANGED 2026-10-06 (owner: *"yes, merge overnight"* · *"if we do some in parallel, we can finish this earlier"*).** PR 1 alone → then TWO lanes at once: **Lane A** PR 2 → PR 3 · **Lane B** PR 4 (disjoint files). PR 5 takes the first free lane once #6359 has merged (a lane may first finish #6359 if it is still stuck). PR 6 waits for the owner's ok (migration). Max two builders at once (2026-09-11 weekly-cap lesson); the controller merges PRs 1–5 on all-green with no owner ok between steps, never a bypass. The second PR of a parallel pair to merge regenerates the generated baselines on the merged tree.
+
 Common to every PR: everything new sits behind `makerStagesStudioEnabled()`; with the flag off the shipped Maker renders unchanged (held by `lib/maker-stages-studio-ships-dark.test.ts` from PR 1 on). No PR touches `apply-pro-sheet.tsx`, `seat-plan-phone.tsx`, `seating-editor.tsx` or `lib/seating.ts`. No PR touches `lib/theme-colours.ts` or `lib/a-theme-preview-wears-the-palette.test.ts` while #6359 is open. Each PR: from fresh `origin/main` after the previous one MERGED; `gh pr list --state open` + `git worktree list` before starting; draft PR, auto-merge OFF and verified, label `do-not-auto-merge`; never merge or bypass — the controller merges after every required check is green and the owner replies "ok" to the check card.
 
 ### PR 1 · `rd/maker-stages-studio-frame` — the switch, the top nav, the half-screen panel, the one sheet, the Studio home
