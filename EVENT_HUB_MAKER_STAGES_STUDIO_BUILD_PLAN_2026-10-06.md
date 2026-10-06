@@ -45,6 +45,8 @@ We rebuild the Event Hub Maker to the approved phone prototype in **six PRs, one
 
 ## 3 · Build sequence
 
+> **ADDED 2026-10-07 (owner: "approve all") — PR 4c `rd/studio-missing-fields`, Lane B after PR 4 / 4b:** the fields PR 4 could not store (Schedule For ▾ · Love Story title + order · registry link · Look extras incl. Shade + single colour · QR on/off), ONE migration. Owner goal, verbatim: *"build the step 1-6 completely and all its fixes"*.
+
 > **FOLDED IN 2026-10-06 (owner: *"If there are builds for the event hub that will be vital for the new simple event hub maker, you have to tell me"*):**
 > - **PR 2 also fixes two shipped bugs** (roadmap §3, handoff NEXT BUILDS 3/4): (a) Animate effects must actually play in ▶ Play/Preview (they did nothing: Schedule › Animate · Editorial · follows scroll · fade/right/grow/blur); `pahina-motion.tsx`'s reveal safety net must not show sections instantly; "Cinematic" not clipped. (b) Every part's styles reachable from Style: the RSVP form's three styles (`FIXED_STYLE_SCENES` omits rsvp; the reply page passes no `sceneStyle`), the palette picker wherever Our colours shows (`layoutDrawsPaletteLook`), Dress code layouts B/C. And typed words stay DRAFT until ✓ Apply (was BUILD_PROMPTS_THU P7).
 > - **PR 4b · Lane B after PR 4 — the Wedding March waits for Apply** (roadmap §2.1): every march step incl. walking/not walking becomes a hub-draft entry (`lib/hub-draft.ts`, `hubDraftAction`, `planHubDraftApply`); Apply names it; Undo works. Without it the full-screen March breaks "Apply publishes".
