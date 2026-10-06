@@ -510,6 +510,7 @@ body.shot .phone{border:0;border-radius:0;box-shadow:none;width:375px;height:812
 /* ONE ROW HEIGHT for the whole toolbar (owner 2026-10-06: "keep all rows consistent in height") —
    the top row, the tab bars, Edit in Studio, every dropdown / switch / slider row: --row, scaled by the phone */
 .phone{--row:44px}
+.row1 .lt-tabs{flex:1;height:var(--row)!important;min-height:var(--row)}.row1 .lt-tabs button{flex:1;justify-content:center;font-size:12.5px;padding:0 4px}
 .pbg{position:absolute;left:0;right:0;top:0;height:160%;z-index:0;transition:filter .3s}.pbg i{position:absolute;inset:0}.pbg.mv{animation:lbmv 9s ease-in-out infinite alternate}
 .ws .scroll{z-index:1}
 #page.on-dark>*{--dominant:#F6EDF2;--ink:#FFFFFF;--ink2:rgba(255,255,255,.86);--mute:rgba(255,255,255,.7);--gold:#E9C987;color:#fff}
@@ -999,7 +1000,7 @@ const LOOKOPT={bg:['Moving background','Still photo','Plain colour','Pattern'],t
 /* ───────── state ───────── */
 const S={side:'stages',stage:'std',sitem:'home',look:'background',sel:null,tool:'style',open:false,playing:false,menu:null,acc:null,returnTo:null,tab:{std:0,rsvpstage:0,inv:0,day:0,post:0},ltH:268,count:0,toast:null,confirm:false,focus:null,
  el:{}, items:{logo:true,mood:true,march:true,story:true,schedule:false,seats:true,gifts:false,rsvp:true},
- lookv:{bg:0,parallax:false,tint:2,buttons:0,font:0,headings:0,music:true,song:0,plays:0},
+ lookv:{bg:0,parallax:false,tint:2,buttons:1,font:0,headings:0,music:true,song:0,plays:0},
  info:{name:'Maria & Jose',note:'',opening:'Together with our families, we invite you to our wedding.',bring:'',who:'Anyone with the link',addr:'maria-and-jose',qr:true},
  rsvp:{by:'15 May 2027',plus:true,meal:true,diet:false,song:false,note:true},
  gifts:{gcash:true,maya:false,bank:false,paypal:false,acct:'0917 ··· 1234 · Maria S.',thanks:'Your presence is the gift. Should you wish to give more, a cash gift is warmly welcome.'},
@@ -1144,7 +1145,7 @@ const tpill=()=>`<span class="tpill" role="tablist">${[['style','i-brush','Style
 const eye=()=>`<button class="rnd eyeb playb ${S.playing?'on':''}" data-act="play" aria-label="${S.sel?'Play this part':'Play the stage as guests see it'}" title="Play">${svg('i-play')}</button>`;
 function row1HTML(){
  if(S.side==='stages') return `<div class="row1">${ddp('item',SHORT[S.stage])}${tpill()}${eye()}</div>`;
- return `<div class="row1">${ddp('item',SHORT[S.sitem])}${eye()}</div>`;
+ return `<div class="row1">${lookTabs()}${eye()}</div>`; /* Look: the four tabs ARE the top row (owner 2026-10-06 "we dont need this, and place the 4 tabs here instead") */
 }
 /* Stages — the tool's controls for the picked part */
 const strip=(on,tag)=>on.map(e=>{const el=$(`.el[data-el="${e}"]`,page);const d=ELS[e];return `<button class="th" data-act="pick:el:${e}"><span class="p"${tag?' style="font-size:11px"':''}>${tag?tag(e):svg(ICON[(d.jump||'').split(':')[1]]||(d.kind==='tool'?'i-brush':'i-form'))}</span><span>${el.dataset.name}</span>${!tag&&(d.jump||d.sup)?`<small>${d.sup?'Suppliers':d.jump.startsWith('info')?'Info':'Studio'}</small>`:''}</button>`;}).join('');
@@ -1212,9 +1213,10 @@ function mainBgCss(){ const m=S.mainbg, base=PAL[3][1], c=PAL[m.col][1];
  return [c,`linear-gradient(135deg,${c},${base})`,`radial-gradient(ellipse at 50% 25%,${c},${base} 72%)`,`${PATS(PAL[0][1])[m.pat]},${base}`,LOOPS[m.loop],GALLERY[m.photo][1]][m.type]; }
 const BGPREV=['<span class="lb-mv"><i>▶</i></span>','<span class="lb-ph"></span>','<span class="lb-pl"></span>','<span class="lb-pt"></span>'];
 const JOBS=['Headings · the names','Cards · panels','Buttons · links','Background · paper','Ornaments · borders'];
+const lookTabs=()=>subtabs('look',S.look,[['background','Background'],['colours','Colours'],['font','Fonts'],['music','Music']]).replace('class="sub"','class="sub phases lt-tabs"');
 function lookPanel(){
  const v=S.lookv, tab=S.look, dd=(l,k,arr)=>`<div class="r"><span class="l">${l}</span><button class="dd" data-act="ldd:${k}"><span>${esc(arr[v[k]])}</span>${svg('i-down')}</button></div>`;
- const tabs=subtabs('look',tab,[['background','Background'],['colours','Colours'],['font','Fonts'],['music','Music']]).replace('class="sub"','class="sub phases"');
+ const tabs='';
  let b='';
  if(tab==='background'){ const m=S.mainbg, mv=m.type>=4, row=(l,ctrl)=>`<div class="r"><span class="l">${l}</span>${ctrl}</div>`, ddm=(k,arr)=>`<button class="dd" data-act="mbg:${k}"><span>${esc(arr[m[k]])}</span>${svg('i-down')}</button>`;
   b=`<div class="lk-explain"><b>The main background</b> — behind every stage and every page, the cover included. A part's own Background can still change just that part.</div>
