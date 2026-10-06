@@ -488,6 +488,40 @@ body.shot .phone{border:0;border-radius:0;box-shadow:none;width:375px;height:812
 .r2 .nb{width:38px;height:30px;border:1px solid var(--line);background:#fff;border-radius:999px;flex:none}
 .r2 .nb .i{width:16px;height:16px}
 .style2 .presets{flex:1;min-height:54px}
+/* THE TOOLBAR IS HALF THE SCREEN (owner 2026-10-06) — "maximize the spaces": every row shares the height,
+   every control grows with the phone (--k = screen height / 812, 0.82–1.22). No resize handle. */
+.sizes{display:flex;gap:6px;justify-content:center;margin:0 0 10px;flex-wrap:wrap}
+.sizes button{height:28px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:11.5px;font-weight:600;color:var(--ink2)}
+.sizes button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.phone{--k:1}
+.lt .grab{cursor:default}.lt .grab:before{display:none}
+.lt .ltin{gap:calc(8px*var(--k));padding:0 calc(10px*var(--k)) calc(8px*var(--k))}
+.lt .row1{height:calc(48px*var(--k))}
+.lt .row1 .ddp{height:calc(46px*var(--k));font-size:calc(11.5px*var(--k));letter-spacing:.06em}
+.lt .tpill .tb{width:calc(46px*var(--k));height:calc(40px*var(--k))}
+.lt .row1 .nb{width:calc(48px*var(--k));height:calc(46px*var(--k))}
+.lt .pane,.lt .look,.lt .nosel{gap:calc(8px*var(--k))}
+.lt .pane>.r,.lt .pane>.r2,.lt .pane>.ar,.lt .look>.r,.lt .acol>.dd,.lt .acol>.sub{flex:1 1 0!important;min-height:calc(40px*var(--k))!important;max-height:calc(64px*var(--k))}
+.lt .r .dd,.lt .r2 .dd,.lt .acol>.dd{height:auto;align-self:stretch;max-height:calc(56px*var(--k));font-size:calc(14px*var(--k));padding:0 calc(12px*var(--k)) 0 calc(14px*var(--k))}
+.lt .dd small{font-size:calc(9.5px*var(--k))}
+.lt .r .l,.lt .ar .l{font-size:calc(13px*var(--k));width:calc(70px*var(--k))}
+.lt .ar .ax{font-size:calc(13px*var(--k))}
+.lt .sub{height:auto;align-self:stretch;max-height:calc(52px*var(--k))}.lt .sub button{font-size:calc(13px*var(--k));padding:0 calc(12px*var(--k))}
+.lt .acol>.sub{display:flex}
+.lt .sw{width:calc(54px*var(--k));height:calc(32px*var(--k))}.lt .sw:after{width:calc(26px*var(--k));height:calc(26px*var(--k))}.lt .sw.on:after{left:calc(100% - 3px - 26px*var(--k))}
+.lt .dir{width:calc(40px*var(--k));height:calc(38px*var(--k));font-size:calc(17px*var(--k))}
+.lt .val{height:calc(38px*var(--k));min-width:calc(58px*var(--k));font-size:calc(13.5px*var(--k))}
+.lt .slider{height:calc(40px*var(--k))}.lt .slider input::-webkit-slider-thumb{width:calc(28px*var(--k));height:calc(28px*var(--k))}
+.lt .r2 .nb{width:calc(44px*var(--k));height:auto;align-self:stretch;max-height:calc(52px*var(--k))}
+.lt .acol{overflow-y:auto}
+.lt .ontext{font-size:calc(12px*var(--k));height:auto;line-height:1.35}
+.lt .nosel .hint{height:calc(40px*var(--k));font-size:calc(14px*var(--k))}
+.lt .th{width:calc(104px*var(--k));font-size:calc(12.5px*var(--k))}
+.lt .look .bigsw button{height:auto;align-self:stretch}
+.lt .msheet .mh{height:calc(48px*var(--k));font-size:calc(15px*var(--k))}
+.lt .mrow,#pmenu .mrow{min-height:calc(50px*var(--k));font-size:calc(15px*var(--k))}
+#pmenu .mrow .nm small{font-size:calc(11.5px*var(--k))}
+.lt .sws{flex:1;display:flex;justify-content:space-between;gap:calc(6px*var(--k))}.lt .swatch{flex:1;min-width:0;max-width:calc(44px*var(--k));height:calc(36px*var(--k))}
 /* EVERY pop-up opens from the bottom, in the thumb zone (owner 2026-10-06: "Every pop-up") */
 #pmenu .scrim{background:rgba(44,42,41,.22);animation:fade .2s}
 #pmenu .menu{left:0!important;right:0;bottom:0!important;top:auto!important;width:auto!important;max-width:none;min-width:0;max-height:62%!important;border-radius:20px 20px 0 0;border-bottom:0;padding:6px 8px 26px;animation:sheetup .26s var(--in)}
@@ -562,7 +596,7 @@ body.shot .phone{border:0;border-radius:0;box-shadow:none;width:375px;height:812
  </div>
 
  <div class="frames">
-  <div class="frame" id="phoneframe"><h2>Phone · 375 × 812 · the only view</h2>
+  <div class="frame" id="phoneframe"><h2>Phone · <span id="psz">375 × 812</span> · the only view</h2><div class="sizes" id="sizes"><button data-sz="375x667">iPhone SE</button><button class="on" data-sz="375x812">iPhone 13 mini</button><button data-sz="393x852">iPhone 15</button><button data-sz="430x932">Pro Max</button></div>
    <div class="phone" id="phone">
     <div class="status"><span>9:41</span><span class="bat"></span></div>
     <div class="pbody" id="pbody">
@@ -819,7 +853,7 @@ function lookPanel(){
 }
 function ltHTML(){
  const inner = S.side==='stages' ? (S.open?stagePanel():'') : lookPanel();
- return `<div class="grab" aria-label="Resize the toolbar"><i></i></div><div class="ltin">${row1HTML()}${inner}<div class="msheet" id="msheet"><div class="mh"><b id="mtitle"></b><button class="nb" data-act="mclose" aria-label="Close">${svg('i-x')}</button></div><div class="mlist" id="mlist"></div></div></div>`;
+ return `<div class="grab" aria-hidden="true"><i></i></div><div class="ltin">${row1HTML()}${inner}<div class="msheet" id="msheet"><div class="mh"><b id="mtitle"></b><button class="nb" data-act="mclose" aria-label="Close">${svg('i-x')}</button></div><div class="mlist" id="mlist"></div></div></div>`;
 }
 /* ───────── Studio — full-screen editors (own bottom) and the Info form ───────── */
 const chip=(n,r,star)=>`<div class="chip ${star?'star':''}"><div class="nm">${n}</div><div class="rl">${r}</div></div>`;
@@ -907,7 +941,7 @@ function renderPhone(){
  if(page.parentNode!==$('#pscroll')) $('#pscroll').appendChild(page);
  { const tabs=TABS[S.stage], t=S.tab[S.stage], g=$('#gtabs'); g.hidden=fullOn(); g.innerHTML=`<div class="cap">You're editing · <b>${esc(FULL[S.stage])}${tabs.length>1?' › '+esc(tabs[t][0]):''}</b></div>${tabs.length>1?`<div class="gbar">${tabs.map((x,i)=>`<button class="${i===t?'on':''}" data-act="gtab:${i}">${esc(x[0])}</button>`).join('')}</div>`:''}`; }
  const lt=$('#plt'); lt.hidden=fullOn(); lt.innerHTML=ltHTML();
- const collapsed=S.side==='stages'&&!S.open; lt.classList.toggle('min',collapsed); lt.style.height=collapsed?'62px':S.ltH+'px';
+ const collapsed=S.side==='stages'&&!S.open; lt.classList.toggle('min',collapsed); const scr=$('#phone').clientHeight, k=Math.max(.82,Math.min(1.22,scr/812)); S.ltH=Math.round(scr*0.5); $('#phone').style.setProperty('--k',k.toFixed(3)); lt.style.height=collapsed?Math.round(62*k)+'px':S.ltH+'px';
  { const h=$('#pfull'), st=h.querySelector('.fbody')?.scrollTop||0; h.innerHTML=fullOn()?fullHTML():''; const b=h.querySelector('.fbody'); if(b&&!S.focus) b.scrollTop=st; if(!fullOn()) lastFull=null; }
  $('#pchip').innerHTML=chipHTML();
  $('#pmenu').innerHTML=menuHTML()+confirmHTML(); placeMenu(pb);
@@ -926,7 +960,17 @@ let toastT; function toast(h){ S.toast=h; paint(); clearTimeout(toastT); toastT=
 /* ───────── selection on the page ───────── */
 function select(id,{scrollTo=true}={}){
  endTyping(); S.side='stages'; S.sel=id; S.open=true; S.menu=null; paint();
- if(scrollTo){ const el=$(`.el[data-el="${id}"]`,page), sc=el.closest('.scroll'); if(sc) sc.scrollTo({top:Math.max(0,el.offsetTop-18),behavior:SHOT?'auto':'smooth'}); }
+ if(scrollTo) centrePicked(id);
+}
+/* the picked part jumps to the CENTRE of the preview that is left above the toolbar (owner 2026-10-06:
+   "making sure they see what element they are editing"). Waits for the toolbar to finish growing, then centres;
+   a part taller than the preview lines up with its top. The page gets bottom room so the last part can centre too. */
+function centrePicked(id){
+ const go=()=>{ const el=$(`.el[data-el="${id}"]`,page); if(!el) return; const sc=el.closest('.scroll'); if(!sc) return;
+  const vis=sc.clientHeight; sc.style.paddingBottom=Math.round(vis/2)+'px';
+  const top=el.offsetTop, h=el.offsetHeight, y=h>=vis-24?top-12:top+h/2-vis/2;
+  sc.scrollTo({top:Math.max(0,y),behavior:SHOT?'auto':'smooth'}); };
+ if(SHOT) go(); else setTimeout(go,240);
 }
 function deselect(){ endTyping(); S.sel=null; S.open=false; S.menu=null; paint(); }
 function step(d){ const on=elems(); if(!S.sel){ select(on[0]); return; } const i=on.indexOf(S.sel), n=i+d; if(n>=0&&n<on.length){ select(on[n]); return; } const tabs=TABS[S.stage], t=S.tab[S.stage], nt=(t+d+tabs.length)%tabs.length; S.tab[S.stage]=nt; S.sel=null; paint(); const on2=elems(); select(d>0?on2[0]:on2[on2.length-1]); }
@@ -935,7 +979,7 @@ page.addEventListener('click',e=>{
  const el=e.target.closest('.el'); if(!el||S.playing) return;
  const id=el.dataset.el;
  if(id===S.sel){ const t=e.target.closest('.t'); if(t){ startTyping(t); return; } }
- if(id!==S.sel) select(id,{scrollTo:false});
+ if(id!==S.sel) select(id);
 });
 function startTyping(t){ if(typing===t) return; endTyping(); typing=t; t.dataset.was=t.textContent; t.setAttribute('contenteditable','true'); t.focus(); const sel=window.getSelection(), r=document.createRange(); r.selectNodeContents(t); r.collapse(false); sel.removeAllRanges(); sel.addRange(r); if(S.tool!=='text'){S.tool='text';paint();} const o=$('#ontext'); if(o){o.textContent='Typing on the page — tap elsewhere when done';o.classList.add('live');} t.addEventListener('blur',endTyping,{once:true}); }
 function endTyping(){ if(!typing) return; const t=typing; typing=null; t.removeAttribute('contenteditable'); if(t.textContent!==t.dataset.was){ const was=t.dataset.was; pushUndo(()=>{t.textContent=was;}); } const o=$('#ontext'); if(o){o.textContent='Words are typed on the page — tap the text of the picked part';o.classList.remove('live');} }
@@ -1071,7 +1115,7 @@ document.addEventListener('change',e=>{ if(e.target.id==='size'){ const was=size
 (function(){
  let sx=0,sy=0,on=false, drag=false, dsy=0, dsh=0, moved=false, lt=null;
  document.addEventListener('pointerdown',e=>{
-  const g=e.target.closest('.lt .grab'); if(g){ lt=g.closest('.lt'); if(lt.classList.contains('min')) return; drag=true; dsy=e.clientY; dsh=lt.getBoundingClientRect().height; moved=false; lt.classList.add('drag'); return; }
+  const g=null&&e.target.closest('.lt .grab'); if(g){ lt=g.closest('.lt'); if(lt.classList.contains('min')) return; drag=true; dsy=e.clientY; dsh=lt.getBoundingClientRect().height; moved=false; lt.classList.add('drag'); return; }
   const l=e.target.closest('.lt'); on=!!l && !e.target.closest('input[type=range],.msheet,.strip'); sx=e.clientX; sy=e.clientY;
  });
  document.addEventListener('pointermove',e=>{ if(!drag) return; const d=dsy-e.clientY; if(Math.abs(d)>4) moved=true; const h=Math.min(406,Math.max(268,dsh+d)); lt.style.height=h+'px'; S.ltH=h; });
@@ -1079,6 +1123,9 @@ document.addEventListener('change',e=>{ if(e.target.id==='size'){ const was=size
   if(!on) return; on=false; if(S.side!=='stages') return; const dx=e.clientX-sx, dy=e.clientY-sy; if(Math.abs(dx)>44&&Math.abs(dx)>1.6*Math.abs(dy)){ if(dx>0) step(1); else step(-1); } };
  document.addEventListener('pointerup',end); document.addEventListener('pointercancel',()=>{on=false;drag=false;});
 })();
+
+/* ───────── phone size — the toolbar is half of whatever screen it is on ───────── */
+document.getElementById('sizes').addEventListener('click',e=>{ const b=e.target.closest('[data-sz]'); if(!b) return; const [w,h]=b.dataset.sz.split('x'); const ph=document.getElementById('phone'); ph.style.width=w+'px'; ph.style.height=h+'px'; document.getElementById('psz').textContent=w+' × '+h; document.querySelectorAll('#sizes button').forEach(x=>x.classList.toggle('on',x===b)); paint(); });
 
 /* ───────── view · deep links ───────── */
 (function(){
@@ -1091,7 +1138,7 @@ document.addEventListener('change',e=>{ if(e.target.id==='size'){ const was=size
  if(h.get('look')){ S.look=h.get('look'); S.side='studio'; S.sitem='look'; }
  if(h.get('tool')) S.tool=h.get('tool');
  if(h.get('focus')) S.focus=h.get('focus');
- if(h.get('lt')==='half') S.ltH=406;
+ /* lt=half retired: the toolbar is always half the screen */
  paint();
  if(h.get('el')) select(h.get('el'));
  if(h.get('open')){ S.open=true; paint(); }

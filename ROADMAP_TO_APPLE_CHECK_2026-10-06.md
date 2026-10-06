@@ -125,7 +125,7 @@ Owner, verbatim: *"this is just planning"*. The pending design change: Animate a
 | Item | Owner / row | Est. |
 |---|---|---|
 | Toolbar + pieces + Style/Text/Animate (supersedes Text · Motion · Arrange) | planning row 10-06 | L |
-| Lower third resizable: drag the top edge up to half the screen; tap toggles; size remembered per device | *"Drag the edge to resize"* — "THE LOWER THIRD CAN BE RESIZED" | S |
+| **Bottom toolbar = 50% of the screen** (supersedes "resizable lower third", owner 06 Oct evening, prototype): no resize; every control scales with the phone's height and the rows fill the half (*"maximize the spaces"*); the picked part jumps to the centre of the preview above it; every pop-up rises from the bottom (phone) | prototype `maker_two_dropdowns_owner_wireframe_2026-10-06_fable.html` | M |
 | Animate effects play in Preview/Play (owner desktop screenshot: Schedule › Animate · Editorial · follows scroll · fade/right/grow/blur did nothing); `pahina-motion.tsx` reveal safety net must not show sections instantly; "Cinematic" clipped; pill rows → dropdowns | handoff NEXT BUILDS 3 | M |
 | Every style reachable in place: RSVP form's 3 styles (`FIXED_STYLE_SCENES` omits rsvp; the reply page passes no sceneStyle) · palette picker wherever Our colours shows (`layoutDrawsPaletteLook`) · Dress code layouts B/C · cover designs from the cover tap · guest-style tab bar page picker · tap-to-edit words on RSVP form / When yes / When no (`data-rsvp-word`) | handoff NEXT BUILDS 4 | M |
 | Tap-to-edit words move to Studio | planning | S |
