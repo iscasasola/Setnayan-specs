@@ -578,7 +578,7 @@ body.shot .phone{border:0;border-radius:0;box-shadow:none;width:375px;height:812
 .sp-door.side{align-self:flex-end}.sp-els{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.sp-els span{font-size:11px;padding:6px 10px;border-radius:8px;background:var(--page);border:1px solid var(--line2)}
 .sp-b.grow{flex:1}.sp-b.okc{background:#E8F3EC;color:var(--ok);border-color:#CFE6D7}.sp-list{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}.sp-lrow{min-height:var(--row);display:flex;align-items:center;gap:10px;padding:8px 12px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;font-family:inherit}.sp-lrow b{font-size:14px;min-width:84px}.sp-lrow span{flex:1;font-size:12.5px;color:var(--ink2)}.sp-lrow .i{width:16px;height:16px}
 .sp-doors{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 12px 6px;padding:10px 12px;border-radius:12px;background:var(--gold-wash);font-size:12.5px}.sp-doors button{height:32px;padding:0 10px;border-radius:999px;border:1px solid var(--line2);background:#fff;font-family:inherit;font-weight:600;font-size:12px}
-.spc-wrap{position:relative;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}.spc{max-height:440px;overflow:auto;padding:10px;-webkit-overflow-scrolling:touch}
+.spc-wrap{position:relative;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}.spc{overflow:auto;padding:10px;display:flex;align-items:flex-start;-webkit-overflow-scrolling:touch}
 .spc-room{position:relative;background:repeating-linear-gradient(0deg,#FBF8F3 0 9px,#F6F1E9 9px 10px),#FBF8F3;border:2px solid var(--line2);border-radius:6px;margin:auto}
 .spc-stage,.spc-dance,.spc-door,.spc-el{position:absolute;display:flex;align-items:center;justify-content:center;border-radius:6px}.spc-stage{background:var(--gold-wash);border:1px solid var(--gold-soft)}.spc-dance{border:2px dashed var(--line2);background:rgba(255,255,255,.6)}.spc-door{background:var(--ink);border-radius:2px}.spc-el{background:#EFE9DF;border:1px solid var(--line2)}
 .spc-stage span,.spc-dance span,.spc-el span{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-weight:700;white-space:nowrap}.spc-stage span{color:var(--gold)}.spc-door span{position:absolute;top:-14px;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);white-space:nowrap}
@@ -1448,7 +1448,8 @@ function spAutoArrange(){ const p=S.sp, G=p.G; G.forEach(g=>g.t=null);
    SLIDES BACK when dropped on another table, the stage or the dance floor ("undroppable when overlap", 2026-07-17), stays inside the walls,
    and lines up with a neighbour's centre when close. The 3D view draws the SAME positions — one plan, two views. ── */
 const SP_FOOT={0:{6:2.3,8:2.5,10:2.8,12:3.1},1:{6:2.0,8:2.6,10:3.2,12:3.8},2:{6:4.4,8:4.4,10:4.4,12:4.4},3:{6:2.4,8:2.4,10:2.4,12:2.4}}; /* TABLE_FOOTPRINT_M, metres with chairs */
-const spRoomWL=()=>{ const p=S.sp; if(p.roomSrc) return [42,28]; const m=SP_ROOMS[p.room][1].match(/(\d+) × (\d+)/); return [+m[1],+m[2]]; };
+/* drawn PORTRAIT on the phone — the stage on the short wall, the long side down the screen (owner 2026-10-06 "maximize space") */
+const spRoomWL=()=>{ const p=S.sp; let a,b; if(p.roomSrc){ a=42; b=28; } else { const m=SP_ROOMS[p.room][1].match(/(\d+) × (\d+)/); a=+m[1]; b=+m[2]; } return [Math.min(a,b),Math.max(a,b)]; };
 function spFixed(){ const p=S.sp, [W,L]=spRoomWL(), sw=Math.min(10,W*.4), F=[];
  const st=p.stage===0?{x:W/2,y:1.5,w:sw,h:3,k:'stage'}:p.stage===1?{x:1.5,y:L/2,w:3,h:Math.min(10,L*.4),k:'stage'}:{x:W-1.5,y:L/2,w:3,h:Math.min(10,L*.4),k:'stage'}; F.push(st);
  const fwd=(d)=>p.stage===0?{x:W/2,y:3+d}:p.stage===1?{x:3+d,y:L/2}:{x:W-3-d,y:L/2};
@@ -1495,7 +1496,7 @@ function spPlace(){ const p=S.sp, [W,L]=spRoomWL(), gap=[0.6,0.9,1.2][p.walk], f
   for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){ const cell={x:x0+sx*(c+.5),y:y0+sy*(r+.5),w:tw,h:th}; if(!placed.some(o=>spHit(cell,o,gap*0.5))) cells.push(cell); } }
  list.forEach((t,k)=>{ const c=cells[k]||{x:W/2,y:L+th}; t.x=c.x; t.y=c.y; if(t.y+spBox(t).h/2>L) p.overflow=true; }); }
 function spCanvas(three){ const p=S.sp, T=p.T, G=p.G, [W,L]=spRoomWL(), z=p.zoom||1;
- const maxF=Math.max(...T.filter(t=>!t.sweet).map(t=>Math.max(t.w,t.h)/(t.len||1)),2.5), sc=(Math.min(318,(document.querySelector(".fbody")||{clientWidth:350}).clientWidth-46))/W*z; /* opens fitted to the phone; + zooms in to the chairs */
+ const maxF=Math.max(...T.filter(t=>!t.sweet).map(t=>Math.max(t.w,t.h)/(t.len||1)),2.5), availW=Math.min(330,(document.querySelector(".fbody")||{clientWidth:350}).clientWidth-34), availH=Math.max(260,(S.sp.availH||460)-22), sc=Math.min(availW/W,availH/L)*z; /* fill the space left on the phone, width and height */ /* opens fitted to the phone; + zooms in to the chairs */
  const box=(o,cls,inner='',attr='')=>`<div class="${cls}" ${attr} style="left:${(o.x-o.w/2)*sc}px;top:${(o.y-o.h/2)*sc}px;width:${o.w*sc}px;height:${o.h*sc}px">${inner}</div>`;
  const fixed=spFixed().filter(f=>f.k!=='sweet').map(f=>box(f,'spc-'+f.k,f.k==='stage'?'<span>Stage</span>':'<span>Dance floor</span>')).join('');
  const GC={Couple:'#C9A86A',Family:'#6E5A80',Sponsors:'#A9834B',Entourage:'#B2687A',Friends:'#7A8B6F',Office:'#5D7C8C'};
@@ -1513,8 +1514,8 @@ function spCanvas(three){ const p=S.sp, T=p.T, G=p.G, [W,L]=spRoomWL(), z=p.zoom
  return {inner,sc,W,L}; }
 function spPlan(){ const p=S.sp, T=p.T, G=p.G, seated=G.filter(g=>g.t!=null).length, un=G.length-seated, cap=T.reduce((a,t)=>a+t.cap,0);
  const cv=spCanvas(false);
- const plan2d=`<div class="spc-wrap"><div class="spc" id="spc">${cv.inner}</div><div class="spc-z"><button data-act="spzoom:-1" aria-label="Zoom out">−</button><button data-act="spzoom:1" aria-label="Zoom in">+</button></div></div>
-  ${p.linkFrom!=null?`<div class="spc-link">Tap the table to join Table ${p.T[p.linkFrom].n} <button data-act="splinkx">Cancel</button></div>`:''}<p class="spc-hint">Drag a table to move it · tap a chair to move that guest · tap a table for who sits there${p.overflow?' · <b style="color:var(--cta)">Some tables run past the room — move them, or pick a bigger room</b>':''}</p>`;
+ const plan2d=`<div class="spc-wrap"><div class="spc" id="spc" style="height:${S.sp.availH||460}px">${cv.inner}</div><div class="spc-z"><button data-act="spzoom:-1" aria-label="Zoom out">−</button><button data-act="spzoom:1" aria-label="Zoom in">+</button></div></div>
+  ${p.linkFrom!=null?`<div class="spc-link">Tap the table to join Table ${p.T[p.linkFrom].n} <button data-act="splinkx">Cancel</button></div>`:''}<p class="spc-hint">Drag a table · tap a chair to move a guest · tap a table to edit it${p.overflow?' · <b style="color:var(--cta)">Some tables run past the room — move them, or pick a bigger room</b>':''}</p>`;
  const list=`<div class="sp-list">${T.map((t,i)=>{ const at=G.filter(g=>g.t===i); return `<button class="sp-lrow" data-act="sptable:${i}"><b>${spTName(i).replace('the s','S')}</b><span>${at.length}/${t.cap}${at.length?' · '+esc(at.slice(0,3).map(g=>g.n.split(' ')[0]).join(', '))+(at.length>3?'…':''):' · empty'}</span>${svg('i-right')}</button>`; }).join('')}</div>`;
  return [`<div class="sp-head"><b>Seat plan · ${T.filter(t=>!t.sweet).length} tables${T.some(t=>t.sweet)?' + sweetheart':''}</b><small>${seated} seated · ${un} not seated yet</small>
    ${p.lastAuto?`<div class="sp-auto">Arranged by ${p.policy===2?'stage order':'side and family'} · <button data-act="spautoundo">Undo</button></div>`:''}
@@ -1811,7 +1812,9 @@ document.addEventListener('pointerup',e=>{ if(!spDrag) return; const d=spDrag; s
 document.addEventListener('click',e=>{ if(spNoClick){ e.stopPropagation(); e.preventDefault(); spNoClick=false; } },true);
 /* keep the floor's scroll where the couple left it across repaints */
 document.addEventListener('scroll',e=>{ if(e.target&&e.target.id==='spc'){ S.sp.sx=e.target.scrollLeft; S.sp.sy=e.target.scrollTop; } },true);
-const _spPaint=paint; paint=function(){ _spPaint(); const c=document.getElementById('spc'); if(c&&S.sp){ c.scrollLeft=S.sp.sx||0; c.scrollTop=S.sp.sy||0; } };
+const _spPaint=paint; paint=function(){ _spPaint(); const c=document.getElementById('spc'); if(c&&S.sp){ c.scrollLeft=S.sp.sx||0; c.scrollTop=S.sp.sy||0;
+  const fb=c.closest('.fbody'); if(fb){ const foot=fb.querySelector('.sp-foot'), hint=fb.querySelector('.spc-hint'); const h=Math.floor(fb.clientHeight-(c.getBoundingClientRect().top-fb.getBoundingClientRect().top)-(foot?foot.offsetHeight+10:0)-(hint?hint.offsetHeight+6:0)-14);
+   if(h>260&&Math.abs(h-(S.sp.availH||0))>6){ S.sp.availH=h; _spPaint(); const c2=document.getElementById('spc'); if(c2){ c2.scrollLeft=S.sp.sx||0; c2.scrollTop=S.sp.sy||0; } } } } };
 let toastT; function toast(h){ S.toast=h; paint(); clearTimeout(toastT); toastT=setTimeout(()=>{S.toast=null;paint();},2400); }
 
 /* ───────── selection on the page ───────── */
