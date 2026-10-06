@@ -86,6 +86,23 @@ Notes: `build-sessions/EVENT-DETAILS-REBUILD-PROGRESS.md` on `rd/event-details-r
   Resolve the public id first, and add a `readEventTypeRow`-style `isUuid` guard.
 - **Done when:** the Vercel group stops recurring; a unit test passes on the public-id path.
 
+### 2.5 The guest camera — the best quality a browser allows  ·  L (measure first)
+- **Why:** owner, 06 Oct: *"we want to be able to provide the best quality at browser mode too. the best there can be."*
+- **Today (shipped, `papic-guest-capture.tsx` + `lib/use-papic-camera.ts`):**
+  - stills are a frame of the video stream (`ideal` 2560×1440 ≈ 3.7 MP)
+  - no flash/torch, no tap-to-focus or exposure, no night/HDR, no pinch zoom
+  - 0.5×/1× only where the phone exposes it (never on iPhone Safari)
+  - clips max 10 s and un-styled
+- **Build, each measured on a real iPhone + a real Android before and after:**
+  1. **Full-sensor stills where the browser allows.** Use `ImageCapture.takePhoto()` on Android Chrome; the hook's own comment says this was deferred only because iOS lacks it. iOS keeps the video frame.
+  2. **Ask for the largest stream the phone offers.** Read `track.getCapabilities()` max width/height instead of a fixed `ideal`.
+  3. **Tap to focus + exposure** (`pointsOfInterest` / `focusMode` / `exposureCompensation`) where the track supports it.
+  4. **Torch while recording** where supported. **Pinch zoom** from the track's `zoom` range.
+  5. **Low light:** run the existing `/papic/lightcheck` probe in a dark room on both phones first (it is the gate named in `Papic_Low_Light_Council_Verdict_2026-07-21`). Only then decide multi-frame stacking (cost it at 3.7 MP per frame, per the `papic-photo-styles.ts` docblock).
+  6. **Fix:** guest clip posters skip the couple's Look (`grabPoster` never calls `applyPapicStyle`). Correct the stale "5 s", "1 photo · 7 clip" and "1080p" comments.
+- **Done when:** a side-by-side contact sheet (old vs new, day and dark room, iPhone and Android) shows the gain, and the guest flow is unchanged (tap = photo, hold = 10 s video, Challenge, Tag who's in it, offline queue).
+- **Honest ceiling:** on iPhone, a web page cannot get full-sensor stills, extra lenses, flash or night mode. That is what §7's native camera is for.
+
 ---
 
 ## 3 · AFTER THE OWNER APPROVES THE STAGES | STUDIO PROTOTYPE — one build of the new Maker
@@ -270,6 +287,7 @@ Apple approves the binary, every website change reaches iOS users without a new 
 
 | Item | Owner / source |
 |---|---|
+| **Native Papic camera (Phase 2)** — full sensor, every lens (0.5× · 2×/3×), the phone’s own night mode / HDR / stabilisation, flash, background upload. Owner, 06 Oct: *"allow this after the apple check when we have a native app"*. `@capacitor/camera` is declared but has zero importers (`app-install-banner.tsx`). | owner 2026-10-06 |
 | **App-Bound Domains** (`WKAppBoundDomains`). List every in-app domain (setnayan.com, www, Supabase auth, checkout host) and test on a device. | *"we do it after apple check"* — DECISION_LOG 2026-10-02 |
 | **NFC write on:** `NEXT_PUBLIC_NFC_WRITE_ENABLED=true` (NFC-OWNER-STEPS step 9) | after approval |
 | **Setnayan's name on Google's sign-in screen** (Supabase custom domain) | *"setnayan name after apple check"* |
