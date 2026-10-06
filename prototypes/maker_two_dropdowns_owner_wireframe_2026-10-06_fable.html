@@ -524,6 +524,14 @@ body.shot .phone{border:0;border-radius:0;box-shadow:none;width:375px;height:812
 /* ONE ROW HEIGHT for the whole toolbar (owner 2026-10-06: "keep all rows consistent in height") —
    the top row, the tab bars, Edit in Studio, every dropdown / switch / slider row: --row, scaled by the phone */
 .phone{--row:44px}
+.lt .lcar{flex:none;display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;padding:2px 2px 4px;margin:0 -2px}
+.lt .lcar::-webkit-scrollbar{display:none}
+.lcard{flex:none;width:62%;scroll-snap-align:center;display:flex;flex-direction:column;gap:6px;align-items:stretch;background:none;padding:0}
+.lprev{display:block;position:relative;height:104px;border-radius:14px;background:var(--page);border:1px solid var(--line);overflow:hidden;pointer-events:none}
+.lscale{position:absolute;left:0;top:0;transform-origin:0 0}
+.lcard.on .lprev{border:2px solid var(--cta);box-shadow:0 0 0 3px var(--cta-wash)}
+.lname{font-size:13px;font-weight:600;color:var(--ink2);text-align:center;height:18px;line-height:18px}
+.lcard.on .lname{color:var(--ink)}
 .lt .strip{flex:none;height:132px}.lt .nosel{justify-content:flex-start} /* ONE HEIGHT: 44 — Apple's tap target; top nav + every toolbar row (owner 2026-10-06) */
 .lt .row1{height:var(--row)}
 .lt .row1 .ddp,.lt .row1 .nb,.lt .tpill{height:var(--row)}
@@ -756,6 +764,18 @@ const fullOn=()=>S.side==='studio'&&S.sitem!=='look';
 const ready=k=>S.items[k];
 
 /* ───────── paint the page (static DOM, imperative) ───────── */
+/* LAYOUT = a carousel of EXACT previews (owner 2026-10-06: "so they can see the exact preview"):
+   each card is a copy of the real part on the page, with that layout applied, scaled down to fit. */
+function fillLayouts(){
+ const car=$('.lcar'); if(!car) return; const id=car.dataset.lay, src=$(`.el[data-el="${id}"]`,page); if(!src) return;
+ const pcs=getComputedStyle(page), W=src.offsetWidth||page.clientWidth;
+ $$('.lcard',car).forEach((card,i)=>{ const box=card.querySelector('.lprev'); box.innerHTML='';
+  const c=src.cloneNode(true); c.classList.remove('on'); c.removeAttribute('id'); c.hidden=false; c.dataset.preset=i; c.style.cssText+=';margin:0;width:'+W+'px;animation:none;opacity:1;transform:none';
+  const wrap=document.createElement('div'); wrap.className='lscale'; wrap.style.cssText=`width:${W}px;font-family:${pcs.fontFamily};color:${pcs.color};background:${pcs.backgroundColor}`; wrap.appendChild(c); box.appendChild(wrap);
+  const bw=box.clientWidth, bh=box.clientHeight, k=Math.min(bw/W, bh/Math.max(1,c.offsetHeight));
+  wrap.style.transform=`translate(${(bw-W*k)/2}px,${(bh-c.offsetHeight*k)/2}px) scale(${k})`; });
+ const on=$('.lcard.on',car); if(on) car.scrollLeft=on.offsetLeft-(car.clientWidth-on.offsetWidth)/2;
+}
 function paintEl(id){
  const el=$(`.el[data-el="${id}"]`,page), s=S.el[id]; el.dataset.preset=s.preset;
  const c=PAL[s.bgc][1];
@@ -819,7 +839,7 @@ function stagePanel(){
   if(S.sphase==='look'){
    const ex=EXTRA[id];
    const ed=d.jump?`<button class="jump" data-act="editin:${d.jump}">${svg(d.jump.startsWith('info')?'i-form':'i-edit')}${d.jump.startsWith('info')?'Edit in Studio › Info':'Edit the '+esc(FULL[d.jump.split(':')[1]])}<small>${d.jump.startsWith('info')?'Info':'Studio'} ›</small></button>`:d.sup?`<button class="jump sup" data-act="toast:${d.sup==='date'?'The date is set when you lock a venue in Suppliers — outside the Maker':'The venue is booked in Suppliers — outside the Maker'}">${svg('i-shop')}${d.sup==='date'?'Change the date in Suppliers':'Change the venue in Suppliers'}<small>Suppliers ›</small></button>`:'';
-   return `<div class="pane style2">${head}${ed}<div class="r2" style="flex:none"><button class="dd" data-act="layout"><small>Layout</small><span class="pv" style="width:46px;height:22px;flex:none;background:#FBF9F5;border:1px solid var(--line);border-radius:6px;font-size:7px;padding:1px 3px;overflow:hidden">${d.thumbs[s.preset]}</span><span>${d.presets[s.preset]}</span>${svg('i-down')}</button></div>
+   return `<div class="pane style2">${head}${ed}<div class="lcar" data-lay="${id}" aria-label="Layout">${d.presets.map((n,i)=>`<button class="lcard ${i===s.preset?'on':''}" data-act="lay:${i}"><span class="lprev"></span><span class="lname">${esc(n)}</span></button>`).join('')}</div>
     ${ex?`<div class="r2" style="flex:none">${ddv('edd:x',ex[0],ex[1][s.ex])}</div>`:''}${id==='yesnote'?`<div class="r2" style="flex:none">${ddv('cele','Celebration ◆',CELE[S.celebrate])}</div>`:''}
     <div class="ontext" style="flex:none;height:auto;white-space:normal;line-height:1.4;margin-top:auto;padding:0 10px">Background, colour and the gallery live in the <b>Background</b> tab · <b>Arrange</b> moves this part on this stage</div></div>`;
   }
@@ -956,7 +976,7 @@ function renderPhone(){
  $('#ptop').innerHTML=topHTML('topnav');
  if(page.parentNode!==$('#pscroll')) $('#pscroll').appendChild(page);
  { const tabs=TABS[S.stage], t=S.tab[S.stage], g=$('#gtabs'); g.hidden=fullOn(); g.innerHTML=`<div class="cap">You're editing · <b>${esc(FULL[S.stage])}${tabs.length>1?' › '+esc(tabs[t][0]):''}</b></div>${tabs.length>1?`<div class="gbar">${tabs.map((x,i)=>`<button class="${i===t?'on':''}" data-act="gtab:${i}">${esc(x[0])}</button>`).join('')}</div>`:''}`; }
- const lt=$('#plt'); lt.hidden=fullOn(); lt.innerHTML=ltHTML();
+ const lt=$('#plt'); lt.hidden=fullOn(); lt.innerHTML=ltHTML(); requestAnimationFrame(fillLayouts);
  const collapsed=S.side==='stages'&&!S.open; lt.classList.toggle('min',collapsed); const scr=$('#phone').clientHeight, k=1; /* owner 2026-10-06: 44 everywhere — sizes no longer scale with the phone */ S.ltH=Math.round(scr*0.5); $('#phone').style.setProperty('--k',k.toFixed(3)); lt.style.height=collapsed?Math.round(62*k)+'px':S.ltH+'px';
  { const h=$('#pfull'), st=h.querySelector('.fbody')?.scrollTop||0; h.innerHTML=fullOn()?fullHTML():''; const b=h.querySelector('.fbody'); if(b&&!S.focus) b.scrollTop=st; if(!fullOn()) lastFull=null; }
  $('#pchip').innerHTML=chipHTML();
@@ -1076,6 +1096,7 @@ document.addEventListener('click',e=>{
   case 'swatch': change(id,{[a]:+c}); paint(); break;
   case 'editin': { S.returnTo={stage:S.stage,sel:id,tool:S.tool}; S.side='studio'; S.menu=null; endTyping(); if(a==='info'){ S.sitem='info'; S.focus=c; } else S.sitem=c; paint(); } break;
   case 'backstage': { const r=S.returnTo; S.returnTo=null; S.focus=null; S.side='stages'; if(r){ S.stage=r.stage; S.sel=r.sel; S.tool=r.tool; S.open=true; } paint(); if(r&&r.sel){ const el=$(`.el[data-el="${r.sel}"]`,page); $('#pscroll').scrollTo({top:Math.max(0,el.offsetTop-18),behavior:'auto'}); } } break;
+  case 'lay': if(+a!==s.preset){ change(id,{preset:+a}); saving(); paint(); } break;
   case 'layout': openSheet('Layout',d.presets,s.preset,i=>{change(id,{preset:i});paint();},null,d.thumbs); break;
   case 'gallery': openSheet('Gallery — ours, and moving backgrounds ◆',GALLERY.map(g=>g[0]),s.bg===4?s.bgp:-1,i=>{change(id,{bg:4,bgp:i});paint();},null,GALLERY.map(g=>`<span style="display:block;width:100%;height:100%;background:${g[1]}"></span>`)); break;
   case 'gtab': S.tab[S.stage]=+a; S.sel=null; S.open=false; S.menu=null; endTyping(); paint(); $('#pscroll').scrollTo({top:0,behavior:'auto'}); break;
@@ -1132,7 +1153,7 @@ document.addEventListener('change',e=>{ if(e.target.id==='size'){ const was=size
  let sx=0,sy=0,on=false, drag=false, dsy=0, dsh=0, moved=false, lt=null;
  document.addEventListener('pointerdown',e=>{
   const g=null&&e.target.closest('.lt .grab'); if(g){ lt=g.closest('.lt'); if(lt.classList.contains('min')) return; drag=true; dsy=e.clientY; dsh=lt.getBoundingClientRect().height; moved=false; lt.classList.add('drag'); return; }
-  const l=e.target.closest('.lt'); on=!!l && !e.target.closest('input[type=range],.msheet,.strip'); sx=e.clientX; sy=e.clientY;
+  const l=e.target.closest('.lt'); on=!!l && !e.target.closest('input[type=range],.msheet,.strip,.lcar'); sx=e.clientX; sy=e.clientY;
  });
  document.addEventListener('pointermove',e=>{ if(!drag) return; const d=dsy-e.clientY; if(Math.abs(d)>4) moved=true; const h=Math.min(406,Math.max(268,dsh+d)); lt.style.height=h+'px'; S.ltH=h; });
  const end=e=>{ if(drag){ drag=false; lt.classList.remove('drag'); if(!moved){ S.ltH=S.ltH>337?268:406; lt.style.height=S.ltH+'px'; } return; }
