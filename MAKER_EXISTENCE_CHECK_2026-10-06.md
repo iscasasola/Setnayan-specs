@@ -145,3 +145,10 @@ Phone-only views (desktop · Both · Signed out) · the Apply/Pro sheet · the v
 4. **Date and Venue** — the approved "Your event" form (2026-10-06, Event Details rebuilt) lists a Date picker and Venue; the same day's planning row moves both to Suppliers. The prototype follows the planning row (a locked venue sets them). Which stands?
 5. **Open browsing** (Settings) — what does it switch? Not drawn until its meaning is confirmed.
 6. **The Apply sheet** — the Pro lock (list of Pro effects, "Apply without the Pro effects", the price) is a toast today. Keep it as shipped in the build, or redraw it in the lower third?
+
+## Owner rulings after this check (2026-10-06)
+- **Prints** → Studio › Prints, the 11th tile (whole shipped group, Finer Details switches included).
+- **Post Event auto scenes** → all nine undrawn ones are now ＋ parts under "After the event"; "Photos of you" renamed to the shipped "Were you there?".
+- **Weight · B/I/U · line/letter spacing** → RETIRED by the owner ("no"). Not a gap.
+- **Date and Venue** → set in Suppliers; Info shows them read-only.
+- Still open: **Open browsing** and the **Apply / Pro sheet** (explained to the owner, awaiting his answer).
