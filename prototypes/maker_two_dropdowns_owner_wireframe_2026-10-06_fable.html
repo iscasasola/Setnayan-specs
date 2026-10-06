@@ -488,10 +488,18 @@ body.shot .phone{border:0;border-radius:0;box-shadow:none;width:375px;height:812
 .r2 .nb{width:38px;height:30px;border:1px solid var(--line);background:#fff;border-radius:999px;flex:none}
 .r2 .nb .i{width:16px;height:16px}
 .style2 .presets{flex:1;min-height:54px}
+/* EVERY pop-up opens from the bottom, in the thumb zone (owner 2026-10-06: "Every pop-up") */
+#pmenu .scrim{background:rgba(44,42,41,.22);animation:fade .2s}
+#pmenu .menu{left:0!important;right:0;bottom:0!important;top:auto!important;width:auto!important;max-width:none;min-width:0;max-height:62%!important;border-radius:20px 20px 0 0;border-bottom:0;padding:6px 8px 26px;animation:sheetup .26s var(--in)}
+#pmenu .menu:before{content:"";display:block;width:40px;height:4px;border-radius:2px;background:#D9D3C8;margin:4px auto 6px;flex:none}
+#pmenu .menu .mh{font-size:12px;letter-spacing:.08em;padding:4px 12px 8px}
+#pmenu .confirm{align-items:flex-end;padding:0}
+#pmenu .confirm .box{max-width:none;border-radius:20px 20px 0 0;padding:20px 18px 30px;animation:sheetup .26s var(--in)}
+@keyframes sheetup{from{transform:translateY(100%)}to{transform:none}}
 /* Animate — ONE column: full-width phases, then a switch per effect, sliders for time (owner 2026-10-06) */
 .acol{overflow-y:auto;overflow-x:hidden;scrollbar-width:none;gap:5px}.acol::-webkit-scrollbar{display:none}
 .acol>.dd{flex:none;width:100%}
-.acol .sub{flex-direction:row;position:static;inset:auto;transform:none}.sub.full{display:flex;width:100%;min-height:32px}.sub.full button{flex:1;justify-content:center}
+.sub.phases{display:flex;flex-direction:row;width:100%;min-height:32px}.sub.phases button{flex:1;justify-content:center}
 .ar{flex:none;min-height:34px;display:flex;align-items:center;gap:10px}
 .ar .l{width:64px;flex:none;font-size:12px;font-weight:600;color:var(--ink2)}
 .ar .ax{flex:1;min-width:0;display:flex;align-items:center;justify-content:flex-end;font-size:12px;color:var(--ink2)}
@@ -797,7 +805,7 @@ function stagePanel(){
   +row('Move',a.move,'move',`<span class="dirs">${dirs}</span>`,'Stays in place')
   +row('Size',a.size,'size',`<span class="sub">${sz}</span>`,'Same size')
   +(ph==='in'?sl('dur','Duration',2)+sl('delay','Delay',2):'');
- return `<div class="pane anim2 acol">${subtabs('aphase',S.aphase,[['in','Build in'],['act','Action'],['out','Build out']]).replace('class="sub"','class="sub full"')}${ddv('add:how','◆ How it moves',custom?'Custom':HOW[an.how],'how')}${rows}${ddv('dd:trans','◆ Into the next scene',an.trans<0?'Stage default · '+TRANS[S.stageTrans]:TRANS[an.trans])}</div>`;
+ return `<div class="pane anim2 acol">${subtabs('aphase',S.aphase,[['in','Build in'],['act','Action'],['out','Build out']]).replace('class="sub"','class="sub phases"')}${ddv('add:how','◆ How it moves',custom?'Custom':HOW[an.how],'how')}${rows}${ddv('dd:trans','◆ Into the next scene',an.trans<0?'Stage default · '+TRANS[S.stageTrans]:TRANS[an.trans])}</div>`;
 }
 /* Studio › Look — the setting's controls, directly */
 function lookPanel(){
@@ -879,7 +887,7 @@ function menuHTML(){
  else { title='Look'; rows=LOOKS.map(([k,n])=>`<button class="mrow ${k===S.look?'on':''}" data-act="pick:look:${k}">${svg(k==='music'?'i-music':k==='font'?'i-edit':'i-mood')}<span class="nm">${n}</span>${svg('i-check','i ck')}</button>`).join(''); }
  return `<div class="scrim" data-act="closemenu"></div><div class="menu" id="menu"><div class="mh">${title}</div><div class="mlist">${rows}</div></div>`;
 }
-function placeMenu(frame){
+function placeMenu(frame){ return; /* owner 2026-10-06: every pop-up opens from the bottom — see #pmenu .menu */
  const m=$('#menu',frame), a=$$(`.ddp[data-menu="${S.menu}"]`,frame).find(x=>x.offsetParent); if(!m||!a) return;
  const fr=frame.getBoundingClientRect(), ar=a.getBoundingClientRect(), up=(ar.top+ar.height/2-fr.top)>fr.height/2;
  const w=Math.min(m.offsetWidth, fr.width-20); let left=ar.left-fr.left; if(left+w>fr.width-10) left=fr.width-10-w; if(left<10) left=10;
@@ -1043,7 +1051,7 @@ document.addEventListener('click',e=>{
 /* a dropdown inside a full-screen form has no msheet — use the pop-over sheet instead */
 function openSheetOrMenu(title,opts,on,pick){
  const host=$('#pmenu');
- host.innerHTML=`<div class="scrim" data-act="closemenu"></div><div class="menu up" id="menu" style="left:50%;transform:translateX(-50%);bottom:40px"><div class="mh">${title}</div><div class="mlist">${opts.map((o,i)=>`<button class="mrow ${i===on?'on':''}" data-mi="${i}"><span class="nm">${esc(o)}</span>${svg('i-check','i ck')}</button>`).join('')}</div></div>`;
+ host.innerHTML=`<div class="scrim" data-act="closemenu"></div><div class="menu" id="menu"><div class="mh">${title}</div><div class="mlist">${opts.map((o,i)=>`<button class="mrow ${i===on?'on':''}" data-mi="${i}"><span class="nm">${esc(o)}</span>${svg('i-check','i ck')}</button>`).join('')}</div></div>`;
  host.querySelector('.mlist').onclick=e=>{ const r=e.target.closest('.mrow'); if(!r) return; pick(+r.dataset.mi); };
 }
 /* empty tap on the page scroll → collapse */
