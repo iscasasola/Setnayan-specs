@@ -587,6 +587,9 @@ body.shot .phone{border:0;border-radius:0;box-shadow:none;width:375px;height:812
 .spc-body b{font-family:var(--serif);font-size:13px;font-weight:600;color:var(--ink)}.spc-body small{font-size:8.5px;color:var(--mute);margin-top:1px}
 .spc-ch{position:absolute;border-radius:50%;border:1px solid var(--line2);background:#fff;padding:0;font:700 8px/1 inherit;color:#fff;display:flex;align-items:center;justify-content:center}.spc-ch.on{border-color:rgba(0,0,0,.08)}
 .spc-z{position:absolute;right:8px;bottom:8px;display:flex;gap:6px}.spc-z button{width:36px;height:36px;border-radius:50%;border:1px solid var(--line2);background:#fff;font-size:18px;font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.spk{padding:2px 12px 8px;border-bottom:1px solid var(--line);margin-bottom:4px}.spk-r{display:flex;gap:6px;align-items:center;margin:6px 0}.spk-r .dd{flex:1;height:44px}.spk-st{display:flex;align-items:center;gap:4px;border:1px solid var(--line2);border-radius:999px;height:44px;padding:0 4px;background:#fff}.spk-st button{width:36px;height:36px;border-radius:50%;border:0;background:var(--page);font-size:18px;font-weight:600}.spk-st span{font-size:12.5px;font-weight:600;min-width:56px;text-align:center}
+.spk-b{flex:1;height:40px;border-radius:12px;border:1px solid var(--line2);background:#fff;font-family:inherit;font-weight:600;font-size:12.5px;padding:0 6px}.spk-b.dark{background:var(--ink);color:#fff;border-color:var(--ink)}
+.spc-link{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;padding:8px 12px;border-radius:12px;background:var(--ink);color:#fff;font-size:13px;font-weight:600}.spc-link button{height:32px;padding:0 12px;border-radius:999px;border:0;background:#fff;color:var(--ink);font-family:inherit;font-weight:600;font-size:12px}
 .spc-hint{font-size:11.5px;color:var(--mute);margin:6px 2px 0;line-height:1.4}
 .sp3d .sp3d-stage{height:360px;overflow:hidden;perspective:900px;display:flex;align-items:center;justify-content:center;background:linear-gradient(#F4EFE7,#E9E2D6)}.sp3d-scene{transform:scale(1.05);transform-style:preserve-3d}.spc-room.d3{transform-style:preserve-3d;box-shadow:0 30px 40px rgba(0,0,0,.18)}
 .spc-room.d3 .spc-t,.spc-room.d3 .spc-stage{transform-style:preserve-3d}.spc-room.d3 .spc-body{transform:translate(-50%,-50%) translateZ(10px);box-shadow:0 0 0 1px rgba(0,0,0,.05),0 8px 6px rgba(0,0,0,.12)}.spc-room.d3 .spc-ch{transform:translateZ(5px)}.spc-room.d3 .spc-stage{transform:translateZ(14px);box-shadow:0 10px 8px rgba(0,0,0,.12)}
@@ -1453,19 +1456,44 @@ function spFixed(){ const p=S.sp, [W,L]=spRoomWL(), sw=Math.min(10,W*.4), F=[];
  if(p.dance){ const ds=Math.max(4,Math.min(8,W*.3,L*.3)); const c=fwd(d+0.8+ds/2); F.push({...c,w:ds,h:ds,k:'dance'}); }
  return F; }
 const spHit=(a,b,g=0)=>Math.abs(a.x-b.x)<(a.w+b.w)/2+g-0.001&&Math.abs(a.y-b.y)<(a.h+b.h)/2+g-0.001;
+
+/* A TABLE'S SIZE AND TURN — size from TABLE_FOOTPRINT_M by type and seats; the turn snaps to 45° on the phone (shipped: rotation_deg, 15° steps on desktop) */
+function spSize(t){ if(t.sweet) return; const per=t.cap/(t.len||1), key=[6,8,10,12].reduce((a,b)=>Math.abs(b-per)<Math.abs(a-per)?b:a), f=SP_FOOT[t.kind][key];
+ t.round=t.kind===0; t.w=t.round?f:f*(t.len||1); t.h=t.round?f:1.9; }
+const spBox=t=>{ const r=((t.rot||0)%180)*Math.PI/180, c=Math.abs(Math.cos(r)), s2=Math.abs(Math.sin(r)); return {x:t.x,y:t.y,w:t.w*c+t.h*s2,h:t.w*s2+t.h*c}; };
+const spFree=(c,skip)=>{ const [W,L]=spRoomWL(); if(c.x-c.w/2<-0.01||c.x+c.w/2>W+0.01||c.y-c.h/2<-0.01||c.y+c.h/2>L+0.01) return false; return ![...spFixed().filter(f=>f.k!=='sweet'),...S.sp.T.filter((o,k)=>!skip.includes(k)).map(spBox)].some(o=>spHit(c,o,0)); };
+function spLink(a,b){ const p=S.sp, A=p.T[a], B=p.T[b];
+ if(A.sweet||B.sweet){ toast('The sweetheart table stays on its own'); return; }
+ if(A.round||B.round){ toast('Round tables don’t join into one — set Type ▾ to Long banquet first'); return; }
+ const mem=t=>t.members||Array.from({length:t.len||1},(_,k)=>({n:k?null:t.n,cap:t.cap/(t.len||1),len:1}));
+ const nw={...A,len:(A.len||1)+(B.len||1),cap:A.cap+B.cap,members:[...mem(A),...mem(B)]}; spSize(nw);
+ const ang=(A.rot||0)*Math.PI/180, grow=(nw.w-A.w)/2; let ok=false;
+ for(const sgn of [1,-1]){ nw.x=A.x+Math.cos(ang)*grow*sgn; nw.y=A.y+Math.sin(ang)*grow*sgn; if(spFree(spBox(nw),[a,b])){ ok=true; break; } }
+ if(!ok){ toast(`No room to join Table ${B.n} to Table ${A.n} here — move a table out of the way first`); return; }
+ const G=p.G, before={T:p.T.map(t=>({...t})),g:G.map(g=>g.t)};
+ G.forEach(g=>{ if(g.t===b) g.t=a; }); p.T[a]=nw; p.T.splice(b,1); G.forEach(g=>{ if(g.t!=null&&g.t>b) g.t--; });
+ pushUndo(()=>{ p.T=before.T; G.forEach((g,k)=>g.t=before.g[k]); }); saving(); paint();
+ toast(`Table ${B.n} joined Table ${A.n} — one table, ${nw.cap} seats, they move together`); }
+function spUnlink(i){ const p=S.sp, t=p.T[i], M=t.members||(t.len>1?Array.from({length:t.len},(_,k)=>({n:null,cap:t.cap/t.len,len:1})):null); if(!M||M.length<2) return;
+ const G=p.G, before={T:p.T.map(x=>({...x})),g:G.map(g=>g.t)}, ang=(t.rot||0)*Math.PI/180; let used=-t.w/2, next=Math.max(...p.T.map(x=>x.n||0));
+ const parts=M.map((m,k)=>{ const q={kind:t.kind,cap:m.cap,len:m.len||1,rot:t.rot,n:k===0?t.n:(m.n||++next)}; spSize(q); const c=used+q.w/2; used+=q.w; q.x=t.x+Math.cos(ang)*c; q.y=t.y+Math.sin(ang)*c; return q; });
+ if(parts.some(q=>!spFree(spBox(q),[i]))){ toast('No room to pull them apart here — move or turn it first'); return; }
+ G.forEach(g=>{ if(g.t!=null&&g.t>i) g.t+=parts.length-1; }); p.T.splice(i,1,...parts);
+ const at=G.map((g,k)=>k).filter(k=>G[k].t===i); let pi=0, fill=0; at.forEach(k=>{ while(pi<parts.length-1&&fill>=parts[pi].cap){ pi++; fill=0; } G[k].t=i+pi; fill++; });
+ pushUndo(()=>{ p.T=before.T; G.forEach((g,k)=>g.t=before.g[k]); }); saving(); $('#pmenu').innerHTML=''; paint(); toast(`Unlinked — ${parts.length} tables again, each keeps its own guests`); }
 function spPlace(){ const p=S.sp, [W,L]=spRoomWL(), gap=[0.6,0.9,1.2][p.walk], fixed=spFixed().filter(f=>f.k!=='sweet');
  const sweetF=spFixed().find(f=>f.k==='sweet'); const placed=[...fixed]; if(sweetF) placed.push(sweetF);
  const per=SP_SEATS[p.seats];
  p.T.forEach(t=>{ if(t.sweet){ Object.assign(t,{x:sweetF.x,y:sweetF.y,w:sweetF.w,h:sweetF.h,round:false}); return; }
-  const f=SP_FOOT[p.kind][per]; t.round=p.kind===0; t.w=t.round?f:f*(t.len||1); t.h=t.round?f:1.9; if(p.stage!==0&&!t.round){ [t.w,t.h]=[t.h,t.w]; } });
+  t.kind=p.kind; spSize(t); t.rot=(p.stage!==0&&!t.round)?90:0; });
  /* SPREAD OVER THE FLOOR (like the shipped solveAutoLayout): an even grid across the room behind the stage, skipping the dance floor and the sweetheart table; a table that cannot fit says so */
  p.overflow=false; const list=p.T.filter(t=>!t.sweet); if(!list.length) return;
- const tw=Math.max(...list.map(t=>t.w)), th=Math.max(...list.map(t=>t.h)), st=fixed.find(f=>f.k==='stage');
+ const tw=Math.max(...list.map(t=>spBox(t).w)), th=Math.max(...list.map(t=>spBox(t).h)), st=fixed.find(f=>f.k==='stage');
  const x0=p.stage===1?st.x+st.w/2+gap:gap, x1=p.stage===2?st.x-st.w/2-gap:W-gap, y0=p.stage===0?st.y+st.h/2+gap:gap, y1=L-gap-1.2; /* keep the entrance clear */
  const Wu=x1-x0, Lu=y1-y0; let cols=Math.max(1,Math.min(Math.floor(Wu/(tw+gap)),Math.round(Math.sqrt(list.length*1.6*Wu/Lu)))), cells=[];
  for(let tries=0;tries<12&&cells.length<list.length;tries++){ const rows=Math.max(1,Math.ceil(list.length/cols)+tries); const sx=Wu/cols, sy=Math.max(th+gap,Lu/rows); cells=[];
   for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){ const cell={x:x0+sx*(c+.5),y:y0+sy*(r+.5),w:tw,h:th}; if(!placed.some(o=>spHit(cell,o,gap*0.5))) cells.push(cell); } }
- list.forEach((t,k)=>{ const c=cells[k]||{x:W/2,y:L+th}; t.x=c.x; t.y=c.y; if(t.y+t.h/2>L) p.overflow=true; }); }
+ list.forEach((t,k)=>{ const c=cells[k]||{x:W/2,y:L+th}; t.x=c.x; t.y=c.y; if(t.y+spBox(t).h/2>L) p.overflow=true; }); }
 function spCanvas(three){ const p=S.sp, T=p.T, G=p.G, [W,L]=spRoomWL(), z=p.zoom||1;
  const maxF=Math.max(...T.filter(t=>!t.sweet).map(t=>Math.max(t.w,t.h)/(t.len||1)),2.5), sc=(Math.min(318,(document.querySelector(".fbody")||{clientWidth:350}).clientWidth-46))/W*z; /* opens fitted to the phone; + zooms in to the chairs */
  const box=(o,cls,inner='',attr='')=>`<div class="${cls}" ${attr} style="left:${(o.x-o.w/2)*sc}px;top:${(o.y-o.h/2)*sc}px;width:${o.w*sc}px;height:${o.h*sc}px">${inner}</div>`;
@@ -1479,14 +1507,14 @@ function spCanvas(three){ const p=S.sp, T=p.T, G=p.G, [W,L]=spRoomWL(), z=p.zoom
    out.push(`<button class="spc-ch ${g?'on':''}" style="left:${cx-cs/2}px;top:${cy-cs/2}px;width:${cs}px;height:${cs}px;${g?`background:${GC[g[0].grp]}`:''}" data-act="${g?'spmove:'+g[1]:'toast:Empty seat — Unseated › puts someone here'}" aria-label="${g?esc(g[0].n):'Empty seat'}">${g&&cs>=13?esc(g[0].n[0]):''}</button>`); }
   return out.join(''); };
  const tabs=T.map((t,i)=>{ const at=spAt(i), bodyW=t.round?(t.w-0.9)*sc:(t.w>=t.h?t.w*sc-0.2*sc:(t.w-0.9)*sc), bodyH=t.round?(t.h-0.9)*sc:(t.w>=t.h?(t.h-0.9)*sc:t.h*sc-0.2*sc);
-  return `<div class="spc-t ${t.round?'spc-rnd':''} ${t.sweet?'spc-sweet':''} ${at>=t.cap?'spc-full':''}" data-ti="${i}" style="left:${(t.x-t.w/2)*sc}px;top:${(t.y-t.h/2)*sc}px;width:${t.w*sc}px;height:${t.h*sc}px"><button class="spc-body" data-act="sptable:${i}" style="width:${bodyW}px;height:${bodyH}px"><b>${t.sweet?'♥':t.n}</b>${sc*Math.min(t.w,t.h)>=44?`<small>${at}/${t.cap}</small>`:''}</button>${chairs(t,i)}</div>`; }).join('');
+  return `<div class="spc-t ${t.round?'spc-rnd':''} ${t.sweet?'spc-sweet':''} ${at>=t.cap?'spc-full':''}" data-ti="${i}" style="left:${(t.x-t.w/2)*sc}px;top:${(t.y-t.h/2)*sc}px;width:${t.w*sc}px;height:${t.h*sc}px;${t.rot?`transform:rotate(${t.rot}deg)`:''}"><button class="spc-body" data-act="sptable:${i}" style="width:${bodyW}px;height:${bodyH}px"><b style="${t.rot?`transform:rotate(${-t.rot}deg)`:''}">${t.sweet?'♥':t.n}</b>${sc*Math.min(t.w,t.h)>=44?`<small>${at}/${t.cap}</small>`:''}</button>${chairs(t,i)}</div>`; }).join('');
  const door=p.door===2?{x:W-0.2,y:L*0.75,w:0.4,h:2.4}:{x:W/2,y:L-0.2,w:p.door===1?3:2.4,h:0.4};
  const inner=`<div class="spc-room ${three?'d3':''}" style="width:${W*sc}px;height:${L*sc}px;${three?`transform:rotateX(56deg) rotateZ(${p.rot||0}deg)`:''}">${fixed}${box(door,'spc-door','<span>'+['Door','Tunnel','Side door'][p.door]+'</span>')}${p.els.map((e,k)=>box({x:W-2.2,y:L-2-k*2.6,w:3.4,h:2},'spc-el','<span>'+esc(e)+'</span>')).join('')}${tabs}</div>`;
  return {inner,sc,W,L}; }
 function spPlan(){ const p=S.sp, T=p.T, G=p.G, seated=G.filter(g=>g.t!=null).length, un=G.length-seated, cap=T.reduce((a,t)=>a+t.cap,0);
  const cv=spCanvas(false);
  const plan2d=`<div class="spc-wrap"><div class="spc" id="spc">${cv.inner}</div><div class="spc-z"><button data-act="spzoom:-1" aria-label="Zoom out">−</button><button data-act="spzoom:1" aria-label="Zoom in">+</button></div></div>
-  <p class="spc-hint">Drag a table to move it · tap a chair to move that guest · tap a table for who sits there${p.overflow?' · <b style="color:var(--cta)">Some tables run past the room — move them, or pick a bigger room</b>':''}</p>`;
+  ${p.linkFrom!=null?`<div class="spc-link">Tap the table to join Table ${p.T[p.linkFrom].n} <button data-act="splinkx">Cancel</button></div>`:''}<p class="spc-hint">Drag a table to move it · tap a chair to move that guest · tap a table for who sits there${p.overflow?' · <b style="color:var(--cta)">Some tables run past the room — move them, or pick a bigger room</b>':''}</p>`;
  const list=`<div class="sp-list">${T.map((t,i)=>{ const at=G.filter(g=>g.t===i); return `<button class="sp-lrow" data-act="sptable:${i}"><b>${spTName(i).replace('the s','S')}</b><span>${at.length}/${t.cap}${at.length?' · '+esc(at.slice(0,3).map(g=>g.n.split(' ')[0]).join(', '))+(at.length>3?'…':''):' · empty'}</span>${svg('i-right')}</button>`; }).join('')}</div>`;
  return [`<div class="sp-head"><b>Seat plan · ${T.filter(t=>!t.sweet).length} tables${T.some(t=>t.sweet)?' + sweetheart':''}</b><small>${seated} seated · ${un} not seated yet</small>
    ${p.lastAuto?`<div class="sp-auto">Arranged by ${p.policy===2?'stage order':'side and family'} · <button data-act="spautoundo">Undo</button></div>`:''}
@@ -1502,7 +1530,12 @@ function spSheet(kind,arg){ const p=S.sp, G=p.G, host=$('#pmenu'); let h='',b=''
  if(kind==='unseated'){ const U=G.map((g,k)=>[g,k]).filter(([g])=>g.t==null&&!g.plus); h=`Not seated yet · ${G.filter(g=>g.t==null).length}`;
   b=U.length?U.slice(0,40).map(([g,k])=>`<button class="mrow" data-act="spmove:${k}"><span class="nm">${esc(g.n)}${spParty(k).length>1?' · +1':''}<small>${esc(g.label)}</small></span>${svg('i-right','i ck')}</button>`).join('')+(U.length>40?`<p class="sp-note">…and ${U.length-40} more — Auto arrange seats everyone at once</p>`:''):'<p class="sp-note">Everyone has a seat.</p>'; }
  if(kind==='table'){ const t=p.T[arg], at=G.map((g,k)=>[g,k]).filter(([g])=>g.t===arg&&!g.plus); h=`${spTName(arg).replace('the s','S')} · ${spAt(arg)} of ${t.cap}`;
-  b=(at.length?at.map(([g,k])=>`<button class="mrow" data-act="spmove:${k}"><span class="nm">${esc(g.n)}${spParty(k).length>1?' · +1':''}<small>Move to another table</small></span>${svg('i-right','i ck')}</button>`).join(''):'<p class="sp-note">Nobody here yet — use Unseated or Auto arrange.</p>')+(t.len>1?`<p class="sp-note">${t.len} tables joined — one name, one seat count, they move together.</p>`:''); }
+  /* 📱 THE SHIPPED PHONE DOCK (seating-editor.tsx, approved 2026-10-01 frame 3): Type ▾ · − seats + · Rotate · Edit chairs… · Link… / Unlink · Done, then its guests */
+  const linked=(t.members&&t.members.length>1)||t.len>1;
+  const dock=t.sweet?'':`<div class="spk"><div class="spk-r"><button class="dd" data-act="sptype:${arg}"><small>Type</small><span>${SP_KINDS[t.kind]}</span>${svg('i-down')}</button><div class="spk-st"><button data-act="spcap:${arg}:-1" aria-label="One seat less">−</button><span>${t.cap} seats</span><button data-act="spcap:${arg}:1" aria-label="One seat more">+</button></div></div>
+   <div class="spk-r"><button class="spk-b" data-act="sprot1:${arg}">↻ Rotate</button><button class="spk-b" data-act="toast:Edit chairs — take one chair away or add one, seat by seat">Edit chairs…</button>${linked?`<button class="spk-b" data-act="spunlink:${arg}">Unlink</button>`:`<button class="spk-b" data-act="splink:${arg}">Link…</button>`}<button class="spk-b dark" data-act="closemenu">Done</button></div>
+   ${linked?`<p class="sp-note" style="margin:2px 2px 6px">${(t.members||[]).length||t.len} tables linked — one name, one seat count, they move and turn together.</p>`:''}</div>`;
+  b=dock+(at.length?at.map(([g,k])=>`<button class="mrow" data-act="spmove:${k}"><span class="nm">${esc(g.n)}${spParty(k).length>1?' · +1':''}<small>Move to another table</small></span>${svg('i-right','i ck')}</button>`).join(''):'<p class="sp-note">Nobody here yet — use Unseated or Auto arrange.</p>')+(t.len>1?`<p class="sp-note">${t.len} tables joined — one name, one seat count, they move together.</p>`:''); }
  if(kind==='move'){ const m=p.mv, g=G[m.g], party=spParty(m.g); h=`Move ${esc(g.n.split(' ')[0])} to…`;
   b=`<div style="padding:4px 6px 8px"><button class="dd" style="width:100%;height:44px" data-act="spmto"><small>Table</small><span>${m.to==='new'?'+ New table':esc(spTName(m.to))+' · '+(p.T[m.to].cap-spAt(m.to))+' seat'+(p.T[m.to].cap-spAt(m.to)>1?'s':'')+' left'}</span>${svg('i-down')}</button>${party.length>1?`<p class="sp-note">Their +1, ${esc(G[party[1]===m.g?party[0]:party[1]].n)}, moves with them.</p>`:''}<button class="ebot-btn" style="margin-top:10px" data-act="spmoved">Move</button></div>`; }
  if(kind==='rules'){ h='Who sits together'; const R=[['plus','Couples and their +1s',1],['family','Each family at its own tables'],['sponsors','Sponsors together'],['entourage','The entourage together']];
@@ -1511,7 +1544,7 @@ function spSheet(kind,arg){ const p=S.sp, G=p.G, host=$('#pmenu'); let h='',b=''
  if(kind==='more'){ h='More seat-plan tools'; b=`<div class="sp-doors">${['Guests see their seats on the day.','Guests see their seats now.'][p.see]} <button data-act="spdoors">Change</button></div>
   <div class="tgh">Add a table or element</div><button class="mrow" data-act="spaddt"><span class="nm">+ A table<small>${SP_KINDS[p.kind]} · ${SP_SEATS[p.seats]} seats</small></span></button><button class="mrow" data-act="spaddel"><span class="nm">Place on the floor ▾<small>Dance floor · bar · buffet · photo booth…</small></span></button>
   <div class="tgh">Share &amp; print</div><button class="mrow" data-act="toast:Saving Seat plan · A3 — the file downloads"><span class="nm">Seat plan · A3<small>Also in Studio › Prints</small></span></button>
-  <div class="tgh">The room</div><button class="mrow" data-act="sppolicy"><span class="nm">Seating policies ▾<small>${SP_POL[p.policy][0]} — ${SP_POL[p.policy][1]}</small></span></button><button class="mrow" data-act="spsetup"><span class="nm">Change the room setup<small>Room · tables · stage · entrance · dance floor</small></span></button>`; }
+  <div class="tgh">The room</div><button class="mrow" data-act="sppolicy"><span class="nm">Seating policies ▾<small>${SP_POL[p.policy][0]} — ${SP_POL[p.policy][1]}</small></span></button><button class="mrow" data-act="spspread"><span class="nm">Spread the tables again<small>Even rows behind the stage · walkway ${['Tight','Service','Comfort'][p.walk]} — your guests keep their tables</small></span></button><button class="mrow" data-act="spsetup"><span class="nm">Change the room setup<small>Room · tables · stage · entrance · dance floor</small></span></button>`; }
  host.innerHTML=`<div class="scrim" data-act="closemenu"></div><div class="menu addsheet" id="menu"><div class="mh">${h}</div><div class="mlist">${b}</div></div>`; }
 function spSetup(){ const p=S.sp, per=SP_SEATS[p.seats], n=Math.ceil(p.guests/per), seats=n*per;
  return [`<div class="sps"><b class="sps-h">Let’s set up your room</b><small class="sps-s">We make the tables and place them — you can move anything after.</small>
@@ -1521,7 +1554,7 @@ function spSetup(){ const p=S.sp, per=SP_SEATS[p.seats], n=Math.ceil(p.guests/pe
   <div class="sps-c"><div class="sps-row"><span>Tables</span><button class="dd" data-act="spset:kind"><span>${SP_KINDS[p.kind]}</span>${svg('i-down')}</button></div><div class="sps-row"><span>Seats each</span><button class="dd" data-act="spset:seats"><span>${per}</span>${svg('i-down')}</button></div>
    <div class="sps-src ${p.tabSrc?'ok':''}">${p.tabSrc?'✓ Your stylist’s tables · 1.8 m, 3.0 m with chairs':'Standard size · '+(p.kind===1?({6:'2.0',8:'2.6',10:'3.2',12:'3.8'}[per])+' m long':p.kind===2?({6:'4.4',8:'4.4',10:'4.4',12:'4.4'}[per])+' m long':p.kind===3?'2.4 m per section':({6:'2.3',8:'2.5',10:'2.8',12:'3.1'}[per])+' m across')+' with chairs'}<button data-act="sptabsrc">${p.tabSrc?'Use standard sizes':'Ask your stylist'}</button></div>${p.kind!==0?`<div class="sps-row"><span>Join tables into one long table</span><button class="dd" data-act="spset:join"><span>${['Don’t join','2 in a row','3 in a row','4 in a row'][p.join]}</span>${svg('i-down')}</button></div><small>Joined tables count as one table — one name, one seat count — and always move together</small>`:''}
    <div class="sps-row"><span>A sweetheart table for the two of you</span><button class="sw ${p.sweet?'on':''}" data-act="spsweet" role="switch"></button></div></div>
-  <div class="sps-c"><div class="sps-row"><span>Stage</span><button class="dd" data-act="spset:stage"><span>${['Top · centre','Left side','Right side'][p.stage]}</span>${svg('i-down')}</button></div><div class="sps-row"><span>Entrance</span><button class="dd" data-act="spset:door"><span>${['Door · bottom','Tunnel · bottom','Door · side'][p.door]}</span>${svg('i-down')}</button></div><div class="sps-row"><span>Dance floor</span><button class="sw ${p.dance?'on':''}" data-act="spdance" role="switch"></button></div><div class="sps-row"><span>Walkway between tables</span><button class="dd" data-act="spset:walk"><span>${['0.6 m · tight','0.9 m · standard','1.2 m · roomy'][p.walk]}</span>${svg('i-down')}</button></div>
+  <div class="sps-c"><div class="sps-row"><span>Stage</span><button class="dd" data-act="spset:stage"><span>${['Top · centre','Left side','Right side'][p.stage]}</span>${svg('i-down')}</button></div><div class="sps-row"><span>Entrance</span><button class="dd" data-act="spset:door"><span>${['Door · bottom','Tunnel · bottom','Door · side'][p.door]}</span>${svg('i-down')}</button></div><div class="sps-row"><span>Dance floor</span><button class="sw ${p.dance?'on':''}" data-act="spdance" role="switch"></button></div><div class="sps-row"><span>Walkway between tables</span><button class="dd" data-act="spset:walk"><span>${['Tight · 0.6 m','Service · 0.9 m','Comfort · 1.2 m'][p.walk]}</span>${svg('i-down')}</button></div>
    <div class="sps-row"><span>Closest to the stage</span><button class="dd" data-act="spprio"><span>${S.sp.prio.slice(0,3).join(' · ')}…</span>${svg('i-down')}</button></div></div>
   <div class="sps-res"><b>${n} ${SP_KINDS[p.kind].toLowerCase()} tables of ${per}${p.kind!==0&&p.join?' · joined '+(p.join+1)+' to a row = '+Math.ceil(n/(p.join+1))+' long tables':''}</b><span>${seats} seats for ${p.guests} guests${p.sweet?' · plus your sweetheart table':''}</span></div></div>`,
   `<button class="ebot-btn" data-act="spmake">Make my room</button>`]; }
@@ -1760,7 +1793,7 @@ let saveT; function saving(){ const el=$('#saveind'); $$('.applyg .n').forEach(n
 
 /* a new table lands in the first free spot; every other table keeps where the couple put it */
 function spPlaceNew(){ const p=S.sp, t=p.T[p.T.length-1], [W,L]=spRoomWL(), per=SP_SEATS[p.seats], f=SP_FOOT[p.kind][per], gap=[0.6,0.9,1.2][p.walk];
- t.round=p.kind===0; t.w=t.round?f:f*(t.len||1); t.h=t.round?f:1.9; const others=[...spFixed(),...p.T.slice(0,-1)];
+ t.kind=p.kind; t.rot=0; spSize(t); const others=[...spFixed(),...p.T.slice(0,-1).map(spBox)];
  for(let y=gap+t.h/2;y<L*3;y+=0.5){ for(let x=gap+t.w/2;x<=W-gap-t.w/2;x+=0.5){ const c={x,y,w:t.w,h:t.h}; if(!others.some(o=>spHit(c,o,gap))){ t.x=x;t.y=y; return; } } } }
 /* DRAG A TABLE — pointer events, so a finger works the same as a mouse (shipped: setPointerCapture in seating-editor.tsx) */
 let spDrag=null, spNoClick=false;
@@ -1770,9 +1803,9 @@ document.addEventListener('pointermove',e=>{ if(!spDrag) return; const dx=e.clie
  spDrag.el.classList.add('spc-drag'); spDrag.el.style.left=(spDrag.l0+dx)+'px'; spDrag.el.style.top=(spDrag.t0+dy)+'px'; });
 document.addEventListener('pointerup',e=>{ if(!spDrag) return; const d=spDrag; spDrag=null; if(!d.moved) return; spNoClick=true; setTimeout(()=>spNoClick=false,50);
  const p=S.sp, t=p.T[d.i], [W,L]=spRoomWL(); let x=(parseFloat(d.el.style.left))/d.sc+t.w/2, y=(parseFloat(d.el.style.top))/d.sc+t.h/2;
- x=Math.max(t.w/2,Math.min(W-t.w/2,x)); y=Math.max(t.h/2,Math.min(L-t.h/2,y)); /* the walls */
+ const bb=spBox(t); x=Math.max(bb.w/2,Math.min(W-bb.w/2,x)); y=Math.max(bb.h/2,Math.min(L-bb.h/2,y)); /* the walls */
  p.T.forEach((o,k)=>{ if(k===d.i) return; if(Math.abs(o.x-x)<0.9) x=o.x; if(Math.abs(o.y-y)<0.9) y=o.y; }); /* line up with a neighbour */
- const c={x,y,w:t.w,h:t.h}, blocked=[...spFixed().filter(f=>!(t.sweet&&f.k==='sweet')),...p.T.filter((o,k)=>k!==d.i)].some(o=>spHit(c,o,0));
+ const c={...spBox(t),x,y}, blocked=[...spFixed().filter(f=>!(t.sweet&&f.k==='sweet')),...p.T.filter((o,k)=>k!==d.i).map(spBox)].some(o=>spHit(c,o,0));
  if(blocked){ d.el.classList.remove('spc-drag'); d.el.classList.add('spc-back'); d.el.style.left=d.l0+'px'; d.el.style.top=d.t0+'px'; setTimeout(()=>{ toast(`No room there — ${spTName(d.i)} slid back`); },260); return; }
  const was={x:t.x,y:t.y}; t.x=x; t.y=y; pushUndo(()=>{t.x=was.x;t.y=was.y;}); saving(); paint(); toast(`${spTName(d.i).replace('the s','S')} moved — the 3D plan has it too`); });
 document.addEventListener('click',e=>{ if(spNoClick){ e.stopPropagation(); e.preventDefault(); spNoClick=false; } },true);
@@ -1910,14 +1943,21 @@ document.addEventListener('click',e=>{
   case 'aphase': S.aphase=a; paint(); break;
   case 'typedone': endTyping(); break;
   case 'mbtab': S.mbtab=a; paint(); break;
-  case 'spset': { const k=a, O={room:SP_ROOMS.map(r=>r[0]+' · '+r[1]),kind:SP_KINDS,seats:SP_SEATS.map(String),join:['Don’t join','2 in a row','3 in a row','4 in a row'],stage:['Top · centre','Left side','Right side'],door:['Door · bottom','Tunnel · bottom','Door · side'],walk:['0.6 m · tight','0.9 m · standard','1.2 m · roomy']}[k]; openSheet({room:'Your room',kind:'Tables',seats:'Seats each',join:'Join tables into one long table',stage:'Stage',door:'Entrance',walk:'Walkway between tables'}[k],O,S.sp[k],i=>{S.sp[k]=i;paint();}); } break;
+  case 'spset': { const k=a, O={room:SP_ROOMS.map(r=>r[0]+' · '+r[1]),kind:SP_KINDS,seats:SP_SEATS.map(String),join:['Don’t join','2 in a row','3 in a row','4 in a row'],stage:['Top · centre','Left side','Right side'],door:['Door · bottom','Tunnel · bottom','Door · side'],walk:['Tight · 0.6 m','Service · 0.9 m','Comfort · 1.2 m']}[k]; openSheet({room:'Your room',kind:'Tables',seats:'Seats each',join:'Join tables into one long table',stage:'Stage',door:'Entrance',walk:'Walkway between tables'}[k],O,S.sp[k],i=>{S.sp[k]=i;paint();}); } break;
   case 'spdance': S.sp.dance=!S.sp.dance; paint(); break;
   case 'spsweet': S.sp.sweet=!S.sp.sweet; paint(); break;
   case 'sproomstd': S.sp.roomSrc=0; paint(); break;
   case 'sptabsrc': if(S.sp.tabSrc){ S.sp.tabSrc=0; } else { S.sp.tabSrc=1; toast('Your stylist sent their table sizes'); } paint(); break;
   case 'spmake': spBuild(); S.sp.empty=false; pushUndo(()=>{S.sp.empty=true;}); saving(); paint(); toast(`Your room is ready — ${S.sp.T.length} tables. Tap Auto arrange to seat everyone`); break;
   case 'spunseated': spSheet('unseated'); break;
-  case 'sptable': spSheet('table',+a); break;
+  case 'sptable': if(S.sp.linkFrom!=null){ const f=S.sp.linkFrom; S.sp.linkFrom=null; if(+a===f){ paint(); break; } spLink(f,+a); break; } spSheet('table',+a); break;
+  case 'splink': S.sp.linkFrom=+a; $('#pmenu').innerHTML=''; S.menu=null; paint(); break;
+  case 'splinkx': S.sp.linkFrom=null; paint(); break;
+  case 'spunlink': spUnlink(+a); break;
+  case 'sprot1': { const t=S.sp.T[+a], was=t.rot||0; t.rot=(was+45)%180; if(!spFree(spBox(t),[+a])){ t.rot=was; toast('No room to turn it here — move it first'); break; } pushUndo(()=>{t.rot=was;}); saving(); paint(); spSheet('table',+a); break; }
+  case 'spcap': { const i=+a, t=S.sp.T[i], n=t.cap+(+c), min=Math.max(2,spAt(i)); if(n<min){ toast(spAt(i)>t.cap-1?'Move someone off this table first':'That is the fewest'); break; } if(n>14*(t.len||1)){ toast('That is the most this table holds'); break; }
+    const was={cap:t.cap,w:t.w,h:t.h}; t.cap=n; spSize(t); if(!spFree(spBox(t),[i])){ Object.assign(t,was); toast('No room for a bigger table here — move it first'); break; } pushUndo(()=>Object.assign(t,was)); saving(); paint(); spSheet('table',i); break; }
+  case 'sptype': { const i=+a, t=S.sp.T[i]; openSheetOrMenu('Type',SP_KINDS,t.kind,k=>{ const was={kind:t.kind,w:t.w,h:t.h,round:t.round}; t.kind=k; spSize(t); if(!spFree(spBox(t),[i])){ Object.assign(t,was); toast('No room for that shape here — move it first'); spSheet('table',i); return; } pushUndo(()=>Object.assign(t,was)); saving(); paint(); spSheet('table',i); }); break; }
   case 'spmove': S.sp.mv={g:+a,to:spRoomFor(+a)}; spSheet('move'); break;
   case 'spmto': { const o=spMoveOpts(S.sp.mv.g); openSheetOrMenu('Table',o.map(x=>x[1]),o.findIndex(x=>x[0]===S.sp.mv.to),i=>{ S.sp.mv.to=o[i][0]; spSheet('move'); }); break; }
   case 'spmoved': { const m=S.sp.mv, G=S.sp.G, before=G.map(g=>g.t); let to=m.to; if(to==='new'){ S.sp.T.push({n:S.sp.T.filter(t=>!t.sweet).length+1,cap:SP_SEATS[S.sp.seats],len:S.sp.kind?1:0}); spPlaceNew(); to=S.sp.T.length-1; }
@@ -1937,6 +1977,7 @@ document.addEventListener('click',e=>{
   case 'spaddel': openSheetOrMenu('Place on the floor',['Dance floor','Bar','Buffet','Photo booth','Gift table','DJ / band'],-1,i=>{ const n=['Dance floor','Bar','Buffet','Photo booth','Gift table','DJ / band'][i]; if(i===0) S.sp.dance=true; else S.sp.els.push(n); paint(); toast(`${n} placed — drag it where it goes`); }); break;
   case 'sppolicy': openSheetOrMenu('Seating policies',SP_POL.map(x=>x[0]),S.sp.policy,i=>{S.sp.policy=i; spSheet('more');}); break;
   case 'spdoors': openSheetOrMenu('When guests see their seats',['On the day','Now'],S.sp.see,i=>{S.sp.see=i; spSheet('more');}); break;
+  case 'spspread': { const T=S.sp.T, was=T.map(t=>({x:t.x,y:t.y,rot:t.rot})); spPlace(); pushUndo(()=>T.forEach((t,k)=>Object.assign(t,was[k]))); $('#pmenu').innerHTML=''; saving(); paint(); toast('Tables spread in even rows — Undo puts them back'); break; }
   case 'spsetup': $('#pmenu').innerHTML=''; S.sp.empty=true; paint(); toast('Your room setup — change anything, then Make my room again'); break;
   case 'lgsel': S.logo.sel=+a; S.logo.sheet='tools'; paint(); break;
   case 'lgpick': S.logo.sel=+a; S.logo.sheet='tools'; paint(); break;
