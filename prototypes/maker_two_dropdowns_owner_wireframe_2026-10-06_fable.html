@@ -510,6 +510,19 @@ body.shot .phone{border:0;border-radius:0;box-shadow:none;width:375px;height:812
 /* ONE ROW HEIGHT for the whole toolbar (owner 2026-10-06: "keep all rows consistent in height") —
    the top row, the tab bars, Edit in Studio, every dropdown / switch / slider row: --row, scaled by the phone */
 .phone{--row:44px}
+/* STUDIO TOOLS — E-Gifts + RSVP: preview first, one card per thing, nothing sideways (owner 2026-10-06 "start with the smaller ones") */
+.gx-prev{margin:2px 0 14px}.gx-prev small{display:block;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);font-weight:700;margin:0 4px 6px}
+.gx-card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px;text-align:center}.gx-card b{font-family:var(--serif);font-size:22px;font-weight:500;color:var(--dominant)}.gx-card p{font-size:13.5px;color:var(--ink2);line-height:1.5;margin:6px 0 10px}
+.gx-m{display:flex;justify-content:space-between;gap:10px;padding:9px 12px;border-radius:12px;background:var(--page);margin-top:6px;font-size:13px;text-align:left}.gx-m span{font-weight:700;color:var(--ink)}.gx-m em{font-style:normal;color:var(--ink2);text-align:right;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gx-none{font-size:12.5px;color:var(--cta);font-weight:600}
+.gx-row{background:#fff;border:1px solid var(--line);border-radius:14px;padding:0 12px;margin-bottom:8px}.gx-row.on{border-color:var(--line2)}
+.gx-h{min-height:52px;display:flex;align-items:center;gap:10px}.gx-h b{flex:1;font-size:14.5px;font-weight:600;color:var(--ink);display:flex;flex-direction:column}.gx-h b small,.gx-h>small{font-size:11.5px;font-weight:500;color:var(--mute)}
+.gx-f{padding:0 0 12px}.gx-f input{width:100%;height:44px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font-size:14px;background:var(--page)}
+.gx-sub{font-size:12px;color:var(--mute);margin:-4px 0 12px;line-height:1.45}
+.gx-g{color:var(--line2);display:flex;cursor:grab}.gx-g .i{width:18px;height:18px;fill:currentColor;stroke:none}.gx-row.lock .gx-g{opacity:.35}
+.gx-ans{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}.gx-ans span input{width:100%;height:44px;border-radius:999px;border:1.5px solid var(--dominant);text-align:center;font-weight:600;font-size:14px;color:var(--dominant);background:#fff}.gx-ans .yes input{background:var(--dominant);color:#fff}
+.gx-chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 0 12px 28px}.gx-chips span,.gx-chips button{height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--line2);font-size:12.5px;display:flex;align-items:center;background:var(--page)}.gx-chips button{border-style:dashed;color:var(--cta);font-weight:600;background:#fff}
+.ebot-note{font-size:12px;color:var(--mute);text-align:center;width:100%}
+.ebot-btn{width:100%;height:44px;border-radius:999px;background:var(--ink);color:#fff;font-weight:600;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px}.ebot-btn .i{width:18px;height:18px}
 /* STUDIO — home tiles · slim "‹ Studio · Tool ▾" head · Seat plan + Wedding March take the whole screen */
 .shome-b{padding:12px 12px 24px!important}
 .shome-h{display:flex;align-items:baseline;justify-content:space-between;padding:4px 4px 12px}.shome-h b{font-family:var(--serif);font-size:26px;font-weight:500;color:var(--ink)}.shome-h span{font-size:12.5px;font-weight:600;color:var(--ok)}
@@ -1198,10 +1211,21 @@ const EDITORS={
   `<div class="row1"><button class="ddp sm" data-act="toast:Pick a time"><span>Time · 8:30 PM</span>${svg('i-down')}</button><button class="addrow" style="flex:1" data-act="addmoment">${svg('i-plus','i s')}Add a moment</button></div>`],
  seats:()=>[`<p class="fnote">Tables and who sits where. Tap a table to seat guests; drag to move it.</p><div class="ed"><div class="room"><div class="stage">Stage · the couple</div>${[1,2,3,4,5,6,7,8].map(n=>`<div class="tbl ${n===6?'on':''}">${n}<small>${n===6?'10 · Santos':[8,10,10,8,10,10,8,6][n-1]+' seats'}</small></div>`).join('')}</div></div>`,
   `<div class="row1"><button class="ddp sm" data-act="toast:Round of 10 · Long of 12 · Cocktail"><span>Table · Round of 10</span>${svg('i-down')}</button><button class="addrow" style="flex:1" data-act="toast:A new table">${svg('i-plus','i s')}Add a table</button></div>`],
- gifts:()=>[`<p class="fnote">Everything the <b>Gifts</b> section says comes from here. The Maker only places it.</p><div class="gh">Where it goes</div><div class="grp"><div class="fr"><div class="l">GCash</div>${inp('gifts.acct',S.gifts.acct)}</div><div class="fr"><div class="l">Registry link</div>${inp('gifts.registry','','Paste a link')}</div></div><div class="gh">What it says</div><div class="grp"><div class="fr col"><div class="l">Thank-you line</div><textarea data-k="gifts.thanks">${esc(S.gifts.thanks)}</textarea></div></div>`,
-  `<div class="lbl">Switch on what you have</div><div class="row1">${[['gcash','GCash'],['maya','Maya'],['bank','Bank'],['paypal','PayPal']].map(([k,l])=>`<button class="ddp sm" style="flex:1;background:${S.gifts[k]?'var(--ok-wash)':'var(--pill)'};color:${S.gifts[k]?'var(--ok)':'var(--ink2)'};padding:0 8px" data-act="sw:gifts.${k}">${S.gifts[k]?svg('i-check','i s'):''}<span>${l}</span></button>`).join('')}</div>`],
- rsvp:()=>[`<p class="fnote"><b>Reply by</b> is read by the guest list and the reminder emails — guests see it right away, it does not wait for Apply.</p><div class="gh">What the reply asks</div><div class="grp">${[['plus','Plus-ones','Only for guests allowed one'],['meal','Meal choice','Beef · fish · vegetarian'],['diet','Dietary needs','Allergies, halal, vegan'],['song','Song request','One song they would love to hear'],['note','A note for the couple','A short message with the reply']].map(([f,l,s])=>`<div class="fr"><div class="l">${l}<small>${s}</small></div>${sw('rsvp.'+f,S.rsvp[f])}</div>`).join('')}</div><p class="fnote">How guests get in is set in Event Setup — RSVP applies only when guests reply.</p>`,
-  `<div class="lbl">Reply by</div><div class="row1"><button class="ddp sm" style="flex:1" data-act="ldd:replyby"><span>${esc(S.rsvp.by)}</span>${svg('i-down')}</button><span style="font-size:11.5px;color:var(--mute);flex:1">Reminders go out 14 and 3 days before</span></div>`]
+ gifts:()=>{ const g=S.gifts, M=[['gcash','GCash','acct','0917 · name on the account'],['maya','Maya','maya_acct','0918 · name on the account'],['bank','Bank transfer','bank_acct','Bank · account name · number'],['paypal','PayPal','paypal_acct','paypal.me/yourname']], on=M.filter(m=>g[m[0]]);
+  return [`<div class="gx-prev"><small>What guests see</small><div class="gx-card"><b>Gifts</b><p>${esc(g.thanks)}</p>${on.length?on.map(m=>`<div class="gx-m"><span>${m[1]}</span><em>${esc(g[m[2]]||'—')}</em></div>`).join(''):'<div class="gx-none">Switch on a way to give below</div>'}${g.registry?`<div class="gx-m"><span>Registry</span><em>${esc(g.registry)}</em></div>`:''}</div></div>
+  <div class="gh">Ways to give <small>switch on what you have</small></div>
+  ${M.map(([k,l,f,ph])=>`<div class="gx-row ${g[k]?'on':''}"><div class="gx-h"><b>${l}</b>${sw('gifts.'+k,g[k])}</div>${g[k]?`<div class="gx-f">${inp('gifts.'+f,g[f]||'',ph)}</div>`:''}</div>`).join('')}
+  <div class="gx-row on"><div class="gx-h"><b>Registry link</b><small>optional</small></div><div class="gx-f">${inp('gifts.registry',g.registry||'','Paste a link to your registry')}</div></div>
+  <div class="gh">What it says</div><div class="grp"><div class="fr col"><div class="l">Thank-you line</div><textarea data-k="gifts.thanks">${esc(g.thanks)}</textarea></div></div>`,
+  `<span class="ebot-note">Shown on Invitation › Welcome and Post Event › Gifts · saves as you type</span>`]; },
+ rsvp:()=>{ const r=S.rsvp, Q=[['plus','Plus-ones','Only for guests you allowed one'],['meal','Meal choice','Beef · Fish · Vegetarian'],['diet','Dietary needs','Allergies · halal · vegan'],['song','Song request','One song they would love to hear'],['note','A note for the couple','A short message with the reply']];
+  return [`<div class="gx-row on"><div class="gx-h"><b>Reply by</b><button class="dd" style="flex:0 1 auto;height:36px" data-act="ldd:replyby"><span>${esc(r.by)}</span>${svg('i-down')}</button></div><p class="gx-sub">Reminders go to guests who have not replied, 14 and 3 days before. Guests see this date right away.</p></div>
+  <div class="gh">The answers <small>tap to rename</small></div><div class="gx-ans"><span class="yes">${inp('rsvp.yes',r.yes||'Joyfully yes')}</span><span>${inp('rsvp.no',r.no||'Sadly no')}</span></div>
+  <div class="gh">What the reply asks <small>drag to reorder</small></div>
+  <div class="gx-row on lock"><div class="gx-h"><span class="gx-g">${svg('i-grip')}</span><b>Will you join us?</b><small>always asked</small></div></div>
+  ${Q.map(([f,l,sub])=>`<div class="gx-row ${r[f]?'on':''}"><div class="gx-h"><span class="gx-g">${svg('i-grip')}</span><b>${l}<small>${sub}</small></b>${sw('rsvp.'+f,r[f])}</div>${f==='meal'&&r.meal?`<div class="gx-chips"><span>Beef</span><span>Fish</span><span>Vegetarian</span><button data-act="toast:A choice is added here">+ Add</button></div>`:''}</div>`).join('')}
+  <p class="fnote">How guests get in is set in Event Setup — the reply applies when guests reply.</p>`,
+  `<button class="ebot-btn" data-act="rsvppreview">${svg('i-eye')}Preview as a guest</button>`]; }
 };
 function infoForm(){
  const f=S.info, fr=(k,l,sub,ctrl,col)=>`<div class="fr ${col?'col':''} ${S.focus===k?'focus':''}" data-f="${k}"><div class="l">${l}${sub?`<small>${sub}</small>`:''}</div>${ctrl}</div>`;
@@ -1419,6 +1443,7 @@ document.addEventListener('click',e=>{
   case 'sphase': S.sphase=a; paint(); break;
   case 'aphase': S.aphase=a; paint(); break;
   case 'typedone': endTyping(); break;
+  case 'rsvppreview': S.returnTo=null; S.side='stages'; S.stage='rsvpstage'; S.tab.rsvpstage=0; S.sel=null; S.open=false; paint(); toast('The RSVP form, as guests see it'); break;
   case 'studiohome': S.sitem='home'; S.menu=null; S.returnTo=null; S.focus=null; paint(); break;
   case 'camv': if(a==='tag'){ S.camView=3; paint(); break; } openSheet('Preview as',CAMV,S.camView,i=>{S.camView=i;paint();}); break;
   case 'camexit': S.tab[S.stage]=0; S.sel=null; S.open=false; paint(); toast('Camera closed — back to where they were'); break;
