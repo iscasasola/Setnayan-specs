@@ -1008,7 +1008,7 @@ function topHTML(cls){
 const tpill=()=>`<span class="tpill" role="tablist">${[['style','i-brush','Style'],['text',null,'Text'],['animate','i-key','Animate']].map((t,i)=>`${i?'<span class="dv"></span>':''}<button class="tb ${S.tool===t[0]&&(S.sel||S.open)?'on':''}" data-act="tool:${t[0]}" aria-label="${t[2]}" title="${t[2]}">${t[1]?svg(t[1]):'<em>Aa</em>'}</button>`).join('')}</span>`;
 const eye=()=>`<button class="rnd eyeb playb ${S.playing?'on':''}" data-act="play" aria-label="${S.sel?'Play this part':'Play the stage as guests see it'}" title="Play">${svg('i-play')}</button>`;
 function row1HTML(){
- if(S.side==='stages') return `<div class="row1">${ddp('item',pageName()?SHORT[S.stage]+' · '+(PAGE_SHORT[pageName()]||pageName()):SHORT[S.stage],pageName()?'pg':'')}${tpill()}${eye()}</div>`;
+ if(S.side==='stages') return `<div class="row1">${ddp('item',SHORT[S.stage])}${tpill()}${eye()}</div>`;
  return `<div class="row1">${ddp('item',SHORT[S.sitem])}${ddp('look',LOOKS.find(l=>l[0]===S.look)[1],'sm')}${eye()}</div>`;
 }
 /* Stages — the tool's controls for the picked part */
@@ -1146,9 +1146,10 @@ function fullHTML(){
 function menuHTML(){
  if(!S.menu) return '';
  let title,rows;
- if(S.menu==='item'&&S.side==='stages'){ title='Stages — a stage, or one of its pages';
-  rows=STAGES.map(([k,f,sh,ic,sub])=>{ const multi=TABS[k].length>1, open=k===S.acc, here=k===S.stage;
-   return `<button class="mrow ${here&&!multi?'on':''}" data-act="${multi?'acc:'+k:'pick:stage:'+k}">${svg(ic)}<span class="nm">${esc(f)}<small>${esc(sub)}</small></span>${here&&!multi?'<span class="state here">Here</span>':''}${multi?`<svg class="i ck chev ${open?'open':''}" data-k="${k}"><use href="#i-down"/></svg>`:svg('i-check','i ck')}</button>`+(multi?`<div class="accb ${open?'open':''}" data-k="${k}">${TABS[k].map((pg,i)=>`<button class="mrow pg ${here&&S.tab[k]===i?'on':''}" data-act="pick:page:${k}.${i}">${svg(PICON[pg[0]]||'i-form')}<span class="nm">${esc(pg[0])}</span>${here&&S.tab[k]===i?'<span class="state here">Here</span>':''}${svg('i-check','i ck')}</button>`).join('')}</div>`:''); }).join(''); }
+ if(S.menu==='item'&&S.side==='stages'){ title='Stages';
+  /* stages only — the guest tab bar above the toolbar picks the page (owner 2026-10-06: "if we are having this, then we don't need the expand on the drop down") */
+  rows=STAGES.map(([k,f,sh,ic,sub])=>{ const here=k===S.stage, pages=TABS[k].length>1?TABS[k].map(x=>x[0]).join(' · '):'One page';
+   return `<button class="mrow ${here?'on':''}" data-act="pick:stage:${k}">${svg(ic)}<span class="nm">${esc(f)}<small>${esc(pages)}</small></span>${here?'<span class="state here">Here</span>':''}${svg('i-check','i ck')}</button>`; }).join(''); }
  else if(S.menu==='item'){ const list=ITEMS[S.side], cur=S.sitem; title='Studio — everything you set up';
   rows=list.map(([k,f,s,ic,sub])=>`<button class="mrow ${k===cur?'on':''}" data-act="pick:${S.side==='stages'?'stage':'studio'}:${k}">${svg(ic)}<span class="nm">${esc(f)}<small>${esc(sub)}</small></span>${k in S.items?(ready(k)?'<span class="state ok">Ready</span>':'<span class="state miss">Missing</span>'):(k===cur?'<span class="state here">Here</span>':'')}${svg('i-check','i ck')}</button>`).join(''); }
  else { title='Look'; rows=LOOKS.map(([k,n])=>`<button class="mrow ${k===S.look?'on':''}" data-act="pick:look:${k}">${svg(k==='music'?'i-music':k==='font'?'i-edit':'i-mood')}<span class="nm">${n}</span>${svg('i-check','i ck')}</button>`).join(''); }
