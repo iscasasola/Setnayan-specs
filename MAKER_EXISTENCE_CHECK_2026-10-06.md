@@ -24,7 +24,7 @@ Checked `MAKER_LIVE_CONTROLS_INVENTORY_2026-10-06.md` (origin/main 217415f) agai
 | Page ▾ · five stages · guest pages per stage · RSVP › Reply | KEPT | Stage ▾ + guest tab bar (RSVP form · When yes · When no) |
 | Page ▾ · live-today dot | NO HOME | — |
 | ＋ Add a scene (◆, six max, 25 templates) | KEPT | ＋ on the picked part's top/bottom edge → parts list + "A scene of your own ◆ · n of 6 left" |
-| Page ▾ · Prints | NO HOME | See questions |
+| Page ▾ · Prints | MOVED | Studio › Prints, the 11th tile (owner 2026-10-06) |
 | Your Event Hub address · Who can view · About the Maker | KEPT | Studio › Info › Your Event Hub (Who can view now says Public · Unlisted · Private, as shipped) |
 | "Me is each guest's own page" | KEPT | Invitation › Me · The Day › Me |
 | Lower third: Menu ▾ · Global settings list | MOVED | Stages \| Studio toggle; Global settings = the Studio tiles |
@@ -121,7 +121,7 @@ Checked `MAKER_LIVE_CONTROLS_INVENTORY_2026-10-06.md` (origin/main 217415f) agai
 | RSVP › What do you ask (Attending · Plus-ones · Meal · Dietary · Song · Note · Mobile number) · Reply by | KEPT | Studio › RSVP (Mobile number added back today) |
 | RSVP › Requests waiting | NO HOME | Belongs with the guest list |
 | RSVP › Words (Yes · No · Heading · Message) | KEPT | Studio › RSVP › Words (Heading added today); the notes in Info › To each guest |
-| Prints (Invitation set · For the day · Download the set · Size · Save PDF · tickets · Menu editor · posters · Finer Details toggles) | NO HOME | See questions |
+| Prints (Invitation set · For the day · Download the set · Size · Save PDF · tickets · Menu editor · posters · Finer Details toggles) | MOVED | Studio › Prints, the 11th tile — every piece, size, save button, ticket style, Menu editor and the Finer Details switches (owner 2026-10-06) |
 | Post Event: Front Page · Statistics · Gallery · Videos · Photo Notes/Messages · Powered by Setnayan · Suppliers We Loved · Where Everyone Sat · Entourage · Schedule · Thank You · Love Story | KEPT | Post Event › Thank you · Gallery · Gifts (seats · entourage · schedule via ＋) |
 | Post Event: Road to the Day · Watch Live · Were you there? · Papic Challenge · Supplier Stories · Live Photo Wall · What They Said · Before & After · Song · What comes next | NO HOME | See questions |
 | Post Event: Style ▾ · Shown / Hidden · Earlier / Later · parts & words | KEPT | Five layouts · Arrange |
