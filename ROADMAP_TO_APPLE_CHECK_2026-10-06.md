@@ -335,6 +335,9 @@ Apple approves the binary, every website change reaches iOS users without a new 
 7. Stages | Studio prototype — "approve"? (gates §3)
 8. Native sign-in setup (§6.1c) done?
 
+## 8b · WAIT LIST — discuss before building (owner 2026-10-06: *"Can we put this to wait list? Once we have properly discussed these"*)
+- **Passcodes — all of it.** The event passcode after Welcome · a personal code per guest (a short form of their personal link → straight to their own profile) · a "Have an event code?" box on setnayan.com and the app's first screen. Controller's proposal on the table, NOT decided: Setnayan-generated codes only, 8 characters, pause on wrong tries per device and network, one-tap new code, a code opens exactly what the personal link opens, couple notified of replies made through a code, "Not you?" sign-out. Open: generated vs chosen event code; replace "Find your invitation" by name. Removed from the Maker build (PR 6) — no migration in that build now.
+
 ## 9 · Operating rules that still bind
 
 - **Trains:** draft member PRs + `do-not-auto-merge` → fold into `rd/train-…` with `--no-ff` → regenerate baselines
