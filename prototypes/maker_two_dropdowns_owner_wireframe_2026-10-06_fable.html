@@ -510,6 +510,8 @@ body.shot .phone{border:0;border-radius:0;box-shadow:none;width:375px;height:812
 /* ONE ROW HEIGHT for the whole toolbar (owner 2026-10-06: "keep all rows consistent in height") —
    the top row, the tab bars, Edit in Studio, every dropdown / switch / slider row: --row, scaled by the phone */
 .phone{--row:44px}
+.gbar button.lk:after{content:"";display:inline-block;width:9px;height:9px;margin-left:4px;vertical-align:-1px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 11V8a5 5 0 0 1 10 0v3h1v10H6V11zm2 0h6V8a3 3 0 0 0-6 0z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 11V8a5 5 0 0 1 10 0v3h1v10H6V11zm2 0h6V8a3 3 0 0 0-6 0z'/%3E%3C/svg%3E") center/contain no-repeat;opacity:.7}
+.locknote{margin:6px 4px 0;font-size:12.5px;line-height:1.45;color:var(--ink2)}
 .el.my .h{font-family:var(--sans);font-size:.7em;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);font-weight:600;margin:0 0 .25em}
 .el.my .myv{font-family:var(--ef,var(--serif));font-size:1.35em;color:var(--dominant);font-weight:500;line-height:1.2;display:flex;align-items:center;gap:8px}.el.my p{font-size:.86em;margin-top:.2em}
 .el.sec.my[data-preset="1"] .myv{justify-content:center}.el.sec.my[data-preset="3"] .myv{font-family:var(--sans);text-transform:uppercase;letter-spacing:.14em;font-size:.95em}.el.sec.my[data-preset="4"] .myv{color:#fff}.el.sec.my[data-preset="4"] .h{color:var(--supporting)}.el.sec.my[data-preset="2"] .myv{font-style:italic;font-size:1.55em}
@@ -895,7 +897,7 @@ const S={side:'stages',stage:'std',sitem:'look',look:'background',sel:null,tool:
 const AN=()=>JSON.parse(JSON.stringify({how:0,...HOWP[0],trans:-1}));
 Object.keys(ELS).forEach(id=>S.el[id]={preset:0,bg:0,bgc:1,bgw:0,bgp:0,shade:1,font:0,color:-1,size:100,an:AN(),ex:0,show:1,align:/^(greeting|story|schedule|dress|march|seats|gifts|bring|venue)$/.test(id)?0:1,space:1});
 /* EVERY WORD ON THE PAGE COMES FROM STUDIO › INFO (owner 2026-10-06 "the information here is not taken from studio") — nothing is typed on the canvas */
-Object.assign(S.info,{titles:{...ENAME},cdlabel:'Until we say I do',greeting:'With joyful hearts we invite you to be with us as we begin our life together. Your presence would mean the world to us.',message:'Two hearts, one home, a thousand tomorrows.',thanks:'We can\'t wait to see you on the day. Your pass is below — show it at the door.',sorry:'Thank you for letting us know. We\'ll save you a slice of cake and a photo or two.'});
+Object.assign(S.info,{lock:false,code:'0612',titles:{...ENAME},cdlabel:'Until we say I do',greeting:'With joyful hearts we invite you to be with us as we begin our life together. Your presence would mean the world to us.',message:'Two hearts, one home, a thousand tomorrows.',thanks:'We can\'t wait to see you on the day. Your pass is below — show it at the door.',sorry:'Thank you for letting us know. We\'ll save you a slice of cake and a photo or two.'});
 S.stageTrans=0; S.stageHow=0; S.celebrate=0; S.aphase='in'; S.sphase='look'; /* stage defaults; a part's trans -1 = follows the stage */
 const undo=[];
 const page=$('#page');
@@ -1043,7 +1045,7 @@ function stagePanel(){
    const ex=EXTRA[id];
    const ed=d.text?`<button class="jump" data-act="editin:info:${d.text==='title'?'title':d.text}">${svg('i-form')}Edit in Studio › Info<small>or tap the words ›</small></button>`:d.jump?`<button class="jump" data-act="editin:${d.jump}">${svg(d.jump.startsWith('info')?'i-form':'i-edit')}${d.jump.startsWith('info')?'Edit in Studio › Info':'Edit the '+esc(FULL[d.jump.split(':')[1]])}<small>${d.jump.startsWith('info')?'Info':'Studio'} ›</small></button>`:d.sup?`<button class="jump sup" data-act="toast:${d.sup==='date'?'The date is set when you lock a venue in Suppliers — outside the Maker':'The venue is booked in Suppliers — outside the Maker'}">${svg('i-shop')}${d.sup==='date'?'Change the date in Suppliers':'Change the venue in Suppliers'}<small>Suppliers ›</small></button>`:'';
    return `<div class="pane style2">${head}${ed}<div class="lcar" data-lay="${id}" aria-label="Layout">${d.presets.map((n,i)=>`<button class="lcard ${i===s.preset?'on':''}" data-act="lay:${i}"><span class="lprev"></span><span class="lname">${esc(n)}</span></button>`).join('')}</div>
-    ${ex?`<div class="r2" style="flex:none">${ddv('edd:x',ex[0],ex[1][s.ex])}</div>`:''}${d.my?`<div class="ontext" style="height:auto;white-space:normal;line-height:1.45;text-align:left;padding:4px 6px;flex:none"><b>Each guest sees their own</b> — ${{role:'their role from the guest list',wear:'the outfit + colour the Mood Board sets for their role (nothing shown when the couple has not said)',arrive:'the Schedule moment marked for their role',guests:'the plus-ones on their row'}[d.my]}. Shown only when How guests get in = <b>List only · Guests reply</b>; hidden for a guest it does not apply to.</div>`:''}${id==='yesnote'?`<div class="r2" style="flex:none">${ddv('cele','Celebration ◆',CELE[S.celebrate])}</div>`:''}
+    ${ex?`<div class="r2" style="flex:none">${ddv('edd:x',ex[0],ex[1][s.ex])}</div>`:''}${d.my?`<div class="ontext" style="height:auto;white-space:normal;line-height:1.45;text-align:left;padding:4px 6px;flex:none"><b>Each guest sees their own</b> — ${{role:'their role from the guest list',wear:'the outfit + colour the Mood Board sets for their role (nothing shown when the couple has not said)',arrive:'the Schedule moment marked for their role',guests:'the plus-ones on their row'}[d.my]}. Shown only when How guests get in = <b>List only · Guests reply</b>, and only to a real guest on the list whose row has it — a visitor, an approved request or an open-QR guest never sees it.</div>`:''}${id==='yesnote'?`<div class="r2" style="flex:none">${ddv('cele','Celebration ◆',CELE[S.celebrate])}</div>`:''}
     <div class="ontext" style="flex:none;height:auto;white-space:normal;line-height:1.4;margin-top:auto;padding:0 10px">Background, colour and the gallery live in the <b>Background</b> tab · <b>Arrange</b> moves this part on this stage</div></div>`;
   }
   if(S.sphase==='bg'){
@@ -1142,6 +1144,9 @@ function infoForm(){
   ${fr('sorry','When no — sorry-to-miss-you note','“We’ll miss you, Ana” then',`<textarea data-k="info.sorry">${esc(f.sorry)}</textarea>`,1)}</div>
   <div class="gh">Your Event Hub</div><div class="grp">
   ${fr('who','Who can view','',`<button class="dd" data-act="ldd:who"><span>${esc(f.who)}</span>${svg('i-down')}</button>`)}
+  ${fr('lock','Passcode after Welcome','Optional · Welcome stays open to everyone',sw('info.lock',f.lock))}
+  ${f.lock?fr('code','Passcode','Share it with the people you want in',inp('info.code',f.code)):''}
+  ${f.lock?`<p class="locknote">Visitors see the Welcome page, then a passcode screen before Details, Our Love Story, Me and The Day. Guests on your list who open their own link go straight in — they never type it.</p>`:''}
   ${fr('addr','Event Hub address','setnayan.com/',inp('info.addr',f.addr))}
   ${fr('qr','QR code','Shown on prints and the invitation',sw('info.qr',f.qr))}</div>
   ${f.qr?`<div class="qr" aria-label="QR code"></div>`:''}
@@ -1187,7 +1192,7 @@ function renderPhone(){
  const pb=$('#pbody'); pb.classList.toggle('playing',S.playing);
  $('#ptop').innerHTML=topHTML('topnav');
  if(page.parentNode!==$('#pscroll')) $('#pscroll').appendChild(page);
- { const tabs=TABS[S.stage], t=S.tab[S.stage], g=$('#gtabs'); g.hidden=fullOn(); g.innerHTML=`<div class="cap">You're editing · <b>${esc(FULL[S.stage])}${tabs.length>1?' › '+esc(tabs[t][0]):''}</b></div>${tabs.length>1?`<div class="gbar">${tabs.map((x,i)=>`<button class="${i===t?'on':''}" data-act="gtab:${i}">${esc(x[0])}</button>`).join('')}</div>`:''}`; }
+ { const tabs=TABS[S.stage], t=S.tab[S.stage], g=$('#gtabs'); g.hidden=fullOn(); g.innerHTML=`<div class="cap">You're editing · <b>${esc(FULL[S.stage])}${tabs.length>1?' › '+esc(tabs[t][0]):''}</b></div>${tabs.length>1?`<div class="gbar">${tabs.map((x,i)=>`<button class="${i===t?'on':''} ${S.info.lock&&i>0&&S.stage!=='rsvpstage'?'lk':''}" data-act="gtab:${i}">${esc(x[0])}</button>`).join('')}</div>`:''}`; }
  const lt=$('#plt'); lt.hidden=fullOn(); lt.innerHTML=ltHTML(); requestAnimationFrame(fillLayouts);
  const collapsed=S.side==='stages'&&!S.open; lt.classList.toggle('min',collapsed); const scr=$('#phone').clientHeight, k=1; /* owner 2026-10-06: 44 everywhere — sizes no longer scale with the phone */ S.ltH=Math.round(scr*0.5); $('#phone').style.setProperty('--k',k.toFixed(3)); lt.style.height=collapsed?Math.round(62*k)+'px':S.ltH+'px';
  { const h=$('#pfull'), st=h.querySelector('.fbody')?.scrollTop||0; h.innerHTML=fullOn()?fullHTML():''; const b=h.querySelector('.fbody'); if(b&&!S.focus) b.scrollTop=st; if(!fullOn()) lastFull=null; }
