@@ -316,7 +316,7 @@ section{padding:18px 0 8px}
   <h2 style="margin-top:36px;font-size:26px">The Maker's shape — one control, one body, tools at the thumb</h2>
   <ol class="delta">
     <li><b>Find · Build · Booked</b> — one segmented control on top, like Stages | Studio. Find is steps 1–3, Build is 4–5 (your cart), Booked is 6–9.</li>
-    <li><b>Find</b> opens on the shipped "Cover your event" ring as rows (<code>shortlist-categories.tsx</code>); "＋ Add to your event" is one dropdown of the admin taxonomy. Tap a category and it unfolds in place (the Your Team FINAL accordion, one open at a time): <i>Yours</i> (the shortlist, one row shape, Add to build · Inquire / Read their reply · Book · Remove), then the marketplace under it, full width and capped with "Show all N ›" (the approved frame 7: one Filter ▾, Save · Ask for a quote). At the thumb: <b>CATEGORY ▾</b> opens a row and scrolls to it, and the build pill.</li>
+    <li><b>Find</b> opens on the shipped "Cover your event" ring as rows (<code>shortlist-categories.tsx</code>); "＋ Add to your event" is one dropdown of the admin taxonomy. Tap a category and it unfolds in place (the Your Team FINAL accordion, one open at a time): <i>Yours</i> (the shortlist, one row shape, Add to build · Inquire / Read their reply · Book · Remove), then the marketplace under it, full width and every candidate shown so they compare at a glance — price first, then free on your date, rating, events, area (the approved frame 7: one Filter ▾, Save · Ask for a quote). At the thumb: <b>CATEGORY ▾</b> opens a row and scrolls to it, and the build pill.</li>
     <li><b>"Add to build" peeks the cart</b> — the line you added, the new total, "View build ›" — then tucks away.</li>
     <li><b>Build</b> is the cart (<code>BuildLocked</code> + <code>BuildCompare</code>): one line per category with Change ›, the money, the date-fit line, saved builds side by side. At the thumb: Save this build · Book N ›.</li>
     <li><b>Booked</b> (<code>TeamRows</code>, <code>MerkadoBudgetLens</code>): your team with what they sent and what they feed across the event, and the original's money rows.</li>
@@ -432,7 +432,7 @@ section{padding:18px 0 8px}
     if(s.covers&&s.covers.length) out.push(`Covers ${s.covers.map(c=>cat(c)?cat(c).name.toLowerCase():c).join(' · ')}`);
     if(s.circle) out.push(`<span class="gild">♥ Booked by ${esc(s.circle)}</span>`);
     return out.join(' · '); };
-  const metaOf=m=>`${m.area||'Metro Manila'}${m.yrs?' · '+m.yrs+' yrs':''}${m.ev?' · '+m.ev+' events':''}${m.from?' · from '+(m.per==='head'?'₱'+m.from.toLocaleString()+' / head':peso(m.from)):''}${m.star?' · ★ '+m.star:''}`;
+  const metaOf=m=>`${m.from?'<b>from '+(m.per==='head'?'₱'+m.from.toLocaleString()+' / head':peso(m.from))+'</b>':(m.price!=null?'<b>'+peso(m.price)+'</b>':'<span class="mute">no price yet</span>')}${m.star?' · ★ '+m.star:''}${m.ev?' · '+m.ev+' events':''} · ${m.area||'Metro Manila'}`;
   const srow=(m,lines,acts,cls)=>`<div class="frow ${cls||''}"><span class="logo">${initials(m.name)}</span><span><b>${esc(m.name)}</b>${m.own?' <span class="mute">· added by you</span>':''}<br><span class="mute">${metaOf(m)}</span><br><span class="fitl">${lines}</span></span><span class="acts">${acts}</span></div>`;
   const venue=()=>bookedIn('reception')||bookedIn('ceremony');
   const dateText=()=>S.dateKnown==='day'?fmtDate(S.date):monthOf(S.date);
@@ -473,12 +473,11 @@ section{padding:18px 0 8px}
         ${ks.map(k=>{ const c=cat(k), st=catState(k), mine=S.suppliers.filter(s=>s.cat===k), open=S.cat===k; const fl=open?(S.filter||'near'):'near';
           let list=(MARKET[k]||[]).filter(m=>!S.suppliers.some(x=>x.id===m.id)); const total=list.length;
           if(fl==='free') list=list.filter(m=>isFree(m)); if(fl==='rated') list=[...list].sort((a,b)=>b.star-a.star); if(fl==='circle') list=list.filter(m=>m.circle); if(fl==='following') list=[];
-          const CAP=3; const shown=S.showAll===k?list:list.slice(0,CAP);
+          const shown=list;
           const body=!open?'':`<div class="unfold">
             ${mine.length?`<p class="k2">Yours</p>${mine.map(x=>srow(x,`<b>${stateOf(x)}</b>${fitLines(x,k)?' · '+fitLines(x,k):''}`,verbs(x,k),x.fresh?'new':'')).join('')}`:''}
-            ${bookedIn(k)?'':`<div class="findhead"><p class="k2">${mine.length?'More in':'In'} ${c.name} · ${list.length} supplier${list.length===1?'':'s'}</p><div class="sel small">${FL[fl]}<select id="findFilter" aria-label="Filter">${Object.entries(FL).map(([v,t])=>`<option value="${v}" ${v===fl?'selected':''}>${t}</option>`).join('')}</select></div></div>
+            ${bookedIn(k)?'':`<div class="findhead"><p class="k2">${mine.length?'More to compare':'To compare'} · ${list.length}</p><div class="sel small">${FL[fl]}<select id="findFilter" aria-label="Filter">${Object.entries(FL).map(([v,t])=>`<option value="${v}" ${v===fl?'selected':''}>${t}</option>`).join('')}</select></div></div>
             ${shown.map(m=>srow(m,fitLines(Object.assign({status:'saved'},m),k),`<button class="quiet" data-act="savesup" data-id="${m.id}" data-cat="${k}">Save</button><button data-act="ask" data-id="${m.id}" data-cat="${k}">Ask for a quote</button>`)).join('')}
-            ${list.length>CAP&&S.showAll!==k?`<button class="all" data-act="showall" data-cat="${k}">Show all ${list.length} ›</button>`:''}
             ${!list.length?`<p class="mute" style="font-size:13px;margin:12px 0 4px">${fl==='near'?'Nobody here yet — suppliers are joining.':'Nobody matches that filter.'}</p>`:''}`}
             <p class="mute" style="font-size:13px;margin:14px 0 6px">Not here? <button class="wine" data-act="sheet" data-key="add" data-cat="${k}">Add your own ›</button>${coveredBy(k)?'':` <span style="margin:0 8px">·</span> <button class="mute" data-act="removecat" data-cat="${k}">Not needed? Remove ${c.name} from your event</button>`}</p></div>`;
           return `<div class="cat ${open?'open':''} ${c.fresh?'new':''}" id="cat-${k}"><button class="bar" data-act="opencat" data-cat="${k}"><span class="ico">${c.icon}</span><span>${c.name}${mine.length?` <span class="mute">· ${mine.length} yours</span>`:''}</span><span class="state ${st.cls}">${st.text}</span><span class="chev">⌄</span></button><div class="exp"><div>${body}</div></div></div>`; }).join('')}
