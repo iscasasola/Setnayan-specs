@@ -48,7 +48,7 @@ Owner (08 Oct): *"at 98% start documentation and still continue safely building 
 
 ## 4 · Sequence of builds (owner order)
 
-🔁 **AMENDED 08 Oct: Level 1 now ALSO includes the fixed onboarding for every event type that ships today (needs picker + one-tap questions + simple events simple). New types stay Level 2. ALSO in Level 1 (last step before Apple): refresh the feature/help pages for search (lib/feature-pages, /help).**
+🔁 **AMENDED 08 Oct: Level 1 now ALSO includes the fixed onboarding for every event type that ships today (needs picker + one-tap questions + simple events simple). New types stay Level 2. ALSO in Level 1 (last step before Apple): refresh the feature/help pages for search (lib/feature-pages, /help). LAST: a full no-errors QUALITY SWEEP (every route, web + iOS app, all roles) → Apple-readiness checklist.**
 🧭 **ROADMAP LOCKED ("ok roadmap", 08 Oct): LEVEL 1 (clean all current features + launch offer + app-shows-owned) → APPLE CHECK → LEVEL 2 (every event type, expos, ticketing L1–L2) → LEVEL 3 (own payments + ticket commission, Apple IAP, reserved seating).** Setnayan never pays suppliers/organisers (no 2307). The numbered list below is Level 1 in detail; the event-coverage item (6b) moves to Level 2.
 
 
