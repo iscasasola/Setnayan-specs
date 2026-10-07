@@ -1,6 +1,9 @@
 # Studio round 3 — build status (2026-10-08, builder S3, wrapped on the owner's call)
 
-PR **#6414** (draft, `do-not-auto-merge`, autoMergeRequest null) · branch `rd/studio-round-3` → base `rd/studio-followups` (#6406) · head `27d3133aa`.
+PR **#6414** (draft, `do-not-auto-merge`, autoMergeRequest null) · branch `rd/studio-round-3` → base `rd/studio-followups` (#6406) · head `a6497e781` (typecheck fix + guards).
+PR **#6417** (draft, `do-not-auto-merge`) · `rd/studio-draft-fields` → base `rd/studio-round-3` · head `bd1be5279` — "draft 1-3".
+
+_Updated after the wrap was lifted (coordinator: keep building ~2.5 h)._
 Side-by-sides: `prototypes/studio-round3-2026-10-08/` (prototype vs built, 375 px, maker-lab fixtures).
 
 ## DONE (in 2caf3c368 + 27d3133aa)
@@ -15,14 +18,15 @@ Side-by-sides: `prototypes/studio-round3-2026-10-08/` (prototype vs built, 375 p
 9. Look › Music — no Save in Studio (upload/switch posts the same `updateSiteChrome` draft form); Play music = switch.
 Guards (each sabotaged red once): `studio-round-3-follows-the-owner` (7), `every-studio-colour-opens-the-one-picker` (3 + 1 todo), `one-setting-two-doors` (3 + 3 todo). Updated: `the-seat-plan-on-the-phone`, `the-guided-steps-share-one-layout`, `every-slot-maps-to-a-taxonomy-category`, `bouquet-and-centrepieces-have-a-slot`. Regenerated `screens.generated.json`. All 41 `ci.yml` node guards green except the build-dependent two (not run).
 
-## NOT RUN (CI is the gate)
-Full `tsc`, full unit suite, production build + 507 KB Maker budget (`check-maker-js-budget.mjs`), `check-vercel-route-count.mjs`. New first-load imports: `Sheet` + `PickMenu` in moment-sheet (the picker sheet is lazy).
+## RUN / NOT RUN
+Full `pnpm typecheck` on the draft-fields tree (which contains round 3): 1 error (maker-logo shipped row) — fixed in a6497e781. Full unit suite: running at the time of this update (see below).
+Not run:  full unit suite, production build + 507 KB Maker budget (`check-maker-js-budget.mjs`), `check-vercel-route-count.mjs`. New first-load imports: `Sheet` + `PickMenu` in moment-sheet (the picker sheet is lazy).
 
 ## IN PROGRESS / STOPPED
 - Groomsmen · Bridesmaids · Flower girl · Ring bearer boards — STOPPED: need `event_inspiration_assets_slot_key_check` widened (migration). Recorded in `AWAITING_A_SLOT`.
 - Supplier photos are tagged by TRADE tile (`MOODBOARD_SLOT_TRADES`: grooms_attire, mens_attire, womens_attire, filipiniana_barongs, brides_attire, hmua), not by attire item — no per-item (gown/suit/flower girl) tagging exists. Search ideas › on each attire board searches its slot's trades.
 - `ColourWell` → `ColourPickerSheet` (Look › Colours › Background · Buttons, all Stages wells) — RD (afea631711599398c) agreed to own it.
-- `rd/studio-draft-fields` — NOT STARTED.
+- `rd/studio-draft-fields` — BUILT as #6417: opening line · thank-you words · Reply by draft, Apply writes them (Reply by via admin client). STOPPED on E-Gifts ways to give (`event_egift_methods` rows — draft-shape change). Registry link stays live.
 
 ## TODO — owner items from tonight (verbatim as relayed)
 - "we already have a design for the color palettes and how to pick colors on the moodboard. apply that same concept on the background and on any other color rules parts" — remaining: ColourWell wells (RD), Prints colours (none found in Studio), Background colour (= ColourWell).
@@ -30,7 +34,7 @@ Full `tsc`, full unit suite, production build + 507 KB Maker budget (`check-make
 - "Inspiration can go more. Bridal Gown, Groom's Suit, Groomsmen, Bridesmaid, Flowergirl, Ring Bearer" / "this simply means on attire, they can upload inspiration photos and also search from the photos uploaded by vendors" — 2 of 6 + Entourage done; 4 need a migration (owner call).
 - Tabs "Palette · Attire · Inspiration · Do's & Don'ts" ("ok") — done.
 - "and no save button" (Look › Music) — done.
-- "draft 1-3": opening line (`print_details.opening_line` via `/api/hub-print/words`), E-Gifts ways to give + Thank-you (`pabuya` / `events.pabuya_message`), RSVP Reply-by (`events.guest_list_edit_deadline` via `updatePaxSettings`) into the hub draft, publish on Apply; slug stays live — NOT STARTED, separate PR `rd/studio-draft-fields`.
+- "draft 1-3": opening line, E-Gifts ways to give + Thank-you, RSVP Reply-by into the hub draft; slug stays live — #6417 (ways to give NOT drafted: owner call on drafting `event_egift_methods` rows).
 - "apply this to all glass row" — rows touched here carry `sn-glass-row`; the class lands with builder GR (not on main at wrap; until then those rows are unfilled).
 
 ## Traps
