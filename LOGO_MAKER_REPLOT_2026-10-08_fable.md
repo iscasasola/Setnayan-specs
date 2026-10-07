@@ -119,3 +119,5 @@ Guards to keep green: `lib/the-maker-keeps-the-page-on-a-phone.test.ts` (the low
 height — the carousel row is 74 px + tools row 44 px inside the existing `MAKER_LT_HEIGHT`),
 `maker-logo-save-gate` (never saves on open — the ungated open must still take its baseline at the
 first touch, not at mount).
+
+- **Owner 08 Oct, on the prototype:** *"no need this play button since there is a play button under"* → REMOVE the floating "▶ Play" on the workspace; the ▶ in the tools row is the only Play. (It also collided with the 🔒 chip on the picked layer.)
