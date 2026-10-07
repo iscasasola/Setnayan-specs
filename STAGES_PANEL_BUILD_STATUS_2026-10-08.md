@@ -1,6 +1,6 @@
 # Stages panel — owner fixes · build status (2026-10-08, wrap-up for the new account — RESUMED, updated per item)
 
-Branch `rd/stages-panel-owner-fixes` · **draft PR #6413** ("WIP — Stages panel owner fixes", `do-not-auto-merge`, auto-merge null) · head **345e598f8** (resumed; see the newest DONE rows).
+Branch `rd/stages-panel-owner-fixes` · **draft PR #6413** ("WIP — Stages panel owner fixes", `do-not-auto-merge`, auto-merge null) · head **f64354e74** (resumed; see the newest DONE rows).
 Built on #6398 (merged cd6d471b5) and FU's #6401 (`rd/stages-panel-styles-and-looks`, merged in at e0e05df4a — one style registry `lib/scene-styles-parts.ts`).
 Worktree: `~/Documents/Claude/Projects/wt-redraw` (kept, `.next` removed).
 
@@ -17,6 +17,7 @@ Worktree: `~/Documents/Claude/Projects/wt-redraw` (kept, `.next` removed).
 | c04ce3e1b | Countdown = prototype five **Big number · Boxes · Offset · Line · Circle** (owner "allow offset" — ONE narrow exception in `lib/layouts-are-the-shipped-scene-styles.test.ts`); The calendar unregistered (not the default; a stored value falls back to Boxes, measured); Arrange: Order row removed, ⓘ on On this stage / Alignment / Spacing | `every-scene-style-draws.test.ts` (Offset/Line/Circle), stages-panel Arrange test |
 | 5bf5fdb67 | **Each tab its own page** (owner "yes pages"): `hubTabsOn` `stagesCanvas` exception via `?tabs=1`; bridge `hubTab` switches in place like `hub-shell.tsx` `showTab`; ready → tab re-sent; `drawnMakerOrder` measures every tab | `lib/every-scene-is-in-the-navigator.test.ts` 1b (amended with owner words, not weakened), `each-tab-is-its-own-page.test.ts` |
 | 58f2835de | port-control baseline regenerated | — |
+| f64354e74 | Full unit suite on 345e598f8: **22,834 pass / 1 fail** — the one (`see-as-draws-the-guest-components` pins the canvas address prefix) fixed here by moving `&tabs=1` after See as; that file re-run green. tsc ✓ · `pnpm -s lint` ✓ · every CI node guard + `lint:dup-rule` ✓. Maker budget: build queued behind the heavy lock (held by S3) — re-measure if this row has no number after it. | — |
 | 345e598f8 | **Item 6, first safe step — RSVP canvas inert:** `rsvp-canvas-bridge.tsx` now swallows click / pointerdown / mousedown / keydown / beforeinput on every form field (`INERT_FIELDS`), on top of the existing submit stop and the sample-guest refusal in `submitInviteReply` (`SIMULATED_GUEST_ID`). The form's step buttons stay live so one-question mode can still be walked. | stages-panel RSVP test (sabotaged red) |
 
 ### Item 6 — the rest of the RSVP stage as parts: PLAN (not built)
