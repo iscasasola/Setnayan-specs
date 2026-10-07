@@ -63,6 +63,17 @@ No navigator beyond the one segmented control (≤3, the owner's rule). Sheets a
 
 **Not in the prototype on purpose (needs an owner call):** the word for a combination — the shipped page says "Picks" (replan flag on) / "Build" (flag off); the owner said *"builds"* today. The prototype says **Build**.
 
+## Setnayan AI on this page — shipped, kept, now drawn
+
+Owner 2026-10-07: *"how about how SAI helps on the Suppliers? is it part of our build also?"* — it already ships on this page and the build keeps all of it (`page.tsx` `aiActive` / `isSetnayanAiActiveForEvent`, `services-takeover.tsx` crest, `merkado-guard-banner.tsx`): **smart matching** (the list is ordered by fit to date, budget and guest count — "Best matches" is the default order; the shipped sort set is Best matches · Nearest to your venue · New here · Lowest price · Top rated), **fit scoring** (the fit badges on the bench card, `shortlist-categories.tsx`), the **watch guard** over the build (warn-only: a shared-date clash, an over-budget build, venue reach, and demand contention — "Another couple is also considering", `eyeingByVendorId`), and the **entitlement** (free while in launch; when the paywall is on, `aiOfferBanner` offers it at the top of the shortlist — "Setnayan AI sorts every supplier by how well they fit your date, budget & guest count"). The prototype now shows Best matches as the default order, the "another couple is also considering" nudge on a card, and the guard line over the build in the shipped words. The gold crest strip is not drawn: SAI is a pillar of Our Services, not a banner. The fit badge's wording is the shipped component's, not the prototype's.
+
+## What is still not in the prototype (small, all shipped behind flags — keep in the build)
+
+- **Suppliers from a past event** (`reuse-bookings-panel.tsx`, `NEXT_PUBLIC_REUSABLE_BOOKINGS_ENABLED`): one line at the top of Find when it has data.
+- **A coordinator proposing a booking** (`pending-lock-proposals.tsx`, `NEXT_PUBLIC_COORDINATOR_PROPOSE_LOCK_ENABLED`): one line in Build when there is one.
+- **Decide-by deadlines** (guided mode): the shipped "168D OVERDUE" is harsh — recommendation 9 proposes the kinder line.
+- **Follow (♡) and Share** on the supplier sheet are stubs here; they are the shipped shop-page controls.
+
 ## Recommendations (one word each)
 
 1. **Retire the five-row "Your planning" menu**; the page is the nine steps in order, no navigator. (Yes / No)
