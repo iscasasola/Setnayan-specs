@@ -616,6 +616,8 @@ section{padding:18px 0 8px}
     save();
   }
   // the cart peeks when something is added (like a shopping cart), then tucks away
+  // scroll so an element's top sits just under the pinned block — measured, so the first service card is never hidden behind it
+  function landOn(id){ setTimeout(()=>{ const el=document.getElementById(id); if(!el) return; const stickH=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--stick-h'))||150; const y=el.getBoundingClientRect().top+window.scrollY-stickH; window.scrollTo({top:Math.max(0,y),behavior:'smooth'}); },60); }
   let cartT=null; function peekCart(line){ $('#cartLine').innerHTML=line; $('#cart').classList.add('on'); clearTimeout(cartT); cartT=setTimeout(()=>$('#cart').classList.remove('on'),2800); }
 
   const lad=steps=>`<div class="ladder">${steps.map(x=>`<div class="step ${x.on?'on':''}"><span class="dotl"></span><span>${x.t}</span>${x.act?`<button class="wine" style="margin-left:auto;font-weight:500" data-act="${x.act}" data-key="${x.key||''}" data-id="${x.id||''}" data-cat="${x.cat||''}">${x.al}</button>`:''}</div>`).join('')}</div>`;
@@ -770,7 +772,6 @@ section{padding:18px 0 8px}
   };
   document.addEventListener('click',e=>{ const b=e.target.closest('[data-act]'); if(!b||b.disabled) return; e.preventDefault(); (ACT[b.dataset.act]||(()=>{}))(Object.assign({},b.dataset)); });
   document.addEventListener('change',e=>{ if(e.target.id==='moreCats'&&e.target.value){ const k=e.target.value; S.cats.push(k); S.removedCats=S.removedCats.filter(x=>x!==k); S.cat=k; S.filter='best'; render(); landOn('cat-'+k); toast(`Added ${cat(k).name}`); }
-    if(e.target.id==='findFilter') openSheet('find',{cat:e.target.dataset.cat,filter:e.target.value});
     if(e.target.id==='findFilter'){ S.filter=e.target.value; render(); }
     if(e.target.id==='payMethod'){ openSheet('pay',{id:e.target.dataset.id,method:e.target.value}); }
     if(e.target.id==='addCat') $('#addCatLabel').textContent=cat(e.target.value).name; if(e.target.id==='addBooked') $('#addBookedLabel').textContent=e.target.selectedOptions[0].text; });
