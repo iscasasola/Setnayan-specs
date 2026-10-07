@@ -17,3 +17,10 @@
 - Is a new `setDelegateAreas` server action OK for the coordinator switch (parallel single writes are unsafe)?
 - Accept the re-measured unnamed guards above.
 - Coordinator ON excluding Budget/Photos (EA's open question) is still open.
+
+## Update — 2026-10-08 (EDB resumed, then stopped again)
+- Done: #6408 merged; PR #6412 rebased onto main and retargeted to base `main` (SHA a383d4133, draft, do-not-auto-merge, autoMergeRequest null). `ActionButton` + `Count` are now on main (use them; Put this away should switch to ActionButton tone neutral).
+- CI guards run locally from the worktree: 34/38 pass. Failures: `check-maker-js-budget` + `check-vercel-route-count` need a `.next` build (CI runs them post-build); `check-ugat-screens` (3 NEW outside-home: `events.std_background`, `std_reveal_effects`, `std_reveal_effects.music` — likely from main, not this PR; verify on main before regenerating with `pnpm --filter @setnayan/web root-map --baseline`); `lint-port-no-lost-controls` (deliberate removals: Row/Section/RequestsPage/SpecialMessageField… → regenerate with `pnpm --filter @setnayan/web port:baseline` in PR-A).
+- Still not run: typecheck (killed while waiting on the heavy lock), lint, full unit suite. Side-by-side and word count still to do.
+- Next: finish the PR-A checks + baselines → PR-B (coordinator switch = instant flip + SEQUENTIAL `setDelegateArea` saves behind it, never parallel, no new "use server" export; test that the switch moves before the save resolves) → PR-C.
+- Owner calls: unchanged (re-measured unnamed guards; coordinator ON excluding Budget/Photos).
