@@ -461,7 +461,7 @@ section{padding:18px 0 8px}
   const SEEDS={
     empty:()=>({dateKnown:'month',date:'2026-12-18',suppliers:[],cats:CATS.filter(c=>c.starter).map(c=>c.key),removedCats:[],picks:{},builds:[],chats:[],roomAsked:{},open:[]}),
     mid:()=>({dateKnown:'day',date:'2026-12-18',
-      suppliers:[mk('seda',{cat:'reception',status:'booked',price:1056000,paid:0}),mk('santuario',{cat:'ceremony',status:'booked',price:null,paid:0,room:null}),
+      suppliers:[mk('seda',{cat:'reception',status:'booked',price:1056000,paid:0,own:true,plan:[{k:'first',label:'First payment',due:'2026-10-05',amt:528000},{k:'balance',label:'Balance',due:'2026-12-11',amt:528000}]}),mk('santuario',{cat:'ceremony',status:'booked',price:null,paid:0,room:null}),
         mk('lumina',{cat:'photo',status:'quote',quote:85000,price:null}),mk('bituin',{cat:'catering',status:'waiting',askedAgo:'3 days ago'}),mk('hiraya',{cat:'catering',status:'saved'})],
       cats:CATS.filter(c=>c.starter).map(c=>c.key),removedCats:[],picks:{},
       builds:[{name:'Garden build',picks:{reception:'seda',ceremony:'santuario',catering:'luntian',photo:'lumina'}},{name:'Simple',picks:{reception:'seda',ceremony:'santuario',catering:'mesa'}}],
@@ -529,7 +529,7 @@ section{padding:18px 0 8px}
   const ICO={chat:'<svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.6-.8L3 21l1.9-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>',book:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M9 16l2 2 4-4"/></svg>',x:'<svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>',folder:'<svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>'};
   const ib=(name,label,attrs)=>`<button class="ic" ${attrs} aria-label="${label}" title="${label}">${ICO[name]}</button>`;
   const verbs=(s,k)=>s.status==='booked'
-      ?`${s.price==null?`<button data-act="sheet" data-key="price" data-id="${s.id}">Set price</button>`:(s.paid<s.price*0.2?`<button data-act="sheet" data-key="pay" data-id="${s.id}">Pay</button>`:`<button class="quiet" data-act="sheet" data-key="pay" data-id="${s.id}">Paid ${Math.round(s.paid/s.price*100)}%</button>`)}${ib('chat','Chat',`data-act="sheet" data-key="chat" data-id="${s.id}"`)}${ib('folder','Workspace',`data-act="note" data-text="Opens the shipped supplier workspace"`)}`
+      ?`${s.price==null?`<button data-act="sheet" data-key="price" data-id="${s.id}">Set price</button>`:(nextDue(s)?`<button data-act="sheet" data-key="pay" data-id="${s.id}">Pay</button>`:`<button class="quiet" data-act="sheet" data-key="pay" data-id="${s.id}">Paid in full</button>`)}${ib('chat','Chat',`data-act="sheet" data-key="chat" data-id="${s.id}"`)}${ib('folder','Workspace',`data-act="note" data-text="Opens the shipped supplier workspace"`)}`
       :s.status==='quote'?`<button data-act="sheet" data-key="chat" data-id="${s.id}">Read their reply</button>${ib('x','Remove',`data-act="remove" data-id="${s.id}"`)}`
       :s.status==='waiting'?`<button data-act="nudge" data-id="${s.id}">Nudge</button>${ib('chat','Chat',`data-act="sheet" data-key="chat" data-id="${s.id}"`)}${ib('x','Remove',`data-act="remove" data-id="${s.id}"`)}`
       :priceOf(s)!=null?`<button data-act="pick" data-id="${s.id}" class="${S.picks[k]===s.id?'on':''}">${S.picks[k]===s.id?'In your build ✓':'Add to build'}</button>${ib('book','Book',`data-act="book" data-id="${s.id}"`)}${ib('chat','Chat',`data-act="sheet" data-key="chat" data-id="${s.id}"`)}${ib('x','Remove',`data-act="remove" data-id="${s.id}"`)}`
@@ -589,14 +589,14 @@ section{padding:18px 0 8px}
     }
     else {
       // BOOKED · steps 6–9: your team, what they feed, the budget, date & place
-      const dues=M.bookedList.filter(s=>s.price!=null&&s.paid<s.price*0.2); const dueNext=dues.reduce((a,s)=>a+(s.price*0.2-s.paid),0); const orders=2500;
+      const dues=M.bookedList.map(nextDue).filter(Boolean); const dueNext=dues.reduce((a,x)=>a+x.amt,0); const orders=2500;
       const FEEDS={reception:['Event Hub · venue & city','Seat plan · room size','Schedule'],ceremony:['Event Hub · ceremony','Schedule'],catering:['Guests · headcount','Budget'],photo:['Papic & Stories','Schedule'],coordinator:['Schedule · they write their part','Chats'],stylist:['Mood board','Seat plan · table sizes'],band:['Schedule · program'],host:['Schedule · program'],hmua:['Schedule · call time'],cake:['Schedule'],car:['Schedule · travel'],shuttle:['Guests · pick-up'],printing:['Guests · invites'],booth:['Papic'],lights:['Schedule'],souvenir:['Guests'],insurance:['Budget']};
       const rows=M.bookedList.map(s=>{ const isVenue=['reception','ceremony'].includes(s.cat);
         const sent=isVenue?(s.room?`<div class="sent">Room size <b>${s.room}</b> <span class="pill ok">sent ✓</span> <span class="mute">· used by your seat plan</span></div>`:`<div class="sent">Room size <span class="mute">${S.roomAsked[s.id]?'asked — waiting':'not sent'}</span>${S.roomAsked[s.id]?'':` <button class="ask" data-act="askroom" data-id="${s.id}">Ask them ›</button>`}</div>`):(s.cat==='stylist'?`<div class="sent">Table sizes <span class="mute">${S.roomAsked[s.id]?'asked — waiting':'not sent'}</span>${S.roomAsked[s.id]?'':` <button class="ask" data-act="askroom" data-id="${s.id}">Ask them ›</button>`}</div>`:'');
         const used=`<div class="sent"><span class="mute">Used across your event:</span> ${(FEEDS[s.cat]||['Schedule']).map(u=>`<span class="pill mute">${u}</span>`).join(' ')}</div>`;
-        const next=s.price==null?`<span class="mute">Next:</span><span class="wine">set the price so your buffer can count</span>`:s.paid<s.price*0.2?`<span class="mute">Next:</span><span class="wine">${s.paid?'next payment':'make your first payment'}</span>`:`<span class="mute">Paid</span><span>${peso(s.paid)} of ${peso(s.price)}</span>`;
+        const nd=nextDue(s); const next=s.price==null?`<span class="mute">Next:</span><span class="wine">set the price so your buffer can count</span>`:nd?`<span class="mute">Next:</span><span class="wine">${nd.line.label.toLowerCase()} · ${peso(nd.amt)} · by ${shortDate(nd.line.due)}</span>`:`<span class="mute">Paid in full</span><span>${peso(s.paid)}</span>`;
         return `<div class="row ${S.open.includes('row-'+s.id)?'open':''} ${s.fresh?'new':''}"><button class="rowbtn" data-act="toggle" data-id="row-${s.id}"><span class="logo">${initials(s.name)}</span><span><span class="name">${esc(s.name)}</span><span class="svc">${cat(s.cat).name}${s.own?' · added by you':''}</span></span><span class="pill ok ${s.pop?'pop':''}">Booked</span></button>
-          <div class="next">${next}<span class="go">${s.price==null?`<button class="wine" data-act="sheet" data-key="price" data-id="${s.id}">Set price ›</button>`:s.paid<s.price*0.2?`<button class="wine" data-act="sheet" data-key="pay" data-id="${s.id}">Pay ›</button>`:`<button class="wine" data-act="sheet" data-key="pay" data-id="${s.id}">Pay more ›</button>`}</span></div>
+          <div class="next">${next}<span class="go">${s.price==null?`<button class="wine" data-act="sheet" data-key="price" data-id="${s.id}">Set price ›</button>`:nd?`<button class="wine" data-act="sheet" data-key="pay" data-id="${s.id}">Pay ›</button>`:`<button class="wine" data-act="sheet" data-key="pay" data-id="${s.id}">Payments ›</button>`}</span></div>
           <div class="exp" style="grid-column:1/4"><div><div class="detail">${sent}${used}<div class="acts"><button data-act="sheet" data-key="chat" data-id="${s.id}">Chat ›</button><button data-act="note" data-text="Opens the shipped supplier workspace">Workspace ›</button><button class="quiet" data-act="cancel" data-id="${s.id}">Cancel booking</button></div></div></div></div></div>`; }).join('');
       const rec=bookedIn('reception'), cer=bookedIn('ceremony'), anyV=rec||cer;
       const lad=steps=>`<div class="ladder">${steps.map(x=>`<div class="step ${x.on?'on':''}"><span class="dotl"></span><span>${x.t}</span>${x.act?`<button class="wine" style="margin-left:auto;font-weight:500" data-act="${x.act}" data-key="${x.key||''}" data-id="${x.id||''}" data-cat="${x.cat||''}">${x.al}</button>`:''}</div>`).join('')}</div>`;
@@ -680,28 +680,38 @@ section{padding:18px 0 8px}
         <div class="compose"><span class="mute">📎</span><input id="composer" placeholder="Message ${esc(s.name.split(' ')[0])}"><button class="wine" data-act="send" data-id="${s.id}">➤</button></div>
         ${s.status!=='booked'?`<div class="cta" style="padding-top:12px"><button class="btn" data-act="book" data-id="${s.id}">Book ${esc(s.name.split(' ')[0])} ›</button></div>`:''}
         <p class="mute" style="font-size:12px;margin-top:10px">Keep chats and payments inside Setnayan — that's what protects your booking.</p>`; },
-    pay({id,method}){ const s=sup(id); const due=Math.max(0,s.price*0.2-s.paid); const amt=due||Math.round(s.price*0.1);
-      const METHODS=[{k:'gcash',label:'GCash · QR',type:'qr',name:esc(s.name),no:'0917 ••• 4471'},{k:'bdo',label:'BDO · bank transfer',type:'bank',name:esc(s.name)+' Inc.',no:'0054 8820 1193'},{k:'link',label:'Payment link',type:'link',name:'',no:''}];
+    pay({id,method}){ const s=sup(id); const plan=planOf(s); const nd=nextDue(s); const amt=nd?nd.amt:0; const onSetnayan=!s.own;
+      const METHODS=[{k:'gcash',label:'GCash · QR',type:'qr',name:esc(s.name),no:'0917 ••• 4471'},{k:'bdo',label:'BDO · bank transfer',type:'bank',name:esc(s.name)+' Inc.',no:'0054 8820 1193'},{k:'link',label:'Payment link',type:'link'}];
       const m=METHODS.find(x=>x.k===(method||'gcash'))||METHODS[0];
       const qr=`<div class="qr" aria-label="QR code"><div class="qr-grid">${Array.from({length:81},(_,i)=>`<i style="opacity:${((i*7+s.name.length)%5<2)?1:0}"></i>`).join('')}</div></div>`;
-      const dest=m.type==='qr'?`${qr}<p class="mute" style="font-size:13px;margin:6px 0 0;text-align:center">Scan with GCash · <b>${peso(amt)}</b> to ${m.name}</p><div class="cta" style="justify-content:center"><button class="btn quiet" data-act="note" data-text="Saved the QR to your photos">Save QR</button><button class="btn quiet" data-act="note" data-text="Copied 0917 ••• 4471">Copy number</button></div>`
-        :m.type==='bank'?`<div class="opt"><span>Account name<br><b>${m.name}</b></span></div><div class="opt"><span>Account number<br><b>${m.no}</b></span><button class="wine" data-act="note" data-text="Copied ${m.no}">Copy</button></div><div class="opt"><span>Amount<br><b>${peso(amt)}</b></span></div>`
-        :`<div class="opt"><span>Their payment link opens in your browser; it carries <b>${peso(amt)}</b>.</span><button class="wine" data-act="note" data-text="Opens the supplier's payment link">Open ›</button></div>`;
-      return `<h3>Pay ${esc(s.name)}</h3><p class="mute" style="margin:0 0 6px">${due?`First payment · ${peso(due)} · by Oct 20 · books the date`:`Paid ${peso(s.paid)} of ${peso(s.price)}`}</p>
-        <p class="k2">1 · Pay them directly</p>
-        <div class="field"><div class="sel">${m.label}<select id="payMethod" data-id="${id}" aria-label="Pay with">${METHODS.map(x=>`<option value="${x.k}" ${x.k===m.k?'selected':''}>${x.label}</option>`).join('')}</select></div></div>
-        ${dest}
-        <p class="mute" style="font-size:12px;margin:8px 0 0">Setnayan never holds the money — you pay ${esc(s.name.split(' ')[0])} directly, to the destinations they published.</p>
-        <p class="k2" style="margin-top:16px">2 · Then record it here</p>
+      const dest=!onSetnayan?`<p class="mute" style="font-size:13.5px">${esc(s.name)} isn’t on Setnayan, so their payment details aren’t here. Pay them the way you agreed with them.</p>`
+        :`<div class="field"><div class="sel">${m.label}<select id="payMethod" data-id="${id}" aria-label="Pay with">${METHODS.map(x=>`<option value="${x.k}" ${x.k===m.k?'selected':''}>${x.label}</option>`).join('')}</select></div></div>`+
+         (m.type==='qr'?`${qr}<p class="mute" style="font-size:13px;margin:6px 0 0;text-align:center">Scan with GCash · <b>${peso(amt)}</b> to ${m.name}</p><div class="cta" style="justify-content:center"><button class="btn quiet" data-act="note" data-text="Saved the QR to your photos">Save QR</button><button class="btn quiet" data-act="note" data-text="Copied 0917 ••• 4471">Copy number</button></div>`
+         :m.type==='bank'?`<div class="opt"><span>Account name<br><b>${m.name}</b></span></div><div class="opt"><span>Account number<br><b>${m.no}</b></span><button class="wine" data-act="note" data-text="Copied ${m.no}">Copy</button></div>`
+         :`<div class="opt"><span>Their payment link carries <b>${peso(amt)}</b>.</span><button class="wine" data-act="note" data-text="Opens the supplier's payment link">Open ›</button></div>`);
+      let paidLeft=s.paid||0;
+      return `<h3>Payments · ${esc(s.name)}</h3>
+        <p class="k2">Payment plan</p><p class="mute" style="font-size:13px;margin:0 0 4px">${s.own?'Your record of what you agreed.':esc(s.name)+' set up this plan; they confirm each payment as received.'}</p>
+        ${plan.map(l=>{ const paidThis=Math.min(l.amt,Math.max(0,paidLeft)); paidLeft-=l.amt; const done=paidThis>=l.amt; return `<div class="opt"><span><span class="${done?'ok':''}">${done?'●':'○'}</span> <b>${l.label}</b><br><span class="mute">${done?'Paid':'Due · '+shortDate(l.due)}</span></span><b>${peso(l.amt)}</b></div>`; }).join('')}
+        ${plan.length?'':`<div class="opt"><span class="mute">No plan yet.</span><button class="wine" data-act="note" data-text="Suggests a first payment + balance split (shipped)">Suggest a first payment + balance split</button></div>`}
+        ${nd?`<p style="margin:12px 0 2px;font-size:14px">Pay ${esc(s.name.split(' ')[0])} directly, then record it here to hold your date on their schedule while they confirm. <span class="mute">Setnayan never holds your money — this is your own record.</span></p>
+        <p class="k2">1 · Pay ${esc(s.name)}</p>${dest}
+        <p class="k2" style="margin-top:14px">2 · Record it here</p>
         <div class="field"><label>Amount</label><input id="payAmt" inputmode="numeric" value="${peso(amt)}" data-peso></div>
         <div class="field"><label>Reference <span class="mute">(optional)</span></label><input id="payRef" placeholder="e.g. GCash ref no."></div>
         <div class="field"><label>Proof <span class="mute">(optional)</span></label><button class="btn quiet" data-act="note" data-text="Picks a screenshot of the payment (ChosenProofField)">＋ Add a screenshot</button></div>
-        <div class="cta"><button class="btn solid" data-act="logpay" data-id="${id}">I’ve paid — record it</button></div>
-        <p class="mute" style="font-size:13px">${esc(s.name.split(' ')[0])} confirms it; until then the date reads “held · awaiting their confirmation”. Your payment plan dates start when you book.</p>`; },
-    price({id}){ const s=sup(id); return `<h3>${esc(s.name.split(' ').slice(0,2).join(' '))} — set the price</h3><p class="mute" style="margin:0">Until there's a number, Buffer stays "Not knowable". That's on purpose.</p>
-        <div class="field"><label>Agreed price</label><input id="priceAmt" inputmode="numeric" placeholder="₱ 0" value="${s.price!=null?peso(s.price):''}" data-peso></div>
+        <div class="cta"><button class="btn solid" data-act="logpay" data-id="${id}">Record payment</button></div>`:`<p class="ok" style="color:var(--ok);margin:12px 0">Paid in full · ${peso(s.paid)}</p>`}
+        ${s.paid?`<p class="k2" style="margin-top:10px">Recorded</p><div class="opt"><span>${peso(s.paid)} <span class="mute">· ${s.awaiting?'date held · awaiting their confirmation':'confirmed by '+esc(s.name.split(' ')[0])}</span></span></div>`:''}`; },
+    price({id}){ const s=sup(id); const c=s.cost||{};
+      return `<h3>Costing · ${esc(s.name)}</h3><p class="mute" style="margin:0 0 4px;font-size:13.5px">What you'll budget is the service price + transport + food allowance. Leave a line blank to count it as ₱0.</p>
+        <div class="field"><label>Service price</label><input id="costSvc" inputmode="numeric" placeholder="₱ 0" value="${c.svc!=null?peso(c.svc):(s.price!=null?peso(s.price):'')}" data-peso></div>
+        <div class="field"><label>Transport cost</label><input id="costTransport" inputmode="numeric" placeholder="₱ 0" value="${c.transport?peso(c.transport):''}" data-peso></div>
+        <div class="field"><label>Food allowance</label><input id="costFood" inputmode="numeric" placeholder="₱ 0" value="${c.food?peso(c.food):''}" data-peso></div>
+        <div class="field"><label>Crew size on the day</label><input id="costCrew" inputmode="numeric" placeholder="0" value="${c.crew||''}"></div>
+        <div class="opt" style="margin-top:6px"><span>Total</span><b id="costTotal">${s.price!=null?peso(s.price):'₱0'}</b></div>
         <div class="field"><label>Paid so far <span class="mute">(optional)</span></label><input id="pricePaid" inputmode="numeric" placeholder="₱ 0" value="${s.paid?peso(s.paid):''}" data-peso></div>
-        <div class="cta"><button class="btn solid" data-act="setprice" data-id="${id}">Save</button></div>`; },
+        <p class="mute" style="font-size:12.5px">Until there’s a total, Buffer stays “Not knowable”. That’s on purpose.</p>
+        <div class="cta"><button class="btn solid" data-act="setprice" data-id="${id}">Save costs</button></div>`; },
     book({id}){ const s=sup(id); const p=priceOf(s); const other=S.suppliers.find(x=>x.cat===s.cat&&x.status==='booked'&&x.id!==s.id);
       return `<h3>Book ${esc(s.name)}?</h3><p class="mute" style="margin:0">Booking asks them to hold ${S.dateKnown==='day'?shortDate(S.date):'a day in '+monthOf(S.date)}. They confirm, then your first payment holds the date.</p>
         <div class="field"><label>Agreed price</label><input id="bookPrice" inputmode="numeric" value="${p!=null?peso(p):''}" placeholder="₱ 0" data-peso></div>
@@ -747,7 +757,7 @@ section{padding:18px 0 8px}
       const s={id:'own'+Date.now(),name,cat:k,own:true,status:booked?'booked':'saved',price:booked?price:null,paid:0,busy:[],fresh:true,pop:booked}; S.suppliers.push(s); if(!S.cats.includes(k)) S.cats.push(k); S.removedCats=S.removedCats.filter(x=>x!==k); if(!S.open.includes('cat-'+k)) S.open.push('cat-'+k);
       closeSheet(); S.mode='find'; S.cat=k; render(); toast(`You added ${name}${booked?' — booked':''}`); },
     logpay(d){ const s=sup(d.id); const v=parseInt(($('#payAmt').value||'').replace(/\D/g,''))||0; if(!v) return; s.paid=(s.paid||0)+v; s.awaiting=true; addChat(s.id,{sys:`You recorded a payment of ${peso(v)} — date held, awaiting ${s.name.split(' ')[0]}’s confirmation.`}); closeSheet(); render(); toast(`Recorded ${peso(v)} · date held, awaiting confirmation`,()=>{s.paid-=v;s.awaiting=false;render();}); },
-    setprice(d){ const s=sup(d.id); s.price=parseInt(($('#priceAmt').value||'').replace(/\D/g,''))||null; s.paid=parseInt(($('#pricePaid').value||'').replace(/\D/g,''))||0; closeSheet(); render(); toast(s.price?'Price set — your buffer can count now':'Price cleared'); },
+    setprice(d){ const s=sup(d.id); const n=id=>parseInt(($('#'+id).value||'').replace(/\D/g,''))||0; const c={svc:n('costSvc')||null,transport:n('costTransport'),food:n('costFood'),crew:n('costCrew')}; s.cost=c; s.price=c.svc!=null?c.svc+c.transport+c.food:null; s.paid=n('pricePaid'); closeSheet(); render(); toast(s.price?`Costs saved · total ${peso(s.price)}`:'Costs cleared'); },
     accept(d){ const s=sup(d.id); s.price=s.quote; s.status='deciding'; S.picks[s.cat]=s.id; addChat(s.id,{me:true,t:'Accepting option A. Thank you!'}); addChat(s.id,{sys:'Quote accepted — in your build. Book when you’re ready.'}); closeSheet(); render(); toast(`Accepted — ${s.name.split(' ')[0]} is in your build`); },
     send(d){ const inp=$('#composer'); const t=d.text||(inp&&inp.value.trim()); if(!t) return; addChat(d.id,{me:true,t}); const s=sup(d.id); if(s.status==='saved'){ s.status='waiting'; s.askedAgo='just now'; } openSheet('chat',d); render(); },
     dobuild(){ const name=($('#buildName').value||'').trim()||`Build ${S.builds.length+1}`; S.builds.push({name,picks:Object.assign({},S.picks),fresh:true}); closeSheet(); render(); toast(`Saved "${name}"`); },
@@ -762,7 +772,7 @@ section{padding:18px 0 8px}
     if(e.target.id==='findFilter'){ S.filter=e.target.value; render(); }
     if(e.target.id==='payMethod'){ openSheet('pay',{id:e.target.dataset.id,method:e.target.value}); }
     if(e.target.id==='addCat') $('#addCatLabel').textContent=cat(e.target.value).name; if(e.target.id==='addBooked') $('#addBookedLabel').textContent=e.target.selectedOptions[0].text; });
-  document.addEventListener('input',e=>{ if(e.target.matches&&e.target.matches('input[data-peso]')){ const d=e.target.value.replace(/\D/g,''); e.target.value=d?peso(parseInt(d,10)):''; } });
+  document.addEventListener('input',e=>{ if(e.target.matches&&e.target.matches('input[data-peso]')){ const d=e.target.value.replace(/\D/g,''); e.target.value=d?peso(parseInt(d,10)):''; } const t=$('#costTotal'); if(t){ const n=id=>parseInt((($('#'+id)||{}).value||'').replace(/\D/g,''))||0; t.textContent=peso(n('costSvc')+n('costTransport')+n('costFood')); } });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSheet(); if(e.key==='Enter'&&e.target.id==='composer'){ const b=body.querySelector('.compose [data-act=send]'); ACT.send({id:b.dataset.id}); } if(e.key==='Enter'&&e.target.id==='addName') ACT.addown(); });
   $('#scrim').addEventListener('click',closeSheet);
 
