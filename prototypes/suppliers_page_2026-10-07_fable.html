@@ -6,6 +6,7 @@
 <title>Suppliers — one screen · 2026-10-07 (Fable)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <style>
 /* ---------- tokens (corpus: paper / ink / gild / wine) ---------- */
 :root{
@@ -262,8 +263,7 @@ button.ic.main.quiet{background:color-mix(in srgb,var(--tone) 12%,transparent);c
 .guard{font-size:13.5px;margin:0 0 10px;padding:9px 12px;border-radius:10px;background:var(--ok-soft);color:var(--ok)}
 .guard.warn{background:var(--warn-bg);color:var(--warn-ink)}
 .qr{display:grid;place-items:center;padding:10px 0 4px}
-.qr-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:3px;width:150px;height:150px;padding:10px;background:#fff;border:1px solid var(--line);border-radius:12px}
-.qr-grid i{display:block;background:#1d1b17;border-radius:1px}
+.qr-svg{width:170px;height:170px;padding:10px;background:#fff;border:1px solid var(--line);border-radius:12px}.qr-svg svg{width:100%;height:100%;display:block}
 .pickone{position:relative;display:inline-block;border:1px solid var(--line);border-radius:999px;padding:7px 32px 7px 12px;background:var(--paper-2);font-size:14px;font-weight:500;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
 .pickone select{position:absolute;inset:0;opacity:0;width:100%}
 .chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
@@ -562,6 +562,7 @@ section{padding:18px 0 8px}
   const FMT={peso:n=>peso(n),int:n=>String(n),pct:n=>n+'%'};
   function count(el,to){ if(!el) return; const key=el.dataset.count||el.id, fmt=FMT[el.dataset.fmt||'peso']; const from=prevMoney[key]??0; prevMoney[key]=to; if(from===to||matchMedia('(prefers-reduced-motion:reduce)').matches){el.textContent=fmt(to);return;}
     const t0=performance.now(),d=Math.min(900,420+Math.abs(to-from)*0.002); (function f(t){const k=Math.min(1,(t-t0)/d),e=1-Math.pow(1-k,3); el.textContent=fmt(Math.round(from+(to-from)*e)); if(k<1) requestAnimationFrame(f);})(t0); }
+  const qrSvg=(text)=>{ try{ const q=qrcode(0,'M'); q.addData(text); q.make(); return `<div class="qr-svg">${q.createSvgTag({cellSize:4,margin:0,scalable:true})}</div>`; }catch(e){ return `<div class="qr-svg mute" style="display:grid;place-items:center;font-size:12px">QR</div>`; } };
   const chip=s=>({asked:'<span class="pill wine">Waiting for their yes</span>',booked:'<span class="pill ok">Booked</span>',quote:'<span class="pill wine">Quote in</span>',waiting:'<span class="pill mute">Waiting</span>',deciding:'<span class="pill mute">In your build</span>',saved:'<span class="pill mute">Saved</span>'}[s.status]);
 
   /* ---------------- render: one mode at a time ---------------- */
@@ -768,7 +769,7 @@ section{padding:18px 0 8px}
       const CH={gcash:'GCash',maya:'Maya',bpi:'BPI · bank transfer',bdo:'BDO · bank transfer',unionbank:'UnionBank · bank transfer',metrobank:'Metrobank · bank transfer',bank:'Other bank',link:'Payment link'};
       const METHODS=[{k:'gcash',label:'GCash · QR',type:'qr',name:esc(s.name),no:'0917 ••• 4471'},{k:'bdo',label:'BDO · bank transfer',type:'bank',name:esc(s.name)+' Inc.',no:'0054 8820 1193'},{k:'link',label:'Payment link',type:'link'}];
       const m=METHODS.find(x=>x.k===(method||'gcash'))||METHODS[0];
-      const qr=`<div class="qr" aria-label="QR code"><div class="qr-grid">${Array.from({length:81},(_,i)=>`<i style="opacity:${((i*7+s.name.length)%5<2)?1:0}"></i>`).join('')}</div></div>`;
+      const qr=`<div class="qr" aria-label="QR code">${qrSvg(`https://setnayan.com/pay/${s.id}?amount=${amt}`)}</div>`;
       const chans=s.payChannels||[]; const ch=chans.find(x=>x.k===method)||chans[0];
       const dest=!onSetnayan?(ch?`<div class="field"><div class="sel">${CH[ch.k]||ch.k}<select id="payMethod" data-id="${id}" aria-label="Pay with">${chans.map(x=>`<option value="${x.k}" ${x===ch?'selected':''}>${CH[x.k]||x.k}</option>`).join('')}</select></div></div>
          ${ch.k==='link'?`<div class="opt"><span>Their payment link</span></div><div class="cta">${bb('share','Open link',`data-act="note" data-text="Opens ${esc(ch.no)}"`)}</div>`:`<div class="opt"><span>${ch.k==='gcash'||ch.k==='maya'?'Mobile number':'Account number'}<br><b>${esc(ch.no)}</b></span></div><div class="opt"><span>Account name<br><b>${esc(ch.name)}</b></span></div><div class="cta">${bb('copy',`Copy number`,`data-act="note" data-text="Copied ${esc(ch.no)}"`)}${bb('pen','Edit record',`data-act="sheet" data-key="price" data-id="${id}"`)}</div>`}
@@ -797,7 +798,7 @@ section{padding:18px 0 8px}
         ${own?`<p class="k2">What they do</p>
         <div class="field"><div class="sel">${cat(s.cat).name}<select id="recCat" data-id="${id}">${CATS.map(x=>`<option value="${x.key}" ${x.key===s.cat?'selected':''}>${x.name}</option>`).join('')}</select></div></div>
         <p class="k2">Also covers</p>
-        <div class="chips">${covers.map(k=>`<span class="chip">${cat(k).name}<button data-act="uncover" data-id="${id}" data-cat="${k}" aria-label="Remove ${cat(k).name}">×</button></span>`).join('')}<div class="sel small"><span>＋ Add a category</span><select id="recCover" data-id="${id}" aria-label="Also covers"><option value="">＋ Add a category</option>${GROUPS.map((g,gi)=>{ const inG=coverOpts.filter(x=>x.g===gi); return inG.length?`<optgroup label="${g}">${inG.map(x=>`<option value="${x.key}">${x.name}</option>`).join('')}</optgroup>`:''; }).join('')}</select></div></div>
+        <div class="chips">${covers.map(k=>`<span class="chip">${cat(k).name}<button data-act="uncover" data-id="${id}" data-cat="${k}" aria-label="Remove ${cat(k).name}">×</button></span>`).join('')}<div class="sel small"><span>＋ Add a category</span><select id="recCover" data-id="${id}" aria-label="Also covers"><option value="">＋ Add a category</option>${coverOpts.filter(x=>cats().includes(x.key)).map(x=>`<option value="${x.key}">${x.name}</option>`).join('')}</select></div></div>
         <p class="mute" style="font-size:12.5px;margin:4px 0 0">A category they cover counts as covered on your page and sits in the same quote.</p>
         <p class="k2">What's included</p>
         <div class="field"><textarea id="recInc" rows="3" placeholder="e.g.
@@ -817,7 +818,7 @@ Same-day edit">${esc((s.inclusions||[]).join('\n'))}</textarea></div>`:''}
         <div class="field"><label>Email <span class="mute">(optional)</span></label><input id="recEmail" inputmode="email" placeholder="name@example.com" value="${esc(s.email||'')}"></div>
         <p class="k2">Their claim link</p>
         <p class="mute" style="font-size:13px;margin:0 0 6px">Show them this or send the link. They sign up, their card fills in from your record, and this becomes a booking.</p>
-        <div class="qr" aria-label="Claim QR"><div class="qr-grid">${Array.from({length:81},(_,i)=>`<i style="opacity:${((i*11+s.name.length*3)%5<2)?1:0}"></i>`).join('')}</div></div>
+        <div class="qr" aria-label="Claim QR">${qrSvg(`https://setnayan.com/vendor/claim/${s.id}`)}</div>
         <p class="mute" style="font-size:12px;text-align:center;margin:4px 0 8px">setnayan.com/vendor/claim/${esc(s.id.replace(/[^a-z0-9]/gi,'').slice(0,6)||'x7k2qp')}</p>
         <div class="cta" style="justify-content:center;padding-top:0">${bb('down','Download',`data-act="note" data-text="Downloads the QR as a PNG"`)}${bb('copy','Copy link',`data-act="note" data-text="Copied their claim link"`)}</div>
         <p class="k2">Payment notes <span class="mute" style="text-transform:none;letter-spacing:0">· private, yours only</span></p>
