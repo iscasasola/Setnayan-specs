@@ -1,0 +1,839 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin dashboard — redesign · 2026-10-08 (Fable)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ---------- tokens — copied from supplier_dashboard_2026-10-08_fable.html so the two look like one app ---------- */
+:root{
+  --paper:#f6f4ef;--paper-2:#fffdf9;--ink:#1d1b17;--mute:#6f6a60;--line:#e4dfd4;
+  --gild:#b8963e;--gild-soft:#f1e9d2;--mulberry:#C24E25;--wine:#8c3b2e;--wine-soft:#f3e3df;
+  --ok:#2B744A;--ok-soft:#e3eee4;--info:#1F6FB2;--warn:#965A00;--warn-soft:#f6e9dd;--danger:#B3261E;
+  --seg-track:rgba(29,27,23,.06);--seg-off:rgba(29,27,23,.6);--on-tone:#fff;
+  --sans:"Hanken Grotesk",system-ui,-apple-system,sans-serif;--bar:64px;--ease:cubic-bezier(.2,.8,.2,1);--t:280ms;
+}
+html[data-theme=dark]{
+  --paper:#161513;--paper-2:#1f1d1a;--ink:#efeae0;--mute:#a39d90;--line:#2e2b26;--gild:#d1b162;--gild-soft:#2d2719;
+  --mulberry:#E5794E;--wine:#d47a69;--wine-soft:#3a221d;--ok:#6FCF97;--ok-soft:#1f2d22;--info:#7AB8F0;--warn:#F0B45A;--warn-soft:#3a2a1e;--danger:#F2817A;
+  --seg-track:rgba(239,234,224,.08);--seg-off:rgba(239,234,224,.62);--on-tone:#161513;
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:left}
+h1,h2,h3{font-weight:500;margin:0;letter-spacing:-.01em}
+.mute{color:var(--mute)}.ok{color:var(--ok)}.wine{color:var(--wine)}.warn{color:var(--warn)}.danger{color:var(--danger)}
+.i{display:inline-grid;place-items:center;width:18px;height:18px;border:1px solid var(--line);border-radius:50%;font-size:11px;color:var(--mute);vertical-align:middle;margin-left:4px;font-style:normal}
+
+/* ---------- gallery ---------- */
+.gallery{max-width:1500px;margin:0 auto;padding:28px 20px 80px}
+.gallery h1{font-size:28px}
+.gallery p{max-width:900px;color:var(--mute)}
+.gallery .frames{display:flex;gap:22px;flex-wrap:wrap;margin-top:22px}
+.gallery .frame{width:375px}
+.gallery .frame iframe{width:375px;height:812px;border:1px solid var(--line);border-radius:26px;background:var(--paper-2);display:block}
+.gallery .cap{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin:8px 0 0 4px}
+.gallery .cap b{color:var(--ink)}
+.gallery h2{font-size:18px;margin-top:40px;padding-top:16px;border-top:1px solid var(--line)}
+html.app .gallery{display:none}html:not(.app) .app{display:none}
+
+/* ---------- the app ---------- */
+.app{min-height:100vh;padding-bottom:calc(var(--bar) + 24px)}
+html:not(.lower-hide) main{padding-bottom:72px}
+.shell{position:sticky;top:0;z-index:5;background:var(--paper-2);border-bottom:1px solid var(--line);height:56px;display:flex;align-items:center;gap:10px;padding:0 16px}
+.shell .logo{font-weight:700;color:var(--gild);font-size:15px;letter-spacing:.14em}
+.shell .shop{font-size:14px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.shell .right{margin-left:auto;display:flex;gap:8px;flex:0 0 auto}
+.shell .door{position:relative;width:38px;height:38px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;color:var(--ink);background:var(--paper-2)}
+.shell .door svg{width:18px;height:18px}
+.shell .av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--gild),var(--wine));display:grid;place-items:center;color:#fff;font-weight:600;font-size:12px}
+.shell .back{width:38px;height:38px;display:grid;place-items:center;margin-left:-8px;font-size:22px;color:var(--ink)}
+main{padding:0 16px}
+svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+
+.seg{display:flex;gap:2px;border-radius:8px;background:var(--seg-track);padding:2px;margin:12px 0 2px}
+.seg button{flex:1;min-height:40px;display:inline-flex;align-items:center;justify-content:center;gap:4px;border-radius:8px;font-size:13px;font-weight:600;color:var(--seg-off);white-space:nowrap;transition:background var(--t),color var(--t)}
+.seg button.on{background:var(--mulberry);color:#fff}
+
+/* rows — hairlines, no boxes */
+.rows{margin-top:4px}
+.row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;min-height:54px;padding:9px 0;border-top:1px solid var(--line);width:100%}
+.row.ic{grid-template-columns:36px 1fr auto}
+.rows>.row:first-child,.rows>.fold:first-child>.row,.rows>.na:first-child{border-top:0}
+.row .l{min-width:0}
+.row .l b{display:block;font-weight:500;font-size:15px;line-height:1.25}
+.row .l span{display:block;font-size:13px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .l span.ok{color:var(--ok)}.row .l span.wine{color:var(--wine)}.row .l span.warn{color:var(--warn)}.row .l span.danger{color:var(--danger)}
+.row .r{display:flex;align-items:center;gap:8px;color:var(--mute);font-size:14px;white-space:nowrap}
+.row .r .amt{font-weight:600;color:var(--ink);font-size:15px}
+.pill{font-size:12px;padding:3px 9px;border-radius:999px;background:var(--gild-soft);color:var(--mute);white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}.pill.wine{background:var(--wine-soft);color:var(--wine)}.pill.warn{background:var(--warn-soft);color:var(--warn)}.pill.info{background:color-mix(in srgb,var(--info) 12%,transparent);color:var(--info)}
+.chev{color:var(--mute);font-size:20px;line-height:1;transition:transform var(--t) var(--ease)}
+.row .go,.na .go{color:var(--gild);font-size:20px;line-height:1}
+.row .ico{width:36px;height:36px;border-radius:50%;background:var(--gild-soft);display:grid;place-items:center;color:var(--ink)}
+.row .ico.ok{background:var(--ok-soft);color:var(--ok)}.row .ico.wine{background:var(--wine-soft);color:var(--wine)}.row .ico.warn{background:var(--warn-soft);color:var(--warn)}
+.fold{border-top:1px solid var(--line)}.fold>.row{border-top:0}
+.fold.open .chev{transform:rotate(180deg)}
+.exp{display:grid;grid-template-rows:0fr;transition:grid-template-rows var(--t) var(--ease)}.exp>div{overflow:clip;min-width:0}
+.fold.open>.exp{grid-template-rows:1fr}
+.inner{padding:0 0 12px 12px}
+.inner .row{min-height:46px;padding:6px 0;border-top:1px solid var(--line)}.inner .row:first-child{border-top:1px dashed var(--line)}
+.inner .row .l b{font-weight:400;font-size:14.5px}
+.inner p{margin:6px 0 10px;font-size:13.5px;color:var(--mute)}
+/* switch */
+.sw{width:44px;height:26px;border-radius:999px;background:var(--line);position:relative;flex:0 0 auto;transition:background var(--t)}
+.sw:after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform var(--t) var(--ease);box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.sw.on{background:var(--ok)}.sw.on:after{transform:translateX(18px)}
+/* dropdown */
+.sel{position:relative;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:8px 30px 8px 13px;background:var(--paper-2);font-size:13.5px;font-weight:500;white-space:nowrap;height:40px}
+.sel:after{content:"⌄";position:absolute;right:11px;top:6px;font-size:18px;color:var(--mute)}
+.sel select{position:absolute;inset:0;opacity:0;width:100%}
+/* inline field (edit in place, autosave) */
+.fld{min-width:84px;height:36px;border:1px solid var(--line);border-radius:10px;padding:0 10px;background:var(--paper-2);font:inherit;font-weight:600;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
+
+/* buttons — BUTTON_RULE */
+.btn{height:40px;padding:0 14px;border:1px solid var(--line);border-radius:999px;display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:500;white-space:nowrap;--tone:var(--ink);color:var(--tone);background:color-mix(in srgb,var(--tone) 9%,transparent);border-color:color-mix(in srgb,var(--tone) 45%,transparent);transition:transform 160ms}
+.btn:active{transform:scale(.97)}
+.btn.t-brand{--tone:var(--mulberry)}.btn.t-ok{--tone:var(--ok)}.btn.t-info{--tone:var(--info)}.btn.t-warn{--tone:var(--warn)}.btn.t-danger{--tone:var(--danger)}.btn.t-grey{--tone:var(--mute)}
+.btn.main{background:var(--tone);color:var(--on-tone);border-color:var(--tone)}.btn.t-brand.main,.btn.t-danger.main{color:#fff}
+.btn.big{height:46px;font-size:15px;padding:0 20px;width:100%;justify-content:center}
+.btn.sm{height:34px;padding:0 11px;font-size:13px}
+.btn.dots{width:34px;padding:0;justify-content:center}
+.acts{display:flex;gap:8px;align-items:center;overflow:hidden}
+.acts.fit .btn:not(.main) .lbl{display:none}.acts.fit .btn:not(.main){width:40px;padding:0;justify-content:center}
+
+/* Next card — the one card the admin keeps (approved 2026-10-01) */
+.next{margin:14px 0 4px;padding:16px 16px 14px;border-radius:18px;background:var(--gild-soft);position:relative}
+.next .eye{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:600}
+.next h2{font-size:24px;line-height:1.1;margin:6px 0 4px}
+.next p{margin:0 0 12px;font-size:14px;color:var(--mute)}
+.next.calm{background:var(--ok-soft)}
+.next.bad{background:var(--warn-soft)}
+.next .cnt{position:absolute;right:16px;top:14px;font-size:12px;color:var(--mute)}
+/* numbers */
+.nums{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin:12px 0 4px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:12px 0}
+.nums button{text-align:center;display:grid;gap:2px}
+.nums b{font-size:26px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
+.nums b.wine{color:var(--wine)}.nums b.warn{color:var(--warn)}
+.nums small{font-size:11.5px;color:var(--mute)}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:600;margin:16px 0 2px;display:flex;align-items:center;gap:8px}
+.eyebrow .sp{margin-left:auto;letter-spacing:0;text-transform:none;font-weight:500;color:var(--wine)}
+.eyebrow .sel{letter-spacing:0;text-transform:none;font-weight:500;color:var(--ink);margin-left:auto}
+.eyebrow .n{letter-spacing:0;color:var(--ink)}
+
+/* Needs-action row: sentence · meta · ONE action · ⋯ (the heart of admin, L4665) */
+.na{display:grid;grid-template-columns:4px 1fr auto;gap:10px;align-items:center;min-height:62px;padding:9px 0;border-top:1px solid var(--line);width:100%}
+.na i{display:block;width:4px;height:36px;border-radius:2px;background:transparent}
+.na.due i{background:var(--gild)}.na.late i{background:var(--wine)}
+.na .l{min-width:0}
+.na .l b{display:block;font-weight:500;font-size:15px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.na .l span{display:block;font-size:13px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.na .l span.late{color:var(--wine)}
+.na .r{display:flex;gap:6px;align-items:center}
+.na.off{opacity:.55}
+.na.cleared .l b{text-decoration:line-through;color:var(--mute)}
+/* money / facts */
+.money{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;padding:14px 0 8px;border-bottom:1px solid var(--line)}
+.money .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.money .v{font-weight:600;font-size:22px;line-height:1.15;font-variant-numeric:tabular-nums}
+.meter{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin:10px 0 2px}
+.meter i{display:block;height:100%;background:var(--ok);width:0;transition:width 700ms var(--ease)}
+.meter i.warn{background:var(--warn)}
+.head{padding:14px 0 4px}
+.head h1{font-size:26px;line-height:1.1}
+.head .f{color:var(--mute);font-size:14px;margin-top:3px}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px;padding:10px 0;border-top:1px solid var(--line)}
+.facts span{color:var(--mute)}.facts b{font-weight:500}
+.shot{height:150px;border-radius:14px;background:linear-gradient(160deg,var(--gild-soft),var(--line));display:grid;place-items:center;color:var(--mute);font-size:13px;margin:10px 0 4px;position:relative}
+.shot .pill{position:absolute;left:10px;bottom:10px}
+/* list rows (people) */
+.chat{display:grid;grid-template-columns:42px 1fr auto;gap:12px;align-items:center;padding:11px 0;border-top:1px solid var(--line);width:100%}
+.chat:first-child{border-top:0}
+.chat .av{width:42px;height:42px;border-radius:50%;background:var(--gild-soft);display:grid;place-items:center;font-size:13px;font-weight:600;color:var(--ink)}
+.chat .av.e{border-radius:12px}
+.chat .av.s{border-radius:12px;background:var(--ok-soft);color:var(--ok)}
+.chat b{display:block;font-weight:500}
+.chat .last{font-size:13px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat .when{font-size:12px;color:var(--mute);display:grid;justify-items:end;gap:6px}
+/* bars (numbers) */
+.bars{display:grid;grid-template-columns:repeat(12,1fr);gap:3px;align-items:end;height:56px;margin:10px 0 4px}
+.bars i{display:block;background:var(--gild);border-radius:3px 3px 0 0;height:var(--h);opacity:.85}
+.bars i:last-child{background:var(--mulberry);opacity:1}
+/* honest failure */
+.fail{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:14px;color:var(--warn)}
+.fail .btn{margin-left:auto;height:34px}
+.fail.dash{border-top:1px dashed var(--line)}
+/* search results */
+.hits .eyebrow{margin-top:14px}
+/* lower glass row */
+.lower{position:fixed;left:0;right:0;bottom:calc(var(--bar) + 10px);padding:0 16px;z-index:4;display:flex;gap:8px;align-items:center;transform:translateY(0);transition:transform 300ms var(--ease)}
+html.lower-hide .lower{transform:translateY(calc(100% + var(--bar) + 20px))}
+.glass{background:color-mix(in srgb,var(--paper) 62%,transparent);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);border:1px solid color-mix(in srgb,var(--ink) 14%,transparent);overflow:hidden;isolation:isolate}
+.lower .search{flex:1 1 60%;min-width:0;height:40px;border-radius:999px;display:flex;align-items:center;gap:8px;padding:0 12px;font-size:14px;color:var(--mute)}
+.lower .search.typed{color:var(--ink);font-weight:500}
+.lower .btn.glass{color:var(--ink)}
+.lower .btn.main{background:var(--tone);border-color:var(--tone);-webkit-backdrop-filter:none;backdrop-filter:none;color:#fff}
+.lower .sel.glass{color:var(--ink)}
+/* bottom bar — the approved four (2026-10-01: Work · Money · People · More) */
+.bar{position:fixed;left:0;right:0;bottom:0;height:var(--bar);background:var(--paper-2);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);z-index:6}
+.bar button{display:grid;place-items:center;gap:2px;font-size:11px;color:var(--mute);padding-top:7px;position:relative}
+.bar button.on{color:var(--ink);font-weight:600}
+.bar button.on svg{color:var(--mulberry)}
+.bar button b{position:absolute;top:6px;left:calc(50% + 6px);background:var(--wine);color:#fff;font-size:10px;border-radius:999px;padding:1px 5px;font-weight:600}
+.bar button b.dot{width:8px;height:8px;padding:0;background:var(--warn)}
+/* sheet */
+.scrim{position:fixed;inset:0;bottom:var(--bar);background:rgba(0,0,0,.28);opacity:0;pointer-events:none;transition:opacity var(--t);z-index:7}
+.sheet{position:fixed;left:0;right:0;bottom:var(--bar);max-height:82vh;overflow:auto;background:var(--paper-2);border-radius:22px 22px 0 0;padding:12px 16px 20px;transform:translateY(calc(100% + var(--bar)));visibility:hidden;transition:transform 320ms var(--ease),visibility 0s 320ms;z-index:8}
+.sheet .grip{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 10px}
+html.sheet-open .scrim{opacity:1;pointer-events:auto}html.sheet-open .sheet{transform:none;visibility:visible;transition:transform 320ms var(--ease),visibility 0s}
+.sheet h3{font-size:19px;margin:2px 0 2px}
+.sheet .sub{font-size:13.5px;color:var(--mute);margin:0 0 6px}
+.sheet .facts{border-top:0;padding-top:4px}
+.sheet .what{margin:8px 0 4px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:600}
+.sheet .what-rows{display:grid;gap:6px;font-size:14px;margin-bottom:12px}
+.sheet .what-rows div{display:flex;gap:8px;align-items:flex-start}
+.sheet .what-rows svg{margin-top:2px;color:var(--ok)}
+.sheet .what-rows .x svg{color:var(--danger)}
+.sheet .typed{height:44px;border:1px solid var(--line);border-radius:12px;padding:0 12px;display:flex;align-items:center;gap:8px;font-size:14px;color:var(--mute);margin:6px 0 12px;background:var(--paper)}
+.sheet .typed b{color:var(--ink);letter-spacing:.06em}
+/* tour */
+.tour{position:fixed;left:16px;right:16px;bottom:calc(var(--bar) + 14px);background:var(--ink);color:var(--paper);padding:14px 16px;border-radius:16px;font-size:14px;z-index:9;display:none}
+.tour b{display:block;font-size:15px;font-weight:600;margin-bottom:2px}
+.tour button{float:right;color:var(--gild);font-weight:600;margin-left:12px}
+html.tour-on .tour{display:block}
+.toast{position:fixed;left:50%;bottom:calc(var(--bar) + 70px);transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 14px;border-radius:999px;font-size:13px;opacity:0;transition:opacity var(--t);z-index:10;pointer-events:none;white-space:nowrap;display:flex;gap:10px;align-items:center}
+.toast u{color:var(--gild);text-decoration:none;font-weight:600}
+.toast.on{opacity:1}
+.note{font-size:12.5px;color:var(--mute);margin:10px 0 0}
+.done{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--ok-soft);color:var(--ok);font-size:14px;margin:10px 0 2px}
+.done u{margin-left:auto;text-decoration:none;font-weight:600}
+</style>
+</head>
+<body>
+
+<!-- =============================== GALLERY =============================== -->
+<div class="gallery">
+  <h1>Admin dashboard — one person, one phone, one list</h1>
+  <p>Bar stays <b>Work · Money · People · More</b> (approved 2026-10-01). <b>Work</b> is the one Needs-action list (owner 2026-10-02: "an easier way to show all that has needs action"); every screen and every control is <b>≤ 3 taps</b> from it (search and the list count as doors). Every money or for-everyone action shows <b>what happens and to whom BEFORE the tap</b> (one confirm sheet, reused) and says what happened after (toast + Undo). Open any frame alone with <code>?s=&lt;name&gt;</code>, dark with <code>&amp;dark=1</code>. Words: supplier · event · Event Hub. A failed read says <b>couldn't load</b>, never 0.</p>
+  <div class="frames" id="frames"></div>
+  <h2>Dark mode</h2>
+  <div class="frames" id="framesDark"></div>
+</div>
+
+<!-- =============================== APP =============================== -->
+<div class="app">
+  <header class="shell" id="shell"></header>
+  <main id="main"></main>
+  <div class="lower" id="lower"></div>
+  <nav class="bar" id="bar"></nav>
+  <div class="scrim" id="scrim"></div>
+  <div class="sheet" id="sheet"></div>
+  <div class="tour" id="tour"></div>
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* ---------------- icons ---------------- */
+const I={
+ work:'<svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>',
+ people:'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-4.5-6.2"/></svg>',
+ money:'<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M3 10h2M19 14h2"/></svg>',
+ more:'<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>',
+ chat:'<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>',
+ chart:'<svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>',
+ gear:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+ plus:'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+ search:'<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
+ send:'<svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>',
+ check:'<svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>',
+ play:'<svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg>',
+ eye:'<svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+ pen:'<svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+ out:'<svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>',
+ x:'<svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>',
+ undo:'<svg viewBox="0 0 24 24"><path d="M3 7v6h6M3 13a9 9 0 1 0 3-7.7"/></svg>',
+ shield:'<svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+ tag:'<svg viewBox="0 0 24 24"><path d="M20.6 13.4L13.4 20.6a2 2 0 0 1-2.8 0L2 12V2h10l8.6 8.6a2 2 0 0 1 0 2.8z"/><circle cx="7" cy="7" r="1.5"/></svg>',
+ star:'<svg viewBox="0 0 24 24"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>',
+ bolt:'<svg viewBox="0 0 24 24"><path d="M13 2L3 14h8l-1 8 10-12h-8z"/></svg>',
+ lock:'<svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+ alert:'<svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></svg>',
+ doc:'<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h8"/></svg>',
+ pic:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>',
+ gift:'<svg viewBox="0 0 24 24"><path d="M20 12v10H4V12M22 7H2v5h20zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>',
+ cal:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+ bell:'<svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>',
+ globe:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>',
+ layers:'<svg viewBox="0 0 24 24"><path d="M12 2l10 5-10 5L2 7zM2 12l10 5 10-5M2 17l10 5 10-5"/></svg>',
+ key:'<svg viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M10.9 12.1L21 2M15 8l3 3M18 5l3 3"/></svg>',
+ rocket:'<svg viewBox="0 0 24 24"><path d="M5 15c-2 2-2 5-2 5s3 0 5-2M14 4c3-2 7-1 7-1s1 4-1 7l-7 7-6-6zM9 15l-2 2M15 9a1.5 1.5 0 1 0 0 .01"/></svg>',
+ refund:'<svg viewBox="0 0 24 24"><path d="M3 10h12a4 4 0 0 1 0 8H9M7 6l-4 4 4 4"/></svg>',
+ ban:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>',
+ phone:'<svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>',
+ clock:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+ trash:'<svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v5M14 11v5"/></svg>',
+};
+const q=new URLSearchParams(location.search);
+const h=document.documentElement;
+const $=s=>document.querySelector(s);
+
+/* ---------------- state ---------------- */
+const S={screen:q.get('s')||'work',v:q.get('v')||'',open:{},sw:{},dark:q.get('dark')==='1',sheet:q.get('sheet')||'',cleared:false,show:'All'};
+if(S.dark) h.dataset.theme='dark';
+if(q.get('open')) S.open[q.get('open')]=true;
+if(S.screen.includes(':')){const [a,b]=S.screen.split(':');S.screen=a;S.v=S.v||b;}
+
+/* ---------------- helpers ---------------- */
+const row=(l,s,r="",o={})=>`<button class="row${o.ic?' ic':''}" data-go="${o.go||''}" ${o.attrs||''}>${o.ic?`<span class="ico ${o.tone||''}">${I[o.ic]}</span>`:''}<span class="l"><b>${l}</b>${s?`<span class="${o.st||''}">${s}</span>`:''}</span><span class="r">${r}</span></button>`;
+const go='<span class="go">›</span>';
+const fold=(key,l,s,inner,o={})=>`<div class="fold${S.open[key]?' open':''}" data-fold="${key}">${row(l,s,`${o.r||''}<span class="chev">⌄</span>`,{ic:o.ic,tone:o.tone,st:o.st,attrs:`data-toggle="${key}"`})}<div class="exp"><div><div class="inner">${inner}</div></div></div></div>`;
+const sw=(key,on,msg)=>`<span class="sw${(S.sw[key]??on)?' on':''}" data-sw="${key}" data-msg="${msg||''}"></span>`;
+const sel=(opts,cur,extra='')=>`<span class="sel ${extra}">${cur}<select>${opts.map(o=>`<option${o===cur?' selected':''}>${o}</option>`).join('')}</select></span>`;
+const btn=(tone,ic,l,main,extra='',cls='')=>`<button class="btn t-${tone}${main?' main':''} ${cls}" ${extra}>${I[ic]||''}<span class="lbl">${l}</span></button>`;
+const dots=(extra='')=>`<button class="btn t-grey sm dots" ${extra} aria-label="More">${I.more}</button>`;
+const fail=(what,dash)=>`<div class="fail${dash?' dash':''}">${I.alert} Couldn't load ${what} ${btn('grey','play','Retry',false,'data-act="retry"','sm')}</div>`;
+const num=(v,l,go,tone)=>`<button data-go="${go}"><b class="${tone||''}" data-count="${v}">${v}</b><small>${l}</small></button>`;
+const fld=(v)=>`<input class="fld" value="${v}" data-act="fld">`;
+/* a Needs-action row: sentence · meta · ONE action · ⋯ */
+const na=(sent,meta,act,o={})=>`<div class="na ${o.cls||''}"><i></i><span class="l"><b>${sent}</b><span class="${o.lateMeta?'late':''}">${meta}</span></span><span class="r">${act}${dots(`data-act="toast" data-msg="${o.dots||'Open · Ask · Decline'}"`)}</span></div>`;
+const confirmBtn=(tone,ic,l,c,main=true,cls='sm')=>btn(tone,ic,l,main,`data-confirm="${c}"`,cls);
+
+/* ---------------- confirm sheets — ONE pattern, reused (money · for-everyone · irreversible) ---------------- */
+const CONFIRMS={
+  pay:{t:'Confirm ₱2,499 from Cale & Ice',s:'GCash · ref ···6789 · Setnayan AI read the receipt: amount and reference match',what:['Marks the payment received','Unlocks the Thank-you film on their Event Hub','Emails their receipt to cale@…'],not:['Does not release a supplier payout (none on this order)'],go:'ok',ic:'check',l:'Confirm',msg:'Confirmed ₱2,499 · receipt sent'},
+  verify:{t:'Approve Lumina Studio',s:'Photo & video · Makati · DTI + ID checked · contact confirmed',what:['Shop goes Live and Verified for couples','Owner Ana Reyes gets the email','Three services publish'],not:['Permit date not checked — none uploaded'],go:'ok',ic:'check',l:'Approve',msg:'Lumina Studio verified'},
+  refund:{t:'Refund ₱147 to Katrina Ocampo',s:'GCash · save-the-date cancelled · under ₱25,000 → one admin',what:['₱147 marked owed to her GCash','She gets the email','Order closes'],not:[],go:'ok',ic:'refund',l:'Refund',msg:'Refund recorded · Katrina told'},
+  swoff:{t:'Turn Reveal Studio off for everyone?',s:'A for-everyone switch · effective on the next page load',what:['312 Event Hubs lose the opening reveal','Couples see a plain open — nothing deleted','Written to the Admin log with your name'],not:[],go:'danger',ic:'bolt',l:'Turn off',msg:'Reveal Studio off · 312 hubs',undo:true},
+  launch:{t:'Apply launch offer changes',s:'Cap 2,000 → 2,500 · Papic credits 50 · Pro free to all',what:['Fee stays free for 500 more bookings','1,384 suppliers keep Pro free','Supplier Plan pages and fee rows read the new cap'],not:[],go:'ok',ic:'check',l:'Apply',msg:'Launch offer updated'},
+  launchoff:{t:'End the launch offer now?',s:'1,240 of 2,000 used · ends at the end of this week',what:['Booking fee resumes for NEW bookings','Pro free ends Sun Nov 1 for 1,384 suppliers','5 %-of-fee Papic grant returns'],not:['Bookings already made stay fee-free'],go:'danger',ic:'bolt',l:'End offer',msg:'Launch offer ends Sun Nov 1',undo:true},
+  price:{t:'Send price change for a second admin',s:'Papic Pass ₱500 → ₱599 · customers · two-admin rule',what:['Nothing changes yet','A second admin sees it under Approvals · 72 h','You will be told when it lands'],not:[],go:'brand',ic:'send',l:'Send',msg:'Sent for approval · 72 h'},
+  reopen:{t:'Reopen the guest list · Cale & Ice',s:'Finalized Oct 1 · 180 guests · deadline moves to Oct 30',what:['Hosts can edit guests again','Caterer is told the count may change','Finalize happens again at the new deadline'],not:[],go:'ok',ic:'undo',l:'Reopen',msg:'Guest list reopened · hosts told'},
+  ban:{t:'Ban Cale Casasola',s:'Signs out everywhere · blocks sign-in · freezes their events · hides their shop seats · deletes nothing',what:['They get the plain email with the reason','Guests still see what was published','Admin log keeps your name and the reason'],not:[],go:'danger',ic:'ban',l:'Ban',msg:'Banned · undo for 24 h',typed:'BAN CALE',undo:true,reason:true},
+  delete:{t:'Delete Katrina Ocampo’s account',s:'She asked 18 h ago · 24-h rule · RA 10173',what:['Account, events, photos and faces erased','Receipts kept 10 years (BIR)','She gets the confirmation email'],not:['Cannot be undone after the 24 h'],go:'danger',ic:'trash',l:'Delete',msg:'Erasure started · she is told',typed:'DELETE KATRINA',reason:false},
+  record:{t:'Record a payment received',s:'Seen in the bank, not logged by the buyer',what:['Payment logged against the order','Then the same Confirm step as any payment'],not:[],go:'ok',ic:'plus',l:'Record',msg:'Recorded · now confirm it',form:true},
+  helpreply:{t:'Send reply to Rolando Mendoza',s:'Help ticket · "Can’t add guests" · open 2 h',what:['Email + in-app message','Ticket stays open until they answer'],not:[],go:'info',ic:'send',l:'Send',msg:'Reply sent · Rolando told'},
+  export:{t:'Send Cale his data',s:'Asked 3 d ago · due Oct 30 · 30-day rule',what:['A zip of everything we hold on him','Emailed with a 7-day link','Logged under who viewed his data'],not:[],go:'ok',ic:'send',l:'Send export',msg:'Export sent · logged'},
+  cat:{t:'Approve "Sorbetero" as a new service',s:'Mang Kanor’s Sorbetes · under Food Cart',what:['Couples can pick it on Explore','Mang Kanor’s shop lists it','Search words: sorbetero · dirty ice cream'],not:[],go:'ok',ic:'check',l:'Approve',msg:'Sorbetero added · shop told'},
+};
+function openConfirm(key){
+  const c=CONFIRMS[key];if(!c)return;S.sheet='confirm:'+key;
+  $('#sheet').innerHTML=`<div class="grip"></div><h3>${c.t}</h3><p class="sub">${c.s}</p>
+  ${c.form?`<div class="rows">${row('Order',sel(['S89O-7K2M · Cale & Ice · ₱2,499','S89O-3PQ9 · Mendoza · ₱2,899','Search…'],'S89O-7K2M · Cale & Ice · ₱2,499'))}${row('Amount','',fld('₱2,499'))}${row('Channel',sel(['GCash','BDO','Other bank'],'GCash'))}${row('Reference','',fld('···6789'))}</div>`:''}
+  ${c.reason?`<div class="rows">${row('Reason',sel(['Chargeback on a confirmed payment','Fraud','Abuse of guests','Other'],'Chargeback on a confirmed payment'))}</div>`:''}
+  <div class="what">What happens</div><div class="what-rows">${c.what.map(w=>`<div>${I.check}<span>${w}</span></div>`).join('')}${c.not.map(w=>`<div class="x">${I.x}<span>${w}</span></div>`).join('')}</div>
+  ${c.typed?`<div class="typed">Type <b>${c.typed}</b> to confirm · no browser dialog</div>`:''}
+  <div class="acts">${btn(c.go,c.ic,c.l,true,`data-act="do" data-msg="${c.msg}" data-undo="${c.undo?1:0}"`)}${btn('grey','x','Cancel',false,'data-act="close"')}</div>
+  <p class="note">${c.undo?'Undo for 24 h from the toast or the Admin log.':'Written to the Admin log with your name.'}</p>`;
+  h.classList.add('sheet-open');
+}
+
+/* ---------------- screens ---------------- */
+const SCREENS={};
+
+/* 1 · WORK — the one Needs-action list (owner 2026-10-02 L4665). Variants: '' busy · calm · fail · done */
+const launchLine=()=>`<button class="row" data-go="launch" style="min-height:44px"><span class="l"><span class="ok" style="font-size:13.5px">${I.rocket} Launch offer · 1,240 of 2,000 · Pro free</span></span><span class="r"><span class="go">›</span></span></button>`;
+SCREENS.work=()=>{
+  if(S.v==='calm') return `
+  <div class="next calm"><span class="eye">Nothing needs you</span><h2>All clear</h2><p>Every source read · checked 9:41 · checks again on its own</p>${btn('grey','chart','Numbers',false,'data-go="numbers"')}</div>
+  ${launchLine()}
+  <div class="nums">${num(0,'need you','work')}${num(0,'late','work')}${num(2,'events today','work')}</div>
+  <div class="eyebrow">Today's events</div>
+  <div class="rows">
+    ${na('Mendoza wedding · now','Papic on · 150 guests · 0 problems',btn('grey','eye','Open',false,'data-go="event"','sm'),{dots:'Open the Event Hub · Message the hosts'})}
+    ${na('Reyes debut · 6:00 PM','Live Watch on · 142 guests · 0 problems',btn('grey','eye','Open',false,'data-go="event"','sm'))}
+  </div>
+  <div class="eyebrow">This week</div>
+  <div class="rows">${row('₱5,594 received','4 payments · 0 refunds',go,{go:'money'})}${row('3 new suppliers','all verified · 0 waiting',go,{go:'people'})}${row('Problems','0 open · 1 fixed itself',go,{go:'problems'})}</div>`;
+  if(S.v==='fail') return `
+  <div class="next bad"><span class="eye">Couldn't load</span><h2>Some lists didn't read</h2><p>Payments and Approvals couldn't be counted · the rest is live · checked 9:41</p><div class="acts">${btn('grey','play','Try again',true,'data-act="retry"')}${btn('grey','alert','Problems',false,'data-go="problems"')}</div></div>
+  ${launchLine()}
+  <div class="nums">${num('—','need you','work','warn')}${num(1,'late','work','wine')}${num(2,'events today','work')}</div>
+  <div class="eyebrow">Money<span class="n">couldn't load</span></div>
+  <div class="rows">${fail('payments',true)}</div>
+  <div class="eyebrow">Suppliers<span class="n">2</span></div>
+  <div class="rows">
+    ${na('Verify Lumina Studio','yesterday · due today · DTI + ID uploaded',btn('grey','eye','Open',false,'data-go="shop"','sm'),{cls:'late',lateMeta:true})}
+    ${na('“Sorbetero” from Mang Kanor’s','category request · we think it is Sorbetes cart',confirmBtn('ok','check','Approve','cat'),{dots:'Map to… · Decline…'})}
+    ${fail('approvals · not “none”',true)}
+  </div>
+  <div class="eyebrow">Today's events<span class="n">2</span></div>
+  <div class="rows">${na('Mendoza wedding · now','Papic on · 1 problem: Upload stalled',btn('grey','eye','Open',false,'data-go="event"','sm'))}</div>`;
+  const done=S.v==='done';
+  return `
+  <div class="next"><span class="cnt">1 of 14</span><span class="eye">Next · waiting 3 h</span><h2>Confirm ₱2,499 from Cale &amp; Ice</h2><p>GCash · Papic add-on, Thank-you film · ref ···6789 · AI read: amount matches</p><div class="acts">${done?btn('grey','check','Confirmed',false,''):confirmBtn('ok','check','Confirm','pay',true,'')}${btn('grey','eye','The receipt',false,'data-go="payment"')}</div></div>
+  ${done?`<div class="done">${I.check} Confirmed ₱2,499 · receipt sent · in the Admin log <u data-act="toast" data-msg="Undone">Undo</u></div>`:''}
+  ${launchLine()}
+  <div class="nums">${num(done?13:14,'need you','work','wine')}${num(2,'late','work','wine')}${num(2,'events today','work')}</div>
+  <div class="eyebrow">Needs action ${sel(['All · 14','Money · 3','Suppliers · 4','Safety · 3','Privacy · 2','Problems · 1','Today\'s events · 2'],'All · 14')}</div>
+  <div class="eyebrow" style="margin-top:8px">Today's events<span class="n">2</span></div>
+  <div class="rows">
+    ${na('Mendoza wedding · now','Papic on · 150 guests · 1 problem: Upload stalled',btn('grey','eye','Open',false,'data-go="event"','sm'),{cls:'due',dots:'Open the Event Hub · Message the hosts'})}
+    ${na('Reyes debut · 6:00 PM','Live Watch on · 142 guests · 0 problems',btn('grey','eye','Open',false,'data-go="event"','sm'))}
+  </div>
+  <div class="eyebrow">Privacy<span class="n">2</span></div>
+  <div class="rows">
+    ${na('Katrina asked to delete her account','18 h ago · 6 h left · 24-h rule',confirmBtn('danger','trash','Delete','delete'),{cls:'due',dots:'Extend 24 h · Decline…'})}
+    ${na('Cale asked for a copy of his data','3 d ago · due Oct 30 · 30-day rule',confirmBtn('ok','send','Send','export'),{dots:'Open the person'})}
+  </div>
+  <div class="eyebrow">Money<span class="n">3</span></div>
+  <div class="rows">
+    ${done?na('₱2,499 from Cale & Ice · cleared','receipt sent · in the Admin log','',{cls:'cleared'}):na('₱2,499 from Cale & Ice · GCash','3 h ago · due in 21 h · AI read matches',confirmBtn('ok','check','Confirm','pay'),{cls:'due',dots:'Open · Ask to resend · Reject…'})}
+    ${na('₱2,899 from Rolando & Carmen · GCash','1 h ago · amount differs from the order',btn('grey','eye','Match',false,'data-go="payment"','sm'),{dots:'Ask to resend · Reject…'})}
+    ${na('Refund ₱147 to Katrina Ocampo','2 d ago · save-the-date cancelled',confirmBtn('ok','refund','Refund','refund'),{dots:'Open the order'})}
+  </div>
+  <div class="eyebrow">Suppliers<span class="n">4</span></div>
+  <div class="rows">
+    ${na('Verify Lumina Studio · Photo & video','yesterday · due today · DTI + ID · contact confirmed',btn('grey','eye','Open',false,'data-go="shop"','sm'),{cls:'late',lateMeta:true,dots:'Ask for more… · Reject…'})}
+    ${na('Lumina Studio · Pro · ₱1,499 · BDO','20 min ago · subscription to confirm',confirmBtn('ok','check','Confirm','pay'),{dots:'Open · Reject…'})}
+    ${na('“Sorbetero” from Mang Kanor’s Sorbetes','yesterday · category request · we think: Sorbetes cart',confirmBtn('ok','check','Approve','cat'),{dots:'Map to… · Decline…'})}
+    ${na('A colleague’s comp needs your sign-off','4 h ago · two-admin · Aurora Blooms · ₱12,000',btn('grey','eye','Open',false,'data-go="approvals"','sm'),{cls:'late',lateMeta:true})}
+  </div>
+  <div class="eyebrow">Safety<span class="n">3</span></div>
+  <div class="rows">
+    ${na('A gallery photo on the Reyes debut was reported','5 h ago · by a guest',btn('grey','eye','Open',false,'data-go="report"','sm'),{dots:'Hide the photo · Dismiss'})}
+    ${na('A quote shared off-platform · Lumina ↔ Cale & Ice','4 d ago · chat flag',btn('grey','check','Clear',false,'data-act="toast" data-msg="Cleared · Undo"','sm'),{dots:'Open the chat · Warn the shop'})}
+    ${na('Rolando: “Can’t add guests”','2 h ago · help ticket',btn('info','chat','Reply',false,'data-go="help"','sm'),{dots:'Close · Mark in progress'})}
+  </div>
+  <div class="eyebrow">Problems<span class="n">1</span></div>
+  <div class="rows">${na('Save didn’t go through · Guest list › Add guest','2 h ago · 14 hits · 6 people · looked like success',btn('grey','eye','Open',false,'data-go="problems"','sm'),{dots:'Mark as fixed · Ignore'})}</div>
+  <p class="note">16 sources feed this list · last checked just now · a source that fails shows "couldn't load" in its group, never 0.</p>`;
+};
+
+/* 2 · MONEY — three numbers · Show ▾ · rows · thumb: search + Record */
+SCREENS.money=()=>`
+  <div class="nums">${num('₱5,594','received this week','money')}${num('₱6,897','to confirm · 3','money','wine')}${num('₱147','refunds owed','money')}</div>
+  <div class="eyebrow">Payments ${sel(['To confirm · 3','Received · 4','Refunds · 1','Needs a quote · 0','Subscriptions · 1','Fees owed · 2','Payouts · old','Everything'],'To confirm · 3')}</div>
+  <div class="rows">
+    ${row('Cale &amp; Ice','Wedding · Papic add-on, Thank-you film · 3 h','<span class="amt">₱2,499</span>'+confirmBtn('ok','check','Confirm','pay'),{go:'payment'})}
+    ${row('Rolando &amp; Carmen Mendoza','Wedding · Guest list Pro · amount differs · 1 h','<span class="amt">₱2,899</span>'+btn('grey','eye','Match',false,'data-go="payment"','sm'),{go:'payment',st:'warn'})}
+    ${row('Lumina Studio','Supplier · Pro plan · October · 20 min','<span class="amt">₱1,499</span>'+confirmBtn('ok','check','Confirm','pay'),{go:'payment'})}
+  </div>
+  <div class="eyebrow">Received<span class="n">this week</span></div>
+  <div class="rows">
+    ${row('Katrina Ocampo','Debut · Save-the-date · receipt sent Sep 29','<span class="amt">₱147</span><span class="pill ok">GCash</span>',{go:'payment'})}
+    ${row('Jun &amp; Liza Cruz','Wedding · Papic top-up · receipt sent Sep 29','<span class="amt">₱49</span><span class="pill ok">BDO</span>',{go:'payment'})}
+  </div>
+  <div class="eyebrow">More money</div>
+  <div class="rows">
+    ${row('Our accounts','BDO · GCash · QR Ph · two admins to change',go,{ic:'money',go:'accounts'})}
+    ${row('Fees owed','2 suppliers · ₱3,100 · launch offer: free',go,{ic:'tag',go:'fees'})}
+    ${row('Receipts','October · 9 · not BIR ORs',go,{ic:'doc',go:'receipts'})}
+    ${row('Pricing &amp; offers','catalogue · launch offer · discount codes',go,{ic:'star',go:'pricing'})}
+  </div>`;
+
+/* A PAYMENT — the facts, the receipt, then the confirm step */
+SCREENS.payment=()=>`
+  <div class="head"><h1>₱2,499 · Cale &amp; Ice</h1><div class="f">To confirm · waiting 3 h · GCash · web</div></div>
+  <div class="facts"><span>For</span><b>Papic add-on · Thank-you film</b><span>Event</span><b>Cale &amp; Ice wedding · Dec 12</b><span>They sent</span><b>₱2,499 · matches the price</b><span>Reference</span><b>7001 2345 6789</b><span>Paid</span><b>Oct 1, 9:12 AM</b><span>Duplicate?</span><b class="ok">No other order uses this reference</b></div>
+  <div class="shot">GCash receipt · tap to zoom<span class="pill ok">AI read · amount + reference match</span></div>
+  <div class="rows">
+    ${row('Buyer','Cale Casasola · account',go,{go:'person'})}
+    ${row('Order','S89O-7K2M9Q4XZ1 · logged Oct 1 · nobody reviewed yet','')}
+    ${row('Read the receipt again','Setnayan AI · 2 s',btn('grey','play','Read',false,'data-act="toast" data-msg="Read again · still matches"','sm'))}
+  </div>`;
+
+/* 3 · PEOPLE — one search, three kinds of page */
+SCREENS.people=()=>`
+  <div class="eyebrow" style="margin-top:12px">Everyone ${sel(['Everything','People','Suppliers','To verify · 2','Events','Venues','Demo suppliers'],'Everything')}</div>
+  <p class="note" style="margin:4px 0 8px">— people · — suppliers · — events · — venues · counts read live</p>
+  <div class="rows">
+    <button class="chat" data-go="person"><span class="av">CC</span><span><b>Cale Casasola</b><span class="last">Host · seen today · 2 events · 1 payment waiting</span></span><span class="when"><span class="pill">Person</span></span></button>
+    <button class="chat" data-go="shop"><span class="av s">LS</span><span><b>Lumina Studio</b><span class="last">Photo &amp; video · waiting to be verified · due today</span></span><span class="when"><span class="pill warn">Verify</span></span></button>
+    <button class="chat" data-go="event"><span class="av e">CI</span><span><b>Cale &amp; Ice wedding</b><span class="last">Dec 12, 2026 · 180 guests · list Finalized</span></span><span class="when"><span class="pill">Event</span></span></button>
+    <button class="chat" data-go="person"><span class="av">RC</span><span><b>Rolando &amp; Carmen Mendoza</b><span class="last">Hosts · wedding Nov 21 · help ticket open</span></span><span class="when"><span class="pill">Person</span></span></button>
+    <button class="chat" data-go="shop"><span class="av s">MK</span><span><b>Mang Kanor’s Sorbetes</b><span class="last">Food cart · Verified · 1 category request</span></span><span class="when"><span class="pill ok">Supplier</span></span></button>
+    <button class="chat" data-go="shop"><span class="av s" style="opacity:.6">AB</span><span><b>Aurora Blooms</b><span class="last">Demo supplier · Flowers · hidden from couples</span></span><span class="when"><span class="pill">Demo</span></span></button>
+  </div>
+  <div class="eyebrow">Also here</div>
+  <div class="rows">${row('ID documents','in use 41 · left over 2',go,{ic:'doc',go:'docs'})}${row('Gifts &amp; comps','3 comped suppliers · 1 couple window',go,{ic:'gift',go:'gifts'})}${row('Partnerships','1 to approve',go,{ic:'people',go:'partners'})}</div>`;
+
+/* A PERSON — everything on one page, support actions in place */
+SCREENS.person=()=>`
+  <div class="head"><h1>Cale Casasola</h1><div class="f">Host · active · seen today · Web + iPhone · S89U-3F7K</div></div>
+  <div class="rows">
+    ${fold('ev','Events','Cale & Ice wedding · Reyes debut (coordinator)',`${row('Cale &amp; Ice wedding','Dec 12 · 180 guests · list Finalized · Papic on',go,{go:'event'})}${row('Reyes debut','coordinator seat · today 6 PM · Live Watch',go,{go:'event'})}`,{ic:'cal',r:'<span class="pill">2</span>'})}
+    ${fold('mo','Orders &amp; payments','2 paid · ₱2,548 · 1 waiting ₱2,499',`${row('Thank-you film','₱2,499 · to confirm',confirmBtn('ok','check','Confirm','pay'),{go:'payment'})}${row('Papic top-up','₱49 · paid · receipt sent','<span class="pill ok">paid</span>')}${row('Comps','none',btn('grey','gift','Comp',false,'data-act="toast" data-msg="Comp → ≤ ₱10,000 one admin · above two"','sm'))}`,{ic:'money'})}
+    ${fold('pe','People on their events','Ice (co-host) · Tita Nene (coordinator) · 180 guests',`${row('Ice Casasola','co-host · Cale & Ice','')}${row('Tita Nene','coordinator seat · Cale & Ice',btn('grey','x','Unlink',false,'data-act="toast" data-msg="Unlink Tita Nene?"','sm'))}`,{ic:'people'})}
+    ${fold('me','Memories','412 photos · 38 faces · 2 takedowns honoured',`${row('Photos','412 on 2 events','')}${row('Takedowns','2 honoured · 0 waiting','')}${row('Creations','3 mood boards · 1 Patiktok','')}`,{ic:'pic'})}
+    ${fold('pr','Problems they hit','2 · Save didn’t go through ×3',`${row('Save didn’t go through','Guest list › Add guest · last 2 h',go,{go:'problems'})}${row('Upload stalled','Papic · Sep 30',go,{go:'problems'})}`,{ic:'alert',tone:'warn'})}
+    ${fold('ac','Access','Google · iPhone app + Safari · 14 emails delivered',`${row('Sign-in','Google · last today 8:41',btn('grey','key','Reset',false,'data-act="toast" data-msg="Reset link sent"','sm'))}${row('Devices','iPhone (app) · Safari (Mac)',btn('grey','out','Sign out all',false,'data-act="toast" data-msg="Signed out everywhere"','sm'))}${row('Their data','export · logged under who viewed',confirmBtn('ok','send','Send','export',false))}`,{ic:'lock'})}
+    ${fold('lg','Admin log · this person','3 entries',`${row('Sep 20','Added as staff of Lumina Studio','')}${row('Sep 12','Face tagging On · by Ice','')}`,{ic:'doc'})}
+  </div>
+  <p class="note">View as this person is read-only and written to the log.</p>`;
+
+/* A SUPPLIER (shop) — verify lives here */
+SCREENS.shop=()=>`
+  <div class="head"><h1>Lumina Studio</h1><div class="f">Photo &amp; video · Makati · owner Ana Reyes · <span class="warn">waiting to be verified · due today</span></div></div>
+  <div class="rows">
+    ${fold('vf','Verification','DTI ✓ · ID ✓ · contact confirmed · permit: none',`${row('DTI certificate','matches the business name','<span class="pill ok">✓</span>')}${row('Government ID','Ana Reyes · matches','<span class="pill ok">✓</span>')}${row('Contact','email + mobile confirmed Oct 6','<span class="pill ok">✓</span>')}${row('Mayor’s permit','not uploaded · valid-until unknown','<span class="pill warn">none</span>')}${row('Web dossier','3 pages · nothing against',btn('grey','search','Deep search',false,'data-act="toast" data-msg="Runs 1–3 min"','sm'))}${row('Documents','open each · 10-min links',btn('grey','eye','View',false,'data-act="toast" data-msg="Opens the file"','sm'))}`,{ic:'shield',tone:'warn',r:'<span class="pill warn">due</span>'})}
+    ${fold('pl','Plan','Pro · free · launch offer',`${row('Plan',sel(['Free','Verified','Solo','Pro','Enterprise'],'Pro'))}${row('Why','launch offer · Pro free for all · ends with the offer','')}${row('Comp a SKU','Papic Challenge · 28 d · two admins',btn('grey','gift','Comp',false,'data-act="toast" data-msg="Opens Approvals · 2nd admin"','sm'))}${row('Founding supplier','not marked',sw('fs',false,'Founding supplier'))}`,{ic:'star'})}
+    ${fold('sv','Services','3 · Wedding Classic · Full-day · Half-day',`${row('Wedding Classic','₱110,000 · draft until verified','')}${row('Full-day','₱85,000','')}${row('Half-day','₱45,000','')}`,{ic:'tag'})}
+    ${fold('mn','Money','₱1,499 Pro · to confirm · 0 fees owed',`${row('Pro · October','₱1,499 · BDO · 20 min',confirmBtn('ok','check','Confirm','pay'))}${row('Fees owed','none · launch offer','')}${row('Payment options','GCash · approved','')}`,{ic:'money'})}
+    ${fold('tm','Team &amp; customers','2 staff · 6 customers · 1 chat flag',`${row('Ana Reyes','owner','')}${row('Cale Casasola','staff · added Sep 20','')}${row('Chat flag','quote shared off-platform · 4 d',btn('grey','check','Clear',false,'data-act="toast" data-msg="Cleared · Undo"','sm'))}`,{ic:'people'})}
+    ${fold('hs','Admin log · this shop','2 entries',`${row('Oct 6','contact confirmed · by Ice','')}${row('Sep 20','application received','')}`,{ic:'doc'})}
+  </div>`;
+
+/* AN EVENT — reopen guest list stays in admin (L4576) */
+SCREENS.event=()=>`
+  <div class="head"><h1>Cale &amp; Ice wedding</h1><div class="f">Dec 12, 2026 · Makati · 180 guests · hosts Cale &amp; Ice · Event Hub live</div></div>
+  <div class="rows">
+    ${row('Guest list','Finalized Oct 1 · deadline passed',confirmBtn('ok','undo','Reopen','reopen',false))}
+    ${row('Face tagging','On · couple did not decline',sw('ft',true,'Face tagging'))}
+    ${row('Papic','on · 412 photos · 38 faces · 50 free credits',go,{go:'event'})}
+    ${row('Suppliers','4 booked · 1 fee waived (launch offer)',go,{go:'people'})}
+    ${row('Money','2 paid · 1 to confirm ₱2,499',go,{go:'money'})}
+    ${row('Problems','Upload stalled · 1 hit today',go,{go:'problems'})}
+    ${row('Removal','not asked · money holding: no','')}
+  </div>
+  <div class="eyebrow">Hosts</div>
+  <div class="rows">${row('Cale Casasola','host · seen today',go,{go:'person'})}${row('Ice Casasola','co-host',go,{go:'person'})}</div>`;
+
+/* HELP — answer a support message in place */
+SCREENS.help=()=>`
+  <div class="head"><h1>Rolando Mendoza</h1><div class="f">Help ticket · open 2 h · Mendoza wedding · Nov 21</div></div>
+  <div style="display:grid;gap:10px;margin-top:14px">
+    <div style="max-width:84%;background:var(--paper-2);border:1px solid var(--line);border-radius:16px 16px 16px 4px;padding:10px 12px;font-size:14.5px">Hi, I can’t add guests — it says Added but the list doesn’t change.<div class="mute" style="font-size:11.5px;margin-top:4px">8:12</div></div>
+    <button class="row" data-go="problems" style="border-top:0;min-height:44px"><span class="l"><span class="warn" style="font-size:13.5px">${I.alert} Same as Problem #41 · coordinator can’t add guests · fix shipping</span></span><span class="r"><span class="go">›</span></span></button>
+    <div style="max-width:84%;justify-self:end;background:var(--gild-soft);border-radius:16px 16px 4px 16px;padding:10px 12px;font-size:14.5px">Hi Rolando — found it: coordinators couldn’t add guests. Fixed today; please try again and tell me if it still fails.<div class="mute" style="font-size:11.5px;margin-top:4px">draft</div></div>
+  </div>
+  <div class="rows" style="margin-top:14px">${row('Status',sel(['Open','In progress','Closed'],'Open'))}${row('Their account','Rolando & Carmen · hosts',go,{go:'person'})}</div>`;
+
+/* REPORT — judgement queue: the case, no fast button on the list */
+SCREENS.report=()=>`
+  <div class="head"><h1>A reported photo</h1><div class="f">Reyes debut · reported by a guest 5 h ago · "shows my child"</div></div>
+  <div class="shot">The photo · blurred until you open it</div>
+  <div class="facts"><span>Taken by</span><b>Papic · guest camera</b><span>In</span><b>Reyes debut gallery · 142 guests see it</b><span>Faces</span><b>2 enrolled · 1 is the reporter’s child</b><span>Rule</span><b>Child + guardian objection → hide</b></div>
+  <div class="rows">${row('The reporter','Marites Reyes · guest',go,{go:'person'})}${row('The hosts','Reyes family',go,{go:'person'})}</div>`;
+
+/* PROBLEMS — what broke (Connection logs renamed, L4662) */
+SCREENS.problems=()=>`
+  <div class="eyebrow" style="margin-top:12px">Problems ${sel(['Most hit','Newest','Live events first','Fixed'],'Most hit')}</div>
+  <p class="note" style="margin:4px 0 6px">5 open · 32 failures in 7 days · 1 fixed · rate — of — actions (read live)</p>
+  <div class="rows">
+    ${fold('p1','Save didn’t go through','Guest list › Add guest · 6 people · 2 h ago',`${row('Where','Guest list › Add guest › Save','')}${row('What failed','write refused · the host is a coordinator, not the couple','')}${row('Looked like','success — “Added”, list unchanged','')}${row('Build','49693bf → still in 2c4a20d','')}${row('Same as','Fixing #41 · fix shipping',go)}<div class="acts" style="margin-top:8px">${btn('ok','check','Mark fixed',true,'data-act="toast" data-msg="Marked fixed · reopens if it recurs"')}${btn('grey','x','Ignore',false,'data-act="toast" data-msg="Ignored"')}</div>`,{ic:'alert',tone:'warn',r:'<span class="amt">14</span>'})}
+    ${fold('p2','Upload stalled','Papic › Upload photo · 4 people · live now',`${row('Where','Papic › Upload · Mendoza wedding (live)','')}${row('What failed','R2 put timed out · 4 of 61','')}`,{ic:'alert',tone:'warn',r:'<span class="amt">9</span>'})}
+    ${fold('p3','Button never answered','Maker › Apply · 3 people · Sep 30',`${row('Where','Maker › Apply','')}`,{ic:'alert',r:'<span class="amt">4</span>'})}
+    ${fold('p4','Dead end','/dashboard/website → not found · old link in an email',`${row('Fix','redirect to the Studio','')}`,{ic:'alert',r:'<span class="amt">3</span>'})}
+    ${row('Page crashed','Event Hub › Programme · fixed in 49693bf · 0 hits since','<span class="pill ok">fixed</span>')}
+  </div>
+  <p class="note">Nothing personal is stored. Success is never stored; only a count, so the rate can be shown.</p>`;
+
+/* APPROVALS — two-admin */
+SCREENS.approvals=()=>`
+  <div class="head"><h1>Approvals</h1><div class="f">Two-admin rule · the proposer can never confirm · 12-h clock</div></div>
+  <div class="rows">
+    ${na('Comp Aurora Blooms · Papic Challenge · ₱12,000','by Marco · 4 h ago · above ₱10,000',confirmBtn('ok','check','Approve','verify'),{cls:'late',lateMeta:true,dots:'Reject…'})}
+    ${na('Price change · Papic Pass ₱500 → ₱599','by you · 1 d ago · waits for a 2nd admin','<span class="pill">yours</span>')}
+  </div>
+  <div class="eyebrow">Decided<span class="n">this month</span></div>
+  <div class="rows">${row('Receiving account · GCash number','approved by Marco · Oct 2','<span class="pill ok">done</span>')}</div>`;
+
+/* 4 · MORE — one heading per job (admin_final, 10 headings on the phone) */
+const MORE=()=>`<div class="rows">
+  ${row('Pricing &amp; offers','launch offer · catalogue · codes',go,{ic:'star',go:'pricing'})}
+  ${row('Content','categories · articles · features · FAQs',go,{ic:'layers',go:'content'})}
+  ${row('Templates','Event Hub themes · Reveal Studio · emails',go,{ic:'pic',go:'templates'})}
+  ${row('Media','front door · songs · mood boards · creations',go,{ic:'play',go:'media'})}
+  ${row('Growth','front door · SEO · referrals · social · stories',go,{ic:'rocket',go:'growth'})}
+  ${row('Numbers','performance · sign-ups · demand · costs',go,{ic:'chart',go:'numbers'})}
+  ${row('Privacy','NPC filing · deletions · removals',go,{ic:'shield',go:'privacy'})}
+  ${row('Set up','onboarding · AI brain · search memory · screens',go,{ic:'layers',go:'setup'})}
+  ${row('Admin','switches · accounts · team · log · menus',go,{ic:'gear',go:'admin'})}
+</div>`;
+SCREENS.more=()=>SCREENS.work();
+
+/* PRICING & OFFERS */
+SCREENS.pricing=()=>`
+  <div class="rows" style="margin-top:8px">
+    ${row('Launch offer','running · 1,240 of 2,000 · Pro free · 50 credits','<span class="pill ok">on</span>'+go,{ic:'rocket',tone:'ok',go:'launch',st:'ok'})}
+    ${row('Catalogue','what customers pay · 49 live · 68 retired',go,{ic:'tag',go:'catalogue'})}
+    ${row('Supplier plans','Free · Solo ₱— · Pro ₱— · Enterprise ₱—',go,{ic:'star',go:'catalogue'})}
+    ${row('Booking fee','5 % · min ₱50 · first 5 free · rail on',go,{ic:'money',go:'catalogue'})}
+    ${row('Free windows','1 · all couples · Dec 1–31',go,{ic:'gift',go:'gifts'})}
+    ${row('Discount codes','4 live · 1 expired',go,{ic:'tag',go:'codes'})}
+    ${row('Papic shot prices','ladder · pool · learning',go,{ic:'pic',go:'catalogue'})}
+    ${row('Setnayan AI prices','per event type',go,{ic:'bolt',go:'catalogue'})}
+    ${row('Custom plans','0 open · composer',go,{ic:'doc',go:'catalogue'})}
+    ${row('Founder seats','3 of 10',go,{ic:'star',go:'gifts'})}
+    ${row('Market price bands','what suppliers charge · recompute',go,{ic:'chart',go:'numbers'})}
+  </div>`;
+
+/* LAUNCH OFFER — the single source the supplier frames 22–25, 27, 30, 34 read. v: '' running · ending · ended */
+SCREENS.launch=()=>{
+  const v=S.v;
+  const used=v==='ended'?2000:v==='ending'?2000:1240;
+  const pct=Math.round(used/2000*100);
+  const state=v==='ended'?`<div class="next bad"><span class="eye">Ended</span><h2>Offer ended Sun Nov 1</h2><p>Cap reached Tue Oct 27 · fee resumed for new bookings · Pro free ended · 5 % grant back</p>${btn('grey','play','Run again',false,'data-act="toast" data-msg="Opens a new window with a reason"')}</div>`
+   :v==='ending'?`<div class="next" style="background:var(--warn-soft)"><span class="eye">Ending week</span><h2>2,000 reached · ends Sun Nov 1</h2><p>Cap hit Tue Oct 27 · fee resumed for NEW bookings · Pro free ends Sun · 1,384 suppliers told</p>${btn('grey','chat','Message suppliers',false,'data-act="toast" data-msg="Opens Talk to users"')}</div>`
+   :`<div class="next calm"><span class="eye">Running</span><h2>1,240 of 2,000</h2><p>fee-free bookings used · Pro free for 1,384 suppliers · 62,000 Papic credits given</p><div class="acts">${confirmBtn('danger','bolt','End now','launchoff',false,'')}${btn('grey','eye','Who reads this',false,'data-toggle-note="1"')}</div></div>`;
+  return `${state}
+  <div class="meter"><i class="${v?'warn':''}" data-fill="${pct}"></i></div>
+  <div class="facts" style="border-top:0"><span>Used</span><b data-count="${used.toLocaleString()}">${used.toLocaleString()}</b><span>Started</span><b>Oct 9, 2026 · reason: launch</b><span>Ends</span><b>${v?'Sun Nov 1 · end of the week the cap landed':'end of the week the 2,000th lands · 4-week cycle'}</b></div>
+  <div class="eyebrow">The rule ${sel(['B · first 2,000 platform bookings','A · first 5 per supplier, first 500 suppliers'],'B · first 2,000 platform bookings')}</div>
+  <div class="rows">
+    ${row('Offer','on · fee-free bookings',sw('lo',v!=='ended','Launch offer'))}
+    ${row('Cap','platform bookings · editable · never hard-coded',fld('2,000'))}
+    ${row('Pro free for all','while the offer runs · full features',sw('pro',v!=='ended','Pro free'))}
+    ${row('Papic credits per fee-free booking','for that event · idempotent per order',fld('50'))}
+    ${row('After it ends','fee resumes for new bookings · 5 %-of-fee grant returns','')}
+    ${row('Week boundary',sel(['Platform week · Sun','Each supplier’s own cycle'],'Platform week · Sun'))}
+  </div>
+  <div class="eyebrow">Who reads this</div>
+  <div class="rows">
+    ${row('Supplier Today line','frame 22 · used · cap','')}
+    ${row('Supplier Plan fold','frames 23–25, 27 · used · cap · end date · Pro free','')}
+    ${row('Fee row + quote','frames 30, 39 · on/off · "free · launch offer"','')}
+    ${row('Papic credits','frame 34 · 50 per booking','')}
+    ${row('Couple fee line','Suppliers page · "booking fee free"','')}
+  </div>
+  <p class="note">Numbers are live reads: used = count of fee-free bookings; a failed read shows "couldn't load", never 0. Changes save as a draft; Apply shows who is affected first.</p>`;
+};
+
+/* CATALOGUE — fix a wrong price (two-admin) */
+SCREENS.catalogue=()=>`
+  <div class="eyebrow" style="margin-top:12px">Catalogue ${sel(['Customers · 49','Supplier plans · 5','Bundles · 3','Retired · 68'],'Customers · 49')}</div>
+  <div class="rows">
+    ${row('Papic Pass','PAPIC_GUEST · 3,000 points','<span class="amt">₱500</span>'+btn('grey','pen','Edit',false,'data-toggle="pp"','sm'))}
+    <div class="fold open" data-fold="pp"><div class="exp"><div><div class="inner">${row('Price','needs a second admin · 72 h',fld('₱599'))}${row('Name customers see','saves at once',fld('Papic Pass'))}${row('Live','couples can buy it',sw('pl',true,'Papic Pass live'))}<div class="acts" style="margin-top:8px">${confirmBtn('brand','send','Send for approval','price')}${btn('grey','x','Discard',false,'data-act="toast" data-msg="Discarded"')}</div></div></div></div></div>
+    ${row('Papic Pass 6K','6,000 points','<span class="amt">₱1,000</span>'+btn('grey','pen','Edit',false,'data-act="toast" data-msg="Opens in place"','sm'))}
+    ${row('Live Watch','one-time unlock','<span class="amt">₱2,500</span>'+btn('grey','pen','Edit',false,'data-act="toast" data-msg="Opens in place"','sm'))}
+    ${row('Live Watch · hosted channel','per day','<span class="amt">₱3,000</span>'+btn('grey','pen','Edit',false,'data-act="toast" data-msg="Opens in place"','sm'))}
+    ${row('Event Hub Pro','28 days','<span class="amt">₱—</span>'+btn('grey','pen','Edit',false,'data-act="toast" data-msg="Opens in place"','sm'))}
+  </div>
+  <p class="note">A customer price change is a two-admin action (approve_retail_price_change). A name change saves at once.</p>`;
+
+/* SWITCHES — the for-everyone settings in one place (settings · integrations · flags with a UI) */
+SCREENS.switches=()=>`
+  <div class="eyebrow" style="margin-top:12px">Switches<span class="n">for everyone</span></div>
+  <div class="rows">
+    ${row('Reveal Studio','openings on couple sites · 312 hubs',sw('rv',true,'swoff'))}
+    ${row('Booking fee rail','both keys on · fee computed','<span class="pill ok">on</span>')}
+    ${row('Fee unlocks the event','supplier sees withheld fields after paying',sw('fu',true,'Fee unlock · 48 suppliers'))}
+    ${row('Setnayan AI paywall',sel(['Follow env','On','Off'],'On'))}
+    ${row('Referral program','1,012 redemptions',sw('rf',true,'Referrals'))}
+    ${row('Spotlight on front door','awards strip',sw('sp',true,'Spotlight'))}
+    ${row('Package credit','choice lines + pools · d8 ON',sw('pk',true,'Package credit'))}
+    ${row('Demo mode','this session only · cookie',sw('dm',false,'Demo mode'))}
+    ${row('Morning digest','email at 7 AM · last sent today 7:02',sw('dg',true,'Digest'))}
+  </div>
+  <div class="eyebrow">Supplier sign-up</div>
+  <div class="rows">${row('Validate email','VALIDATE',sw('ve',true,'Validate email'))}${row('Validate mobile','VALIDATE',sw('vm',true,'Validate mobile'))}</div>
+  <div class="eyebrow">Only in code<span class="n">read-only here</span></div>
+  <div class="rows">${row('Live Watch channels','NEXT_PUBLIC_LIVE_STUDIO_ROAM_ENABLED','<span class="pill">env · on</span>')}${row('Chat contact filter','NEXT_PUBLIC_CHAT_CONTACT_FILTER_ENABLED','<span class="pill">env · on</span>')}${row('Device fingerprint','NEXT_PUBLIC_DEVICE_FINGERPRINT_ENABLED','<span class="pill">env · off</span>')}</div>
+  <p class="note">A for-everyone switch always shows who is affected before it flips (frame: the confirm step). A failed read shows "couldn't load" and the switch is locked, never shown off.</p>`;
+
+/* ACCOUNTS — Setnayan's receiving accounts */
+SCREENS.accounts=()=>`
+  <div class="head"><h1>Our accounts</h1><div class="f">Where money lands · QR Ph · two admins to change a number</div></div>
+  <div class="rows">
+    ${row('BDO','Setnayan Inc · ···4471 · QR uploaded','<span class="pill ok">on</span>'+go,{ic:'money'})}
+    ${row('GCash','0917 ··· 2211 · QR uploaded','<span class="pill ok">on</span>'+go,{ic:'phone'})}
+    ${row('Monthly cap','GCash ₱100,000 · 62 % used','')}
+    ${row('Add an account','Maribank · UNO · any bank or e-wallet',btn('brand','plus','Add',false,'data-act="toast" data-msg="Name · number · QR → 2nd admin"','sm'))}
+  </div>
+  <p class="note">Owner 2026-10-02: keep GCash + BDO until a real payment channel; "scan with any bank or e-wallet app (QR Ph)".</p>`;
+
+SCREENS.fees=()=>`
+  <div class="head"><h1>Fees owed</h1><div class="f">Supplier booking fees · 5 % · first 5 free · launch offer: free</div></div>
+  <div class="rows">${row('Lumina Studio','Cruz wedding · ₱2,100 · 48 h','<span class="pill warn">due</span>'+go,{go:'shop'})}${row('Pop &amp; Party Co.','Reyes debut · ₱1,000 · paid Oct 3','<span class="pill ok">paid</span>')}${row('Mang Kanor’s','Mendoza wedding · ₱0 · launch offer','<span class="pill ok">free</span>')}</div>`;
+SCREENS.receipts=()=>`
+  <div class="eyebrow" style="margin-top:12px">Receipts ${sel(['October','September','August'],'October')}</div>
+  <div class="rows">${row('R-2026-0931','Cale & Ice · ₱49 · Papic top-up','<span class="amt">₱49</span>')}${row('R-2026-0930','Katrina Ocampo · ₱147 · Save-the-date','<span class="amt">₱147</span>')}${row('R-2026-0929','Jun & Liza Cruz · ₱2,499','<span class="amt">₱2,499</span>')}</div><p class="note">App receipts · not BIR official receipts.</p>`;
+SCREENS.codes=()=>`
+  <div class="eyebrow" style="margin-top:12px">Discount codes ${sel(['Live · 4','Expired · 1','All'],'Live · 4')}</div>
+  <div class="rows">${row('WELCOME10','10 % · all customers · 212 used',sw('c1',true,'WELCOME10'))}${row('PAPIC50','₱50 off Papic Pass · 40 used',sw('c2',true,'PAPIC50'))}${row('SUPPLIERPRO','first cycle free · suppliers',sw('c3',true,'SUPPLIERPRO'))}</div>`;
+SCREENS.gifts=()=>`
+  <div class="head"><h1>Gifts &amp; comps</h1><div class="f">Every comp, deal and free window in one place</div></div>
+  <div class="rows">${row('Lumina Studio','Pro · admin comp · until Dec 31','<span class="pill ok">Pro</span>'+go,{go:'shop'})}${row('Aurora Blooms','Papic Challenge · waits for 2nd admin','<span class="pill warn">approval</span>'+go,{go:'approvals'})}${row('All couples · Dec 1–31','free Save-the-date · reason: Christmas',sw('fw',true,'Free window'))}${row('Founder seats','3 of 10 · grant · revoke',go)}</div>`;
+SCREENS.docs=()=>`
+  <div class="head"><h1>ID documents</h1><div class="f">Supplier files in the verification bucket</div></div>
+  <div class="rows">${row('Lumina Studio','DTI · ID · 2 files · in use','<span class="pill ok">in use</span>')}${row('Mang Kanor’s','DTI · permit · ID · in use','<span class="pill ok">in use</span>')}${row('Left over','2 files · no shop references them',btn('danger','trash','Delete',false,'data-act="toast" data-msg="Only a provably unreferenced file can go"','sm'))}</div>`;
+SCREENS.partners=()=>`
+  <div class="head"><h1>Partnerships</h1><div class="f">Supplier-to-supplier recommendations</div></div>
+  <div class="rows">${na('Lumina Studio ↔ Pop & Party Co.','asked 2 d ago',confirmBtn('ok','check','Approve','verify'),{dots:'Reject…'})}</div>`;
+
+/* HEADING PAGES under More — every shipped page has a row (3 taps from Work) */
+SCREENS.content=()=>`<div class="rows" style="margin-top:8px">${row('Categories &amp; event types','16 groups · 80 categories · 222 services · 2 requests','<span class="pill warn">2</span>'+go,{ic:'layers',go:'categories'})}${row('Articles · the Journal','12 · 1 draft',go,{ic:'doc'})}${row('Features page','what /features says we ship',go,{ic:'star'})}${row('FAQs &amp; help','help-centre articles · tickets stay on Work',go,{ic:'chat'})}</div>`;
+SCREENS.categories=()=>`
+  <div class="eyebrow" style="margin-top:12px">${sel(['Supplier categories','Event types','Religions'],'Supplier categories')}</div>
+  <div class="rows">
+    ${row('Venues &amp; churches','5 categories · — suppliers',go)}${row('Catering &amp; cake','4 categories',go)}
+    ${fold('bc','Booths, carts &amp; bars','15 categories · 1 request',`${row('Mobile Bar','2 services',go)}${row('Food Cart','9 services · 1 request','<span class="pill warn">1</span>'+go)}${na('“Sorbetero” · Mang Kanor’s','we think: Sorbetes cart',confirmBtn('ok','check','Approve','cat'),{dots:'Map to ▾ · Decline ▾'})}${row('Dessert','1 service',go)}`,{r:'<span class="pill warn">1</span>'})}
+    ${row('Styling, flowers &amp; lights','9 categories',go)}${row('Hosts, music &amp; program','11 categories',go)}${row('Photo &amp; video','3 categories',go)}${row('Attire, hair &amp; make-up','9 categories',go)}
+  </div><p class="note">The approved one-page Categories design (2026-10-02), unchanged — a request is a row where it belongs.</p>`;
+SCREENS.templates=()=>`<div class="rows" style="margin-top:8px">${row('Event Hub themes','11 · 3 free · 8 pro',go,{ic:'pic',go:'themes'})}${row('Reveal Studio','openings · 5 templates · video review',go,{ic:'play',go:'reveal'})}${row('Patiktok templates','9',go,{ic:'play'})}${row('Email &amp; notification','which alerts email you · 14 templates',go,{ic:'bell'})}${row('Guest-import sheet','the sheet couples download',go,{ic:'doc'})}</div>`;
+SCREENS.themes=()=>`
+  <div class="eyebrow" style="margin-top:12px">Event Hub themes ${sel(['Everything · 11','Live · 11','Draft · 0','Retired · 0'],'Everything · 11')}</div>
+  <div class="rows">${row('Debutante','Pro · debut · live just now','<span class="pill ok">live</span>'+btn('grey','pen','Edit',false,'data-act="toast" data-msg="Opens the theme maker"','sm'))}${row('Classic','Free · every event','<span class="pill ok">live</span>'+btn('grey','pen','Edit',false,'data-act="toast" data-msg="Opens the theme maker"','sm'))}${row('Modern','Free · every event','<span class="pill ok">live</span>'+btn('grey','pen','Edit',false,'','sm'))}${row('Rustic','Pro · every event','<span class="pill ok">live</span>'+btn('grey','pen','Edit',false,'','sm'))}${row('Cinderella','Pro · wedding · debut','<span class="pill ok">live</span>'+btn('grey','pen','Edit',false,'','sm'))}</div><p class="note">Duplicate is the fastest way to a new theme. Retiring keeps every couple who chose it on it.</p>`;
+SCREENS.reveal=()=>`
+  <div class="rows" style="margin-top:8px">
+    ${row('Reveal on couple sites','312 hubs · needs Event Hub Pro',sw('rv',true,'swoff'))}
+    ${row('Default opening',sel(['Four-flap envelope','Two-flap side','Two-flap top','Church doors','Sheer veil'],'Four-flap envelope'))}
+    ${fold('tp','Openings couples can pick','5 of 5 on',`${row('Four-flap envelope','',sw('t1',true,'Four-flap'))}${row('Two-flap side open','',sw('t2',true,'Two-flap side'))}${row('Two-flap top open','',sw('t3',true,'Two-flap top'))}${row('Church doors','',sw('t4',true,'Church doors'))}${row('Sheer bridal veil','',sw('t5',true,'Veil'))}`)}
+    ${fold('fx','Effects','petals · logo · music',`${row('Petals','',sw('f1',true,'Petals'))}${row('Logo','',sw('f2',true,'Logo'))}${row('Music','',sw('f3',false,'Music'))}${row('Touch glow','',sw('f4',true,'Touch glow'))}`)}
+    ${fold('lk','Look','veil · butterflies · motion — the sliders',`<p>Veil tile · logo size · folds · wind · petal fall · butterflies · shadow — 24 sliders, live preview, Replay.</p>${row('Preview','on a sample event',btn('grey','play','Replay',false,'data-act="toast" data-msg="Plays"','sm'))}`)}
+  </div>
+  <div class="eyebrow">Save-the-Date videos<span class="n">1 to review</span></div>
+  <div class="rows">${na('Cruz wedding · 14 s clip','in review · nothing else can let it play',btn('grey','eye','Watch',false,'data-act="toast" data-msg="Plays the sealed clip"','sm'),{dots:'Approve · Reject…'})}</div>
+  <p class="note">Every switch here is for everyone: the confirm step names how many hubs it touches.</p>`;
+SCREENS.media=()=>`<div class="rows" style="margin-top:8px">${row('Front door media','6 looping videos · 14 images',go,{ic:'play'})}${row('Songs','312 · 40 curated',go,{ic:'play'})}${row('Mood board library','418 · 1 to approve','<span class="pill warn">1</span>'+go,{ic:'pic'})}${row('All creations','mood boards · Patiktok · recaps · takedown lever',go,{ic:'pic'})}${row('Papic storage','1.2 TB · tiles backfilled',go,{ic:'pic'})}</div>`;
+SCREENS.growth=()=>`<div class="rows" style="margin-top:8px">${row('Front door','the public setnayan.com home',go,{ic:'globe'})}${row('SEO &amp; GEO','42 pages · 3 warnings',go,{ic:'chart'})}${row('Referrals','on · 1,012 redemptions',go,{ic:'gift'})}${row('Real Stories','9 featured',go,{ic:'doc'})}${row('Spotlight Awards','front door strip on',go,{ic:'star'})}${row('Social queue','3 scheduled · 0 failed',go,{ic:'send'})}${row('Announcements','talk to users · signals',go,{ic:'bell'})}</div>`;
+SCREENS.numbers=()=>`
+  <div class="eyebrow" style="margin-top:12px">Numbers ${sel(['Last 28 days','This week','This year'],'Last 28 days')}</div>
+  <div class="nums">${num(312,'sign-ups','numbers')}${num(48,'bookings','numbers')}${num('₱61k','revenue','numbers')}</div>
+  <div class="bars">${[40,55,38,60,70,52,80,66,90,74,85,100].map(v=>`<i style="--h:${v}%"></i>`).join('')}</div>
+  <div class="rows">
+    ${row('Problems','5 open · rate — of — actions',go,{ic:'alert',tone:'warn',go:'problems'})}
+    ${row('Sign-ups &amp; retention','couples 212 · suppliers 100',go,{ic:'people'})}
+    ${row('Funnels','visit → event → booking',go,{ic:'chart'})}
+    ${row('Demand','by month and region · intelligence',go,{ic:'chart'})}
+    ${row('Costs','Live Watch channels · Papic storage · expenses',go,{ic:'money'})}
+    ${row('Offline daemon · interconnections · browser blocks','wiring',go,{ic:'bolt'})}
+  </div>
+  <p class="note">Uptime and error rate read "—" until wired — never a confident zero.</p>`;
+SCREENS.privacy=()=>`<div class="rows" style="margin-top:8px">${row('Deletions due','1 · Katrina · 6 h left','<span class="pill wine">1</span>'+go,{ic:'trash',go:'work'})}${row('Data-export requests','1 · Cale · due Oct 30',go,{ic:'send',go:'work'})}${row('Event removals','0 asked',go,{ic:'cal'})}${row('NPC filing','controls · checklist 18 of 22 · data sheet',go,{ic:'shield'})}${row('Who viewed whose data','access log',go,{ic:'eye'})}</div><p class="note">The owner is the DPO. The two rows with counts are the same rows as on Work.</p>`;
+SCREENS.setup=()=>`<div class="rows" style="margin-top:8px">${row('Onboarding','music · steps per event type',go,{ic:'play'})}${row('Setnayan AI brain','chunks · unanswered',go,{ic:'bolt'})}${row('Search memory','what the search box learned · 1 phrase',go,{ic:'search'})}${row('Screens','Root map · read-only',go,{ic:'layers'})}${row('Demo suppliers','seed · regenerate · hide one',go,{ic:'people'})}</div>`;
+SCREENS.admin=()=>`<div class="rows" style="margin-top:8px">${row('Switches','for-everyone settings · 12',go,{ic:'bolt',go:'switches'})}${row('Our accounts','BDO · GCash',go,{ic:'money',go:'accounts'})}${row('Business details','name · TIN · address · VAT',go,{ic:'doc'})}${row('Integrations','Resend · Maya · Google · TikTok',go,{ic:'key'})}${row('Secrets','rotate · write-only',go,{ic:'lock'})}${row('Team &amp; permissions','2 admins · every page name is a permission',go,{ic:'people'})}${row('Menus &amp; icons','rename or hide any slot · 190',go,{ic:'layers'})}${row('Admin log','who did what',go,{ic:'doc'})}</div>`;
+
+/* SEARCH — the field in the thumb zone, results above */
+SCREENS.search=()=>`
+  <div class="hits">
+    <div class="eyebrow">Pages</div>
+    <div class="rows">${row('Payments to confirm','Money · 3 waiting',go,{go:'money'})}${row('Approvals','Work · 1 waiting',go,{go:'approvals'})}${row('Suppliers to verify','People · 2 waiting',go,{go:'people'})}</div>
+    <div class="eyebrow">Actions</div>
+    <div class="rows">${row('Confirm a payment','opens the next one · Cale & Ice · ₱2,499',btn('ok','check','Confirm',false,'data-confirm="pay"','sm'))}${row('Approve a supplier','Lumina Studio',go,{go:'shop'})}</div>
+    <div class="eyebrow">People &amp; orders</div>
+    <div class="rows">${row('Nothing called “pending”','names, orders, references and guests are searched too','')}</div>
+    <div class="eyebrow">Not here?</div>
+    <div class="rows">${row('Ask Setnayan AI','“show me the prices of papic” works · routes, never acts',btn('grey','bolt','Ask',false,'data-act="toast" data-msg="Takes you to Pricing › Papic"','sm'))}</div>
+  </div>`;
+
+/* ---------------- shell / bar / lower ---------------- */
+const BAR=[['work','Work','work'],['money','Money','money'],['people','People','people'],['more','More','more']];
+const SUB={payment:['money','₱2,499'],person:['people','Person'],shop:['people','Supplier'],event:['people','Event'],help:['work','Help'],report:['work','Reported photo'],problems:['work','Problems'],approvals:['work','Approvals'],pricing:['more','Pricing & offers'],launch:['more','Launch offer'],catalogue:['more','Catalogue'],switches:['more','Switches'],accounts:['money','Our accounts'],fees:['money','Fees owed'],receipts:['money','Receipts'],codes:['more','Discount codes'],gifts:['people','Gifts & comps'],docs:['people','ID documents'],partners:['people','Partnerships'],content:['more','Content'],categories:['more','Categories'],templates:['more','Templates'],themes:['more','Event Hub themes'],reveal:['more','Reveal Studio'],media:['more','Media'],growth:['more','Growth'],numbers:['more','Numbers'],privacy:['more','Privacy'],setup:['more','Set up'],admin:['more','Admin'],search:['work','Search']};
+const BACK={payment:'money',person:'people',shop:'people',event:'people',help:'work',report:'work',problems:'work',approvals:'work',pricing:'more',launch:'pricing',catalogue:'pricing',switches:'admin',accounts:'money',fees:'money',receipts:'money',codes:'pricing',gifts:'people',docs:'people',partners:'people',content:'more',categories:'content',templates:'more',themes:'templates',reveal:'templates',media:'more',growth:'more',numbers:'more',privacy:'more',setup:'more',admin:'more',search:'work'};
+function activeTab(){const s=S.screen;if(s==='more'||s==='avatar')return s==='more'?'more':'work';if(['work','search'].includes(s))return 'work';return (SUB[s]||[s])[0];}
+function renderShell(){
+  const sub=SUB[S.screen];
+  const badge=S.v==='calm'?'':S.v==='fail'?'<b class="dot"></b>':`<b>${S.v==='done'?13:14}</b>`;
+  $('#shell').innerHTML=sub?`<button class="back" data-act="back">‹</button><span class="shop" style="color:var(--ink);font-weight:500">${sub[1]}</span><span class="right"><button class="door" data-go="search" aria-label="Search">${I.search}</button><button class="av" data-go="avatar" aria-label="Account">IC</button></span>`
+   :`<span class="logo">SETNAYAN</span><span class="shop">Admin</span><span class="right"><button class="door" data-go="search" aria-label="Search">${I.search}</button><button class="av" data-go="avatar" aria-label="Account">IC</button></span>`;
+  $('#bar').innerHTML=BAR.map(b=>`<button class="${activeTab()===b[0]?'on':''}" data-tab="${b[0]}">${I[b[2]]}${b[1]}${b[0]==='work'?badge:''}</button>`).join('');
+}
+function renderLower(){
+  const s=S.screen;let html='';
+  const g=(ic,l,msg)=>`<button class="btn t-grey glass" data-act="toast" data-msg="${msg||l}">${I[ic]}<span class="lbl">${l}</span></button>`;
+  if(s==='work') html=`<div class="search glass" data-go="search">${I.search}Search anything</div>${btn('grey','alert','Problems',false,'data-go="problems"')}`;
+  else if(s==='money') html=`<div class="search glass" data-go="search">${I.search}Name · order · reference</div>${btn('brand','plus','Record',true,'data-confirm="record"')}`;
+  else if(s==='people') html=`<div class="search glass" data-go="search">${I.search}Person · supplier · event</div>${btn('brand','plus','Add',true,'data-act="toast" data-msg="Venue · demo supplier · outside shop"')}`;
+  else if(s==='payment') html=`${btn('ok','check','Confirm',true,'data-confirm="pay"')}${g('send','Resend','Asked them to resend')}${g('x','Reject','Reject → cancels the order · asks once')}`;
+  else if(s==='person') html=`${btn('info','chat','Message',true,'data-act="toast" data-msg="Opens a message to Cale"')}${g('eye','View as','View as Cale · read-only · logged')}<button class="btn t-grey glass" data-confirm="ban">${I.ban}<span class="lbl">Actions</span></button>`;
+  else if(s==='shop') html=`${btn('ok','check','Approve',true,'data-confirm="verify"')}${g('chat','Message','Message Ana')}${g('x','Reject','Reject → tells them what to fix')}`;
+  else if(s==='event') html=`${btn('info','chat','Message hosts',true,'data-act="toast" data-msg="Message Cale & Ice"')}${g('eye','Event Hub','Opens their Event Hub')}<button class="btn t-grey glass" data-act="toast" data-msg="Force-delete → reason · type the name · 24-h undo">${I.trash}<span class="lbl">Actions</span></button>`;
+  else if(s==='help') html=`<div class="search glass">${I.chat}Edit the reply…</div>${btn('info','send','Send',true,'data-confirm="helpreply"')}`;
+  else if(s==='report') html=`${btn('danger','eye','Hide photo',true,'data-act="toast" data-msg="Hidden · guest told · Undo"')}${g('x','Dismiss','Dismissed · reporter told')}${g('ban','Block','Block the uploader?')}`;
+  else if(s==='launch'&&S.v!=='ended') html=`${btn('ok','check','Apply',true,'data-confirm="launch"')}${g('x','Discard','Draft discarded')}`;
+  else if(s==='launch') html=`${btn('brand','play','New window',true,'data-act="toast" data-msg="Opens a new offer with a reason"')}`;
+  else if(s==='catalogue') html=`<div class="search glass" data-go="search">${I.search}Search a price</div>${btn('brand','plus','Add',true,'data-act="toast" data-msg="New catalogue row"')}`;
+  else if(s==='search') html=`<div class="search glass typed">${I.search}pending<span style="margin-left:auto;color:var(--mute)">${I.x}</span></div>`;
+  else if(s==='problems') html=`<div class="search glass" data-go="search">${I.search}Search a problem</div>`;
+  else if(s==='categories') html=`<div class="search glass" data-go="search">${I.search}Group · category · service</div>${btn('brand','plus','Add',true,'data-act="toast" data-msg="New category"')}`;
+  else if(s==='approvals') html=`${btn('brand','plus','New request',true,'data-act="toast" data-msg="Promote admin · grant · account change"')}`;
+  $('#lower').innerHTML=html;h.classList.toggle('lower-hide',!html);
+  fitRows();
+}
+function fitRows(){document.querySelectorAll('.acts,.lower').forEach(r=>{r.classList.remove('fit');if(r.scrollWidth>r.clientWidth+1)r.classList.add('fit');});}
+
+/* ---------------- sheets (More · avatar · confirm) ---------------- */
+function openMore(){$('#sheet').innerHTML=`<div class="grip"></div><h3>More</h3><p class="sub">one heading per job · 3 taps to anything</p>${MORE()}`;h.classList.add('sheet-open');}
+function openAvatar(){
+  $('#sheet').innerHTML=`<div class="grip"></div><div class="rows">${row('Ice Casasola','iscasasolaii@… · owner · DPO',go,{ic:'people'})}${row('Switches','Reveal · fee · AI paywall · referrals',go,{ic:'bolt',go:'switches'})}${row('Alerts to my phone','push on · digest 7 AM',sw('push',true,'Push'),{ic:'bell'})}${row('Team &amp; permissions','2 admins',go,{ic:'people',go:'admin'})}${row('Admin log','what changed, by whom',go,{ic:'doc',go:'admin'})}${row('Sign out','this device','',{ic:'out',attrs:'data-act="toast" data-msg="Signed out"'})}</div>`;
+  h.classList.add('sheet-open');
+}
+function closeSheet(){h.classList.remove('sheet-open');S.sheet='';}
+
+/* ---------------- tour ---------------- */
+const TOUR={work:['One list, nothing else','Everything that needs you, most urgent first. Tap the action in the row; it clears with Undo. Search finds any page in one go.'],money:['Money','Three numbers, then every payment. Confirm shows what happens before it does.'],people:['People','One search for a person, a supplier or an event — every action on their page.'],launch:['Launch offer','The one page suppliers’ Plan and fee rows read. Apply names who is affected first.']};
+function tour(){const t=TOUR[S.screen];if(!t||q.get('tour')==='0'||sessionStorage.getItem('at-'+S.screen)){h.classList.remove('tour-on');return;}$('#tour').innerHTML=`<button data-act="tour-ok">Got it</button><b>${t[0]}</b>${t[1]}`;h.classList.add('tour-on');}
+
+/* ---------------- render ---------------- */
+function render(){
+  const base=S.screen==='more'||S.screen==='avatar'?'work':S.screen;
+  $('#main').innerHTML=(SCREENS[base]||SCREENS.work)();
+  renderShell();renderLower();tour();
+  if(S.screen==='more')openMore();else if(S.screen==='avatar')openAvatar();else if(S.sheet.startsWith('confirm:'))openConfirm(S.sheet.split(':')[1]);else closeSheet();
+  document.querySelectorAll('[data-fill]').forEach(m=>requestAnimationFrame(()=>m.style.width=m.dataset.fill+'%'));
+  document.querySelectorAll('[data-count]').forEach(el=>{const raw=el.dataset.count;const n=parseInt(raw.replace(/[^\d]/g,''));if(isNaN(n))return;const pre=raw.match(/^[^\d]*/)[0],suf=raw.match(/[^\d,]*$/)[0];const t0=performance.now(),d=Math.min(900,420+n/300);const step=t=>{const p=Math.min(1,(t-t0)/d),e=1-Math.pow(1-p,3);el.textContent=pre+Math.round(n*e).toLocaleString()+suf;if(p<1)requestAnimationFrame(step);};requestAnimationFrame(step);});
+  window.scrollTo(0,0);
+}
+function nav(target){if(!target)return;S.sheet='';if(target.includes(':')){const [a,b]=target.split(':');S.screen=a;S.v=b;}else{S.screen=target;if(!['work'].includes(target))S.v='';}render();}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-tab],[data-go],[data-toggle],[data-sw],[data-act],[data-confirm]');
+  if(!t)return;
+  if(t.dataset.tab){const k=t.dataset.tab;S.sheet='';if(k==='more'){S.screen='more';}else{S.screen=k;if(k==='work'&&S.v==='done')S.v='';else if(k!=='work')S.v='';}render();return;}
+  if(t.dataset.toggle){const k=t.dataset.toggle;const f=t.closest('.fold');const was=f.classList.contains('open');document.querySelectorAll('.fold.open').forEach(x=>{x.classList.remove('open');S.open[x.dataset.fold]=false;});if(!was){f.classList.add('open');S.open[k]=true;}return;}
+  if(t.dataset.sw){const k=t.dataset.sw;const on=t.classList.contains('on');if(on&&CONFIRMS[t.dataset.msg]){openConfirm(t.dataset.msg);S.pendingSw=t;return;}t.classList.toggle('on');S.sw[k]=!on;toast((t.dataset.msg||'Setting')+(on?' off':' on')+' · Undo');return;}
+  if(t.dataset.confirm){openConfirm(t.dataset.confirm);return;}
+  if(t.dataset.act==='back'){S.sheet='';const b=BACK[S.screen]||'work';S.screen=b;S.v='';render();return;}
+  if(t.dataset.act==='retry'){S.v='';render();toast('Loaded · every source read');return;}
+  if(t.dataset.act==='tour-ok'){sessionStorage.setItem('at-'+S.screen,'1');h.classList.remove('tour-on');return;}
+  if(t.dataset.act==='close'){closeSheet();S.pendingSw=null;return;}
+  if(t.dataset.act==='do'){const m=t.dataset.msg;closeSheet();if(S.pendingSw){S.pendingSw.classList.remove('on');S.sw[S.pendingSw.dataset.sw]=false;S.pendingSw=null;}if(S.screen==='work'&&m.startsWith('Confirmed')){S.v='done';render();}toast(m,t.dataset.undo==='1');return;}
+  if(t.dataset.act==='toast'){toast(t.dataset.msg||'Done');return;}
+  if(t.dataset.act==='fld'){return;}
+  if(t.dataset.go!==undefined&&t.dataset.go!==''){nav(t.dataset.go);return;}
+});
+$('#scrim').addEventListener('click',()=>{closeSheet();if(S.screen==='more'||S.screen==='avatar'){S.screen='work';render();}});
+window.addEventListener('resize',fitRows);
+let tt;function toast(m,undo){const el=$('#toast');el.innerHTML=m+(undo?'<u>Undo</u>':'');el.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('on'),1800);}
+
+/* ---------------- mode ---------------- */
+const FRAMES=[
+ ['work','01 · Work · busy day — ONE Needs-action list'],
+ ['work&v=calm','02 · Work · calm day — "Nothing needs you"'],
+ ['work&v=fail','03 · Work · couldn’t load — never 0'],
+ ['work&sheet=confirm:pay','04 · The confirm step — what happens, to whom, BEFORE the tap'],
+ ['work&v=done','05 · After the tap — cleared in place · Undo'],
+ ['money','06 · Money'],
+ ['payment','07 · A payment — facts · receipt · Confirm / Resend / Reject'],
+ ['money&sheet=confirm:record','08 · Record a payment received (was missing)'],
+ ['people','09 · People — one search, three kinds of page'],
+ ['person','10 · A person — everything on one page'],
+ ['person&sheet=confirm:ban','11 · Account actions · Ban — reason · typed · 24-h undo'],
+ ['shop','12 · A supplier — verification lives here'],
+ ['shop&sheet=confirm:verify','13 · Verify a supplier — the confirm step'],
+ ['event','14 · An event — Reopen guest list · face tagging'],
+ ['help','15 · Answer a support message'],
+ ['report','16 · A judgement — reported photo, the case, then the buttons'],
+ ['problems','17 · Problems — what broke, most-hit first'],
+ ['approvals','18 · Approvals — two-admin'],
+ ['more','19 · More — one heading per job'],
+ ['pricing','20 · Pricing & offers'],
+ ['launch','21 · Launch offer · running (the single source)'],
+ ['launch&v=ending','22 · Launch offer · ending week'],
+ ['launch&v=ended','23 · Launch offer · ended'],
+ ['catalogue','24 · Fix a wrong price — two-admin'],
+ ['switches','25 · Switches — for-everyone settings'],
+ ['switches&sheet=confirm:swoff','26 · Switch a feature off — who is affected first'],
+ ['reveal','27 · Templates › Reveal Studio'],
+ ['search','28 · Search anything — field in the thumb zone'],
+ ['avatar','29 · Profile picture → Switches · alerts · team · log · sign out'],
+ ['numbers','30 · Numbers'],
+ ['categories','31 · Content › Categories (approved design)'],
+ ['privacy','32 · Privacy'],
+ ['admin','33 · Admin'],
+ ['accounts','34 · Our accounts'],
+ ['work&tour=1','35 · First-visit tour'],
+];
+if(q.has('s')){h.classList.add('app');render();}
+else{
+  const mk=(f,dark)=>`<div class="frame"><iframe src="?s=${f[0]}${f[0].includes('tour=')?'':'&tour=0'}${dark?'&dark=1':''}" loading="lazy"></iframe><div class="cap">${f[1]}${dark?' · <b>dark</b>':''}</div></div>`;
+  $('#frames').innerHTML=FRAMES.map(f=>mk(f,false)).join('');
+  $('#framesDark').innerHTML=[FRAMES[0],FRAMES[5],FRAMES[20]].map(f=>mk(f,true)).join('');
+}
+</script>
+</body>
+</html>
