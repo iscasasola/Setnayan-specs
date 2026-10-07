@@ -24,3 +24,4 @@
 - Still not run: typecheck (killed while waiting on the heavy lock), lint, full unit suite. Side-by-side and word count still to do.
 - Next: finish the PR-A checks + baselines → PR-B (coordinator switch = instant flip + SEQUENTIAL `setDelegateArea` saves behind it, never parallel, no new "use server" export; test that the switch moves before the save resolves) → PR-C.
 - Owner calls: unchanged (re-measured unnamed guards; coordinator ON excluding Budget/Photos).
+- Typecheck did complete before the stop: 3 errors, all in `launch/_components/add-part-sheet.tsx` (variable 'to' used before it is declared, line 326). That file is not touched by #6412, so the errors come from main; check main. No errors in the Event Details files.
