@@ -70,7 +70,6 @@ html.settled .card,html.settled .sec,html.settled .row,html.settled .nums,html.s
 .card:nth-child(2){animation-delay:40ms}.nums{animation-delay:80ms}.row:nth-child(n+3){animation-delay:60ms}.tiles{animation-delay:120ms}
 .g.fresh{animation:slidein 420ms var(--ease) both}
 .g.picked .ava,.bar .ico.picked{animation:popin 320ms var(--ease)}
-.lower{animation:up 300ms var(--ease) both}
 .pill{transition:background 200ms,color 200ms}
 @media (prefers-reduced-motion:reduce){.card,.sec,.row,.nums,.tiles,.counts,.search,.g.fresh,.g.picked .ava,.bar .ico.picked,.lower{animation:none}}
 @keyframes catpop{0%{transform:scale(1)}30%{transform:scale(1.28) rotate(-6deg)}60%{transform:scale(.92) rotate(4deg)}100%{transform:scale(1) rotate(0)}}
@@ -100,7 +99,7 @@ html.settled .card,html.settled .sec,html.settled .row,html.settled .nums,html.s
 .maptree{display:none}
 @media (max-width:1023px){.mapwrap{margin-left:-16px;margin-right:-16px;border-radius:0;border-left:0;border-right:0}.node{height:32px;padding:0 10px;font-size:12.5px}.node.root{height:42px;font-size:14px}}
 /* ===== lower bar, sheet, toast ===== */
-.lower{position:fixed;left:0;right:0;bottom:var(--bar);padding:10px 16px;background:linear-gradient(transparent,var(--paper) 30%);display:flex;gap:10px;align-items:center;z-index:5}.lower .btn{flex:1;justify-content:center}
+.lower{position:fixed;left:0;right:0;bottom:var(--bar);padding:10px 16px;background:linear-gradient(transparent,var(--paper) 30%);display:flex;gap:10px;align-items:center;z-index:5;transform:translateY(110%);transition:transform 320ms var(--ease)}.lower.on{transform:none}.lower .btn{flex:1;justify-content:center}
 .lower .search.thumb{position:static;flex:1;padding:0;background:transparent;display:flex;gap:6px;align-items:center;min-width:0}
 .lower .search.thumb .acts{gap:6px}.lower .search.thumb [data-side=right]{display:flex}.lower .search.thumb .icon-only{width:38px}
 .lower{background:linear-gradient(transparent,var(--paper) 25%)}
@@ -183,7 +182,7 @@ html.sheet-open .sheet{transform:none}.scrim{position:fixed;inset:0;background:r
   const visible=()=>{ const q=S.q.trim().toLowerCase(); return S.guests.filter(g=>!q||hay(g).includes(q)); };
   /* ---- render ---- */
   function nav(){ $('#nav').innerHTML=[['⌂','Home','home'],['👥','Guests','guests'],['◎','Suppliers',''],['🌐','Hub',''],['✦','More','']].map(([i,l,p])=>`<button data-act="page" data-page="${p}" class="${S.page===p?'on':''}"><span>${i}</span><span>${l}</span></button>`).join(''); }
-  let settleT; function render(){ nav(); if(S.page==='home') renderHome(); else renderGuests(); fitActs(); clearTimeout(settleT); settleT=setTimeout(()=>h.classList.add('settled'),500); document.querySelectorAll('[data-count]').forEach(count); fills(); const st=document.querySelector('.stick'); if(st) h.style.setProperty('--stick-h',st.offsetHeight+'px'); const sr=document.querySelector('main .search'); h.style.setProperty('--search-h',(sr?sr.offsetHeight:0)+'px'); }
+  let settleT; function render(){ nav(); if(S.page==='home') renderHome(); else renderGuests(); fitActs(); { const L=$('#lower'); const has=!!L.innerHTML.trim(); if(!has) L.classList.remove('on'); else if(!L.classList.contains('on')) requestAnimationFrame(()=>requestAnimationFrame(()=>L.classList.add('on'))); } clearTimeout(settleT); settleT=setTimeout(()=>h.classList.add('settled'),500); document.querySelectorAll('[data-count]').forEach(count); fills(); const st=document.querySelector('.stick'); if(st) h.style.setProperty('--stick-h',st.offsetHeight+'px'); const sr=document.querySelector('main .search'); h.style.setProperty('--search-h',(sr?sr.offsetHeight:0)+'px'); }
   function renderHome(){
     const st=stats(); const days=72; const paid=0, owing=1056000;
     const guestsOk=!fail;
@@ -274,8 +273,8 @@ html.sheet-open .sheet{transform:none}.scrim{position:fixed;inset:0;background:r
   let toastT; function toast(text,undo){ const t=$('#toast'); $('#toastText').textContent=text; $('#toastUndo').style.display=undo?'':'none'; $('#toastUndo').onclick=()=>{undo&&undo(); t.classList.remove('on');}; t.classList.add('on'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('on'),4200); }
   /* ---- actions ---- */
   const ACT={
-    page(d){ if(!d.page) return toast('Not in this prototype — see the Suppliers one'); S.page=d.page; h.classList.remove('settled'); render(); window.scrollTo(0,0); },
-    gview(d){ S.gview=d.gview; h.classList.remove('settled'); render(); window.scrollTo(0,0); },
+    page(d){ if(!d.page) return toast('Not in this prototype — see the Suppliers one'); const L=$('#lower'); const go=()=>{ S.page=d.page; h.classList.remove('settled'); render(); window.scrollTo(0,0); }; if(L.classList.contains('on')){ L.classList.remove('on'); setTimeout(go,300); } else go(); },
+    gview(d){ const L=$('#lower'); const go=()=>{ S.gview=d.gview; h.classList.remove('settled'); render(); window.scrollTo(0,0); }; if(L.classList.contains('on')&&d.gview!=='list'){ L.classList.remove('on'); setTimeout(go,300); } else go(); },
     togglesec(d){ const id=d.id; if(!id){ return; } const opening=!S.open.includes(id); S.open=opening?[...S.open,id]:S.open.filter(x=>x!==id); render(); if(opening) setTimeout(()=>{ const el=document.getElementById(id); el&&el.scrollIntoView({block:'start',behavior:'smooth'}); },80); },
     expandall(d){ const ids=grouping(visible()).map(([r])=>secId(r)); S.open=d.all==='1'?ids:[]; render(); },
     maplens(d,el){ S.mapLens=el.value; render(); },

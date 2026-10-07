@@ -684,7 +684,7 @@ section{padding:18px 0 8px}
         <div class="replay"><button data-act="tour">Replay the first-visit tour</button> · <button data-act="reset" data-mode="mid">Reset: mid-planning</button> · <button data-act="reset" data-mode="empty">Reset: start from zero</button></div>`;
       lower='';
     }
-    $('#view').innerHTML=html; if(lower!==null) $('#lower').innerHTML=lower; fitActs(); if(typeof setStickH==='function') setStickH(); const oh=document.querySelector('.cat.open>.cathead'); document.documentElement.style.setProperty('--bar-h',(oh?oh.offsetHeight:56)+'px'); $('#lower').classList.toggle('on',!!lower); document.body.classList.toggle('has-lower',!!lower);
+    $('#view').innerHTML=html; if(lower!==null){ $('#lower').innerHTML=lower; } fitActs(); if(typeof setStickH==='function') setStickH(); const oh=document.querySelector('.cat.open>.cathead'); document.documentElement.style.setProperty('--bar-h',(oh?oh.offsetHeight:56)+'px'); if(lower!==null){ const L=$('#lower'); L.classList.remove('on'); if(lower){ requestAnimationFrame(()=>requestAnimationFrame(()=>L.classList.add('on'))); } } document.body.classList.toggle('has-lower',!!lower);
     document.querySelectorAll('[data-count]').forEach(el=>count(el,+el.dataset.n));
     document.querySelectorAll('[data-fill]').forEach(el=>{ const k='fill-'+el.dataset.fill, to=+el.dataset.w, from=prevMoney[k]??0; prevMoney[k]=to; el.style.transition='none'; el.style.width=from+'%'; void el.offsetWidth; el.style.transition=''; requestAnimationFrame(()=>{ el.style.width=to+'%'; }); });
     count($('#mBooked'),M.bookedSum); count($('#mToBook'),M.toBook); count($('#mBuffer'),BUDGET-M.bookedSum-M.toBook); count($('#mBooked2'),M.bookedSum); count($('#mToBook2'),M.toBook); count($('#mPaid'),M.paidSum); count($('#mBuffer2'),BUDGET-M.bookedSum-M.toBook);
@@ -849,7 +849,8 @@ Same-day edit">${esc((s.inclusions||[]).join('\n'))}</textarea></div>`:''}
   function ensure(s){ if(!S.suppliers.includes(s)) S.suppliers.push(s); }
   function doBook(s,price){ ensure(s); s.status=s.own?'booked':'asked'; s.price=price; if(!s.own){ setTimeout(()=>{ if(s.status!=='asked') return; s.status='booked'; s.pop=true; addChat(s.id,{sys:`${s.name} said yes — booked for ${S.dateKnown==='day'?shortDate(S.date):monthOf(S.date)}`}); render(); toast(`${s.name.split(' ')[0]} said yes — booked ✓`); },10000); } s.paid=s.paid||0; s.pop=true; delete S.picks[s.cat]; if(['reception','ceremony'].includes(s.cat)&&S.dateKnown!=='day'){} addChat(s.id,{sys:`You asked to book for ${S.dateKnown==='day'?shortDate(S.date):monthOf(S.date)}. Waiting for their confirmation.`}); }
   const ACT={
-    mode(d){ S.mode=d.mode; $('#cart').classList.remove('on'); render(); window.scrollTo({top:0}); },
+    mode(d){ const L=$('#lower'); if(L.classList.contains('on')&&S.mode!==d.mode){ L.classList.remove('on'); setTimeout(()=>ACT._mode(d),300); return; } ACT._mode(d); },
+    _mode(d){ S.mode=d.mode; $('#cart').classList.remove('on'); render(); window.scrollTo({top:0}); },
     expandall(){ S.openAll=!S.openAll; S.folded=[]; if(S.openAll) S.cat=null; render(); window.scrollTo({top:0}); },
     opencat(d){ closeSheet(); S.justOpened=d.cat||null; setTimeout(()=>{ S.justOpened=null; },700); if(S.openAll&&d.cat){ S.folded=S.folded.includes(d.cat)?S.folded.filter(x=>x!==d.cat):[...S.folded,d.cat]; render(); return; } const was=S.mode==='find'&&S.cat===d.cat; S.mode='find'; S.cat=was?null:(d.cat||null); S.filter='best'; S.showAll=null; S.catQuery=''; render(); if(!was&&d.cat) landOn('cat-'+d.cat); },
     showall(d){ S.showAll=d.cat; render(); },
