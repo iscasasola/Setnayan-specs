@@ -486,6 +486,9 @@ section{padding:18px 0 8px}
   const isFree=(s,d)=>!(s.busy||[]).includes(d||S.date);
   // the window the couple has: a day → free that day; only a month → free on at least one day of it (a supplier may block whole months via busyMonths)
   const availableFor=m=>S.dateKnown==='day'?isFree(m,S.date):!(m.busyMonths||[]).includes(S.date.slice(0,7));
+  // the payment plan is the supplier's own (their lines + due dates); without one, the shipped "first payment + balance" split — never a guessed percentage
+  const planOf=s=>{ if(s.plan) return s.plan; if(s.price==null) return []; const half=Math.round(s.price/2); return [{k:'first',label:'First payment',due:'2026-10-05',amt:half},{k:'balance',label:'Balance',due:'2026-12-11',amt:s.price-half}]; };
+  const nextDue=s=>{ let paid=s.paid||0; for(const l of planOf(s)){ if(paid>=l.amt){paid-=l.amt;continue;} return {line:l,amt:l.amt-paid}; } return null; };
   const fmtDate=d=>new Date(d+'T00:00:00').toLocaleDateString('en-PH',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
   const shortDate=d=>new Date(d+'T00:00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric'});
   const monthOf=d=>new Date(d+'T00:00:00').toLocaleDateString('en-PH',{month:'long',year:'numeric'});
