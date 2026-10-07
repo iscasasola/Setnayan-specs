@@ -17,3 +17,4 @@ All PRs DRAFT + `do-not-auto-merge`, auto-merge off. Stacked: step 1 on `rd/make
 - Where the free single-camera Live Watch door lives once the shop window is gone (kept on the page as "Go live" in #6411).
 - Whether a Patiktok booth on/off switch exists.
 - New from step 2 reading: what the prototype's "Setnayan mark" switch should control (no such setting exists).
+- 08 Oct owner add: Home › Your services = quick-setup rows (Setnayan AI switch · Papic credits + Buy more · Live Watch Activate · Music Maker · Video booth), see DECISION_LOG 2026-10-08. Build alongside these controllers, sharing their readers/sheets.
