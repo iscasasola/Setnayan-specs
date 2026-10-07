@@ -1,4 +1,4 @@
-# Universal UI rules — buttons (one colour per meaning, icon + word by width) · numbers (count to their value)
+# Universal UI rules — buttons (one colour per meaning, icon + word by width) · numbers (count to their value) · meters (grow to their value)
 **2026-10-07 · Fable · design rule for the WHOLE site (owner, verbatim: *"can we create this similar rule on all buttons on the website?"* · *"so a list of all buttons on the website and what their colors are"* · *"we want all interactive button to be buttons across the website"*).**
 Nothing here is built. The Suppliers prototype (`prototypes/suppliers_page_2026-10-07_fable.html`, corpus 459e015) is the reference implementation of the rule; this doc carries it to every other page.
 
@@ -26,6 +26,12 @@ Nothing here is built. The Suppliers prototype (`prototypes/suppliers_page_2026-
 - The same component keys on a stable id, so a re-render of the page does not restart from 0 — only a real change animates.
 - Reference implementation: `count()` / `money$()` / `num$()` in `prototypes/suppliers_page_2026-10-07_fable.html` (corpus, this date); in the repo the nearest shipped piece is the budget meter's animated figures — the builder extends that into the shared component rather than writing a second one.
 - Exempt: the guest Event Hub (above).
+
+## Rule 3 — every meter, bar and progress fill animates (owner 2026-10-07: *"this should animate also and all similar like this. universal rule … on load"*)
+- Any bar whose width or height stands for a value — the budget meter, the Papic pool, an upload chip, a step progress line — **grows from 0 on load** and **slides from the old value to the new on change** (≈ 700 ms, ease-out; reduced-motion → jump).
+- Same shared keying as Rule 2, so a re-render does not replay the growth; only a real change moves the bar. Numbers and the bar they describe animate together.
+- Reference: `[data-fill]` + `.meter-fill` in the Suppliers prototype. The builder gives `Count` a sibling `Fill` (or one `Measure` component with both) rather than per-page CSS transitions.
+- Exempt: the guest Event Hub (couple-designed).
 
 ## How a builder applies it (one component, then sweeps)
 1. **Two shared components** — `apps/web/components/action-button.tsx` and `apps/web/components/count.tsx` (Rule 2). `ActionButton`: `<ActionButton tone icon label main onClick/href>`; renders icon + `<span class="lbl">`; `aria-label` = the word, so icon-only is still readable. Plus one hook `useFitRow(ref)` = the fit pass (remove `icon-only`, then from the right add it until `scrollWidth ≤ clientWidth`; re-run on resize). Tokens `--color-ok/info/warn/danger` added to `globals.css` light + dark with the AA numbers in the comment, as every other token there has.
