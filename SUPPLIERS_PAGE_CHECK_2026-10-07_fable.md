@@ -92,6 +92,14 @@ Owner 2026-10-07: *"how about how SAI helps on the Suppliers? is it part of our 
 
 ## Build plan (Opus, after approval — nothing started)
 
+> 🛑 **BUILD CONTRACT — owner, verbatim, 2026-10-07: *"all these builds need to be EXACTLY as we planned okay. no skipping or re inventing."***
+> The plan is `prototypes/suppliers_page_2026-10-07_fable.html` plus this doc. For every builder prompt:
+> 1. **Build what is drawn, behaviour for behaviour** — the order of sections, the words on every button, which verbs appear at which step, what pins where, what animates, what the sheets contain. The prototype's `SEEDS.mid` state at 375 px and at 1280 px is the acceptance picture.
+> 2. **No skipping.** Every element in the prototype ships in the PR that owns it (the table below says which). A PR that leaves one out says so in its body *before* it opens, with the reason — it does not quietly drop it.
+> 3. **No re-inventing.** Use the shipped component the mapping names (`ISegmented`, `PickMenu`, `ServiceCardFace`, `MiniTour`, the Maker's `DateEditor`/`VenuesEditor`, One Chat Box, VendorDirectPay …). A new component where one is named is a defect, not a deliverable. If the shipped one cannot do what is drawn, **stop and say so** — do not substitute.
+> 4. **Every PR carries a side-by-side**: the prototype and the built screen, same state, 375 px and 1280 px, in the PR body — the owner approves the look, not the green suite (memory: *a green suite is not the approved look*).
+> 5. **Words are fixed.** "Supplier", "book", "event", "Event Hub"; the verb set; the sheet copy — as in the prototype. No synonyms.
+
 Owner, 2026-10-07: *"this build is not build intensive because we are just adapting everything we already have and refining it properly."* That is what the mapping shows — **nothing on this page is a new mechanism**; every part is a shipped component moved, re-ordered or re-worded. Four PRs, each small.
 
 | PR | Adapt what | From (shipped) | New code, honestly |
