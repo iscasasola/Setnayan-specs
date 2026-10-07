@@ -2,6 +2,8 @@
 
 **Owner's brief, verbatim (2026-10-07):** *"right now you have hidden the bench the compare budget, and everything else in the suppliers and just showed suppliers that are booked. we want to create a uni screen interface that adapts to both desktop and mobile view. which handles everything we have and still keeps it un clumped. i want a uniscreen that can help them navigate properly to all their categories, find suppliers, compare combinations, add supplier manually, chat with suppliers, and still make it look legible to the eyes. with animation"*
 
+**Owner, later the same day, verbatim — the journey the page must follow:** *"1. they start looking for categories and search or add manually their suppliers · 2. they get to talk and inquire services · 3. they accept their price proposal · 4. the can start creating builds. to compare combinations of each vendor they get · 5. compare multipl builds · 6. book a supplier's service · 7. see all booked services · 8. see the budget on where they are · 9. see if the date becomes more specific. and location also becomes more specific."* And: *"once they have locked vendors. this data can be used across the event."*
+
 **How this was measured.** The live site (`www.setnayan.com`) at 375 px, signed in on the owner's event (looked only; nothing pressed except the "Saved" row, which only scrolls), plus `origin/main` at `fe86472846` read from a detached worktree. Anchors are file:symbol, never line numbers. Screenshots: `prototypes/suppliers_page_live_2026-10-07-*.jpg`.
 
 ## Verdict
@@ -38,38 +40,45 @@
 
 ## What the prototype keeps, and what it changes
 
-Prototype: `prototypes/suppliers_page_2026-10-07_fable.html` (phone 375 and desktop 1280 side by side; open `?frame=1` to resize it live).
+Prototype: `prototypes/suppliers_page_2026-10-07_fable.html` — a **working model**, not a picture: every button does its job and the state is kept in the browser. Open `?frame=1` to resize it; `?frame=1&start=empty` starts from zero so the nine steps can be walked in order. Screenshots: `prototypes/suppliers_page_2026-10-07_fable-*.jpg`.
 
 **Kept as shipped:** the shell bar, the Home · Guests · Suppliers · Hub · More bar, `TeamRows` content and its one-action-per-row rule, `ShortlistCategories` data (folders, counts, "Cover your event"), `BuildLocked` picks, `MerkadoBudgetLens` figures incl. "Not knowable", `BuildCompare`, `FindYourDate`, `NewManualVendorModal`, the One Chat Box, `MiniTour`.
 
-**The delta (six things):**
-1. **One scroller, no menu.** The planning list and the hidden `#team-find-area` go. Six sections in one page: Your suppliers · Cover your event · Picks · Plans · Payments · Chats. A sticky **"Jump to" dropdown** under the title navigates and follows the scroll (any set of choices is one dropdown).
-2. **The date and the venue are the second line of the page**, tappable in place. Date opens a sheet with "I have a date / Help me choose" (`FindYourDate`). Venue shows the booked venue or "Set when you book your venue", with the room size the venue sent and "Ask them" when missing.
-3. **Categories are rows that open in place.** "Cover your event" lists only what this event type needs (approved starter scoping) and a "More categories" dropdown for the rest. A row opens with an animated height change into: saved suppliers as a swipe strip (Add to picks · Inquire · Book · Remove), then "Find more in X ›" and "Add your own". Nothing leaves the page: find and add open as a bottom sheet (phone) / right panel (desktop).
-4. **Picks and money are one section, always visible**, with the date-fit line ("3 of 3 priced picks are free on Dec 18 ✓") and "Save as a plan" / "Compare plans ›". Compare opens in place as side-by-side columns.
-5. **Chats live on the page**: the three latest threads as Messenger rows, a conversation opens as a sheet/panel; the 💬 door stays.
-6. **Motion with meaning**: rows and categories open with a height transition; sheets slide up (phone) or in from the right (desktop); the jump label crossfades as you scroll; money counts to its new value when a pick is added; "Booked" pops once. All of it honours `prefers-reduced-motion`.
+**The page is the owner's nine steps, in order, on one scroller:**
 
-**Desktop:** the same six sections, two columns at ≥1024 px — suppliers and categories on the left, Picks · Plans · Payments · Chats in a sticky right rail. Sheets become a right-side panel.
+| # | Section | Owner's step | What happens there |
+|---|---|---|---|
+| 1 | **Cover your event** | 1 · find categories, search, add manually | Only the starter categories for the event type; "More categories" is one dropdown. A row opens in place to a swipe strip (Add to build · Inquire · Book · Remove); "Find in X" and "Add your own" open as sheets. Nothing leaves the page. |
+| 2 | **Chats** | 2 · talk, inquire · 3 · accept the price | Messenger rows with the supplier's state and one next step (Read the quote · Nudge). Accepting a quote puts the supplier in the build. |
+| 3 | **Build** | 4 · create builds | One supplier per category, money and date-fit update as you pick. Save this build · Book this build. |
+| 4 | **Compare builds** | 5 · compare multiple builds | Saved builds as rows; side-by-side sheet with totals, buffer and the dates each build is free on. Use › |
+| 5 | **Booked** | 6 · book · 7 · see all booked | Booked rows with one next step (Set price · Pay). Each opens to what the supplier sent (room size, table sizes, or "Ask them") and **"Used across your event"** — the Event Hub, seat plan, schedule, guests, Papic — the owner's "this data can be used across the event". |
+| 6 | **Budget** | 8 · where they are | Booked · in your build · paid · buffer, a meter, and the payment rows. Buffer still refuses while anyone is unpriced. |
+| 7 | **Date & place** | 9 · date and location become more specific | Two ladders that fill as you book: month → day → time, region → city → venue → room size. The line under the title sharpens with them: "December 2026 · Metro Manila" becomes "Fri, Dec 18, 2026 · Seda Vertis North, Quezon City". |
+
+A sticky **Jump to** dropdown navigates and follows the scroll. **Desktop (≥1024 px):** steps 1, 2, 5 on the left; 3, 4, 6, 7 in a sticky right rail; sheets become a right-side panel. **Motion with meaning:** rows and categories open with a height transition, sheets slide, money counts to its new value, "Booked" pops once, ladders fill; all honour `prefers-reduced-motion`.
+
+**Not in the prototype on purpose (needs an owner call):** the word for a combination — the shipped page says "Picks" (replan flag on) / "Build" (flag off); the owner said *"builds"* today. The prototype says **Build**.
 
 ## Recommendations (one word each)
 
-1. **Retire the five-row "Your planning" menu** in favour of the jump dropdown and the always-visible sections. (Yes / No)
+1. **Retire the five-row "Your planning" menu**; the page is the nine steps in order with a Jump dropdown. (Yes / No)
 2. **The second line of the page is "date · venue"**, both editable in place; the Maker's Details tool loses both. (Yes / No)
 3. **"Cover your event" shows only the starter categories for the event type**, the rest behind one "More categories" dropdown — not the 70-row wall. (Yes / No)
 4. **Compare plans opens in place** (sheet/panel), not as a collapsed section at the bottom. (Yes / No)
 5. **Chats get a section on the page** (3 latest threads); the `/messages` page stays as the full inbox. (Yes / No)
 6. **Hairline rows, not boxed cards**, for suppliers — as the approved 2026-10-01 frame drew them. (Yes / No)
+7. **"Build" is the word** for a combination (not "Picks"), per today's phrasing. (Yes / No)
 
 ## Build plan (Opus, after approval — nothing started)
 
 | PR | Scope | Touches | Guard |
 |---|---|---|---|
-| 1 | Shell: remove `hidden lg:block` + lazy mount; one scroller with six `<section id>`s; sticky Jump dropdown with scroll-spy; retire `PlanningList` + `planning-list.test.ts`; update `your-team-phone-first.test.ts` / `suppliers-opens-fast.test.ts` to the new order | `services-takeover.tsx`, `page.tsx` | "every section is in the first render on a phone" |
+| 1 | Shell: remove `hidden lg:block` + lazy mount; one scroller with seven `<section id>`s in the journey order; sticky Jump dropdown with scroll-spy; retire `PlanningList` + `planning-list.test.ts`; update `your-team-phone-first.test.ts` / `suppliers-opens-fast.test.ts` to the new order | `services-takeover.tsx`, `page.tsx` | "every section is in the first render on a phone" |
 | 2 | Date + venue line: read `event_date` / venue; sheets reuse `DateEditor`, `FindYourDate`, `VenuesEditor`; Maker Details shows read-only "Set when you book your venue in Suppliers" | `services-takeover.tsx`, `launch/_components/details-your-event.tsx` | "the Maker has no date or venue writer" |
 | 3 | Categories in place: starter-scoped rows + "More categories" dropdown; row opens to swipe strip; Find and Add as sheets (reuse `FindSupplierPage` body, `NewManualVendorModal`) | `shortlist-categories.tsx`, `categories/` | "Find a supplier never navigates away" |
 | 4 | Picks + money + date-fit line always visible; Compare as a sheet (`BuildCompare` body) | `build-locked.tsx`, `merkado-budget-lens.tsx`, `build-compare.tsx` | "Buffer still says Not knowable while anyone is unpriced" |
-| 5 | Chats section (3 latest threads via the messages read) + conversation sheet (One Chat Box) | new `_components/chats-section.tsx` | "unread count on the page equals the door badge" |
+| 5 | Chats section (threads via the messages read, state pill + next step) + conversation sheet (One Chat Box); Booked rows get "Used across your event" from the shipped feeds (venue → Event Hub/seat plan, coordinator → schedule, photo → Papic) | new `_components/chats-section.tsx`, `team-rows.tsx` | "unread count on the page equals the door badge" |
 | 6 | Supplier sends room size / table sizes: supplier-side field, couple-side "received / Ask them" line | migration (RLS pattern per table), supplier workspace, Suppliers row detail | db-tests + Ugat map |
 | 7 | Tour `customer_suppliers_v2` (3 stops) + motion polish + reduced-motion | `lib/tours.ts`, CSS | `marketplace-mini-tour.test.ts` updated |
 

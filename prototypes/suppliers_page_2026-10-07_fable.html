@@ -43,8 +43,8 @@ h1,h2,h3{font-family:var(--serif);font-weight:500;margin:0}
 .delta{columns:2;column-gap:40px;max-width:1000px;margin-top:28px}
 .delta li{break-inside:avoid;margin-bottom:8px}
 .pill-link{display:inline-block;border:1px solid var(--ink);border-radius:999px;padding:8px 16px;text-decoration:none;color:var(--ink);margin-top:12px}
-html.frame .gallery{display:none}
-html:not(.frame) .app{display:none}
+html.appmode .gallery{display:none}
+html:not(.appmode) .app{display:none}
 
 /* ---------- the app ---------- */
 .app{min-height:100vh;padding-bottom:calc(var(--bar) + 16px)}
@@ -72,7 +72,8 @@ main{max-width:1180px;margin:0 auto;padding:0 16px}
 .jump .sel:after{content:"⌄";position:absolute;right:14px;top:6px;font-size:18px;color:var(--mute)}
 .jump select{position:absolute;inset:0;opacity:0;width:100%;cursor:pointer}
 
-.cols{display:grid;grid-template-columns:1fr;gap:0}
+.cols{display:flex;flex-direction:column}
+.col-main,.col-rail{display:contents}
 section{padding:22px 0 8px;scroll-margin-top:118px}
 section h2{font-size:26px;line-height:1.1}
 .sub{color:var(--mute);margin:2px 0 10px;font-size:14px}
@@ -102,7 +103,8 @@ main{overflow-x:clip}
 .detail .acts{display:flex;gap:16px;flex-wrap:wrap}
 .detail .acts button{color:var(--wine);font-weight:500}
 .detail .acts .quiet{color:var(--mute);font-weight:400}
-.sent{display:flex;gap:8px;align-items:center}
+.sent{display:flex;gap:6px 8px;align-items:center;flex-wrap:wrap}
+.sent>.mute:first-child{white-space:nowrap}
 .sent .ask{color:var(--wine);font-weight:500}
 
 /* categories */
@@ -207,7 +209,8 @@ html.tour-on .tour{display:block}
   .shell{padding:0 28px}
   main{padding:0 28px}
   .title h1{font-size:44px}
-  .cols{grid-template-columns:minmax(0,1fr) 400px;column-gap:56px;align-items:start}
+  .cols{display:grid;grid-template-columns:minmax(0,1fr) 400px;column-gap:56px;align-items:start}
+  .col-main,.col-rail{display:block}
   .col-rail{position:sticky;top:118px;max-height:calc(100vh - 118px - var(--bar));overflow:auto;padding-bottom:20px}
   .col-rail section{padding-top:16px}
   .col-rail section:first-child{padding-top:22px}
@@ -219,6 +222,27 @@ html.tour-on .tour{display:block}
   .tour{left:auto;right:28px;bottom:28px;width:360px}
   .strip{padding-left:48px}
 }
+
+/* toast with undo — sits above the bar, never over it */
+.toast{position:fixed;left:16px;right:16px;bottom:calc(var(--bar) + 14px);background:var(--ink);color:var(--paper);padding:12px 16px;border-radius:14px;font-size:14px;z-index:9;display:flex;gap:14px;align-items:center;transform:translateY(20px);opacity:0;pointer-events:none;transition:transform var(--t) var(--ease),opacity var(--t)}
+.toast.on{transform:none;opacity:1;pointer-events:auto}
+.toast button{color:var(--gild);font-weight:600;margin-left:auto}
+.new{animation:slide 420ms var(--ease) both}
+.sheet .opt button,.sheet .frow button{font-weight:500}
+.sheet .opt .ok{color:var(--ok);font-weight:500}
+@media (min-width:1024px){ .toast{left:auto;right:28px;bottom:28px;width:380px} }
+
+/* ladders (date & place sharpen) and the budget meter */
+.ladder{display:grid;gap:0}
+.step{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:14px;color:var(--mute);transition:color var(--t)}
+.step:first-child{border-top:0}
+.step .dotl{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--line);background:var(--paper);transition:background var(--t),border-color var(--t)}
+.step.on{color:var(--ink)} .step.on .dotl{background:var(--ok);border-color:var(--ok)}
+.meter{position:relative;height:6px;border-radius:3px;background:var(--line);margin-top:12px;overflow:hidden}
+.meter-fill{position:absolute;left:0;top:0;bottom:0;background:var(--gild);transition:width 600ms var(--ease)}
+.meter-fill.paid{background:var(--ok)}
+.chat .name .pill{font-size:11px;padding:1px 7px;margin-left:4px;vertical-align:1px}
+.chat .name{white-space:normal}
 </style>
 </head>
 <body>
@@ -228,8 +252,8 @@ html.tour-on .tour{display:block}
   <h1>Suppliers — one screen</h1>
   <p class="mute">2026-10-07 · Fable · prototype only, nothing built.</p>
   <p><b>Owner's brief:</b> <i>"we want a uni screen interface that adapts to both desktop and mobile view… navigate properly to all their categories, find suppliers, compare combinations, add supplier manually, chat with suppliers, and still make it look legible to the eyes. with animation"</i></p>
-  <p>Below is the same page twice: a phone at 375 and a computer at 1280. Both frames are live — tap the rows, the categories, the date, the venue, "Find more", "Add your own", a chat. Nothing leaves the page.</p>
-  <a class="pill-link" href="?frame=1" target="_blank">Open it full size and resize the window ›</a>
+  <p>Below is the same page twice: a phone at 375 and a computer at 1280. Both are a working model — every button does its job (find, save, inquire, accept, build, compare, book, pay, set a price, remove with undo, change the date). What you do is remembered in this browser; "Reset" is at the bottom.</p>
+  <a class="pill-link" href="?frame=1" target="_blank">Open it full size and resize the window ›</a> <a class="pill-link" href="?frame=1&start=empty" target="_blank">Start from zero · walk the nine steps ›</a>
   <div class="frames">
     <div>
       <div class="frame phone"><iframe src="?frame=1" title="phone"></iframe></div>
@@ -240,19 +264,21 @@ html.tour-on .tour{display:block}
       <div class="cap">Computer · 1280 (scaled to fit)</div>
     </div>
   </div>
-  <h2 style="margin-top:36px;font-size:26px">What changes (the delta)</h2>
+  <h2 style="margin-top:36px;font-size:26px">The page follows the couple's journey</h2>
   <ol class="delta">
-    <li><b>One scroller, no menu.</b> "Your planning" and the hidden find-area go. Six sections: Your suppliers · Cover your event · Picks · Plans · Payments · Chats. A sticky <b>Jump to</b> dropdown navigates and follows the scroll.</li>
-    <li><b>Date · venue</b> are the second line of the page, editable in place. Date Finder opens there. Venue shows the room size the venue sent, or "Ask them".</li>
-    <li><b>Categories open in place.</b> Only what this event type needs; the rest behind one "More categories" dropdown. A row opens to a swipe strip (Add to picks · Inquire · Book · Remove), then "Find more" and "Add your own" as sheets.</li>
-    <li><b>Picks + money always visible</b>, with the date-fit line. "Compare plans" opens side by side, in place.</li>
-    <li><b>Chats on the page</b>: three latest threads; a conversation opens as a sheet (phone) or panel (computer).</li>
-    <li><b>Motion with meaning</b>: height transitions, sheets slide, the Jump label crossfades, money counts to its new value, "Booked" pops once. Respects reduced motion.</li>
+    <li><b>Cover your event</b> — the categories a wedding needs. Open one to find suppliers, save them, ask for a quote, or add your own.</li>
+    <li><b>Chats</b> — inquire, read the quote, accept the price. The supplier lands in your build.</li>
+    <li><b>Build</b> — one supplier per category; the money and the date-fit update as you pick. Save it.</li>
+    <li><b>Compare builds</b> — side by side, with the dates each one is free on. Use one.</li>
+    <li><b>Booked</b> — book from a build or a chat. Each booked supplier shows what it feeds: Event Hub, seat plan, schedule, guests.</li>
+    <li><b>Budget</b> — booked · in your build · paid · buffer, and a meter. Buffer refuses to guess while anyone is unpriced.</li>
+    <li><b>Date &amp; place</b> — two ladders that fill in as you book: month → day → time, region → city → venue → room size. The line under the title sharpens with them.</li>
   </ol>
+  <p class="mute">One scroller, a sticky <b>Jump to</b> dropdown, sheets that never leave the page, motion with meaning (height transitions, sliding sheets, counting money, a one-time "Booked" pop). Phone first; two columns at 1024.</p>
   <p class="mute" style="margin-top:28px">Kept as shipped: the shell bar, the five-tab bar, TeamRows content and one action per row, the bench data, BuildLocked picks, the budget lens ("Not knowable"), BuildCompare, FindYourDate, the manual-add modal, the One Chat Box, MiniTour.</p>
 </div>
 
-<!-- ======================= THE APP ======================= -->
+<!-- ======================= THE APP (state-driven, in the owner's journey order) ======================= -->
 <div class="app">
   <header class="shell"><span>≡</span><span class="logo">SETNAYAN</span>
     <div class="right"><span class="ic">⌕</span><span class="ic">💬</span><span class="ic">🔔</span><span class="av"></span></div>
@@ -260,210 +286,38 @@ html.tour-on .tour{display:block}
 
   <main>
     <div class="head">
-      <div class="title"><h1>Suppliers</h1><button class="door" data-sheet="chat" aria-label="Chats">💬<b>1</b></button></div>
-      <p class="facts">
-        <button data-sheet="date">Fri, Dec 18, 2026</button><span class="mute">·</span>
-        <button data-sheet="venue">Seda Vertis North</button><span class="mute">·</span>
-        <span class="mute">NCR</span>
-      </p>
+      <div class="title"><h1>Suppliers</h1><button class="door" data-act="go" data-id="s-chats" aria-label="Chats">💬<b id="doorBadge">1</b></button></div>
+      <p class="facts" id="facts"></p>
     </div>
-      <div class="jump">
-        <label>Jump to</label>
-        <div class="sel"><span id="jumpLabel">Your suppliers</span>
-          <select id="jump" aria-label="Jump to a section">
-            <option value="s-team">Your suppliers</option>
-            <option value="s-cover">Cover your event</option>
-            <option value="s-picks">Picks &amp; budget</option>
-            <option value="s-plans">Plans</option>
-            <option value="s-pay">Payments</option>
-            <option value="s-chats">Chats</option>
-          </select>
-        </div>
+    <div class="jump">
+      <label>Jump to</label>
+      <div class="sel"><span id="jumpLabel">Cover your event</span>
+        <select id="jump" aria-label="Jump to a section">
+          <option value="s-cover">Cover your event</option>
+          <option value="s-chats">Chats</option>
+          <option value="s-build">Build</option>
+          <option value="s-compare">Compare builds</option>
+          <option value="s-booked">Booked</option>
+          <option value="s-budget">Budget</option>
+          <option value="s-date">Date &amp; place</option>
+        </select>
       </div>
+    </div>
 
     <div class="cols">
       <div class="col-main">
-
-        <!-- 1 · Your suppliers (TeamRows as rows, not boxes) -->
-        <section id="s-team">
-          <h2>Your suppliers</h2>
-          <p class="sub">2 booked · <span class="wine">2 need you</span> · 1 quote in</p>
-
-          <div class="row rowbtn-wrap">
-            <button class="rowbtn" data-toggle>
-              <span class="logo">SN</span>
-              <span><span class="name">Seda Vertis North</span><br><span class="svc">Reception venue</span></span>
-              <span class="pill ok">Booked</span>
-            </button>
-            <div class="next"><span class="mute">Next:</span><span class="wine">make your first payment</span><button class="go" data-sheet="pay">Pay ›</button></div>
-            <div class="exp" style="grid-column:1/4"><div>
-              <div class="detail">
-                <div class="sent">Room size <b>18 × 24 m</b> <span class="pill ok">sent ✓</span> <span class="mute">· used by your seat plan</span></div>
-                <div class="sent">Street address <span class="mute">Vertis North, Quezon City</span></div>
-                <div class="acts"><button data-sheet="chat">Chat ›</button><button>Workspace ›</button><button class="quiet">Booking details</button></div>
-              </div>
-            </div></div>
-          </div>
-
-          <div class="row">
-            <button class="rowbtn" data-toggle>
-              <span class="logo">SP</span>
-              <span><span class="name">Santuario de San Vicente de Paul</span><br><span class="svc">Ceremony venue</span></span>
-              <span class="pill ok">Booked</span>
-            </button>
-            <div class="next"><span class="mute">Next:</span><span class="wine">set the price so your buffer can count</span><button class="go" data-sheet="price">Set price ›</button></div>
-            <div class="exp" style="grid-column:1/4"><div>
-              <div class="detail">
-                <div class="sent">Room size <span class="mute">not sent</span> <button class="ask">Ask them ›</button></div>
-                <div class="acts"><button data-sheet="chat">Chat ›</button><button>Workspace ›</button></div>
-              </div>
-            </div></div>
-          </div>
-
-          <div class="row">
-            <button class="rowbtn" data-toggle>
-              <span class="logo">LS</span>
-              <span><span class="name">Lumina Studio</span><br><span class="svc">Photo &amp; video</span></span>
-              <span class="pill wine">Quote in</span>
-            </button>
-            <div class="next"><span class="mute">Next:</span><span>₱85,000 · 2 options</span><button class="go" data-sheet="chat">Read it ›</button></div>
-            <div class="exp" style="grid-column:1/4"><div>
-              <div class="detail">
-                <div class="acts"><button id="addLumina" data-pick="lumina">Add to picks</button><button>Book ›</button><button class="quiet">Remove</button></div>
-              </div>
-            </div></div>
-          </div>
-
-          <div class="row">
-            <button class="rowbtn" data-toggle>
-              <span class="logo">BC</span>
-              <span><span class="name">Bituin Catering</span><br><span class="svc">Catering</span></span>
-              <span class="pill mute">Waiting</span>
-            </button>
-            <div class="next"><span class="mute">Next:</span><span class="mute">asked 3 days ago</span><button class="go">Nudge ›</button></div>
-            <div class="exp" style="grid-column:1/4"><div>
-              <div class="detail"><div class="acts"><button data-sheet="chat">Chat ›</button><button class="quiet">Remove</button></div></div>
-            </div></div>
-          </div>
+        <section id="s-cover" style="order:1"><h2>Cover your event <span class="i" title="Only what this event type usually needs. Add more below.">i</span></h2><p class="sub" id="coverSub"></p><div id="coverBody"></div>
+          <div class="more"><span class="mute">Need something else?</span><div class="sel">More categories<select id="moreCats" aria-label="More categories"></select></div></div>
         </section>
-
-        <!-- 2 · Cover your event (starter-scoped categories, open in place) -->
-        <section id="s-cover">
-          <h2>Cover your event <span class="i">i</span></h2>
-          <p class="sub">A wedding usually needs these six · <b class="ok" style="color:var(--ok)">2 of 6 covered</b></p>
-
-          <div class="cat">
-            <button class="bar" data-toggle><span class="ico">⛪</span><span>Ceremony</span><span class="state ok">Booked ✓ · Santuario</span><span class="chev">⌄</span></button>
-            <div class="exp"><div>
-              <div class="strip">
-                <div class="card"><div class="ph"></div><div class="nm">Santuario de San Vicente</div><div class="pr mute">No price recorded</div><div class="acts"><button data-sheet="price">Set price</button><button class="quiet" data-sheet="chat">Chat</button></div></div>
-              </div>
-              <div class="foot"><button class="quiet">Booked — nothing else needed</button></div>
-            </div></div>
-          </div>
-
-          <div class="cat">
-            <button class="bar" data-toggle><span class="ico">🏛</span><span>Reception</span><span class="state ok">Booked ✓ · Seda</span><span class="chev">⌄</span></button>
-            <div class="exp"><div>
-              <div class="strip">
-                <div class="card"><div class="ph"></div><div class="nm">Seda Vertis North</div><div class="pr">₱1,056,000</div><div class="fit">Free on Dec 18 ✓</div><div class="acts"><button data-sheet="chat">Chat</button><button class="quiet">Workspace</button></div></div>
-              </div>
-              <div class="foot"><button class="quiet">Booked — nothing else needed</button></div>
-            </div></div>
-          </div>
-
-          <div class="cat open" id="catCatering">
-            <button class="bar" data-toggle><span class="ico">🍽</span><span>Catering</span><span class="state wine">2 to decide</span><span class="chev">⌄</span></button>
-            <div class="exp"><div>
-              <div class="strip">
-                <div class="card"><div class="ph"></div><div class="nm">Bituin Catering</div><div class="pr">from ₱950 / head</div><div class="fit">Fits your budget ✓</div><div class="acts"><button data-pick="bituin">Add to picks</button><button data-sheet="chat">Inquire</button><button>Book</button><button class="quiet">Remove</button></div></div>
-                <div class="card"><div class="ph"></div><div class="nm">Hiraya Table</div><div class="pr">from ₱1,200 / head</div><div class="fit mute">Waiting for quote</div><div class="acts"><button data-pick="hiraya">Add to picks</button><button data-sheet="chat">Inquire</button><button class="quiet">Remove</button></div></div>
-                <div class="card" style="border-top-style:dashed"><div class="ph" style="background:none;display:grid;place-items:center;color:var(--mute);font-size:13px">Your own caterer?</div><div class="acts"><button data-sheet="add">＋ Add your own</button></div></div>
-              </div>
-              <div class="foot"><button data-sheet="find">Find more in Catering ›</button><button class="quiet" data-sheet="add">Add your own</button><button class="quiet">Not needed? Remove</button></div>
-            </div></div>
-          </div>
-
-          <div class="cat">
-            <button class="bar" data-toggle><span class="ico">📷</span><span>Photo &amp; video</span><span class="state wine">1 quote in</span><span class="chev">⌄</span></button>
-            <div class="exp"><div>
-              <div class="strip">
-                <div class="card"><div class="ph"></div><div class="nm">Lumina Studio</div><div class="pr">₱85,000 · quote</div><div class="fit">Free on Dec 18 ✓</div><div class="acts"><button data-pick="lumina">Add to picks</button><button>Book</button><button class="quiet">Remove</button></div></div>
-              </div>
-              <div class="foot"><button data-sheet="find">Find more in Photo &amp; video ›</button><button class="quiet" data-sheet="add">Add your own</button></div>
-            </div></div>
-          </div>
-
-          <div class="cat">
-            <button class="bar" data-toggle><span class="ico">📋</span><span>Coordinator</span><span class="state">Nothing yet</span><span class="chev">⌄</span></button>
-            <div class="exp"><div>
-              <div class="foot"><button data-sheet="find">Find a coordinator ›</button><button class="quiet" data-sheet="add">Add your own</button><button class="quiet">Not needed? Remove</button></div>
-            </div></div>
-          </div>
-
-          <div class="cat">
-            <button class="bar" data-toggle><span class="ico">💄</span><span>Hair &amp; make-up</span><span class="state">Nothing yet</span><span class="chev">⌄</span></button>
-            <div class="exp"><div>
-              <div class="foot"><button data-sheet="find">Find hair &amp; make-up ›</button><button class="quiet" data-sheet="add">Add your own</button><button class="quiet">Not needed? Remove</button></div>
-            </div></div>
-          </div>
-
-          <div class="more"><span class="mute">Need something else?</span>
-            <div class="sel">More categories
-              <select aria-label="More categories"><option>More categories</option><option>Cake</option><option>Bridal car</option><option>Live band</option><option>Stylist / Decorator</option><option>Invitations &amp; prints</option><option>Photo booth</option><option>Host / MC</option><option>Lights &amp; sound</option><option>Souvenirs</option><option>Guest shuttle</option><option>Event insurance</option></select>
-            </div>
-          </div>
-        </section>
+        <section id="s-chats" style="order:2"><h2>Chats</h2><p class="sub" id="chatSub"></p><div id="chatBody"></div></section>
+        <section id="s-booked" style="order:5"><h2>Booked</h2><p class="sub" id="bookedSub"></p><div id="bookedBody"></div></section>
       </div>
-
       <div class="col-rail">
-
-        <!-- 3 · Picks + money (BuildLocked + MerkadoBudgetLens, always visible) -->
-        <section id="s-picks">
-          <h2>Picks <span class="i">i</span></h2>
-          <p class="sub">Your current combination — change it anywhere above.</p>
-          <div class="pick"><span><span class="k">Reception</span><br><span class="v">Seda Vertis North</span></span><span class="amt">₱1,056,000</span></div>
-          <div class="pick"><span><span class="k">Ceremony</span><br><span class="v">Santuario de San Vicente</span></span><button class="set" data-sheet="price">Set price ›</button></div>
-          <div class="pick" id="pickCatering"><span><span class="k">Catering</span><br><span class="v mute">Pick one above</span></span><span class="amt mute">—</span></div>
-          <div class="pick" id="pickPhoto"><span><span class="k">Photo &amp; video</span><br><span class="v mute">Pick one above</span></span><span class="amt mute">—</span></div>
-          <div class="money">
-            <div><div class="k">Booked</div><div class="v" id="mBooked" data-n="1056000">₱1,056,000</div><div class="n">1 supplier has no price</div></div>
-            <div><div class="k">Still to book</div><div class="v" id="mToBook" data-n="0">₱0</div></div>
-            <div><div class="k">Budget</div><div class="v">₱2,250,000</div></div>
-            <div><div class="k">Buffer <span class="i">i</span></div><div class="v" id="mBuffer" style="font-size:20px">Not knowable</div><div class="n">until Santuario has a price</div></div>
-          </div>
-          <div class="fitline"><span style="color:var(--ok)">✓</span><span id="fitText">2 of 2 priced picks are free on Dec 18</span><button class="wine" style="margin-left:auto;font-weight:500;white-space:nowrap" data-sheet="date">Help me choose ›</button></div>
-          <div class="cta"><button class="btn solid">Save as a plan</button><button class="btn" data-sheet="compare">Compare plans ›</button></div>
-        </section>
-
-        <!-- 4 · Plans (BuildCompare, opens in place) -->
-        <section id="s-plans">
-          <h2>Plans</h2>
-          <p class="sub">Saved combinations, side by side.</p>
-          <div class="plan"><span>Current picks</span><span class="amt">₱1,056,000</span><span class="mute">now</span></div>
-          <div class="plan"><span>Garden plan</span><span class="amt">₱1,320,000</span><button class="use">Use ›</button></div>
-          <div class="plan"><span>Simple</span><span class="amt">₱980,000</span><button class="use">Use ›</button></div>
-          <button class="all" data-sheet="compare">Compare all three ›</button>
-        </section>
-
-        <!-- 5 · Payments -->
-        <section id="s-pay">
-          <h2>Payments</h2>
-          <p class="sub">Paid so far <b>₱0</b> · due next <b>₱211,200</b></p>
-          <div class="pick"><span><span class="k">Seda Vertis North</span><br><span class="v">First payment · by Oct 20</span></span><button class="set" data-sheet="pay">Pay ₱211,200 ›</button></div>
-          <div class="pick"><span><span class="k">Santuario</span><br><span class="v mute">No amount yet</span></span><button class="set" data-sheet="price">Set price ›</button></div>
-          <div class="pick"><span><span class="k">Setnayan</span><br><span class="v">Event Hub Pro · paid ✓</span></span><span class="amt">₱2,500</span></div>
-        </section>
-
-        <!-- 6 · Chats (Messenger rows, conversation opens in place) -->
-        <section id="s-chats">
-          <h2>Chats</h2>
-          <p class="sub">1 unread</p>
-          <button class="chat" data-sheet="chat"><span class="logo">LS</span><span><span class="name">Lumina Studio</span><br><span class="last unread">Sent the quote — 2 options inside</span></span><span class="when">10:12<span class="dot"></span></span></button>
-          <button class="chat" data-sheet="chat"><span class="logo">SN</span><span><span class="name">Seda Vertis North</span><br><span class="last">See you at the ocular on Saturday</span></span><span class="when">Yesterday</span></button>
-          <button class="chat" data-sheet="chat"><span class="logo">BC</span><span><span class="name">Bituin Catering</span><br><span class="last">Will send tasting dates this week</span></span><span class="when">Mon</span></button>
-          <button class="all">All chats ›</button>
-          <div class="replay"><button id="replay">Replay the first-visit tour</button></div>
+        <section id="s-build" style="order:3"><h2>Build <span class="i" title="Your current combination — one supplier per category. Change it anywhere above.">i</span></h2><p class="sub" id="buildSub"></p><div id="buildBody"></div></section>
+        <section id="s-compare" style="order:4"><h2>Compare builds</h2><p class="sub">Saved combinations, side by side.</p><div id="compareBody"></div></section>
+        <section id="s-budget" style="order:6"><h2>Budget</h2><p class="sub" id="budgetSub"></p><div id="budgetBody"></div></section>
+        <section id="s-date" style="order:7"><h2>Date &amp; place</h2><p class="sub">They get sharper as you book.</p><div id="dateBody"></div>
+          <div class="replay"><button data-act="tour">Replay the first-visit tour</button> · <button data-act="reset" data-mode="mid">Reset: mid-planning</button> · <button data-act="reset" data-mode="empty">Reset: start from zero</button></div>
         </section>
       </div>
     </div>
@@ -472,133 +326,294 @@ html.tour-on .tour{display:block}
   <nav class="bar5"><div><i>⌂</i>Home</div><div><i>👥</i>Guests</div><div class="on"><i>◎</i>Suppliers</div><div><i>🌐</i>Hub</div><div><i>✦</i>More</div></nav>
 
   <div class="scrim" id="scrim"></div>
-  <div class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="grip"></div><button class="x" id="closeSheet" aria-label="Close">×</button><div id="sheetBody"></div></div>
-
-  <div class="tour" id="tour"><button class="n" id="tourNext">Next ›</button><b id="tourTitle">Your suppliers</b><span id="tourText">Everyone you've booked or asked, with one next step each.</span></div>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="grip"></div><button class="x" data-act="close" aria-label="Close">×</button><div id="sheetBody"></div></div>
+  <div class="toast" id="toast"><span id="toastText"></span><button id="toastUndo">Undo</button></div>
+  <div class="tour" id="tour"><button class="n" id="tourNext">Next ›</button><b id="tourTitle"></b><span id="tourText"></span></div>
 </div>
-
-<!-- sheet contents -->
-<template id="t-date">
-  <h3>Your date</h3><p class="mute" style="margin:0 0 6px">Friday, December 18, 2026 · every pick is checked against it.</p>
-  <div class="field"><label>I have a date</label><input type="date" value="2026-12-18"></div>
-  <p style="margin:18px 0 6px"><b>Help me choose</b> <span class="mute">— dates your picks are all free</span></p>
-  <div class="opt"><span>Sat, Dec 12, 2026</span><span class="ok">3 of 3 free ✓</span></div>
-  <div class="opt"><span>Fri, Dec 18, 2026 <span class="mute">· current</span></span><span class="ok">3 of 3 free ✓</span></div>
-  <div class="opt"><span>Sat, Jan 9, 2027</span><span class="wine">Seda is taken</span></div>
-  <div class="opt"><span>Sat, Jan 16, 2027</span><span class="ok">3 of 3 free ✓</span></div>
-  <div class="cta"><button class="btn solid">Keep Dec 18</button></div>
-</template>
-<template id="t-venue">
-  <h3>Your venue</h3><p class="mute" style="margin:0 0 6px">Set when you book your venue — it's booked.</p>
-  <div class="opt"><span><b>Seda Vertis North</b><br><span class="mute">Reception · Vertis North, Quezon City</span></span><span class="ok">Booked ✓</span></div>
-  <div class="opt"><span>Room size<br><span class="mute">sent by Seda · your seat plan uses it</span></span><span><b>18 × 24 m</b></span></div>
-  <div class="opt"><span><b>Santuario de San Vicente</b><br><span class="mute">Ceremony</span></span><span class="ok">Booked ✓</span></div>
-  <div class="opt"><span>Room size<br><span class="mute">not sent yet</span></span><button class="wine">Ask them ›</button></div>
-  <p class="mute" style="font-size:13px;margin-top:16px">Changing the venue means cancelling a booking — do that from the supplier's row above.</p>
-</template>
-<template id="t-find">
-  <h3>Find more in Catering</h3>
-  <div class="field"><input placeholder="Search in Catering"></div>
-  <div class="field"><div class="sel">Filter · Metro Manila first<select aria-label="Filter"><option>Metro Manila first</option><option>Fits my budget</option><option>Free on Dec 18</option><option>Top rated</option><option>Following ♥</option></select></div></div>
-  <p class="mute" style="font-size:13px;margin:12px 0 4px">4 suppliers</p>
-  <div class="frow"><span class="logo">HT</span><span><b>Hiraya Table</b><br><span class="mute">Quezon City · 6 yrs · 40 events · from ₱1,200 / head · ★ 4.8</span></span><span class="acts"><button>Ask for a quote</button><button class="quiet">Save</button></span></div>
-  <div class="frow"><span class="logo">MK</span><span><b>Mesa Kusina</b><br><span class="mute">Pasig · 3 yrs · 12 events · from ₱850 / head · ★ 4.6</span></span><span class="acts"><button>Ask for a quote</button><button class="quiet">Save</button></span></div>
-  <div class="frow"><span class="logo">LB</span><span><b>Luntian Buffet</b><br><span class="mute">Makati · 9 yrs · 120 events · from ₱1,500 / head · ★ 4.9</span></span><span class="acts"><button>Ask for a quote</button><button class="quiet">Save</button></span></div>
-  <div class="frow"><span class="logo">BC</span><span><b>Bituin Catering</b><br><span class="mute">Saved · waiting for their quote</span></span><span class="acts"><button class="quiet">Open chat ›</button></span></div>
-  <p class="mute" style="font-size:13px;margin-top:14px">Not here yet? <button class="wine" data-sheet="add">Add your own caterer ›</button></p>
-</template>
-<template id="t-add">
-  <h3>Add your own supplier</h3><p class="mute" style="margin:0">Someone you already talk to outside Setnayan.</p>
-  <div class="field"><label>Name</label><input placeholder="e.g. Tita Baby's Catering"></div>
-  <div class="field"><label>What they do</label><div class="sel">Catering<select><option>Catering</option><option>Photo &amp; video</option><option>Coordinator</option><option>Hair &amp; make-up</option><option>Cake</option><option>Live band</option></select></div></div>
-  <div class="field"><label>Agreed price <span class="mute">(optional)</span></label><input inputmode="numeric" placeholder="₱ 0"></div>
-  <div class="field"><label>Already booked? <span class="mute">— with a price, they count as booked</span></label><div class="sel">Yes, booked<select><option>Yes, booked</option><option>Not yet, still deciding</option></select></div></div>
-  <div class="cta"><button class="btn solid">Add to Catering</button><button class="btn quiet">Send them an invite by email</button></div>
-</template>
-<template id="t-chat">
-  <h3>Lumina Studio</h3><p class="mute" style="margin:0 0 8px">Photo &amp; video · Dec 18, 2026 · ~180 guests</p>
-  <div class="bubble">Hi! Sent the quote — 2 options inside. Option A is full day, B is ceremony + reception only.</div>
-  <div class="bubble" style="border:1px solid var(--line);background:var(--paper-2)"><b>Quote · ₱85,000</b><br><span class="mute">Option A · full day · 2 photographers</span><br><button class="wine" style="font-weight:500;margin-top:6px">Accept ›</button> <button class="mute" style="margin-left:12px">Ask a question</button></div>
-  <div class="bubble me">Thank you! Looking at both now.</div>
-  <div class="compose"><span class="mute">📎</span><input placeholder="Message Lumina Studio"><span class="wine">➤</span></div>
-  <p class="mute" style="font-size:12px;margin-top:10px">Keep chats and payments inside Setnayan — that's what protects your booking.</p>
-</template>
-<template id="t-pay">
-  <h3>Pay Seda Vertis North</h3><p class="mute" style="margin:0 0 6px">First payment · ₱211,200 · by Oct 20</p>
-  <div class="opt"><span>GCash</span><span class="mute">09•• ••• 4471</span></div>
-  <div class="opt"><span>BDO</span><span class="mute">•••• 8820</span></div>
-  <div class="field"><label>Amount</label><input inputmode="numeric" value="₱ 211,200"></div>
-  <div class="cta"><button class="btn solid">Log this payment</button></div>
-  <p class="mute" style="font-size:13px">Your payment plan dates start when you book.</p>
-</template>
-<template id="t-price">
-  <h3>Santuario — set the price</h3><p class="mute" style="margin:0">Until there's a number, Buffer stays "Not knowable". That's on purpose.</p>
-  <div class="field"><label>Agreed price</label><input inputmode="numeric" placeholder="₱ 0"></div>
-  <div class="field"><label>Paid so far <span class="mute">(optional)</span></label><input inputmode="numeric" placeholder="₱ 0"></div>
-  <div class="cta"><button class="btn solid">Save</button></div>
-</template>
-<template id="t-compare">
-  <h3>Compare plans</h3><p class="mute" style="margin:0">Side by side — and which dates work for each.</p>
-  <div class="cmp">
-    <div><div class="h">Current</div><div class="a">₱1,056,000</div><div class="mute">+ Santuario (no price)</div><div style="margin-top:8px">Reception · Seda</div><div>Ceremony · Santuario</div><div class="mute">Catering · —</div><div class="mute">Photo · —</div><div class="ok" style="margin-top:8px">Dec 18 ✓</div><div class="mute">Buffer: not knowable</div></div>
-    <div><div class="h">Garden plan</div><div class="a">₱1,320,000</div><div class="mute">all priced</div><div style="margin-top:8px">Reception · Seda</div><div>Ceremony · Santuario</div><div>Catering · Luntian</div><div>Photo · Lumina</div><div class="ok" style="margin-top:8px">Dec 18 ✓ · Jan 16 ✓</div><div class="ok">Buffer ₱930,000</div><button class="wine" style="margin-top:10px;font-weight:500">Use this plan ›</button></div>
-    <div><div class="h">Simple</div><div class="a">₱980,000</div><div class="mute">all priced</div><div style="margin-top:8px">Reception · Seda</div><div>Ceremony · Santuario</div><div>Catering · Mesa Kusina</div><div class="mute">Photo · —</div><div class="wine" style="margin-top:8px">Dec 18 — Mesa is taken</div><div class="ok">Buffer ₱1,270,000</div><button class="wine" style="margin-top:10px;font-weight:500">Use this plan ›</button></div>
-  </div>
-</template>
 
 <script>
 (function(){
   const h=document.documentElement;
-  if(new URLSearchParams(location.search).has('frame')) h.classList.add('frame');
-  if(!h.classList.contains('frame')) return;
+  const q=new URLSearchParams(location.search);
+  if(q.has('frame')) h.classList.add('appmode');
+  if(!h.classList.contains('appmode')) return;
 
-  // open / close in place (height transition via grid-template-rows)
-  document.querySelectorAll('[data-toggle]').forEach(b=>b.addEventListener('click',()=>{
-    const host=b.closest('.row,.cat'); host.classList.toggle('open');
-  }));
+  /* ---------------- data ---------------- */
+  const CATS=[
+    {key:'ceremony',name:'Ceremony',icon:'⛪',starter:true},{key:'reception',name:'Reception',icon:'🏛',starter:true},
+    {key:'catering',name:'Catering',icon:'🍽',starter:true},{key:'photo',name:'Photo & video',icon:'📷',starter:true},
+    {key:'coordinator',name:'Coordinator',icon:'📋',starter:true},{key:'hmua',name:'Hair & make-up',icon:'💄',starter:true},
+    {key:'cake',name:'Cake',icon:'🎂'},{key:'car',name:'Bridal car',icon:'🚗'},{key:'band',name:'Live band',icon:'🎸'},
+    {key:'stylist',name:'Stylist / Decorator',icon:'💐'},{key:'prints',name:'Invitations & prints',icon:'✉️'},{key:'booth',name:'Photo booth',icon:'📸'},
+    {key:'host',name:'Host / MC',icon:'🎤'},{key:'lights',name:'Lights & sound',icon:'🔊'},{key:'souvenirs',name:'Souvenirs',icon:'🎁'},{key:'shuttle',name:'Guest shuttle',icon:'🚌'},{key:'insurance',name:'Event insurance',icon:'🛡'}
+  ];
+  const MARKET={
+    reception:[{id:'seda',name:'Seda Vertis North',area:'Quezon City',city:'Quezon City',yrs:9,ev:320,from:1056000,star:4.8,busy:['2027-01-09'],room:'18 × 24 m',addr:'Vertis North, Quezon City'},{id:'blue',name:'Blue Leaf Filipinas',area:'Parañaque',city:'Parañaque',yrs:12,ev:900,from:980000,star:4.7,busy:['2026-12-18'],room:'20 × 30 m'}],
+    ceremony:[{id:'santuario',name:'Santuario de San Vicente de Paul',area:'Manila',city:'Manila',yrs:30,ev:2000,from:null,star:4.9,busy:[]},{id:'sanagustin',name:'San Agustin Church',area:'Intramuros',city:'Manila',yrs:60,ev:5000,from:45000,star:4.9,busy:['2026-12-18']}],
+    catering:[{id:'bituin',name:'Bituin Catering',area:'Quezon City',yrs:5,ev:80,from:950,per:'head',star:4.7,busy:[]},{id:'hiraya',name:'Hiraya Table',area:'Quezon City',yrs:6,ev:40,from:1200,per:'head',star:4.8,busy:[]},{id:'mesa',name:'Mesa Kusina',area:'Pasig',yrs:3,ev:12,from:850,per:'head',star:4.6,busy:['2026-12-18']},{id:'luntian',name:'Luntian Buffet',area:'Makati',yrs:9,ev:120,from:1500,per:'head',star:4.9,busy:[]}],
+    photo:[{id:'lumina',name:'Lumina Studio',area:'Makati',yrs:8,ev:260,from:85000,star:4.9,busy:[]},{id:'kislap',name:'Kislap Films',area:'Makati',yrs:7,ev:210,from:95000,star:4.9,busy:[]},{id:'tala',name:'Tala Studio',area:'Taguig',yrs:4,ev:60,from:60000,star:4.7,busy:['2026-12-18']}],
+    coordinator:[{id:'dalisay',name:'Dalisay Events',area:'Quezon City',yrs:10,ev:300,from:45000,star:4.9,busy:[]},{id:'bukas',name:'Bukas Coordination',area:'Pasig',yrs:2,ev:25,from:28000,star:4.5,busy:[]}],
+    hmua:[{id:'ganda',name:'Ganda by Mia',area:'Makati',yrs:8,ev:400,from:18000,star:4.8,busy:[]}],
+    cake:[{id:'tinapay',name:'Tinapay & Co.',area:'Quezon City',yrs:5,ev:90,from:12000,star:4.7,busy:[]}],
+    band:[{id:'awit',name:'Awit Collective',area:'Manila',yrs:6,ev:150,from:55000,star:4.8,busy:[]}],
+    stylist:[{id:'bulaklak',name:'Bulaklak Studio',area:'Makati',yrs:12,ev:500,from:120000,star:4.9,busy:[]}]
+  };
+  const GUESTS=180, BUDGET=2250000;
+  const mk=(id,extra)=>Object.assign({},Object.values(MARKET).flat().find(m=>m.id===id),extra);
+  const SEEDS={
+    empty:()=>({dateKnown:'month',date:'2026-12-18',suppliers:[],cats:CATS.filter(c=>c.starter).map(c=>c.key),removedCats:[],picks:{},builds:[],chats:[],roomAsked:{},open:[]}),
+    mid:()=>({dateKnown:'day',date:'2026-12-18',
+      suppliers:[mk('seda',{cat:'reception',status:'booked',price:1056000,paid:0}),mk('santuario',{cat:'ceremony',status:'booked',price:null,paid:0,room:null}),
+        mk('lumina',{cat:'photo',status:'quote',quote:85000,price:null}),mk('bituin',{cat:'catering',status:'waiting',askedAgo:'3 days ago'}),mk('hiraya',{cat:'catering',status:'saved'})],
+      cats:CATS.filter(c=>c.starter).map(c=>c.key),removedCats:[],picks:{},
+      builds:[{name:'Garden build',picks:{reception:'seda',ceremony:'santuario',catering:'luntian',photo:'lumina'}},{name:'Simple',picks:{reception:'seda',ceremony:'santuario',catering:'mesa'}}],
+      chats:[{sid:'lumina',unread:true,when:'10:12',msgs:[{t:'Hi! Sent the quote — 2 options inside. Option A is full day, B is ceremony + reception only.'},{quote:85000}]},
+             {sid:'seda',unread:false,when:'Yesterday',msgs:[{t:'See you at the ocular on Saturday'},{me:true,t:'See you!'}]},
+             {sid:'bituin',unread:false,when:'Mon',msgs:[{me:true,t:'Hi! Could you quote for Dec 18, ~180 guests?'},{t:'Will send tasting dates this week'}]}],
+      roomAsked:{},open:['cat-catering']})
+  };
+  let S; const startMode=q.get('start')==='empty'?'empty':'mid';
+  try{ const saved=localStorage.getItem('sup-proto-v2'); S=saved&&!q.has('start')?JSON.parse(saved):SEEDS[startMode](); }catch(e){ S=SEEDS[startMode](); }
+  const save=()=>{ try{ localStorage.setItem('sup-proto-v2',JSON.stringify(S)); }catch(e){} };
 
-  // sheets — phone: up from the bottom · desktop: in from the right
-  const sheet=document.getElementById('sheet'), body=document.getElementById('sheetBody');
-  function openSheet(key){ const t=document.getElementById('t-'+key); if(!t) return;
-    body.innerHTML=''; body.appendChild(t.content.cloneNode(true)); h.classList.add('sheet-open'); sheet.scrollTop=0; wire(body); }
+  /* ---------------- helpers ---------------- */
+  const $=s=>document.querySelector(s);
+  const peso=n=>'₱'+Math.round(n).toLocaleString('en-PH');
+  const cat=k=>CATS.find(c=>c.key===k);
+  const sup=id=>S.suppliers.find(s=>s.id===id)||Object.values(MARKET).flat().find(s=>s.id===id);
+  const initials=n=>n.split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+  const priceOf=s=>s.price!=null?s.price:(s.per==='head'&&s.from?s.from*GUESTS:(s.from||null));
+  const isFree=(s,d)=>!(s.busy||[]).includes(d||S.date);
+  const fmtDate=d=>new Date(d+'T00:00:00').toLocaleDateString('en-PH',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+  const shortDate=d=>new Date(d+'T00:00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric'});
+  const monthOf=d=>new Date(d+'T00:00:00').toLocaleDateString('en-PH',{month:'long',year:'numeric'});
+  const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const cats=()=>S.cats.filter(k=>!S.removedCats.includes(k));
+  const bookedIn=k=>S.suppliers.find(s=>s.cat===k&&s.status==='booked');
+  const venue=()=>bookedIn('reception')||bookedIn('ceremony');
+  const dateText=()=>S.dateKnown==='day'?fmtDate(S.date):monthOf(S.date);
+  const placeText=()=>{ const v=venue(); return v?`${v.name}, ${v.city||'Metro Manila'}`:'Metro Manila'; };
+  let toastTimer=null, undoFn=null;
+  function toast(text,undo){ $('#toastText').textContent=text; undoFn=undo||null; $('#toastUndo').style.display=undo?'':'none'; $('#toast').classList.add('on'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>$('#toast').classList.remove('on'),undo?6000:2600); }
+  $('#toastUndo').addEventListener('click',()=>{ if(undoFn) undoFn(); $('#toast').classList.remove('on'); undoFn=null; });
+  const prevMoney={};
+  function count(el,to){ if(!el) return; const from=prevMoney[el.id]??to; prevMoney[el.id]=to; if(from===to||matchMedia('(prefers-reduced-motion:reduce)').matches){el.textContent=peso(to);return;}
+    const t0=performance.now(),d=520; (function f(t){const k=Math.min(1,(t-t0)/d),e=1-Math.pow(1-k,3); el.textContent=peso(Math.round(from+(to-from)*e)); if(k<1) requestAnimationFrame(f);})(t0); }
+  const chip=s=>({booked:'<span class="pill ok">Booked</span>',quote:'<span class="pill wine">Quote in</span>',waiting:'<span class="pill mute">Waiting</span>',deciding:'<span class="pill mute">In your build</span>',saved:'<span class="pill mute">Saved</span>'}[s.status]);
+
+  /* ---------------- render ---------------- */
+  function render(){
+    const v=venue();
+    $('#facts').innerHTML=`<button data-act="sheet" data-key="date" class="${S.dateKnown==='day'?'':'set'}">${dateText()}</button><span class="mute">·</span><button data-act="sheet" data-key="venue" class="${v?'':'set'}">${esc(placeText())}</button>`;
+
+    // 1 · Cover your event — find · add · save
+    const ks=cats(); const covered=ks.filter(k=>bookedIn(k)).length;
+    $('#coverSub').innerHTML=`A wedding usually needs these ${ks.filter(k=>cat(k).starter).length} · <b style="color:var(--ok)">${covered} of ${ks.length} covered</b>`;
+    $('#coverBody').innerHTML=ks.map(k=>{ const c=cat(k), list=S.suppliers.filter(s=>s.cat===k), b=bookedIn(k);
+      const st=b?{cls:'ok',text:'Booked ✓ · '+esc(b.name.split(' ')[0])}:list.some(s=>s.status==='quote')?{cls:'wine',text:list.filter(s=>s.status==='quote').length+' quote in'}:list.length?{cls:'wine',text:list.length+' to decide'}:{cls:'',text:'Nothing yet'};
+      const cards=list.map(s=>{ const p=priceOf(s); const pr=s.status==='booked'&&s.price==null?'<span class="mute">No price recorded</span>':s.per==='head'?`from ₱${s.from.toLocaleString()} / head`:s.quote&&s.status==='quote'?`${peso(s.quote)} · quote`:p?peso(p):'<span class="mute">No price yet</span>';
+        const fit=s.status==='waiting'?'<span class="mute">Waiting for their quote</span>':isFree(s)?`Free on ${shortDate(S.date)} ✓`:`<span class="wine">Taken on ${shortDate(S.date)}</span>`;
+        const acts=s.status==='booked'?`<button data-act="sheet" data-key="chat" data-id="${s.id}">Chat</button>${s.price==null?`<button data-act="sheet" data-key="price" data-id="${s.id}">Set price</button>`:''}`
+          :`<button data-act="pick" data-id="${s.id}" class="${S.picks[k]===s.id?'on':''}">${S.picks[k]===s.id?'In your build ✓':'Add to build'}</button><button data-act="sheet" data-key="chat" data-id="${s.id}">${s.status==='saved'?'Inquire':'Chat'}</button><button data-act="book" data-id="${s.id}">Book</button><button class="quiet" data-act="remove" data-id="${s.id}">Remove</button>`;
+        return `<div class="card ${s.fresh?'new':''}"><div class="ph"></div><div class="nm">${esc(s.name)}</div><div class="pr">${pr}</div><div class="fit">${fit}</div><div class="acts">${acts}</div></div>`; }).join('');
+      const own=`<div class="card" style="border-top-style:dashed"><div class="ph" style="background:none;display:grid;place-items:center;color:var(--mute);font-size:13px">Your own ${c.name.toLowerCase()}?</div><div class="acts"><button data-act="sheet" data-key="add" data-cat="${k}">＋ Add your own</button></div></div>`;
+      const foot=b?`<span class="quiet mute">Covered — nothing else needed</span>`:`<button data-act="sheet" data-key="find" data-cat="${k}">Find ${list.length?'more ':''}in ${c.name} ›</button><button class="quiet" data-act="sheet" data-key="add" data-cat="${k}">Add your own</button><button class="quiet" data-act="removecat" data-cat="${k}">Not needed? Remove</button>`;
+      return `<div class="cat ${S.open.includes('cat-'+k)?'open':''} ${c.fresh?'new':''}" id="cat-${k}">
+        <button class="bar" data-act="toggle" data-id="cat-${k}"><span class="ico">${c.icon}</span><span>${c.name}</span><span class="state ${st.cls}">${st.text}</span><span class="chev">⌄</span></button>
+        <div class="exp"><div>${list.length?`<div class="strip">${cards}${own}</div>`:''}<div class="foot">${foot}</div></div></div></div>`; }).join('');
+    $('#moreCats').innerHTML=`<option value="">More categories</option>`+CATS.filter(c=>!ks.includes(c.key)).map(c=>`<option value="${c.key}">${c.name}</option>`).join('');
+
+    // 2 · Chats — talk · inquire · accept the quote
+    const unread=S.chats.filter(c=>c.unread).length; $('#doorBadge').textContent=unread; $('#doorBadge').style.display=unread?'':'none';
+    $('#chatSub').textContent=S.chats.length?(unread?`${unread} unread`:'All read'):'No chats yet — they start from a supplier above.';
+    $('#chatBody').innerHTML=S.chats.map(c=>{ const s=sup(c.sid); const last=c.msgs[c.msgs.length-1]; const text=!last?'':last.quote?`Quote · ${peso(last.quote)}`:last.sys?last.sys:(last.me?'You: ':'')+last.t;
+      const next=s.status==='quote'?`<button class="go" data-act="sheet" data-key="chat" data-id="${s.id}">Read the quote ›</button>`:s.status==='waiting'?`<button class="go" data-act="nudge" data-id="${s.id}">Nudge ›</button>`:'';
+      return `<button class="chat ${c.fresh?'new':''}" data-act="sheet" data-key="chat" data-id="${c.sid}"><span class="logo">${initials(s.name)}</span><span><span class="name">${esc(s.name)} ${chip(s)}</span><span class="last ${c.unread?'unread':''}">${esc(text)}</span></span><span class="when">${c.when}${c.unread?'<span class="dot"></span>':''}</span></button>${next?`<div class="next" style="margin:-6px 0 8px 56px">${next}</div>`:''}`; }).join('');
+
+    // 3 · Build — one supplier per category
+    const rows=ks.map(k=>{ const c=cat(k), b=bookedIn(k), p=b||sup(S.picks[k]);
+      if(!p) return `<div class="pick"><span><span class="k">${c.name}</span><br><span class="v mute">Pick one above</span></span><span class="amt mute">—</span></div>`;
+      const price=priceOf(p); return `<div class="pick"><span><span class="k">${c.name}${b?' · booked':''}</span><br><span class="v">${esc(p.name)}</span></span>${price!=null?`<span class="amt">${peso(price)}</span>`:`<button class="set" data-act="sheet" data-key="price" data-id="${p.id}">Set price ›</button>`}</div>`; }).join('');
+    const bookedList=S.suppliers.filter(s=>s.status==='booked'), unpriced=bookedList.filter(s=>s.price==null);
+    const bookedSum=bookedList.reduce((a,s)=>a+(s.price||0),0);
+    const toBook=ks.filter(k=>!bookedIn(k)&&S.picks[k]).reduce((a,k)=>a+(priceOf(sup(S.picks[k]))||0),0);
+    const picked=ks.map(k=>bookedIn(k)||sup(S.picks[k])).filter(Boolean), priced=picked.filter(s=>priceOf(s)!=null), free=priced.filter(s=>isFree(s)).length;
+    const nPicks=Object.keys(S.picks).filter(k=>!bookedIn(k)).length;
+    $('#buildSub').innerHTML=picked.length?`${picked.length} of ${ks.length} categories filled · this build ${peso(bookedSum+toBook)}`:'Add suppliers to your build from the categories above.';
+    $('#buildBody').innerHTML=rows+`<div class="fitline"><span style="color:${free===priced.length?'var(--ok)':'var(--wine)'}">${free===priced.length?'✓':'!'}</span><span>${priced.length?`${free} of ${priced.length} priced picks are free on ${shortDate(S.date)}`:'Pick suppliers to check your date'}</span><button class="wine" style="margin-left:auto;font-weight:500;white-space:nowrap" data-act="sheet" data-key="date">${S.dateKnown==='day'?'Help me choose ›':'Set the date ›'}</button></div>
+      <div class="cta"><button class="btn solid" data-act="sheet" data-key="savebuild" ${nPicks?'':'disabled style="opacity:.4"'}>Save this build</button>${nPicks?`<button class="btn" data-act="bookbuild">Book this build ›</button>`:''}</div>`;
+
+    // 4 · Compare builds
+    const total=p=>Object.entries(p.picks).reduce((a,[k,id])=>{const s=sup(id);return a+(s?(priceOf(s)||0):0);},0);
+    $('#compareBody').innerHTML=S.builds.length?`<div class="plan"><span>Current build</span><span class="amt">${peso(bookedSum+toBook)}</span><span class="mute">now</span></div>`+
+      S.builds.map((p,i)=>`<div class="plan ${p.fresh?'new':''}"><span>${esc(p.name)}</span><span class="amt">${peso(total(p))}</span><span><button class="use" data-act="usebuild" data-i="${i}">Use ›</button> <button class="mute" data-act="delbuild" data-i="${i}" title="Delete">×</button></span></div>`).join('')+
+      `<button class="all" data-act="sheet" data-key="compare">Compare all ${S.builds.length+1} side by side ›</button>`
+      :`<p class="mute" style="font-size:14px">Save a build above, then compare it here with your current one.</p>`;
+
+    // 5 · Booked
+    $('#bookedSub').innerHTML=bookedList.length?`${bookedList.length} booked${unpriced.length?` · <span class="wine">${unpriced.length} without a price</span>`:''} · their details feed your Event Hub, seat plan and schedule`:'Nothing booked yet — book from a category or from your build.';
+    $('#bookedBody').innerHTML=bookedList.map(s=>{ const next=s.price==null?`<span class="mute">Next:</span><span class="wine">set the price so your buffer can count</span><button class="go" data-act="sheet" data-key="price" data-id="${s.id}">Set price ›</button>`
+        :s.paid<s.price*0.2?`<span class="mute">Next:</span><span class="wine">${s.paid?'next payment':'make your first payment'}</span><button class="go" data-act="sheet" data-key="pay" data-id="${s.id}">Pay ›</button>`:`<span class="mute">Paid</span><span>${peso(s.paid)} of ${peso(s.price)}</span><button class="go" data-act="sheet" data-key="pay" data-id="${s.id}">Pay more ›</button>`;
+      const FEEDS={reception:['Event Hub · venue & city','Seat plan · room size','Schedule'],ceremony:['Event Hub · ceremony','Schedule'],catering:['Guests · headcount','Budget'],photo:['Papic & Stories','Schedule'],coordinator:['Schedule · they write their part','Chats'],stylist:['Mood board','Seat plan · table sizes'],band:['Schedule · program'],host:['Schedule · program'],hmua:['Schedule · call time'],cake:['Schedule'],car:['Schedule · travel'],shuttle:['Guests · pick-up'],prints:['Guests · invites'],booth:['Papic'],lights:['Schedule'],souvenirs:['Guests'],insurance:['Budget']};
+      const used=(FEEDS[s.cat]||['Schedule']); const usedLine=`<div class="sent"><span class="mute">Used across your event:</span> ${used.map(u=>`<span class="pill mute">${u}</span>`).join(' ')}</div>`;
+      const isVenue=['reception','ceremony'].includes(s.cat);
+      const sent=isVenue?(s.room?`<div class="sent">Room size <b>${s.room}</b> <span class="pill ok">sent ✓</span> <span class="mute">· used by your seat plan</span></div>`:`<div class="sent">Room size <span class="mute">${S.roomAsked[s.id]?'asked — waiting':'not sent'}</span>${S.roomAsked[s.id]?'':` <button class="ask" data-act="askroom" data-id="${s.id}">Ask them ›</button>`}</div>`):(s.cat==='stylist'?`<div class="sent">Table sizes <span class="mute">${S.roomAsked[s.id]?'asked — waiting':'not sent'}</span>${S.roomAsked[s.id]?'':` <button class="ask" data-act="askroom" data-id="${s.id}">Ask them ›</button>`}</div>`:'');
+      return `<div class="row ${S.open.includes('row-'+s.id)?'open':''} ${s.fresh?'new':''}">
+        <button class="rowbtn" data-act="toggle" data-id="row-${s.id}"><span class="logo">${initials(s.name)}</span><span><span class="name">${esc(s.name)}</span><span class="svc">${cat(s.cat).name}${s.own?' · added by you':''}</span></span><span class="pill ok ${s.pop?'pop':''}">Booked</span></button>
+        <div class="next">${next}</div>
+        <div class="exp" style="grid-column:1/4"><div><div class="detail">${sent}${usedLine}<div class="acts"><button data-act="sheet" data-key="chat" data-id="${s.id}">Chat ›</button><button data-act="note" data-text="Opens the shipped supplier workspace">Workspace ›</button><button class="quiet" data-act="cancel" data-id="${s.id}">Cancel booking</button></div></div></div></div></div>`; }).join('');
+
+    // 6 · Budget — where you are
+    const paidSum=bookedList.reduce((a,s)=>a+(s.paid||0),0); const dues=bookedList.filter(s=>s.price!=null&&s.paid<s.price*0.2); const dueNext=dues.reduce((a,s)=>a+(s.price*0.2-s.paid),0);
+    $('#budgetSub').innerHTML=`Budget <b>${peso(BUDGET)}</b> · paid so far <b>${peso(paidSum)}</b>${dueNext?` · due next <b class="wine">${peso(dueNext)}</b>`:''}`;
+    $('#budgetBody').innerHTML=`<div class="money" style="border-top:0;padding-top:4px">
+        <div><div class="k">Booked</div><div class="v" id="mBooked"></div>${unpriced.length?`<div class="n">${unpriced.length} supplier${unpriced.length>1?'s have':' has'} no price</div>`:''}</div>
+        <div><div class="k">In your build</div><div class="v" id="mToBook"></div></div>
+        <div><div class="k">Paid</div><div class="v" id="mPaid"></div></div>
+        <div><div class="k">Buffer <span class="i" title="Budget minus everything booked and in your build. Refuses to guess while any booked supplier has no price.">i</span></div>${unpriced.length?`<div class="v" style="font-size:20px">Not knowable</div><div class="n">until ${esc(unpriced[0].name.split(' ')[0])} has a price</div>`:`<div class="v" id="mBuffer" style="${BUDGET-bookedSum-toBook<0?'color:var(--wine)':''}"></div>`}</div></div>
+      <div class="meter"><div class="meter-fill" style="width:${Math.min(100,(bookedSum+toBook)/BUDGET*100)}%"></div><div class="meter-fill paid" style="width:${Math.min(100,paidSum/BUDGET*100)}%"></div></div>
+      <div class="mute" style="font-size:12px;margin:6px 0 10px">${Math.round((bookedSum+toBook)/BUDGET*100)}% of your budget is spoken for · ${Math.round(paidSum/BUDGET*100)}% paid</div>`+
+      bookedList.map(s=>{ if(s.price==null) return `<div class="pick"><span><span class="k">${esc(s.name)}</span><br><span class="v mute">No amount yet</span></span><button class="set" data-act="sheet" data-key="price" data-id="${s.id}">Set price ›</button></div>`;
+        const due=Math.max(0,s.price*0.2-s.paid); return `<div class="pick"><span><span class="k">${esc(s.name)}</span><br><span class="v">${due?'First payment · by Oct 20':`Paid ${peso(s.paid)} of ${peso(s.price)}`}</span></span>${due?`<button class="set" data-act="sheet" data-key="pay" data-id="${s.id}">Pay ${peso(due)} ›</button>`:`<span class="pill ok">On track</span>`}</div>`; }).join('');
+    count($('#mBooked'),bookedSum); count($('#mToBook'),toBook); count($('#mPaid'),paidSum); count($('#mBuffer'),BUDGET-bookedSum-toBook);
+
+    // 7 · Date & place — they sharpen as you book
+    const rec=bookedIn('reception'), cer=bookedIn('ceremony'); const anyV=rec||cer;
+    const lad=(steps)=>`<div class="ladder">${steps.map(s=>`<div class="step ${s.on?'on':''}"><span class="dotl"></span><span>${s.t}</span>${s.act?`<button class="wine" style="margin-left:auto;font-weight:500" data-act="${s.act}" data-key="${s.key||''}" data-id="${s.id||''}">${s.al}</button>`:''}</div>`).join('')}</div>`;
+    $('#dateBody').innerHTML=`<p class="k mute" style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 4px">Date</p>`+lad([
+        {on:true,t:`Month · ${monthOf(S.date)}`},
+        {on:S.dateKnown==='day',t:S.dateKnown==='day'?`Day · ${fmtDate(S.date)}`:'Day · not yet',act:'sheet',key:'date',al:S.dateKnown==='day'?'Change ›':'Choose ›'},
+        {on:false,t:'Time · set with your coordinator',act:bookedIn('coordinator')?'note':'',al:'Ask ›'}])+
+      `<p class="k mute" style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin:14px 0 4px">Place</p>`+lad([
+        {on:true,t:'Region · Metro Manila'},
+        {on:!!anyV,t:anyV?`City · ${anyV.city||'Quezon City'}`:'City · set when you book your venue'},
+        {on:!!rec,t:rec?`Reception · ${esc(rec.name)}`:'Reception venue · not yet',act:rec?'':'sheet',key:'find',al:'Find ›'},
+        {on:!!cer,t:cer?`Ceremony · ${esc(cer.name)}`:'Ceremony venue · not yet',act:cer?'':'sheet',key:'find',al:'Find ›'},
+        {on:!!(rec&&rec.room),t:rec&&rec.room?`Room size · ${rec.room} · sent by the venue`:rec?(S.roomAsked[rec.id]?'Room size · asked, waiting':'Room size · ask the venue'):'Room size · after the venue',act:rec&&!rec.room&&!S.roomAsked[rec.id]?'askroom':'',id:rec?rec.id:'',al:'Ask them ›'}]);
+    $('#dateBody').querySelectorAll('[data-key=find]').forEach((b,i)=>b.dataset.cat=i===0?'reception':'ceremony');
+    S.suppliers.forEach(s=>{delete s.fresh;delete s.pop;}); S.builds.forEach(p=>delete p.fresh); S.chats.forEach(c=>delete c.fresh); CATS.forEach(c=>delete c.fresh);
+    save();
+  }
+
+  /* ---------------- sheets ---------------- */
+  const sheet=$('#sheet'), body=$('#sheetBody');
+  function openSheet(key,d){ body.innerHTML=SHEETS[key](d||{}); h.classList.add('sheet-open'); sheet.scrollTop=0; const f=body.querySelector('input'); if(f&&innerWidth>=1024) f.focus(); }
   function closeSheet(){ h.classList.remove('sheet-open'); }
-  function wire(root){ root.querySelectorAll('[data-sheet]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();openSheet(b.dataset.sheet);})); }
-  wire(document);
-  document.getElementById('scrim').addEventListener('click',closeSheet);
-  document.getElementById('closeSheet').addEventListener('click',closeSheet);
-  addEventListener('keydown',e=>{ if(e.key==='Escape') closeSheet(); });
+  const SHEETS={
+    date(){ const cands=['2026-12-12','2026-12-18','2027-01-09','2027-01-16']; const picked=cats().map(k=>bookedIn(k)||sup(S.picks[k])).filter(Boolean);
+      return `<h3>Your date</h3><p class="mute" style="margin:0 0 6px">${S.dateKnown==='day'?fmtDate(S.date)+' · every pick is checked against it.':'You know the month. Pick the day when your suppliers are free.'}</p>
+        <div class="field"><label>I have a date</label><input type="date" id="dateInput" value="${S.date}"></div>
+        <p style="margin:18px 0 6px"><b>Help me choose</b> <span class="mute">— dates ${picked.length?'your picks are all free':'in your month'}</span></p>
+        ${cands.map(d=>{ const taken=picked.filter(s=>!isFree(s,d)); return `<div class="opt"><span>${fmtDate(d)}${d===S.date&&S.dateKnown==='day'?' <span class="mute">· current</span>':''}</span>${taken.length?`<span class="wine">${esc(taken[0].name.split(' ')[0])} is taken</span>`:`<button class="ok" data-act="setdate" data-date="${d}">${picked.length?picked.length+' of '+picked.length+' free ✓ · ':''}use</button>`}</div>`; }).join('')}
+        <div class="cta"><button class="btn solid" data-act="setdate" data-from="input">Save date</button></div>`; },
+    venue(){ const vs=S.suppliers.filter(s=>['reception','ceremony'].includes(s.cat)&&s.status==='booked');
+      return `<h3>Your place</h3><p class="mute" style="margin:0 0 6px">${vs.length?'Set when you booked your venue.':'Set when you book your venue.'}</p>
+        ${vs.length?vs.map(v=>`<div class="opt"><span><b>${esc(v.name)}</b><br><span class="mute">${cat(v.cat).name}${v.addr?' · '+v.addr:''}</span></span><span class="ok">Booked ✓</span></div>
+          <div class="opt"><span>Room size<br><span class="mute">${v.room?'sent by '+esc(v.name.split(' ')[0])+' · your seat plan uses it':S.roomAsked[v.id]?'asked — waiting for their reply':'not sent yet'}</span></span>${v.room?`<b>${v.room}</b>`:S.roomAsked[v.id]?'<span class="mute">Asked</span>':`<button class="wine" data-act="askroom" data-id="${v.id}">Ask them ›</button>`}</div>`).join('')
+          :`<div class="opt"><span class="mute">No venue booked yet. Metro Manila for now.</span></div><div class="cta"><button class="btn" data-act="sheet" data-key="find" data-cat="reception">Find a reception venue ›</button><button class="btn quiet" data-act="sheet" data-key="add" data-cat="reception">Add your own venue</button></div>`}
+        <p class="mute" style="font-size:13px;margin-top:16px">Changing the venue means cancelling a booking — do that from the Booked section.</p>`; },
+    find({cat:k}){ const c=cat(k); const list=(MARKET[k]||[]).filter(m=>!S.suppliers.some(s=>s.id===m.id)); const mine=S.suppliers.filter(s=>s.cat===k);
+      return `<h3>Find ${mine.length?'more ':''}in ${c.name}</h3>
+        <div class="field"><input placeholder="Search in ${c.name}"></div>
+        <div class="field"><div class="sel">Filter · Metro Manila first<select aria-label="Filter"><option>Metro Manila first</option><option>Fits my budget</option><option>Free on ${shortDate(S.date)}</option><option>Top rated</option><option>Following ♥</option></select></div></div>
+        <p class="mute" style="font-size:13px;margin:12px 0 4px">${list.length?list.length+' supplier'+(list.length>1?'s':''):'Nobody here yet — suppliers are joining. Add your own below.'}</p>
+        ${list.map(m=>`<div class="frow"><span class="logo">${initials(m.name)}</span><span><b>${esc(m.name)}</b><br><span class="mute">${m.area} · ${m.yrs} yrs · ${m.ev} events${m.from?' · from '+(m.per==='head'?'₱'+m.from.toLocaleString()+' / head':peso(m.from)):''} · ★ ${m.star}${isFree(m)?'':' · <span class=wine>taken on '+shortDate(S.date)+'</span>'}</span></span><span class="acts"><button data-act="ask" data-id="${m.id}" data-cat="${k}">Ask for a quote</button><button class="quiet" data-act="savesup" data-id="${m.id}" data-cat="${k}">Save</button></span></div>`).join('')}
+        ${mine.map(s=>`<div class="frow"><span class="logo">${initials(s.name)}</span><span><b>${esc(s.name)}</b><br><span class="mute">${{saved:'Saved',waiting:'Saved · waiting for their quote',quote:'Quote in',booked:'Booked ✓',deciding:'In your build'}[s.status]}</span></span><span class="acts"><button class="quiet" data-act="sheet" data-key="chat" data-id="${s.id}">Open chat ›</button></span></div>`).join('')}
+        <p class="mute" style="font-size:13px;margin-top:14px">Not here? <button class="wine" data-act="sheet" data-key="add" data-cat="${k}">Add your own ›</button></p>`; },
+    add({cat:k}){ k=k||'catering'; return `<h3>Add your own supplier</h3><p class="mute" style="margin:0">Someone you already talk to outside Setnayan.</p>
+        <div class="field"><label>Name</label><input id="addName" placeholder="e.g. Tita Baby's Catering"></div>
+        <div class="field"><label>What they do</label><div class="sel"><span id="addCatLabel">${cat(k).name}</span><select id="addCat">${CATS.map(c=>`<option value="${c.key}" ${c.key===k?'selected':''}>${c.name}</option>`).join('')}</select></div></div>
+        <div class="field"><label>Agreed price <span class="mute">(optional)</span></label><input id="addPrice" inputmode="numeric" placeholder="₱ 0"></div>
+        <div class="field"><label>Already booked? <span class="mute">— with a price, they count as booked</span></label><div class="sel"><span id="addBookedLabel">Not yet, still deciding</span><select id="addBooked"><option value="0">Not yet, still deciding</option><option value="1">Yes, booked</option></select></div></div>
+        <div class="cta"><button class="btn solid" data-act="addown">Add</button><button class="btn quiet" data-act="note" data-text="Sends them an invite by email (sendVendorInvite)">Invite them by email</button></div>`; },
+    chat({id}){ const s=sup(id); let c=S.chats.find(x=>x.sid===id); if(!c){ c={sid:id,unread:false,msgs:[],when:'now',fresh:true}; S.chats.unshift(c);} c.unread=false; render();
+      return `<h3>${esc(s.name)}</h3><p class="mute" style="margin:0 0 8px">${cat(s.cat).name} · ${S.dateKnown==='day'?shortDate(S.date):monthOf(S.date)} · ~${GUESTS} guests ${chip(s)}</p>
+        <div id="msgs">${c.msgs.map(m=>m.quote?`<div class="bubble" style="border:1px solid var(--line);background:var(--paper-2)"><b>Quote · ${peso(m.quote)}</b><br><span class="mute">Full day · 2 photographers</span><br>${s.status==='quote'?`<button class="wine" style="font-weight:500;margin-top:6px" data-act="accept" data-id="${s.id}">Accept ›</button> <button class="mute" style="margin-left:12px" data-act="send" data-id="${s.id}" data-text="Can you do option B for less?">Ask a question</button>`:'<span style="color:var(--ok)">Accepted ✓</span>'}</div>`:m.sys?`<p class="mute" style="font-size:12px;text-align:center">${esc(m.sys)}</p>`:`<div class="bubble ${m.me?'me':''}">${esc(m.t)}</div>`).join('')||`<p class="mute" style="font-size:13px">Say hello — your event brief (${S.dateKnown==='day'?shortDate(S.date):monthOf(S.date)}, ~${GUESTS} guests, Metro Manila) goes with the first message.</p>`}</div>
+        <div class="compose"><span class="mute">📎</span><input id="composer" placeholder="Message ${esc(s.name.split(' ')[0])}"><button class="wine" data-act="send" data-id="${s.id}">➤</button></div>
+        ${s.status!=='booked'?`<div class="cta" style="padding-top:12px"><button class="btn" data-act="book" data-id="${s.id}">Book ${esc(s.name.split(' ')[0])} ›</button></div>`:''}
+        <p class="mute" style="font-size:12px;margin-top:10px">Keep chats and payments inside Setnayan — that's what protects your booking.</p>`; },
+    pay({id}){ const s=sup(id); const due=Math.max(0,s.price*0.2-s.paid);
+      return `<h3>Pay ${esc(s.name)}</h3><p class="mute" style="margin:0 0 6px">${due?`First payment · ${peso(due)} · by Oct 20`:`Paid ${peso(s.paid)} of ${peso(s.price)}`}</p>
+        <div class="opt"><span>GCash</span><span class="mute">09•• ••• 4471</span></div><div class="opt"><span>BDO</span><span class="mute">•••• 8820</span></div>
+        <div class="field"><label>Amount</label><input id="payAmt" inputmode="numeric" value="${due||Math.round(s.price*0.1)}"></div>
+        <div class="cta"><button class="btn solid" data-act="logpay" data-id="${id}">Log this payment</button></div>
+        <p class="mute" style="font-size:13px">Your payment plan dates start when you book.</p>`; },
+    price({id}){ const s=sup(id); return `<h3>${esc(s.name.split(' ').slice(0,2).join(' '))} — set the price</h3><p class="mute" style="margin:0">Until there's a number, Buffer stays "Not knowable". That's on purpose.</p>
+        <div class="field"><label>Agreed price</label><input id="priceAmt" inputmode="numeric" placeholder="₱ 0" value="${s.price||''}"></div>
+        <div class="field"><label>Paid so far <span class="mute">(optional)</span></label><input id="pricePaid" inputmode="numeric" placeholder="₱ 0" value="${s.paid||''}"></div>
+        <div class="cta"><button class="btn solid" data-act="setprice" data-id="${id}">Save</button></div>`; },
+    book({id}){ const s=sup(id); const p=priceOf(s); const other=S.suppliers.find(x=>x.cat===s.cat&&x.status==='booked'&&x.id!==s.id);
+      return `<h3>Book ${esc(s.name)}?</h3><p class="mute" style="margin:0">Booking asks them to hold ${S.dateKnown==='day'?shortDate(S.date):'a day in '+monthOf(S.date)}. They confirm, then your first payment holds the date.</p>
+        <div class="field"><label>Agreed price</label><input id="bookPrice" inputmode="numeric" value="${p||''}" placeholder="₱ 0"></div>
+        ${other?`<p class="wine" style="font-size:13px">You already booked ${esc(other.name)} for ${cat(s.cat).name}. Both will show.</p>`:''}
+        <div class="cta"><button class="btn solid" data-act="dobook" data-id="${id}">Book</button><button class="btn quiet" data-act="close">Not yet</button></div>`; },
+    savebuild(){ return `<h3>Save this build</h3><p class="mute" style="margin:0">Your current combination, kept to compare later.</p>
+        <div class="field"><label>Name <span class="mute">(optional)</span></label><input id="buildName" placeholder="Build ${S.builds.length+1}"></div>
+        <div class="cta"><button class="btn solid" data-act="dobuild">Save build</button></div>`; },
+    compare(){ const ks=cats(); const cur={name:'Current',picks:Object.assign({},S.picks)}; S.suppliers.filter(s=>s.status==='booked').forEach(s=>cur.picks[s.cat]=s.id);
+      const col=(p,i)=>{ const items=ks.map(k=>{const s=sup(p.picks[k]);return s?{k,s}:{k};}); const priced=items.filter(x=>x.s&&priceOf(x.s)!=null); const tot=priced.reduce((a,x)=>a+priceOf(x.s),0); const unp=items.filter(x=>x.s&&priceOf(x.s)==null).length;
+        const dates=['2026-12-12','2026-12-18','2027-01-16'].filter(d=>items.every(x=>!x.s||isFree(x.s,d)));
+        return `<div><div class="h">${esc(p.name)}</div><div class="a">${peso(tot)}</div><div class="mute">${unp?`+ ${unp} without a price`:'all priced'}</div><div style="margin-top:8px">${items.map(x=>`<div class="${x.s?'':'mute'}">${cat(x.k).name} · ${x.s?esc(x.s.name.split(' ')[0]):'—'}</div>`).join('')}</div><div class="${dates.length?'ok':'wine'}" style="margin-top:8px">${dates.length?'Free: '+dates.map(shortDate).join(' · '):'No shared free date'}</div><div class="${unp?'mute':'ok'}">${unp?'Buffer: not knowable':'Buffer '+peso(BUDGET-tot)}</div>${i>=0?`<button class="wine" style="margin-top:10px;font-weight:500" data-act="usebuild" data-i="${i}">Use this build ›</button>`:''}</div>`; };
+      return `<h3>Compare builds</h3><p class="mute" style="margin:0">Side by side — and which dates work for each.</p><div class="cmp" style="grid-template-columns:repeat(${S.builds.length+1},minmax(120px,1fr))">${col(cur,-1)}${S.builds.map(col).join('')}</div>`; }
+  };
 
-  // jump dropdown: navigates, and follows the scroll (scroll-spy with a crossfade)
-  const jump=document.getElementById('jump'), label=document.getElementById('jumpLabel');
-  jump.addEventListener('change',()=>{ document.getElementById(jump.value).scrollIntoView({block:'start'}); });
-  const names={}; [...jump.options].forEach(o=>names[o.value]=o.text);
-  const io=new IntersectionObserver(es=>{ es.forEach(e=>{ if(e.isIntersecting){ const id=e.target.id; if(jump.value!==id){ label.classList.add('fade'); setTimeout(()=>{label.textContent=names[id]; jump.value=id; label.classList.remove('fade');},160);} } }); },{rootMargin:'-120px 0px -70% 0px',threshold:0});
-  document.querySelectorAll('section[id]').forEach(s=>io.observe(s));
+  /* ---------------- actions ---------------- */
+  function addChat(sid,msg){ let c=S.chats.find(x=>x.sid===sid); if(!c){c={sid,unread:false,msgs:[],when:'now',fresh:true};S.chats.unshift(c);} c.msgs.push(msg); c.when='now'; S.chats.sort((a,b)=>(b.when==='now')-(a.when==='now')); }
+  function ensure(s){ if(!S.suppliers.includes(s)) S.suppliers.push(s); }
+  function doBook(s,price){ ensure(s); s.status='booked'; s.price=price; s.paid=s.paid||0; s.pop=true; delete S.picks[s.cat]; if(['reception','ceremony'].includes(s.cat)&&S.dateKnown!=='day'){} addChat(s.id,{sys:`You asked to book for ${S.dateKnown==='day'?shortDate(S.date):monthOf(S.date)}. Waiting for their confirmation.`}); }
+  const ACT={
+    toggle(d){ const i=S.open.indexOf(d.id); i<0?S.open.push(d.id):S.open.splice(i,1); render(); },
+    sheet(d){ openSheet(d.key,d); }, close(){ closeSheet(); }, note(d){ toast(d.text); },
+    go(d){ document.getElementById(d.id).scrollIntoView({block:'start'}); },
+    pick(d){ const s=sup(d.id); if(S.picks[s.cat]===s.id){ delete S.picks[s.cat]; if(s.status==='deciding') s.status='saved'; } else { S.picks[s.cat]=s.id; if(s.status==='saved') s.status='deciding'; } render(); },
+    book(d){ openSheet('book',d); },
+    dobook(d){ const s=sup(d.id); const v=parseInt(($('#bookPrice').value||'').replace(/\D/g,''))||null; doBook(s,v); closeSheet(); render(); toast(`Booked ${s.name} ✓`); },
+    bookbuild(){ const list=cats().filter(k=>!bookedIn(k)&&S.picks[k]).map(k=>sup(S.picks[k])); list.forEach(s=>doBook(s,priceOf(s))); render(); toast(`Booked ${list.length} supplier${list.length>1?'s':''} ✓`); },
+    cancel(d){ const s=sup(d.id); const was={status:s.status,price:s.price}; s.status='saved'; s.price=null; render(); toast(`Cancelled ${s.name}`,()=>{Object.assign(s,was);render();}); },
+    remove(d){ const i=S.suppliers.findIndex(s=>s.id===d.id); const [s]=S.suppliers.splice(i,1); Object.keys(S.picks).forEach(k=>{if(S.picks[k]===d.id) delete S.picks[k];}); render(); toast(`Removed ${s.name}`,()=>{S.suppliers.splice(i,0,s);render();}); },
+    removecat(d){ S.removedCats.push(d.cat); render(); toast(`Removed ${cat(d.cat).name}`,()=>{S.removedCats=S.removedCats.filter(k=>k!==d.cat);render();}); },
+    nudge(d){ const s=sup(d.id); addChat(s.id,{me:true,t:'Hi! Just checking on the quote — any update?'}); s.askedAgo='just now'; render(); toast(`Nudged ${s.name.split(' ')[0]}`); },
+    askroom(d){ S.roomAsked[d.id]=true; const s=sup(d.id); addChat(d.id,{me:true,t:s.cat==='stylist'?'Could you send your table sizes? Our seat plan needs them.':'Could you send the room size (width × length)? Our seat plan needs it.'}); closeSheet(); render(); toast('Asked — it will show here when they reply'); },
+    setdate(d){ const nd=d.from==='input'?$('#dateInput').value:d.date; if(!nd) return; const old={date:S.date,k:S.dateKnown}; S.date=nd; S.dateKnown='day'; closeSheet(); render(); toast(`Date set to ${shortDate(nd)}`,()=>{S.date=old.date;S.dateKnown=old.k;render();}); },
+    ask(d){ const s=mk(d.id,{cat:d.cat,status:'waiting',askedAgo:'just now',fresh:true}); S.suppliers.push(s); addChat(s.id,{me:true,t:`Hi! Could you quote for ${S.dateKnown==='day'?shortDate(S.date):monthOf(S.date)}, ~${GUESTS} guests?`}); if(!S.open.includes('cat-'+d.cat)) S.open.push('cat-'+d.cat); closeSheet(); render(); toast(`Asked ${s.name} for a quote`);
+      setTimeout(()=>{ const x=sup(d.id); if(x&&x.status==='waiting'){ x.status='quote'; x.quote=priceOf(x)||50000; const c=S.chats.find(c=>c.sid===d.id); if(c){c.msgs.push({t:'Thanks for reaching out! Here is our quote.'},{quote:x.quote});c.unread=true;c.when='now';} render(); toast(`${x.name.split(' ')[0]} sent a quote`); } },9000); },
+    savesup(d){ S.suppliers.push(mk(d.id,{cat:d.cat,status:'saved',fresh:true})); if(!S.open.includes('cat-'+d.cat)) S.open.push('cat-'+d.cat); closeSheet(); render(); toast(`Saved to ${cat(d.cat).name}`); },
+    addown(){ const name=($('#addName').value||'').trim(); if(!name){ $('#addName').focus(); return; } const k=$('#addCat').value; const price=parseInt(($('#addPrice').value||'').replace(/\D/g,''))||null; const booked=$('#addBooked').value==='1';
+      const s={id:'own'+Date.now(),name,cat:k,own:true,status:booked?'booked':'saved',price:booked?price:null,paid:0,busy:[],fresh:true,pop:booked}; S.suppliers.push(s); if(!S.cats.includes(k)) S.cats.push(k); S.removedCats=S.removedCats.filter(x=>x!==k); if(!S.open.includes('cat-'+k)) S.open.push('cat-'+k);
+      closeSheet(); render(); toast(`You added ${name}${booked?' — booked':''}`); },
+    logpay(d){ const s=sup(d.id); const v=parseInt(($('#payAmt').value||'').replace(/\D/g,''))||0; if(!v) return; s.paid=(s.paid||0)+v; addChat(s.id,{sys:`You logged a payment of ${peso(v)}.`}); closeSheet(); render(); toast(`Logged ${peso(v)} to ${s.name.split(' ')[0]}`,()=>{s.paid-=v;render();}); },
+    setprice(d){ const s=sup(d.id); s.price=parseInt(($('#priceAmt').value||'').replace(/\D/g,''))||null; s.paid=parseInt(($('#pricePaid').value||'').replace(/\D/g,''))||0; closeSheet(); render(); toast(s.price?'Price set — your buffer can count now':'Price cleared'); },
+    accept(d){ const s=sup(d.id); s.price=s.quote; s.status='deciding'; S.picks[s.cat]=s.id; addChat(s.id,{me:true,t:'Accepting option A. Thank you!'}); addChat(s.id,{sys:'Quote accepted — in your build. Book when you’re ready.'}); closeSheet(); render(); toast(`Accepted — ${s.name.split(' ')[0]} is in your build`); },
+    send(d){ const inp=$('#composer'); const t=d.text||(inp&&inp.value.trim()); if(!t) return; addChat(d.id,{me:true,t}); const s=sup(d.id); if(s.status==='saved'){ s.status='waiting'; s.askedAgo='just now'; } openSheet('chat',d); render(); },
+    dobuild(){ const name=($('#buildName').value||'').trim()||`Build ${S.builds.length+1}`; S.builds.push({name,picks:Object.assign({},S.picks),fresh:true}); closeSheet(); render(); toast(`Saved "${name}"`); },
+    usebuild(d){ const p=S.builds[+d.i]; const old=Object.assign({},S.picks); Object.entries(p.picks).forEach(([k,id])=>{ if(bookedIn(k)) return; let s=S.suppliers.find(x=>x.id===id); if(!s){ s=mk(id,{cat:k,status:'deciding',fresh:true}); S.suppliers.push(s);} S.picks[k]=id; if(s.status==='saved') s.status='deciding'; }); closeSheet(); render(); toast(`Using "${p.name}"`,()=>{S.picks=old;render();}); },
+    delbuild(d){ const [p]=S.builds.splice(+d.i,1); render(); toast(`Deleted "${p.name}"`,()=>{S.builds.splice(+d.i,0,p);render();}); },
+    tour(){ startTour(); },
+    reset(d){ try{localStorage.removeItem('sup-proto-v2');localStorage.removeItem('sup-tour');}catch(e){} S=SEEDS[d.mode||'mid'](); closeSheet(); render(); window.scrollTo({top:0}); toast(d.mode==='empty'?'Starting from zero — step 1: cover your event':'Mid-planning demo'); }
+  };
+  document.addEventListener('click',e=>{ const b=e.target.closest('[data-act]'); if(!b||b.disabled) return; e.preventDefault(); (ACT[b.dataset.act]||(()=>{}))(Object.assign({},b.dataset)); });
+  document.addEventListener('change',e=>{ if(e.target.id==='moreCats'&&e.target.value){ const k=e.target.value; S.cats.push(k); S.removedCats=S.removedCats.filter(x=>x!==k); cat(k).fresh=true; S.open.push('cat-'+k); render(); toast(`Added ${cat(k).name}`); setTimeout(()=>document.getElementById('cat-'+k).scrollIntoView({block:'center'}),50); }
+    if(e.target.id==='addCat') $('#addCatLabel').textContent=cat(e.target.value).name; if(e.target.id==='addBooked') $('#addBookedLabel').textContent=e.target.selectedOptions[0].text; });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSheet(); if(e.key==='Enter'&&e.target.id==='composer'){ const b=body.querySelector('.compose [data-act=send]'); ACT.send({id:b.dataset.id}); } if(e.key==='Enter'&&e.target.id==='addName') ACT.addown(); });
+  $('#scrim').addEventListener('click',closeSheet);
 
-  // picks: adding a supplier moves the money, and the number counts to its new value
-  const picks={lumina:{row:'pickPhoto',name:'Lumina Studio',amt:85000},bituin:{row:'pickCatering',name:'Bituin Catering',amt:171000},hiraya:{row:'pickCatering',name:'Hiraya Table',amt:216000}};
-  const chosen={};
-  function peso(n){return '₱'+n.toLocaleString('en-PH');}
-  function count(el,to){ const from=+el.dataset.n||0; const t0=performance.now(), d=520;
-    const r=matchMedia('(prefers-reduced-motion:reduce)').matches; if(r){el.textContent=peso(to);el.dataset.n=to;return;}
-    (function f(t){ const k=Math.min(1,(t-t0)/d), e=1-Math.pow(1-k,3); el.textContent=peso(Math.round(from+(to-from)*e)); if(k<1) requestAnimationFrame(f); else el.dataset.n=to; })(t0); }
-  document.querySelectorAll('[data-pick]').forEach(b=>b.addEventListener('click',()=>{
-    const p=picks[b.dataset.pick]; const row=document.getElementById(p.row);
-    document.querySelectorAll('[data-pick]').forEach(x=>{ if(picks[x.dataset.pick].row===p.row){x.textContent='Add to picks';x.classList.remove('on');} });
-    b.textContent='In your picks ✓'; b.classList.add('on'); chosen[p.row]=p;
-    row.querySelector('.v').textContent=p.name; row.querySelector('.v').classList.remove('mute');
-    const amt=row.querySelector('.amt'); amt.classList.remove('mute'); amt.textContent=peso(p.amt); amt.classList.add('pill','pop'); setTimeout(()=>amt.classList.remove('pill','pop'),500);
-    const toBook=Object.values(chosen).reduce((s,x)=>s+x.amt,0); count(document.getElementById('mToBook'),toBook);
-    const n=2+Object.keys(chosen).length; document.getElementById('fitText').textContent=n+' of '+n+' priced picks are free on Dec 18';
-  }));
+  /* ---------------- jump dropdown + scroll-spy ---------------- */
+  const jump=$('#jump'), label=$('#jumpLabel'); const names={}; [...jump.options].forEach(o=>names[o.value]=o.text);
+  jump.addEventListener('change',()=>document.getElementById(jump.value).scrollIntoView({block:'start'}));
+  // scroll-spy: the section whose top is nearest above the line under the sticky bar wins
+  const secs=[...document.querySelectorAll('section[id]')]; let spyT=null;
+  function spy(){ const line=130; const vis=secs.map(s=>[s.id,s.getBoundingClientRect().top]).sort((a,b)=>a[1]-b[1]); let cur=vis[0][0]; vis.forEach(([id,top])=>{ if(top<=line) cur=id; }); if(jump.value!==cur){ label.classList.add('fade'); clearTimeout(spyT); spyT=setTimeout(()=>{label.textContent=names[cur];jump.value=cur;label.classList.remove('fade');},140);} }
+  addEventListener('scroll',spy,{passive:true}); spy();
 
-  // first-visit tour (MiniTour shape: 3 stops)
-  const stops=[['s-team','Your suppliers','Everyone you’ve booked or asked, with one next step each.'],['s-cover','Cover your event','Only what a wedding needs. Open a row to find, add, or book.'],['s-picks','Picks','Your combination and your money, always in view. Compare plans here.']];
-  let i=0; const tour=document.getElementById('tour');
-  function show(){ const s=stops[i]; document.getElementById('tourTitle').textContent=s[1]; document.getElementById('tourText').textContent=s[2]; document.getElementById('tourNext').textContent=i<stops.length-1?'Next ›':'Done'; document.getElementById(s[0]).scrollIntoView({block:'start'}); }
-  document.getElementById('tourNext').addEventListener('click',()=>{ i++; if(i>=stops.length){h.classList.remove('tour-on'); i=0; return;} show(); });
-  document.getElementById('replay').addEventListener('click',()=>{ i=0; h.classList.add('tour-on'); show(); });
-  try{ if(!localStorage.getItem('sup-tour')){ h.classList.add('tour-on'); show(); localStorage.setItem('sup-tour','1'); } }catch(e){}
+  /* ---------------- tour ---------------- */
+  const stops=[['s-cover','1 · Cover your event','Open a category to find suppliers, save them, or add your own.'],['s-chats','2 · Chats','Inquire, read quotes, accept the price. Everything stays here.'],['s-build','3 · Build','Add suppliers to a build, save it, compare builds, then book.'],['s-budget','4 · Budget & date','Watch where you are, and your date and place sharpen as you book.']];
+  let ti=0;
+  function showStop(){ const s=stops[ti]; $('#tourTitle').textContent=s[1]; $('#tourText').textContent=s[2]; $('#tourNext').textContent=ti<stops.length-1?'Next ›':'Done'; document.getElementById(s[0]).scrollIntoView({block:'start'}); }
+  function startTour(){ ti=0; h.classList.add('tour-on'); showStop(); }
+  $('#tourNext').addEventListener('click',()=>{ ti++; if(ti>=stops.length){ h.classList.remove('tour-on'); return; } showStop(); });
+
+  render();
+  try{ if(!localStorage.getItem('sup-tour')){ startTour(); localStorage.setItem('sup-tour','1'); } }catch(e){}
 })();
 </script>
 </body>
