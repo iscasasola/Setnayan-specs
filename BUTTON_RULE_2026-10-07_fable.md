@@ -6,6 +6,7 @@ Nothing here is built. The Suppliers prototype (`prototypes/suppliers_page_2026-
 1. **Every interactive control is a button** — a pill with a border, 40 px tall on phone, never a bare text link with a › after it. (Links that *navigate* to another page stay links; anything that *does* something is a button.)
 2. **Icon + word.** Every button carries an icon and its word. *"when icon can present text, show text. when icon can present icon with text show both."*
 3. **Words drop by width.** *"so it depends on the width of the screen."* A row measures itself after render; if the words do not fit, the right-most secondary buttons drop to icon-only, one at a time; the main verb always keeps its word. Desktop shows every word.
+3b. **A text field in a row of buttons keeps at least 60 % of the row's width**; the buttons beside it are what adapt (words → icons), never the field (owner 2026-10-07, Guests search row: *"this should always be at least 60% of the width and the 3 buttons adjust"*).
 4. **One colour per meaning**, the convention every major system shares (Bootstrap · Material · Ant · Apple HIG): the same meaning is the same colour on every screen, so the colour is learnt once.
 
 ## The colours (shipped tokens — read `apps/web/app/globals.css`, never a hex from memory)
