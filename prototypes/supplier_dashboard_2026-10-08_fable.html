@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Supplier dashboard — redesign · 2026-10-08 (Fable)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ---------- tokens — the same values suppliers_page_2026-10-07_fable.html reads from globals.css ---------- */
+:root{
+  --paper:#f6f4ef;--paper-2:#fffdf9;--ink:#1d1b17;--mute:#6f6a60;--line:#e4dfd4;
+  --gild:#b8963e;--gild-soft:#f1e9d2;--mulberry:#C24E25;--wine:#8c3b2e;--wine-soft:#f3e3df;
+  --ok:#2B744A;--ok-soft:#e3eee4;--info:#1F6FB2;--warn:#965A00;--warn-soft:#f6e9dd;--danger:#B3261E;
+  --seg-track:rgba(29,27,23,.06);--seg-off:rgba(29,27,23,.6);--on-tone:#fff;
+  --sans:"Hanken Grotesk",system-ui,-apple-system,sans-serif;--bar:64px;--ease:cubic-bezier(.2,.8,.2,1);--t:280ms;
+}
+html[data-theme=dark]{
+  --paper:#161513;--paper-2:#1f1d1a;--ink:#efeae0;--mute:#a39d90;--line:#2e2b26;--gild:#d1b162;--gild-soft:#2d2719;
+  --mulberry:#E5794E;--wine:#d47a69;--wine-soft:#3a221d;--ok:#6FCF97;--ok-soft:#1f2d22;--info:#7AB8F0;--warn:#F0B45A;--warn-soft:#3a2a1e;--danger:#F2817A;
+  --seg-track:rgba(239,234,224,.08);--seg-off:rgba(239,234,224,.62);--on-tone:#161513;
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:left}
+h1,h2,h3{font-weight:500;margin:0;letter-spacing:-.01em}
+.mute{color:var(--mute)}.ok{color:var(--ok)}.wine{color:var(--wine)}.warn{color:var(--warn)}
+.i{display:inline-grid;place-items:center;width:18px;height:18px;border:1px solid var(--line);border-radius:50%;font-size:11px;color:var(--mute);vertical-align:middle;margin-left:4px;font-style:normal}
+
+/* ---------- gallery (what the owner opens) ---------- */
+.gallery{max-width:1500px;margin:0 auto;padding:28px 20px 80px}
+.gallery h1{font-size:28px}
+.gallery p{max-width:860px;color:var(--mute)}
+.gallery .frames{display:flex;gap:22px;flex-wrap:wrap;margin-top:22px}
+.gallery .frame{width:375px}
+.gallery .frame iframe{width:375px;height:812px;border:1px solid var(--line);border-radius:26px;background:var(--paper-2);display:block}
+.gallery .cap{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin:8px 0 0 4px}
+.gallery .cap b{color:var(--ink)}
+.gallery h2{font-size:18px;margin-top:40px;padding-top:16px;border-top:1px solid var(--line)}
+html.app .gallery{display:none}html:not(.app) .app{display:none}
+
+/* ---------- the app ---------- */
+.app{min-height:100vh;padding-bottom:calc(var(--bar) + 24px)}
+html:not(.lower-hide) main{padding-bottom:72px}
+.shell{position:sticky;top:0;z-index:5;background:var(--paper-2);border-bottom:1px solid var(--line);height:56px;display:flex;align-items:center;gap:10px;padding:0 16px}
+.shell .logo{font-weight:700;color:var(--gild);font-size:15px;letter-spacing:.14em}
+.shell .shop{font-size:14px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.shell .right{margin-left:auto;display:flex;gap:8px;flex:0 0 auto}
+.shell .door{position:relative;width:38px;height:38px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;color:var(--ink);background:var(--paper-2)}
+.shell .door svg{width:18px;height:18px}
+.shell .door b{position:absolute;top:-3px;right:-3px;background:var(--wine);color:#fff;font-size:10px;border-radius:999px;padding:1px 5px;line-height:1.3}
+.shell .av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--gild),var(--wine));display:grid;place-items:center;color:#fff;font-weight:600;font-size:12px}
+.shell .back{width:38px;height:38px;display:grid;place-items:center;margin-left:-8px;font-size:22px;color:var(--ink)}
+main{padding:0 16px}
+svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+
+/* segmented (the Suppliers / Guests / Event Details control) */
+.seg{display:flex;gap:2px;border-radius:8px;background:var(--seg-track);padding:2px;margin:12px 0 2px}
+.seg button{flex:1;min-height:40px;display:inline-flex;align-items:center;justify-content:center;gap:4px;border-radius:8px;font-size:13px;font-weight:600;color:var(--seg-off);white-space:nowrap;transition:background var(--t),color var(--t)}
+.seg button.on{background:var(--mulberry);color:#fff}
+.seg b{font-weight:500;opacity:.8}
+
+/* rows — hairlines, no boxes: label · summary · › ⌄ switch */
+.rows{margin-top:4px}
+.row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;min-height:54px;padding:9px 0;border-top:1px solid var(--line);width:100%}
+.row.ic{grid-template-columns:36px 1fr auto}
+.rows>.row:first-child,.rows>.fold:first-child>.row{border-top:0}
+.row .l{min-width:0}
+.row .l b{display:block;font-weight:500;font-size:15px;line-height:1.25}
+.row .l span{display:block;font-size:13px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .l span.ok{color:var(--ok)}.row .l span.wine{color:var(--wine)}.row .l span.warn{color:var(--warn)}
+.row .r{display:flex;align-items:center;gap:8px;color:var(--mute);font-size:14px;white-space:nowrap}
+.row .r .amt{font-weight:600;color:var(--ink);font-size:15px}
+.row .r .pill{font-size:12px;padding:3px 9px;border-radius:999px;background:var(--gild-soft);color:var(--mute)}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}.pill.wine{background:var(--wine-soft);color:var(--wine)}.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.chev{color:var(--mute);font-size:20px;line-height:1;transition:transform var(--t) var(--ease)}
+.row .go{color:var(--gild);font-size:20px;line-height:1}
+.row .ico{width:36px;height:36px;border-radius:50%;background:var(--gild-soft);display:grid;place-items:center;color:var(--ink)}
+.row .ico.ok{background:var(--ok-soft);color:var(--ok)}
+.fold{border-top:1px solid var(--line)}.fold>.row{border-top:0}
+.fold.open .chev{transform:rotate(180deg)}
+.exp{display:grid;grid-template-rows:0fr;transition:grid-template-rows var(--t) var(--ease)}.exp>div{overflow:clip;min-width:0}
+.fold.open>.exp{grid-template-rows:1fr}
+.inner{padding:0 0 12px 12px}
+.inner .row{min-height:46px;padding:6px 0;border-top:1px solid var(--line)}.inner .row:first-child{border-top:1px dashed var(--line)}
+.inner .row .l b{font-weight:400;font-size:14.5px}
+.inner p{margin:6px 0 10px;font-size:13.5px;color:var(--mute)}
+/* switch */
+.sw{width:44px;height:26px;border-radius:999px;background:var(--line);position:relative;flex:0 0 auto;transition:background var(--t)}
+.sw:after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform var(--t) var(--ease);box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.sw.on{background:var(--ok)}.sw.on:after{transform:translateX(18px)}
+/* dropdown (one dropdown for any set of choices) */
+.sel{position:relative;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:8px 30px 8px 13px;background:var(--paper-2);font-size:13.5px;font-weight:500;white-space:nowrap;height:40px}
+.sel:after{content:"⌄";position:absolute;right:11px;top:6px;font-size:18px;color:var(--mute)}
+.sel select{position:absolute;inset:0;opacity:0;width:100%}
+
+/* buttons — BUTTON_RULE: icon + word, one colour per meaning, 40 px */
+.btn{height:40px;padding:0 14px;border:1px solid var(--line);border-radius:999px;display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:500;white-space:nowrap;--tone:var(--ink);color:var(--tone);background:color-mix(in srgb,var(--tone) 9%,transparent);border-color:color-mix(in srgb,var(--tone) 45%,transparent);transition:transform 160ms}
+.btn:active{transform:scale(.97)}
+.btn.t-brand{--tone:var(--mulberry)}.btn.t-ok{--tone:var(--ok)}.btn.t-info{--tone:var(--info)}.btn.t-warn{--tone:var(--warn)}.btn.t-danger{--tone:var(--danger)}.btn.t-grey{--tone:var(--mute)}
+.btn.main{background:var(--tone);color:var(--on-tone);border-color:var(--tone)}.btn.t-brand.main{color:#fff}
+.btn.big{height:46px;font-size:15px;padding:0 20px;width:100%;justify-content:center}
+.acts{display:flex;gap:8px;align-items:center;overflow:hidden}
+.acts.fit .btn:not(.main) .lbl{display:none}.acts.fit .btn:not(.main){width:40px;padding:0;justify-content:center}
+
+/* Next card — the one card the app keeps (approved 2026-10-01) */
+.next{margin:14px 0 4px;padding:16px 16px 14px;border-radius:18px;background:var(--gild-soft);position:relative}
+.next .eye{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:600}
+.next h2{font-size:24px;line-height:1.1;margin:6px 0 4px}
+.next p{margin:0 0 12px;font-size:14px;color:var(--mute)}
+.next.day{background:var(--ink);color:var(--paper)}.next.day .eye,.next.day p{color:color-mix(in srgb,var(--paper) 70%,transparent)}
+.next .cnt{position:absolute;right:16px;top:14px;font-size:12px;color:var(--mute)}
+/* numbers */
+.nums{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin:12px 0 4px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:12px 0}
+.nums button{text-align:center;display:grid;gap:2px}
+.nums b{font-size:26px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
+.nums b.wine{color:var(--wine)}
+.nums small{font-size:11.5px;color:var(--mute)}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:600;margin:16px 0 2px;display:flex;align-items:center;gap:8px}
+.eyebrow .sp{margin-left:auto;letter-spacing:0;text-transform:none;font-weight:500;color:var(--wine)}
+/* calendar */
+.cal{margin-top:8px}
+.cal .mh{display:flex;align-items:center;justify-content:space-between;padding:6px 0}
+.cal .mh b{font-size:17px;font-weight:500}
+.cal .mh .btn{height:34px;width:34px;padding:0;justify-content:center}
+.cal .g{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.cal .g i{font-style:normal;font-size:11px;color:var(--mute);padding:4px 0}
+.cal .g button{aspect-ratio:1;border-radius:10px;display:grid;place-items:center;font-size:14px;position:relative}
+.cal .g button.d:after{content:"";position:absolute;bottom:5px;width:5px;height:5px;border-radius:50%;background:var(--ok)}
+.cal .g button.b{background:var(--ok-soft);color:var(--ok);font-weight:600}
+.cal .g button.h{background:var(--warn-soft);color:var(--warn);font-weight:600}
+.cal .g button.x{color:var(--mute);text-decoration:line-through}
+.cal .g button.t{outline:2px solid var(--mulberry);outline-offset:-2px}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--mute);margin:8px 0 2px;flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+/* money */
+.money{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;padding:14px 0 8px;border-bottom:1px solid var(--line)}
+.money .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.money .v{font-weight:600;font-size:22px;line-height:1.15;font-variant-numeric:tabular-nums}
+.meter{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin:10px 0 2px}
+.meter i{display:block;height:100%;background:var(--ok);width:0;transition:width 700ms var(--ease)}
+/* customer card head */
+.head{padding:14px 0 4px}
+.head h1{font-size:26px;line-height:1.1}
+.head .f{color:var(--mute);font-size:14px;margin-top:3px}
+.stage{display:flex;gap:4px;margin:12px 0 4px;align-items:center}
+.stage i{flex:1;height:4px;border-radius:2px;background:var(--line);font-style:normal}
+.stage i.on{background:var(--ok)}
+.stage small{font-size:12px;color:var(--mute);margin-left:6px;white-space:nowrap}
+/* chat list */
+.chat{display:grid;grid-template-columns:42px 1fr auto;gap:12px;align-items:center;padding:11px 0;border-top:1px solid var(--line);width:100%}
+.chat:first-child{border-top:0}
+.chat .av{width:42px;height:42px;border-radius:50%;background:var(--gild-soft);display:grid;place-items:center;font-size:13px;font-weight:600;color:var(--ink)}
+.chat .av.l{border-radius:12px;background:var(--paper-2);border:1px solid var(--line);font-size:11px}
+.chat b{display:block;font-weight:500}
+.chat .last{font-size:13px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat .last.u{color:var(--ink);font-weight:500}
+.chat .when{font-size:12px;color:var(--mute);display:grid;justify-items:end;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--wine)}
+/* insights */
+.bars{display:grid;grid-template-columns:repeat(12,1fr);gap:3px;align-items:end;height:56px;margin:10px 0 4px}
+.bars i{display:block;background:var(--gild);border-radius:3px 3px 0 0;height:var(--h);opacity:.85}
+.bars i:last-child{background:var(--mulberry);opacity:1}
+/* shop services */
+.svc{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:11px 0;border-top:1px solid var(--line);width:100%}
+.svc:first-child{border-top:0}
+.svc .th{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--gild-soft),var(--line))}
+.svc b{display:block;font-weight:500}.svc span{font-size:13px;color:var(--mute)}
+.svc .pr{display:grid;justify-items:end;gap:6px;font-weight:600}
+.pics{display:flex;gap:8px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:none}
+.pics div{flex:0 0 92px;height:120px;border-radius:12px;background:linear-gradient(160deg,var(--gild-soft),var(--line));position:relative}
+.pics div.on{outline:2px solid var(--mulberry);outline-offset:-2px}
+.pics div span{position:absolute;left:8px;bottom:6px;font-size:11px;font-weight:600}
+/* honest failure */
+.fail{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:14px;color:var(--warn)}
+.fail .btn{margin-left:auto;height:34px}
+/* lower glass row — frosted, no background of its own, buttons keep their colour */
+.lower{position:fixed;left:0;right:0;bottom:calc(var(--bar) + 10px);padding:0 16px;z-index:4;display:flex;gap:8px;align-items:center;transform:translateY(0);transition:transform 300ms var(--ease)}
+html.lower-hide .lower{transform:translateY(calc(100% + var(--bar) + 20px))}
+.glass{background:color-mix(in srgb,var(--paper) 62%,transparent);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);border:1px solid color-mix(in srgb,var(--ink) 14%,transparent);overflow:hidden;isolation:isolate}
+.eyebrow .sel{letter-spacing:0;text-transform:none;font-weight:500;color:var(--ink)}
+.lower .search{flex:1 1 60%;min-width:0;height:40px;border-radius:999px;display:flex;align-items:center;gap:8px;padding:0 12px;font-size:14px;color:var(--mute)}
+.lower .btn.glass{color:var(--ink)}
+.lower .btn.main{background:var(--tone);border-color:var(--tone);-webkit-backdrop-filter:none;backdrop-filter:none;-webkit-mask-image:none;color:#fff}
+/* bottom bar — the approved four */
+.bar{position:fixed;left:0;right:0;bottom:0;height:var(--bar);background:var(--paper-2);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);z-index:6}
+.bar button{display:grid;place-items:center;gap:2px;font-size:11px;color:var(--mute);padding-top:7px;position:relative}
+.bar button.on{color:var(--ink);font-weight:600}
+.bar button.on svg{color:var(--mulberry)}
+.bar button b{position:absolute;top:6px;left:calc(50% + 6px);background:var(--wine);color:#fff;font-size:10px;border-radius:999px;padding:1px 5px;font-weight:600}
+/* sheet */
+.scrim{position:fixed;inset:0;bottom:var(--bar);background:rgba(0,0,0,.28);opacity:0;pointer-events:none;transition:opacity var(--t);z-index:7}
+.sheet{position:fixed;left:0;right:0;bottom:var(--bar);max-height:80vh;overflow:auto;background:var(--paper-2);border-radius:22px 22px 0 0;padding:12px 16px 20px;transform:translateY(calc(100% + var(--bar)));visibility:hidden;transition:transform 320ms var(--ease),visibility 0s 320ms;z-index:8}
+.sheet .grip{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 10px}
+html.sheet-open .scrim{opacity:1;pointer-events:auto}html.sheet-open .sheet{transform:none;visibility:visible;transition:transform 320ms var(--ease),visibility 0s}
+.sheet h3{font-size:18px;margin:2px 0 4px}
+.sheet .ab{display:flex;gap:2px;background:var(--seg-track);border-radius:8px;padding:2px;margin:6px 0 10px}
+.sheet .ab button{flex:1;min-height:34px;border-radius:7px;font-size:12.5px;font-weight:600;color:var(--seg-off);text-align:center}
+.sheet .ab button.on{background:var(--ink);color:var(--paper)}
+/* tour (shipped MiniTour, one slide per page) */
+.tour{position:fixed;left:16px;right:16px;bottom:calc(var(--bar) + 14px);background:var(--ink);color:var(--paper);padding:14px 16px;border-radius:16px;font-size:14px;z-index:9;display:none}
+.tour b{display:block;font-size:15px;font-weight:600;margin-bottom:2px}
+.tour button{float:right;color:var(--gild);font-weight:600;margin-left:12px}
+html.tour-on .tour{display:block}
+.toast{position:fixed;left:50%;bottom:calc(var(--bar) + 70px);transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 14px;border-radius:999px;font-size:13px;opacity:0;transition:opacity var(--t);z-index:10;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1}
+.note{font-size:12.5px;color:var(--mute);margin:10px 0 0}
+</style>
+</head>
+<body>
+
+<!-- =============================== GALLERY =============================== -->
+<div class="gallery">
+  <h1>Supplier dashboard — the same rules as the event dashboard</h1>
+  <p>One phone, every page. Bar stays <b>Today · Customers · Shop · More</b> (approved 2026-10-01). Each frame is live: tap the bar, the segments, the rows. <b>Frame 10 vs 11</b> is the owner's question #1 — keep the More sheet tidied (A) or re-plot the six rows into the pages they belong to (B, recommended). Open any frame alone with <code>?s=&lt;name&gt;</code>, dark with <code>&amp;dark=1</code>.</p>
+  <div class="frames" id="frames"></div>
+  <h2>Dark mode</h2>
+  <div class="frames" id="framesDark"></div>
+</div>
+
+<!-- =============================== APP =============================== -->
+<div class="app">
+  <header class="shell" id="shell"></header>
+  <main id="main"></main>
+  <div class="lower" id="lower"></div>
+  <nav class="bar" id="bar"></nav>
+  <div class="scrim" id="scrim"></div>
+  <div class="sheet" id="sheet"></div>
+  <div class="tour" id="tour"></div>
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* ---------------- icons ---------------- */
+const I={
+ home:'<svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
+ people:'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-4.5-6.2"/></svg>',
+ shop:'<svg viewBox="0 0 24 24"><path d="M3 9l1.5-5h15L21 9M3 9v11h18V9M3 9h18M9 20v-6h6v6"/></svg>',
+ more:'<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>',
+ chat:'<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>',
+ cal:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+ money:'<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M3 10h2M19 14h2"/></svg>',
+ chart:'<svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>',
+ hub:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M9 15l2 2 4-4"/></svg>',
+ gear:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+ plus:'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+ search:'<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
+ scan:'<svg viewBox="0 0 24 24"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3M3 12h18"/></svg>',
+ send:'<svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>',
+ check:'<svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>',
+ play:'<svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg>',
+ bell:'<svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>',
+ tools:'<svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0 5 5L22 9l-3-3-2.3 2.3zM2 22l9.3-9.3M9.3 12.7l2-2"/></svg>',
+ eye:'<svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+ pen:'<svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+ phone:'<svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.8 2z"/></svg>',
+ out:'<svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>',
+ x:'<svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>',
+ qr:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14v7h-6"/></svg>',
+ list:'<svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>',
+ cam:'<svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
+};
+const q=new URLSearchParams(location.search);
+const h=document.documentElement;
+const $=s=>document.querySelector(s);
+
+/* ---------------- state ---------------- */
+const S={
+  screen:q.get('s')||'today',      // today · today-day · customers · customer · shop · more-a · more-b · hub · messages · settings · insights … (segments are inside)
+  seg:{customers:'people',shop:'services'},
+  ab:'b', open:{}, sw:{}, dark:q.get('dark')==='1', fail:q.get('s')==='fail',
+};
+if(S.dark) h.dataset.theme='dark';
+const SEGS={customers:['people','dates','money'],shop:['services','page','insights']};
+const SEGL={people:'People',dates:'Dates',money:'Money',services:'Services',page:'Page',insights:'Insights'};
+// deep-link a segment: ?s=customers:dates
+if(S.screen.includes(':')){const [a,b]=S.screen.split(':');S.screen=a;S.seg[a]=b;}
+if(q.get('open')) S.open[q.get('open')]=true;
+
+/* ---------------- helpers ---------------- */
+const row=(l,s,r="",o={})=>`<button class="row${o.ic?' ic':''}" data-go="${o.go||''}" ${o.attrs||''}>${o.ic?`<span class="ico ${o.tone||''}">${I[o.ic]}</span>`:''}<span class="l"><b>${l}</b>${s?`<span class="${o.st||''}">${s}</span>`:''}</span><span class="r">${r}</span></button>`;
+const go='<span class="go">›</span>';
+const fold=(key,l,s,inner,o={})=>`<div class="fold${S.open[key]?' open':''}" data-fold="${key}">${row(l,s,`${o.r||''}<span class="chev">⌄</span>`,{ic:o.ic,tone:o.tone,st:o.st,attrs:`data-toggle="${key}"`})}<div class="exp"><div><div class="inner">${inner}</div></div></div></div>`;
+const sw=(key,on)=>`<span class="sw${(S.sw[key]??on)?' on':''}" data-sw="${key}"></span>`;
+const sel=(opts,cur)=>`<span class="sel">${cur}<select>${opts.map(o=>`<option${o===cur?' selected':''}>${o}</option>`).join('')}</select></span>`;
+const btn=(tone,ic,l,main,extra='')=>`<button class="btn t-${tone}${main?' main':''}" ${extra}>${I[ic]||''}<span class="lbl">${l}</span></button>`;
+const seg=(page)=>`<div class="seg">${SEGS[page].map(k=>`<button class="${S.seg[page]===k?'on':''}" data-seg="${page}:${k}">${SEGL[k]}${k==='people'?' <b>3</b>':''}</button>`).join('')}</div>`;
+const fail=(what)=>`<div class="fail">⚠ Couldn't load ${what} ${btn('grey','play','Retry',false,'data-act="retry"')}</div>`;
+const num=(v,l,go,wine)=>`<button data-go="${go}"><b class="${wine?'wine':''}" data-count="${v}">${v}</b><small>${l}</small></button>`;
+
+/* ---------------- screens ---------------- */
+const SCREENS={};
+
+/* 1 · TODAY (normal) */
+SCREENS.today=()=>`
+  ${S.fail?`<div class="next"><span class="eye">Next</span><h2>Some answers couldn't load</h2><p>Nothing is lost.</p>${btn('grey','play','Try again',true)}</div>`:
+  `<div class="next"><span class="cnt">1 of 3</span><span class="eye">Next · waiting 2 h</span><h2>Reply to Ana &amp; Miguel</h2><p>Wedding · Mar 13, 2027 · Tagaytay · ~150 guests</p><div class="acts">${btn('info','chat','Reply',true,'data-go="messages"')}${btn('grey','eye','Their brief',false,'data-go="customer"')}</div></div>`}
+  <div class="nums">${num(3,'waiting on you','customers',true)}${num(2,'events this week','customers:dates')}${S.fail?`<button data-go="customers:money"><b class="warn">—</b><small>couldn't load</small></button>`:num('₱48k','to come in','customers:money')}</div>
+  <div class="eyebrow">Coming up<span class="sp" data-go="customers:dates">All dates ›</span></div>
+  <div class="rows">
+    ${row('Sat 3 · Reyes debut','Tagaytay · 2:00 PM · Full-day',go,{go:'customer'})}
+    ${row('Sun 4 · Cruz wedding','Makati · 1:00 PM · Wedding Classic',go,{go:'customer'})}
+    ${row('Sat 10 · Bautista christening','Quezon City · 9:00 AM · Half-day',go,{go:'customer'})}
+  </div>
+  <div class="eyebrow">Also waiting</div>
+  <div class="rows">
+    ${row('Agree to this booking','Rolando &amp; Carmen · asked to book','<span class="pill warn">2 of 3</span>'+go,{go:'customer'})}
+    ${row('Send your quote','Katrina Ocampo · debut','<span class="pill warn">3 of 3</span>'+go,{go:'customer'})}
+  </div>
+  <div class="eyebrow">Shop<span class="sp" data-go="shop">Open ›</span></div>
+  <div class="rows">${row('Lumina Studio','Live · Verified · 4.8 ★ · 31 reviews','<span class="pill ok">Live</span>'+go,{go:'shop'})}</div>`;
+
+/* 2 · TODAY on an event day — "Run the day" IS the Next card (approved answer 2) */
+SCREENS['today-day']=()=>`
+  <div class="next day"><span class="eye">Today · live since 12:00</span><h2>Cruz wedding</h2><p>Makati Shangri-La · 1:00 PM · 150 guests · 2 crew</p><div class="acts">${btn('brand','play','Run the day',true,'data-go="hub"')}${btn('grey','chat','Chat',false,'data-go="messages"')}</div></div>
+  <div class="nums">${num(1,'waiting on you','customers',true)}${num('14:30','next: first dance','hub')}${num('118','checked in','hub')}</div>
+  <div class="eyebrow">Also today</div>
+  <div class="rows">
+    ${row('Schedule','Ceremony 1:00 · Reception 3:30 · Dance 14:30','<span class="pill ok">On time</span>'+go,{go:'hub'})}
+    ${row('Shot list','12 of 30 done',go,{go:'hub'})}
+    ${row('Scan','Souvenirs · Once · 118 of 150',go,{go:'hub'})}
+  </div>
+  <div class="eyebrow">Coming up<span class="sp" data-go="customers:dates">All dates ›</span></div>
+  <div class="rows">${row('Sat 10 · Bautista christening','Quezon City · 9:00 AM',go,{go:'customer'})}</div>`;
+
+/* 3 · CUSTOMERS — People · Dates · Money (one page, three views of the same bookings) */
+const CUST=[
+ ['AM','Ana &amp; Miguel','Wedding · Mar 13, 2027 · Tagaytay','<span class="pill wine">Asked</span>','Reply','info','chat','waiting 2 h'],
+ ['RC','Rolando &amp; Carmen','Wedding · Nov 21, 2026 · Makati','<span class="pill warn">Booking</span>','Agree','ok','check','asked to book'],
+ ['KO','Katrina Ocampo','Debut · Oct 3, 2026 · Tagaytay','<span class="pill">Quoted</span>','Quote','brand','send','quote pending'],
+ ['JC','Jun &amp; Liza Cruz','Wedding · Oct 4, 2026 · Makati','<span class="pill ok">Booked</span>','The day','grey','hub','₱42,000 due Oct 3'],
+ ['LB','Lourdes Bautista','Christening · Oct 10 · QC','<span class="pill ok">Booked</span>','The day','grey','hub','paid in full'],
+ ['PV','Paolo &amp; Nina','Wedding · Aug 15 · Cebu','<span class="pill">Done</span>','Review','grey','eye','reply to review'],
+];
+SCREENS.customers=()=>{
+  const s=S.seg.customers;
+  if(s==='people') return `${seg('customers')}
+    <div class="eyebrow" style="margin-top:12px">Waiting first ${sel(['Everyone','Waiting','Holding','Talking','Booked','Done'],'Everyone')}</div>
+    <div class="rows">${CUST.map(c=>`<button class="chat" data-go="customer"><span class="av">${c[0]}</span><span><b>${c[1]}</b><span class="last">${c[2]}</span></span><span class="when">${c[3]}<span>${c[7]}</span></span></button>`).join('')}</div>
+    <p class="note">Outside clients and kept notes live here too — one list, not two.</p>`;
+  if(s==='dates') return `${seg('customers')}
+    <div class="cal"><div class="mh">${btn('grey','','‹')}<b>October 2026</b>${btn('grey','','›')}</div>
+    <div class="g">${['M','T','W','T','F','S','S'].map(d=>`<i>${d}</i>`).join('')}${['','',1,2,'3b','4b',5,6,7,8,9,'10b',11,12,13,'14x','15x',16,17,18,19,20,21,22,23,'24h','25h',26,27,28,29,30,31].map(d=>{if(d==='')return '<span></span>';const m=String(d).match(/(\d+)(\w?)/);return `<button class="${m[2]} ${m[1]==='3'?'t':''}" data-go="customer">${m[1]}</button>`}).join('')}</div>
+    <div class="legend"><span><i style="background:var(--ok-soft)"></i>Booked</span><span><i style="background:var(--warn-soft)"></i>Holding</span><span><i style="background:var(--line)"></i>Blocked</span></div></div>
+    <div class="eyebrow">Sat 3 · tomorrow ${sel(['All calendars','Main team','Second team'],'All calendars')}</div>
+    <div class="rows">${row('Reyes debut','Tagaytay · 2:00 PM · Full-day','<span class="pill ok">Booked</span>'+go,{go:'customer'})}</div>
+    <div class="rows" style="margin-top:14px">
+      ${fold('block','Block days','Oct 14–15 blocked',`${row('Oct 14–15','Family trip','<span class="btn t-danger" style="height:32px">'+I.x+'</span>')}<div class="acts" style="margin-top:8px">${btn('grey','cal','Block a date')}</div>`)}
+      ${fold('wait','Waitlist','2 couples on Oct 24',`${row('Dela Cruz','Oct 24 · asked Sep 30',btn('ok','check','Pick'))}${row('Santos','Oct 24 · asked Oct 1',btn('ok','check','Pick'))}`)}
+      ${fold('cap','Capacity','1 event a day · 2 calendars',`${row('Events a day',sel(['1','2','3'],'1'))}${row('Calendars','Main team · Second team',go)}`)}
+    </div>`;
+  return `${seg('customers')}
+    ${S.fail?fail('your payments'):`<div class="money"><div><div class="k">Received</div><div class="v ok" data-count="₱186,000">₱186,000</div></div><div><div class="k">To come in</div><div class="v" data-count="₱48,000">₱48,000</div></div><div style="grid-column:1/-1"><div class="meter"><i data-fill="79"></i></div><span class="mute" style="font-size:12px">79% of ₱234,000 booked this year</span></div></div>`}
+    <div class="eyebrow">Next in ${sel(['This month','Next month','All'],'This month')}</div>
+    <div class="rows">
+      ${row('Jun &amp; Liza Cruz','Balance · due Oct 3','<span class="amt">₱42,000</span><span class="pill warn">due</span>'+go,{go:'customer'})}
+      ${row('Lourdes Bautista','Balance · due Oct 8','<span class="amt">₱6,000</span>'+go,{go:'customer'})}
+      ${row('Katrina Ocampo','Deposit · logged, confirm it','<span class="amt">₱15,000</span><span class="pill wine">check</span>'+go,{go:'customer'})}
+    </div>
+    <div class="eyebrow">Setnayan</div>
+    <div class="rows">
+      ${row('Booking fee','Cruz wedding · due Oct 10','<span class="amt">₱2,500</span>'+btn('ok','money','Pay',true))}
+      ${fold('year','This year','₱186,000 received · 9 bookings',`${row('Oct','₱48,000 · 2 bookings','')}${row('Sep','₱62,000 · 3 bookings','')}${row('Aug','₱40,000 · 2 bookings','')}`)}
+    </div>`;
+};
+
+/* 4 · A CUSTOMER — key facts · one stage button · closed rows (approved frame 3), Event Hub inside */
+SCREENS.customer=()=>`
+  <div class="head"><h1>Jun &amp; Liza Cruz</h1><div class="f">Wedding · Sun, Oct 4, 2026 · 1:00 PM · Makati · 150 guests</div>
+  <div class="stage"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><small>Booked · balance due Oct 3</small></div></div>
+  <div class="rows">
+    ${fold('brief','Their brief','Wedding Classic · 12 h · 150 guests · Shangri-La',`${row('Package','Wedding Classic · ₱85,000','')}${row('Venue','Makati Shangri-La · Rizal Ballroom','')}${row('Headcount','150 invited · 118 replied','')}${row('Mood board','Classic · ivory · gold',go)}${row('Schedule','1:00 ceremony · 3:30 reception',go,{go:'hub'})}`,{st:''})}
+    ${fold('pay','Money','₱43,000 paid · ₱42,000 due Oct 3',`<div class="money" style="padding-top:6px"><div><div class="k">Paid</div><div class="v ok">₱43,000</div></div><div><div class="k">Due Oct 3</div><div class="v">₱42,000</div></div></div>${row('Deposit','Sep 2 · GCash','<span class="pill ok">Received</span>')}${row('Balance','Oct 3 · bank','<span class="pill warn">due</span>')}<div class="acts" style="margin-top:8px">${btn('ok','check','Log a payment')}${btn('grey','send','Quote')}</div>`,{st:'ok'})}
+    ${fold('files','Files','Contract signed · 3 shared',`${row('Contract','Signed Sep 1',go)}${row('Shot list','Shared Sep 20',go)}${row('Venue map','From the couple',go)}`)}
+    ${row('Event Hub','Scan · schedule · shot list · headcount','<span class="pill ok">Oct 4</span>'+go,{go:'hub',ic:'hub',tone:'ok'})}
+    ${fold('notes','Notes','2 · reminder Oct 2',`${row('Oct 2','Call about parking','')}${row('Sep 20','Bride wants film look','')}<p>Autosaves as you type.</p>`)}
+  </div>`;
+
+/* 5 · SHOP — Services · Page · Insights */
+SCREENS.shop=()=>{
+  const s=S.seg.shop;
+  if(s==='services') return `${seg('shop')}
+    <div class="eyebrow" style="margin-top:12px">What you sell ${sel(['All','Services','Packages','Add-ons'],'All')}</div>
+    <div class="rows">
+      ${[['Full-day wedding coverage','Photo + video · 12 h · booked 9×','₱85,000','full',true],['Half-day coverage','Photo + video · 6 h · booked 5×','₱45,000','half',true],['Same-day edit','Add-on · 3-min film','₱12,000','sde',false],['Wedding Classic','Package · full-day + album + SDE','₱110,000','wc',true],['Debut Essentials','Package · half-day + 18 roses reel','₱55,000','de',false]].map(x=>`<div class="svc"><span class="th"></span><span><b>${x[0]}</b><span>${x[1]}</span></span><span class="pr">${x[2]}${sw(x[3],x[4])}</span></div>`).join('')}
+    </div>
+    <p class="note">Tap a row to edit it in place; the switch is Live / Draft. Publishing needs a cover, a price and one inclusion (shipped gate).</p>`;
+  if(s==='page') return `${seg('shop')}
+    <div class="rows">
+      ${row('Lumina Studio','setnayan.com/lumina · 4.8 ★ · 31 reviews','<span class="pill ok">Live</span>'+btn('grey','eye','View'),{})}
+      ${fold('verify','Verified','Approved Sep 12 · papers on file',`${row('Documents','4 of 4',go)}${row('Contacts','Email ✓ · Phone ✓','')}`,{st:'ok'})}
+      ${fold('profile','Profile','9 of 10 · add your EST year',`${row('Shop name','Lumina Studio',go)}${row('Owner','Ana Reyes',go)}${row('Address','Makati',go)}${row('Phone','+63 917 …',go)}${row('EST','—','<span class="pill wine">add</span>'+go)}<p>Each row edits in place and saves on close (shipped <code>editable-row</code>).</p>`,{st:'wine'})}
+      ${fold('look','Look','Classic · gold accent',`<div class="eyebrow" style="margin-top:4px">Theme</div><div class="pics"><div class="on"><span>Classic</span></div><div><span>Modern</span></div><div><span>Rustic</span></div><div><span>Luxe</span></div></div>${row('Accent',sel(['Gold','Wine','Ink'],'Gold'))}${row('Hero photo','Pro',go)}`)}
+      ${fold('photos','Photos','18 · 2 videos',`<div class="pics"><div></div><div></div><div></div><div></div></div><div class="acts">${btn('brand','plus','Add photos')}${btn('grey','cam','Instagram')}</div>`)}
+      ${fold('about','About','Documentary wedding films…',`<p style="color:var(--ink)">Documentary wedding films, shot across Luzon.</p>${row('Sections','Portfolio · Trusted by · Reviews',go)}`)}
+      ${row('Reviews','4.8 ★ · 31 · 1 to reply','<span class="pill wine">1</span>'+go)}
+      ${row('Reach','Makati · free within 30 km · up to 200 km',go)}
+      ${row('Auto-reply','On · 20 a day',sw('ar',true))}
+    </div>`;
+  return `${seg('shop')}
+    <div class="eyebrow" style="margin-top:12px">Last 28 days ${sel(['Last 28 days','This year','Daily · Pro'],'Last 28 days')}</div>
+    <div class="rows">
+      ${row('Views','312 · up 18%','<span class="amt" data-count="312">312</span>')}
+      ${row('Inquiries','14 · reply in 2 h median','<span class="amt" data-count="14">14</span>')}
+      ${row('Booked','4 · ₱230,000','<span class="amt" data-count="4">4</span>')}
+    </div>
+    <div class="bars">${[30,40,35,50,45,60,55,70,65,80,75,100].map(v=>`<i style="--h:${v}%"></i>`).join('')}</div>
+    <div class="rows" style="margin-top:12px">
+      ${fold('health','How you\'re doing','Good · reply time 2 h · 4.8 ★',`${row('Reply time','2 h · couples see this','<span class="pill ok">Good</span>')}${row('Your price','₱85,000 verified median','')}${row('Where bookings come from','Setnayan 7 · own 2','')}`,{st:'ok'})}
+      ${fold('pro','More · Pro','Funnel · demand · capacity · reputation',`${row('Funnel','views › inquiries › quotes › booked',go)}${row('Demand radar','Tagaytay up · Dec full',go)}${row('Capacity','48 days booked ahead',go)}${row('How you compare','top 20% in Makati',go)}${row('Reputation','4.8 ★ · 31 · 2 awards',go)}`)}
+    </div>`;
+};
+
+/* 6 · EVENT HUB — the supplier's console for ONE booked event (On the day) */
+SCREENS.hub=()=>`
+  <div class="head"><h1>Cruz wedding</h1><div class="f">Sun, Oct 4 · Makati Shangri-La · live 12:00 – 21:00</div></div>
+  <div class="rows">
+    ${row('Schedule','1:00 ceremony · 3:30 reception · 14:30 first dance','<span class="pill ok">On time</span>'+go,{ic:'list'})}
+    ${row('Headcount','118 of 150 checked in','<span class="amt" data-count="118">118</span>',{ic:'people'})}
+    ${fold('scan','Scan','Souvenirs · Once · 118 of 150',`${row('Mode',sel(['Once','Ordered › Received','Unlimited','Group','Roaming'],'Once'))}${row('Last','#0118 · Santos · 14:02','')}${row('Upload to #','after each scan',sw('up',false))}`,{ic:'scan'})}
+    ${row('Shot list','12 of 30 · next: rings',go,{ic:'cam'})}
+    ${row('Papic','40 of 50 credits · 23 shot today',go,{ic:'cam'})}
+    ${row('Tell the coordinator','Last: "Set up done" · 12:40',go,{ic:'send'})}
+    ${row('Hand over','Photos · 3 clips · review link',go,{ic:'check'})}
+    ${fold('mytools','My tools','Song desk · requests · sets',`${row('Requests','3 from the couple',go)}${row('Sets','Set 1 · Set 2 · last dance',go)}`,{ic:'tools'})}
+  </div>
+  <p class="note">Opens from Today's "Run the day", from the customer card, and from More › Event Hub (scan, per the 2026-10-03 rule). Unpaid booking fee = this page says so, never an empty page.</p>`;
+
+/* 7 · MESSAGES — one inbox */
+SCREENS.messages=()=>`
+  <div class="eyebrow" style="margin-top:12px">Inbox ${sel(['All','Unread','New inquiries','Booked','Archived'],'All')}</div>
+  <div class="rows">
+    ${[['AM','Ana &amp; Miguel','Hi! Are you free on Mar 13? We love…','2 h',true,'<span class="pill wine">New</span>'],['RC','Rolando &amp; Carmen','Yes, let\'s book the full day.','5 h',true,''],['KO','Katrina Ocampo','Can you add the 18 roses reel?','1 d',false,''],['JC','Jun &amp; Liza Cruz','Parking is at the basement, gate 2.','2 d',false,''],['LB','Lourdes Bautista','Thank you po!','4 d',false,''],['SN','Setnayan','Your Pro trial ends Oct 31.','6 d',false,'']].map(c=>`<button class="chat" data-go="customer"><span class="av${c[0]==='SN'?' l':''}">${c[0]}</span><span><b>${c[1]}</b><span class="last${c[4]?' u':''}">${c[2]}</span></span><span class="when">${c[3]}${c[4]?'<span class="dot"></span>':c[5]}</span></button>`).join('')}
+  </div>`;
+
+/* 8 · SETTINGS — behind the avatar (and More in A) */
+SCREENS.settings=()=>`
+  <div class="head"><h1>Settings</h1></div>
+  <div class="rows">
+    ${row('Account','Ana Reyes · ana@lumina.ph',go,{ic:'people'})}
+    ${fold('notif','Notifications','Push on · email on',`${row('Push','Instant · inquiries, bookings, payments',sw('push',true))}${row('Email','Daily digest',sw('mail',true))}`,{ic:'bell'})}
+    ${fold('plan','Plan','Pro · renews Oct 31 · ₱2,500 / 28 d',`${row('Plan',sel(['Free','Solo','Pro','Enterprise','Custom'],'Pro'))}${row('Cycle',sel(['28 days','Annual'],'28 days'))}${row('Add-ons','Vendor AI · Papic Challenges',go)}${row('Pay','₱2,500 · due Oct 31',btn('ok','money','Pay'))}`,{ic:'gear'})}
+    ${fold('paid','Getting paid','BDO · GCash QR',`${row('BDO','Lumina Studio Inc · ••••4821',sw('bdo',true))}${row('GCash','QR · verified',sw('gc',true))}<div class="acts" style="margin-top:8px">${btn('brand','plus','Add a way')}</div>`,{ic:'money'})}
+    ${fold('team','Team','3 of 5 seats · 2 admins',`${row('Ana Reyes','Admin','')}${row('Marco Lim','Agent · video','')}${row('Jo Tan','Viewer','')}<div class="acts" style="margin-top:8px">${btn('brand','plus','Invite')}</div>`,{ic:'people'})}
+    ${fold('tools','More tools','Recommend · Partners · Creators · Protection',`${row('Recommend','3 vouch for you',go)}${row('Partnerships','1 preferred partner',go)}${row('Creators','0 offers',go)}${row('Theft Watch','Clean',go)}${row('Disputes','None',go)}${row('Deep Search','₱500 · 1 free on Pro',go)}`,{ic:'tools'})}
+    ${row('Sign out','',I.out,{ic:'out'})}
+  </div>`;
+
+/* 9 · MORE — A (tidied) vs B (re-plot) */
+const MORE_A=()=>`<div class="rows">
+  ${row('Calendar','Dates · blocked · waitlist',go,{ic:'cal',go:'customers:dates'})}
+  ${row('Money','In · due · payday',go,{ic:'money',go:'customers:money'})}
+  ${row('Messages','3 unread','<b style="color:var(--wine)">3</b>'+go,{ic:'chat',go:'messages'})}
+  ${row('Insights','Views · inquiries · booked',go,{ic:'chart',go:'shop:insights'})}
+  ${row('Event Hub','Next: Cruz wedding · Oct 4',go,{ic:'hub',go:'hub'})}
+  ${row('Settings','Plan · team · notifications',go,{ic:'gear',go:'settings'})}
+</div>`;
+const MORE_B=()=>`<div class="rows">
+  ${row('Event Hub','Next: Cruz wedding · Oct 4','<span class="pill ok">Oct 4</span>'+go,{ic:'hub',tone:'ok',go:'hub'})}
+  ${row('Settings','Plan · team · notifications',go,{ic:'gear',go:'settings'})}
+  ${row('More tools','Recommend · partners · protection',go,{ic:'tools',go:'settings'})}
+</div>
+<p class="note">Calendar → Customers › Dates · Money → Customers › Money · Insights → Shop › Insights · Messages → the envelope on every page.</p>`;
+SCREENS['more-a']=()=>SCREENS.today();
+SCREENS['more-b']=()=>SCREENS.today();
+
+/* ---------------- shell / bar / lower ---------------- */
+const BAR=[['today','Today','home'],['customers','Customers','people'],['shop','Shop','shop'],['more','More','more']];
+function activeTab(){const s=S.screen;if(s.startsWith('today'))return 'today';if(s==='customers'||s==='customer'||s==='messages')return 'customers';if(s==='shop')return 'shop';if(s.startsWith('more'))return 'more';return 'none';}
+function renderShell(){
+  const sub={customer:true,hub:true,messages:true,settings:true}[S.screen];
+  const title={customer:'Customer',hub:'Event Hub',messages:'Messages',settings:'Settings'}[S.screen]||'';
+  $('#shell').innerHTML=sub?`<button class="back" data-act="back">‹</button><span class="shop" style="color:var(--ink);font-weight:500">${title}</span><span class="right"><button class="door" data-go="messages" aria-label="Messages">${I.chat}<b>3</b></button><button class="av" data-go="settings" aria-label="Settings">AR</button></span>`
+   :`<span class="logo">SETNAYAN</span><span class="shop">Lumina Studio</span><span class="right"><button class="door" data-go="messages" aria-label="Messages">${I.chat}<b>3</b></button><button class="av" data-go="settings" aria-label="Settings">AR</button></span>`;
+  $('#bar').innerHTML=BAR.map(b=>`<button class="${activeTab()===b[0]?'on':''}" data-tab="${b[0]}">${I[b[2]]}${b[1]}${b[0]==='customers'?'<b>3</b>':''}</button>`).join('');
+}
+function renderLower(){
+  const s=S.screen;let html='';
+  if(s==='customers'&&S.seg.customers==='people') html=`<div class="search glass">${I.search}Search a customer</div>${btn('brand','plus','Add',true,'data-act="toast" data-msg="Add an outside client · free"')}`;
+  else if(s==='customers'&&S.seg.customers==='dates') html=`${btn('grey','cal','Block a date',false,'data-act="toast" data-msg="Block Oct 14?"')}${btn('brand','plus','Add',true,'data-act="toast" data-msg="Add an outside client · free"')}`;
+  else if(s==='customers') html=`${btn('ok','check','Log a payment',true,'data-act="toast" data-msg="Log a payment"')}`;
+  else if(s==='customer') html=`${btn('info','chat','Chat',true,'data-go="messages"')}<button class="btn t-grey glass" data-act="toast" data-msg="Quote">${I.send}<span class="lbl">Quote</span></button><button class="btn t-grey glass" data-act="toast" data-msg="Log a payment">${I.money}<span class="lbl">Payment</span></button><button class="btn t-grey glass" data-act="toast" data-msg="Call">${I.phone}<span class="lbl">Call</span></button>`;
+  else if(s==='shop'&&S.seg.shop==='services') html=`<div class="search glass">${I.search}Search what you sell</div>${btn('brand','plus','Add',true,'data-act="toast" data-msg="New service"')}`;
+  else if(s==='shop'&&S.seg.shop==='page') html=`${btn('grey','eye','View page',false,'data-act="toast" data-msg="Opens your public page"')}${btn('brand','check','Apply',true,'data-act="toast" data-msg="Published"')}`;
+  else if(s==='hub') html=`${btn('brand','scan','Scan',true,'data-act="toast" data-msg="Scanner open"')}<button class="btn t-grey glass" data-act="toast" data-msg="Shutter">${I.cam}<span class="lbl">Papic</span></button><button class="btn t-grey glass" data-act="toast" data-msg="Sent">${I.send}<span class="lbl">Tell</span></button>`;
+  else if(s==='messages') html=`<div class="search glass">${I.search}Search messages</div>`;
+  $('#lower').innerHTML=html;h.classList.toggle('lower-hide',!html);
+  $('#lower').querySelectorAll('.btn.t-grey:not(.glass)').forEach(b=>b.classList.add('glass'));
+  fitRows();
+}
+function fitRows(){document.querySelectorAll('.acts,.lower').forEach(r=>{r.classList.remove('fit');if(r.scrollWidth>r.clientWidth+1)r.classList.add('fit');});}
+
+/* ---------------- sheet (More) ---------------- */
+function openMore(){
+  $('#sheet').innerHTML=`<div class="grip"></div><h3>More</h3><div class="ab"><button class="${S.ab==='a'?'on':''}" data-ab="a">A · keep, tidied</button><button class="${S.ab==='b'?'on':''}" data-ab="b">B · re-plot (recommended)</button></div>${S.ab==='a'?MORE_A():MORE_B()}`;
+  h.classList.add('sheet-open');
+}
+function closeMore(){h.classList.remove('sheet-open');}
+
+/* ---------------- tour (one slide per page; shipped MiniTour) ---------------- */
+const TOUR={today:['One thing at a time','The Next card is what waits on you. Answer it and the next takes its place.'],customers:['People · Dates · Money','One list of your customers, the same bookings as a calendar, and the money behind them.'],shop:['Services · Page · Insights','What you sell, how your page looks, how it is doing.'],hub:['Run the day','Scan, schedule, shot list, headcount — for this event only.']};
+function tour(){const t=TOUR[S.screen];if(!t||q.get('tour')==='0'||sessionStorage.getItem('t-'+S.screen)){h.classList.remove('tour-on');return;}$('#tour').innerHTML=`<button data-act="tour-ok">Got it</button><b>${t[0]}</b>${t[1]}`;h.classList.add('tour-on');}
+
+/* ---------------- render ---------------- */
+function render(){
+  if(S.screen==='fail'){S.screen='today';S.fail=true;}
+  $('#main').innerHTML=(SCREENS[S.screen]||SCREENS.today)();
+  renderShell();renderLower();tour();
+  if(S.screen.startsWith('more')){S.ab=S.screen.endsWith('a')?'a':'b';openMore();}else closeMore();
+  // Rule 2/3: numbers count, meters grow
+  document.querySelectorAll('[data-fill]').forEach(m=>requestAnimationFrame(()=>m.style.width=m.dataset.fill+'%'));
+  document.querySelectorAll('[data-count]').forEach(el=>{const raw=el.dataset.count;const n=parseInt(raw.replace(/[^\d]/g,''));if(isNaN(n))return;const pre=raw.match(/^[^\d]*/)[0],suf=raw.match(/[^\d,]*$/)[0];const t0=performance.now(),d=Math.min(900,420+n/300);const step=t=>{const p=Math.min(1,(t-t0)/d),e=1-Math.pow(1-p,3);el.textContent=pre+Math.round(n*e).toLocaleString()+suf;if(p<1)requestAnimationFrame(step);};requestAnimationFrame(step);});
+  window.scrollTo(0,0);
+}
+function nav(target){
+  if(!target)return;
+  if(target.includes(':')){const [a,b]=target.split(':');S.screen=a;S.seg[a]=b;}
+  else S.screen=target;
+  S.fail=false;render();
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-tab],[data-go],[data-seg],[data-toggle],[data-sw],[data-ab],[data-act]');
+  if(!t)return;
+  if(t.dataset.tab){const k=t.dataset.tab;if(k==='more'){S.screen='more-'+S.ab;render();}else{S.screen=k;S.fail=false;render();}return;}
+  if(t.dataset.seg){const [p,k]=t.dataset.seg.split(':');S.seg[p]=k;render();return;}
+  if(t.dataset.toggle){const k=t.dataset.toggle;const f=t.closest('.fold');const was=f.classList.contains('open');document.querySelectorAll('.fold.open').forEach(x=>{x.classList.remove('open');S.open[x.dataset.fold]=false;});if(!was){f.classList.add('open');S.open[k]=true;}return;}
+  if(t.dataset.sw){t.classList.toggle('on');S.sw[t.dataset.sw]=t.classList.contains('on');toast(t.classList.contains('on')?'Live':'Draft');return;}
+  if(t.dataset.ab){S.ab=t.dataset.ab;S.screen='more-'+S.ab;render();return;}
+  if(t.dataset.act==='back'){S.screen=activeTab()==='none'?'today':(S.screen==='messages'||S.screen==='customer'?'customers':'today');render();return;}
+  if(t.dataset.act==='retry'){S.fail=false;render();toast('Loaded');return;}
+  if(t.dataset.act==='tour-ok'){sessionStorage.setItem('t-'+S.screen,'1');h.classList.remove('tour-on');return;}
+  if(t.dataset.act==='toast'){toast(t.dataset.msg||'Done');return;}
+  if(t.dataset.go!==undefined&&t.dataset.go!==''){nav(t.dataset.go);return;}
+});
+$('#scrim').addEventListener('click',()=>{closeMore();S.screen='today';render();});
+window.addEventListener('resize',fitRows);
+let tt;function toast(m){const el=$('#toast');el.textContent=m;el.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('on'),1400);}
+
+/* ---------------- mode ---------------- */
+const FRAMES=[['today','01 · Today'],['today-day','02 · Today — event day: Run the day'],['customers:people','03 · Customers · People'],['customers:dates','04 · Customers · Dates (Calendar)'],['customers:money','05 · Customers · Money (Earnings & payday)'],['customer','06 · A customer (Event Hub inside)'],['shop:services','07 · Shop · Services'],['shop:page','08 · Shop · Page'],['shop:insights','09 · Shop · Insights'],['more-a','10 · More — A keep, tidied'],['more-b','11 · More — B re-plot (recommended)'],['hub','12 · Event Hub (On the day)'],['messages','13 · Messages'],['settings','14 · Settings (avatar)'],['fail','15 · Couldn\'t load — never a zero']];
+if(q.has('s')){h.classList.add('app');render();}
+else{
+  const mk=(f,dark)=>`<div class="frame"><iframe src="?s=${f[0]}&tour=0${dark?'&dark=1':''}" loading="lazy"></iframe><div class="cap">${f[1]}${dark?' · <b>dark</b>':''}</div></div>`;
+  $('#frames').innerHTML=FRAMES.map(f=>mk(f,false)).join('');
+  $('#framesDark').innerHTML=[FRAMES[1],FRAMES[2],FRAMES[8]].map(f=>mk(f,true)).join('');
+}
+</script>
+</body>
+</html>
