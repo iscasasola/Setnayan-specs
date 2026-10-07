@@ -18,6 +18,18 @@
 | `DECISION_LOG.md` 2026-09-20 / 2026-09-22 | the pre-existing fee-unlock rule this page mirrors — cite, never re-derive |
 
 ## Contact sheet
+**Thumb bar (final, 2026-10-07 evening):**
+
+![expand all](prototypes/suppliers_final_2026-10-07/19-thumb-bar-expand-all.jpg)
+
+![search all](prototypes/suppliers_final_2026-10-07/20-thumb-bar-collapsed-search-all.jpg)
+
+![impala unfolds Bridal Car](prototypes/suppliers_final_2026-10-07/21-search-all-impala-unfolds-bridal-car.jpg)
+
+![no hit → add](prototypes/suppliers_final_2026-10-07/22-search-all-no-hit-add.jpg)
+
+![buffet across both lists](prototypes/suppliers_final_2026-10-07/17-thumb-search-buffet-both-lists.jpg)
+
 ⚠ Pictures 03 and 13 show the search/add row pinned inside the category; since 2026-10-07 evening it is the THUMB BAR (see the check doc § "The category's search/add box is the thumb bar") — the prototype at corpus HEAD is the truth.
 
 
