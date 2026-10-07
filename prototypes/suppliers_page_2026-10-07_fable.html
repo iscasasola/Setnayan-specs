@@ -178,6 +178,10 @@ html.sheet-open .sheet{transform:none;visibility:visible;transition:transform 32
 .opt{display:grid;grid-template-columns:1fr auto;gap:10px;padding:12px 0;border-top:1px solid var(--line);font-size:14px;align-items:center}
 .opt:first-of-type{border-top:0}
 .opt .ok{color:var(--ok)} .opt .wine{color:var(--wine);font-weight:500}
+.findbar{display:flex;align-items:center;gap:10px;margin:4px 0 6px;font-size:14px}
+.findbar .sel{margin-left:auto;position:relative;border:1px solid var(--line);border-radius:999px;padding:7px 30px 7px 12px;background:var(--paper);font-size:13px}
+.findbar .sel:after{content:"⌄";position:absolute;right:11px;top:3px;font-size:17px;color:var(--mute)}
+.findbar select{position:absolute;inset:0;opacity:0;width:100%}
 .frow{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:11px 0;border-top:1px solid var(--line);font-size:14px}
 .frow:first-of-type{border-top:0}
 .frow .acts{display:grid;gap:4px;justify-items:end} .frow .acts button{color:var(--wine);font-weight:500;font-size:13px}
@@ -347,8 +351,9 @@ html.tour-on .tour{display:block}
     catering:[{id:'bituin',name:'Bituin Catering',area:'Quezon City',yrs:5,ev:80,from:950,per:'head',star:4.7,busy:[]},{id:'hiraya',name:'Hiraya Table',area:'Quezon City',yrs:6,ev:40,from:1200,per:'head',star:4.8,busy:[]},{id:'mesa',name:'Mesa Kusina',area:'Pasig',yrs:3,ev:12,from:850,per:'head',star:4.6,busy:['2026-12-18']},{id:'luntian',name:'Luntian Buffet',area:'Makati',yrs:9,ev:120,from:1500,per:'head',star:4.9,busy:[]}],
     photo:[{id:'lumina',name:'Lumina Studio',area:'Makati',yrs:8,ev:260,from:85000,star:4.9,busy:[]},{id:'kislap',name:'Kislap Films',area:'Makati',yrs:7,ev:210,from:95000,star:4.9,busy:[]},{id:'tala',name:'Tala Studio',area:'Taguig',yrs:4,ev:60,from:60000,star:4.7,busy:['2026-12-18']}],
     coordinator:[{id:'dalisay',name:'Dalisay Events',area:'Quezon City',yrs:10,ev:300,from:45000,star:4.9,busy:[]},{id:'bukas',name:'Bukas Coordination',area:'Pasig',yrs:2,ev:25,from:28000,star:4.5,busy:[]}],
-    hmua:[{id:'ganda',name:'Ganda by Mia',area:'Makati',yrs:8,ev:400,from:18000,star:4.8,busy:[]}],
-    cake:[{id:'tinapay',name:'Tinapay & Co.',area:'Quezon City',yrs:5,ev:90,from:12000,star:4.7,busy:[]}],
+    cake:[{id:'tinapay',name:'Tinapay & Co.',area:'Quezon City',yrs:5,ev:90,from:12000,star:4.7,busy:[]},{id:'asukal',name:'Asukal Cakes',area:'Makati',yrs:8,ev:300,from:18000,star:4.9,busy:['2026-12-18']},{id:'bibingka',name:'Bibingka Bakehouse',area:'Marikina',yrs:3,ev:40,from:8500,star:4.6,busy:[]}],
+    car:[{id:'vintage',name:'Vintage Rides MNL',area:'Quezon City',yrs:7,ev:220,from:15000,star:4.8,busy:[]},{id:'lumba',name:'Lumba Bridal Cars',area:'Pasig',yrs:4,ev:90,from:9500,star:4.6,busy:[]},{id:'classic',name:'Classic Beetle Co.',area:'Makati',yrs:10,ev:400,from:12000,star:4.9,busy:['2026-12-18']}],
+    hmua:[{id:'ganda',name:'Ganda by Mia',area:'Makati',yrs:8,ev:400,from:18000,star:4.8,busy:[]},{id:'kilay',name:'Kilay Studio',area:'Quezon City',yrs:5,ev:150,from:12000,star:4.7,busy:[]}],
     band:[{id:'awit',name:'Awit Collective',area:'Manila',yrs:6,ev:150,from:55000,star:4.8,busy:[]}],
     stylist:[{id:'bulaklak',name:'Bulaklak Studio',area:'Makati',yrs:12,ev:500,from:120000,star:4.9,busy:[]}]
   };
@@ -506,12 +511,22 @@ html.tour-on .tour{display:block}
           <div class="opt"><span>Room size<br><span class="mute">${v.room?'sent by '+esc(v.name.split(' ')[0])+' · your seat plan uses it':S.roomAsked[v.id]?'asked — waiting for their reply':'not sent yet'}</span></span>${v.room?`<b>${v.room}</b>`:S.roomAsked[v.id]?'<span class="mute">Asked</span>':`<button class="wine" data-act="askroom" data-id="${v.id}">Ask them ›</button>`}</div>`).join('')
           :`<div class="opt"><span class="mute">No venue booked yet. Metro Manila for now.</span></div><div class="cta"><button class="btn" data-act="sheet" data-key="find" data-cat="reception">Find a reception venue ›</button><button class="btn quiet" data-act="sheet" data-key="add" data-cat="reception">Add your own venue</button></div>`}
         <p class="mute" style="font-size:13px;margin-top:16px">Changing the venue means cancelling a booking — do that from the Booked section.</p>`; },
-    find({cat:k}){ const c=cat(k); const list=(MARKET[k]||[]).filter(m=>!S.suppliers.some(s=>s.id===m.id)); const mine=S.suppliers.filter(s=>s.cat===k);
-      return `<h3>Find ${mine.length?'more ':''}in ${c.name}</h3>
-        <div class="field"><input placeholder="Search in ${c.name}"></div>
-        <div class="field"><div class="sel">Filter · Metro Manila first<select aria-label="Filter"><option>Metro Manila first</option><option>Fits my budget</option><option>Free on ${shortDate(S.date)}</option><option>Top rated</option><option>Following ♥</option></select></div></div>
-        <p class="mute" style="font-size:13px;margin:12px 0 4px">${list.length?list.length+' supplier'+(list.length>1?'s':''):'Nobody here yet — suppliers are joining. Add your own below.'}</p>
+    find({cat:k,filter:fl}){ const c=cat(k); fl=fl||'near'; const mine=S.suppliers.filter(s=>s.cat===k);
+      let list=(MARKET[k]||[]).filter(m=>!S.suppliers.some(s=>s.id===m.id));
+      const remaining=BUDGET-S.suppliers.filter(s=>s.status==='booked').reduce((a,s)=>a+(s.price||0),0);
+      if(fl==='free') list=list.filter(m=>isFree(m));
+      if(fl==='budget') list=list.filter(m=>(priceOf(m)||0)<=remaining*0.15);
+      if(fl==='rated') list=[...list].sort((a,b)=>b.star-a.star);
+      if(fl==='following') list=[];
+      const FL={near:'Metro Manila first',budget:'Fits my budget',free:`Free on ${shortDate(S.date)}`,rated:'Top rated',following:'Following ♥'};
+      return `<h3>${c.name}</h3>
+        <div class="findbar"><span class="mute">${list.length?`${list.length} supplier${list.length>1?'s':''}`:'No suppliers match'}</span>
+          <div class="sel small">${FL[fl]}<select id="findFilter" data-cat="${k}" aria-label="Filter">${Object.entries(FL).map(([v,t])=>`<option value="${v}" ${v===fl?'selected':''}>${t}</option>`).join('')}</select></div></div>
         ${list.map(m=>`<div class="frow"><span class="logo">${initials(m.name)}</span><span><b>${esc(m.name)}</b><br><span class="mute">${m.area} · ${m.yrs} yrs · ${m.ev} events${m.from?' · from '+(m.per==='head'?'₱'+m.from.toLocaleString()+' / head':peso(m.from)):''} · ★ ${m.star}${isFree(m)?'':' · <span class=wine>taken on '+shortDate(S.date)+'</span>'}</span></span><span class="acts"><button data-act="ask" data-id="${m.id}" data-cat="${k}">Ask for a quote</button><button class="quiet" data-act="savesup" data-id="${m.id}" data-cat="${k}">Save</button></span></div>`).join('')}
+        ${!list.length&&fl==='near'?`<p class="mute" style="font-size:13px;margin:12px 0 4px">Nobody here yet — suppliers are joining.</p>`:''}
+        ${!list.length&&fl!=='near'?`<p class="mute" style="font-size:13px;margin:12px 0 4px">Try another filter.</p>`:''}
+        ${list.length>6?`<div class="field"><input placeholder="Search in ${c.name}"></div>`:''}
+        ${mine.length?`<p class="mute" style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;margin:16px 0 0">Already yours</p>`:''}
         ${mine.map(s=>`<div class="frow"><span class="logo">${initials(s.name)}</span><span><b>${esc(s.name)}</b><br><span class="mute">${{saved:'Saved',waiting:'Saved · waiting for their quote',quote:'Quote in',booked:'Booked ✓',deciding:'In your build'}[s.status]}</span></span><span class="acts"><button class="quiet" data-act="sheet" data-key="chat" data-id="${s.id}">Open chat ›</button></span></div>`).join('')}
         <p class="mute" style="font-size:13px;margin-top:14px">Not here? <button class="wine" data-act="sheet" data-key="add" data-cat="${k}">Add your own ›</button></p>`; },
     add({cat:k}){ k=k||'catering'; return `<h3>Add your own supplier</h3><p class="mute" style="margin:0">Someone you already talk to outside Setnayan.</p>
@@ -587,6 +602,7 @@ html.tour-on .tour{display:block}
   };
   document.addEventListener('click',e=>{ const b=e.target.closest('[data-act]'); if(!b||b.disabled) return; e.preventDefault(); (ACT[b.dataset.act]||(()=>{}))(Object.assign({},b.dataset)); });
   document.addEventListener('change',e=>{ if(e.target.id==='moreCats'&&e.target.value){ const k=e.target.value; S.cats.push(k); S.removedCats=S.removedCats.filter(x=>x!==k); cat(k).fresh=true; S.open.push('cat-'+k); render(); toast(`Added ${cat(k).name}`); setTimeout(()=>document.getElementById('cat-'+k).scrollIntoView({block:'center'}),50); }
+    if(e.target.id==='findFilter') openSheet('find',{cat:e.target.dataset.cat,filter:e.target.value});
     if(e.target.id==='addCat') $('#addCatLabel').textContent=cat(e.target.value).name; if(e.target.id==='addBooked') $('#addBookedLabel').textContent=e.target.selectedOptions[0].text; });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSheet(); if(e.key==='Enter'&&e.target.id==='composer'){ const b=body.querySelector('.compose [data-act=send]'); ACT.send({id:b.dataset.id}); } if(e.key==='Enter'&&e.target.id==='addName') ACT.addown(); });
   $('#scrim').addEventListener('click',closeSheet);
