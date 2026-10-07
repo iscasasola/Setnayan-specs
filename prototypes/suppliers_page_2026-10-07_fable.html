@@ -252,6 +252,12 @@ html.sheet-open .sheet{transform:none;visibility:visible;transition:transform 32
 .qr-grid i{display:block;background:#1d1b17;border-radius:1px}
 .pickone{position:relative;display:inline-block;border:1px solid var(--line);border-radius:999px;padding:7px 32px 7px 12px;background:var(--paper-2);font-size:14px;font-weight:500;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
 .pickone select{position:absolute;inset:0;opacity:0;width:100%}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 6px 5px 11px;font-size:13px;background:var(--paper-2)}
+.chip button{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;color:var(--mute);font-size:14px}
+.chips .sel{position:relative;border:1px dashed var(--line);border-radius:999px;padding:6px 30px 6px 12px;font-size:13px;color:var(--mute)}
+.chips select{position:absolute;inset:0;opacity:0;width:100%}
+.field textarea{border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:var(--paper);font:inherit;color:inherit;width:100%;resize:vertical}
 .svc-card{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--paper);margin:4px 0 6px}
 .svc-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .svc-price{font-size:22px;font-weight:600;letter-spacing:-.01em;margin:6px 0 4px}
@@ -356,7 +362,7 @@ section{padding:18px 0 8px}
 }
 
 /* one chevron for every dropdown — an icon, centred, never a text glyph (the shipped PickMenu uses lucide ChevronDown) */
-.sel:after,.pickone:after,.lower .lowersel:after,.more .sel:after,.findhead .sel:after,.field .sel:after,.srow .sel:after{content:"";position:absolute;right:12px;top:50%;width:14px;height:14px;transform:translateY(-50%);background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a857a' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>") center/contain no-repeat;font-size:0}
+.sel:after,.pickone:after,.chips .sel:after,.lower .lowersel:after,.more .sel:after,.findhead .sel:after,.field .sel:after,.srow .sel:after{content:"";position:absolute;right:12px;top:50%;width:14px;height:14px;transform:translateY(-50%);background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a857a' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>") center/contain no-repeat;font-size:0}
 .lower .lowersel{padding-right:34px}
 </style>
 </head>
@@ -717,16 +723,36 @@ section{padding:18px 0 8px}
         <div class="field"><label>Proof <span class="mute">(optional)</span></label><button class="btn quiet" data-act="note" data-text="Picks a screenshot of the payment (ChosenProofField)">＋ Add a screenshot</button></div>
         <div class="cta"><button class="btn solid" data-act="logpay" data-id="${id}">Record payment</button></div>`:`<p class="ok" style="color:var(--ok);margin:12px 0">Paid in full · ${peso(s.paid)}</p>`}
         ${s.paid?`<p class="k2" style="margin-top:10px">Recorded</p><div class="opt"><span>${peso(s.paid)} <span class="mute">· ${s.awaiting?'date held · awaiting their confirmation':'confirmed by '+esc(s.name.split(' ')[0])}</span></span></div>`:''}`; },
-    price({id}){ const s=sup(id); const c=s.cost||{};
-      return `<h3>Costing · ${esc(s.name)}</h3><p class="mute" style="margin:0 0 4px;font-size:13.5px">What you'll budget is the service price + transport + food allowance. Leave a line blank to count it as ₱0.</p>
+    price({id}){ const s=sup(id); const c=s.cost||{}; const covers=s.covers||[]; const own=!!s.own;
+      const coverOpts=CATS.filter(x=>x.key!==s.cat&&!covers.includes(x.key));
+      return `<h3>${own?'Your record':'Costing'} · ${esc(s.name)}</h3>
+        ${own?`<p class="k2">What they do</p>
+        <div class="field"><div class="sel">${cat(s.cat).name}<select id="recCat" data-id="${id}">${CATS.map(x=>`<option value="${x.key}" ${x.key===s.cat?'selected':''}>${x.name}</option>`).join('')}</select></div></div>
+        <p class="k2">Also covers</p>
+        <div class="chips">${covers.map(k=>`<span class="chip">${cat(k).name}<button data-act="uncover" data-id="${id}" data-cat="${k}" aria-label="Remove ${cat(k).name}">×</button></span>`).join('')}<div class="sel small"><span>＋ Add a category</span><select id="recCover" data-id="${id}" aria-label="Also covers"><option value="">＋ Add a category</option>${GROUPS.map((g,gi)=>{ const inG=coverOpts.filter(x=>x.g===gi); return inG.length?`<optgroup label="${g}">${inG.map(x=>`<option value="${x.key}">${x.name}</option>`).join('')}</optgroup>`:''; }).join('')}</select></div></div>
+        <p class="mute" style="font-size:12.5px;margin:4px 0 0">A category they cover counts as covered on your page and sits in the same quote.</p>
+        <p class="k2">What's included</p>
+        <div class="field"><textarea id="recInc" rows="3" placeholder="e.g.
+Full-day coverage
+2 photographers
+Same-day edit">${esc((s.inclusions||[]).join('\n'))}</textarea></div>`:''}
+        <p class="k2">Costing</p><p class="mute" style="margin:0 0 4px;font-size:13px">What you'll budget is the service price + transport + food allowance. Leave a line blank to count it as ₱0.</p>
         <div class="field"><label>Service price</label><input id="costSvc" inputmode="numeric" placeholder="₱ 0" value="${c.svc!=null?peso(c.svc):(s.price!=null?peso(s.price):'')}" data-peso></div>
         <div class="field"><label>Transport cost</label><input id="costTransport" inputmode="numeric" placeholder="₱ 0" value="${c.transport?peso(c.transport):''}" data-peso></div>
         <div class="field"><label>Food allowance</label><input id="costFood" inputmode="numeric" placeholder="₱ 0" value="${c.food?peso(c.food):''}" data-peso></div>
         <div class="field"><label>Crew size on the day</label><input id="costCrew" inputmode="numeric" placeholder="0" value="${c.crew||''}"></div>
         <div class="opt" style="margin-top:6px"><span>Total</span><b id="costTotal">${s.price!=null?peso(s.price):'₱0'}</b></div>
         <div class="field"><label>Paid so far <span class="mute">(optional)</span></label><input id="pricePaid" inputmode="numeric" placeholder="₱ 0" value="${s.paid?peso(s.paid):''}" data-peso></div>
-        <p class="mute" style="font-size:12.5px">Until there’s a total, Buffer stays “Not knowable”. That’s on purpose.</p>
-        <div class="cta"><button class="btn solid" data-act="setprice" data-id="${id}">Save costs</button></div>`; },
+        ${own?`<p class="k2">Contact</p>
+        <div class="field"><label>Who you talk to</label><input id="recWho" placeholder="e.g. Maria Santos" value="${esc(s.contactName||'')}"></div>
+        <div class="field"><label>Mobile</label><input id="recPhone" inputmode="tel" placeholder="+63 9XX XXX XXXX" value="${esc(s.phone||'')}"></div>
+        <div class="field"><label>Email <span class="mute">(optional)</span></label><input id="recEmail" inputmode="email" placeholder="name@example.com" value="${esc(s.email||'')}"></div>
+        <div class="cta" style="padding-top:4px"><button class="btn quiet" data-act="note" data-text="Sends them an invite to Setnayan (sendVendorInvite) — their chat, quote and payments move here">Invite them to Setnayan by email</button></div>
+        <p class="k2">Payment notes <span class="mute" style="text-transform:none;letter-spacing:0">· private, yours only</span></p>
+        <div class="field"><textarea id="recPay" rows="2" placeholder="e.g. GCash 0917 555 1234 (Maria Santos)
+or BPI 1234-5678-90">${esc(s.payNotes||'')}</textarea></div>`:''}
+        <p class="mute" style="font-size:12.5px">Until there's a total, Buffer stays "Not knowable". That's on purpose.</p>
+        <div class="cta"><button class="btn solid" data-act="setprice" data-id="${id}">Save</button></div>`; },
     book({id}){ const s=sup(id); const p=priceOf(s); if(!availableFor(s)) return `<h3>${esc(s.name)} is taken on ${shortDate(S.date)}</h3><p class="mute">You can ask them about another day, or pick another supplier.</p><div class="cta"><button class="btn" data-act="sheet" data-key="chat" data-id="${id}">Ask about another day</button><button class="btn quiet" data-act="sheet" data-key="date">Help me choose a date</button></div>`; const other=S.suppliers.find(x=>x.cat===s.cat&&x.status==='booked'&&x.id!==s.id);
       return `<h3>Book ${esc(s.name)}?</h3><p class="mute" style="margin:0">Booking asks them to hold ${S.dateKnown==='day'?shortDate(S.date):'a day in '+monthOf(S.date)}. They confirm, then your first payment holds the date.</p>
         <div class="field"><label>Agreed price</label><input id="bookPrice" inputmode="numeric" value="${p!=null?peso(p):''}" placeholder="₱ 0" data-peso></div>
@@ -770,9 +796,12 @@ section{padding:18px 0 8px}
     savesup(d){ S.suppliers.push(mk(d.id,{cat:d.cat,status:'saved',fresh:true})); S.mode='find'; S.cat=d.cat; render(); toast(`Saved ${mk(d.id).name} — now under Yours`); },
     addown(){ const name=($('#addName').value||'').trim(); if(!name){ $('#addName').focus(); return; } const k=$('#addCat').value; const price=parseInt(($('#addPrice').value||'').replace(/\D/g,''))||null; const booked=$('#addBooked').value==='1';
       const s={id:'own'+Date.now(),name,cat:k,own:true,status:booked?'booked':'saved',price:booked?price:null,paid:0,busy:[],fresh:true,pop:booked}; S.suppliers.push(s); if(!S.cats.includes(k)) S.cats.push(k); S.removedCats=S.removedCats.filter(x=>x!==k); if(!S.open.includes('cat-'+k)) S.open.push('cat-'+k);
-      closeSheet(); S.mode='find'; S.cat=k; render(); toast(`You added ${name}${booked?' — booked':''}`); },
+      S.mode='find'; S.cat=k; render(); openSheet('price',{id:s.id}); toast(`You added ${name}${booked?' — booked':''} — fill in the rest of your record`); },
     logpay(d){ const s=sup(d.id); const v=parseInt(($('#payAmt').value||'').replace(/\D/g,''))||0; if(!v) return; s.paid=(s.paid||0)+v; s.awaiting=true; addChat(s.id,{sys:`You recorded a payment of ${peso(v)} — date held, awaiting ${s.name.split(' ')[0]}’s confirmation.`}); closeSheet(); render(); toast(`Recorded ${peso(v)} · date held, awaiting confirmation`,()=>{s.paid-=v;s.awaiting=false;render();}); },
-    setprice(d){ const s=sup(d.id); const n=id=>parseInt(($('#'+id).value||'').replace(/\D/g,''))||0; const c={svc:n('costSvc')||null,transport:n('costTransport'),food:n('costFood'),crew:n('costCrew')}; s.cost=c; s.price=c.svc!=null?c.svc+c.transport+c.food:null; s.paid=n('pricePaid'); closeSheet(); render(); toast(s.price?`Costs saved · total ${peso(s.price)}`:'Costs cleared'); },
+    setprice(d){ const s=sup(d.id); const v=id=>($('#'+id)||{}).value; const n=id=>parseInt((v(id)||'').replace(/\D/g,''))||0; const c={svc:n('costSvc')||null,transport:n('costTransport'),food:n('costFood'),crew:n('costCrew')}; s.cost=c; s.price=c.svc!=null?c.svc+c.transport+c.food:null; s.paid=n('pricePaid');
+      if(s.own){ if(v('recCat')&&v('recCat')!==s.cat){ s.cat=v('recCat'); if(!S.cats.includes(s.cat)) S.cats.push(s.cat); } s.inclusions=(v('recInc')||'').split('\n').map(x=>x.trim()).filter(Boolean); s.includes=s.inclusions.join(' · ')||null; s.contactName=v('recWho')||''; s.phone=v('recPhone')||''; s.email=v('recEmail')||''; s.payNotes=v('recPay')||''; }
+      closeSheet(); render(); toast(s.price?`Saved · total ${peso(s.price)}`:'Saved'); },
+    uncover(d){ const s=sup(d.id); s.covers=(s.covers||[]).filter(k=>k!==d.cat); openSheet('price',{id:d.id}); render(); },
     accept(d){ const s=sup(d.id); s.price=s.quote; s.status='deciding'; S.picks[s.cat]=s.id; addChat(s.id,{me:true,t:'Accepting option A. Thank you!'}); addChat(s.id,{sys:'Quote accepted — in your build. Book when you’re ready.'}); closeSheet(); render(); toast(`Accepted — ${s.name.split(' ')[0]} is in your build`); },
     send(d){ const inp=$('#composer'); const t=d.text||(inp&&inp.value.trim()); if(!t) return; addChat(d.id,{me:true,t}); const s=sup(d.id); if(s.status==='saved'){ s.status='waiting'; s.askedAgo='just now'; } openSheet('chat',d); render(); },
     dobuild(){ const name=($('#buildName').value||'').trim()||`Build ${S.builds.length+1}`; S.builds.push({name,picks:Object.assign({},S.picks),fresh:true}); closeSheet(); render(); toast(`Saved "${name}"`); },
@@ -786,6 +815,7 @@ section{padding:18px 0 8px}
     if(e.target.id==='findFilter'){ S.filter=e.target.value; render(); }
     if(e.target.id==='payMethod'){ openSheet('pay',{id:e.target.dataset.id,method:e.target.value}); }
     if(e.target.dataset&&e.target.dataset.pickcat){ const k=e.target.dataset.pickcat, id=e.target.value; const prev=S.picks[k]; if(prev&&prev!==id){ const ps=sup(prev); if(ps&&ps.status==='deciding') ps.status='saved'; } if(id){ S.picks[k]=id; const x=sup(id); if(x&&x.status==='saved') x.status='deciding'; } else delete S.picks[k]; render(); }
+    if(e.target.id==='recCover'&&e.target.value){ const s=sup(e.target.dataset.id); s.covers=(s.covers||[]).concat([e.target.value]); openSheet('price',{id:s.id}); render(); }
     if(e.target.id==='addCat') $('#addCatLabel').textContent=cat(e.target.value).name; if(e.target.id==='addBooked') $('#addBookedLabel').textContent=e.target.selectedOptions[0].text; });
   document.addEventListener('input',e=>{ if(e.target.matches&&e.target.matches('input[data-peso]')){ const d=e.target.value.replace(/\D/g,''); e.target.value=d?peso(parseInt(d,10)):''; } const t=$('#costTotal'); if(t){ const n=id=>parseInt((($('#'+id)||{}).value||'').replace(/\D/g,''))||0; t.textContent=peso(n('costSvc')+n('costTransport')+n('costFood')); } });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSheet(); if(e.key==='Enter'&&e.target.id==='composer'){ const b=body.querySelector('.compose [data-act=send]'); ACT.send({id:b.dataset.id}); } if(e.key==='Enter'&&e.target.id==='addName') ACT.addown(); });
