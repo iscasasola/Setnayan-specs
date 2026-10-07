@@ -233,3 +233,7 @@ Measured GAPs for PR6 (all against the rule): `vendor_agree_to_lock` books `cont
 
 ## All five audits are in — PR6 in one paragraph
 The fee rule exists and is ON, but it holds in exactly one place: the supplier's own customer-card pages. It is **not** in RLS, **not** on 23 of 51 supplier surfaces or 11 action modules, **not** read anywhere on the couple's side (0 of 44), the only attribution source is the chat thread (so find → save → book without a chat is free), and 5 booking paths book with no charge at all. PR6 = make it one server-side predicate (settled charge) used by RLS, every event-bound write, every couple-side booked reader and the notifications; one attribution function over three sources; the five minting gaps; the admin roll-up and the leak matcher. Four owner rulings gate it: charge at the yes or at the acknowledgement · `host_marketplace_search` sourced · self-added = claim or direct · gate manpower / appointments / story credit.
+
+
+## Owner add, 2026-10-08 ~02:15 PH
+- Owner, verbatim: *"budget page still needs refinement"*. The Budget view (reached from Home's money card → `vendors?part=budget`) is in scope for the Suppliers work on the new account. Apply the same rules as tonight: minimal words, one row shape, ActionButton, dropdowns for choices, frosted thumb row, honest reads (never ₱0 on a failed read), first-visit tour. Start with a side-by-side audit of today's Budget at 375 px.
