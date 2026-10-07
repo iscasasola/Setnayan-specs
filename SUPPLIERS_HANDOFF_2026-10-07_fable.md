@@ -237,3 +237,11 @@ The fee rule exists and is ON, but it holds in exactly one place: the supplier's
 
 ## Owner add, 2026-10-08 ~02:15 PH
 - Owner, verbatim: *"budget page still needs refinement"*. The Budget view (reached from Home's money card → `vendors?part=budget`) is in scope for the Suppliers work on the new account. Apply the same rules as tonight: minimal words, one row shape, ActionButton, dropdowns for choices, frosted thumb row, honest reads (never ₱0 on a failed read), first-visit tour. Start with a side-by-side audit of today's Budget at 375 px.
+- Owner screenshot of today's Budget (2026-10-08 ~02:20, 375-ish px), faults measured from it:
+  - the four numbers (Target ₱2,250,000 · Agreed ₱1,082,499 · Paid ₱0 · Owed ₱1,191,000) are crammed into one row, so the figures run into each other ("₱2,250,000₱1,082,499₱0"); use two by two, or one line plus a meter;
+  - the numbers are in a monospace font; use the app font with tabular numerals (Count);
+  - "What's your total wedding budget?" is a big question plus a paragraph plus a separate "Update my budget" Save button; make it one "Target" row that edits in place, with the explanation behind ⓘ and no Save button;
+  - "Export upcoming dates (.ics)" sits at the top of Budget; it belongs to Schedule/dates, not money;
+  - boxed cards (YOUR TARGET / YOUR BUDGET); make them rows;
+  - eyebrow labels repeat ("Your budget" + "Target · Agreed · Paid · Owed" + sub-lines "Your stated budget", "Agreed minus paid"); keep 1–3 word labels only;
+  - "wedding" in the copy: use the event's own kind or just "budget".
