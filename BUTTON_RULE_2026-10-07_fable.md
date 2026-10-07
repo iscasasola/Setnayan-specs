@@ -40,6 +40,9 @@ Nothing here is built. The Suppliers prototype (`prototypes/suppliers_page_2026-
 - Typing **never rebuilds the box being typed in** — the list updates, the box keeps its node, focus and caret; any "rise on load" animation plays once per page/mode, never on a re-render.
 - The same colour rules apply to the box's own button: **Add is terracotta (brand) everywhere** — Suppliers and Guests alike (a specificity slip had left it ink in both prototypes on 2026-10-07; fixed).
 
+## Rule 5 — the floating thumb bar animates in and out (owner 2026-10-07: *"animate this going up and hiding down when leaving the page. apply to guests as well"*)
+- The bar (search/add + controls, or the mode's actions) **slides up** once the page or mode has rendered, and **slides down first** (≈ 300 ms) when the couple leaves the page or switches to a mode without it; it never pops in or vanishes. Same bar on Suppliers and Guests.
+
 ## How a builder applies it (one component, then sweeps)
 1. **Two shared components** — `apps/web/components/action-button.tsx` and `apps/web/components/count.tsx` (Rule 2). `ActionButton`: `<ActionButton tone icon label main onClick/href>`; renders icon + `<span class="lbl">`; `aria-label` = the word, so icon-only is still readable. Plus one hook `useFitRow(ref)` = the fit pass (remove `icon-only`, then from the right add it until `scrollWidth ≤ clientWidth`; re-run on resize). Tokens `--color-ok/info/warn/danger` added to `globals.css` light + dark with the AA numbers in the comment, as every other token there has.
 2. **Sweep by area, one PR per area**, in the order below. Each PR: replace every `<button>`/`<a className="…btn…">`/text-link-with-› in that area with `ActionButton`, tone from the table in this doc; the PR body carries the before/after at 375 and 1280 and a one-line check card for the owner.
