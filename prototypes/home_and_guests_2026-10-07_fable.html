@@ -33,7 +33,7 @@ button.ic:active,.btn:active{transform:scale(.97)}
 button.ic svg,.btn svg{width:18px;height:18px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 button.ic.icon-only,.btn.icon-only{width:40px;padding:0;justify-content:center}button.ic.icon-only .lbl,.btn.icon-only .lbl{display:none}
 button.ic.text-only svg,.btn.text-only svg,.sel.ctl.text-only svg{display:none}
-button.ic,.btn{--tone:var(--ink)}.t-brand{--tone:var(--mulberry)}.t-ok{--tone:var(--ok)}.t-info{--tone:var(--info)}.t-warn{--tone:var(--warn)}.t-danger{--tone:var(--danger)}.t-neutral{--tone:var(--mute)}
+button.ic,.btn{--tone:var(--ink)}button.ic.t-brand,.btn.t-brand{--tone:var(--mulberry)}button.ic.t-ok,.btn.t-ok{--tone:var(--ok)}button.ic.t-info,.btn.t-info{--tone:var(--info)}button.ic.t-warn,.btn.t-warn{--tone:var(--warn)}button.ic.t-danger,.btn.t-danger{--tone:var(--danger)}button.ic.t-neutral,.btn.t-neutral{--tone:var(--mute)}
 button.ic,.btn.t-info,.btn.t-danger,.btn.t-warn,.btn.t-neutral{color:var(--tone);border-color:color-mix(in srgb,var(--tone) 45%,transparent);background:color-mix(in srgb,var(--tone) 9%,transparent)}
 button.ic.main,.btn.t-ok,.btn.t-brand{background:var(--tone);color:var(--on-tone);border-color:var(--tone)}button.ic.t-brand.main,.btn.t-brand{color:#fff}
 button.ic.main.quiet{background:color-mix(in srgb,var(--tone) 12%,transparent);color:var(--tone)}
@@ -65,6 +65,7 @@ button.ic.main.quiet{background:color-mix(in srgb,var(--tone) 12%,transparent);c
 @keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @keyframes popin{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
 @keyframes slidein{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+html.settled .card,html.settled .sec,html.settled .row,html.settled .nums,html.settled .tiles,html.settled .counts,html.settled .search,html.settled .lower{animation:none}
 .card,.sec,.row,.nums,.tiles,.counts,.search{animation:up 360ms var(--ease) both}
 .card:nth-child(2){animation-delay:40ms}.nums{animation-delay:80ms}.row:nth-child(n+3){animation-delay:60ms}.tiles{animation-delay:120ms}
 .g.fresh{animation:slidein 420ms var(--ease) both}
@@ -101,7 +102,7 @@ button.ic.main.quiet{background:color-mix(in srgb,var(--tone) 12%,transparent);c
 /* ===== lower bar, sheet, toast ===== */
 .lower{position:fixed;left:0;right:0;bottom:var(--bar);padding:10px 16px;background:linear-gradient(transparent,var(--paper) 30%);display:flex;gap:10px;align-items:center;z-index:5}.lower .btn{flex:1;justify-content:center}
 .lower .search.thumb{position:static;flex:1;padding:0;background:transparent;display:flex;gap:6px;align-items:center;min-width:0}
-.lower .search.thumb .acts{gap:6px}.lower .search.thumb .icon-only{width:38px}
+.lower .search.thumb .acts{gap:6px}.lower .search.thumb [data-side=right]{display:flex}.lower .search.thumb .icon-only{width:38px}
 .lower{background:linear-gradient(transparent,var(--paper) 25%)}
 .nav{position:fixed;left:0;right:0;bottom:0;height:var(--bar);background:var(--paper);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);z-index:6}.nav button{display:grid;place-items:center;gap:2px;font-size:11px;color:var(--mute)}.nav button.on{color:var(--ink);font-weight:600}.nav button span:first-child{font-size:18px}
 .sheet{position:fixed;left:0;right:0;bottom:0;max-height:88dvh;overflow:auto;background:var(--paper-2);border-radius:22px 22px 0 0;padding:16px 16px calc(var(--bar) + 20px);transform:translateY(105%);transition:transform 320ms var(--ease);z-index:8;box-shadow:0 -10px 40px rgba(0,0,0,.18)}
@@ -182,7 +183,7 @@ html.sheet-open .sheet{transform:none}.scrim{position:fixed;inset:0;background:r
   const visible=()=>{ const q=S.q.trim().toLowerCase(); return S.guests.filter(g=>!q||hay(g).includes(q)); };
   /* ---- render ---- */
   function nav(){ $('#nav').innerHTML=[['⌂','Home','home'],['👥','Guests','guests'],['◎','Suppliers',''],['🌐','Hub',''],['✦','More','']].map(([i,l,p])=>`<button data-act="page" data-page="${p}" class="${S.page===p?'on':''}"><span>${i}</span><span>${l}</span></button>`).join(''); }
-  function render(){ nav(); if(S.page==='home') renderHome(); else renderGuests(); fitActs(); document.querySelectorAll('[data-count]').forEach(count); fills(); const st=document.querySelector('.stick'); if(st) h.style.setProperty('--stick-h',st.offsetHeight+'px'); const sr=document.querySelector('main .search'); h.style.setProperty('--search-h',(sr?sr.offsetHeight:0)+'px'); }
+  let settleT; function render(){ nav(); if(S.page==='home') renderHome(); else renderGuests(); fitActs(); clearTimeout(settleT); settleT=setTimeout(()=>h.classList.add('settled'),500); document.querySelectorAll('[data-count]').forEach(count); fills(); const st=document.querySelector('.stick'); if(st) h.style.setProperty('--stick-h',st.offsetHeight+'px'); const sr=document.querySelector('main .search'); h.style.setProperty('--search-h',(sr?sr.offsetHeight:0)+'px'); }
   function renderHome(){
     const st=stats(); const days=72; const paid=0, owing=1056000;
     const guestsOk=!fail;
@@ -247,7 +248,9 @@ html.sheet-open .sheet{transform:none}.scrim{position:fixed;inset:0;background:r
     const expandBtn=(()=>{ const ids=grouping(vis).map(([r])=>secId(r)); const all=ids.every(i=>S.open.includes(i)); return ib(all?'collapse':'expand',all?'Collapse all':'Expand all',`data-act="expandall" data-all="${all?0:1}"`); })();
     const sortBtn=`<div class="sel ctl" style="flex:0 0 auto" title="Sort">${ICO.sort}<span class="lbl">${({role:'Role',alpha:'Last name',side:'Side',group:'Group',rsvp:'RSVP'})[S.viewBy]}</span><select data-act="viewby" aria-label="Sort — groups the list by"><option value="role" ${S.viewBy==='role'?'selected':''}>Role</option><option value="alpha" ${S.viewBy==='alpha'?'selected':''}>Last name</option><option value="side" ${S.viewBy==='side'?'selected':''}>Side</option><option value="group" ${S.viewBy==='group'?'selected':''}>Group</option><option value="rsvp" ${S.viewBy==='rsvp'?'selected':''}>RSVP</option></select></div>`;
     // the owner's order: expand/collapse · select · search · sort
-    const box=`<div class="search thumb"><span class="acts">${expandBtn}${ib('select','Select',`data-act="selectmode"`)}</span><input id="gq" value="${esc(S.q)}" placeholder="Search or add" autocomplete="off" aria-label="Search guests or add">${S.q&&!vis.length?`<span class="acts">${ib('plus','Add',`data-act="sheet" data-key="add" data-name="${esc(S.q)}"`,'main')}</span>`:sortBtn}</div>`;
+    const leftHtml=`${expandBtn}${ib('select','Select',`data-act="selectmode"`)}`; const rightHtml=S.q&&!vis.length?`${ib('plus','Add',`data-act="sheet" data-key="add" data-name="${esc(S.q)}"`,'main')}`:sortBtn;
+    const box=`<div class="search thumb"><span class="acts" data-side="left">${leftHtml}</span><input id="gq" value="${esc(S.q)}" placeholder="Search or add" autocomplete="off" aria-label="Search guests or add"><span class="acts" data-side="right">${rightHtml}</span></div>`;
+    if(S.typing&&S.gview==='list'&&!S.selectMode&&$('#lower .search.thumb')){ $('#lower [data-side=left]').innerHTML=leftHtml; $('#lower [data-side=right]').innerHTML=rightHtml; return; }
     $('#lower').innerHTML=S.gview!=='list'?'':S.selectMode?`${bb('mail',`Invite ${S.selected.length}`,`data-act="bulkinvite" ${S.selected.length?'':'disabled'}`)}${bb('x',`Remove ${S.selected.length}`,`data-act="bulkremove" ${S.selected.length?'':'disabled'}`)}${ib('select','Done',`data-act="selectmode"`,'main')}`:box;
   }
   /* ---- sheets ---- */
@@ -271,8 +274,8 @@ html.sheet-open .sheet{transform:none}.scrim{position:fixed;inset:0;background:r
   let toastT; function toast(text,undo){ const t=$('#toast'); $('#toastText').textContent=text; $('#toastUndo').style.display=undo?'':'none'; $('#toastUndo').onclick=()=>{undo&&undo(); t.classList.remove('on');}; t.classList.add('on'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('on'),4200); }
   /* ---- actions ---- */
   const ACT={
-    page(d){ if(!d.page) return toast('Not in this prototype — see the Suppliers one'); S.page=d.page; render(); window.scrollTo(0,0); },
-    gview(d){ S.gview=d.gview; render(); window.scrollTo(0,0); },
+    page(d){ if(!d.page) return toast('Not in this prototype — see the Suppliers one'); S.page=d.page; h.classList.remove('settled'); render(); window.scrollTo(0,0); },
+    gview(d){ S.gview=d.gview; h.classList.remove('settled'); render(); window.scrollTo(0,0); },
     togglesec(d){ const id=d.id; if(!id){ return; } const opening=!S.open.includes(id); S.open=opening?[...S.open,id]:S.open.filter(x=>x!==id); render(); if(opening) setTimeout(()=>{ const el=document.getElementById(id); el&&el.scrollIntoView({block:'start',behavior:'smooth'}); },80); },
     expandall(d){ const ids=grouping(visible()).map(([r])=>secId(r)); S.open=d.all==='1'?ids:[]; render(); },
     maplens(d,el){ S.mapLens=el.value; render(); },
@@ -298,7 +301,7 @@ html.sheet-open .sheet{transform:none}.scrim{position:fixed;inset:0;background:r
   };
   document.addEventListener('click',e=>{ const b=e.target.closest('[data-act]'); if(!b||b.tagName==='SELECT') return; const act=ACT[b.dataset.act]; if(act) act(b.dataset,b); });
   document.addEventListener('change',e=>{ const b=e.target.closest('select[data-act]'); if(!b) return; const act=ACT[b.dataset.act]; if(act) act(b.dataset,b); });
-  document.addEventListener('input',e=>{ if(e.target.id==='gq'){ const pos=e.target.selectionStart; S.q=e.target.value; render(); const el=$('#gq'); if(el){ el.focus(); try{ el.setSelectionRange(pos,pos);}catch(_){} } } });
+  let qT; document.addEventListener('input',e=>{ if(e.target.id==='gq'){ const v=e.target.value; clearTimeout(qT); qT=setTimeout(()=>{ S.q=v; S.typing=true; render(); S.typing=false; },250); /* search runs once you stop typing (owner 2026-10-07) */ } });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSheet(); if(e.key==='Enter'&&e.target.id==='addName') ACT.addguest(); if(e.key==='Enter'&&e.target.id==='gq'&&S.q&&!visible().length) openSheet('add',{name:S.q}); });
   window.__errs=[]; addEventListener('error',e=>window.__errs.push(String(e.message)));
   render();

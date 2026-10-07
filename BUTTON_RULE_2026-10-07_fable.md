@@ -35,6 +35,11 @@ Nothing here is built. The Suppliers prototype (`prototypes/suppliers_page_2026-
 - Reference: `[data-fill]` + `.meter-fill` in the Suppliers prototype. The builder gives `Count` a sibling `Fill` (or one `Measure` component with both) rather than per-page CSS transitions.
 - Exempt: the guest Event Hub (couple-designed).
 
+## Rule 4 — a search runs once you stop typing, and never blinks (owner 2026-10-07: *"why does it blink everytime i type"* · *"we cannot have that issue on suppliers and guests"* · *"start searching once we stop typing?"*)
+- The results update **250 ms after the last keystroke** (the shipped `GuestsTopSearch` debounce), not on every key.
+- Typing **never rebuilds the box being typed in** — the list updates, the box keeps its node, focus and caret; any "rise on load" animation plays once per page/mode, never on a re-render.
+- The same colour rules apply to the box's own button: **Add is terracotta (brand) everywhere** — Suppliers and Guests alike (a specificity slip had left it ink in both prototypes on 2026-10-07; fixed).
+
 ## How a builder applies it (one component, then sweeps)
 1. **Two shared components** — `apps/web/components/action-button.tsx` and `apps/web/components/count.tsx` (Rule 2). `ActionButton`: `<ActionButton tone icon label main onClick/href>`; renders icon + `<span class="lbl">`; `aria-label` = the word, so icon-only is still readable. Plus one hook `useFitRow(ref)` = the fit pass (remove `icon-only`, then from the right add it until `scrollWidth ≤ clientWidth`; re-run on resize). Tokens `--color-ok/info/warn/danger` added to `globals.css` light + dark with the AA numbers in the comment, as every other token there has.
 2. **Sweep by area, one PR per area**, in the order below. Each PR: replace every `<button>`/`<a className="…btn…">`/text-link-with-› in that area with `ActionButton`, tone from the table in this doc; the PR body carries the before/after at 375 and 1280 and a one-line check card for the owner.
