@@ -57,7 +57,8 @@ Owner (08 Oct): *"at 98% start documentation and still continue safely building 
 4. Suppliers + Budget + launch offer (option B, 50 free Papic credits) — target: suppliers join the weekend of 10–11 Oct.
 4b. Admin pages, same treatment: "an easy one man handled website".
 5. Event Details (#6412 → PR-B, PR-C) and the More-menu pages (#6411 → steps 2–10; step 6 needs a new table, owner sign-off first).
-6. Look redesign (after owner approval).
+6. Look redesign (after owner approval) · Logo maker replot (approved).
+6b. **When ALL features are clean:** redesign + replot onboarding and per-event coverage (EVENT_COVERAGE_MATRIX_2026-10-08_fable.md, A–G incl. expo exhibitors) — before the Apple check.
 7. E-Gifts wish list (design first).
 Apple check last (`ROADMAP_TO_APPLE_CHECK_2026-10-06.md`), then the post-Apple builds, then **a public feature page per feature for search visibility** (DECISION_LOG 2026-10-08).
 
