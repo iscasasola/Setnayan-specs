@@ -17,3 +17,13 @@ Source: Apple's "Preparing your app for iPhone Duo" (owner pasted 2026-10-08). i
 
 ## Done when
 A walk-through in the iPhone Duo simulator (all poses, rotations) of: onboarding, Home, Guests, Suppliers, the Maker (Stages + Studio), the guest Event Hub, Papic camera — with screenshots, no clipped or unreachable controls, no reloads on fold/unfold. Part of the Level 1 quality sweep.
+
+## From Apple's "Interface fundamentals" (owner pasted 2026-10-08) — also in the Level 1 sweep
+10. **Automatic layout:** every screen adapts to every iPhone and iPad size and orientation (iPad = the Desktop three-column layout at its width).
+11. **Dark Mode:** if the app supports dark (globals has `html.dark` tokens), every screen must look right in it (contrast, the frosted rows, look cards); if not fully ready, force light consistently rather than half-dark.
+12. **Dynamic Type (iOS text size):** the app's text must stay readable and not break layouts when the iPhone's text size is larger (test at the largest accessibility sizes); in WKWebView, honour the system text size where possible.
+13. **Accessibility (VoiceOver):** every button has a spoken name (ActionButton's aria-label = its word), images have alt text or are hidden from VoiceOver, picture-card looks are labelled, and the focus order follows the screen.
+14. **Language:** English + Tagalog are already supported for public pages; dates, times and pesos formatted for the Philippines (en-PH).
+15. **Undo:** the Maker's ↺ Undo covers every edit, including gestures (the Logo maker).
+16. **Copy and paste:** links, the Event Hub address and codes are copyable with one tap (the Share/Copy pattern).
+17. **App bundle:** the shell launches without the network failing silently; offline shows an honest "no connection" screen, never a blank or stale page (the service-worker stale-copy trap seen 08 Oct).
