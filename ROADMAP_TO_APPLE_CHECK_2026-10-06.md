@@ -338,6 +338,9 @@ Apple approves the binary, every website change reaches iOS users without a new 
 7. Stages | Studio prototype — "approve"? (gates §3)
 8. Native sign-in setup (§6.1c) done?
 
+## 8a · NEXT AFTER THE EVENT HUB MAKER — THE SUPPLIERS PAGE (owner 2026-10-07: *"after we finish event hub maker, this is what we will do."*)
+The handoff `SUPPLIERS_HANDOFF_2026-10-07_fable.md` (corpus root) is the plan: seven PRs, the prototype `prototypes/suppliers_page_2026-10-07_fable.html` is the contract, acceptance pictures in `prototypes/suppliers_final_2026-10-07/`. PR0 (ActionButton · Count · Fill · tones) is being built TONIGHT by the Maker's button-rule builder (`rd/maker-button-rule`) to the PR0 spec — Suppliers starts at PR1 (plus PR0's Ugat nodes). PR6 (booking-fee rules) needs four owner rulings first: charge at the yes or at the deposit acknowledgement · `host_marketplace_search` sourced · self-added = claim or direct · gate manpower / appointments / story credit (+ import rows toward free-5).
+
 ## 8b · WAIT LIST — discuss before building (owner 2026-10-06: *"Can we put this to wait list? Once we have properly discussed these"*)
 - **Passcodes — all of it.** The event passcode after Welcome · a personal code per guest (a short form of their personal link → straight to their own profile) · a "Have an event code?" box on setnayan.com and the app's first screen. Controller's proposal on the table, NOT decided: Setnayan-generated codes only, 8 characters, pause on wrong tries per device and network, one-tap new code, a code opens exactly what the personal link opens, couple notified of replies made through a code, "Not you?" sign-out. Open: generated vs chosen event code; replace "Find your invitation" by name. Removed from the Maker build (PR 6) — no migration in that build now.
 
