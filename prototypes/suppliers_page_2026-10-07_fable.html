@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Suppliers — one screen · 2026-10-07 (Fable)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ---------- tokens (corpus: paper / ink / gild / wine) ---------- */
+:root{
+  --paper:#f6f4ef; --paper-2:#fffdf9; --ink:#1d1b17; --mute:#6f6a60; --line:#e4dfd4;
+  --gild:#b8963e; --gild-soft:#f1e9d2; --wine:#8c3b2e; --wine-soft:#f3e3df; --ok:#3f6b4a; --ok-soft:#e3eee4;
+  --serif:"Cormorant Garamond",Georgia,serif; --sans:Inter,system-ui,-apple-system,sans-serif;
+  --bar:64px; --ease:cubic-bezier(.2,.8,.2,1); --t:280ms;
+}
+@media (prefers-color-scheme:dark){
+  :root{ --paper:#161513; --paper-2:#1f1d1a; --ink:#efeae0; --mute:#a39d90; --line:#2e2b26;
+         --gild:#d1b162; --gild-soft:#2d2719; --wine:#d47a69; --wine-soft:#3a221d; --ok:#8fc49a; --ok-soft:#1f2d22; }
+}
+@media (prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important;scroll-behavior:auto!important} }
+*{box-sizing:border-box} html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:left}
+select{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--serif);font-weight:500;margin:0}
+.serif{font-family:var(--serif)}
+.mute{color:var(--mute)} .wine{color:var(--wine)} .gild{color:var(--gild)}
+.i{display:inline-grid;place-items:center;width:18px;height:18px;border:1px solid var(--line);border-radius:50%;font-size:11px;color:var(--mute);vertical-align:middle;margin-left:4px}
+
+/* ---------- gallery (what the owner opens) ---------- */
+.gallery{max-width:1180px;margin:0 auto;padding:32px 20px 80px}
+.gallery h1{font-size:34px}
+.gallery p{max-width:760px}
+.frames{display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap;margin-top:24px}
+.frame{background:var(--paper-2);border:1px solid var(--line);border-radius:28px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.12)}
+.frame.phone{width:375px;height:812px}
+.frame.desk{width:720px;height:461px;border-radius:14px}
+.frame iframe{border:0;display:block}
+.frame.phone iframe{width:375px;height:812px}
+.frame.desk iframe{width:1280px;height:820px;transform:scale(.5625);transform-origin:0 0}
+.cap{font-size:12px;color:var(--mute);margin:8px 0 0 4px;letter-spacing:.06em;text-transform:uppercase}
+.delta{columns:2;column-gap:40px;max-width:1000px;margin-top:28px}
+.delta li{break-inside:avoid;margin-bottom:8px}
+.pill-link{display:inline-block;border:1px solid var(--ink);border-radius:999px;padding:8px 16px;text-decoration:none;color:var(--ink);margin-top:12px}
+html.frame .gallery{display:none}
+html:not(.frame) .app{display:none}
+
+/* ---------- the app ---------- */
+.app{min-height:100vh;padding-bottom:calc(var(--bar) + 16px)}
+.shell{position:sticky;top:0;z-index:5;background:var(--paper-2);border-bottom:1px solid var(--line);height:56px;display:flex;align-items:center;gap:14px;padding:0 16px}
+.shell .logo{font-family:var(--serif);font-weight:600;color:var(--gild);font-size:22px;letter-spacing:.04em}
+.shell .right{margin-left:auto;display:flex;gap:8px}
+.shell .ic{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;font-size:14px;color:var(--mute)}
+.shell .av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gild),var(--wine))}
+
+main{max-width:1180px;margin:0 auto;padding:0 16px}
+.head{padding:18px 0 0}
+.title{display:flex;align-items:baseline;gap:12px}
+.title h1{font-size:40px;line-height:1}
+.door{margin-left:auto;position:relative;width:40px;height:40px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;background:var(--paper-2)}
+.door b{position:absolute;top:-4px;right:-4px;background:var(--wine);color:#fff;font-size:10px;border-radius:999px;padding:1px 5px}
+.facts{margin:8px 0 0;font-size:15px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.facts button{border-bottom:1px dotted var(--mute);padding-bottom:1px}
+.facts button:hover{border-bottom-color:var(--ink)}
+.facts .set{color:var(--wine)}
+.jump{position:sticky;top:56px;z-index:4;background:linear-gradient(var(--paper) 80%,transparent);padding:12px 0 10px;display:flex;align-items:center;gap:10px}
+.jump label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.jump .sel{position:relative;display:inline-flex;align-items:center;border:1px solid var(--ink);border-radius:999px;padding:9px 38px 9px 16px;background:var(--paper-2);min-width:200px;transition:transform var(--t) var(--ease)}
+.jump .sel:active{transform:scale(.98)}
+.jump .sel span{transition:opacity 180ms var(--ease)} .jump .sel span.fade{opacity:0}
+.jump .sel:after{content:"⌄";position:absolute;right:14px;top:6px;font-size:18px;color:var(--mute)}
+.jump select{position:absolute;inset:0;opacity:0;width:100%;cursor:pointer}
+
+.cols{display:grid;grid-template-columns:1fr;gap:0}
+section{padding:22px 0 8px;scroll-margin-top:118px}
+section h2{font-size:26px;line-height:1.1}
+.sub{color:var(--mute);margin:2px 0 10px;font-size:14px}
+.sub .wine{font-weight:500}
+
+/* rows — hairlines, no boxes */
+.row{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line);min-height:56px}
+.row:first-of-type{border-top:0}
+.logo{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:12px;letter-spacing:.06em;color:var(--mute);background:var(--paper-2)}
+.name{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.row>.rowbtn>span:nth-child(2),.chat>span:nth-child(2),.frow>span:nth-child(2){min-width:0}
+main{overflow-x:clip}
+.svc{font-size:13px;color:var(--mute)}
+.pill{font-size:12px;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.wine{background:var(--wine-soft);color:var(--wine)} .pill.mute{background:var(--gild-soft);color:var(--mute)}
+.pill.pop{animation:pop 420ms var(--ease)}
+@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+.next{grid-column:2/4;display:flex;gap:8px;align-items:baseline;font-size:14px;margin-top:-4px}
+.next .go{margin-left:auto;color:var(--wine);font-weight:500;white-space:nowrap}
+.rowbtn{display:contents}
+.exp{display:grid;grid-template-rows:0fr;transition:grid-template-rows var(--t) var(--ease)}
+.exp>div{overflow:hidden}
+.open>.exp{grid-template-rows:1fr}
+.chev{transition:transform var(--t) var(--ease);color:var(--mute);font-size:18px;line-height:1}
+.open .chev{transform:rotate(180deg)}
+.detail{padding:4px 0 14px 56px;font-size:14px;display:grid;gap:8px}
+.detail .acts{display:flex;gap:16px;flex-wrap:wrap}
+.detail .acts button{color:var(--wine);font-weight:500}
+.detail .acts .quiet{color:var(--mute);font-weight:400}
+.sent{display:flex;gap:8px;align-items:center}
+.sent .ask{color:var(--wine);font-weight:500}
+
+/* categories */
+.cat{border-top:1px solid var(--line)}
+.cat .bar{display:grid;grid-template-columns:36px 1fr auto 20px;gap:12px;align-items:center;min-height:56px;padding:10px 0;width:100%}
+.cat .ico{width:36px;height:36px;border-radius:50%;background:var(--gild-soft);display:grid;place-items:center;font-size:15px}
+.cat .state{font-size:13px;color:var(--mute)}
+.cat .state.ok{color:var(--ok)} .cat .state.wine{color:var(--wine)}
+.strip{display:flex;gap:12px;overflow-x:auto;padding:4px 0 10px 48px;scroll-snap-type:x mandatory;scrollbar-width:none}
+.strip::-webkit-scrollbar{display:none}
+.card{flex:0 0 220px;scroll-snap-align:start;border-top:2px solid var(--line);padding-top:10px;display:grid;gap:4px;animation:slide 380ms var(--ease) both}
+.card:nth-child(2){animation-delay:60ms}.card:nth-child(3){animation-delay:120ms}
+@keyframes slide{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+.card .ph{height:110px;border-radius:12px;background:linear-gradient(135deg,var(--gild-soft),var(--line))}
+.card .nm{font-weight:500}
+.card .pr{font-size:13px}
+.card .fit{font-size:12px;color:var(--ok)}
+.card .acts{display:flex;gap:12px;font-size:13px;margin-top:4px;flex-wrap:wrap}
+.card .acts button{color:var(--wine);font-weight:500}
+.card .acts .quiet{color:var(--mute);font-weight:400}
+.card .acts .on{color:var(--ok)}
+.cat .foot{display:flex;gap:18px;padding:0 0 14px 48px;font-size:14px}
+.cat .foot button{color:var(--wine);font-weight:500}
+.cat .foot .quiet{color:var(--mute);font-weight:400}
+.more{display:flex;align-items:center;gap:10px;padding:14px 0 4px;border-top:1px solid var(--line);font-size:14px}
+.more .sel{position:relative;border:1px solid var(--line);border-radius:999px;padding:8px 32px 8px 14px;background:var(--paper-2)}
+.more .sel:after{content:"⌄";position:absolute;right:12px;top:4px;font-size:18px;color:var(--mute)}
+.more select{position:absolute;inset:0;opacity:0;width:100%}
+
+/* picks + money */
+.pick{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px 0;border-top:1px solid var(--line);font-size:14px;align-items:baseline}
+.pick:first-of-type{border-top:0}
+.pick .k{color:var(--mute);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.pick .v{font-weight:500}
+.pick .amt{font-family:var(--serif);font-size:20px;font-style:italic;white-space:nowrap}
+.pick .set{color:var(--wine);font-weight:500}
+.money{display:grid;grid-template-columns:1fr 1fr;gap:14px 24px;padding:14px 0 6px;border-top:1px solid var(--line);margin-top:6px}
+.money .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.money .v{font-family:var(--serif);font-size:26px;font-style:italic;line-height:1.1}
+.money .n{font-size:12px;color:var(--mute)}
+.fitline{padding:10px 0;font-size:14px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center}
+.cta{display:flex;gap:10px;padding:8px 0 10px;flex-wrap:wrap}
+.btn{border:1px solid var(--ink);border-radius:999px;padding:10px 18px;font-weight:500;background:var(--paper-2);transition:transform 160ms var(--ease),background 160ms}
+.btn:active{transform:scale(.97)}
+.btn.solid{background:var(--ink);color:var(--paper)}
+.btn.quiet{border-color:var(--line);color:var(--mute)}
+
+/* plans, payments, chats */
+.plan{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:baseline;padding:11px 0;border-top:1px solid var(--line);font-size:14px}
+.plan:first-of-type{border-top:0}
+.plan .amt{font-family:var(--serif);font-style:italic;font-size:19px}
+.plan .use{color:var(--wine);font-weight:500}
+.chat{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:11px 0;border-top:1px solid var(--line);width:100%}
+.chat:first-of-type{border-top:0}
+.chat .last{font-size:13px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat .last.unread{color:var(--ink);font-weight:500}
+.chat .when{font-size:12px;color:var(--mute);display:grid;justify-items:end;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--wine)}
+.all{display:inline-block;margin:10px 0 4px;color:var(--wine);font-weight:500}
+
+/* bottom bar (shipped) */
+.bar5{position:fixed;left:0;right:0;bottom:0;height:var(--bar);background:var(--paper-2);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);z-index:6}
+.bar5 div{display:grid;place-items:center;gap:2px;font-size:11px;color:var(--mute);padding-top:8px}
+.bar5 .on{color:var(--ink)} .bar5 .on i{background:var(--gild-soft);border-radius:50%;width:32px;height:32px;display:grid;place-items:center;font-style:normal}
+.bar5 i{font-style:normal;font-size:18px}
+
+/* sheet (phone: from the bottom · desktop: from the right) — never over the bar */
+.scrim{position:fixed;inset:0;bottom:var(--bar);background:rgba(0,0,0,.28);opacity:0;pointer-events:none;transition:opacity var(--t) var(--ease);z-index:7}
+.sheet{position:fixed;left:0;right:0;bottom:var(--bar);max-height:78vh;background:var(--paper-2);border-radius:22px 22px 0 0;box-shadow:0 -12px 40px rgba(0,0,0,.18);transform:translateY(calc(100% + var(--bar) + 40px));visibility:hidden;transition:transform 320ms var(--ease),visibility 0s 320ms;z-index:8;overflow:auto;padding:14px 18px 24px}
+.sheet .grip{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 12px}
+.sheet h3{font-size:24px;margin-bottom:2px}
+.sheet .x{position:absolute;right:14px;top:12px;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--mute)}
+html.sheet-open .scrim{opacity:1;pointer-events:auto}
+html.sheet-open .sheet{transform:none;visibility:visible;transition:transform 320ms var(--ease),visibility 0s}
+.field{display:grid;gap:4px;margin-top:12px;font-size:14px}
+.field input,.field .sel{border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:var(--paper);font:inherit;color:inherit;width:100%}
+.field .sel{position:relative} .field .sel:after{content:"⌄";position:absolute;right:12px;top:7px;font-size:18px;color:var(--mute)} .field select{position:absolute;inset:0;opacity:0;width:100%}
+.opt{display:grid;grid-template-columns:1fr auto;gap:10px;padding:12px 0;border-top:1px solid var(--line);font-size:14px;align-items:center}
+.opt:first-of-type{border-top:0}
+.opt .ok{color:var(--ok)} .opt .wine{color:var(--wine);font-weight:500}
+.frow{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:11px 0;border-top:1px solid var(--line);font-size:14px}
+.frow:first-of-type{border-top:0}
+.frow .acts{display:grid;gap:4px;justify-items:end} .frow .acts button{color:var(--wine);font-weight:500;font-size:13px}
+.frow .acts .quiet{color:var(--mute);font-weight:400}
+.bubble{max-width:82%;padding:10px 12px;border-radius:16px;background:var(--paper);font-size:14px;margin:8px 0}
+.bubble.me{margin-left:auto;background:var(--gild-soft)}
+.compose{display:flex;gap:8px;margin-top:12px;align-items:center}
+.compose input{flex:1;border:1px solid var(--line);border-radius:999px;padding:10px 14px;background:var(--paper);font:inherit;color:inherit}
+.cmp{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--line);margin-top:8px;font-size:13px}
+.cmp>div{padding:10px 8px;border-right:1px solid var(--line)} .cmp>div:last-child{border-right:0}
+.cmp .h{font-weight:500;font-size:14px} .cmp .a{font-family:var(--serif);font-style:italic;font-size:19px}
+.cmp .ok{color:var(--ok)} .cmp .wine{color:var(--wine)}
+.tour{position:fixed;left:16px;right:16px;bottom:calc(var(--bar) + 14px);background:var(--ink);color:var(--paper);padding:14px 16px;border-radius:16px;font-size:14px;z-index:9;display:none;animation:up 320ms var(--ease)}
+.tour b{display:block;font-family:var(--serif);font-size:18px;font-weight:500;margin-bottom:2px}
+.tour .n{float:right;color:var(--gild);font-weight:500}
+@keyframes up{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
+html.tour-on .tour{display:block}
+.replay{font-size:13px;color:var(--mute);padding:20px 0 0}
+
+/* ---------- desktop ---------- */
+@media (min-width:1024px){
+  .shell{padding:0 28px}
+  main{padding:0 28px}
+  .title h1{font-size:44px}
+  .cols{grid-template-columns:minmax(0,1fr) 400px;column-gap:56px;align-items:start}
+  .col-rail{position:sticky;top:118px;max-height:calc(100vh - 118px - var(--bar));overflow:auto;padding-bottom:20px}
+  .col-rail section{padding-top:16px}
+  .col-rail section:first-child{padding-top:22px}
+  .bar5{display:none}
+  .app{padding-bottom:40px}
+  .scrim{bottom:0}
+  .sheet{left:auto;right:0;top:56px;bottom:0;width:460px;max-height:none;border-radius:0;transform:translateX(110%);padding:22px 26px}
+  .sheet .grip{display:none}
+  .tour{left:auto;right:28px;bottom:28px;width:360px}
+  .strip{padding-left:48px}
+}
+</style>
+</head>
+<body>
+
+<!-- ======================= GALLERY ======================= -->
+<div class="gallery">
+  <h1>Suppliers — one screen</h1>
+  <p class="mute">2026-10-07 · Fable · prototype only, nothing built.</p>
+  <p><b>Owner's brief:</b> <i>"we want a uni screen interface that adapts to both desktop and mobile view… navigate properly to all their categories, find suppliers, compare combinations, add supplier manually, chat with suppliers, and still make it look legible to the eyes. with animation"</i></p>
+  <p>Below is the same page twice: a phone at 375 and a computer at 1280. Both frames are live — tap the rows, the categories, the date, the venue, "Find more", "Add your own", a chat. Nothing leaves the page.</p>
+  <a class="pill-link" href="?frame=1" target="_blank">Open it full size and resize the window ›</a>
+  <div class="frames">
+    <div>
+      <div class="frame phone"><iframe src="?frame=1" title="phone"></iframe></div>
+      <div class="cap">Phone · 375 × 812</div>
+    </div>
+    <div>
+      <div class="frame desk"><iframe src="?frame=1" title="desktop"></iframe></div>
+      <div class="cap">Computer · 1280 (scaled to fit)</div>
+    </div>
+  </div>
+  <h2 style="margin-top:36px;font-size:26px">What changes (the delta)</h2>
+  <ol class="delta">
+    <li><b>One scroller, no menu.</b> "Your planning" and the hidden find-area go. Six sections: Your suppliers · Cover your event · Picks · Plans · Payments · Chats. A sticky <b>Jump to</b> dropdown navigates and follows the scroll.</li>
+    <li><b>Date · venue</b> are the second line of the page, editable in place. Date Finder opens there. Venue shows the room size the venue sent, or "Ask them".</li>
+    <li><b>Categories open in place.</b> Only what this event type needs; the rest behind one "More categories" dropdown. A row opens to a swipe strip (Add to picks · Inquire · Book · Remove), then "Find more" and "Add your own" as sheets.</li>
+    <li><b>Picks + money always visible</b>, with the date-fit line. "Compare plans" opens side by side, in place.</li>
+    <li><b>Chats on the page</b>: three latest threads; a conversation opens as a sheet (phone) or panel (computer).</li>
+    <li><b>Motion with meaning</b>: height transitions, sheets slide, the Jump label crossfades, money counts to its new value, "Booked" pops once. Respects reduced motion.</li>
+  </ol>
+  <p class="mute" style="margin-top:28px">Kept as shipped: the shell bar, the five-tab bar, TeamRows content and one action per row, the bench data, BuildLocked picks, the budget lens ("Not knowable"), BuildCompare, FindYourDate, the manual-add modal, the One Chat Box, MiniTour.</p>
+</div>
+
+<!-- ======================= THE APP ======================= -->
+<div class="app">
+  <header class="shell"><span>≡</span><span class="logo">SETNAYAN</span>
+    <div class="right"><span class="ic">⌕</span><span class="ic">💬</span><span class="ic">🔔</span><span class="av"></span></div>
+  </header>
+
+  <main>
+    <div class="head">
+      <div class="title"><h1>Suppliers</h1><button class="door" data-sheet="chat" aria-label="Chats">💬<b>1</b></button></div>
+      <p class="facts">
+        <button data-sheet="date">Fri, Dec 18, 2026</button><span class="mute">·</span>
+        <button data-sheet="venue">Seda Vertis North</button><span class="mute">·</span>
+        <span class="mute">NCR</span>
+      </p>
+    </div>
+      <div class="jump">
+        <label>Jump to</label>
+        <div class="sel"><span id="jumpLabel">Your suppliers</span>
+          <select id="jump" aria-label="Jump to a section">
+            <option value="s-team">Your suppliers</option>
+            <option value="s-cover">Cover your event</option>
+            <option value="s-picks">Picks &amp; budget</option>
+            <option value="s-plans">Plans</option>
+            <option value="s-pay">Payments</option>
+            <option value="s-chats">Chats</option>
+          </select>
+        </div>
+      </div>
+
+    <div class="cols">
+      <div class="col-main">
+
+        <!-- 1 · Your suppliers (TeamRows as rows, not boxes) -->
+        <section id="s-team">
+          <h2>Your suppliers</h2>
+          <p class="sub">2 booked · <span class="wine">2 need you</span> · 1 quote in</p>
+
+          <div class="row rowbtn-wrap">
+            <button class="rowbtn" data-toggle>
+              <span class="logo">SN</span>
+              <span><span class="name">Seda Vertis North</span><br><span class="svc">Reception venue</span></span>
+              <span class="pill ok">Booked</span>
+            </button>
+            <div class="next"><span class="mute">Next:</span><span class="wine">make your first payment</span><button class="go" data-sheet="pay">Pay ›</button></div>
+            <div class="exp" style="grid-column:1/4"><div>
+              <div class="detail">
+                <div class="sent">Room size <b>18 × 24 m</b> <span class="pill ok">sent ✓</span> <span class="mute">· used by your seat plan</span></div>
+                <div class="sent">Street address <span class="mute">Vertis North, Quezon City</span></div>
+                <div class="acts"><button data-sheet="chat">Chat ›</button><button>Workspace ›</button><button class="quiet">Booking details</button></div>
+              </div>
+            </div></div>
+          </div>
+
+          <div class="row">
+            <button class="rowbtn" data-toggle>
+              <span class="logo">SP</span>
+              <span><span class="name">Santuario de San Vicente de Paul</span><br><span class="svc">Ceremony venue</span></span>
+              <span class="pill ok">Booked</span>
+            </button>
+            <div class="next"><span class="mute">Next:</span><span class="wine">set the price so your buffer can count</span><button class="go" data-sheet="price">Set price ›</button></div>
+            <div class="exp" style="grid-column:1/4"><div>
+              <div class="detail">
+                <div class="sent">Room size <span class="mute">not sent</span> <button class="ask">Ask them ›</button></div>
+                <div class="acts"><button data-sheet="chat">Chat ›</button><button>Workspace ›</button></div>
+              </div>
+            </div></div>
+          </div>
+
+          <div class="row">
+            <button class="rowbtn" data-toggle>
+              <span class="logo">LS</span>
+              <span><span class="name">Lumina Studio</span><br><span class="svc">Photo &amp; video</span></span>
+              <span class="pill wine">Quote in</span>
+            </button>
+            <div class="next"><span class="mute">Next:</span><span>₱85,000 · 2 options</span><button class="go" data-sheet="chat">Read it ›</button></div>
+            <div class="exp" style="grid-column:1/4"><div>
+              <div class="detail">
+                <div class="acts"><button id="addLumina" data-pick="lumina">Add to picks</button><button>Book ›</button><button class="quiet">Remove</button></div>
+              </div>
+            </div></div>
+          </div>
+
+          <div class="row">
+            <button class="rowbtn" data-toggle>
+              <span class="logo">BC</span>
+              <span><span class="name">Bituin Catering</span><br><span class="svc">Catering</span></span>
+              <span class="pill mute">Waiting</span>
+            </button>
+            <div class="next"><span class="mute">Next:</span><span class="mute">asked 3 days ago</span><button class="go">Nudge ›</button></div>
+            <div class="exp" style="grid-column:1/4"><div>
+              <div class="detail"><div class="acts"><button data-sheet="chat">Chat ›</button><button class="quiet">Remove</button></div></div>
+            </div></div>
+          </div>
+        </section>
+
+        <!-- 2 · Cover your event (starter-scoped categories, open in place) -->
+        <section id="s-cover">
+          <h2>Cover your event <span class="i">i</span></h2>
+          <p class="sub">A wedding usually needs these six · <b class="ok" style="color:var(--ok)">2 of 6 covered</b></p>
+
+          <div class="cat">
+            <button class="bar" data-toggle><span class="ico">⛪</span><span>Ceremony</span><span class="state ok">Booked ✓ · Santuario</span><span class="chev">⌄</span></button>
+            <div class="exp"><div>
+              <div class="strip">
+                <div class="card"><div class="ph"></div><div class="nm">Santuario de San Vicente</div><div class="pr mute">No price recorded</div><div class="acts"><button data-sheet="price">Set price</button><button class="quiet" data-sheet="chat">Chat</button></div></div>
+              </div>
+              <div class="foot"><button class="quiet">Booked — nothing else needed</button></div>
+            </div></div>
+          </div>
+
+          <div class="cat">
+            <button class="bar" data-toggle><span class="ico">🏛</span><span>Reception</span><span class="state ok">Booked ✓ · Seda</span><span class="chev">⌄</span></button>
+            <div class="exp"><div>
+              <div class="strip">
+                <div class="card"><div class="ph"></div><div class="nm">Seda Vertis North</div><div class="pr">₱1,056,000</div><div class="fit">Free on Dec 18 ✓</div><div class="acts"><button data-sheet="chat">Chat</button><button class="quiet">Workspace</button></div></div>
+              </div>
+              <div class="foot"><button class="quiet">Booked — nothing else needed</button></div>
+            </div></div>
+          </div>
+
+          <div class="cat open" id="catCatering">
+            <button class="bar" data-toggle><span class="ico">🍽</span><span>Catering</span><span class="state wine">2 to decide</span><span class="chev">⌄</span></button>
+            <div class="exp"><div>
+              <div class="strip">
+                <div class="card"><div class="ph"></div><div class="nm">Bituin Catering</div><div class="pr">from ₱950 / head</div><div class="fit">Fits your budget ✓</div><div class="acts"><button data-pick="bituin">Add to picks</button><button data-sheet="chat">Inquire</button><button>Book</button><button class="quiet">Remove</button></div></div>
+                <div class="card"><div class="ph"></div><div class="nm">Hiraya Table</div><div class="pr">from ₱1,200 / head</div><div class="fit mute">Waiting for quote</div><div class="acts"><button data-pick="hiraya">Add to picks</button><button data-sheet="chat">Inquire</button><button class="quiet">Remove</button></div></div>
+                <div class="card" style="border-top-style:dashed"><div class="ph" style="background:none;display:grid;place-items:center;color:var(--mute);font-size:13px">Your own caterer?</div><div class="acts"><button data-sheet="add">＋ Add your own</button></div></div>
+              </div>
+              <div class="foot"><button data-sheet="find">Find more in Catering ›</button><button class="quiet" data-sheet="add">Add your own</button><button class="quiet">Not needed? Remove</button></div>
+            </div></div>
+          </div>
+
+          <div class="cat">
+            <button class="bar" data-toggle><span class="ico">📷</span><span>Photo &amp; video</span><span class="state wine">1 quote in</span><span class="chev">⌄</span></button>
+            <div class="exp"><div>
+              <div class="strip">
+                <div class="card"><div class="ph"></div><div class="nm">Lumina Studio</div><div class="pr">₱85,000 · quote</div><div class="fit">Free on Dec 18 ✓</div><div class="acts"><button data-pick="lumina">Add to picks</button><button>Book</button><button class="quiet">Remove</button></div></div>
+              </div>
+              <div class="foot"><button data-sheet="find">Find more in Photo &amp; video ›</button><button class="quiet" data-sheet="add">Add your own</button></div>
+            </div></div>
+          </div>
+
+          <div class="cat">
+            <button class="bar" data-toggle><span class="ico">📋</span><span>Coordinator</span><span class="state">Nothing yet</span><span class="chev">⌄</span></button>
+            <div class="exp"><div>
+              <div class="foot"><button data-sheet="find">Find a coordinator ›</button><button class="quiet" data-sheet="add">Add your own</button><button class="quiet">Not needed? Remove</button></div>
+            </div></div>
+          </div>
+
+          <div class="cat">
+            <button class="bar" data-toggle><span class="ico">💄</span><span>Hair &amp; make-up</span><span class="state">Nothing yet</span><span class="chev">⌄</span></button>
+            <div class="exp"><div>
+              <div class="foot"><button data-sheet="find">Find hair &amp; make-up ›</button><button class="quiet" data-sheet="add">Add your own</button><button class="quiet">Not needed? Remove</button></div>
+            </div></div>
+          </div>
+
+          <div class="more"><span class="mute">Need something else?</span>
+            <div class="sel">More categories
+              <select aria-label="More categories"><option>More categories</option><option>Cake</option><option>Bridal car</option><option>Live band</option><option>Stylist / Decorator</option><option>Invitations &amp; prints</option><option>Photo booth</option><option>Host / MC</option><option>Lights &amp; sound</option><option>Souvenirs</option><option>Guest shuttle</option><option>Event insurance</option></select>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="col-rail">
+
+        <!-- 3 · Picks + money (BuildLocked + MerkadoBudgetLens, always visible) -->
+        <section id="s-picks">
+          <h2>Picks <span class="i">i</span></h2>
+          <p class="sub">Your current combination — change it anywhere above.</p>
+          <div class="pick"><span><span class="k">Reception</span><br><span class="v">Seda Vertis North</span></span><span class="amt">₱1,056,000</span></div>
+          <div class="pick"><span><span class="k">Ceremony</span><br><span class="v">Santuario de San Vicente</span></span><button class="set" data-sheet="price">Set price ›</button></div>
+          <div class="pick" id="pickCatering"><span><span class="k">Catering</span><br><span class="v mute">Pick one above</span></span><span class="amt mute">—</span></div>
+          <div class="pick" id="pickPhoto"><span><span class="k">Photo &amp; video</span><br><span class="v mute">Pick one above</span></span><span class="amt mute">—</span></div>
+          <div class="money">
+            <div><div class="k">Booked</div><div class="v" id="mBooked" data-n="1056000">₱1,056,000</div><div class="n">1 supplier has no price</div></div>
+            <div><div class="k">Still to book</div><div class="v" id="mToBook" data-n="0">₱0</div></div>
+            <div><div class="k">Budget</div><div class="v">₱2,250,000</div></div>
+            <div><div class="k">Buffer <span class="i">i</span></div><div class="v" id="mBuffer" style="font-size:20px">Not knowable</div><div class="n">until Santuario has a price</div></div>
+          </div>
+          <div class="fitline"><span style="color:var(--ok)">✓</span><span id="fitText">2 of 2 priced picks are free on Dec 18</span><button class="wine" style="margin-left:auto;font-weight:500;white-space:nowrap" data-sheet="date">Help me choose ›</button></div>
+          <div class="cta"><button class="btn solid">Save as a plan</button><button class="btn" data-sheet="compare">Compare plans ›</button></div>
+        </section>
+
+        <!-- 4 · Plans (BuildCompare, opens in place) -->
+        <section id="s-plans">
+          <h2>Plans</h2>
+          <p class="sub">Saved combinations, side by side.</p>
+          <div class="plan"><span>Current picks</span><span class="amt">₱1,056,000</span><span class="mute">now</span></div>
+          <div class="plan"><span>Garden plan</span><span class="amt">₱1,320,000</span><button class="use">Use ›</button></div>
+          <div class="plan"><span>Simple</span><span class="amt">₱980,000</span><button class="use">Use ›</button></div>
+          <button class="all" data-sheet="compare">Compare all three ›</button>
+        </section>
+
+        <!-- 5 · Payments -->
+        <section id="s-pay">
+          <h2>Payments</h2>
+          <p class="sub">Paid so far <b>₱0</b> · due next <b>₱211,200</b></p>
+          <div class="pick"><span><span class="k">Seda Vertis North</span><br><span class="v">First payment · by Oct 20</span></span><button class="set" data-sheet="pay">Pay ₱211,200 ›</button></div>
+          <div class="pick"><span><span class="k">Santuario</span><br><span class="v mute">No amount yet</span></span><button class="set" data-sheet="price">Set price ›</button></div>
+          <div class="pick"><span><span class="k">Setnayan</span><br><span class="v">Event Hub Pro · paid ✓</span></span><span class="amt">₱2,500</span></div>
+        </section>
+
+        <!-- 6 · Chats (Messenger rows, conversation opens in place) -->
+        <section id="s-chats">
+          <h2>Chats</h2>
+          <p class="sub">1 unread</p>
+          <button class="chat" data-sheet="chat"><span class="logo">LS</span><span><span class="name">Lumina Studio</span><br><span class="last unread">Sent the quote — 2 options inside</span></span><span class="when">10:12<span class="dot"></span></span></button>
+          <button class="chat" data-sheet="chat"><span class="logo">SN</span><span><span class="name">Seda Vertis North</span><br><span class="last">See you at the ocular on Saturday</span></span><span class="when">Yesterday</span></button>
+          <button class="chat" data-sheet="chat"><span class="logo">BC</span><span><span class="name">Bituin Catering</span><br><span class="last">Will send tasting dates this week</span></span><span class="when">Mon</span></button>
+          <button class="all">All chats ›</button>
+          <div class="replay"><button id="replay">Replay the first-visit tour</button></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <nav class="bar5"><div><i>⌂</i>Home</div><div><i>👥</i>Guests</div><div class="on"><i>◎</i>Suppliers</div><div><i>🌐</i>Hub</div><div><i>✦</i>More</div></nav>
+
+  <div class="scrim" id="scrim"></div>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="grip"></div><button class="x" id="closeSheet" aria-label="Close">×</button><div id="sheetBody"></div></div>
+
+  <div class="tour" id="tour"><button class="n" id="tourNext">Next ›</button><b id="tourTitle">Your suppliers</b><span id="tourText">Everyone you've booked or asked, with one next step each.</span></div>
+</div>
+
+<!-- sheet contents -->
+<template id="t-date">
+  <h3>Your date</h3><p class="mute" style="margin:0 0 6px">Friday, December 18, 2026 · every pick is checked against it.</p>
+  <div class="field"><label>I have a date</label><input type="date" value="2026-12-18"></div>
+  <p style="margin:18px 0 6px"><b>Help me choose</b> <span class="mute">— dates your picks are all free</span></p>
+  <div class="opt"><span>Sat, Dec 12, 2026</span><span class="ok">3 of 3 free ✓</span></div>
+  <div class="opt"><span>Fri, Dec 18, 2026 <span class="mute">· current</span></span><span class="ok">3 of 3 free ✓</span></div>
+  <div class="opt"><span>Sat, Jan 9, 2027</span><span class="wine">Seda is taken</span></div>
+  <div class="opt"><span>Sat, Jan 16, 2027</span><span class="ok">3 of 3 free ✓</span></div>
+  <div class="cta"><button class="btn solid">Keep Dec 18</button></div>
+</template>
+<template id="t-venue">
+  <h3>Your venue</h3><p class="mute" style="margin:0 0 6px">Set when you book your venue — it's booked.</p>
+  <div class="opt"><span><b>Seda Vertis North</b><br><span class="mute">Reception · Vertis North, Quezon City</span></span><span class="ok">Booked ✓</span></div>
+  <div class="opt"><span>Room size<br><span class="mute">sent by Seda · your seat plan uses it</span></span><span><b>18 × 24 m</b></span></div>
+  <div class="opt"><span><b>Santuario de San Vicente</b><br><span class="mute">Ceremony</span></span><span class="ok">Booked ✓</span></div>
+  <div class="opt"><span>Room size<br><span class="mute">not sent yet</span></span><button class="wine">Ask them ›</button></div>
+  <p class="mute" style="font-size:13px;margin-top:16px">Changing the venue means cancelling a booking — do that from the supplier's row above.</p>
+</template>
+<template id="t-find">
+  <h3>Find more in Catering</h3>
+  <div class="field"><input placeholder="Search in Catering"></div>
+  <div class="field"><div class="sel">Filter · Metro Manila first<select aria-label="Filter"><option>Metro Manila first</option><option>Fits my budget</option><option>Free on Dec 18</option><option>Top rated</option><option>Following ♥</option></select></div></div>
+  <p class="mute" style="font-size:13px;margin:12px 0 4px">4 suppliers</p>
+  <div class="frow"><span class="logo">HT</span><span><b>Hiraya Table</b><br><span class="mute">Quezon City · 6 yrs · 40 events · from ₱1,200 / head · ★ 4.8</span></span><span class="acts"><button>Ask for a quote</button><button class="quiet">Save</button></span></div>
+  <div class="frow"><span class="logo">MK</span><span><b>Mesa Kusina</b><br><span class="mute">Pasig · 3 yrs · 12 events · from ₱850 / head · ★ 4.6</span></span><span class="acts"><button>Ask for a quote</button><button class="quiet">Save</button></span></div>
+  <div class="frow"><span class="logo">LB</span><span><b>Luntian Buffet</b><br><span class="mute">Makati · 9 yrs · 120 events · from ₱1,500 / head · ★ 4.9</span></span><span class="acts"><button>Ask for a quote</button><button class="quiet">Save</button></span></div>
+  <div class="frow"><span class="logo">BC</span><span><b>Bituin Catering</b><br><span class="mute">Saved · waiting for their quote</span></span><span class="acts"><button class="quiet">Open chat ›</button></span></div>
+  <p class="mute" style="font-size:13px;margin-top:14px">Not here yet? <button class="wine" data-sheet="add">Add your own caterer ›</button></p>
+</template>
+<template id="t-add">
+  <h3>Add your own supplier</h3><p class="mute" style="margin:0">Someone you already talk to outside Setnayan.</p>
+  <div class="field"><label>Name</label><input placeholder="e.g. Tita Baby's Catering"></div>
+  <div class="field"><label>What they do</label><div class="sel">Catering<select><option>Catering</option><option>Photo &amp; video</option><option>Coordinator</option><option>Hair &amp; make-up</option><option>Cake</option><option>Live band</option></select></div></div>
+  <div class="field"><label>Agreed price <span class="mute">(optional)</span></label><input inputmode="numeric" placeholder="₱ 0"></div>
+  <div class="field"><label>Already booked? <span class="mute">— with a price, they count as booked</span></label><div class="sel">Yes, booked<select><option>Yes, booked</option><option>Not yet, still deciding</option></select></div></div>
+  <div class="cta"><button class="btn solid">Add to Catering</button><button class="btn quiet">Send them an invite by email</button></div>
+</template>
+<template id="t-chat">
+  <h3>Lumina Studio</h3><p class="mute" style="margin:0 0 8px">Photo &amp; video · Dec 18, 2026 · ~180 guests</p>
+  <div class="bubble">Hi! Sent the quote — 2 options inside. Option A is full day, B is ceremony + reception only.</div>
+  <div class="bubble" style="border:1px solid var(--line);background:var(--paper-2)"><b>Quote · ₱85,000</b><br><span class="mute">Option A · full day · 2 photographers</span><br><button class="wine" style="font-weight:500;margin-top:6px">Accept ›</button> <button class="mute" style="margin-left:12px">Ask a question</button></div>
+  <div class="bubble me">Thank you! Looking at both now.</div>
+  <div class="compose"><span class="mute">📎</span><input placeholder="Message Lumina Studio"><span class="wine">➤</span></div>
+  <p class="mute" style="font-size:12px;margin-top:10px">Keep chats and payments inside Setnayan — that's what protects your booking.</p>
+</template>
+<template id="t-pay">
+  <h3>Pay Seda Vertis North</h3><p class="mute" style="margin:0 0 6px">First payment · ₱211,200 · by Oct 20</p>
+  <div class="opt"><span>GCash</span><span class="mute">09•• ••• 4471</span></div>
+  <div class="opt"><span>BDO</span><span class="mute">•••• 8820</span></div>
+  <div class="field"><label>Amount</label><input inputmode="numeric" value="₱ 211,200"></div>
+  <div class="cta"><button class="btn solid">Log this payment</button></div>
+  <p class="mute" style="font-size:13px">Your payment plan dates start when you book.</p>
+</template>
+<template id="t-price">
+  <h3>Santuario — set the price</h3><p class="mute" style="margin:0">Until there's a number, Buffer stays "Not knowable". That's on purpose.</p>
+  <div class="field"><label>Agreed price</label><input inputmode="numeric" placeholder="₱ 0"></div>
+  <div class="field"><label>Paid so far <span class="mute">(optional)</span></label><input inputmode="numeric" placeholder="₱ 0"></div>
+  <div class="cta"><button class="btn solid">Save</button></div>
+</template>
+<template id="t-compare">
+  <h3>Compare plans</h3><p class="mute" style="margin:0">Side by side — and which dates work for each.</p>
+  <div class="cmp">
+    <div><div class="h">Current</div><div class="a">₱1,056,000</div><div class="mute">+ Santuario (no price)</div><div style="margin-top:8px">Reception · Seda</div><div>Ceremony · Santuario</div><div class="mute">Catering · —</div><div class="mute">Photo · —</div><div class="ok" style="margin-top:8px">Dec 18 ✓</div><div class="mute">Buffer: not knowable</div></div>
+    <div><div class="h">Garden plan</div><div class="a">₱1,320,000</div><div class="mute">all priced</div><div style="margin-top:8px">Reception · Seda</div><div>Ceremony · Santuario</div><div>Catering · Luntian</div><div>Photo · Lumina</div><div class="ok" style="margin-top:8px">Dec 18 ✓ · Jan 16 ✓</div><div class="ok">Buffer ₱930,000</div><button class="wine" style="margin-top:10px;font-weight:500">Use this plan ›</button></div>
+    <div><div class="h">Simple</div><div class="a">₱980,000</div><div class="mute">all priced</div><div style="margin-top:8px">Reception · Seda</div><div>Ceremony · Santuario</div><div>Catering · Mesa Kusina</div><div class="mute">Photo · —</div><div class="wine" style="margin-top:8px">Dec 18 — Mesa is taken</div><div class="ok">Buffer ₱1,270,000</div><button class="wine" style="margin-top:10px;font-weight:500">Use this plan ›</button></div>
+  </div>
+</template>
+
+<script>
+(function(){
+  const h=document.documentElement;
+  if(new URLSearchParams(location.search).has('frame')) h.classList.add('frame');
+  if(!h.classList.contains('frame')) return;
+
+  // open / close in place (height transition via grid-template-rows)
+  document.querySelectorAll('[data-toggle]').forEach(b=>b.addEventListener('click',()=>{
+    const host=b.closest('.row,.cat'); host.classList.toggle('open');
+  }));
+
+  // sheets — phone: up from the bottom · desktop: in from the right
+  const sheet=document.getElementById('sheet'), body=document.getElementById('sheetBody');
+  function openSheet(key){ const t=document.getElementById('t-'+key); if(!t) return;
+    body.innerHTML=''; body.appendChild(t.content.cloneNode(true)); h.classList.add('sheet-open'); sheet.scrollTop=0; wire(body); }
+  function closeSheet(){ h.classList.remove('sheet-open'); }
+  function wire(root){ root.querySelectorAll('[data-sheet]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();openSheet(b.dataset.sheet);})); }
+  wire(document);
+  document.getElementById('scrim').addEventListener('click',closeSheet);
+  document.getElementById('closeSheet').addEventListener('click',closeSheet);
+  addEventListener('keydown',e=>{ if(e.key==='Escape') closeSheet(); });
+
+  // jump dropdown: navigates, and follows the scroll (scroll-spy with a crossfade)
+  const jump=document.getElementById('jump'), label=document.getElementById('jumpLabel');
+  jump.addEventListener('change',()=>{ document.getElementById(jump.value).scrollIntoView({block:'start'}); });
+  const names={}; [...jump.options].forEach(o=>names[o.value]=o.text);
+  const io=new IntersectionObserver(es=>{ es.forEach(e=>{ if(e.isIntersecting){ const id=e.target.id; if(jump.value!==id){ label.classList.add('fade'); setTimeout(()=>{label.textContent=names[id]; jump.value=id; label.classList.remove('fade');},160);} } }); },{rootMargin:'-120px 0px -70% 0px',threshold:0});
+  document.querySelectorAll('section[id]').forEach(s=>io.observe(s));
+
+  // picks: adding a supplier moves the money, and the number counts to its new value
+  const picks={lumina:{row:'pickPhoto',name:'Lumina Studio',amt:85000},bituin:{row:'pickCatering',name:'Bituin Catering',amt:171000},hiraya:{row:'pickCatering',name:'Hiraya Table',amt:216000}};
+  const chosen={};
+  function peso(n){return '₱'+n.toLocaleString('en-PH');}
+  function count(el,to){ const from=+el.dataset.n||0; const t0=performance.now(), d=520;
+    const r=matchMedia('(prefers-reduced-motion:reduce)').matches; if(r){el.textContent=peso(to);el.dataset.n=to;return;}
+    (function f(t){ const k=Math.min(1,(t-t0)/d), e=1-Math.pow(1-k,3); el.textContent=peso(Math.round(from+(to-from)*e)); if(k<1) requestAnimationFrame(f); else el.dataset.n=to; })(t0); }
+  document.querySelectorAll('[data-pick]').forEach(b=>b.addEventListener('click',()=>{
+    const p=picks[b.dataset.pick]; const row=document.getElementById(p.row);
+    document.querySelectorAll('[data-pick]').forEach(x=>{ if(picks[x.dataset.pick].row===p.row){x.textContent='Add to picks';x.classList.remove('on');} });
+    b.textContent='In your picks ✓'; b.classList.add('on'); chosen[p.row]=p;
+    row.querySelector('.v').textContent=p.name; row.querySelector('.v').classList.remove('mute');
+    const amt=row.querySelector('.amt'); amt.classList.remove('mute'); amt.textContent=peso(p.amt); amt.classList.add('pill','pop'); setTimeout(()=>amt.classList.remove('pill','pop'),500);
+    const toBook=Object.values(chosen).reduce((s,x)=>s+x.amt,0); count(document.getElementById('mToBook'),toBook);
+    const n=2+Object.keys(chosen).length; document.getElementById('fitText').textContent=n+' of '+n+' priced picks are free on Dec 18';
+  }));
+
+  // first-visit tour (MiniTour shape: 3 stops)
+  const stops=[['s-team','Your suppliers','Everyone you’ve booked or asked, with one next step each.'],['s-cover','Cover your event','Only what a wedding needs. Open a row to find, add, or book.'],['s-picks','Picks','Your combination and your money, always in view. Compare plans here.']];
+  let i=0; const tour=document.getElementById('tour');
+  function show(){ const s=stops[i]; document.getElementById('tourTitle').textContent=s[1]; document.getElementById('tourText').textContent=s[2]; document.getElementById('tourNext').textContent=i<stops.length-1?'Next ›':'Done'; document.getElementById(s[0]).scrollIntoView({block:'start'}); }
+  document.getElementById('tourNext').addEventListener('click',()=>{ i++; if(i>=stops.length){h.classList.remove('tour-on'); i=0; return;} show(); });
+  document.getElementById('replay').addEventListener('click',()=>{ i=0; h.classList.add('tour-on'); show(); });
+  try{ if(!localStorage.getItem('sup-tour')){ h.classList.add('tour-on'); show(); localStorage.setItem('sup-tour','1'); } }catch(e){}
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+# Suppliers page — check before design · 2026-10-07 (Fable)
+
+**Owner's brief, verbatim (2026-10-07):** *"right now you have hidden the bench the compare budget, and everything else in the suppliers and just showed suppliers that are booked. we want to create a uni screen interface that adapts to both desktop and mobile view. which handles everything we have and still keeps it un clumped. i want a uniscreen that can help them navigate properly to all their categories, find suppliers, compare combinations, add supplier manually, chat with suppliers, and still make it look legible to the eyes. with animation"*
+
+**How this was measured.** The live site (`www.setnayan.com`) at 375 px, signed in on the owner's event (looked only; nothing pressed except the "Saved" row, which only scrolls), plus `origin/main` at `fe86472846` read from a detached worktree. Anchors are file:symbol, never line numbers. Screenshots: `prototypes/suppliers_page_live_2026-10-07-*.jpg`.
+
+## Verdict
+
+**The complaint is accurate, and the cause is one CSS class.** The page opens to the booked rows and a five-row menu. Everything else — the bench, Picks, the six money figures, Plans, Payments — sits in one `#team-find-area` that is `hidden lg:block` and is not even mounted on a phone until a menu row is tapped (`services-takeover.tsx:ServicesTakeover`). When it does open it is one tall scroll, with Payments and Your plans collapsed at the very bottom. Three jobs leave the page entirely: **Find a supplier** (`/vendors/categories`), **Budget** (`?part=budget`) and **Chats** (`/messages`). On a computer it is the same phone column plus a 380 px rail. No design in the corpus draws a one-screen page; the nearest approved pieces are listed below and the prototype assembles them.
+
+## The table
+
+| # | Item | Where it was decided | Shipped? (origin/main anchor) | What is wrong or missing |
+|---|---|---|---|---|
+| 1 | Suppliers = booked rows, one next step each, one "Find a supplier" button | DECISION_LOG 2026-10-01 (simple phone app) | **Yes** · `lib/your-team-rows.ts:teamRows`, `team-rows.tsx:TeamRows` | Rows ship as boxed cards; the approved frame draws hairline rows. A supplier who is only saved returns `null` from `teamRowOf`, so the page reads "2 booked" to a couple with 50 names on the bench. |
+| 2 | Messenger-style Chats door + inbox | APPROVED 2026-10-01 · `prototypes/supplier_inbox_and_find_2026-10-01_fable.html` frames 1–3 | **Partly** · `chats-door.tsx:ChatsDoor` → `/messages` | The door exists; Chats is a separate page (measured live: 1 thread, "Choose a supplier" dropdown). It leaves Suppliers. |
+| 3 | Find a supplier by event type ("Popular for weddings", scoped groups) | APPROVED 2026-10-01, frames 4–6 | **Yes, as a separate route** · `categories/page.tsx:FindSupplierPage` (`buildShortlistFolders`, `applicable_event_types`) | Measured live: ~70 categories, almost every one "Joining soon". It leaves Suppliers. The page is honest but it is a wall. |
+| 4 | Category → its suppliers, "Save to bench" / "Ask for a quote" | APPROVED 2026-10-01, frame 7 | **Yes** · `categories/_components/find-supplier-controls.tsx:SaveToBenchButton`, `contact-shortlist-vendor-button.tsx` | Not walked live (every category I could open says "Joining soon"). |
+| 5 | Bench: "Cover your event" ring, 12 folders, sort, search | `your_team_FINAL_2026-09-22.html` | **Yes** · `shortlist-categories.tsx:ShortlistCategories` | Hidden below 1024 px until "Saved" is tapped; on a phone it is the third screen down. |
+| 6 | Picks (the build) | same | **Yes** · `build-locked.tsx:BuildLocked` (label "Picks" = `NEXT_PUBLIC_EXPLORE_REPLAN_ENABLED` is **on** in prod, read from the live labels) | Same hiding. `team-controls.tsx` Remove/Clear only render behind the replan flag. |
+| 7 | Money split + a buffer that refuses while anyone is unpriced (Your Team slice 3) | `your_team_BUILD_PLAN_2026-09-22.md` | **Yes** · `merkado-budget-lens.tsx:MerkadoBudgetLens` ("Buffer · Not knowable · 1 supplier has no price recorded", measured live) | Collapsed by default on both widths (`budgetOpen=false`). The plan file still says "no slice done" — the plan's status rotted, not the code. |
+| 8 | Capped lists + unread badges (slices 0–1) | same | **Yes** · `lib/capped-rows.ts`, `lib/bench-unread.ts` exist | Plan status not updated. Slices 2 and 4: not measured. |
+| 9 | Compare saved builds (Plans) | same | **Yes** · `build-compare.tsx:BuildCompare` | Collapsed by default (`compareOpen=false`), last thing on the page. "Compare combinations" is the item the owner named and it is the hardest to reach. |
+| 10 | Budget page | `?part=budget` | **Yes** · `page.tsx` early return → `BudgetPage` | A second door to money that leaves the page; with the replan flag off the menu shows two rows both labelled "Budget" (`planning-list.test.ts`). |
+| 11 | Add a supplier manually | DECISION_LOG 2026-09-20 (a)–(k) | **Yes** · `NewManualVendorModal` inside `shortlist-categories.tsx` | Three taps deep on a phone: Saved → open a category → "Add manually". "Manual add with an agreed price = booked" is still in the roadmap queue, not built. |
+| 12 | Remove on every non-booked bench card | DECISION_LOG 2026-10-05 | **Partly** · `deleteVendor` is wired in `shortlist-categories.tsx` (self-added, with undo) | Shortlisted (not self-added) suppliers: queued in `ROADMAP_TO_APPLE_CHECK_2026-10-06.md` §5.1, not re-verified here. |
+| 13 | The other §5.1 bench items (payment-plan hint, Edit sheet + Send by email, PesoInput, Paid so far, inclusion chips, price × guests, locked groups, picked tile sticks, "Not needed? Remove" index bug, one pill height) | ROADMAP §5.1 | **Not measured individually** — the roadmap lists them as queued | They are all bench-card details; the uniscreen keeps the bench card, so they stay valid as a follow-on batch. |
+| 14 | "Book", never "lock" | repo guard `the-couple-books-never-locks` (named in the brief; not found under that filename in `apps/web/lib` — anchor the test by grep, not path) | **Partly** · `team-rows.tsx` "Book ›", `accordion-lock.tsx` default label "Book this pick" | `bench-vendor-actions.tsx` docblock still says "Lock this"; comments and symbol names say lock everywhere. Copy is right where I could read it. |
+| 15 | Event date lives in Suppliers | DECISION_LOG 2026-10-06 | **No** · editors are `details/_components/governed-fields.tsx:GovernedFields` and `launch/_components/details-your-event.tsx:DateEditor`; Suppliers only reads `event_date` | Needs a home on the page. |
+| 16 | Date Finder lives in Suppliers | same | **No** · `find-date/_components/find-your-date.tsx:FindYourDate` (own route) + `launch/_components/details-date-finder.tsx` (Maker) | Reuse `FindYourDate` in place; do not redraw it. |
+| 17 | Venue lives in Suppliers; Maker shows "Set when you book your venue in Suppliers" | same | **No** · `details-your-event.tsx:VenuesEditor` | Needs a home on the page, with manual venue entry. |
+| 18 | Room size from the venue, table sizes from the stylist | DECISION_LOG 2026-10-06 | **No** · `venue_width_m` is written only by `seating/actions.ts:saveFloorPlan` | No supplier-send path exists. The Suppliers page should show what was received and offer "Ask them". |
+| 19 | First-visit tour | owner rule 2026-09-25 | **No** · `customer_vendors_v1` retired 2026-10-02 (`marketplace-mini-tour.test.ts`), no replacement | A new page gets a new tour. |
+| 20 | Desktop adaptation | — | **Partly** · `lg:grid-cols-[minmax(0,1fr)_380px]`, sticky rail; nothing else responsive in `page.tsx` | It is a phone column with a rail. |
+| 21 | Animation | — | **Barely** · `services-takeover.tsx` has 5 transition classes, `team-rows.tsx` 1 | No motion carries meaning (nothing opens, slides, or counts). |
+
+**Tests that fence any redesign** (keep them green or change them with the design): `your-team-phone-first.test.ts` (source order team → Find → planning list → find area; find area may be hidden on a phone only while closed; rows from `lib/your-team-rows.ts`; one action per row), `suppliers-opens-fast.test.ts` (first paint shows the team, does not draw the closed find area), `suppliers-keeps-the-shell-bar.test.ts`, `planning-list.test.ts` (five rows in the owner's order, 48 px, no ⋯ menu). **The uniscreen replaces the planning list with a jump dropdown, so `planning-list.test.ts` is retired with it, not weakened.**
+
+## What the prototype keeps, and what it changes
+
+Prototype: `prototypes/suppliers_page_2026-10-07_fable.html` (phone 375 and desktop 1280 side by side; open `?frame=1` to resize it live).
+
+**Kept as shipped:** the shell bar, the Home · Guests · Suppliers · Hub · More bar, `TeamRows` content and its one-action-per-row rule, `ShortlistCategories` data (folders, counts, "Cover your event"), `BuildLocked` picks, `MerkadoBudgetLens` figures incl. "Not knowable", `BuildCompare`, `FindYourDate`, `NewManualVendorModal`, the One Chat Box, `MiniTour`.
+
+**The delta (six things):**
+1. **One scroller, no menu.** The planning list and the hidden `#team-find-area` go. Six sections in one page: Your suppliers · Cover your event · Picks · Plans · Payments · Chats. A sticky **"Jump to" dropdown** under the title navigates and follows the scroll (any set of choices is one dropdown).
+2. **The date and the venue are the second line of the page**, tappable in place. Date opens a sheet with "I have a date / Help me choose" (`FindYourDate`). Venue shows the booked venue or "Set when you book your venue", with the room size the venue sent and "Ask them" when missing.
+3. **Categories are rows that open in place.** "Cover your event" lists only what this event type needs (approved starter scoping) and a "More categories" dropdown for the rest. A row opens with an animated height change into: saved suppliers as a swipe strip (Add to picks · Inquire · Book · Remove), then "Find more in X ›" and "Add your own". Nothing leaves the page: find and add open as a bottom sheet (phone) / right panel (desktop).
+4. **Picks and money are one section, always visible**, with the date-fit line ("3 of 3 priced picks are free on Dec 18 ✓") and "Save as a plan" / "Compare plans ›". Compare opens in place as side-by-side columns.
+5. **Chats live on the page**: the three latest threads as Messenger rows, a conversation opens as a sheet/panel; the 💬 door stays.
+6. **Motion with meaning**: rows and categories open with a height transition; sheets slide up (phone) or in from the right (desktop); the jump label crossfades as you scroll; money counts to its new value when a pick is added; "Booked" pops once. All of it honours `prefers-reduced-motion`.
+
+**Desktop:** the same six sections, two columns at ≥1024 px — suppliers and categories on the left, Picks · Plans · Payments · Chats in a sticky right rail. Sheets become a right-side panel.
+
+## Recommendations (one word each)
+
+1. **Retire the five-row "Your planning" menu** in favour of the jump dropdown and the always-visible sections. (Yes / No)
+2. **The second line of the page is "date · venue"**, both editable in place; the Maker's Details tool loses both. (Yes / No)
+3. **"Cover your event" shows only the starter categories for the event type**, the rest behind one "More categories" dropdown — not the 70-row wall. (Yes / No)
+4. **Compare plans opens in place** (sheet/panel), not as a collapsed section at the bottom. (Yes / No)
+5. **Chats get a section on the page** (3 latest threads); the `/messages` page stays as the full inbox. (Yes / No)
+6. **Hairline rows, not boxed cards**, for suppliers — as the approved 2026-10-01 frame drew them. (Yes / No)
+
+## Build plan (Opus, after approval — nothing started)
+
+| PR | Scope | Touches | Guard |
+|---|---|---|---|
+| 1 | Shell: remove `hidden lg:block` + lazy mount; one scroller with six `<section id>`s; sticky Jump dropdown with scroll-spy; retire `PlanningList` + `planning-list.test.ts`; update `your-team-phone-first.test.ts` / `suppliers-opens-fast.test.ts` to the new order | `services-takeover.tsx`, `page.tsx` | "every section is in the first render on a phone" |
+| 2 | Date + venue line: read `event_date` / venue; sheets reuse `DateEditor`, `FindYourDate`, `VenuesEditor`; Maker Details shows read-only "Set when you book your venue in Suppliers" | `services-takeover.tsx`, `launch/_components/details-your-event.tsx` | "the Maker has no date or venue writer" |
+| 3 | Categories in place: starter-scoped rows + "More categories" dropdown; row opens to swipe strip; Find and Add as sheets (reuse `FindSupplierPage` body, `NewManualVendorModal`) | `shortlist-categories.tsx`, `categories/` | "Find a supplier never navigates away" |
+| 4 | Picks + money + date-fit line always visible; Compare as a sheet (`BuildCompare` body) | `build-locked.tsx`, `merkado-budget-lens.tsx`, `build-compare.tsx` | "Buffer still says Not knowable while anyone is unpriced" |
+| 5 | Chats section (3 latest threads via the messages read) + conversation sheet (One Chat Box) | new `_components/chats-section.tsx` | "unread count on the page equals the door badge" |
+| 6 | Supplier sends room size / table sizes: supplier-side field, couple-side "received / Ask them" line | migration (RLS pattern per table), supplier workspace, Suppliers row detail | db-tests + Ugat map |
+| 7 | Tour `customer_suppliers_v2` (3 stops) + motion polish + reduced-motion | `lib/tours.ts`, CSS | `marketplace-mini-tour.test.ts` updated |
+
+Then the §5.1 bench batch from the roadmap, unchanged.
+
+**For the controller (Maker change needed):** PR 2 removes the date and venue editors from the Maker's Details tool and leaves a read-only line. Nothing else touches Maker files.
