@@ -50,7 +50,8 @@ Owner: *"document everything properly and all our rules and prototypes and plans
 1. Fix main if red: `launch/_components/add-part-sheet.tsx` (a variable used before it is declared, reported by EDB's typecheck on 08 Oct; verify on origin/main first).
 2. Finish the in-flight refinements: RD panel → S3 Studio → small PRs (#6409, #6410, tiles, top search) → owner check on the preview → merge → deploy.
 3. Desktop three columns.
-4. Suppliers + Budget.
+4. Suppliers + Budget + launch offer (option B, 50 free Papic credits) — target: suppliers join the weekend of 10–11 Oct.
+4b. Admin pages, same treatment: "an easy one man handled website".
 5. Event Details (#6412 → PR-B, PR-C) and the More-menu pages (#6411 → steps 2–10; step 6 needs a new table, owner sign-off first).
 6. Look redesign (after owner approval).
 7. E-Gifts wish list (design first).
