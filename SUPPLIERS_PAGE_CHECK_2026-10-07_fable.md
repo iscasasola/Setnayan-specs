@@ -44,19 +44,22 @@ Prototype: `prototypes/suppliers_page_2026-10-07_fable.html` — a **working mod
 
 **Kept as shipped:** the shell bar, the Home · Guests · Suppliers · Hub · More bar, `TeamRows` content and its one-action-per-row rule, `ShortlistCategories` data (folders, counts, "Cover your event"), `BuildLocked` picks, `MerkadoBudgetLens` figures incl. "Not knowable", `BuildCompare`, `FindYourDate`, `NewManualVendorModal`, the One Chat Box, `MiniTour`.
 
-**The page is the owner's nine steps, in order, on one scroller:**
+**The page is the owner's nine steps, in order, on one scroller — six parts, each mapped to what ships:**
 
-| # | Section | Owner's step | What happens there |
-|---|---|---|---|
-| 1 | **Cover your event** | 1 · find categories, search, add manually | The shipped "Cover your event" ring as rows, the rest of the admin taxonomy behind one "More categories" dropdown grouped as the Find page groups it. A row reads "N suppliers ›" / "Booked ✓ ›" and opens that category's suppliers **exactly as the approved frames 4 and 7 draw it** (search · one Filter ▾ · "N suppliers · Metro Manila first" · rows with Save · Ask for a quote; yours first with their state; a booked one shows Booked · Open chat ›). Add your own and "Not needed? Remove" sit at the end of that list. Nothing leaves the page. |
-| 2 | **Chats** | 2 · talk, inquire · 3 · accept the price | Messenger rows with the supplier's state and one next step (Read the quote · Nudge). Accepting a quote puts the supplier in the build. |
-| 3 | **Build** | 4 · create builds | One supplier per category, money and date-fit update as you pick. Save this build · Book this build. |
-| 4 | **Compare builds** | 5 · compare multiple builds | Saved builds as rows; side-by-side sheet with totals, buffer and the dates each build is free on. Use › |
-| 5 | **Booked** | 6 · book · 7 · see all booked | Booked rows with one next step (Set price · Pay). Each opens to what the supplier sent (room size, table sizes, or "Ask them") and **"Used across your event"** — the Event Hub, seat plan, schedule, guests, Papic — the owner's "this data can be used across the event". |
-| 6 | **Budget** | 8 · where they are | Booked · in your build · paid · buffer, a meter, and the payment rows. Buffer still refuses while anyone is unpriced. |
-| 7 | **Date & place** | 9 · date and location become more specific | Two ladders that fill as you book: month → day → time, region → city → venue → room size. The line under the title sharpens with them: "December 2026 · Metro Manila" becomes "Fri, Dec 18, 2026 · Seda Vertis North, Quezon City". |
+| # | Section | Owner's steps | Maps to (shipped) | What happens there |
+|---|---|---|---|---|
+| 1 | **Cover your event** | 1 find · 2 talk, inquire · 3 accept | `shortlist-categories.tsx` ("Cover your event" ring, folders → cards), `categories/page.tsx ?c=` (frame 7), `NewManualVendorModal`, One Chat Box | The shipped ring as rows; "＋ Add to your event" is one dropdown of the admin taxonomy. A row with a shortlist opens **on the page** to the couple's suppliers as rows (the Your Team FINAL carousel, one row shape): Add to build · Inquire / Nudge / Read their reply · Book · Remove. "Find more in X ›" opens the marketplace as a **sheet** (the approved frame 7: search · one Filter ▾ · Save · Ask for a quote); Save or Ask closes the sheet and the supplier lands on the page. "Not needed? Remove X from your event" and "＋ Add your own" in the original's words. Chat is not a section: it hangs off the row; the inbox is the shell's one icon. |
+| 2 | **Build** | 4 create builds | `build-locked.tsx:BuildLocked` | One supplier per category; money and date-fit update as you pick. Save this build · Book this build. |
+| 3 | **Compare builds** | 5 compare builds | `build-compare.tsx:BuildCompare` | Side by side in place, with totals, buffer and the dates each build is free on. Use › |
+| 4 | **Booked** | 6 book · 7 see all booked | `team-rows.tsx:TeamRows`, `lib/your-team-rows.ts` | One next step each (Set price · Pay). Opens to what they sent (room size, table sizes, "Ask them") and **"Used across your event"** (Event Hub · seat plan · schedule · guests · Papic). |
+| 5 | **Budget** | 8 where they are | `merkado-budget-lens.tsx`, `BudgetPage`, `workspace?tab=payments` | The FINAL's rows, restored: Budget · Booked · Paid to suppliers · Setnayan orders · If you book these · Buffer ("Not knowable" while anyone is unpriced), a meter, the payment rows. |
+| 6 | **Date & place** | 9 date and location sharpen | `DateEditor`, `FindYourDate`, `VenuesEditor` (moved here) | Two ladders that fill as you book; the line under the title sharpens: "December 2026 · Metro Manila" → "Fri, Dec 18, 2026 · Seda Vertis North, Quezon City". |
 
-**Desktop (≥1024 px):** steps 1, 2, 5 on the left; 3, 4, 6, 7 in a sticky right rail; sheets become a right-side panel. **Motion with meaning:** rows and categories open with a height transition, sheets slide, money counts to its new value, "Booked" pops once, ladders fill; all honour `prefers-reduced-motion`.
+**Each supplier row carries only what is true** (one row shape everywhere): free on your date · covers other categories (the shipped "also covers") · booked by someone in your circle (trusted circle). The shipped **fit badge** (Merkado scoring) is referenced, not redrawn — the prototype never guesses whether a price fits.
+
+No navigator. Sheets are for browsing and input only (marketplace, chat, pay, price, book, date, add your own); nothing of the couple's lives in a sheet. **Desktop (≥1024 px):** Cover and Booked on the left; Build · Compare · Budget · Date & place in a sticky rail. Motion: rows open with a height transition, sheets slide, money counts, "Booked" pops once, ladders fill; `prefers-reduced-motion` honoured.
+
+**What the comparables do (The Knot / WeddingWire Vendor Manager, Zola, Bridebook, Thumbtack; checked 2026-10-07):** all split find / your vendors / budget / messages into 3–4 places; all share the spine we keep (your suppliers by category with a moving status, quotes and deposits feeding the budget). None compares builds across categories, none sharpens date and place, none feeds a booked supplier into the rest of the event.
 
 **Not in the prototype on purpose (needs an owner call):** the word for a combination — the shipped page says "Picks" (replan flag on) / "Build" (flag off); the owner said *"builds"* today. The prototype says **Build**.
 
@@ -65,11 +68,12 @@ Prototype: `prototypes/suppliers_page_2026-10-07_fable.html` — a **working mod
 1. **Retire the five-row "Your planning" menu**; the page is the nine steps in order, no navigator. (Yes / No)
 2. **The second line of the page is "date · venue"**, both editable in place; the Maker's Details tool loses both. (Yes / No)
 3. **"Cover your event" shows the shipped starter ring for the event type**, the rest behind one "More categories" dropdown — not the 70-row wall. (Yes / No)
-3b. **Retire `ChatsDoor`** once Chats is a section; the shell's Messages icon is the one door. (Yes / No)
 4. **Compare plans opens in place** (sheet/panel), not as a collapsed section at the bottom. (Yes / No)
 5. **Chats get a section on the page** (3 latest threads); the `/messages` page stays as the full inbox. (Yes / No)
 6. **Hairline rows, not boxed cards**, for suppliers — as the approved 2026-10-01 frame drew them. (Yes / No)
 7. **"Build" is the word** for a combination (not "Picks"), per today's phrasing. (Yes / No)
+8. **Chats is not a section**: the conversation hangs off the supplier's row; the shell's Messages icon is the only inbox door. (Yes / No)
+9. **Add later, each needs your data, none guessed:** a suggested spend per category (Bridebook's one good idea; admin-set figures) · "Ask 3 at once" quote fan-out on a category · a kinder "usually books N months out" line instead of "168 days overdue". (Yes to any)
 
 ## Build plan (Opus, after approval — nothing started)
 
