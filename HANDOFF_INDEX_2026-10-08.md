@@ -48,6 +48,9 @@ Owner (08 Oct): *"at 98% start documentation and still continue safely building 
 
 ## 4 · Sequence of builds (owner order)
 
+🧭 **ROADMAP LOCKED ("ok roadmap", 08 Oct): LEVEL 1 (clean all current features + launch offer + app-shows-owned) → APPLE CHECK → LEVEL 2 (every event type, expos, ticketing L1–L2) → LEVEL 3 (own payments + ticket commission, Apple IAP, reserved seating).** Setnayan never pays suppliers/organisers (no 2307). The numbered list below is Level 1 in detail; the event-coverage item (6b) moves to Level 2.
+
+
 ⏰ **TARGET (owner, 08 Oct ~03:30): "later, we can also finish supplier build so we can allow vendors to come in this weekend"** → Suppliers must be ready for real suppliers to join by the weekend of 10–11 Oct. FIRST ask the owner, in one line, which side this means: the couple's Suppliers page + Budget, or the supplier's own side (sign-up / shop / onboarding), or both. Then plan the build to land before the weekend.
 
 1. Fix main if red: `launch/_components/add-part-sheet.tsx` (a variable used before it is declared, reported by EDB's typecheck on 08 Oct; verify on origin/main first).
