@@ -102,6 +102,7 @@ main{overflow-x:clip}
 
 /* categories */
 .cat{border-top:1px solid var(--line)}
+.cat{scroll-margin-top:var(--stick-h,150px)}
 .cat.open>.bar{position:sticky;top:var(--stick-h,150px);z-index:3;background:var(--paper);box-shadow:0 1px 0 var(--line)}
 .cat .bar{display:grid;grid-template-columns:36px 1fr auto 14px;gap:12px;align-items:center;min-height:56px;padding:10px 0;width:100%}
 .cat .ico{width:36px;height:36px;border-radius:50%;background:var(--gild-soft);display:grid;place-items:center;font-size:15px}
@@ -695,7 +696,7 @@ section{padding:18px 0 8px}
   function doBook(s,price){ ensure(s); s.status='booked'; s.price=price; s.paid=s.paid||0; s.pop=true; delete S.picks[s.cat]; if(['reception','ceremony'].includes(s.cat)&&S.dateKnown!=='day'){} addChat(s.id,{sys:`You asked to book for ${S.dateKnown==='day'?shortDate(S.date):monthOf(S.date)}. Waiting for their confirmation.`}); }
   const ACT={
     mode(d){ S.mode=d.mode; $('#cart').classList.remove('on'); render(); window.scrollTo({top:0}); },
-    opencat(d){ closeSheet(); const was=S.mode==='find'&&S.cat===d.cat; S.mode='find'; S.cat=was?null:(d.cat||null); S.filter='near'; S.showAll=null; render(); if(!was&&d.cat){ const el=document.getElementById('cat-'+d.cat); if(el) setTimeout(()=>el.scrollIntoView({block:'start'}),60); } },
+    opencat(d){ closeSheet(); const was=S.mode==='find'&&S.cat===d.cat; S.mode='find'; S.cat=was?null:(d.cat||null); S.filter='near'; S.showAll=null; render(); if(!was&&d.cat) landOn('cat-'+d.cat); },
     showall(d){ S.showAll=d.cat; render(); },
     askcat(d){ const m=sup(d.id); if(!S.cats.includes(d.cat)) S.cats.push(d.cat); S.removedCats=S.removedCats.filter(x=>x!==d.cat); const copy=Object.assign({},m,{id:m.id+'@'+d.cat,cat:d.cat,status:'waiting',askedAgo:'just now',fresh:true,from:null,per:null,covers:[]}); S.suppliers.push(copy); addChat(m.id,{me:true,t:`Could you also quote for ${cat(d.cat).name}?`}); closeSheet(); S.mode='find'; S.cat=d.cat; render(); toast(`Asked ${m.name} about ${cat(d.cat).name}`); },
     toggle(d){ const i=S.open.indexOf(d.id); i<0?S.open.push(d.id):S.open.splice(i,1); render(); },
@@ -729,7 +730,7 @@ section{padding:18px 0 8px}
     reset(d){ try{localStorage.removeItem('sup-proto-v2');localStorage.removeItem('sup-tour');}catch(e){} S=SEEDS[d.mode||'mid'](); S.mode='find'; S.cat=null; closeSheet(); render(); window.scrollTo({top:0}); toast(d.mode==='empty'?'Starting from zero — step 1: cover your event':'Mid-planning demo'); }
   };
   document.addEventListener('click',e=>{ const b=e.target.closest('[data-act]'); if(!b||b.disabled) return; e.preventDefault(); (ACT[b.dataset.act]||(()=>{}))(Object.assign({},b.dataset)); });
-  document.addEventListener('change',e=>{ if(e.target.id==='moreCats'&&e.target.value){ const k=e.target.value; S.cats.push(k); S.removedCats=S.removedCats.filter(x=>x!==k); S.cat=k; S.filter='near'; render(); window.scrollTo({top:0}); toast(`Added ${cat(k).name}`); }
+  document.addEventListener('change',e=>{ if(e.target.id==='moreCats'&&e.target.value){ const k=e.target.value; S.cats.push(k); S.removedCats=S.removedCats.filter(x=>x!==k); S.cat=k; S.filter='near'; render(); landOn('cat-'+k); toast(`Added ${cat(k).name}`); }
     if(e.target.id==='findFilter') openSheet('find',{cat:e.target.dataset.cat,filter:e.target.value});
     if(e.target.id==='findFilter'){ S.filter=e.target.value; render(); }
     if(e.target.id==='addCat') $('#addCatLabel').textContent=cat(e.target.value).name; if(e.target.id==='addBooked') $('#addBookedLabel').textContent=e.target.selectedOptions[0].text; });
