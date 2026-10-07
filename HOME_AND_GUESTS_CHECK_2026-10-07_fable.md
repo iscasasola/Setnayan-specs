@@ -24,9 +24,9 @@ Ships: no visible title or search at 375 (the shell top bar's `?q=` is the searc
 
 | # | Adjust | Today (file:symbol) | In the prototype |
 |---|---|---|---|
-| G1 | The Maker/Suppliers shape: one segmented control, one body, tools at the thumb | doors drawn inside the ⋯ sheet (`GuestsPhoneMenu`, `RosterTabs`) | `List N · Map · Share the link` as the sticky `ISegmented`; no ⋯ sheet |
+| G1 | The Maker/Suppliers shape: one segmented control, one body, tools at the thumb | doors drawn inside the ⋯ sheet (`GuestsPhoneMenu`, `RosterTabs`) | **List N · Map · Share** as the sticky `ISegmented` (owner: *"List Map Share?"* — one word each); no ⋯ sheet |
 | G2 | One button at a time for adding — we pick the method | round wordless **+** (`OpenAddGuestButton`) + four add doors behind ⋯ (`AddDoors rows`) | thumb bar `＋ Add a guest` (main) → name box, Add; the four doors are ONE dropdown "Add another way" inside the sheet |
-| G3 | A visible search, pinned | none on the page at 375 (`GuestsTopSearch` in the shell) | `Search guests or add` pinned under the counts; no match → `＋ Add "…"` |
+| G3 | A visible search, pinned | none on the page at 375 (`GuestsTopSearch` in the shell) | `Search` pinned under the counts with Sort · Select · Expand beside it; no match → `＋ Add "…"` as the result. **One add door only — the thumb bar's ＋ Add a guest** (owner: *"2 ways to add guest?"*) |
 | G4 | Numbers count, a replied meter | counts line is static; `RosterMeters` is computer-only | attending · not coming · no reply · to invite = `Count`; `Fill` = replied % |
 | G5 | Gesture-only controls become buttons | select only by 480 ms long-press (`MobileListRow`), delete only by swipe (`SwipeToDelete`), group kebab only on hover (`KebabMenu`) | ☑ Select in the search row → avatars become checkboxes, thumb bar `✉ Invite N · ✕ Remove N`; every row has `✕ Remove`; groups get a visible ⋯ |
 | G6 | Every row action a button with icon + word | bulk bar text buttons, "Reopen", "Delete", "Close", "Choose all N shown", "Rename this role", "Change your message", the wrap-strip links | `✓ Attending / Maybe / Not coming` (state, quiet main) · `🔔 Nudge` (no reply) · `✉ Invite` (to invite, main) · `💬 Message` · `✎ Edit` · `✕ Remove` — words drop by width |
