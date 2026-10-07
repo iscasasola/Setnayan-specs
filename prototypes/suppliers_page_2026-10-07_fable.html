@@ -240,8 +240,15 @@ html.sheet-open .sheet{transform:none;visibility:visible;transition:transform 32
 .cmp .acts .ic svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .scard .acts button{border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:500;color:var(--ink);white-space:nowrap}
 .scard .acts button.quiet{color:var(--mute)}
-.scard .acts .ic{width:40px;height:40px;padding:0;border-radius:50%;display:grid;place-items:center;color:var(--ink)}
-.scard .acts .ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.scard .acts .ic{height:40px;padding:0 14px;border-radius:999px;display:inline-flex;align-items:center;gap:7px;color:var(--ink);flex:0 0 auto;white-space:nowrap}
+.scard .acts .ic.main{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.scard .acts .ic.main.quiet{background:transparent;color:var(--mute);border-color:var(--line)}
+.scard .acts .ic.main.on{background:var(--ok);border-color:var(--ok)}
+.scard .acts .ic.icon-only{width:40px;padding:0;justify-content:center}
+.scard .acts .ic.icon-only .lbl{display:none}
+.scard .acts .ic .lbl{font-size:13px;font-weight:500}
+.scard .acts{overflow:hidden}
+.scard .acts .ic svg{width:18px;height:18px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .scard .acts{flex-wrap:nowrap;align-items:center}
 .scard .acts button:not(.ic){flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .scard .acts button[data-act=ask],.scard .acts button[data-act=pick]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
@@ -548,16 +555,16 @@ section{padding:18px 0 8px}
 
   /* ---------------- render: one mode at a time ---------------- */
   // icon buttons (lucide shapes): the step's main verb stays a word; the rest are icons so every card's row fits on one line
-  const ICO={chat:'<svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.6-.8L3 21l1.9-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>',book:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M9 16l2 2 4-4"/></svg>',x:'<svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>',pen:'<svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',folder:'<svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',nudge:'<svg viewBox="0 0 24 24"><path d="M6 17V11a6 6 0 0 1 12 0v6l2 2H4zM10 21h4"/></svg>'};
-  const ib=(name,label,attrs)=>`<button class="ic" ${attrs} aria-label="${label}" title="${label}">${ICO[name]}</button>`;
+  const ICO={chat:'<svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.6-.8L3 21l1.9-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>',book:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M9 16l2 2 4-4"/></svg>',x:'<svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>',pen:'<svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',folder:'<svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',nudge:'<svg viewBox="0 0 24 24"><path d="M6 17V11a6 6 0 0 1 12 0v6l2 2H4zM10 21h4"/></svg>',plus:'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',check:'<svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg>',card:'<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/></svg>',cal:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>'};
+  const ib=(name,label,attrs,cls='')=>`<button class="ic ${cls}" ${attrs} aria-label="${label}" title="${label}">${ICO[name]}<span class="lbl">${label}</span></button>`;
   const verbs=(s,k)=>s.status==='booked'
-      ?`${s.price==null?`<button data-act="sheet" data-key="price" data-id="${s.id}">${s.own?'Your record':'Set price'}</button>`:(nextDue(s)?`<button data-act="sheet" data-key="pay" data-id="${s.id}">Pay</button>`:`<button class="quiet" data-act="sheet" data-key="pay" data-id="${s.id}">Paid in full</button>`)}${s.own&&s.price!=null?ib('pen','Your record',`data-act="sheet" data-key="price" data-id="${s.id}"`):''}${ib('chat','Chat',`data-act="sheet" data-key="chat" data-id="${s.id}"`)}${ib('folder','Workspace',`data-act="note" data-text="Opens the shipped supplier workspace"`)}`
-      :s.status==='quote'?`<button data-act="sheet" data-key="chat" data-id="${s.id}">Read their reply</button>${ib('x','Remove',`data-act="remove" data-id="${s.id}"`)}`
+      ?`${s.price==null?ib('pen',s.own?'Your record':'Set price',`data-act="sheet" data-key="price" data-id="${s.id}"`,'main'):(nextDue(s)?ib('card','Pay',`data-act="sheet" data-key="pay" data-id="${s.id}"`,'main'):ib('check','Paid in full',`data-act="sheet" data-key="pay" data-id="${s.id}"`,'main quiet'))}${s.own&&s.price!=null?ib('pen','Your record',`data-act="sheet" data-key="price" data-id="${s.id}"`):''}${ib('chat','Chat',`data-act="sheet" data-key="chat" data-id="${s.id}"`)}${ib('folder','Workspace',`data-act="note" data-text="Opens the shipped supplier workspace"`)}`
+      :s.status==='quote'?`${ib('chat','Read their reply',`data-act="sheet" data-key="chat" data-id="${s.id}"`,'main')}${ib('x','Remove',`data-act="remove" data-id="${s.id}"`)}`
       :s.status==='waiting'?`${ib('nudge','Nudge',`data-act="nudge" data-id="${s.id}"`)}${ib('chat','Chat',`data-act="sheet" data-key="chat" data-id="${s.id}"`)}${ib('x','Remove',`data-act="remove" data-id="${s.id}"`)}`
-      :!availableFor(s)?`<button class="quiet" data-act="sheet" data-key="chat" data-id="${s.id}">Ask about another day</button>${ib('x','Remove',`data-act="remove" data-id="${s.id}"`)}`
-      :priceOf(s)!=null?`<button data-act="pick" data-id="${s.id}" class="${S.picks[k]===s.id?'on':''}">${S.picks[k]===s.id?'In your build ✓':'Add to build'}</button>${ib('book','Book',`data-act="book" data-id="${s.id}"`)}${s.own?ib('pen','Your record',`data-act="sheet" data-key="price" data-id="${s.id}"`):ib('chat','Chat',`data-act="sheet" data-key="chat" data-id="${s.id}"`)}${ib('x','Remove',`data-act="remove" data-id="${s.id}"`)}`
-      :s.own?`<button data-act="sheet" data-key="price" data-id="${s.id}">Your record</button>${ib('x','Remove',`data-act="remove" data-id="${s.id}"`)}`
-      :`<button data-act="ask" data-id="${s.id}" data-cat="${k}">Ask for a quote</button>${ib('x','Remove',`data-act="remove" data-id="${s.id}"`)}`;
+      :!availableFor(s)?`${ib('cal','Ask about another day',`data-act="sheet" data-key="chat" data-id="${s.id}"`,'main quiet')}${ib('x','Remove',`data-act="remove" data-id="${s.id}"`)}`
+      :priceOf(s)!=null?`${S.picks[k]===s.id?ib('check','In your build',`data-act="pick" data-id="${s.id}"`,'main on'):ib('plus','Add to build',`data-act="pick" data-id="${s.id}"`,'main')}${ib('book','Book',`data-act="book" data-id="${s.id}"`)}${s.own?ib('pen','Your record',`data-act="sheet" data-key="price" data-id="${s.id}"`):ib('chat','Chat',`data-act="sheet" data-key="chat" data-id="${s.id}"`)}${ib('x','Remove',`data-act="remove" data-id="${s.id}"`)}`
+      :s.own?`${ib('pen','Your record',`data-act="sheet" data-key="price" data-id="${s.id}"`,'main')}${ib('x','Remove',`data-act="remove" data-id="${s.id}"`)}`
+      :`${ib('chat','Ask for a quote',`data-act="ask" data-id="${s.id}" data-cat="${k}"`,'main')}${ib('x','Remove',`data-act="remove" data-id="${s.id}"`)}`;
   const currentPicks=()=>{ const p=Object.assign({},S.picks); S.suppliers.filter(x=>x.status==='booked').forEach(x=>{ p[x.cat]=x.id; }); return p; };
   const sameBuild=(a,b)=>{ const ka=Object.keys(a).filter(k=>a[k]).sort(), kb=Object.keys(b).filter(k=>b[k]).sort(); return ka.length===kb.length&&ka.every((k,i)=>k===kb[i]&&a[k]===b[k]); };
   const twinOf=()=>{ const cur=currentPicks(); return S.builds.find(b=>sameBuild(b.picks,cur))||null; };
@@ -594,7 +601,7 @@ section{padding:18px 0 8px}
             ${mine.map(x=>srow(x,`<b>${stateOf(x)}</b>${fitLines(x,k)?' · '+fitLines(x,k):''}`,verbs(x,k),x.fresh?'new':'',k)).join('')}
             ${bookedIn(k)?'':`<div class="findhead"><p class="k2">${mine.length?'More to compare':'To compare'} · ${list.length}</p><div class="sel small">${FL[fl]}<select id="findFilter" aria-label="Filter">${Object.entries(FL).map(([v,t])=>`<option value="${v}" ${v===fl?'selected':''}>${t}</option>`).join('')}</select></div></div>
             ${addown}
-            ${shown.map(m=>srow(m,fitLines(Object.assign({status:'saved'},m),k),`<button data-act="ask" data-id="${m.id}" data-cat="${k}">Ask for a quote</button>`,'',k)).join('')}
+            ${shown.map(m=>srow(m,fitLines(Object.assign({status:'saved'},m),k),`${ib('chat','Ask for a quote',`data-act="ask" data-id="${m.id}" data-cat="${k}"`,'main')}`,'',k)).join('')}
             ${!list.length?`<p class="mute" style="font-size:13px;margin:12px 0 4px">${qn0?`Nobody called “${esc((S.catQuery||'').trim())}” here yet — add them as your own.`:fl==='best'?`Nobody is free ${S.dateKnown==='day'?'on '+shortDate(S.date)+' — try another day in Help me choose':'in '+monthOf(S.date)}.`:'Nobody matches that filter.'}</p>`:''}`}
             <p class="mute" style="font-size:13px;margin:14px 0 6px">${bookedIn(k)?`<button class="wine" data-act="sheet" data-key="add" data-cat="${k}">＋ Add your own ›</button>`:''}${coveredBy(k)?'':`<button class="mute" data-act="removecat" data-cat="${k}">Not needed? Remove ${c.name} from your event</button>`}</p></div>`;
           return `<div class="cat ${open?'open':''} ${c.fresh?'new':''}" id="cat-${k}"><div class="cathead"><button class="bar" data-act="opencat" data-cat="${k}"><span class="ico">${c.icon}</span><span>${c.name}${mine.length?` <span class="mute">· ${mine.length} yours</span>`:''}</span><span class="state ${st.cls}">${st.text}</span><span class="chev">⌄</span></button></div><div class="exp"><div>${body}</div></div></div>`; }).join('')}
@@ -647,7 +654,7 @@ section{padding:18px 0 8px}
         <div class="replay"><button data-act="tour">Replay the first-visit tour</button> · <button data-act="reset" data-mode="mid">Reset: mid-planning</button> · <button data-act="reset" data-mode="empty">Reset: start from zero</button></div>`;
       lower='';
     }
-    $('#view').innerHTML=html; $('#lower').innerHTML=lower; if(typeof setStickH==='function') setStickH(); const oh=document.querySelector('.cat.open>.cathead'); document.documentElement.style.setProperty('--bar-h',(oh?oh.offsetHeight:56)+'px'); $('#lower').classList.toggle('on',!!lower); document.body.classList.toggle('has-lower',!!lower);
+    $('#view').innerHTML=html; $('#lower').innerHTML=lower; fitActs(); if(typeof setStickH==='function') setStickH(); const oh=document.querySelector('.cat.open>.cathead'); document.documentElement.style.setProperty('--bar-h',(oh?oh.offsetHeight:56)+'px'); $('#lower').classList.toggle('on',!!lower); document.body.classList.toggle('has-lower',!!lower);
     document.querySelectorAll('[data-count]').forEach(el=>count(el,+el.dataset.n));
     count($('#mBooked'),M.bookedSum); count($('#mToBook'),M.toBook); count($('#mBuffer'),BUDGET-M.bookedSum-M.toBook); count($('#mBooked2'),M.bookedSum); count($('#mToBook2'),M.toBook); count($('#mPaid'),M.paidSum); count($('#mBuffer2'),BUDGET-M.bookedSum-M.toBook);
     S.suppliers.forEach(s=>{delete s.fresh;delete s.pop;}); S.builds.forEach(p=>delete p.fresh); S.chats.forEach(c=>delete c.fresh); CATS.forEach(c=>delete c.fresh);
@@ -655,6 +662,8 @@ section{padding:18px 0 8px}
   }
   // the cart peeks when something is added (like a shopping cart), then tucks away
   // scroll so an element's top sits just under the pinned block — measured, so the first service card is never hidden behind it
+  function fitActs(){ document.querySelectorAll('.scard .acts').forEach(row=>{ const ics=[...row.querySelectorAll('.ic')]; ics.forEach(b=>b.classList.remove('icon-only')); const sec=ics.filter(b=>!b.classList.contains('main')).reverse(); for(const b of sec){ if(row.scrollWidth<=row.clientWidth+1) break; b.classList.add('icon-only'); } }); }
+  addEventListener('resize',()=>fitActs());
   function landOn(id){ setTimeout(()=>{ const el=document.getElementById(id); if(!el) return; const stickH=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--stick-h'))||150; const y=el.getBoundingClientRect().top+window.scrollY-stickH; window.scrollTo({top:Math.max(0,y),behavior:'smooth'}); },60); }
   let cartT=null; function peekCart(line){ $('#cartLine').innerHTML=line; $('#cart').classList.add('on'); clearTimeout(cartT); cartT=setTimeout(()=>$('#cart').classList.remove('on'),2800); }
 
@@ -685,7 +694,7 @@ section{padding:18px 0 8px}
       return `<p class="mute" style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;margin:0">Wedding · ${GROUPS[c.g]}</p><h3>${c.name}</h3>
         <div class="srow"><input placeholder="Search in ${c.name}"><div class="sel small">Filter<select id="findFilter" data-cat="${k}" aria-label="Filter">${Object.entries(FL).map(([v,t])=>`<option value="${v}" ${v===fl?'selected':''}>${t}</option>`).join('')}</select></div></div>
         <p class="mute" style="font-size:13px;margin:10px 0 2px">${list.length} supplier${list.length===1?'':'s'} · ${FL[fl]}${mine?` · ${mine} already on your page`:''}</p>
-        ${list.map(m=>srow(m,fitLines(Object.assign({status:'saved'},m),k),`<button class="quiet" data-act="savesup" data-id="${m.id}" data-cat="${k}">Save</button><button data-act="ask" data-id="${m.id}" data-cat="${k}">Ask for a quote</button>`)).join('')}
+        ${list.map(m=>srow(m,fitLines(Object.assign({status:'saved'},m),k),`<button class="quiet" data-act="savesup" data-id="${m.id}" data-cat="${k}">Save</button>${ib('chat','Ask for a quote',`data-act="ask" data-id="${m.id}" data-cat="${k}"`,'main')}`)).join('')}
         ${!list.length?`<p class="mute" style="font-size:13px;margin:12px 0 4px">${fl==='best'?'Nobody here yet — suppliers are joining.':'Nobody matches that filter.'}</p>`:''}
         <p class="mute" style="font-size:13px;margin-top:16px">Not here? <button class="wine" data-act="sheet" data-key="add" data-cat="${k}">Add your own ›</button>${coveredBy(k)?'':` <span style="margin:0 8px">·</span> <button class="mute" data-act="removecat" data-cat="${k}">Not needed? Remove ${c.name} from your event</button>`}</p>`; },
     supplier({id,cat:k}){ const m=sup(id); const mine=S.suppliers.find(x=>x.id===id); k=k||(mine&&mine.cat)||m.cat||'catering';
@@ -721,7 +730,7 @@ section{padding:18px 0 8px}
       return `<h3>${esc(s.name)}</h3><p class="mute" style="margin:0 0 8px">${cat(s.cat).name} · ${S.dateKnown==='day'?shortDate(S.date):monthOf(S.date)} · ~${GUESTS} guests ${chip(s)}</p>
         <div id="msgs">${c.msgs.map(m=>m.quote?`<div class="bubble" style="border:1px solid var(--line);background:var(--paper-2)"><b>Quote · ${peso(m.quote)}</b><br><span class="mute">Full day · 2 photographers</span><br>${s.status==='quote'?`<button class="wine" style="font-weight:500;margin-top:6px" data-act="accept" data-id="${s.id}">Accept ›</button> <button class="mute" style="margin-left:12px" data-act="send" data-id="${s.id}" data-text="Can you do option B for less?">Ask a question</button>`:'<span style="color:var(--ok)">Accepted ✓</span>'}</div>`:m.sys?`<p class="mute" style="font-size:12px;text-align:center">${esc(m.sys)}</p>`:`<div class="bubble ${m.me?'me':''}">${esc(m.t)}</div>`).join('')||`<p class="mute" style="font-size:13px">Say hello — your event brief (${S.dateKnown==='day'?shortDate(S.date):monthOf(S.date)}, ~${GUESTS} guests, Metro Manila) goes with the first message.</p>`}</div>
         <div class="compose"><span class="mute">📎</span><input id="composer" placeholder="Message ${esc(s.name.split(' ')[0])}"><button class="wine" data-act="send" data-id="${s.id}">➤</button></div>
-        ${s.status!=='booked'?`<div class="cta" style="padding-top:12px"><button class="btn" data-act="book" data-id="${s.id}">Book ${esc(s.name.split(' ')[0])} ›</button></div>`:''}
+        <div class="cta" style="padding-top:12px;display:flex;gap:8px;flex-wrap:wrap">${s.status!=='booked'?`<button class="btn" data-act="book" data-id="${s.id}">Book ${esc(s.name.split(' ')[0])} ›</button>`:''}<button class="btn quiet" data-act="note" data-text="Opens this thread in the shipped One Chat Box (the Messenger-style inbox approved 2026-10-01) — attachments, the full history, every supplier in one place">Open full chat ›</button></div>
         <p class="mute" style="font-size:12px;margin-top:10px">Keep chats and payments inside Setnayan — that's what protects your booking.</p>`; },
     pay({id,method}){ const s=sup(id); const plan=planOf(s); const nd=nextDue(s); const amt=nd?nd.amt:0; const onSetnayan=!s.own;
       const METHODS=[{k:'gcash',label:'GCash · QR',type:'qr',name:esc(s.name),no:'0917 ••• 4471'},{k:'bdo',label:'BDO · bank transfer',type:'bank',name:esc(s.name)+' Inc.',no:'0054 8820 1193'},{k:'link',label:'Payment link',type:'link'}];
