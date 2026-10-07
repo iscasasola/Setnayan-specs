@@ -63,6 +63,14 @@ BUILD EXACTLY (prototype Find mode, Catering open):
 - **A row changes state as one** (universal rule 3a): all buttons icon + word → all word only → all icon only; never mixed. **A text field in a button row keeps ≥ 60 % of the row** (rule 3b); the buttons adapt, the field never shrinks below it.
 - Acceptance pictures for these: `prototypes/suppliers_final_2026-10-07/16…22-*.jpg`; pictures 03 and 13 (the old pinned row) are superseded.
 
+
+**UPDATED 2026-10-07 LATE — supersedes earlier lines where they differ:**
+- **Search scope = the pinned category.** With several categories open (Expand all), the scope is the open category whose header is stuck under the segmented control; the box's words follow the pin as you scroll (`Search Catering or add your own` → `Search all suppliers or add your own` when nothing is pinned), and so does the Add button's category. One open category behaves the same.
+- **The floating bar slides** up once the mode has rendered and slides down (≈300 ms) before a mode/page change (universal rule 5). **Search runs 250 ms after the last keystroke and never blinks** — typing never rebuilds the box; load animations play once (rule 4). **Add is terracotta** everywhere.
+- **Every category dropdown on this page lists ONLY the categories on the event** — the add sheet's "What they do" (asked first when no category is pinned) and the record's "Also covers". A new category comes from "＋ Add to your event" under the ring.
+- **The claim link offers Download · Copy link only** — no Write to NFC on this page. **QRs are real codes** of the real links (`QrActions` ships this).
+- Acceptance pictures 16–22 and the prototype at corpus HEAD are the truth for the thumb bar.
+
 SHIPPED TO ADAPT: `shortlist-categories.tsx`, `categories/page.tsx` + `find-supplier-controls.tsx`, `category-search-overlay.tsx` (retire the overlay), `ServiceCardFace`, `vendor-badge-row.tsx`, `trusted-circle-badge.tsx`, `contact-shortlist-vendor-button.tsx` → `startServiceInquiry` (stamps the inquiry source — never bypass it), `new-manual-vendor-modal.tsx`, `self-added-contact-card.tsx`, `claim-link-share.tsx` + `qr-actions.tsx`, `lib/vendor-payment-methods.ts`, `merkado-guard-banner.tsx` (Sai's line), `accordion-lock.tsx` + `lock-milestone.tsx`.
 DO NOT: invent taxonomy names; show "Free on"; filter the shortlist with the search field; put the search field above the shortlist; add a second chat door; add tiers (Basic/Essential/Complete); write a tolerance number.
 ACCEPTANCE: prototype Find, Catering open, scrolled 900 px: pinned field at `--stick-h + row height`; all verbs per step match; dark mode pills correct; Add your own at ₱197,000 catering shows the Kusina ni Lola warn card.

@@ -17,6 +17,15 @@
 | `BOOKING_FEE_AUDIT_2026-10-07/` | the whole-app audits of the fee rules (3 and 5 landed; 1, 2, 4 pending) |
 | `DECISION_LOG.md` 2026-09-20 / 2026-09-22 | the pre-existing fee-unlock rule this page mirrors — cite, never re-derive |
 
+## LATE DELTAS (2026-10-07 evening) — read with PR2
+
+**UPDATED 2026-10-07 LATE — supersedes earlier lines where they differ:**
+- **Search scope = the pinned category.** With several categories open (Expand all), the scope is the open category whose header is stuck under the segmented control; the box's words follow the pin as you scroll (`Search Catering or add your own` → `Search all suppliers or add your own` when nothing is pinned), and so does the Add button's category. One open category behaves the same.
+- **The floating bar slides** up once the mode has rendered and slides down (≈300 ms) before a mode/page change (universal rule 5). **Search runs 250 ms after the last keystroke and never blinks** — typing never rebuilds the box; load animations play once (rule 4). **Add is terracotta** everywhere.
+- **Every category dropdown on this page lists ONLY the categories on the event** — the add sheet's "What they do" (asked first when no category is pinned) and the record's "Also covers". A new category comes from "＋ Add to your event" under the ring.
+- **The claim link offers Download · Copy link only** — no Write to NFC on this page. **QRs are real codes** of the real links (`QrActions` ships this).
+- Acceptance pictures 16–22 and the prototype at corpus HEAD are the truth for the thumb bar.
+
 ## Contact sheet
 **Thumb bar (final, 2026-10-07 evening):**
 
