@@ -96,14 +96,14 @@ The web's shared convention is not per-button, it is per **meaning** — the sem
 
 | Colour | Meaning (the convention) | Buttons on this page |
 |---|---|---|
-| **Mulberry** (brand, `--mulberry`) | primary — the forward step you most want | **Add to build** · Save this build |
+| **Terracotta** (the CTA token — still *named* `mulberry` in `globals.css`: #C24E25 light · #E5794E dark; `ISegmented tone=wine` fills with it) | primary — the forward step you most want | **Find** segment · **Add to build** · Save this build |
 | **Green** (`--ok`) | success / confirm / money committed | **Book** · Book this build · Pay · Record payment · Paid in full · In your build ✓ |
 | **Blue** (`--info`) | messaging / information | **Chat** · Ask for a quote · Read their reply · Open full chat |
 | **Amber** (`--warn`) | attention, something waiting on you | **Nudge** · Ask about another day (date conflict) |
 | **Red** (`--danger`) | destructive — take it back | **Remove** · Cancel booking |
 | **Grey** (ink/mute) | neutral — manage, edit | Your record · Set price · Workspace |
 
-Main verb = filled with its colour; the rest = outlined, colour ink + a 9 % tint. Every colour has a dark-mode twin (lighter, with dark ink on a filled button). Proof: `prototypes/suppliers_page_2026-10-07_fable-14-button-colours-light.jpg` / `-15-…-dark.jpg`.
+Main verb = filled with its colour; the rest = outlined, colour ink + a 9 % tint. ⚠ The first cut of this used the retired Rich Mulberry #5C2542 with an invented pink dark twin (#B8889C) — owner: *"why pink?"* — fixed to the shipped token; never derive a brand colour from memory, read `globals.css`. Every colour has a dark-mode twin (lighter, with dark ink on a filled button). Proof: `prototypes/suppliers_page_2026-10-07_fable-14-button-colours-light.jpg` / `-15-…-dark.jpg`.
 ⚠ Book and Pay share green deliberately — both are "commit"; their icons (calendar-check vs card) and words tell them apart. If the owner wants Pay distinct, the only honest alternative is the brand colour (PayPal/GCash/Maya each use their own brand for Pay — there is no cross-site standard).
 
 ## Build plan (Opus, after approval — nothing started)
