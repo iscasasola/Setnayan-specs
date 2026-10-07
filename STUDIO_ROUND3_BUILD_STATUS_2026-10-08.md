@@ -78,3 +78,5 @@ Plus margin: the venues' entry of `HUB_DRAFT_FACT_GROUP` written out, not comput
 Checks on d947aacc5: full `tsc` 0 errors (202 s) · `pnpm lint` 0 errors · 34 guard files 291 tests (287 pass · 0 fail · 4 todo, pre-existing) · 19 `ci.yml` node guards green. Full unit suite + build-dependent guards: CI.
 
 **Bundle verdict (CI, d947aacc5, run 37697799867):** ✅ "bundle size check" GREEN — Maker first load **506.9 KB**, 0.1 KB headroom, budget not raised (was 507.4 red at 3f6072200). Headroom is still only ~0.1 KB: the next first-load addition must be lazy, and see "How the first load grows without a first-load edit" above.
+
+**07:22 PHT, S3b — first-load moves for the combined train (509.5 of 507):** #6417 head **11583a187** = d947aacc5 + `c9d7deb0d` (the Studio tiles' words leave the shell's first load) + `11583a187` (the Studio forms' group headings drawn by the server). No behaviour or visual change; static estimate ≈ −0.4 to −0.55 KB gz, NOT built — Builder T re-measures on the train. Notes for T in `controller-2026-10-08/first-load-moves.md`.
