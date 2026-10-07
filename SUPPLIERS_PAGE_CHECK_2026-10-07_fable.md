@@ -90,6 +90,22 @@ Owner 2026-10-07: *"how about how SAI helps on the Suppliers? is it part of our 
 11. **Attribution on a manual add whose shop already exists** (owner: *"does our ruling of checking if the vendor exists still adapt here… we saw them first"*). The shipped rule (`lib/booking-fee-gate.ts` + SQL `booking_fee_is_sourced_surface`): sourced = `explore · search · shortlist · first_pick · favorites · auto_build · editorial · influencer` (billable, 5% then 1%); `host_manual · invite_claim · degree · website` = import, free forever. Ask for a quote from a category → sourced; Add your own → import; the supplier claiming via the link → import. **Gap:** `vendor_profile_views(event_id, source)` records "we saw them first" but nothing reads it for the fee. Proposed rule: a manual add that matches an existing shop is sourced only if this event viewed or inquired that shop through a sourced surface before; otherwise import. One rule in the gate + its SQL mirror, held by the existing drift test. (Yes / No)
 12. **Add later, each needs your data, none guessed:** a suggested spend per category (Bridebook's one good idea; admin-set figures) · "Ask 3 at once" quote fan-out on a category · a kinder "usually books N months out" line instead of "168 days overdue". (Yes to any)
 
+## Button colours — one colour per meaning (owner 2026-10-07: *"color code each button so they can have easier familiarity with the colors. base it on the recommended colors for that button across the internet"*)
+
+The web's shared convention is not per-button, it is per **meaning** — the semantic set every major system ships (Bootstrap `primary / success / info / warning / danger`, Material and Ant's equivalents, Apple's red for destructive). So each button takes the colour of what it does, and the same meaning is the same colour on every screen:
+
+| Colour | Meaning (the convention) | Buttons on this page |
+|---|---|---|
+| **Mulberry** (brand, `--mulberry`) | primary — the forward step you most want | **Add to build** · Save this build |
+| **Green** (`--ok`) | success / confirm / money committed | **Book** · Book this build · Pay · Record payment · Paid in full · In your build ✓ |
+| **Blue** (`--info`) | messaging / information | **Chat** · Ask for a quote · Read their reply · Open full chat |
+| **Amber** (`--warn`) | attention, something waiting on you | **Nudge** · Ask about another day (date conflict) |
+| **Red** (`--danger`) | destructive — take it back | **Remove** · Cancel booking |
+| **Grey** (ink/mute) | neutral — manage, edit | Your record · Set price · Workspace |
+
+Main verb = filled with its colour; the rest = outlined, colour ink + a 9 % tint. Every colour has a dark-mode twin (lighter, with dark ink on a filled button). Proof: `prototypes/suppliers_page_2026-10-07_fable-14-button-colours-light.jpg` / `-15-…-dark.jpg`.
+⚠ Book and Pay share green deliberately — both are "commit"; their icons (calendar-check vs card) and words tell them apart. If the owner wants Pay distinct, the only honest alternative is the brand colour (PayPal/GCash/Maya each use their own brand for Pay — there is no cross-site standard).
+
 ## Build plan (Opus, after approval — nothing started)
 
 > 🛑 **BUILD CONTRACT — owner, verbatim, 2026-10-07: *"all these builds need to be EXACTLY as we planned okay. no skipping or re inventing."***
