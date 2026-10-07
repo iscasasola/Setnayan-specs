@@ -1,7 +1,7 @@
 # Studio round 3 — build status (2026-10-08, builder S3, wrapped on the owner's call)
 
-PR **#6414** (draft, `do-not-auto-merge`, autoMergeRequest null) · branch `rd/studio-round-3` → base `rd/studio-followups` (#6406) · head `299f22f1b` (typecheck clean, preload fix, guards; Maker budget: CI measured 509.4 KB > 507 on 02d5a3ab0 — the Studio Love Story sheet moved to its own lazy file in 299f22f1b; re-measure on CI).
-PR **#6417** (draft, `do-not-auto-merge`) · `rd/studio-draft-fields` → base `rd/studio-round-3` · head `390689416` — "draft 1-3".
+PR **#6414** (draft, `do-not-auto-merge`, autoMergeRequest null) · `rd/studio-round-3` → `rd/studio-followups` · head `ef04b9e20`.
+PR **#6417** (draft, `do-not-auto-merge`) · `rd/studio-draft-fields` → `rd/studio-round-3` · head `e1951b758` — "draft 1-3".
 
 _Updated after the wrap was lifted (coordinator: keep building ~2.5 h)._
 Side-by-sides: `prototypes/studio-round3-2026-10-08/` (prototype vs built, 375 px, maker-lab fixtures).
@@ -42,3 +42,9 @@ Not run:  full unit suite, production build + 507 KB Maker budget (`check-maker-
 - A single-file `tsx --test` on a path with `[eventId]` matches nothing — use `app/dashboard/*/…`.
 - `node:test` `todo` hides a failure — the Guests halves are separate `todo` tests so the Studio halves still fail loudly.
 - maker-lab needs `R2_PUBLIC_URL` set to show the theme stills; its Seat plan tile is not the seat-plan editor.
+
+## 🔴 OPEN BLOCKER — Maker first-load budget (#6414), measured by CI
+Base (#6406) 506.9 KB → 509.4 (02d5a3ab0) → 508.9 → 507.4 → 507.2 → 507.1 → **507.2 KB at ef04b9e20 — 0.2 KB over 507**. Never raised. Done so far: Studio Love Story sheet split into its own lazy file (`moment-sheet-studio.tsx`, cards chunk); OpenInPlace + the film switch ride the lazy `StudioTool` door; the colour picker rides its lazy callers (no preload entry); the glass-foot constant inlined. Next: find the last ~0.2 KB of first-load delta vs base (candidates: `maker-details.tsx`'s two new server wrappers' StudioTool props, `lib/studio-details.ts` CSS if any client reads it, `maker-tools.tsx`); a local `next build` + `node scripts/check-maker-js-budget.mjs` under the heavy lock gives the chunk list.
+
+## Full unit suite (#6417 tree, 19:02Z run)
+22,841 tests · 22,830 pass · **4 fail** · 4 todo → all 4 were guards pinning the pre-"draft 1-3" shapes / one unread audit error; fixed in a7a3afb20 and the 5 files re-run green (65/65). Not re-run in full after the fix.
