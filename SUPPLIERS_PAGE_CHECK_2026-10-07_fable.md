@@ -15,7 +15,7 @@
 | # | Item | Where it was decided | Shipped? (origin/main anchor) | What is wrong or missing |
 |---|---|---|---|---|
 | 1 | Suppliers = booked rows, one next step each, one "Find a supplier" button | DECISION_LOG 2026-10-01 (simple phone app) | **Yes** · `lib/your-team-rows.ts:teamRows`, `team-rows.tsx:TeamRows` | Rows ship as boxed cards; the approved frame draws hairline rows. A supplier who is only saved returns `null` from `teamRowOf`, so the page reads "2 booked" to a couple with 50 names on the bench. |
-| 2 | Messenger-style Chats door + inbox | APPROVED 2026-10-01 · `prototypes/supplier_inbox_and_find_2026-10-01_fable.html` frames 1–3 | **Partly** · `chats-door.tsx:ChatsDoor` → `/messages` | The door exists; Chats is a separate page (measured live: 1 thread, "Choose a supplier" dropdown). It leaves Suppliers. |
+| 2 | Messenger-style Chats door + inbox | APPROVED 2026-10-01 · `prototypes/supplier_inbox_and_find_2026-10-01_fable.html` frames 1–3 | **Partly** · `chats-door.tsx:ChatsDoor` → `/messages` | The door exists; Chats is a separate page (measured live: 1 thread, "Choose a supplier" dropdown). It leaves Suppliers. **And it is double:** the shell bar already carries a Messages icon beside the bell, so the page shows two chat icons (owner spotted it on the prototype, 2026-10-07; it is true of the live page too). With Chats as a section, `ChatsDoor` retires. |
 | 3 | Find a supplier by event type ("Popular for weddings", scoped groups) | APPROVED 2026-10-01, frames 4–6 | **Yes, as a separate route** · `categories/page.tsx:FindSupplierPage` (`buildShortlistFolders`, `applicable_event_types`) | Measured live: ~70 categories, almost every one "Joining soon". It leaves Suppliers. The page is honest but it is a wall. |
 | 4 | Category → its suppliers, "Save to bench" / "Ask for a quote" | APPROVED 2026-10-01, frame 7 | **Yes** · `categories/_components/find-supplier-controls.tsx:SaveToBenchButton`, `contact-shortlist-vendor-button.tsx` | Not walked live (every category I could open says "Joining soon"). |
 | 5 | Bench: "Cover your event" ring, 12 folders, sort, search | `your_team_FINAL_2026-09-22.html` | **Yes** · `shortlist-categories.tsx:ShortlistCategories` | Hidden below 1024 px until "Saved" is tapped; on a phone it is the third screen down. |
@@ -48,7 +48,7 @@ Prototype: `prototypes/suppliers_page_2026-10-07_fable.html` — a **working mod
 
 | # | Section | Owner's step | What happens there |
 |---|---|---|---|
-| 1 | **Cover your event** | 1 · find categories, search, add manually | Only the starter categories for the event type; "More categories" is one dropdown. A row opens in place to a swipe strip (Add to build · Inquire · Book · Remove); "Find in X" and "Add your own" open as sheets. Nothing leaves the page. |
+| 1 | **Cover your event** | 1 · find categories, search, add manually | The shipped "Cover your event" ring as rows, the rest of the admin taxonomy behind one "More categories" dropdown grouped as the Find page groups it. A row reads "N suppliers ›" / "Booked ✓ ›" and opens that category's suppliers **exactly as the approved frames 4 and 7 draw it** (search · one Filter ▾ · "N suppliers · Metro Manila first" · rows with Save · Ask for a quote; yours first with their state; a booked one shows Booked · Open chat ›). Add your own and "Not needed? Remove" sit at the end of that list. Nothing leaves the page. |
 | 2 | **Chats** | 2 · talk, inquire · 3 · accept the price | Messenger rows with the supplier's state and one next step (Read the quote · Nudge). Accepting a quote puts the supplier in the build. |
 | 3 | **Build** | 4 · create builds | One supplier per category, money and date-fit update as you pick. Save this build · Book this build. |
 | 4 | **Compare builds** | 5 · compare multiple builds | Saved builds as rows; side-by-side sheet with totals, buffer and the dates each build is free on. Use › |
@@ -64,7 +64,8 @@ Prototype: `prototypes/suppliers_page_2026-10-07_fable.html` — a **working mod
 
 1. **Retire the five-row "Your planning" menu**; the page is the nine steps in order, no navigator. (Yes / No)
 2. **The second line of the page is "date · venue"**, both editable in place; the Maker's Details tool loses both. (Yes / No)
-3. **"Cover your event" shows only the starter categories for the event type**, the rest behind one "More categories" dropdown — not the 70-row wall. (Yes / No)
+3. **"Cover your event" shows the shipped starter ring for the event type**, the rest behind one "More categories" dropdown — not the 70-row wall. (Yes / No)
+3b. **Retire `ChatsDoor`** once Chats is a section; the shell's Messages icon is the one door. (Yes / No)
 4. **Compare plans opens in place** (sheet/panel), not as a collapsed section at the bottom. (Yes / No)
 5. **Chats get a section on the page** (3 latest threads); the `/messages` page stays as the full inbox. (Yes / No)
 6. **Hairline rows, not boxed cards**, for suppliers — as the approved 2026-10-01 frame drew them. (Yes / No)
