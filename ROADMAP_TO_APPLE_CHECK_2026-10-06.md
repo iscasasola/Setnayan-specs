@@ -212,7 +212,7 @@ Owner: *"wait after the test"*. All reuse shipped code. Batch by area.
   - Ticket thumbnail too small.
 
 **5.3 Home and money labels  ·  S each**
-- **Home event header card** wears the event's poster (`resolveEventPoster` → `sceneCoverFor`). Owner: *"i thought this
+- 🔨 **MOVED INTO THE MAKER BUILD'S FINAL FIXES PR 2026-10-07 (owner asked again).** **Home event header card** wears the event's poster (`resolveEventPoster` → `sceneCoverFor`). Owner: *"i thought this
   will have the same background as our event hub?"*
 - **"Settle a payment"** shows the catalogue title, not the code. Fix the "2 vs 1 waiting" badge.
 - **Home tile "Guest photos · Papic"** → "Event Gallery".
