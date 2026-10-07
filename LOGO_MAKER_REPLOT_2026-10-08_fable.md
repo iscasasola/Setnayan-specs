@@ -121,3 +121,4 @@ height — the carousel row is 74 px + tools row 44 px inside the existing `MAKE
 first touch, not at mount).
 
 - **Owner 08 Oct, on the prototype:** *"no need this play button since there is a play button under"* → REMOVE the floating "▶ Play" on the workspace; the ▶ in the tools row is the only Play. (It also collided with the 🔒 chip on the picked layer.)
+- **Owner 08 Oct (verbatim):** *"size across updown and rotate can be finger handled and when we pinch and twist, the sliders auto adjust with it too"* → Direct touch on the picked layer in the workspace: drag = move (across / up-down), pinch = size, two-finger twist = rotate. The Style sliders (Size · Across · Up/down · Rotate) are TWO-WAY bound to the same values: gestures move the sliders live, and sliders move the layer. One source of truth per value; values snap to the centre guides; ↺ Undo takes a whole gesture back as one step. Desktop: drag + handles + the same sliders.
