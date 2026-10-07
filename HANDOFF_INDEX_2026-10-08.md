@@ -52,6 +52,7 @@ Owner (08 Oct): *"at 98% start documentation and still continue safely building 
 
 1. Fix main if red: `launch/_components/add-part-sheet.tsx` (a variable used before it is declared, reported by EDB's typecheck on 08 Oct; verify on origin/main first).
 2. Finish the in-flight refinements: RD panel → S3 Studio → small PRs (#6409, #6410, tiles, top search) → owner check on the preview → merge → deploy.
+2b. **Maker by event type** (DECISION_LOG 2026-10-08): design the per-type table first (simple events → simple Maker; no dress code → Mood Board = Colours only), owner approves, then build.
 3. Desktop three columns.
 4. Suppliers + Budget + launch offer (option B, 50 free Papic credits) — target: suppliers join the weekend of 10–11 Oct.
 4b. Admin pages, same treatment: "an easy one man handled website".
