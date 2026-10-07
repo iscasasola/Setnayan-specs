@@ -43,6 +43,9 @@ Nothing here is built. The Suppliers prototype (`prototypes/suppliers_page_2026-
 ## Rule 5 — the floating thumb bar animates in and out (owner 2026-10-07: *"animate this going up and hiding down when leaving the page. apply to guests as well"*)
 - The bar (search/add + controls, or the mode's actions) **slides up** once the page or mode has rendered, and **slides down first** (≈ 300 ms) when the couple leaves the page or switches to a mode without it; it never pops in or vanishes. Same bar on Suppliers and Guests.
 
+## Rule 6 — a pinned header's first tap goes back to its top; a tap at the top folds it (owner 2026-10-07: *"first tap will always go to top? second tap will collapse?"* · *"same rule on guests"*)
+- A section that is open and scrolled into (its header stuck under the sticky block): tapping the header scrolls back to its first row, nothing folds. Tapping the header while the section's top is in view folds it. Applies to Suppliers categories and Guests roles alike.
+
 ## How a builder applies it (one component, then sweeps)
 1. **Two shared components** — `apps/web/components/action-button.tsx` and `apps/web/components/count.tsx` (Rule 2). `ActionButton`: `<ActionButton tone icon label main onClick/href>`; renders icon + `<span class="lbl">`; `aria-label` = the word, so icon-only is still readable. Plus one hook `useFitRow(ref)` = the fit pass (remove `icon-only`, then from the right add it until `scrollWidth ≤ clientWidth`; re-run on resize). Tokens `--color-ok/info/warn/danger` added to `globals.css` light + dark with the AA numbers in the comment, as every other token there has.
 2. **Sweep by area, one PR per area**, in the order below. Each PR: replace every `<button>`/`<a className="…btn…">`/text-link-with-› in that area with `ActionButton`, tone from the table in this doc; the PR body carries the before/after at 375 and 1280 and a one-line check card for the owner.
