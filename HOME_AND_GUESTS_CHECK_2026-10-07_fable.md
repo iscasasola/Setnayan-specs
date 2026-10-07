@@ -77,6 +77,12 @@ Ships: no visible title or search at 375 (the shell top bar's `?q=` is the searc
 
 ⇒ **PR 4 of `EVENT_HUB_MAKER_STAGES_STUDIO_BUILD_PLAN_2026-10-06.md` (Studio › RSVP) carries this mapping**: the five plain names, the six asks as toggle buttons, the Reply-by line, and no "How guests get in" switch of its own. Added there as a dated delta.
 
+**Built at the same time, as ONE set of shared parts (owner 2026-10-07: *"setup and Event Hub Maker is not fixed at the same time?"*).** The Maker builds first (Event Hub builds precede Suppliers → Guests), so **Maker PR 4 builds the shared parts and Guests › Setup mounts the very same parts — never a second copy**:
+- `GuestsGetIn` — the one dropdown: the five values of `GUESTS_GET_IN_CHOICES` with the plain names and hints (G25) changed **in `lib/who-can-reply.ts` itself**, so every door reads the new words at once (Event Details, the onboarding card, the Maker, Setup);
+- `RsvpAsks` — the six toggle buttons over `RSVP_ASK_FIELDS`, saving `rsvp_ask_config`;
+- `ReplyBy` — the line that prints `events.guest_list_edit_deadline` (and, on Setup only, the date field that sets it).
+G-PR2 then mounts `GuestsGetIn`, `RsvpAsks`, `ReplyBy` on Setup and adds the Setup-only rows (Invitations, Headcount). If G-PR2 ever runs before Maker PR 4, it builds those three parts and PR 4 mounts them — either order, one copy. The builder of each PR says in the PR body which parts it created and which it mounted.
+
 ## Plan — right after Suppliers (owner), before the area sweep
 | PR | Scope | Size |
 |---|---|---|
