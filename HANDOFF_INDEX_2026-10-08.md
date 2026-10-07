@@ -2,6 +2,9 @@
 
 Owner: *"document everything properly and all our rules and prototypes and plans and sequence of builds"*. This is the ONE page to read first; every line points to the file that holds the detail. Newest wins. **A handoff is not evidence: re-measure before acting.**
 
+## 0 · FIRST: catch up on work done AFTER this doc was written
+Owner (08 Oct): *"at 98% start documentation and still continue safely building … the documentation will scan up to what part was built after the documentation and proceed after that"*. Builders kept going after this index was written. Before resuming ANY stream, for each branch in §3 run `git fetch origin && git log --since="<this doc's commit time>" origin/<branch>` and `gh pr list --state all --limit 30`, read each builder's status file (they are updated after every item), and treat commits newer than this doc as DONE. Then continue from the first item not yet done. Also check what merged to main (`git log origin/main --since=...`) and whether deploy-prod ran.
+
 ## 1 · The rules (owner, standing)
 | Rule | Where it lives |
 |---|---|
