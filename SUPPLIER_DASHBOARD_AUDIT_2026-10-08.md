@@ -78,3 +78,43 @@ PER PAGE
 REACHABILITY: bottom nav lists theft-watch, recaps, partnerships (in More); shop-tool-shelves.ts holds recommendations, partnerships, creators, track-record, recaps, theft-watch (with sentence `sub:` texts); deep-search only via subscription; moodboard-library/manpower/activities not in nav (inbound links only).
 GOOD: honest "couldn't load" in 7 on-the-day files + several others; console claims guarded by tests; redirects keep old URLs; live console is dark phone-first with press-and-hold Papic shutter; 44px touch targets in places.
 
+
+---
+# COVERAGE CHECK (2026-10-08, after the Fable redesign)
+# Coverage: supplier PLANS vs redesign (Sonnet, 2026-10-08) — verdict PARTIAL
+Overrides: DECISION_LOG launch offer B (2,000 fee-free bookings, Pro free till end of the week the 2,000th lands on 4-week cycle, one admin page: on/off · cap · live count · end date); 50 Papic credits per fee-free booking (admin-editable; ₱500 pack stays; 5% grant returns after). Prices from vendor_billing_catalog only (lib/vendor-tier-caps.ts header stale). Ceilings L3093: live candidates/date Free1 Solo3 Pro5 Ent10; waitlist 0/1/3/5; grandfathering 2026-08-28. Supplier Pro web-only (L4852): app shows no buy button. lib/vendor-launch-free-window.ts = older "free until Nov 30", NOT the 2,000 offer (no code yet).
+HOMED: plan picker+cycle (Settings › Plan) · renewal line · caps behind ⓘ · AI add-on + Papic Challenge (Plan › Add-ons row) · Deep Search (More tools) · Branch (Page › Reach) · Team seats/roles (Settings › Team) · market intel (Insights › More·Pro) · Verified (Page) · reviews/stats (Insights) · booking fee (Money › Setnayan; fee row on card + Event Hub "Pay to open", fails open) · Papic credits (Event Hub › Papic) · locked Pro (Insights fold; "Solo and up ›" on My tools).
+MISSING / UNCLEAR:
+1 Launch offer: Plan fold state "Pro free until 2,000 bookings…", pill on Today + fee row, ending state.
+2 Plan status visible only deep in Settings → "Plan: Pro (free)" on avatar sheet / Shop.
+3 One shared Upgrade row pattern (reason + See plans ›) for: Free 3-booking cap, date-candidate ceiling, waitlist ceiling, category ceiling, Ring-2 reach cap, team seats.
+4 One grey locked-row look ("Pro ›") used everywhere (Insights Pro, Team roles, agent calendars, Branch).
+5 Add-ons sheet not drawn (AI Basic/Advanced, Papic Challenge, 3D Booth, Branch, Deep Search with tier prices); 3D Booth missing from label.
+6 "Fully booked" state when Free cap of 3 reached.
+7 Agent calendars / unified team calendar (Pro+) — team filter in Dates or declare out of scope.
+8 API access (Enterprise) — name it or "deferred".
+9 Custom plan builder — "Build Custom ›" row.
+10 First-5-sourced-bookings-free perk — "2 of 5 free used" on fee row.
+11 Papic credit pack purchase (₱500/100) — Buy row.
+12 Search boost / Featured / lead priority — a status line so payers see what they get.
+13 Store shell (Apple): plan status read-only, no buy button — define it.
+
+# Coverage: ROUTES + UGAT MAP vs redesign (Sonnet, 2026-10-08)
+Verdict: no supplier route wholly orphaned in the md prose; the prototype is thinner than the md. ~14 unclear.
+UNCLEAR / MISSING (suggested home):
+1 Notifications list (bell inbox) dropped — "Setnayan" chat thread is not in NEW-data list; add as NEW or keep a "Recent" fold under Settings › Notifications.
+2 Date change answer (J51 Move / Unlock, 3-day due) only implicit — name it as a Next-card kind with deadline pill; Move/Unlock as ActionButton tones.
+3 Contracts: create, e-sign, amendments (contracts/new, contracts/[id], J26, J27) — card Files › "Contract ›" + "Send contract"; Quote row shows amendments; templates.
+4 WhatsNewFeed (Today) not in keep/merge/remove — fold into Also waiting or remove explicitly.
+5 Papic supplier (J20 missions, J49 credits/tier/portfolio album import, credit pack purchase) — Event Hub Papic row with buy pack + import; Shop › Photos portfolio fold.
+6 More tools list incomplete in md line 36 + prototype: add Track record, Moodboard library, Repertoire, Attributes, Your segments, Manpower (all 15); access-gated rows hidden when not granted; show moodboard rejection_reason (J45).
+7 Customer-card subpages cocktail, editorial-media, production-sheet, challenge-photos — home under Event Hub row or Their brief by category.
+8 Thread page tools (quote, lock, thread stage in messages/[threadId]) — say kept / where.
+9 /open-shop + public token pages (vendor/lock, claim, fit, vendor-invite) — state "unchanged / out of scope".
+10 Add sheets must list entries: New contract, services/new wizard.
+11 calendar/[date] → Dates day sheet (or redirect ?seg=dates&day=).
+12 Staff role scoping (filterVendorNavGroups) + admin-renamable slots (vendor.sidebar.*, vendor.bottom-nav.*) on new Settings + More rows.
+13 New Settings route must join the route registries; account menu "Account ›"/"Sign out" home.
+14 Packages row is flag-conditional — confirm package CRUD entry when flag off.
+Also: J47 sign-off reopen counter-handshake, J37 suggest-a-change flow not explicit.
+Prototype lacks labels for: Hand over, Manpower, Moodboard, Repertoire, Attributes, Track record, Recaps, Stories, Proposal, Branch/Reach, claim.
