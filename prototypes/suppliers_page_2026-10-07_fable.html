@@ -102,6 +102,7 @@ main{overflow-x:clip}
 
 /* categories */
 .cat{border-top:1px solid var(--line)}
+.cat.open>.bar{position:sticky;top:var(--stick-h,150px);z-index:3;background:var(--paper);box-shadow:0 1px 0 var(--line)}
 .cat .bar{display:grid;grid-template-columns:36px 1fr auto 14px;gap:12px;align-items:center;min-height:56px;padding:10px 0;width:100%}
 .cat .ico{width:36px;height:36px;border-radius:50%;background:var(--gild-soft);display:grid;place-items:center;font-size:15px}
 .cat .state{font-size:13px;color:var(--mute)}
@@ -364,7 +365,7 @@ section{padding:18px 0 8px}
   </div>
   <h2 style="margin-top:36px;font-size:26px">The Maker's shape — one control, one body, tools at the thumb</h2>
   <ol class="delta">
-    <li><b>Find · Build · Booked</b> — one segmented control on top, like Stages | Studio; it and the date · place line stay pinned under the shell bar as you scroll. Find is steps 1–3, Build is 4–5 (your cart), Booked is 6–9.</li>
+    <li><b>Find · Build · Booked</b> — one segmented control on top, like Stages | Studio; it and the date · place line stay pinned under the shell bar as you scroll, and an open category's header pins under them so it can be collapsed from deep in its list. Find is steps 1–3, Build is 4–5 (your cart), Booked is 6–9.</li>
     <li><b>Find</b> opens on the shipped "Cover your event" ring as rows (<code>shortlist-categories.tsx</code>); "＋ Add to your event" is one dropdown of the admin taxonomy. Tap a category and it unfolds in place (the Your Team FINAL accordion, one open at a time): <i>Yours</i> (each candidate is their <b>service card</b> (the shipped <code>ServiceCardFace</code>: cover, name, supplier, price, what's included); under it one word for the step's verb (Ask for a quote → Nudge → Read their reply → Add to build → Pay) and icons for the rest (book · chat · remove · workspace), one row), then the marketplace under it, full width and every candidate shown so they compare at a glance — price first, then free on your date, rating, events, area (the approved frame 7; <b>we filter by the date ourselves</b> — only cards free in the couple's window are listed, the month when only the month is known, the day once it is set, and nothing says so; one Filter ▾ for area · rating · circle · following; pressing the row opens the supplier's page adapted to the category — their badges (the shipped four-badge system: New · Verified · Couple Trusted · Most Booked, plus Top Pick and "Vouched for by …" from the trusted circle), their service card (the shipped <code>ServiceCardFace</code>) first, then proof — why they fit this category, their rating with its count, couples' reviews in this category (the shipped reviews, words and date only), their work as photo grids per event labelled type · venue · month, their own shots only, no names and no guest details — then the rest of their portfolio; the one verb on a new supplier is <b>Ask for a quote</b>; Add to build appears once a price is in). At the thumb: <b>CATEGORY ▾</b> opens a row and scrolls to it, and the build pill.</li>
     <li><b>"Add to build" peeks the cart</b> — the line you added, the new total, "View build ›" — then tucks away.</li>
     <li><b>Build</b> is the cart (<code>BuildLocked</code> + <code>BuildCompare</code>): one line per category with Change ›, the money, the date-fit line, saved builds side by side. At the thumb: Save this build · Book N ›.</li>
@@ -591,7 +592,7 @@ section{padding:18px 0 8px}
         <div class="replay"><button data-act="tour">Replay the first-visit tour</button> · <button data-act="reset" data-mode="mid">Reset: mid-planning</button> · <button data-act="reset" data-mode="empty">Reset: start from zero</button></div>`;
       lower='';
     }
-    $('#view').innerHTML=html; $('#lower').innerHTML=lower; $('#lower').classList.toggle('on',!!lower); document.body.classList.toggle('has-lower',!!lower);
+    $('#view').innerHTML=html; $('#lower').innerHTML=lower; if(typeof setStickH==='function') setStickH(); $('#lower').classList.toggle('on',!!lower); document.body.classList.toggle('has-lower',!!lower);
     count($('#mBooked'),M.bookedSum); count($('#mToBook'),M.toBook); count($('#mBuffer'),BUDGET-M.bookedSum-M.toBook); count($('#mBooked2'),M.bookedSum); count($('#mToBook2'),M.toBook); count($('#mPaid'),M.paidSum); count($('#mBuffer2'),BUDGET-M.bookedSum-M.toBook);
     S.suppliers.forEach(s=>{delete s.fresh;delete s.pop;}); S.builds.forEach(p=>delete p.fresh); S.chats.forEach(c=>delete c.fresh); CATS.forEach(c=>delete c.fresh);
     save();
@@ -744,7 +745,7 @@ section{padding:18px 0 8px}
   function startTour(){ ti=0; h.classList.add('tour-on'); showStop(); }
   $('#tourNext').addEventListener('click',()=>{ ti++; if(ti>=stops.length){ h.classList.remove('tour-on'); return; } showStop(); });
 
-  const stick=document.querySelector('.stick'); addEventListener('scroll',()=>stick.classList.toggle('stuck',stick.getBoundingClientRect().top<=56),{passive:true});
+  var stick=document.querySelector('.stick'); function setStickH(){ document.documentElement.style.setProperty('--stick-h',(56+stick.offsetHeight)+'px'); } const _unused=()=>document.documentElement.style.setProperty('--stick-h',(56+stick.offsetHeight)+'px'); addEventListener('scroll',()=>stick.classList.toggle('stuck',stick.getBoundingClientRect().top<=56),{passive:true}); addEventListener('resize',setStickH); setTimeout(setStickH,0);
   if(!S.mode) S.mode='find';
   render();
   try{ if(!localStorage.getItem('sup-tour')){ startTour(); localStorage.setItem('sup-tour','1'); } }catch(e){}
