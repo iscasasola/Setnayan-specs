@@ -68,3 +68,9 @@ Owner rulings recorded tonight: "allow offset" (done) · "keep pro" (every revea
 - GitHub returned 500 on push several times; retry loop + `git ls-remote` to confirm.
 - A build started while the unit suite runs gets killed by the 30-min background limit — one heavy job at a time.
 - The full-canvas ticket view (`data-maker-ticket-view`) predates this work; under Stages it is now `hidden` (kept mounted for its pinned guard).
+
+## Owner preview check 08 Oct ~04:40 (preview f2bd04c5e) — STILL UNPICKABLE, first item for the new account
+- The Day parts render as gold placeholder plates and CANNOT be picked: `section[data-maker-day-part="announcements"]` ("drawn as The banner"), `[data-maker-day-part="live_hub"]` (Watch live · Live photo wall, "Player and wall"), `[data-maker-day-part="find_your_seat"]` (Your seat, "The map"). They carry `data-setnayan-editor-bound="1"` and cursor:pointer, so the tap is bound but no frame or panel appears: trace the day-part tap → pick path.
+- The Details "WHEN · December 12, 2026" plate (`div.pahina-plate` inside `section#site-details`) still does not pick.
+- The owner also implies the placeholders should look like the real thing: each Day part should draw a sample of its real look (banner, player + wall, seat map), not a gold plate with an explanation sentence; the same lesson as the Photos-of-you looks.
+- The frame chips/name tab worked on SCHEDULE (↑ chip + tab + ＋ + 🗑 seen).
