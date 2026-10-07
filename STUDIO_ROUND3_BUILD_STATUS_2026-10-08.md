@@ -1,6 +1,6 @@
 # Studio round 3 — build status (2026-10-08, builder S3, wrapped on the owner's call)
 
-PR **#6414** (draft, `do-not-auto-merge`, autoMergeRequest null) · `rd/studio-round-3` → `rd/studio-followups` · head `ef04b9e20`.
+PR **#6414** (draft, `do-not-auto-merge`) · `rd/studio-round-3` → `rd/studio-followups` · head `4e4a2047f` — **bundle size check GREEN in CI: 506.9 KB, 0.1 KB headroom, budget not raised.**
 PR **#6417** (draft, `do-not-auto-merge`) · `rd/studio-draft-fields` → `rd/studio-round-3` · head `e1951b758` — "draft 1-3".
 
 _Updated after the wrap was lifted (coordinator: keep building ~2.5 h)._
@@ -43,7 +43,7 @@ Not run:  full unit suite, production build + 507 KB Maker budget (`check-maker-
 - `node:test` `todo` hides a failure — the Guests halves are separate `todo` tests so the Studio halves still fail loudly.
 - maker-lab needs `R2_PUBLIC_URL` set to show the theme stills; its Seat plan tile is not the seat-plan editor.
 
-## 🔴 OPEN BLOCKER — Maker first-load budget (#6414), measured by CI
+## ✅ RESOLVED — Maker first-load budget (#6414)
 Base (#6406) 506.9 KB → 509.4 (02d5a3ab0) → 508.9 → 507.4 → 507.2 → 507.1 → **507.2 KB at ef04b9e20 — 0.2 KB over 507**. Never raised. Done so far: Studio Love Story sheet split into its own lazy file (`moment-sheet-studio.tsx`, cards chunk); OpenInPlace + the film switch ride the lazy `StudioTool` door; the colour picker rides its lazy callers (no preload entry); the glass-foot constant inlined. Next: find the last ~0.2 KB of first-load delta vs base (candidates: `maker-details.tsx`'s two new server wrappers' StudioTool props, `lib/studio-details.ts` CSS if any client reads it, `maker-tools.tsx`); a local `next build` + `node scripts/check-maker-js-budget.mjs` under the heavy lock gives the chunk list.
 
 ## Full unit suite (#6417 tree, 19:02Z run)
@@ -51,3 +51,5 @@ Base (#6406) 506.9 KB → 509.4 (02d5a3ab0) → 508.9 → 507.4 → 507.2 → 50
 
 ## Budget push (in progress, 20:18Z)
 Local `next build` of #6414 head `ef04b9e20` started under the heavy lock (`s3 build budget`) to list the first-load chunks; static diff vs base shows no first-load client file grew on purpose (maker-tools/details-lazy net 0, studio-skin smaller), so the build list decides. If this line is the last word, the build did not finish: re-run `next build` + `node scripts/check-maker-js-budget.mjs` in apps/web and diff against #6406.
+
+**Budget resolved (4e4a2047f).** Local `next build` reproduced 507.3 KB and showed the culprit: `SiteChromePanel` (website/editor/_components/media-panels.tsx) is in the Maker's FIRST LOAD, and round 3's Music switch Tailwind classes grew it. The switch look now lives in the Studio's server-drawn CSS (`studioFullScreenCss` → `STUDIO_MUSIC_SWITCH_CSS`); the shipped Maker keeps the plain checkbox. CI: 506.9 KB ✅. Headroom is only 0.1 KB — the next first-load addition must be lazy. #6417 rebased onto it.
