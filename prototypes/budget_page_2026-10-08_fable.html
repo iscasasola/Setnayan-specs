@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Budget page · 2026-10-08 · Fable</title>
+<!--
+  BUDGET PAGE — design prototype, 2026-10-08, designer BU (Fable).
+  Owner 2026-10-08: "we need a properly arrange budget page" · "opening budget will show all your booked vendors,
+  and expenses and they can add more manually" · "including purchased in setnayan" · estimates list: "not this one".
+  Owner add: Suppliers keeps a small summary (Paid · Owed · next due) + "Open budget ›".
+  One reader feeds both: the totals at the top are SUMS OF THE LIST BELOW, never a second query.
+  States (gallery below, or ?state=…): summary · list · add · owing · failed · suppliers
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f6f4ef; --paper-2:#fffdf9; --ink:#1d1b17; --mute:#6f6a60; --line:#e4dfd4;
+  --gild:#b8963e; --gild-soft:#f1e9d2; --brand:#C24E25; --wine:#8c3b2e; --wine-soft:#f3e3df;
+  --ok:#2E7D4F; --ok-soft:#e3eee4; --danger:#B3261E; --danger-soft:#f8e4e2; --info:#1F6FB2;
+  --seg-track:rgba(29,27,23,.06); --seg-off:rgba(29,27,23,.6);
+  --sans:"Hanken Grotesk",system-ui,-apple-system,sans-serif;
+  --bar:64px; --ease:cubic-bezier(.2,.8,.2,1); --t:280ms;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){ --paper:#161513; --paper-2:#1f1d1a; --ink:#efeae0; --mute:#a39d90; --line:#2e2b26;
+    --gild:#d1b162; --gild-soft:#2d2719; --brand:#E5794E; --wine:#d47a69; --wine-soft:#3a221d; --ok:#6FCF97; --ok-soft:#1f2d22;
+    --danger:#F2817A; --danger-soft:#3a2220; --info:#7AB8F0; --seg-track:rgba(239,234,224,.08); --seg-off:rgba(239,234,224,.62); }
+}
+:root[data-theme="dark"]{ --paper:#161513; --paper-2:#1f1d1a; --ink:#efeae0; --mute:#a39d90; --line:#2e2b26;
+    --gild:#d1b162; --gild-soft:#2d2719; --brand:#E5794E; --wine:#d47a69; --wine-soft:#3a221d; --ok:#6FCF97; --ok-soft:#1f2d22;
+    --danger:#F2817A; --danger-soft:#3a2220; --info:#7AB8F0; --seg-track:rgba(239,234,224,.08); --seg-off:rgba(239,234,224,.62); }
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:left}
+input,select{font:inherit;color:inherit}
+h1,h2,h3{font-weight:500;margin:0;letter-spacing:-.01em}
+.mute{color:var(--mute)} .wine{color:var(--wine)} .ok{color:var(--ok)}
+.num{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"lnum" 1} /* Count: the app font, tabular — never monospace */
+.i{text-transform:none;display:inline-grid;place-items:center;width:18px;height:18px;border:1px solid var(--line);border-radius:50%;font-size:11px;color:var(--mute);vertical-align:middle;margin-left:4px;font-weight:500}
+
+/* ---------- gallery ---------- */
+.gallery{max-width:1180px;margin:0 auto;padding:32px 20px 80px}
+.gallery h1{font-size:30px}
+.gallery p{max-width:760px}
+.frames{display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap;margin-top:24px}
+.frame{background:var(--paper-2);border:1px solid var(--line);border-radius:28px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.12);width:375px;height:812px}
+.frame iframe{width:375px;height:812px;border:0;display:block}
+.cap{font-size:12px;color:var(--mute);margin:8px 0 0 4px;letter-spacing:.06em;text-transform:uppercase}
+.delta{columns:2;column-gap:40px;max-width:1000px;margin-top:28px;font-size:14px}
+.delta li{break-inside:avoid;margin-bottom:8px}
+html.appmode .gallery{display:none}
+html:not(.appmode) .app{display:none}
+
+/* ---------- app ---------- */
+.app{min-height:100vh;padding-bottom:calc(var(--bar) + 96px)}
+.shell{position:sticky;top:0;z-index:5;background:var(--paper-2);border-bottom:1px solid var(--line);height:56px;display:flex;align-items:center;gap:14px;padding:0 16px}
+.shell .logo{font-weight:700;color:var(--gild);font-size:17px;letter-spacing:.12em}
+.shell .right{margin-left:auto;display:flex;gap:8px}
+.shell .ic{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;font-size:14px;color:var(--mute)}
+.shell .av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gild),var(--wine))}
+main{max-width:1180px;margin:0 auto;padding:0 16px}
+.facts{margin:10px 0 0;font-size:15px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.facts button{border-bottom:1px dotted var(--mute);padding-bottom:1px}
+.seg{display:flex;gap:2px;border-radius:8px;background:var(--seg-track);padding:2px;margin:10px 0 0}
+.seg button{flex:1;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:4px;border-radius:8px;padding:0 10px;font-size:12.5px;font-weight:600;color:var(--seg-off);white-space:nowrap}
+.seg button.on{background:var(--wine);color:#fff}
+.seg b{font-weight:500;opacity:.8;margin-left:2px}
+.head{display:flex;align-items:center;gap:10px;margin:18px 0 0}
+.head h1{font-size:30px;line-height:1.05;font-weight:400}
+.head .back{width:36px;height:36px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;color:var(--mute);font-size:16px}
+.head .sub{margin-left:auto;font-size:13px;color:var(--mute)}
+
+/* summary — rows, not tiles */
+.sum{margin-top:10px}
+.sum .grid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+.sum .cell{padding:10px 0 8px;border-top:1px solid var(--line);min-width:0}
+.sum .cell:nth-child(-n+2){border-top:0}
+.sum .k{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);display:flex;align-items:center;gap:2px}
+.sum .v{font-size:24px;line-height:1.15;font-weight:500;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sum .v.small{font-size:18px}
+.sum .v.wine{color:var(--wine)} .sum .v.ok{color:var(--ok)} .sum .v.muted{color:var(--mute);font-weight:400}
+.target{display:flex;align-items:baseline;gap:4px;min-width:0}
+.target input{width:100%;min-width:0;border:0;border-bottom:1px dashed var(--mute);background:none;padding:0 0 1px;font-size:24px;font-weight:500;line-height:1.15;outline:none}
+.target input:focus{border-bottom-color:var(--brand);border-bottom-style:solid}
+.target .pencil{color:var(--mute);font-size:20px;flex:none;margin-right:2px}
+.saved{font-size:12px;color:var(--ok);margin-left:6px;opacity:0;transition:opacity 200ms}
+.saved.on{opacity:1}
+.meter{position:relative;height:6px;border-radius:3px;background:var(--line);margin:12px 0 6px;overflow:hidden}
+.meter .agreed{position:absolute;left:0;top:0;bottom:0;background:var(--gild);width:0;transition:width 600ms var(--ease)}
+.meter .paid{position:absolute;left:0;top:0;bottom:0;background:var(--ok);width:0;transition:width 600ms var(--ease)}
+.meter .over{position:absolute;right:0;top:0;bottom:0;background:var(--danger);width:0}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--mute);align-items:center}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:middle}
+.nextdue{display:flex;gap:8px;align-items:baseline;margin-top:12px;font-size:14px;padding-top:12px;border-top:1px solid var(--line)}
+.nextdue .go{margin-left:auto;color:var(--wine);font-weight:500;white-space:nowrap}
+
+/* the list */
+.list{margin-top:8px}
+.grp{display:flex;align-items:baseline;gap:8px;margin:22px 0 4px}
+.grp h2{font-size:19px;line-height:1.15}
+.grp .cnt{color:var(--mute);font-size:14px}
+.grp .sum2{margin-left:auto;font-size:13px;color:var(--mute);white-space:nowrap}
+.row{display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;padding:11px 0;border-top:1px solid var(--line);min-height:56px;width:100%}
+.grp+.row,.row:first-child{border-top:0}
+.row .logo{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:11.5px;letter-spacing:.06em;color:var(--mute);background:var(--paper-2)}
+.row .logo.s{background:var(--gild-soft);color:var(--gild);border-color:transparent;font-weight:700;font-size:13px}
+.row .mid{min-width:0}
+.row .name{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.row .svc{font-size:13px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.row .amt{text-align:right;white-space:nowrap}
+.row .amt b{display:block;font-weight:500;font-size:15px}
+.row .amt small{display:block;font-size:12px;color:var(--mute)}
+.row .amt small.wine{color:var(--wine)} .row .amt small.ok{color:var(--ok)}
+.row .chev{color:var(--mute);font-size:16px;margin-left:6px}
+.row .end{display:flex;align-items:center}
+.empty{padding:10px 0 4px;color:var(--mute);font-size:14px}
+.fail{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line);color:var(--mute);font-size:14px}
+.fail .dot{width:8px;height:8px;border-radius:50%;background:var(--danger);flex:none}
+.fail button{margin-left:auto;color:var(--wine);font-weight:500}
+.filterline{font-size:13px;color:var(--mute);margin-top:10px}
+
+/* ActionButton: icon + word, pill */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--paper-2);font-weight:500;font-size:14px;white-space:nowrap;transition:transform 160ms var(--ease)}
+.btn:active{transform:scale(.97)}
+.btn svg{width:17px;height:17px;flex:none}
+.btn.brand{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.wine{color:var(--wine);border-color:color-mix(in srgb,var(--wine) 55%,transparent)}
+.btn.sm{min-height:36px;padding:0 13px;font-size:13px}
+.btn.icon{width:44px;padding:0}
+.sel{position:relative;display:inline-flex;align-items:center;min-height:44px;padding:0 34px 0 16px;border-radius:999px;border:1px solid var(--line);background:var(--paper-2);font-weight:500;font-size:14px;white-space:nowrap}
+.sel:after{content:"";position:absolute;right:12px;top:50%;width:14px;height:14px;transform:translateY(-50%);background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236f6a60' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>") center/contain no-repeat}
+.sel select{position:absolute;inset:0;opacity:0;width:100%;cursor:pointer}
+
+/* frosted thumb row — glass: the controls blur what is behind them */
+.lower{position:fixed;left:0;right:0;bottom:var(--bar);padding:10px 16px;display:flex;gap:8px;align-items:center;z-index:5}
+.lower .btn,.lower .sel{background:color-mix(in srgb,var(--paper) 62%,transparent);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3)}
+.lower .btn.brand{background:var(--brand);-webkit-backdrop-filter:none;backdrop-filter:none}
+.lower .grow{flex:1}
+
+/* bottom nav */
+.nav{position:fixed;left:0;right:0;bottom:0;height:var(--bar);background:var(--paper-2);border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-around;padding:0 6px calc(env(safe-area-inset-bottom)/2);z-index:6}
+.nav button{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;color:var(--mute);min-width:56px}
+.nav button .ic{width:30px;height:30px;display:grid;place-items:center;font-size:17px;border-radius:50%}
+.nav button.on{color:var(--ink);font-weight:600} .nav button.on .ic{background:var(--gild-soft)}
+
+/* sheets */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.28);opacity:0;pointer-events:none;transition:opacity var(--t);z-index:8}
+.sheet{position:fixed;left:0;right:0;bottom:0;max-height:86vh;overflow:auto;background:var(--paper-2);border-radius:22px 22px 0 0;box-shadow:0 -12px 40px rgba(0,0,0,.18);transform:translateY(110%);visibility:hidden;transition:transform 320ms var(--ease),visibility 0s 320ms;z-index:9;padding:12px 16px calc(var(--bar) + 20px)}
+.sheet .grip{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 12px}
+.sheet h3{font-size:20px;margin-bottom:2px}
+.sheet .x{position:absolute;right:14px;top:12px;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--mute)}
+html.sheet-open .scrim{opacity:1;pointer-events:auto}
+html.sheet-open .sheet.on{transform:none;visibility:visible;transition:transform 320ms var(--ease),visibility 0s}
+.field{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line);min-height:56px}
+.field:first-of-type{border-top:0}
+.field label{font-size:15px;display:flex;align-items:center}
+.field input{border:0;background:none;text-align:right;width:150px;font-size:16px;outline:none;border-bottom:1px dashed var(--mute);padding:2px 0}
+.field input:focus{border-bottom:1px solid var(--brand)}
+.field input::placeholder{color:var(--mute)}
+.field .sel{min-height:38px;font-size:14px}
+.sheet .acts{display:flex;gap:8px;margin-top:14px;justify-content:flex-end}
+.pay{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+.pay:first-of-type{border-top:0}
+.pay .d{color:var(--mute);font-size:13px}
+.pay .a{text-align:right;font-weight:500}
+.pay .a.due{color:var(--wine);font-weight:400}
+.pay .a.ok{color:var(--ok)}
+.toast{position:fixed;left:50%;transform:translateX(-50%) translateY(8px);bottom:calc(var(--bar) + 76px);background:var(--ink);color:var(--paper);padding:9px 14px;border-radius:999px;font-size:13px;opacity:0;transition:opacity 220ms,transform 220ms;z-index:12;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1;transform:translateX(-50%)}
+
+/* tour */
+.tour{position:fixed;left:16px;right:16px;bottom:calc(var(--bar) + 72px);background:var(--ink);color:var(--paper);padding:14px 16px;border-radius:16px;font-size:14px;z-index:7;display:none}
+.tour b{display:block;font-size:15px;font-weight:600;margin-bottom:2px}
+.tour .n{float:right;color:var(--gild);font-weight:500}
+html.tour-on .tour{display:block}
+
+/* suppliers-tab summary block (one extra state) */
+.sblock{margin-top:22px}
+.sblock h2{font-size:21px}
+.sblock .two{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:8px}
+.sblock .k{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.sblock .v{font-size:22px;font-weight:500;margin-top:2px}
+.sblock .open{margin-top:12px;display:flex}
+.peek{opacity:.5;margin-top:22px}
+</style>
+</head>
+<body>
+
+<!-- ============ GALLERY ============ -->
+<div class="gallery">
+  <h1>Budget page · one list, totals derived from it</h1>
+  <p>Phone first at 375. The totals at the top are sums of the list below — booked suppliers, bought on Setnayan, your expenses — never a second query. The Suppliers tab keeps a small Paid · Owed + next-due block that reads the same source, with <b>Open budget ›</b>.</p>
+  <div class="frames" id="frames"></div>
+  <ul class="delta">
+    <li><b>Keep</b> · Target · Agreed · Paid · Owed; the next-payments list (now one line); per-supplier payments on tap; "Costs you pay yourself" (becomes Your expenses); the tour.</li>
+    <li><b>Move</b> · Export upcoming dates (.ics) → Schedule; CSV/Print → the ⋯ menu.</li>
+    <li><b>Remove</b> · the big "What's your total wedding budget?" + "Update my budget"; the category ESTIMATES list ("not this one"); Suggested budget split; the Category-by-category table; boxed tiles; monospace numerals; "wedding".</li>
+    <li><b>One source</b> · summary = sum(list). A failed group read shows "couldn't load" + Retry and the summary shows — for the parts it cannot know. Never ₱0.</li>
+  </ul>
+</div>
+
+<!-- ============ APP ============ -->
+<div class="app">
+  <div class="shell"><span class="logo">SETNAYAN</span><div class="right"><span class="ic">⌕</span><span class="ic">💬</span><span class="ic">🔔</span><span class="av"></span></div></div>
+  <main>
+    <div class="facts"><button>Fri, Dec 18, 2026</button><span class="mute">·</span><button>Seda Vertis North, Quezon City</button></div>
+    <div class="seg" id="seg"><button data-mode="find">Find</button><button data-mode="build">Build <b>2/5</b></button><button data-mode="booked" class="on">Booked <b>2</b></button></div>
+
+    <!-- ===== Suppliers tab: the small summary block (state: suppliers) ===== -->
+    <div id="suppliersView" hidden>
+      <div class="peek">
+        <div class="row"><span class="logo">SV</span><span class="mid"><span class="name">Seda Vertis North</span><span class="svc">Reception · added by you</span></span><span class="end"><span class="amt"><b class="num">₱1,056,000</b><small class="wine num">₱950,400 owed · Oct 5</small></span></span></div>
+        <div class="row"><span class="logo">SD</span><span class="mid"><span class="name">Santuario de San Vicente</span><span class="svc">Ceremony</span></span><span class="end"><span class="amt"><b class="num">₱26,499</b><small class="ok">paid</small></span></span></div>
+      </div>
+      <section class="sblock">
+        <h2>Budget</h2>
+        <div class="two">
+          <div><div class="k">Paid</div><div class="v ok num" id="sPaid"></div></div>
+          <div><div class="k">Owed</div><div class="v wine num" id="sOwed"></div></div>
+        </div>
+        <div class="meter"><div class="agreed" id="sMa"></div><div class="paid" id="sMp"></div></div>
+        <div class="legend"><span><i style="background:var(--ok)"></i>paid</span><span><i style="background:var(--gild)"></i>agreed</span><span><i style="background:var(--line)"></i>target</span></div>
+        <div class="nextdue"><span class="mute">Next</span><span id="sNext"></span></div>
+        <div class="open"><button class="btn wine" onclick="go('summary')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>Open budget ›</button></div>
+      </section>
+    </div>
+
+    <!-- ===== Budget page ===== -->
+    <div id="budgetView">
+      <div class="head"><button class="back" onclick="go('suppliers')" aria-label="Back to Suppliers">‹</button><h1>Budget</h1><span class="sub" id="evKind">Wedding</span></div>
+
+      <section class="sum" id="sum">
+        <div class="grid">
+          <div class="cell">
+            <div class="k">Target <span class="i" title="What you plan to spend in all. Tap the number to change it; it saves as you type.">i</span><span class="saved" id="tSaved">saved</span></div>
+            <div class="v target"><span class="pencil">₱</span><input class="num" id="tIn" inputmode="numeric" aria-label="Target"></div>
+          </div>
+          <div class="cell"><div class="k">Agreed <span class="i" title="Everything booked, bought or added below, at the price agreed.">i</span></div><div class="v num" id="vAgreed"></div></div>
+          <div class="cell"><div class="k">Paid</div><div class="v ok num" id="vPaid"></div></div>
+          <div class="cell"><div class="k">Owed</div><div class="v wine num" id="vOwed"></div></div>
+        </div>
+        <div class="meter"><div class="agreed" id="mA"></div><div class="paid" id="mP"></div><div class="over" id="mO"></div></div>
+        <div class="legend"><span><i style="background:var(--ok)"></i>paid</span><span><i style="background:var(--gild)"></i>agreed</span><span><i style="background:var(--line)"></i>target</span><span id="left" style="margin-left:auto"></span></div>
+        <div class="nextdue" id="nextdue"><span class="mute">Next</span><span id="nextTxt"></span><button class="go" id="nextGo">Pay ›</button></div>
+      </section>
+
+      <div class="filterline" id="filterline" hidden></div>
+      <div class="list" id="list"></div>
+    </div>
+  </main>
+
+  <!-- frosted thumb row -->
+  <div class="lower" id="lower">
+    <button class="btn brand" onclick="openAdd()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add expense</button>
+    <label class="sel"><span id="filLbl">All</span><select id="fil" aria-label="Filter"><option value="all">All</option><option value="owing">Owing</option><option value="paid">Paid</option></select></label>
+    <span class="grow"></span>
+    <button class="btn icon" aria-label="Search" onclick="toast('Search filters the list as you type')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+  </div>
+
+  <div class="nav"><button><span class="ic">⌂</span>Home</button><button><span class="ic">👥</span>Guests</button><button class="on"><span class="ic">◎</span>Suppliers</button><button><span class="ic">🌐</span>Hub</button><button><span class="ic">✦</span>More</button></div>
+
+  <div class="scrim" onclick="closeSheets()"></div>
+
+  <!-- add expense -->
+  <div class="sheet" id="shAdd">
+    <div class="grip"></div><button class="x" onclick="closeSheets()">×</button>
+    <h3>Add expense</h3><div class="mute" style="font-size:13px">Anything not booked through Setnayan.</div>
+    <div style="margin-top:8px">
+      <div class="field"><label>Name</label><input id="aName" placeholder="Church offering" style="width:190px"></div>
+      <div class="field"><label>Amount</label><input id="aAmt" class="num" inputmode="numeric" placeholder="₱"></div>
+      <div class="field"><label>Paid so far <span class="i" title="What you have already handed over. Leave empty if nothing yet.">i</span></label><input id="aPaid" class="num" inputmode="numeric" placeholder="₱ 0"></div>
+      <div class="field"><label>Category <span class="mute" style="font-size:12px;margin-left:4px">optional</span></label><label class="sel"><span id="aCatLbl">Pick</span><select id="aCat"><option value="">—</option><option>Ceremony</option><option>Reception</option><option>Attire</option><option>Catering</option><option>Photo &amp; video</option><option>Music</option><option>Gifts</option><option>Other</option></select></label></div>
+    </div>
+    <div class="acts"><button class="btn brand" onclick="addExpense()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add</button></div>
+  </div>
+
+  <!-- supplier payments -->
+  <div class="sheet" id="shPay">
+    <div class="grip"></div><button class="x" onclick="closeSheets()">×</button>
+    <h3 id="pName"></h3><div class="mute num" style="font-size:13px" id="pSub"></div>
+    <div id="pList" style="margin-top:8px"></div>
+    <div class="acts" id="pActs"></div>
+  </div>
+
+  <!-- record a payment -->
+  <div class="sheet" id="shRec">
+    <div class="grip"></div><button class="x" onclick="closeSheets()">×</button>
+    <h3>Record a payment</h3><div class="mute" style="font-size:13px" id="rSub"></div>
+    <div style="margin-top:8px">
+      <div class="field"><label>Amount</label><input id="rAmt" class="num" inputmode="numeric" placeholder="₱"></div>
+      <div class="field"><label>Date</label><input id="rDate" type="date" style="width:150px;text-align:right"></div>
+      <div class="field"><label>How</label><label class="sel"><span id="rHowLbl">GCash</span><select id="rHow"><option>GCash</option><option>Bank transfer</option><option>Cash</option><option>Card</option></select></label></div>
+    </div>
+    <div class="acts"><button class="btn brand" onclick="recordPayment()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>Record</button></div>
+  </div>
+
+  <!-- expense edit (fields save on blur: no Save) -->
+  <div class="sheet" id="shExp">
+    <div class="grip"></div><button class="x" onclick="closeSheets()">×</button>
+    <h3 id="eName"></h3><div class="mute" style="font-size:13px">Edits save as you type.</div>
+    <div style="margin-top:8px">
+      <div class="field"><label>Amount</label><input id="eAmt" class="num" inputmode="numeric"></div>
+      <div class="field"><label>Paid so far</label><input id="ePaid" class="num" inputmode="numeric"></div>
+    </div>
+    <div class="acts"><button class="btn sm" onclick="removeExpense()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>Remove</button></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="tour" id="tour">
+    <span class="n" id="tourN">1/3</span><b id="tourT"></b><span id="tourB"></span>
+    <div style="margin-top:8px;display:flex;gap:14px"><button style="color:var(--gild);font-weight:600" onclick="tourNext()">Next</button><button style="color:rgba(255,255,255,.6)" onclick="tourEnd()">Skip</button></div>
+  </div>
+</div>
+
+<script>
+const q=new URLSearchParams(location.search);
+const STATE=q.get('state');
+const $=id=>document.getElementById(id);
+const peso=n=>'₱'+Math.round(n).toLocaleString('en-PH');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* one source: the list. Totals are sums of these rows. */
+const S={
+  target:2250000,
+  filter:'all',
+  ordersFailed: STATE==='failed',
+  suppliers:[
+    {id:'sv',ini:'SV',name:'Seda Vertis North',svc:'Reception',agreed:1056000,
+      pays:[{d:'2026-08-02',a:105600,how:'Bank transfer',paid:true},{d:'2026-10-05',a:528000,due:true},{d:'2026-12-04',a:422400,due:true}]},
+    {id:'sd',ini:'SD',name:'Santuario de San Vicente de Paul',svc:'Ceremony',agreed:26499,
+      pays:[{d:'2026-07-21',a:26499,how:'GCash',paid:true}]},
+  ],
+  orders:[
+    {name:'Event Hub Pro',d:'2026-09-14',a:2499},
+    {name:'Papic · 2 cameras',d:'2026-09-14',a:2899},
+    {name:'Live Watch',d:'2026-09-30',a:2500},
+  ],
+  expenses:[
+    {id:'e1',name:'Church offering',cat:'Ceremony',amt:15000,paid:15000},
+    {id:'e2',name:'Entourage gowns',cat:'Attire',amt:84000,paid:40000},
+  ],
+};
+if(STATE==='owing') S.filter='owing';
+const sPaid=s=>s.pays.filter(p=>p.paid).reduce((a,p)=>a+p.a,0);
+const sNextDue=s=>s.pays.find(p=>p.due);
+function totals(){
+  const sup=S.suppliers.reduce((t,s)=>{t.agreed+=s.agreed;t.paid+=sPaid(s);return t},{agreed:0,paid:0});
+  const ord=S.ordersFailed?null:S.orders.reduce((t,o)=>t+o.a,0);
+  const exp=S.expenses.reduce((t,e)=>{t.agreed+=e.amt;t.paid+=e.paid;return t},{agreed:0,paid:0});
+  const agreed=sup.agreed+exp.agreed+(ord??0), paid=sup.paid+exp.paid+(ord??0);
+  return {agreed,paid,owed:agreed-paid,partial:ord===null};
+}
+function nextDue(){
+  let best=null;
+  S.suppliers.forEach(s=>{const p=sNextDue(s); if(p&&(!best||p.d<best.p.d)) best={s,p};});
+  return best;
+}
+const fmtD=d=>new Date(d+'T00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric'});
+
+function renderSummary(){
+  const t=totals();
+  const tilde=t.partial?'~':'';
+  $('vAgreed').textContent=t.partial?'—':peso(t.agreed);
+  $('vPaid').textContent=t.partial?'—':peso(t.paid);
+  $('vOwed').textContent=peso(t.owed)+(t.partial?'+':''); $('vOwed').title=t.partial?'At least this. Bought on Setnayan could not load, so there may be more.':'';
+  $('vAgreed').title=t.partial?'Bought on Setnayan could not load, so this is not known yet.':'';
+  $('vPaid').title=$('vAgreed').title;
+  if(document.activeElement!==$('tIn')) $('tIn').value=S.target.toLocaleString('en-PH');
+  const base=Math.max(S.target,t.agreed,1);
+  $('mA').style.width=(t.agreed/base*100)+'%'; $('mP').style.width=(t.paid/base*100)+'%';
+  $('mO').style.width=t.agreed>S.target?((t.agreed-S.target)/base*100)+'%':'0';
+  const left=S.target-t.agreed;
+  $('left').innerHTML=t.partial?'<span class="wine">part of this couldn’t load</span>':(left>=0?`${peso(left)} left of target`:`<span class="wine">${peso(-left)} over target</span>`);
+  const nd=nextDue();
+  if(nd){ $('nextTxt').innerHTML=`<b class="num">${peso(nd.p.a)}</b> · ${esc(nd.s.name)} · ${fmtD(nd.p.d)}`; $('nextGo').onclick=()=>openPay(nd.s.id); $('nextdue').hidden=false; }
+  else $('nextdue').hidden=true;
+  // suppliers-tab block reads the same totals
+  $('sPaid').textContent=t.partial?'—':peso(t.paid); $('sOwed').textContent=peso(t.owed)+(t.partial?'+':'');
+  $('sMa').style.width=(t.agreed/base*100)+'%'; $('sMp').style.width=(t.paid/base*100)+'%';
+  $('sNext').innerHTML=nd?`<b class="num">${peso(nd.p.a)}</b> · ${esc(nd.s.name)} · ${fmtD(nd.p.d)}`:'nothing due';
+}
+function show(status){ // filter
+  if(S.filter==='all') return true;
+  return S.filter==='owing'?status==='owing':status==='paid';
+}
+function renderList(){
+  const f=S.filter; let h='';
+  const sup=S.suppliers.filter(s=>show(sPaid(s)>=s.agreed?'paid':'owing'));
+  h+=`<div class="grp"><h2>Booked suppliers</h2><span class="cnt">${S.suppliers.length}</span></div>`;
+  if(!sup.length) h+=`<div class="empty">${f==='owing'?'Nothing owed to a supplier.':'None fully paid yet.'}</div>`;
+  sup.forEach(s=>{const p=sPaid(s),o=s.agreed-p,nd=sNextDue(s);
+    h+=`<button class="row" onclick="openPay('${s.id}')"><span class="logo">${s.ini}</span><span class="mid"><span class="name">${esc(s.name)}</span><span class="svc">${s.svc} · ${o>0?`${peso(p)} paid`:'paid in full'}</span></span><span class="end"><span class="amt"><b class="num">${peso(s.agreed)}</b>${o>0?`<small class="wine num">${peso(o)} owed${nd?' · '+fmtD(nd.d):''}</small>`:`<small class="ok">paid ✓</small>`}</span><span class="chev">›</span></span></button>`;});
+  h+=`<div class="grp"><h2>Bought on Setnayan</h2><span class="cnt">${S.ordersFailed?'':S.orders.length}</span></div>`;
+  if(S.ordersFailed){ h+=`<div class="fail"><span class="dot"></span>Couldn’t load your purchases.<button onclick="retry()">Retry</button></div>`; }
+  else if(f==='owing') h+=`<div class="empty">Everything bought here is paid.</div>`;
+  else S.orders.forEach(o=>{h+=`<div class="row"><span class="logo s">S</span><span class="mid"><span class="name">${esc(o.name)}</span><span class="svc">${fmtD(o.d)} · receipt</span></span><span class="end"><span class="amt"><b class="num">${peso(o.a)}</b><small class="ok">paid ✓</small></span></span></div>`;});
+  const exp=S.expenses.filter(e=>show(e.paid>=e.amt?'paid':'owing'));
+  h+=`<div class="grp"><h2>Your expenses</h2><span class="cnt">${S.expenses.length}</span></div>`;
+  if(!S.expenses.length) h+=`<div class="empty">Nothing added yet. Use ＋ Add expense for anything paid outside Setnayan.</div>`;
+  else if(!exp.length) h+=`<div class="empty">${f==='owing'?'No expense still owing.':'None fully paid yet.'}</div>`;
+  exp.forEach(e=>{const o=e.amt-e.paid;
+    h+=`<button class="row" onclick="openExp('${e.id}')"><span class="logo">${esc(e.name.slice(0,2).toUpperCase())}</span><span class="mid"><span class="name">${esc(e.name)}</span><span class="svc">${e.cat?e.cat+' · ':''}${o>0?`${peso(e.paid)} paid`:'paid in full'}</span></span><span class="end"><span class="amt"><b class="num">${peso(e.amt)}</b>${o>0?`<small class="wine num">${peso(o)} owed</small>`:`<small class="ok">paid ✓</small>`}</span><span class="chev">›</span></span></button>`;});
+  $('list').innerHTML=h;
+  $('filterline').hidden=f==='all';
+  $('filterline').textContent=f==='owing'?'Showing what is still owed.':'Showing what is paid in full.';
+  $('filLbl').textContent={all:'All',owing:'Owing',paid:'Paid'}[f]; $('fil').value=f;
+}
+function render(){renderSummary();renderList();}
+
+/* target edits in place, saves as you type (debounced) */
+let tT; $('tIn').addEventListener('input',e=>{const n=parseInt(e.target.value.replace(/[^\d]/g,''),10); if(!isNaN(n)){S.target=n; clearTimeout(tT); tT=setTimeout(()=>{renderSummary(); $('tSaved').classList.add('on'); setTimeout(()=>$('tSaved').classList.remove('on'),1400);},500);}});
+$('tIn').addEventListener('blur',()=>{$('tIn').value=S.target.toLocaleString('en-PH')});
+$('fil').addEventListener('change',e=>{S.filter=e.target.value; renderList();});
+$('aCat').addEventListener('change',e=>$('aCatLbl').textContent=e.target.value||'Pick');
+$('rHow').addEventListener('change',e=>$('rHowLbl').textContent=e.target.value);
+
+/* sheets */
+function openSheet(id){closeSheets(true); document.documentElement.classList.add('sheet-open'); $(id).classList.add('on');}
+function closeSheets(keep){document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('on')); if(!keep) document.documentElement.classList.remove('sheet-open');}
+function openAdd(){ ['aName','aAmt','aPaid'].forEach(i=>$(i).value=''); $('aCat').value=''; $('aCatLbl').textContent='Pick'; openSheet('shAdd'); setTimeout(()=>$('aName').focus(),350); }
+function addExpense(){ const name=$('aName').value.trim(), amt=+($('aAmt').value.replace(/[^\d]/g,'')||0), paid=+($('aPaid').value.replace(/[^\d]/g,'')||0);
+  if(!name||!amt){toast('Name and amount, please');return;}
+  S.expenses.push({id:'e'+Date.now(),name,cat:$('aCat').value,amt,paid:Math.min(paid,amt)}); closeSheets(); render(); toast('Added · totals updated'); }
+let curSup=null, curExp=null;
+function openPay(id){ curSup=S.suppliers.find(s=>s.id===id); const s=curSup,p=sPaid(s);
+  $('pName').textContent=s.name; $('pSub').textContent=`${s.svc} · ${peso(s.agreed)} agreed · ${peso(p)} paid`;
+  $('pList').innerHTML=s.pays.map(x=>`<div class="pay"><span>${x.paid?'Paid':'Due'} <span class="d">· ${fmtD(x.d)}${x.how?' · '+x.how:''}</span></span><span class="a ${x.paid?'ok':'due'} num">${peso(x.a)}</span></div>`).join('');
+  $('pActs').innerHTML=`<button class="btn sm" onclick="toast('Opens the supplier chat')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>Chat</button><button class="btn brand sm" onclick="openRec()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>Record a payment</button>`;
+  openSheet('shPay'); }
+function openRec(){ const nd=sNextDue(curSup); $('rSub').textContent=curSup.name+(nd?` · next due ${peso(nd.a)} by ${fmtD(nd.d)}`:''); $('rAmt').value=nd?nd.a.toLocaleString('en-PH'):''; $('rDate').value=new Date().toISOString().slice(0,10); openSheet('shRec'); }
+function recordPayment(){ const a=+($('rAmt').value.replace(/[^\d]/g,'')||0); if(!a){toast('Amount, please');return;}
+  const nd=sNextDue(curSup); if(nd&&nd.a===a){nd.paid=true;nd.due=false;nd.d=$('rDate').value;nd.how=$('rHow').value;} else curSup.pays.push({d:$('rDate').value,a,how:$('rHow').value,paid:true});
+  closeSheets(); render(); toast('Recorded · owed updated'); }
+function openExp(id){ curExp=S.expenses.find(e=>e.id===id); $('eName').textContent=curExp.name; $('eAmt').value=curExp.amt.toLocaleString('en-PH'); $('ePaid').value=curExp.paid.toLocaleString('en-PH'); openSheet('shExp'); }
+['eAmt','ePaid'].forEach(i=>$(i).addEventListener('input',e=>{if(!curExp)return; const n=+(e.target.value.replace(/[^\d]/g,'')||0); if(i==='eAmt')curExp.amt=n; else curExp.paid=n; render();}));
+function removeExpense(){ S.expenses=S.expenses.filter(e=>e!==curExp); closeSheets(); render(); toast('Removed'); }
+function retry(){ S.ordersFailed=false; render(); toast('Loaded'); }
+let tt; function toast(m){$('toast').textContent=m;$('toast').classList.add('on');clearTimeout(tt);tt=setTimeout(()=>$('toast').classList.remove('on'),1600);}
+
+/* views */
+function go(v){ const sup=v==='suppliers'; $('suppliersView').hidden=!sup; $('budgetView').hidden=sup; $('lower').style.display=sup?'none':'flex'; window.scrollTo(0,0); }
+
+/* tour (first visit) */
+const TOUR=[['One list, one truth','Booked suppliers, what you bought here, and your own expenses. The numbers up top are the sum of this list.'],['Tap a supplier','See every payment and record one. Owed moves the moment you do.'],['Add anything else','＋ Add expense for what you pay outside Setnayan. No Save button — it keeps as you type.']];
+let ti=0; function tourShow(){ $('tourN').textContent=(ti+1)+'/3'; $('tourT').textContent=TOUR[ti][0]; $('tourB').textContent=TOUR[ti][1]; }
+function tourNext(){ ti++; if(ti>=TOUR.length) return tourEnd(); tourShow(); }
+function tourEnd(){ document.documentElement.classList.remove('tour-on'); }
+
+/* boot */
+if(STATE){ document.documentElement.classList.add('appmode'); render();
+  if(STATE==='suppliers') go('suppliers'); else go('summary');
+  if(STATE==='add') setTimeout(openAdd,250);
+  if(STATE==='summary'&&q.get('tour')!=='0'){ document.documentElement.classList.add('tour-on'); tourShow(); }
+  if(STATE==='list'){ setTimeout(()=>window.scrollTo({top:300,behavior:'instant'}),100); }
+} else {
+  const F=[['suppliers','Suppliers · Booked tab keeps a small summary + Open budget'],['summary','Budget · summary + first-visit tour'],['list','Budget · the one list'],['add','Add expense'],['owing','Filter · Owing'],['failed','A failed read — never ₱0']];
+  $('frames').innerHTML=F.map(([s,c])=>`<div><div class="frame"><iframe src="?state=${s}${s==='summary'?'':'&tour=0'}" title="${c}"></iframe></div><div class="cap">${c}</div></div>`).join('');
+}
+</script>
+</body>
+</html>
