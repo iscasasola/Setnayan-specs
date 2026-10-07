@@ -157,6 +157,7 @@ main{overflow-x:clip}
 .btn:active{transform:scale(.97)}
 .btn.solid{background:var(--ink);color:var(--paper)}
 .btn.quiet{border-color:var(--line);color:var(--mute)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
 
 /* plans, payments, chats */
 .plan{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:baseline;padding:11px 0;border-top:1px solid var(--line);font-size:14px}
@@ -606,7 +607,7 @@ section{padding:18px 0 8px}
           const items=ks.map(k=>{const s=sup(pk[k]);return s?{k,s}:{k};}); const pr=items.filter(x=>x.s&&priceOf(x.s)!=null); const tot=pr.reduce((a,x)=>a+priceOf(x.s),0); const unp=items.filter(x=>x.s&&priceOf(x.s)==null).length; const dates=['2026-12-12','2026-12-18','2027-01-16'].filter(d=>items.every(x=>!x.s||isFree(x.s,d)));
           return `<div><div class="h">${esc(p.name)}</div><div class="a">${money$('cmp-'+i,tot)}</div><div class="mute">${unp?`+ ${unp} without a price`:'all priced'}</div><div style="margin-top:8px">${items.map(x=>`<div class="${x.s?'':'mute'}">${cat(x.k).name} · ${x.s?esc(x.s.name.split(' ')[0]):'—'}</div>`).join('')}</div><div class="${dates.length?'ok':'wine'}" style="margin-top:8px">${dates.length?'Free: '+dates.map(shortDate).join(' · '):'No shared free date'}</div><div class="${unp?'mute':'ok'}">${unp?'Buffer: not knowable':'Buffer '+money$('cmpb-'+i,BUDGET-tot)}</div>${p.cur?'':`<span class="acts" style="margin-top:10px"><button data-act="usebuild" data-i="${i-1}">Use</button>${ib('x','Delete this build',`data-act="delbuild" data-i="${i-1}"`)}</span>`}</div>`; }).join('')}</div>`:''}
         </section>`;
-      lower=`<button class="btn" data-act="sheet" data-key="savebuild" ${nPicks?'':'disabled style="opacity:.4"'}>Save this build</button>${nPicks?`<button class="btn solid" data-act="bookbuild">Book this build ›</button>`:''}`;
+      lower=`<button class="btn" data-act="sheet" data-key="savebuild" ${filled?'':'disabled'}>Save this build</button>${nPicks?`<button class="btn solid" data-act="bookbuild">Book this build ›</button>`:''}`;
     }
     else {
       // BOOKED · steps 6–9: your team, what they feed, the budget, date & place
@@ -807,7 +808,7 @@ or BPI 1234-5678-90">${esc(s.payNotes||'')}</textarea></div>`:''}
     uncover(d){ const s=sup(d.id); s.covers=(s.covers||[]).filter(k=>k!==d.cat); openSheet('price',{id:d.id}); render(); },
     accept(d){ const s=sup(d.id); s.price=s.quote; s.status='deciding'; S.picks[s.cat]=s.id; addChat(s.id,{me:true,t:'Accepting option A. Thank you!'}); addChat(s.id,{sys:'Quote accepted — in your build. Book when you’re ready.'}); closeSheet(); render(); toast(`Accepted — ${s.name.split(' ')[0]} is in your build`); },
     send(d){ const inp=$('#composer'); const t=d.text||(inp&&inp.value.trim()); if(!t) return; addChat(d.id,{me:true,t}); const s=sup(d.id); if(s.status==='saved'){ s.status='waiting'; s.askedAgo='just now'; } openSheet('chat',d); render(); },
-    dobuild(){ const name=($('#buildName').value||'').trim()||`Build ${S.builds.length+1}`; S.builds.push({name,picks:Object.assign({},S.picks),fresh:true}); closeSheet(); render(); toast(`Saved "${name}"`); },
+    dobuild(){ const name=($('#buildName').value||'').trim()||`Build ${S.builds.length+1}`; const picks=Object.assign({},S.picks); S.suppliers.filter(x=>x.status==='booked').forEach(x=>{ picks[x.cat]=x.id; }); S.builds.push({name,picks,fresh:true}); closeSheet(); render(); toast(`Saved "${name}" — see All builds`); setTimeout(()=>{ const el=document.querySelector('.cmp'); if(el) el.scrollIntoView({block:'nearest',behavior:'smooth'}); },80); },
     usebuild(d){ const p=S.builds[+d.i]; const old=Object.assign({},S.picks); Object.entries(p.picks).forEach(([k,id])=>{ if(bookedIn(k)) return; let s=S.suppliers.find(x=>x.id===id); if(!s){ s=mk(id,{cat:k,status:'deciding',fresh:true}); S.suppliers.push(s);} S.picks[k]=id; if(s.status==='saved') s.status='deciding'; }); closeSheet(); render(); toast(`Using "${p.name}"`,()=>{S.picks=old;render();}); },
     delbuild(d){ const [p]=S.builds.splice(+d.i,1); render(); toast(`Deleted "${p.name}"`,()=>{S.builds.splice(+d.i,0,p);render();}); },
     tour(){ startTour(); },
