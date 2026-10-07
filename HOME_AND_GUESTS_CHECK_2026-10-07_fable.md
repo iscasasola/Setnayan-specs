@@ -9,6 +9,7 @@ Ships (plan phase, `home-first-screen.tsx:HomeFirstScreen`): cover band · ONE N
 
 | # | Adjust | Today (file:symbol) | In the prototype |
 |---|---|---|---|
+| H1a | `✎ Edit your Event Hub` is full width (owner: *"maximize this button"*) | a small outlined button | the row's only button grows to the full width, keeps its word |
 | H1 | Every control a button, icon + word, tone | Next action, Edit your Event Hub, Event Details, the money card, service tiles, decision CTAs are links / styled spans (`HomeFirstScreen`, `NextCard`, `EventDashboard:renderDecisionGroup`, `ExpandCard fullLabel`) | ✉ Send invitations (main) · 📅 Later · ✎ Edit your Event Hub · ⓘ Event Details · Book 📅 / Pay 💳 / Pick 👤 per decision · ✓ Your checklist · 47% |
 | H2 | Numbers count, the money bar grows | static on the plan-phase Home; only day-of views use CountUp/ProgressRing | days · coming · no reply · Paid · Still owing = `Count`; one `Fill` under Paid/owing |
 | H3 | A failed read never reads as success | `pickHomeNext`: a failed guest read → "You are on track — Nothing is waiting"; `moneyRead` failure hides the card like "not shared"; services print "0 orders" on a thrown read; the Guests badge hides on an unmeasured count | `&fail=1`: the Next card says "We couldn't read your guest list — this is not 'on track'" + ⟳ Reload; the two guest numbers become "Guest counts couldn't load · not zero — unread" |
@@ -87,6 +88,6 @@ G-PR2 then mounts `GuestsGetIn`, `RsvpAsks`, `ReplyBy` on Setup and adds the Set
 | PR | Scope | Size |
 |---|---|---|
 | G-PR1 · Guests shell + list | G1–G6, G11, G24–G25, G28, G32–G37: the segmented, counts + meter, pinned search/add, the role sections with pop → unfold, rows as ActionButtons, Select mode with the thumb bar, Add sheet with the "Add another way" dropdown, requests + finalize rows | 2 sessions |
-| G-PR2 · Guests card + Setup + map | G7–G10, G26–G27, G29–G31, G38–G39 (+ the Maker side of G30, see below): the card's dropdowns and in-place access, Share the link with the message in place, the mind map lens dropdown, the five native selects, the words | 1–2 sessions |
-| H-PR1 · Home | H1–H8 in one PR: ActionButtons, Count/Fill, the honest failure states, the money door to Suppliers · Booked, What's next unfolds in place, the words | 1 session |
+| G-PR2 · Guests card + map | G7–G10, G38–G39 — **Setup (G24–G31, G37) is NOT here: it builds with the Event Hub as Maker PR 4d `rd/guests-setup-with-the-maker` (owner 2026-10-07: *"this build must build with the event hub"*)**: the card's dropdowns and in-place access, Share the link with the message in place, the mind map lens dropdown, the five native selects, the words | 1–2 sessions |
+| ~~H-PR1 · Home~~ → **Maker PR 4e `rd/home-with-the-maker`** (owner 2026-10-07: *"and home as well. add this to the builds on event hub maker"*) | H1–H8 in one PR: ActionButtons, Count/Fill, the honest failure states, the money door to Suppliers · Booked, What's next unfolds in place, the words | 1 session |
 Each PR: the prototype state at 375 and 1280 as the acceptance picture; side-by-side in the PR body; the build contract; a check card. Then the universal-rules sweep converts what remains in these areas (reader counts: Guests + Maker ≈ 179 controls; Home/event dashboard ≈ 693).
