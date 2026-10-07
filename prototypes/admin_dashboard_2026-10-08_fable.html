@@ -42,7 +42,7 @@ html.app .gallery{display:none}html:not(.app) .app{display:none}
 
 /* ---------- the app ---------- */
 .app{min-height:100vh;padding-bottom:calc(var(--bar) + 24px)}
-html:not(.lower-hide) main{padding-bottom:72px}
+html:not(.lower-hide) main{padding-bottom:150px}
 .shell{position:sticky;top:0;z-index:5;background:var(--paper-2);border-bottom:1px solid var(--line);height:56px;display:flex;align-items:center;gap:10px;padding:0 16px}
 .shell .logo{font-weight:700;color:var(--gild);font-size:15px;letter-spacing:.14em}
 .shell .shop{font-size:14px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
@@ -135,6 +135,11 @@ svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke
 .na .r{display:flex;gap:6px;align-items:center}
 .na.off{opacity:.55}
 .na.cleared .l b{text-decoration:line-through;color:var(--mute)}
+/* AI assist line — a suggestion with its evidence one tap away; never an auto-action */
+.na .l .ai{display:block;font-size:12.5px;color:var(--info);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.na .l .ai.bad{color:var(--warn)}
+.tag{font-size:11px;padding:2px 7px;border-radius:999px;border:1px solid var(--line);color:var(--mute);margin-left:6px;vertical-align:middle;font-weight:500}
+.tag.new{color:var(--mulberry);border-color:color-mix(in srgb,var(--mulberry) 45%,transparent)}
 /* money / facts */
 .money{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;padding:14px 0 8px;border-bottom:1px solid var(--line)}
 .money .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
@@ -274,6 +279,7 @@ const I={
  ban:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>',
  phone:'<svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>',
  clock:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+ tools:'<svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0 5 5L22 9l-3-3-2.3 2.3zM2 22l9.3-9.3M9.3 12.7l2-2"/></svg>',
  trash:'<svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v5M14 11v5"/></svg>',
 };
 const q=new URLSearchParams(location.search);
@@ -298,12 +304,13 @@ const fail=(what,dash)=>`<div class="fail${dash?' dash':''}">${I.alert} Couldn't
 const num=(v,l,go,tone)=>`<button data-go="${go}"><b class="${tone||''}" data-count="${v}">${v}</b><small>${l}</small></button>`;
 const fld=(v)=>`<input class="fld" value="${v}" data-act="fld">`;
 /* a Needs-action row: sentence · meta · ONE action · ⋯ */
-const na=(sent,meta,act,o={})=>`<div class="na ${o.cls||''}"><i></i><span class="l"><b>${sent}</b><span class="${o.lateMeta?'late':''}">${meta}</span></span><span class="r">${act}${dots(`data-act="toast" data-msg="${o.dots||'Open · Ask · Decline'}"`)}</span></div>`;
+const na=(sent,meta,act,o={})=>`<div class="na ${o.cls||''}"><i></i><span class="l"><b>${sent}</b><span class="${o.lateMeta?'late':''}">${meta}</span>${o.ai?`<button class="ai ${o.aibad?'bad':''}" data-act="toast" data-msg="${o.aiev||'Opens the evidence'}">✦ AI: ${o.ai} · evidence ›</button>`:''}</span><span class="r">${act}${dots(`data-act="toast" data-msg="${o.dots||'Open · Ask · Decline'}"`)}</span></div>`;
+const NEW='<span class="tag new">NEW</span>';const EX='<span class="tag">exists</span>';
 const confirmBtn=(tone,ic,l,c,main=true,cls='sm')=>btn(tone,ic,l,main,`data-confirm="${c}"`,cls);
 
 /* ---------------- confirm sheets — ONE pattern, reused (money · for-everyone · irreversible) ---------------- */
 const CONFIRMS={
-  pay:{t:'Confirm ₱2,499 from Cale & Ice',s:'GCash · ref ···6789 · Setnayan AI read the receipt: amount and reference match',what:['Marks the payment received','Unlocks the Thank-you film on their Event Hub','Emails their receipt to cale@…'],not:['Does not release a supplier payout (none on this order)'],go:'ok',ic:'check',l:'Confirm',msg:'Confirmed ₱2,499 · receipt sent'},
+  pay:{t:'Confirm ₱2,499 from Cale & Ice',s:'GCash · ref ···6789 · Setnayan AI read the receipt: amount and reference match',what:['Releases: Thank-you film on the Cale & Ice Event Hub (SKU activates)','Sends the receipt to cale@… · R-2026-0932','Supplier payout: none on this order'],not:['Does not refund or change the price'],go:'ok',ic:'check',l:'Confirm',msg:'Confirmed ₱2,499 · receipt sent'},
   verify:{t:'Approve Lumina Studio',s:'Photo & video · Makati · DTI + ID checked · contact confirmed',what:['Shop goes Live and Verified for couples','Owner Ana Reyes gets the email','Three services publish'],not:['Permit date not checked — none uploaded'],go:'ok',ic:'check',l:'Approve',msg:'Lumina Studio verified'},
   refund:{t:'Refund ₱147 to Katrina Ocampo',s:'GCash · save-the-date cancelled · under ₱25,000 → one admin',what:['₱147 marked owed to her GCash','She gets the email','Order closes'],not:[],go:'ok',ic:'refund',l:'Refund',msg:'Refund recorded · Katrina told'},
   swoff:{t:'Turn Reveal Studio off for everyone?',s:'A for-everyone switch · effective on the next page load',what:['312 Event Hubs lose the opening reveal','Couples see a plain open — nothing deleted','Written to the Admin log with your name'],not:[],go:'danger',ic:'bolt',l:'Turn off',msg:'Reveal Studio off · 312 hubs',undo:true},
@@ -313,6 +320,20 @@ const CONFIRMS={
   reopen:{t:'Reopen the guest list · Cale & Ice',s:'Finalized Oct 1 · 180 guests · deadline moves to Oct 30',what:['Hosts can edit guests again','Caterer is told the count may change','Finalize happens again at the new deadline'],not:[],go:'ok',ic:'undo',l:'Reopen',msg:'Guest list reopened · hosts told'},
   ban:{t:'Ban Cale Casasola',s:'Signs out everywhere · blocks sign-in · freezes their events · hides their shop seats · deletes nothing',what:['They get the plain email with the reason','Guests still see what was published','Admin log keeps your name and the reason'],not:[],go:'danger',ic:'ban',l:'Ban',msg:'Banned · undo for 24 h',typed:'BAN CALE',undo:true,reason:true},
   delete:{t:'Delete Katrina Ocampo’s account',s:'She asked 18 h ago · 24-h rule · RA 10173',what:['Account, events, photos and faces erased','Receipts kept 10 years (BIR)','She gets the confirmation email'],not:['Cannot be undone after the 24 h'],go:'danger',ic:'trash',l:'Delete',msg:'Erasure started · she is told',typed:'DELETE KATRINA',reason:false},
+  compgive:{t:'Comp Live Watch to Cale & Ice wedding',s:'₱2,500 retail · until the event · reason: service failed on Sep 30 · under ₱10,000 → one admin',what:['Cale & Ice wedding gets Live Watch now','Cale gets the email','Order row marked comp · Admin log'],not:['Above ₱10,000 a second admin would confirm first'],go:'ok',ic:'gift',l:'Give',msg:'Comped · Cale told'},
+  compshop:{t:'Comp Papic Challenge to Lumina Studio',s:'one 28-day cycle · ₱12,000 retail · reason required · above ₱10,000 → second admin',what:['Nothing changes yet','A second admin sees it under Approvals · 72 h','Lumina is told when it lands'],not:[],go:'brand',ic:'send',l:'Send',msg:'Sent for approval · 72 h'},
+  freeze:{t:'Freeze Cale Casasola’s account',s:'Temporary hold · reversible · NEW (not in code today)',what:['Signed out everywhere · sign-in blocked until you lift it','Events stay as they are · guests still read them','Lift it from this page · logged'],not:['Nothing is deleted · not a ban'],go:'warn',ic:'lock',l:'Freeze',msg:'Frozen · lift from this page',reason:true},
+  freezeshop:{t:'Suspend Lumina Studio',s:'Hidden from couples · bookings paused · exists (fraud suspend / unsuspend)',what:['Shop hidden from Explore and search','Open bookings keep their chats','Unsuspend from this page · logged'],not:['Nothing is deleted · not a ban'],go:'warn',ic:'lock',l:'Suspend',msg:'Suspended · Ana told',reason:true},
+  freezeevent:{t:'Hold Cale & Ice wedding',s:'Guests see "paused" · NEW (not in code today)',what:['Event Hub shows a paused page','Replies and uploads stop','Lift from this page · logged'],not:[],go:'warn',ic:'lock',l:'Hold',msg:'Event on hold',reason:true},
+  move:{t:'Move Papic Pass to Reyes debut',s:'Bought for Cale & Ice wedding · never used (0 of 3,000 points · 0 photos · no seat claimed) · next event he created: Reyes debut · Oct 2 · NEW action',what:['Cale & Ice wedding loses the Papic Pass','Reyes debut gets 3,000 points now','Cale is told · order re-pointed · Admin log keeps both'],not:['Not a refund · nothing is charged','A partly used pass cannot move (points spent)'],go:'ok',ic:'out',l:'Move',msg:'Moved to Reyes debut · Undo',undo:true},
+  rotate:{t:'Rotate RESEND_API_KEY',s:'Vercel secret · last rotated Jul 2 · 98 days',what:['New value saved to Vercel (write-only)','Marked rotated today · next due in 90 d','Redeploy needed — offered after'],not:[],go:'brand',ic:'key',l:'Rotate',msg:'Rotated · redeploy?'},
+  codeadd:{t:'Create code WELCOME15',s:'15 % off · couples · Dec 1–31 · 500 uses',what:['Live at once on checkout','Shows on the Promo codes list','Admin log'],not:[],go:'brand',ic:'plus',l:'Create',msg:'WELCOME15 live'},
+  windowadd:{t:'Open a free window',s:'All couples · Save-the-Date · Dec 1–31 · reason required (L4067)',what:['Save-the-Date free for every couple in the window','Supplier fee rows unaffected','Reason kept in the audit row'],not:[],go:'brand',ic:'plus',l:'Open',msg:'Window open · Dec 1–31',reason:true},
+  launchusers:{t:'Turn the users’ half off?',s:'50 Papic credits per booked event · 1,240 events received so far',what:['New bookings stop earning the 50 credits','Credits already given stay','Couple Papic pages stop showing the line'],not:['The suppliers’ half keeps running'],go:'danger',ic:'bolt',l:'Turn off',msg:'Users’ half off · Undo',undo:true},
+  articlepub:{t:'Publish “Ten questions for your caterer”',s:'The Journal · NEW editor (posts are code today)',what:['Live on setnayan.com/journal','Spotlight: Lumina Studio · free','Admin log'],not:[],go:'brand',ic:'send',l:'Publish',msg:'Published'},
+  venuedel:{t:'Remove Manila Hotel from the directory',s:'Venue directory · 3 events picked it',what:['Gone from Explore and onboarding','The 3 events keep their typed venue'],not:[],go:'danger',ic:'trash',l:'Remove',msg:'Removed · Undo 24 h',undo:true,typed:'REMOVE'},
+  eventtypeadd:{t:'Create event type “Reunion”',s:'Group: Get-togethers · Draft until you switch it Live',what:['Appears in Categories & event types','Onboarding offers it once Live','Suppliers can scope services to it'],not:[],go:'brand',ic:'plus',l:'Create',msg:'Reunion created · draft'},
+  catadd:{t:'Create category “Sorbetes cart”',s:'Group: Booths, carts & bars · 2 search words',what:['Couples see it on Explore at once','Suppliers can list under it','Admin log'],not:[],go:'brand',ic:'plus',l:'Create',msg:'Sorbetes cart created'},
   record:{t:'Record a payment received',s:'Seen in the bank, not logged by the buyer',what:['Payment logged against the order','Then the same Confirm step as any payment'],not:[],go:'ok',ic:'plus',l:'Record',msg:'Recorded · now confirm it',form:true},
   helpreply:{t:'Send reply to Rolando Mendoza',s:'Help ticket · "Can’t add guests" · open 2 h',what:['Email + in-app message','Ticket stays open until they answer'],not:[],go:'info',ic:'send',l:'Send',msg:'Reply sent · Rolando told'},
   export:{t:'Send Cale his data',s:'Asked 3 d ago · due Oct 30 · 30-day rule',what:['A zip of everything we hold on him','Emailed with a 7-day link','Logged under who viewed his data'],not:[],go:'ok',ic:'send',l:'Send export',msg:'Export sent · logged'},
@@ -375,25 +396,25 @@ SCREENS.work=()=>{
   </div>
   <div class="eyebrow">Privacy<span class="n">2</span></div>
   <div class="rows">
-    ${na('Katrina asked to delete her account','18 h ago · 6 h left · 24-h rule',confirmBtn('danger','trash','Delete','delete'),{cls:'due',dots:'Extend 24 h · Decline…'})}
+    ${na('Katrina asked to delete her account','18 h ago · 6 h left · 24-h rule',btn('grey','eye','Open',false,'data-go="person"','sm'),{cls:'due',dots:'Extend 24 h · Decline…'})}
     ${na('Cale asked for a copy of his data','3 d ago · due Oct 30 · 30-day rule',confirmBtn('ok','send','Send','export'),{dots:'Open the person'})}
   </div>
   <div class="eyebrow">Money<span class="n">3</span></div>
   <div class="rows">
-    ${done?na('₱2,499 from Cale & Ice · cleared','receipt sent · in the Admin log','',{cls:'cleared'}):na('₱2,499 from Cale & Ice · GCash','3 h ago · due in 21 h · AI read matches',confirmBtn('ok','check','Confirm','pay'),{cls:'due',dots:'Open · Ask to resend · Reject…'})}
-    ${na('₱2,899 from Rolando & Carmen · GCash','1 h ago · amount differs from the order',btn('grey','eye','Match',false,'data-go="payment"','sm'),{dots:'Ask to resend · Reject…'})}
+    ${done?na('₱2,499 from Cale & Ice · cleared','receipt sent · in the Admin log','',{cls:'cleared'}):na('₱2,499 from Cale & Ice · GCash','3 h ago · due in 21 h',confirmBtn('ok','check','Confirm','pay'),{cls:'due',dots:'Open · Ask to resend · Reject…',ai:S.v==='ai'?'amount matches · ref matches · no duplicate · safe to confirm':'',aiev:'The receipt read · payment_receipt_reads'})}
+    ${na('₱2,899 from Rolando & Carmen · GCash','1 h ago · amount differs from the order',btn('grey','eye','Match',false,'data-go="payment"','sm'),{dots:'Ask to resend · Reject…',ai:S.v==='ai'?'read ₱2,899 · order is ₱2,499 · over by ₱400 — not confirmed for you':'',aibad:true})}
     ${na('Refund ₱147 to Katrina Ocampo','2 d ago · save-the-date cancelled',confirmBtn('ok','refund','Refund','refund'),{dots:'Open the order'})}
   </div>
   <div class="eyebrow">Suppliers<span class="n">4</span></div>
   <div class="rows">
-    ${na('Verify Lumina Studio · Photo & video','yesterday · due today · DTI + ID · contact confirmed',btn('grey','eye','Open',false,'data-go="shop"','sm'),{cls:'late',lateMeta:true,dots:'Ask for more… · Reject…'})}
+    ${na('Verify Lumina Studio · Photo & video','yesterday · due today · DTI + ID · contact confirmed',btn('grey','eye','Open',false,'data-go="shop"','sm'),{cls:'late',lateMeta:true,dots:'Ask for more… · Reject…',ai:S.v==='ai'?'DTI name = ID name · dossier clean · permit couldn’t read':'',aiev:'Auto checks + web dossier'})}
     ${na('Lumina Studio · Pro · ₱1,499 · BDO','20 min ago · subscription to confirm',confirmBtn('ok','check','Confirm','pay'),{dots:'Open · Reject…'})}
-    ${na('“Sorbetero” from Mang Kanor’s Sorbetes','yesterday · category request · we think: Sorbetes cart',confirmBtn('ok','check','Approve','cat'),{dots:'Map to… · Decline…'})}
+    ${na('“Sorbetero” from Mang Kanor’s Sorbetes','yesterday · category request',confirmBtn('ok','check','Approve','cat'),{dots:'Map to… · Decline…',ai:S.v==='ai'?'we already have Sorbetes cart · suggest Map to it':'we think: Sorbetes cart',aiev:'Lexical match · a suggestion, not a decision'})}
     ${na('A colleague’s comp needs your sign-off','4 h ago · two-admin · Aurora Blooms · ₱12,000',btn('grey','eye','Open',false,'data-go="approvals"','sm'),{cls:'late',lateMeta:true})}
   </div>
   <div class="eyebrow">Safety<span class="n">3</span></div>
   <div class="rows">
-    ${na('A gallery photo on the Reyes debut was reported','5 h ago · by a guest',btn('grey','eye','Open',false,'data-go="report"','sm'),{dots:'Hide the photo · Dismiss'})}
+    ${na('A gallery photo on the Reyes debut was reported','5 h ago · by a guest',btn('grey','eye','Open',false,'data-go="report"','sm'),{dots:'Hide the photo · Dismiss',ai:S.v==='ai'?'screen: a child’s face · guardian objected · hide is the rule':'',aiev:'Face enrolment + the report'})}
     ${na('A quote shared off-platform · Lumina ↔ Cale & Ice','4 d ago · chat flag',btn('grey','check','Clear',false,'data-act="toast" data-msg="Cleared · Undo"','sm'),{dots:'Open the chat · Warn the shop'})}
     ${na('Rolando: “Can’t add guests”','2 h ago · help ticket',btn('info','chat','Reply',false,'data-go="help"','sm'),{dots:'Close · Mark in progress'})}
   </div>
@@ -421,7 +442,7 @@ SCREENS.money=()=>`
     ${row('Our accounts','BDO · GCash · QR Ph · two admins to change',go,{ic:'money',go:'accounts'})}
     ${row('Fees owed','2 suppliers · ₱3,100 · launch offer: free',go,{ic:'tag',go:'fees'})}
     ${row('Receipts','October · 9 · not BIR ORs',go,{ic:'doc',go:'receipts'})}
-    ${row('Pricing &amp; offers','catalogue · launch offer · discount codes',go,{ic:'star',go:'pricing'})}
+    ${row('Catalogue','prices customers and suppliers pay · 49 live',go,{ic:'tag',go:'catalogue'})}
   </div>`;
 
 /* A PAYMENT — the facts, the receipt, then the confirm step */
@@ -448,18 +469,19 @@ SCREENS.people=()=>`
     <button class="chat" data-go="shop"><span class="av s" style="opacity:.6">AB</span><span><b>Aurora Blooms</b><span class="last">Demo supplier · Flowers · hidden from couples</span></span><span class="when"><span class="pill">Demo</span></span></button>
   </div>
   <div class="eyebrow">Also here</div>
-  <div class="rows">${row('ID documents','in use 41 · left over 2',go,{ic:'doc',go:'docs'})}${row('Gifts &amp; comps','3 comped suppliers · 1 couple window',go,{ic:'gift',go:'gifts'})}${row('Partnerships','1 to approve',go,{ic:'people',go:'partners'})}</div>`;
+  <div class="rows">${row('ID documents','in use 41 · left over 2',go,{ic:'doc',go:'docs'})}${row('Gifts &amp; comps','3 comped suppliers · 1 couple window',go,{ic:'gift',go:'gifts'})}${row('Give a comp','to an event · a supplier · a person',go,{ic:'gift',go:'comp'})}${row('Venues','214 · add · edit · pin',go,{ic:'globe',go:'venues'})}${row('Partnerships','1 to approve',go,{ic:'people',go:'partners'})}</div>`;
 
 /* A PERSON — everything on one page, support actions in place */
 SCREENS.person=()=>`
   <div class="head"><h1>Cale Casasola</h1><div class="f">Host · active · seen today · Web + iPhone · S89U-3F7K</div></div>
   <div class="rows">
     ${fold('ev','Events','Cale & Ice wedding · Reyes debut (coordinator)',`${row('Cale &amp; Ice wedding','Dec 12 · 180 guests · list Finalized · Papic on',go,{go:'event'})}${row('Reyes debut','coordinator seat · today 6 PM · Live Watch',go,{go:'event'})}`,{ic:'cal',r:'<span class="pill">2</span>'})}
-    ${fold('mo','Orders &amp; payments','2 paid · ₱2,548 · 1 waiting ₱2,499',`${row('Thank-you film','₱2,499 · to confirm',confirmBtn('ok','check','Confirm','pay'),{go:'payment'})}${row('Papic top-up','₱49 · paid · receipt sent','<span class="pill ok">paid</span>')}${row('Comps','none',btn('grey','gift','Comp',false,'data-act="toast" data-msg="Comp → ≤ ₱10,000 one admin · above two"','sm'))}`,{ic:'money'})}
+    ${fold('mo','Orders &amp; payments','2 paid · ₱2,548 · 1 waiting ₱2,499',`${row('Thank-you film','₱2,499 · to confirm',confirmBtn('ok','check','Confirm','pay'),{go:'payment'})}${S.v==='nonext'?row('Papic Pass · Cale & Ice wedding','₱500 · paid Aug 2 · <b class="warn">unused</b> · 0 of 3,000 points · 0 photos','<span class="pill warn">waits for their next event</span>'):row('Papic Pass · Cale & Ice wedding','₱500 · paid Aug 2 · <b class="warn">unused</b> · 0 of 3,000 points · 0 photos · next: Reyes debut · Oct 2',NEW+confirmBtn('ok','out','Move','move',false))}${row('Live Watch · Cale & Ice wedding','₱2,500 · used · session Sep 30','<span class="pill ok">used</span>')}${row('Papic top-up','₱49 · paid · used 18 of 100','<span class="pill ok">used</span>')}${row('Comps','none',btn('grey','gift','Comp',false,'data-act="toast" data-msg="Comp → ≤ ₱10,000 one admin · above two"','sm'))}`,{ic:'money'})}
     ${fold('pe','People on their events','Ice (co-host) · Tita Nene (coordinator) · 180 guests',`${row('Ice Casasola','co-host · Cale & Ice','')}${row('Tita Nene','coordinator seat · Cale & Ice',btn('grey','x','Unlink',false,'data-act="toast" data-msg="Unlink Tita Nene?"','sm'))}`,{ic:'people'})}
     ${fold('me','Memories','412 photos · 38 faces · 2 takedowns honoured',`${row('Photos','412 on 2 events','')}${row('Takedowns','2 honoured · 0 waiting','')}${row('Creations','3 mood boards · 1 Patiktok','')}`,{ic:'pic'})}
     ${fold('pr','Problems they hit','2 · Save didn’t go through ×3',`${row('Save didn’t go through','Guest list › Add guest · last 2 h',go,{go:'problems'})}${row('Upload stalled','Papic · Sep 30',go,{go:'problems'})}`,{ic:'alert',tone:'warn'})}
     ${fold('ac','Access','Google · iPhone app + Safari · 14 emails delivered',`${row('Sign-in','Google · last today 8:41',btn('grey','key','Reset',false,'data-act="toast" data-msg="Reset link sent"','sm'))}${row('Devices','iPhone (app) · Safari (Mac)',btn('grey','out','Sign out all',false,'data-act="toast" data-msg="Signed out everywhere"','sm'))}${row('Their data','export · logged under who viewed',confirmBtn('ok','send','Send','export',false))}`,{ic:'lock'})}
+    ${row('Launch offer','on · his 2 events got 50 Papic credits each','<span class="pill ok">on</span>')}
     ${fold('lg','Admin log · this person','3 entries',`${row('Sep 20','Added as staff of Lumina Studio','')}${row('Sep 12','Face tagging On · by Ice','')}`,{ic:'doc'})}
   </div>
   <p class="note">View as this person is read-only and written to the log.</p>`;
@@ -469,10 +491,11 @@ SCREENS.shop=()=>`
   <div class="head"><h1>Lumina Studio</h1><div class="f">Photo &amp; video · Makati · owner Ana Reyes · <span class="warn">waiting to be verified · due today</span></div></div>
   <div class="rows">
     ${fold('vf','Verification','DTI ✓ · ID ✓ · contact confirmed · permit: none',`${row('DTI certificate','matches the business name','<span class="pill ok">✓</span>')}${row('Government ID','Ana Reyes · matches','<span class="pill ok">✓</span>')}${row('Contact','email + mobile confirmed Oct 6','<span class="pill ok">✓</span>')}${row('Mayor’s permit','not uploaded · valid-until unknown','<span class="pill warn">none</span>')}${row('Web dossier','3 pages · nothing against',btn('grey','search','Deep search',false,'data-act="toast" data-msg="Runs 1–3 min"','sm'))}${row('Documents','open each · 10-min links',btn('grey','eye','View',false,'data-act="toast" data-msg="Opens the file"','sm'))}`,{ic:'shield',tone:'warn',r:'<span class="pill warn">due</span>'})}
-    ${fold('pl','Plan','Pro · free · launch offer',`${row('Plan',sel(['Free','Verified','Solo','Pro','Enterprise'],'Pro'))}${row('Why','launch offer · Pro free for all · ends with the offer','')}${row('Comp a SKU','Papic Challenge · 28 d · two admins',btn('grey','gift','Comp',false,'data-act="toast" data-msg="Opens Approvals · 2nd admin"','sm'))}${row('Founding supplier','not marked',sw('fs',false,'Founding supplier'))}`,{ic:'star'})}
+    ${fold('pl','Plan','Pro · free · launch offer',`${row('Plan',sel(['Free','Verified','Solo','Pro','Enterprise'],'Pro'))}${row('Why','launch offer · Pro free for all · ends with the offer','')}${row('Comp a SKU','Papic Challenge · 28 d · ₱12,000 → second admin',confirmBtn('grey','gift','Comp','compshop',false))}${row('Founding supplier','not marked',sw('fs',false,'Founding supplier'))}`,{ic:'star'})}
     ${fold('sv','Services','3 · Wedding Classic · Full-day · Half-day',`${row('Wedding Classic','₱110,000 · draft until verified','')}${row('Full-day','₱85,000','')}${row('Half-day','₱45,000','')}`,{ic:'tag'})}
     ${fold('mn','Money','₱1,499 Pro · to confirm · 0 fees owed',`${row('Pro · October','₱1,499 · BDO · 20 min',confirmBtn('ok','check','Confirm','pay'))}${row('Fees owed','none · launch offer','')}${row('Payment options','GCash · approved','')}`,{ic:'money'})}
     ${fold('tm','Team &amp; customers','2 staff · 6 customers · 1 chat flag',`${row('Ana Reyes','owner','')}${row('Cale Casasola','staff · added Sep 20','')}${row('Chat flag','quote shared off-platform · 4 d',btn('grey','check','Clear',false,'data-act="toast" data-msg="Cleared · Undo"','sm'))}`,{ic:'people'})}
+    ${row('Launch offer','on · Pro free · 0 fee-free bookings yet · 0 credits','<span class="pill ok">on</span>')}
     ${fold('hs','Admin log · this shop','2 entries',`${row('Oct 6','contact confirmed · by Ice','')}${row('Sep 20','application received','')}`,{ic:'doc'})}
   </div>`;
 
@@ -486,6 +509,9 @@ SCREENS.event=()=>`
     ${row('Suppliers','4 booked · 1 fee waived (launch offer)',go,{go:'people'})}
     ${row('Money','2 paid · 1 to confirm ₱2,499',go,{go:'money'})}
     ${row('Problems','Upload stalled · 1 hit today',go,{go:'problems'})}
+    ${row('Launch offer','1 booking fee-free · 50 Papic credits received Oct 9','<span class="pill ok">on</span>')}
+    ${row('Comp a service','Live Watch · Save-the-Date · Papic …',confirmBtn('grey','gift','Comp','compgive',false))}
+    ${row('Hold this event','guests see "paused" · reversible','<span class="tag new">NEW</span>'+confirmBtn('grey','lock','Hold','freezeevent',false))}
     ${row('Removal','not asked · money holding: no','')}
   </div>
   <div class="eyebrow">Hosts</div>
@@ -553,43 +579,44 @@ SCREENS.pricing=()=>`
     ${row('Supplier plans','Free · Solo ₱— · Pro ₱— · Enterprise ₱—',go,{ic:'star',go:'catalogue'})}
     ${row('Booking fee','5 % · min ₱50 · first 5 free · rail on',go,{ic:'money',go:'catalogue'})}
     ${row('Free windows','1 · all couples · Dec 1–31',go,{ic:'gift',go:'gifts'})}
-    ${row('Discount codes','4 live · 1 expired',go,{ic:'tag',go:'codes'})}
+    ${row('Money off','codes · free windows · deals',go,{ic:'tag',go:'promos'})}
     ${row('Papic shot prices','ladder · pool · learning',go,{ic:'pic',go:'catalogue'})}
     ${row('Setnayan AI prices','per event type',go,{ic:'bolt',go:'catalogue'})}
     ${row('Custom plans','0 open · composer',go,{ic:'doc',go:'catalogue'})}
     ${row('Founder seats','3 of 10',go,{ic:'star',go:'gifts'})}
+    ${row('Budget benchmarks','bands · allocation',go,{ic:'chart',go:'benchmarks'})}
     ${row('Market price bands','what suppliers charge · recompute',go,{ic:'chart',go:'numbers'})}
   </div>`;
 
-/* LAUNCH OFFER — the single source the supplier frames 22–25, 27, 30, 34 read. v: '' running · ending · ended */
+/* LAUNCH OFFER — ONE page, two halves under one counter (L4823–4825 only: B · Pro free till the week the 2,000th lands · 50 Papic credits per fee-free booked event). The single source supplier frames 22–25, 27, 30, 34 and the couple's Papic / Suppliers rows read. v: '' running · ending · ended */
 SCREENS.launch=()=>{
-  const v=S.v;
-  const used=v==='ended'?2000:v==='ending'?2000:1240;
-  const pct=Math.round(used/2000*100);
-  const state=v==='ended'?`<div class="next bad"><span class="eye">Ended</span><h2>Offer ended Sun Nov 1</h2><p>Cap reached Tue Oct 27 · fee resumed for new bookings · Pro free ended · 5 % grant back</p>${btn('grey','play','Run again',false,'data-act="toast" data-msg="Opens a new window with a reason"')}</div>`
-   :v==='ending'?`<div class="next" style="background:var(--warn-soft)"><span class="eye">Ending week</span><h2>2,000 reached · ends Sun Nov 1</h2><p>Cap hit Tue Oct 27 · fee resumed for NEW bookings · Pro free ends Sun · 1,384 suppliers told</p>${btn('grey','chat','Message suppliers',false,'data-act="toast" data-msg="Opens Talk to users"')}</div>`
-   :`<div class="next calm"><span class="eye">Running</span><h2>1,240 of 2,000</h2><p>fee-free bookings used · Pro free for 1,384 suppliers · 62,000 Papic credits given</p><div class="acts">${confirmBtn('danger','bolt','End now','launchoff',false,'')}${btn('grey','eye','Who reads this',false,'data-toggle-note="1"')}</div></div>`;
+  const v=S.v; const used=v?2000:1240; const pct=Math.round(used/2000*100); const on=v!=='ended';
+  const state=v==='ended'?`<div class="next bad"><span class="eye">Ended</span><h2>Offer ended Sun Nov 1</h2><p>2,000th booking Tue Oct 27 · fee resumed for new bookings · Pro free ended · 5 %-of-fee grant back · 50-credit grant stopped</p>${btn('grey','play','Run again',false,'data-act="toast" data-msg="Opens a new window with a reason"')}</div>`
+   :v==='ending'?`<div class="next" style="background:var(--warn-soft)"><span class="eye">Ending week</span><h2>2,000 reached · ends Sun Nov 1</h2><p>2,000th booking Tue Oct 27 · fee resumed for NEW bookings · Pro free ends Sun · 1,384 suppliers told · credits stop with the fee</p>${btn('grey','chat','Message suppliers',false,'data-go="promotions"')}</div>`
+   :`<div class="next calm"><span class="eye">Running · one counter for both halves</span><h2>1,240 of 2,000</h2><p>fee-free bookings used · since Oct 9 · ends at the end of the week the 2,000th lands (4-week cycle)</p><div class="acts">${confirmBtn('danger','bolt','End now','launchoff',false,'')}${btn('grey','pen','Cap',false,'data-act="toast" data-msg="Cap field below"')}</div></div>`;
   return `${state}
   <div class="meter"><i class="${v?'warn':''}" data-fill="${pct}"></i></div>
-  <div class="facts" style="border-top:0"><span>Used</span><b data-count="${used.toLocaleString()}">${used.toLocaleString()}</b><span>Started</span><b>Oct 9, 2026 · reason: launch</b><span>Ends</span><b>${v?'Sun Nov 1 · end of the week the cap landed':'end of the week the 2,000th lands · 4-week cycle'}</b></div>
-  <div class="eyebrow">The rule ${sel(['B · first 2,000 platform bookings','A · first 5 per supplier, first 500 suppliers'],'B · first 2,000 platform bookings')}</div>
+  <div class="rows">${row('Cap','platform bookings · editable · never hard-coded',fld('2,000'))}${row('Week boundary',sel(['Platform week · Sun 23:59','Each supplier’s own cycle'],'Platform week · Sun 23:59'))}</div>
+  <div class="eyebrow">For suppliers<span class="n">${on?'1,384 on it':'ended'}</span></div>
   <div class="rows">
-    ${row('Offer','on · fee-free bookings',sw('lo',v!=='ended','Launch offer'))}
-    ${row('Cap','platform bookings · editable · never hard-coded',fld('2,000'))}
-    ${row('Pro free for all','while the offer runs · full features',sw('pro',v!=='ended','Pro free'))}
-    ${row('Papic credits per fee-free booking','for that event · idempotent per order',fld('50'))}
-    ${row('After it ends','fee resumes for new bookings · 5 %-of-fee grant returns','')}
-    ${row('Week boundary',sel(['Platform week · Sun','Each supplier’s own cycle'],'Platform week · Sun'))}
+    ${row('Pro free for all','full features while the offer runs · ends with the week',sw('pro',on,'launchoff'))}
+    ${row('Booking fee','₱0 on every booking until the cap · then 5 % resumes','<span class="pill ok">free</span>')}
+    ${row('Gives · to whom · since','Pro + fee-free · every supplier · Oct 9','')}
+    ${row('Count so far','1,384 suppliers on Pro free · 1,240 fee-free bookings','<span class="amt" data-count="1,384">1,384</span>')}
+    ${row('Ends when','2,000th booking → end of that week','')}
+    ${fold('ws','Who reads this','supplier frames 22 · 23 · 24 · 25 · 27 · 30 · 39',`${row('Today line','22 · used · cap','')}${row('Plan fold','23–25 · used · cap · Pro free · end date','')}${row('Picture sheet','27 · "Pro · free · launch offer"','')}${row('Fee row · quote','30 · 39 · "free · launch offer · ₱0"','')}`)}
   </div>
-  <div class="eyebrow">Who reads this</div>
+  <div class="eyebrow">For users’ events<span class="n">${on?'1,240 events received':'ended'}</span></div>
   <div class="rows">
-    ${row('Supplier Today line','frame 22 · used · cap','')}
-    ${row('Supplier Plan fold','frames 23–25, 27 · used · cap · end date · Pro free','')}
-    ${row('Fee row + quote','frames 30, 39 · on/off · "free · launch offer"','')}
-    ${row('Papic credits','frame 34 · 50 per booking','')}
-    ${row('Couple fee line','Suppliers page · "booking fee free"','')}
+    ${row('50 Papic credits per booked event','the EVENT receives them when its fee-free booking locks',sw('lu',on,'launchusers'))}
+    ${row('Credits per booking','admin-editable · idempotent per order',fld('50'))}
+    ${row('Gives · to whom · since','50 credits · the host’s event · Oct 9','')}
+    ${row('Count so far','1,240 events · 62,000 credits given','<span class="amt" data-count="62,000">62,000</span>')}
+    ${row('Ends when','with the fee — the 2,000th booking · 5 %-of-fee grant returns','')}
+    ${row('Anything else for users','nothing decided (L4823–4825) — owner question 2','<span class="tag">decided: no</span>')}
+    ${fold('wu','Who reads this','couple: Papic credits · Suppliers › Booked row · Home',`${row('Event › Papic credits','"50 free · launch offer"','')}${row('Suppliers › Booked row','"booking fee waived · launch offer"','')}${row('Home / Budget','fee line ₱0 when shown','')}${row('Supplier Event Hub › Papic','34 · the same grant','')}`)}
   </div>
-  <p class="note">Numbers are live reads: used = count of fee-free bookings; a failed read shows "couldn't load", never 0. Changes save as a draft; Apply shows who is affected first.</p>`;
+  <p class="note">Both halves read one counter (count of fee-free bookings). A switch flips through the confirm step naming who is affected. A failed read shows "couldn't load" on every reader, never "free".</p>`;
 };
 
 /* CATALOGUE — fix a wrong price (two-admin) */
@@ -656,15 +683,15 @@ SCREENS.partners=()=>`
   <div class="rows">${na('Lumina Studio ↔ Pop & Party Co.','asked 2 d ago',confirmBtn('ok','check','Approve','verify'),{dots:'Reject…'})}</div>`;
 
 /* HEADING PAGES under More — every shipped page has a row (3 taps from Work) */
-SCREENS.content=()=>`<div class="rows" style="margin-top:8px">${row('Categories &amp; event types','16 groups · 80 categories · 222 services · 2 requests','<span class="pill warn">2</span>'+go,{ic:'layers',go:'categories'})}${row('Articles · the Journal','12 · 1 draft',go,{ic:'doc'})}${row('Features page','what /features says we ship',go,{ic:'star'})}${row('FAQs &amp; help','help-centre articles · tickets stay on Work',go,{ic:'chat'})}</div>`;
+SCREENS.content=()=>`<div class="rows" style="margin-top:8px">${row('Categories &amp; event types','16 groups · 80 categories · 222 services · 2 requests','<span class="pill warn">2</span>'+go,{ic:'layers',go:'categories'})}${row('Articles · the Journal','12 · 1 draft',go,{ic:'doc',go:'articles'})}${row('Features page','what /features says we ship',go,{ic:'star'})}${row('FAQs &amp; help','help-centre articles · tickets stay on Work',go,{ic:'chat'})}</div>`;
 SCREENS.categories=()=>`
-  <div class="eyebrow" style="margin-top:12px">${sel(['Supplier categories','Event types','Religions'],'Supplier categories')}</div>
+  <div class="eyebrow" style="margin-top:12px">${sel(['Supplier categories','Event types','Religions'],'Supplier categories')}<span class="n"><button class="btn t-grey sm" data-go="eventtypes">${I.cal}<span class="lbl">Event types</span></button></span></div>
   <div class="rows">
     ${row('Venues &amp; churches','5 categories · — suppliers',go)}${row('Catering &amp; cake','4 categories',go)}
     ${fold('bc','Booths, carts &amp; bars','15 categories · 1 request',`${row('Mobile Bar','2 services',go)}${row('Food Cart','9 services · 1 request','<span class="pill warn">1</span>'+go)}${na('“Sorbetero” · Mang Kanor’s','we think: Sorbetes cart',confirmBtn('ok','check','Approve','cat'),{dots:'Map to ▾ · Decline ▾'})}${row('Dessert','1 service',go)}`,{r:'<span class="pill warn">1</span>'})}
     ${row('Styling, flowers &amp; lights','9 categories',go)}${row('Hosts, music &amp; program','11 categories',go)}${row('Photo &amp; video','3 categories',go)}${row('Attire, hair &amp; make-up','9 categories',go)}
   </div><p class="note">The approved one-page Categories design (2026-10-02), unchanged — a request is a row where it belongs.</p>`;
-SCREENS.templates=()=>`<div class="rows" style="margin-top:8px">${row('Event Hub themes','11 · 3 free · 8 pro',go,{ic:'pic',go:'themes'})}${row('Reveal Studio','openings · 5 templates · video review',go,{ic:'play',go:'reveal'})}${row('Patiktok templates','9',go,{ic:'play'})}${row('Email &amp; notification','which alerts email you · 14 templates',go,{ic:'bell'})}${row('Guest-import sheet','the sheet couples download',go,{ic:'doc'})}</div>`;
+SCREENS.templates=()=>`<div class="rows" style="margin-top:8px">${row('Event Hub themes','11 · 3 free · 8 pro',go,{ic:'pic',go:'themes'})}${row('Add to the Event Hub','themes · loops · openings · songs · videos',go,{ic:'plus',go:'hubadd'})}${row('Reveal Studio','openings · 5 templates · video review',go,{ic:'play',go:'reveal'})}${row('Patiktok templates','9',go,{ic:'play'})}${row('Email &amp; notification','which alerts email you · 14 templates',go,{ic:'bell'})}${row('Guest-import sheet','the sheet couples download',go,{ic:'doc'})}</div>`;
 SCREENS.themes=()=>`
   <div class="eyebrow" style="margin-top:12px">Event Hub themes ${sel(['Everything · 11','Live · 11','Draft · 0','Retired · 0'],'Everything · 11')}</div>
   <div class="rows">${row('Debutante','Pro · debut · live just now','<span class="pill ok">live</span>'+btn('grey','pen','Edit',false,'data-act="toast" data-msg="Opens the theme maker"','sm'))}${row('Classic','Free · every event','<span class="pill ok">live</span>'+btn('grey','pen','Edit',false,'data-act="toast" data-msg="Opens the theme maker"','sm'))}${row('Modern','Free · every event','<span class="pill ok">live</span>'+btn('grey','pen','Edit',false,'','sm'))}${row('Rustic','Pro · every event','<span class="pill ok">live</span>'+btn('grey','pen','Edit',false,'','sm'))}${row('Cinderella','Pro · wedding · debut','<span class="pill ok">live</span>'+btn('grey','pen','Edit',false,'','sm'))}</div><p class="note">Duplicate is the fastest way to a new theme. Retiring keeps every couple who chose it on it.</p>`;
@@ -679,8 +706,8 @@ SCREENS.reveal=()=>`
   <div class="eyebrow">Save-the-Date videos<span class="n">1 to review</span></div>
   <div class="rows">${na('Cruz wedding · 14 s clip','in review · nothing else can let it play',btn('grey','eye','Watch',false,'data-act="toast" data-msg="Plays the sealed clip"','sm'),{dots:'Approve · Reject…'})}</div>
   <p class="note">Every switch here is for everyone: the confirm step names how many hubs it touches.</p>`;
-SCREENS.media=()=>`<div class="rows" style="margin-top:8px">${row('Front door media','6 looping videos · 14 images',go,{ic:'play'})}${row('Songs','312 · 40 curated',go,{ic:'play'})}${row('Mood board library','418 · 1 to approve','<span class="pill warn">1</span>'+go,{ic:'pic'})}${row('All creations','mood boards · Patiktok · recaps · takedown lever',go,{ic:'pic'})}${row('Papic storage','1.2 TB · tiles backfilled',go,{ic:'pic'})}</div>`;
-SCREENS.growth=()=>`<div class="rows" style="margin-top:8px">${row('Front door','the public setnayan.com home',go,{ic:'globe'})}${row('SEO &amp; GEO','42 pages · 3 warnings',go,{ic:'chart'})}${row('Referrals','on · 1,012 redemptions',go,{ic:'gift'})}${row('Real Stories','9 featured',go,{ic:'doc'})}${row('Spotlight Awards','front door strip on',go,{ic:'star'})}${row('Social queue','3 scheduled · 0 failed',go,{ic:'send'})}${row('Announcements','talk to users · signals',go,{ic:'bell'})}</div>`;
+SCREENS.media=()=>`<div class="rows" style="margin-top:8px">${row('Front door media','5 pillar videos · hero · 14 images',go,{ic:'play',go:'videoadd'})}${row('Songs','312 · 40 curated',go,{ic:'play'})}${row('Mood board library','418 · 1 to approve','<span class="pill warn">1</span>'+go,{ic:'pic'})}${row('All creations','mood boards · Patiktok · recaps · takedown lever',go,{ic:'pic'})}${row('Papic storage','1.2 TB · tiles backfilled',go,{ic:'pic'})}</div>`;
+SCREENS.growth=()=>`<div class="rows" style="margin-top:8px">${row('Front door','the public setnayan.com home',go,{ic:'globe'})}${row('SEO &amp; GEO','42 pages · 3 warnings',go,{ic:'chart'})}${row('Referrals','on · 1,012 redemptions',go,{ic:'gift'})}${row('Real Stories','9 featured',go,{ic:'doc'})}${row('Spotlight Awards','front door strip on',go,{ic:'star'})}${row('Promotions','feature · post · announce · boost',go,{ic:'star',go:'promotions'})}${row('Social queue','3 scheduled · 0 failed',go,{ic:'send',go:'promotions'})}</div>`;
 SCREENS.numbers=()=>`
   <div class="eyebrow" style="margin-top:12px">Numbers ${sel(['Last 28 days','This week','This year'],'Last 28 days')}</div>
   <div class="nums">${num(312,'sign-ups','numbers')}${num(48,'bookings','numbers')}${num('₱61k','revenue','numbers')}</div>
@@ -691,12 +718,13 @@ SCREENS.numbers=()=>`
     ${row('Funnels','visit → event → booking',go,{ic:'chart'})}
     ${row('Demand','by month and region · intelligence',go,{ic:'chart'})}
     ${row('Costs','Live Watch channels · Papic storage · expenses',go,{ic:'money'})}
+    ${row('Reports','receipts · money · pricing · CSV',go,{ic:'doc',go:'reports'})}
     ${row('Offline daemon · interconnections · browser blocks','wiring',go,{ic:'bolt'})}
   </div>
-  <p class="note">Uptime and error rate read "—" until wired — never a confident zero.</p>`;
+  <p class="note">Not measured yet: Uptime · Error rate · API speed · Web Vitals — they read "—", never a confident zero.</p>`;
 SCREENS.privacy=()=>`<div class="rows" style="margin-top:8px">${row('Deletions due','1 · Katrina · 6 h left','<span class="pill wine">1</span>'+go,{ic:'trash',go:'work'})}${row('Data-export requests','1 · Cale · due Oct 30',go,{ic:'send',go:'work'})}${row('Event removals','0 asked',go,{ic:'cal'})}${row('NPC filing','controls · checklist 18 of 22 · data sheet',go,{ic:'shield'})}${row('Who viewed whose data','access log',go,{ic:'eye'})}</div><p class="note">The owner is the DPO. The two rows with counts are the same rows as on Work.</p>`;
 SCREENS.setup=()=>`<div class="rows" style="margin-top:8px">${row('Onboarding','music · steps per event type',go,{ic:'play'})}${row('Setnayan AI brain','chunks · unanswered',go,{ic:'bolt'})}${row('Search memory','what the search box learned · 1 phrase',go,{ic:'search'})}${row('Screens','Root map · read-only',go,{ic:'layers'})}${row('Demo suppliers','seed · regenerate · hide one',go,{ic:'people'})}</div>`;
-SCREENS.admin=()=>`<div class="rows" style="margin-top:8px">${row('Switches','for-everyone settings · 12',go,{ic:'bolt',go:'switches'})}${row('Our accounts','BDO · GCash',go,{ic:'money',go:'accounts'})}${row('Business details','name · TIN · address · VAT',go,{ic:'doc'})}${row('Integrations','Resend · Maya · Google · TikTok',go,{ic:'key'})}${row('Secrets','rotate · write-only',go,{ic:'lock'})}${row('Team &amp; permissions','2 admins · every page name is a permission',go,{ic:'people'})}${row('Menus &amp; icons','rename or hide any slot · 190',go,{ic:'layers'})}${row('Admin log','who did what',go,{ic:'doc'})}</div>`;
+SCREENS.admin=()=>`<div class="rows" style="margin-top:8px">${row('Switches','for-everyone settings · 12',go,{ic:'bolt',go:'switches'})}${row('Our accounts','BDO · GCash',go,{ic:'money',go:'accounts'})}${row('Business details','name · TIN · address · VAT',go,{ic:'doc'})}${row('Integrations','Resend · Maya · Google · TikTok',go,{ic:'key'})}${row('Secrets','rotate · 2 due',go,{ic:'lock',go:'secrets'})}${row('Team &amp; permissions','2 admins · every page name is a permission',go,{ic:'people'})}${row('Menus &amp; icons','rename or hide any slot · 190',go,{ic:'layers'})}${row('Admin log','who did what',go,{ic:'doc'})}</div>`;
 
 /* SEARCH — the field in the thumb zone, results above */
 SCREENS.search=()=>`
@@ -711,10 +739,153 @@ SCREENS.search=()=>`
     <div class="rows">${row('Ask Setnayan AI','“show me the prices of papic” works · routes, never acts',btn('grey','bolt','Ask',false,'data-act="toast" data-msg="Takes you to Pricing › Papic"','sm'))}</div>
   </div>`;
 
+
+/* ====== the owner's jobs 1–22 (added pass 2) ====== */
+SCREENS.catadd=()=>`
+  <div class="head"><h1>New category</h1><div class="f">Categories &amp; event types · saves on Create</div></div>
+  <div class="rows">${row('Name','',fld('Sorbetes cart'))}${row('Group',sel(['Booths, carts & bars','Catering & cake','Venues & churches','Styling, flowers & lights'],'Booths, carts & bars'))}${row('Picture & icon','',btn('grey','pic','Choose',false,'data-act="toast" data-msg="Picker"','sm'))}${row('Shows for',sel(['Every event type','Weddings only','Pick…'],'Every event type'))}${row('Search words','sorbetero · dirty ice cream',btn('grey','plus','Add',false,'data-act="toast" data-msg="Word added"','sm'))}${row('Book by',sel(['2 months before','1 month before','No deadline'],'2 months before'))}${row('Hidden from couples','',sw('hc',false,'Hidden'))}</div>`;
+SCREENS.eventtypes=()=>`
+  <div class="eyebrow" style="margin-top:12px">Event types ${sel(['All · 16','Live · 12','Draft · 3','Retired · 1'],'All · 16')}</div>
+  <div class="rows">
+    ${row('Wedding','Celebrations · 9 questions · 14 deadlines · religion asked','<span class="pill ok">live</span>'+go,{go:'eventtypeadd'})}
+    ${row('Debut','Celebrations · 6 questions','<span class="pill ok">live</span>'+go,{go:'eventtypeadd'})}
+    ${row('Christening','Faith · 5 questions · religion asked','<span class="pill ok">live</span>'+go,{go:'eventtypeadd'})}
+    ${row('Corporate','Work · 4 questions','<span class="pill ok">live</span>'+go,{go:'eventtypeadd'})}
+    ${row('Wake','Faith · 3 questions · quiet tone','<span class="pill ok">live</span>'+go,{go:'eventtypeadd'})}
+    ${row('Reunion','Get-togethers · draft','<span class="pill warn">draft</span>'+go,{go:'eventtypeadd'})}
+  </div>
+  <p class="note">Admin creates event TYPES (createEventTypeRoster · setEventTypeStatus · updateEventTypePresentation — exists). Admin cannot create an EVENT for a user — not in code (NEW; not recommended: the host creates, admin fixes).</p>`;
+SCREENS.eventtypeadd=()=>`
+  <div class="head"><h1>Reunion <span class="tag warn">draft</span></h1><div class="f">Event type · what the shipped editor sets</div></div>
+  <div class="rows">${row('Name',fld('Reunion'))}${row('Group',sel(['Get-togethers','Celebrations','Faith','Work','Thin events'],'Get-togethers'))}${row('Icon &amp; picture','',btn('grey','pic','Choose',false,'','sm'))}${row('Words','"host" · "guests" · "Will you join us?"',go)}${row('Questions asked','4 refinements · options',go)}${row('Planning deadlines','3 · book venue by…',go)}${row('Religion asked','',sw('ra',false,'Religion asked'))}${row('Supplier categories','scoped · 6 of 80',go)}${row('Status',sel(['Draft','Live','Retired'],'Draft'))}</div>`;
+SCREENS.hubadd=()=>`
+  <div class="eyebrow" style="margin-top:12px">Add to the Event Hub<span class="n">what admin can add today</span></div>
+  <div class="rows">
+    ${row('Event Hub themes','11 · the ten are code (lib/invite-themes) · theme maker',NEW+btn('grey','plus','Add',false,'data-act="toast" data-msg="Theme maker · NEW build"','sm'),{go:'themes'})}
+    ${row('Reveal openings','5 · code-only union type · a 6th needs a build',NEW+'<span class="pill">code</span>',{go:'reveal'})}
+    ${row('Video loops (◆ backgrounds)','theme loops are code + files today',NEW+btn('brand','plus','Add',false,'data-go="videoadd"','sm'))}
+    ${row('Front-door videos','5 pillar slots + hero · upload · publish',EX+btn('brand','plus','Add',false,'data-go="videoadd"','sm'))}
+    ${row('Patiktok templates','9 · upload a template',EX+btn('brand','plus','Add',false,'data-act="toast" data-msg="Template upload"','sm'))}
+    ${row('Songs','312 · add · merge · curate',EX+btn('brand','plus','Add',false,'data-act="toast" data-msg="Add a song"','sm'))}
+    ${row('Mood board library','418 · upload · colour ranges · approve',EX+btn('brand','plus','Add',false,'data-act="toast" data-msg="Upload an asset"','sm'))}
+    ${row('Event types','16 · questions · deadlines',EX+go,{go:'eventtypes'})}
+  </div>
+  <p class="note">NEW = not an upload today; the row says "code" instead of a fake Add. Reveal: a new opening = code (lib/reveal-config-pure.ts). Loops: smallest build = a scope column on homepage_background_videos (front-door · hub-loop) + name · poster · is_pro.</p>`;
+SCREENS.videoadd=()=>`
+  <div class="head"><h1>Add a video</h1><div class="f">One step for both kinds · draft until Publish</div></div>
+  <div class="rows">
+    ${row('File','MP4 · ≤ 100 MB · loops',btn('grey','pic','Choose',false,'data-act="toast" data-msg="File picker"','sm'))}
+    ${row('Poster still','shown while it loads',btn('grey','pic','Choose',false,'','sm'))}
+    ${row('Where it shows',sel(['Front door · pillar slot 3','Front door · hero','Event Hub · theme loop (NEW)'],'Front door · pillar slot 3'))}
+    ${row('Name','',fld('Garden dusk'))}
+    ${row('Free or ◆',sel(['Free','◆ Pro'],'Free'))}
+    ${row('Published','guests see it',sw('vp',false,'Published'))}
+  </div>
+  <div class="rows" style="margin-top:12px">${fail('the current front-door videos',true)}</div>
+  <p class="note">Front-door slots: exists (saveBackgroundVideo · toggleBackgroundVideoPublish) — the "couldn't load" state above is the one it lacks today. Event Hub loops: NEW.</p>`;
+SCREENS.promos=()=>`
+  <div class="eyebrow" style="margin-top:12px">Money off<span class="n">codes · free windows · deals</span></div>
+  <div class="rows">
+    ${row('WELCOME10','10 % · couples · 212 used · no end',sw('c1',true,'WELCOME10'),{go:'codeadd'})}
+    ${row('PAPIC50','₱50 off Papic Pass · 40 used · Dec 31',sw('c2',true,'PAPIC50'),{go:'codeadd'})}
+    ${row('SUPPLIERPRO','first cycle free · suppliers · 12 used',sw('c3',true,'SUPPLIERPRO'),{go:'codeadd'})}
+    ${row('Free window · all couples','Save-the-Date free · Dec 1–31 · reason: Christmas',sw('fw',true,'Free window'),{go:'windowadd'})}
+    ${row('Deal · new verified suppliers','Pro free first cycle · since Sep 1 · 31 took it',sw('dl',true,'Deal'),{go:'windowadd'})}
+    ${row('Launch offer','not a promo — its own page',go,{go:'launch'})}
+  </div>
+  <p class="note">Money OFF lives here (Pricing &amp; offers). Visibility (featuring, boosting, posts) lives under Growth › Promotions — never both.</p>`;
+SCREENS.codeadd=()=>`
+  <div class="head"><h1>New code</h1><div class="f">Discount code · exists (discount_codes)</div></div>
+  <div class="rows">${row('Code',fld('WELCOME15'))}${row('For',sel(['Couples','Suppliers','Named people…'],'Couples'))}${row('Takes off',sel(['15 %','₱ amount','First cycle free'],'15 %'))}${row('On',sel(['Everything','Papic Pass','Event Hub Pro','Supplier Pro'],'Everything'))}${row('From · to','',fld('Dec 1 – 31'))}${row('Limit','uses',fld('500'))}${row('Live',sw('cl',true,'Live'))}</div>`;
+SCREENS.windowadd=()=>`
+  <div class="head"><h1>New free window · deal</h1><div class="f">promo_free_windows · exists · reason required</div></div>
+  <div class="rows">${row('Kind',sel(['Free window · couples','Deal · all suppliers','Deal · new verified suppliers'],'Free window · couples'))}${row('What is free',sel(['Save-the-Date','Event Hub Pro','Papic Pass','Supplier Pro (one cycle)'],'Save-the-Date'))}${row('Event dates','couples whose event falls in',fld('any'))}${row('From · to','',fld('Dec 1 – 31'))}${row('Reason','kept in the audit row',fld('Christmas'))}${row('On',sw('wo',true,'On'))}</div>`;
+SCREENS.comp=()=>`
+  <div class="head"><h1>Give a comp</h1><div class="f">To an event or to a supplier · one admin ≤ ₱10,000 · two above</div></div>
+  <div class="rows">${row('To',sel(['Event · Cale & Ice wedding','Supplier · Lumina Studio','Person · Cale Casasola'],S.v==='shop'?'Supplier · Lumina Studio':'Event · Cale & Ice wedding'))}${S.v==='shop'?row('What',sel(['Papic Challenge · 28 d','Pro · 28 d','Branch','Deep Search'],'Papic Challenge · 28 d')):row('What',sel(['Live Watch','Save-the-Date','Papic Pass','Event Hub Pro','Setnayan AI'],'Live Watch'))}${row('Until',sel(['The event','28 days','A date…'],S.v==='shop'?'28 days':'The event'))}${row('Retail value','',`<span class="amt">${S.v==='shop'?'₱12,000':'₱2,500'}</span>`)}${row('Reason','≥ 10 characters',fld(S.v==='shop'?'Verification delay':'Service failed Sep 30'))}${row('Needs','',S.v==='shop'?'<span class="pill warn">second admin</span>':'<span class="pill ok">one admin</span>')}</div>
+  <p class="note">issueCompGrant / revokeCompGrant (events, people) and issueVendorSkuComp → executeVendorSkuComp (suppliers) exist. Gifts &amp; comps lists every one.</p>`;
+SCREENS.articles=()=>`
+  <div class="eyebrow" style="margin-top:12px">Articles · the Journal ${sel(['Live · 12','Draft · 1','All'],'Live · 12')}</div>
+  <div class="rows">${row('Ten questions for your caterer','draft · spotlight: Lumina Studio · free','<span class="pill warn">draft</span>'+go,{go:'article'})}${row('How a Papic day runs','Sep 20 · 1,204 reads','<span class="pill ok">live</span>'+go,{go:'article'})}${row('The 4-week supplier cycle','Sep 2 · sponsored: Pop & Party Co.','<span class="pill ok">live</span>'+go,{go:'article'})}</div>
+  <p class="note">${NEW} Posts are code today (lib/blog.ts); only the supplier SPOTLIGHT on a post is a DB row (journal_vendor_spotlights · free / sponsored · approval). The editor needs a journal_posts table.</p>`;
+SCREENS.article=()=>`
+  <div class="head"><h1>Ten questions for your caterer</h1><div class="f">Draft · the Journal · ${NEW}</div></div>
+  <div class="rows">${row('Title',fld('Ten questions…'))}${row('Address','setnayan.com/journal/…',fld('ten-questions-caterer'))}${row('Summary','one line under the title',go)}${row('Body','1,240 words · edit in place',go)}${row('Cover','',btn('grey','pic','Choose',false,'','sm'))}${row('Supplier spotlight',sel(['Lumina Studio · free','Pop & Party Co. · sponsored','None'],'Lumina Studio · free'))}${row('Status',sel(['Draft','Live','Retired'],'Draft'))}</div>`;
+SCREENS.secrets=()=>`
+  <div class="eyebrow" style="margin-top:12px">Secrets<span class="n">write-only · rotate</span></div>
+  <div class="rows">
+    ${row('RESEND_API_KEY','Vercel · rotated Jul 2 · <b class="warn">98 d · due</b>',confirmBtn('brand','key','Rotate','rotate',false))}
+    ${row('ANTHROPIC_API_KEY','Vercel · rotated Aug 27 · 42 d',btn('grey','key','Rotate',false,'data-confirm="rotate"','sm'))}
+    ${row('SUPABASE_SERVICE_ROLE','DB · rotated Sep 1 · 37 d',btn('grey','key','Rotate',false,'data-confirm="rotate"','sm'))}
+    ${row('R2 keys (4 buckets)','DB · rotated Jun 30 · <b class="warn">100 d · due</b>',btn('grey','key','Rotate',false,'data-confirm="rotate"','sm'))}
+    ${row('VAPID (push)','build-time · set',btn('grey','check','Mark rotated',false,'data-act="toast" data-msg="Marked rotated"','sm'))}
+    ${row('Apple secret','due Dec 8–11 · reminder on Work when due','<span class="pill">Dec</span>')}
+  </div>
+  <p class="note">Exists (updateVercelSecret · updateDbSecret · clearDbSecret · markRotated · redeployProduction · runReencryptSweep). Values are never shown. "Rotating backend data" — if you mean demo data, that is Set up › Demo suppliers (owner question 3).</p>`;
+SCREENS.reports=()=>`
+  <div class="eyebrow" style="margin-top:12px">Reports<span class="n">files you can send</span></div>
+  <div class="rows">
+    ${row('Receipts by month','October · 9 · CSV',EX+btn('grey','doc','Download',false,'data-act="toast" data-msg="receipts-2026-10.csv"','sm'))}
+    ${row('Money by month','received · refunds · fees',NEW+btn('grey','doc','Download',false,'','sm'))}
+    ${row('Legacy pricing report','service_catalog · CSV',EX+btn('grey','doc','Download',false,'','sm'))}
+    ${row('A person’s data','from their page · logged',EX+go,{go:'people'})}
+    ${row('Admin log','who did what · CSV',NEW+btn('grey','doc','Download',false,'','sm'))}
+    ${row('NPC data sheet','PDF packet',EX+btn('grey','doc','Download',false,'','sm'))}
+  </div>
+  <p class="note">Reports about PEOPLE (reported photos, chapters) are Work › Safety rows, not here.</p>`;
+SCREENS.ask=()=>`
+  <div class="hits">
+    <div class="eyebrow">Prepared for you<span class="n">you confirm</span></div>
+    <div class="rows">${na('Refund ₱147 to Katrina Ocampo','GCash · save-the-date cancelled · under ₱25,000',confirmBtn('ok','refund','Refund','refund'),{ai:'found the order · amount matches the receipt · one admin',aiev:'Order S89O-3PQ9'})}</div>
+    <div class="eyebrow">Pages</div>
+    <div class="rows">${row('Money › Refunds','1 owed',go,{go:'money'})}${row('Katrina Ocampo','person · 1 event',go,{go:'person'})}</div>
+    <div class="eyebrow">What this box can do</div>
+    <div class="rows">${row('Find a page or a record','317 jobs · people · orders · prices',EX)}${row('Fill a form for you','202 form jobs · ?admin_ask= · you press',EX)}${row('Prepare a money action for your confirm','never acts · couldn’t read says so',NEW)}</div>
+  </div>`;
+SCREENS.venues=()=>`
+  <div class="eyebrow" style="margin-top:12px">Venues ${sel(['All · 214','Churches · 61','Reception · 140','Needs a pin · 3'],'All · 214')}</div>
+  <div class="rows">
+    ${row('Manila Hotel','Reception · Manila · pinned · 3 events',go,{go:'venueedit'})}
+    ${row('San Agustin Church','Church · Intramuros · pinned · 9 events',go,{go:'venueedit'})}
+    ${row('Tagaytay Highlands','Reception · Tagaytay · <b class="warn">needs a pin</b>',go,{go:'venueedit'})}
+    ${row('Shangri-La Makati','Reception · Makati · pinned · 12 events',go,{go:'venueedit'})}
+  </div>
+  <p class="note">The data-list pattern: list · search in the thumb row · ＋ Add · a row opens the edit sheet (saves on close) · Remove with confirm · "couldn't load" in place.</p>`;
+SCREENS.venueedit=()=>`
+  <div class="head"><h1>Manila Hotel</h1><div class="f">Venue · saves when you leave a field</div></div>
+  <div class="rows">${row('Name',fld('Manila Hotel'))}${row('Kind',sel(['Reception','Church','Both'],'Reception'))}${row('Address','One Rizal Park, Manila',go)}${row('Pin','14.5806, 120.9742 · set',btn('grey','pic','Move',false,'','sm'))}${row('Photo','',btn('grey','pic','Change',false,'','sm'))}${row('Capacity','',fld('800'))}${row('Used by','3 events',go,{go:'people'})}${row('Remove','from the directory',confirmBtn('danger','trash','Remove','venuedel',false))}</div>`;
+SCREENS.benchmarks=()=>`
+  <div class="eyebrow" style="margin-top:12px">Budget benchmarks ${sel(['Wedding · Metro Manila','Wedding · Cebu','Debut · Metro Manila'],'Wedding · Metro Manila')}</div>
+  <div class="rows">
+    ${row('Venue','typical 30 % · ₱90k – ₱450k',fld('30 %'))}
+    ${row('Catering','typical 25 % · ₱300 – ₱2,500 a head',fld('25 %'))}
+    ${row('Photo &amp; video','typical 12 %',fld('12 %'))}
+    ${row('Styling &amp; flowers','typical 10 %',fld('10 %'))}
+    ${row('Attire','typical 8 %',fld('8 %'))}
+    ${row('Bands','Modest · Mid · Lavish · set the cut-offs',go)}
+    ${row('Allocation engine','how the planner splits a total',go)}
+  </div>
+  <p class="note">Same pattern as Venues: edit in place, saves on leave; a failed read locks the fields (never 0 / 0).</p>`;
+SCREENS.promotions=()=>`
+  <div class="eyebrow" style="margin-top:12px">Promotions<span class="n">visibility · not money off</span></div>
+  <div class="rows">
+    ${row('Spotlight Awards','front door strip · recomputed weekly',EX+btn('grey','star','Feature',false,'data-act="toast" data-msg="Feature on the front door · add by hand"','sm'))}
+    ${row('Journal spotlights','on a post · free or sponsored (paid)',EX+btn('grey','star','Attach',false,'data-act="toast" data-msg="Attach to a post · approval"','sm'))}
+    ${row('Real Stories','9 featured · rank',EX+btn('grey','star','Feature',false,'','sm'))}
+    ${row('Storytellers','featured chapters · rank',EX+btn('grey','star','Feature',false,'','sm'))}
+    ${row('Social queue','3 scheduled · 0 failed',EX+btn('brand','send','Post',false,'data-act="toast" data-msg="Post now · schedule"','sm'))}
+    ${row('Announcements','to users · suppliers · the Setnayan thread',NEW+btn('brand','send','Write',false,'data-act="toast" data-msg="Audience ▾ · text · Send"','sm'))}
+    ${row('Referrals','on · 1,012 redemptions',EX+sw('rf',true,'Referrals'))}
+    ${row('Founding suppliers','3 marked · badge on their page',EX+go,{go:'people'})}
+    ${row('Service-card Boost','paid · spec 2026-09-09 · not in code',NEW+'<span class="pill">spec</span>')}
+    ${row('Launch-offer banner','on supplier Today · with A-PR2',NEW+go,{go:'launch'})}
+    ${row('Money off (codes · windows · deals)','lives under Pricing & offers',go,{go:'promos'})}
+  </div>`;
+
 /* ---------------- shell / bar / lower ---------------- */
 const BAR=[['work','Work','work'],['money','Money','money'],['people','People','people'],['more','More','more']];
-const SUB={payment:['money','₱2,499'],person:['people','Person'],shop:['people','Supplier'],event:['people','Event'],help:['work','Help'],report:['work','Reported photo'],problems:['work','Problems'],approvals:['work','Approvals'],pricing:['more','Pricing & offers'],launch:['more','Launch offer'],catalogue:['more','Catalogue'],switches:['more','Switches'],accounts:['money','Our accounts'],fees:['money','Fees owed'],receipts:['money','Receipts'],codes:['more','Discount codes'],gifts:['people','Gifts & comps'],docs:['people','ID documents'],partners:['people','Partnerships'],content:['more','Content'],categories:['more','Categories'],templates:['more','Templates'],themes:['more','Event Hub themes'],reveal:['more','Reveal Studio'],media:['more','Media'],growth:['more','Growth'],numbers:['more','Numbers'],privacy:['more','Privacy'],setup:['more','Set up'],admin:['more','Admin'],search:['work','Search']};
-const BACK={payment:'money',person:'people',shop:'people',event:'people',help:'work',report:'work',problems:'work',approvals:'work',pricing:'more',launch:'pricing',catalogue:'pricing',switches:'admin',accounts:'money',fees:'money',receipts:'money',codes:'pricing',gifts:'people',docs:'people',partners:'people',content:'more',categories:'content',templates:'more',themes:'templates',reveal:'templates',media:'more',growth:'more',numbers:'more',privacy:'more',setup:'more',admin:'more',search:'work'};
+const SUB={payment:['money','₱2,499'],person:['people','Person'],shop:['people','Supplier'],event:['people','Event'],help:['work','Help'],report:['work','Reported photo'],problems:['work','Problems'],approvals:['work','Approvals'],pricing:['more','Pricing & offers'],launch:['more','Launch offer'],catalogue:['more','Catalogue'],switches:['more','Switches'],accounts:['money','Our accounts'],fees:['money','Fees owed'],receipts:['money','Receipts'],codes:['more','Discount codes'],gifts:['people','Gifts & comps'],docs:['people','ID documents'],partners:['people','Partnerships'],content:['more','Content'],categories:['more','Categories'],templates:['more','Templates'],themes:['more','Event Hub themes'],reveal:['more','Reveal Studio'],media:['more','Media'],growth:['more','Growth'],numbers:['more','Numbers'],privacy:['more','Privacy'],setup:['more','Set up'],admin:['more','Admin'],search:['work','Search'],catadd:['more','New category'],eventtypes:['more','Event types'],eventtypeadd:['more','Event type'],hubadd:['more','Add to the Event Hub'],videoadd:['more','Add a video'],promos:['more','Money off'],codeadd:['more','New code'],windowadd:['more','New window'],comp:['people','Give a comp'],articles:['more','Articles'],article:['more','Article'],secrets:['more','Secrets'],reports:['more','Reports'],ask:['work','Ask'],venues:['people','Venues'],venueedit:['people','Venue'],benchmarks:['more','Budget benchmarks'],promotions:['more','Promotions']};
+const BACK={payment:'money',person:'people',shop:'people',event:'people',help:'work',report:'work',problems:'work',approvals:'work',pricing:'more',launch:'pricing',catalogue:'pricing',switches:'admin',accounts:'money',fees:'money',receipts:'money',codes:'pricing',gifts:'people',docs:'people',partners:'people',content:'more',categories:'content',templates:'more',themes:'templates',reveal:'templates',media:'more',growth:'more',numbers:'more',privacy:'more',setup:'more',admin:'more',search:'work',catadd:'categories',eventtypes:'categories',eventtypeadd:'eventtypes',hubadd:'templates',videoadd:'hubadd',promos:'pricing',codeadd:'promos',windowadd:'promos',comp:'people',articles:'content',article:'articles',secrets:'admin',reports:'numbers',ask:'work',venues:'people',venueedit:'venues',benchmarks:'pricing',promotions:'growth'};
 function activeTab(){const s=S.screen;if(s==='more'||s==='avatar')return s==='more'?'more':'work';if(['work','search'].includes(s))return 'work';return (SUB[s]||[s])[0];}
 function renderShell(){
   const sub=SUB[S.screen];
@@ -726,21 +897,34 @@ function renderShell(){
 function renderLower(){
   const s=S.screen;let html='';
   const g=(ic,l,msg)=>`<button class="btn t-grey glass" data-act="toast" data-msg="${msg||l}">${I[ic]}<span class="lbl">${l}</span></button>`;
-  if(s==='work') html=`<div class="search glass" data-go="search">${I.search}Search anything</div>${btn('grey','alert','Problems',false,'data-go="problems"')}`;
-  else if(s==='money') html=`<div class="search glass" data-go="search">${I.search}Name · order · reference</div>${btn('brand','plus','Record',true,'data-confirm="record"')}`;
+  if(s==='money') html=`<div class="search glass" data-go="search">${I.search}Name · order · reference</div>${btn('brand','plus','Record',true,'data-confirm="record"')}`;
   else if(s==='people') html=`<div class="search glass" data-go="search">${I.search}Person · supplier · event</div>${btn('brand','plus','Add',true,'data-act="toast" data-msg="Venue · demo supplier · outside shop"')}`;
   else if(s==='payment') html=`${btn('ok','check','Confirm',true,'data-confirm="pay"')}${g('send','Resend','Asked them to resend')}${g('x','Reject','Reject → cancels the order · asks once')}`;
-  else if(s==='person') html=`${btn('info','chat','Message',true,'data-act="toast" data-msg="Opens a message to Cale"')}${g('eye','View as','View as Cale · read-only · logged')}<button class="btn t-grey glass" data-confirm="ban">${I.ban}<span class="lbl">Actions</span></button>`;
-  else if(s==='shop') html=`${btn('ok','check','Approve',true,'data-confirm="verify"')}${g('chat','Message','Message Ana')}${g('x','Reject','Reject → tells them what to fix')}`;
+  else if(s==='person') html=`${btn('info','chat','Message',true,'data-act="toast" data-msg="Opens a message to Cale"')}<button class="btn t-grey glass" data-sheet="fix">${I.tools}<span class="lbl">Fix it</span></button><button class="btn t-grey glass" data-confirm="${S.v==='delete'?'delete':'ban'}">${I.ban}<span class="lbl">Actions</span></button>`;
+  else if(s==='shop') html=`${btn('ok','check','Approve',true,'data-confirm="verify"')}<button class="btn t-grey glass" data-sheet="fixshop">${I.tools}<span class="lbl">Fix it</span></button>${g('x','Reject','Reject → tells them what to fix')}`;
   else if(s==='event') html=`${btn('info','chat','Message hosts',true,'data-act="toast" data-msg="Message Cale & Ice"')}${g('eye','Event Hub','Opens their Event Hub')}<button class="btn t-grey glass" data-act="toast" data-msg="Force-delete → reason · type the name · 24-h undo">${I.trash}<span class="lbl">Actions</span></button>`;
-  else if(s==='help') html=`<div class="search glass">${I.chat}Edit the reply…</div>${btn('info','send','Send',true,'data-confirm="helpreply"')}`;
+  else if(s==='help') html=`<div class="search glass">${I.chat}Edit the reply…</div>${btn('info','send','Send',true,'data-act="toast" data-msg="Reply sent · Rolando told"')}`;
   else if(s==='report') html=`${btn('danger','eye','Hide photo',true,'data-act="toast" data-msg="Hidden · guest told · Undo"')}${g('x','Dismiss','Dismissed · reporter told')}${g('ban','Block','Block the uploader?')}`;
   else if(s==='launch'&&S.v!=='ended') html=`${btn('ok','check','Apply',true,'data-confirm="launch"')}${g('x','Discard','Draft discarded')}`;
   else if(s==='launch') html=`${btn('brand','play','New window',true,'data-act="toast" data-msg="Opens a new offer with a reason"')}`;
   else if(s==='catalogue') html=`<div class="search glass" data-go="search">${I.search}Search a price</div>${btn('brand','plus','Add',true,'data-act="toast" data-msg="New catalogue row"')}`;
-  else if(s==='search') html=`<div class="search glass typed">${I.search}pending<span style="margin-left:auto;color:var(--mute)">${I.x}</span></div>`;
+  else if(s==='search') html=`<div class="search glass typed">${I.search}pending<span style="margin-left:auto;color:var(--mute)">${I.x}</span></div>${btn('grey','bolt','Ask',false,'data-go="ask"')}`;
   else if(s==='problems') html=`<div class="search glass" data-go="search">${I.search}Search a problem</div>`;
-  else if(s==='categories') html=`<div class="search glass" data-go="search">${I.search}Group · category · service</div>${btn('brand','plus','Add',true,'data-act="toast" data-msg="New category"')}`;
+  else if(s==='categories') html=`<div class="search glass" data-go="search">${I.search}Group · category · service</div>${btn('brand','plus','Add',true,'data-go="catadd"')}`;
+  else if(s==='catadd') html=`${btn('brand','plus','Create',true,'data-confirm="catadd"')}${g('x','Discard','Discarded')}`;
+  else if(s==='eventtypes') html=`<div class="search glass" data-go="search">${I.search}Event type</div>${btn('brand','plus','Add',true,'data-go="eventtypeadd"')}`;
+  else if(s==='eventtypeadd') html=`${btn('brand','plus','Create',true,'data-confirm="eventtypeadd"')}${g('x','Discard','Discarded')}`;
+  else if(s==='videoadd') html=`${btn('brand','plus','Upload',true,'data-act="toast" data-msg="Uploading · publish when ready"')}${g('x','Discard','Discarded')}`;
+  else if(s==='promos') html=`<div class="search glass" data-go="search">${I.search}Code · window</div>${sel(['New ▾','Discount code','Free window','Supplier deal'],'New ▾','glass')}`;
+  else if(s==='codeadd') html=`${btn('brand','plus','Create',true,'data-confirm="codeadd"')}${g('x','Discard','Discarded')}`;
+  else if(s==='windowadd') html=`${btn('brand','plus','Open',true,'data-confirm="windowadd"')}${g('x','Discard','Discarded')}`;
+  else if(s==='comp') html=`${btn('ok','gift','Give',true,`data-confirm="${S.v==='shop'?'compshop':'compgive'}"`)}${g('x','Cancel','Cancelled')}`;
+  else if(s==='articles') html=`<div class="search glass" data-go="search">${I.search}Article</div>${btn('brand','plus','Write',true,'data-go="article"')}`;
+  else if(s==='article') html=`${g('eye','Preview','Preview')}${btn('brand','send','Publish',true,'data-confirm="articlepub"')}`;
+  else if(s==='secrets') html=`${btn('brand','play','Redeploy',false,'data-act="toast" data-msg="Production redeploy started"')}${g('key','Re-encrypt sweep','Sweep · 0 rows left')}`;
+  else if(s==='ask') html=`<div class="search glass typed">${I.bolt}refund katrina 147<span style="margin-left:auto;color:var(--mute)">${I.x}</span></div>`;
+  else if(s==='venues') html=`<div class="search glass" data-go="search">${I.search}Venue · city</div>${btn('brand','plus','Add',true,'data-go="venueedit"')}`;
+  else if(s==='benchmarks') html=`<div class="search glass" data-go="search">${I.search}Category</div>${btn('grey','undo','Reset to typical',false,'data-act="toast" data-msg="Reset to the typical split?"')}`;
   else if(s==='approvals') html=`${btn('brand','plus','New request',true,'data-act="toast" data-msg="Promote admin · grant · account change"')}`;
   $('#lower').innerHTML=html;h.classList.toggle('lower-hide',!html);
   fitRows();
@@ -753,6 +937,33 @@ function openAvatar(){
   $('#sheet').innerHTML=`<div class="grip"></div><div class="rows">${row('Ice Casasola','iscasasolaii@… · owner · DPO',go,{ic:'people'})}${row('Switches','Reveal · fee · AI paywall · referrals',go,{ic:'bolt',go:'switches'})}${row('Alerts to my phone','push on · digest 7 AM',sw('push',true,'Push'),{ic:'bell'})}${row('Team &amp; permissions','2 admins',go,{ic:'people',go:'admin'})}${row('Admin log','what changed, by whom',go,{ic:'doc',go:'admin'})}${row('Sign out','this device','',{ic:'out',attrs:'data-act="toast" data-msg="Signed out"'})}</div>`;
   h.classList.add('sheet-open');
 }
+function openFix(kind){
+  const P=`<div class="grip"></div><h3>Fix it for Cale</h3><p class="sub">every do-it-myself action in code today · the ones marked NEW are not</p><div class="rows">
+  ${row('Confirm his email','confirmUserEmail',btn('grey','check','Do',false,'data-act="toast" data-msg="Email confirmed"','sm'))}
+  ${row('Temporary password','resetUserPassword · emailed',btn('grey','key','Send',false,'data-act="toast" data-msg="Sent"','sm'))}
+  ${row('Sign out everywhere','forceSignOutUser',btn('grey','out','Do',false,'data-act="toast" data-msg="Signed out everywhere"','sm'))}
+  ${row('Resend Event Hub access','link to his event',btn('grey','send','Send',false,'data-act="toast" data-msg="Sent"','sm'))}
+  ${row('Reopen guest list','Cale & Ice wedding',confirmBtn('grey','undo','Reopen','reopen',false))}
+  ${row('Move an unused service','Papic Pass → his next event (Reyes debut)',NEW+confirmBtn('grey','out','Move','move',false))}
+  ${row('Comp a service','to one of his events',btn('grey','gift','Give',false,'data-go="comp"','sm'))}
+  ${row('Send him his data','export · logged',confirmBtn('grey','send','Send','export',false))}
+  ${row('Freeze the account','temporary · reversible',NEW+confirmBtn('warn','lock','Freeze','freeze',false))}
+  ${row('Act as Cale','not in code · not recommended',NEW+'<span class="pill">no</span>')}
+  </div>`;
+  const S2=`<div class="grip"></div><h3>Fix it for Lumina Studio</h3><p class="sub">every do-it-myself action in code today</p><div class="rows">
+  ${row('Edit the shop','unclaimed shops only · claimed: ask Ana',btn('grey','pen','Edit',false,'data-act="toast" data-msg="Claimed → consent-to-fix"','sm'))}
+  ${row('Set plan','Free · Solo · Pro · Enterprise · reason',btn('grey','star','Set',false,'data-act="toast" data-msg="Plan ▾ in the Plan fold"','sm'))}
+  ${row('Comp an add-on','Papic Challenge · 28 d → second admin',confirmBtn('grey','gift','Comp','compshop',false))}
+  ${row('Move the shop address','corrections mover',btn('grey','globe','Move',false,'data-act="toast" data-msg="Address mover"','sm'))}
+  ${row('Apply a correction','1 waiting · locked field',btn('grey','check','Apply',false,'data-act="toast" data-msg="Applied · Ana told"','sm'))}
+  ${row('Mark contact confirmed','mark_vendor_contact_confirmed',btn('grey','check','Do',false,'','sm'))}
+  ${row('Re-run checks','auto checks · dossier · deep search',btn('grey','play','Run',false,'','sm'))}
+  ${row('Hide the listing','couples stop seeing it · reversible',btn('grey','eye','Hide',false,'data-act="toast" data-msg="Hidden · Undo"','sm'))}
+  ${row('Suspend the shop','fraud suspend / unsuspend',confirmBtn('warn','lock','Suspend','freezeshop',false))}
+  ${row('Founding supplier','mark · remove',sw('fs2',false,'Founding'))}
+  </div>`;
+  $('#sheet').innerHTML=kind==='fixshop'?S2:P;h.classList.add('sheet-open');
+}
 function closeSheet(){h.classList.remove('sheet-open');S.sheet='';}
 
 /* ---------------- tour ---------------- */
@@ -764,18 +975,19 @@ function render(){
   const base=S.screen==='more'||S.screen==='avatar'?'work':S.screen;
   $('#main').innerHTML=(SCREENS[base]||SCREENS.work)();
   renderShell();renderLower();tour();
-  if(S.screen==='more')openMore();else if(S.screen==='avatar')openAvatar();else if(S.sheet.startsWith('confirm:'))openConfirm(S.sheet.split(':')[1]);else closeSheet();
+  if(S.screen==='more')openMore();else if(S.screen==='avatar')openAvatar();else if(S.sheet.startsWith('confirm:'))openConfirm(S.sheet.split(':')[1]);else if(S.sheet==='fix'||S.sheet==='fixshop')openFix(S.sheet);else closeSheet();
   document.querySelectorAll('[data-fill]').forEach(m=>requestAnimationFrame(()=>m.style.width=m.dataset.fill+'%'));
   document.querySelectorAll('[data-count]').forEach(el=>{const raw=el.dataset.count;const n=parseInt(raw.replace(/[^\d]/g,''));if(isNaN(n))return;const pre=raw.match(/^[^\d]*/)[0],suf=raw.match(/[^\d,]*$/)[0];const t0=performance.now(),d=Math.min(900,420+n/300);const step=t=>{const p=Math.min(1,(t-t0)/d),e=1-Math.pow(1-p,3);el.textContent=pre+Math.round(n*e).toLocaleString()+suf;if(p<1)requestAnimationFrame(step);};requestAnimationFrame(step);});
   window.scrollTo(0,0);
 }
 function nav(target){if(!target)return;S.sheet='';if(target.includes(':')){const [a,b]=target.split(':');S.screen=a;S.v=b;}else{S.screen=target;if(!['work'].includes(target))S.v='';}render();}
 document.addEventListener('click',e=>{
-  const t=e.target.closest('[data-tab],[data-go],[data-toggle],[data-sw],[data-act],[data-confirm]');
+  const t=e.target.closest('[data-tab],[data-go],[data-toggle],[data-sw],[data-act],[data-confirm],[data-sheet]');
   if(!t)return;
   if(t.dataset.tab){const k=t.dataset.tab;S.sheet='';if(k==='more'){S.screen='more';}else{S.screen=k;if(k==='work'&&S.v==='done')S.v='';else if(k!=='work')S.v='';}render();return;}
   if(t.dataset.toggle){const k=t.dataset.toggle;const f=t.closest('.fold');const was=f.classList.contains('open');document.querySelectorAll('.fold.open').forEach(x=>{x.classList.remove('open');S.open[x.dataset.fold]=false;});if(!was){f.classList.add('open');S.open[k]=true;}return;}
   if(t.dataset.sw){const k=t.dataset.sw;const on=t.classList.contains('on');if(on&&CONFIRMS[t.dataset.msg]){openConfirm(t.dataset.msg);S.pendingSw=t;return;}t.classList.toggle('on');S.sw[k]=!on;toast((t.dataset.msg||'Setting')+(on?' off':' on')+' · Undo');return;}
+  if(t.dataset.sheet){S.sheet=t.dataset.sheet;openFix(t.dataset.sheet);return;}
   if(t.dataset.confirm){openConfirm(t.dataset.confirm);return;}
   if(t.dataset.act==='back'){S.sheet='';const b=BACK[S.screen]||'work';S.screen=b;S.v='';render();return;}
   if(t.dataset.act==='retry'){S.v='';render();toast('Loaded · every source read');return;}
@@ -827,7 +1039,41 @@ const FRAMES=[
  ['admin','33 · Admin'],
  ['accounts','34 · Our accounts'],
  ['work&tour=1','35 · First-visit tour'],
+ ['categories','36 · (dark set below) — placeholder'],
 ];
+FRAMES.pop();
+const JOBS=[
+ ['catadd','39 · Job 1 · New category — a real form, not a toast'],
+ ['eventtypes','40 · Job 2 · Event types — admin creates TYPES, not events'],
+ ['eventtypeadd','41 · Job 2 · An event type — what the editor sets'],
+ ['hubadd','42 · Job 3 · Add to the Event Hub — exists vs NEW, honestly'],
+ ['videoadd','43 · Job 17 · Add a video — both kinds, one step'],
+ ['promos','44 · Job 4 · Money off — codes · windows · deals (one New ▾)'],
+ ['codeadd','45 · Job 4 · New discount code'],
+ ['windowadd','46 · Job 4 · New free window / supplier deal (reason required)'],
+ ['comp','47 · Job 5 · Give a comp to an event (one admin ≤ ₱10k)'],
+ ['comp&v=shop','48 · Job 5 · Give a comp to a supplier (second admin)'],
+ ['person&sheet=fix','49 · Job 6 · Fix it for a person — every shipped action'],
+ ['shop&sheet=fixshop','50 · Job 6 · Fix it for a supplier'],
+ ['person&sheet=confirm:freeze','51 · Job 12 · Freeze an account (NEW, reversible)'],
+ ['shop&sheet=confirm:freezeshop','52 · Job 12 · Suspend a shop (exists)'],
+ ['articles','53 · Job 14 · Articles (editor NEW — posts are code today)'],
+ ['article','54 · Job 14 · Write · publish an article'],
+ ['secrets','55 · Job 15 · Secrets — rotate · mark · redeploy'],
+ ['reports','56 · Job 9 · Reports — the files you can send'],
+ ['launch','57 · Job 21 · Launch offer — suppliers + users’ events under one counter'],
+ ['launch&v=ending','58 · Job 21 · Launch offer · ending week'],
+ ['work&v=ai','59 · Job 18 · AI assists IN the row — suggest, never act'],
+ ['ask','60 · Job 18 · Ask — prepares the action for your confirm'],
+ ['venues','61 · Job 19 · The data-list pattern — Venues'],
+ ['venueedit','62 · Job 19 · A venue — edit sheet, saves on close, Remove with confirm'],
+ ['benchmarks','63 · Job 19 · The data-list pattern — Budget benchmarks'],
+ ['promotions','64 · Job 20 · Promotions — visibility, one door under Growth'],
+ ['person&sheet=confirm:move&open=mo','65 · Job 22 · Move unused Papic to their NEXT event (NEW)'],
+ ['person&v=nonext&open=mo','65b · Job 22 · No next event yet — "waits for their next event"'],
+ ['event','66 · Jobs 5 · 12 · 21 · An event — comp · hold · launch row'],
+];
+FRAMES.push(...JOBS);
 if(q.has('s')){h.classList.add('app');render();}
 else{
   const mk=(f,dark)=>`<div class="frame"><iframe src="?s=${f[0]}${f[0].includes('tour=')?'':'&tour=0'}${dark?'&dark=1':''}" loading="lazy"></iframe><div class="cap">${f[1]}${dark?' · <b>dark</b>':''}</div></div>`;
