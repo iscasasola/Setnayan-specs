@@ -12,9 +12,9 @@ Nothing here is built. The Suppliers prototype (`prototypes/suppliers_page_2026-
 | Tone | Meaning | Token (light · dark) | Filled (main verb) / outlined (the rest) |
 |---|---|---|---|
 | **Terracotta** | primary — the forward step | `--color-mulberry` (name kept; #C24E25 · #E5794E) — what `ISegmented tone=wine` and `.m-btn-primary` already use | white word on terracotta / terracotta word on 9 % tint |
-| **Green** | confirm · commit · money | new `--color-ok` (#2E7D4F · #6FCF97) — today the app has `text-emerald-*`/`bg-emerald-*` scattered, no token | same |
-| **Blue** | messaging · information | new `--color-info` (#1F6FB2 · #7AB8F0) — close to the shipped `--color-link` slate (#5B6E8C · #9DB2CE); owner call: reuse `--color-link` or add `--color-info` | same |
-| **Amber** | attention — waiting on you | new `--color-warn` (#B26B00 · #F0B45A) — today `amber-*` classes, no token | same |
+| **Green** | confirm · commit · money | new `--color-ok` (#2E7D4F · #6FCF97) — ⚠ **as built #2B744A** (AA on its 9% tint) — today the app has `text-emerald-*`/`bg-emerald-*` scattered, no token | same |
+| **Blue** | messaging · information | new `--color-info` (#1F6FB2 · #7AB8F0) — close to the shipped `--color-link` slate (#5B6E8C · #9DB2CE); owner call: reuse `--color-link` or add `--color-info` — ✅ **built: reused** (`--color-info: var(--color-link)`) | same |
+| **Amber** | attention — waiting on you | new `--color-warn` (#B26B00 · #F0B45A) — ⚠ **as built #965A00** (#B26B00 fails AA on white, 4.20; DECISION_LOG 2026-10-07 "BUTTON-RULE TONES, AS BUILT") — today `amber-*` classes, no token | same |
 | **Red** | destructive — take it back | new `--color-danger` (#B3261E · #F2817A) — today `text-red-600` etc. in 40+ files, no token | same |
 | **Grey** | manage · edit · neutral | `--color-ink` / `--color-mute` (shipped) | ink word on paper |
 ⚠ Book and Pay share green deliberately (both are "commit"); the icon and the word separate them. If Pay must differ, the only honest choice is terracotta — no cross-site standard exists for Pay.
