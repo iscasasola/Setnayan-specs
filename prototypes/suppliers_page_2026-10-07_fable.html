@@ -272,7 +272,9 @@ html.sheet-open .sheet{transform:none;visibility:visible;transition:transform 32
 .bubble.me{margin-left:auto;background:var(--gild-soft)}
 .compose{display:flex;gap:8px;margin-top:12px;align-items:center}
 .compose input{flex:1;border:1px solid var(--line);border-radius:999px;padding:10px 14px;background:var(--paper);font:inherit;color:inherit}
-.cmp{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--line);margin-top:8px;font-size:13px}
+.cmp{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(160px,1fr);gap:0;border-top:1px solid var(--line);margin-top:4px;font-size:13px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.cmp::-webkit-scrollbar{display:none}
+.cmp>div{scroll-snap-align:start}
 .cmp>div{padding:10px 8px;border-right:1px solid var(--line)}
 .cmp>div.twin{background:var(--ok-soft)} .cmp>div:last-child{border-right:0}
 .cmp .h{font-weight:600;font-size:13.5px} .cmp .a{font-weight:600;font-size:17px}
@@ -286,6 +288,8 @@ html.tour-on .tour{display:block}
 
 /* ---------- desktop ---------- */
 @media (min-width:1024px){
+  .swipe-hint{display:none}
+  .cmp{grid-auto-columns:minmax(140px,1fr)}
   .stick{margin:0 -28px;padding-left:28px;padding-right:28px}
   .seg button{min-height:32px}
   .seg{max-width:420px}
@@ -608,7 +612,7 @@ section{padding:18px 0 8px}
         <div class="fitline"><span style="color:${free===priced.length?'var(--ok)':'var(--wine)'}">${free===priced.length?'✓':'!'}</span><span>${priced.length?`${free} of ${priced.length} priced picks are free on ${shortDate(S.date)}`:'Pick suppliers to check your date'}</span><button class="wine" style="margin-left:auto;font-weight:500;white-space:nowrap" data-act="sheet" data-key="date">${S.dateKnown==='day'?'Help me choose ›':'Set the date ›'}</button></div>
         </section>
         <section><h2>All builds</h2><p class="sub">${S.builds.length?'Compared side by side, with the dates each one is free on.':'Save this build to compare it with another.'}</p>
-        ${S.builds.length?`<div class="cmp" style="grid-template-columns:repeat(${S.builds.length+1},minmax(120px,1fr))">${[{name:'This build',picks:Object.assign({},S.picks),cur:true}].concat(S.builds).map((p,i)=>{ const pk=Object.assign({},p.picks); if(p.cur) S.suppliers.filter(s=>s.status==='booked').forEach(s=>pk[s.cat]=s.id);
+        ${S.builds.length?`<p class="mute swipe-hint" style="font-size:12px;margin:0 0 4px">${S.builds.length+1} builds · swipe to compare ›</p><div class="cmp">${[{name:'This build',picks:Object.assign({},S.picks),cur:true}].concat(S.builds).map((p,i)=>{ const pk=Object.assign({},p.picks); if(p.cur) S.suppliers.filter(s=>s.status==='booked').forEach(s=>pk[s.cat]=s.id);
           const items=ks.map(k=>{const s=sup(pk[k]);return s?{k,s}:{k};}); const pr=items.filter(x=>x.s&&priceOf(x.s)!=null); const tot=pr.reduce((a,x)=>a+priceOf(x.s),0); const unp=items.filter(x=>x.s&&priceOf(x.s)==null).length; const dates=['2026-12-12','2026-12-18','2027-01-16'].filter(d=>items.every(x=>!x.s||isFree(x.s,d)));
           return `<div${!p.cur&&twin===p?' class="twin"':''}><div class="h">${esc(p.name)}${!p.cur&&twin===p?' <span class="mute" style="font-weight:400">· this build</span>':''}</div><div class="a">${money$('cmp-'+i,tot)}</div><div class="mute">${unp?`+ ${unp} without a price`:'all priced'}</div><div style="margin-top:8px">${items.map(x=>`<div class="${x.s?'':'mute'}">${cat(x.k).name} · ${x.s?esc(x.s.name.split(' ')[0]):'—'}</div>`).join('')}</div><div class="${dates.length?'ok':'wine'}" style="margin-top:8px">${dates.length?'Free: '+dates.map(shortDate).join(' · '):'No shared free date'}</div><div class="${unp?'mute':'ok'}">${unp?'Buffer: not knowable':'Buffer '+money$('cmpb-'+i,BUDGET-tot)}</div>${p.cur?'':`<span class="acts" style="margin-top:10px"><button data-act="usebuild" data-i="${i-1}">Use</button>${ib('x','Delete this build',`data-act="delbuild" data-i="${i-1}"`)}</span>`}</div>`; }).join('')}</div>`:''}
         </section>`;
