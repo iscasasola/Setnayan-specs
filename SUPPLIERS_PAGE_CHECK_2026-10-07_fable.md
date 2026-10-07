@@ -56,13 +56,13 @@ Prototype: `prototypes/suppliers_page_2026-10-07_fable.html` — a **working mod
 | 6 | **Budget** | 8 · where they are | Booked · in your build · paid · buffer, a meter, and the payment rows. Buffer still refuses while anyone is unpriced. |
 | 7 | **Date & place** | 9 · date and location become more specific | Two ladders that fill as you book: month → day → time, region → city → venue → room size. The line under the title sharpens with them: "December 2026 · Metro Manila" becomes "Fri, Dec 18, 2026 · Seda Vertis North, Quezon City". |
 
-A sticky **Jump to** dropdown navigates and follows the scroll. **Desktop (≥1024 px):** steps 1, 2, 5 on the left; 3, 4, 6, 7 in a sticky right rail; sheets become a right-side panel. **Motion with meaning:** rows and categories open with a height transition, sheets slide, money counts to its new value, "Booked" pops once, ladders fill; all honour `prefers-reduced-motion`.
+**Desktop (≥1024 px):** steps 1, 2, 5 on the left; 3, 4, 6, 7 in a sticky right rail; sheets become a right-side panel. **Motion with meaning:** rows and categories open with a height transition, sheets slide, money counts to its new value, "Booked" pops once, ladders fill; all honour `prefers-reduced-motion`.
 
 **Not in the prototype on purpose (needs an owner call):** the word for a combination — the shipped page says "Picks" (replan flag on) / "Build" (flag off); the owner said *"builds"* today. The prototype says **Build**.
 
 ## Recommendations (one word each)
 
-1. **Retire the five-row "Your planning" menu**; the page is the nine steps in order with a Jump dropdown. (Yes / No)
+1. **Retire the five-row "Your planning" menu**; the page is the nine steps in order, no navigator. (Yes / No)
 2. **The second line of the page is "date · venue"**, both editable in place; the Maker's Details tool loses both. (Yes / No)
 3. **"Cover your event" shows only the starter categories for the event type**, the rest behind one "More categories" dropdown — not the 70-row wall. (Yes / No)
 4. **Compare plans opens in place** (sheet/panel), not as a collapsed section at the bottom. (Yes / No)
@@ -74,7 +74,7 @@ A sticky **Jump to** dropdown navigates and follows the scroll. **Desktop (≥10
 
 | PR | Scope | Touches | Guard |
 |---|---|---|---|
-| 1 | Shell: remove `hidden lg:block` + lazy mount; one scroller with seven `<section id>`s in the journey order; sticky Jump dropdown with scroll-spy; retire `PlanningList` + `planning-list.test.ts`; update `your-team-phone-first.test.ts` / `suppliers-opens-fast.test.ts` to the new order | `services-takeover.tsx`, `page.tsx` | "every section is in the first render on a phone" |
+| 1 | Shell: remove `hidden lg:block` + lazy mount; one scroller with seven `<section id>`s in the journey order; no navigator; retire `PlanningList` + `planning-list.test.ts`; update `your-team-phone-first.test.ts` / `suppliers-opens-fast.test.ts` to the new order | `services-takeover.tsx`, `page.tsx` | "every section is in the first render on a phone" |
 | 2 | Date + venue line: read `event_date` / venue; sheets reuse `DateEditor`, `FindYourDate`, `VenuesEditor`; Maker Details shows read-only "Set when you book your venue in Suppliers" | `services-takeover.tsx`, `launch/_components/details-your-event.tsx` | "the Maker has no date or venue writer" |
 | 3 | Categories in place: starter-scoped rows + "More categories" dropdown; row opens to swipe strip; Find and Add as sheets (reuse `FindSupplierPage` body, `NewManualVendorModal`) | `shortlist-categories.tsx`, `categories/` | "Find a supplier never navigates away" |
 | 4 | Picks + money + date-fit line always visible; Compare as a sheet (`BuildCompare` body) | `build-locked.tsx`, `merkado-budget-lens.tsx`, `build-compare.tsx` | "Buffer still says Not knowable while anyone is unpriced" |
