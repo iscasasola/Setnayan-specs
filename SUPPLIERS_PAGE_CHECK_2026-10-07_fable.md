@@ -78,16 +78,16 @@ No navigator beyond the one segmented control (≤3, the owner's rule). Sheets a
 
 ## Build plan (Opus, after approval — nothing started)
 
-| PR | Scope | Touches | Guard |
-|---|---|---|---|
-| 1 | Shell: remove `hidden lg:block` + lazy mount; one segmented control Find · Build · Booked (`ISegmented`); Find opens on the ring, a category takes the screen; the thumb bar (category dropdown + build pill) and the cart peek; retire `PlanningList` + `planning-list.test.ts`; update `your-team-phone-first.test.ts` / `suppliers-opens-fast.test.ts` | `services-takeover.tsx`, `page.tsx` | "Find paints on a phone's first render; no section is hidden by width" |
-| 2 | Date + venue line: read `event_date` / venue; sheets reuse `DateEditor`, `FindYourDate`, `VenuesEditor`; Maker Details shows read-only "Set when you book your venue in Suppliers" | `services-takeover.tsx`, `launch/_components/details-your-event.tsx` | "the Maker has no date or venue writer" |
-| 3 | Categories in place: starter-scoped rows + "More categories" dropdown; row opens to swipe strip; Find and Add as sheets (reuse `FindSupplierPage` body, `NewManualVendorModal`) | `shortlist-categories.tsx`, `categories/` | "Find a supplier never navigates away" |
-| 4 | Picks + money + date-fit line always visible; Compare as a sheet (`BuildCompare` body) | `build-locked.tsx`, `merkado-budget-lens.tsx`, `build-compare.tsx` | "Buffer still says Not knowable while anyone is unpriced" |
-| 5 | Chats section (threads via the messages read, state pill + next step) + conversation sheet (One Chat Box); Booked rows get "Used across your event" from the shipped feeds (venue → Event Hub/seat plan, coordinator → schedule, photo → Papic) | new `_components/chats-section.tsx`, `team-rows.tsx` | "unread count on the page equals the door badge" |
-| 6 | Supplier sends room size / table sizes: supplier-side field, couple-side "received / Ask them" line | migration (RLS pattern per table), supplier workspace, Suppliers row detail | db-tests + Ugat map |
-| 7 | Tour `customer_suppliers_v2` (3 stops) + motion polish + reduced-motion | `lib/tours.ts`, CSS | `marketplace-mini-tour.test.ts` updated |
+Owner, 2026-10-07: *"this build is not build intensive because we are just adapting everything we already have and refining it properly."* That is what the mapping shows — **nothing on this page is a new mechanism**; every part is a shipped component moved, re-ordered or re-worded. Four PRs, each small.
 
-Then the §5.1 bench batch from the roadmap, unchanged.
+| PR | Adapt what | From (shipped) | New code, honestly |
+|---|---|---|---|
+| 1 | **The shell**: `Find · Build · Booked` as one `ISegmented` (tone wine); one full-width body per mode; the thumb bar (category `PickMenu` + build pill); the cart peek on Add to build; the date · place line under the title. Retire `PlanningList`, the hidden `#team-find-area` and `ChatsDoor`. | `inspector-kit.tsx` (`ISegmented`, `ISeg`), `pick-menu.tsx`, `services-takeover.tsx`, `page.tsx` | the mode state and the cart peek (a toast) — ~1 file |
+| 2 | **Find**: the "Cover your event" ring as rows that unfold in place; under a row, the couple's suppliers then the marketplace, every candidate, rows lined up to compare; the verbs by step (Ask for a quote → Nudge → Read their reply → Add to build · Book); "＋ Add to your event" from the admin taxonomy; "Not needed? Remove X from your event". Pressing a row opens the shop page in a sheet, adapted to the category: badges → service card → proof (fit, rating, reviews, photos by event, type · venue · month) → the rest of their portfolio with "Ask about X ›". | `shortlist-categories.tsx` (ring, folders, cards' verbs, `NewManualVendorModal`), `categories/page.tsx ?c=` (the list + Filter), `contact-shortlist-vendor-button.tsx`, `/v/[slug]/page.tsx` (shop), `ServiceCardFace`, `lib/vendor-badges.ts` + `vendor-badge-row.tsx`, `trusted-circle-badge.tsx`, `vendors/[vendorId]/review`, the "also covers" bench rule | the category-scoped view of the shop page (a prop: which category first) and "Ask about X" (one more `contact-shortlist-vendor` call) |
+| 3 | **Build + Booked**: `This build` / `All builds` with the owner's verbs; Booked rows with "Used across your event"; Budget with the FINAL's rows. | `build-locked.tsx`, `build-compare.tsx`, `team-rows.tsx`, `merkado-budget-lens.tsx`, `workspace?tab=payments` | the "Used across your event" line (a static map by category) |
+| 4 | **Date · place + the tour**: the date and place sheets (ladders) from the Maker's editors; room size / table sizes shown as received or "Ask them"; `customer_suppliers_v2` tour (3 stops). | `details-your-event.tsx` (`DateEditor`, `VenuesEditor`), `find-date/_components/find-your-date.tsx`, `lib/tours.ts` / `MiniTour` | the supplier-sends-room-size path is the only schema item (one column + RLS per the pattern table; Ugat map) — can be its own later PR |
+
+Tests: `planning-list.test.ts` retires with the menu; `your-team-phone-first.test.ts` and `suppliers-opens-fast.test.ts` are re-pointed at the new order; `marketplace-mini-tour.test.ts` learns the new tour id. Then the §5.1 bench batch from the roadmap, unchanged.
+
 
 **For the controller (Maker change needed):** PR 2 removes the date and venue editors from the Maker's Details tool and leaves a read-only line. Nothing else touches Maker files.
