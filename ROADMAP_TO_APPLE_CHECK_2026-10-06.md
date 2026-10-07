@@ -214,7 +214,7 @@ Owner: *"wait after the test"*. All reuse shipped code. Batch by area.
 **5.3 Home and money labels  ·  S each**
 - 🔨 **MOVED INTO THE MAKER BUILD'S FINAL FIXES PR 2026-10-07 (owner asked again).** **Home event header card** wears the event's poster (`resolveEventPoster` → `sceneCoverFor`). Owner: *"i thought this
   will have the same background as our event hub?"*
-- **"Settle a payment"** shows the catalogue title, not the code. Fix the "2 vs 1 waiting" badge.
+- ☁ **SENT TO A $5 CLOUD SESSION 2026-10-07** (prompt: repo `build-sessions/CLOUD-5USD-PAYMENT-TITLE-AND-OFL-2026-10-07.md`, branch `claude/payment-title-and-ofl`). **"Settle a payment"** shows the catalogue title, not the code. Fix the "2 vs 1 waiting" badge.
 - **Home tile "Guest photos · Papic"** → "Event Gallery".
 - **cale-ice order SNCNJ1E3Y8** (₱350 test) — cancel ONLY if the owner says *"cancel it"*.
 
@@ -226,7 +226,7 @@ Owner: *"wait after the test"*. All reuse shipped code. Batch by area.
 - **Date change moves the whole schedule**, and the Apply sheet names each change. Owner yes, 4 Oct. Re-measure: may be
   partly shipped.
 - **Copy sweep "celebration" → "event"** in UI labels (~593 hits). Re-measure with grep.
-- **OFL.txt licence files** for the older font folders.
+- ☁ **SENT TO THE SAME $5 CLOUD SESSION 2026-10-07.** **OFL.txt licence files** for the older font folders.
 
 **5.5 Performance (offered, not yet approved)**
 - Home/dashboard server render takes 4.5–6.5 s. Owner: *"takes too long"*.
