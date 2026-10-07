@@ -1,6 +1,6 @@
-# Stages panel — owner fixes · build status (2026-10-08, wrap-up for the new account)
+# Stages panel — owner fixes · build status (2026-10-08, wrap-up for the new account — RESUMED, updated per item)
 
-Branch `rd/stages-panel-owner-fixes` · **draft PR #6413** ("WIP — Stages panel owner fixes", `do-not-auto-merge`, auto-merge null) · head **58f2835de**.
+Branch `rd/stages-panel-owner-fixes` · **draft PR #6413** ("WIP — Stages panel owner fixes", `do-not-auto-merge`, auto-merge null) · head **4e22cd36b** (resumed; see the newest DONE rows).
 Built on #6398 (merged cd6d471b5) and FU's #6401 (`rd/stages-panel-styles-and-looks`, merged in at e0e05df4a — one style registry `lib/scene-styles-parts.ts`).
 Worktree: `~/Documents/Claude/Projects/wt-redraw` (kept, `.next` removed).
 
@@ -17,6 +17,7 @@ Worktree: `~/Documents/Claude/Projects/wt-redraw` (kept, `.next` removed).
 | c04ce3e1b | Countdown = prototype five **Big number · Boxes · Offset · Line · Circle** (owner "allow offset" — ONE narrow exception in `lib/layouts-are-the-shipped-scene-styles.test.ts`); The calendar unregistered (not the default; a stored value falls back to Boxes, measured); Arrange: Order row removed, ⓘ on On this stage / Alignment / Spacing | `every-scene-style-draws.test.ts` (Offset/Line/Circle), stages-panel Arrange test |
 | 5bf5fdb67 | **Each tab its own page** (owner "yes pages"): `hubTabsOn` `stagesCanvas` exception via `?tabs=1`; bridge `hubTab` switches in place like `hub-shell.tsx` `showTab`; ready → tab re-sent; `drawnMakerOrder` measures every tab | `lib/every-scene-is-in-the-navigator.test.ts` 1b (amended with owner words, not weakened), `each-tab-is-its-own-page.test.ts` |
 | 58f2835de | port-control baseline regenerated | — |
+| 4e22cd36b | **Item 1 (resume):** frame chips ↑ upper-left · ↓ lower-left · ✕ lower-right (32 px, name tab right of ↑); ↑/↓ keys, Esc, a tap on the page's ground (`tapOutside`) let go; the SHIPPED swipe step (`makerStepPart`) now walks the page's DRAWN order (`partsInPageOrder`, measured tops), on into the next/previous tab; the frame + ＋ stop in the MIDDLE of the gap to the neighbour (`partFrameEdges`, `lib/maker-stage-room.ts`) and ＋'s tap is only as tall as the gap — fixes the Logo frame on "TOGETHER WITH THEIR FAMILIES". Not seen at runtime yet. | stages-panel test §9 (3 tests, 4 sabotages red) |
 
 Checks: tsc ✓ · `pnpm -s lint` ✓ · every CI `node …mjs` guard + `lint:dup-rule` ✓ (at 5bf5fdb67) · full unit suite 22,825 pass / 0 fail (at 415798ff4) · Maker budget **506.7 / 507 KB** at 415798ff4; CameraPartTools moved lazy afterwards but the final build was STOPPED at wrap-up — **re-measure** (`node apps/web/scripts/check-maker-js-budget.mjs` after `pnpm build`).
 
