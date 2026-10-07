@@ -36,6 +36,9 @@ Ships: no visible title or search at 375 (the shell top bar's `?q=` is the searc
 | G10 | Words and orphans | "celebration" in `guestListErrorCopy`; "Add with details" opens a modal titled "Quick add"; two sender UIs (`GuestInviteCell`, `SendInviteActions`); `?gview=share` and `/guests/invite` both draw `InvitePanel` | one word per door; one sender; one share surface |
 | G11 | Requests and Finalize as rows with a button | requests strip is a link card with "Review →"; Finalize pill has no icon; Reopen is an underlined text button | `👤 Review` (main) · `✓ Finalize guest list` (main) · `⟳ Reopen` |
 | G12 | Tour | both off | the flag decision |
+| G13 | The open role pins on top, like the open category in Suppliers | `TierHeader` scrolls away | the open role's header sticks under the search row; opening lands its first row at the top (owner: *"follow the same concept on suppliers where we can pin on top"*) |
+| G14 | Select by role | select only one by one (and only via long-press) | in Select mode each role header has a circle: tap = everyone in that role (respecting the filters); tap again = unselect (owner: *"we can select roles so selects all"*) |
+| G15 | No repetition | — | the reply state lives on the row only; the action row never repeats it (owner: *"no repetition"*) |
 | — | Keep | the role sections and their fold (`TierHeader` already a button), the four filter dropdowns, the autosave card and its folds, the Undo snackbar, the digital ticket block, the "Invited to" switches, the join link | unchanged (re-skinned only) |
 
 ## Plan — right after Suppliers (owner), before the area sweep
