@@ -1,4 +1,4 @@
-# Button rule — every interactive control is a button, one colour per meaning, icon + word by width
+# Universal UI rules — buttons (one colour per meaning, icon + word by width) · numbers (count to their value)
 **2026-10-07 · Fable · design rule for the WHOLE site (owner, verbatim: *"can we create this similar rule on all buttons on the website?"* · *"so a list of all buttons on the website and what their colors are"* · *"we want all interactive button to be buttons across the website"*).**
 Nothing here is built. The Suppliers prototype (`prototypes/suppliers_page_2026-10-07_fable.html`, corpus 459e015) is the reference implementation of the rule; this doc carries it to every other page.
 
@@ -18,10 +18,17 @@ Nothing here is built. The Suppliers prototype (`prototypes/suppliers_page_2026-
 | **Red** | destructive — take it back | new `--color-danger` (#B3261E · #F2817A) — today `text-red-600` etc. in 40+ files, no token | same |
 | **Grey** | manage · edit · neutral | `--color-ink` / `--color-mute` (shipped) | ink word on paper |
 ⚠ Book and Pay share green deliberately (both are "commit"); the icon and the word separate them. If Pay must differ, the only honest choice is terracotta — no cross-site standard exists for Pay.
-⚠ **Guest Event Hub (`/[slug]`, `/e/…`) is the exception.** Those pages wear the couple's theme (their own colours), so semantic tones would fight the theme. Rule there: still buttons, still icon + word, but the colour comes from the hub's theme tokens (`--hub-btn-solid` …), and red for destructive only. **Owner call needed.**
+✅ **The guest Event Hub (`/[slug]`, `/e/…`) is EXEMPT from both rules** — owner, verbatim, 2026-10-07: *"except for the event hub which the users design themselves."* Couples design those pages; the platform's button colours and counting numbers do not apply there. (The Maker that EDITS the hub is platform UI and follows the rules.)
+
+## Rule 2 — every number counts to its value (owner 2026-10-07: *"all numbers on the app will animate going to that number … upon load or change"* · *"this needs to be universal rules across the website"*)
+- **Every number the user reads** — money, counts ("6 yours", "2 of 5", "3 builds"), percentages — is rendered through one component (`<Count value format>`), never as a bare string.
+- **On load** it counts from 0 to its value; **on change** from the old value to the new. Ease-out, 420–900 ms (longer for a bigger jump), formatted at every frame (₱ with separators · integer · %). `prefers-reduced-motion` → the value is shown at once.
+- The same component keys on a stable id, so a re-render of the page does not restart from 0 — only a real change animates.
+- Reference implementation: `count()` / `money$()` / `num$()` in `prototypes/suppliers_page_2026-10-07_fable.html` (corpus, this date); in the repo the nearest shipped piece is the budget meter's animated figures — the builder extends that into the shared component rather than writing a second one.
+- Exempt: the guest Event Hub (above).
 
 ## How a builder applies it (one component, then sweeps)
-1. **One shared component** `apps/web/components/action-button.tsx`: `<ActionButton tone icon label main onClick/href>`; renders icon + `<span class="lbl">`; `aria-label` = the word, so icon-only is still readable. Plus one hook `useFitRow(ref)` = the fit pass (remove `icon-only`, then from the right add it until `scrollWidth ≤ clientWidth`; re-run on resize). Tokens `--color-ok/info/warn/danger` added to `globals.css` light + dark with the AA numbers in the comment, as every other token there has.
+1. **Two shared components** — `apps/web/components/action-button.tsx` and `apps/web/components/count.tsx` (Rule 2). `ActionButton`: `<ActionButton tone icon label main onClick/href>`; renders icon + `<span class="lbl">`; `aria-label` = the word, so icon-only is still readable. Plus one hook `useFitRow(ref)` = the fit pass (remove `icon-only`, then from the right add it until `scrollWidth ≤ clientWidth`; re-run on resize). Tokens `--color-ok/info/warn/danger` added to `globals.css` light + dark with the AA numbers in the comment, as every other token there has.
 2. **Sweep by area, one PR per area**, in the order below. Each PR: replace every `<button>`/`<a className="…btn…">`/text-link-with-› in that area with `ActionButton`, tone from the table in this doc; the PR body carries the before/after at 375 and 1280 and a one-line check card for the owner.
 3. **A guard** (`apps/web/tests/every-action-is-a-button.test.ts` or a CI script): in swept areas, no `<button` without `ActionButton`, no `›` inside an `<a>`/`<button>` text, no `text-red-*`/`bg-emerald-*` on a button. Scope grows with each sweep; never weakened.
 
