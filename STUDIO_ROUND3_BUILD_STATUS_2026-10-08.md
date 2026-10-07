@@ -1,7 +1,7 @@
 # Studio round 3 — build status (2026-10-08, builder S3, wrapped on the owner's call)
 
-PR **#6414** (draft, `do-not-auto-merge`, autoMergeRequest null) · branch `rd/studio-round-3` → base `rd/studio-followups` (#6406) · head `a6497e781` (typecheck fix + guards).
-PR **#6417** (draft, `do-not-auto-merge`) · `rd/studio-draft-fields` → base `rd/studio-round-3` · head `bd1be5279` — "draft 1-3".
+PR **#6414** (draft, `do-not-auto-merge`, autoMergeRequest null) · branch `rd/studio-round-3` → base `rd/studio-followups` (#6406) · head `02d5a3ab0` (typecheck clean, preload fix, guards).
+PR **#6417** (draft, `do-not-auto-merge`) · `rd/studio-draft-fields` → base `rd/studio-round-3` · head `390689416` — "draft 1-3".
 
 _Updated after the wrap was lifted (coordinator: keep building ~2.5 h)._
 Side-by-sides: `prototypes/studio-round3-2026-10-08/` (prototype vs built, 375 px, maker-lab fixtures).
@@ -19,7 +19,7 @@ Side-by-sides: `prototypes/studio-round3-2026-10-08/` (prototype vs built, 375 p
 Guards (each sabotaged red once): `studio-round-3-follows-the-owner` (7), `every-studio-colour-opens-the-one-picker` (3 + 1 todo), `one-setting-two-doors` (3 + 3 todo). Updated: `the-seat-plan-on-the-phone`, `the-guided-steps-share-one-layout`, `every-slot-maps-to-a-taxonomy-category`, `bouquet-and-centrepieces-have-a-slot`. Regenerated `screens.generated.json`. All 41 `ci.yml` node guards green except the build-dependent two (not run).
 
 ## RUN / NOT RUN
-Full `pnpm typecheck` on the draft-fields tree (which contains round 3): 1 error (maker-logo shipped row) — fixed in a6497e781. Full unit suite: running at the time of this update (see below).
+`pnpm typecheck`: clean (after fixing the maker-logo shipped row twice — CI caught a negative tuple index). Full unit suite on the #6417 tree (contains round 3): 22,828 tests · 22,825 pass · 0 fail · 3 skipped (44 min). All 39 non-build `ci.yml` node guards green on the same tree.
 Not run:  full unit suite, production build + 507 KB Maker budget (`check-maker-js-budget.mjs`), `check-vercel-route-count.mjs`. New first-load imports: `Sheet` + `PickMenu` in moment-sheet (the picker sheet is lazy).
 
 ## IN PROGRESS / STOPPED
