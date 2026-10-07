@@ -54,6 +54,8 @@ We rebuild the Event Hub Maker to the approved phone prototype in **six PRs, one
 
 > **PASSCODE OFF THE BUILD 2026-10-06 (owner: *"Can we put this to wait list? Once we have properly discussed these"*).** PR 6 builds the four per-guest parts, the Reply card and the full-screen camera with its three looks ONLY — **no passcode, no `event_hub_passcodes`, no migration, no new server action for it**. Everything passcode-related (event code, personal codes, the setnayan.com code box) is on the wait list in `ROADMAP_TO_APPLE_CHECK_2026-10-06.md` §8b. With no migration, PR 6 merges on all-green like PRs 1–5.
 
+> **FIRST, NOW 2026-10-07 (owner: *"priority build it now"*) — PR 4g `rd/bottom-nav-one-icon-set`: the bottom nav + Home doorway icons as one lucide family; no dependency, launch immediately, parallel to anything in flight.**
+
 > **PRIORITY 2026-10-07 (owner: *"send these builds home and guests as priority builds on the event hub maker build because they also matter with the event hub"*) — PR 4d `rd/guests-setup-with-the-maker` → PR 4e `rd/home-with-the-maker` → PR 4f `rd/guests-with-the-maker`, Lane B straight after PR 4/4b/4c and BEFORE PR 5 and PR 6:** Guests › Setup (the five plainly named get-in choices, RSVP asks, Reply by, Headcount with one-way Finalize, the Digital Pass) built together with the Maker's Studio › RSVP as three shared parts; then the couple's Home (H1–H8); then Guests › List and Map (the rest of `HOME_AND_GUESTS_CHECK`). Nothing of Home or Guests waits for the Suppliers build any more.
 
 > **RUN ORDER CHANGED 2026-10-06 (owner: *"yes, merge overnight"* · *"if we do some in parallel, we can finish this earlier"*).** PR 1 alone → then TWO lanes at once: **Lane A** PR 2 → PR 3 · **Lane B** PR 4 (disjoint files). PR 5 takes the first free lane once #6359 has merged (a lane may first finish #6359 if it is still stuck). PR 6 waits for the owner's ok (migration). Max two builders at once (2026-09-11 weekly-cap lesson); the controller merges PRs 1–5 on all-green with no owner ok between steps, never a bypass. The second PR of a parallel pair to merge regenerates the generated baselines on the merged tree.
@@ -95,6 +97,15 @@ Common to every PR: everything new sits behind `makerStagesStudioEnabled()`; wit
 - **Depends on:** PR 1 merged (PR 2/3 must also be merged — strictly in order). **Migration:** none. `+0` server actions — "All of them" reuses the shipped `open_browse` + `launch_mode` actions.
 - **Tests/guards:** `which-version-guests-see-is-one-control.test.ts` — the Info form has ONE dropdown for version whose "All of them" choice sets `website_open_browse` true and `launch_mode` auto, and no separate Open browsing switch remains behind the flag (sabotage: add the switch back → red) · `how-guests-answer-is-one-aton.test.ts` — "How guests answer ▾" reads/writes `oneAtATime` only · Info form shows Date and Venue read-only with the Suppliers line (sabotage: a date input → red) · Prints tile: every `PRINT_SET_KEYS` + `FREE_PRINT_KEYS` piece drawn (count equals the lists) · Schedule "For ▾" writes the shipped `audience` (or, if `audience` cannot carry a role, the builder STOPS and reports — no new column) · Text controls never regain Weight/B/I/U/spacing (PR 2's guard).
 - **Check card:** Studio › Info → one scrolling form → change "Which version guests see" to "All of them" → open the guest page in a private tab: every page opens → Studio › RSVP › How guests answer › One by one → Studio › Schedule → add a moment "Entourage photos" For › Entourage.
+
+### PR 4g · `rd/bottom-nav-one-icon-set` — the bottom nav and the Home doorway row wear ONE icon set · FIRST PRIORITY, build it now (owner 2026-10-07: *"make the logo of guests, supplier and event hub consistent"* · *"fix the bottom nav and add it to the build. to fix the icons on the bottom nav as well"* · *"priority build it now"*)
+
+- **Goal:** one line-icon family everywhere the five destinations appear — the customer bottom nav (`customer-bottom-nav.tsx`, five tabs Home · Guests · Suppliers · Hub · More) and the Home doorway row (`Edit your Guest list · Edit your Suppliers · Edit your Event Hub`, PR 4e) draw the SAME lucide icons at the same stroke: **Home · Users · Store · Globe · Sparkles** (the `EVENT_MENU_ICONS` family in `lib/customer-menu.ts`). No emoji, no mixed families, no filled-vs-line mix; the active tab is the ink colour + 600 weight, never a second icon style. The three doorway buttons use Users · Store · Globe — exactly the tabs they open.
+- **Owns:** `customer-bottom-nav.tsx` (icon resolution: a registry override may change the LABEL and pick another icon from the same lucide family via `navIconComponent`, never an emoji or a raster; `SetnayanMark` stays only where it is today), `lib/customer-menu.ts` `EVENT_MENU_ICONS` for the five tab keys, `app/_components/nav/nav-icon-component.ts` (refuse non-lucide names for these five slots), the Home doorway row's icons (in PR 4e's file if 4e has merged; else a one-line follow-up in 4e).
+- **Must not touch:** the admin and vendor bottom navs (their own PRs), the Maker, Guests, `apply-pro-sheet.tsx`, seat plan.
+- **Depends on:** nothing — build it first, in parallel with whatever is in flight (disjoint files). **Migration:** none. `+0` server actions.
+- **Tests/guards:** `bottom-nav-is-one-icon-family.test.ts` — the five customer tabs resolve to lucide components from `EVENT_MENU_ICONS` (Home · Users · Store · Globe · Sparkles), a registry override cannot substitute an emoji or an image (sabotage: an emoji string in a slot → red) · `home-doorways-wear-the-nav-icons.test.ts` — the three doorway buttons import the same three components the nav uses (sabotage: a Pencil on Event Hub → red).
+- **Check card:** open any event on the phone → the five bottom icons are one line family → Home → the three doorway buttons show the same Guests / Suppliers / Hub icons as the bar below them.
 
 ### PR 4d · `rd/guests-setup-with-the-maker` — Guests › SETUP, built WITH the Event Hub (owner 2026-10-07: *"this build must build with the event hub"* · *"add these to the build."*)
 
@@ -289,6 +300,43 @@ You are Builder S4 for the Setnayan platform (Next.js monorepo, apps/web).
 - the sabotages caught;
 - deviations from this brief, each with a recommendation;
 - a CHECK CARD for the owner: what changed · Open · ≤3 steps · what you should see · a phone screenshot · reply "ok". Never use Restore or Undo as a step.
+
+### Prompt · PR 4g
+
+Model: Opus · effort high.   ← always lead with the model and effort; Fable only designs and plans.
+
+You are Builder S4g for the Setnayan platform (Next.js monorepo, apps/web).
+- **Where to work:** the repo is ~/Documents/Claude/Projects/setnayan-platform, and you work in your own worktree. NEVER read code from ~ (the home directory is a stale checkout).
+- **Read first:** the repo CLAUDE.md, plus the DECISION_LOG rows named below. Rule 0: find what exists and extend it; never redraw it.
+
+**Task:** ONE icon set for the five destinations — owner, verbatim (2026-10-07): *"make the logo of guests, supplier and event hub consistent"* · *"fix the bottom nav and add it to the build. to fix the icons on the bottom nav as well"* · *"priority build it now"*. The customer bottom nav (`app/dashboard/[eventId]/_components/customer-bottom-nav.tsx`) must draw its five tabs — Home · Guests · Suppliers · Hub · More — with one lucide line family at one stroke: **Home · Users · Store · Globe · Sparkles**, the `EVENT_MENU_ICONS` family in `lib/customer-menu.ts`. Audit what each tab actually resolves to today on a phone (the registry override path `navIconComponent(slot.icon)`, the `SetnayanMark` branch, the More tab): any emoji, raster, filled-vs-line mix or off-family icon is the defect — fix the resolver so a registry override can relabel a tab and pick another icon from the same family, never an emoji or an image; `SetnayanMark` stays only where it is today. The Home doorway row — `Edit your Guest list · Edit your Suppliers · Edit your Event Hub` (PR 4e; if 4e has not merged, land the three icons as exported constants 4e will import) — wears **Users · Store · Globe**, the exact icons of the tabs it opens. The acceptance picture is the bottom bar + doorway row of `~/Documents/Claude/Projects/Setnayan/prototypes/home_and_guests_2026-10-07_fable.html?frame=1&page=home` at 375 px. Active tab = ink colour + 600 weight; the icon itself never changes style.
+**Branch:** rd/bottom-nav-one-icon-set from fresh origin/main (no dependency — first in the queue, parallel to whatever is in flight).
+**Files owned by other builders:** the Maker (PR 1–6), Guests (PR 4d/4f), Home's other rows (PR 4e), the admin and vendor bottom navs, `apply-pro-sheet.tsx`, seat plan. Import from them; never edit them. Merge origin/main right before pushing.
+
+**Must hold:**
+- +0 exported "use server" functions (the Vercel route ceiling; `apps/web/scripts/lint-server-action-budget.mjs`).
+- No migration unless named here (none is). Never apply one yourself; the pipeline applies it.
+- Each new test is seen to FAIL once: sabotage, restore, print `git status --short`.
+- Run `pnpm -s lint` from apps/web (not bare npx eslint), plus every lint-*.mjs guard in .github/workflows/ci.yml, plus tsc.
+- Before calling it green, run the FULL unit suite. A bracketed path passed alone runs zero tests.
+- `scripts/port-control-baseline.json` is REGENERATED on the merged tree, never hand-merged.
+- UI copy says "Event Hub", never "website", and "supplier", never "vendor". Keep words minimal and put helper text behind ⓘ. No cards or boxes. Any set of choices is a PickMenu dropdown.
+- Phone check at 375/390 with touch, on a TEST event or a local harness. Never use the owner's signed-in Browser pane. On cale-ice: read only; never press Apply, Undo, Restore or Finalize, and never type.
+- Add a changelog.d fragment. Open the PR with auto-merge OFF, then VERIFY it with `gh pr view <N> --json autoMergeRequest`.
+- Never deploy. Never run pollers or background waiters; the controller messages you.
+- Run the full unit suite AND every guard from `apps/web` (BUILDER-RULES-2026-10-04.md list + every `lint-*.mjs` in ci.yml); `*` globs, non-zero count. Heavy jobs under `heavy-lock.sh`.
+- NEVER merge, mark ready, bypass or `--admin` before every required check is green — owner: *"make sure all checks work"*. Draft PR, `do-not-auto-merge`, `--disable-auto`, `autoMergeRequest` null.
+- Budgets never raised (CI "bundle size check" log).
+- New tests: `bottom-nav-is-one-icon-family.test.ts` · `home-doorways-wear-the-nav-icons.test.ts` (each as described in § 3 · PR 4g; each sabotaged once).
+- The BUILD CONTRACT (owner: *"all these builds need to be EXACTLY as we planned okay. no skipping or re inventing"*): the prototype + check doc are the plan, element for element; no silent drop — a piece that cannot ship is named in the PR body before it opens; no substitute component; a side-by-side (prototype vs built, phone) in the PR body; words fixed, no synonyms.
+- Owner rules: "Event Hub" never "website" · "supplier" never "vendor" · "event" never "celebration" · any set of choices is ONE PickMenu dropdown · no "Edit in X ↗" links · one open at a time · opening never writes · every interactive thing is a button with icon + word, toned by meaning (`BUTTON_RULE_2026-10-07_fable.md`) · numbers count on load and on change · rows change state together.
+
+**Report back with:**
+- the PR number and head SHA;
+- the checks run, with counts;
+- the sabotages caught;
+- deviations from this brief, each with a recommendation;
+- a CHECK CARD for the owner: what changed · Open · ≤3 steps · what you should see · a phone screenshot · reply "ok". Never use Restore, Undo or Finalize as a step.
 
 ### Prompt · PR 4d
 
