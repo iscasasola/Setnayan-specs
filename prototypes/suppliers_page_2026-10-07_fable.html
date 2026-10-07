@@ -107,7 +107,8 @@ main{overflow-x:clip}
 /* categories */
 .cat{border-top:1px solid var(--line)}
 .cat{scroll-margin-top:var(--stick-h,150px)}
-.cat.open>.bar{position:sticky;top:var(--stick-h,150px);z-index:3;background:var(--paper);box-shadow:0 1px 0 var(--line)}
+.cat.open>.cathead{position:sticky;top:var(--stick-h,150px);z-index:3;background:var(--paper);box-shadow:0 1px 0 var(--line)}
+.cathead .addown{margin:0 0 8px}
 .cat .bar{display:grid;grid-template-columns:36px 1fr auto 14px;gap:12px;align-items:center;min-height:56px;padding:10px 0;width:100%}
 .cat .ico{width:36px;height:36px;border-radius:50%;background:var(--gild-soft);display:grid;place-items:center;font-size:15px}
 .cat .state{font-size:13px;color:var(--mute)}
@@ -587,11 +588,12 @@ section{padding:18px 0 8px}
           const shown=list;
           const body=!open?'':`<div class="unfold">
             ${mine.map(x=>srow(x,`<b>${stateOf(x)}</b>${fitLines(x,k)?' · '+fitLines(x,k):''}`,verbs(x,k),x.fresh?'new':'',k)).join('')}
-            ${bookedIn(k)?'':`<p class="addown"><span class="mute">Not here?</span> <button class="wine" data-act="sheet" data-key="add" data-cat="${k}">＋ Add your own ›</button></p><div class="findhead"><p class="k2">${mine.length?'More to compare':'To compare'} · ${list.length}</p><div class="sel small">${FL[fl]}<select id="findFilter" aria-label="Filter">${Object.entries(FL).map(([v,t])=>`<option value="${v}" ${v===fl?'selected':''}>${t}</option>`).join('')}</select></div></div>
+            ${bookedIn(k)?'':`<div class="findhead"><p class="k2">${mine.length?'More to compare':'To compare'} · ${list.length}</p><div class="sel small">${FL[fl]}<select id="findFilter" aria-label="Filter">${Object.entries(FL).map(([v,t])=>`<option value="${v}" ${v===fl?'selected':''}>${t}</option>`).join('')}</select></div></div>
             ${shown.map(m=>srow(m,fitLines(Object.assign({status:'saved'},m),k),`<button data-act="ask" data-id="${m.id}" data-cat="${k}">Ask for a quote</button>`,'',k)).join('')}
             ${!list.length?`<p class="mute" style="font-size:13px;margin:12px 0 4px">${fl==='best'?`Nobody is free ${S.dateKnown==='day'?'on '+shortDate(S.date)+' — try another day in Help me choose':'in '+monthOf(S.date)}.`:'Nobody matches that filter.'}</p>`:''}`}
             <p class="mute" style="font-size:13px;margin:14px 0 6px">${bookedIn(k)?`<button class="wine" data-act="sheet" data-key="add" data-cat="${k}">＋ Add your own ›</button>`:''}${coveredBy(k)?'':`<button class="mute" data-act="removecat" data-cat="${k}">Not needed? Remove ${c.name} from your event</button>`}</p></div>`;
-          return `<div class="cat ${open?'open':''} ${c.fresh?'new':''}" id="cat-${k}"><button class="bar" data-act="opencat" data-cat="${k}"><span class="ico">${c.icon}</span><span>${c.name}${mine.length?` <span class="mute">· ${mine.length} yours</span>`:''}</span><span class="state ${st.cls}">${st.text}</span><span class="chev">⌄</span></button><div class="exp"><div>${body}</div></div></div>`; }).join('')}
+          const addown=open&&!bookedIn(k)?`<p class="addown"><span class="mute">Not here?</span> <button class="wine" data-act="sheet" data-key="add" data-cat="${k}">＋ Add your own ›</button></p>`:'';
+          return `<div class="cat ${open?'open':''} ${c.fresh?'new':''}" id="cat-${k}"><div class="cathead"><button class="bar" data-act="opencat" data-cat="${k}"><span class="ico">${c.icon}</span><span>${c.name}${mine.length?` <span class="mute">· ${mine.length} yours</span>`:''}</span><span class="state ${st.cls}">${st.text}</span><span class="chev">⌄</span></button>${addown}</div><div class="exp"><div>${body}</div></div></div>`; }).join('')}
         <div class="more"><span class="mute">Need something else?</span><div class="sel">＋ Add to your event<select id="moreCats" aria-label="Add a category to your event"><option value="">＋ Add to your event</option>${GROUPS.map((g,gi)=>{ const inG=CATS.filter(c=>c.g===gi&&!ks.includes(c.key)); return inG.length?`<optgroup label="${g}">${inG.map(c=>`<option value="${c.key}">${c.name}</option>`).join('')}</optgroup>`:''; }).join('')}</select></div></div></section>`;
       lower=(nPicks||filled)?`<button class="pillbtn" data-act="mode" data-mode="build">View this build · ${filled} of ${ks.length} · ${money$('pill',M.bookedSum+M.toBook)} ›</button>`:'';
     }
