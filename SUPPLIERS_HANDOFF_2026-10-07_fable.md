@@ -18,6 +18,8 @@
 | `DECISION_LOG.md` 2026-09-20 / 2026-09-22 | the pre-existing fee-unlock rule this page mirrors — cite, never re-derive |
 
 ## Contact sheet
+⚠ Pictures 03 and 13 show the search/add row pinned inside the category; since 2026-10-07 evening it is the THUMB BAR (see the check doc § "The category's search/add box is the thumb bar") — the prototype at corpus HEAD is the truth.
+
 
 ![00-contact-sheet.jpg](prototypes/suppliers_final_2026-10-07/00-contact-sheet.jpg)
 

@@ -370,6 +370,8 @@ html.tour-on .tour{display:block}
 .pillbtn{margin-left:auto;background:var(--ink);color:var(--paper);border-radius:999px;padding:12px 16px;font-weight:500;font-size:14px;white-space:nowrap;transition:transform 160ms var(--ease)}
 .pillbtn:active{transform:scale(.97)}
 .lower .btn{flex:1;text-align:center}
+.lower .search.thumb{flex:1;display:flex;gap:6px;align-items:center;min-width:0}.lower .search.thumb input{flex:1 0 60%;min-width:60%;border:1px solid var(--line);border-radius:999px;padding:9px 14px;background:var(--paper-2);font:inherit;font-size:14px;color:inherit}.lower .search.thumb .acts{flex:0 0 auto;gap:6px}.lower .search.thumb .icon-only{width:38px}.lower .search.thumb .btn{flex:0 0 auto}
+button.ic.text-only svg,.btn.text-only svg{display:none}
 body.has-lower .app{padding-bottom:calc(var(--bar) + 84px)}
 .cart{position:fixed;left:16px;right:16px;bottom:calc(var(--bar) + 76px);background:var(--ink);color:var(--paper);border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:12px;z-index:7;transform:translateY(16px);opacity:0;pointer-events:none;transition:transform var(--t) var(--ease),opacity var(--t);font-size:14px}
 .cart.on{transform:none;opacity:1;pointer-events:auto}
@@ -611,13 +613,14 @@ section{padding:18px 0 8px}
           const body=!open?'':`<div class="unfold">
             ${mine.map(x=>srow(x,`<b>${stateOf(x)}</b>${fitLines(x,k)?' · '+fitLines(x,k):''}`,verbs(x,k),x.fresh?'new':'',k)).join('')}
             ${bookedIn(k)?'':`<div class="findhead"><p class="k2">${mine.length?'More to compare':'To compare'} · ${num$('cmp-n-'+k,list.length)}</p><div class="sel small">${FL[fl]}<select id="findFilter" aria-label="Filter">${Object.entries(FL).map(([v,t])=>`<option value="${v}" ${v===fl?'selected':''}>${t}</option>`).join('')}</select></div></div>
-            ${addown}
             ${shown.map(m=>srow(m,fitLines(Object.assign({status:'saved'},m),k),`${ib('chat','Ask for a quote',`data-act="ask" data-id="${m.id}" data-cat="${k}"`,'main')}`,'',k)).join('')}
             ${!list.length?`<p class="mute" style="font-size:13px;margin:12px 0 4px">${qn0?`Nobody called “${esc((S.catQuery||'').trim())}” here yet — add them as your own.`:fl==='best'?`Nobody is free ${S.dateKnown==='day'?'on '+shortDate(S.date)+' — try another day in Help me choose':'in '+monthOf(S.date)}.`:'Nobody matches that filter.'}</p>`:''}`}
             <div class="acts" style="margin:12px 0 6px">${bookedIn(k)?bb('plus','Add your own',`data-act="sheet" data-key="add" data-cat="${k}"`):''}${coveredBy(k)?'':bb('x',`Not needed · Remove ${c.name}`,`data-act="removecat" data-cat="${k}"`)}</div></div>`;
           return `<div class="cat ${open?'open':''} ${c.fresh?'new':''}" id="cat-${k}"><div class="cathead"><button class="bar" data-act="opencat" data-cat="${k}"><span class="ico">${c.icon}</span><span>${c.name}${mine.length?` <span class="mute">· ${num$('yours-'+k,mine.length)} yours</span>`:''}</span><span class="state ${st.cls}">${st.text}</span><span class="chev">⌄</span></button></div><div class="exp"><div>${body}</div></div></div>`; }).join('')}
         <div class="more"><span class="mute">Need something else?</span><div class="sel">＋ Add to your event<select id="moreCats" aria-label="Add a category to your event"><option value="">＋ Add to your event</option>${GROUPS.map((g,gi)=>{ const inG=CATS.filter(c=>c.g===gi&&!ks.includes(c.key)); return inG.length?`<optgroup label="${g}">${inG.map(c=>`<option value="${c.key}">${c.name}</option>`).join('')}</optgroup>`:''; }).join('')}</select></div></div></section>`;
-      lower=(nPicks||filled)?`<button class="pillbtn" data-act="mode" data-mode="build">View this build · ${num$('pill-n',filled)} of ${ks.length} · ${money$('pill',M.bookedSum+M.toBook)} ›</button>`:'';
+      const oc=S.cat&&cat(S.cat); const qv2=S.catQuery||''; const qn2=qv2.trim();
+      lower=oc&&!bookedIn(S.cat)?`<div class="search thumb"><input class="catsearch" data-cat="${S.cat}" value="${esc(qv2)}" placeholder="Search ${esc(oc.name)} or add your own" autocomplete="off" aria-label="Search ${esc(oc.name)} or add your own"><span class="acts">${qn2?bb('plus','Add',`data-act="sheet" data-key="add" data-cat="${S.cat}" data-name="${esc(qn2)}"`):bb('plus','Add your own',`data-act="sheet" data-key="add" data-cat="${S.cat}"`)}</span></div>`
+        :(nPicks||filled)?`<button class="pillbtn" data-act="mode" data-mode="build">View this build · ${num$('pill-n',filled)} of ${ks.length} · ${money$('pill',M.bookedSum+M.toBook)} ›</button>`:'';
     }
     else if(S.mode==='build'){
       // BUILD · the cart (steps 4–5): one supplier per category, the money, save · compare · book
@@ -682,7 +685,7 @@ section{padding:18px 0 8px}
   }
   // the cart peeks when something is added (like a shopping cart), then tucks away
   // scroll so an element's top sits just under the pinned block — measured, so the first service card is never hidden behind it
-  function fitActs(){ document.querySelectorAll('.acts,.cta,.lower').forEach(row=>{ const ics=[...row.querySelectorAll('.ic,.btn')]; ics.forEach(b=>b.classList.remove('icon-only')); const sec=ics.filter(b=>!b.classList.contains('main')).reverse(); for(const b of sec){ if(row.scrollWidth<=row.clientWidth+1) break; b.classList.add('icon-only'); } }); }
+  function fitActs(){ document.querySelectorAll('.acts,.cta,.lower,.search').forEach(row=>{ if(row.parentElement&&row.parentElement.closest('.acts,.cta,.lower,.search')) return; const ics=[...row.querySelectorAll('.ic,.btn')]; if(!ics.length) return; const field=row.querySelector('input'); const tight=()=>row.scrollWidth>row.clientWidth+1||(field&&field.getBoundingClientRect().width<row.clientWidth*0.6); const set=c=>ics.forEach(b=>{ b.classList.remove('icon-only','text-only'); if(c) b.classList.add(c); }); /* one state for the whole row (owner 2026-10-07): icon + word → word only → icon only, never mixed */ set(''); if(tight()) set('text-only'); if(tight()) set('icon-only'); }); }
   addEventListener('resize',()=>fitActs());
   function landOn(id){ setTimeout(()=>{ const el=document.getElementById(id); if(!el) return; const stickH=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--stick-h'))||150; const y=el.getBoundingClientRect().top+window.scrollY-stickH; window.scrollTo({top:Math.max(0,y),behavior:'smooth'}); },60); }
   let cartT=null; function peekCart(line){ $('#cartLine').innerHTML=line; $('#cart').classList.add('on'); clearTimeout(cartT); cartT=setTimeout(()=>$('#cart').classList.remove('on'),2800); }

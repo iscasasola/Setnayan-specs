@@ -32,6 +32,7 @@ button.ic,.btn{height:40px;padding:0 14px;border:1px solid var(--line);border-ra
 button.ic:active,.btn:active{transform:scale(.97)}
 button.ic svg,.btn svg{width:18px;height:18px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 button.ic.icon-only,.btn.icon-only{width:40px;padding:0;justify-content:center}button.ic.icon-only .lbl,.btn.icon-only .lbl{display:none}
+button.ic.text-only svg,.btn.text-only svg,.sel.ctl.text-only svg{display:none}
 button.ic,.btn{--tone:var(--ink)}.t-brand{--tone:var(--mulberry)}.t-ok{--tone:var(--ok)}.t-info{--tone:var(--info)}.t-warn{--tone:var(--warn)}.t-danger{--tone:var(--danger)}.t-neutral{--tone:var(--mute)}
 button.ic,.btn.t-info,.btn.t-danger,.btn.t-warn,.btn.t-neutral{color:var(--tone);border-color:color-mix(in srgb,var(--tone) 45%,transparent);background:color-mix(in srgb,var(--tone) 9%,transparent)}
 button.ic.main,.btn.t-ok,.btn.t-brand{background:var(--tone);color:var(--on-tone);border-color:var(--tone)}button.ic.t-brand.main,.btn.t-brand{color:#fff}
@@ -99,7 +100,8 @@ button.ic.main.quiet{background:color-mix(in srgb,var(--tone) 12%,transparent);c
 @media (min-width:1024px){.maptree{display:none}}
 /* ===== lower bar, sheet, toast ===== */
 .lower{position:fixed;left:0;right:0;bottom:var(--bar);padding:10px 16px;background:linear-gradient(transparent,var(--paper) 30%);display:flex;gap:10px;align-items:center;z-index:5}.lower .btn{flex:1;justify-content:center}
-.lower .search.thumb{position:static;flex:1;padding:0;background:transparent;display:flex;gap:8px;align-items:center;min-width:0}
+.lower .search.thumb{position:static;flex:1;padding:0;background:transparent;display:flex;gap:6px;align-items:center;min-width:0}
+.lower .search.thumb .acts{gap:6px}.lower .search.thumb .icon-only{width:38px}
 .lower{background:linear-gradient(transparent,var(--paper) 25%)}
 .nav{position:fixed;left:0;right:0;bottom:0;height:var(--bar);background:var(--paper);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);z-index:6}.nav button{display:grid;place-items:center;gap:2px;font-size:11px;color:var(--mute)}.nav button.on{color:var(--ink);font-weight:600}.nav button span:first-child{font-size:18px}
 .sheet{position:fixed;left:0;right:0;bottom:0;max-height:88dvh;overflow:auto;background:var(--paper-2);border-radius:22px 22px 0 0;padding:16px 16px calc(var(--bar) + 20px);transform:translateY(105%);transition:transform 320ms var(--ease);z-index:8;box-shadow:0 -10px 40px rgba(0,0,0,.18)}
@@ -146,7 +148,7 @@ html.sheet-open .sheet{transform:none}.scrim{position:fixed;inset:0;background:r
   const TONE={expand:'neutral',collapse:'neutral',chat:'info',mail:'info',nudge:'warn',x:'danger',book:'ok',card:'ok',check:'ok',plus:'brand',pen:'neutral',cal:'neutral',info:'neutral',list:'neutral',user:'brand',share:'neutral',copy:'neutral',reload:'neutral',select:'neutral',search:'brand',qr:'neutral',camera:'neutral',spark:'neutral',story:'brand',more:'neutral'};
   const ib=(name,label,attrs='',cls='')=>`<button class="ic t-${TONE[name]||'neutral'} ${cls}" ${attrs} aria-label="${esc(label)}" title="${esc(label)}">${ICO[name]}<span class="lbl">${esc(label)}</span></button>`;
   const bb=(name,label,attrs='',cls='')=>`<button class="btn t-${cls.includes('neutral')?'neutral':(TONE[name]||'neutral')} ${cls}" ${attrs} aria-label="${esc(label)}" title="${esc(label)}">${ICO[name]}<span class="lbl">${esc(label)}</span></button>`;
-  function fitActs(){ document.querySelectorAll('.acts,.cta,.lower,.search').forEach(row=>{ if(row.parentElement&&row.parentElement.closest('.acts,.cta,.lower,.search')) return; const ics=[...row.querySelectorAll('.ic,.btn,.sel.ctl')]; ics.forEach(b=>b.classList.remove('icon-only')); const field=row.querySelector('input'); const tight=()=>row.scrollWidth>row.clientWidth+1||(field&&field.getBoundingClientRect().width<row.clientWidth*0.6); /* a text field keeps at least 60 % of its row; the buttons adapt (owner 2026-10-07) */ const sec=ics.filter(b=>!b.classList.contains('main')).reverse(); for(const b of sec){ if(!tight()) break; b.classList.add('icon-only'); } }); }
+  function fitActs(){ document.querySelectorAll('.acts,.cta,.lower,.search').forEach(row=>{ if(row.parentElement&&row.parentElement.closest('.acts,.cta,.lower,.search')) return; const ics=[...row.querySelectorAll('.ic,.btn,.sel.ctl')]; if(!ics.length) return; const field=row.querySelector('input'); const tight=()=>row.scrollWidth>row.clientWidth+1||(field&&field.getBoundingClientRect().width<row.clientWidth*0.6); const set=c=>ics.forEach(b=>{ b.classList.remove('icon-only','text-only'); if(c) b.classList.add(c); }); /* one state for the whole row (owner 2026-10-07): icon + word → word only → icon only, never mixed */ set(''); if(tight()) set('text-only'); if(tight()) set('icon-only'); }); }
   addEventListener('resize',fitActs);
   /* ---- numbers count, meters grow (keyed, so re-renders do not replay) ---- */
   const prev={}; const FMT={peso:n=>peso(n),int:n=>String(n),pct:n=>n+'%'};
