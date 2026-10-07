@@ -44,6 +44,9 @@ Owner: *"document everything properly and all our rules and prototypes and plans
 | E-Gifts wish list | DECISION_LOG 2026-10-08 | design first |
 
 ## 4 · Sequence of builds (owner order)
+
+⏰ **TARGET (owner, 08 Oct ~03:30): "later, we can also finish supplier build so we can allow vendors to come in this weekend"** → Suppliers must be ready for real suppliers to join by the weekend of 10–11 Oct. FIRST ask the owner, in one line, which side this means: the couple's Suppliers page + Budget, or the supplier's own side (sign-up / shop / onboarding), or both. Then plan the build to land before the weekend.
+
 1. Fix main if red: `launch/_components/add-part-sheet.tsx` (a variable used before it is declared, reported by EDB's typecheck on 08 Oct; verify on origin/main first).
 2. Finish the in-flight refinements: RD panel → S3 Studio → small PRs (#6409, #6410, tiles, top search) → owner check on the preview → merge → deploy.
 3. Desktop three columns.
