@@ -27,3 +27,11 @@ A walk-through in the iPhone Duo simulator (all poses, rotations) of: onboarding
 15. **Undo:** the Maker's ↺ Undo covers every edit, including gestures (the Logo maker).
 16. **Copy and paste:** links, the Event Hub address and codes are copyable with one tap (the Share/Copy pattern).
 17. **App bundle:** the shell launches without the network failing silently; offline shows an honest "no connection" screen, never a blank or stale page (the service-worker stale-copy trap seen 08 Oct).
+
+## From Apple's tech talk "Bring your app to iPhone Duo" (owner pasted 2026-10-08)
+18. **Xcode 27.1 / iOS 27.1 SDK** gives true full-screen (edge to edge); older SDKs leave space beside the status bar and camera. Rebuild the Capacitor shell with Xcode 27.1 and test in **Device Hub's iPhone Duo simulator** (open · close · rotate · fold controls). Try Xcode's **"App Resizability" skill** on the native shell.
+19. **Size classes, not devices:** outer display = compact width (like any iPhone); inner display = regular × regular (room for sidebars → our desktop/tablet layout). In the web layer, switch layouts by available WIDTH only, never by "is iPhone/iPad" sniffing or orientation.
+20. **The inner display ignores supported orientations**, and people may stand the phone like a tent → our app must work in landscape on the outer display too.
+21. **Never assume equal safe areas:** insets are often ASYMMETRIC (vertical system bars can sit on the left or right, including in Split View). Use `env(safe-area-inset-left/right/top/bottom)` each separately; test the app dragged to either side in Split View on the inner display.
+22. **Rounded screen corners:** keep edge-hugging UI (the frosted thumb rows, sheets) clear of the new corner shapes.
+23. **Custom bars:** our bottom bar and thumb-zone rows are custom (web), so the system won't move them vertically or around the camera; they must stay inside the safe area on every pose. (Native ReservedRegion APIs do not reach the web view; rely on safe-area env vars.)
