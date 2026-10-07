@@ -54,7 +54,7 @@ Owner: *"document everything properly and all our rules and prototypes and plans
 5. Event Details (#6412 → PR-B, PR-C) and the More-menu pages (#6411 → steps 2–10; step 6 needs a new table, owner sign-off first).
 6. Look redesign (after owner approval).
 7. E-Gifts wish list (design first).
-Apple check last (`ROADMAP_TO_APPLE_CHECK_2026-10-06.md`).
+Apple check last (`ROADMAP_TO_APPLE_CHECK_2026-10-06.md`), then the post-Apple builds, then **a public feature page per feature for search visibility** (DECISION_LOG 2026-10-08).
 
 ## 5 · Where tonight's rulings are
 DECISION_LOG.md rows dated 2026-10-07 and 2026-10-08 (verbatim owner words). Handoff state: `setnayan-handoff-src/CURRENT-STATE.md` (top block). Memory: `maker-build-state-2026-10-07-evening.md`.
