@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Event needs — onboarding picker · hangout before/after · Simple · Wedding · Expo — Setnayan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/*
+  EVENT NEEDS — ONBOARDING FOLLOWS WHAT THE EVENT NEEDS (DECISION_LOG 2026-10-08, two rows).
+  Designer EC (Fable). Research + design only. Companion: EVENT_COVERAGE_MATRIX_2026-10-08_fable.md.
+  Panels: 1 Hangout BEFORE (what ships today) · 2 Hangout AFTER (preset "Simple event") · 3 the needs picker ·
+          4 Wedding (preset "Fully planned") · 5 Expo / organiser (NOT SUPPORTED — drawn to show the gap).
+  Each panel is a 375-wide phone; the rig scrolls sideways. Visual language: when_yes_celebration_2026-10-06_fable.html.
+  No libraries. window.proto exposes panel ids for the screenshot script.
+*/
+:root{--paper:#FFFFFF;--page:#F3F0EA;--ink:#2C2A29;--ink2:#5A5755;--mute:#8A8580;--gold:#A9834B;--gold-soft:#E6D8BE;--gold-wash:#F8F3E9;--cta:#C24E25;--cta-wash:#FBEDE6;--line:#E6E1D8;--line2:#D9D3C8;--ok:#2F6B4F;--ok-wash:#E8F1EC;--bad:#B3261E;--bad-wash:#FBE9E7;--pill:#F1EEE8;--bezel:#14161A;
+ --serif:"Cormorant Garamond",Georgia,serif;--sans:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif;
+ --c1:#5B1A22;--c2:#6B7A3A;--c3:#E0A52B;--c4:#8E2E3C;--c5:#F2C8C2;
+ --h1:#2F4858;--h2:#F2A541;--h3:#88B04B;--h4:#F6E7C1;--h5:#E6E1D8}
+*{box-sizing:border-box}
+html,body{margin:0;background:#EDE8DF}
+body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;font-size:14px;line-height:1.45}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+.rig{padding:14px 16px 10px;max-width:2100px;margin:0 auto}
+.brand{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);font-weight:600}
+h1{font-family:var(--serif);font-weight:500;font-size:26px;line-height:1.1;margin:6px 0 4px}
+.lead{font-size:13px;color:var(--ink2);margin:0 0 12px;max-width:900px}
+.lead b{color:var(--ink)}
+.row{display:flex;gap:18px;overflow-x:auto;padding:6px 2px 18px;scroll-snap-type:x proximity}
+.col{flex:0 0 auto;scroll-snap-align:start}
+.cap{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:600;margin:0 0 6px 4px;display:flex;gap:8px;align-items:center}
+.cap .tag{font-size:9px;letter-spacing:.1em;padding:2px 7px;border-radius:999px;background:var(--pill);color:var(--ink2)}
+.cap .tag.bad{background:var(--bad-wash);color:var(--bad)}
+.cap .tag.ok{background:var(--ok-wash);color:var(--ok)}
+.cap .tag.new{background:var(--gold-wash);color:var(--gold)}
+.sub{font-size:12px;color:var(--ink2);margin:6px 4px 0;max-width:375px;line-height:1.4}
+/* phone */
+.ph{width:375px;height:812px;background:var(--page);border-radius:34px;box-shadow:0 0 0 7px var(--bezel),0 18px 40px rgba(44,42,41,.35);overflow:hidden;position:relative;display:flex;flex-direction:column}
+.sb{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:12px;font-weight:600}
+.top{height:48px;display:flex;align-items:center;gap:10px;padding:0 14px;background:var(--paper);border-bottom:1px solid var(--line)}
+.top .t{font-family:var(--serif);font-size:19px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top .x{width:36px;height:36px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:var(--pill);font-size:16px}
+.body{flex:1;overflow-y:auto;padding:12px 14px 14px;display:flex;flex-direction:column;gap:10px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.card h3{margin:0 0 2px;font-size:14px;font-weight:600}
+.card p{margin:0;font-size:12px;color:var(--ink2)}
+.door{display:flex;align-items:center;gap:10px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-weight:600;font-size:14px}
+.door .ic{width:30px;height:30px;border-radius:9px;background:var(--pill);display:flex;align-items:center;justify-content:center;font-size:14px}
+.door .ch{margin-left:auto;color:var(--mute)}
+.wrong{outline:2px dashed var(--bad);outline-offset:-2px;position:relative}
+.wrong::after{content:"doesn’t belong";position:absolute;right:10px;top:-8px;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--bad);background:var(--bad-wash);padding:1px 6px;border-radius:999px;font-weight:700}
+.bar{height:68px;background:var(--paper);border-top:1px solid var(--line);display:flex;align-items:stretch;padding:0 4px}
+.bar b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10px;font-weight:600;color:var(--ink2)}
+.bar b .i{width:22px;height:22px;border-radius:7px;background:var(--pill)}
+.bar b.on{color:var(--ink)}
+.bar b.on .i{background:var(--ink)}
+.home{height:4px;width:120px;border-radius:2px;background:var(--ink);opacity:.5;margin:6px auto 8px}
+.hero{border-radius:16px;padding:16px;color:#fff;background:linear-gradient(135deg,var(--c1),var(--c4));min-height:120px;display:flex;flex-direction:column;justify-content:flex-end}
+.hero.h{background:linear-gradient(135deg,var(--h1),#1f3340)}
+.hero .n{font-family:var(--serif);font-size:26px;line-height:1.05;font-weight:500}
+.hero .d{font-size:12px;opacity:.85;margin-top:4px}
+.sw{display:flex;gap:6px;margin-top:8px}
+.sw i{width:18px;height:18px;border-radius:999px;border:1px solid rgba(255,255,255,.6);display:block}
+.qr{display:flex;gap:12px;align-items:center}
+.qr .q{width:64px;height:64px;border-radius:10px;background:
+ repeating-linear-gradient(90deg,var(--ink) 0 6px,transparent 6px 12px),repeating-linear-gradient(0deg,var(--ink) 0 6px,transparent 6px 12px);background-blend-mode:multiply;opacity:.85;flex:0 0 auto}
+.pap{display:flex;align-items:center;gap:10px}
+.pap .big{font-family:var(--serif);font-size:26px;font-weight:600;line-height:1}
+.pap .b{margin-left:auto;background:var(--cta);color:#fff;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:600}
+.dd{display:flex;align-items:center;height:40px;border:1px solid var(--line2);border-radius:999px;padding:0 12px 0 14px;background:var(--paper);font-size:13px;font-weight:600;gap:8px}
+.dd .l{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);font-weight:700}
+.dd .v{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dd .a{color:var(--mute)}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);font-weight:700}
+.field .in{height:44px;border:1px solid var(--line2);border-radius:12px;background:var(--paper);display:flex;align-items:center;padding:0 14px;font-size:15px}
+.field .in.ph{color:var(--mute);height:44px;width:auto;box-shadow:none;border-radius:12px;display:flex}
+.need{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--paper);border:1px solid var(--line);border-radius:12px;font-size:13px}
+.need .k{width:22px;height:22px;border-radius:999px;border:1.5px solid var(--line2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:0 0 auto}
+.need.on .k{background:var(--ok);border-color:var(--ok);color:#fff}
+.need.on{border-color:#CFE0D6}
+.need .s{color:var(--mute);font-size:11px;margin-left:auto;white-space:nowrap}
+.need.lock .k{background:var(--ink);border-color:var(--ink);color:#fff}
+.cta{height:48px;border-radius:999px;background:var(--cta);color:#fff;font-weight:600;font-size:15px;display:flex;align-items:center;justify-content:center}
+.note{font-size:11px;color:var(--mute);text-align:center}
+.seg{display:flex;height:40px;border-radius:10px;background:rgba(44,42,41,.07);padding:3px;gap:2px}
+.seg b{flex:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:11px;font-weight:600;color:var(--ink2)}
+.seg b.on{background:var(--paper);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tile{aspect-ratio:1/0.82;background:var(--paper);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;justify-content:flex-end;padding:9px;font-size:11px;font-weight:600;gap:4px}
+.tile .ic{width:22px;height:22px;border-radius:7px;background:var(--gold-wash);margin-bottom:auto}
+.tile.w{border:2px dashed var(--bad)}
+.tile.w .ic{background:var(--bad-wash)}
+.stages{display:flex;gap:6px;overflow:hidden}
+.stages b{flex:0 0 auto;padding:7px 10px;border-radius:999px;background:var(--pill);font-size:11px;font-weight:600;color:var(--ink2)}
+.stages b.on{background:var(--ink);color:#fff}
+.stages b.w{outline:2px dashed var(--bad);outline-offset:-2px}
+.cv{border-radius:14px;border:1px solid var(--line);background:var(--paper);overflow:hidden}
+.cv .img{height:150px;background:linear-gradient(135deg,var(--h1),#355a6b);color:#fff;display:flex;flex-direction:column;justify-content:flex-end;padding:14px}
+.cv .img.w{background:linear-gradient(135deg,var(--c1),var(--c4))}
+.cv .img.x{background:linear-gradient(135deg,#1F2A44,#3C4F7A)}
+.cv .img .n{font-family:var(--serif);font-size:24px;line-height:1.05}
+.cv .img .d{font-size:11px;opacity:.85;margin-top:3px}
+.cv .gal{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:8px}
+.cv .gal i{aspect-ratio:1;border-radius:6px;background:var(--gold-soft);display:block}
+.cv .gal i:nth-child(3n){background:#D9CFC0}
+.pw{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;padding:8px}
+.pw i{aspect-ratio:1;border-radius:4px;background:#C9D3E0;display:block}
+.pw i:nth-child(4n){background:#9FB0C8}
+.kv{display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-top:1px solid var(--line)}
+.kv:first-of-type{border-top:0}
+.kv b{color:var(--ink)}
+.kv .gap{color:var(--bad);font-weight:600}
+.kv .own{color:var(--gold);font-weight:600}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--ink2);margin:0 0 8px 4px}
+.legend i{display:inline-block;width:14px;height:10px;border:2px dashed var(--bad);vertical-align:middle;margin-right:4px}
+.scr{font-size:10px;color:var(--mute);margin:4px 4px 0}
+</style>
+</head>
+<body>
+<div class="rig">
+  <div class="brand">Setnayan · Designer EC · 2026-10-08</div>
+  <h1>Onboarding follows what the event needs</h1>
+  <p class="lead">Owner: <b>“looking at the created event made it feel too complex for a simple hangout.”</b> Left to right: a hangout <b>before</b> (what ships today) · the same hangout <b>after</b> preset <b>Simple event</b> · the one onboarding screen that decides it · a wedding (<b>Fully planned</b>) · a wedding expo (<b>not supported</b> — drawn to show the gap). Every phone is 375 px. Dashed red = shows today and does not belong.</p>
+  <div class="legend"><span><i></i>doesn’t belong to this event</span><span>Papic is on for every event · <b>no minimum</b> shots per guest; a <b>maximum</b> is optional</span></div>
+
+  <div class="row">
+
+    <!-- 1 · HANGOUT BEFORE -->
+    <div class="col" id="p-before">
+      <div class="cap">1 · Hangout — BEFORE <span class="tag bad">ships today</span></div>
+      <div class="ph">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div class="top"><div class="x">‹</div><div class="t">Movie night sa bahay</div></div>
+        <div class="body">
+          <div class="hero h"><div class="n">Movie night sa bahay</div><div class="d">Fri 16 Oct · Pasig</div></div>
+          <div class="card wrong"><h3>Finish your Event Hub — 1 of 5</h3><p>When should guests arrive · Parish and reception · What everyone wears · What to ask guests · Your guests’ names</p></div>
+          <div class="door wrong"><span class="ic">👥</span>Edit your Guest list<span class="ch">›</span></div>
+          <div class="door wrong"><span class="ic">🛠</span>Edit your Suppliers<span class="ch">›</span></div>
+          <div class="door"><span class="ic">✦</span>Edit your Event Hub<span class="ch">›</span></div>
+          <div class="card wrong"><h3>What’s next</h3><p>Add your guests · Send 0 invitations · Set your budget</p></div>
+          <div class="card pap"><div><div class="big">150</div><p>Papic credits</p></div><span class="b">Buy more</span></div>
+          <div class="card wrong"><h3>Studio</h3><p>Info · Look · Logo · Mood Board &amp; Dress Code · Schedule · E-Gifts · RSVP · Prints</p></div>
+        </div>
+        <div class="bar"><b class="on"><i class="i"></i>Home</b><b class="wrong"><i class="i"></i>Guests</b><b class="wrong"><i class="i"></i>Suppliers</b><b><i class="i"></i>Hub</b><b><i class="i"></i>More</b></div>
+        <div class="home"></div>
+      </div>
+      <p class="sub">Measured on <code>origin/main</code>: 12 onboarding screens (pax · region · five “feel” axes…), 5 tabs, 3 doors, all 5 Maker stages, 5 setup steps, 8 Studio tiles. <b>9 screens · 2 tabs · 2 doors · 3 stages · 4 steps · 5 tiles don’t belong.</b></p>
+    </div>
+
+    <!-- 2 · HANGOUT AFTER -->
+    <div class="col" id="p-after">
+      <div class="cap">2 · Hangout — AFTER <span class="tag ok">preset · Simple event</span></div>
+      <div class="ph">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div class="top"><div class="x">‹</div><div class="t">Movie night sa bahay</div></div>
+        <div class="body">
+          <div class="hero h"><div class="n">Movie night sa bahay</div><div class="d">Fri 16 Oct · Pasig</div><div class="sw"><i style="background:var(--h1)"></i><i style="background:var(--h2)"></i><i style="background:var(--h3)"></i><i style="background:var(--h4)"></i><i style="background:var(--h5)"></i></div></div>
+          <div class="card pap"><div><div class="big">150</div><p>Papic credits · 0 used</p></div><span class="b">Buy more</span></div>
+          <div class="dd"><span class="l">Most shots per guest</span><span class="v">None</span><span class="a">▾</span></div>
+          <div class="card qr"><div class="q"></div><div><h3>One QR for everyone</h3><p>Anyone with the link gets in. Share it, print it, stick it on the door.</p></div></div>
+          <div class="door"><span class="ic">✦</span>Your Event Hub · cover + photos<span class="ch">›</span></div>
+          <div class="card"><h3>Switch on more</h3><p>Guest list · Suppliers · Invitation · Live</p></div>
+        </div>
+        <div class="bar"><b class="on"><i class="i"></i>Home</b><b><i class="i"></i>Hub</b><b><i class="i"></i>More</b></div>
+        <div class="home"></div>
+      </div>
+      <p class="sub">Name · place · date · Papic · one QR. Three tabs. The Maker is one stage (The Day: cover + Papic gallery) and two Studio tiles (Info · Look/colours). Nothing greyed out — what is off is absent.</p>
+    </div>
+
+    <!-- 3a · THE SEVEN GROUPS -->
+    <div class="col" id="p-groups">
+      <div class="cap">3a · Onboarding — pick the event <span class="tag new">seven groups</span></div>
+      <div class="ph">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div class="top"><div class="x">‹</div><div class="t">What are you thinking of?</div></div>
+        <div class="body">
+          <p class="note" style="text-align:left;margin:0 2px 2px">Whatever it is, we have it covered.</p>
+          <div class="tiles" style="grid-template-columns:repeat(2,1fr)">
+            <div class="tile" style="aspect-ratio:1/0.62;background:linear-gradient(160deg,#fff 55%,var(--c5))"><span class="ic" style="background:var(--c1)"></span>Life events<p style="margin:0;font-size:10px;font-weight:500;color:var(--mute)">Wedding · Debut · Birthday · Christening…</p></div>
+            <div class="tile" style="aspect-ratio:1/0.62;background:linear-gradient(160deg,#fff 55%,var(--h4))"><span class="ic" style="background:var(--h2)"></span>Family &amp; community<p style="margin:0;font-size:10px;font-weight:500;color:var(--mute)">Reunion · Fiesta · House blessing…</p></div>
+            <div class="tile" style="aspect-ratio:1/0.62;background:linear-gradient(160deg,#fff 55%,#E9E6E1)"><span class="ic" style="background:#6B6764"></span>Memorial<p style="margin:0;font-size:10px;font-weight:500;color:var(--mute)">Wake · Pasiyam · 40th day</p></div>
+            <div class="tile" style="aspect-ratio:1/0.62;background:linear-gradient(160deg,#fff 55%,#DCE5F0)"><span class="ic" style="background:#2F4858"></span>Big public events<p style="margin:0;font-size:10px;font-weight:500;color:var(--mute)">Concert · Fun Run · Sports fest · Expo · Car show · Cosplay…</p></div>
+            <div class="tile" style="aspect-ratio:1/0.62;background:linear-gradient(160deg,#fff 55%,#E3E8DF)"><span class="ic" style="background:var(--c2)"></span>Work<p style="margin:0;font-size:10px;font-weight:500;color:var(--mute)">Corporate · Conference · Year-end…</p></div>
+            <div class="tile" style="aspect-ratio:1/0.62;background:linear-gradient(160deg,#fff 55%,var(--gold-wash))"><span class="ic" style="background:var(--gold)"></span>Simple<p style="margin:0;font-size:10px;font-weight:500;color:var(--mute)">Hangout · Dinner · Simple event</p></div>
+            <div class="tile" style="aspect-ratio:1/0.62;background:linear-gradient(160deg,#fff 55%,#F9E3D5)"><span class="ic" style="background:var(--cta)"></span>Seasons &amp; trips<p style="margin:0;font-size:10px;font-weight:500;color:var(--mute)">New Year · Halloween · Outing · Travel</p></div>
+            <div class="tile" style="aspect-ratio:1/0.62;border-style:dashed"><span class="ic" style="background:var(--pill)"></span>Something else<p style="margin:0;font-size:10px;font-weight:500;color:var(--mute)">Just name it · Simple preset</p></div>
+          </div>
+          <div class="note">One tap opens the group’s types. The type sets the preset; the next screen shows it.</div>
+        </div>
+        <div class="home"></div>
+      </div>
+      <p class="sub">Seven groups, owner-approved 2026-10-08: Life events · Family &amp; community · Memorial · Big public events · Work · Simple · Seasons &amp; trips — plus <b>Something else</b> (Simple preset + a name). Each type card carries its one-sentence limit line underneath (matrix §1b).</p>
+    </div>
+
+    <!-- 3 · THE NEEDS PICKER -->
+    <div class="col" id="p-picker">
+      <div class="cap">3 · Onboarding — the needs picker <span class="tag new">one screen</span></div>
+      <div class="ph">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div class="top"><div class="x">‹</div><div class="t">New hangout</div></div>
+        <div class="body">
+          <div class="field"><label>Event name</label><div class="in">Movie night sa bahay</div></div>
+          <div class="field"><label>Where</label><div class="in">Pasig · our place</div></div>
+          <div class="field"><label>When <span style="text-transform:none;letter-spacing:0;font-weight:500">(optional)</span></label><div class="in">Fri 16 Oct ▾</div></div>
+          <div class="field"><label>What do you need?</label>
+            <div class="dd"><span class="v">Simple event · Papic + one QR</span><span class="a">▾</span></div>
+          </div>
+          <div class="need on lock"><span class="k">✓</span>Photos with Papic<span class="s">always on</span></div>
+          <div class="need on"><span class="k">✓</span>One QR for everyone<span class="s">no guest list</span></div>
+          <div class="need"><span class="k"></span>Guest list &amp; replies<span class="s">off</span></div>
+          <div class="need"><span class="k"></span>Suppliers<span class="s">off</span></div>
+          <div class="need"><span class="k"></span>Event Hub with details<span class="s">cover + photos only</span></div>
+          <div class="cta">Make the event</div>
+          <div class="note">You can switch anything on later from Home.</div>
+        </div>
+        <div class="home"></div>
+      </div>
+      <p class="sub">The dropdown holds the five presets — Simple event · Open event, one QR · Guest list + replies · Fully planned · Organiser / expo. The type picks the default; each row flips alone. Every row maps to exactly one tab, one Home row, one Maker scope.</p>
+    </div>
+
+    <!-- 4 · WEDDING -->
+    <div class="col" id="p-wedding">
+      <div class="cap">4 · Wedding — preset Fully planned <span class="tag ok">ships today</span></div>
+      <div class="ph">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div class="top"><div class="x">‹</div><div class="t">Maker · Mia &amp; Jared</div></div>
+        <div class="body">
+          <div class="seg"><b class="on">Stages</b><b>Studio</b></div>
+          <div class="stages"><b>Save the Date</b><b>RSVP</b><b class="on">Invitation</b><b>The Day</b><b>Post Event</b></div>
+          <div class="cv"><div class="img w"><div class="n">Mia &amp; Jared</div><div class="d">Sat 6 Feb 2027 · San Agustin · Blue Leaf</div></div></div>
+          <div class="card"><h3>Parts on this stage</h3><p>Countdown · Special message · Love Story · Event details · Schedule · Venue map · Dress code · What to bring · Entourage · Find your seat</p></div>
+          <div class="tiles">
+            <div class="tile"><span class="ic"></span>Info</div><div class="tile"><span class="ic"></span>Look</div><div class="tile"><span class="ic"></span>Logo</div>
+            <div class="tile"><span class="ic"></span>Mood Board &amp; Dress Code</div><div class="tile"><span class="ic"></span>Schedule</div><div class="tile"><span class="ic"></span>Love Story</div>
+            <div class="tile"><span class="ic"></span>Wedding March</div><div class="tile"><span class="ic"></span>Seat plan</div><div class="tile"><span class="ic"></span>E-Gifts</div>
+            <div class="tile"><span class="ic"></span>RSVP</div><div class="tile"><span class="ic"></span>Prints</div>
+          </div>
+        </div>
+        <div class="bar"><b><i class="i"></i>Home</b><b><i class="i"></i>Guests</b><b><i class="i"></i>Suppliers</b><b class="on"><i class="i"></i>Hub</b><b><i class="i"></i>More</b></div>
+        <div class="home"></div>
+      </div>
+      <p class="sub">All five stages, all eleven Studio tiles, five tabs, full Mood Board (figures · attire by role · Do’s &amp; Don’ts). Nothing changes for a wedding — it is the one row that already fits the Maker.</p>
+    </div>
+
+    <!-- 5 · EXPO -->
+    <div class="col" id="p-expo">
+      <div class="cap">5 · Wedding expo — preset Organiser <span class="tag bad">not supported yet</span></div>
+      <div class="ph">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div class="top"><div class="x">‹</div><div class="t">Manila Bridal Fair 2027</div></div>
+        <div class="body">
+          <div class="dd"><span class="l">Duration</span><span class="v">Several days · 14–15 Mar</span><span class="a">▾</span></div>
+          <div class="cv"><div class="img x"><div class="n">Manila Bridal Fair 2027</div><div class="d">Day 1 of 2 · SMX Convention Center · venue required</div></div><div class="pw"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+          <div class="card pap"><div><div class="big">2,000</div><p>guests today · Papic at scale</p></div><span class="b">Organiser plan</span></div>
+          <div class="dd"><span class="l">Most shots per guest</span><span class="v">10</span><span class="a">▾</span></div>
+          <div class="card"><h3>Exhibitors · 64 booths</h3><p>Suppliers as exhibitors — a different role from a couple’s booked suppliers.</p>
+            <div class="kv"><span>Exhibitor role</span><span class="gap">NEW</span></div>
+            <div class="kv"><span>Booth map</span><span class="gap">NEW</span></div>
+            <div class="kv"><span>Entry · one QR</span><b>ships</b></div>
+            <div class="kv"><span>Ticketed entry</span><span class="own">owner</span></div>
+            <div class="kv"><span>Live streaming</span><b>ships (₱ once)</b></div>
+            <div class="kv"><span>Photo wall</span><b>ships (gallery)</b></div>
+            <div class="kv"><span>“Unlimited” Papic</span><span class="own">pricing — owner</span></div>
+          </div>
+        </div>
+        <div class="bar"><b class="on"><i class="i"></i>Home</b><b><i class="i"></i>Exhibitors</b><b><i class="i"></i>Hub</b><b><i class="i"></i>Live</b><b><i class="i"></i>More</b></div>
+        <div class="home"></div>
+      </div>
+      <p class="sub">Venue required · exhibitors, not booked suppliers · one QR, maybe ticketed · Papic with a per-guest maximum set by the organiser (built on <code>papic_guest_spend_ceilings</code>). “Unlimited” is a <b>pricing</b> decision — a flat organiser package vs credits — never assumed free.</p>
+    </div>
+
+  </div>
+  <p class="scr">Screenshots: prototypes/event-needs-2026-10-08/ · 01-hangout-before-375 · 02-hangout-after-375 · 03a-pick-the-event-375 · 03-needs-picker-375 · 04-wedding-375 · 05-expo-375 · side-by-side</p>
+</div>
+<script>
+window.proto = { panels: ['p-before','p-after','p-groups','p-picker','p-wedding','p-expo'] };
+</script>
+</body>
+</html>
