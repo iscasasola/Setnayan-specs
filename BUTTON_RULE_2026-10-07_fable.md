@@ -46,7 +46,7 @@ Nothing here is built. The Suppliers prototype (`prototypes/suppliers_page_2026-
 ## Rule 6 — a pinned header's first tap goes back to its top; a tap at the top folds it (owner 2026-10-07: *"first tap will always go to top? second tap will collapse?"* · *"same rule on guests"*)
 - A section that is open and scrolled into (its header stuck under the sticky block): tapping the header scrolls back to its first row, nothing folds. Tapping the header while the section's top is in view folds it. Applies to Suppliers categories and Guests roles alike.
 
-## Rule 7 — the floating row is glass (owner 2026-10-07: *"this row will have no background and the buttons will follow its style but make it look like glass that blurs whatever is behind it"*)
+## Rule 7 — the floating row is FROSTED GLASS (owner 2026-10-08: "frosted" is the word; code class `sn-glass-row`) (owner 2026-10-07: *"this row will have no background and the buttons will follow its style but make it look like glass that blurs whatever is behind it"*)
 - The row itself has no background or gradient. Its box and buttons are frosted: translucent paper (≈62 %) over `backdrop-filter: blur(16px) saturate(1.3)`, a faint ink border, NO shadow (a shadow reads as a box — owner); the blur is clipped to the pill (`overflow:hidden; isolation:isolate; -webkit-mask-image: -webkit-radial-gradient(white, black)` for Safari); every toned button keeps its FULL colour (Add terracotta, Invite blue, Remove red) — only the box and the neutral controls are frosted (owner: *"it still needs to have their button colors"*). Content scrolls visibly under it. Same on Suppliers and Guests (and any page that gets the row).
 
 ## How a builder applies it (one component, then sweeps)
