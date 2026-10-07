@@ -24,6 +24,7 @@
 - **The floating bar slides** up once the mode has rendered and slides down (≈300 ms) before a mode/page change (universal rule 5). **Search runs 250 ms after the last keystroke and never blinks** — typing never rebuilds the box; load animations play once (rule 4). **Add is terracotta** everywhere.
 - **Every category dropdown on this page lists ONLY the categories on the event** — the add sheet's "What they do" (asked first when no category is pinned) and the record's "Also covers". A new category comes from "＋ Add to your event" under the ring.
 - **The claim link offers Download · Copy link only** — no Write to NFC on this page. **QRs are real codes** of the real links (`QrActions` ships this).
+- **The floating row is glass (rule 7):** no background of its own; the box and the neutral controls (expand/collapse, select, sort) are frosted — translucent paper over `backdrop-filter: blur(16px) saturate(1.3)`, faint ink border, no shadow, blur clipped to the pill; **every toned button keeps its full colour** (Add terracotta, Invite blue, Remove red). It **slides up** on arrival and **down** before leaving (rule 5). **A pinned header's first tap goes back to its first card; a tap at its top folds it** (rule 6).
 - Acceptance pictures 16–22 and the prototype at corpus HEAD are the truth for the thumb bar.
 
 ## Contact sheet
