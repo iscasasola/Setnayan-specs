@@ -48,3 +48,6 @@ Base (#6406) 506.9 KB → 509.4 (02d5a3ab0) → 508.9 → 507.4 → 507.2 → 50
 
 ## Full unit suite (#6417 tree, 19:02Z run)
 22,841 tests · 22,830 pass · **4 fail** · 4 todo → all 4 were guards pinning the pre-"draft 1-3" shapes / one unread audit error; fixed in a7a3afb20 and the 5 files re-run green (65/65). Not re-run in full after the fix.
+
+## Budget push (in progress, 20:18Z)
+Local `next build` of #6414 head `ef04b9e20` started under the heavy lock (`s3 build budget`) to list the first-load chunks; static diff vs base shows no first-load client file grew on purpose (maker-tools/details-lazy net 0, studio-skin smaller), so the build list decides. If this line is the last word, the build did not finish: re-run `next build` + `node scripts/check-maker-js-budget.mjs` in apps/web and diff against #6406.
