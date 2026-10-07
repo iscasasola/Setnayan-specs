@@ -57,7 +57,7 @@ Owner (08 Oct): *"at 98% start documentation and still continue safely building 
 1. Fix main if red: `launch/_components/add-part-sheet.tsx` (a variable used before it is declared, reported by EDB's typecheck on 08 Oct; verify on origin/main first).
 2. Finish the in-flight refinements: RD panel → S3 Studio → small PRs (#6409, #6410, tiles, top search) → owner check on the preview → merge → deploy.
 2b. **Event coverage (BEFORE the Apple check)**: every PH event style + needs presets + limits + Maker/onboarding/Home by type (DECISION_LOG 2026-10-08): design the per-type table first (simple events → simple Maker; no dress code → Mood Board = Colours only), owner approves, then build.
-3. Desktop three columns.
+3. Desktop three columns **+ iPhone Duo, designed together as one responsive system** (IPHONE_DUO_READINESS_2026-10-08.md) — Level 1, before Apple.
 4. Suppliers + Budget + launch offer (option B, 50 free Papic credits) — target: suppliers join the weekend of 10–11 Oct.
 4b. Admin pages, same treatment: "an easy one man handled website".
 5. Event Details (#6412 → PR-B, PR-C) and the More-menu pages (#6411 → steps 2–10; step 6 needs a new table, owner sign-off first).
