@@ -258,6 +258,15 @@ html,body{margin:0;height:100%;background:#D9D4CB;color:var(--ink);font:16px/1.4
 .pm-fab i{height:14px;border-radius:4px;outline:1px dashed rgba(44,42,41,.45);outline-offset:-3px}.pm-chp i{height:24px;border-radius:2px;box-shadow:inset 0 -7px #fff;border:1px solid rgba(0,0,0,.1)}.pm-cir{justify-content:space-evenly}.pm-cir i{flex:none;width:9px;height:9px;border-radius:50%}.pm-rib{gap:0}.pm-rib i{height:9px;border-radius:0}.pm-rib i:first-child{border-radius:5px 0 0 5px}.pm-rib i:last-child{border-radius:0 5px 5px 0}
 .pal-fab i{height:30px;border-radius:8px;outline:1px dashed rgba(44,42,41,.45);outline-offset:-4px}.pal-chp i{height:46px;border-radius:3px;box-shadow:inset 0 -14px #fff;border:1px solid rgba(0,0,0,.1)}.pal-cir{justify-content:center}.pal-cir i{flex:none;width:26px;height:26px;border-radius:50%}.pal-rib{gap:0}.pal-rib i{height:16px;border-radius:0}.pal-rib i:first-child{border-radius:8px 0 0 8px}.pal-rib i:last-child{border-radius:0 8px 8px 0}
 .fbtn.off{color:rgba(44,42,41,.4)}.fbtn.off svg{color:rgba(44,42,41,.4)}.fl.w{flex:1;width:auto}button.sw{border:0;padding:0;flex:none}
+
+.smp.camfull{overflow:hidden}.camfull .pg{height:100%;padding:0}.camfull .pt{height:100%;margin:0;border:0;border-radius:0}.camfull .pt.on{box-shadow:none}.camfull .pt.on::after{content:'';position:absolute;inset:0;border:3px solid var(--cta);pointer-events:none;z-index:3}.camfull .pt .tab{top:46px;left:10px;z-index:4}
+.cs{position:relative;width:100%;height:100%;background:radial-gradient(ellipse at 50% 42%,#5a5160,#2a2530 75%);color:#fff;overflow:hidden;font-family:var(--f)}
+.cs-top{position:absolute;left:0;right:0;top:0;height:40px;display:flex;align-items:center;gap:10px;padding:0 14px;font:600 14px var(--f);background:linear-gradient(rgba(0,0,0,.35),transparent)}.cs-x{font-size:16px}
+.cs-bar{position:absolute;left:0;right:0;bottom:0;height:22%;min-height:50px;display:flex;align-items:center;justify-content:space-around;padding:0 6%}
+.cs-sh{width:58px;height:58px;border-radius:50%;border:4px solid #fff;box-shadow:inset 0 0 0 4px rgba(255,255,255,.25);flex:none}.cs-g{width:34px;height:34px;border-radius:9px;border:2px solid rgba(255,255,255,.85);flex:none}.cs-f{font-size:28px;line-height:34px;color:rgba(255,255,255,.9);width:34px;text-align:center}
+.cs-logo{position:absolute;left:14px;top:46px;background:rgba(255,255,255,.88);color:#2C2A29;border-radius:8px;padding:5px 10px;font:italic 16px Georgia,serif}
+.cs-chip{position:absolute;left:50%;bottom:26%;transform:translateX(-50%);background:rgba(255,255,255,.9);color:#2C2A29;border-radius:999px;padding:8px 14px;font:600 13px var(--f);white-space:nowrap}
+.pvin .cs{width:150px;height:270px;border-radius:14px}.pvin .cs-top{height:26px;padding:0 9px;font-size:10px}.pvin .cs-sh{width:38px;height:38px;border-width:3px}.pvin .cs-g{width:22px;height:22px;border-radius:6px}.pvin .cs-f{font-size:20px;width:22px;line-height:22px}.pvin .cs-logo{top:32px;left:9px;font-size:11px;padding:3px 7px}.pvin .cs-chip{font-size:9px;padding:5px 9px;bottom:25%}
 @media(prefers-reduced-motion:reduce){*{transition-duration:.01s!important}}
 </style></head><body><div class="wrap">
 <p class="note"><b>Prototype — the two bars.</b> Tap Stages ▾ or Studio ▾ and pick from the list. In a stage, tap any part of the guests’ page — it only picks the part. The toolbar then shows four tools: Edit, Style, Background, Animate — each is exactly four rows, nothing scrolls. The buttons below compare each choice with the other way.</p>
@@ -357,7 +366,7 @@ const WHY_STUDIO = 'Nothing to change here — edit it in Studio.';
 let lastThumb = 0, side = 'stages', page = null, stage = 'inv', changes = 0, nameMode = 'fit', variant = 'B', left = 'back', stagesDrop = true, both = true, eq = true, longMode = 'short', curved = true, autoPick = true, roomy = true, ph = 812, tool = null, pg = null, part = null;
 const SEC = { style:'look', animate:'in' };
 const STATE = {}, LAYOUT = {};
-let TH = 128, LOOK = null;
+let TH = 128, LOOK = null, remember = null;
 const st = k => (STATE[k] ??= {});
 const $ = id => document.getElementById(id);
 function press(el){ el.animate([{transform:'scale(1)'},{transform:'scale(.93)'},{transform:'scale(1)'}],{duration:320,easing:'cubic-bezier(.34,1.56,.64,1)'}); let r=el.querySelector(':scope>.ring'); if(!r){r=document.createElement('i');r.className='ring';el.appendChild(r);} r.animate([{opacity:.55,transform:'scale(.9)'},{opacity:0,transform:'scale(1.18)'}],{duration:520,easing:'ease-out'}); }
@@ -436,7 +445,7 @@ function partHtml(k){
     case 'spotlight': return '<div class="sc"><div class="spot">Happening now<b>The ceremony</b>Watch the event live →</div></div>';
     case 'announce': return '<div class="sc"><div class="ann">Dinner is served at 6:30 — find your table on Me.</div></div>';
     case 'livehub': return '<div class="sc band"><div class="sh">Watch live</div><div class="film"><i>'+svg('play')+'</i></div><div class="ps" style="margin-top:6px">Live photo wall · 128 photos</div></div>';
-    case 'camera': return '<div class="sc"><div class="cam"></div></div>';
+    case 'camera': return camScreen(curLook('camera'));
     case 'gallery': return '<div class="sc"><div class="sh">Gallery</div><div class="grid"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>';
     case 'myphotos': return '<div class="sc band"><div class="sh">Photos of you</div><div class="grid"><i></i><i></i><i></i></div></div>';
     case 'numbers': return '<div class="sc"><div class="sh">'+esc(textVal('numbers'))+'</div><div class="num"><span><b>180</b><small>guests</small></span><span><b>1,240</b><small>photos</small></span><span><b>9</b><small>hours</small></span></div></div>';
@@ -448,6 +457,13 @@ function partHtml(k){
 }
 const HERO_KEYS = ['logo','ename','names','heroline','date','place','herolink'];
 const curLook = k => LOOK ?? st(k).style ?? stylesOf(k)[0];
+function camScreen(look){
+  return '<div class="cs">'
+   +'<div class="cs-top"><span class="cs-x">✕</span><b>Maria &amp; Jose</b></div>'
+   +(look==='Your brand'?'<div class="cs-logo">M&amp;J</div>':'')
+   +(look==='Challenges'?'<div class="cs-chip">Take a photo with the bride</div>':'')
+   +'<div class="cs-bar"><i class="cs-g"></i><i class="cs-sh"></i><i class="cs-f">⟳</i></div></div>';
+}
 function lookWrap(k, h, name, idx){ const L=stylesOf(k); if(!L.length||['reveal','camera','names','ename'].includes(k)) return h; const i = idx ?? Math.max(0,L.indexOf(name ?? curLook(k))); return i===0 ? h : '<div class="lv'+(i%5)+'">'+h+'</div>'; }
 const SRC_OPTS = ['The Event Hub’s','Colour','Scene ◆','Video ◆','Upload ◆'];
 const CARDS = ['Plain','Dawn','Diagonal','Glow','Opaque','Frosted'];
@@ -487,8 +503,9 @@ function pageHtml(keys){
 /* ══ WHICH TOOLS WORK ON A PART — lib/maker-parts.ts makerPartToolWorks, now five tools ══ */
 function stylesOf(k){ return (k==='gallery'&&stage==='post') ? POST_GALLERY : k==='dress' ? PARTS.dress.styles.slice(0,3) : PARTS[k].styles; }
 function charWorks(k){ const p=PARTS[k]; return stage!=='rsvpst' && k!=='pass' && (p.c==='w' || (p.c==='hero'&&!!p.el)); }
-function works(k, t){ if(t==='edit'||t==='animate') return true; if(t==='bg') return !HERO_KEYS.includes(k); if(stage==='rsvpst'||k==='pass') return false; return stylesOf(k).length>0 || charWorks(k); }
-function why(k, t){ if(t==='bg') return 'This sits on the cover’s background.'; return PARTS[k].src==='studio' ? WHY_STUDIO : TN()[t]+' has nothing to change on this part.'; }
+function works(k, t){ if(k==='camera') return t==='style'; if(t==='edit') return true; if(t==='animate') return true; if(t==='bg') return !HERO_KEYS.includes(k); if(stage==='rsvpst'||k==='pass') return false; return stylesOf(k).length>0 || charWorks(k); }
+function why(k, t){ if(k==='camera') return t==='edit' ? 'Nothing to edit on the camera.' : t==='bg' ? 'The camera is the whole screen.' : 'Nothing to animate on the camera.';
+  if(t==='bg') return 'This sits on the cover’s background.'; return PARTS[k].src==='studio' ? WHY_STUDIO : TN()[t]+' has nothing to change on this part.'; }
 
 const esc = x => String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 const TEXTS = {
@@ -532,12 +549,12 @@ function body(){
     const toolsRow='<div class="tools">'+sel+playBtn+'</div>';
     const pageName = pages.length>1 ? pages.find(x=>x[0]===pg)[1] : '';
     const gbar = pages.length>1 ? '<div class="gb" role="tablist">'+pages.map(x=>'<button data-p="'+x[0]+'"'+(x[0]===pg?' aria-current="page"':'')+'>'+(x[2]?svg(x[2]):'')+x[1]+'</button>').join('')+'</div>' : '';
-    b.innerHTML='<div class="stgcol"><div class="smpw"><div class="smp" id="smp">'+pageHtml(ks)+'</div></div>'+gbar
+    b.innerHTML='<div class="stgcol"><div class="smpw"><div class="smp'+(stage==='day'&&pg==='camera'?' camfull':'')+'" id="smp">'+pageHtml(ks)+'</div></div>'+gbar
       +'<div class="tbar" style="height:'+tb+'px;--rh:'+rh+'px;--rg:'+gp+'px"><div class="grabh"><i></i></div><div class="edit"></div>'+toolsRow+'<div class="tcont stg" id="tcont" style="height:'+(grid+bot)+'px"><div class="g4" id="strip"></div></div></div></div>';
     setEditLine(); bindParts();
     $('smp').onclick=e=>{ if(e.target===$('smp')||e.target.classList.contains('pg')){ part=null; body(); } };
     b.querySelectorAll('.gb button').forEach(x=>x.onclick=()=>{ press(x); setTimeout(()=>{ pg=x.dataset.p; part=null; body(); },140); });
-    b.querySelectorAll('.tsel button').forEach(x=>x.onclick=()=>{ const t=x.dataset.t; press(x); if(part && !works(part,t)){ say(why(part,t),'note'); return; } tool=t; syncSel(); drawStrip(); });
+    b.querySelectorAll('.tsel button').forEach(x=>x.onclick=()=>{ const t=x.dataset.t; press(x); if(part && !works(part,t)){ say(why(part,t),'note'); return; } tool=t; if(part!=='camera') remember=null; syncSel(); drawStrip(); });
     $('tplay').onclick=e=>{press(e.currentTarget);say('Play — not in this prototype');};
     if(part) pickPart(part); else { syncSel(); drawStrip(); }
     return; }
@@ -568,7 +585,7 @@ function pickPart(k){
   part=k; const b=$('body');
   b.querySelectorAll('.pt').forEach(x=>{ const on=x.dataset.k===k; x.classList.toggle('on',on); x.setAttribute('aria-pressed',on); });
   setEditLine();
-  if(tool===null || !works(k,tool)) tool = toolKeys().find(t=>works(k,t));
+  { const want = remember ?? tool; if(want!==null && works(k,want)){ tool=want; remember=null; } else { if(want!==null) remember=want; tool=toolKeys().find(t=>works(k,t)); } }
   syncSel(); drawStrip(); centrePicked();
 }
 function centrePicked(){ setTimeout(()=>{ const el=document.querySelector('.pt.on'); const s=$('smp'); if(!el||!s) return; const top=el.offsetTop - (s.clientHeight - el.offsetHeight)/2; s.scrollTo({top:Math.max(0,top),behavior:'smooth'}); },60); }
@@ -600,9 +617,11 @@ function bindEdit(el){
 }
 const WIDE_LOOK = /line|spaced|between|flanked|pill|pin|name first|joiner/i;
 function gridDims(){ const t=document.querySelector('.tbar'); const rh=t?parseFloat(t.style.getPropertyValue('--rh'))||44:44, rg=t?parseFloat(t.style.getPropertyValue('--rg'))||4:4; return {rh,rg}; }
-function cardW(k, o, ch){ if(PARTS[k].c==='hero' && k!=='logo' && WIDE_LOOK.test(o)) return Math.min(213, Math.round(ch*2)); return Math.max(Math.round(ch*.75), Math.min(112, Math.round(o.length*5.6+14))); }
+function cardW(k, o, ch){ if(k==='camera') return Math.max(86, Math.round(ch*.55));
+  if(PARTS[k].c==='hero' && k!=='logo' && WIDE_LOOK.test(o)) return Math.min(213, Math.round(ch*2)); return Math.max(Math.round(ch*.75), Math.min(112, Math.round(o.length*5.6+14))); }
 function lookPreview(k, o, i){
-  if(k==='reveal'||k==='camera') return o==='None' ? '<span class="mv none"></span>' : '<span class="mv '+(k==='camera'?'cam '+({'Classic':'c1','Your brand':'c2','Challenges':'c3'}[o]||'c1'):'')+'"></span>';
+  if(k==='camera') return '<span class="pvin" style="width:150px;height:270px">'+camScreen(o)+'</span>';
+  if(k==='reveal') return o==='None' ? '<span class="mv none"></span>' : '<span class="mv '+(k==='camera'?'cam '+({'Classic':'c1','Your brand':'c2','Challenges':'c3'}[o]||'c1'):'')+'"></span>';
   LOOK=o; let h; try{ h=lookWrap(k, partHtml(k), o, i); } finally { LOOK=null; }
   return '<span class="pvin"><div class="pt'+(HERO_KEYS.includes(k)?' hero':'')+'">'+h+'</div></span>';
 }

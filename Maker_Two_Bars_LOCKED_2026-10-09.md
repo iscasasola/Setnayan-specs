@@ -27,9 +27,12 @@ handle 14 + "You're editing · Stage › Page › Part" line 20 + selector band 
 - "there should always be animate and background?" → "yes that is what we are doing. giving the freedom to fix their event hub." — Animate live for EVERY element; Background live for every BLOCK; Background grey only for single lines inside the cover (Logo, Title, Names, Invite line, Date, Place, Link). NEW ABILITY for fixed blocks (March, E-Gifts, The details, What to wear, Seats, Pass…): real build work AFTER the toolbar; not sized.
 
 ### EDIT
-- Row 1: one short text → a text box with the part's words (typing bar above the keyboard, terracotta Done; live on the page); anything bigger → ONE button "Open in Studio › <page>" ("Edit … jump to that detail"; not everything editable here — agreed); Date/Place → "Change it in Suppliers".
-- Row 4 ALWAYS ("always set this as the last row"): ↑ Earlier · ↓ Later · Remove (red; asks first).
-- Venue's Map row removed ("remove these details") → needs a home with venue details. RSVP stage: row 1 = "Open in Studio › RSVP".
+- RULE (owner, 2026-10-09 morning): "if the edit is just text, then don't need to jump. but it can both adapt to whichever is edited. same goes to simple edits. Only jump if it has editing that cannot be done there. Example: Schedule, Love Story, Wedding March, Logo".
+- Rows 1–3: text and simple values are edited RIGHT THERE — one Form-row field per short text of the part (up to three rows), the field for the text last tapped comes first ("adapt to whichever is edited"); a simple single choice = its dropdown / switch. Same writes as the shipped typing door (one editor per fact).
+- Jump ("Open in Studio › <page>", ONE button in row 1) ONLY where editing cannot be done in three rows: Schedule, Love Story, Wedding March, Logo (his examples); by the same test E-Gifts ways to give, the RSVP form, Mood Board & Dress Code colours, Seat plan [controller's reading — builder to list each part's side].
+- Date / Place → "Change it in Suppliers".
+- Row 4 ALWAYS ("always set this as the last row"): ↑ Earlier · ↓ Later · Remove (red; asks first). No Add.
+- Venue's Map row removed ("remove these details") → needs a home with venue details. Post Event scenes: heading field + "Shown to guests" switch.
 
 ### STYLE
 - Rows 1–3: look cards — a carousel, "maximize the height … portrait", long one-line text up to 60 % width, picked one centred with previous/next visible; previews centred and scaled to fit, never cut.
@@ -54,3 +57,6 @@ handle 14 + "You're editing · Stage › Page › Part" line 20 + selector band 
 The Day and Post Event (toolbar says "Not built in this prototype yet"); six parts the page does not draw (`canvas: null`).
 ## Things with no home yet (owner to decide)
 Where to add a part · the ⓘ explanations · Venue's Map choice · Dress code Do's & Don'ts look · the third "note" toast look · Studio cards page keep/delete · E-Gifts ways-to-give live vs Apply · what "finish the guest list" covers.
+
+## The Day › Camera (owner, 2026-10-09 morning)
+"Camera is a full screen design" — the sample IS the camera, edge to edge, one part. "camera greyed out background and animate" · "edit is greyed out too. only have style" — on the Camera ONLY Style is live (the three camera looks as tall phone-shaped cards: Classic · Your brand · Challenges, `lib/camera-look.ts`); Edit, Background, Animate are grey; no Earlier · Later · Remove. Styles only — no adding pieces (controller's recommendation; he asked "add elements … or just different styles?").
