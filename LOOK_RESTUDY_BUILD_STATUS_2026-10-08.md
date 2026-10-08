@@ -190,3 +190,25 @@ The typecheck is still unverified for everything since `3db6e108e` (CI's `ci` wo
 14. **The swatches under "Match my photo's colours" (Buttons · Accents · Ornaments) are not drawn in the Studio**; Match / Keep is one dropdown and what it measures is behind its ⓘ.
 15. **In the app-store shell there is no main background panel**, so there the Studio keeps row 1's rows (page fill, hero video, the old extras, Candlelight under Elements) and the "main background" line has no ⓘ to sit behind.
 16. **The built Studio has no "LOOK ▾ · ▶" row above the bar and the picked segment is the shipped white pill, not ink** — both are the Studio's shipped chrome (round 3: "its one bar is the section picker — no second ▾ above it"), not touched by rows 1–2.
+
+## THE AMENDMENT (Builder L3, 2026-10-08 evening) — `BACKGROUND_SOURCES_AMEND_2026-10-08_fable.md` § 8
+_Worktree `~/Documents/Claude/Projects/wt-look3`. Every branch below is LOCAL (the controller holds the push: GitHub's queue is jammed) and stacked in this order. Updated after each step; a line saying IN PROGRESS with nothing newer after it is where the work stopped._
+
+| Step | Branch | Head (local) | State |
+|---|---|---|---|
+| PR 0 · the sample screen | `rd/look-sample-screen` | `8f63dea16` | built, merged into the review copy |
+| PR 1 · two colours | `rd/background-two-colours` | `46164d9e9` | built, merged into the review copy |
+| PR 0b · pill selectors + press + switches + tool icons | `rd/selectors-are-pills` | `ce6d6f779` | built; `cd87189c3`…`81f0355bc` merged into the review copy, `ce6d6f779` handed over |
+| PR 2 · the fade bar | `rd/background-fade-bar` | `76d0fcf1e` | built, handed over |
+| Style card (one size · terracotta ring · real-progress pie · strip lock) | — | — | NOT started |
+| PickMenu (terracotta chevron/tick · phone sheet · the popup rule) | — | — | reported, NOT started |
+| PR 3 effects · PR 4 pattern/cover · PR 5 Elements · PR 6 Music · PR 7 entrance videos | — | — | NOT started |
+
+**PR 0 — Studio › Look shows a sample screen.** `look-sample.tsx` (label · names · rule · date · venue line · the two real buttons · a row with a section heading, a link and a mono code) on the real background; `lib/look-sample.ts` composes the guest page's own look (the guard RUNS `guestLookFrom` beside it over 4,200+ looks — equal); `lib/look-sample-store.ts` lets each control tell the sample what it drew. Studio › Look mounts no guest-page frame. While the sample is the screen, a pick the server must measure no longer re-renders the hidden stage canvas: ONE write, 0 renders; the stage redraws once on return (`holdCanvasRedraw`). The dev lab feeds the sample the standard event.
+ - Requests: Look open — 0 guest-page documents of its own (was 1; the lab's cold load reads 5 documents = the Maker page + its four hidden stage frames, none of them Look's). A pick — 1 draft write, 0 renders (was 1 write + 2 page renders for a colour/Shade/Candlelight/Parallax pick).
+ - Deviations: the date is the app's shipped format (no weekday); the line is the venue name (no "reply by" — not on the page's one events read); "Details" is the guest page's real `.button-secondary`, not the prototype's translucent plate; at 900 px the sample stays on top (the workspace goes side by side from 1,024 px); the shipped Maker (flag off) keeps its page frame.
+**PR 1 — two colours.** `ombre:<effect>:<hex>:<hex>` (≤ 30 chars, no migration; three segments read and re-encode byte for byte). Two Mood-Board circles, the ONE colour sheet, ✕ removes; Plain is faint "· one colour" with two and says why; blend cards are drawn veiled, as the guest will see them.
+**PR 0b — the app's selector.** Template: `apps/web/app/_components/pill-selector.tsx` (+ `pill-thumb.tsx`). One terracotta, a thumb that slides, lands with a bounce and pulses on a pick; `--sn-pill-dur: 700ms` is the family's one speed. The universal press dips to .93 and springs back everywhere except inside the guest shell (`.sn-editorial`). `.sn-switch` = the Maker's four switches, terracotta or grey. Tool icons: SwatchBook · ALargeSmall · Orbit. ⚠ Found: arbitrary `duration-[…ms]` classes emit nothing while `tailwindcss-animate` is loaded (six dead uses listed in `changelog.d/rd-selectors-are-pills.md`).
+**PR 2 — the fade bar.** `main.shade` also holds −100…100 (0 never stored; words read at −70 · −45 · +45 · +70 with the same veils). A drag writes nothing; the release is one write. Shade ▾ gone; Candlelight not offered — a stored one is named with "Turn off" (words are the builder's, awaiting the owner's).
+
+**Could NOT be verified by L3 (no dev server of its own; the controller looks on :3480):** the sample against a real event (themed faces, a real film, own photos); the fade bar's drag on a phone; the press spring on buttons that carry a Tailwind `transition-*` utility (they dip but snap — the utility replaces the transition list); the Maker first-load budget (PR 0 adds ~0.15 KB to `lib/maker-refresh.ts`; the selector adds a small static import to `inspector-kit.tsx`) — CI judges at the push.
