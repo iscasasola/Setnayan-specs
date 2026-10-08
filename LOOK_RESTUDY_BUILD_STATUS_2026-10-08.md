@@ -28,15 +28,19 @@ Checks: #6426 head — `tsc` 0 errors · lint 0 errors · 36/36 node guards · 9
 
 Rows 3+ NOT started.
 
-## IN PROGRESS
-_(nothing — Builder L1 stopped after row 2, as briefed)_
+## IN PROGRESS — ROW 3 (`rd/elements-roles`), Builder L1, started after the controller's go (2026-10-08)
+- **3a · the column — PR #6438 · `rd/site-roles-column` · head `0070ccdf6` · base `main`** — DRAFT, `do-not-auto-merge`, auto-merge OFF. The migration ALONE (`20271266068325_events_site_roles.sql`) + the regenerated exposure baseline (+1 line). **Not applied anywhere by the builder** — it reaches production only through the pipeline when the PR merges (owner's call; it changes the production schema).
+  - Rule 0: the Mood Board's five (Dominant · Supporting · Accent · Neutral · Accent 2) are `events.role_palette.reception` by position (draft key `main_colours`) — the PALETTE every role's default derives from, not a role's own pick, and they hold no font. Three role facts already have a column: Headings font = `site_font_key`, Buttons fill = `site_button_color`, Buttons shape = `site_button_style`. So `site_roles` holds only what had no home: `{heading:{color}, body:{font,color}, button:{font}, highlight:{font,color}}` — **narrower than § 6's sketch** (which also listed `heading.font` and `button.fill`; repeating them = two sources of truth for one fact).
+  - Checks: `lint-events-column-grants` ✓ · timestamp guard ✓ · PGlite replay applies it · `ugat-schema-claims` 3/3 · `ugat-concept-coverage` 3/3 (no new subsystem → no map node) · `events-column-privileges` 7/7 · `exposure-freeze` 6/6 · `ugat-both-ends` 4/4.
+- **3b · the code — `rd/elements-roles`, stacked on `rd/background-source-cards` @ `0d32a6619` with 3a merged in** — being built: `lib/site-roles.ts` (shape · sanitiser · guest variables · AA) → the draft wiring → the guest page → Studio › Elements (Pairing ▾ · four role rows · AA badges).
+  - ⚠ The preview shares the production database: until #6438 is deployed, the preview of `rd/elements-roles` cannot load an event at all (its events selects name `site_roles`).
 
 ## TODO (per plan row)
 | # | Branch | State |
 |---|---|---|
 | 1 | `rd/look-three-tabs` | **PR #6426**, draft, head `77faecaa4` (`main` @ `9b2065225` merged in; preview-walk fixes) — awaits CI + the owner's OK at 375 |
 | 2 | `rd/background-source-cards` | **PR #6431**, draft, head `0d32a6619` (row 1 merged in; preview-walk fix) — awaits CI + the owner's OK at 375 |
-| 3 | `rd/elements-roles` | NOT L1's — needs the new `events.site_roles` column |
+| 3 | `rd/elements-roles` | **in progress (L1)** — the column is PR #6438; the code is being built |
 | 4 | `rd/one-colour-picker` | Builder C, in flight |
 | 5 | `rd/music-only-music` | NOT L1's — waits on the owner's "Our music" call |
 | 6 | `rd/cover-follows-main` | NOT L1's — the Save the Date background migration |
