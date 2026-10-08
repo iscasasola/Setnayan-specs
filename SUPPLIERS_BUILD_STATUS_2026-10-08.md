@@ -4,8 +4,8 @@
 
 | Branch | PR | Head | On `origin/main` |
 |---|---|---|---|
-| `rd/suppliers-shell-three-modes` | #6422 (draft · `do-not-auto-merge`) | `55d0f9bbc` | `9b2065225` merged in (baselines regenerated — no change needed) |
-| `rd/suppliers-find` | #6425 (draft · `do-not-auto-merge`, base = the shell branch) | `7c710c451` | same, through the shell branch |
+| `rd/suppliers-shell-three-modes` | #6422 (draft · `do-not-auto-merge`) | `8af5ea67b` | `9b2065225` merged in (baselines regenerated — no change needed) |
+| `rd/suppliers-find` | #6425 (draft · `do-not-auto-merge`, base = the shell branch) | `4d80389cb` | same, through the shell branch |
 
 Checks on the merged trees: shell — cold `tsc` rc 0 (173 s) · `next lint --no-cache` 0 errors · 831 pinned tests pass. Find — 882 pinned tests pass (cold `tsc` runs with the next item).
 
@@ -17,12 +17,16 @@ Checks on the merged trees: shell — cold `tsc` rc 0 (173 s) · `next lint --no
 | Flat rows · ring · state words · pinned header · scoped search · ONE "Add to your event" dropdown | DONE `c45748a` |
 | The three faults the controller measured on the preview at 375 | DONE `5733ba34e` — one "＋" on "Add to your event" · the search field keeps 60 % of the bar (`useFitRow` now runs in the component that draws the row, plus a CSS floor) · category names wrap, never clip ("· N yours" rides the same run) |
 | Verbs by step | DONE `76e767376` — one table `lib/supplier-card-verbs.ts`, drawn by `bench-vendor-actions.tsx` as `ActionButton`s; Remove, Nudge, Pay / Payments, Read their reply, Ask about another day, Workspace are new on the card; +0 exported actions (Nudge is a branch of `contactShortlistVendor` through `sendChatMessageCore`) · 929 pinned tests · 18 sabotages red |
-| Service cards in the rows | IN PROGRESS |
-| "More to compare" always on, with a count | not started |
+| Service cards in the rows | DONE `b027e91c6` — inside a row the couple's suppliers are a LIST of service cards (80×112 cover · service name + running offer · who and where · price · included · not included · gift line) with the verb row across the foot; every line the bench card carried is kept. `lib/bench-service-card.ts` (one decision over `snapshotFromService`; a shop that hides prices shows no peso figure; ended offers dropped) + `lib/bench-service-cards.ts` (batched read on the page's photo pass; a failed read is `null` → the card says nothing, never "Price on request"). 11 new tests · 893 pinned pass · 33 guards pass · 22 sabotages red · +0 actions |
+| "More to compare" always on, with a count | IN PROGRESS |
 | The supplier sheet | not started |
 | 2b (own stacked branch + draft PR; may carry the ONE named migration; never applied, never deployed) | not started |
 
 **Old links (the controller's note):** the segments still write the shipped keys, on purpose — `?tab=shortlist` (+ `open=`) → Find · `?tab=build` → Build · `?tab=compare` → Build, scrolled to the plans · `?tab=budget` → Booked at its top. Executed by the deep-link case in `vendors/suppliers-opens-fast.test.ts`.
+
+**Service card deviations to rule on:** drawn with the bench card's own elements in the `ServiceCardFace` SHAPE (not the component — it has no slot for the corner, the badges, the dates or a tap target; the values come from the same `snapshotFromService`) · a self-added supplier with no price says "No price recorded", not "Price on request" · card radius is the 14 px token (the radius guard refuses 16 px) · the rail's "Find more" / "Add manually" tiles are still there as two small pills until More to compare lands.
+
+**Trap:** `pnpm -s port:baseline` / `ugat:screens` / `root-map` are scripts of `apps/web` — run from the repo root with `-s` they do NOTHING and print nothing. Run them from `apps/web`. (The merged trees were re-checked: only the baseline's `ref` line had moved.)
 
 **Verb deviations to rule on:** Nudge sends the prototype's one sentence in both the quote and the asked-to-book states · `Connect` stays as one extra grey button until 2b's record sheet · booked with nothing due says "Payments", not "Paid in full" · a marketplace supplier booked with no price says "Set price" and opens the workspace.
 
