@@ -1,4 +1,35 @@
-# Suppliers one-screen — BUILD STATUS · 2026-10-08 (Builder SP1, Opus)
+# Suppliers one-screen — BUILD STATUS · 2026-10-08 (Builder SP1 → SP2, Opus)
+
+## NOW — SP2's stack (updated 2026-10-08 evening; SP1's sections follow unchanged)
+
+| Branch | PR | Head | Base |
+|---|---|---|---|
+| `rd/suppliers-find-walk-fixes` | **#6455** (draft · `do-not-auto-merge`) | `7eafb5f12` | `rd/suppliers-find` (#6425) |
+| `rd/suppliers-sheet-part-2` | **#6459** (draft · `do-not-auto-merge`) | `d73303688` | `rd/suppliers-find-walk-fixes` |
+
+Worktree `~/Documents/Claude/Projects/wt-suppliers2` (its `node_modules` are links into `wt-suppliers` — do not prune that one first). Both branches carry `origin/main` `482a671b3` and `rd/suppliers-find` `24aaff10c` (FX's fix).
+
+| Item | State |
+|---|---|
+| A · the controller's walk findings at 375 | **DONE — #6455.** One button height (40 px) in the bench · the pinned block and the pinned category head travel with the top bar (measured in the lab: the strip above the date line 10.2 px → 0) · "More to compare" under a booked category is by design absent (prototype `bookedIn(k) ? '' : …`), held by a test. Icon-only circles after "Pay" are the design (picture `05-booked-rows-room-size-light.jpg`) and stay. |
+| `/dev/suppliers-lab` | **DONE — #6455.** Real shell + Find body + sheet on fixtures; 404 in production. Run with `NEXT_PUBLIC_EXPLORE_REPLAN_ENABLED=true NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 NEXT_PUBLIC_SUPABASE_ANON_KEY=lab-no-database` (the middleware needs the two Supabase names; nothing is contacted). `?open=<tile>` · `&fail=1` · `&sheetfail=1` · `&slow=1` · `&empty=1`. |
+| B · supplier sheet, part 2 | **DONE — #6459**, re-planned under the minimum-request rules: a CLIENT sheet (lazy), drawn at once from the pressed card, ONE small request (5 reads, one per table, together; rides `fetchInlineMoreRow` as `sheetFor`, +0 actions), kept for the visit; the page is never re-rendered. Photos (three + "+N") · the rest of their portfolio ("Ask about X") · Follow · Share · a sheet for a "More to compare" card. "More to compare" now asks once per category per visit. |
+| C · "Add your own" (2b) + its ONE migration | **NOT STARTED.** The re-plan below is what to build. |
+
+**Captures:** `prototypes/suppliers-built-2026-10-08/` — `A0…A3` (walk fixes) · `B1…B6` (the sheet; B2–B6 were taken before the last polish and have the lab's cookie banner and dev overlay across the bottom — retake when the heavy-job slot is free: `scratchpad/lab-run.sh walk-b.cjs`).
+
+**Deviations to rule on (B):** photos are the supplier's published photos, NOT split by event — the per-event album (`vendor_papic_portfolio_photos`) is private to the supplier and `vendor_completed_events` has no venue; draw the grids when S-PR6c lands · no "N yrs · N events through Setnayan" line and Verified is the only badge (the pressed card does not hold the rest) · a self-added supplier's card still opens their own record, not the sheet · no Share and no photos for a shop whose name is still withheld · reviews are not filtered to the category (no such column) · the desktop inspector column is no longer opened from a card on this page.
+
+**Debts measured, not repaired (rule 4):** "Save" and "Remove" on a card still `router.refresh()` the whole page (≈47 query sites by reading the loader). Fix = insert/remove the card locally in the bench.
+
+### C · "Add your own" — RE-PLANNED under the minimum-request rules (build this, in this order)
+1. **Screen PR (no column needed):** `NewManualVendorModal` in steps — name → "Is it one of these? Yes — Inquire" (`searchMarketplaceVendorsByName`, ONE request, 250 ms after the last keystroke, cached per typed name for the visit) → what they do (one dropdown of the categories on the event) → price → booked? ; `＋ Add "…"` carries the typed name from the thumb row; the record sheet (Also covers · What's included · Costing · Contact · claim link QR with Download · Copy link only · payment channels as rows). **One write per press:** `addManualSupplier` once; the new card is inserted into the bench LOCALLY (no `router.refresh()`); the record sheet opens on the returned row. The record sheet's own data is ONE read when it opens (`loadSelfAddedSupplier` already is). No file goes through a server action (the QR is drawn in the browser by `QrActions`). `Connect` leaves the verb row when the record sheet carries the claim link.
+2. **Migration PR (its own draft, `pnpm migration:new`, never applied by a builder):** `platform_settings.fee_leak_price_tolerance` (no default number invented — NULL means the price half of the check is off until the admin sets it) · `event_manual_vendors.leak_match_vendor_profile_id uuid NULL REFERENCES vendor_profiles ON DELETE SET NULL` · promote `event_manual_vendors` to an Ugat joint with its claim and delete its baseline line.
+3. **Fee-leak check (needs 2):** the name / price match against this couple's quotes in the category is computed inside the SAME `addManualSupplier` call (no second request) and the warn card "This looks like X's quote — It's X, book them" is drawn from the proposals the page already holds for the category.
+
+---
+
+## EARLIER — SP1's record (kept as written)
 
 ## NOW — where both branches stand (updated after every item)
 
