@@ -53,9 +53,9 @@ The plan's PR2 is too big for one PR (the bench it adapts is 3,729 lines, pinned
 
 | Part | What | State |
 |---|---|---|
-| **2a · part 1** | Find's thumb row: ⇕ Expand all / Collapse all · search · ＋ Add your own | **PR #6425** — DRAFT · `do-not-auto-merge` · auto-merge OFF · base `rd/suppliers-shell-three-modes` · branch `rd/suppliers-find` · head **`c1a8fc349248c308047e30d6a8ff91975967afd9`** |
-| **2a · part 2** | Flat category rows + state words + pinned header + scoped search; service cards + verbs by step; "More to compare" always on; "＋ Add to your event" as one dropdown | NOT STARTED — see "Next" below |
-| **2b** | Add your own (steps, twin match), the record, payment channels, fee-leak check | BLOCKED — needs a migration and probably new server actions; COMMON.md forbids both this week. Needs the controller's word |
+| **2a · part 1** | Find's thumb row: ⇕ Expand all / Collapse all · search · ＋ Add your own | DONE — in **PR #6425** (DRAFT · `do-not-auto-merge` · auto-merge OFF · base `rd/suppliers-shell-three-modes` · branch `rd/suppliers-find`), commit `c1a8fc3` |
+| **2a · part 2** | Flat category rows + state words + pinned header + scoped search; service cards + verbs by step; "More to compare" always on; "＋ Add to your event" as one dropdown | rows + ring + scope DONE at `c45748a` (same PR); cards · verbs · More to compare · supplier sheet still to build |
+| **2b** | Add your own (steps, twin match), the record, payment channels, fee-leak check | NOT STARTED — owner said OK: one named migration allowed; stay within the route ceiling |
 
 ### 2a · part 1 — checks at `c1a8fc3`
 | Check | Result |
@@ -71,21 +71,31 @@ Files: `vendors/_components/find-thumb-row.tsx` (new) · `suppliers-mode.tsx` (n
 
 Deviations in part 1: the box always says and searches "all suppliers" (the scoped words need the pinned header, part 2) · no `＋ Add "…"` with the typed name (the shipped form takes no name — 2b) · "which category first" is a small sheet with one dropdown, then the shipped form · still the shipped folders under the row.
 
-### 2a · part 2 — IN PROGRESS (WIP pushed on `rd/suppliers-find`, PR #6425; battery safeguard 2026-10-08)
+### 2a · part 2 — rows + ring + scope DONE at `c45748a2c26d61fdf0e0d84ef55d9f9b200399c8` (PR #6425, `rd/suppliers-find`)
 
-Owner rulings received ("1. yes 2. go 3. ok"): keep an added category on the event · a wedding shows its own onboarding picks, else the popular four · 2b may carry its one migration.
+Owner rulings ("1. yes 2. go 3. ok") built:
+- **The ring.** `resolveBenchRing` (one call, the list and the page): the event's own onboarding picks — a wedding's too — else `popularTilesFor(type)`; a category with a supplier or a booking always shows.
+- **An added category stays** — `restoreTileToPlan` writes `style_preferences.added_categories` after a host check (`writeStylePreferenceKey`). +0 exported actions, no migration.
+- **Checklist finding:** the onboarding picks list is read by the checklist budget, the checklist suggestions, the supplier brief and the onboarding auto-inquiry fan-out, in the picker's vocabulary. The added category is therefore kept under its OWN key and **changes nothing on the checklist**. Recommendation: keep.
+- **Flat rows**, "· N yours", one state word, "Covered N of M" (booked or covered), ONE "+ Add to your event" dropdown, "Not needed · Remove ‹Category›", heading "Cover your event".
+- **Pinned header + scope:** the open row's head pins; the thumb row's words, search and Add follow the pinned category; rule 6 header taps; landing without a guessed delay.
+- **`Build N/M`** counted over the ring.
 
-**Built in the WIP commit (typecheck clean; 823 of 824 pinned tests pass):**
-- The starter ring — `resolveInPlanTiles` takes `starterTiles`; the page passes `popularTilesFor(event type)`; a wedding now honours its own onboarding picks (mapped picker key → tile by `plannedTileIdSet`). A category holding a supplier or a booking always shows.
-- "＋ Add to your event" keeps the category: `restoreTileToPlan` writes it to `style_preferences.added_categories` through `writeStylePreferenceKey`, after a host check. **+0 exported actions, no migration.**
-- ⚠ **Finding on the checklist (asked for before relying on it):** the onboarding picks list (`interested_categories`) is read in the onboarding PICKER's vocabulary by the checklist's budget scope, the checklist suggestions, the brief sent to suppliers, and the onboarding auto-inquiry fan-out. Appending a bench category there would add checklist budget lines for the ~15 categories that share a picker key, do nothing for the others, and could be swept into a still-pending fan-out that messages suppliers. So the added category is stored under its OWN key in the same blob: **an added category changes nothing on the checklist.** Recommendation: keep it that way; switching to the picks list is a one-line change if the owner wants the checklist to follow.
-- Flat rows (no folder level), "· N yours", one state word per row (Booked ✓ · Covered ✓ · N quote in · N to decide), "Covered N of M" counting booked or covered, ONE "+ Add to your event" dropdown, "Not needed · Remove ‹Category›", Find's heading "Cover your event".
+| Check at `c45748a` | Result |
+|---|---|
+| `tsc --noEmit`, COLD | rc 0 · 178 s · empty log |
+| `next lint --no-cache` | 0 errors |
+| 86 test files reading the page / bench / shell / action / touched libs | 947 pass / 0 fail |
+| ci.yml node guards | 23 pass / 0 fail · server actions 1199 of 1225 (+0) |
+| Sabotage | 56 runs over the three commits, each red, restored |
+| Browser | NOT looked at |
 
-**Exactly where it stopped:**
-1. One stale assertion: `find-thumb-row.test.ts` T5 expects `const folderOpen = searching || openAll || …`; the code is now `replan || searching || openAll || …`. Update the regex.
-2. No tests yet for: the flat rows / pool dropdown / remove label in the bench source. `lib/suppliers-shell.test.ts` T6 and `lib/explore-in-plan.test.ts` (starter + kept) are written and green.
-3. No sabotage for part 2. No cold tsc / lint for part 2. Guards and baselines not re-run. Changelog fragment not updated.
-4. Still to build in part 2: the pinned row header + search scope and words, cards as service cards + verbs by step (ActionButtons), "More to compare" always on with a count, the supplier sheet, `Build N/M` with M = the ring.
+**Still to build in 2a (same branch):** service cards (`ServiceCardFace` needs a `Snapshot` per shortlisted supplier — a new batched read on the page) · verbs by step as `ActionButton`s (Ask for a quote · Nudge · Chat · Remove · Read their reply · Add to build · Book · Your record · Withdraw · Pay / Set price · Workspace — today's slots are in `bench-vendor-actions.tsx`; Remove-on-card, Nudge, Pay and Read-their-reply are not on the bench card) · "More to compare" always on with a count (the inline row's state is single-tile today: key it by tile; `h6-mirrors-the-booking-path.test.ts` maps `searchCategoryVendors` callers) · the per-category sort · the supplier sheet.
+**2b (own stacked branch + PR, may carry the one named migration):** not started.
+
+Deviations in 2a so far: "Covered ✓" without the covering supplier's name · an empty row says nothing (no marketplace count on the bench) · the scoped search filters the couple's own cards only · shipped cards and verbs inside a row, one bench-wide sort · no `＋ Add "…"` · an explicit removal still hides a category that holds an unbooked supplier.
+
+Traps met in part 2: `lint-colour-exists` reads any `ring-*` class as a Tailwind ring colour · BSD `sed` has no `\b` · `bench-deep-link-anchor.test.ts` forbids `setTimeout(…benchTileAnchorId` — land with a layout effect and `transitionend` · `.fold-collapse>.fold-body` is `overflow:hidden` even when open, which stops a sticky head · the heavy lock once broke another session's lock as "stale" on a corrupt timestamp (not mine; noted).
 
 ### Measured before part 2 (kept for reference)
 A read-only map of the bench against the prototype was taken at `8954305`. The findings that decide the design:
