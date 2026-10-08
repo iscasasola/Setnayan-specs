@@ -8,10 +8,14 @@ Built-vs-prototype at 375 px: `prototypes/wish-list-built-2026-10-08/` (8 side-b
 
 | Step | Branch | PR | Head |
 |---|---|---|---|
-| **E-PR1 · the two tables** | `rd/wish-list-tables` (from `origin/main` `560e6d0f0`) | **#6432** | `7cf5e2e93` |
-| **E-PR2 · Studio › Wish list** | `rd/wish-list-studio` (from `origin/rd/studio-reply-by-editable` `83c336a26` + the tables branch) | **#6435** | `40f7d4a21` |
+| **E-PR1 · the two tables** | `rd/wish-list-tables` (from `origin/main` `560e6d0f0`; `main` `9b2065225` merged in) | **#6432** | `937358e65` |
+| **E-PR2 · Studio › Wish list** | `rd/wish-list-studio` (from `origin/rd/studio-reply-by-editable` `83c336a26` — since merged to `main` — + the tables branch) | **#6435** | `540bbd12e` |
 
 **E-PR1 carries ONE migration: `supabase/migrations/20271266228704_the_wish_list_two_tables.sql`.** The pipeline applies it. Never apply it by hand. E-PR2 adds none.
+
+## CI
+- #6432's first run: one red test of 22,913 (`the committed screens map matches a fresh scan exactly`) — fixed by regenerating `screens.generated.json`. It then conflicted with `main` on that same generated file when the Event Hub train merged; `main` is merged in and the file regenerated. New runs were queued when this was written — **not seen green yet**.
+- #6435: runs queued — **not seen green yet**. The two bundle budgets are CI's to measure (`production build` · `bundle size check`).
 
 ## TODO
 - **E-PR3** · guest list + send sheet (`/[slug]/pabuya`, the Welcome door's line) — not started.
@@ -64,6 +68,7 @@ Built-vs-prototype at 375 px: `prototypes/wish-list-built-2026-10-08/` (8 side-b
 - **Event media sweep (E-PR4):** register `event_gift_records.screenshot_r2_key` in `lib/event-media-sweep-core.ts` in the PR that first uploads one (wish photos are already there).
 - **Storage:** a replaced or removed wish photo is not deleted until the event is (no displaced-object cleanup yet).
 - **`every-maker-edit-shows-before-it-saves`:** every `makerSave` in the Maker must follow a state write in the same handler — draw first, save behind it, put it back on refusal.
+- **`numbers-carry-commas`** reads a JSX `{count}` (any identifier that looks like a quantity) as a number printed without commas — name a sentence a sentence.
 - **The dup-rule guard** reads a hand-typed select that reproduces ≥ ~30 % of `WISH_ITEM_SELECT` as a dropped column. Use the constant, or a named `*_FIELDS` projection.
 - `formatPhp` (`lib/php.ts`) is the only money formatter.
 - DB tests: `event_moderators.permissions_json` is NOT NULL (`'{}'::jsonb`). `tests/db/the-wish-list-writes-keep-their-rules.db.test.ts` has a small supabase-shaped client that runs as the signed-in person with RLS on — reuse it for `recordGift`.
