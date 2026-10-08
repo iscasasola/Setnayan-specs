@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Studio › Info — redesign (2026-10-08)</title>
+<!--
+  Setnayan · Event Hub Maker · Studio › Info — REDESIGN 2026-10-08 (Fable). Design + prototype only. Nothing here is built.
+  Owner, verbatim: "so first, Info. redesign it based on our rules similar to look? no preview needed since info is just form. but how
+  each row is presented there and create a selector if needed." · "prioritize only what they need to input here" · "on studio look - when
+  we enter, you see that their is no more look title there. make this same to the other studio pages".
+  Map read from origin/main + origin/rd/background-source-cards (maker-details.tsx studio branch, studio-tools.tsx, studio-event-name.tsx,
+  opening-line-field.tsx, special-message-field.tsx, lib/hub-draft.ts, lib/name-style.ts, lib/opening-lines.ts). Sample: Maria & Jose.
+  Self-contained: no external requests. ?shot=<frame id> isolates a frame.
+-->
+<style>
+:root{--paper:#FBF9F5;--page:#F4F0E8;--ink:#2C2A29;--ink2:#5B5752;--mute:#8E8880;--line:#E6E0D6;--line2:#D9D3C8;--pill:#F1ECE3;--gold:#A9834B;--cta:#C24E25;--cta-wash:#F8E7E0;--ok:#2B744A;--ok-wash:#E6F2EA;--bad:#B3261E;--warn:#965A00;--shadow:rgba(44,42,41,.35);--in:cubic-bezier(.2,.8,.2,1);--sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;--serif:"Cormorant Garamond",Georgia,serif;--bezel:#1b1b1b}
+*{box-sizing:border-box}
+html,body{margin:0;background:#EDE8DF;font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;appearance:none;border:0;background:none;cursor:pointer;padding:0;margin:0;text-align:left}
+input,textarea{font:inherit;color:inherit}
+svg{display:block}
+.wrap{max-width:1240px;margin:0 auto;padding:22px 16px 60px}
+h1{font-family:var(--serif);font-weight:500;font-size:30px;margin:8px 0 2px}
+.lead{font-size:13.5px;color:var(--ink2);max-width:960px;line-height:1.5;margin:0 0 14px}
+.banner{display:inline-flex;align-items:center;gap:8px;background:var(--cta-wash);color:var(--cta);border:1px solid #E9C9C5;border-radius:999px;padding:5px 12px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700}
+.map{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 22px;font-size:12px;line-height:1.45;overflow:auto}
+.map h2{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:0 0 8px}
+.map table{border-collapse:collapse;width:100%;min-width:900px}
+.map th,.map td{text-align:left;vertical-align:top;padding:5px 8px;border-top:1px solid var(--line)}
+.map th{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);border-top:0}
+.map code{font-family:ui-monospace,Menlo,monospace;font-size:11px;background:var(--pill);padding:0 4px;border-radius:4px}
+.map .live{color:var(--warn);font-weight:600}.map .draft{color:var(--ok);font-weight:600}.map .shown{color:var(--mute);font-weight:600}
+.frames{display:flex;flex-wrap:wrap;gap:26px;justify-content:center;align-items:flex-start}
+.frame h2{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:700;margin:0 0 8px;text-align:center;max-width:375px}
+.frame.wide h2{max-width:900px}
+.frame .cap{max-width:375px;font-size:12px;color:var(--ink2);line-height:1.45;margin:8px auto 0;text-align:center}
+body.shot{background:#fff}body.shot .wrap{padding:0;max-width:none}body.shot .banner,body.shot h1,body.shot .lead,body.shot .map,body.shot .frame h2,body.shot .frame .cap{display:none}
+body.shot .frames{gap:0}body.shot .phone{border:0;border-radius:0;box-shadow:none}
+/* phone */
+.phone{width:375px;height:812px;background:var(--page);border:6px solid var(--bezel);border-radius:40px;position:relative;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 50px -30px var(--shadow)}
+.phone.wide{width:900px;height:700px;border-radius:18px}
+.status{height:46px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 5px;font-size:13px;font-weight:600;background:var(--paper);z-index:50}
+.status .bat{width:24px;height:11px;border:1.5px solid var(--ink);border-radius:3px;position:relative;margin-bottom:2px}
+.status .bat:after{content:"";position:absolute;left:2px;top:2px;bottom:2px;right:5px;background:var(--ink);border-radius:1px}
+.home{flex:none;height:26px;background:var(--paper);position:relative}
+.home:after{content:"";position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.85}
+.topnav{height:56px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;background:var(--paper);border-bottom:1px solid var(--line);z-index:20}
+.rnd{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;position:relative}
+.exitx{background:var(--bad);color:#fff}.applyg{background:var(--ok);color:#fff}
+.applyg .n{position:absolute;right:-3px;top:-3px;min-width:19px;height:19px;border-radius:10px;background:var(--ink);color:#fff;font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid var(--paper)}
+.undob{background:var(--pill);border:1px solid var(--line);color:var(--ink)}
+.seg{flex:1;height:44px;border-radius:999px;background:var(--pill);border:1px solid var(--line);display:flex;padding:3px;position:relative}
+.seg span{flex:1;display:flex;align-items:center;justify-content:center;border-radius:999px;font-size:13px;font-weight:600;color:var(--ink2);position:relative;z-index:1}
+.seg span.on{color:#fff}
+.seg .thumb{position:absolute;top:3px;bottom:3px;left:50%;width:calc(50% - 3px);border-radius:999px;background:var(--cta)}
+/* the page — a form: no title, opens on the first input */
+.lt{flex:1;min-height:0;position:relative;display:flex;flex-direction:column;overflow:hidden}
+.pane{flex:1;min-height:0;overflow:auto;padding:4px 16px 24px;scrollbar-width:none}
+.pane::-webkit-scrollbar{display:none}
+.wide .pane{max-width:560px;margin:0 auto;width:100%}
+/* THE ROW PATTERN — label left (+ⓘ), value or control right, one hairline, helper one line or none; a long text opens under its row */
+.r{min-height:52px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line)}
+.r.nb{border-bottom:0}
+.r.tap{cursor:pointer}
+.r .l{flex:none;font-size:15px;color:var(--ink);display:flex;align-items:center;gap:6px;max-width:48%}
+.r .l.sub{font-size:14px;color:var(--ink2);padding-left:12px}
+.i{width:18px;height:18px;border-radius:50%;border:1px solid var(--line2);display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--mute);font-style:normal;flex:none}
+.r .sp{flex:1;min-width:0}
+.r .val{flex:1;min-width:0;text-align:right;font-size:14px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r .val.empty{color:var(--cta)}
+.dd{height:40px;display:inline-flex;align-items:center;gap:6px;padding:0 10px 0 14px;border-radius:999px;background:#fff;border:1px solid var(--line2);font-size:14px;font-weight:500;flex:none;max-width:210px}
+.dd span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dd.off{color:var(--mute);border-style:dashed}
+.chev{flex:none}
+.fld{display:block;width:100%;min-height:44px;border-radius:12px;border:1px solid var(--line2);background:#fff;padding:10px 12px;font-size:15px;line-height:1.4;resize:none;outline:none}
+.fld:focus{border-color:var(--ink)}
+.fld.one{min-height:44px;height:44px;padding:0 12px}
+.open{padding:6px 0 10px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.help{font-size:12px;color:var(--mute);line-height:1.4}
+.fact{min-height:44px;display:flex;align-items:center;gap:8px;font-size:13px;line-height:1.35;color:var(--ink2);border-bottom:1px solid var(--line);padding:6px 0}
+.fact b{font-weight:500;color:var(--ink)}
+.fact small{margin-left:auto;color:var(--mute);font-size:12px;white-space:nowrap}
+.brk{display:flex;align-items:center;gap:10px;padding:16px 0 4px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:700}
+.brk:after{content:"";flex:1;height:1px;background:var(--line)}
+.fold{min-height:48px;display:flex;align-items:center;gap:8px;width:100%;border-bottom:1px solid var(--line)}
+.fold .t{flex:1;min-width:0;font-size:15px}.fold .t small{display:block;font-size:12px;color:var(--mute);margin-top:1px}
+.fold .chev{transition:transform .2s var(--in)}.fold.on .chev{transform:rotate(180deg)}
+.grp{padding-left:0}
+.sw{width:50px;height:30px;border-radius:999px;background:#D9D3C8;position:relative;flex:none;transition:background .2s}
+.sw:after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s var(--in)}
+.sw.on{background:var(--ok)}.sw.on:after{transform:translateX(20px)}
+/* a press answers at once; a save says what is happening; a failure says so with Retry */
+.live{min-height:24px;font-size:12.5px;color:var(--ink2);display:flex;align-items:center;gap:8px;padding:6px 0}
+.live .dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--line2);border-top-color:var(--cta);animation:spin .9s linear infinite;flex:none}
+.live.bad{color:var(--bad)}.live.ok{color:var(--ok)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ab{height:32px;padding:0 10px;border-radius:999px;border:1px solid var(--line2);background:#fff;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;flex:none;color:var(--ink)}
+.ab.cta{border-color:var(--cta);color:var(--cta);background:var(--cta-wash)}
+.ab svg{width:14px;height:14px}
+.qr{width:120px;height:120px;border-radius:10px;background:repeating-linear-gradient(0deg,#2C2A29 0 4px,transparent 4px 8px),repeating-linear-gradient(90deg,#2C2A29 0 4px,#fff 4px 8px);border:6px solid #fff;flex:none}
+/* sheets */
+.bd{position:absolute;inset:0;z-index:70}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:calc(100% - 16px);background:var(--paper);border-top-left-radius:20px;border-top-right-radius:20px;box-shadow:0 -10px 40px -20px var(--shadow);z-index:80;display:flex;flex-direction:column;animation:up .22s var(--in)}
+.wide .sheet{left:auto;right:16px;bottom:16px;width:360px;border-radius:20px}
+@keyframes up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+.sheet .sh{display:flex;align-items:center;gap:8px;padding:12px 12px 6px 16px;flex:none}
+.sheet .sh b{flex:1;font-size:14px}.sheet .sh small{display:block;font-weight:400;color:var(--mute);font-size:11.5px}
+.sheet .sh .x{width:36px;height:36px;border-radius:50%;background:var(--pill);display:flex;align-items:center;justify-content:center}
+.sheet .sl{overflow:auto;padding:0 10px 14px;display:flex;flex-direction:column;gap:2px}
+.mrow{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 10px 0 12px;border-radius:11px;font-size:14px;width:100%}
+.mrow.on{background:var(--cta-wash);font-weight:600}
+.mrow .ck{margin-left:auto;color:var(--cta);flex:none}
+.mrow small{display:block;font-size:11.5px;color:var(--mute);font-weight:400;line-height:1.35}
+.mrow .t{flex:1;min-width:0}
+.toast{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 14px;border-radius:999px;font-size:12px;z-index:90;white-space:nowrap;opacity:0;transition:opacity .2s;pointer-events:none}.toast.on{opacity:1}
+.ipop{position:absolute;z-index:85;left:12px;right:12px;bottom:14px;background:var(--ink);color:#fff;border-radius:14px;padding:10px 12px;font-size:12.5px;line-height:1.45;animation:up .2s var(--in)}
+.ipop b{display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="banner">Prototype · Studio › Info · nothing here is built · Fable · 2026-10-08</div>
+ <h1>Studio › Info — what they need to type, first</h1>
+ <p class="lead">No title row, no preview: the page opens on the first input. What a couple must type is open on entry (the names, the opening line, a message, what to bring); the date and venue are one quiet line each (they are set when a venue is booked); everything optional sits below a break, folded, each saying in one line what it does for a guest. One row pattern for the whole Studio: label left with ⓘ, value or control right, one hairline. Per INTERACTION_RULES § 2: a value with 3 or more choices is ONE ▾ that opens its choices (Name style, Start from, Who can view); yes/no is a switch; free words are a field. Info has no sections and no two-way value, so it needs no segmented selector and gets none. Every row rides the draft and ✓ Apply — except the Event Hub address and access, which stay live and say so once.</p>
+
+ <div class="map">
+  <h2>Map card — Studio › Info as shipped (origin/main + rd/background-source-cards), in the order drawn, and where it goes</h2>
+  <table>
+   <tr><th>#</th><th>Row today</th><th>Control today</th><th>Stored</th><th>Typed here?</th><th>Saves today</th><th>Read by (guest side)</th><th>In the redesign</th></tr>
+   <tr><td colspan="8"><b>“INFO ▾” title pill</b> — the Studio tool's own head (<code>StudioTool</code> / <code>studio-tools.tsx</code>) · <span class="shown">removed</span> (owner: no title, like Look)</td></tr>
+   <tr><td colspan="8"><b>YOUR EVENT</b> (<code>DETAILS_ITEM_GROUPS</code> · group <code>event</code>, <code>form: true</code>)</td></tr>
+   <tr><td>1</td><td>Event name · <i>Maria &amp; Jose</i> ▾</td><td>row opens in place: each person's first + last name, Name style ▾ (Full · Middle initial · Surname first — <code>NAME_STYLE_CHOICES</code>)</td><td><code>events.display_name</code> (composed by <code>coupleNameColumns</code>); <code>print_details.name_style</code></td><td>typed</td><td><span class="draft">draft</span> — <code>AutoDraft</code> as typed, ✓ Apply</td><td>the hero's names, every print, every pass (<code>editorial/data.ts</code>, <code>loaders.ts</code>)</td><td>first row, open; Name style = <b>pill selector</b> (3 fixed)</td></tr>
+   <tr><td>2</td><td>Date</td><td>fact line “Set when you book your venue in Suppliers” (<code>StudioTool part="fact"</code>)</td><td><code>events.event_date</code> (from the booking)</td><td><span class="shown">shown only</span></td><td>—</td><td>hero date line, countdown, prints</td><td>one quiet line, merged with Venue</td></tr>
+   <tr><td>3</td><td>Venue</td><td>fact line, same words</td><td><code>resolveEventVenues(bookings, row)</code></td><td><span class="shown">shown only</span></td><td>—</td><td>hero place line, directions</td><td>same quiet line</td></tr>
+   <tr><td>4</td><td>E-Gifts</td><td>the answer (a pick) + the E-Gifts manager in place: ways to give, their details, a registry link</td><td><code>events.gifts_on</code>; rows of <code>event_egift_methods</code>; the registry link</td><td>typed</td><td>the answer <span class="draft">draft</span> (<code>HUB_DRAFT_ANSWER_COLUMNS</code>); the methods and link <span class="live">live</span> (the E-Gifts page's own writes — not <code>events</code> columns, so the draft cannot hold them)</td><td>the E-Gifts scene, <code>pabuya/page.tsx</code></td><td>below the break, folded: “Lets guests send a gift”</td></tr>
+   <tr><td>5</td><td>Thank-you message</td><td>textarea (<code>PabuyaMessageEditor</code>)</td><td><code>events.pabuya_message</code></td><td>typed</td><td><span class="draft">draft</span> since “draft 1-3” (2026-10-08; the file says so)</td><td><code>pabuya/page.tsx</code> — after a gift</td><td>below the break, inside E-Gifts</td></tr>
+   <tr><td>6</td><td>Opening line</td><td>Start from ▾ (Faith · Formal · Warm · Filipino · Simple — <code>OPENING_LINE_TEMPLATES</code>) + a field + <b>Save</b> (“Guests see this right away”)</td><td><code>events.print_details.opening_line</code></td><td>typed</td><td><span class="live">live</span> — the print-words form (<code>SaveWords</code> + <code>HubSavesImmediately</code>); ⚠ <code>HUB_DRAFT_OPENING_LINE_KEY</code> exists in <code>hub-draft.ts</code> too: two doors</td><td>the invitation's opening words (hero, prints)</td><td>open on entry; Start from = <b>▾</b> (5 + your own); the field; <b>Save button gone</b> → draft</td></tr>
+   <tr><td>7</td><td>Special message</td><td>textarea (<code>SpecialMessageField</code>)</td><td><code>events.special_message</code></td><td>typed</td><td><span class="draft">draft</span> (<code>makerSave</code> patch, <code>HubDraftField</code>)</td><td><code>editorial/compose.ts</code> — a message scene</td><td>open on entry; a field</td></tr>
+   <tr><td>8</td><td>What to bring ⓘ</td><td>textarea (<code>StudioTool part="bring"</code>)</td><td><code>events.what_to_bring</code></td><td>typed</td><td><span class="draft">draft</span> after a pause</td><td><code>guest-welcome.tsx</code> — the Reminders box</td><td>open on entry; a field</td></tr>
+   <tr><td colspan="8"><b>YOUR EVENT HUB</b> (<code>StudioTool part="hub"</code> · <code>StudioHubSettings</code>) — “Guests see this right away”, said once by the address</td></tr>
+   <tr><td>9</td><td>Event Hub address</td><td><code>SlugField</code> (3–32 chars, a check, suggestions) + Save</td><td><code>events.slug</code></td><td>typed</td><td><span class="live">live</span> (owner lock: the address stays live)</td><td>every link, print and pass</td><td>below the break, under “Your Event Hub”, live, said once</td></tr>
+   <tr><td>10</td><td>Go live</td><td>▾ (<code>LaunchStdButton</code>'s own sheet)</td><td>the event's live stage</td><td>a pick</td><td><span class="live">live</span></td><td>which stage guests open</td><td>stays; ▾ (an action with its own sheet)</td></tr>
+   <tr><td>11</td><td>Who can view</td><td>▾ Private · Unlisted · Public</td><td>the event's access</td><td>a pick</td><td><span class="live">live</span> (owner: access stays live; it belongs in Event Details)</td><td>the gate on the page</td><td><b>pill selector</b> (3 fixed); recommend it ALSO lives in Event Details and leaves Info — owner call</td></tr>
+   <tr><td>12</td><td>Which version guests see</td><td>a pick</td><td>the published stage</td><td>a pick</td><td><span class="live">live</span></td><td>—</td><td>folds into Go live's sheet</td></tr>
+   <tr><td>13</td><td>Event Bar</td><td>switch (<code>StudioSwitch</code>)</td><td><code>maker.eventBar</code></td><td>a pick</td><td><span class="live">live</span></td><td>the sticky bar on the page</td><td>a switch, under Your Event Hub</td></tr>
+   <tr><td>14</td><td>Show the event QR</td><td>switch (<code>StudioQrShown</code>)</td><td><code>events.qr_shown</code></td><td>a pick</td><td><span class="draft">draft</span></td><td><code>print/page.tsx</code> — every print and pass</td><td>a switch, with the QR under it</td></tr>
+   <tr><td>15</td><td>QR code</td><td>the image + Copy · Share · Download (<code>QrActions</code>) + its look (<code>QrLookControls</code>, Pro store shell)</td><td><code>/api/website/qr/&lt;slug&gt;</code>; the look via <code>qrStyleAction</code></td><td>a pick</td><td>the look <span class="live">live</span> (a form)</td><td>prints, passes</td><td>under the switch; the look's ▾ opens its choices</td></tr>
+   <tr><td>16</td><td>Restore draft · Reset…</td><td>the draft bar's own quiet rows (<code>StudioTool part="quiet"</code>)</td><td>—</td><td>—</td><td>—</td><td>—</td><td>unchanged, last</td></tr>
+  </table>
+ </div>
+ <div class="frames" id="frames"></div>
+</div>
+<script>
+const EV={a:{first:'Maria',last:'Santos'},b:{first:'Jose',last:'Reyes'},date:'Saturday, December 12, 2026',venue:'Seda Vertis North, Quezon City',slug:'maria-and-jose'};
+const STYLES=[['full','Full','Maria Santos & Jose Reyes'],['middle-initial','Middle initial','Maria D. Santos & Jose M. Reyes'],['surname-first','Surname first','Santos, Maria D. & Reyes, Jose M.']];
+const OPEN=[['faith','Faith','With thanksgiving to God and with the blessing of our parents,'],['formal','Formal','Together with their families, request the honour of your presence at their marriage'],['warm','Warm','With joyful hearts, we invite you to celebrate the beginning of our forever'],['filipino','Filipino','Sa biyaya ng Diyos at sa basbas ng aming mga magulang, kami ay nag-aanyaya'],['simple','Simple','Please join us as we begin our life together']];
+const VIEW=[['private','Private'],['unlisted','Unlisted'],['public','Public']];
+function S0(){return {n:3,names:false,style:'full',openFrom:'formal',opening:'Together with their families, request the honour of your presence at their marriage',special:'',bring:'',edit:null,more:false,hub:false,gifts:true,thanks:'Thank you for thinking of us — see you on the twelfth.',view:'unlisted',bar:true,qr:true,sheet:null,ipop:null,save:null};}
+const F={};
+const chev=()=>`<svg class="chev" width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>`;
+const I=(k,t)=>`<button class="i" data-act="ipop" data-v="${k}" aria-label="${t}">i</button>`;
+const ck=`<svg class="ck" width="16" height="16" viewBox="0 0 16 16"><path d="M3 8l3.5 3.5L13 5" fill="none" stroke="currentColor" stroke-width="2"/></svg>`;
+const ICO={retry:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12a8 8 0 11-2.3-5.7M20 4v5h-5"/></svg>',copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg>',share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8h16v-8M12 16V3m0 0L8 7m4-4l4 4"/></svg>',dl:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v13m0 0l-4-4m4 4l4-4M4 21h16"/></svg>'};
+const AB=(tone,ico,word,act,v='')=>`<button class="ab ${tone}" data-act="${act}" data-v="${v}" aria-label="${word}">${ICO[ico]}<span>${word}</span></button>`;
+const namesLine=S=>STYLES.find(s=>s[0]===S.style)[2].replace(/ [A-Z]\. /g,' ').split(' & ').map(x=>x.split(',')[0].split(' ')[0]).join(' & ');
+function saveLine(S,key){ if(!S.save||S.save.key!==key) return ''; const s=S.save; if(s.state==='saving') return `<div class="live" aria-live="polite"><span class="dot"></span>Saving to your draft…</div>`; if(s.state==='bad') return `<div class="live bad" aria-live="polite">Could not save. ${AB('cta','retry','Retry','retry',key)}</div>`; return ''; }
+function textRow(S,key,label,info,value,placeholder,help){ const open=S.edit===key; const empty=!value;
+  if(open) return `<div class="open"><div class="r nb" style="min-height:40px"><div class="l">${label} ${I(key,info)}</div><div class="sp"></div><button class="ab" data-act="done" data-v="${key}">Done</button></div><textarea class="fld" data-key="${key}" rows="3" placeholder="${placeholder}" aria-label="${label}">${value}</textarea>${help?`<div class="help">${help}</div>`:''}${saveLine(S,key)}</div>`;
+  return `<div class="r tap" role="button" tabindex="0" data-act="edit" data-v="${key}"><div class="l">${label} ${I(key,info)}</div><div class="val ${empty?'empty':''}">${empty?'Add':value}</div>${chev()}</div>${saveLine(S,key)}`; }
+function paneHTML(S){ let h='';
+  /* 1 · the names — one row, opens the two people and the Name style pill */
+  h+=`<div class="r tap" role="button" tabindex="0" data-act="names"><div class="l">Event name ${I('names','Read on the hero, every print and every pass')}</div><div class="val">${namesLine(S)}</div>${chev()}</div>`;
+  if(S.names) h+=`<div class="open"><div style="display:flex;gap:8px"><input class="fld one" value="${EV.a.first}" aria-label="First name"><input class="fld one" value="${EV.a.last}" aria-label="Last name"></div><div style="display:flex;gap:8px"><input class="fld one" value="${EV.b.first}" aria-label="First name"><input class="fld one" value="${EV.b.last}" aria-label="Last name"></div><div class="r nb" style="min-height:44px"><div class="l sub" style="padding-left:0">Name style</div><div class="sp"></div><button class="dd" data-act="sheet" data-v="style"><span>${STYLES.find(s=>s[0]===S.style)[1]}</span>${chev()}</button></div><div class="help">${STYLES.find(s=>s[0]===S.style)[2]} — on prints and passes</div>${saveLine(S,'names')}</div>`;
+  /* 2–3 · shown only: one quiet line */
+  h+=`<div class="fact"><span><b>${EV.date}</b><br>${EV.venue}</span><small>set when you book</small></div>`;
+  /* 6 · the opening line — Start from ▾ opens the five; the field; no Save */
+  h+=`<div class="r"><div class="l">Opening line ${I('opening','The first words of the invitation, above your names')}</div><div class="sp"></div><button class="dd" data-act="sheet" data-v="from"><span>${S.openFrom==='own'?'Your own':'Start from · '+OPEN.find(o=>o[0]===S.openFrom)[1]}</span>${chev()}</button></div>`;
+  h+=`<div class="open" style="padding-top:8px"><textarea class="fld" data-key="opening" rows="2" aria-label="Opening line">${S.opening}</textarea>${saveLine(S,'opening')}</div>`;
+  /* 7–8 · free words */
+  h+=textRow(S,'special','Special message','A message of your own on its own page','', 'Something you want every guest to read…',S.special?'':'');
+  h=h.replace(`data-key="special" rows="3" placeholder="Something you want every guest to read…" aria-label="Special message"></textarea>`,`data-key="special" rows="3" placeholder="Something you want every guest to read…" aria-label="Special message">${S.special}</textarea>`);
+  h=h.replace(`<div class="val ${S.special?'':'empty'}">${S.special?S.special:'Add'}</div>`,`<div class="val ${S.special?'':'empty'}">${S.special||'Add'}</div>`);
+  h+=textRow(S,'bring','What to bring','Shown in the Reminders box on the Event Hub',S.bring,'Fans, flats for dancing, your invitation…','');
+  /* the break — optional, folded, each one line of what it does for a guest */
+  h+=`<div class="brk">More for guests</div>`;
+  h+=`<button class="fold ${S.more?'on':''}" data-act="more"><span class="t">E-Gifts<small>Lets guests send a gift, and thanks them after</small></span><span class="sw ${S.gifts?'on':''}" aria-hidden="true"></span>${chev()}</button>`;
+  if(S.more) h+=`<div class="open"><div class="r nb" style="min-height:44px"><div class="l sub" style="padding-left:0">Ways to give</div><div class="val">GCash · BDO · a registry link</div>${chev()}</div><div class="r nb" style="min-height:40px"><div class="l sub" style="padding-left:0">Thank-you message ${I('thanks','Sent to a guest after a gift')}</div></div><textarea class="fld" data-key="thanks" rows="2" aria-label="Thank-you message">${S.thanks}</textarea>${saveLine(S,'thanks')}</div>`;
+  h+=`<button class="fold ${S.hub?'on':''}" data-act="hub"><span class="t">Your Event Hub<small>The address, who can view, the QR — changes right away</small></span>${chev()}</button>`;
+  if(S.hub){ h+=`<div class="open"><div class="help" style="color:var(--warn)">These change your live Event Hub right away — not on ✓ Apply.</div>
+   <div class="r"><div class="l">Address ${I('addr','On every link, print and pass')}</div><div class="val">setnayan.com/${EV.slug}</div>${chev()}</div>
+   <div class="r"><div class="l">Go live</div><div class="sp"></div><button class="dd" data-act="sheet" data-v="golive"><span>Save the Date is live</span>${chev()}</button></div>
+   <div class="r"><div class="l">Who can view</div><div class="sp"></div><button class="dd" data-act="sheet" data-v="view"><span>${VIEW.find(v=>v[0]===S.view)[1]}</span>${chev()}</button></div>
+   <div class="r"><div class="l">Event Bar ${I('bar','The sticky bar with the pages at the foot of the Event Hub')}</div><div class="sp"></div><button class="sw ${S.bar?'on':''}" data-act="bar" role="switch" aria-checked="${S.bar}" aria-label="Event Bar"></button></div>
+   <div class="r"><div class="l">Show the event QR ${I('qr','On every print and pass; guests open the Event Hub by scanning it')}</div><div class="sp"></div><button class="sw ${S.qr?'on':''}" data-act="qr" role="switch" aria-checked="${S.qr}" aria-label="Show the event QR"></button></div>
+   ${S.qr?`<div style="display:flex;gap:12px;align-items:center;padding:8px 0"><span class="qr" aria-label="QR code for your Event Hub"></span><div style="display:flex;flex-direction:column;gap:6px">${AB('','copy','Copy','copy')}${AB('','share','Share','share')}${AB('','dl','Download','dl')}</div></div><div class="r nb"><div class="l sub" style="padding-left:0">QR look</div><div class="sp"></div><button class="dd" data-act="sheet" data-v="qrlook"><span>Ink on paper</span>${chev()}</button></div>`:''}</div>`; }
+  h+=`<div class="r nb" style="min-height:44px;padding-top:8px"><div class="sp"></div><button class="ab" data-act="noop">Restore draft</button><button class="ab" data-act="noop" style="color:var(--bad)">Reset…</button></div>`;
+  return h; }
+const IPOP={names:['Event name','Read on the hero, every print and every pass. Your two first names as the page shows them; the full names and their style on prints.'],opening:['Opening line','The first words of the invitation, above your names. Start from one of five, then make it yours.'],special:['Special message','A message of your own on its own page of the Event Hub.'],bring:['What to bring','Shown in the Reminders box on the Event Hub.'],thanks:['Thank-you message','Sent to a guest after a gift.'],addr:['Address','On every link, print and pass. Changing it ends the old link — guests who saved it would need the new one.'],bar:['Event Bar','The sticky bar with the pages at the foot of the Event Hub.'],qr:['Show the event QR','On every print and pass; guests open the Event Hub by scanning it.']};
+function sheetHTML(S){ if(!S.sheet) return ''; let title='',sub='',body=''; const X=`<button class="x" data-act="close" aria-label="Close">✕</button>`;
+  if(S.sheet==='style'){ title='Name style'; sub='On prints and passes'; body=STYLES.map(([k,n,ex])=>`<button class="mrow ${S.style===k?'on':''}" data-act="style" data-v="${k}"><span class="t">${n}<small>${ex}</small></span>${S.style===k?ck:''}</button>`).join(''); }
+  else if(S.sheet==='view'){ title='Who can view'; sub='Changes right away'; body=[['private','Private','Only your hosts and your guests.'],['unlisted','Unlisted','Anyone with the link — not listed publicly.'],['public','Public','Anyone can find and open it; people can ask to join.']].map(([k,n,h])=>`<button class="mrow ${S.view===k?'on':''}" data-act="view" data-v="${k}"><span class="t">${n}<small>${h}</small></span>${S.view===k?ck:''}</button>`).join(''); }
+  else if(S.sheet==='from'){ title='Start from'; sub='Pick one, then make it yours'; body=OPEN.map(([k,n,b])=>`<button class="mrow ${S.openFrom===k?'on':''}" data-act="from" data-v="${k}"><span class="t">${n}<small>${b}</small></span>${S.openFrom===k?ck:''}</button>`).join('')+`<button class="mrow ${S.openFrom==='own'?'on':''}" data-act="from" data-v="own"><span class="t">Your own<small>Keep what you wrote</small></span>${S.openFrom==='own'?ck:''}</button>`; }
+  else if(S.sheet==='golive'){ title='Go live'; body=[['std','Save the Date','What guests open today'],['inv','Invitation','Opens the full invitation'],['day','The Day','The schedule, seating and photos']].map(([k,n,b])=>`<button class="mrow ${k==='std'?'on':''}" data-act="close"><span class="t">${n}<small>${b}</small></span>${k==='std'?ck:''}</button>`).join(''); }
+  else if(S.sheet==='qrlook'){ title='QR look'; body=[['ink','Ink on paper'],['brand','Your colours ◆'],['mono','Monogram in the middle ◆']].map(([k,n])=>`<button class="mrow ${k==='ink'?'on':''}" data-act="close"><span class="t">${n}</span>${k==='ink'?ck:''}</button>`).join(''); }
+  return `<div class="bd" data-act="close"></div><div class="sheet"><div class="sh"><b>${title}${sub?`<small>${sub}</small>`:''}</b>${X}</div><div class="sl">${body}</div></div>`; }
+function phoneHTML(S,id,wide){ const ip=S.ipop?IPOP[S.ipop]:null;
+  const nav=`<div class="topnav"><span class="rnd exitx" aria-label="Exit"><svg width="18" height="18" viewBox="0 0 18 18"><path d="M4 4l10 10M14 4L4 14" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></span><span class="seg"><span class="thumb"></span><span>Stages</span><span class="on">Studio</span></span><span class="rnd undob" aria-label="Undo"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 5L3 9l4 4M3 9h8a4 4 0 010 8"/></svg></span><span class="rnd applyg" aria-label="Apply"><svg width="18" height="18" viewBox="0 0 18 18"><path d="M3 9.5l4 4L15 5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg><span class="n">${S.n}</span></span></div>`;
+  return `<div class="status"><span>9:41</span><span class="bat"></span></div>${nav}<div class="lt"><div class="pane">${paneHTML(S)}</div>${sheetHTML(S)}${ip?`<div class="ipop" data-act="close"><b>${ip[0]}</b>${ip[1]}</div>`:''}<div class="toast" data-toast ${S.toast?'style="opacity:1"':''}>${S.toast||''}</div></div>${wide?'':'<div class="home"></div>'}`; }
+function placeThumbs(ph,S){ ph.querySelectorAll('[data-pills-none]').forEach(p=>{ const th=p.querySelector('.thumb'); const on=p.querySelector('.on'); if(!th||!on) return; const x=on.offsetLeft-3,w=on.offsetWidth; const key=p.closest('.open')?'style':'view'; const prev=S._th?.[key]; if(prev&&(prev.x!==x||prev.w!==w)){th.style.transition='none';th.style.setProperty('--x',prev.x+'px');th.style.setProperty('--w',prev.w+'px');void th.offsetWidth;th.style.transition='';} th.style.setProperty('--x',x+'px');th.style.setProperty('--w',w+'px');(S._th??={})[key]={x,w}; }); }
+function paint(id){ const S=F[id]; const ph=document.getElementById('ph-'+id); const pane=ph.querySelector('.pane'); const sc=pane?pane.scrollTop:0; const act=document.activeElement; const fk=act&&act.dataset?act.dataset.key:null; const pos=act&&act.selectionStart;
+  ph.innerHTML=phoneHTML(S,id,ph.classList.contains('wide')); const p2=ph.querySelector('.pane'); if(p2) p2.scrollTop=S.scrollTo??sc; S.scrollTo=undefined; placeThumbs(ph,S);
+  if(fk){ const el=ph.querySelector(`[data-key="${fk}"]`); if(el){ el.focus(); try{el.setSelectionRange(pos,pos);}catch(e){} } } }
+/* a drafted save: the press answers at once (the row shows the words), the line says "Saving to your draft…" only past 300 ms, the ✓ count bumps when it lands */
+function toast(id,t){ const el=document.querySelector('#ph-'+id+' [data-toast]'); if(!el) return; el.textContent=t; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),1600); }
+function draftSave(id,key,fail){ const S=F[id]; const t=setTimeout(()=>{S.save={key,state:'saving'};paint(id);},300); setTimeout(()=>{clearTimeout(t); if(fail){S.save={key,state:'bad'};} else {S.save=null;S.n++;} paint(id); if(!fail) toast(id,'Saved to your draft · '+S.n+' to apply');},fail?900:700); }
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-act]'); if(!b) return; const ph=e.target.closest('.phone'); if(!ph) return; const id=ph.id.slice(3); const S=F[id]; const a=b.dataset.act,v=b.dataset.v;
+  if(a==='ipop'){S.ipop=S.ipop===v?null:v;e.stopPropagation();}
+  else if(a==='close'){S.sheet=null;S.ipop=null;}
+  else if(a==='sheet'){S.sheet=v;}
+  else if(a==='names'){S.names=!S.names;S.edit=null;S.more=false;S.hub=false;}
+  else if(a==='style'){S.style=v;S.sheet=null;draftSave(id,'names');}
+  else if(a==='from'){S.sheet=null; S.openFrom=v; if(v!=='own') S.opening=OPEN.find(o=>o[0]===v)[2]; draftSave(id,'opening');}
+  else if(a==='edit'){S.edit=v;S.names=false;S.more=false;S.hub=false;}
+  else if(a==='done'){S.edit=null;}
+  else if(a==='more'){S.more=!S.more;S.hub=false;S.edit=null;S.names=false;}
+  else if(a==='hub'){S.hub=!S.hub;S.more=false;S.edit=null;S.names=false;}
+  else if(a==='view'){S.view=v;S.sheet=null;toast(id,'Who can view: '+VIEW.find(x=>x[0]===v)[1]+' — live');}
+  else if(a==='bar'){S.bar=!S.bar;}
+  else if(a==='qr'){S.qr=!S.qr;draftSave(id,'qr');}
+  else if(a==='retry'){S.save=null;paint(id);draftSave(id,v,false);return;}
+  paint(id); });
+/* typing: the words are on the row at once; one draft write after a pause (the names' AutoDraft beat) */
+document.addEventListener('input',e=>{ const el=e.target.closest('[data-key]'); if(!el) return; const id=e.target.closest('.phone').id.slice(3); const S=F[id]; const k=el.dataset.key; if(k==='opening'){S.opening=el.value;S.openFrom='own';} else S[k]=el.value; clearTimeout(S._t); S._t=setTimeout(()=>draftSave(id,k),600); });
+const FRAMES=[
+ ['entry','01 · On entry — no title; the names, the date line, the opening line, a message, what to bring; optional below the break',s=>{},'Only what a couple must type is open. The date and venue are one quiet line (set when they book). E-Gifts and Your Event Hub are folded, each saying in one line what it does for a guest.'],
+ ['editing','02 · Editing a field — Special message open in place, the words on the row at once',s=>{s.edit='special';s.special='We are so glad you are coming. Dress for a garden evening — the reception is outdoors.';},'A long text opens under its row with Done; the draft write follows after a pause.'],
+ ['from-open','03 · Start from ▾ open — five starting points and “Your own”',s=>{s.sheet='from';},'A choice among more than four, each with its first words: a ▾ that opens, never cycles.'],
+ ['names-open','04 · Event name open — the two people and Name style ▾ (three choices → ONE dropdown, INTERACTION_RULES § 2)',s=>{s.names=true;s.style='middle-initial';},'The helper shows the full line as prints will carry it.'],
+ ['style-open','04b · Name style ▾ open — each choice with its example',s=>{s.names=true;s.sheet='style';},''],
+ ['saved-toast','04c · A save landed — the small toast (§ 5: success = a small toast), the ✓ count bumped',s=>{s.names=true;s.n=4;s.toast='Saved to your draft · 4 to apply';},''],
+ ['more-open','05 · The optional part opened — E-Gifts with its ways to give and the thank-you message',s=>{s.more=true;s.scrollTo=380;},'Folded by default; one line says what it does for a guest.'],
+ ['hub-open','06 · Your Event Hub opened — address, Go live ▾, Who can view ▾, Event Bar, the QR',s=>{s.hub=true;s.scrollTo=520;},'These rows change the live Event Hub right away and say so once at the top of the group — the one honest exception to the draft.'],
+ ['saving','07 · A save in progress — “Saving to your draft…” after 300 ms',s=>{s.save={key:'bring',state:'saving'};s.bring='Fans and flats for dancing';},'The press answered at once (the words are on the row); the line names the step; the ✓ count bumps when it lands.'],
+ ['failed','08 · A failed save — “Could not save.” with Retry',s=>{s.save={key:'bring',state:'bad'};s.bring='Fans and flats for dancing';},'Never silent; Retry runs the same write.'],
+ ['wide','09 · ~900 wide — the same form, one column, centred',s=>{s.names=true;},'No three columns for a form: one column at a reading width.'],
+];
+const q=new URLSearchParams(location.search); const shot=q.get('shot'); if(shot) document.body.classList.add('shot');
+const host=document.getElementById('frames');
+FRAMES.forEach(([id,title,setup,cap])=>{ if(shot&&shot!==id) return; const S=S0(); setup(S); F[id]=S; const wide=id==='wide'; const el=document.createElement('div'); el.className='frame'+(wide?' wide':''); el.innerHTML=`<h2>${title}</h2><div class="phone ${wide?'wide':''}" id="ph-${id}"></div><div class="cap">${cap}</div>`; host.appendChild(el); paint(id); });
+</script>
+</body>
+</html>
