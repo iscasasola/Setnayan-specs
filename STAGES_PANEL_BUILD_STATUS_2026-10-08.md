@@ -201,3 +201,81 @@ Branch `rd/rsvp-stage-as-parts` (worktree `~/Documents/Claude/Projects/wt-rsvp-p
 **NOT verified (needs the signed-in preview) — everything at runtime:** the frame's position on the three screens (the `inert` hit-test falling to the part under a control; the masthead stamps landing on the right nodes for every theme skin), the tools opening per part, the tab ending at scrollY 0 on a KEPT frame, the label, the tiles list per screen, the second-tap caret and the keyboard rising on iOS, the Done bar riding the keyboard, a typed word reaching the draft and the Apply count.
 
 **Round 5 · RSVP — fix after the controller's preview probe (011fc16, 375 px), head `01469dfe2`:** picking, the frame, inert controls and tab → scrollY 0 were confirmed on the preview; ONE fault — **the tab row was under the RSVP layer** (tabs at y 706–750, `elementFromPoint` at each centre = the RSVP frame; only a scripted click reached them). Cause: the row is drawn over the foot of the work area (`absolute … z-[25]` in the shell); the RSVP stage is a layer OVER the work area (`absolute inset-0 z-30`). Fix: on the RSVP stage the row is drawn into a slot at the foot of the stage's own flex column, after its screens (`RSVP_STAGE_BAR_SLOT`, in flow) — the screens end above it at every panel height; the label says the tab's word ("RSVP › Form"). Guard: "👆 a FINGER reaches the tabs" in `the-rsvp-stage-is-parts.test.ts` (host derived from the two layers' order; slot = the sibling after the screens in one flex column; 4 sabotages red). tsc ✓ · lint ✓ · 85 pinning files 841/841. **Trap:** anything drawn into the shell over the work area's foot is UNDER the RSVP layer — check `elementFromPoint`, never a scripted `.click()`. Not re-verified at runtime.
+
+## Round 6 — the guest follows the Maker (Builder F, 2026-10-08)
+
+Owner, DECISION_LOG 2026-10-08 "EIGHT OWNER ANSWERS", answer 5. Asked: *"the Maker now files parts by the prototype (for example Countdown on Welcome), while guests' phones still use the old filing (Countdown on Details). Should the guest page change to match?"* — *"yes"*. This closes Round 4's "Owner call: move the guest page to match, or not."
+
+Branch `rd/guest-pages-follow-the-maker` (base `origin/rd/studio-reply-by-editable` @ 83c336a26) · **draft PR #6433** (`do-not-auto-merge`, auto-merge off) · head **0edb0a9d5** · worktree `~/Documents/Claude/Projects/wt-guest-filing`. **Changes LIVE guest pages — merges only after the owner's 375 side-by-side OK; not part of any train.** No migration, +0 server actions, no new client code.
+
+> A handoff is not evidence. Nothing below was seen at runtime — no sign-in, and the public key cannot read the sample event locally. Re-measure on the preview.
+
+**One filing.** `lib/maker-stage-filing.ts` `prototypePageOf` (the prototype's page for a canvas key, `MAKER_STAGE_PAGES`) is read by BOTH `makerStagesPageOf` (the Stages canvas — same answers as Round 4) and the new `readerPageOf` (every reader's page: a guest, a reader without a key, a supplier, the couple reading their own page, and a See as sample guest). `site-body.tsx` asks it for each part it draws (`readerAt`); `fileScenes` splits the couple's scenes into three runs (the Welcome's own · the page's own sections · another tab).
+
+**The fallback order, stated** (a reader's tabs stay the tabs of their OWN bar — a tab with nothing behind it is not drawn):
+1. the prototype's page, when this reader's bar has that tab;
+2. else the tab the part asked for before this ruling;
+3. else the nearest tab above that in `HUB_TAB_ORDER` — live · home · details · story · gallery · me;
+4. else the bar's first tab.
+A section no prototype part names (the checklist, the reply lines, the scan-trail switch, the song request, the camera card, the doorway strip) has no step 1 — it is not moved.
+
+**Before → after** (tab; "=" unchanged; "—" not drawn for that reader, before or after). Measured by the roster test on the real bar resolver and filing (`FILING_TABLE=1 tsx --test lib/a-guests-pages-are-filed-like-the-makers.test.ts` prints all 478 rows).
+
+*Invitation* (bar: Welcome · Details · Our Love Story · Me — a reader without a key has no Me)
+
+| Part | signed out | guest · not replied | guest · yes | guest · declined | supplier | the couple |
+|---|---|---|---|---|---|---|
+| Cover (logo · title · names · date · place · invite line · link) + the reply card | Welcome = | Welcome = | Welcome = | Welcome = | Welcome = | Welcome = |
+| **Countdown** | **Details → Welcome** | **Details → Welcome** | **Details → Welcome** | **Details → Welcome** | **Details → Welcome** | **Details → Welcome** |
+| **Message** | **Details → Welcome** | **Details → Welcome** | **Details → Welcome** | **Details → Welcome** | **Details → Welcome** | **Details → Welcome** |
+| Greeting line | — | Welcome = | Welcome = | Welcome = | — | — |
+| Checklist · reply lines ("We'll miss you", the saved note, the change link) | — | Welcome = | Welcome = | Welcome = | — | — |
+| **The guest's own look** | — | **Welcome → Me** | **Welcome → Me** | **Welcome → Me** | — | — |
+| E-Gifts door | Welcome = | Welcome = | Welcome = | Welcome = | Welcome = | Welcome = |
+| THE DETAILS · WHEN · WHERE (open browse) | Details = | — | — | — | Details = | Details = |
+| Schedule · Venue · Dress code · the couple's other scenes · What to bring | Details = | Details = | Details = | Details = | Details = | Details = |
+| Walking order | Details = | Details = | Details = | Details = | Details = | Details = |
+| Our Love Story | Story = | Story = | Story = | Story = | Story = | Story = |
+| **Seat line "Your seat · Table N →"** (once seats may be seen) | — | — | **Welcome + Me → Me, once** | — | — | — |
+| Me (ticket · names · save) | — | Me = | Me = | Me = | — | Me = |
+
+*The Day* (bar: Live · Welcome · Camera · Gallery · Me — a reader without a key: Live · Welcome)
+
+| Part | signed out | guest · not replied | guest · yes | guest · declined | supplier | the couple |
+|---|---|---|---|---|---|---|
+| Cover + the arrival action | Live = | Live = | Live = | Live = | Live = | Live = |
+| **"Happening now" card** (open browse) | Live = | **Welcome → Live** | **Welcome → Live** | **Welcome → Live** | Live = | Live = |
+| Directions lead · the stream · the day's programme · the wall · song request · camera card | Live = | Live = | Live = | Live = | Live = | Live = |
+| **The guest's table (floor plan)** | — | **Welcome → Me** | **Welcome → Me** | **Welcome → Me** | — | — |
+| **The seat finder link** | — | — | — | — | Welcome = (no Me) | **Welcome → Me** |
+| The day's Welcome (look · reminders · walking order · venue directions · E-Gifts) | Welcome = | Welcome = | Welcome = | Welcome = | Welcome = | Welcome = |
+| Schedule scene | Live = | Live = | Live = | Live = | **Welcome → Live** | Live = |
+| **Venue scene · Dress code scene** (and What to bring, where it is on the day) | **Live → Welcome** | **Live → Welcome** | **Live → Welcome** | **Live → Welcome** | Welcome = | **Live → Welcome** |
+| **Walking order** | **Live → Welcome** | (in the day's Welcome) | (same) | (same) | Welcome = | **Live → Welcome** |
+| Photo moments · Your photos · other scenes · THE DETAILS | Live = | Live = | Live = | Live = | Welcome = | Live = |
+| The couple's Photos scene (open browse), where a Gallery tab is drawn | Live = | **Live → Gallery** | **Live → Gallery** | **Live → Gallery** | Welcome = | **Live → Gallery** |
+| Photos of you · your shots | — | Gallery = | Gallery = | Gallery = | — | — |
+| Scan-trail switch | — | Welcome = | Welcome = | Welcome = | — | — |
+| Me (ticket · names · save) | — | Me = | Me = | Me = | — | Me = |
+
+(A supplier's page sections asked for their "Cues" tab, which their bar does not draw, and had fallen onto Welcome; the parts the prototype names now go to the prototype's page.)
+
+**The bar stays honest — two tabs are resolved from what asks for them:**
+- **Details** (Invitation) is drawn only when a scene's own page is Details. A couple with only a Countdown and a Message had a Details tab holding both; both are Welcome's now, so that tab is not drawn. `#site-details` (the cover's "the day, the place, the story ↓") then lands on the Welcome's scenes.
+- **The day's Welcome** is drawn when its own parts (look · reminders · walk · venue · E-Gifts) or a scene filed on it exist. A guest's table no longer makes the tab by itself: on a bare day (no venue to point at, no dress code, no reminders, no walk, no gifts) a seated guest had a Welcome holding only their table — now no Welcome tab, and what else stood there (the scan-trail switch, the doorway strip; Photos of you when no Gallery tab is drawn) shows on Live, as it already did for a guest with no table.
+
+**Deviations and things to confirm (each with a recommendation):**
+1. **See as › a sample guest in the Stages canvas follows the guests.** The guest tree IS the guest's page wherever it is drawn, so it is re-filed with them (it agrees with the Maker's own canvas now). The ordinary Stages canvas (no See as, and See as › Signed out) is untouched — its arms read what they read before (pinned). Recommendation: keep.
+2. **On Me, the table says "It's on your ticket in Me"** — the seat block's own line (`your-seat-styles.tsx` `OnYourTicket`, R2's renderer, not edited) links to the page it now stands on. Recommendation: R2 drops the line when the block is on Me.
+3. **On the day's Me the table is named twice**: the floor plan block (moved) and Me's own "Your seat · Table N →" line under the ticket (`page.tsx` `meSlotFor`, not edited). Recommendation: Me's line stands down when the plan is drawn — one line in `page.tsx`; owner's word first (it removes a line a guest sees today).
+4. **On the day's Welcome the venue is shown twice for a guest**: the Welcome's own directions (the ONE venue now) and the couple's Venue scene (moved from Live). Both were drawn before, on two tabs. Recommendation: owner picks one for Welcome.
+5. **Order on Me**: reply card · Me's four parts · **the guest's look** (only where the four parts are not drawn) · **the table** · the ticket. The prototype lists no ticket on the Invitation's Me; the table is before the ticket (prototype: seats · pass).
+6. **Order on the Invitation's Welcome**: cover + reply card · checklist · **countdown** · greeting · **message** · reply lines · E-Gifts — the prototype's (reply card · countdown · greeting · message · E-Gifts). The prototype's "opening" and "reminders" are not drawn on the Welcome yet (no canvas, unchanged).
+7. **Not re-pointed, reported:** Find your seat › "Back to the invitation" still returns to `#site-details` (`find-seat/_lib/back-to-the-invitation.ts`). On a tabbed page the seat line it names was already on Welcome/Me, not Details, before this round; it is on Me now. A reader without a key has no Me, so one mark cannot serve both — left as shipped. Recommendation: return a guest to `?tab=me`.
+8. **`lib/maker-navigator-tabs.ts` `anchorOfTile`** (first-load file, not edited) still describes the older filing in its comments; it answers only for keys no part names.
+
+**Tests** (each seen red by sabotage — 19 sabotages): `lib/a-guests-pages-are-filed-like-the-makers.test.ts` — 13 tests on the real `resolveSiteNav` · `readerPageOf` · `ownPageOf` · `fileScenes` · `makerStagesPageOf` · `welcomeParts` · `welcomePartsOnTheDay`, over six readers × two stages × three events (478 sections), and every `group(…)` of both trees accounted for. Extended: `every-stages-tab-has-its-own-page` (+1, 1 pin amended), `each-tab-is-its-own-page` (+1, 1 amended), `the-stage-pages-are-the-prototypes` (+1). Pins amended with the owner's words, not weakened: `the-day-guest-pages`, `the-invitation-opens-on-the-mark`, `the-hub-is-cards`, `the-panel-follow-ups-are-real`, `welcome-is-the-guests-own`.
+
+**Checks:** on 0edb0a9d5 — full `tsc --noEmit` 0 errors under the lock (rc 0, 197 s) · `pnpm -s lint` 0 errors · the 156 test files that pin the touched files 1,551 pass / 0 fail (the four named files 49 / 49) · 36 `ci.yml` node guards + `lint:dup-rule` green · no generated baseline needed regenerating · `tests/db` has nothing that pins the page's sections or tabs (grepped). Full unit suite, DB replay, production build and both bundle budgets: CI on #6433 (pending when this was written). The base had not moved (83c336a26) at the push.
+
+**NOT verified (needs the preview):** every pixel. No local side-by-side was possible: the guest page reads through the service key, the local fallback is the public key, and the public key cannot read `events` or `invitation_widgets` (measured: `[]` and `42501`); the maker lab is a stand-in page, not `site-body`. Screens wanted at 375, before (main) and after (this branch), same event: Invitation — Welcome · Details · Our Love Story · Me, as a guest and signed out; The Day — Live · Welcome · Gallery · Me, as a seated guest and signed out; a lean event (countdown + message only) to see the Details tab gone and the cover's link land on the countdown.
