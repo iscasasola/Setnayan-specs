@@ -75,3 +75,5 @@ Owner, verbatim: *"so the idea is this will be a type of selector we will have a
 - **Page card:** reads and presses like an app button (the mark as an app-icon tile).
 - **Switch:** terracotta when on, grey when off — owner, verbatim: *"switch is teracota or greyed out"* (after first asking about green/red and seeing both). The knob travels and lands with the same small bounce.
 - **ⓘ explanation:** on a phone it is a popup in the centre of the screen with one "Got it" button; on a desktop a small note beside the ⓘ — owner: *"explanation on what you show is for desktop / there is an appropriate info like a center screen popup?"*.
+- **Form row, editing a typed answer:** tapping the answer opens the field across the WHOLE row (the row's name stays above it as a small caption), with a round ✕ (leave it as it was; Esc) and a round terracotta ✓ (keep it; Enter) at the right — owner: *"when we click to edit. it will fill up the whole width with a (X) (v)?"*. Then "Saved" beside the answer; a failure says so with Try again.
+- **Stages tool icons (owner's pick, "S5 T4 A5"):** Style = swatch-book · Text = a-large-small · Animate = orbit.
