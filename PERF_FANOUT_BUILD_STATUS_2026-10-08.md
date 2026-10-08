@@ -52,4 +52,8 @@ to invalidate; saves 3–4 of 35 per guest render.
   5 min per job key PER SERVER INSTANCE; the dashboard writes `setnayan_ai_guard_log` on every open.
 
 ## Checks / PR
-See the PR (number added when opened).
+Draft PR **#6448** (`rd/one-question-per-render`), label `do-not-auto-merge`, auto-merge OFF.
+Local: 1,595 unit tests that pin the touched files pass · new guards 15 + 5 + rewritten section pass ·
+2 DB tests pinning the RPCs pass (13 + 9) · 40 of ci.yml's node guards pass (the 2 that need a
+production build run in CI) · dup-rule lint clean · 14 sabotages each seen red.
+Full tsc + next lint: queued on the heavy lock at the time of writing — CI runs both on the PR.
