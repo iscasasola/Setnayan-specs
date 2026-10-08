@@ -1,10 +1,71 @@
-# E-Gifts › Wish list — build status (Builder E1, 2026-10-08)
+# E-Gifts › Wish list — build status (Builder E1, then Builder EH, 2026-10-08)
 
 Contract: `EGIFTS_WISH_LIST_2026-10-08_fable.md` · prototype `prototypes/egifts_wish_list_2026-10-08_fable.html` · owner: "ok wish list" · "1. per item 2. live".
-Worktree: `~/Documents/Claude/Projects/wt-wish` (on `rd/wish-list-studio`).
-Built-vs-prototype at 375 px: `prototypes/wish-list-built-2026-10-08/` (8 side-by-sides + 8 built frames; the maker lab on fixtures).
 
-## DONE (pushed · all three DRAFT · `do-not-auto-merge` · auto-merge off)
+> A handoff is not evidence. Re-read every head and check below before acting on it.
+
+## STATE (Builder EH, 2026-10-08 evening) — all four DRAFT · `do-not-auto-merge` · auto-merge off
+
+| Step | Branch | PR | Head | Mergeable when written |
+|---|---|---|---|---|
+| E-PR1 · the two tables | `rd/wish-list-tables` | #6432 | MERGED (tables live in production) | — |
+| **E-PR2 · Studio › Wish list** | `rd/wish-list-studio` | **#6435** | `8a5883272` | MERGEABLE, checks running |
+| **E-PR3 · the guest's list + send sheet** | `rd/wish-list-guest` | **#6440** | `2e22ecee8` | MERGEABLE, checks running |
+| **E-PR4 · "I sent it"** | `rd/wish-list-record` | **#6444** | `1e6647f4b` | MERGEABLE, checks running |
+| **E-PR5 · Gifts sent to you** | `rd/wish-list-gifts` | **#6463** | `7e0590940` | MERGEABLE, checks running |
+
+Each branch carries `origin/main` `482a671b3` and everything below it (merged bottom-up; generated baselines regenerated on each merged tree, never hand-merged). No migration in any of the four. +0 exported server actions (1,199). +0 routes.
+
+## THE MINIMUM-REQUEST CHANGES (owner rule 2026-10-08; controller's four named changes — all done, on the lowest branch that holds each file)
+
+| # | Where | Before (read from the code) | After | Guard |
+|---|---|---|---|---|
+| 1 | #6435 `studio-wish-list.tsx`, `wish-items.server.ts`, `pabuya/actions.ts` | every add · edit · got it · remove · reorder = 1 action + 1 `router.refresh()`, and **2 whole-Maker server renders** (one inside the action's own response — `revalidatePath` in an action makes Next render the action's route — one from `requestMakerRefresh`); a reorder wrote each moved wish one after another | **1 request, 0 Maker renders.** The five saves are held; edit / got it / a run of moves fold into one write per wish (`makerLatestWrite`); a save answers with the row as kept; the door refreshes guests' pages after its answer (`after`); a reorder writes only the moved wishes, together | `lib/the-wish-list-costs-one-request.test.ts` (5) · DB test 8 |
+| 2 | #6444 `gift-record-sheet.tsx`, `wish-list.tsx` | `router.refresh()` after a kept gift = the whole gift page rendered again | **0 page renders**: the list is redrawn from the write's answer (`withOwnGift`), pinned equal to the next read | `lib/a-kept-gift-is-drawn-not-refetched.test.ts` (5) |
+| 3 | #6440 `loaders.ts` `loadDoorwayFacts` | +2 reads after the egift read, on every guest page view of an event with a way to give on | **+1** (`readOpenWishCount`: a head count; event-level — no guest id, no cookie; at most once per render via `askedOnce`); **0** when no way to give is on — skipped by `enabledEgiftCount`, a fact the loader already holds (it folds in the gift route switch and "Accept gifts? No") | `lib/the-gift-door-asks-one-count.test.ts` (5) |
+| 4 | #6444 `gift-door.server.ts` | two `revalidatePath` by hand | the one door, `revalidateGuestSite(slug)` | same file as 2 |
+
+Supabase requests per write, counted on the REAL functions over the replayed schema with RLS on (`counted()` in `tests/db/pglite-client.ts`): add a wish 2 · edit 3 · got it 1 · remove 1 · reorder 1 + one per wish that moved · "I sent it" toward a wish 4 together + insert + sum + (mark only when it reaches) · correct / remove / put back a gift 1 (+2 together and 0–1 mark when it counts toward a wish) · move a gift 2 together + 1 + 2 together + 0–2 marks · one opened screenshot 1. Each Studio action also costs the door's sign-in check and, after the answer, one read of the event's address.
+
+Per render: Studio › E-Gifts' wish list = **2 reads** (one per table, together; nothing signed). The guest's E-Gifts page list = **2 reads** together (3 for a recognised reader — see "Open choices").
+
+## What is in E-PR5 (Builder EH, on E1's uncommitted draft — saved first as `511eaed87`)
+
+E1 left 13 uncommitted files: the list screen, the open-gift sheet, the three writes and their tests, mostly complete. What EH changed before calling it done:
+- **No screenshot is signed in the list read.** The draft signed one address per record on every Maker render and drew a picture in every row. Now the list read signs nothing; ONE gift's screenshot is asked for when that gift is opened (`readGiftShotUrl`: host's own client, this event's private folder only, 10-minute address, reused 8 minutes; "Try again" on a refusal, nothing retries by itself). A row draws a mark.
+- **A gift action is 1 request and 0 renders** (the draft: 2 Maker renders per action, a read before every write, a read per wish settled one after another). Drawn first (`settleDrawn` ⇄ `gotAfterGifts`), saved held, one-pass settle, a refusal puts back only that record; a late refusal (`kept`) leaves the record as drawn.
+- "Counts toward" is the Maker's own dropdown (`PickMenu`), not a native select.
+- "Gifts sent to you" is a screen of its own: one CSS rule (`globals.css`, keyed on `data-details-egifts`) hides the rest of E-Gifts while it is open.
+
+Files: `studio-wish-gifts.tsx` · `studio-wish-sheet.tsx` (new, lazy) · `studio-wish-list.tsx` · `pabuya/gift-records.server.ts` (new) · `pabuya/wish-items.server.ts` · `pabuya/actions.ts` · `lib/wish-list.server.ts` · `lib/wish-list-studio.ts` · `maker-details.tsx` (a comment) · `globals.css` (one rule) · `wish-list-fixture.ts` (the lab's stand-in screenshot).
+
+Lab: `/dev/maker-lab?studio=1&tool=details&item=gifts&wish=five` → open the E-Gifts tile → "Gifts sent to you ›".
+
+## Deviations in E-PR5 (each with a recommendation)
+1. **A row shows a mark, not the screenshot's thumbnail.** A private picture per row is a request per row; there is no stored thumbnail. *Keep, or add a small stored thumbnail (a column → a migration) if the owner wants pictures in rows.*
+2. **No `/api/gift-shot/[publicId]` route** (the plan's). A route counts against Vercel's 2,048. The picture rides the E-Gifts page's one door. *Keep.*
+3. **`OpenInPlace` is not the component used** — its door is a fixed "＋ word" pill; the drawing's is a row with ›. Same ✓ Done skin. *Keep, or give `OpenInPlace` a `door` slot.*
+4. **"E-Gifts" stays as the title above "Gifts sent to you"** (the drawing replaces it). *Owner call.*
+5. **Put it back** on a removed record is added (the design says remove is soft so a record can be restored, and draws no control).
+6. **No toast.**
+
+## Open choices (not changed — owner / controller)
+- **A recognised reader's gift page reads `event_gift_records` twice** (all sums, then their own records): 3 reads. One read is possible by taking `giver_guest_id` with the sum — at the cost of the stack's guarantee that the guest path's sum read names no person.
+- **The wish photo's address** is built with `publicUrlForStoredAsset` (as E-PR2 shipped); COMMON rule 5 now prefers `displayUrlForStoredAsset`. The speed lane's door.
+- **The Maker's canvas does not redraw after a wish write** (held saves). The Welcome door's "Wish list · N things they'd love" on the canvas is as of its last render. `makerRedrawSave` would redraw it at the cost of a guest-page render per wish action. *Recommendation: leave held.*
+- **The approved E-Gifts rows above the wish list (ways to give, QR, registry) still save unheld** (`studio-tools.tsx`, on main) — the speed plan's step 14.
+
+## NOT verified (be exact)
+- **No browser was opened and no capture was made by EH**: the one dev-server slot was the owner's review server for the session. Frames 07 · 08 (built vs prototype at 375) are still owed — `prototypes/wish-list-built-2026-10-08/` has E1's frames 02–06 · 09–17 · 21–23 only.
+- **`PickMenu` inside the gift sheet** (a dropdown opened above a `Sheet`: its list is z-95 over the sheet's z-90) — not seen.
+- **The `:has()` rule** that makes the gifts list a screen of its own — pinned as text, not seen.
+- A real signed address against the real bucket (the DB test signs with made-up credentials and checks the URL's parts).
+- That `after()` + `revalidatePath` refreshes guest pages on Vercel as a direct call did; that Next skips the render when no path was revalidated (both read from next 15.5's code).
+- Full `tsc`, the full unit suite, the DB replay step, the production build and both bundle budgets: CI's.
+
+---
+
+## E1's RECORD (as written 2026-10-08 ~13:00 — heads and CI lines below are SUPERSEDED by the table above)
 
 | Step | Branch | PR | Head |
 |---|---|---|---|
@@ -25,9 +86,7 @@ Built-vs-prototype at 375 px: `prototypes/wish-list-built-2026-10-08/` (Studio, 
 2. **A wish with no photo draws ONE gift glyph** (lucide `Gift`) in its square — Studio rows and the guest's list. The prototype's fryer / cooker / luggage drawings are per-item stand-ins for the couple's own photos with no rule behind them. Inside the lazy Studio chunk; nothing added to the Maker's first load.
 3. **Scratch:** everything of mine now lives under `<session scratchpad>/e1-wish/`. Before that I wrote to the SHARED top level: `capture.mjs`, `run-capture.sh`, `tsc.log`, `dev.log`, `capture.log`, `bak/` (two files), `shots/` (created, nothing written), and several `*.txt` / `*.log` lists. `capture.mjs`, `dev.log` and `capture.log` existed or were written by another builder at the same time — treat those three as possibly clobbered.
 
-## TODO
-- **E-PR4** · the gift record ("✓ I sent it" → Show the couple) — not started.
-- **E-PR5** · Gifts sent to you (the screen, one gift open, the screenshot route) — not started.
+## TODO (as E1 left it — both are now built: E-PR4 = #6444, E-PR5 = #6463)
 
 ## What is in E-PR1
 - `event_wish_items` + `event_gift_records` as § 3 of the design. RLS on at CREATE TABLE; one policy each, the exact `event_egift_methods_host_all` predicate; no anon policy, no anon grant.
