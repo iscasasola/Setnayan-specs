@@ -1,5 +1,31 @@
 # Suppliers one-screen — BUILD STATUS · 2026-10-08 (Builder SP1, Opus)
 
+## NOW — where both branches stand (updated after every item)
+
+| Branch | PR | Head | On `origin/main` |
+|---|---|---|---|
+| `rd/suppliers-shell-three-modes` | #6422 (draft · `do-not-auto-merge`) | `55d0f9bbc` | `9b2065225` merged in (baselines regenerated — no change needed) |
+| `rd/suppliers-find` | #6425 (draft · `do-not-auto-merge`, base = the shell branch) | `7c710c451` | same, through the shell branch |
+
+Checks on the merged trees: shell — cold `tsc` rc 0 (173 s) · `next lint --no-cache` 0 errors · 831 pinned tests pass. Find — 882 pinned tests pass (cold `tsc` runs with the next item).
+
+**2a items, in order:**
+
+| Item | State |
+|---|---|
+| Thumb row (expand · search · add) | DONE `c1a8fc3` |
+| Flat rows · ring · state words · pinned header · scoped search · ONE "Add to your event" dropdown | DONE `c45748a` |
+| The three faults the controller measured on the preview at 375 | DONE `5733ba34e` — one "＋" on "Add to your event" · the search field keeps 60 % of the bar (`useFitRow` now runs in the component that draws the row, plus a CSS floor) · category names wrap, never clip ("· N yours" rides the same run) |
+| Verbs by step | DONE `76e767376` — one table `lib/supplier-card-verbs.ts`, drawn by `bench-vendor-actions.tsx` as `ActionButton`s; Remove, Nudge, Pay / Payments, Read their reply, Ask about another day, Workspace are new on the card; +0 exported actions (Nudge is a branch of `contactShortlistVendor` through `sendChatMessageCore`) · 929 pinned tests · 18 sabotages red |
+| Service cards in the rows | IN PROGRESS |
+| "More to compare" always on, with a count | not started |
+| The supplier sheet | not started |
+| 2b (own stacked branch + draft PR; may carry the ONE named migration; never applied, never deployed) | not started |
+
+**Old links (the controller's note):** the segments still write the shipped keys, on purpose — `?tab=shortlist` (+ `open=`) → Find · `?tab=build` → Build · `?tab=compare` → Build, scrolled to the plans · `?tab=budget` → Booked at its top. Executed by the deep-link case in `vendors/suppliers-opens-fast.test.ts`.
+
+**Verb deviations to rule on:** Nudge sends the prototype's one sentence in both the quote and the asked-to-book states · `Connect` stays as one extra grey button until 2b's record sheet · booked with nothing due says "Payments", not "Paid in full" · a marketplace supplier booked with no price says "Set price" and opens the workspace.
+
 ## PR1 · the shell — COMPLETE (code + local checks), waiting for the preview side-by-side
 
 - Branch `rd/suppliers-shell-three-modes` · head **`b5bb865078f4c13f8392a63edb049a76fa60f0d7`** (two commits on `origin/main` `560e6d0f0`; main had not moved at the final push)
