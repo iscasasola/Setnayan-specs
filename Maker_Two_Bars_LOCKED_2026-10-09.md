@@ -60,3 +60,15 @@ Where to add a part · the ⓘ explanations · Venue's Map choice · Dress code 
 
 ## The Day › Camera (owner, 2026-10-09 morning)
 "Camera is a full screen design" — the sample IS the camera, edge to edge, one part. "camera greyed out background and animate" · "edit is greyed out too. only have style" — on the Camera ONLY Style is live (the three camera looks as tall phone-shaped cards: Classic · Your brand · Challenges, `lib/camera-look.ts`); Edit, Background, Animate are grey; no Earlier · Later · Remove. Styles only — no adding pieces (controller's recommendation; he asked "add elements … or just different styles?").
+
+## DECIDED 2026-10-09 ~09:30 — owner: "do your recommendations" (the controller's recommendations become the decisions; each reversible on his word)
+1. Camera's two new styles: **Minimal** and **Film** (with Classic · Your brand · Challenges = five). New work in `lib/camera-look.ts` + the guest camera, AFTER the toolbar.
+2. Adding a part: the **＋ on the page stays** (the one control left on the preview); no Add in the toolbar.
+3. Dress code's Do's & Don'ts look → **Studio › Mood Board & Dress Code** (not in the toolbar).
+4. The ⓘ explanations → **one ⓘ at the right end of the "You're editing" line**, opening the centred pop-up for the picked part and tool.
+5. Venue's Map choice → **Studio › Info**, beside the Venue line.
+6. The Studio cards page **goes**; "N of 11 ready" moves to the page list's heading and each row keeps its Ready / Missing; the ⓘ texts move onto the list's rows. Outside doors that landed on the cards open the page list instead.
+7. E-Gifts ways to give **wait for ✓ Apply** (drafted), like the rest of the page.
+8. Build out has **no Delay** (the app has none): row 4 = Movement ◆ + Next scene ◆.
+9. Guest list: the top toast gains **Undo**; the old guest sub-pages (/new, /quick, /claims, /import, /checkin) are **left out** of this pass; dead guest code is removed first.
+10. The Day's Gallery gets the three styles (Mosaic · Grid · Film strip) it has on the other stages — new work, after the toolbar.
