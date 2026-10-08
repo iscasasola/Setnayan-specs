@@ -4,22 +4,29 @@ Contract: `EGIFTS_WISH_LIST_2026-10-08_fable.md` · prototype `prototypes/egifts
 Worktree: `~/Documents/Claude/Projects/wt-wish` (on `rd/wish-list-studio`).
 Built-vs-prototype at 375 px: `prototypes/wish-list-built-2026-10-08/` (8 side-by-sides + 8 built frames; the maker lab on fixtures).
 
-## DONE (pushed · both DRAFT · `do-not-auto-merge` · auto-merge off)
+## DONE (pushed · all three DRAFT · `do-not-auto-merge` · auto-merge off)
 
 | Step | Branch | PR | Head |
 |---|---|---|---|
-| **E-PR1 · the two tables** | `rd/wish-list-tables` (from `origin/main` `560e6d0f0`; `main` `9b2065225` merged in) | **#6432** | `937358e65` |
-| **E-PR2 · Studio › Wish list** | `rd/wish-list-studio` (from `origin/rd/studio-reply-by-editable` `83c336a26` — since merged to `main` — + the tables branch) | **#6435** | `540bbd12e` |
+| **E-PR1 · the two tables** | `rd/wish-list-tables` (`main` `9b2065225` merged in) | **#6432** | `937358e65` |
+| **E-PR2 · Studio › Wish list** | `rd/wish-list-studio` (on the tables branch) | **#6435** | `0e1719a38` |
+| **E-PR3 · the guest's list + send sheet** | `rd/wish-list-guest` (on the Studio branch) | **#6440** | `a3eda2880` |
 
-**E-PR1 carries ONE migration: `supabase/migrations/20271266228704_the_wish_list_two_tables.sql`.** The pipeline applies it. Never apply it by hand. E-PR2 adds none.
+**E-PR1 carries ONE migration: `supabase/migrations/20271266228704_the_wish_list_two_tables.sql`.** The pipeline applies it. Never apply it by hand. E-PR2 and E-PR3 add none. Nothing is deployed.
 
-## CI
-- #6432's first run: one red test of 22,913 (`the committed screens map matches a fresh scan exactly`) — fixed by regenerating `screens.generated.json`. It then conflicted with `main` on that same generated file when the Event Hub train merged; `main` is merged in and the file regenerated. New runs were queued when this was written — **not seen green yet**.
-- #6435: runs queued — **not seen green yet**. The two bundle budgets are CI's to measure (`production build` · `bundle size check`).
+Built-vs-prototype at 375 px: `prototypes/wish-list-built-2026-10-08/` (Studio, frames 02–06 · 09–11) and `…/guest/` (frames 12–17 · 21–23, plus 17b = the send sheet for a reader the event does not recognise).
+
+## CI (read 2026-10-08 ~13:00 PHT — re-read before acting)
+- #6432 @ `937358e65`: 14 pass, `typecheck + lint` still running (its first run's one red test — the stale Ugat screens map — is fixed).
+- #6435 @ `0e1719a38` and #6440 @ `a3eda2880`: runs in progress — **not seen green yet**. The two bundle budgets are CI's to measure.
+
+## Controller's three items (2026-10-08, after reading frames 02–11)
+1. **`main` `9b2065225` merged** into the tables branch, and that into the Studio branch. Baselines regenerated on each: `ugat:screens` (changed on both) · `port:baseline` (changed on Studio and guest; on the tables branch only its ref stamp moved, so it was left) · `root-map`, `lint-no-card --update-baseline`, `exposure:baseline` (unchanged). Count headers rechecked: exposure 6646 facts · `ugat-both-ends` 45 on tables / 44 on Studio and guest.
+2. **A wish with no photo draws ONE gift glyph** (lucide `Gift`) in its square — Studio rows and the guest's list. The prototype's fryer / cooker / luggage drawings are per-item stand-ins for the couple's own photos with no rule behind them. Inside the lazy Studio chunk; nothing added to the Maker's first load.
+3. **Scratch:** everything of mine now lives under `<session scratchpad>/e1-wish/`. Before that I wrote to the SHARED top level: `capture.mjs`, `run-capture.sh`, `tsc.log`, `dev.log`, `capture.log`, `bak/` (two files), `shots/` (created, nothing written), and several `*.txt` / `*.log` lists. `capture.mjs`, `dev.log` and `capture.log` existed or were written by another builder at the same time — treat those three as possibly clobbered.
 
 ## TODO
-- **E-PR3** · guest list + send sheet (`/[slug]/pabuya`, the Welcome door's line) — not started.
-- **E-PR4** · the gift record ("I sent it" → Show the couple) — not started.
+- **E-PR4** · the gift record ("✓ I sent it" → Show the couple) — not started.
 - **E-PR5** · Gifts sent to you (the screen, one gift open, the screenshot route) — not started.
 
 ## What is in E-PR1
@@ -37,6 +44,14 @@ Built-vs-prototype at 375 px: `prototypes/wish-list-built-2026-10-08/` (8 side-b
 - `lib/tours.ts`: `customer_wish_list_v1`. `lib/r2-client-ref.ts`: `wishPhotoPolicy`. Event media sweep: wish photos are deleted with the event.
 - `ugat-both-ends` baseline 45 → 44.
 - Lab: `/dev/maker-lab?studio=1&tool=details&item=gifts&wish=five|empty|fail|noway|off` (open the E-Gifts tile).
+
+## What is in E-PR3
+- `app/[slug]/pabuya/_components/wish-list.tsx` — the guest's list (four shapes) and the send sheet. Takes the page's ready-drawn ways (`ways`) and, for 4/5, one prop `sent`.
+- `app/[slug]/pabuya/page.tsx` — reads the list beside the ways to give, asks `wishListShownToGuests`, resolves the shape from the picked E-Gifts look, mounts the list above the ways.
+- `lib/wish-list-guest.ts` (the guest's view and words, `wishListShape`, `wishDoorLine`) · `lib/wish-list.server.ts` `readGuestWishList` (service role; `WISH_GUEST_FIELDS` + `GIFT_SUM_FIELDS`).
+- The Welcome door's line: `loaders.ts` (`openWishCount`) → `site-nav.ts` (`GuestDoorways.wishes`) → `site-body.tsx` → `guest-welcome.tsx` → `guest-doorway-strip.tsx`.
+- `app/_components/pabuya/pabuya-card-list.tsx` — optional `idScope` (the second drawing's element ids).
+- Lab: `/dev/maker-lab/guest?wish=five|got|long|noprice|door&look=rows|side|tiles|ruled&known=0` (no new route).
 
 ## Type letters used
 **All 26 single letters are already passed to `generate_public_id` by some table** (`Y` by four, `C` by six), so none is free; the letter is a reading aid, never a key.
@@ -58,10 +73,21 @@ Built-vs-prototype at 375 px: `prototypes/wish-list-built-2026-10-08/` (8 side-b
 10. A way to give's label is the shipped one ("Bank transfer", the drawing says "Bank").
 11. A wish's link accepts a paste without its scheme (`shop.example/x` is kept as `https://shop.example/x`).
 
-## Traps for whoever builds E-PR3–5
+12. **(E-PR3) No "✓ I sent it" yet.** The send sheet draws ✕ Close alone and only "Setnayan never touches your money." — the screenshot sentence, "Sent a gift? Show the couple ›" and "You sent ₱ ✓" arrive with E-PR4 through the list's `sent` prop. *A button for a step that is not built would be a dead control.*
+13. **(E-PR3) No wish line on a solemn page's gift door.** "things they'd love" is a celebration's sentence and no quiet one is written; the list itself is still drawn on a wake's gift page. *Owner call: a quiet sentence, or no wish list at all for a wake.*
+14. **(E-PR3) The list's styles are classes in the component**, not three blocks in `globals.css` as the plan's table says. Same drawing, no global rule to collide with the door's `[data-part-look="gifts.*"] a` rules.
+15. **(E-PR3) A wish's shop link is not shown to guests** — the drawing shows none (the couple's note is shown).
+16. **(E-PR3) The door's first line is the shipped one** ("The digital money dance — straight to the couple." on a wedding); the drawing shows the plain "Send E-Gifts straight to the couple."
+17. **(E-PR3) The hub page's gift door has no wish line** (it builds its own doorway facts; not drawn in the prototype).
+18. **(E-PR3) I edited five guest files other builders may be in** — `site-body.tsx` (6 added lines), `guest-welcome.tsx`, `guest-doorway-strip.tsx`, `site-nav.ts`, `loaders.ts` — all additive. Expect a textual merge with #6433 / #6437.
+
+## Traps for whoever builds E-PR4–5
 - **A record's `wish_item_id` is a single-column FK** — nothing ties it to the same event. Every read filters on `event_id` too.
 - **Sums:** always `sumSent` / `sentByWish` (removed records never count). A guest page may read only `GIFT_SUM_FIELDS`; ask `wishListShownToGuests` whether to draw the list at all.
 - **Got it:** call `gotAfterGifts(wish, sentPhp)` in the action that adds / corrects / moves / removes a record; `'host'` is never touched by a sum. After a host flips OFF an auto-marked wish, the next record marks it again (the design's rule) — say so on the screen or raise it.
+- **E-PR4 hooks:** pass `sent={(wish) => <YourButton …/>}` to `WishList` (it also switches on the screenshot sentence); a guest's record names a wish by its PUBLIC id (`GuestWish.id`, `S89H-…`) — resolve it to the row with `event_id` in the same query. Two tests pin that the page hands in no `sent` — update them in that PR.
+- **The no-card lint** cannot see that a class string in a table belongs to a `<button>` — mark such lines `// no-card-ok: <why>`.
+- **The dup-rule guard** also refuses a LOCAL named like an imported module's export (`const openWishCount` beside `import … from wish-list-guest`).
 - **The honest-words guard** (`app/[slug]/_lib/the-guest-text-is-honest.test.ts`, `GIFT_SURFACES`): add every new gift surface to the list. It reads identifiers too — a state called `confirm` trips it.
 - **Data-subject register (E-PR4):** `event_gift_records.giver_name`, the message and the screenshot are a GUEST's personal data. The register's scan does not match `giver_name`; anchor it in the `guest` category in the PR that first writes a record. It changes the privacy register — surface it to the owner.
 - **Erasure (E-PR4):** a gift record has no account column, so the erasure detector cannot see it.
