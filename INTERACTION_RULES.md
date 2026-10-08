@@ -73,4 +73,5 @@ Owner, verbatim: *"so the idea is this will be a type of selector we will have a
 - **Dropdown:** on a phone the choices rise from the bottom as a sheet; on a desktop they open as a list under the button. A date in a Form row opens the same way, holding a calendar.
 - **Style card:** one fixed size everywhere, the picture edge to edge, no frame.
 - **Page card:** reads and presses like an app button (the mark as an app-icon tile).
-- **NOT decided:** the Switch's off colour — owner asked *"switch needs to go green when on and red when off?"*; the gallery shows grey-off and red-off side by side. Controller's advice given to him: grey when off (red is the app's error colour; a page with several things simply switched off would look like a page of faults).
+- **Switch:** terracotta when on, grey when off — owner, verbatim: *"switch is teracota or greyed out"* (after first asking about green/red and seeing both). The knob travels and lands with the same small bounce.
+- **ⓘ explanation:** on a phone it is a popup in the centre of the screen with one "Got it" button; on a desktop a small note beside the ⓘ — owner: *"explanation on what you show is for desktop / there is an appropriate info like a center screen popup?"*.
