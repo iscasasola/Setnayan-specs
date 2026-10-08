@@ -8,6 +8,13 @@
 >
 > When this body disagrees with the above, **the above wins.**
 
+> ## AS-SHIPPED LETTERS — 2026-10-08 (measured from `supabase/migrations/`, not from § 2)
+> **Every one of the 26 single type letters is already passed to `generate_public_id` by at least one table, and most by several** (`C` by six, `Y` and `F` by four) — plus one two-letter code, `SO`. § 2's "four used · nine reserved" table is the 2026-05 plan, not what shipped. So:
+> - **The type letter is a reading aid, never a key.** Uniqueness is per table (`public_id UNIQUE`); two tables sharing a letter never collide, and nothing may look a row up by its letter.
+> - **No letter is free.** A new table picks the letter of the FAMILY it belongs to, or the least confusing one beside the ids it sits next to — and says which in its migration header.
+> - **Stay single-letter.** `lib/csp-report.ts` normalises only `S89[A-Z]-<10>` out of reported URLs; a two-letter code is not masked there.
+> - **E-Gifts (owner 2026-10-08, wish list):** `event_egift_methods` → `Y` (2026-07) · `event_wish_items` → `H` (shared only with `chat_threads`) · `event_gift_records` → `Y`, the E-Gifts letter — NOT the designed `G`, which is `guests`, because a gift record sits beside its giver's guest id (migration `20271266228704`).
+
 **Status:** Locked 2026-05-12
 **Applies to:** Every customer-facing identifier across the platform.
 **Replaces:** Earlier `STNYN-XXXXXXXX` reference codes documented in iteration 0034 § 4.1 (those were superseded by `SET-XXXXXXXX` during the rename cleanup; this doc supersedes BOTH and locks `S89O-` for orders).
