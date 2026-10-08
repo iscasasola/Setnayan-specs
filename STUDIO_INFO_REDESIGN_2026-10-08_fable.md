@@ -54,10 +54,38 @@ Where a line of the rules file collided with the brief: the brief's "pill select
 - **Saving:** the press answers at once (the words are on the row); "Saving to your draft…" appears only past 300 ms; when it lands the ✓ count bumps and a small toast says "Saved to your draft · 4 to apply" (§ 5: success = a small toast); a failure says "Could not save." with ↻ Retry (terracotta, icon + word), never silent. Live rows (the Hub group) say so once at the group's head and toast "— live" on change.
 - **At 900 wide:** one column at a reading width (560 px), centred — a form gets no three columns.
 
+## 2b · The templates (INTERACTION_RULES § 9) — control → kind, and the two kinds defined here
+
+Every control on Info and on the Studio home is one of the seven kinds (the full `control → kind` tables are in each prototype's map card). Two kinds are defined by this work and become the template:
+
+**Form row** (defined on Info; every other Studio page reuses it)
+- *Box:* full width of the body; min-height 52 px (44 touch floor + 8 air); one hairline (`--line`, 1 px) under each row; no background, no radius, no card.
+- *Left:* the label, 15 px sentence case, ink; an ⓘ (the ⓘ explanation kind, 18 px ring inside a 44 px target) 6 px after it; a sub-row (inside a group or an opened row) is 14 px, ink-2, indented 12 px.
+- *Right:* ONE of — a Dropdown (the ▾ pill, 40 px, white, `--line2` border, max 210 px, ellipsis) · a Switch · a short value (14 px, ink-2, right-aligned, ellipsis; "Add" in terracotta when empty, with a chevron) · nothing (a read-only fact).
+- *Opened (long text):* the row stays as its head with a "Done" ActionButton; a textarea (12 px radius, white, `--line2` border, 15 px, ink border on focus) sits under it; the helper line (12 px, mute) under that; one open at a time (§ 8); the names row opens its fields the same way.
+- *States:* saving — "Saving to your draft…" with a 14 px spinner, only after 300 ms; landed — the ✓ count bumps and a small toast (§ 5); failed — "Could not save." in red with ↻ Retry (terracotta ActionButton); live rows — one amber line at the group head, never per row.
+- *Motion:* the opened body appears in 180 ms (height + opacity, house ease); instant under reduced motion. A press answers at once (the words are on the row before the write).
+- *Open questions for the owner:* (a) is a **read-only fact row** (date · venue) its own kind or the Form row with no control? (b) is a **fold** ("More for guests" groups) its own kind? Both are drawn as Form-row variants and marked in the map until he says.
+
+**Page card** (defined on the Studio home; § 2c)
+
+## 2c · The Studio home — eleven Page cards
+
+Prototype: `prototypes/studio_home_2026-10-08_fable.html` · captures `prototypes/studio-home-2026-10-08/` (01 home · 02 one ⓘ open · 03 a card pressed · 04 the first second of opening · 05 done and unread · 06 at 900). Owner, verbatim: *"we can improve the page card as well. how they can be presented"* · a card holds *"Logo / Topic / Description and a small (i) that will give a more detailed explanation"*.
+
+- **Three parts in his order:** the **mark** (a 44 px rounded square, gild-soft paper with a gild line icon — eleven distinct marks: list lines · palette · monogram ring · board · clock · open book · two aisles · a round table with seats · a wrapped gift · an envelope with a tick · a printer), the **topic** (15 px semibold), the **description** (one plain sentence, 12.5 px, what the couple does there — never nouns joined by dots). Beside the card, outside its button, a **ⓘ** (44 px target) that opens the house popover with three short paragraphs: what this page controls · *Guests see it:* where · *Do this first:* one thing. All eleven texts are in the prototype (`TILES`).
+- **Why one column at 375:** two columns of 160 px cannot hold a sentence, a status dot and a 44 px ⓘ without wrapping the topic ("Mood Board & Dress Code", "Wedding March") — the shipped two-up grid already clips its sub line. One column of 72 px rows reads at a glance and keeps the ⓘ beside each card; two columns at 900.
+- **What the card still tells them:** done / unread / untouched = one 10 px dot at the card's right (green · terracotta · empty ring; `data-studio-done`), the header's "N of 11 ready" counts the green; **Full screen** = an 8.5 px outlined tag after the topic, on Wedding March and Seat plan only.
+- **A press answers at once:** within 100 ms the card scales to .985 and its paper darkens (`:active`). **The first second of opening:** the tapped card stays as the page's head and lifts into the first row while the page's rows fade in under it (300 ms) — no blank screen, no spinner; then it is the page (which, per the owner, has no title row of its own).
+- **The title stays:** "Studio" with the ready count — it is the one place the count lives, and the home is not a page inside Studio.
+
+**Page card — the template spec:** full-width row at 375 (two columns ≥ 768); min-height 72 px; 16 px radius; paper (`--paper`) on a 1 px `--line` border; 12 px inner padding, 12 px gap; mark 44 × 44, 12 px radius, `--gold-soft` fill, 24 px gild line icon; topic 15 px/600, description 12.5 px/1.35 ink-2, both left; status dot 10 px at the right edge, the Full-screen tag inline after the topic; the ⓘ a sibling 44 px target 4 px to the right of the card, never inside it; pressed: scale .985 + `--pill` fill within 100 ms; opening: the card lifts to the page head in 320 ms while rows fade in over 300 ms; reduced motion: no scale, no lift. One source: `StudioHome`'s tile becomes `PageCard`.
+
 ## 4 · Build note — small PRs, in order
 
 1. **`rd/info-no-title-first-input`** — remove the Studio tool's "INFO ▾" head on Info (and, per the owner, on every Studio page the way Look has none); the first row is the names. Guard: `studio-pages-open-on-their-first-input`.
 2. **`rd/info-row-pattern`** — the shared row primitive (`StudioRow`: label + ⓘ · right side = ▾ | switch | field; long field opens under with Done; one open at a time) used by Info first; the date/venue fact line; the "More for guests" break with the two folds. No data change.
 3. **`rd/opening-line-drafts`** — the finding of § 0.3: the Studio's Opening line writes through the hub draft (`HUB_DRAFT_OPENING_LINE_KEY`) and the print-words live post stops carrying it from the Studio; the Save button and `HubSavesImmediately` go from this row; guard: `the-opening-line-has-one-door`. **Needs the owner's nod on § 0.2 first.**
 4. **`rd/info-hub-group`** — Who can view → Event Details (if § 0.1 is yes) · "Which version guests see" into Go live's sheet · the amber "changes right away" line once at the group head. No migration.
-5. **Nothing here needs a migration.** Every value already has a column or a draft key; the only data change is which DOOR the Opening line uses.
+5. **`rd/studio-home-page-cards`** — `PageCard` (§ 2c spec) replaces the tile in `StudioHome` (`stages-studio-parts.tsx`); the eleven marks, descriptions and ⓘ texts from the prototype's `TILES`; the ⓘ as a sibling target opening the house popover; the opening transition; guard: no `<button>` inside a `PageCard`'s button, eleven distinct marks (`page-cards-are-one-template`). No data change.
+6. **Nothing here needs a migration.** Every value already has a column or a draft key; the only data change is which DOOR the Opening line uses.
