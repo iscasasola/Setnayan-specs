@@ -12,13 +12,17 @@ _This file is updated after each finished item. If a line below says IN PROGRESS
   - Side-by-side at 375: NOT captured for row 1's own state. Row 2's head carries the same three tabs; the controller takes row 1 on the Vercel preview.
 
 ## IN PROGRESS
-- **Row 2 · `rd/background-source-cards`** — stacked on row 1; the pure reader (`lib/background-source.ts`), the cards, the panel's Studio branch, the guard and the Candlelight-off-the-canvas fix are drafted; applying, then tsc / lint / guards / push / draft PR (base `rd/look-three-tabs`).
+- **Row 2 · PR #6431 (DRAFT, "WIP — …", `do-not-auto-merge`, auto-merge OFF) · `rd/background-source-cards` · head `42268191f` · base `rd/look-three-tabs`** — safeguard push at ~09:10 PHT (machine on battery).
+  - BUILT and pushed: `lib/background-source.ts` (source read off what is stored · ◆ map · Shade write · one draft patch) · `background-cards.tsx` (BgRow · BgCards · BgCard · LoopPicture) · the panel's Studio branch (Source ▾ + cards for all five sources · Colour via `StudioColourField` · Shade ▾ incl. Candlelight · Motion · Blur · Focus · Match colours ▾ · in-place upload · hero video slot) · `lib/main-ground-patterns.ts` (the guest pattern CSS, moved byte for byte) · `CandlelightOffOnCanvas` (a draft takes a live Candlelight off the host's canvas) · Look draws each control once · guard `lib/the-background-has-one-source.test.ts` (8 tests) · port baseline regenerated · changelog fragment.
+  - VERIFIED on the tree just before the last small edit: full `tsc` 0 errors · `pnpm lint` 0 errors · pinning tests 271 files / 1,952 tests / 1 fail (fixed: `HeroFrameSync` is one mount again) · 14 sabotages each caught (list below) · 35 of 36 node guards green + the port baseline regenerated (−`GroundCarousel`, +the cards).
+  - STILL TO DO: merge the fixed base (`origin/rd/studio-reply-by-editable` @ `83c336a26`) into BOTH branches · run the `tests/db` files that pin Look draft columns · final tsc · rewrite the PR body · 375 captures (NOT taken — no dev server while on battery; the controller takes them on the Vercel preview).
+  - Sabotages (row 2): library scene read as "own" → (1) · Scene's ◆ off → (2) · a Source pick that writes → (3) · a scene card as a bare `<img>` → (4) + `studio-round-3` 2 · a card without its swatch → (4) · `autoPlay` on a loop → (5) · reduced motion ignored → (5) · leaving Candlelight writes nothing → (6) · Look drawing the page fill twice → (7) · Candlelight under Elements in the Studio → (7) · the attribute not lifted → (8) · the marker mounted for a Candlelight draft → (8) · the cover-photo card bypassing `pickGround` → (3) + `studio-screens` 4 · a second `HeroFrameSync` mount → `opening-the-maker-counts-zero-waiting`.
 
 ## TODO (per plan row)
 | # | Branch | State |
 |---|---|---|
 | 1 | `rd/look-three-tabs` | **PR #6426**, draft, head `ed2ede65c` — awaits CI + the owner's 375 side-by-side |
-| 2 | `rd/background-source-cards` | in progress (L1), stacked on row 1 |
+| 2 | `rd/background-source-cards` | **PR #6431**, WIP draft, head `42268191f` — being finished (L1) |
 | 3 | `rd/elements-roles` | NOT L1's — needs the new `events.site_roles` column |
 | 4 | `rd/one-colour-picker` | Builder C, in flight |
 | 5 | `rd/music-only-music` | NOT L1's — waits on the owner's "Our music" call |
@@ -46,3 +50,15 @@ _This file is updated after each finished item. If a line below says IN PROGRESS
 - `FileUpload` writes its named hidden field only once it holds a value on the client — a static render never shows `name="bg_music_url"`; assert the two form branches in source and the visible labels in the render.
 - Importing `studio-tools.tsx` in a node test pulls `server-only` modules — read its source instead.
 - `ColorsPanel part="colours"` (page + Candlelight + Magic Move in one form) is still used by the Event Details record row (`details/_components/record-editor.tsx`); Look uses `part="page"` and `part="art"`.
+
+## Deviations found in row 2 (each needs the owner's eye)
+6. **Shade ▾ on a flat Colour or Pattern lists As is · Candlelight only.** The shipped veil (`mainGroundShade`) is measured over a PICTURE's colours and is stored on a main background that has one; a flat page colour's words are computed by a different path (`buildSitePaletteVars` / `ombreLook`). Laying Darker ↔ Lighter over a flat colour is a new guest-render path — not built on a morning guests are receiving links. Recommendation: its own PR (or with row 8), with `shade-never-crosses-the-floor` extended.
+7. **The greyed Motion ▾ / Blur ▾ rows and the "Effects — on top of any background" label are NOT in row 2** — the plan gives them to row 8 (`rd/background-effects`). Row 2 draws Motion ▾ (own photo and scene stills), Blur ▾ and Focus ▾ where they apply today.
+8. **Rows are the Studio's hairline rows, not frosted glass rows.** `.sn-glass-row` clips its content (`overflow:hidden` + mask), which cuts off the ⓘ popover; the rows keep the row skin the rest of Studio uses.
+9. **The Upload card opens the shipped uploader under the cards** (one tap more than the prototype's toast) — so its progress and refusals are on screen, never hidden.
+10. **"Your photo or video" cards are named generically** ("Your photo", "Your clip", "Your video", "Your upload") — the picture lists the page already builds carry no names ("Save the Date upload", "Gallery · 12" in the prototype).
+11. **With nothing stored and a hero photo (the default "follows the cover photo"), Shade ▾ lists As is · Candlelight** — a veil step is stored ON the main background, and the default stores none (the shipped limit; `StudioMainExtras` drew no Shade there either).
+12. **Herringbone (prototype, "new, optional") is not built** — not one of the four shipped patterns.
+13. **"A colour outside the five is added to the Mood Board" is not built** — that is the one-colour-picker PR's (Builder C, #6427).
+14. **The swatches under "Match my photo's colours" (Buttons · Accents · Ornaments) are not drawn in the Studio**; Match / Keep is one dropdown and what it measures is behind its ⓘ.
+15. **In the app-store shell there is no main background panel**, so there the Studio keeps row 1's rows (page fill, hero video, the old extras, Candlelight under Elements) and the "main background" line has no ⓘ to sit behind.
