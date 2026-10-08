@@ -47,7 +47,43 @@
 7. `?tab=budget` and the Booked segment both open Booked at its top.
 8. Desktop segments are 32 px tall (`ISeg`'s own rule).
 
-## PR2 · Find — STARTED (see the section at the end of this file as it is filled in)
+## PR2 · Find — split in three; part 1 of 2a is up
+
+The plan's PR2 is too big for one PR (the bench it adapts is 3,729 lines, pinned by ~28 tests). Split, said before opening:
+
+| Part | What | State |
+|---|---|---|
+| **2a · part 1** | Find's thumb row: ⇕ Expand all / Collapse all · search · ＋ Add your own | **PR #6425** — DRAFT · `do-not-auto-merge` · auto-merge OFF · base `rd/suppliers-shell-three-modes` · branch `rd/suppliers-find` · head **`c1a8fc349248c308047e30d6a8ff91975967afd9`** |
+| **2a · part 2** | Flat category rows + state words + pinned header + scoped search; service cards + verbs by step; "More to compare" always on; "＋ Add to your event" as one dropdown | NOT STARTED — see "Next" below |
+| **2b** | Add your own (steps, twin match), the record, payment channels, fee-leak check | BLOCKED — needs a migration and probably new server actions; COMMON.md forbids both this week. Needs the controller's word |
+
+### 2a · part 1 — checks at `c1a8fc3`
+| Check | Result |
+|---|---|
+| `tsc --noEmit`, COLD | rc 0 · 221 s · empty log |
+| `next lint --no-cache` | 0 errors |
+| The 71 test files that read the page, the bench, the shell or a touched file | 763 pass / 0 fail |
+| ci.yml node guards | 22 pass / 0 fail (port baseline regenerated) |
+| Sabotage | 20 runs, each red, restored (list in the PR body) |
+| Browser | NOT looked at — needs the preview |
+
+Files: `vendors/_components/find-thumb-row.tsx` (new) · `suppliers-mode.tsx` (new — the context a body reads: which body is on screen, and `leaving`) · `services-takeover.tsx` (provider + the ~300 ms wait before a swap when a row is up) · `shortlist-categories.tsx` (`openAll` / `folded`, the in-list search box only when the replan flag is off, `addYourOwn`, the "What they do" ask sheet, the row's mount) · `lib/suppliers-shell.ts` (`isCategoryOpen`) · tests: `vendors/find-thumb-row.test.ts` (new), `lib/suppliers-shell.test.ts` (T5), `lib/floating-rows-are-glass.test.ts` (row registered) · `changelog.d/rd-suppliers-find.md`.
+
+Deviations in part 1: the box always says and searches "all suppliers" (the scoped words need the pinned header, part 2) · no `＋ Add "…"` with the typed name (the shipped form takes no name — 2b) · "which category first" is a small sheet with one dropdown, then the shipped form · still the shipped folders under the row.
+
+### Next — 2a · part 2, measured (do not re-measure; verify and build)
+A read-only map of the bench against the prototype was taken at `8954305`. The findings that decide the design:
+
+1. **"The categories on the event" has no clean store for a wedding.** `resolveInPlanTiles` (`lib/explore-in-plan.ts`): a SEEDED event (onboarding picks) → plan ∪ engaged − excluded; an UNSEEDED one → EVERY tile minus the removed ones (~53 rows). And `vendors/page.tsx` (~line 1486) deliberately makes every wedding unseeded, although wedding onboarding DOES save `style_preferences.interested_categories` (`app/onboarding/wedding/actions.ts`). The prototype's five-row ring therefore needs: weddings to honour their own onboarding picks (a filter flip, no schema), and a starter set when there are none — `POPULAR_BY_TYPE` in `lib/supplier-find.ts` is the shipped "four a host of that type books first".
+2. **"＋ Add to your event" cannot make a never-planned category stick.** `event_category_decisions.decision` is `excluded | deferred | complete` — there is no "added". `restoreTileToPlan` only deletes an exclusion row; for a seeded event today the chip on a never-planned tile changes nothing that survives a refresh. **Owner / controller call:** (a) a migration adding an "included" decision, (b) have the existing `restoreTileToPlan` also append the tile to `style_preferences.interested_categories` (+0 actions, no migration — recommended; note the checklist reads that list too), or (c) the row lives for the session until a supplier is added there.
+3. **"Covered N of M" today counts only categories the couple marked done** (`coverageSummary`), not booked ones. The prototype counts booked or covered-by. `coverageStateOf` already knows `locked` and `covered` — count both.
+4. **Row state words exist only at folder grain** (`folderSummaryOf`). Per row: `coverageStateOf` (booked / covered / asked / picked / exploring / empty) + `standings[..].needsYou` for "N quote in". "N suppliers" (the marketplace count for an empty category) has no data on the bench — it would be a new read per category.
+5. **The marketplace list inside a category is opt-in and one-at-a-time** (`moreOpen`, a single row's state). "More to compare" always on, with a count, for several open categories needs that state keyed by tile.
+6. **`ShortlistVendor` carries no service-card fields** — `ServiceCardFace` needs a `Snapshot` (`lib/service-card-snapshot.ts`), i.e. a read of the supplier's service card per shortlisted supplier.
+7. **Card verbs:** Add to build · In your build · Book · Withdraw · Set price ship in `BenchVendorActions`; "Inquire" / "Open conversation" need the prototype's words; **Remove on a card, Nudge, Pay, Read their reply are not on the bench card today** (Nudge / Pay live in `lib/your-team-rows.ts` for the Booked body).
+8. **`h6-mirrors-the-booking-path.test.ts` holds an exact map of `searchCategoryVendors` callers** — a new caller fails it until added there.
+9. Tests that pin the bench's structure and will need re-pointing when the folder level goes: `category-hints`, `bench-deep-link-anchor`, `the-bench-card-keeps-everything` (exact occurrence counts), `bench-category-search`, `choices-are-one-dropdown`, `card-dates`, `bench-arrangement`, `inline-more-order`, `the-bench-says-where-you-stand`, `the-unread-badge-reaches-the-cards`.
+
 
 ## What PR2–PR4 need from this
 - Bodies: `data-suppliers-body="find" | "build" | "booked"` in `services-takeover.tsx`. Each is a slot the page fills:
