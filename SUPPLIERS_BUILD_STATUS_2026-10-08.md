@@ -71,7 +71,23 @@ Files: `vendors/_components/find-thumb-row.tsx` (new) · `suppliers-mode.tsx` (n
 
 Deviations in part 1: the box always says and searches "all suppliers" (the scoped words need the pinned header, part 2) · no `＋ Add "…"` with the typed name (the shipped form takes no name — 2b) · "which category first" is a small sheet with one dropdown, then the shipped form · still the shipped folders under the row.
 
-### Next — 2a · part 2, measured (do not re-measure; verify and build)
+### 2a · part 2 — IN PROGRESS (WIP pushed on `rd/suppliers-find`, PR #6425; battery safeguard 2026-10-08)
+
+Owner rulings received ("1. yes 2. go 3. ok"): keep an added category on the event · a wedding shows its own onboarding picks, else the popular four · 2b may carry its one migration.
+
+**Built in the WIP commit (typecheck clean; 823 of 824 pinned tests pass):**
+- The starter ring — `resolveInPlanTiles` takes `starterTiles`; the page passes `popularTilesFor(event type)`; a wedding now honours its own onboarding picks (mapped picker key → tile by `plannedTileIdSet`). A category holding a supplier or a booking always shows.
+- "＋ Add to your event" keeps the category: `restoreTileToPlan` writes it to `style_preferences.added_categories` through `writeStylePreferenceKey`, after a host check. **+0 exported actions, no migration.**
+- ⚠ **Finding on the checklist (asked for before relying on it):** the onboarding picks list (`interested_categories`) is read in the onboarding PICKER's vocabulary by the checklist's budget scope, the checklist suggestions, the brief sent to suppliers, and the onboarding auto-inquiry fan-out. Appending a bench category there would add checklist budget lines for the ~15 categories that share a picker key, do nothing for the others, and could be swept into a still-pending fan-out that messages suppliers. So the added category is stored under its OWN key in the same blob: **an added category changes nothing on the checklist.** Recommendation: keep it that way; switching to the picks list is a one-line change if the owner wants the checklist to follow.
+- Flat rows (no folder level), "· N yours", one state word per row (Booked ✓ · Covered ✓ · N quote in · N to decide), "Covered N of M" counting booked or covered, ONE "+ Add to your event" dropdown, "Not needed · Remove ‹Category›", Find's heading "Cover your event".
+
+**Exactly where it stopped:**
+1. One stale assertion: `find-thumb-row.test.ts` T5 expects `const folderOpen = searching || openAll || …`; the code is now `replan || searching || openAll || …`. Update the regex.
+2. No tests yet for: the flat rows / pool dropdown / remove label in the bench source. `lib/suppliers-shell.test.ts` T6 and `lib/explore-in-plan.test.ts` (starter + kept) are written and green.
+3. No sabotage for part 2. No cold tsc / lint for part 2. Guards and baselines not re-run. Changelog fragment not updated.
+4. Still to build in part 2: the pinned row header + search scope and words, cards as service cards + verbs by step (ActionButtons), "More to compare" always on with a count, the supplier sheet, `Build N/M` with M = the ring.
+
+### Measured before part 2 (kept for reference)
 A read-only map of the bench against the prototype was taken at `8954305`. The findings that decide the design:
 
 1. **"The categories on the event" has no clean store for a wedding.** `resolveInPlanTiles` (`lib/explore-in-plan.ts`): a SEEDED event (onboarding picks) → plan ∪ engaged − excluded; an UNSEEDED one → EVERY tile minus the removed ones (~53 rows). And `vendors/page.tsx` (~line 1486) deliberately makes every wedding unseeded, although wedding onboarding DOES save `style_preferences.interested_categories` (`app/onboarding/wedding/actions.ts`). The prototype's five-row ring therefore needs: weddings to honour their own onboarding picks (a filter flip, no schema), and a starter set when there are none — `POPULAR_BY_TYPE` in `lib/supplier-find.ts` is the shipped "four a host of that type books first".
