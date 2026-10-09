@@ -49,7 +49,7 @@ The build is local (branch `rd/rsvp-stage-per-element`); nothing of it is on Git
   (Fade · Blur · Move · Size + Movement Quick · Calm · Cinematic). A reply page is one screen with no scroll to
   follow and no exit, so Action and Build out are not offered there (controller's decision).
 - STORED in `events.rsvp_ask_config`: the three words, and one key `look` =
-  `{ lines: { '<line>': { c, s, i, v } }, card: { '<screen>': { g: 'none' | 'frost', i, v } } }`. Absent = today's
+  `{ lines: { '<part>.<line>': { c, s, i, v } }, card: { '<part>': { g: 'none' | 'frost', i, v } } }` — line keys rsvp.eyebrow · rsvp.question · rsvp.yes · rsvp.no · rsvp.hint · yesnote.heading · yesnote.message · pass.save · nonote.heading · nonote.message; card keys rsvp · yesnote · nonote; c = 1–5 (never on a button), s = 85 · 92 · 110 · 120 · 132 (100 not stored), i = the Event Hub's effect object, v = quick | cinematic. Absent = today's
   look. Fixed-list values only; nothing typed reaches CSS. The app's save refuses at 1,900 bytes with a plain sentence
   ("It is too long to keep: your RSVP's words and looks are at their limit. Shorten a message, then try again.").
 - DATABASE: the column has a 2,048-byte CHECK (migration 20271247938209). Steps 5–7 (added lines, pictures, order,
