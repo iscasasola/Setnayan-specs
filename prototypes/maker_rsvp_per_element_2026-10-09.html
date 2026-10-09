@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RSVP · per element · prototype</title>
+<!--
+  RSVP STAGE — EVERY ELEMENT IS ITS OWN PART. A prototype to try, not app code (2026-10-09). Plain HTML / CSS / JS.
+  The owner, on the live Maker's RSVP stage:
+    · "why is this grouped?"            — the eyebrow, the question, both answers and the hint sat in ONE frame
+    · "why do i see a rounded edge frame as well?" — the page's card AND a selection frame, not aligned
+    · "why is this scrolling? the bottom toolbar is not aligned to our design" — every word of the block in one list
+    · "shouldn't it be per element?"     — YES, per element is the ruling
+    · "how come background not fixed and no animate?" — Background and Animate were grey on every RSVP part
+  What this shows:
+    · tap any line → ONE frame, exactly on that line, with its name; the toolbar shows ONLY that line's rows;
+    · Edit = its words (+ its "Start from"); Style = its looks + Colour / Size; Animate = its own;
+    · Background on a line says whose background it sits on; tap the card's edge to pick the CARD — that is where
+      the background is (the card itself, or no card at all);
+    · Form · When yes · When no are the stage's three screens, as today.
+-->
+<style>
+  :root { --ink:#2C2A29; --mute:#8A8580; --line:#E3DED5; --cta:#C24E24; --gold:#A9834B; --panel:#F0EDE6; --paper:#FBF9F5; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { margin:0; height:100%; background:#D9D4CA; color:var(--ink); font:16px/1.4 -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; }
+  button { font:inherit; color:inherit; }
+  #phone { position:relative; margin:0 auto; max-width:430px; height:100dvh; display:flex; flex-direction:column; background:#fff; overflow:hidden; }
+  /* top bar */
+  #top { display:flex; gap:8px; align-items:center; padding:6px 8px; border-bottom:2px solid #d8d3ca; }
+  .round { flex:0 0 44px; height:44px; border:0; border-radius:999px; background:#EAE7E1; font-size:18px; color:#8a8580; }
+  .round.x { background:#B3261E; color:#fff; }
+  .where { display:flex; flex:1; min-width:0; padding:3px; border-radius:999px; background:#EFECE6; }
+  .where span { flex:1; height:38px; display:flex; align-items:center; justify-content:center; border-radius:999px; font-weight:600; font-size:14px; color:#7b7671; }
+  .where span.on { background:var(--cta); color:#fff; }
+  /* the canvas: the guest's RSVP page */
+  #canvas { position:relative; flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; }
+  #ground { position:absolute; inset:0; min-height:100%; background:linear-gradient(160deg,#EBD9C3 0%,#D9B99A 45%,#B98E6C 100%); }
+  #ground::after { content:'The Look’s background'; position:absolute; right:8px; top:6px; font:600 9.5px/1 -apple-system, Arial, sans-serif; letter-spacing:.14em; text-transform:uppercase; color:rgba(44,42,41,.45); }
+  #page { position:relative; padding:22px 16px 28px; text-align:center; }
+  .mono { margin:0 auto 8px; width:64px; height:64px; border-radius:50%; border:1px solid var(--gold); display:flex; align-items:center; justify-content:center; font:italic 500 20px Georgia, serif; color:#7a5a25; background:rgba(255,255,255,.35); }
+  .inv { font:700 10px/1.2 -apple-system, Arial, sans-serif; letter-spacing:.24em; text-transform:uppercase; color:#7a5a25; }
+  .names { margin:4px 0 2px; font:500 26px/1.1 Georgia, serif; }
+  .meta { font:500 11px/1.3 ui-monospace, Menlo, monospace; letter-spacing:.12em; text-transform:uppercase; color:rgba(44,42,41,.65); }
+  #card { margin:18px 0 0; padding:22px 18px 20px; border-radius:22px; text-align:left; transition:background .2s, box-shadow .2s, border-color .2s; border:1px solid transparent; }
+  #card[data-bg="plain"] { background:var(--paper); border-color:rgba(44,42,41,.08); box-shadow:0 10px 26px rgba(30,34,41,.12); }
+  #card[data-bg="frost"] { background:rgba(255,255,255,.5); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); border-color:rgba(255,255,255,.6); }
+  #card[data-bg="none"] { background:transparent; }
+  .greet { margin:0 0 14px; font-size:14px; color:rgba(44,42,41,.75); }
+  .el { cursor:pointer; border-radius:8px; }
+  [data-el="eyebrow"] { display:block; font:700 11px/1.3 -apple-system, Arial, sans-serif; letter-spacing:.26em; text-transform:uppercase; color:#7B2D3B; }
+  [data-el="eyebrow"][data-look="plain"] { letter-spacing:0; text-transform:none; font-weight:600; font-size:13px; }
+  [data-el="question"] { display:block; margin:6px 0 14px; font:500 23px/1.2 Georgia, serif; }
+  [data-el="question"][data-look="sans"] { font-family:-apple-system, Arial, sans-serif; font-weight:650; }
+  [data-el="question"][data-look="script"] { font:italic 400 26px/1.15 "Snell Roundhand", "Apple Chancery", cursive; }
+  .ans { display:flex; min-height:48px; margin:0 0 9px; align-items:center; justify-content:center; padding:0 18px; border-radius:999px; font-weight:600; font-size:15px; border:1.5px solid var(--ink); background:#fff; }
+  .ans[data-look="filled"] { background:var(--ink); color:#fff; }
+  .ans[data-look="soft"] { border-color:transparent; background:rgba(44,42,41,.08); }
+  [data-el="hint"] { display:block; margin-top:4px; text-align:center; font-size:12.5px; color:rgba(44,42,41,.6); }
+  [data-el="hint"][data-look="hidden"] { opacity:.25; text-decoration:line-through; }
+  .big { display:block; font:500 25px/1.2 Georgia, serif; }
+  .big[data-look="sans"] { font-family:-apple-system, Arial, sans-serif; font-weight:650; }
+  .msg { display:block; margin-top:8px; font-size:15px; color:rgba(44,42,41,.78); }
+  .stub { margin:16px auto 0; width:200px; padding:14px; border-radius:16px; background:#fff; text-align:center; font:600 11px/1.3 -apple-system, Arial, sans-serif; letter-spacing:.14em; text-transform:uppercase; color:var(--mute); box-shadow:0 14px 28px -16px rgba(30,34,41,.45); }
+  .screen { display:none; } .screen.on { display:block; }
+  /* ONE selection frame, exactly on the picked element */
+  #frame { position:absolute; display:none; pointer-events:none; border:2px solid var(--cta); border-radius:12px; box-shadow:0 0 0 5px rgba(194,78,36,.14); transition:all .12s ease; z-index:5; }
+  #frame b { position:absolute; left:-2px; top:-21px; padding:3px 8px 2px; border-radius:6px 6px 6px 0; background:var(--cta); color:#fff; font:700 9.5px/1.3 -apple-system, Arial, sans-serif; letter-spacing:.14em; text-transform:uppercase; white-space:nowrap; }
+  /* the stage's three screens */
+  #tabs { display:flex; border-top:1px solid var(--line); background:#fff; }
+  #tabs button { flex:1; height:46px; border:0; background:none; font-weight:600; font-size:13.5px; color:#9a958f; border-top:3px solid transparent; }
+  #tabs button[aria-current="page"] { color:var(--ink); border-top-color:var(--ink); }
+  /* the lower third: the four-row toolbar */
+  #tools { flex:0 0 auto; height:270px; padding:6px 10px 10px; background:var(--panel); border-radius:22px 22px 0 0; border-top:1px solid #dcd7ce; display:flex; flex-direction:column; }
+  #tools::before { content:''; align-self:center; width:40px; height:4px; border-radius:4px; background:#d5d0c6; }
+  #crumb { margin:7px 0 8px; text-align:center; font:600 9.5px/1.3 -apple-system, Arial, sans-serif; letter-spacing:.18em; text-transform:uppercase; color:var(--mute); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #crumb b { color:var(--ink); }
+  .row { display:flex; gap:8px; align-items:center; min-height:44px; margin-bottom:8px; }
+  .row.one { color:#6b6763; font-size:14px; padding:0 4px; }
+  .seg { display:flex; flex:1; min-width:0; padding:3px; border-radius:999px; background:#fff; border:1px solid var(--line); }
+  .seg button { flex:1; min-width:0; height:38px; border:0; border-radius:999px; background:none; font-weight:600; font-size:13.5px; color:#77726d; white-space:nowrap; }
+  .seg button[aria-pressed="true"] { background:var(--cta); color:#fff; }
+  .seg button[aria-disabled="true"] { color:#c4bfb7; }
+  /* the four tools: each as wide as its word ("Background" is the long one), as on the real toolbar */
+  #toolsel button { flex:1 1 auto; padding:0 9px; font-size:13px; letter-spacing:-.01em; }
+  #play { flex:0 0 44px; height:44px; border:1px solid var(--line); border-radius:999px; background:#EFECE6; font-size:15px; }
+  .lbl { flex:0 0 auto; min-width:64px; font-size:14.5px; }
+  .field { flex:1; min-width:0; height:44px; padding:0 14px; border:1px solid var(--line); border-radius:999px; background:#fff; font:inherit; color:inherit; }
+  .dd { flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center; height:44px; padding:0 14px; border:1px solid var(--line); border-radius:999px; background:#fff; text-align:left; }
+  .dd small { font-size:11px; color:var(--mute); line-height:1.1; } .dd span { font-size:13.5px; font-weight:600; line-height:1.2; }
+  .chips { display:flex; gap:6px; flex:1; } .chips button { flex:1; height:40px; border:1px solid var(--line); border-radius:999px; background:#fff; font-weight:600; font-size:13px; color:#77726d; }
+  .chips button[aria-pressed="true"] { background:var(--ink); border-color:var(--ink); color:#fff; }
+  /* the card's background: small picture tiles with their names on them, the one worn ringed — as Background's row 2 */
+  .tiles { display:flex; gap:8px; flex:1; } .tile { position:relative; flex:1; height:44px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#fff; }
+  .tile span { position:absolute; left:8px; bottom:5px; font:600 11.5px/1 -apple-system, Arial, sans-serif; color:var(--ink); }
+  .tile[data-face="none"] { background:linear-gradient(to top right, #fff calc(50% - 1px), #d5cfc6 50%, #fff calc(50% + 1px)); }
+  .tile[data-face="plain"] { background:var(--paper); } .tile[data-face="frost"] { background:linear-gradient(135deg, rgba(255,255,255,.9), rgba(217,185,154,.55)); }
+  .tile[aria-pressed="true"] { box-shadow:0 0 0 2px var(--cta); border-color:transparent; }
+  .sw { flex:0 0 40px; height:40px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1px var(--line); }
+  .sw[aria-pressed="true"] { box-shadow:0 0 0 2px var(--cta); }
+  .step { flex:0 0 44px; height:44px; border:1px solid var(--line); border-radius:999px; background:#fff; font-weight:700; }
+  #say { position:absolute; left:50%; transform:translateX(-50%); bottom:332px; max-width:86%; padding:8px 14px; border-radius:999px; background:rgba(44,42,41,.9); color:#fff; font:600 12px/1.25 -apple-system, Arial, sans-serif; text-align:center; opacity:0; transition:opacity .2s; pointer-events:none; z-index:9; }
+  #say.on { opacity:1; }
+  @keyframes in-fade { from { opacity:0; } } @keyframes in-move { from { opacity:0; transform:translateY(22px); } }
+  @keyframes in-blur { from { opacity:0; filter:blur(8px); } } @keyframes in-size { from { opacity:0; transform:scale(.86); } }
+  @media (prefers-reduced-motion: reduce) { .el { animation:none !important; } }
+</style>
+</head>
+<body>
+<div id="phone">
+  <div id="top">
+    <button class="round x" aria-label="Close">✕</button>
+    <div class="where"><span class="on">RSVP ▾</span><span>Studio ▾</span></div>
+    <button class="round" aria-label="Undo">↶</button><button class="round" aria-label="Apply">✓</button>
+  </div>
+
+  <div id="canvas">
+    <div id="ground"></div>
+    <div id="page">
+      <div class="mono">M &amp; J</div>
+      <div class="inv">You’re invited</div>
+      <div class="names">Maria &amp; Jose</div>
+      <div class="meta">Sat 12 Dec 2026 · Seda Vertis North</div>
+
+      <div id="card" class="el" data-el="card" data-bg="plain">
+        <div class="screen on" data-screen="form">
+          <p class="greet">Teresita Aquino</p>
+          <span class="el" data-el="eyebrow"></span>
+          <span class="el" data-el="question"></span>
+          <span class="el ans" data-el="yes"></span>
+          <span class="el ans" data-el="no"></span>
+          <span class="el" data-el="hint"></span>
+        </div>
+        <div class="screen" data-screen="yes">
+          <span class="el big" data-el="yhead"></span>
+          <span class="el msg" data-el="ymsg"></span>
+          <div class="stub">Your digital pass<br>Teresita Aquino</div>
+        </div>
+        <div class="screen" data-screen="no">
+          <span class="el big" data-el="nhead"></span>
+          <span class="el msg" data-el="nmsg"></span>
+        </div>
+      </div>
+      <div id="frame"><b></b></div>
+    </div>
+  </div>
+
+  <div id="tabs">
+    <button data-tab="form" aria-current="page">Form</button>
+    <button data-tab="yes">When yes</button>
+    <button data-tab="no">When no</button>
+  </div>
+
+  <div id="say" role="status"></div>
+  <div id="tools">
+    <div id="crumb"></div>
+    <div class="row">
+      <div class="seg" id="toolsel">
+        <button data-tool="edit">Edit</button><button data-tool="style">Style</button><button data-tool="bg">Background</button><button data-tool="anim">Animate</button>
+      </div>
+      <button id="play" aria-label="Play this element">▶</button>
+    </div>
+    <div id="rows"></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const SCREEN = { form: 'Form', yes: 'When yes', no: 'When no' };
+  /* Every element of the RSVP: its name, its words, the page's own words ("Automatic"), its looks. */
+  const E = {
+    card:     { name: 'RSVP card', block: true },
+    eyebrow:  { name: 'Eyebrow', text: 'Your reply', auto: 'Your reply', looks: [['caps', 'Small capitals'], ['plain', 'Plain']] },
+    question: { name: 'Question', text: 'Will you celebrate with us?', auto: 'Will you celebrate with us?', looks: [['serif', 'Serif'], ['sans', 'Sans'], ['script', 'Script']] },
+    yes:      { name: 'Yes answer', text: 'Yes, with joy', auto: 'Yes, with joy', looks: [['outline', 'Outline'], ['filled', 'Filled'], ['soft', 'Soft']] },
+    no:       { name: 'No answer', text: 'Sadly, no', auto: 'Sadly, no', looks: [['outline', 'Outline'], ['filled', 'Filled'], ['soft', 'Soft']] },
+    hint:     { name: 'Hint', text: 'Tap one to continue', auto: 'Tap one to continue', looks: [['quiet', 'Quiet'], ['hidden', 'Hidden']] },
+    yhead:    { name: 'Heading', text: 'See you there, Teresita', auto: 'See you there, Teresita', looks: [['serif', 'Serif'], ['sans', 'Sans']] },
+    ymsg:     { name: 'Message', text: 'We cannot wait to celebrate with you.', auto: '', looks: [['plain', 'Plain']] },
+    nhead:    { name: 'Heading', text: 'We will miss you.', auto: 'We will miss you.', looks: [['serif', 'Serif'], ['sans', 'Sans']] },
+    nmsg:     { name: 'Message', text: 'Thank you for letting us know.', auto: '', looks: [['plain', 'Plain']] },
+  };
+  for (const k in E) Object.assign(E[k], { own: false, look: E[k].looks?.[0][0] ?? null, colour: null, size: 0, fx: new Set(['fade']), feel: 'Auto' });
+  const COLOURS = [null, '#7B2D3B', '#C24E24', '#5B6B3A', '#2C2A29'];
+  const S = { screen: 'form', picked: null, tool: 'edit', phase: 'in' };
+  const node = (k) => $(`[data-el="${k}"]`);
+  const say = (words) => { const t = $('#say'); t.textContent = words; t.classList.add('on'); clearTimeout(say.t); say.t = setTimeout(() => t.classList.remove('on'), 2600); };
+
+  function draw() {
+    for (const k in E) { const e = E[k], n = node(k); if (e.block) continue;
+      n.textContent = e.own ? e.text : (e.auto || e.text); n.dataset.look = e.look ?? '';
+      n.style.color = e.colour ?? ''; n.style.fontSize = e.size ? `calc(1em + ${e.size * 2}px)` : '';
+      if (n.classList.contains('ans') && e.look === 'filled' && e.colour) { n.style.background = e.colour; n.style.borderColor = e.colour; n.style.color = '#fff'; } else if (n.classList.contains('ans')) { n.style.background = ''; n.style.borderColor = e.colour ?? ''; } }
+    $$('.screen').forEach((s) => s.classList.toggle('on', s.dataset.screen === S.screen));
+    $$('#tabs button').forEach((b) => b.toggleAttribute('aria-current', false) || (b.dataset.tab === S.screen && b.setAttribute('aria-current', 'page')));
+    frame(); panel();
+  }
+  function frame() {
+    const f = $('#frame'), n = S.picked && node(S.picked);
+    if (!n || !n.offsetParent) return void (f.style.display = 'none');
+    const a = n.getBoundingClientRect(), b = $('#page').getBoundingClientRect(), pad = E[S.picked].block ? 0 : 5;
+    Object.assign(f.style, { display: 'block', left: `${a.left - b.left - pad}px`, top: `${a.top - b.top - pad}px`, width: `${a.width + pad * 2}px`, height: `${a.height + pad * 2}px`, borderRadius: E[S.picked].block ? '22px' : n.classList.contains('ans') ? '999px' : '12px' });
+    f.firstElementChild.textContent = E[S.picked].name;
+  }
+  const row = (html, cls = '') => `<div class="row ${cls}">${html}</div>`;
+  function panel() {
+    const e = S.picked ? E[S.picked] : null;
+    $('#crumb').innerHTML = `You’re editing · <b>RSVP › ${SCREEN[S.screen]}${e ? ' › ' + e.name : ''}</b>`;
+    $$('#toolsel button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.tool === S.tool)));
+    const rows = $('#rows');
+    if (!e) return void (rows.innerHTML = row('Tap any line of the RSVP — each one is its own part. Tap the card’s edge for the card itself.', 'one'));
+    if (S.tool === 'edit') {
+      rows.innerHTML = e.block
+        ? row('The card holds the lines of this screen. Tap a line to change its words.', 'one')
+        : row(`<span class="lbl">${e.name}</span><input class="field" id="words" value="${(e.own ? e.text : e.auto || e.text).replace(/"/g, '&quot;')}" aria-label="${e.name}">`) +
+          (e.auto ? row(`<button class="dd" id="from"><small>Start from</small><span>${e.own ? 'What you wrote' : 'Automatic'} ▾</span></button>`) : row('This one has no automatic words — it shows only what you write.', 'one'));
+    } else if (S.tool === 'style') {
+      rows.innerHTML = e.block
+        ? row('The card’s own look is its background — open Background.', 'one')
+        : row(`<button class="dd" id="look"><small>Look</small><span>${e.looks.find((l) => l[0] === e.look)[1]} ▾</span></button>`) +
+          row(`<span class="lbl">Colour</span>${COLOURS.map((c, i) => `<button class="sw" data-c="${i}" aria-pressed="${e.colour === c}" style="background:${c ?? 'conic-gradient(#eee,#bbb,#eee)'}" aria-label="${c ?? 'The page’s own'}"></button>`).join('')}`) +
+          row(`<span class="lbl">Size</span><button class="step" data-s="-1">A−</button><button class="step" data-s="1">A+</button><span style="font-size:13px;color:#8a8580">${e.size === 0 ? 'As designed' : (e.size > 0 ? '+' : '') + e.size}</span>`);
+    } else if (S.tool === 'bg') {
+      const bg = $('#card').dataset.bg;
+      rows.innerHTML = e.block
+        ? row(`<div class="tiles">${[['none', 'None'], ['plain', 'Plain'], ['frost', 'Frosted']].map(([k, n]) => `<button class="tile" data-bg="${k}" data-face="${k}" aria-pressed="${bg === k}"><span>${n}</span></button>`).join('')}</div>`) +
+          row('Behind the card is the Look’s background — the same one every page wears.', 'one')
+        : row(`This sits on the RSVP card’s background. <button class="step" id="tocard" style="flex:0 0 auto;padding:0 14px;margin-left:auto">Open the card</button>`, 'one');
+    } else {
+      rows.innerHTML = e.block
+        ? row('The card arrives with the page. Its lines each have their own Animate — tap one.', 'one')
+        : row(`<div class="seg">${[['in', 'Build in'], ['act', 'Action'], ['out', 'Build out']].map(([k, n]) => `<button data-phase="${k}" aria-pressed="${S.phase === k}">${n}</button>`).join('')}</div>`) +
+          (S.phase === 'act' ? row('<div class="seg"><button aria-pressed="true">Still</button><button>Drift</button></div>')
+            : row(`<div class="chips">${['fade', 'blur', 'move', 'size'].map((k) => `<button data-fx="${k}" aria-pressed="${e.fx.has(k)}">${k[0].toUpperCase() + k.slice(1)}</button>`).join('')}</div>`) +
+              row(`<button class="dd" id="feel"><small>Movement ◆</small><span>${e.feel} ▾</span></button><button class="dd" style="flex:.9"><small>Plays</small><span>On arrival ▾</span></button>`));
+    }
+  }
+  function play() {
+    const e = S.picked && E[S.picked]; if (!e || e.block) return say('Tap a line first — ▶ plays that line’s own Build in.');
+    const n = node(S.picked), kf = ['move', 'size', 'blur', 'fade'].find((k) => e.fx.has(k)); if (!kf) return say('Build in: none — nothing to play.');
+    const secs = { Auto: 0.9, Quick: 0.5, Calm: 1.1, Cinematic: 1.8 }[e.feel];
+    n.style.animation = 'none'; void n.offsetWidth; n.style.animation = `in-${kf} ${secs}s ease both`;
+    say(`${e.name} · Build in · ${[...e.fx].join(' + ') || 'none'} · ${e.feel}`);
+  }
+
+  /* TAPS: a line picks the line; the card's own edge (anything in the card that is not a line) picks the card. */
+  $('#canvas').addEventListener('click', (ev) => {
+    const line = ev.target.closest('.el[data-el]:not(#card)'), card = ev.target.closest('#card');
+    S.picked = line ? line.dataset.el : card ? 'card' : null;
+    if (S.picked === 'card' && (S.tool === 'edit' || S.tool === 'anim')) S.tool = 'bg';
+    draw();
+  });
+  $('#tabs').addEventListener('click', (ev) => { const b = ev.target.closest('button'); if (!b) return; S.screen = b.dataset.tab; S.picked = null; $('#canvas').scrollTop = 0; draw(); });
+  $('#toolsel').addEventListener('click', (ev) => { const b = ev.target.closest('button'); if (b) { S.tool = b.dataset.tool; panel(); } });
+  $('#play').addEventListener('click', play);
+  $('#rows').addEventListener('input', (ev) => { if (ev.target.id !== 'words') return; const e = E[S.picked]; e.text = ev.target.value; e.own = true; const n = node(S.picked); n.textContent = e.text; frame(); const f = $('#from span'); if (f) f.textContent = 'What you wrote ▾'; });
+  $('#rows').addEventListener('click', (ev) => {
+    const e = S.picked && E[S.picked], b = ev.target.closest('button'); if (!e || !b) return;
+    if (b.id === 'from') { e.own = !e.own; if (e.own && !e.text) e.text = e.auto; say(e.own ? 'Your own words — kept as you wrote them.' : 'Automatic — the page’s own words for this event.'); }
+    else if (b.id === 'look') { const i = e.looks.findIndex((l) => l[0] === e.look); e.look = e.looks[(i + 1) % e.looks.length][0]; }
+    else if (b.dataset.c !== undefined) e.colour = COLOURS[Number(b.dataset.c)];
+    else if (b.dataset.s) e.size = Math.max(-2, Math.min(4, e.size + Number(b.dataset.s)));
+    else if (b.dataset.bg) $('#card').dataset.bg = b.dataset.bg;
+    else if (b.id === 'tocard') { S.picked = 'card'; }
+    else if (b.dataset.phase) S.phase = b.dataset.phase;
+    else if (b.dataset.fx) { e.fx.has(b.dataset.fx) ? e.fx.delete(b.dataset.fx) : e.fx.add(b.dataset.fx); }
+    else if (b.id === 'feel') { const F = ['Auto', 'Quick', 'Calm', 'Cinematic']; e.feel = F[(F.indexOf(e.feel) + 1) % 4]; }
+    else return;
+    draw();
+  });
+  $('#canvas').addEventListener('scroll', frame, { passive: true });
+  addEventListener('resize', frame);
+  draw();
+  say('Tap any line of the RSVP — each is its own part.');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RSVP · add, drag, group · prototype</title>
+<!--
+  RSVP STAGE — ＋ IS BACK · HOLD TO MOVE · PICK SEVERAL AND GROUP. A prototype to try, not app code (2026-10-09).
+  Plain HTML / CSS / JS. It EXTENDS `rsvp-per-element.html` (which the owner liked: "i like this idea") — same look,
+  same sample RSVP, same top bar, same four-tool bar. Only three things are new:
+
+  1. ＋ IS BACK. On the real RSVP stage the ＋ was switched off (the pages were treated as fixed). Here a picked part
+     wears the shipped frame's ＋ — 26 px, on the middle of the frame's top and bottom edge, the only button on the
+     frame (`add-part-sheet.tsx`: `PART_OUTLINE` · `EDGE_BTN` · `ADD_FACE` · `data-part-add`). A tap opens the shipped
+     sheet's shape, "Add above / below <part>", offering only what belongs on an RSVP: Heading · Message · Picture.
+     The picked part steps apart from its neighbours so ＋ never sits on another line's words.
+  2. HOLD TO MOVE — the Wedding March's feel (`details-march.tsx`): press and hold (350 ms), the part lifts as a
+     ghost with a shadow at 103 %, its own place dims, the gap under the finger opens with a line in it, and on
+     letting go everything settles (240 ms) while the ghost flies home. A short tap still only picks. A plain swipe
+     still scrolls; while a part is held the finger does not move the page. Earlier · Later stay in Edit's last row.
+  3. GROUP. Edit's last row has "Group": it turns on picking more (each tapped line gets a tick; a bar in the lower
+     third says "3 picked · Done · Cancel"). Done wraps them in one card with one shared background. The group is
+     then one part: Background (None · Plain · Frosted) is the whole card's, it moves as one, Edit shows "Ungroup".
+     A line inside a group is still picked on its own; ＋ on it adds a line INTO that group.
+     Moving inside a group: hold the line that is picked to move that line; hold anywhere else to move the group.
+-->
+<style>
+  :root { --ink:#2C2A29; --mute:#8A8580; --line:#E3DED5; --cta:#C24E24; --gold:#A9834B; --panel:#F0EDE6; --paper:#FBF9F5; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { margin:0; height:100%; background:#D9D4CA; color:var(--ink); font:16px/1.4 -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; }
+  button { font:inherit; color:inherit; }
+  #phone { position:relative; margin:0 auto; max-width:430px; height:100dvh; display:flex; flex-direction:column; background:#fff; overflow:hidden; }
+  /* top bar */
+  #top { display:flex; gap:8px; align-items:center; padding:6px 8px; border-bottom:2px solid #d8d3ca; }
+  .round { flex:0 0 44px; height:44px; border:0; border-radius:999px; background:#EAE7E1; font-size:18px; color:#8a8580; }
+  .round.x { background:#B3261E; color:#fff; }
+  .where { display:flex; flex:1; min-width:0; padding:3px; border-radius:999px; background:#EFECE6; }
+  .where span { flex:1; height:38px; display:flex; align-items:center; justify-content:center; border-radius:999px; font-weight:600; font-size:14px; color:#7b7671; }
+  .where span.on { background:var(--cta); color:#fff; }
+  /* the canvas: the guest's RSVP page */
+  /* The Look's background is the canvas's own, so it stays behind the page however long added lines make it. */
+  #canvas { position:relative; flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; background:linear-gradient(160deg,#EBD9C3 0%,#D9B99A 45%,#B98E6C 100%); }
+  #ground { position:absolute; inset:0; min-height:100%; }
+  #ground::after { content:'The Look’s background'; position:absolute; right:8px; top:6px; font:600 9.5px/1 -apple-system, Arial, sans-serif; letter-spacing:.14em; text-transform:uppercase; color:rgba(44,42,41,.45); }
+  #page { position:relative; padding:22px 16px 28px; text-align:center; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+  .mono { margin:0 auto 8px; width:64px; height:64px; border-radius:50%; border:1px solid var(--gold); display:flex; align-items:center; justify-content:center; font:italic 500 20px Georgia, serif; color:#7a5a25; background:rgba(255,255,255,.35); }
+  .inv { font:700 10px/1.2 -apple-system, Arial, sans-serif; letter-spacing:.24em; text-transform:uppercase; color:#7a5a25; }
+  .names { margin:4px 0 2px; font:500 26px/1.1 Georgia, serif; }
+  .meta { font:500 11px/1.3 ui-monospace, Menlo, monospace; letter-spacing:.12em; text-transform:uppercase; color:rgba(44,42,41,.65); }
+  #card { margin:18px 0 0; padding:22px 18px 20px; border-radius:22px; text-align:left; transition:background .2s, box-shadow .2s, border-color .2s; border:1px solid transparent; }
+  #card[data-bg="plain"] { background:var(--paper); border-color:rgba(44,42,41,.08); box-shadow:0 10px 26px rgba(30,34,41,.12); }
+  #card[data-bg="frost"] { background:rgba(255,255,255,.5); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); border-color:rgba(255,255,255,.6); }
+  #card[data-bg="none"] { background:transparent; }
+  .greet { margin:0 0 14px; font-size:14px; color:rgba(44,42,41,.75); }
+  .el { position:relative; cursor:pointer; border-radius:8px; touch-action:pan-y; }
+  .k-eyebrow { display:block; margin:0 0 6px; font:700 11px/1.3 -apple-system, Arial, sans-serif; letter-spacing:.26em; text-transform:uppercase; color:#7B2D3B; }
+  .k-eyebrow[data-look="plain"] { letter-spacing:0; text-transform:none; font-weight:600; font-size:13px; }
+  .k-question { display:block; margin:6px 0 14px; font:500 23px/1.2 Georgia, serif; }
+  .k-question[data-look="sans"] { font-family:-apple-system, Arial, sans-serif; font-weight:650; }
+  .k-question[data-look="script"] { font:italic 400 26px/1.15 "Snell Roundhand", "Apple Chancery", cursive; }
+  .ans { display:flex; min-height:48px; margin:0 0 9px; align-items:center; justify-content:center; padding:0 18px; border-radius:999px; font-weight:600; font-size:15px; border:1.5px solid var(--ink); background:#fff; }
+  .ans[data-look="filled"] { background:var(--ink); color:#fff; }
+  .ans[data-look="soft"] { border-color:transparent; background:rgba(44,42,41,.08); }
+  .k-hint { display:block; margin-top:4px; text-align:center; font-size:12.5px; color:rgba(44,42,41,.6); }
+  .k-hint[data-look="hidden"] { opacity:.25; text-decoration:line-through; }
+  .big { display:block; font:500 25px/1.2 Georgia, serif; }
+  .big[data-look="sans"] { font-family:-apple-system, Arial, sans-serif; font-weight:650; }
+  .msg { display:block; margin-top:8px; font-size:15px; color:rgba(44,42,41,.78); }
+  /* the three things ＋ offers on an RSVP page */
+  .k-heading { display:block; margin:10px 0 6px; font:500 20px/1.2 Georgia, serif; }
+  .k-heading[data-look="sans"] { font-family:-apple-system, Arial, sans-serif; font-weight:650; }
+  .k-message { display:block; margin:6px 0 10px; font-size:14.5px; color:rgba(44,42,41,.78); }
+  .k-picture { display:block; margin:10px 0; height:112px; border-radius:14px; background:radial-gradient(circle at 74% 34%, rgba(255,246,228,.95) 0 11%, transparent 12%), linear-gradient(180deg,#E7C9A6 0%,#D2A77F 58%,#8E6A4E 59%,#A98263 100%); }
+  .k-picture[data-look="tall"] { height:176px; }
+  .k-picture i { position:absolute; left:10px; bottom:8px; font:600 9.5px/1 -apple-system, Arial, sans-serif; font-style:normal; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.92); }
+  /* a group: several lines in one card, one shared background */
+  .grp { margin:12px 0; padding:14px; border-radius:16px; border:1px solid transparent; }
+  .grp[data-bg="plain"] { background:#fff; border-color:rgba(44,42,41,.09); box-shadow:0 10px 22px -14px rgba(30,34,41,.4); }
+  .grp[data-bg="frost"] { background:rgba(255,255,255,.5); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); border-color:rgba(255,255,255,.75); box-shadow:0 10px 22px -16px rgba(30,34,41,.35); }
+  .grp[data-bg="none"] { background:transparent; }
+  .grp > div.el:first-of-type { margin-top:0; } .grp > div.el:last-of-type { margin-bottom:0; }
+  /* THE PICKED PART STEPS APART (the shipped prototype's `.el.on{padding-block:18px}`): the frame's edge sits in the
+     middle of the gap and the 26 px ＋ on it never lies over a neighbour's words. */
+  #page .el.on { margin-block:36px !important; }
+  .stub { margin:16px auto 0; width:200px; padding:14px; border-radius:16px; background:#fff; text-align:center; font:600 11px/1.3 -apple-system, Arial, sans-serif; letter-spacing:.14em; text-transform:uppercase; color:var(--mute); box-shadow:0 14px 28px -16px rgba(30,34,41,.45); }
+  .screen { display:none; } .screen.on { display:block; }
+  /* ONE selection frame, exactly on the picked element — and its ＋, the only buttons on it */
+  #frame { position:absolute; display:none; pointer-events:none; border:2px solid var(--cta); border-radius:12px; box-shadow:0 0 0 5px rgba(194,78,36,.14); transition:all .12s ease; z-index:5; }
+  #frame b { position:absolute; left:-2px; top:-12px; padding:3px 8px 2px; border-radius:4px; background:var(--cta); color:#fff; font:700 9.5px/1.3 -apple-system, Arial, sans-serif; letter-spacing:.14em; text-transform:uppercase; white-space:nowrap; }
+  .addp { position:absolute; left:50%; width:44px; height:36px; padding:0; border:0; background:none; transform:translate(-50%,-50%); display:flex; align-items:center; justify-content:center; pointer-events:auto; cursor:pointer; }
+  .addp[data-part-add="above"] { top:-1px; } .addp[data-part-add="below"] { top:calc(100% + 1px); }
+  .addp span { display:flex; width:26px; height:26px; align-items:center; justify-content:center; border-radius:50%; background:var(--cta); color:#fff; font:600 18px/1 -apple-system, Arial, sans-serif; box-shadow:0 0 0 3px #fff, 0 4px 10px -4px rgba(0,0,0,.4); }
+  .addp:active span { transform:scale(.92); }
+  #frame.bare .addp { display:none; }
+  /* HOLD TO MOVE (the Wedding March): the place it left dims, the gap under the finger opens, the ghost carries it */
+  .el.lifted { opacity:.3; outline:1.5px dashed rgba(44,42,41,.7); outline-offset:4px; }
+  .gap { display:block; position:relative; height:0; transition:height .2s; }
+  .gap.on { height:20px; }
+  .gap i { position:absolute; left:24px; right:24px; top:50%; height:2px; margin-top:-1px; border-radius:2px; background:var(--cta); opacity:0; transition:opacity .15s; }
+  .gap.on i { opacity:1; }
+  .ghost { position:fixed; left:0; top:0; z-index:9999; margin:0; pointer-events:none; text-align:left; box-shadow:0 18px 34px -14px rgba(44,42,41,.55); will-change:transform; }
+  .ghost.bare { padding:8px 10px; border-radius:12px; background:#fff; }
+  .ghost > * { margin:0 !important; }
+  body.holding, body.holding * { cursor:grabbing !important; }
+  /* PICKING MORE FOR A GROUP: a ring on every line that can join, a tick on each one picked */
+  #page.picking .lines > .el { margin:12px 0 12px 24px !important; } /* the lines step apart and make room for their marks */
+  .el.can::after, .el.tick::after { content:''; position:absolute; left:-26px; top:50%; width:18px; height:18px; margin-top:-9px; display:grid; place-items:center; border-radius:50%; border:1.5px solid rgba(44,42,41,.4); background:#fff; font:700 11px/1 -apple-system, Arial, sans-serif; letter-spacing:0; text-transform:none; }
+  .el.tick::after { content:'✓'; border-color:var(--cta); background:var(--cta); color:#fff; }
+  .el.tick { outline:2px solid var(--cta); outline-offset:2px; }
+  .el.cant { opacity:.4; }
+  /* the stage's three screens */
+  #tabs { display:flex; border-top:1px solid var(--line); background:#fff; }
+  #tabs button { flex:1; height:46px; border:0; background:none; font-weight:600; font-size:13.5px; color:#9a958f; border-top:3px solid transparent; }
+  #tabs button[aria-current="page"] { color:var(--ink); border-top-color:var(--ink); }
+  /* the lower third: the four-row toolbar */
+  #tools { flex:0 0 auto; height:270px; padding:6px 10px 10px; background:var(--panel); border-radius:22px 22px 0 0; border-top:1px solid #dcd7ce; display:flex; flex-direction:column; }
+  #tools::before { content:''; align-self:center; width:40px; height:4px; border-radius:4px; background:#d5d0c6; }
+  #crumb { margin:7px 0 8px; text-align:center; font:600 9.5px/1.3 -apple-system, Arial, sans-serif; letter-spacing:.18em; text-transform:uppercase; color:var(--mute); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #crumb b { color:var(--ink); }
+  #rows { flex:1; min-height:0; display:flex; flex-direction:column; }
+  .row { display:flex; gap:8px; align-items:center; min-height:44px; margin-bottom:8px; }
+  .row.one { color:#6b6763; font-size:14px; padding:0 4px; }
+  .row.last { margin-top:auto; margin-bottom:0; gap:6px; }
+  .seg { display:flex; flex:1; min-width:0; padding:3px; border-radius:999px; background:#fff; border:1px solid var(--line); }
+  .seg button { flex:1; min-width:0; height:38px; border:0; border-radius:999px; background:none; font-weight:600; font-size:13.5px; color:#77726d; white-space:nowrap; }
+  .seg button[aria-pressed="true"] { background:var(--cta); color:#fff; }
+  .seg button[aria-disabled="true"] { color:#c4bfb7; }
+  /* the four tools: each as wide as its word ("Background" is the long one), as on the real toolbar */
+  #toolsel button { flex:1 1 auto; padding:0 9px; font-size:13px; letter-spacing:-.01em; }
+  #play { flex:0 0 44px; height:44px; border:1px solid var(--line); border-radius:999px; background:#EFECE6; font-size:15px; }
+  .lbl { flex:0 0 auto; min-width:64px; font-size:14.5px; }
+  .field { flex:1; min-width:0; height:44px; padding:0 14px; border:1px solid var(--line); border-radius:999px; background:#fff; font:inherit; color:inherit; }
+  .dd { flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center; height:44px; padding:0 14px; border:1px solid var(--line); border-radius:999px; background:#fff; text-align:left; }
+  .dd small { font-size:11px; color:var(--mute); line-height:1.1; } .dd span { font-size:13.5px; font-weight:600; line-height:1.2; }
+  .chips { display:flex; gap:6px; flex:1; } .chips button { flex:1; height:40px; border:1px solid var(--line); border-radius:999px; background:#fff; font-weight:600; font-size:13px; color:#77726d; }
+  .chips button[aria-pressed="true"] { background:var(--ink); border-color:var(--ink); color:#fff; }
+  /* the card's background: small picture tiles with their names on them, the one worn ringed — as Background's row 2 */
+  .tiles { display:flex; gap:8px; flex:1; } .tile { position:relative; flex:1; height:44px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#fff; }
+  .tile span { position:absolute; left:8px; bottom:5px; font:600 11.5px/1 -apple-system, Arial, sans-serif; color:var(--ink); }
+  .tile[data-face="none"] { background:linear-gradient(to top right, #fff calc(50% - 1px), #d5cfc6 50%, #fff calc(50% + 1px)); }
+  .tile[data-face="plain"] { background:var(--paper); } .tile[data-face="frost"] { background:linear-gradient(135deg, rgba(255,255,255,.9), rgba(217,185,154,.55)); }
+  .tile[aria-pressed="true"] { box-shadow:0 0 0 2px var(--cta); border-color:transparent; }
+  .sw { flex:0 0 40px; height:40px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1px var(--line); }
+  .sw[aria-pressed="true"] { box-shadow:0 0 0 2px var(--cta); }
+  .step { flex:0 0 44px; height:44px; border:1px solid var(--line); border-radius:999px; background:#fff; font-weight:700; }
+  /* Edit's LAST row — ↑ Earlier · ↓ Later · Group · Remove (moving and removing live here, never on the frame) */
+  .act { flex:1 1 0; min-width:0; height:44px; padding:0 4px; border:1px solid var(--line); border-radius:999px; background:#fff; font-weight:600; font-size:13px; white-space:nowrap; }
+  .act[aria-disabled="true"] { opacity:.42; }
+  .act.danger { color:#B3261E; }
+  .act:active, .pickbar button:active { transform:scale(.97); }
+  /* picking more: the one small bar */
+  .pickbar { display:flex; align-items:center; gap:8px; height:58px; padding:0 7px 0 18px; border-radius:999px; background:#fff; border:1px solid var(--line); box-shadow:0 12px 26px -18px rgba(30,34,41,.55); }
+  .pickbar b { flex:1; min-width:0; font-size:15px; }
+  .pickbar button { height:44px; padding:0 18px; border:1px solid var(--line); border-radius:999px; background:#fff; font-weight:600; font-size:14px; }
+  .pickbar .go { background:var(--cta); border-color:var(--cta); color:#fff; }
+  .pickbar .go[aria-disabled="true"] { opacity:.42; }
+  #say { position:absolute; left:50%; transform:translateX(-50%); bottom:332px; max-width:86%; padding:8px 14px; border-radius:999px; background:rgba(44,42,41,.9); color:#fff; font:600 12px/1.25 -apple-system, Arial, sans-serif; text-align:center; opacity:0; transition:opacity .2s; pointer-events:none; z-index:9; }
+  #say.on { opacity:1; }
+  /* ＋ "Add above / below <part>" — the shipped sheet's shape (`MakerSheet`): the page stays clear, the rest goes dark */
+  #sheet { position:absolute; inset:0; z-index:20; }
+  #sheet[hidden] { display:none; }
+  #sheet .scrim { position:absolute; inset:0; width:100%; height:100%; border:0; padding:0; background:none; cursor:default; touch-action:none; }
+  #sheet .dark { position:absolute; inset:0; pointer-events:none; background:rgba(44,42,41,.42); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); }
+  #sheet .box { position:absolute; left:0; right:0; bottom:0; max-height:62dvh; display:flex; flex-direction:column; padding:4px 8px max(24px, env(safe-area-inset-bottom)); border-radius:24px 24px 0 0; background:#fff; box-shadow:0 -18px 40px -18px rgba(30,26,18,.45), 0 0 0 1px rgba(44,42,41,.1); animation:sheet-up .2s cubic-bezier(.16,1,.3,1); }
+  #sheet .box::before { content:''; align-self:center; flex:0 0 4px; width:40px; margin:4px 0 6px; border-radius:4px; background:rgba(44,42,41,.15); }
+  #sheet p { margin:0; padding:0 12px 8px; font:600 12px/1.4 -apple-system, Arial, sans-serif; letter-spacing:.08em; text-transform:uppercase; color:rgba(44,42,41,.55); }
+  #sheet .opt { display:flex; width:100%; height:48px; align-items:center; gap:10px; padding:0 12px; margin-bottom:2px; border:0; border-radius:12px; background:none; text-align:left; font-size:15px; }
+  #sheet .opt:active { background:rgba(44,42,41,.06); }
+  #sheet .opt span { flex:1; min-width:0; }
+  #sheet .opt svg { flex:0 0 16px; width:16px; height:16px; stroke:var(--cta); stroke-width:2.4; stroke-linecap:round; fill:none; }
+  @keyframes sheet-up { from { transform:translateY(24px); opacity:0; } }
+  @keyframes in-fade { from { opacity:0; } } @keyframes in-move { from { opacity:0; transform:translateY(22px); } }
+  @keyframes in-blur { from { opacity:0; filter:blur(8px); } } @keyframes in-size { from { opacity:0; transform:scale(.86); } }
+  @media (prefers-reduced-motion: reduce) { .el { animation:none !important; } .gap, #sheet .box { transition:none; animation:none; } }
+</style>
+</head>
+<body>
+<div id="phone">
+  <div id="top">
+    <button class="round x" aria-label="Close">✕</button>
+    <div class="where"><span class="on">RSVP ▾</span><span>Studio ▾</span></div>
+    <button class="round" aria-label="Undo">↶</button><button class="round" aria-label="Apply">✓</button>
+  </div>
+
+  <div id="canvas">
+    <div id="ground"></div>
+    <div id="page">
+      <div class="mono">M &amp; J</div>
+      <div class="inv">You’re invited</div>
+      <div class="names">Maria &amp; Jose</div>
+      <div class="meta">Sat 12 Dec 2026 · Seda Vertis North</div>
+
+      <div id="card" class="el" data-el="card" data-bg="plain">
+        <div class="screen on" data-screen="form">
+          <p class="greet">Teresita Aquino</p>
+          <div class="lines" data-lines="form"></div>
+        </div>
+        <div class="screen" data-screen="yes">
+          <div class="lines" data-lines="yes"></div>
+          <div class="stub">Your digital pass<br>Teresita Aquino</div>
+        </div>
+        <div class="screen" data-screen="no">
+          <div class="lines" data-lines="no"></div>
+        </div>
+      </div>
+      <div id="frame"><b></b>
+        <button type="button" class="addp" data-part-add="above"><span>+</span></button>
+        <button type="button" class="addp" data-part-add="below"><span>+</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tabs">
+    <button data-tab="form" aria-current="page">Form</button>
+    <button data-tab="yes">When yes</button>
+    <button data-tab="no">When no</button>
+  </div>
+
+  <div id="say" role="status"></div>
+  <div id="tools">
+    <div id="crumb"></div>
+    <div class="row" id="toolrow">
+      <div class="seg" id="toolsel">
+        <button data-tool="edit">Edit</button><button data-tool="style">Style</button><button data-tool="bg">Background</button><button data-tool="anim">Animate</button>
+      </div>
+      <button id="play" aria-label="Play this element">▶</button>
+    </div>
+    <div id="rows"></div>
+  </div>
+
+  <div id="sheet" hidden>
+    <button type="button" class="scrim" aria-label="Close"></button>
+    <span class="dark" aria-hidden="true"></span>
+    <div class="box" role="dialog" aria-modal="true">
+      <p id="sheetname"></p>
+      <button type="button" class="opt" data-add="heading"><span>Heading</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v11M2.5 8h11"/></svg></button>
+      <button type="button" class="opt" data-add="message"><span>Message</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v11M2.5 8h11"/></svg></button>
+      <button type="button" class="opt" data-add="picture"><span>Picture</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v11M2.5 8h11"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const SCREEN = { form: 'Form', yes: 'When yes', no: 'When no' };
+  /* Every element of the RSVP: its name, its words, the page's own words ("Automatic"), its looks. */
+  const E = {
+    card:     { name: 'RSVP card', card: true },
+    eyebrow:  { name: 'Eyebrow', cls: 'k-eyebrow', text: 'Your reply', auto: 'Your reply', looks: [['caps', 'Small capitals'], ['plain', 'Plain']] },
+    question: { name: 'Question', cls: 'k-question', text: 'Will you celebrate with us?', auto: 'Will you celebrate with us?', looks: [['serif', 'Serif'], ['sans', 'Sans'], ['script', 'Script']] },
+    yes:      { name: 'Yes answer', cls: 'ans', text: 'Yes, with joy', auto: 'Yes, with joy', looks: [['outline', 'Outline'], ['filled', 'Filled'], ['soft', 'Soft']] },
+    no:       { name: 'No answer', cls: 'ans', text: 'Sadly, no', auto: 'Sadly, no', looks: [['outline', 'Outline'], ['filled', 'Filled'], ['soft', 'Soft']] },
+    hint:     { name: 'Hint', cls: 'k-hint', text: 'Tap one to continue', auto: 'Tap one to continue', looks: [['quiet', 'Quiet'], ['hidden', 'Hidden']] },
+    yhead:    { name: 'Heading', cls: 'big', text: 'See you there, Teresita', auto: 'See you there, Teresita', looks: [['serif', 'Serif'], ['sans', 'Sans']] },
+    ymsg:     { name: 'Message', cls: 'msg', text: 'We cannot wait to celebrate with you.', auto: '', looks: [['plain', 'Plain']] },
+    nhead:    { name: 'Heading', cls: 'big', text: 'We will miss you.', auto: 'We will miss you.', looks: [['serif', 'Serif'], ['sans', 'Sans']] },
+    nmsg:     { name: 'Message', cls: 'msg', text: 'Thank you for letting us know.', auto: '', looks: [['plain', 'Plain']] },
+  };
+  /* What ＋ offers on an RSVP page — and the sample line each one puts there. */
+  const ADD = {
+    heading: { name: 'Heading', cls: 'k-heading', text: 'A note from us', auto: '', looks: [['serif', 'Serif'], ['sans', 'Sans']] },
+    message: { name: 'Message', cls: 'k-message', text: 'Kindly reply by 12 November.', auto: '', looks: [['plain', 'Plain']] },
+    picture: { name: 'Picture', cls: 'k-picture', picture: true, looks: [['wide', 'Wide'], ['tall', 'Tall']] },
+  };
+  const fresh = (e) => Object.assign(e, { own: false, look: e.looks?.[0][0] ?? null, colour: null, size: 0, fx: new Set(['fade']), feel: 'Auto' });
+  for (const k in E) fresh(E[k]);
+  /* THE ORDER of each screen's parts — a part is a line, or a group (`E[g].items` holds its lines). */
+  const ORDER = { form: ['eyebrow', 'question', 'yes', 'no', 'hint'], yes: ['yhead', 'ymsg'], no: ['nhead', 'nmsg'] };
+  const COLOURS = [null, '#7B2D3B', '#C24E24', '#5B6B3A', '#2C2A29'];
+  const S = { screen: 'form', picked: null, tool: 'edit', phase: 'in', multi: null, adding: null, lifted: null };
+  let seq = 0;
+  const canvas = $('#canvas'), page = $('#page');
+  const node = (k) => $(`#page [data-el="${k}"]`);
+  const say = (words) => { const t = $('#say'); t.textContent = words; t.classList.add('on'); clearTimeout(say.t); say.t = setTimeout(() => t.classList.remove('on'), 2600); };
+  /** Where a part lives: the list that holds it, its place there, and its group (null: straight on the card). */
+  function home(k) {
+    const top = ORDER[S.screen]; let i = top.indexOf(k);
+    if (i >= 0) return { list: top, i, group: null };
+    for (const g of top) if (E[g].group && (i = E[g].items.indexOf(k)) >= 0) return { list: E[g].items, i, group: g };
+    return null;
+  }
+  const plural = (n) => (n === 1 ? '1 line' : `${n} lines`);
+
+  /* ── the page, drawn from the order ─────────────────────────────────────── */
+  function lineNode(k, inside = false) {
+    const e = E[k], n = document.createElement('div');
+    n.className = `el ${e.cls}`; n.dataset.el = k;
+    if (e.group) { n.dataset.bg = e.bg; n.append(...e.items.map((c) => lineNode(c, true))); }
+    else if (e.picture) { n.dataset.look = e.look; n.innerHTML = '<i>Sample picture</i>'; }
+    else {
+      n.textContent = e.own ? e.text : (e.auto || e.text); n.dataset.look = e.look ?? '';
+      n.style.color = e.colour ?? ''; n.style.fontSize = e.size ? `calc(1em + ${e.size * 2}px)` : '';
+      if (e.cls === 'ans' && e.look === 'filled' && e.colour) { n.style.background = e.colour; n.style.borderColor = e.colour; n.style.color = '#fff'; } else if (e.cls === 'ans') n.style.borderColor = e.colour ?? '';
+    }
+    if (S.multi) { if (!inside) n.classList.add(S.multi.has(k) ? 'tick' : e.group ? 'cant' : 'can'); }
+    else if (S.picked === k) n.classList.add('on');
+    if (S.lifted === k) n.classList.add('lifted');
+    return n;
+  }
+  const SETTLE_MS = 240, EASE = 'cubic-bezier(.16,1,.3,1)';
+  const shown = () => $$('#page .el[data-el]').filter((n) => n.id !== 'card' && n.offsetParent);
+  const rects = () => new Map(shown().map((n) => [n.dataset.el, n.getBoundingClientRect()]));
+  /** The others make room: every part slides from where it was to where it is now (the march's re-flow). */
+  function flip(was) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const els = shown(), delta = new Map();
+    for (const el of els) { const b = was.get(el.dataset.el), a = el.getBoundingClientRect(); delta.set(el, b ? [b.left - a.left, b.top - a.top] : null); }
+    for (const el of els) {
+      const d = delta.get(el);
+      if (!d) { el.animate([{ opacity: 0, transform: 'scale(.94)' }, { opacity: 1, transform: 'none' }], { duration: SETTLE_MS, easing: EASE }); continue; }
+      /* A line inside a group that moved too travels WITH it: animate only its own share of the move. */
+      const up = el.parentElement.closest('.grp'), pd = (up && delta.get(up)) || [0, 0];
+      const dx = d[0] - pd[0], dy = d[1] - pd[1];
+      if (Math.abs(dx) < 1 && Math.abs(dy) < 1) continue;
+      el.animate([{ transform: `translate(${dx}px,${dy}px)` }, { transform: 'none' }], { duration: SETTLE_MS, easing: EASE });
+    }
+  }
+  function draw(was = rects()) {
+    const top = canvas.scrollTop;
+    for (const s in ORDER) $(`[data-lines="${s}"]`).replaceChildren(...(s === S.screen ? ORDER[s].map((k) => lineNode(k)) : []));
+    page.classList.toggle('picking', Boolean(S.multi));
+    $$('.screen').forEach((s) => s.classList.toggle('on', s.dataset.screen === S.screen));
+    $$('#tabs button').forEach((b) => b.toggleAttribute('aria-current', false) || (b.dataset.tab === S.screen && b.setAttribute('aria-current', 'page')));
+    canvas.scrollTop = top;
+    frame(); /* measured BEFORE the re-flow shifts the boxes */
+    const now = rects();
+    if (was) flip(was); /* null: a fresh screen is simply there — nothing slides in */
+    panel();
+    return now;
+  }
+  /** The frame, between the part's neighbours (`partFrameEdges`): each edge at most PAD out, never past the middle of the gap. */
+  const PAD = 18;
+  /** Where a part sits on the page AS LAID OUT — never where a re-flow is carrying it: the frame is asked for again
+   *  while lines are still sliding (a scroll, a resize), and it must land on the part's place, not beside it. */
+  function laid(n) {
+    let left = 0, top = 0;
+    for (let m = n; m && m !== page; ) { left += m.offsetLeft; top += m.offsetTop; m = m.offsetParent; if (m && m !== page) { left += m.clientLeft; top += m.clientTop; } }
+    return { left, top, bottom: top + n.offsetHeight, width: n.offsetWidth, height: n.offsetHeight };
+  }
+  function frame() {
+    const f = $('#frame'), n = S.picked && !S.multi && !drag && node(S.picked);
+    if (!n || !n.offsetParent) return void (f.style.display = 'none');
+    const e = E[S.picked], a = laid(n);
+    const near = (dir) => { let s = n[dir]; while (s && !s.classList.contains('el')) s = s[dir]; return s ? laid(s) : null; };
+    const prev = near('previousElementSibling'), next = near('nextElementSibling');
+    const up = e.card ? 0 : prev ? Math.max(0, Math.min(PAD, (a.top - prev.bottom) / 2)) : PAD;
+    const down = e.card ? 0 : next ? Math.max(0, Math.min(PAD, (next.top - a.bottom) / 2)) : PAD;
+    const side = e.card ? 0 : 5;
+    Object.assign(f.style, { display: 'block', left: `${a.left - side}px`, top: `${a.top - up}px`, width: `${a.width + side * 2}px`, height: `${a.height + up + down}px`, borderRadius: e.card ? '22px' : e.group ? '20px' : e.cls === 'ans' ? '999px' : '12px' });
+    f.classList.toggle('bare', Boolean(e.card)); /* the card is the page's own — nothing is added above or below it */
+    f.firstElementChild.textContent = e.name;
+    $$('.addp', f).forEach((p) => p.setAttribute('aria-label', `Add ${p.dataset.partAdd} ${e.name}`));
+  }
+
+  /* ── the lower third ────────────────────────────────────────────────────── */
+  const row = (html, cls = '') => `<div class="row ${cls}">${html}</div>`;
+  const act = (a, words, off, cls = '') => `<button class="act ${cls}" data-act="${a}" aria-disabled="${off}">${words}</button>`;
+  /** Edit's LAST row: ↑ Earlier · ↓ Later · Group (a group: Ungroup) · Remove. */
+  function lastRow(k) {
+    const e = E[k], h = home(k);
+    return row(act('earlier', '↑ Earlier', h.i === 0) + act('later', '↓ Later', h.i === h.list.length - 1) +
+      (e.group ? act('ungroup', 'Ungroup', false) : act('group', 'Group', Boolean(h.group)) + act('remove', 'Remove', !e.added, 'danger')), 'last');
+  }
+  function panel() {
+    const e = S.picked ? E[S.picked] : null, h = e && !e.card ? home(S.picked) : null;
+    const rows = $('#rows');
+    $('#toolrow').style.display = S.multi ? 'none' : '';
+    if (S.multi) {
+      const n = S.multi.size;
+      $('#crumb').innerHTML = `Group · <b>pick the lines</b>`;
+      rows.innerHTML = row('Tap each line that should share one background. Tap it again to let it go.', 'one') +
+        `<div class="pickbar" role="group" aria-label="Group"><b id="picked">${n} picked</b><button class="go" id="mdone" aria-disabled="${n < 2}">Done</button><button id="mcancel">Cancel</button></div>`;
+      return;
+    }
+    $('#crumb').innerHTML = `You’re editing · <b>RSVP › ${SCREEN[S.screen]}${h?.group ? ' › Group' : ''}${e ? ' › ' + e.name : ''}</b>`;
+    $$('#toolsel button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.tool === S.tool)));
+    if (!e) return void (rows.innerHTML = row('Tap any line of the RSVP — each one is its own part. Hold a line to move it. Tap the card’s edge for the card itself.', 'one'));
+    const where = h?.group ? 'its group' : 'the RSVP card';
+    if (S.tool === 'edit') {
+      rows.innerHTML = e.card
+        ? row('The card holds the lines of this screen. Tap a line to change its words.', 'one')
+        : e.group ? row(`This group holds ${plural(e.items.length)}. They share one background and move as one. Tap a line inside to change its words.`, 'one') + lastRow(S.picked)
+        : e.picture ? row('A sample picture. Yours would be chosen here.', 'one') + lastRow(S.picked)
+        : row(`<span class="lbl">${e.name}</span><input class="field" id="words" value="${(e.own ? e.text : e.auto || e.text).replace(/"/g, '&quot;')}" aria-label="${e.name}">`) +
+          (e.auto ? row(`<button class="dd" id="from"><small>Start from</small><span>${e.own ? 'What you wrote' : 'Automatic'} ▾</span></button>`) : row('This one has no automatic words — it shows only what you write.', 'one')) + lastRow(S.picked);
+    } else if (S.tool === 'style') {
+      rows.innerHTML = e.card ? row('The card’s own look is its background — open Background.', 'one')
+        : e.group ? row('The group’s own look is its background — open Background.', 'one')
+        : row(`<button class="dd" id="look"><small>Look</small><span>${e.looks.find((l) => l[0] === e.look)[1]} ▾</span></button>`) + (e.picture ? '' :
+          row(`<span class="lbl">Colour</span>${COLOURS.map((c, i) => `<button class="sw" data-c="${i}" aria-pressed="${e.colour === c}" style="background:${c ?? 'conic-gradient(#eee,#bbb,#eee)'}" aria-label="${c ?? 'The page’s own'}"></button>`).join('')}`) +
+          row(`<span class="lbl">Size</span><button class="step" data-s="-1">A−</button><button class="step" data-s="1">A+</button><span style="font-size:13px;color:#8a8580">${e.size === 0 ? 'As designed' : (e.size > 0 ? '+' : '') + e.size}</span>`));
+    } else if (S.tool === 'bg') {
+      const bg = e.card ? $('#card').dataset.bg : e.bg;
+      rows.innerHTML = e.card || e.group
+        ? row(`<div class="tiles">${[['none', 'None'], ['plain', 'Plain'], ['frost', 'Frosted']].map(([k, n]) => `<button class="tile" data-bg="${k}" data-face="${k}" aria-pressed="${bg === k}"><span>${n}</span></button>`).join('')}</div>`) +
+          row(e.card ? 'Behind the card is the Look’s background — the same one every page wears.' : `One background for all ${plural(e.items.length)} in this group. Behind it is the RSVP card.`, 'one')
+        : row(`This sits on ${where === 'its group' ? 'its group’s' : 'the RSVP card’s'} background. <button class="step" id="toback" style="flex:0 0 auto;padding:0 14px;margin-left:auto">Open ${h.group ? 'the group' : 'the card'}</button>`, 'one');
+    } else {
+      rows.innerHTML = e.card ? row('The card arrives with the page. Its lines each have their own Animate — tap one.', 'one')
+        : e.group ? row('The group arrives with the page. Its lines each have their own Animate — tap one.', 'one')
+        : row(`<div class="seg">${[['in', 'Build in'], ['act', 'Action'], ['out', 'Build out']].map(([k, n]) => `<button data-phase="${k}" aria-pressed="${S.phase === k}">${n}</button>`).join('')}</div>`) +
+          (S.phase === 'act' ? row('<div class="seg"><button aria-pressed="true">Still</button><button>Drift</button></div>')
+            : row(`<div class="chips">${['fade', 'blur', 'move', 'size'].map((k) => `<button data-fx="${k}" aria-pressed="${e.fx.has(k)}">${k[0].toUpperCase() + k.slice(1)}</button>`).join('')}</div>`) +
+              row(`<button class="dd" id="feel"><small>Movement ◆</small><span>${e.feel} ▾</span></button><button class="dd" style="flex:.9"><small>Plays</small><span>On arrival ▾</span></button>`));
+    }
+  }
+  function play() {
+    const e = S.picked && E[S.picked]; if (!e || e.card || e.group) return say('Tap a line first — ▶ plays that line’s own Build in.');
+    const n = node(S.picked), kf = ['move', 'size', 'blur', 'fade'].find((k) => e.fx.has(k)); if (!kf) return say('Build in: none — nothing to play.');
+    const secs = { Auto: 0.9, Quick: 0.5, Calm: 1.1, Cinematic: 1.8 }[e.feel];
+    n.style.animation = 'none'; void n.offsetWidth; n.style.animation = `in-${kf} ${secs}s ease both`;
+    say(`${e.name} · Build in · ${[...e.fx].join(' + ') || 'none'} · ${e.feel}`);
+  }
+
+  /* ── 1 · ＋ — "Add above / below <part>" ────────────────────────────────── */
+  function openSheet(where) {
+    S.adding = where;
+    const sheet = $('#sheet'), name = `Add ${where} ${E[S.picked].name}`;
+    $('#sheetname').textContent = name; $('.box', sheet).setAttribute('aria-label', name);
+    sheet.hidden = false;
+    /* The page stays clear (the shipped sheet's dark is cut around the live preview); everything else goes dark. */
+    const p = $('#phone').getBoundingClientRect(), c = canvas.getBoundingClientRect();
+    const l = c.left - p.left, t = c.top - p.top, r = l + c.width, b = t + c.height;
+    $('.dark', sheet).style.clipPath = `polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, ${l}px ${t}px, ${r}px ${t}px, ${r}px ${b}px, ${l}px ${b}px, ${l}px ${t}px)`;
+    $('.opt', sheet).focus({ preventScroll: true });
+  }
+  function closeSheet() { S.adding = null; $('#sheet').hidden = true; }
+  function add(kind) {
+    const anchor = S.picked, where = S.adding, h = home(anchor), k = `a${++seq}`;
+    E[k] = fresh({ ...ADD[kind], added: true });
+    h.list.splice(where === 'above' ? h.i : h.i + 1, 0, k);
+    closeSheet(); S.picked = k; S.tool = 'edit'; draw();
+    node(k)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    say(`${E[k].name} added ${where} ${E[anchor].name}${h.group ? ' — inside its group' : ''}.`);
+  }
+  $('#sheet').addEventListener('click', (ev) => {
+    const o = ev.target.closest('.opt');
+    if (o) add(o.dataset.add); else if (ev.target.closest('.scrim')) closeSheet();
+  });
+  addEventListener('keydown', (ev) => { if (ev.key !== 'Escape') return; if (S.adding) closeSheet(); else if (S.multi) { S.multi = null; draw(); } });
+
+  /* ── 2 · HOLD TO MOVE — the Wedding March's drag ────────────────────────── */
+  const HOLD_MS = 350, EDGE_PX = 56;
+  let drag = null, pending = null, raf = 0, swallow = 0;
+  /** What a press picks up: the line — or, inside a group, the whole group unless that very line is the picked one. */
+  function subjectOf(target) {
+    const line = target.closest('.el[data-el]'); if (!line || line.id === 'card') return null;
+    const grp = line.closest('.grp');
+    return grp && grp !== line && S.picked !== line.dataset.el ? grp : line;
+  }
+  function stopAll() {
+    if (pending?.timer) clearTimeout(pending.timer);
+    pending = null; cancelAnimationFrame(raf);
+    removeEventListener('pointermove', onMove); removeEventListener('pointerup', onUp); removeEventListener('pointercancel', onCancel);
+  }
+  function hit() {
+    const d = drag; let best = null, bd = 120;
+    /* Measured as if every gap were closed: the gap that is open pushes the ones under it down, and a finger resting
+       on a boundary must not flip between two answers because of the room it has just been given. */
+    const open = d.target ? Number(d.target.dataset.slot) : Infinity, room = d.target ? d.target.getBoundingClientRect().height : 0;
+    for (const g of d.gaps) { const dy = Math.abs(d.y - (g.getBoundingClientRect().top - (Number(g.dataset.slot) > open ? room : 0))); if (dy < bd) { bd = dy; best = g; } }
+    const next = best && !best.hasAttribute('data-home') ? best : null; /* its own place: it settles back */
+    if (next === d.target) return;
+    d.target?.classList.remove('on'); next?.classList.add('on'); d.target = next;
+  }
+  function loop() {
+    const d = drag; if (!d) return;
+    if (d.dir) { /* near the page's top or bottom edge the page comes to the finger (the finger itself never scrolls it) */
+      const r = canvas.getBoundingClientRect(), dist = d.dir < 0 ? r.top + EDGE_PX - d.y : d.y - (r.bottom - EDGE_PX);
+      canvas.scrollTop += d.dir * Math.min(18, 4 + dist / 4); hit();
+    }
+    raf = requestAnimationFrame(loop);
+  }
+  const place = (d) => { d.ghost.style.transform = `translate(${d.x - d.ox}px,${d.y - d.oy}px) scale(1.03)`; };
+  function lift(x, y) {
+    const p = pending; if (!p || drag || !p.el.isConnected) return;
+    const el = p.el, box = el.parentElement, sibs = [...box.children].filter((c) => c.classList.contains('el')), idx = sibs.indexOf(el);
+    /* The gaps a drop can land in — closed (no height, nothing shifts) until the finger is over one. */
+    const gaps = [], after = sibs[sibs.length - 1].nextSibling;
+    for (let s = 0; s <= sibs.length; s++) {
+      const g = document.createElement('span'); g.className = 'gap'; g.dataset.slot = s; g.innerHTML = '<i></i>';
+      if (s === idx || s === idx + 1) g.setAttribute('data-home', '');
+      box.insertBefore(g, sibs[s] ?? after); gaps.push(g);
+    }
+    const r = el.getBoundingClientRect();
+    const bare = !(el.classList.contains('ans') || el.classList.contains('k-picture') || (el.classList.contains('grp') && el.dataset.bg !== 'none'));
+    const px = bare ? 10 : 0, py = bare ? 8 : 0;
+    const ghost = document.createElement('div'), copy = el.cloneNode(true);
+    [copy, ...copy.querySelectorAll('[data-el]')].forEach((c) => { c.removeAttribute('data-el'); c.classList.remove('on', 'lifted'); });
+    ghost.className = `ghost${bare ? ' bare' : ''}`; ghost.setAttribute('aria-hidden', 'true'); ghost.append(copy);
+    Object.assign(ghost.style, { width: `${r.width + px * 2}px`, height: `${r.height + py * 2}px`, borderRadius: bare ? '' : getComputedStyle(el).borderRadius });
+    document.body.appendChild(ghost);
+    drag = { el, key: el.dataset.el, gaps, ghost, px, py, ox: x - (r.left - px), oy: y - (r.top - py), x, y, dir: 0, target: null, top: canvas.scrollTop };
+    place(drag);
+    S.lifted = drag.key; el.classList.add('lifted'); document.body.classList.add('holding'); frame();
+    try { navigator.vibrate?.(10); } catch { /* no haptics here */ }
+    raf = requestAnimationFrame(loop);
+  }
+  function onMove(e) {
+    const p = pending; if (!p || e.pointerId !== p.pid) return; /* one finger moves it; a second one is ignored */
+    if (!drag) {
+      const moved = Math.hypot(e.clientX - p.x, e.clientY - p.y);
+      if (p.touch) { if (moved > 8) stopAll(); return; } /* moving before the hold ends is a scroll — let it be one */
+      if (moved > 4) lift(e.clientX, e.clientY); /* a mouse lifts on a 4 px drag too, as the march does */
+      if (!drag) return;
+    }
+    e.preventDefault();
+    const d = drag; d.x = e.clientX; d.y = e.clientY; place(d); hit();
+    const r = canvas.getBoundingClientRect();
+    d.dir = d.y < r.top + EDGE_PX && d.y > r.top - 40 ? -1 : d.y > r.bottom - EDGE_PX && d.y < r.bottom + 40 ? 1 : 0;
+  }
+  function onUp(e) {
+    if (e && pending && e.pointerId !== pending.pid) return;
+    const d = drag; stopAll(); if (!d) return;
+    drag = null; swallow = performance.now() + 450; document.body.classList.remove('holding');
+    const was = rects(); /* as drawn now — the open gap included */
+    if (d.target) { const s = Number(d.target.dataset.slot), h = home(d.key); h.list.splice(h.i, 1); h.list.splice(s > h.i ? s - 1 : s, 0, d.key); }
+    S.picked = d.key;
+    /* The ghost flies home — to where its part settles, measured before the re-flow moves a thing; its place stays dim until it lands. */
+    const at = draw(was).get(d.key);
+    let once = false;
+    const done = () => { if (once) return; once = true; d.ghost.remove(); if (S.lifted === d.key && !drag) { S.lifted = null; node(d.key)?.classList.remove('lifted'); } };
+    if (!at || matchMedia('(prefers-reduced-motion: reduce)').matches) return done();
+    d.ghost.animate([{ transform: d.ghost.style.transform, opacity: 1 }, { transform: `translate(${at.left - d.px}px,${at.top - d.py}px)`, opacity: 0.2 }], { duration: 220, easing: EASE, fill: 'forwards' }).onfinish = done;
+    setTimeout(done, 320); /* a hidden tab may never finish the animation */
+  }
+  function onCancel() {
+    const d = drag; stopAll(); drag = null; document.body.classList.remove('holding');
+    if (d) { d.ghost.remove(); S.lifted = null; draw(); }
+  }
+  canvas.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0 || !e.isPrimary || drag || pending || S.multi || S.adding || e.target.closest('[data-part-add]')) return;
+    const el = subjectOf(e.target); if (!el) return;
+    pending = { el, x: e.clientX, y: e.clientY, touch: e.pointerType !== 'mouse', pid: e.pointerId, timer: setTimeout(() => lift(e.clientX, e.clientY), HOLD_MS) };
+    addEventListener('pointermove', onMove, { passive: false }); addEventListener('pointerup', onUp); addEventListener('pointercancel', onCancel);
+  });
+  /* 📱 While a part is held the page must not scroll under the finger. On the canvas from the start, NOT added at the
+     lift: a browser decides at touchstart whether anything may block its scroll (the march's own note). */
+  canvas.addEventListener('touchmove', (e) => { if (drag) e.preventDefault(); }, { passive: false });
+  canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+  /* ── 3 · GROUP — pick several, one card, one background ─────────────────── */
+  function group() {
+    const list = ORDER[S.screen], picks = list.filter((k) => S.multi.has(k));
+    if (picks.length < 2) return say('Pick at least two lines.');
+    const g = `g${++seq}`, at = list.indexOf(picks[0]);
+    E[g] = { name: 'Group', cls: 'grp', group: true, bg: 'plain', items: picks };
+    const rest = list.filter((k) => !S.multi.has(k)); rest.splice(at, 0, g); ORDER[S.screen] = rest;
+    S.multi = null; S.picked = g; S.tool = 'bg'; draw();
+    say(`Grouped — one background for all ${picks.length}. Choose it below.`);
+  }
+  function ungroup(g) {
+    const h = home(g), items = E[g].items;
+    h.list.splice(h.i, 1, ...items); delete E[g];
+    S.picked = items[0] ?? null; S.tool = 'edit'; draw();
+    say('Ungrouped — each line sits on the RSVP card again.');
+  }
+  function toggleTick(k) {
+    if (E[k].group) return say('A group cannot go inside another group.');
+    if (home(k).group) return say('That line is already in a group — ungroup it first.');
+    S.multi.has(k) ? S.multi.delete(k) : S.multi.add(k); draw();
+  }
+
+  /* TAPS: a line picks the line; the card's own edge (anything in the card that is not a line) picks the card. */
+  canvas.addEventListener('click', (ev) => {
+    if (performance.now() < swallow) return; /* the click a drop leaves behind */
+    const plus = ev.target.closest('[data-part-add]'); if (plus) return openSheet(plus.dataset.partAdd);
+    const line = ev.target.closest('.el[data-el]:not(#card)'), card = ev.target.closest('#card');
+    if (S.multi) return void (line && toggleTick(line.dataset.el));
+    S.picked = line ? line.dataset.el : card ? 'card' : null;
+    if (S.picked === 'card' && (S.tool === 'edit' || S.tool === 'anim')) S.tool = 'bg';
+    draw();
+  });
+  $('#tabs').addEventListener('click', (ev) => { const b = ev.target.closest('button'); if (!b) return; S.screen = b.dataset.tab; S.picked = null; S.multi = null; canvas.scrollTop = 0; draw(null); });
+  $('#toolsel').addEventListener('click', (ev) => { const b = ev.target.closest('button'); if (b) { S.tool = b.dataset.tool; panel(); } });
+  $('#play').addEventListener('click', play);
+  $('#rows').addEventListener('input', (ev) => { if (ev.target.id !== 'words') return; const e = E[S.picked]; e.text = ev.target.value; e.own = true; const n = node(S.picked); n.textContent = e.text; frame(); const f = $('#from span'); if (f) f.textContent = 'What you wrote ▾'; });
+  $('#rows').addEventListener('click', (ev) => {
+    const b = ev.target.closest('button'); if (!b) return;
+    if (b.id === 'mcancel') { S.multi = null; return draw(); }
+    if (b.id === 'mdone') return group();
+    const k = S.picked, e = k && E[k]; if (!e) return;
+    const a = b.dataset.act, off = b.getAttribute('aria-disabled') === 'true';
+    if (a) {
+      const h = home(k), inside = h.group ? 'in its group' : 'on this screen';
+      if (a === 'earlier' || a === 'later') {
+        if (off) return say(`Already ${a === 'earlier' ? 'first' : 'last'} ${inside}.`);
+        const to = h.i + (a === 'earlier' ? -1 : 1); h.list.splice(h.i, 1); h.list.splice(to, 0, k);
+      } else if (a === 'group') {
+        if (off) return say('This line is already in a group. Open the group, then Ungroup.');
+        S.multi = new Set([k]);
+      } else if (a === 'ungroup') return ungroup(k);
+      else if (a === 'remove') {
+        if (off) return say('This line is part of the RSVP — it stays. Lines you add can be removed.');
+        h.list.splice(h.i, 1); delete E[k]; S.picked = null;
+        if (h.group && !h.list.length) { const g = home(h.group); g.list.splice(g.i, 1); delete E[h.group]; }
+        say(`${e.name} removed.`);
+      }
+      draw();
+      if (a === 'earlier' || a === 'later') node(k)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      return;
+    }
+    if (b.id === 'from') { e.own = !e.own; if (e.own && !e.text) e.text = e.auto; say(e.own ? 'Your own words — kept as you wrote them.' : 'Automatic — the page’s own words for this event.'); }
+    else if (b.id === 'look') { const i = e.looks.findIndex((l) => l[0] === e.look); e.look = e.looks[(i + 1) % e.looks.length][0]; }
+    else if (b.dataset.c !== undefined) e.colour = COLOURS[Number(b.dataset.c)];
+    else if (b.dataset.s) e.size = Math.max(-2, Math.min(4, e.size + Number(b.dataset.s)));
+    else if (b.dataset.bg) { if (e.group) e.bg = b.dataset.bg; else $('#card').dataset.bg = b.dataset.bg; }
+    else if (b.id === 'toback') { S.picked = home(k).group ?? 'card'; }
+    else if (b.dataset.phase) S.phase = b.dataset.phase;
+    else if (b.dataset.fx) { e.fx.has(b.dataset.fx) ? e.fx.delete(b.dataset.fx) : e.fx.add(b.dataset.fx); }
+    else if (b.id === 'feel') { const F = ['Auto', 'Quick', 'Calm', 'Cinematic']; e.feel = F[(F.indexOf(e.feel) + 1) % 4]; }
+    else return;
+    draw();
+  });
+  canvas.addEventListener('scroll', frame, { passive: true });
+  addEventListener('resize', frame);
+  draw(null);
+  say('Tap any line of the RSVP — each is its own part. Hold one to move it.');
+})();
+</script>
+</body>
+</html>
