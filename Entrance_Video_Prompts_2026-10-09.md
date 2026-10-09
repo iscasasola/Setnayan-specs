@@ -54,3 +54,53 @@ An entrance video must play ONCE when the guest opens the page and then REST on 
 background loops, so these five would jump back to the start. Needed: a per-video "plays once" mark in the catalogue, the
 last frame as the resting picture, the upload of the five files to the theme-backgrounds folder, and their cards under
 Background › Video. Whether the nine shipped loops are remade in this grammar is the owner's later call.
+
+---
+
+# The stills — a FIRST frame and a LAST frame for each video (make these as images, then use them as the start and end)
+
+Add to every still, word for word: "Hand-painted gouache and oil illustration, soft visible brushwork, warm natural
+light, muted earthy palette. Vertical 9:16 portrait. Centred, eye level, symmetrical. The upper-middle third is pale,
+plain sky or wall with nothing in it; the bottom fifth is calm and simple. No people, no faces, no text, no lettering,
+no logos."
+
+Make the LAST frame first and keep its look; then make the FIRST frame asking for "the same place, the same painting
+style and colours" so the two belong together.
+
+1. HACIENDA GARDEN
+   - LAST: "A calm, wide Philippine hacienda garden seen from the middle of a straight gravel path: clipped hedges on both
+     sides, old acacia trees, a white-washed ancestral house small at the far end of the path, a large pale cream morning
+     sky filling the upper half. Two tiny birds far away. Open and quiet, no foreground frame."
+   - FIRST: "View from close behind a weathered stone archway hung with pink bougainvillea; the arch fills the left, right
+     and top edges of the picture like a doorway, two clay jars at its foot. Through the arch, small and far, the same
+     sunlit hacienda garden with the gravel path leading straight ahead."
+
+2. OLD STONE CHURCH
+   - LAST: "The centre of the aisle of an old Philippine stone church: coral-stone walls, a long tiled aisle running
+     straight ahead, tall windows with soft shafts of light, a simple retablo small and far, a pale plaster vault filling
+     the upper half. Empty pews, dust in the light. No foreground frame."
+   - FIRST: "View from just outside heavy carved wooden church doors standing half open; the dark doors fill the left and
+     right edges of the picture and the stone lintel the top. Between them, small and far, the same church aisle glowing
+     with soft light."
+
+3. BEACH AT SUNSET
+   - LAST: "A wide, empty Philippine beach at sunset facing the horizon: pale sand, a calm sea, a low sun behind thin cloud,
+     a large soft peach-and-cream sky filling the upper half. Small waves folding onto the shore. No foreground frame."
+   - FIRST: "View from behind sheer white drapes hanging at the left and right edges and the leaning trunks of two coconut
+     palms just inside them, their fronds across the top. Between them, small and far, the same beach and sunset."
+
+4. LAKE TERRACE
+   - LAST: "A stone terrace with a low balustrade above a wide crater lake ringed by soft green hills, morning mist on the
+     water, one very small banca far away, a pale silver-blue sky filling the upper half. No foreground frame."
+   - FIRST: "View from inside a room through an open pair of wood-and-capiz sliding panels that fill the left and right
+     edges, a hanging fern at the top corner. Between them, small and far, the same terrace and misty lake."
+
+5. CAPIZ HOUSE AT DUSK
+   - LAST: "An old bahay na bato at dusk seen from its garden path: capiz-shell windows glowing warm from inside, paper
+     lanterns along the path, hedges on both sides, a pale lavender-to-cream evening sky filling the upper half above the
+     roof. Fireflies near the hedges. No foreground frame."
+   - FIRST: "View from outside a low wooden garden gate standing open at dusk; dark leaves fill the left, right and top
+     edges like a tunnel. Through the gate, small and far, the same glowing capiz house and its lantern-lit path."
+
+Then, in the video tool: start image = FIRST, end image = LAST, and paste that scene's video prompt from the top of this
+file.
