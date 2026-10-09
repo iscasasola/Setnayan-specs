@@ -50,3 +50,31 @@ STATE: built, proven in Chromium on a generated page and the lab, SHIPS DARK (`l
 - Known limits: a PART with its own motion inside a Scrub scene plays its own way; an anchor jump lands up to one hold off.
 - Owner's numbers (tunable): Build out 55 % of a screen, the arrival enters at 80 % and runs 22 %, rest 30 % between two
   centred back-to-back hand-overs; Held = Centred.
+
+---
+# UPDATE 2026-10-09 evening (17:55 UTC) — what the Scrub builder did today, and what is left
+Branches (LOCAL ONLY, worktree wt-scrub-fix): `rd/scrub-heading-and-card-rule` (ae5d655a05 · e5466a8342) → `rd/scrub-cover-hand-over-zero` on top (eb0dcf639 · f3f0c17d8 · d934d5ed0). All merged into the review copy. Harness 289 green at five/six sizes, Chromium only. `SCRUB_OUT_OFFERED` still false.
+
+DONE
+- One number for "the top of the room": `--hub-pin` in globals.css (moved out of the @supports gate); the engine reads it back. (The iPhone recording's heading going off the top was NOT this — it is the approved "a long list scrolls through" rule.)
+- The card rule: `:is(.sn-hub-cards,.hub-scene) > .hub-canvas.hub-no-media:not(.hub-bg-none):not(.hub-has-tpl) > .hub-canvas-body > section` — every arranged, frame-drawn scene with no ground of its own gets the hub card back (wider than motion-only; templates excluded). CHANGES SOME LIVE SCENES when it ships — tell the owner at the batch.
+- THE COVER AS HAND-OVER ZERO, in the lab and on generated pages only: held where it stands when the page opens (0 % at scroll 0), builds out in place (default Fade), whatever comes next arrives on the centred line at ~80 %, the block after stays below until the cover is gone. Engine: a stage cannot stick before the hand-over before it has let go. Reveal mark `data-reveal-up` on <html>: hand-over zero arms only once the opening is gone (checked by setting the mark by hand; no real Reveal played). A cover whose last child has a bottom margin: fixed (was 40 px low). Lab badge names hand-over zero.
+- Controller's decisions (owner has NOT yet looked): hold = where it stands; arrival = whatever comes next (B); the cover leaves through its parts' sheet ("Scene leaves ◆" on the hero row) — no toolbar cover part yet.
+
+LEFT, IN ORDER
+1. A WAY TO RENDER THE REAL GUEST TREE. `SiteBody` is an async server component (~55 props) calling createAdminClient() loaders (`loadEventRoleNames`, `loadEventNameStyle`, `loadEditorialData`; also `resolveHubTheme`, `eventWordsFor`, `resolveProfile`, `mainGroundLayerFor`). Only `app/[slug]/page.tsx` imports it; no test renders it; the lab's guest route is a stand-in. Build a fixture render (stub the loaders) — or use a session with database access. NOTHING below can be proven without it.
+2. Byte-for-byte guard on the PAGE (not only the component): a page whose cover does not leave renders identically before/after; sabotage by wrapping anyway.
+3. Wire the invitation's GUEST tree only: the two `PahinaMasthead` branches of `plan.body === 'normal' && plan.heroShouldRender` inside `<article data-pahina-chapters className="space-y-12">`. Leave the stranger tree's two call sites and `SaveTheDateView`.
+4. Measure chapters + spacing before/after on a page with a leaving cover.
+5. Stranger tree → Save the Date (its cover is drawn by SaveTheDateView with the film; that stage has its own Auto walker).
+6. iOS Safari — nothing has run on WebKit for the cover. 7. A toolbar part for the cover with its own Animate (after the RSVP builder's files are free). 8. COUNT stored scrub scenes, then flip `SCRUB_OUT_OFFERED` on the owner's go.
+
+TRAPS (new today)
+- The cover is NOT a sibling of the rest of the page: it sits inside `group(leadTab, <>…</>, { chapters: true, className: 'space-y-12' })` with the reply card / arrival row; the rest is in later group() calls. HubCoverHold can only wrap the cover and the rest of that one group.
+- The engine looks for followers only inside `.hub-cover-after` → later groups would not be held under the cover; the `followers` walk in hub-scrub-engine.ts must continue up to the page's stage (provable on a generated page first).
+- The group wrapper carries `data-pahina-chapters`; the scroll reveal styles `[data-pahina-chapters] > *` → once wrapped, the cover's cell is the one chapter child and the reply card stops revealing on its own.
+- `space-y-12` sits on the group → once wrapped, the 3rem between cover and next block is lost; the rest-of-page box needs it.
+- Tabbed page: the cover's hand-over only on the first tab.
+- `hubScrubHoldsAtMost(widgets, …)` already counts the hero row → a page already wraps itself one pair more once a cover is set to Scrub, even before the cover is wired.
+- Many guards regex site-body's JSX, incl. the two `<HubPageHold holds={pageHolds}>\s*<article data-pahina-chapters` matches in guard (8).
+- Unit tests run with `tsx --test`; a path with `[slug]` must be written `[[]slug[]]` or zero tests run and it prints green.
