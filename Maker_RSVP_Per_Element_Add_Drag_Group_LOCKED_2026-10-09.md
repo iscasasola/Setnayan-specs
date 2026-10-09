@@ -58,3 +58,20 @@ The build is local (branch `rd/rsvp-stage-per-element`); nothing of it is on Git
 - When no has two cards on the real page. Rule: untouched = today's look; once the couple chooses None or Frosted,
   the inner note card gives up its own paper so ONE card shows (owner: "why do i see a rounded edge frame as well?").
 - Also fixed: the cookie card can no longer sit over the reply pages inside the Maker's canvas.
+
+## 5. Four fixed blocks get Animate (built 2026-10-09 evening; draft PR #6471, not merged)
+- Owner's rule (2026-10-09): "there should always be animate and background?" → "yes that is what we are doing. giving
+  the freedom to fix their event hub." Built for the FOUR fixed blocks that have one real root on a guest's page:
+  Wedding March · The details · E-Gifts (only when the event has gift details) · Happening now. Full Animate (Build in ·
+  Action · Build out, Movement, Plays, Delay) through the Event Hub's scroll-aware motion.
+- STORED in `events.style_preferences.block_looks = { entourage | details | gifts | spotlight: { motion } }` (the Event
+  Hub's own motion shape; no migration — proved on the replayed schema: no CHECK or trigger touches the column).
+  Absent = today's page.
+- NOT built: Background for those four (rule decided: the same three tiles; nothing stored = today's look, today's tile
+  shown picked; grey with a reason where a card would break the layout).
+- SIX blocks stay grey and say why — Your seat · Photos of you · Announcements · Live hub · Digital pass · What to wear:
+  what the Maker shows is a sample; each guest's real one is another component. Their real surfaces are not mapped.
+- For steps 5–7 (＋ · drag · Group), the builder's sums for the size cap: worst case ≈ 17,300 bytes with at most four
+  added lines per screen → database CHECK 24,576 bytes, the app's refusal at 19,000. The migration's own test must
+  measure `pg_column_size` of the worst case in the replay before the number is fixed. Not written yet.
+- OPEN for the owner: a line's Colour row shows six circles; his rule elsewhere in Style is one circle.
