@@ -38,3 +38,23 @@ The build is local (branch `rd/rsvp-stage-per-element`); nothing of it is on Git
 - NOT RULED: the same three things on the other stages (his first question). Controller's recommendation: one concept
   everywhere, after RSVP is seen working. Not built, not promised.
 - NOT PROVEN: the prototype ran in simulated touch at 375×812 and 441×882 only; no real iPhone.
+
+## 4. What was built locally on 2026-10-09 (steps 1–4 of 7; nothing on GitHub or live yet)
+- Step 1: every line picks on its own; the card's side picks the whole group, named "Card".
+- Step 2: Edit shows only the picked line's words (+ "Start from" on the two answers). Three new optional words:
+  the form's Eyebrow, Question and Hint. Untouched, the card prints what it printed before.
+- Step 3: Style per line = Colour (the page's own, or one of the event's five colours, stored as a slot 1–5 so it
+  follows the event's colours) and Size (85 · 92 · 100 · 110 · 120 · 132 %). A button has Size only.
+- Step 4: the card's Background = None · Plain · Frosted; Animate per line and for the card = Build in only
+  (Fade · Blur · Move · Size + Movement Quick · Calm · Cinematic). A reply page is one screen with no scroll to
+  follow and no exit, so Action and Build out are not offered there (controller's decision).
+- STORED in `events.rsvp_ask_config`: the three words, and one key `look` =
+  `{ lines: { '<line>': { c, s, i, v } }, card: { '<screen>': { g: 'none' | 'frost', i, v } } }`. Absent = today's
+  look. Fixed-list values only; nothing typed reaches CSS. The app's save refuses at 1,900 bytes with a plain sentence
+  ("It is too long to keep: your RSVP's words and looks are at their limit. Shorten a message, then try again.").
+- DATABASE: the column has a 2,048-byte CHECK (migration 20271247938209). Steps 5–7 (added lines, pictures, order,
+  groups) do not fit. Owner, asked "Shall I include that database change in the next batch?": "yes". The migration
+  raising the cap rides the next batch through the pipeline; never applied by hand.
+- When no has two cards on the real page. Rule: untouched = today's look; once the couple chooses None or Frosted,
+  the inner note card gives up its own paper so ONE card shows (owner: "why do i see a rounded edge frame as well?").
+- Also fixed: the cookie card can no longer sit over the reply pages inside the Maker's canvas.
