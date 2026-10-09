@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Scrub · prototype</title>
+<!--
+  SCRUB — a prototype to FEEL, not app code (2026-10-09). Plain HTML / CSS / JS, phone width.
+
+  The owner's rules it plays, in his words:
+    · "scrub is the element at the center of the screen … the page will not scroll, the element scrubs out on the
+      center … the next element takes its place"
+    · "build out from current element and build in on next element under it applies at the same time on scrub like a
+      cross fade for both"
+    · "just when it is at the center"
+    · long item: "centered, from the top of that element, build in as you show the rest of the long item … as you
+      scrub it scrolls to show the other parts. it only scrubs out after the bottom part of the element is at the
+      center of the screen"
+    · "if no build out, element stay permanent on the page"
+    · "if we scroll backwards effect is just reversed"
+    · "element run completely normal. we only control the effect"
+    · THE TWIST: "until we say i do should be where maria jose build out" · "them must be on the same position to
+      create that keynote like transistion" — the arrival is drawn over the one that leaves ("Arrives: In the same
+      place", the default; "Just below" is the first version, kept to compare).
+
+  HOW IT IS MADE (so the real thing can be costed from it):
+    · every element sits in ordinary page flow, one under another — nothing is stacked or taken out of the page;
+    · ONE number drives everything: how far the page has moved. The page moves 1 : 1 with the thumb, except during a
+      HOLD — a stretch of thumb travel at a hand-over during which the page stands still;
+    · a hand-over starts when the outgoing element's BOTTOM is on the centre line. The next element's TOP is then on
+      the centre line too (it is the next thing in the page). While the page holds, the outgoing plays its Build out
+      and the incoming its Build in, both from the same progress;
+    · a long item's rows build as each row's top reaches the centre line (or all together, with the switch);
+    · an element with no Build out has no hold after it: the page just goes on;
+    · going back is the same numbers run backwards — there is no second set of effects.
+-->
+<style>
+  :root { --bg:#F3F0EA; --paper:#fff; --ink:#2C2A29; --mute:#8A8580; --line:#E6E1D8; --cta:#C24E24; --gold:#A9834B; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.45 -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; -webkit-text-size-adjust:100%; }
+  body { overscroll-behavior-y: none; }
+  /* The page itself: fixed, and moved by the one number. The document's own height is what the thumb scrolls. */
+  #page { position:fixed; inset:0 0 auto 0; margin:0 auto; max-width:430px; will-change:transform; }
+  #page.plain { position:static; }
+  .pad { padding:0 16px; }
+  .el { position:relative; margin:0 0 16px; padding:22px 18px; background:var(--paper); border:1px solid var(--line); border-radius:18px; will-change:transform, opacity, filter; }
+  .el h2 { margin:0 0 4px; font:600 21px/1.2 Georgia, "Times New Roman", serif; }
+  .el p { margin:0; color:#5A5755; }
+  .tag { display:block; margin:0 0 10px; font:700 10.5px/1.3 -apple-system, Arial, sans-serif; letter-spacing:.08em; text-transform:uppercase; color:var(--gold); }
+  .tag b { color:var(--cta); font-weight:700; }
+  .intro { padding:190px 18px 8px; min-height:92vh; }
+  .intro h1 { margin:0 0 8px; font:600 26px/1.15 Georgia, serif; }
+  .intro p { margin:0 0 10px; color:#5A5755; }
+  .big { font:600 30px/1.1 Georgia, serif; text-align:center; padding:8px 0 2px; }
+  .amp { display:block; color:var(--gold); font-size:18px; }
+  .count { display:flex; gap:8px; justify-content:center; padding-top:6px; }
+  .count span { flex:1; text-align:center; padding:10px 0 8px; border:1px solid var(--line); border-radius:12px; font:500 24px/1 Georgia, serif; }
+  .count small { display:block; margin-top:6px; font:600 9.5px/1 -apple-system, Arial, sans-serif; letter-spacing:.12em; color:var(--mute); }
+  .rows { margin:10px 0 0; padding:0; list-style:none; }
+  .rows li { display:flex; gap:14px; align-items:baseline; padding:15px 0; border-top:1px solid var(--line); will-change:transform, opacity; }
+  .rows time { flex:0 0 68px; font:600 13px/1.2 -apple-system, Arial, sans-serif; color:var(--cta); }
+  .rows b { display:block; font-weight:600; }
+  .rows i { display:block; font-style:normal; color:var(--mute); font-size:13.5px; }
+  .sw { height:86px; border-radius:12px; margin-top:10px; background:linear-gradient(135deg,#d9c3a5,#8a6b39 60%,#3a382f); }
+  .end { padding:30px 18px 60px; text-align:center; color:var(--mute); }
+  /* The little panel at the top — the one switch he asked for, and a guide line he can turn on. */
+  #hud { position:fixed; z-index:20; top:max(6px, env(safe-area-inset-top)); left:50%; transform:translateX(-50%); width:min(414px, calc(100vw - 12px)); padding:6px; border-radius:18px; background:rgba(255,255,255,.94); border:1px solid var(--line); box-shadow:0 4px 14px rgba(0,0,0,.08); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+  #hud .hrow { display:flex; gap:6px; align-items:center; }
+  #hud .hrow + .hrow { margin-top:5px; }
+  #hud .lbl { flex:0 0 auto; padding-left:4px; font:600 11px/1 -apple-system, Arial, sans-serif; color:var(--mute); white-space:nowrap; }
+  .seg { position:relative; display:flex; flex:1; min-width:0; padding:3px; border-radius:999px; background:rgba(44,42,41,.07); }
+  .seg button { flex:1; min-width:0; height:36px; padding:0 4px; border:0; border-radius:999px; background:transparent; color:#6b6763; font:600 11.5px/1 -apple-system, Arial, sans-serif; white-space:nowrap; }
+  .seg button[aria-pressed="true"] { background:var(--cta); color:#fff; }
+  #guide { position:absolute; right:8px; top:100%; margin-top:6px; height:32px; padding:0 12px; border:1px solid var(--line); border-radius:999px; background:rgba(255,255,255,.94); color:var(--ink); font:600 11.5px/1 -apple-system, Arial, sans-serif; }
+  #guide[aria-pressed="true"] { border-color:var(--cta); color:var(--cta); }
+  #centre { position:fixed; z-index:15; left:0; right:0; top:50%; height:0; border-top:1.5px dashed rgba(194,78,36,.55); pointer-events:none; display:none; }
+  #centre::after { content:'centre'; position:absolute; right:8px; top:-18px; font:700 10px/1 -apple-system, Arial, sans-serif; letter-spacing:.1em; text-transform:uppercase; color:var(--cta); }
+  #state { position:fixed; z-index:20; left:50%; transform:translateX(-50%); bottom:max(10px, env(safe-area-inset-bottom)); padding:8px 14px; border-radius:999px; background:rgba(44,42,41,.88); color:#fff; font:600 12px/1.2 -apple-system, Arial, sans-serif; white-space:nowrap; pointer-events:none; }
+  @media (prefers-reduced-motion: reduce) { #state::after { content:' · reduce motion: plain page'; } }
+</style>
+</head>
+<body>
+
+<div id="hud" role="group" aria-label="Prototype settings">
+  <div class="hrow">
+    <span class="lbl">Arrives</span>
+    <span class="seg" role="group" aria-label="Where the next element arrives">
+      <button type="button" data-set="arrives" data-v="same" aria-pressed="true">In the same place</button>
+      <button type="button" data-set="arrives" data-v="below" aria-pressed="false">Just below</button>
+    </span>
+  </div>
+  <div class="hrow">
+    <span class="lbl">Held</span>
+    <span class="seg" style="flex:1.25" role="group" aria-label="Where the pair is held">
+      <button type="button" data-set="align" data-v="middle" aria-pressed="true">Centred</button>
+      <button type="button" data-set="align" data-v="top" aria-pressed="false">At the line</button>
+    </span>
+    <span class="lbl">Rows</span>
+    <span class="seg" style="flex:1.5" role="group" aria-label="How the schedule's rows build in">
+      <button type="button" data-set="rows" data-v="one" aria-pressed="true">One by one</button>
+      <button type="button" data-set="rows" data-v="all" aria-pressed="false">Together</button>
+    </span>
+  </div>
+  <div class="hrow">
+    <span class="lbl">Enters at</span>
+    <span class="seg" role="group" aria-label="When the next element starts to build in">
+      <button type="button" data-set="enters" data-v="0.8" aria-pressed="true">80 %</button>
+      <button type="button" data-set="enters" data-v="0.5" aria-pressed="false">50 %</button>
+      <button type="button" data-set="enters" data-v="0" aria-pressed="false">Together</button>
+    </span>
+  </div>
+  <button type="button" id="guide" aria-pressed="false">Centre line</button>
+</div>
+<div id="centre" aria-hidden="true"></div>
+<div id="state" role="status">Scroll with your thumb</div>
+
+<main id="page">
+  <div class="intro">
+    <h1>Scrub — try it with your thumb</h1>
+    <p>Scroll down slowly, then back up. Every card says what it is set to. Nothing here is the app: it is only to feel how Scrub should behave before it is built.</p>
+    <p>Watch for: the page <b>standing still</b> while one card leaves and the next arrives <b>in the same place</b>; the long Schedule building as you go; the card with no Build out simply staying on the page.</p>
+    <p>The switches above compare “In the same place” with the first version (“Just below”), and two ways to line the pair up.</p>
+  </div>
+  <div class="pad">
+
+    <section class="el" data-in="fade" data-out="up" data-leaves="scrub" data-name="Maria &amp; Jose">
+      <span class="tag">Build in <b>Fade</b> · Build out <b>Move up + Fade</b> · Leaves <b>Scrub out</b></span>
+      <div class="big">Maria <span class="amp">&amp;</span> Jose</div>
+    </section>
+
+    <section class="el" data-in="below" data-out="shrink" data-leaves="scrub" data-name="Until we say ‘I do’">
+      <span class="tag">Build in <b>From below + Fade</b> · Build out <b>Shrink + Fade</b> · Leaves <b>Scrub out</b></span>
+      <h2>Until we say “I do”</h2>
+      <div class="count"><span>63<small>DAYS</small></span><span>12<small>HOURS</small></span><span>40<small>MINS</small></span></div>
+    </section>
+
+    <section class="el" data-in="rows" data-out="blur" data-leaves="scrub" data-name="Schedule">
+      <span class="tag">A long item · rows build in <b>From the right + Fade</b> · Build out <b>Blur + Fade</b> · Leaves <b>Scrub out</b></span>
+      <h2>Schedule</h2>
+      <ul class="rows">
+        <li><time>2:00 pm</time><span><b>Guests arrive</b><i>Seda Vertis North, garden gate</i></span></li>
+        <li><time>2:30 pm</time><span><b>Ceremony</b><i>The chapel</i></span></li>
+        <li><time>3:30 pm</time><span><b>Family photos</b><i>On the steps</i></span></li>
+        <li><time>4:00 pm</time><span><b>Cocktail hour</b><i>The terrace</i></span></li>
+        <li><time>5:30 pm</time><span><b>Grand entrance</b><i>The ballroom</i></span></li>
+        <li><time>6:00 pm</time><span><b>Dinner</b><i>Four courses</i></span></li>
+        <li><time>7:30 pm</time><span><b>Toasts and first dance</b><i>The ballroom</i></span></li>
+        <li><time>8:30 pm</time><span><b>Dancing</b><i>Until late</i></span></li>
+      </ul>
+    </section>
+
+    <section class="el" data-in="grow" data-out="none" data-leaves="scroll" data-name="A note from us">
+      <span class="tag">Build in <b>Grow + Fade</b> · <b>No Build out</b> — it stays on the page</span>
+      <h2>A note from us</h2>
+      <p>We cannot wait to celebrate with you. Come hungry, bring your dancing shoes, and stay as long as you like.</p>
+    </section>
+
+    <section class="el" data-in="left" data-out="fade" data-leaves="scrub" data-name="What to wear">
+      <span class="tag">After a card that stays: it builds in <b>below it</b> · Build in <b>From the left + Fade</b> · Build out <b>Fade</b> · Leaves <b>Scrub out</b></span>
+      <h2>What to wear</h2>
+      <p>Garden formal, in warm earth tones.</p>
+      <div class="sw"></div>
+    </section>
+
+    <section class="el" data-in="none" data-out="none" data-leaves="scroll" data-name="Gifts">
+      <span class="tag">The last hand-over on the page · <b>no effect of its own</b> — it simply appears in that place</span>
+      <h2>Gifts</h2>
+      <p>Your presence is the gift. This card has nothing switched on: when the card before it has gone, it is there.</p>
+    </section>
+  </div>
+  <div class="end">The end of the page. Now scroll back up — everything rewinds.</div>
+</main>
+
+<script>
+(() => {
+  const page = document.getElementById('page');
+  const state = document.getElementById('state');
+  const els = [...document.querySelectorAll('.el')];
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ── the settings ── */
+  const set = { arrives: 'same', align: 'middle', rows: 'one', enters: '0.8' };
+  document.querySelectorAll('[data-set]').forEach((b) => b.addEventListener('click', () => {
+    set[b.dataset.set] = b.dataset.v;
+    document.querySelectorAll(`[data-set="${b.dataset.set}"]`).forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    if (!still) again();
+  }));
+  const guide = document.getElementById('guide');
+  guide.addEventListener('click', () => {
+    const on = guide.getAttribute('aria-pressed') !== 'true';
+    guide.setAttribute('aria-pressed', String(on));
+    document.getElementById('centre').style.display = on ? 'block' : 'none';
+  });
+
+  if (still) { page.classList.add('plain'); state.textContent = 'Scroll with your thumb'; return; }
+
+  /* ── the geometry: measured from the page as it is laid out, and again when the screen or a setting changes ── */
+  const clamp = (v) => Math.max(0, Math.min(1, v));
+  const ease = (t) => t * t * (3 - 2 * t);
+  const ROW_SPAN = 90;              /* how much travel one row's Build in takes once its top is on the centre line */
+  const tail = document.querySelector('.end');
+  let V = 0, C = 0, OUT = 0, IN_LEN = 0, ENTER = 0, HOLD = 0, DWELL = 0, IN_SPAN = 0, TOPLINE = 0, ROOM = 0, items = [], holds = [], contentH = 0, lift = 0;
+  function measure() {
+    V = window.innerHeight; C = V / 2;
+    IN_SPAN = Math.round(V * 0.22);   /* thumb travel of an ordinary Build in once the top is on the centre line */
+    OUT = Math.round(V * 0.55);       /* thumb travel of a Build out at a hand-over */
+    /* ⏱ "let it enter on the last 20% of the build out" (owner): the arrival's Build in BEGINS when the Build out is
+       80 % done (or 50 %; "Together" is the first version — both over the whole span) and then runs its ordinary
+       length. The page stands still for all of it: the Build out, and what remains of the Build in after it. */
+    const e = Number(set.enters);
+    ENTER = Math.round(OUT * e);
+    IN_LEN = e > 0 ? IN_SPAN : OUT;
+    HOLD = Math.max(OUT, ENTER + IN_LEN);
+    DWELL = Math.round(V * 0.3);      /* …and the rest between two hand-overs that follow each other with no scrolling between */
+    TOPLINE = document.getElementById('hud').getBoundingClientRect().bottom + 44;   /* the top of the room an element can be seen in */
+    ROOM = V - TOPLINE - 70;          /* an element taller than this cannot be held whole */
+    tail.style.transform = '';
+    for (const e of els) { e.style.transform = e.style.opacity = e.style.filter = e.style.visibility = ''; e.querySelectorAll('li').forEach((li) => { li.style.transform = li.style.opacity = ''; }); }
+    const base = page.getBoundingClientRect().top;
+    items = els.map((e) => {
+      const r = e.getBoundingClientRect();
+      const rows = [...e.querySelectorAll('.rows li')].map((li) => ({ li, lt: li.getBoundingClientRect().top - base }));
+      return { e, lt: r.top - base, h: r.height, rows, in: e.dataset.in, out: e.dataset.out, scrub: e.dataset.leaves === 'scrub', name: e.dataset.name, up: 0, holdAt: undefined };
+    });
+    /* WHERE EACH ELEMENT IS DRAWN — ONE SEQUENCE, EACH STEP GATED BY THE ONE BEFORE (owner: "it entered when the
+       previous element is not yet done"). "Just below": where the page lays it. "In the same place": the element
+       handed to by a Scrub is drawn in the leaving one's FRAME — and three things are true by construction:
+         1. the arrival never reaches above the frame's top (nothing before the pair is ever covered);
+         2. the arrival's bottom is never above the centre line when it has arrived — so what follows it has NOT
+            reached the centre yet, and cannot begin before the arrival is done;
+         3. what follows the pair sits below the LOWER of the two bottoms; where the arrival is the shorter one it
+            rises to it while the pair is held, and is under it when the leaving one has gone.
+       `up` is how far above its laid-out place an element is drawn once everything before it is done. */
+    /* WHO IS SCROLLED THROUGH rather than held whole — an element taller than the room, and ANY element whose rows
+       build one by one: each row builds as it reaches the centre line, so every row must pass it, however tall the
+       window is (on a tall desktop window the Schedule "fits" and was held centred — its later rows never built). */
+    const through = (it) => it.h > ROOM || (it.rows.length > 0 && set.rows === 'one');
+    holds = [];
+    let up = 0;
+    items.forEach((it, i) => {
+      it.up = up;
+      const next = items[i + 1];
+      if (!it.scrub || !next) return;
+      const top = it.lt - up, bottom = top + it.h;
+      const same = set.arrives === 'same';
+      /* THE HOLD STARTS — "Centred" and it fits the room: when it is centred on the screen (two short elements read as
+         one slide changing). Otherwise when its BOTTOM is on the centre line (a long item is scrolled through first). */
+      const centred = same && set.align === 'middle' && !through(it);
+      const at = centred ? top + it.h / 2 - C : bottom - C;
+      /* HOW LONG THE PAGE STANDS STILL: the Build out, what remains of the Build in after it — and, for an arrival
+         with rows, room for its heading to finish AFTER the leaving one has completely gone (no row may begin before). */
+      const hold = { i, at, rise: 0, len: Math.max(HOLD, next.rows.length ? OUT + IN_LEN / 2 : 0) };
+      if (same) {
+        /* THE FRAME — what of the leaving element is on screen when the hold starts: all of one that is held centred,
+           else its last stretch, from the top of the room down to the centre line. */
+        const frameTop = through(it) ? Math.max(top, bottom - Math.max(0, C - TOPLINE)) : top;
+        const room = bottom - frameTop;
+        /* THE ARRIVAL IN IT — taller than the frame: tops together, and it runs on below (a long arrival's rows then
+           build as you scrub on). Not taller: centres together in a centred frame, else ENDS together on the line. */
+        const nextTop = next.h > room || through(next) ? frameTop : centred ? (frameTop + bottom) / 2 - next.h / 2 : bottom - next.h;
+        up = next.lt - nextTop;
+        hold.rise = Math.max(0, bottom - (nextTop + next.h));
+      }
+      holds.push(hold);
+      it.holdAt = at;
+    });
+    lift = up;
+    /* Two hand-overs with no scrolling between them (the arrival is already where IT hands over): a rest between. */
+    let last = -Infinity;
+    for (const h of holds) { h.rest = h.at <= last + 1; h.at = Math.max(h.at, last); last = h.at; }
+    /* THE PAGE'S END — long enough for everything to finish: the last element's bottom can always reach the centre
+       line, so the last hand-over on the page completes whatever follows it (an ordinary card, or nothing at all). */
+    const lastIt = items[items.length - 1];
+    contentH = Math.max(page.scrollHeight - lift, lastIt.lt - lift + lastIt.h - C + V);
+    document.body.style.height = `${contentH + holds.reduce((n, h) => n + h.len + (h.rest ? DWELL : 0), 0)}px`;
+  }
+  /* The one number: thumb travel → how far the page has moved, and how far through each hold. */
+  function where(s) {
+    let moved = s; const prog = new Map(); let resting = null;
+    for (const h of holds) {
+      if (moved <= h.at) { prog.set(h.i, 0); continue; }
+      let into = moved - h.at;
+      if (h.rest) { const d = Math.min(DWELL, into); into -= d; moved -= d; if (into <= 0 && d < DWELL + 1) resting = h.i; }
+      const t = Math.min(h.len, into);
+      prog.set(h.i, t);
+      moved -= t;
+    }
+    return { moved: Math.max(0, moved), prog, resting };
+  }
+  const FROM = {
+    fade: () => '', below: (k) => `translateY(${28 * k}px)`, left: (k) => `translateX(${-34 * k}px)`, grow: (k) => `scale(${1 - 0.1 * k})`,
+  };
+  function draw() {
+    const { moved, prog, resting } = where(window.scrollY);
+    page.style.transform = `translate3d(0, ${-moved}px, 0)`;
+    let said = 'Scrolling';
+    /* What follows a pair sits under the lower of its two bottoms until the leaving one has gone (3, above). */
+    const lenOf = new Map(holds.map((h) => [h.i, h.len]));
+    const riseBefore = (i) => holds.reduce((n, h) => (i > h.i + 1 ? n + h.rise * (1 - prog.get(h.i) / h.len) : n), 0);
+    tail.style.transform = `translateY(${riseBefore(items.length) - lift}px)`;
+    items.forEach((it, i) => {
+      const down = riseBefore(i);
+      const top = it.lt - it.up + down;
+      /* BUILD IN — handed to by a Scrub: it plays during that hold. Otherwise: from its top reaching the centre line.
+         (An element already past the centre line when the page opens is simply there.) */
+      const before = items[i - 1];
+      const handed = before && before.scrub;
+      /* Its Build in is always FINISHED by the time it is where it hands over (a short element centred on the screen
+         gets there in less than the usual span). */
+      const span = it.holdAt === undefined ? IN_SPAN : Math.max(40, Math.min(IN_SPAN, it.holdAt - (top - C)));
+      const pin = handed ? clamp((prog.get(i - 1) - ENTER) / IN_LEN) : top <= C ? 1 : clamp((moved - (top - C)) / span);
+      /* BUILD OUT — only by Scrub, during its own hold. No Build out: nothing ever plays. */
+      const t = it.scrub ? prog.get(i) : 0;
+      const pout = clamp(t / OUT);
+      let op = 1, tf = '', fl = '';
+      if (it.in !== 'none' && it.in !== 'rows') { const k = 1 - ease(pin); op *= ease(pin); tf = FROM[it.in](k); }
+      /* Handed to with NO Build in of its own: it simply appears, when its turn comes. */
+      if (it.in === 'none' && handed && pin <= 0) op = 0;
+      if (it.in === 'rows') {
+        /* A long item: its heading arrives with the hand-over; each row when ITS top reaches the centre line — never
+           before the item itself has arrived — or all together. */
+        op *= ease(clamp(pin * 2));
+        /* …and no row begins until the heading HAS arrived AND the element before it has completely gone. */
+        const after = handed ? clamp(Math.min((pin - 0.5) * 2, (prog.get(i - 1) - OUT) / (IN_LEN / 2))) : clamp((pin - 0.5) * 2);
+        it.rows.forEach((r) => {
+          const crossed = (moved - (r.lt - it.up + down - C)) / ROW_SPAN;
+          const q = ease(clamp(set.rows === 'all' ? after : Math.min(after, crossed)));
+          r.li.style.opacity = q.toFixed(3);
+          r.li.style.transform = `translateX(${(26 * (1 - q)).toFixed(1)}px)`;
+        });
+      }
+      if (pout > 0) {
+        const k = ease(pout);
+        op *= 1 - k;
+        if (it.out === 'up') tf = `translateY(${-30 * k}px)`;
+        if (it.out === 'shrink') tf = `scale(${1 - 0.08 * k})`;
+        if (it.out === 'blur') fl = `blur(${(8 * k).toFixed(1)}px)`;
+      }
+      it.e.style.opacity = op.toFixed(3);
+      it.e.style.transform = `translateY(${down - it.up}px) ${tf}`;
+      it.e.style.filter = fl;
+      it.e.style.visibility = op <= 0.001 ? 'hidden' : 'visible';
+      it.e.style.zIndex = handed && pin < 1 ? 2 : 1;
+      if (it.scrub && t > 0 && t < lenOf.get(i)) said = `${it.name} leaves ${Math.round(pout * 100)} % · ${items[i + 1].name} arrives ${Math.round(clamp((t - ENTER) / IN_LEN) * 100)} %`;
+      else if (resting === i && said === 'Scrolling') said = `${it.name} rests`;
+    });
+    state.textContent = said;
+  }
+  let queued = false;
+  addEventListener('scroll', () => { if (queued) return; queued = true; requestAnimationFrame(() => { queued = false; draw(); }); }, { passive: true });
+  /* Thumb travel for a place in the page — the way back from `where`, for when the screen or a setting changes. */
+  const travelFor = (moved) => moved + holds.filter((h) => h.at < moved).reduce((n, h) => n + h.len + (h.rest ? DWELL : 0), 0);
+  function again() { const keep = holds.length ? where(window.scrollY).moved : 0; measure(); window.scrollTo(0, travelFor(keep)); draw(); }
+  addEventListener('resize', again);
+  (document.fonts?.ready ?? Promise.resolve()).then(again);
+  measure(); draw();
+})();
+</script>
+</body>
+</html>
