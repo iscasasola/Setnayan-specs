@@ -1,0 +1,1088 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Setnayan · the modern app look — a look board (2026-10-10)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* ───────────────────────────────────────────────────────────────────────────
+   THE BOARD'S OWN CHROME (outside the phone). Neutral, never themed.
+   ─────────────────────────────────────────────────────────────────────────── */
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:#E9E6E0;color:#2C2A29;font:15px/1.45 "Hanken Grotesk",system-ui,-apple-system,sans-serif}
+.board{min-height:100%;display:flex;flex-direction:column;align-items:center;gap:12px;padding:12px 0 40px}
+.ctl{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;width:100%;max-width:375px;padding:0 12px}
+.ctl label{position:relative;display:inline-flex;align-items:center;height:44px;flex:1 1 auto;min-width:0}
+.ctl select{appearance:none;-webkit-appearance:none;width:100%;height:44px;padding:0 36px 0 14px;border:1px solid rgba(44,42,41,.16);border-radius:999px;background:#fff;color:#2C2A29;font:600 14px/1 "Hanken Grotesk",system-ui,sans-serif;text-overflow:ellipsis;white-space:nowrap;overflow:hidden}
+.ctl label::after{content:"";position:absolute;right:14px;top:17px;width:8px;height:8px;border-right:2px solid #C24E25;border-bottom:2px solid #C24E25;transform:rotate(45deg);pointer-events:none}
+.ctl .k{position:absolute;left:14px;top:-7px;font:600 10px/1 "Hanken Grotesk",sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#6A6865;background:#E9E6E0;padding:0 4px}
+.board h1{font:600 16px/1.3 "Hanken Grotesk",sans-serif;margin:4px 16px 0;max-width:375px;text-align:center}
+.board h1 small{display:block;font:400 13px/1.4 inherit;color:#6A6865}
+.notes{width:100%;max-width:375px;padding:0 16px;font-size:13px;color:#4A4846}
+.notes h2{font:600 13px/1.3 inherit;margin:14px 0 6px;color:#2C2A29;letter-spacing:.02em;text-transform:uppercase}
+.notes p{margin:0 0 8px}
+.notes b{color:#2C2A29}
+.notes table{width:100%;border-collapse:collapse;font-size:12px}
+.notes td,.notes th{padding:5px 6px;border-bottom:1px solid rgba(44,42,41,.12);text-align:left;vertical-align:top}
+.notes th{font-weight:600}
+.notes code{font:500 11.5px/1.4 ui-monospace,Menlo,monospace;background:rgba(44,42,41,.06);padding:1px 4px;border-radius:4px}
+.notes .new{display:inline-block;font:700 10px/16px inherit;letter-spacing:.06em;color:#fff;background:#C24E25;border-radius:999px;padding:0 6px;vertical-align:middle;margin-left:4px}
+.notes ul{padding-left:18px;margin:0 0 8px}
+.notes li{margin-bottom:4px}
+.sw{display:inline-block;width:11px;height:11px;border-radius:3px;vertical-align:-1px;margin-right:4px;border:1px solid rgba(0,0,0,.12)}
+[hidden]{display:none!important}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   SETNAYAN TOKENS — read from apps/web/app/globals.css (2026-10-10 tree).
+   Names kept as the app spells them; values are the app's values.
+   The ONE proposed token is --sn-surface (marked NEW in the table below).
+   ─────────────────────────────────────────────────────────────────────────── */
+.phone{
+  /* ground + ink */
+  --sn-canvas:#F7F5F0;               /* globals.css --sn-canvas (light) */
+  --sn-surface:#FFFFFF;              /* NEW · the resting surface one step above the ground (= --color-cream in light; dark gets a WARM step, not the blue-grey --sn-glass-bg-raised) */
+  --ink:#2C2A29;                     /* --color-ink */
+  --mute:#6A6865;                    /* --color-ink at ~.70 on white, resolved to a flat value so it measures ≥4.5:1 */
+  --line:rgba(44,42,41,.22);         /* CHANGED · the divider between topics — the app's border-ink/10 measures 1.2:1 on the ground; .22 measures 1.5:1 */
+  --edge:rgba(44,42,41,.55);         /* NEW · --sn-edge: the outline of a neutral pressable control, ≥3:1 against the ground */
+  --fill:rgba(44,42,41,.05);         /* hover-bg-ink/5 — the pressed row */
+  --fill-2:rgba(44,42,41,.09);
+  /* accent by JOB (owner 2026-10-08: one named token for "on / picked / tappable") */
+  --accent:#C24E25;                  /* --sn-accent → --color-mulberry (terracotta) */
+  --accent-ink:#9D3F1E;              /* --color-mulberry-700 — the brand WORD on a tint (5.88:1) */
+  --accent-deep:#8C3B2E;             /* the wine the approved prototypes pair with terracotta — the avatar's far end */
+  --ok-ink:#25613D;                  /* NEW · the green WORD on its chip tint — #2B744A measures 4.37:1 there, under AA for 12 px */
+  --on-accent:#FFFFFF;               /* cream label 4.61:1 AA */
+  --gold:#A9834B;                    /* --color-terracotta (Atelier gold) — large type and marks only */
+  --gold-ink:#6F5527;                /* NEW · the gold WORD on a gold tint (the Pro chip); #A9834B itself is 3.4:1 on white — large type only */
+  --ok:#2B744A; --warn:#965A00; --danger:#B3261E; --info:#3B4E67;   /* --color-ok / -warn / -danger / -info */
+  /* radius — the --m-r-* scale */
+  --r-sm:8px; --r-md:14px; --r-lg:22px; --r-xl:36px; --r-full:999px;
+  /* elevation — --sn-sh-float (contact + two soft ambients, warm) */
+  --sh-float:0 1px 2px rgba(40,34,24,.07),0 10px 24px -12px rgba(30,26,18,.30),0 30px 60px -30px rgba(30,26,18,.28);
+  --sh-tile:0 1px 2px rgba(40,34,24,.05),0 18px 40px -26px rgba(30,26,18,.4);
+  /* glass */
+  --glass-bg:rgba(255,255,255,.86);  /* --sn-glass-bg-raised */
+  --glass-blur:blur(22px) saturate(1.5); /* --sn-glass-blur */
+  /* motion */
+  --dur:700ms;                       /* --sn-pill-dur */
+  --spring:cubic-bezier(.34,1.56,.64,1); /* --sn-pill-spring */
+  --ease-out:cubic-bezier(.16,1,.3,1);   /* --sn-ease-out */
+  --scrim:rgba(23,22,15,.42);
+  --sans:"Hanken Grotesk",system-ui,-apple-system,sans-serif;
+  --serif:"Cormorant Garamond",Georgia,serif;
+}
+.phone[data-theme="dark"]{
+  --sn-canvas:#17160F;               /* html.dark --sn-canvas */
+  --sn-surface:#232019;              /* NEW (dark pair) — warm, one step above the ground */
+  --ink:#FBFAF7;                     /* html.dark --color-ink */
+  --mute:#B3AEA3;
+  --line:rgba(251,250,247,.26);     /* CHANGED · the divider must be seen in the dark: the dormant .12 measures 1.6:1; .26 measures 2.3:1 */
+  --edge:rgba(251,250,247,.50);     /* NEW · --sn-edge (dark pair) — ≈4.6:1 against #17160F */
+  --fill:rgba(251,250,247,.07);
+  --fill-2:rgba(251,250,247,.12);
+  --accent:#E5794E;                  /* html.dark --color-mulberry · 6.20:1 on the dark page */
+  --accent-ink:#F0A07E;
+  --accent-deep:#EC8A5F;             /* html.dark --color-mulberry-600 — the dark avatar's far end, so its dark initials stay ≥4.5:1 */
+  --ok-ink:#6FCF97;
+  --on-accent:#17160F;               /* a white word on #E5794E would be 2.9:1 — the label ink is worked out from the accent */
+  --gold:#CBA766;
+  --gold-ink:#E2C98B;                /* NEW (dark pair) */
+  --ok:#6FCF97; --warn:#F0B45A; --danger:#F2817A; --info:#9DB2CE;
+  --sh-float:0 1px 2px rgba(0,0,0,.4),0 10px 24px -12px rgba(0,0,0,.6),0 30px 60px -30px rgba(0,0,0,.6);
+  --sh-tile:0 1px 2px rgba(0,0,0,.4),0 18px 40px -26px rgba(0,0,0,.7);
+  --glass-bg:rgba(35,32,25,.88);
+  --scrim:rgba(0,0,0,.55);
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   THE PHONE
+   ─────────────────────────────────────────────────────────────────────────── */
+.phone{position:relative;width:375px;max-width:100vw;height:812px;background:var(--sn-canvas);color:var(--ink);overflow:hidden;border-radius:26px;box-shadow:0 20px 50px -20px rgba(0,0,0,.45);font-family:var(--sans);font-size:15px;line-height:1.4;isolation:isolate}
+@media (max-width:420px){html,body{background:#E9E6E0}.board{padding:8px 0 40px}.phone{border-radius:22px}}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:0 0 32px}
+.phone.locked .screen{overflow:hidden}
+.status{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;font:600 14px/1 var(--sans)}
+.status .pill-dyn{width:92px;height:24px;border-radius:999px;background:var(--ink)}
+.status .sig{display:flex;gap:5px;align-items:center}
+.status .sig i{display:block;width:16px;height:9px;border-radius:2px;background:var(--ink)}
+.status .sig i:first-child{width:12px;border-radius:0;background:linear-gradient(to right,var(--ink) 0 2px,transparent 2px 3.5px,var(--ink) 3.5px 5.5px,transparent 5.5px 7px,var(--ink) 7px 9px,transparent 9px 10.5px,var(--ink) 10.5px 12px)}
+.pad{padding:0 16px}
+.eyebrow{font:600 11px/1.3 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+h2.t{font:600 22px/1.2 var(--serif);margin:0}
+.name{font:600 30px/1.1 var(--serif);letter-spacing:-.01em}
+.big{font:600 34px/1.05 var(--sans);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.big.money{font-size:30px}
+.cap{font:500 13px/1.35 var(--sans);color:var(--mute)}
+.body-t{font:400 15px/1.45 var(--sans)}
+.lbl{font:600 13px/1.3 var(--sans)}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt20{margin-top:20px}.mt28{margin-top:28px}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;margin:22px 16px 10px}
+.sec-h .eyebrow{color:var(--mute)}
+.sec-h .small{font:500 12px/1 var(--sans);color:var(--mute)}
+
+/* SURFACES — the card (soft surface on a tinted ground; shadow, never a hairline) */
+.card{background:var(--sn-surface);border-radius:var(--r-lg);box-shadow:var(--sh-tile);padding:16px;position:relative}
+.card.hero{border-radius:var(--r-xl);padding:20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stack{display:flex;flex-direction:column;gap:12px}
+
+/* CONTROLS — every control is a pill (BUTTON_RULE) */
+.btn{appearance:none;border:0;margin:0;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:var(--r-full);font:600 15px/1 var(--sans);color:var(--ink);background:var(--sn-surface);box-shadow:inset 0 0 0 1.5px var(--edge);cursor:pointer;transition:transform var(--dur) var(--spring),background 200ms;white-space:nowrap;text-decoration:none}
+.btn:active{transform:scale(.96)}
+.btn.main{background:var(--accent);color:var(--on-accent);width:100%;box-shadow:none}
+.btn.outl{background:transparent;box-shadow:inset 0 0 0 1.5px var(--accent);color:var(--accent-ink)}
+.btn.quiet{background:transparent;color:var(--accent-ink);box-shadow:none}
+.btn.danger{background:var(--danger);color:#fff;box-shadow:none}
+.phone[data-theme="dark"] .btn.danger{color:#17160F}
+.btn.sm{min-height:44px;padding:0 14px;font-size:14px}
+.btn.icon{width:44px;height:44px;padding:0;border-radius:var(--r-full)}
+.btn.icon.on-surface{background:var(--sn-surface);box-shadow:inset 0 0 0 1.5px var(--edge),var(--sh-tile)}
+.btn.drop{background:var(--sn-surface);box-shadow:inset 0 0 0 1.5px var(--edge);min-height:44px;padding:0 12px 0 14px;font-size:14px}
+.btn.drop svg{color:var(--accent);width:16px;height:16px}
+.btn .badge{position:absolute;top:2px;right:2px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--accent);color:var(--on-accent);font:700 11px/18px var(--sans)}
+.btn.icon{position:relative}
+
+/* icon tile + label (a door) */
+.tile{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;appearance:none;border:0;background:transparent;padding:4px 0;cursor:pointer;color:var(--ink);font:600 12.5px/1.2 var(--sans);transition:transform var(--dur) var(--spring)}
+.tile:active{transform:scale(.95)}
+.tile .ic{width:56px;height:56px;border-radius:18px;background:var(--sn-surface);box-shadow:inset 0 0 0 1.5px var(--edge),var(--sh-tile);display:grid;place-items:center;color:var(--accent)}
+.tile .ic svg{width:24px;height:24px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+
+/* chips */
+.chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;font:600 12px/1 var(--sans);white-space:nowrap}
+.chip i{width:6px;height:6px;border-radius:999px;background:currentColor;display:block}
+.chip.ok{color:var(--ok-ink);background:color-mix(in srgb,var(--ok) 13%,transparent)}
+.chip.warn{color:var(--warn);background:color-mix(in srgb,var(--warn) 14%,transparent)}
+.chip.danger{color:var(--danger);background:color-mix(in srgb,var(--danger) 12%,transparent)}
+.chip.info{color:var(--info);background:color-mix(in srgb,var(--info) 13%,transparent)}
+.chip.accent{color:var(--accent-ink);background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.chip.gold{color:var(--gold-ink);background:color-mix(in srgb,var(--gold) 16%,transparent)}
+.chip.grey{color:var(--ink);background:var(--fill-2)}
+
+/* rows */
+.row{display:flex;align-items:center;gap:12px;min-height:44px;padding:0 10px;border-radius:var(--r-md);font:600 15px/1.2 var(--sans);color:var(--ink);appearance:none;border:0;background:transparent;width:100%;text-align:left;cursor:pointer}
+.row svg.i{color:var(--accent)}
+.row .sp{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .val{font:500 14px/1 var(--sans);color:var(--mute)}
+.row.pressed,.row:active{background:var(--fill)}
+.row.door{background:var(--sn-surface);box-shadow:inset 0 0 0 1.5px var(--edge);margin:6px 0;padding:0 12px;min-height:56px}
+.row.door:active{background:var(--fill)}
+.card.door{box-shadow:inset 0 0 0 1.5px var(--edge),var(--sh-tile);cursor:pointer}
+.card.door:active{background:var(--fill)}
+.row .chev{color:var(--accent);width:16px;height:16px}
+.divider{height:1px;background:var(--line);margin:6px 0}
+
+/* meters */
+.meter{height:10px;border-radius:999px;background:var(--fill-2);overflow:hidden}
+.meter > i{display:block;height:100%;width:0;border-radius:999px;background:var(--accent);transition:width var(--dur) var(--ease-out)}
+.live .meter > i{width:var(--v)}
+
+/* bar strip */
+.bars{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px;align-items:end;height:84px;padding-top:26px}
+.bars .b{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+.bars .b i{display:block;width:100%;max-width:22px;height:0;border-radius:6px;background:var(--fill-2);transition:height var(--dur) var(--ease-out)}
+.live .bars .b i{height:var(--h)}
+.bars .b.now i{background:var(--accent)}
+.bars .b.ahead i{background:transparent;box-shadow:inset 0 0 0 1.5px var(--line);height:0}
+.live .bars .b.ahead i{height:12px}
+.bars .b small{font:500 10.5px/1 var(--sans);color:var(--mute)}
+.bars .b.now small{color:var(--ink);font-weight:700}
+.bars .b .bub{position:absolute;top:-2px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--sn-canvas);font:700 11px/1 var(--sans);padding:5px 7px;border-radius:999px;white-space:nowrap}
+.bars .b .bub::after{content:"";position:absolute;left:50%;bottom:-4px;width:8px;height:8px;background:var(--ink);transform:translateX(-50%) rotate(45deg);border-radius:2px}
+.bars.m-phone{height:46px;padding-top:0;gap:4px}
+.bars.m-phone .b i{max-width:14px;border-radius:4px}
+
+/* rings */
+.ring{width:84px;height:84px;flex:none}
+.ring circle{fill:none;stroke-width:9;stroke-linecap:round}
+.ring .tr{stroke:var(--fill-2)}
+.ring .v{stroke:var(--accent);stroke-dasharray:0 100;transition:stroke-dasharray var(--dur) var(--ease-out);transform:rotate(-90deg);transform-origin:50% 50%}
+.live .ring .v{stroke-dasharray:var(--v) 100}
+.ring.ok .v{stroke:var(--ok)}
+
+/* sparkline */
+.spark{width:100%;height:52px;display:block}
+.spark path.l{fill:none;stroke:var(--ok);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset var(--dur) var(--ease-out)}
+.live .spark path.l{stroke-dashoffset:0}
+.spark path.f{fill:url(#sparkfill);opacity:0;transition:opacity var(--dur)}
+.live .spark path.f{opacity:1}
+.spark .dot{fill:var(--ok)}
+
+/* half-ring gauge */
+.gauge{width:220px;height:124px;display:block;margin:0 auto}
+.gauge path{fill:none;stroke-width:16;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset var(--dur) var(--ease-out)}
+.live .gauge path{stroke-dashoffset:0}
+.gauge path.s2{transition-delay:150ms}.gauge path.s3{transition-delay:300ms}
+.gauge .tr{stroke:var(--fill-2)}
+.gcenter{text-align:center;margin-top:-52px;position:relative}
+.gcenter .big{font-size:32px}
+.legend{display:flex;gap:12px;margin-top:14px;border-radius:var(--r-md);background:var(--fill);padding:10px 12px}
+.legend > div{flex:1;min-width:0}
+.legend .k{display:flex;align-items:center;gap:6px;font:600 12px/1 var(--sans);color:var(--mute)}
+.legend .k i{width:8px;height:8px;border-radius:999px;display:block}
+.legend .n{font:700 16px/1.2 var(--sans);margin-top:4px;font-variant-numeric:tabular-nums}
+.leg3{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.leg3 span{display:inline-flex;align-items:center;gap:6px;font:500 12.5px/1 var(--sans);color:var(--mute)}
+.leg3 span i{width:8px;height:8px;border-radius:999px;display:block}
+.leg3 b{color:var(--ink)}
+
+/* stat card innards */
+.stat .head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.stat .ttl{display:flex;align-items:center;gap:8px;font:600 14px/1.2 var(--sans)}
+.stat .ttl .ic{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent)}
+.stat .ttl .ic svg{width:16px;height:16px}
+.stat .big{margin-top:10px}
+.stat .cap{margin-top:3px}
+.stat .side{display:flex;align-items:center;gap:12px;margin-top:8px}
+.stat .side .ring{width:76px;height:76px}
+.ringwrap{position:relative;width:76px;height:76px;flex:none}
+.ringwrap .in{position:absolute;inset:0;display:grid;place-items:center;font:700 14px/1 var(--sans)}
+.failed .big{color:var(--mute)}
+.failed .line{display:flex;align-items:center;gap:8px;margin-top:8px;font:500 13px/1.3 var(--sans)}
+.empty .big{color:var(--mute);font-weight:500;font-size:22px}
+
+/* popups */
+.poplayer{position:absolute;inset:0;z-index:40;pointer-events:none}
+.scrim{position:absolute;inset:0;background:var(--scrim);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;transition:opacity 220ms;pointer-events:none}
+.poplayer.on{pointer-events:auto}
+.poplayer.on .scrim{opacity:1;pointer-events:auto}
+.panel{position:absolute;background:var(--sn-surface);border-radius:var(--r-lg);box-shadow:var(--sh-float);padding:6px;display:none;z-index:2;font-family:var(--sans)}
+.panel.show{display:block;animation:pop 240ms var(--ease-out)}
+@keyframes pop{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
+.panel .row{min-height:44px;border-radius:var(--r-md)}
+.panel .head{display:flex;align-items:center;gap:10px;padding:8px 10px 10px}
+.panel .head .av{width:40px;height:40px;border-radius:999px;background:linear-gradient(140deg,var(--accent),var(--accent-deep));color:var(--on-accent);display:grid;place-items:center;font:700 14px/1 var(--sans)}
+.panel .head .who{min-width:0}
+.panel .head .who b{display:block;font:600 15px/1.2 var(--serif);font-size:17px}
+.panel .head .who span{display:block;font:500 12px/1.3 var(--sans);color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--sn-surface);border-radius:var(--r-lg) var(--r-lg) 0 0;box-shadow:var(--sh-float);padding:8px 10px calc(16px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform 320ms var(--ease-out);z-index:2;max-height:calc(100% - 56px);overflow-y:auto;font-family:var(--sans)}
+.sheet.show{transform:none}
+.sheet .grab{width:36px;height:5px;border-radius:999px;background:var(--fill-2);margin:2px auto 10px}
+.sheet .sh-t{display:flex;align-items:center;justify-content:space-between;padding:2px 6px 8px}
+.sheet .sh-t b{font:600 15px/1.2 var(--sans)}
+.confirm{position:absolute;left:24px;right:24px;top:50%;transform:translateY(-50%) scale(.97);background:var(--sn-surface);border-radius:var(--r-lg);box-shadow:var(--sh-float);padding:22px 20px 18px;display:none;z-index:2;text-align:center;font-family:var(--sans)}
+.confirm.show{display:block;animation:pop 220ms var(--ease-out) forwards;transform:translateY(-50%)}
+.confirm h3{font:600 22px/1.2 var(--serif);margin:0 0 6px}
+.confirm p{margin:0 0 16px;color:var(--mute);font:400 14px/1.45 var(--sans)}
+.confirm .acts{display:flex;gap:10px}
+.confirm .acts .btn{flex:1}
+.notice{position:absolute;top:10px;left:50%;transform:translate(-50%,-140%);background:var(--accent);color:var(--on-accent);border-radius:999px;padding:0 18px;min-height:44px;display:inline-flex;align-items:center;gap:8px;font:600 14px/1 var(--sans);box-shadow:var(--sh-float);transition:transform 360ms var(--spring);z-index:3;white-space:nowrap;pointer-events:auto}
+.notice.show{transform:translate(-50%,0)}
+.notice svg{width:18px;height:18px}
+.tick{color:var(--accent);font-weight:700}
+.panel .row .chev,.sheet .row .chev{margin-left:auto}
+
+/* mini side-by-side (section 2a) */
+.minis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.m-phone{position:relative;height:300px;border-radius:14px;overflow:hidden;background:var(--sn-canvas);box-shadow:inset 0 0 0 1px var(--line)}
+.m-phone .m-scrim{position:absolute;inset:0;background:var(--scrim)}
+.m-phone .m-trig{position:absolute;top:10px;right:8px;display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 6px 0 3px;border-radius:999px;background:var(--sn-surface);font:600 9px/1 var(--sans);color:var(--ink);z-index:3;box-shadow:var(--sh-tile)}
+.m-phone .m-trig .av{width:20px;height:20px;border-radius:999px;background:linear-gradient(140deg,var(--accent),var(--accent-deep))}
+.m-phone .m-panel{position:absolute;background:var(--sn-surface);border-radius:12px;box-shadow:var(--sh-float);padding:4px;z-index:2}
+.m-phone .m-panel.anch{top:42px;right:8px;left:8px}
+.m-phone .m-panel.m-sheet{left:0;right:0;bottom:0;border-radius:12px 12px 0 0;padding-bottom:10px}
+.m-phone .m-row{display:flex;align-items:center;gap:6px;height:24px;padding:0 6px;border-radius:7px;font:600 9px/1 var(--sans);color:var(--ink)}
+.m-phone .m-row i{width:9px;height:9px;border-radius:3px;background:var(--accent);opacity:.9;display:block;flex:none}
+.m-phone .m-row.p{background:var(--fill)}
+.m-phone .m-row .m-chip{margin-left:auto;font:700 7px/1 var(--sans);color:var(--gold-ink);background:color-mix(in srgb,var(--gold) 16%,transparent);padding:3px 5px;border-radius:999px}
+.m-phone .m-div{height:1px;background:var(--line);margin:3px 0}
+.m-phone .m-lbl{position:absolute;left:8px;top:10px;font:600 10px/1 var(--sans);color:var(--ink);z-index:3;background:var(--sn-surface);padding:5px 7px;border-radius:999px;box-shadow:var(--sh-tile)}
+.m-phone .m-page{position:absolute;inset:44px 8px 0;opacity:.9}
+.m-phone .m-page b{display:block;height:30px;border-bottom:1px solid var(--line);margin-bottom:6px}
+.m-phone .m-page b:first-child{height:60px}
+
+/* account trigger pill */
+.acct{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 10px 0 4px;border-radius:999px;background:var(--sn-surface);box-shadow:inset 0 0 0 1.5px var(--edge),var(--sh-tile);border:0;font:600 14px/1 var(--sans);color:var(--ink);cursor:pointer}
+.acct .av{width:36px;height:36px;border-radius:999px;background:linear-gradient(140deg,var(--accent),var(--accent-deep));color:var(--on-accent);display:grid;place-items:center;font:700 13px/1 var(--sans)}
+.acct svg{width:16px;height:16px;color:var(--accent)}
+
+/* event card with ⋯ */
+.evcard{display:flex;align-items:center;gap:12px}
+.evcard .cov{width:56px;height:56px;border-radius:16px;background:linear-gradient(150deg,#D9B98A,#8C5A3C);flex:none}
+.evcard .who{flex:1;min-width:0}
+.evcard .who b{display:block;font:600 19px/1.2 var(--serif)}
+.evcard .who span{display:block;font:500 12.5px/1.3 var(--sans);color:var(--mute)}
+
+/* section 5 — screens */
+.scr5{height:812px;position:relative;scroll-snap-align:start;overflow:hidden}
+.scr5 .screen-lbl{position:absolute;left:50%;top:8px;transform:translateX(-50%);z-index:5;font:600 11px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--on-accent);background:var(--accent);padding:7px 10px;border-radius:999px;box-shadow:var(--sh-tile)}
+.scroller5{scroll-snap-type:y mandatory}
+.topbar{height:52px;display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:0 12px}
+.cover{position:relative;margin:0 0 -28px;height:214px;background:
+  radial-gradient(120% 90% at 20% 10%,rgba(255,255,255,.35),transparent 50%),
+  linear-gradient(160deg,#C8A47A 0%,#9A6B4A 55%,#5E3A2C 100%);overflow:hidden;color:#fff}
+.cover::after{content:"";position:absolute;inset:auto 0 0;height:60%;background:linear-gradient(to top,rgba(30,20,12,.55),transparent)}
+.cover .txt{position:absolute;left:16px;right:16px;bottom:44px;z-index:1}
+.cover .txt .eyebrow{color:rgba(255,255,255,.9)}
+.cover .txt .name{color:#fff;margin-top:2px}
+.cover .txt .btn{margin-top:10px;background:rgba(255,255,255,.92);color:#2C2A29;min-height:44px;font-size:14px;box-shadow:var(--sh-tile)}
+.hero-next .eyebrow{color:var(--accent-ink)}
+.hero-next .line{font:600 26px/1.15 var(--serif);margin-top:6px;letter-spacing:-.01em}
+.hero-next .sub{margin-top:6px}
+.hero-next .acts{display:flex;gap:8px;margin-top:14px;align-items:center}
+.hero-next .acts .main{flex:1;width:auto}
+.nums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.nums .card{padding:12px 10px}
+.nums .big{font-size:26px}
+.nums .cap{font-size:12px;margin-top:2px}
+.money .top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.money .top > div:last-child{text-align:right}
+.money .meter{margin-top:12px}
+.bottombar{position:absolute;left:12px;right:12px;bottom:12px;height:64px;border-radius:999px;background:var(--glass-bg);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);box-shadow:var(--sh-float);display:grid;grid-template-columns:repeat(5,1fr);align-items:center;padding:0 6px;z-index:4}
+.bottombar button{appearance:none;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:3px;height:52px;justify-content:center;font:600 10.5px/1 var(--sans);color:var(--mute);border-radius:999px;cursor:pointer}
+.bottombar button.on{color:var(--accent)}
+.bottombar button svg{width:22px;height:22px}
+.fade-bottom{position:absolute;left:0;right:0;bottom:0;height:110px;background:linear-gradient(to top,var(--sn-canvas) 30%,transparent);pointer-events:none;z-index:3}
+.srow{display:flex;align-items:center;gap:12px;min-height:56px;padding:8px 12px;appearance:none;border:0;width:100%;text-align:left;font-family:var(--sans);color:var(--ink);background:var(--sn-surface);box-shadow:inset 0 0 0 1.5px var(--edge);border-radius:var(--r-md);margin-bottom:8px;cursor:pointer}
+.srow:active{background:var(--fill)}
+.srow .arr{color:var(--accent);width:16px;height:16px;flex:none}
+.srow .when{font:700 13px/1.2 var(--sans);width:58px;flex:none;color:var(--accent-ink)}
+.srow .what{flex:1;min-width:0}
+.srow .what b{display:block;font:600 15px/1.25 var(--sans)}
+.srow .what span{display:block;font:500 12.5px/1.3 var(--sans);color:var(--mute)}
+
+/* ticket */
+.ticket{position:relative;margin:0 auto;width:300px;filter:drop-shadow(0 18px 30px rgba(30,26,18,.28))}
+.phone[data-theme="dark"] .ticket{filter:drop-shadow(0 18px 30px rgba(0,0,0,.6))}
+.ticket .tp{background:var(--sn-surface);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:22px 20px 18px;text-align:center;position:relative}
+.ticket .tb{background:var(--sn-surface);border-radius:0 0 var(--r-lg) var(--r-lg);padding:18px 20px 20px;text-align:center;position:relative}
+.ticket .perf{position:relative;height:0;border-top:2px dashed var(--line)}
+.ticket .perf::before,.ticket .perf::after{content:"";position:absolute;top:-12px;width:24px;height:24px;border-radius:999px;background:var(--sn-canvas)}
+.ticket .perf::before{left:-12px}.ticket .perf::after{right:-12px}
+.ticket .qr{width:150px;height:150px;border-radius:999px;background:#fff;margin:14px auto 10px;display:grid;place-items:center;box-shadow:inset 0 0 0 6px color-mix(in srgb,var(--gold) 35%,#fff)}
+.ticket .qr svg{width:102px;height:102px;shape-rendering:crispEdges}
+.ticket .qr svg path{fill:#2C2A29}
+.ticket .evn{font:600 24px/1.1 var(--serif)}
+.ticket .who{font:600 20px/1.2 var(--serif);margin-top:6px}
+.ticket .meta{display:flex;justify-content:space-between;gap:8px;margin-top:8px;text-align:left}
+.ticket .meta div{flex:1}
+.ticket .meta small{display:block;font:600 10.5px/1.3 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.ticket .meta b{display:block;font:600 15px/1.3 var(--sans);margin-top:2px}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   SWITCH C · DEFAULT = "press": a frame exists ONLY on something a person
+   presses (owner 2026-10-11: "only have frames if something needs to be clicked
+   like a button, separate topics with divider."). A read-only .card loses its
+   surface; topics end with a divider. A .door card is pressable and keeps one.
+   "cards" = everything in soft cards (the pictures) — kept for the comparison,
+   not chosen.
+   ─────────────────────────────────────────────────────────────────────────── */
+.phone[data-surfaces="press"] .card:not(.door){background:transparent;box-shadow:none;border-radius:0;padding:14px 0}
+.phone[data-surfaces="press"] .card.hero:not(.door){padding:18px 0 20px}
+.phone[data-surfaces="press"] .stack > .card:not(.door){border-bottom:1px solid var(--line)}
+.phone[data-surfaces="press"] .stack > .card:last-child{border-bottom:0}
+.phone[data-surfaces="press"] .grid2{gap:0 20px}
+.phone[data-surfaces="press"] .grid2 > .card:not(.door){border-bottom:1px solid var(--line)}
+.phone[data-surfaces="press"] .grid2 > .card:nth-last-child(-n+2){border-bottom:0}
+.phone[data-surfaces="press"] .nums{gap:0}
+.phone[data-surfaces="press"] .nums .card{padding:10px 0;border-right:1px solid var(--line);text-align:left}
+.phone[data-surfaces="press"] .nums .card + .card{padding-left:12px}
+.phone[data-surfaces="press"] .nums .card:last-child{border-right:0}
+.phone[data-surfaces="press"] .legend{background:transparent;padding:10px 0 0;border-top:1px solid var(--line);border-radius:0}
+.phone[data-surfaces="press"] .stat .ttl .ic{background:transparent;width:auto;height:auto}
+.phone[data-surfaces="press"] .hr{height:1px;background:var(--line);margin:14px 16px;display:block}
+.phone[data-surfaces="press"] .cover{margin-bottom:0}
+.phone[data-surfaces="press"] .hero-next{margin-top:0}
+.phone[data-surfaces="press"] .sec-h{margin-top:18px}
+.phone[data-surfaces="press"] .ticket{filter:none}
+.phone[data-surfaces="press"] .ticket .tp,.phone[data-surfaces="press"] .ticket .tb{box-shadow:inset 0 0 0 1px var(--line)}
+.hr{display:none}
+/* the comparison: everything in cards — the pressed-row chrome in a card goes back to shadow-only */
+.phone[data-surfaces="cards"] .srow{box-shadow:none;background:transparent;border-radius:0;border-bottom:1px solid var(--line);margin:0;padding:8px 0}
+.phone[data-surfaces="cards"] .srow:last-child{border-bottom:0}
+.phone[data-surfaces="cards"] .card.door{box-shadow:var(--sh-tile)}
+
+@media (prefers-reduced-motion:reduce){
+  .phone *{transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+<div class="board">
+  <h1>The modern app look, in Setnayan's own language<small>One direction from the eleven pictures · drawn on Setnayan's real parts · Light and Dark · 2026-10-11</small></h1>
+
+  <div class="ctl">
+    <label><span class="k">Board</span>
+      <select id="selBoard" aria-label="Board section">
+        <option value="language">1 · The language</option>
+        <option value="popups">2 · One frame for every popup</option>
+        <option value="graphs">3 · Graph cards</option>
+        <option value="gauge">4 · The progress gauge</option>
+        <option value="screens">5 · Three real screens</option>
+      </select></label>
+    <label style="flex:0 0 112px"><span class="k">Theme</span>
+      <select id="selTheme" aria-label="Light or Dark">
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+      </select></label>
+    <label style="flex:1 1 100%"><span class="k">Switch C · Surfaces</span>
+      <select id="selSurf" aria-label="Surfaces">
+        <option value="press">Frames only on what you press (your rule)</option>
+        <option value="cards">Everything in soft cards (the pictures) — not chosen</option>
+      </select></label>
+  </div>
+
+  <div class="phone" id="phone" data-theme="light" data-surfaces="press">
+
+    <!-- ════════════════ SECTION 1 · THE LANGUAGE ════════════════ -->
+    <div class="screen" data-sec="language">
+      <div class="status"><span>9:41</span><span class="pill-dyn" aria-hidden="true"></span><span class="sig" aria-hidden="true"><i></i><i></i></span></div>
+      <div class="pad">
+        <div class="eyebrow">The rule</div>
+        <h2 class="t mt8" style="font-size:20px">“Only have frames if something needs to be clicked, like a button. Separate topics with a divider.”</h2>
+        <div class="cap mt8">— you, 2026-10-11. A frame (a filled or outlined pill, a tile, a door row) means <b style="color:var(--ink)">press me</b>. Anything only read sits on the page.</div>
+
+        <div class="sec-h" style="margin-left:0;margin-right:0"><span class="eyebrow">Read · no frame</span><span class="small">ends with a divider</span></div>
+        <div class="card stat">
+          <div class="head"><div class="ttl"><span class="ic">
+            <svg class="i" viewBox="0 0 24 24"><path d="M3 7h18M3 12h12M3 17h8"/></svg></span>Replies</div>
+            <span class="chip ok"><i></i>+12 this week</span></div>
+          <div class="big" data-count="86">0</div>
+          <div class="cap">replied · of 120 invited</div>
+        </div>
+        <div class="divider" style="margin:4px 0 0"></div>
+
+        <div class="sec-h" style="margin-left:0;margin-right:0"><span class="eyebrow">Press · framed</span><span class="small">a door, a row that opens</span></div>
+        <button class="card door evcard" type="button" style="width:100%;text-align:left;font-family:inherit;color:inherit">
+          <span class="cov" aria-hidden="true"></span>
+          <div class="who"><b>Maria &amp; Jose</b><span>Wedding · December 12, 2026 · opens the event</span></div>
+          <svg class="i chev" viewBox="0 0 24 24" style="color:var(--accent)"><path d="m9 6 6 6-6 6"/></svg>
+        </button>
+
+        <div class="sec-h" style="margin-left:0;margin-right:0"><span class="eyebrow">The type scale</span></div>
+        <div class="big" data-count="150000" data-fmt="money">₱0</div>
+        <div class="cap">One big number, one quiet caption</div>
+        <h2 class="t mt16">A title, in the serif</h2>
+        <p class="body-t" style="margin:6px 0 0">Body text is plain English at 15 px. It says one thing and stops.</p>
+        <div class="lbl mt12">A label at 13 px, semibold</div>
+        <div class="eyebrow mt8">An eyebrow · 11 px · spaced</div>
+
+        <div class="sec-h" style="margin-left:0;margin-right:0"><span class="eyebrow">Controls</span><span class="small">every control is a pill</span></div>
+        <button class="btn main" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>Send invitations</button>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:10px">
+          <button class="btn outl" type="button" style="flex:1"><svg class="i" viewBox="0 0 24 24"><path d="M4 12v8h16v-8M12 3v13M8 7l4-4 4 4"/></svg>Share</button>
+          <button class="btn icon on-surface" type="button" aria-label="More"><svg class="i" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></button>
+          <button class="btn icon on-surface" type="button" aria-label="Notifications"><svg class="i" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21a2 2 0 0 0 4 0"/></svg><span class="badge">3</span></button>
+          <button class="btn drop" type="button">This week<svg class="i" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+        </div>
+
+        <div class="sec-h" style="margin-left:0;margin-right:0"><span class="eyebrow">Icon tiles</span><span class="small">a door with its word</span></div>
+        <div class="tiles">
+          <button class="tile" type="button"><span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Guest list</button>
+          <button class="tile" type="button"><span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M3 9l1-5h16l1 5M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0M5 9v11h14V9"/></svg></span>Suppliers</button>
+          <button class="tile" type="button"><span class="ic"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18M8 4v5"/></svg></span>Event Hub</button>
+        </div>
+
+        <div class="sec-h" style="margin-left:0;margin-right:0"><span class="eyebrow">Status chips</span><span class="small">one tone per meaning</span></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="chip ok"><i></i>Coming</span>
+          <span class="chip warn"><i></i>No reply yet</span>
+          <span class="chip danger"><i></i>Can't come</span>
+          <span class="chip info"><i></i>Message sent</span>
+          <span class="chip accent"><i></i>Due Friday</span>
+          <span class="chip gold">◆ Pro</span>
+          <span class="chip grey">Draft</span>
+        </div>
+
+        <div class="sec-h" style="margin-left:0;margin-right:0"><span class="eyebrow">Rows in a menu</span><span class="small">icon · label · trailing</span></div>
+        <div class="card door" style="padding:6px">
+          <button class="row" type="button"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span class="sp">Your events</span><span class="val">3</span><svg class="i chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+          <button class="row pressed" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M3 9l1-5h16l1 5M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0M5 9v11h14V9"/></svg><span class="sp">Your shop</span><span class="chip gold">◆ Pro</span></button>
+          <div class="divider"></div>
+          <button class="row" type="button"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg><span class="sp">Help</span><svg class="i chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+        </div>
+        <div class="cap mt8">A menu's rows live inside one framed, opened surface; the second row is drawn pressed — a soft rounded fill, nothing else moves. On the page itself a row that opens something is framed on its own:</div>
+        <button class="row door mt8" type="button"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg><span class="sp">Budget</span><span class="val">75% paid</span><svg class="i chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+        <div class="divider mt12"></div>
+        <div class="cap mt8">A divider ends a topic. It is the only line that is not a control.</div>
+        <div style="height:28px"></div>
+      </div>
+    </div>
+
+    <!-- ════════════════ SECTION 2 · ONE FRAME FOR EVERY POPUP ════════════════ -->
+    <div class="screen" data-sec="popups" hidden>
+      <div class="status"><span>9:41</span><span class="pill-dyn" aria-hidden="true"></span><span class="sig" aria-hidden="true"><i></i><i></i></span></div>
+      <div class="pad" style="display:flex;justify-content:space-between;align-items:center">
+        <h2 class="t">Your events</h2>
+        <button class="acct" type="button" data-open="acct-sheet" aria-haspopup="menu"><span class="av">MR</span>Maria<svg class="i" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+      </div>
+      <div class="pad mt12">
+        <div class="eyebrow">a · The account menu</div>
+        <div class="cap mt8">Tap Maria ▴ above: on a phone it rises as a sheet (your ruling). The two small drawings compare the reference's anchored panel with the sheet.</div>
+        <div class="minis mt12">
+          <div class="m-phone">
+            <span class="m-lbl">Reference</span>
+            <span class="m-trig"><span class="av"></span>Maria ▾</span>
+            <div class="m-page"><b></b><b></b><b></b></div>
+            <div class="m-scrim"></div>
+            <div class="m-panel anch">
+              <div class="m-row"><i></i>Your events</div>
+              <div class="m-row p"><i></i>Your shop <span class="m-chip">◆ Pro</span></div>
+              <div class="m-row"><i></i>Profile</div>
+              <div class="m-div"></div>
+              <div class="m-row"><i></i>Appearance ▾</div>
+              <div class="m-row"><i></i>Help</div>
+              <div class="m-div"></div>
+              <div class="m-row"><i></i>Sign out</div>
+            </div>
+          </div>
+          <div class="m-phone">
+            <span class="m-lbl">Your ruling</span>
+            <span class="m-trig"><span class="av"></span>Maria ▾</span>
+            <div class="m-page"><b></b><b></b><b></b></div>
+            <div class="m-scrim"></div>
+            <div class="m-panel m-sheet">
+              <div class="m-row"><i></i>Your events</div>
+              <div class="m-row p"><i></i>Your shop <span class="m-chip">◆ Pro</span></div>
+              <div class="m-row"><i></i>Profile</div>
+              <div class="m-div"></div>
+              <div class="m-row"><i></i>Appearance ▾</div>
+              <div class="m-row"><i></i>Help</div>
+              <div class="m-div"></div>
+              <div class="m-row"><i></i>Sign out</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn sm" type="button" data-open="acct-anch" style="flex:1">Open anchored</button>
+          <button class="btn sm" type="button" data-open="acct-sheet" style="flex:1">Open as sheet</button>
+        </div>
+
+        <div class="sec-h" style="margin-left:0;margin-right:0"><span class="eyebrow">b · ⋯ on an event card</span></div>
+        <div class="card door evcard">
+          <span class="cov" aria-hidden="true"></span>
+          <div class="who"><b>Maria &amp; Jose</b><span>Wedding · December 12, 2026</span></div>
+          <button class="btn icon" type="button" aria-label="More for this event" data-open="more"><svg class="i" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></button>
+        </div>
+
+        <div class="sec-h" style="margin-left:0;margin-right:0"><span class="eyebrow">c · A dropdown of choices</span><span class="small">the shipped PickMenu</span></div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <span class="lbl">Show</span>
+          <button class="btn drop" type="button" data-open="pick" id="pickBtn" aria-haspopup="listbox" style="flex:1;justify-content:space-between"><span id="pickVal">Everyone</span><svg class="i" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+        </div>
+
+        <div class="sec-h" style="margin-left:0;margin-right:0"><span class="eyebrow">d · A confirm</span><span class="small">only for what can't be undone</span></div>
+        <button class="btn outl" type="button" data-open="confirm" style="width:100%;box-shadow:inset 0 0 0 1.5px var(--danger);color:var(--danger)"><svg class="i" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>Remove this supplier</button>
+
+        <div class="sec-h" style="margin-left:0;margin-right:0"><span class="eyebrow">e · A notice from the top</span><span class="small">never darkens</span></div>
+        <button class="btn" type="button" data-notice="Saved" style="width:100%">Show a notice</button>
+        <div style="height:40px"></div>
+      </div>
+    </div>
+
+    <!-- ════════════════ SECTION 3 · GRAPH CARDS ════════════════ -->
+    <div class="screen nb" data-sec="graphs" hidden>
+      <div class="status"><span>9:41</span><span class="pill-dyn" aria-hidden="true"></span><span class="sig" aria-hidden="true"><i></i><i></i></span></div>
+      <div class="pad stack">
+        <div class="card stat">
+          <div class="head">
+            <div class="ttl"><span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M4 4h16v12H7l-3 3z"/></svg></span>Replies</div>
+            <button class="btn drop" type="button" data-open="pick-week" aria-haspopup="listbox"><span id="weekVal">This week</span><svg class="i" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+          </div>
+          <div class="big" data-count="86">0</div>
+          <div class="cap">replied · of 120 invited</div>
+          <div class="bars mt12" aria-label="Replies in the last 9 days">
+            <div class="b" style="--h:28%"><i></i><small>3</small></div>
+            <div class="b" style="--h:40%"><i></i><small>4</small></div>
+            <div class="b" style="--h:18%"><i></i><small>5</small></div>
+            <div class="b" style="--h:60%"><i></i><small>6</small></div>
+            <div class="b" style="--h:34%"><i></i><small>7</small></div>
+            <div class="b" style="--h:50%"><i></i><small>8</small></div>
+            <div class="b" style="--h:46%"><i></i><small>9</small></div>
+            <div class="b now" style="--h:82%"><span class="bub">+12</span><i></i><small>Today</small></div>
+            <div class="b ahead"><i></i><small>12</small></div>
+          </div>
+          <button class="btn sm mt12" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Guest list</button>
+        </div>
+
+        <div class="grid2">
+          <div class="card stat">
+            <div class="ttl"><span class="ic"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg></span>Paid</div>
+            <div class="side">
+              <div class="ringwrap"><svg class="ring" viewBox="0 0 36 36" style="--v:75"><circle class="tr" cx="18" cy="18" r="15.9" pathLength="100"/><circle class="v" cx="18" cy="18" r="15.9" pathLength="100"/></svg><span class="in"><span data-count="75" data-fmt="pct">0%</span></span></div>
+              <div style="min-width:0"><div class="big money" style="font-size:20px;margin:0" data-count="150000" data-fmt="money">₱0</div><div class="cap">of ₱200,000</div></div>
+            </div>
+            <button class="btn sm mt12" type="button" style="width:100%"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg>Budget</button>
+          </div>
+          <div class="card stat">
+            <div class="ttl"><span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M4 18V9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9M2 18h20M7 7V5h10v2"/></svg></span>Guests seated</div>
+            <div class="side">
+              <div class="ringwrap"><svg class="ring ok" viewBox="0 0 36 36" style="--v:58"><circle class="tr" cx="18" cy="18" r="15.9" pathLength="100"/><circle class="v" cx="18" cy="18" r="15.9" pathLength="100"/></svg><span class="in"><span data-count="58" data-fmt="pct">0%</span></span></div>
+              <div style="min-width:0"><div class="big" style="font-size:20px;margin:0" data-count="70">0</div><div class="cap">of 120</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="card stat">
+            <div class="head"><div class="ttl"><span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></span>Shop views</div></div>
+            <div class="big" style="font-size:26px" data-count="1240">0</div>
+            <div class="cap">this week · <span style="color:var(--ok)">+18%</span></div>
+            <div class="bars mini mt12" aria-label="Views by day">
+              <div class="b" style="--h:35%"><i></i></div><div class="b" style="--h:50%"><i></i></div><div class="b" style="--h:28%"><i></i></div><div class="b" style="--h:66%"><i></i></div><div class="b" style="--h:52%"><i></i></div><div class="b" style="--h:80%"><i></i></div><div class="b now" style="--h:100%"><i></i></div>
+            </div>
+          </div>
+          <div class="card stat">
+            <div class="head"><div class="ttl"><span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h11"/></svg></span>Bookings</div></div>
+            <div class="big" style="font-size:26px" data-count="14">0</div>
+            <div class="cap">this month · <span style="color:var(--ok)">+3</span></div>
+            <svg class="spark mt12" viewBox="0 0 120 52" preserveAspectRatio="none" aria-label="Bookings over six months">
+              <defs><linearGradient id="sparkfill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2B744A" stop-opacity=".28"/><stop offset="1" stop-color="#2B744A" stop-opacity="0"/></linearGradient></defs>
+              <path class="f" d="M2 40 L22 34 L42 36 L62 24 L82 26 L102 14 L118 10 L118 52 L2 52 Z"/>
+              <path class="l" pathLength="1" d="M2 40 L22 34 L42 36 L62 24 L82 26 L102 14 L118 10"/>
+              <circle class="dot" cx="118" cy="10" r="3"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="card stat failed">
+            <div class="head"><div class="ttl"><span class="ic"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg></span>Paid</div></div>
+            <div class="big">—</div>
+            <div class="line">We couldn't load this.</div>
+            <button class="btn sm mt8" type="button" style="width:100%">Try again</button>
+          </div>
+          <div class="card stat empty">
+            <div class="head"><div class="ttl"><span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h11"/></svg></span>Bookings</div></div>
+            <div class="big">Nothing yet</div>
+            <div class="cap">Your first booking shows here.</div>
+          </div>
+        </div>
+        <div style="height:20px"></div>
+      </div>
+    </div>
+
+    <!-- ════════════════ SECTION 4 · THE PROGRESS GAUGE ════════════════ -->
+    <div class="screen nb" data-sec="gauge" hidden>
+      <div class="status"><span>9:41</span><span class="pill-dyn" aria-hidden="true"></span><span class="sig" aria-hidden="true"><i></i><i></i></span></div>
+      <div class="pad stack">
+        <!-- (i) Budget -->
+        <div class="card stat">
+          <div class="head">
+            <div class="ttl"><span class="ic"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg></span><span>Budget<br><span class="cap" style="font-weight:500">Maria &amp; Jose · agreed with 6 suppliers</span></span></div>
+            <span class="chip ok"><i></i>+₱35,000 this month</span>
+          </div>
+          <div class="big money" data-count="150000" data-fmt="money">₱0</div>
+          <div class="cap">paid · of ₱200,000 agreed</div>
+          <svg class="spark mt8" viewBox="0 0 120 52" preserveAspectRatio="none" style="height:40px" aria-label="Paid over time">
+            <path class="f" d="M2 48 L22 44 L42 40 L62 28 L82 26 L102 16 L118 8 L118 52 L2 52 Z"/>
+            <path class="l" pathLength="1" d="M2 48 L22 44 L42 40 L62 28 L82 26 L102 16 L118 8"/>
+            <circle class="dot" cx="118" cy="8" r="3"/>
+          </svg>
+          <div class="cap" style="font-size:11.5px">Five dated payments, April → October</div>
+          <svg class="gauge mt12" viewBox="0 0 220 124" data-gauge="75,10,15" data-tones="ok,warn,fill" aria-label="75% paid, 10% due soon, 15% remaining"></svg>
+          <div class="gcenter"><div class="big" data-count="75" data-fmt="pct">0%</div><div class="cap">of what you agreed is paid</div></div>
+          <div class="legend">
+            <div><div class="k"><i style="background:var(--ok)"></i>Paid</div><div class="n" data-count="150000" data-fmt="money">₱0</div></div>
+            <div><div class="k"><i style="background:var(--warn)"></i>Still to pay</div><div class="n" data-count="50000" data-fmt="money">₱0</div></div>
+          </div>
+          <div class="leg3"><span><i style="background:var(--warn)"></i><b>₱20,000</b> due soon</span><span><i style="background:var(--fill-2);box-shadow:inset 0 0 0 1px var(--line)"></i><b>₱30,000</b> remaining</span></div>
+        </div>
+
+        <!-- (ii) Guest replies -->
+        <div class="card stat">
+          <div class="head">
+            <div class="ttl"><span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M4 4h16v12H7l-3 3z"/></svg></span><span>Guest replies<br><span class="cap" style="font-weight:500">Invitations sent September 20</span></span></div>
+            <span class="chip ok"><i></i>+12 this week</span>
+          </div>
+          <div class="big"><span data-count="86">0</span> <span style="font-size:20px;color:var(--mute);font-weight:500">of 120</span></div>
+          <div class="cap">replied</div>
+          <svg class="gauge mt12" viewBox="0 0 220 124" data-gauge="58,14,28" data-tones="ok,danger,fill" aria-label="70 coming, 16 not coming, 34 no reply yet"></svg>
+          <div class="gcenter"><div class="big" data-count="72" data-fmt="pct">0%</div><div class="cap">have replied</div></div>
+          <div class="leg3" style="margin-top:16px"><span><i style="background:var(--ok)"></i><b>70</b> coming</span><span><i style="background:var(--danger)"></i><b>16</b> not coming</span><span><i style="background:var(--fill-2);box-shadow:inset 0 0 0 1px var(--line)"></i><b>34</b> no reply yet</span></div>
+        </div>
+
+        <!-- (iii) Hub setup -->
+        <div class="card stat">
+          <div class="head">
+            <div class="ttl"><span class="ic"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18M8 4v5"/></svg></span><span>Setting up your Event Hub<br><span class="cap" style="font-weight:500">Two steps left</span></span></div>
+          </div>
+          <div class="big"><span data-count="5">0</span> <span style="font-size:20px;color:var(--mute);font-weight:500">of 7 steps</span></div>
+          <div class="cap">done</div>
+          <svg class="gauge mt12" viewBox="0 0 220 124" data-gauge="71.4,28.6" data-tones="accent,fill" aria-label="5 of 7 steps done"></svg>
+          <div class="gcenter"><div class="big"><span data-count="5">0</span><span style="font-size:18px;color:var(--mute)">/7</span></div><div class="cap">steps done</div></div>
+          <button class="btn main mt16" type="button">Add your Love Story</button>
+        </div>
+        <div style="height:20px"></div>
+      </div>
+    </div>
+
+    <!-- ════════════════ SECTION 5 · THREE REAL SCREENS ════════════════ -->
+    <div class="screen nb scroller5" data-sec="screens" hidden style="padding-bottom:0">
+
+      <!-- (a) the couple's event dashboard -->
+      <section class="scr5">
+        <span class="screen-lbl">Couple · Home</span>
+        <div class="status"><span>9:41</span><span class="pill-dyn" aria-hidden="true"></span><span class="sig" aria-hidden="true"><i></i><i></i></span></div>
+        <div class="topbar">
+          <button class="btn icon on-surface" type="button" aria-label="Messages, 2 unread"><svg class="i" viewBox="0 0 24 24"><path d="M4 4h16v12H7l-3 3z"/></svg><span class="badge">2</span></button>
+          <button class="btn icon on-surface" type="button" aria-label="Notifications, 1 unread"><svg class="i" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21a2 2 0 0 0 4 0"/></svg><span class="badge">1</span></button>
+          <button class="acct" type="button" aria-label="Account" style="padding-right:4px"><span class="av">MR</span></button>
+        </div>
+        <div class="cover">
+          <div class="txt">
+            <div class="eyebrow">Wedding · December 12, 2026</div>
+            <div class="name">Maria &amp; Jose</div>
+            <button class="btn sm" type="button"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>Event Details</button>
+          </div>
+        </div>
+        <div class="pad">
+          <div class="card hero hero-next">
+            <div class="eyebrow">Your next step</div>
+            <div class="line">Send 34 invitations</div>
+            <div class="cap sub">The guest list is ready. Each guest gets one email and a link to the Event Hub.</div>
+            <div class="acts"><button class="btn main" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>Send invitations</button><button class="btn quiet" type="button">Later</button></div>
+          </div>
+          <div class="tiles mt16">
+            <button class="tile" type="button"><span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Edit your Guest list</button>
+            <button class="tile" type="button"><span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M3 9l1-5h16l1 5M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0M5 9v11h14V9"/></svg></span>Edit your Suppliers</button>
+            <button class="tile" type="button"><span class="ic"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18M8 4v5"/></svg></span>Edit your Event Hub</button>
+          </div>
+          <div class="hr"></div>
+          <div class="nums mt16">
+            <div class="card"><div class="big" data-count="62">0</div><div class="cap">days to go</div></div>
+            <div class="card"><div class="big" data-count="70">0</div><div class="cap">coming</div></div>
+            <div class="card"><div class="big" data-count="34">0</div><div class="cap">no reply</div></div>
+          </div>
+          <div class="hr"></div>
+          <div class="card money mt12">
+            <div class="top">
+              <div><div class="eyebrow">Paid</div><div class="big money" style="font-size:24px" data-count="150000" data-fmt="money">₱0</div></div>
+              <div><div class="eyebrow">Still owing</div><div class="big money" style="font-size:24px;color:var(--warn)" data-count="50000" data-fmt="money">₱0</div></div>
+            </div>
+            <div class="meter" style="--v:75%"><i></i></div>
+            <div class="cap mt8"><span data-count="75" data-fmt="pct">0%</span> paid · Budget ₱200,000</div>
+            <button class="btn sm mt12" type="button"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg>Budget</button>
+          </div>
+        </div>
+        <div class="fade-bottom"></div>
+        <nav class="bottombar" aria-label="Event menu">
+          <button class="on" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M3 11 12 3l9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>Home</button>
+          <button type="button"><svg class="i" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Guests</button>
+          <button type="button"><svg class="i" viewBox="0 0 24 24"><path d="M3 9l1-5h16l1 5M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0M5 9v11h14V9"/></svg>Suppliers</button>
+          <button type="button"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18M8 4v5"/></svg>Hub</button>
+          <button type="button"><svg class="i" viewBox="0 0 24 24"><circle cx="5" cy="6" r="1.4"/><circle cx="12" cy="6" r="1.4"/><circle cx="19" cy="6" r="1.4"/><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/><circle cx="5" cy="18" r="1.4"/><circle cx="12" cy="18" r="1.4"/><circle cx="19" cy="18" r="1.4"/></svg>More</button>
+        </nav>
+      </section>
+
+      <!-- (b) a supplier's Today -->
+      <section class="scr5">
+        <span class="screen-lbl">Supplier · Today</span>
+        <div class="status"><span>9:41</span><span class="pill-dyn" aria-hidden="true"></span><span class="sig" aria-hidden="true"><i></i><i></i></span></div>
+        <div class="topbar" style="justify-content:space-between;padding-left:16px">
+          <div><div class="eyebrow">Saturday, October 11</div><h2 class="t">Today</h2></div>
+          <button class="acct" type="button" aria-label="Account" style="padding-right:4px"><span class="av" style="background:linear-gradient(140deg,#3B4E67,#1F6FB2)">LF</span></button>
+        </div>
+        <div class="pad mt12">
+          <div class="card hero hero-next">
+            <div class="eyebrow">Next up · 3:00 PM</div>
+            <div class="line">Maria &amp; Jose · Tagaytay</div>
+            <div class="cap sub">Photo &amp; film · Full day · Call time 1:30 PM at the venue</div>
+            <div class="acts"><button class="btn main" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Mark as done</button><button class="btn icon on-surface" type="button" aria-label="Message the couple"><svg class="i" viewBox="0 0 24 24"><path d="M4 4h16v12H7l-3 3z"/></svg></button></div>
+          </div>
+          <div class="hr"></div>
+          <div class="grid2 mt12">
+            <div class="card stat">
+              <div class="ttl"><span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h11"/></svg></span>Bookings</div>
+              <div class="big" style="font-size:26px" data-count="14">0</div>
+              <div class="cap">this month · <span style="color:var(--ok)">+3</span></div>
+            </div>
+            <div class="card stat">
+              <div class="ttl"><span class="ic"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg></span>Paid to you</div>
+              <div class="big money" style="font-size:22px" data-count="86500" data-fmt="money">₱0</div>
+              <div class="cap">October · 4 payments</div>
+            </div>
+          </div>
+          <div class="hr"></div>
+          <div class="sec-h" style="margin-left:0;margin-right:0"><span class="eyebrow">Today's bookings</span><span class="chip warn"><i></i>1 waiting on you</span></div>
+          <div class="card" style="padding:0">
+            <button class="srow" type="button"><span class="when">10:00</span><div class="what"><b>Reyes family · birthday</b><span>Quezon City · Half day</span></div><span class="chip ok"><i></i>Done</span><svg class="i arr" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+            <button class="srow" type="button"><span class="when">3:00 PM</span><div class="what"><b>Maria &amp; Jose · wedding</b><span>Tagaytay · Full day</span></div><span class="chip accent"><i></i>Next</span><svg class="i arr" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+            <button class="srow" type="button"><span class="when">Tue</span><div class="what"><b>Santos · corporate</b><span>Makati · Asked for a quote</span></div><span class="chip warn"><i></i>Reply</span><svg class="i arr" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+          </div>
+        </div>
+        <div class="fade-bottom"></div>
+        <nav class="bottombar" aria-label="Shop menu">
+          <button class="on" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M3 11 12 3l9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>Today</button>
+          <button type="button"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Bookings</button>
+          <button type="button"><svg class="i" viewBox="0 0 24 24"><path d="M3 9l1-5h16l1 5M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0M5 9v11h14V9"/></svg>Shop</button>
+          <button type="button"><svg class="i" viewBox="0 0 24 24"><path d="M4 4h16v12H7l-3 3z"/></svg>Messages</button>
+          <button type="button"><svg class="i" viewBox="0 0 24 24"><circle cx="5" cy="6" r="1.4"/><circle cx="12" cy="6" r="1.4"/><circle cx="19" cy="6" r="1.4"/><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/><circle cx="5" cy="18" r="1.4"/><circle cx="12" cy="18" r="1.4"/><circle cx="19" cy="18" r="1.4"/></svg>More</button>
+        </nav>
+      </section>
+
+      <!-- (c) a guest's Digital pass -->
+      <section class="scr5">
+        <span class="screen-lbl">Guest · Digital pass</span>
+        <div class="status"><span>9:41</span><span class="pill-dyn" aria-hidden="true"></span><span class="sig" aria-hidden="true"><i></i><i></i></span></div>
+        <div class="pad" style="text-align:center;margin-top:8px">
+          <div class="eyebrow">Your pass</div>
+          <div class="cap mt8">Show the QR at the door. The scanner reads it in a second.</div>
+        </div>
+        <div class="ticket mt20">
+          <div class="tp">
+            <div class="eyebrow">Wedding · December 12, 2026</div>
+            <div class="evn">Maria &amp; Jose</div>
+            <div class="qr" aria-label="Your QR code"><svg viewBox="0 0 29 29" role="img"><path id="qrpath"/></svg></div>
+            <div class="cap">Scan at the door</div>
+          </div>
+          <div class="perf" aria-hidden="true"></div>
+          <div class="tb">
+            <div class="who">Ana Reyes</div>
+            <div class="chip ok" style="margin-top:6px"><i></i>Coming · 2 seats</div>
+            <div class="meta">
+              <div><small>Table</small><b>7</b></div>
+              <div><small>Seats</small><b>3 – 4</b></div>
+              <div><small>Doors</small><b>3:30 PM</b></div>
+            </div>
+          </div>
+        </div>
+        <div class="pad" style="position:absolute;left:0;right:0;bottom:24px">
+          <button class="btn main" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>Save to phone</button>
+          <div style="display:flex;gap:10px;margin-top:10px">
+            <button class="btn outl" type="button" style="flex:1"><svg class="i" viewBox="0 0 24 24"><path d="M4 12v8h16v-8M12 3v13M8 7l4-4 4 4"/></svg>Share</button>
+            <button class="btn" type="button" style="flex:1"><svg class="i" viewBox="0 0 24 24"><path d="M12 21s-7-4.5-7-11a7 7 0 0 1 14 0c0 6.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Directions</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ════════════════ THE POPUP LAYER (one frame) ════════════════ -->
+    <div class="poplayer" id="pops">
+      <div class="scrim" id="scrim"></div>
+
+      <!-- a · account, anchored (the reference) -->
+      <div class="panel" id="pop-acct-anch" role="menu" style="top:56px;right:16px;width:260px">
+        <div class="head"><span class="av">MR</span><div class="who"><b>Maria Reyes</b><span>maria@example.com</span></div></div>
+        <div class="divider" style="margin:0 0 4px"></div>
+        <button class="row" type="button" role="menuitem" data-close><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span class="sp">Your events</span><span class="val">3</span></button>
+        <button class="row" type="button" role="menuitem" data-close><svg class="i" viewBox="0 0 24 24"><path d="M3 9l1-5h16l1 5M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0M5 9v11h14V9"/></svg><span class="sp">Your shop</span><span class="chip gold">◆ Pro</span></button>
+        <button class="row" type="button" role="menuitem" data-close><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="sp">Profile</span></button>
+        <div class="divider"></div>
+        <button class="row" type="button" role="menuitem" aria-haspopup="listbox"><svg class="i" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.5 0-1-.1-1.4A5 5 0 0 1 12 3z"/></svg><span class="sp">Appearance</span><span class="val">Light</span><svg class="i chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+        <button class="row" type="button" role="menuitem" data-close><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg><span class="sp">Help</span></button>
+        <div class="divider"></div>
+        <button class="row" type="button" role="menuitem" data-close><svg class="i" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg><span class="sp">Sign out</span></button>
+      </div>
+
+      <!-- a · account, as a sheet (the ruling) -->
+      <div class="sheet" id="pop-acct-sheet" role="menu">
+        <div class="grab" aria-hidden="true"></div>
+        <div class="head" style="display:flex;align-items:center;gap:10px;padding:0 6px 10px"><span class="av" style="width:40px;height:40px;border-radius:999px;background:linear-gradient(140deg,var(--accent),var(--accent-deep));color:var(--on-accent);display:grid;place-items:center;font:700 14px/1 var(--sans)">MR</span><div class="who" style="min-width:0"><b style="display:block;font:600 17px/1.2 var(--serif)">Maria Reyes</b><span class="cap" style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">maria@example.com</span></div><button class="btn icon" type="button" aria-label="Close" data-close style="margin-left:auto"><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+        <div class="divider" style="margin:0 0 4px"></div>
+        <button class="row" type="button" role="menuitem" data-close><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span class="sp">Your events</span><span class="val">3</span></button>
+        <button class="row" type="button" role="menuitem" data-close><svg class="i" viewBox="0 0 24 24"><path d="M3 9l1-5h16l1 5M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0M5 9v11h14V9"/></svg><span class="sp">Your shop</span><span class="chip gold">◆ Pro</span></button>
+        <button class="row" type="button" role="menuitem" data-close><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="sp">Profile</span></button>
+        <div class="divider"></div>
+        <button class="row" type="button" role="menuitem" aria-haspopup="listbox"><svg class="i" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.5 0-1-.1-1.4A5 5 0 0 1 12 3z"/></svg><span class="sp">Appearance</span><span class="val">Light</span><svg class="i chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+        <button class="row" type="button" role="menuitem" data-close><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg><span class="sp">Help</span></button>
+        <div class="divider"></div>
+        <button class="row" type="button" role="menuitem" data-close><svg class="i" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg><span class="sp">Sign out</span></button>
+      </div>
+
+      <!-- b · ⋯ on an event card -->
+      <div class="sheet" id="pop-more" role="menu">
+        <div class="grab" aria-hidden="true"></div>
+        <div class="sh-t"><b>Maria &amp; Jose</b><button class="btn icon" type="button" aria-label="Close" data-close><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+        <button class="row" type="button" role="menuitem" data-close><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span class="sp">Open</span></button>
+        <button class="row" type="button" role="menuitem" data-close><svg class="i" viewBox="0 0 24 24"><path d="M4 12v8h16v-8M12 3v13M8 7l4-4 4 4"/></svg><span class="sp">Share</span></button>
+        <button class="row" type="button" role="menuitem" data-close><svg class="i" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span class="sp">Duplicate</span></button>
+        <div class="divider"></div>
+        <button class="row" type="button" role="menuitem" data-close><svg class="i" viewBox="0 0 24 24"><path d="M3 4h18v4H3zM5 8v12h14V8M10 12h4"/></svg><span class="sp">Archive</span><span class="val">Keeps everything</span></button>
+      </div>
+
+      <!-- c · the dropdown (PickMenu) as its sheet -->
+      <div class="sheet" id="pop-pick" role="listbox" aria-label="Show">
+        <div class="grab" aria-hidden="true"></div>
+        <div class="sh-t"><b>Show</b><button class="btn icon" type="button" aria-label="Close" data-close><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+        <button class="row" type="button" role="option" data-pick="Everyone" aria-selected="true"><span class="sp">Everyone</span><span class="val">120</span><span class="tick">✓</span></button>
+        <button class="row" type="button" role="option" data-pick="Coming"><span class="sp">Coming</span><span class="val">70</span></button>
+        <button class="row" type="button" role="option" data-pick="Not coming"><span class="sp">Not coming</span><span class="val">16</span></button>
+        <button class="row" type="button" role="option" data-pick="No reply yet"><span class="sp">No reply yet</span><span class="val">34</span></button>
+        <div class="divider"></div>
+        <div class="eyebrow" style="padding:6px 10px 4px">By side</div>
+        <button class="row" type="button" role="option" data-pick="Maria's side"><span class="sp">Maria's side</span><span class="val">64</span></button>
+        <button class="row" type="button" role="option" data-pick="Jose's side"><span class="sp">Jose's side</span><span class="val">56</span></button>
+      </div>
+
+      <!-- c' · the "This week" dropdown on the Replies card -->
+      <div class="sheet" id="pop-pick-week" role="listbox" aria-label="Period">
+        <div class="grab" aria-hidden="true"></div>
+        <div class="sh-t"><b>Show replies for</b><button class="btn icon" type="button" aria-label="Close" data-close><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+        <button class="row" type="button" role="option" data-pick-week="This week" aria-selected="true"><span class="sp">This week</span><span class="tick">✓</span></button>
+        <button class="row" type="button" role="option" data-pick-week="Last week"><span class="sp">Last week</span></button>
+        <button class="row" type="button" role="option" data-pick-week="Since invitations went out"><span class="sp">Since invitations went out</span></button>
+      </div>
+
+      <!-- d · confirm -->
+      <div class="confirm" id="pop-confirm" role="alertdialog" aria-labelledby="cfh">
+        <h3 id="cfh">Remove this supplier?</h3>
+        <p>Golden Hour Studio leaves your event. Their messages stay in your inbox.</p>
+        <div class="acts"><button class="btn" type="button" data-close>Keep</button><button class="btn danger" type="button" data-close data-notice="Supplier removed">Remove</button></div>
+      </div>
+
+      <!-- e · notice -->
+      <div class="notice" id="notice" role="status" aria-live="polite"><svg class="i" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span id="noticeText">Saved</span></div>
+    </div>
+  </div>
+
+  <!-- ════════════════ NOTES UNDER THE FRAME ════════════════ -->
+  <div class="notes" data-note="language">
+    <h2>The tokens used</h2>
+    <table>
+      <tr><th>Name</th><th>Light</th><th>Dark</th></tr>
+      <tr><td><code>--sn-canvas</code> the ground</td><td><span class="sw" style="background:#F7F5F0"></span>#F7F5F0</td><td><span class="sw" style="background:#17160F"></span>#17160F</td></tr>
+      <tr><td><code>--sn-surface</code> the resting surface<span class="new">NEW</span></td><td><span class="sw" style="background:#fff"></span>#FFFFFF (= <code>--color-cream</code>)</td><td><span class="sw" style="background:#232019"></span>#232019 (warm)</td></tr>
+      <tr><td><code>--color-ink</code></td><td>#2C2A29</td><td>#FBFAF7</td></tr>
+      <tr><td><code>--sn-accent</code> → <code>--color-mulberry</code></td><td><span class="sw" style="background:#C24E25"></span>#C24E25</td><td><span class="sw" style="background:#E5794E"></span>#E5794E</td></tr>
+      <tr><td><code>--color-mulberry-700</code> the brand word on a tint</td><td>#9D3F1E</td><td>—</td></tr>
+      <tr><td><code>--color-terracotta</code> (gold)</td><td><span class="sw" style="background:#A9834B"></span>#A9834B</td><td><span class="sw" style="background:#CBA766"></span>#CBA766</td></tr>
+      <tr><td><code>--color-ok · -warn · -danger · -info</code></td><td>#2B744A · #965A00 · #B3261E · #3B4E67</td><td>#6FCF97 · #F0B45A · #F2817A · #9DB2CE</td></tr>
+      <tr><td><code>--m-r-md · -lg · -xl · -full</code></td><td colspan="2">14 · 22 · 36 · 999 px (chips and rows 14; surfaces 22; the hero 36; every control 999)</td></tr>
+      <tr><td><code>--sn-sh-tile</code> a resting surface</td><td colspan="2">0 1px 2px .05 + 0 18px 40px −26px .4 (warm)</td></tr>
+      <tr><td><code>--sn-sh-float</code> a popup</td><td colspan="2">contact + two soft ambients (the shipped PickMenu's)</td></tr>
+      <tr><td><code>--sn-glass-bg-raised · --sn-glass-blur</code></td><td colspan="2">the bottom bar (.86 paper · blur 22 px)</td></tr>
+      <tr><td><code>--sn-pill-dur · --sn-pill-spring</code></td><td colspan="2">700 ms · (.34, 1.56, .64, 1) — every press, count and meter</td></tr>
+      <tr><td><code>--sn-edge</code> the outline of a neutral pressable control<span class="new">NEW</span></td><td>ink at .55 (measured 3.4:1 against the ground)</td><td>paper at .50 (5.1:1)</td></tr>
+      <tr><td><code>--line</code> the divider between topics<span class="new">CHANGED</span></td><td>ink at .22 (measured 1.5:1; the app's border-ink/10 reads 1.2:1)</td><td>paper at .26 (measured 2.3:1; the dormant .12 reads 1.6:1)</td></tr>
+      <tr><td><code>--gold-ink</code> the Pro word on its tint<span class="new">NEW</span></td><td>#6F5527 (#A9834B is 3.4:1 on white — large type only)</td><td>#E2C98B</td></tr>
+      <tr><td><code>--ok-ink</code> the green word on its chip<span class="new">NEW</span></td><td>#25613D (#2B744A measures 4.37:1 on the tint)</td><td>= <code>--color-ok</code></td></tr>
+      <tr><td><code>--mute</code> the caption ink</td><td>#6A6865 (5.4:1)</td><td>#B3AEA3 (8.2:1) <span class="new">NEW</span> — no dormant dark value exists for ink/70</td></tr>
+      <tr><td>Chip tint</td><td colspan="2">the tone at 12–16 % over the surface (the button rule's 9 % tint, a shade stronger so a chip reads on the ground too)</td></tr>
+    </table>
+    <p class="mt8"><b>What is pressable is framed; what is read is not.</b> A neutral control is the surface colour with a 1.5 px <code>--sn-edge</code> outline (and the tile shadow where it floats); the main verb is filled terracotta; a destructive verb filled red; a dropdown the same outline with a terracotta chevron. A read-only stat, chart, gauge or group sits on the ground and ends with a <code>--line</code> divider. The one floating surface is a popup — something opened — and it darkens and blurs the page.</p>
+    <p><b>Dark works.</b> Every value is the dormant <code>html.dark</code> pair from <code>globals.css</code>; the four marked NEW / CHANGED are the ones the file lacks or that measure under 3:1 (an edge, a divider) or 4.5:1 (a word). <code>--sn-surface</code> is new in both themes: in Light it equals <code>--color-cream</code> (white); in Dark the only raised value, <code>--sn-glass-bg-raised</code>, is blue-grey (30, 34, 41) against the kit's "warm, never grey", so a warm step #232019 is proposed. Appearance = Light · Dark is one dropdown in account settings (approved 2026-10-07).</p>
+  </div>
+
+  <div class="notes" data-note="popups" hidden>
+    <h2>Which already wear this frame</h2>
+    <ul>
+      <li><b>The dropdown (c)</b> — the shipped <code>PickMenu</code>: <code>sn-glass-bare rounded-2xl</code>, rows <code>min-h-11 rounded-xl hover:bg-ink/5</code>, group dividers, terracotta chevron and tick, a sheet on a phone. The board only moves it onto <code>--sn-surface</code> and the float shadow.</li>
+      <li><b>The account menu (a), the ⋯ menus (b), the confirm box (d), the older toast (e)</b> — each draws its own today. Here they borrow the dropdown's frame: radius 22, the float shadow, 44 px rows, a hairline between groups, one chip at a row's right.</li>
+    </ul>
+    <h2>Where the anchored panel and the sheet differ</h2>
+    <p>The reference's panel hangs from the trigger at the top right — the rows sit in the top third, out of the thumb's reach, and the first row is nearest the trigger. Your ruling puts the same rows at the bottom: the first row is highest, Sign out is nearest the thumb, and the sheet is the same frame every other popup uses. Both darken and blur the page and close on a tap outside. The panel is drawn here only so the difference is visible; the ruling stands unless you change it.</p>
+    <p><b>Appearance ▾</b> on the account menu is one dropdown (Light · Dark), as approved 2026-10-07.</p>
+  </div>
+
+  <div class="notes" data-note="graphs" hidden>
+    <h2>What the sample values stand on</h2>
+    <ul>
+      <li><b>Replies</b> — dated guest replies; so the bar strip, "+12 this week" and "This week ▾" are honest. The two bars after Today are the days ahead, drawn faded and empty.</li>
+      <li><b>Paid</b> — dated payments; a ring of ₱150,000 of ₱200,000.</li>
+      <li><b>Guests seated</b> — a ring: 70 of 120 have a seat. No change chip: seating has no history.</li>
+      <li><b>Shop views · Bookings</b> — both stored with dates, so "+18%" and the sparkline are allowed.</li>
+      <li><b>Failed read</b> — never ₱0: "—" and a plain line with Try again. <b>Empty</b> — "Nothing yet" and what will appear.</li>
+    </ul>
+    <p>One meter per page: on a real page only one of these rings or strips is the page's meter; the rest are numbers.</p>
+    <h2>Doors and not-doors</h2>
+    <p><b>Doors</b> (framed, pressable): the <b>Guest list</b> pill under Replies, the <b>Budget</b> pill under Paid, the <b>This week ▾</b> dropdown, <b>Try again</b>. <b>Not doors</b> (no frame): every number, caption, bar strip, ring and sparkline; Guests seated, Shop views, Bookings and the empty state are read only. A stat that opens a page is not boxed whole — the pill beside it is the one framed thing, icon + word, following the button rule.</p>
+  </div>
+
+  <div class="notes" data-note="gauge" hidden>
+    <h2>Three honest uses</h2>
+    <ul>
+      <li><b>(i) Budget</b> — payments are dated, so the trend line (five payments, April → October) and "+₱35,000 this month" are true readings. Segments: Paid · Due soon · Remaining; the strip under it is Paid | Still to pay.</li>
+      <li><b>(ii) Guest replies</b> — replies are dated; "+12 this week" is true. Segments: Coming · Not coming · No reply yet.</li>
+      <li><b>(iii) Setting up your Event Hub</b> — 5 of 7 steps. <b>No change chip and no trend line are drawn, on purpose:</b> no history is stored for the steps, so "up from last week" would be an invented figure. The gauge shows only what is measured now.</li>
+    </ul>
+    <p>Every number counts up to its value and every ring grows from zero on load (the 700 ms family), and shows at once under reduced motion.</p>
+  </div>
+
+  <div class="notes" data-note="screens" hidden>
+    <h2>Couple · Home — what is in your picture but not in the app today</h2>
+    <ul>
+      <li><b>A greeting with the person's name</b> — the cover band names the EVENT ("Maria &amp; Jose"), not the person; the avatar in the top bar is the only trace of who is signed in. Home stays about the event.</li>
+      <li><b>A round centre button in the bottom bar</b> — removed 2026-10-01 ("we only have our simple bottom nav"); the five tabs stand, and a guard forbids a second bar or a floating button over it.</li>
+      <li><b>An alert strip</b> — the "Your next step" card is the alert: exactly one, with one main verb; when a read fails it becomes "The guest list couldn't load · Reload".</li>
+    </ul>
+    <p>Drawn from <code>home-first-screen.tsx</code> as it ships: top bar (messages · bell · avatar), the cover band wearing the Hub's background, the Next card, three doorways with their bottom-bar icons, three numbers, the money meter, the five-tab bar.</p>
+    <p><b>Doors on Home:</b> the three top-bar buttons, Event Details, Send invitations, Later, the three doorway tiles, the Budget pill, the five tabs. <b>Not doors:</b> the cover band, the Next step's line, the three numbers, the money figures and meter — all unframed. <b>Doors on Today:</b> the avatar, Mark as done, the message button, the three booking rows (framed rows with the terracotta arrow), the five tabs. <b>Not doors:</b> the Next-up line, Bookings, Paid to you. <b>On the pass:</b> Save to phone, Share, Directions are doors; the ticket is read only — see below.</p>
+    <h2>Supplier · Today</h2>
+    <p>The hero is the next booking; Bookings and Paid to you are dated, so their small changes are true. "1 waiting on you" is a count, not a percentage.</p>
+    <h2>Guest · Digital pass</h2>
+    <p>The approved ticket shape (notches at a perforation), a QR in a round disc — a QR, not a barcode, because the door scanner reads QR. The pass wears the event's own theme on the real page; here it is drawn in the Setnayan look only so it sits beside the other two. Under your rule the ticket is the one framed thing that is not pressed: it keeps its approved shape (2026-09-29) with a hairline instead of a shadow. Whether the rule reaches the pass is your call — it is listed, not hidden.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  const phone=document.getElementById('phone');
+  const selBoard=document.getElementById('selBoard'),selTheme=document.getElementById('selTheme'),selSurf=document.getElementById('selSurf');
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const ease=t=>1-Math.pow(1-t,3);
+  const fmt=(n,k)=>k==='money'?'₱'+Math.round(n).toLocaleString('en-PH'):k==='pct'?Math.round(n)+'%':Math.round(n).toLocaleString('en-PH');
+
+  /* numbers count to their value (BUTTON_RULE rule 2) — once per element, keyed on the node */
+  function countUp(root){
+    root.querySelectorAll('[data-count]').forEach(el=>{
+      if(el.dataset.done)return; el.dataset.done='1';
+      const v=+el.dataset.count,k=el.dataset.fmt||'int';
+      if(reduced){el.textContent=fmt(v,k);return}
+      const dur=Math.min(900,Math.max(420,300+Math.log10(v+1)*150));let t0;
+      const step=ts=>{t0=t0||ts;const p=Math.min(1,(ts-t0)/dur);el.textContent=fmt(v*ease(p),k);if(p<1)requestAnimationFrame(step)};
+      requestAnimationFrame(step);
+    });
+  }
+  /* the half-ring gauge: thick rounded segments with small gaps, from 180° to 360° */
+  function buildGauge(svg){
+    if(svg.dataset.built)return;svg.dataset.built='1';
+    const parts=svg.dataset.gauge.split(',').map(Number),tones=svg.dataset.tones.split(',');
+    const cx=110,cy=112,r=92,gap=4.5,total=180-gap*(parts.length-1);
+    const tone=t=>t==='fill'?'var(--fill-2)':`var(--${t})`;
+    const pt=a=>{const rad=Math.PI*(1+a/180);return [cx+r*Math.cos(rad),cy+r*Math.sin(rad)]};
+    let a=0,html='';
+    parts.forEach((p,i)=>{const span=total*p/100;const [x1,y1]=pt(a),[x2,y2]=pt(a+span);
+      html+=`<path class="s${i+1}" pathLength="1" d="M${x1.toFixed(1)} ${y1.toFixed(1)} A${r} ${r} 0 ${span>180?1:0} 1 ${x2.toFixed(1)} ${y2.toFixed(1)}" style="stroke:${tone(tones[i])}"/>`;a+=span+gap;});
+    svg.innerHTML=html;
+  }
+  function wake(sec){
+    sec.querySelectorAll('svg.gauge').forEach(buildGauge);
+    countUp(sec);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>sec.classList.add('live')));
+  }
+  /* QR (a placeholder pattern with the three finder squares; not a real code) */
+  (function(){const s=new Set();const f=(x,y)=>{for(let i=0;i<7;i++)for(let j=0;j<7;j++){const e=i===0||i===6||j===0||j===6,c=i>=2&&i<=4&&j>=2&&j<=4;if(e||c)s.add((x+i)+','+(y+j))}};f(0,0);f(22,0);f(0,22);
+    let seed=7;const rnd=()=>{seed=(seed*9301+49297)%233280;return seed/233280};
+    for(let x=0;x<29;x++)for(let y=0;y<29;y++){if((x<8&&y<8)||(x>20&&y<8)||(x<8&&y>20))continue;if(rnd()<.45)s.add(x+','+y)}
+    let d='';s.forEach(k=>{const [x,y]=k.split(',');d+=`M${x} ${y}h1v1h-1z`});document.getElementById('qrpath').setAttribute('d',d)})();
+
+  /* board switching */
+  function show(name){
+    document.querySelectorAll('.screen').forEach(s=>{const on=s.dataset.sec===name;s.hidden=!on;if(on){wake(s);s.scrollTop=0}});
+    document.querySelectorAll('.notes').forEach(n=>n.hidden=n.dataset.note!==name);
+    closePop();
+  }
+  function apply(){phone.dataset.theme=selTheme.value;phone.dataset.surfaces=selSurf.value;show(selBoard.value);
+    const q=new URLSearchParams({board:selBoard.value,theme:selTheme.value,surf:selSurf.value});history.replaceState(null,'','?'+q)}
+  const q=new URLSearchParams(location.search);
+  if(q.get('board'))selBoard.value=q.get('board');if(q.get('surf')==='soft')q.set('surf','cards');if(q.get('surf')==='none')q.set('surf','press');if(q.get('theme'))selTheme.value=q.get('theme');if(q.get('surf'))selSurf.value=q.get('surf');
+  [selBoard,selTheme,selSurf].forEach(s=>s.addEventListener('change',apply));
+  /* the Appearance row in the account menu also flips the theme (one dropdown, two values) */
+  document.querySelectorAll('.row[aria-haspopup="listbox"]').forEach(b=>b.addEventListener('click',()=>{selTheme.value=selTheme.value==='light'?'dark':'light';phone.dataset.theme=selTheme.value;document.querySelectorAll('.row[aria-haspopup="listbox"] .val').forEach(v=>v.textContent=selTheme.value==='light'?'Light':'Dark')}));
+
+  /* popups — one open at a time; the scrim darkens + blurs; a tap outside closes (a confirm closes as Keep) */
+  const pops=document.getElementById('pops');let open=null,noticeT;
+  function openPop(id){closePop();const el=document.getElementById('pop-'+id);if(!el)return;open=el;pops.classList.add('on');phone.classList.add('locked');el.classList.add('show');}
+  function closePop(){if(!open)return;open.classList.remove('show');open=null;pops.classList.remove('on');phone.classList.remove('locked')}
+  function notice(text){const n=document.getElementById('notice');document.getElementById('noticeText').textContent=text;n.classList.add('show');clearTimeout(noticeT);noticeT=setTimeout(()=>n.classList.remove('show'),2400)}
+  document.getElementById('scrim').addEventListener('click',closePop);
+  phone.addEventListener('click',e=>{
+    const o=e.target.closest('[data-open]');if(o){openPop(o.dataset.open);return}
+    const p=e.target.closest('[data-pick]');if(p){document.getElementById('pickVal').textContent=p.dataset.pick;p.parentElement.querySelectorAll('[data-pick]').forEach(r=>{r.setAttribute('aria-selected',r===p);const t=r.querySelector('.tick');if(t)t.remove()});p.insertAdjacentHTML('beforeend','<span class="tick">✓</span>');closePop();return}
+    const w=e.target.closest('[data-pick-week]');if(w){document.getElementById('weekVal').textContent=w.dataset.pickWeek;w.parentElement.querySelectorAll('[data-pick-week]').forEach(r=>{r.setAttribute('aria-selected',r===w);const t=r.querySelector('.tick');if(t)t.remove()});w.insertAdjacentHTML('beforeend','<span class="tick">✓</span>');closePop();return}
+    const c=e.target.closest('[data-close]');if(c){closePop();if(c.dataset.notice)notice(c.dataset.notice);return}
+    const n=e.target.closest('[data-notice]');if(n){notice(n.dataset.notice)}
+  });
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closePop()});
+  window.__look={openPop,closePop,show,apply};
+  apply();
+})();
+</script>
+</body>
+</html>
