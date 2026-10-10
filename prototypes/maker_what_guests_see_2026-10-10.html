@@ -5,9 +5,11 @@
   WHAT GUESTS SEE — a sheet in the Maker. A prototype to try, not app code (2026-10-10). Plain HTML / CSS / JS, no requests.
   The owner: "Maybe we can have a table on event hub to know what information they want to share in the event hub.
   during Save the Date, RSVP, Invitation, The Day, and Post Event?" · "like a tick box?" · "like a presetup? or no need?"
-  Rows = pieces of information · columns = the five stages · each cell a tick. Arrives ticked with our defaults; the couple
-  only unticks. Nothing is saved until Apply. Three cases: ?case=a (the whole table) · ?case=b (one stage at a time) ·
-  ?case=c (the first visit). ?case=a&rsvp=off folds the RSVP column away.
+  Rows = pieces of information · columns = the five stages · each cell a box. Our picks arrive ticked (with a small dot);
+  the couple may untick them or tick any empty box. Nothing is saved until Apply.
+  Owner, same day, after seeing the first draft: "i like the 5 columns." · "but give them freedom to pick what they want to
+  add. but have our recommendation as the checked one". So: no "not on this stage" walls — only four dashes remain, where
+  the thing cannot exist at that time. Cases: ?case=a (the table, DEFAULT) · ?case=a&rsvp=off · ?case=b · ?case=c.
   Visual language copied from maker_two_bars_2026-10-09.html and maker_rsvp_per_element_2026-10-09.html.
 -->
 <style>
@@ -48,7 +50,8 @@ button{font:inherit;color:inherit}
 /* ── the body ── */
 .body{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;position:relative;scrollbar-width:none}
 .body::-webkit-scrollbar{display:none}
-.intro{margin:14px 16px 4px;font:500 15px/1.4 var(--f);color:var(--ink)}
+.title{margin:14px 16px 0;font:500 24px/1.1 Georgia,serif;color:var(--ink)}
+.intro{margin:10px 16px 2px;font:500 14.5px/1.35 var(--f);color:var(--ink2)}
 .fp{display:flex;align-items:center;justify-content:space-between;gap:6px;width:calc(100% - 32px);margin:12px 16px 4px;height:44px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:0 14px 0 16px;font:600 15px var(--f);color:var(--ink);text-align:left}
 .fp span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fp svg{width:14px;height:14px;color:var(--cta);flex:none;stroke-width:2.4}
@@ -72,7 +75,9 @@ button{font:inherit;color:inherit}
 .c[aria-checked=true] .bx{background:var(--cta);border-color:var(--cta)}
 .c[aria-checked=true] .bx svg,.c.al .bx svg{opacity:1;transform:none}
 .c.al .bx{background:var(--gold);border-color:var(--gold)}
+.c.pick::after{content:'';position:absolute;left:50%;bottom:3px;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:#B3ADA4}
 .c.dash .bx{width:14px;height:2px;border:0;border-radius:1px;background:#C9C3B9}
+.r.off .c.dash .bx{opacity:1}
 .c.dash .bx svg{display:none}
 .r.empty .c:not(.al):not(.dash) .bx{opacity:.4}
 .caption{margin:14px 0 0;font:400 12.5px/1.4 var(--f);color:var(--mute)}
@@ -84,8 +89,12 @@ button{font:inherit;color:inherit}
 .status{min-height:40px;display:block;text-align:center;font:500 13px/1.3 var(--f);color:var(--ink2);padding:6px 4px 8px}
 .status b{color:var(--ink);font-weight:600}
 .status.quiet{color:var(--mute)}
-.legend{display:flex;justify-content:center;gap:14px;font:500 11.5px var(--f);color:var(--mute);padding:0 0 10px;white-space:nowrap}
+.legend{display:flex;flex-direction:column;align-items:center;gap:3px;font:500 11.5px/1.3 var(--f);color:var(--mute);padding:0 0 10px;white-space:nowrap}
+.legend>div{display:flex;justify-content:center;gap:12px}
 .legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i.pk{width:5px;height:5px;border:0;border-radius:50%;background:#B3ADA4;margin:0 5px}
+.plain{display:block;width:100%;height:44px;margin:0 0 8px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--ink);font:600 14px var(--f);position:relative}
+.plain[aria-disabled=true]{color:#B3ADA4;background:#F7F5F1;border-color:#EDE8DF}
 .legend i{width:16px;height:16px;border-radius:5px;border:1.5px solid #C9C3B9;background:#fff;display:grid;place-items:center;color:#fff}
 .legend i svg{width:10px;height:10px;fill:none;stroke:currentColor;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
 .legend i.on{background:var(--cta);border-color:var(--cta)}
@@ -141,12 +150,12 @@ button{font:inherit;color:inherit}
   <div class="hind"></div>
 </div>
 <div class="check"><h4>What to check</h4><ol>
-<li>Untick <b>Countdown</b> under Invitation — the bottom line should say it is still shown on Save the Date, and ✓ Apply turns terracotta.</li>
-<li>Tap a <b>dash</b> (Schedule under Save the Date) — nothing ticks; one plain line says why.</li>
+<li>Untick <b>Countdown</b> under Invitation — the bottom line says it is still shown on Save the Date; ✓ Apply turns terracotta. The small dot under the box stays: it was our pick.</li>
+<li>Tick an empty box — <b>Schedule</b> under Save the Date. The line reads "Added to Save the Date." Then <b>Back to our picks</b> wakes up; tap it and both boxes return.</li>
+<li>Tap a <b>dash</b> (Camera under Save the Date) — nothing ticks; one plain line says why. Only four cells are dashes.</li>
 <li>Tap the gold tick on <b>Names and date</b> — it does not change; one line says it is always shown.</li>
 <li>Tap <b>↺</b> — the last change comes back. Tap <b>✕</b> with nothing changed — it just closes.</li>
-<li><b>What to bring</b> is empty in this sample — its ticks are greyed and the row says guests will not see it.</li>
-<li>Flip the dropdown to <b>A · RSVP folded</b> and to <b>B</b> and compare how each reads at 375.</li>
+<li><b>What to bring</b> is empty in this sample — adding it says guests will not see it until it is written.</li>
 </ol></div>
 </div>
 <script>
@@ -166,51 +175,47 @@ const svg=k=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+I[k]+'</svg>';
 function press(el){ el.animate([{transform:'scale(1)'},{transform:'scale(.93)'},{transform:'scale(1)'}],{duration:320,easing:'cubic-bezier(.34,1.56,.64,1)'}); let r=el.querySelector(':scope>.ring'); if(!r){r=document.createElement('i');r.className='ring';el.appendChild(r);} r.animate([{opacity:.55,transform:'scale(.9)'},{opacity:0,transform:'scale(1.18)'}],{duration:520,easing:'ease-out'}); }
 function toast(t){ const o=$('toast'); o.textContent=t; o.classList.add('on'); clearTimeout(toast.t); toast.t=setTimeout(()=>o.classList.remove('on'),2600); }
 
-/* ── THE DATA — read from the app's code today. T = tick (on by default) · A = always · - = not on this stage · ? = not decided ── */
-const STAGES=[['std','Save the Date','holds the date'],['rsvp','RSVP','takes the reply'],['inv','Invitation','tells the day'],['day','The Day','is “be here now”'],['post','Post Event','looks back']];
+/* ── THE DATA — owner, 2026-10-10: "i like the 5 columns" · "give them freedom to pick what they want to add. but have our
+   recommendation as the checked one". T = our pick (ticked) · O = a box, off (theirs to add) · A = always, locked ·
+   X = cannot exist at that time (a dash, only the controller's short list). ── */
+const STAGES=[['std','Save the Date'],['rsvp','RSVP'],['inv','Invitation'],['day','The Day'],['post','Post Event']];
 const GROUPS=[
- ['The basics',[['names','Names and date','AAAAA'],['place','Place','AAAA?',{note:'The address and map open once a guest has replied.'}],['countdown','Countdown','T-T--']]],
- ['The story',[['message','Message','?-T-T'],['story','Love Story','T-T-T'],['ourphotos','Our photos','T---T']]],
- ['The details',[['schedule','Schedule','--TT-'],['map','Map','--TT-'],['dress','Dress code','--T?-'],['bring','What to bring','--T?-',{empty:true}],['gifts','E-Gifts','?-TT?']]],
- ['People',[['entourage','Entourage','--TTT'],['reply','Reply card','-AA--']]],
- ['On the day',[['seat','Your seat','---T-'],['pass','Digital pass','????-'],['announce','Announce­ments','--TT-',{plain:'Announcements'}],['live','Live','---TT'],['camera','Camera','---T-'],['photosofyou','Photos of you','---TT']]],
- ['The opening',[['reveal','Reveal','T-TT-']]],
+ ['The basics',[['names','Names and date','AAAAA'],['place','Place','AAAAO',{note:'The address and map open once a guest has replied.'}],['countdown','Countdown','TOTOO']]],
+ ['The story',[['message','Message','OOTOT'],['story','Love Story','TOTOT'],['ourphotos','Our photos','TOOOT']]],
+ ['The details',[['schedule','Schedule','OOTTO'],['map','Map','OOTTO'],['dress','Dress code','OOTOO'],['bring','What to bring','OOTOO',{empty:true}],['gifts','E-Gifts','OOTTO']]],
+ ['People',[['entourage','Entourage','OOTTT'],['reply','Reply card','OAAOX']]],
+ ['On the day',[['seat','Your seat','XOOTO'],['pass','Digital pass','OOOOO'],['announce','Announce­ments','OOTTO',{plain:'Announcements'}],['live','Live','OOOTT'],['camera','Camera','XOOTX'],['photosofyou','Photos of you','OOOTT']]],
+ ['The opening',[['reveal','Reveal','TOTTX']]],
 ];
 const ROWS=[]; GROUPS.forEach(g=>g[1].forEach(r=>ROWS.push({id:r[0],name:r[1],plain:(r[3]&&r[3].plain)||r[1],kinds:r[2].split(''),opt:r[3]||{},group:g[0]})));
 const ALWAYS={names:'Names and date are always shown.',place:'The place is always shown.',reply:'The reply card is always on the Invitation and RSVP — it is how guests answer.'};
-/* one plain line for every dash — each stage does one job */
-const REASON={
- 'seat:std':'The seat appears on The Day.','seat:inv':'The seat appears on The Day.','seat:post':'The seat appears on The Day.',
- 'camera:inv':'The camera opens on The Day.','camera:post':'The camera opens on The Day.','camera:std':'The camera opens on The Day.',
- 'live:inv':'Live starts on The Day.','live:std':'Live starts on The Day.',
- 'photosofyou:inv':'Photos of you arrive on The Day.','photosofyou:std':'Photos of you arrive on The Day.',
- 'countdown:day':'The Day has arrived — there is nothing left to count.','countdown:post':'Post Event looks back — nothing left to count.',
- 'ourphotos:inv':'The Invitation tells the Love Story instead.','ourphotos:day':'On The Day the photos are the guests’ own.',
- 'reply:std':'Save the Date only holds the date — the reply comes with the Invitation.','reply:day':'Replies closed before The Day.','reply:post':'Replies closed before The Day.',
- 'reveal:post':'Post Event looks back — the reveal has happened.',
-};
-function reason(row,si){ const k=row.id+':'+STAGES[si][0]; if(REASON[k]) return REASON[k]; const s=STAGES[si]; if(s[0]==='rsvp') return 'RSVP is the reply screens — it only takes the answer.'; if(s[0]==='std') return 'Save the Date only holds the date.'; const nm=/^[A-Z]-|Love|Story/.test(row.plain)?row.plain:row.plain.toLowerCase(); return s[1]+' '+s[2]+' — '+nm+' is not part of it.'; }
+/* the only dashes — where the thing cannot exist at that time */
+const REASON={'reply:post':'The reply closes after the day.','seat:std':'Seats are set closer to the day.','camera:std':'The camera opens on the day.','camera:post':'The camera opens on the day.','reveal:post':'The opening plays before the day.'};
+function reason(row,si){ return REASON[row.id+':'+STAGES[si][0]]||'Not possible at this time.'; }
 
 /* ── state ── */
 const q=new URLSearchParams(location.search);
 let CASE=(q.get('case')||'a').toLowerCase(); if(!['a','a4','b','c'].includes(CASE)) CASE='a';
 let showRsvp = CASE==='a4' ? false : (q.get('rsvp')||'on')!=='off'; if(CASE==='a4') CASE='a';
 let bStage='inv';
-const base={}; ROWS.forEach(r=>{ base[r.id]=r.kinds.map(k=>k==='T'); });
+const REC={}; ROWS.forEach(r=>{ REC[r.id]=r.kinds.map(k=>k==='T'); });   /* our picks — never changes */
+const base={}; ROWS.forEach(r=>{ base[r.id]=REC[r.id].slice(); });         /* what is applied */
 let on=JSON.parse(JSON.stringify(base)); let undo=[]; let seen=false;
+const isBox=k=>k==='T'||k==='O';
 try{ seen=sessionStorage.getItem('wgs-seen')==='1'; }catch(e){}
 let firstVisit = CASE==='c' && !seen;
 let afterContinue = CASE==='c' && seen;
-window.__wgs={get on(){return on},get undo(){return undo},get changes(){return changes()},CASE,get showRsvp(){return showRsvp}};
+window.__wgs={get on(){return on},get undo(){return undo},get changes(){return changes()},get offPicks(){return offPicks()},REC,CASE,get showRsvp(){return showRsvp}};
 
-function changes(){ let n=0; ROWS.forEach(r=>r.kinds.forEach((k,i)=>{ if(k==='T'&&on[r.id][i]!==base[r.id][i]) n++; })); return n; }
+function changes(){ let n=0; ROWS.forEach(r=>r.kinds.forEach((k,i)=>{ if(isBox(k)&&on[r.id][i]!==base[r.id][i]) n++; })); return n; }
+function offPicks(){ let n=0; ROWS.forEach(r=>r.kinds.forEach((k,i)=>{ if(isBox(k)&&on[r.id][i]!==REC[r.id][i]) n++; })); return n; }
 function cols(){ return STAGES.map((s,i)=>i).filter(i=>showRsvp||STAGES[i][0]!=='rsvp'); }
 
-/* ── top bar — [✕] [Stages ▾ | Guests see ▾] [↺] [✓], as approved ── */
+/* ── top bar — [✕] [Stages ▾ | Studio ▾] [↺] [✓], as approved; the sheet's title sits in the body ── */
 function bar(){
   const n=changes(); const studio=!afterContinue;
   const half=(on_,text,id)=>'<button id="'+id+'" aria-pressed="'+on_+'" aria-haspopup="listbox"><span class="lbl">'+text+'</span>'+svg('down')+'</button>';
-  $('bar').innerHTML='<button class="round exit" id="exit" aria-label="Close">'+svg('x')+'</button><div class="mid"><div class="seg"><i class="thumb" id="thumb" style="transform:translateX('+(studio?100:0)+'%)"></i>'+half(!studio, studio?'Stages':'Invitation','lefth')+half(studio, studio?'Guests see':'Studio','righth')+'</div></div><button class="round" id="undo" aria-label="Undo">'+svg('undo')+'</button><button class="round apply'+(n?' on':'')+'" id="apply" aria-label="Apply">'+svg('check')+'<i class="badge">'+n+'</i></button>';
+  $('bar').innerHTML='<button class="round exit" id="exit" aria-label="Close">'+svg('x')+'</button><div class="mid"><div class="seg"><i class="thumb" id="thumb" style="transform:translateX('+(studio?100:0)+'%)"></i>'+half(!studio, studio?'Stages':'Invitation','lefth')+half(studio, 'Studio','righth')+'</div></div><button class="round" id="undo" aria-label="Undo">'+svg('undo')+'</button><button class="round apply'+(n?' on':'')+'" id="apply" aria-label="Apply">'+svg('check')+'<i class="badge">'+n+'</i></button>';
   $('exit').onclick=e=>{ press(e.currentTarget); doExit(); };
   $('undo').onclick=e=>{ press(e.currentTarget); doUndo(); };
   $('apply').onclick=e=>{ press(e.currentTarget); doApply(); };
@@ -222,19 +227,19 @@ function bar(){
 function cell(row,si,forB){
   const k=row.kinds[si];
   if(k==='A') return '<button class="c al" data-r="'+row.id+'" data-s="'+si+'" aria-label="'+row.plain+' · '+STAGES[si][1]+' · always shown" aria-checked="true" role="checkbox" aria-readonly="true"><i class="bx">'+svg('check')+'</i></button>';
-  if(k==='-'||k==='?') return '<button class="c dash'+(k==='?'?' undec':'')+'" data-r="'+row.id+'" data-s="'+si+'" aria-label="'+row.plain+' · '+STAGES[si][1]+' · '+(k==='?'?'not decided yet':'not on this stage')+'" aria-disabled="true"><i class="bx"></i></button>';
-  return '<button class="c" role="checkbox" data-r="'+row.id+'" data-s="'+si+'" aria-checked="'+on[row.id][si]+'" aria-label="'+row.plain+' · '+STAGES[si][1]+'"><i class="bx">'+svg('check')+'</i></button>';
+  if(k==='X') return '<button class="c dash" data-r="'+row.id+'" data-s="'+si+'" aria-label="'+row.plain+' · '+STAGES[si][1]+' · not possible yet" aria-disabled="true"><i class="bx"></i></button>';
+  return '<button class="c'+(k==='T'?' pick':'')+'" role="checkbox" data-r="'+row.id+'" data-s="'+si+'" aria-checked="'+on[row.id][si]+'" aria-label="'+row.plain+' · '+STAGES[si][1]+(k==='T'?' · our pick':'')+'"><i class="bx">'+svg('check')+'</i></button>';
 }
 function label(row){ return '<div class="lab">'+row.name+(row.opt.note?'<small>'+row.opt.note+'</small>':'')+(row.opt.empty?'<small>Nothing written yet — guests will not see it.</small>':'')+'</div>'; }
 
 /* ── CASE A (and C) — the whole table, header pinned ── */
 function tableA(){
   const cs=cols(); document.documentElement.style.setProperty('--n',cs.length); document.documentElement.style.setProperty('--cw',cs.length===5?'48px':'54px');
-  let h='';
+  let h='<h1 class="title">What guests see</h1>';
   if(firstVisit) h+='<p class="intro">This is what your guests will see at each stage. Untick anything you would rather not share.</p>';
-  h+='<div class="tbl"><div class="thead"><div class="lab">Guests see</div>'+cs.map(i=>'<div class="st">'+STAGES[i][1]+'</div>').join('')+'</div>';
+  h+='<div class="tbl"><div class="thead"><div class="lab">Shown at</div>'+cs.map(i=>'<div class="st">'+STAGES[i][1]+'</div>').join('')+'</div>';
   GROUPS.forEach(g=>{ h+='<div class="grp">'+g[0]+'</div>'; g[1].forEach(rr=>{ const row=ROWS.find(x=>x.id===rr[0]); h+='<div class="r'+(row.opt.empty?' empty':'')+'" data-row="'+row.id+'">'+label(row)+cs.map(i=>cell(row,i)).join('')+'</div>'; }); });
-  h+='<p class="caption">'+(showRsvp?'The RSVP column is nearly all dashes on purpose — the RSVP stage is the reply screens, so it shares almost nothing here. <button id="foldr">Hide the RSVP column</button>':'RSVP is folded away — it is the reply screens and shares almost nothing here; the reply card stays always on. <button id="foldr">Show RSVP</button>')+'</p></div>';
+  h+='<p class="caption">'+(showRsvp?'The RSVP stage is the reply screens — only the reply card is our pick there; the rest is yours to add. <button id="foldr">Hide the RSVP column</button>':'RSVP is folded away — it is the reply screens; the reply card stays always on. <button id="foldr">Show RSVP</button>')+'</p></div>';
   $('body').innerHTML=h; $('body').scrollTop=0;
   $('foldr').onclick=()=>{ showRsvp=!showRsvp; const u=new URL(location); u.searchParams.set('case','a'); u.searchParams.set('rsvp',showRsvp?'on':'off'); history.replaceState(null,'',u); $('case').value=showRsvp?'a':'a4'; tableA(); };
   wireCells();
@@ -243,10 +248,10 @@ function tableA(){
 /* ── CASE B — one stage at a time: ONE dropdown, one list, one tick each ── */
 function listB(){
   const si=STAGES.findIndex(s=>s[0]===bStage); const s=STAGES[si];
-  let h='<button class="fp" id="stagedd" aria-haspopup="listbox"><span>'+s[1]+'<small>'+(si+1)+' of 5</small></span>'+svg('down')+'</button><div class="tbl">';
+  let h='<h1 class="title">What guests see</h1><button class="fp" id="stagedd" aria-haspopup="listbox"><span>'+s[1]+'<small>'+(si+1)+' of 5</small></span>'+svg('down')+'</button><div class="tbl">';
   const offs=[];
-  GROUPS.forEach(g=>{ const rows=g[1].map(rr=>ROWS.find(x=>x.id===rr[0])); const live=rows.filter(r=>r.kinds[si]==='T'||r.kinds[si]==='A'); rows.filter(r=>!live.includes(r)).forEach(r=>offs.push(r)); if(!live.length) return; h+='<div class="grp">'+g[0]+'</div>'; live.forEach(row=>{ h+='<div class="r b'+(row.opt.empty?' empty':'')+'" data-row="'+row.id+'">'+label(row)+cell(row,si,true)+'</div>'; }); });
-  if(offs.length){ h+='<div class="offhead">Not part of this stage</div>'; offs.forEach(row=>{ h+='<div class="r b off" data-row="'+row.id+'"><div class="lab">'+row.name+'</div><button class="c dash'+(row.kinds[si]==='?'?' undec':'')+'" data-r="'+row.id+'" data-s="'+si+'" aria-disabled="true" aria-label="'+row.plain+' · not on '+s[1]+'"><i class="bx" style="opacity:0"></i></button></div>'; }); }
+  GROUPS.forEach(g=>{ const rows=g[1].map(rr=>ROWS.find(x=>x.id===rr[0])); const live=rows.filter(r=>r.kinds[si]!=='X'); rows.filter(r=>!live.includes(r)).forEach(r=>offs.push(r)); if(!live.length) return; h+='<div class="grp">'+g[0]+'</div>'; live.forEach(row=>{ h+='<div class="r b'+(row.opt.empty?' empty':'')+'" data-row="'+row.id+'">'+label(row)+cell(row,si,true)+'</div>'; }); });
+  if(offs.length){ h+='<div class="offhead">Not possible yet</div>'; offs.forEach(row=>{ h+='<div class="r b off" data-row="'+row.id+'"><div class="lab">'+row.name+'<small>'+reason(row,si)+'</small></div>'+cell(row,si,true)+'</div>'; }); }
   h+='</div>';
   $('body').innerHTML=h; $('body').scrollTop=0;
   $('stagedd').onclick=e=>{ press(e.currentTarget); openList('bstage'); };
@@ -259,31 +264,42 @@ function wireCells(){
     const row=ROWS.find(r=>r.id===c.dataset.r), si=+c.dataset.s, k=row.kinds[si];
     press(c);
     if(k==='A'){ status(ALWAYS[row.id]||(row.plain+' is always shown.')); return; }
-    if(k==='?'){ status('Not decided yet.'); return; }
-    if(k==='-'){ status(reason(row,si)); return; }
+    if(k==='X'){ status(reason(row,si)); return; }
     undo.push({r:row.id,s:si,v:on[row.id][si]}); on[row.id][si]=!on[row.id][si];
     c.setAttribute('aria-checked',on[row.id][si]); bar(); lower();
-    const others=STAGES.map((st,i)=>i).filter(i=>i!==si&&(row.kinds[i]==='A'||(row.kinds[i]==='T'&&on[row.id][i]))).map(i=>STAGES[i][1]);
-    if(!on[row.id][si]) status('<b>Hidden on '+STAGES[si][1]+'.</b> '+(others.length?'Still shown on '+joinAnd(others)+'.':'Not shown on any other stage either.'));
-    else status('<b>Shown on '+STAGES[si][1]+' again.</b>'+(row.opt.empty?' Nothing written yet — guests will not see it.':''));
+    const st=STAGES[si][1], empty=row.opt.empty?' Nothing written yet — guests will not see it until you write it.':'';
+    const others=STAGES.map((x,i)=>i).filter(i=>i!==si&&(row.kinds[i]==='A'||(isBox(row.kinds[i])&&on[row.id][i]))).map(i=>STAGES[i][1]);
+    if(on[row.id][si]) status(k==='T' ? '<b>Shown on '+st+' again.</b>'+empty : '<b>Added to '+st+'.</b>'+empty);
+    else status(k==='T' ? '<b>Hidden on '+st+'.</b> '+(others.length?'Still shown on '+joinAnd(others)+'.':'Not shown on any other stage either.') : '<b>Removed from '+st+'.</b>');
   });
+}
+function backToPicks(){
+  const diff=[]; ROWS.forEach(r=>r.kinds.forEach((k,i)=>{ if(isBox(k)&&on[r.id][i]!==REC[r.id][i]) diff.push({r:r.id,s:i,v:on[r.id][i]}); }));
+  if(!diff.length) return;
+  undo.push({multi:diff}); diff.forEach(d=>{ on[d.r][d.s]=REC[d.r][d.s]; const c=$('body').querySelector('.c[data-r="'+d.r+'"][data-s="'+d.s+'"]'); if(c) c.setAttribute('aria-checked',REC[d.r][d.s]); });
+  bar(); lower(); status('<b>Back to our picks.</b> '+diff.length+' box'+(diff.length===1?'':'es')+' changed — Apply to keep it.');
 }
 const joinAnd=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
 function status(html){ const s=$('status'); if(!s) return; s.innerHTML=html; s.classList.remove('quiet'); }
 
 /* ── the lower third — status line · legend · Apply (or Continue) ── */
 function lower(){
-  const n=changes();
-  const legend='<div class="legend"><span><i class="on">'+svg('check')+'</i>Your choice</span><span><i class="al">'+svg('check')+'</i>Always shown</span><span><i class="dash"></i>Not on this stage</span></div>';
+  const n=changes(), d=offPicks();
+  const legend='<div class="legend"><div><span><i class="on">'+svg('check')+'</i>Guests see it</span><span><i></i>Hidden</span><span><i class="pk"></i>Our pick</span></div><div><span><i class="al">'+svg('check')+'</i>Always shown</span><span><i class="dash"></i>Not possible yet</span></div></div>';
+  const back='<button class="plain" id="backpicks" aria-disabled="'+!d+'">Back to our picks</button>';
   const btn = firstVisit ? '<button class="big on" id="bigbtn">Continue</button>' : '<button class="big'+(n?' on':'')+'" id="bigbtn" aria-disabled="'+!n+'">Apply'+(n?' · '+n+' change'+(n===1?'':'s'):'')+'</button>';
   const cur=$('status'); const keep=cur&&!cur.classList.contains('quiet')?cur.innerHTML:null;
-  $('tbar').innerHTML='<div class="grabh"><i></i></div><div class="status'+(keep?'':' quiet')+'" id="status">'+(keep||(firstVisit?'Everything is ticked the way most couples want it. Nothing is saved until you continue.':'Nothing changed yet — the defaults do the work.'))+'</div>'+legend+btn;
+  $('tbar').innerHTML='<div class="grabh"><i></i></div><div class="status'+(keep?'':' quiet')+'" id="status">'+(keep||(firstVisit?'Our picks are ticked. Add or untick what you like — nothing is saved until you continue.':'Nothing changed yet — our picks do the work.'))+'</div>'+legend+back+btn;
   $('bigbtn').onclick=e=>{ press(e.currentTarget); if(firstVisit) doContinue(); else doApply(); };
+  $('backpicks').onclick=e=>{ if(!offPicks()){ status('These are our picks already.'); return; } press(e.currentTarget); backToPicks(); };
 }
 
 /* ── Apply · Undo · Close · Continue ── */
 function doApply(){ const n=changes(); if(!n){ status('Nothing to apply yet.'); return; } ROWS.forEach(r=>{ base[r.id]=on[r.id].slice(); }); undo=[]; bar(); lower(); $('status').classList.add('quiet'); $('status').textContent='Applied — your Event Hub shows this now.'; toast('Applied'); }
-function doUndo(){ const u=undo.pop(); if(!u){ status('Nothing to undo.'); $('status').classList.add('quiet'); return; } on[u.r][u.s]=u.v; const c=$('body').querySelector('.c[data-r="'+u.r+'"][data-s="'+u.s+'"]'); if(c) c.setAttribute('aria-checked',u.v); bar(); lower(); const row=ROWS.find(r=>r.id===u.r); status('Undone — '+row.plain+' is '+(u.v?'shown':'hidden')+' on '+STAGES[u.s][1]+' again.'); }
+function doUndo(){ const u=undo.pop(); if(!u){ status('Nothing to undo.'); $('status').classList.add('quiet'); return; }
+  const put=(r,s,v)=>{ on[r][s]=v; const c=$('body').querySelector('.c[data-r="'+r+'"][data-s="'+s+'"]'); if(c) c.setAttribute('aria-checked',v); };
+  if(u.multi){ u.multi.forEach(d=>put(d.r,d.s,d.v)); bar(); lower(); status('Undone — your '+u.multi.length+' box'+(u.multi.length===1?'':'es')+' are back.'); return; }
+  put(u.r,u.s,u.v); bar(); lower(); const row=ROWS.find(r=>r.id===u.r); status('Undone — '+row.plain+' is '+(u.v?'shown':'hidden')+' on '+STAGES[u.s][1]+' again.'); }
 function doExit(){ const n=changes(); if(!n){ toast('Closed — nothing changed, nothing asked'); return; } pop('Leave without applying?', n+' change'+(n===1?'':'s')+' will be lost.', [['Keep editing',()=>closeAll()],['Leave',()=>{ on=JSON.parse(JSON.stringify(base)); undo=[]; closeAll(); draw(); toast('Closed — nothing applied'); },'rm']]); }
 function doContinue(){ ROWS.forEach(r=>{ base[r.id]=on[r.id].slice(); }); undo=[]; try{ sessionStorage.setItem('wgs-seen','1'); }catch(e){} firstVisit=false; afterContinue=true; draw(); toast('Saved. Find this any time under Studio ▾ › What guests see.'); setTimeout(()=>openList('studio'),1400); }
 function pop(h,p,btns){ $('poph').textContent=h; $('popp').textContent=p; $('popb').innerHTML=btns.map((b,i)=>'<button class="cb'+(b[2]?' '+b[2]:'')+'" data-i="'+i+'">'+b[0]+'</button>').join(''); $('popb').querySelectorAll('.cb').forEach(b=>b.onclick=()=>{ press(b); setTimeout(()=>{ closeAll(); btns[+b.dataset.i][1](); },160); }); $('phone').classList.add('open'); $('pop').classList.add('on'); }
@@ -318,9 +334,9 @@ $('case').value = CASE==='a' ? (showRsvp?'a':'a4') : CASE;
 $('case').onchange=e=>{ const v=e.target.value; const u=new URL(location); u.search=''; u.searchParams.set('case',v==='a4'?'a':v); if(v==='a4') u.searchParams.set('rsvp','off'); location.href=u; };
 $('resetseen').hidden = CASE!=='c';
 $('resetseen').onclick=()=>{ try{ sessionStorage.removeItem('wgs-seen'); }catch(e){} location.reload(); };
-const LEAD={a:'<b>Case A — the whole table.</b> Rows are pieces of information, columns the five stages, every cell a tick. It arrives ticked with our defaults; the couple only unticks. The stage names stay pinned while the rows scroll. Nothing is saved until ✓ Apply.',
- b:'<b>Case B — one stage at a time.</b> The same data, calmer: one Stage ▾ dropdown, one list, one tick each. Rows the stage never shows are listed last, greyed, with no tick.',
- c:'<b>Case C — the first visit.</b> Case A opened once, the first time the couple enters the Maker, with one line above it and one button: Continue. After Continue it never appears again; the same sheet is a row under Studio ▾ › What guests see.'+(seen?' <b>Already seen in this browser</b> — you are on the Maker page; tap Studio ▾ in the frame to find it, or reset above.':'')};
+const LEAD={a:'<b>Case A — the whole table, five columns (the owner’s pick).</b> Rows are pieces of information, columns the five stages, every cell a box. Our picks arrive ticked and carry a small dot; the couple may untick them or tick any empty box. Only four cells are dashes — things that cannot exist at that time. Nothing is saved until ✓ Apply.',
+ b:'<b>Case B — one stage at a time (for comparison).</b> The same data: one Stage ▾ dropdown, one list, one box each. The stage’s dashes are listed last under Not possible yet.',
+ c:'<b>Case C — the first visit.</b> The five-column table opened once, the first time the couple enters the Maker, with one line above it and one button: Continue. After Continue it never appears again; the same sheet is a row under Studio ▾ › What guests see.'+(seen?' <b>Already seen in this browser</b> — you are on the Maker page; tap Studio ▾ in the frame to find it, or reset above.':'')};
 $('lead').innerHTML=LEAD[CASE];
 })();
 </script></body></html>
