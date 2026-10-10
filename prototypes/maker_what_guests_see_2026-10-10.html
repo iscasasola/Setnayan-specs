@@ -8,8 +8,8 @@
   Rows = pieces of information · columns = the five stages · each cell a box. Our picks arrive ticked (with a small dot);
   the couple may untick them or tick any empty box. Nothing is saved until Apply.
   Owner, same day, after seeing the first draft: "i like the 5 columns." · "but give them freedom to pick what they want to
-  add. but have our recommendation as the checked one". So: no "not on this stage" walls — only four dashes remain, where
-  the thing cannot exist at that time. Cases: ?case=a (the table, DEFAULT) · ?case=a&rsvp=off · ?case=b · ?case=c.
+  add. but have our recommendation as the checked one". So: no "not on this stage" walls — only ten dashes remain, where
+  the thing cannot exist at that time (measured from the live page). Cases: ?case=a (the table, DEFAULT) · ?case=a&rsvp=off · ?case=b · ?case=c.
   Visual language copied from maker_two_bars_2026-10-09.html and maker_rsvp_per_element_2026-10-09.html.
 -->
 <style>
@@ -152,7 +152,7 @@ button{font:inherit;color:inherit}
 <div class="check"><h4>What to check</h4><ol>
 <li>Untick <b>Countdown</b> under Invitation — the bottom line says it is still shown on Save the Date; ✓ Apply turns terracotta. The small dot under the box stays: it was our pick.</li>
 <li>Tick an empty box — <b>Schedule</b> under Save the Date. The line reads "Added to Save the Date." Then <b>Back to our picks</b> wakes up; tap it and both boxes return.</li>
-<li>Tap a <b>dash</b> (Camera under Save the Date) — nothing ticks; one plain line says why. Only four cells are dashes.</li>
+<li>Tap a <b>dash</b> (Live under Save the Date) — nothing ticks; one plain line says why. Only ten cells are dashes, things that cannot exist at that time.</li>
 <li>Tap the gold tick on <b>Names and date</b> — it does not change; one line says it is always shown.</li>
 <li>Tap <b>↺</b> — the last change comes back. Tap <b>✕</b> with nothing changed — it just closes.</li>
 <li><b>What to bring</b> is empty in this sample — adding it says guests will not see it until it is written.</li>
@@ -180,17 +180,18 @@ function toast(t){ const o=$('toast'); o.textContent=t; o.classList.add('on'); c
    X = cannot exist at that time (a dash, only the controller's short list). ── */
 const STAGES=[['std','Save the Date'],['rsvp','RSVP'],['inv','Invitation'],['day','The Day'],['post','Post Event']];
 const GROUPS=[
- ['The basics',[['names','Names and date','AAAAA'],['place','Place','AAAAO',{note:'The address and map open once a guest has replied.'}],['countdown','Countdown','TOTOO']]],
+ ['The basics',[['names','Names and date','AAAAA'],['place','Place','AAAAO',{note:'The address and map open once a guest has replied.'}],['countdown','Countdown','TOTOX']]],
  ['The story',[['message','Message','OOTOT'],['story','Love Story','TOTOT'],['ourphotos','Our photos','TOOOT']]],
- ['The details',[['schedule','Schedule','OOTTO'],['map','Map','OOTTO'],['dress','Dress code','OOTOO'],['bring','What to bring','OOTOO',{empty:true}],['gifts','E-Gifts','OOTTO']]],
+ ['The details',[['schedule','Schedule','OOTTO'],['map','Map','OOTTO'],['dress','Dress code','OOTTO'],['bring','What to bring','OOTTX',{empty:true}],['gifts','E-Gifts','TOTTT']]],
  ['People',[['entourage','Entourage','OOTTT'],['reply','Reply card','OAAOX']]],
- ['On the day',[['seat','Your seat','XOOTO'],['pass','Digital pass','OOOOO'],['announce','Announce­ments','OOTTO',{plain:'Announcements'}],['live','Live','OOOTT'],['camera','Camera','XOOTX'],['photosofyou','Photos of you','OOOTT']]],
+ ['On the day',[['seat','Your seat','OOTTO'],['pass','Digital pass','TOTTT'],['announce','Announce­ments','TOTTX',{plain:'Announcements'}],['live','Live','XOTTT'],['camera','Camera','OOOTX'],['photosofyou','Photos of you','XXXTT']]],
  ['The opening',[['reveal','Reveal','TOTTX']]],
 ];
+/* (measured from the live page, 2026-10-10 — the controller's first dash list was a guess and is replaced by this one) */
 const ROWS=[]; GROUPS.forEach(g=>g[1].forEach(r=>ROWS.push({id:r[0],name:r[1],plain:(r[3]&&r[3].plain)||r[1],kinds:r[2].split(''),opt:r[3]||{},group:g[0]})));
 const ALWAYS={names:'Names and date are always shown.',place:'The place is always shown.',reply:'The reply card is always on the Invitation and RSVP — it is how guests answer.'};
 /* the only dashes — where the thing cannot exist at that time */
-const REASON={'reply:post':'The reply closes after the day.','seat:std':'Seats are set closer to the day.','camera:std':'The camera opens on the day.','camera:post':'The camera opens on the day.','reveal:post':'The opening plays before the day.'};
+const REASON={'countdown:post':'The countdown ends on the day.','bring:post':'The day has passed.','reply:post':'The reply closes after the day.','announce:post':'Announcements end with the day.','reveal:post':'The opening plays before the day.','live:std':'Live opens on the day.','photosofyou:std':'Photos of you come from the day.','photosofyou:rsvp':'Photos of you come from the day.','photosofyou:inv':'Photos of you come from the day.','camera:post':'The camera closes after the day.'};
 function reason(row,si){ return REASON[row.id+':'+STAGES[si][0]]||'Not possible at this time.'; }
 
 /* ── state ── */
@@ -334,7 +335,7 @@ $('case').value = CASE==='a' ? (showRsvp?'a':'a4') : CASE;
 $('case').onchange=e=>{ const v=e.target.value; const u=new URL(location); u.search=''; u.searchParams.set('case',v==='a4'?'a':v); if(v==='a4') u.searchParams.set('rsvp','off'); location.href=u; };
 $('resetseen').hidden = CASE!=='c';
 $('resetseen').onclick=()=>{ try{ sessionStorage.removeItem('wgs-seen'); }catch(e){} location.reload(); };
-const LEAD={a:'<b>Case A — the whole table, five columns (the owner’s pick).</b> Rows are pieces of information, columns the five stages, every cell a box. Our picks arrive ticked and carry a small dot; the couple may untick them or tick any empty box. Only four cells are dashes — things that cannot exist at that time. Nothing is saved until ✓ Apply.',
+const LEAD={a:'<b>Case A — the whole table, five columns (the owner’s pick).</b> Rows are pieces of information, columns the five stages, every cell a box. Our picks arrive ticked and carry a small dot; the couple may untick them or tick any empty box. Only ten cells are dashes — things that cannot exist at that time. Nothing is saved until ✓ Apply.',
  b:'<b>Case B — one stage at a time (for comparison).</b> The same data: one Stage ▾ dropdown, one list, one box each. The stage’s dashes are listed last under Not possible yet.',
  c:'<b>Case C — the first visit.</b> The five-column table opened once, the first time the couple enters the Maker, with one line above it and one button: Continue. After Continue it never appears again; the same sheet is a row under Studio ▾ › What guests see.'+(seen?' <b>Already seen in this browser</b> — you are on the Maker page; tap Studio ▾ in the frame to find it, or reset above.':'')};
 $('lead').innerHTML=LEAD[CASE];
