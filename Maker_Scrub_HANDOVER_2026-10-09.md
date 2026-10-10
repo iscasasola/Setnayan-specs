@@ -78,3 +78,20 @@ TRAPS (new today)
 - `hubScrubHoldsAtMost(widgets, …)` already counts the hero row → a page already wraps itself one pair more once a cover is set to Scrub, even before the cover is wired.
 - Many guards regex site-body's JSX, incl. the two `<HubPageHold holds={pageHolds}>\s*<article data-pahina-chapters` matches in guard (8).
 - Unit tests run with `tsx --test`; a path with `[slug]` must be written `[[]slug[]]` or zero tests run and it prints green.
+
+---
+# UPDATE 2026-10-10 — THE BLOCKER IS GONE: the real guest page can be rendered on a Mac with no database
+Commit `7ae4c46d8`, branch `rd/site-body-fixture-render` (worktree wt-sitebody), merged into the review copy (`56e81e506`). NOT on GitHub / not live — test tooling only; rides the next batch. `site-body.tsx` is NOT edited.
+- Helper: `apps/web/lib/site-body-fixture-render.ts` → `renderSiteBodyFixture(overrides?)` / `renderSiteBodyFixtureFull(...)` (returns `{ html, mounts }`). It replaces only the two modules that build a database client (`lib/supabase/admin.ts`, `lib/supabase/server.ts`) through the `Module._load` door the repo's render tests already use; behind it is an empty database (reads recorded, writes throw). Clock, time zone and locale are pinned for the render. A test must import the helper BEFORE anything that draws the guest page.
+- Guards: `apps/web/lib/site-body-fixture-render.test.ts` + `site-body-fixture.golden.html`: (1) the real tree is drawn, (2) BYTE FOR BYTE against the golden, (3) no Scrub boxes and no island on a page with no Scrub, (4) a stored Scrub scene while dark = the plain page; switched on = one page pair + the island, (5) nothing in the app imports the fixture. 5/5 on the review tree.
+- COVERS: the invitation's GUEST tree, ordinary state (Maria & Jose, 12 Dec 2026, a listed guest who has not replied, Invitation stage, `plan.body === 'normal'`, monogram masthead, free event, House theme, tabbed page). NOT COVERED: the stranger's tree, Save the Date, The Day, Post Event, the Maker's canvas, hero photo/film, Pro themes, a replied/declined guest.
+- NEXT STEP (item 3 of "LEFT, IN ORDER" above): wire `HubCoverHold` into the two `PahinaMasthead` branches of the guest tree, run guard (2) WITHOUT `UPDATE_GOLDEN` (green = a page whose cover does not leave is unchanged), then add:
+  ```ts
+  const today  = await renderSiteBodyFixture({ proWatermarkHidden: true });
+  const stored = await renderSiteBodyFixtureFull({ proWatermarkHidden: true, widgets: fixtureWidgets({ hero: LAB_SCRUB_COVER }) });
+  assert.ok(stored.html === today, 'a cover stored to leave by Scrub, while dark, is today’s page');
+  assert.equal(stored.mounts.HubScrub, 0);
+  ```
+  and for the switched-on arm branch on `SCRUB_OUT_OFFERED` and assert `class="hub-cover-cell"` once and `stored.mounts.HubScrub > 0`.
+- FOUND, not changed: a Countdown stored to Scrub on the tabbed Invitation draws no cell (it is alone in its scenes block on Welcome) yet the page still wraps one pair for it; schedule times follow the SERVER's locale (`formatBlockTimeRange` uses `toLocaleString(undefined, …)` — a German process prints "14:30").
+- LIMITS: this is React's HTML renderer calling the components — not the HTML Vercel serves (no document shell, no client scripts), nothing ran in a browser, CI has not seen the golden (made on Node 22.18).
