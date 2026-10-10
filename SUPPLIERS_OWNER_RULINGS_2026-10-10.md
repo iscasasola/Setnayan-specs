@@ -52,3 +52,22 @@ Prototypes: `prototypes/suppliers_add_your_own_2026-10-10.html` (both phones: Co
   Minimum pairs before inviting suppliers: P0 notices + email · P1 ask/answer/quote · P2 book + the supplier's yes ·
   P3 money · P4 Add your own + the claim · P5 calendar truth ("Not set", never "Free").
 - The supplier dashboard is 2 of 13 steps rebuilt (S-PR0, S-PR1).
+
+## Added the same day — search and the inquiry (owner, verbatim)
+
+> "so when they search for a supplier's service card. it will be compared to the available schedule of that service on the
+> event's date and if there is a location already, if we can cater that service to that location.
+> service card will not show if they are not available to that date/s or that location.
+> when they inquire, we also show what other categories they offer. so when they inquire, they will inquire for all the
+> categories they want to know. it will be counted as 1 inquiry."
+
+- Find hides a service card that cannot be booked on the event's date(s) or delivered to its place. Full row: DECISION_LOG
+  2026-10-10 "SEARCH SHOWS ONLY WHAT CAN BE BOOKED FOR THIS EVENT".
+- What exists (read in code, re-measure): the per-card hide (`hideUnbookable`, `service_cards_unbookable_on`) — Find does not
+  pass it; the reach gate (`radiusOk`) — Find has it; one thread per event and supplier with many categories
+  (`thread_service_interests`, `alsoServiceIds`) — the new Suppliers sheet sends one category per press.
+- The delta: Find passes the hide · candidate dates are read · the sheet's ask step gets a tick list, one send.
+- Not set ≠ not available: a supplier with no calendar or no pin stays shown, labelled "Not set" (P5).
+- Not said by him: whether the "farther away" expander stays; whether `/explore` changes (kept demote-only on 2026-09-11).
+- The supplier-dashboard comparison page (18 cards) is fully answered: cards 1, 9, 3, 8, F4 "built for all 5"; the other
+  thirteen take the recommendation on each card.
