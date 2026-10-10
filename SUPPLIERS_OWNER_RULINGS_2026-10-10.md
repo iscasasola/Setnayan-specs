@@ -68,6 +68,9 @@ Prototypes: `prototypes/suppliers_add_your_own_2026-10-10.html` (both phones: Co
   (`thread_service_interests`, `alsoServiceIds`) — the new Suppliers sheet sends one category per press.
 - The delta: Find passes the hide · candidate dates are read · the sheet's ask step gets a tick list, one send.
 - Not set ≠ not available: a supplier with no calendar or no pin stays shown, labelled "Not set" (P5).
-- Not said by him: whether the "farther away" expander stays; whether `/explore` changes (kept demote-only on 2026-09-11).
+- **"Farther away" stays (owner, verbatim, same day):** "yes offer the farther away option. in case the need to search more".
+  ⇒ a supplier out of reach is not in the first list, and Find offers the existing "farther away" option
+  (`includeFarther`) to show them. He spoke of distance only: a card that cannot be booked on the date stays hidden.
+- Not said by him: whether `/explore` changes (kept demote-only on 2026-09-11).
 - The supplier-dashboard comparison page (18 cards) is fully answered: cards 1, 9, 3, 8, F4 "built for all 5"; the other
   thirteen take the recommendation on each card.
