@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Suppliers — the date sheet, the place sheet, Help me choose, the first-visit tour · PR5 prototype (2026-10-10)</title>
+<style>
+/* ---------- tokens: copied from the approved prototype prototypes/suppliers_page_2026-10-07_fable.html (paper / ink / gild / wine / mulberry) ---------- */
+:root{
+  --paper:#f6f4ef; --paper-2:#fffdf9; --ink:#1d1b17; --mute:#6f6a60; --line:#e4dfd4;
+  --gild:#b8963e; --mulberry:#C24E25; --seg-track:rgba(29,27,23,.06); --seg-off:rgba(29,27,23,.6); --price:#b4602a; --warn-bg:#f6e9dd; --warn-ink:#8a4a1e; --gild-soft:#f1e9d2; --wine:#8c3b2e; --wine-soft:#f3e3df; --ok:#2E7D4F; --ok-soft:#e3eee4; --info:#1F6FB2; --warn:#B26B00; --danger:#B3261E; --cream:#fff;
+  --sans:"Hanken Grotesk",system-ui,-apple-system,sans-serif; --serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --bar:64px; --ease:cubic-bezier(.2,.8,.2,1); --t:280ms; --dev:36px;
+}
+@media (prefers-color-scheme:dark){
+  :root{ --mulberry:#E5794E; --seg-track:rgba(239,234,224,.08); --seg-off:rgba(239,234,224,.62); --price:#e0955f; --warn-bg:#3a2a1e; --warn-ink:#f0c9a6; --paper:#161513; --paper-2:#1f1d1a; --ink:#efeae0; --mute:#a39d90; --line:#2e2b26;
+         --gild:#d1b162; --gild-soft:#2d2719; --wine:#d47a69; --wine-soft:#3a221d; --ok:#6FCF97; --ok-soft:#1f2d22; --info:#7AB8F0; --warn:#F0B45A; --danger:#F2817A; --on-tone:#161513; --cream:#161513; }
+}
+@media (prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important;scroll-behavior:auto!important} }
+*{box-sizing:border-box} html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent}
+select,input{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--sans);font-weight:500;margin:0;letter-spacing:-.01em}
+.mute{color:var(--mute)} .wine{color:var(--wine)} .ok{color:var(--ok)}
+.today{display:inline-block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);border:1px dashed var(--line);border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:1px;white-space:nowrap}
+
+/* ---------- prototype-only strip: "Try a state" (not part of the page) ---------- */
+.dev{position:sticky;top:0;z-index:12;height:var(--dev);background:#111;color:#ddd;display:flex;align-items:center;gap:10px;padding:0 12px;font-size:12px}
+.dev .pickone{margin:0;background:#222;border-color:#444;color:#eee;font-size:12px;padding:6px 30px 6px 10px;min-height:28px}
+.dev .pickone:after{filter:invert(.8)}
+.dev .tag{margin-left:auto;opacity:.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ---------- the app (shell, pinned block, body, bar) — as the approved prototype draws them ---------- */
+.app{min-height:100vh;padding-bottom:calc(var(--bar) + 92px)}
+.shell{position:sticky;top:var(--dev);z-index:5;background:var(--paper-2);border-bottom:1px solid var(--line);height:56px;display:flex;align-items:center;gap:14px;padding:0 16px}
+.shell .logo{font-weight:700;color:var(--gild);font-size:17px;letter-spacing:.12em}
+.shell .right{margin-left:auto;display:flex;gap:8px}
+.shell .ic{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;font-size:14px;color:var(--mute)}
+.shell .av{width:44px;height:44px;margin:0 -5px;border-radius:50%;background:radial-gradient(circle,var(--gild) 0,var(--wine) 60%,transparent 61%);border:0}
+main{max-width:1180px;margin:0 auto;padding:0 16px;overflow-x:clip}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.stick{position:sticky;top:calc(var(--dev) + 56px);z-index:4;background:var(--paper);padding:10px 0 8px;margin:0 -16px;padding-left:16px;padding-right:16px;transition:box-shadow var(--t)}
+.stick.stuck{box-shadow:0 1px 0 var(--line)}
+.facts{margin:4px 0 0;font-size:15px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;line-height:1.3}
+.facts button{border-bottom:1px dotted var(--mute);padding:6px 0 1px;min-height:32px}
+.facts button:hover{border-bottom-color:var(--ink)}
+.facts .set{color:var(--wine);border-bottom-color:var(--wine)}
+.facts .ask{font-size:12px;color:var(--warn);margin-left:2px;border:0}
+.seg{display:flex;flex:1;gap:2px;border-radius:8px;background:var(--seg-track);padding:2px;margin:10px 0 0}
+.seg button{flex:1;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:4px;border-radius:8px;padding:0 10px;font-size:12.5px;font-weight:600;color:var(--seg-off);white-space:nowrap;transition:background var(--t),color var(--t)}
+.seg button.on{background:var(--mulberry);color:#fff;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.seg b{font-weight:500;opacity:.8;margin-left:2px}
+section{padding:18px 0 8px}
+section h2{font-size:21px;line-height:1.15}
+.sub{color:var(--mute);margin:2px 0 10px;font-size:14px}
+
+/* categories (Find) */
+.cat{border-top:1px solid var(--line)}
+.cat .bar{display:grid;grid-template-columns:36px 1fr auto 14px;gap:12px;align-items:center;min-height:56px;padding:10px 0;width:100%}
+.cat .ico{width:36px;height:36px;border-radius:50%;background:var(--gild-soft);display:grid;place-items:center;font-size:15px}
+.cat .state{font-size:13px;color:var(--mute)} .cat .state.ok{color:var(--ok)} .cat .state.wine{color:var(--wine)}
+.chev{transition:transform var(--t) var(--ease);color:var(--mute);font-size:18px;line-height:1}
+.open .chev{transform:rotate(180deg)}
+.exp{display:grid;grid-template-rows:0fr;transition:grid-template-rows var(--t) var(--ease)}
+.exp>div{overflow:clip;min-width:0}
+.open>.exp{grid-template-rows:1fr}
+.scard{display:grid;grid-template-columns:80px 1fr;gap:4px 12px;border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--paper-2);margin:8px 0;align-items:start}
+.scard .cover{grid-row:1/2;width:80px;height:112px;border-radius:8px;display:block}
+.scard .body{display:grid;gap:3px;min-width:0}
+.sc-name{font-size:14px;font-weight:600}
+.sc-leaf{font-size:11.5px;color:var(--mute)}
+.sc-price{font-size:12.5px;font-weight:500;color:var(--price)}
+.sc-inc{font-size:11.5px;font-weight:500;color:var(--ok)}
+.sc-state{grid-column:1/-1;font-size:13px;margin-top:2px}
+.sc-state .ok{font-weight:500}
+.scard .acts{grid-column:1/-1;display:flex;gap:8px;flex-wrap:nowrap;overflow:hidden;align-items:center;margin-top:2px}
+
+/* buttons: icon + word, a tone each (the shipped ActionButton; 44 px tap targets on this page) */
+button.ic,.btn{min-height:44px;padding:0 14px;border:1px solid var(--line);border-radius:999px;display:inline-flex;align-items:center;gap:7px;color:var(--ink);flex:0 0 auto;white-space:nowrap;font-size:13px;font-weight:500;--tone:var(--ink);background:var(--paper-2)}
+button.ic svg,.btn svg{width:18px;height:18px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.icon-only{width:44px;padding:0;justify-content:center} .icon-only .lbl{display:none}
+.t-brand{--tone:var(--mulberry)} .t-ok{--tone:var(--ok)} .t-info{--tone:var(--info)} .t-warn{--tone:var(--warn)} .t-danger{--tone:var(--danger)} .t-neutral{--tone:var(--mute)}
+button.ic,.btn.t-info,.btn.t-danger,.btn.t-warn,.btn.t-neutral{color:var(--tone);border-color:color-mix(in srgb,var(--tone) 45%,transparent);background:color-mix(in srgb,var(--tone) 9%,transparent)}
+button.ic.main,.btn.main,.btn.t-ok,.btn.t-brand{background:var(--tone);color:var(--on-tone,#fff);border-color:var(--tone)}
+.btn.t-brand,.btn.t-brand.main,button.ic.t-brand.main{color:#fff}
+button.ic.main.quiet{background:color-mix(in srgb,var(--tone) 12%,transparent);color:var(--tone)}
+.btn:active,button.ic:active{transform:scale(.97)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.cta{display:flex;gap:10px;padding:8px 0 10px;flex-wrap:wrap}
+
+/* Build money block */
+.pick{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px 0;border-top:1px solid var(--line);font-size:14px;align-items:center;min-height:52px}
+.pick:first-of-type{border-top:0}
+.pick .k{color:var(--mute);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.pick .v{font-weight:500}
+.money{display:grid;grid-template-columns:1fr 1fr;gap:14px 24px;padding:14px 0 6px;border-top:1px solid var(--line);margin-top:6px}
+.money .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.money .v{font-weight:600;font-size:22px;line-height:1.1}
+.money .n{font-size:12px;color:var(--mute)}
+.fitline{padding:10px 0;font-size:14px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.fitline .acts{margin-left:auto}
+
+/* rows (Booked) */
+.row{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line);min-height:56px}
+.row:first-of-type{border-top:0}
+.logo{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:12px;letter-spacing:.06em;color:var(--mute);background:var(--paper-2)}
+.name{font-weight:500;display:block}
+.svc{font-size:13px;color:var(--mute)}
+.pill{font-size:12px;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.wine{background:var(--wine-soft);color:var(--wine)}
+
+/* bottom bar (shipped) + the thumb row (PR2 as built: search + Add your own) */
+.bar5{position:fixed;left:0;right:0;bottom:0;height:var(--bar);background:var(--paper-2);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);z-index:6}
+.bar5 div{display:grid;place-items:center;gap:2px;font-size:11px;color:var(--mute);padding-top:8px}
+.bar5 .on{color:var(--ink)} .bar5 .on i{background:var(--gild-soft);border-radius:50%;width:32px;height:32px;display:grid;place-items:center}
+.bar5 i{font-style:normal;font-size:18px;display:grid;place-items:center;width:32px;height:32px}
+.bar5 i svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
+.lower{position:fixed;left:0;right:0;bottom:var(--bar);padding:10px 16px;display:flex;gap:8px;align-items:center;z-index:5;transform:translateY(110%);transition:transform 300ms var(--ease)}
+.lower.on{transform:none}
+.lower input{flex:1 1 60%;min-width:0;min-height:44px;border:1px solid color-mix(in srgb,var(--ink) 14%,transparent);border-radius:999px;padding:9px 14px;background:color-mix(in srgb,var(--paper) 62%,transparent);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);font-size:14px}
+.lower button.ic{background:color-mix(in srgb,var(--paper) 62%,transparent);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3)}
+.lower button.ic.t-brand.main{background:var(--mulberry);color:#fff;border-color:var(--mulberry)}
+.cart{position:fixed;left:16px;right:16px;bottom:calc(var(--bar) + 76px);background:var(--ink);color:var(--paper);border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:12px;z-index:7;transform:translateY(16px);opacity:0;pointer-events:none;transition:transform var(--t) var(--ease),opacity var(--t);font-size:14px}
+.cart.on{transform:none;opacity:1;pointer-events:auto}
+.cart .mute{color:rgba(255,255,255,.65)} .cart button{margin-left:auto;color:var(--gild);font-weight:600;white-space:nowrap;min-height:44px}
+
+/* sheet (phone: from the bottom) — never over the bar; its one main action sits in its footer, in the lower third */
+.scrim{position:fixed;inset:0;bottom:var(--bar);background:rgba(0,0,0,.28);opacity:0;pointer-events:none;transition:opacity var(--t) var(--ease);z-index:7}
+.sheet{position:fixed;left:0;right:0;bottom:var(--bar);max-height:calc(100vh - var(--bar) - var(--dev) - 56px);background:var(--paper-2);border-radius:22px 22px 0 0;box-shadow:0 -12px 40px rgba(0,0,0,.18);transform:translateY(calc(100% + var(--bar) + 40px));visibility:hidden;transition:transform 320ms var(--ease),visibility 0s 320ms;z-index:8;display:flex;flex-direction:column}
+.sheet .grip{width:40px;height:4px;border-radius:2px;background:var(--line);margin:12px auto 10px;flex:0 0 auto}
+.sheet .x{position:absolute;right:10px;top:8px;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--mute);z-index:2}
+.sheet .x:after{content:"×";font-size:20px;line-height:1}
+.sheet h3{font-size:20px;margin-bottom:2px;padding-right:44px}
+.sheetbody{overflow:auto;padding:0 18px 12px;flex:1 1 auto;min-height:0}
+.sheetfoot{flex:0 0 auto;padding:10px 18px 14px;border-top:1px solid var(--line);background:var(--paper-2);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.sheetfoot:empty{display:none}
+html.sheet-open .scrim{opacity:1;pointer-events:auto}
+html.sheet-open .sheet{transform:none;visibility:visible;transition:transform 320ms var(--ease),visibility 0s}
+.field{display:grid;gap:4px;margin-top:12px;font-size:14px}
+.field label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.field input,.field textarea{border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:var(--paper);width:100%;min-height:44px;font-size:16px}
+.opt{display:grid;grid-template-columns:1fr auto;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:14px;align-items:center;min-height:52px}
+.opt:first-of-type{border-top:0}
+.k2{font-size:11px;letter-spacing:.14px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:16px 0 4px}
+.note{font-size:13px;color:var(--mute);margin:8px 0 0}
+.saved{font-size:12.5px;color:var(--ink);opacity:.75;margin:8px 0 0}
+
+/* ladders (date & place sharpen) — the approved prototype's */
+.ladder{display:grid;gap:0;margin-top:6px}
+.step{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:14px;color:var(--mute);transition:color var(--t);min-height:44px}
+.step:first-child{border-top:0}
+.step .dotl{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--line);background:var(--paper);flex:0 0 auto;transition:background var(--t),border-color var(--t)}
+.step.on{color:var(--ink)} .step.on .dotl{background:var(--ok);border-color:var(--ok)}
+.step .t{flex:1 1 auto;min-width:0}
+.step .act{margin-left:auto;color:var(--wine);font-weight:500;min-height:44px;display:inline-flex;align-items:center;white-space:nowrap;padding-left:8px}
+
+/* one dropdown for a set of choices (the shipped PickMenu) */
+.pickone{position:relative;display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:7px 34px 7px 14px;background:var(--paper-2);font-size:14px;font-weight:500;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:44px}
+.pickone select{position:absolute;inset:0;opacity:0;width:100%;height:100%}
+.pickone:after,.chevicon:after{content:"";position:absolute;right:12px;top:50%;width:14px;height:14px;transform:translateY(-50%);background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a857a' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>") center/contain no-repeat}
+.rowhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px}
+.rowhead .pickone{flex:0 1 auto}
+
+/* Help me choose — the shipped Find your date's candidate list, in its own look (details-date-finder.tsx) */
+.eyebrow{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);margin:14px 0 6px}
+.cand{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.cand button{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;border-radius:12px;background:var(--paper);box-shadow:0 1px 2px rgba(40,34,24,.06);padding:10px 14px;border:2px solid transparent}
+.cand button[aria-pressed=true]{border-color:var(--ink)}
+.cand .n{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--mute);width:16px}
+.cand .d{font-size:18px;font-weight:600;letter-spacing:-.01em}
+.cand .dow{font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);margin-left:8px}
+.cand .best{display:inline-flex;align-items:center;gap:4px;border-radius:999px;background:color-mix(in srgb,var(--mulberry) 15%,transparent);color:var(--mulberry);font-size:11px;font-weight:500;padding:1px 8px;margin-left:8px;vertical-align:2px}
+.cand .cov{display:block;font-size:13px;color:var(--mute);margin-top:2px}
+.who{display:grid;gap:0;margin-top:4px}
+.who button{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;width:100%;min-height:48px;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.who button:first-child{border-top:0}
+.who .c{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);display:block}
+.who .go{color:var(--wine);font-weight:500;white-space:nowrap}
+.linkish{min-height:44px;display:inline-flex;align-items:center;font-size:14px;font-weight:500;text-decoration:underline;text-underline-offset:2px;color:var(--ink);opacity:.75}
+
+/* a clash: the shipped DateClashNote (details-date-clash.tsx), terracotta tint */
+.clash{display:flex;flex-direction:column;gap:8px;border-radius:10px;background:color-mix(in srgb,var(--mulberry) 10%,transparent);padding:10px 12px;margin-top:12px;font-size:13px}
+.clash .ask{color:var(--mulberry);font-weight:600;text-decoration:underline;text-underline-offset:2px;min-height:44px;display:inline-flex;align-items:center;width:fit-content}
+.clash .acts{display:flex;gap:8px;flex-wrap:wrap}
+.clash .acts button{min-height:44px;border-radius:999px;padding:0 16px;font-size:13px;font-weight:600;border:1px solid var(--line)}
+.clash .acts .yes{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.clash .msg{color:var(--mute);font-size:12.5px;text-decoration:underline;text-underline-offset:2px;min-height:44px;display:inline-flex;align-items:center;width:fit-content}
+.pending{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:12px;font-size:13.5px;display:grid;gap:6px;background:var(--paper)}
+.pending b{font-weight:600}
+
+/* the booked venue card (VenuesEditor's `data-venue-booked`) + the pinned map (AddressPinField) */
+.vcard{display:flex;gap:12px;align-items:flex-start;border-radius:10px;background:color-mix(in srgb,var(--ink) 3%,transparent);padding:10px 12px;margin-top:6px}
+.vcard .pin{width:36px;height:36px;border-radius:8px;background:var(--paper-2);display:grid;place-items:center;color:var(--mulberry);flex:0 0 auto}
+.vcard .pin svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.vcard p{margin:0} .vcard .nm{font-size:14px;font-weight:500} .vcard .ad{font-size:12px;color:var(--mute)} .vcard .fb{font-size:11.5px;color:var(--mute);margin-top:4px}
+.map{position:relative;height:150px;border-radius:12px;margin-top:8px;overflow:hidden;background:
+  repeating-linear-gradient(0deg,transparent 0 23px,color-mix(in srgb,var(--ink) 8%,transparent) 23px 24px),
+  repeating-linear-gradient(90deg,transparent 0 23px,color-mix(in srgb,var(--ink) 8%,transparent) 23px 24px),
+  color-mix(in srgb,var(--gild-soft) 55%,var(--paper))}
+.map:before{content:"";position:absolute;left:50%;top:50%;width:22px;height:22px;border:2px solid var(--mulberry);border-radius:50%;transform:translate(-50%,-50%)}
+.map:after{content:"";position:absolute;left:50%;top:50%;width:2px;height:34px;background:var(--mulberry);transform:translate(-50%,-50%);box-shadow:0 0 0 0}
+.map .road{position:absolute;left:-10%;right:-10%;top:58%;height:14px;background:color-mix(in srgb,var(--paper-2) 80%,transparent);transform:rotate(-8deg)}
+.map .road.b{top:30%;transform:rotate(22deg);height:9px}
+.pinned{font-size:12.5px;color:var(--mute);margin-top:6px}
+.photo-row{display:flex;gap:10px;align-items:center;margin-top:12px}
+.photo-row .th{width:56px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--gild-soft),var(--line));flex:0 0 auto}
+
+/* toast — above the bar */
+.toast{position:fixed;left:16px;right:16px;bottom:calc(var(--bar) + 14px);background:var(--ink);color:var(--paper);padding:12px 16px;border-radius:14px;font-size:14px;z-index:9;display:flex;gap:14px;align-items:center;transform:translateY(20px);opacity:0;pointer-events:none;transition:transform var(--t) var(--ease),opacity var(--t)}
+.toast.on{transform:none;opacity:1;pointer-events:auto}
+.toast button{color:var(--gild);font-weight:600;margin-left:auto;min-height:44px;padding:0 4px}
+
+/* ---------- the first-visit tour: THE APPROVED SPOTLIGHT (prototypes/spotlight_tour_sample_2026-10-02.html, owner "Yes. That is good.") ----------
+   The dim is the ring's own 9999px shadow; the ring GLIDES (0.75 s ease) and stays on; a hand shows where to tap; the tip card pops in with Step N of M + a progress bar; Skip always visible.
+   Colours are the sample's own (ink #1e2229 · gold #b8934a · wine #6e2a3a). Everything here is position:fixed because this page scrolls (the sample was a fixed phone frame). */
+.sp-blocker{position:fixed;inset:0;z-index:13;display:none}
+.sp-ring{position:fixed;z-index:14;border-radius:999px;box-shadow:0 0 0 9999px rgba(15,17,21,.64);outline:3px solid #fff;outline-offset:4px;transition:all .75s cubic-bezier(.65,0,.35,1);pointer-events:none;display:none}
+.sp-ring::after{content:"";position:absolute;inset:-10px;border-radius:inherit;border:2px solid rgba(255,255,255,.6);animation:sp-pulse 1.6s ease-out infinite}
+@keyframes sp-pulse{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.2)}}
+.sp-hole{position:fixed;z-index:15;cursor:pointer;border-radius:999px;display:none}
+.sp-tip{position:fixed;z-index:16;left:16px;right:16px;background:#fff;color:#1e2229;border-radius:18px;padding:14px 16px;box-shadow:0 14px 36px rgba(0,0,0,.28);transition:top .5s cubic-bezier(.2,.8,.2,1),opacity .2s;display:none}
+.sp-tip.pop{animation:sp-pop .45s cubic-bezier(.2,1.4,.4,1)}
+@keyframes sp-pop{from{opacity:0;transform:translateY(10px) scale(.94)}}
+.sp-tip .step{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#b8934a;margin-bottom:2px}
+.sp-tip h4{margin:0 0 4px;font-size:17px;font-weight:600}
+.sp-tip p{margin:0 0 12px;font-size:14px;color:#3a3e45;line-height:1.4}
+.sp-tip .hint{font-size:13px;color:#6e2a3a;font-weight:600;margin:-6px 0 10px}
+.sp-tip .rowb{display:flex;justify-content:space-between;align-items:center}
+.sp-tip .prog{height:4px;border-radius:4px;background:#efe9df;flex:1;margin:0 12px;overflow:hidden}
+.sp-tip .prog i{display:block;height:100%;background:#6e2a3a;transition:width .5s}
+.sp-tip .skip{background:none;border:0;color:#6b6f76;font:inherit;font-size:14px;min-height:44px;padding:0 4px;cursor:pointer}
+.sp-tip .go,.sp-done .go{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:999px;font-weight:600;font-size:14px;border:1px solid #1e2229;background:#1e2229;color:#fff;cursor:pointer;user-select:none}
+.sp-finger{position:fixed;z-index:17;width:34px;height:34px;pointer-events:none;opacity:0;transition:left .8s cubic-bezier(.2,.8,.2,1),top .8s cubic-bezier(.2,.8,.2,1),opacity .3s;display:none}
+.sp-finger.tap{animation:sp-tap .9s ease-in-out infinite}
+@keyframes sp-tap{50%{transform:scale(.8)}}
+.sp-done{position:fixed;inset:0;z-index:18;display:none;align-items:center;justify-content:center;background:rgba(15,17,21,.6)}
+.sp-done .sp-tip{position:static;display:block;margin:0 16px;text-align:center;max-width:420px}
+.sp-done .close{background:none;border:0;color:#6b6f76;font:inherit;font-size:14px;min-height:44px;padding:0 10px;cursor:pointer;margin-left:10px}
+.sp-confetti{position:fixed;inset:0;z-index:19;pointer-events:none;overflow:hidden;display:none}
+.sp-confetti i{position:absolute;top:-12px;width:8px;height:12px;border-radius:2px;animation:sp-fall 1.8s ease-in forwards}
+@keyframes sp-fall{to{transform:translateY(100vh) rotate(540deg);opacity:.2}}
+html.tour-on .sp-blocker,html.tour-on .sp-ring,html.tour-on .sp-hole,html.tour-on .sp-tip,html.tour-on .sp-finger{display:block}
+html.tour-done .sp-done{display:flex} html.tour-done .sp-confetti{display:block}
+/* Home's Next card (DECISION_LOG 2026-10-02: "Show me" opens the spotlight on the exact button) */
+.nextcard{background:var(--paper-2);border:1px solid var(--line);border-radius:18px;padding:16px;margin:14px 0}
+.nextcard .eyebrow{margin:0 0 2px;color:var(--gild)} .nextcard h3{font-size:18px;margin:4px 0 6px} .nextcard p{margin:0 0 12px;color:var(--mute);font-size:14px}
+
+/* Account rows (the shipped way a tour is found again: Account › "Restart welcome tour") */
+.acct{display:grid}
+.acct button,.acct div{display:flex;align-items:center;justify-content:space-between;min-height:52px;padding:0 2px;border-top:1px solid var(--line);font-size:15px;width:100%}
+.acct>:first-child{border-top:0}
+.acct .l{display:inline-flex;align-items:center;gap:10px}
+.acct svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.acct .ch{color:color-mix(in srgb,var(--ink) 40%,transparent)}
+</style>
+</head>
+<body>
+
+<!-- ===== prototype-only: jump to a state (not part of the page) ===== -->
+<div class="dev">
+  <span>Try a state</span>
+  <span class="pickone"><span id="devLabel">1 · The page as built</span><select id="devState" aria-label="Try a state"></select></span>
+  <span class="tag" id="devTag">PR5 prototype · 2026-10-10</span>
+</div>
+
+<div class="app">
+  <header class="shell"><span>≡</span><span class="logo">SETNAYAN</span>
+    <div class="right"><span class="ic">⌕</span><span class="ic">💬</span><span class="ic">🔔</span><button class="av" data-act="sheet" data-key="account" aria-label="Account"></button></div>
+  </header>
+  <main>
+    <h1 class="sr">Suppliers</h1>
+    <div class="stick" id="stick">
+      <p class="facts" id="facts"></p>
+      <div class="seg" role="tablist" aria-label="Find, Build or Booked" data-tour-anchor="segmented"><button data-act="mode" data-mode="find" role="tab">Find</button><button data-act="mode" data-mode="build" role="tab">Build <b id="segBuild"></b></button><button data-act="mode" data-mode="booked" role="tab">Booked <b id="segBooked"></b></button></div>
+    </div>
+    <div id="view"></div>
+  </main>
+
+  <nav class="bar5"><div><i><svg viewBox="0 0 24 24"><path d="M3 11 12 3l9 8M5 10v10h14V10M10 20v-6h4v6"/></svg></i>Home</div><div><i><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-5-6.3"/></svg></i>Guests</div><div class="on"><i><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg></i>Suppliers</div><div><i><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></i>Hub</div><div><i><svg viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></svg></i>More</div></nav>
+  <div class="lower" id="lower"></div>
+  <div class="cart" id="cart"><div id="cartLine"></div><button data-act="mode" data-mode="build">View this build ›</button></div>
+  <div class="scrim" id="scrim" data-act="close"></div>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="grip"></div><button class="x" data-act="close" aria-label="Close"></button><div class="sheetbody" id="sheetBody"></div><div class="sheetfoot" id="sheetFoot"></div></div>
+  <div class="toast" id="toast"><span id="toastText"></span><button id="toastUndo">Undo</button></div>
+
+  <!-- the tour: the approved spotlight layer -->
+  <div class="sp-blocker" id="spBlocker"></div>
+  <div class="sp-ring" id="spRing"></div>
+  <div class="sp-hole" id="spHole" title="Tap it" data-act="spadvance"></div>
+  <svg class="sp-finger" id="spFinger" viewBox="0 0 24 24"><path fill="#fff" stroke="#1e2229" stroke-width="1.2" d="M9 11V5.5a1.5 1.5 0 0 1 3 0V10l.5-.1a1.5 1.5 0 0 1 2 1.2l.1.4a1.5 1.5 0 0 1 2.4.9V13a1.4 1.4 0 0 1 2.5.9v2.6c0 3-2.4 5.5-5.4 5.5h-1.4a5.5 5.5 0 0 1-4.6-2.5L5.4 15a1.4 1.4 0 0 1 2.2-1.8L9 14.6"/></svg>
+  <div class="sp-tip" id="spTip" role="dialog" aria-live="polite"><div class="step" id="spStep"></div><h4 id="spT"></h4><p id="spB"></p><div class="hint">Tap it yourself — or press Next</div><div class="rowb"><button class="skip" data-act="spskip">Skip</button><div class="prog"><i id="spBar"></i></div><button class="go" id="spGo" data-act="spadvance">Next</button></div></div>
+  <div class="sp-done" id="spDone"><div class="sp-tip"><div class="step">Done</div><h4>You’re set 🎉</h4><p>Whenever you’re unsure, the <b>Next</b> card on Home shows the one thing to do — tap <b>Show me</b> and we’ll walk you there.</p><button class="go" data-act="spagain">Play again</button><button class="close" data-act="spclose">Close</button></div></div>
+  <div class="sp-confetti" id="spConfetti"></div>
+</div>
+
+<script>
+(function(){
+  const $=s=>document.querySelector(s), h=document.documentElement;
+  const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  /* ---------------- icons (lucide shapes, as the approved prototype) ---------------- */
+  const ICO={chat:'<svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.6-.8L3 21l1.9-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>',book:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M9 16l2 2 4-4"/></svg>',x:'<svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>',plus:'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',check:'<svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg>',cal:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>',search:'<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',expand:'<svg viewBox="0 0 24 24"><path d="m7 9 5-5 5 5M7 15l5 5 5-5"/></svg>',pin:'<svg viewBox="0 0 24 24"><path d="M12 21s7-6.5 7-11.5a7 7 0 1 0-14 0C5 14.5 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',nudge:'<svg viewBox="0 0 24 24"><path d="M6 17V11a6 6 0 0 1 12 0v6l2 2H4zM10 21h4"/></svg>',card:'<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/></svg>',pen:'<svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',undo:'<svg viewBox="0 0 24 24"><path d="M3 7v6h6M3 13a9 9 0 1 0 3-7"/></svg>'};
+  const TONE={chat:'info',book:'ok',x:'danger',plus:'brand',check:'ok',cal:'warn',search:'brand',expand:'neutral',pin:'neutral',nudge:'warn',card:'ok',pen:'neutral',undo:'neutral'};
+  const bb=(name,label,attrs,cls='')=>`<button class="btn t-${cls.includes('neutral')?'neutral':(TONE[name]||'neutral')} ${cls}" ${attrs||''} aria-label="${esc(label)}" title="${esc(label)}">${ICO[name]}<span class="lbl">${esc(label)}</span></button>`;
+  const ib=(name,label,attrs,cls='')=>`<button class="ic t-${TONE[name]||'neutral'} ${cls}" ${attrs||''} aria-label="${esc(label)}" title="${esc(label)}">${ICO[name]}<span class="lbl">${esc(label)}</span></button>`;
+  const pick=(id,value,opts,extra='')=>`<span class="pickone" ${extra}><span>${esc((opts.find(o=>o[0]===value)||opts[0])[1])}</span><select id="${id}" aria-label="${esc(id)}">${opts.map(o=>`<option value="${o[0]}" ${o[0]===value?'selected':''}>${esc(o[1])}</option>`).join('')}</select></span>`;
+
+  /* ---------------- dates ---------------- */
+  const DAY={weekday:'short',month:'short',day:'numeric',year:'numeric'}, MON={month:'long',year:'numeric'};
+  const toD=k=>{ const [y,m,d]=k.split('-').map(Number); return new Date(y,m-1,d||1); };
+  const fmtDate=k=>toD(k).toLocaleDateString('en-US',DAY);
+  const monthOf=k=>toD(k).toLocaleDateString('en-US',MON);
+  const shortDate=k=>toD(k).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const dow=k=>toD(k).toLocaleDateString('en-US',{weekday:'short'});
+  const key=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const saturdays=ym=>{ const [y,m]=ym.split('-').map(Number); const out=[]; for(let d=1;d<=31;d++){ const t=new Date(y,m-1,d); if(t.getMonth()!==m-1) break; if(t.getDay()===6) out.push(key(t)); } return out; };
+
+  /* ---------------- fixtures: the approved prototype's names; the lab's categories ----------------
+     Prices shown are the approved prototype's (₱950 / head · ₱1,200 / head · ₱1,056,000) — none invented here. */
+  const CATS=[{k:'reception',name:'Reception venue',ico:'🏛'},{k:'catering',name:'Catering',ico:'🍽'},{k:'photo',name:'Photo & video',ico:'📷'},{k:'cake',name:'Cake',ico:'🎂'},{k:'flowers',name:'Flowers',ico:'💐'}];
+  const cat=k=>CATS.find(c=>c.k===k);
+  const SUP={
+    seda:{id:'seda',name:'Seda Vertis North',cat:'reception',city:'Quezon City',addr:'North Ave corner EDSA, Quezon City',svc:'Grand ballroom · up to 300 pax',inc:'Catering · cake · bridal suite · 8 hrs',taken:['2026-12-05','2027-01-09'],photos:true,room:false},
+    bituin:{id:'bituin',name:'Bituin Catering',cat:'catering',city:'Quezon City',svc:'Wedding buffet · 150–250 pax',price:'from ₱950 / head',inc:'Tasting for 4 · crew meals · 2 live stations',taken:['2026-12-12','2026-12-26']},
+    hiraya:{id:'hiraya',name:'Hiraya Table',cat:'catering',city:'Quezon City',svc:'Plated dinner · 100–200 pax',price:'from ₱1,200 / head',inc:'Tasting for 2 · table styling',taken:[]},
+    lumina:{id:'lumina',name:'Lumina Studio',cat:'photo',city:'Pasig',svc:'Full-day photo & video',inc:'Same-day edit · 2 shooters',taken:[]},
+  };
+  const sup=id=>SUP[id];
+  const CITIES=['Quezon City','Makati','Taguig','Pasig','Manila','Tagaytay','Cebu City','Davao City'];
+
+  /* ---------------- state ----------------
+     scenario: none  = no date, nothing booked, suppliers shortlisted
+               set   = a date set, nothing booked (Seda is a pick in the build)
+               booked= a date set and Seda booked on it (the page as built) */
+  let S; const SEED=sc=>{
+    const base={scenario:sc,mode:'find',cat:'catering',picks:{catering:'bituin',photo:'lumina'},shortlist:{reception:['seda'],catering:['bituin','hiraya'],photo:['lumina']},
+      date:null,precision:null,month:null,dateMode:'have',helpPick:null,mustHave:'',request:null,draftNote:null,
+      city:null,venueTyped:null,ceremonyTime:null,roomAsked:false,booked:{},tourDone:false,placeSource:'supplier',addOwn:false};
+    if(sc==='set'){ base.date='2026-12-18'; base.precision='day'; base.month='2026-12'; base.city='Quezon City'; base.picks.reception='seda'; }
+    if(sc==='booked'){ base.date='2026-12-18'; base.precision='day'; base.month='2026-12'; base.city='Quezon City'; base.booked={reception:'seda'}; }
+    return base; };
+  S=SEED('booked');
+
+  const bookedIn=k=>S.booked[k]?sup(S.booked[k]):null;
+  const bookedList=()=>Object.values(S.booked).map(sup);
+  const isFree=(s,k)=>!(k&&s.taken.includes(k));
+  const availableFor=s=>S.precision==='day'?isFree(s,S.date):true;
+  const pricedPicks=()=>Object.keys(S.picks).filter(k=>!bookedIn(k)).map(k=>sup(S.picks[k])).filter(Boolean);
+  const venue=()=>bookedIn('reception')||bookedIn('ceremony');
+  // the shipped words (lib/suppliers-shell.ts): a day · a month · a year · "Pick your date"; "venue, area" · the area · "Pick the place"
+  const dateFact=()=>!S.date?{text:'Pick your date',open:true}:S.precision==='month'?{text:monthOf(S.date),open:true}:S.precision==='year'?{text:S.date.slice(0,4),open:true}:{text:fmtDate(S.date),open:false};
+  const placeFact=()=>{ const v=venue(); if(v) return {text:`${v.name}, ${v.city}`,open:false}; if(S.venueTyped&&S.venueTyped.name) return {text:`${S.venueTyped.name}, ${S.city||''}`.replace(/, $/,''),open:false}; if(S.city) return {text:S.city,open:true}; return {text:'Pick the place',open:true}; };
+
+  /* ---------------- toast ---------------- */
+  let toastT=null, undoFn=null;
+  function toast(text,undo){ $('#toastText').textContent=text; undoFn=undo||null; $('#toastUndo').style.display=undo?'':'none'; $('#toast').classList.add('on'); clearTimeout(toastT); toastT=setTimeout(()=>$('#toast').classList.remove('on'),undo?6000:2800); }
+  $('#toastUndo').addEventListener('click',()=>{ if(undoFn) undoFn(); $('#toast').classList.remove('on'); undoFn=null; });
+  let cartT=null; function peekCart(line){ $('#cartLine').innerHTML=line; $('#cart').classList.add('on'); clearTimeout(cartT); cartT=setTimeout(()=>$('#cart').classList.remove('on'),2500); }
+
+  /* ---------------- render: the page (surroundings as built — Find, Build, Booked) ---------------- */
+  function render(){
+    // a pick a changed date makes unavailable drops out of the build (plan PR5: "choosing a day re-runs the availability filter everywhere")
+    Object.keys(S.picks).forEach(k=>{ const x=sup(S.picks[k]); if(x&&!availableFor(x)) delete S.picks[k]; });
+    const d=dateFact(), p=placeFact();
+    $('#facts').innerHTML=`<button data-act="sheet" data-key="date" data-fact="date" class="${d.open?'set':''}" aria-label="Date: ${esc(d.text)}">${esc(d.text)}</button>${S.request?`<button class="ask" data-act="sheet" data-key="date" aria-label="A date change is asked">· change asked</button>`:''}<span class="mute">·</span><button data-act="sheet" data-key="place" data-fact="place" class="${p.open?'set':''}" aria-label="Place: ${esc(p.text)}">${esc(p.text)}</button>`;
+    const filled=CATS.filter(c=>bookedIn(c.k)||S.picks[c.k]).length;
+    $('#segBuild').textContent=`${filled}/${CATS.length}`; $('#segBooked').textContent=String(bookedList().length);
+    document.querySelectorAll('.seg [data-mode]').forEach(b=>{ b.classList.toggle('on',b.dataset.mode===S.mode); b.setAttribute('aria-selected',b.dataset.mode===S.mode); });
+    const v=$('#view'); v.innerHTML=S.mode==='find'?renderFind():S.mode==='build'?renderBuild():S.mode==='home'?renderHome():renderBooked();
+    const lower=$('#lower'); lower.classList.toggle('on',S.mode==='find'); document.body.classList.toggle('has-lower',S.mode==='find');
+    lower.innerHTML=S.mode==='find'?`${ib('expand','Expand all','','icon-only')}<input placeholder="Search ${S.cat?cat(S.cat).name:'all suppliers'} or add your own" aria-label="Search all suppliers or add your own">${ib('plus','Add your own','data-act="note" data-text="Add your own — PR2\'s step-by-step add (not built yet)"','main icon-only')}`:'';
+  }
+  const stateOf=(s,k)=>bookedIn(k)===s?'<span class="ok">Booked ✓</span>':S.picks[k]===s.id?'<span class="ok">In your build</span>':!availableFor(s)?`<span class="wine">Cannot add to build — there is a conflict on the date (taken on ${shortDate(S.date)})</span>`:s.price?'Saved · priced':'Saved';
+  const verbs=(s,k)=>bookedIn(k)===s?`${ib('card','Pay','data-act="note" data-text="Pay — the shipped Payments sheet (PR4)"','main')}${ib('chat','Chat','data-act="note" data-text="Chat — the One Chat Box"')}`
+    :!availableFor(s)?`${ib('cal','Ask about another day','data-act="note" data-text="Opens the chat with one line about another day"','main quiet')}${ib('x','Remove','data-act="note" data-text="Remove"')}`
+    :(s.price||s.id==='lumina'||s.id==='seda')?`${S.picks[k]===s.id?ib('check','In your build',`data-act="pick" data-id="${s.id}" data-cat="${k}"`,'main'):ib('plus','Add to build',`data-act="pick" data-id="${s.id}" data-cat="${k}"`,'main')}${ib('book','Book','data-act="note" data-text="Book — the shipped date-lock confirmations (PR2)"')}${ib('chat','Chat','data-act="note" data-text="Chat"')}${ib('x','Remove','data-act="note" data-text="Remove"')}`
+    :`${ib('chat','Ask for a quote','data-act="note" data-text="Ask for a quote"','main')}${ib('x','Remove','data-act="note" data-text="Remove"')}`;
+  const scard=(s,k)=>`<div class="scard" data-supplier="${s.id}"><span class="cover" style="background:linear-gradient(135deg,${s.id==='bituin'?'#c9d2e6,#a8b6d9':s.id==='hiraya'?'#cfe3cf,#a9cba9':s.id==='seda'?'#e6d8c9,#cdb79b':'#e3cfe0,#c7a9c4'})"></span><div class="body"><span class="sc-name">${esc(s.svc)}</span><span class="sc-leaf">${esc(s.name)} · ${esc(s.city)}</span>${s.price?`<span class="sc-price">${esc(s.price)}</span>`:''}<span class="sc-inc">🎁 ${esc(s.inc)}</span></div><span class="sc-state">${stateOf(s,k)}</span><span class="acts">${verbs(s,k)}</span></div>`;
+  function renderFind(){
+    return `<section style="padding-top:4px"><h2 class="sr">Cover your event</h2>${CATS.map(c=>{ const list=(S.shortlist[c.k]||[]).map(sup); const open=S.cat===c.k; const b=bookedIn(c.k);
+      const st=b?'<span class="state ok">Booked ✓</span>':list.length?`<span class="state wine">${list.length} to decide</span>`:'<span class="state">Find suppliers</span>';
+      return `<div class="cat ${open?'open':''}" id="cat-${c.k}" ${c.k==='catering'?'data-tour-anchor="category-row"':''}><button class="bar" data-act="opencat" data-cat="${c.k}" aria-expanded="${open}"><span class="ico">${c.ico}</span><span><b style="font-weight:500">${esc(c.name)}</b>${list.length?` <span class="mute">· ${list.length} yours</span>`:''}</span>${st}<span class="chev">⌃</span></button><div class="exp"><div>${open?(list.length?list.map(s=>scard(s,c.k)).join(''):`<p class="note" style="margin:0 0 12px">Nobody here yet — search above or add your own.</p>`):''}</div></div></div>`; }).join('')}</section>`;
+  }
+  function renderBuild(){
+    const priced=pricedPicks(), free=priced.filter(s=>availableFor(s));
+    const line=S.precision==='day'?(priced.length?`${free.length} of ${priced.length} priced picks are free on ${shortDate(S.date)}`:'Pick suppliers to check your date'):(S.date?`Your date is a month — pick a day to check your picks`:'Pick a date to check your picks');
+    return `<section style="padding-top:8px"><h2>This build</h2><p class="sub">${CATS.filter(c=>bookedIn(c.k)||S.picks[c.k]).length} of ${CATS.length} categories · ₱1,056,000</p>
+      ${CATS.map(c=>{ const b=bookedIn(c.k), p=S.picks[c.k]?sup(S.picks[c.k]):null; return `<div class="pick"><span><span class="k">${esc(c.name)}${b?' · BOOKED':''}</span><br><span class="v">${b?esc(b.name):p?esc(p.name):'<span class="mute">Nobody yet</span>'}</span></span>${b||p?'':ib('search',`Find in ${c.name}`,`data-act="opencat" data-cat="${c.k}" data-go="find"`)}</div>`; }).join('')}
+      <div class="fitline" data-tour-anchor="fit-line"><span style="color:${free.length===priced.length&&priced.length?'var(--ok)':'var(--wine)'}">${free.length===priced.length?'✓':'!'}</span><span>${line}</span><span class="acts">${ib('cal',S.precision==='day'?'Help me choose':'Set the date','data-act="sheet" data-key="date" data-help="1"')}</span></div>
+      <div class="money"><div><div class="k">Booked</div><div class="v">${bookedList().length?'—':'₱0'}</div><div class="n">${bookedList().length?`${bookedList().length} booked · no price recorded`:'None yet'}</div></div><div><div class="k">If you book these</div><div class="v">₱1,056,000</div><div class="n">${priced.length} in your build</div></div></div>
+      <p class="note">Build's other parts (All builds, Save, Book this build) are PR3 — not drawn here.</p></section>`;
+  }
+  function renderHome(){ return `<section style="padding-top:8px"><p class="eyebrow" style="margin:0">Wedding · Dec 18</p><h2>Home</h2><div class="nextcard"><p class="eyebrow">Next</p><h3>Find your suppliers</h3><p>Your date and place are set — now cover your event.</p>${bb('check','Show me','data-act="showme"','main')}</div><p class="note">The one door to a tour, per DECISION_LOG 2026-10-02: Home’s Next card, “Show me” opens the spotlight on the exact button; a finished tour never shows twice by itself. <span class="today">today’s behaviour</span> Account › “Restart welcome tour” (the avatar) still clears every tour.</p></section>`; }
+  function renderBooked(){ const list=bookedList();
+    return `<section style="padding-top:8px"><h2>Booked</h2><p class="sub">${list.length?`${list.length} booked`:'Nobody booked yet'}</p>${list.map(s=>`<div class="row"><span class="logo">${esc(s.name.split(' ').map(w=>w[0]).join('').slice(0,2))}</span><span><span class="name">${esc(s.name)}</span><span class="svc">${esc(cat(s.cat).name)} · ${S.precision==='day'?'holds '+shortDate(S.date):'date held'}</span></span><span class="pill ok">Booked</span></div>`).join('')}<p class="note">Booked's rows, Budget and the Pay sheet are PR4 — not drawn here.</p></section>`; }
+
+  /* ---------------- sheets ---------------- */
+  const sheet=$('#sheet'), body=$('#sheetBody'), foot=$('#sheetFoot');
+  let openKey=null;
+  function openSheet(key,d){ openKey=key; const r=SHEETS[key](d||{}); body.innerHTML=r.body; foot.innerHTML=r.foot||''; h.classList.add('sheet-open'); body.scrollTop=0; }
+  function refresh(){ if(openKey) openSheet(openKey); }
+  function closeSheet(){ h.classList.remove('sheet-open'); openKey=null; }
+  const lad=steps=>`<div class="ladder">${steps.map(x=>`<div class="step ${x.on?'on':''}"><span class="dotl"></span><span class="t">${x.t}</span>${x.act?`<button class="act" ${x.act}>${esc(x.al)}</button>`:''}</div>`).join('')}</div>`;
+
+  /* candidates: the shipped Find your date ranks a month's Saturdays by how many shortlisted suppliers are free; only days every BOOKED supplier can do are offered (lib/date-fits-booked.ts) */
+  function candidates(ym){ const cats=Object.keys(S.shortlist); const b=bookedList();
+    return saturdays(ym).filter(k=>b.every(s=>isFree(s,k))).map(k=>{ const per=cats.map(c=>{ const top=S.booked[c]?sup(S.booked[c]):(S.picks[c]?sup(S.picks[c]):sup(S.shortlist[c][0])); const freeOnes=S.shortlist[c].map(sup).filter(s=>isFree(s,k)); return {c,top,topFree:isFree(top,k),free:freeOnes}; });
+      const covered=per.filter(x=>x.free.length).length, kept=per.filter(x=>x.topFree).length; return {k,per,covered,kept,total:cats.length}; })
+      .sort((a,b)=>(b.covered-a.covered)||(b.kept-a.kept)||a.k.localeCompare(b.k)).map((d,i)=>Object.assign(d,{best:i===0&&d.total>0})); }
+  const coverage=d=>{ const swaps=d.covered-d.kept; if(d.covered===d.total) return d.kept===d.total?`All ${d.total} categories covered · keeps every top pick`:`All ${d.total} covered · ${swaps} swap${swaps===1?'':'s'}`; return `${d.covered} of ${d.total} categories covered`; };
+
+  /* a typed day: a booked supplier who cannot do it refuses it at the pick, with one way to ask them (DateClashNote) */
+  function clashFor(k){ return bookedList().filter(s=>!isFree(s,k)); }
+  let clash=null, confirming=false;
+  function setDate(k,precision){ clash=null; confirming=false; const who=clashFor(k);
+    if(who.length){ clash={pick:k,precision,list:who}; refresh(); return; }
+    const prev={date:S.date,precision:S.precision}; S.date=k; S.precision=precision; S.month=k.slice(0,7);
+    S.draftNote=bookedList().length?'Saved to your draft — your booked suppliers can do this day. They are told when you Apply.':'Saved to your draft — guests see it when you Apply your Event Hub.';
+    render(); closeSheet(); toast(precision==='day'?`Your date is ${fmtDate(k)}`:`Your date is ${monthOf(k)} for now`,()=>{ S.date=prev.date; S.precision=prev.precision; S.draftNote=null; render(); }); }
+
+  const SHEETS={
+    date({help}){ if(help) S.dateMode='help'; const b=bookedList(); const y=S.date?S.date.slice(0,4):null;
+      const held=b.length&&S.precision==='day';
+      const body=`<h3>Your date</h3><p class="mute" style="margin:0">It gets sharper as you book.</p>
+        ${lad([{on:!!S.date,t:S.date?`Year · ${y}`:'Year · not yet'},{on:!!S.date&&S.precision!=='year',t:S.date&&S.precision!=='year'?`Month · ${monthOf(S.date)}`:'Month · not yet'},{on:S.precision==='day',t:S.precision==='day'?`Day · ${fmtDate(S.date)}${held?` <span class="mute">· held by ${esc(b[0].name)}’s booking</span>`:''}`:'Day · not yet'},{on:!!S.ceremonyTime,t:S.ceremonyTime?`Time · ${esc(S.ceremonyTime)} ceremony <span class="today">today’s behaviour</span>`:'Time · ceremony, after the day <span class="today">today’s behaviour</span>'}])}
+        ${S.request?pendingCard():''}
+        <div class="rowhead"><span style="font-size:14px">Your date</span>${pick('dateMode',S.dateMode,[['have','I have a date'],['help','Help me choose']])}</div>
+        ${S.dateMode==='have'?`<div class="field"><label>${S.precision==='day'?'Change the day':'The day'}</label><input type="date" id="dateInput" value="${S.precision==='day'?S.date:''}" aria-label="The day"></div>
+          ${S.precision==='day'?`<div class="field"><label>Ceremony time <span class="today">today’s behaviour</span></label><input type="time" id="timeInput" value="${S.ceremonyTime?to24(S.ceremonyTime):''}" aria-label="Ceremony time"></div>`:''}
+          ${clash?clashCard():''}
+          ${S.draftNote?`<p class="saved" data-date-note="">${esc(S.draftNote)}</p>`:''}
+          ${held&&!clash?`<p class="note">A day ${esc(b.map(s=>s.name).join(' and '))} can’t do is never moved quietly — they are asked first, and your date stays until they answer.</p>`:''}`
+        :helpBody()}`;
+      const foot=S.dateMode==='have'?(clash?'':bb('check',S.precision==='day'?'Save date':'Save date','data-act="savedate"')):(S.helpPick?bb('check',`Use ${fmtDate(S.helpPick)}`,`data-act="setdate" data-date="${S.helpPick}" data-precision="day"`):'');
+      return {body,foot}; },
+    place(){ const rec=bookedIn('reception'), cer=bookedIn('ceremony'), pickRec=S.picks.reception?sup(S.picks.reception):null, own=S.placeSource==='own'||!!S.venueTyped; const typed=S.venueTyped||{name:'',addr:'',pinned:false,photo:'none'};
+      const recRung=rec?{on:true,t:`Reception · ${esc(rec.name)}`}:typed.name?{on:true,t:`Reception · ${esc(typed.name)} <span class="mute">· typed by you</span>`}:pickRec?{on:false,t:`Reception · ${esc(pickRec.name)} <span class="mute">· in your build, not booked</span> <span class="today">today’s behaviour</span>`,act:'data-act="note" data-text="Book — the shipped date-lock confirmations (PR2)"',al:'Book ›'}:{on:false,t:'Reception · not yet',act:'data-act="opencat" data-cat="reception" data-go="find"',al:'Find ›'};
+      const cerRung=cer?{on:true,t:`Ceremony · ${esc(cer.name)}`}:{on:false,t:'Ceremony · not yet',act:'data-act="opencat" data-cat="ceremony" data-go="find"',al:'Find ›'};
+      const roomRung=rec?(rec.room?{on:true,t:'Room size · sent by the venue · your seat plan uses it'}:S.roomAsked?{on:false,t:`Room size · asked ${esc(rec.name)}, waiting`}:{on:false,t:'Room size · ask the venue',act:'data-act="askroom"',al:'Ask them ›'}):{on:false,t:'Room size · after the venue'};
+      const body=`<h3>Your place</h3><p class="mute" style="margin:0">It gets sharper as you book.</p>
+        ${lad([{on:!!S.city,t:S.city?`City or area · ${esc(S.city)}`:'City or area · not yet'},recRung,cerRung,roomRung])}
+        <div class="rowhead"><span style="font-size:14px">City or area</span>${pick('cityPick',S.city||'',[['','Pick a city or area']].concat(CITIES.map(c=>[c,c])))}</div>
+        ${rec?`<div class="rowhead" style="margin-top:14px"><span class="k2" style="margin:0">Reception</span>${pick('placeSource',own?'own':'supplier',[['supplier','Use the supplier’s details'],['own','Enter your own']])}</div>`:`<p class="k2">Reception</p>`}
+        ${rec&&!own?`<div class="vcard" data-venue-booked=""><span class="pin">${ICO.pin}</span><div><p class="nm">${esc(rec.name)}</p><p class="ad">${esc(rec.addr)}</p><p class="fb">Booked · follows the booking · pinned on the map</p></div></div>
+          <div class="photo-row"><span class="th"></span>${pick('venuePhoto','supplier',[['supplier','Supplier’s photo'],['upload','Upload a photo'],['none','No photo']])}</div>
+          <p class="note">Changing the venue means cancelling a booking — do that from Booked. <span class="today">today’s behaviour</span></p>`
+        :(own||S.addOwn)?`<div class="field"><label>Name of the place</label><input id="vName" value="${esc(typed.name)}" placeholder="Name of the place" aria-label="Reception — name of the place"></div>
+          <div class="field"><label>Exact address</label><input id="vAddr" value="${esc(typed.addr)}" placeholder="Street, barangay, city" aria-label="Reception — exact address"></div>
+          <div class="cta" style="padding-top:4px">${bb('search','Find on the map','data-act="findmap"','neutral')}</div>
+          <div class="map"><div class="road"></div><div class="road b"></div></div>
+          <p class="pinned">${typed.pinned?`Pinned at ${esc(typed.addr||typed.name||'the crosshair')} · drag the map to move the pin`:'Drag the map to put the crosshair on the door — or Find the address.'}</p>
+          <div class="photo-row"><span class="th"></span>${pick('venuePhoto',typed.photo,[['upload','Upload a photo'],['none','No photo']])}</div>
+          <p class="saved">Saves as you type. Guests see it when you Apply your Event Hub.</p>`
+        :`<div class="cta" style="padding-top:2px">${ib('search','Find in Reception venue','data-act="opencat" data-cat="reception" data-go="find"','main')}${ib('plus','Add your own venue','data-act="addown"')}</div>
+          <p class="note">Add your own venue opens the Add flow in Reception: Setnayan is checked first, then your record. <span class="today">PR2, not built yet</span></p>`}`;
+      return {body,foot:''}; },
+    account(){ return {body:`<h3>Account</h3><p class="mute" style="margin:0 0 10px">Where a tour is found again — the shipped row.</p><div class="acct"><div><span class="l">Appearance</span><span class="ch">›</span></div><div><span class="l">Setnayan AI</span><span class="ch">›</span></div><button data-act="restarttour"><span class="l"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>Restart welcome tour</span></button><div><span class="l">Sign out</span><span class="ch">›</span></div></div><p class="note">Today’s behaviour: this clears every tour you’ve seen — the Suppliers tour plays again the next time you open Suppliers.</p>`,foot:''}; },
+  };
+  const to24=t=>{ const m=/(\d+):(\d+)\s*(AM|PM)/i.exec(t); if(!m) return ''; let hh=+m[1]%12; if(/pm/i.test(m[3])) hh+=12; return `${String(hh).padStart(2,'0')}:${m[2]}`; };
+  const to12=v=>{ const [hh,mm]=v.split(':').map(Number); const ap=hh>=12?'PM':'AM'; return `${hh%12||12}:${String(mm).padStart(2,'0')} ${ap}`; };
+  function helpBody(){ const b=bookedList();
+    if(!S.month) return `<p class="note" style="margin-top:12px">Which month are you considering? Its Saturdays appear here, ranked by how many of your suppliers are free.</p><div class="field"><label>The month</label><input type="month" id="monthInput" min="2026-10" aria-label="The month you are considering"></div><div class="cta">${bb('cal','Compare its Saturdays','data-act="usemonth"','neutral')}</div>`;
+    const list=candidates(S.month); const all=S.showAll; const shown=all?list:list.slice(0,3); const cur=S.helpPick||(list[0]&&list[0].k);
+    const none=`<p class="note" data-find-date-none-fit="">No Saturday that month works with your booked suppliers. Choose another month below.</p>`;
+    return `<p class="eyebrow">The days you’re considering — ranked by your suppliers</p>
+      ${!list.length?none:`<ol class="cand">${shown.map((d,i)=>`<li><button data-act="helppick" data-date="${d.k}" aria-pressed="${d.k===cur}" data-find-date-candidate="${d.k}"><span class="n">${i+1}</span><span style="min-width:0;flex:1"><span class="d">${esc(shortDate(d.k))}, ${d.k.slice(0,4)}</span><span class="dow">${esc(dow(d.k))}</span>${d.best?'<span class="best">★ Best match</span>':''}<span class="cov">${esc(coverage(d))}</span></span></button></li>`).join('')}</ol>
+      ${list.length>3?`<button class="linkish" data-act="showall">${all?'Show the top three':`Show all ${list.length} days`}</button>`:''}`}
+      ${cur&&list.length?whoWorks(list.find(d=>d.k===cur)):''}
+      <div class="rowhead" style="margin-top:14px"><span style="font-size:14px">Must-have supplier</span>${pick('mustHave',S.mustHave,[['','Nobody in particular']].concat(Object.values(S.shortlist).flat().map(id=>[id,sup(id).name])))}</div>
+      <p class="note">${b.length?`Only days every booked supplier can do are offered — ${esc(b.map(s=>s.name).join(', '))} ${b.length===1?'holds':'hold'} your date.`:'Nobody is booked yet, so every Saturday is offered — ranked by who is free.'}</p>
+      <div class="field"><label>Compare another month</label><input type="month" id="monthInput" value="${S.month}" aria-label="The month you are considering"></div><div class="cta">${bb('cal','Compare its Saturdays','data-act="usemonth"','neutral')}</div>`; }
+  function whoWorks(d){ return `<p class="eyebrow">Who works together on ${esc(shortDate(d.k))}</p><div class="who" data-tour-anchor="who-works">${d.per.map(x=>{ const c=cat(x.c); const b=S.booked[x.c]?sup(S.booked[x.c]):null; const t=b?`${esc(b.name)} <span class="ok">· booked, free</span>`:x.free.length?(x.topFree?esc(x.top.name)+(S.picks[x.c]===x.top.id?' <span class="ok">· in your build</span>':''):`${esc(x.free[0].name)} <span class="mute">· ${esc(x.top.name)} is taken</span>`):`<span class="wine">No free option</span>`; return `<button data-act="opencat" data-cat="${x.c}" data-go="find" data-from="help"><span><span class="c">${esc(c.name)}</span>${t}</span><span class="go">${x.free.length?'Open ›':'Find ›'}</span></button>`; }).join('')}</div>`; }
+  function clashCard(){ const who=clash.list.map(s=>s.name); const whoT=who.length===1?who[0]:who.slice(0,-1).join(', ')+' and '+who[who.length-1];
+    return `<div class="clash" role="alert" data-date-clash=""><p style="margin:0">${esc(whoT)} ${who.length===1?'is':'are'} booked elsewhere that day. Your date stays as it is.</p>
+      ${confirming?`<p style="margin:0;color:var(--mute)">We’ll ask ${esc(whoT)} to move to the new date or unlock their service. They have 3 days to answer. Your date stays as it is meanwhile, and guests see nothing.</p><div class="acts"><button class="yes" data-act="askmove">Yes, ask them</button><button data-act="notnow">Not now</button></div>`
+      :`<button class="ask" data-act="confirmask" data-date-clash-ask="">Ask them to move or unlock?</button>`}
+      ${clash.list.map(s=>`<button class="msg" data-act="note" data-text="Opens your conversation with ${esc(s.name)}">Message ${esc(s.name)}</button>`).join('')}</div>`; }
+  function pendingCard(){ const r=S.request; return `<div class="pending" data-date-change-asked=""><span><b>Asked.</b> You asked to move to <b>${esc(fmtDate(r.date))}</b>.</span><span>Waiting on ${esc(r.who.map(s=>s.name).join(', '))} — ${r.who.length===1?'they have':'each has'} 3 days to move to the new date or unlock their service. Your date stays ${esc(fmtDate(S.date))} meanwhile, and guests see nothing.</span><div class="cta" style="padding-bottom:0">${ib('chat','Message '+r.who[0].name.split(' ')[0],'data-act="note" data-text="Opens your conversation"')}${ib('x','Withdraw','data-act="withdraw"')}</div><span class="note" style="margin:0">After 3 days with no answer you choose: keep waiting · drop that supplier · cancel the change. <span class="today">today’s behaviour · followed on Home</span></span></div>`; }
+
+  /* ---------------- the tour: customer_suppliers_v2 — three stops, each the REAL element on the page ----------------
+     Behaviour copied from the approved sample: the ring glides from element to element and stays on; tapping the lit element does the real thing (or Next); Skip → Done. */
+  const STOPS=[
+    {sel:'[data-tour-anchor="segmented"]',t:'Find, Build, Booked',b:'Find suppliers, build your combination, see who is booked — one control.',act(then){ S.mode='find'; render(); then(200); },before(){ S.mode='find'; S.cat=null; render(); scrollTo({top:0}); }},
+    {sel:'#cat-catering > .bar',t:'Tap a category',b:'Your shortlist first, then every supplier free on your date.',act(then){ S.cat='catering'; render(); then(450); },before(){ S.mode='find'; S.cat=null; render(); setTimeout(()=>{ const el=document.getElementById('cat-catering'); if(el) scrollTo({top:Math.max(0,el.getBoundingClientRect().top+scrollY-200)}); },0); }},
+    {sel:'.seg [data-mode="build"]',t:'Build is your cart',b:'One supplier per category, the cost, and whether all are free.',act(then){ S.mode='build'; render(); scrollTo({top:0}); then(450); },before(){ scrollTo({top:0}); }},
+  ];
+  let ti=0, busy=false;
+  const sp=id=>document.getElementById(id);
+  function spPlace(){ const el=document.querySelector(STOPS[ti].sel); if(!el) return; const r=el.getBoundingClientRect(), pad=8;
+    let x=r.left-10-pad, w=r.width+pad*2+20; const y=r.top-10-pad, hh=r.height+pad*2+20, rad=hh>70?'22px':'999px'; /* keep the ring whole inside the viewport (the sample's screen padding was 18, this page's is 16) */ if(x<4){ w+=x-4; x=4; } if(x+w>innerWidth-4) w=innerWidth-4-x;
+    Object.assign(sp('spRing').style,{left:x+'px',top:y+'px',width:w+'px',height:hh+'px',borderRadius:rad});
+    Object.assign(sp('spHole').style,{left:x+'px',top:y+'px',width:w+'px',height:hh+'px',borderRadius:rad});
+    const tip=sp('spTip'); const below=y+hh+20; const limit=innerHeight-64; tip.style.top=(below+190<limit?below:Math.max(parseFloat(getComputedStyle(h).getPropertyValue('--dev'))+8,y-205))+'px';
+    tip.classList.remove('pop'); void tip.offsetWidth; tip.classList.add('pop');
+    sp('spStep').textContent=`Step ${ti+1} of ${STOPS.length}`; sp('spT').textContent=STOPS[ti].t; sp('spB').textContent=STOPS[ti].b;
+    sp('spBar').style.width=((ti+1)/STOPS.length*100)+'%'; sp('spGo').textContent=ti===STOPS.length-1?'Finish':'Next';
+    const f=sp('spFinger'); f.classList.remove('tap'); f.style.opacity=0; f.style.left=(x+w+30)+'px'; f.style.top=(y+hh+40)+'px';
+    clearTimeout(spPlace.ft); spPlace.ft=setTimeout(()=>{ f.style.opacity=1; f.style.left=(x+w/2-6)+'px'; f.style.top=(y+hh/2-4)+'px'; setTimeout(()=>f.classList.add('tap'),800); },700); }
+  function showStop(){ STOPS[ti].before(); setTimeout(spPlace,260); }
+  function startTour(){ ti=0; busy=false; closeSheet(); h.classList.remove('tour-done'); h.classList.add('tour-on'); sp('spTip').style.opacity=1; showStop(); }
+  function advance(){ if(busy) return; busy=true; sp('spFinger').style.opacity=0; sp('spTip').style.opacity=0;
+    STOPS[ti].act(wait=>setTimeout(()=>{ busy=false; sp('spTip').style.opacity=1; if(ti<STOPS.length-1){ ti++; showStop(); } else finish(); },wait)); }
+  function finish(){ h.classList.remove('tour-on'); h.classList.add('tour-done'); S.tourDone=true; try{localStorage.setItem('sup-tour-v2','1');}catch(e){}
+    const c=sp('spConfetti'); c.innerHTML=''; const cols=['#b8934a','#6e2a3a','#fff','#e8c88a','#c97b8d']; for(let n=0;n<70;n++){ const e=document.createElement('i'); e.style.left=Math.random()*100+'%'; e.style.background=cols[n%5]; e.style.animationDelay=(Math.random()*.6)+'s'; e.style.animationDuration=(1.4+Math.random())+'s'; c.appendChild(e); } }
+  function endTour(){ h.classList.remove('tour-on','tour-done'); }
+  addEventListener('resize',()=>{ if(h.classList.contains('tour-on')) spPlace(); });
+  addEventListener('scroll',()=>{ if(h.classList.contains('tour-on')) spPlace(); },{passive:true});
+
+  /* ---------------- actions ---------------- */
+  const ACT={
+    mode(d){ S.mode=d.mode; closeSheet(); render(); scrollTo({top:0}); },
+    opencat(d){ if(d.go==='find'){ S.mode='find'; } S.cat=S.cat===d.cat&&!d.go?null:d.cat; if(d.go) closeSheet(); render(); if(d.go) setTimeout(()=>{ const el=document.getElementById('cat-'+d.cat); if(el) scrollTo({top:el.getBoundingClientRect().top+scrollY-170,behavior:'smooth'}); },40); },
+    sheet(d){ openSheet(d.key,{help:d.help==='1'}); },
+    close(){ closeSheet(); },
+    note(d){ toast(d.text); },
+    pick(d){ const k=d.cat; if(S.picks[k]===d.id){ delete S.picks[k]; render(); return; } S.picks[k]=d.id; render(); peekCart(`<span>Added ${esc(sup(d.id).name)} <span class="mute">· ${Object.keys(S.picks).length+bookedList().length} of ${CATS.length} · ₱1,056,000</span></span>`); },
+    savedate(){ const v=$('#dateInput')&&$('#dateInput').value; const t=$('#timeInput')&&$('#timeInput').value; if(t) S.ceremonyTime=to12(t); if(!v){ if(t){ refresh(); toast('Ceremony time saved to your draft'); } return; } setDate(v,'day'); },
+    setdate(d){ setDate(d.date,d.precision||'day'); },
+    usemonth(){ const v=$('#monthInput')&&$('#monthInput').value; if(!v) return; S.month=v; S.helpPick=null; S.showAll=false; if(!S.date||S.precision!=='day'){ S.date=v+'-01'; S.precision='month'; render(); toast(`Your date is ${monthOf(S.date)} for now`); } refresh(); },
+    helppick(d){ S.helpPick=d.date; refresh(); },
+    showall(){ S.showAll=!S.showAll; refresh(); },
+    confirmask(){ confirming=true; refresh(); },
+    notnow(){ confirming=false; refresh(); },
+    askmove(){ S.request={date:clash.pick,who:clash.list}; clash=null; confirming=false; render(); refresh(); toast('Asked. They have 3 days to answer.'); },
+    withdraw(){ const r=S.request; S.request=null; render(); refresh(); toast('Withdrawn — your date stays as it is',()=>{ S.request=r; render(); refresh(); }); },
+    askroom(){ S.roomAsked=true; refresh(); toast('Asked Seda Vertis North for the room size — one line in your chat'); },
+    addown(){ S.addOwn=true; S.placeSource='own'; S.venueTyped=S.venueTyped||{name:'',addr:'',pinned:false,photo:'none'}; refresh(); toast('Add your own venue — the first step of PR2’s add flow'); },
+    findmap(){ S.venueTyped=S.venueTyped||{name:'',addr:'',pinned:false,photo:'none'}; S.venueTyped.name=($('#vName')&&$('#vName').value)||S.venueTyped.name; S.venueTyped.addr=($('#vAddr')&&$('#vAddr').value)||S.venueTyped.addr; S.venueTyped.pinned=true; if(!S.city) S.city='Quezon City'; render(); refresh(); toast(S.city?`Pinned · City or area set to ${S.city} (nearest by km)`:'Pinned'); },
+    restarttour(){ closeSheet(); toast('Every tour will play again — opening Suppliers'); setTimeout(startTour,900); },
+    spadvance(){ advance(); },
+    spskip(){ finish(); },
+    spagain(){ startTour(); },
+    spclose(){ endTour(); },
+    showme(){ S.mode='find'; render(); startTour(); },
+  };
+  document.addEventListener('click',e=>{ const b=e.target.closest('[data-act]'); if(!b) return; const fn=ACT[b.dataset.act]; if(fn) fn(b.dataset); });
+  document.addEventListener('change',e=>{ const t=e.target;
+    if(t.id==='dateMode'){ S.dateMode=t.value; clash=null; refresh(); }
+    if(t.id==='cityPick'){ S.city=t.value||null; render(); refresh(); if(S.city) toast(`City or area · ${S.city}`); }
+    if(t.id==='placeSource'){ S.placeSource=t.value; if(t.value==='own'){ S.venueTyped=S.venueTyped||{name:'',addr:'',pinned:false,photo:'none'}; } else { S.venueTyped=null; S.addOwn=false; } render(); refresh(); }
+    if(t.id==='venuePhoto'&&S.venueTyped){ S.venueTyped.photo=t.value; }
+    if(t.id==='mustHave'){ S.mustHave=t.value; refresh(); }
+  });
+  document.addEventListener('input',e=>{ const t=e.target; if(!S.venueTyped) return; if(t.id==='vName'){ S.venueTyped.name=t.value; render(); } if(t.id==='vAddr'){ S.venueTyped.addr=t.value; } });
+  addEventListener('scroll',()=>$('#stick').classList.toggle('stuck',$('#stick').getBoundingClientRect().top<=92),{passive:true});
+  addEventListener('keydown',e=>{ if(e.key==='Escape'){ if(h.classList.contains('tour-on')||h.classList.contains('tour-done')) endTour(); else closeSheet(); } });
+
+  /* ---------------- prototype-only: the states ---------------- */
+  const STATES=[
+    ['built','1 · The page as built (date set · Seda booked)',()=>{ S=SEED('booked'); render(); }],
+    ['d-none','2 · Date sheet · no date yet',()=>{ S=SEED('none'); render(); openSheet('date'); }],
+    ['d-set','3 · Date sheet · a date set, nothing booked',()=>{ S=SEED('set'); render(); openSheet('date'); }],
+    ['d-booked','4 · Date sheet · a date set, Seda booked on it',()=>{ S=SEED('booked'); render(); openSheet('date'); }],
+    ['d-clash','5 · Date sheet · a day Seda can’t do (typed Jan 9)',()=>{ S=SEED('booked'); render(); openSheet('date'); clash={pick:'2027-01-09',precision:'day',list:[sup('seda')]}; confirming=false; refresh(); }],
+    ['d-asked','6 · Date sheet · asked them to move (pending)',()=>{ S=SEED('booked'); S.request={date:'2027-01-09',who:[sup('seda')]}; render(); openSheet('date'); }],
+    ['help','7 · Help me choose (from Build’s fit line)',()=>{ S=SEED('booked'); S.mode='build'; render(); openSheet('date',{help:true}); }],
+    ['help-none','8 · Help me choose · no month yet',()=>{ S=SEED('none'); render(); openSheet('date',{help:true}); }],
+    ['p-none','9 · Place sheet · Pick the place',()=>{ S=SEED('none'); render(); openSheet('place'); }],
+    ['p-pick','10 · Place sheet · a venue from Setnayan, not booked',()=>{ S=SEED('set'); render(); openSheet('place'); }],
+    ['p-typed','11 · Place sheet · a venue typed by hand',()=>{ S=SEED('set'); S.picks.reception=undefined; delete S.picks.reception; S.placeSource='own'; S.venueTyped={name:'Casa Ibarra',addr:'Scout Borromeo St, Quezon City',pinned:true,photo:'upload'}; render(); openSheet('place'); }],
+    ['p-booked','12 · Place sheet · a booked venue (Seda)',()=>{ S=SEED('booked'); render(); openSheet('place'); }],
+    ['tour','13 · The first-visit tour',()=>{ S=SEED('booked'); render(); startTour(); }],
+    ['tour-again','14 · Find the tour again (Home’s Next card · Show me)',()=>{ S=SEED('booked'); S.mode='home'; render(); }],
+  ];
+  const sel=$('#devState'); sel.innerHTML=STATES.map(s=>`<option value="${s[0]}">${esc(s[1])}</option>`).join('');
+  function goState(id){ const s=STATES.find(x=>x[0]===id)||STATES[0]; sel.value=s[0]; $('#devLabel').textContent=s[1]; h.classList.remove('tour-on','tour-done'); closeSheet(); clash=null; confirming=false; $('#toast').classList.remove('on'); $('#cart').classList.remove('on'); s[2](); history.replaceState(null,'','#'+s[0]); }
+  sel.addEventListener('change',()=>goState(sel.value));
+  window.__proto={goState,get S(){return S;},STATES:STATES.map(s=>s[0])};
+
+  render();
+  const start=(location.hash||'#built').slice(1);
+  if(start!=='built'){ goState(start); } else { let seen=false; try{ seen=!!localStorage.getItem('sup-tour-v2'); }catch(e){} if(!seen&&!/notour/.test(location.search)) startTour(); }
+})();
+</script>
+</body>
+</html>
