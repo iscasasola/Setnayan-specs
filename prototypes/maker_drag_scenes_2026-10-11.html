@@ -1,0 +1,739 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Maker · drag the scene — prototype 2026-10-11</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   TOKENS — from apps/web/app/globals.css (light block + .dark block) and the
+   approved maker_two_dropdowns_owner_wireframe_2026-10-06_fable.html.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --ui:'Hanken Grotesk',-apple-system,system-ui,sans-serif;
+  --serif:'Fraunces',Georgia,serif;
+}
+.frame{
+  --paper:#FFFFFF;          /* --color-cream (white since 2026-08-20) */
+  --ink:#2C2A29;            /* --color-ink */
+  --ink2:#5A5755;           /* --ink2 (approved prototype) */
+  --mute:#6E6A62;           /* --m-sidebar-fg-muted (4.9:1 on white; the approved prototype's #8A8580 reads 3.65:1) */
+  --edge:var(--line);       /* a pressable's edge — in light it is the shipped faint line */
+  --edge-top:transparent;   /* the top bar's grey pills have no edge in light, as shipped */
+  --line:#E6E1D8;           /* --line */
+  --line2:#D9D3C8;          /* --line2 */
+  --soft:#F4F2EC;           /* --surface-soft — the lower third */
+  --cta:#C24E25;            /* --color-mulberry (CTA) */
+  --on-cta:#FFFFFF;         /* --sn-on-accent */
+  --cta-wash:#FBEDE6;       /* --cta-wash */
+  --gold:#A9834B;           /* --color-terracotta (accent) */
+  --plum:#4A2A3F;           /* the M&M monogram in his screenshot */
+  --danger:#B3261E;         /* --color-danger */
+  --danger-wash:#F7E6E4;
+  --skel:#E9E7E3;
+  --skel2:#D7D4CF;
+  --shadow-lg:0 24px 48px -16px rgba(30,26,18,.35), 0 8px 20px -8px rgba(30,26,18,.18);
+  --r-md:14px; --r-lg:22px; --r-full:999px;
+}
+.frame[data-theme="dark"]{
+  --paper:#17160F;          /* dark --color-cream */
+  --ink:#FBFAF7;            /* dark --color-ink */
+  --ink2:rgba(251,250,247,.86);
+  --mute:rgba(251,250,247,.70);
+  --edge:rgba(255,255,255,.42);      /* 3:1+ against the dark page and the dark lower third */
+  --edge-top:rgba(255,255,255,.42);
+  --line:rgba(255,255,255,.16);
+  --line2:rgba(255,255,255,.24);
+  --soft:#1E2229;           /* dark --surface */
+  --cta:#E5794E;            /* dark --color-mulberry */
+  --on-cta:#17160F;         /* dark --sn-on-accent */
+  --cta-wash:rgba(229,121,78,.18);
+  --gold:#CBA766;
+  --plum:#D9B8CF;
+  --danger:#F2817A;
+  --danger-wash:rgba(242,129,122,.16);
+  --skel:#2A2E36;
+  --skel2:#3A3F49;
+  --shadow-lg:0 24px 48px -16px rgba(0,0,0,.7), 0 8px 20px -8px rgba(0,0,0,.5);
+}
+
+/* ─── the page around the frame (NOT the product) ───────────────────────── */
+*{box-sizing:border-box}
+html,body{margin:0;background:#ECE9E2;color:#2C2A29;font-family:var(--ui);-webkit-text-size-adjust:100%}
+body{padding:12px 12px 40px;overflow-x:hidden}
+@media (max-width:419px){body{padding:10px 0 40px}.compare,.cap{padding:0 12px}.frame{height:min(812px,100dvh)}}
+.compare{max-width:1320px;margin:0 auto 10px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font-size:13px}
+.compare .tag{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#6E6A62;font-weight:600;width:100%}
+.compare label{display:inline-flex;align-items:center;gap:6px;color:#3A382F}
+.compare select{font:inherit;font-size:13px;padding:6px 10px;border:1px solid #C9C3B8;border-radius:10px;background:#fff;color:#2C2A29;max-width:220px}
+.compare input[type=checkbox]{width:16px;height:16px}
+.cap{max-width:1320px;margin:0 auto 12px;font-size:13px;line-height:1.45;color:#3A382F}
+.cap b{font-weight:600}
+.cap .buzz{color:#6E6A62}
+.stage{display:flex;justify-content:center}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE FRAME — today's Maker, redrawn. Phone first (375 × 812).
+   ═══════════════════════════════════════════════════════════════════════════ */
+.frame{
+  position:relative;width:375px;height:812px;background:var(--paper);color:var(--ink);
+  border-radius:0;overflow:hidden;font-family:var(--ui);font-size:15px;line-height:1.35;
+  display:grid;grid-template-rows:64px 1fr 48px auto;grid-template-columns:1fr;
+  --lt-h:236px;--dur:.28s;--ease:cubic-bezier(.4,0,.2,1);
+  grid-template-areas:"top" "page" "tabs" "lt";
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+  box-shadow:0 0 0 1px rgba(0,0,0,.08);
+}
+@media (min-width:420px){.frame{border-radius:28px}}
+.frame>*{min-width:0;min-height:0}
+.frame [hidden]{display:none!important}
+.frame button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.frame .parts{display:none}
+
+/* ─── top bar: ✕ · [Invitation ▾ | Studio ▾] · ↺ · ✓ (as shipped) ────────── */
+.top{grid-area:top;display:flex;align-items:center;gap:6px;padding:12px 10px 8px;background:var(--paper)}
+.top .x{width:44px;height:44px;border-radius:var(--r-full);background:var(--danger);color:#fff;display:grid;place-items:center;flex:none}
+.top .x svg{width:18px;height:18px;stroke:#fff;stroke-width:2.5;fill:none}
+.top .seg{flex:1;height:44px;border-radius:var(--r-full);background:var(--soft);display:flex;padding:3px;min-width:0;box-shadow:0 0 0 1px var(--edge-top)}
+.top .seg button{flex:1;border-radius:var(--r-full);font-size:15px;font-weight:500;color:var(--ink2);display:flex;align-items:center;justify-content:center;gap:4px;min-width:0;white-space:nowrap}
+.top .seg button.on{background:var(--cta);color:var(--on-cta);font-weight:600}
+.top .seg svg{width:14px;height:14px;stroke:currentColor;stroke-width:2.2;fill:none;flex:none}
+.top .rnd{width:44px;height:44px;border-radius:var(--r-full);background:var(--soft);color:var(--ink2);display:grid;place-items:center;flex:none;position:relative;box-shadow:0 0 0 1px var(--edge-top)}
+.top .rnd svg{width:20px;height:20px;stroke:currentColor;stroke-width:2;fill:none}
+.top .rnd[disabled]{opacity:.45;cursor:default}
+.top .rnd .n{position:absolute;top:-2px;right:-2px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--cta);color:var(--on-cta);font-size:11px;font-weight:600;display:grid;place-items:center}
+
+/* ─── the page (scrolls) ─────────────────────────────────────────────────── */
+.pagewrap{grid-area:page;position:relative;min-height:0;display:flex;flex-direction:column}
+.page{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;position:relative;padding:8px 10px 24px;background:var(--paper);overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.page::-webkit-scrollbar{width:0;height:0}
+.scene{position:relative;margin:6px 0;padding:14px 10px;border-radius:var(--r-md);touch-action:pan-y;transition:transform .18s ease,opacity .18s ease}
+.scene[data-movable="1"]{cursor:default}
+.frame[data-mode="scene"] .scene[data-movable="1"]{cursor:grab}
+.frame[data-mode="scene"].mouse .scene[data-movable="1"]:hover{outline:1px dashed var(--line2);outline-offset:-1px}
+.scene.picked{outline:2px solid var(--cta);outline-offset:-2px;box-shadow:0 0 0 6px var(--cta-wash);margin:16px 0}
+.scene .lbl{position:absolute;left:0;top:-10px;transform:translateY(-0%);height:22px;padding:0 10px;border-radius:7px 7px 7px 0;background:var(--cta);color:var(--on-cta);font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;display:none;align-items:center;z-index:3}
+.scene.picked .lbl{display:flex}
+.frame:not([data-mode="today"]) .scene.picked .lbl{cursor:pointer}
+.frame:not([data-mode="today"]) .scene.picked .lbl::after{content:"";width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid currentColor;margin-left:6px;opacity:.85}
+.scene .plus{position:absolute;left:50%;width:36px;height:36px;margin-left:-18px;border-radius:var(--r-full);background:var(--cta);color:var(--on-cta);box-shadow:0 0 0 3px var(--paper);display:none;place-items:center;z-index:3}
+.scene .plus svg{width:16px;height:16px;stroke:currentColor;stroke-width:2.4;fill:none}
+.scene .plus.a{top:-18px}.scene .plus.b{bottom:-18px}
+.scene.picked .plus{display:grid}
+.scene.picked.noabove .plus.a{display:none}
+.scene.lifted{position:absolute;z-index:20;margin:0;background:var(--paper);box-shadow:var(--shadow-lg);transform:scale(1.03);transition:transform .16s ease,opacity .16s ease,box-shadow .16s ease;outline:2px solid var(--cta);outline-offset:-2px;cursor:grabbing;pointer-events:none;will-change:top}
+.scene.lifted.tobin{transform:scale(.62);opacity:.55}
+.scene.lifted .plus{display:none!important}
+.scene.lifted .lbl::after{display:none}
+.scene.settling{transition:top .18s ease,left .18s ease,transform .18s ease,opacity .18s ease}
+.gap{margin:6px 0;border-radius:var(--r-md);border:1.5px dashed var(--line2);background:transparent;transition:height .18s ease}
+.scene.nudge{animation:nudge .36s ease}
+@keyframes nudge{0%{transform:translateX(0)}25%{transform:translateX(-4px)}50%{transform:translateX(4px)}75%{transform:translateX(-2px)}100%{transform:translateX(0)}}
+.scene.flip{transition:none}
+
+/* page content — the guest page as his screenshots draw it */
+.eyebrow{font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--mute);text-align:center}
+.eyebrow.sm{font-size:10.5px;letter-spacing:.22em}
+.ph{font-family:var(--serif);font-style:italic;font-weight:300;font-size:22px;color:var(--ink2);text-align:center;margin:10px 0 6px}
+.cardish{border:1px solid var(--line);border-radius:var(--r-md);padding:18px 12px 16px;background:var(--paper)}
+.ttl{font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--ink2);display:flex;align-items:center;justify-content:center;gap:10px}
+.ttl i{width:34px;height:1px;background:var(--gold);opacity:.7}
+.ttl.left{justify-content:flex-start}
+.bar{height:10px;border-radius:5px;background:var(--skel2)}
+.box{background:var(--skel);border-radius:4px;padding:14px 20px;margin:16px 0 10px}
+.box .bar{margin:0 auto 8px}
+.box .bar:last-child{margin-bottom:0}
+.tiles{display:flex;justify-content:center;gap:8px;margin:18px 0 8px}
+.tiles span{width:38px;height:38px;border-radius:8px;background:var(--skel)}
+.tiles.u span{height:6px;width:30px;border-radius:3px;background:var(--skel2)}
+.reveal{padding:10px 0 2px;text-align:center}
+.reveal .pill{width:120px;height:14px;margin:0 auto 10px;border-radius:0 0 12px 12px;background:#6B6B6B}
+.reveal h4{margin:0;font-family:var(--serif);font-weight:400;font-size:17px;color:var(--ink)}
+.reveal p{margin:4px 0 0;font-size:13px;color:var(--ink2)}
+.mono{font-family:var(--serif);font-style:italic;font-weight:400;font-size:78px;line-height:1;color:var(--plum);text-align:center;margin:10px 0 4px;letter-spacing:-.02em}
+.mono small{font-size:28px;vertical-align:middle;margin:0 -4px}
+.names{text-align:center;font-family:var(--serif);font-weight:300;font-size:40px;line-height:1.05;color:var(--ink)}
+.names em{display:block;font-size:19px;color:var(--gold);font-weight:400}
+.line{text-align:center;font-size:15px;color:var(--ink2);margin-top:10px}
+.herolink{text-align:center;font-family:var(--serif);font-style:italic;color:var(--cta);font-size:20px}
+.herolink b{display:block;font-style:normal;font-weight:400;font-size:18px;margin-top:2px}
+.rsvp h3{margin:4px 0 6px;text-align:center;font-family:var(--serif);font-weight:400;font-size:24px;color:var(--ink)}
+.rsvp .btns{display:flex;gap:8px;margin-top:14px}
+.rsvp .btns span{flex:1;height:40px;border-radius:var(--r-full);background:var(--skel)}
+.greet{font-size:17px;color:var(--ink);margin:2px 0 6px}
+.gifts .row{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+.gifts .pillph{width:64px;height:28px;border-radius:14px;background:var(--skel)}
+.gifts .ph{text-align:left;margin:16px 0 6px}
+
+/* ─── page tabs ──────────────────────────────────────────────────────────── */
+.tabs{grid-area:tabs;display:flex;border-top:1px solid var(--line);background:var(--paper)}
+.tabs button{flex:1;font-size:14px;color:var(--ink2);position:relative;transition:opacity .2s}
+.tabs button.on{color:var(--ink);font-weight:600}
+.tabs button.on::before{content:"";position:absolute;left:0;right:0;top:-1px;height:3px;background:var(--ink)}
+.frame.dragging .tabs button:not(.on){opacity:.35}
+
+/* ─── the lower third ────────────────────────────────────────────────────── */
+.lt{grid-area:lt;height:var(--lt-h);overflow:hidden;position:relative;transition:height var(--dur) var(--ease)}
+.ltin{height:var(--lt-h);background:var(--soft);border-radius:18px 18px 0 0;padding:6px 10px 10px;display:flex;flex-direction:column;gap:9px;transition:transform var(--dur) var(--ease)}
+/* ↓ while a scene is held: the lower third slides down and the page takes its room (same duration, same ease) */
+.frame.dragging:not(.desktop) .lt{height:0}
+.frame.dragging:not(.desktop) .page{padding-bottom:calc(24px + var(--lt-h))}   /* the scroll offset never clamps while the viewport grows */
+@media (prefers-reduced-motion:reduce){.frame{--dur:.2s}.ltin{transition:opacity var(--dur) linear}.frame.dragging:not(.desktop) .ltin{opacity:0}}
+.lt .handle{width:30px;height:4px;border-radius:2px;background:var(--line2);margin:0 auto}
+.lt .where{text-align:center;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lt .where b{color:var(--ink);font-weight:600}
+.lt .tools{display:flex;gap:6px;align-items:center}
+.lt .tools .seg{flex:1;height:48px;border-radius:var(--r-full);background:var(--paper);display:flex;padding:3px;box-shadow:0 0 0 1px var(--edge)}
+.lt .tools .seg button{flex:1;border-radius:var(--r-full);font-size:14px;letter-spacing:-.01em;color:var(--ink2);white-space:nowrap;min-width:0;padding:0 2px}
+.lt .tools .seg button.on{background:var(--cta);color:var(--on-cta);font-weight:600}
+.lt .tools .seg button.dim{color:var(--mute);opacity:.6}
+.lt .tools .play{width:44px;height:44px;border-radius:var(--r-full);background:var(--paper);box-shadow:0 0 0 1px var(--edge);display:grid;place-items:center;flex:none}
+.lt .tools .play svg{width:20px;height:20px;stroke:var(--ink);stroke-width:1.8;fill:none}
+.lt .door{height:48px;border-radius:var(--r-full);background:var(--paper);box-shadow:0 0 0 1px var(--edge);display:flex;align-items:center;gap:10px;padding:0 16px;font-size:15px;color:var(--ink);width:100%;text-align:left}
+.lt .door svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.8;fill:none;flex:none}
+.lt .door .v{margin-left:auto;color:var(--ink);font-weight:500}
+.lt .door .pen{margin-left:auto;stroke:var(--cta)}
+.lt .row4{margin-top:auto;min-height:48px;display:flex;align-items:center;justify-content:center}
+.lt .three{display:none;gap:8px;width:100%}
+.frame[data-mode="today"] .three{display:flex}
+.lt .three button{flex:1;height:48px;border-radius:var(--r-full);box-shadow:0 0 0 1px var(--edge);background:var(--paper);font-size:15px;color:var(--ink);display:flex;align-items:center;justify-content:center;gap:8px}
+.lt .three button svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none}
+.lt .three button.off{color:var(--mute);background:var(--soft);box-shadow:0 0 0 1px var(--line)}
+.lt .three button.rm{color:var(--danger);background:var(--danger-wash);box-shadow:0 0 0 1px var(--danger)}
+.lt .status{display:none;align-items:center;justify-content:center;gap:12px;font-size:14px;color:var(--ink2);text-align:center;padding:0 4px;width:100%}
+.frame:not([data-mode="today"]) .status{display:flex}
+.lt .status.err{color:var(--danger)}
+.lt .status .undo{height:34px;padding:0 14px;border-radius:var(--r-full);background:var(--paper);box-shadow:0 0 0 1px var(--edge);color:var(--ink);font-weight:600;font-size:14px;flex:none}
+.lt .status .spin{width:14px;height:14px;border:2px solid var(--line2);border-top-color:var(--cta);border-radius:50%;animation:spin .8s linear infinite;flex:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ─── the bin (only while a scene is lifted) ─────────────────────────────── */
+.bin{position:absolute;left:50%;bottom:30px;transform:translate(-50%,24px) scale(.6);width:64px;height:64px;border-radius:var(--r-full);background:var(--paper);box-shadow:0 0 0 1.5px var(--line2),0 10px 24px -8px rgba(0,0,0,.3);display:grid;place-items:center;z-index:30;opacity:0;pointer-events:none;transition:transform var(--dur) var(--ease),opacity var(--dur) var(--ease),background .2s ease,box-shadow .2s ease}
+.bin svg{width:26px;height:26px;stroke:var(--ink);stroke-width:1.8;fill:none;transition:stroke .2s,transform .2s}
+.bin .w{position:absolute;top:-30px;left:50%;transform:translateX(-50%);font-size:12px;color:var(--ink);white-space:nowrap;letter-spacing:.02em;padding:3px 10px;border-radius:var(--r-full);background:var(--paper);box-shadow:0 1px 6px rgba(0,0,0,.12)}
+.frame.dragging .bin{opacity:1;transform:translate(-50%,0) scale(1);pointer-events:none}
+.frame.dragging .bin.hot{transform:translate(-50%,0) scale(1.22);background:var(--danger);box-shadow:0 0 0 1.5px var(--danger),0 14px 30px -8px rgba(0,0,0,.4)}
+.frame.dragging .bin.hot svg{stroke:#fff;transform:rotate(-12deg)}
+.frame.dragging .bin.hot .w{color:var(--danger);font-weight:600}
+.frame.dragging:not(.desktop) .bin.hot{transform:translate(-50%,0) scale(1.22)}
+
+/* ─── sheets + menu ──────────────────────────────────────────────────────── */
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.28);z-index:40;display:none}
+.scrim.on{display:block}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--paper);border-radius:22px 22px 0 0;padding:14px 18px 22px;z-index:41;display:none;box-shadow:0 -10px 40px -10px rgba(0,0,0,.25)}
+.sheet.on{display:block}
+.sheet .handle{width:30px;height:4px;border-radius:2px;background:var(--line2);margin:0 auto 14px}
+.sheet h4{margin:0 0 6px;font-size:18px;font-weight:600;color:var(--ink)}
+.sheet p{margin:0 0 16px;font-size:15px;color:var(--ink2);line-height:1.45}
+.sheet .acts{display:flex;gap:8px}
+.sheet .acts button{flex:1;height:48px;border-radius:var(--r-full);box-shadow:0 0 0 1px var(--edge);background:var(--paper);font-size:15px;color:var(--ink)}
+.sheet .acts button.rm{background:var(--danger);color:#fff;box-shadow:none;font-weight:600}
+.menu{position:absolute;z-index:42;background:var(--paper);border-radius:14px;box-shadow:0 0 0 1px var(--line),0 12px 30px -10px rgba(0,0,0,.3);padding:6px;display:none;min-width:180px}
+.menu.on{display:block}
+.menu button{display:flex;align-items:center;gap:10px;width:100%;height:44px;padding:0 12px;border-radius:10px;font-size:15px;color:var(--ink);text-align:left}
+.menu button:hover{background:var(--soft)}
+.menu button.rm{color:var(--danger)}
+.menu button[disabled]{color:var(--mute);cursor:default}
+.menu button svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none}
+.toast{position:absolute;left:50%;top:84px;transform:translateX(-50%);background:var(--paper);color:var(--ink);box-shadow:0 0 0 1px var(--line),0 10px 30px -10px rgba(0,0,0,.3);border-radius:var(--r-full);padding:10px 16px;font-size:14px;z-index:35;display:none;white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis}
+.toast.on{display:block}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DESKTOP (≥ 1280) — three columns, as ruled 2026-10-07:
+   LEFT = the page's parts list · CENTRE = the page preview · RIGHT = the tools.
+   The bin sits at the bottom of the centre column.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.frame.desktop{width:1280px;height:800px;border-radius:14px;
+  grid-template-rows:64px 1fr;grid-template-columns:300px 1fr 390px;
+  grid-template-areas:"top top top" "parts page lt"}
+.frame.desktop .top{justify-content:center}
+.frame.desktop .top .seg{flex:0 0 380px}
+.frame.desktop .top .x{margin-right:auto}
+.frame.desktop .top .rnd:first-of-type{margin-left:auto}
+.frame.desktop .parts{display:flex;flex-direction:column;grid-area:parts;border-right:1px solid var(--line);background:var(--paper);min-height:0}
+.frame.desktop .parts .st{height:44px;margin:10px 12px 6px;border-radius:var(--r-full);background:var(--soft);display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-weight:600;font-size:15px}
+.frame.desktop .parts .st svg{width:14px;height:14px;stroke:currentColor;stroke-width:2.2;fill:none}
+.frame.desktop .parts .ptabs{display:flex;border-bottom:1px solid var(--line);margin:0 12px}
+.frame.desktop .parts .ptabs button{flex:1;height:40px;font-size:13px;color:var(--ink2);position:relative}
+.frame.desktop .parts .ptabs button.on{color:var(--ink);font-weight:600}
+.frame.desktop .parts .ptabs button.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--ink)}
+.frame.desktop .parts ul{list-style:none;margin:8px 0 0;padding:0 12px;overflow:auto}
+.frame.desktop .parts li{display:flex;align-items:center;gap:8px;height:44px;padding:0 6px 0 12px;border-radius:12px;font-size:14px;color:var(--ink)}
+.frame.desktop .parts li.on{background:var(--cta-wash);color:var(--ink);font-weight:600}
+.frame.desktop .parts li .nm{flex:1}
+.frame.desktop .parts li .lock{font-size:11px;color:var(--mute);letter-spacing:.08em;text-transform:uppercase;font-weight:500}
+.frame.desktop .parts li .ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:var(--ink2)}
+.frame.desktop .parts li .ic svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none}
+.frame.desktop .parts li .ic.g svg{fill:currentColor;stroke:none}
+.frame.desktop .parts li .ic.g{cursor:grab}
+.frame.desktop .tabs{display:none}
+.frame.desktop .page{padding:24px 0 80px}
+.frame.desktop .page .inner{width:420px;margin:0 auto}
+.frame.desktop .lt{height:auto;transition:none}
+.frame.desktop .ltin{height:100%;border-radius:0;border-left:1px solid var(--line);padding:14px 16px 16px;opacity:1!important}
+.frame.desktop .lt .handle{display:none}
+.frame.desktop .bin{bottom:22px}
+.frame.desktop .lt .row4{margin-top:14px}
+.frame.desktop .pagewrap{grid-area:page}
+.frame.desktop .sheet{left:auto;right:0;width:390px;border-radius:0}
+.frame.desktop .scene[data-movable="1"]{cursor:grab}
+</style>
+</head>
+<body>
+
+<!-- ═══ FOR COMPARING ONLY — outside the phone ═══ -->
+<div class="compare">
+  <span class="tag">For comparing only · not part of the Maker</span>
+  <label>How a scene moves
+    <select id="mode">
+      <option value="today">Today (buttons)</option>
+      <option value="scene" selected>Drag the scene (the build)</option>
+    </select>
+  </label>
+  <label>Look <select id="theme"><option value="light" selected>Light</option><option value="dark">Dark</option></select></label>
+  <label>Screen <select id="device"><option value="phone" selected>Phone · 375</option><option value="desktop">Desktop · 1280</option></select></label>
+  <label><input type="checkbox" id="fail"> The next save fails (to see that case)</label>
+</div>
+<p class="cap" id="cap"></p>
+
+<div class="stage">
+<div class="frame" id="frame" data-theme="light" data-mode="scene">
+
+  <!-- top bar — as shipped -->
+  <header class="top">
+    <button class="x" aria-label="Exit the Maker"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    <div class="seg">
+      <button class="on">Invitation <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+      <button>Studio <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+    </div>
+    <button class="rnd" id="undoBtn" aria-label="Undo" disabled><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg><span class="n" id="undoN" hidden>0</span></button>
+    <button class="rnd" aria-label="Apply"><svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></button>
+  </header>
+
+  <!-- desktop only: the parts list -->
+  <aside class="parts" aria-label="Parts on this page">
+    <div class="st">Invitation <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
+    <div class="ptabs"><button class="on">Welcome</button><button>Details</button><button>Our Love Story</button><button>Me</button></div>
+    <ul id="partsList"></ul>
+  </aside>
+
+  <!-- the page -->
+  <div class="pagewrap"><main class="page" id="page"><div class="inner" id="inner"></div></main>
+  <!-- the bin -->
+  <div class="bin" id="bin" aria-hidden="true">
+    <svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 10v6M14 10v6"/></svg>
+    <span class="w" id="binWord">Drop here to remove</span>
+  </div></div>
+
+  <!-- page tabs -->
+  <nav class="tabs" id="tabs">
+    <button class="on">Welcome</button><button>Details</button><button>Our Love Story</button><button>Me</button>
+  </nav>
+
+  <!-- the lower third — as shipped; only row 4 changes -->
+  <section class="lt" id="lt"><div class="ltin">
+    <div class="handle"></div>
+    <div class="where">You're editing · <b>Invitation › Welcome › <span id="whereName">Message</span></b></div>
+    <div class="tools">
+      <div class="seg">
+        <button class="on">Edit</button><button>Style</button><button id="bgTool">Background</button><button>Animate</button>
+      </div>
+      <button class="play" aria-label="Preview"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+    </div>
+    <button class="door" id="door"></button>
+    <div class="row4">
+      <div class="three">
+        <button id="bEarlier"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>Earlier</button>
+        <button id="bLater"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>Later</button>
+        <button id="bRemove" class="rm"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>Remove</button>
+      </div>
+      <div class="status" id="status" aria-live="polite"></div>
+    </div>
+  </div></section>
+
+  <div class="scrim" id="scrim"></div>
+  <div class="sheet" id="sheet" role="dialog">
+    <div class="handle"></div>
+    <h4 id="shTitle">Remove from this page?</h4>
+    <p id="shBody"></p>
+    <div class="acts"><button id="shNo">Cancel</button><button class="rm" id="shYes">Remove</button></div>
+  </div>
+  <div class="menu" id="menu" role="menu">
+    <button id="mUp"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>Move up</button>
+    <button id="mDown"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>Move down</button>
+    <button id="mRemove" class="rm"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>Remove</button>
+  </div>
+  <div class="toast" id="toast"></div>
+</div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE SAMPLE — Invitation › Welcome of a wedding, as his screenshots show it.
+   movable: the shipped rule (`canMove` = a SCENE; a line of the cover, a fixed
+   block, the Reveal and the reply card "keep their place" — makerPartStepWhy).
+   ═══════════════════════════════════════════════════════════════════════════ */
+const SCENES = [
+  { k:'reveal', label:'Reveal', movable:false, why:'The Reveal is always first on this page.', door:['about','Plays once, over the cover'],
+    html:`<div class="reveal"><div class="pill"></div><h4>Opens once, over the cover</h4><p>then every page after it opens plain</p></div>` },
+  { k:'names', label:'Names', movable:false, why:'Names keeps its place on this page.', door:['field','Names','Marco &amp; Marga'],
+    html:`<div class="eyebrow">Together with their families</div><div class="mono">M<small>&amp;</small>M</div><div class="names">Marco<em>and</em>Marga</div><div class="line">invite you to celebrate their wedding</div>` },
+  { k:'herolink', label:'The day, the story', movable:false, why:'The day, the story keeps its place on this page.', door:['field','Words','the day, the story'],
+    html:`<div class="herolink">the day, the story<b>↓</b></div>` },
+  { k:'rsvpcard', label:'Reply card', movable:false, why:'Reply card keeps its place on this page.', door:['studio','Open in Studio › RSVP'],
+    html:`<div class="rsvp"><h3>Will you be there?</h3><div class="eyebrow sm">Each guest sees their own reply, from their own link</div><div class="btns"><span></span><span></span></div></div>` },
+  { k:'countdown', label:'Countdown', movable:true, door:['studio','Change the date in Suppliers'],
+    html:`<div class="cardish"><div class="ttl">Countdown <i></i></div><div class="tiles"><span></span><span></span><span></span><span></span></div><div class="tiles u"><span></span><span></span><span></span><span></span></div><div class="ph">Needs your date.</div><div class="eyebrow sm">Only you see this · guests see it once it has content</div></div>` },
+  { k:'greeting', label:'Greeting', movable:true, door:['field','Greeting','We’d love to celebrate with you.'],
+    html:`<div class="greet">We’d love to celebrate with you.</div><div class="eyebrow sm" style="text-align:left">Each guest sees their own</div>` },
+  { k:'message', label:'Message', movable:true, door:['studio','Open in Studio › Info'],
+    html:`<div class="cardish"><div class="ttl">Special message <i></i></div><div class="box"><div class="bar" style="width:84%"></div><div class="bar" style="width:72%"></div><div class="bar" style="width:46%"></div></div><div class="ph">Write your message.</div><div class="eyebrow sm">Only you see this · guests see it once it has content</div></div>` },
+  { k:'gifts', label:'E-Gifts', movable:false, why:'E-Gifts keeps its place on this page.', door:['studio','Open in Studio › E-Gifts'],
+    html:`<div class="gifts"><div class="ttl left">E-Gifts <i></i></div><div class="row"><div style="flex:1"><div class="bar" style="width:62%;margin-bottom:10px"></div><div class="bar" style="width:42%"></div></div><span class="pillph"></span></div><div class="ph">Add a way to receive gifts.</div><div class="eyebrow sm" style="text-align:left">Only you see this · guests see it once a gift method is on</div></div>` },
+];
+
+const $ = (s, r=document) => r.querySelector(s);
+const frame = $('#frame'), page = $('#page'), inner = $('#inner'), status = $('#status'), bin = $('#bin');
+const HOLD_MS = 350, SLOP = 8, EDGE = 56;
+let picked = 'message';
+let undoStack = [];           // ONE press = ONE step: {type:'move'|'remove', k, before:[order]}
+let saving = null;
+
+/* ── draw ─────────────────────────────────────────────────────────────────── */
+const ico = {
+  plus:`<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>`,
+  grip:`<svg viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>`,
+  studio:`<svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>`,
+  pen:`<svg class="pen" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>`,
+  info:`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>`,
+  bin:`<svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>`,
+};
+function draw(){
+  inner.innerHTML = '';
+  for (const s of SCENES){
+    const el = document.createElement('section');
+    el.className = 'scene' + (s.k===picked?' picked':'') + (s.k==='reveal'?' noabove':'');
+    el.dataset.k = s.k; el.dataset.movable = s.movable?'1':'0'; el.tabIndex = 0;
+    el.setAttribute('aria-label', s.label + (s.movable?' — hold to move':' — keeps its place'));
+    el.innerHTML = `<button class="lbl" aria-label="${s.label} — move or remove">${s.label}</button>
+      <button class="plus a" aria-label="Add above ${s.label}">${ico.plus}</button>
+      <button class="plus b" aria-label="Add below ${s.label}">${ico.plus}</button>${s.html}`;
+    inner.appendChild(el);
+  }
+  drawTools();
+}
+function drawTools(){
+  const s = SCENES.find(x=>x.k===picked);
+  $('#whereName').textContent = s.label;
+  const d = s.door;
+  const door = $('#door');
+  if (d[0]==='field') door.innerHTML = `<span>${d[1]}</span><span class="v">${d[2]}</span>${ico.pen}`;
+  else if (d[0]==='about') door.innerHTML = `${ico.info}<span>${d[1]}</span>`;
+  else door.innerHTML = `${ico.studio}<span>${d[1]}</span>`;
+  $('#bgTool').classList.toggle('dim', s.k==='names'||s.k==='herolink'||s.k==='reveal');
+  /* today's row 4 — grey when it cannot (as shipped: makerPartStepWhy) */
+  const i = order().indexOf(picked), mv = order().filter(k=>SCENES.find(x=>x.k===k).movable);
+  const first = mv[0]===picked, last = mv[mv.length-1]===picked;
+  $('#bEarlier').classList.toggle('off', !s.movable || first);
+  $('#bLater').classList.toggle('off', !s.movable || last);
+  $('#bRemove').classList.toggle('off', !s.movable); $('#bRemove').classList.toggle('rm', s.movable);
+  $('#mUp').disabled = !s.movable || first; $('#mDown').disabled = !s.movable || last; $('#mRemove').disabled = !s.movable;
+  $('#undoBtn').disabled = undoStack.length===0;
+  $('#undoN').hidden = undoStack.length===0; $('#undoN').textContent = undoStack.length;
+  drawList();
+}
+function drawList(){
+  const ul = $('#partsList'); ul.innerHTML = '';
+  for (const k of order()){
+    const s = SCENES.find(x=>x.k===k);
+    const li = document.createElement('li'); li.className = k===picked?'on':''; li.dataset.k = k;
+    li.innerHTML = `<span class="nm">${s.label}</span>` + (s.movable
+      ? `<span class="ic">${ico.plus}</span><span class="ic g" title="Drag the scene on the page to move it">${ico.grip}</span><span class="ic">${ico.bin}</span>`
+      : (k==='reveal' ? `<span class="lock">locked first</span>` : `<span class="ic">${ico.plus}</span><span class="lock">keeps its place</span>`));
+    li.addEventListener('click', ()=>pick(k));
+    ul.appendChild(li);
+  }
+}
+function order(){ return [...inner.querySelectorAll('.scene')].map(e=>e.dataset.k); }
+function sceneEl(k){ return inner.querySelector(`.scene[data-k="${k}"]`); }
+function pick(k){ picked = k; inner.querySelectorAll('.scene').forEach(e=>e.classList.toggle('picked', e.dataset.k===k)); drawTools(); }
+
+/* ── status line (row 4 after the buttons go) ─────────────────────────────── */
+let statusT = null;
+function say(html, {err=false, keep=false}={}){
+  clearTimeout(statusT); status.className = 'status' + (err?' err':''); status.innerHTML = html;
+  if (!keep && html) statusT = setTimeout(()=>{ if (status.innerHTML===html) status.innerHTML=''; }, 3200);
+}
+let toastT=null; function toast(w){ const t=$('#toast'); t.textContent=w; t.classList.add('on'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('on'),1800); }
+
+/* ── FLIP: siblings glide to their new places ─────────────────────────────── */
+function rects(){ const m=new Map(); inner.querySelectorAll('.scene:not(.lifted), .gap').forEach(e=>m.set(e,e.getBoundingClientRect().top)); return m; }
+function flip(before){
+  inner.querySelectorAll('.scene:not(.lifted), .gap').forEach(e=>{
+    const b = before.get(e); if (b==null) return;
+    const d = b - e.getBoundingClientRect().top; if (!d) return;
+    e.classList.add('flip'); e.style.transform = `translateY(${d}px)`;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{ e.classList.remove('flip'); e.style.transform=''; }));
+  });
+}
+function applyOrder(ord){ const b=rects(); for (const k of ord) inner.appendChild(sceneEl(k)); flip(b); }
+
+/* ── one press = one undo step; the page is busy until it shows the result ── */
+function commit(step, said){
+  undoStack.push(step); drawTools();
+  say(`<span class="spin"></span> Saving…`, {keep:true});
+  const fail = $('#fail').checked;
+  saving = setTimeout(()=>{
+    saving = null;
+    if (fail){
+      $('#fail').checked = false;
+      undoStack.pop();
+      if (step.type==='move') applyOrder(step.before);
+      if (step.type==='remove'){ const el=step.el; el.hidden=false; applyOrder(step.before); }
+      drawTools(); say('That did not save. Nothing changed — please try again.', {err:true});
+      return;
+    }
+    if (said) say(said, {keep: step.type==='remove'}); else say('');
+    if (step.type==='remove'){
+      status.innerHTML = `<span>${step.label} removed</span><button class="undo" id="undoNow">Undo</button>`;
+      $('#undoNow').addEventListener('click', undo);
+    }
+  }, 700);
+}
+function undo(){
+  if (saving) return;
+  const step = undoStack.pop(); if (!step) return;
+  if (step.type==='remove'){ step.el.hidden=false; }
+  applyOrder(step.before); pick(step.k); drawTools();
+  say(step.type==='remove' ? `${step.label} is back` : 'Move undone');
+}
+$('#undoBtn').addEventListener('click', undo);
+
+/* ── moves by step (today's buttons · the fallback menu) ──────────────────── */
+function moveBy(k, dir){
+  const ord = order(), mv = ord.filter(x=>SCENES.find(s=>s.k===x).movable);
+  const i = mv.indexOf(k); const j = i+dir; if (i<0||j<0||j>=mv.length) return false;
+  const before = [...ord]; const a = ord.indexOf(mv[i]), b = ord.indexOf(mv[j]);
+  ord[a]=mv[j]; ord[b]=mv[i]; applyOrder(ord); commit({type:'move', k, before}, ''); return true;
+}
+function removeScene(k){
+  const el = sceneEl(k), s = SCENES.find(x=>x.k===k); const before = order();
+  const b = rects(); el.hidden = true; flip(b);
+  const mv = order().filter(x=>!sceneEl(x).hidden && SCENES.find(s=>s.k===x).movable);
+  pick(mv[0] || 'names');
+  commit({type:'remove', k, el, label:s.label, before}, `${s.label} removed`);
+}
+
+/* today's three buttons — Earlier / Later / Remove, as shipped (with their grey-tap words) */
+$('#bEarlier').addEventListener('click', ()=>{ const s=SCENES.find(x=>x.k===picked); if (!s.movable) return toast(s.why); if(!moveBy(picked,-1)) toast('It is already first on this page.'); });
+$('#bLater').addEventListener('click', ()=>{ const s=SCENES.find(x=>x.k===picked); if (!s.movable) return toast(s.why); if(!moveBy(picked,1)) toast('It is already last on this page.'); });
+$('#bRemove').addEventListener('click', ()=>{ const s=SCENES.find(x=>x.k===picked); if (!s.movable) return toast(`${s.label} stays on this page.`); askRemove(picked); });
+function askRemove(k){
+  const s = SCENES.find(x=>x.k===k);
+  $('#shTitle').textContent = 'Remove from this page?';
+  $('#shBody').textContent = `${s.label} leaves this page. Its words stay in Studio, and ＋ brings it back.`;
+  $('#scrim').classList.add('on'); $('#sheet').classList.add('on');
+  $('#shYes').onclick = ()=>{ closeSheet(); removeScene(k); };
+}
+function closeSheet(){ $('#scrim').classList.remove('on'); $('#sheet').classList.remove('on'); }
+$('#shNo').addEventListener('click', closeSheet); $('#scrim').addEventListener('click', ()=>{ closeSheet(); closeMenu(); });
+
+/* the fallback for someone who cannot drag: the picked scene's label opens one small menu */
+function openMenu(lbl){
+  const m = $('#menu'), fr = frame.getBoundingClientRect(), r = lbl.getBoundingClientRect();
+  m.classList.add('on'); m.style.left = (r.left-fr.left)+'px'; m.style.top = (r.bottom-fr.top+6)+'px';
+  $('#scrim').classList.add('on'); $('#scrim').style.background='transparent';
+}
+function closeMenu(){ $('#menu').classList.remove('on'); $('#scrim').style.background=''; }
+$('#mUp').addEventListener('click', ()=>{ closeMenu(); $('#scrim').classList.remove('on'); moveBy(picked,-1); });
+$('#mDown').addEventListener('click', ()=>{ closeMenu(); $('#scrim').classList.remove('on'); moveBy(picked,1); });
+$('#mRemove').addEventListener('click', ()=>{ closeMenu(); $('#scrim').classList.remove('on'); removeScene(picked); });
+
+/* taps on the page: pick · ＋ · label */
+inner.addEventListener('click', e=>{
+  if (frame.classList.contains('dragging') || suppressClick) return;
+  const scene = e.target.closest('.scene'); if (!scene) return;
+  if (e.target.closest('.plus')) return toast('Opens the ＋ sheet, as today.');
+  if (e.target.closest('.lbl')){ if (frame.dataset.mode!=='today') openMenu(e.target.closest('.lbl')); return; }
+  pick(scene.dataset.k);
+});
+$('.x').addEventListener('click', ()=>toast('Exits the Maker.'));
+document.querySelectorAll('.tabs button, .ptabs button').forEach(b=>b.addEventListener('click', ()=>{ if(!b.classList.contains('on')) toast('Another page — its own scenes. (not drawn here)'); }));
+$('.play').addEventListener('click', ()=>toast('▶ previews the page, as today.'));
+$('#door').addEventListener('click', ()=>toast('Edit, as today.'));
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE DRAG — pointer events; a finger and a mouse.
+   phone:  press and HOLD 350 ms → lift. A move of > 8 px before that is a
+           scroll, and the hold is cancelled.
+   mouse:  press and move → lift at once; hover = grab cursor.
+   ═══════════════════════════════════════════════════════════════════════════ */
+let press = null, drag = null, suppressClick = false, raf = null;
+function haptic(){ try{ navigator.vibrate && navigator.vibrate(12); }catch(e){} }
+
+inner.addEventListener('pointerdown', e=>{
+  if (press || drag || $('#sheet').classList.contains('on') || $('#menu').classList.contains('on')) return;
+  if (e.button && e.button!==0) return;
+  const scene = e.target.closest('.scene'); if (!scene) return;
+  if (frame.dataset.mode==='today') return;
+  if (e.target.closest('.plus, .lbl')) return;
+  const s = SCENES.find(x=>x.k===scene.dataset.k);
+  press = { scene, s, x:e.clientX, y:e.clientY, id:e.pointerId, mouse:e.pointerType==='mouse', timer:null, armed:false };
+  if (press.mouse){
+    if (!s.movable){ nudge(scene, s); press=null; return; }
+    press.armed = true;   /* mouse: lifts on the first real move */
+  } else {
+    press.timer = setTimeout(()=>{ press.timer=null; if (!s.movable){ nudge(scene, s); press=null; return; } lift(press.last||e); }, HOLD_MS);
+  }
+});
+/* the page's own touchmove: while a scene is lifted the finger moves the scene, never the page */
+frame.addEventListener('touchmove', e=>{ if (drag) e.preventDefault(); }, {passive:false});   /* on the FRAME: the lifted scene rides on it, outside the page's scroll box */
+inner.addEventListener('contextmenu', e=>{ if (press||drag) e.preventDefault(); });
+
+function nudge(scene, s){
+  scene.classList.remove('nudge'); void scene.offsetWidth; scene.classList.add('nudge');
+  pick(s.k); say(s.why);
+  if (frame.dataset.mode==='today') toast(s.why);
+}
+
+function lift(e){
+  const {scene, s} = press; pick(s.k); haptic();
+  const fr = frame.getBoundingClientRect(), r = scene.getBoundingClientRect();
+  const gap = document.createElement('div'); gap.className='gap'; gap.style.height = r.height+'px';
+  const before = order();
+  scene.after(gap);
+  scene.classList.add('lifted');
+  scene.style.left = (r.left-fr.left)+'px'; scene.style.width = r.width+'px'; scene.style.top = (r.top-fr.top)+'px';
+  frame.appendChild(scene);
+  drag = { scene, s, gap, fr, before, dy: (press.last||e).clientY - r.top, dx: e.clientX - r.left, y:e.clientY, overBin:false, moved:false };
+  frame.classList.add('dragging'); $('#binWord').textContent = 'Drop here to remove';
+  try{ inner.setPointerCapture(press.id); }catch(err){}
+  say('');
+  press = null; tick();
+}
+inner.addEventListener('pointermove', e=>{
+  if (press){
+    press.last = e;
+    if (press.timer){ if (Math.hypot(e.clientX-press.x, e.clientY-press.y) > SLOP){ clearTimeout(press.timer); press=null; } return; }  /* a swipe scrolls */
+    if (press.armed && Math.hypot(e.clientX-press.x, e.clientY-press.y) > 6){ e.preventDefault(); lift(e); }
+    return;
+  }
+  if (!drag) return;
+  e.preventDefault(); drag.y = e.clientY; drag.x = e.clientX; drag.moved = true;
+  place();
+});
+function place(){
+  if (!drag) return;
+  const {scene, gap, fr} = drag;
+  scene.style.top = (drag.y - drag.dy - fr.top)+'px';
+  /* over the bin? */
+  const b = bin.getBoundingClientRect(); const pad = 26;
+  const over = drag.x > b.left-pad && drag.x < b.right+pad && drag.y > b.top-pad && drag.y < b.bottom+pad;
+  if (over !== drag.overBin){ drag.overBin = over; bin.classList.toggle('hot', over); scene.classList.toggle('tobin', over); if (over) haptic(); }
+  if (over) return;
+  /* where would it land? among the movable scenes only — the cover, the reply card, E-Gifts and the Reveal never open */
+  const mv = [...inner.querySelectorAll('.scene[data-movable="1"]:not(.lifted):not([hidden])')];
+  /* layout positions (offsetTop), never the transformed rect — the FLIP glide must not move the target */
+  const pr = page.getBoundingClientRect(); const topOf = el => pr.top - page.scrollTop + el.offsetTop;
+  let target = null;
+  for (const m of mv){ const t = topOf(m); if (drag.y < t + m.offsetHeight/2){ target = m; break; } }
+  const nextOf = n => { n = n.nextElementSibling; while (n && (n.classList.contains('lifted') || n.hidden)) n = n.nextElementSibling; return n; };
+  const prevOf = n => { n = n.previousElementSibling; while (n && (n.classList.contains('lifted') || n.hidden)) n = n.previousElementSibling; return n; };
+  if (target ? nextOf(gap)===target : prevOf(gap)===mv[mv.length-1]) return;
+  const before = rects();
+  if (target) target.before(gap); else if (mv.length) mv[mv.length-1].after(gap);
+  flip(before);
+}
+/* the page scrolls by itself near its top and bottom edge */
+function tick(){
+  if (!drag) return;
+  const pr = page.getBoundingClientRect(); let v = 0;
+  if (drag.y < pr.top + EDGE) v = -Math.min(14, Math.ceil((pr.top+EDGE-drag.y)/5));
+  else if (drag.y > pr.bottom - EDGE && drag.y < pr.bottom && !drag.overBin) v = Math.min(14, Math.ceil((drag.y-(pr.bottom-EDGE))/5));
+  if (v){ page.scrollTop += v; place(); }
+  raf = requestAnimationFrame(tick);
+}
+function endDrag(cancel){
+  if (!drag) return;
+  cancelAnimationFrame(raf);
+  const {scene, s, gap, fr} = drag; const d = drag; drag = null;
+  if (!frame.classList.contains('desktop')){
+    const extra = parseFloat(getComputedStyle(frame).getPropertyValue('--lt-h')) || 236;
+    const maxAfter = (page.scrollHeight - extra) - (page.clientHeight - extra);   /* the page's max scroll once the panel is back */
+    const over = Math.max(0, Math.ceil(page.scrollTop - maxAfter));
+    page.style.paddingBottom = over ? (24 + over) + 'px' : '';
+  }
+  frame.classList.remove('dragging'); bin.classList.remove('hot');
+  suppressClick = true; setTimeout(()=>suppressClick=false, 50);
+  const before = d.before;
+  const settle = ()=>{
+    scene.classList.remove('lifted','tobin','settling'); scene.style.left=scene.style.top=scene.style.width=scene.style.transform='';
+    gap.replaceWith(scene);
+  };
+  if (!cancel && d.overBin){
+    /* into the bin: it leaves the page; the line says so, with Undo */
+    scene.classList.add('settling'); const b = bin.getBoundingClientRect();
+    scene.style.top = (b.top+b.height/2-fr.top-scene.offsetHeight/2)+'px'; scene.style.transform='scale(.1)'; scene.style.opacity='0';
+    setTimeout(()=>{ settle(); scene.style.opacity=''; const gb=rects(); scene.hidden=true; flip(gb);
+      const mv = order().filter(x=>!sceneEl(x).hidden && SCENES.find(q=>q.k===x).movable); pick(mv[0]||'names');
+      commit({type:'remove', k:s.k, el:scene, label:s.label, before: before}, `${s.label} removed`);
+    }, 200);
+    return;
+  }
+  /* drop: it sits in its place at once, then Saving… */
+  const gr = gap.getBoundingClientRect();
+  scene.classList.add('settling'); scene.style.top = (gr.top-fr.top)+'px'; scene.style.transform='scale(1)';
+  setTimeout(()=>{
+    settle();
+    const after = order();
+    const changed = after.some((k,i)=>k!==before[i]);
+    if (cancel || !changed) { say(''); drawTools(); return; }
+    commit({type:'move', k:s.k, before}, '');
+  }, 190);
+}
+inner.addEventListener('pointerup', e=>{ if (press){ clearTimeout(press.timer); press=null; } endDrag(false); });
+inner.addEventListener('pointercancel', e=>{ if (press){ clearTimeout(press.timer); press=null; } endDrag(true); });
+inner.addEventListener('lostpointercapture', ()=>{ if (drag && !drag.moved) {} });
+/* a drag can end over the lower third — the bin is there */
+frame.addEventListener('pointerup', ()=>{ if (drag) endDrag(false); });
+frame.addEventListener('pointermove', e=>{ if (drag && e.target.closest('#inner')===null){ drag.y=e.clientY; drag.x=e.clientX; place(); } });
+
+/* the extra room at the page's end goes once it would not move the page */
+function dropPad(){
+  if (drag || !page.style.paddingBottom) return;
+  const extra = parseFloat(page.style.paddingBottom) - 24;
+  if (page.scrollTop <= page.scrollHeight - extra - page.clientHeight) page.style.paddingBottom = '';
+}
+page.addEventListener('scroll', dropPad, {passive:true});
+/* keyboard, for the scene that has focus: ↑ ↓ move it, Delete removes */
+inner.addEventListener('keydown', e=>{
+  const scene = e.target.closest('.scene'); if (!scene) return; const s = SCENES.find(x=>x.k===scene.dataset.k);
+  if (e.key==='ArrowUp' && e.altKey){ e.preventDefault(); pick(s.k); s.movable ? moveBy(s.k,-1) : say(s.why); }
+  if (e.key==='ArrowDown' && e.altKey){ e.preventDefault(); pick(s.k); s.movable ? moveBy(s.k,1) : say(s.why); }
+  if (e.key==='Delete' || e.key==='Backspace'){ e.preventDefault(); pick(s.k); s.movable ? removeScene(s.k) : say(`${s.label} stays on this page.`); }
+  if (e.key==='Enter' || e.key===' '){ e.preventDefault(); pick(s.k); }
+});
+
+/* ── the compare switches (outside the Maker) ─────────────────────────────── */
+const CAPS = {
+  today: `<b>Today.</b> The picked scene's Edit ends in Earlier · Later · Remove. Remove asks first; ＋ brings a removed scene back.`,
+  scene: `<b>The build.</b> Press and <b>hold</b> a scene (about a third of a second) — it lifts <span class="buzz">(the phone buzzes once)</span>, the bottom toolbar slides down out of the way so the whole page shows, the others open a gap where it would land; let go and it settles there at once. While it is lifted a bin appears in the thumb zone: drop the scene on it to remove it; the line under the tools says "<i>Message removed · Undo</i>". A quick swipe still scrolls. Hold a part that cannot move (the cover, the reply card, E-Gifts, the Reveal): it nudges and the line says why. Tap the scene's name tag for Move up · Move down · Remove without dragging. A scene stays on its page — the other tabs dim while one is lifted.`,
+};
+function setMode(m){ frame.dataset.mode = m; $('#cap').innerHTML = CAPS[m] + (frame.classList.contains('desktop') ? ` <b>Desktop:</b> press and drag with the mouse, no hold; the bin sits at the bottom of the centre column; the tools column stays — the page column is already full height.` : ''); say(''); drawTools(); }
+$('#mode').addEventListener('change', e=>setMode(e.target.value));
+$('#theme').addEventListener('change', e=>frame.dataset.theme=e.target.value);
+$('#device').addEventListener('change', e=>{ frame.classList.toggle('desktop', e.target.value==='desktop'); setMode(frame.dataset.mode); });
+window.addEventListener('pointerover', e=>{ if (e.pointerType==='mouse') frame.classList.add('mouse'); }, {once:true});
+/* ?mode=&theme=&device= — for the screenshots */
+const q = new URLSearchParams(location.search);
+if (q.get('mode')) $('#mode').value = q.get('mode');
+if (q.get('theme')) { $('#theme').value = q.get('theme'); frame.dataset.theme = q.get('theme'); }
+if (q.get('device')==='desktop') { $('#device').value='desktop'; frame.classList.add('desktop'); }
+draw(); setMode($('#mode').value);
+/* the picked scene in view, as today */
+requestAnimationFrame(()=>{ const el=sceneEl(picked); if (el) page.scrollTop = Math.max(0, el.offsetTop - 60); });
+</script>
+</body>
+</html>
