@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prints' six + the seat counter · prototype</title>
+<!--
+  PRINTS' SIX CONTROLS + THE SEAT COUNTER — on the approved templates (2026-10-13, Fable, design only).
+  Plain HTML / CSS / JS, no requests. Tokens and classes come from the approved galleries
+  (prototypes/control_templates_2026-10-08.html · control_templates_round2_2026-10-12.html); the top bar from
+  Maker_Two_Bars_LOCKED_2026-10-09.md. Record: MAKER_PRINTS_SEAT_COUNTER_2026-10-13_fable.md.
+  States for pictures: ?screen=prints|seat&view=phone|desk&theme=light|dark&state=<name>
+    prints states: top · parents · kindly · menu · pass · poster · changed · pro
+    seat states:   sheet · undo · min · max
+-->
+<style>
+:root{--paper:#FBF9F5;--page:#F4F0E8;--surf:#FFFFFF;--ink:#2C2A29;--ink2:#5B5752;--mute:#8E8880;--line:#E6E0D6;--line2:#D9D3C8;--pill:#F1ECE3;--gold:#A9834B;--gold-ink:#6F5527;--gold-soft:#E8DCC3;--cta:#C24E25;--on-cta:#FFFFFF;--ok:#2B744A;--ok-ink:#25613D;--ok-soft:#E6F2EA;--warn:#965A00;--warn-soft:#FBEFD9;--bad:#B3261E;--bad-soft:#F8E0DE;--off:#9A948C;--scrim:rgba(44,42,41,.42);--shadow:0 14px 34px -14px rgba(44,42,41,.4);
+--in:cubic-bezier(.2,.8,.2,1);--spring:cubic-bezier(.34,1.56,.64,1);--t:3.04;--dur:.7s;
+--sans:-apple-system,"Helvetica Neue",Inter,system-ui,Arial,sans-serif;--serif:"Cormorant Garamond",Georgia,"Times New Roman",serif}
+html[data-theme=dark]{--paper:#1E1C15;--page:#17160F;--surf:#232019;--ink:#FBFAF7;--ink2:#D6D1C7;--mute:#B3AEA3;--line:rgba(251,250,247,.16);--line2:rgba(251,250,247,.28);--pill:rgba(251,250,247,.08);--gold:#CBA766;--gold-ink:#E2C98B;--gold-soft:rgba(203,167,102,.18);--cta:#E5794E;--on-cta:#17160F;--ok:#6FCF97;--ok-ink:#6FCF97;--ok-soft:rgba(111,207,151,.14);--warn:#F0B45A;--warn-soft:rgba(240,180,90,.14);--bad:#F2817A;--bad-soft:rgba(242,129,122,.16);--off:#8A857C;--scrim:rgba(0,0,0,.55);--shadow:0 14px 34px -14px rgba(0,0,0,.7)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%}
+body{background:#D9D4CB;color:var(--ink);font:15px/1.45 var(--sans);padding:12px 0 40px}
+html[data-theme=dark] body{background:#0E0D09}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input,textarea,select{font:inherit;color:inherit}
+[hidden]{display:none!important}
+svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.wrap{display:flex;flex-direction:column;align-items:center;gap:12px}
+.ctl{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;width:375px;max-width:100vw;padding:0 16px;font-size:13px}
+.ctl .ps{height:40px;flex:1 1 0;min-width:0}
+.ctl .ps button{font-size:12px;padding:0 6px}
+body.desk .ctl,body.desk .note{width:1024px}
+.note{width:375px;max-width:100vw;background:var(--surf);border:1px solid var(--line);border-radius:16px;padding:12px 14px;font-size:12.5px;color:var(--ink2)}
+.note h4{font:700 11.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-bottom:6px}
+.note table{width:100%;border-collapse:collapse;font-size:12.5px}
+.note td{padding:4px 6px 4px 0;border-top:1px solid var(--line);vertical-align:top}
+.note td:first-child{font-weight:600;color:var(--ink);white-space:nowrap}
+.note b{color:var(--ink)}
+/* ── pill selector (kind 1) ── */
+.ps{position:relative;display:flex;height:44px;padding:3px;border-radius:999px;background:var(--pill);border:1px solid var(--line)}
+.ps button{flex:1;position:relative;z-index:1;border-radius:999px;font-size:13px;font-weight:600;color:var(--off);display:flex;align-items:center;justify-content:center;gap:6px;padding:0 10px;white-space:nowrap;transition:color calc(220ms*var(--t)) var(--in)}
+.ps button[aria-pressed=true]{color:var(--on-cta)}
+.ps .th{position:absolute;top:3px;bottom:3px;left:0;width:var(--w,0px);transform:translateX(var(--x,0px));border-radius:999px;background:var(--cta);transition:transform calc(230ms*var(--t)) var(--spring),width calc(230ms*var(--t)) var(--spring)}
+@keyframes press{0%{scale:1}35%{scale:.93}100%{scale:1}}
+.pulse-el{animation:press calc(320ms*var(--t)) var(--in)}
+/* ── the phone ── */
+.phone{position:relative;width:375px;max-width:100vw;height:812px;background:var(--page);overflow:hidden;border-radius:26px;box-shadow:0 20px 50px -20px rgba(0,0,0,.45);display:flex;flex-direction:column;isolation:isolate}
+body.desk .phone{width:1024px;height:720px;border-radius:18px}
+@media(max-width:420px){body{padding:0}.wrap{gap:0}.ctl{height:52px;background:var(--surf);border-bottom:1px solid var(--line);flex-wrap:nowrap}.phone{border-radius:0;height:calc(100dvh - 52px)!important;box-shadow:none}.note{display:none}}
+/* ── top bar (Maker_Two_Bars_LOCKED: [✕][Stages ▾ | Page ▾][↺][✓]) ── */
+.bar{flex:none;height:52px;display:flex;align-items:center;gap:6px;padding:0 6px;background:var(--surf);border-bottom:1px solid var(--line);z-index:5;position:relative}
+.round{flex:none;width:44px;height:44px;border-radius:999px;display:grid;place-items:center;background:var(--pill);color:var(--mute);position:relative}
+.round svg{width:20px;height:20px}
+.round.exit{background:var(--bad);color:#fff}
+.round.apply.on{background:var(--cta);color:var(--on-cta)}
+.round.apply .badge{position:absolute;top:-2px;right:-2px;min-width:18px;height:18px;border-radius:999px;background:var(--surf);color:var(--cta);border:1.5px solid var(--cta);font:700 11px/15px var(--sans);text-align:center;padding:0 4px;display:none}
+.round.apply.on .badge{display:block}
+.round[disabled]{opacity:.45}
+.mid{flex:1;min-width:0;display:flex;justify-content:center}
+.seg{position:relative;display:flex;background:var(--pill);border-radius:999px;padding:3px;width:100%;max-width:420px}
+.seg button{flex:1 1 0;min-width:0;height:38px;border-radius:999px;font:600 13px var(--sans);color:var(--off);position:relative;z-index:1;transition:color .3s;display:inline-flex;align-items:center;justify-content:center;gap:3px;padding:0 4px;white-space:nowrap}
+.seg button[aria-pressed=true]{color:var(--on-cta)}
+.seg button svg{width:12px;height:12px;flex:none;stroke-width:2.4;transition:transform .35s var(--spring)}
+.seg button:not([aria-pressed=true]) svg{color:var(--cta)}
+.seg .thumb{position:absolute;top:3px;bottom:3px;left:3px;width:calc(50% - 3px);border-radius:999px;background:var(--cta);transition:transform var(--dur) var(--spring);z-index:0}
+.seg.second .thumb{transform:translateX(100%)}
+/* ── body ── */
+.body{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;position:relative;scrollbar-width:none;padding:0 16px 40px}
+.body::-webkit-scrollbar{display:none}
+.where{margin:12px 0 2px;font:500 12.5px var(--sans);color:var(--mute)}
+.where b{color:var(--ink2);font-weight:600}
+.gh{margin:18px 0 2px;font:700 11.5px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--mute);display:flex;align-items:baseline;gap:8px}
+.gh small{font-weight:400;letter-spacing:0;text-transform:none;font-size:12px}
+.piece{margin-top:10px}
+.piece+.piece{border-top:1px solid var(--line);padding-top:6px}
+.phead{display:flex;align-items:center;gap:12px;min-height:60px}
+.paper{flex:none;width:44px;height:62px;border-radius:4px;background:#FFFDF9;border:1px solid #E6E0D6;box-shadow:0 1px 3px rgba(0,0,0,.12);position:relative;overflow:hidden;color:#2C2A29}
+.paper.wide{width:62px;height:44px}.paper.tall{width:40px;height:62px}
+.paper i{position:absolute;left:8px;right:8px;height:2px;background:#BFB6A8;border-radius:1px}
+.paper i:nth-child(1){top:14px;height:3px;background:#8E6D3A}.paper i:nth-child(2){top:24px}.paper i:nth-child(3){top:31px;right:16px}.paper i:nth-child(4){top:38px;right:12px}.paper i:nth-child(5){bottom:8px;left:14px;right:14px;height:7px;border:1px solid #2C2A29;background:none;border-radius:1px}
+.paper .ph{position:absolute;inset:6px 6px 24px;background:linear-gradient(135deg,#E9C9A8,#B9826A);border-radius:2px}
+.phead .tx{flex:1;min-width:0}
+.phead .tx b{display:block;font-size:15.5px;font-weight:600}
+.phead .tx span{display:block;font-size:12.5px;color:var(--ink2)}
+.unch{font-size:11px;color:var(--mute);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+/* ── form rows (kind 6 / 10) ── */
+.fr{display:flex;align-items:center;gap:10px;min-height:52px;border-top:1px solid var(--line)}
+.rows>.fr:first-child,.phead+.fr{border-top:0}
+.fr .l{flex:1;font-weight:500;display:flex;align-items:center;gap:2px;min-width:0}
+.fr .l small{display:block;font-size:12px;color:var(--mute);font-weight:400}
+.fr .l .stack{display:flex;flex-direction:column;min-width:0}
+.fr .v{color:var(--ink2);font-size:14px;display:inline-flex;align-items:center;gap:6px;min-height:44px}
+.sub{padding-left:8px;border-left:2px solid var(--line);margin:2px 0 8px}
+.sub .fr{min-height:48px}
+.cap{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);font-weight:700}
+/* typed answer = the same pill with a pencil */
+.ans{height:44px;display:inline-flex;align-items:center;gap:8px;padding:0 10px 0 14px;border-radius:999px;background:var(--surf);border:1px solid var(--line2);font-size:14px;max-width:220px;text-align:left}
+.ans span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.ans svg{width:14px;height:14px;color:var(--cta);flex:none;stroke-width:2.3}
+.ans.empty span{color:var(--mute)}
+.fr.editing .l{display:none}
+.ed{flex:1;display:flex;align-items:center;gap:8px;animation:edin calc(200ms*var(--t)) var(--spring)}
+@keyframes edin{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:none}}
+.ed .inbox{flex:1;min-width:0;display:flex;align-items:center;gap:6px;height:44px;padding:0 18px;border-radius:999px;background:var(--surf);border:1px solid var(--cta);box-shadow:0 0 0 3px color-mix(in srgb,var(--cta) 14%,transparent)}
+.ed .inbox input{flex:1;min-width:0;width:auto;height:auto;padding:0;border:0;outline:0;background:none;font:inherit;font-size:16px;color:var(--ink)}
+.ed .no{width:44px;height:44px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--pill);color:var(--ink2);border:1px solid var(--line2)}
+.ed .no svg{width:18px;height:18px;stroke-width:2.4}
+.ed .capn{font:700 12px var(--sans);color:var(--cta);flex:none}
+/* open boxes (filling something new, kind 10) */
+.box{flex:1;min-width:0;display:flex;align-items:center;gap:6px;height:44px;padding:0 16px;border-radius:999px;background:var(--surf);border:1px solid var(--line2);transition:border-color calc(50ms*var(--t)),box-shadow calc(50ms*var(--t))}
+.box:focus-within{border-color:var(--cta);box-shadow:0 0 0 3px color-mix(in srgb,var(--cta) 14%,transparent)}
+.box input{flex:1;min-width:0;border:0;outline:0;background:none;font-size:16px;height:40px}
+.box input::placeholder{color:var(--mute)}
+.box .x{width:36px;height:40px;display:flex;align-items:center;justify-content:center;color:var(--mute);flex:none;margin-right:-10px}
+.box .x svg{width:16px;height:16px}
+/* ── dropdown (kind 2) ── */
+.ddw{position:relative}
+.dd{height:44px;display:inline-flex;align-items:center;gap:6px;padding:0 10px 0 14px;border-radius:999px;background:var(--surf);border:1px solid var(--line2);font-size:14px;font-weight:500;width:170px;justify-content:space-between;transition:border-color calc(160ms*var(--t))}
+.dd.short{width:118px}.dd.full{width:100%}
+.dd span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dd svg{flex:none;width:14px;height:14px;color:var(--cta);stroke-width:2.4;transition:transform calc(180ms*var(--t)) var(--spring)}
+.ddw.open .dd svg{transform:rotate(180deg)}.ddw.open .dd{border-color:var(--cta)}
+/* ── switch (kind 3) ── */
+.sw{width:50px;height:30px;border-radius:999px;background:var(--line2);position:relative;flex:none;transition:background calc(220ms*var(--t)) var(--in)}
+.sw:after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform calc(200ms*var(--t)) var(--spring)}
+.sw[aria-checked=true]{background:var(--cta)}
+.sw[aria-checked=true]:after{transform:translateX(20px)}
+.sw[disabled]{opacity:.45}
+/* ── ⓘ (kind 7) ── */
+.ib{width:44px;min-height:44px;flex:none;display:flex;align-items:center;justify-content:center}
+.ib i{width:22px;height:22px;border-radius:50%;border:1px solid var(--line2);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--cta);font-style:normal;background:var(--surf)}
+/* ── action button (kind 9) ── */
+.ab{height:44px;padding:0 18px;border-radius:999px;font-weight:600;font-size:14px;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:0;transition:background calc(60ms*var(--t)),color calc(60ms*var(--t)),opacity calc(60ms*var(--t))}
+.ab.main{background:var(--cta);color:var(--on-cta)}
+.ab.second{background:var(--surf);color:var(--ink);border:1px solid var(--line2)}
+.ab.quiet{background:none;color:var(--cta);padding:0 10px}
+.ab.danger{background:none;color:var(--bad);border:1px solid color-mix(in srgb,var(--bad) 40%,transparent)}
+.ab.icon{width:44px;padding:0}
+.ab[disabled]{background:var(--pill);color:var(--off);border-color:var(--line);pointer-events:none}
+.ab svg{width:18px;height:18px;stroke-width:2.2}
+.ab .spin{width:16px;height:16px;border-radius:50%;border:2px solid color-mix(in srgb,currentColor 30%,transparent);border-top-color:currentColor;animation:sp .8s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 0 4px}
+/* ── Pro mark (kind 20) ── */
+.pro{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 9px;border-radius:999px;background:var(--gold-soft);color:var(--gold-ink);font-size:11px;font-weight:800;letter-spacing:.04em}
+.pro.own{background:none;color:var(--gold);padding:0;height:auto;font-size:14px}
+/* ── status line + toast (kind 12) ── */
+.status{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:500;padding:10px 14px;border-radius:14px;margin:6px 0}
+.status.warn{background:var(--warn-soft);color:var(--warn)}
+.status.ok{background:var(--ok-soft);color:var(--ok-ink)}
+.status.bad{background:var(--bad-soft);color:var(--bad)}
+.status.info{background:var(--pill);color:var(--ink2)}
+.status svg{width:18px;height:18px;flex:none;stroke-width:2.2}
+.status .tx{flex:1;min-width:0}.status .tx b{font-weight:700}
+.status button{color:inherit;text-decoration:underline;font-weight:700;min-height:44px;padding:0 6px;flex:none}
+.toast{position:absolute;left:50%;top:60px;z-index:60;transform:translate(-50%,-320%);background:var(--cta);color:var(--on-cta);border-radius:999px;padding:0 20px;height:44px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;box-shadow:var(--shadow);transition:transform calc(90ms*var(--t)) var(--spring);white-space:nowrap;max-width:calc(100% - 32px)}
+.toast.on{transform:translate(-50%,0)}
+.toast svg{width:18px;height:18px;stroke-width:2.4}
+.toast.bad{background:#7A1712;color:#fff}
+/* ── scrim + sheet + confirm (popups darken + blur) ── */
+.scrim{position:absolute;inset:0;background:var(--scrim);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity calc(90ms*var(--t)) var(--in);z-index:40}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:calc(100% - 16px);background:var(--paper);border-radius:22px 22px 0 0;transform:translateY(105%);transition:transform var(--dur) var(--spring);z-index:50;display:flex;flex-direction:column;box-shadow:0 -10px 40px -20px rgba(0,0,0,.5)}
+.sheet.on{transform:none}
+.grab{width:40px;height:4px;border-radius:9px;background:var(--line2);margin:10px auto 2px;flex:none}
+.sheet h3{font:700 12px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin:8px 20px 4px}
+.sheet .rows{overflow:auto;padding:0 12px 16px}
+.menu button{display:flex;width:100%;align-items:center;min-height:48px;padding:0 12px;border-radius:12px;font-size:15px;text-align:left;gap:10px}
+.menu button[aria-checked=true]{color:var(--cta);font-weight:600}
+.menu button .tick{margin-left:auto;width:18px;height:18px;visibility:hidden;stroke-width:2.6}
+.menu button[aria-checked=true] .tick{visibility:visible}
+.menu button small{color:var(--mute);font-weight:400;font-size:13px}
+.cfm{position:absolute;left:50%;top:50%;z-index:60;width:min(320px,calc(100% - 48px));transform:translate(-50%,-46%) scale(.94);opacity:0;pointer-events:none;background:var(--surf);border-radius:24px;padding:22px 20px 16px;text-align:center;box-shadow:0 24px 60px -20px rgba(0,0,0,.5);transition:opacity calc(50ms*var(--t)),transform calc(70ms*var(--t)) var(--spring)}
+.cfm.on{opacity:1;transform:translate(-50%,-50%);pointer-events:auto}
+.cfm b{display:block;font-size:18px;margin-bottom:6px}.cfm p{color:var(--ink2);font-size:14px;margin-bottom:16px}
+.cfm .btnrow{justify-content:center;flex-wrap:nowrap;padding:0}.cfm .ab{flex:1}
+/* ── style cards (kind 5) ── */
+.strip{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 6px;scrollbar-width:none;margin:0 -2px}
+.strip::-webkit-scrollbar{display:none}
+.sc{flex:none;width:112px;scroll-snap-align:center;text-align:center;transition:opacity calc(120ms*var(--t)) var(--in)}
+.sc .f{display:block;width:112px;height:149px;border-radius:14px;position:relative;overflow:hidden;box-shadow:0 0 0 0 var(--cta);transition:box-shadow calc(160ms*var(--t)) var(--spring),transform calc(160ms*var(--t)) var(--spring);background:#FFFDF9;color:#2C2A29}
+.sc[aria-checked=true] .f{box-shadow:0 0 0 3px var(--cta)}
+.sc b{display:block;margin-top:9px;font-size:12px;font-weight:500;color:var(--off)}
+.sc[aria-checked=true] b{color:var(--cta);font-weight:700}
+.tk{position:absolute;inset:0;padding:10px 10px;font-size:7px;line-height:1.3;text-align:left;color:#2C2A29}
+.tk .nm{font:600 10px/1.1 var(--serif);margin-top:4px}
+.tk .qr{position:absolute;left:10px;bottom:10px;width:26px;height:26px;background:repeating-linear-gradient(90deg,#2C2A29 0 3px,#fff 3px 6px),repeating-linear-gradient(0deg,#2C2A29 0 3px,#fff 3px 6px);background-blend-mode:multiply;border:2px solid #fff;outline:1px solid #2C2A29}
+.tk .tag{position:absolute;right:10px;top:10px;font-size:6px;letter-spacing:.14em;text-transform:uppercase;color:#8E6D3A}
+.tk.ticket{background:repeating-linear-gradient(180deg,transparent 0 118px,#E6E0D6 118px 119px,transparent 119px),#FFFDF9}
+.tk.ticket:after{content:"";position:absolute;left:-6px;right:-6px;top:112px;height:12px;background:radial-gradient(circle at 0 50%,var(--paper) 6px,transparent 6.5px),radial-gradient(circle at 100% 50%,var(--paper) 6px,transparent 6.5px);background-size:50% 100%;background-repeat:no-repeat;background-position:left,right}
+.tk.poster{background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.65)),linear-gradient(135deg,#E9C9A8,#8E5B47);color:#fff}
+.tk.poster .tag{color:#fff}
+/* ── upload (kind 21) ── */
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;height:120px;width:120px;border-radius:18px;border:1.5px dashed var(--line2);background:var(--surf);color:var(--cta);font-weight:600;font-size:13px;position:relative;overflow:hidden;flex:none}
+.drop small{color:var(--mute);font-weight:400;font-size:12px}
+.drop svg{width:24px;height:24px}
+.drop.has{border:0;background:linear-gradient(135deg,#E9C9A8,#B9826A);color:#fff}
+.drop u{position:absolute;right:8px;top:8px;width:28px;height:28px;border-radius:50%;background:rgba(44,42,41,.6);color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:13px}
+.pie{width:56px;height:56px;border-radius:50%;background:conic-gradient(var(--cta) calc(var(--p,0)*1%),var(--pill) 0);display:flex;align-items:center;justify-content:center}
+.pie i{width:44px;height:44px;border-radius:50%;background:var(--surf);color:var(--cta);font-style:normal;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.uprow{display:flex;gap:14px;align-items:center;padding:8px 0}
+.uprow p{font-size:13px;color:var(--ink2)}
+/* ── list rows (kind 15) ── */
+.lrow{display:flex;align-items:center;gap:12px;min-height:56px;width:100%;text-align:left;border-top:1px solid var(--line);padding:0 2px}
+.lrow .tx{flex:1;min-width:0}.lrow .tx b{display:block;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lrow .tx span{display:block;font-size:12.5px;color:var(--ink2)}
+.lrow>svg{width:16px;height:16px;stroke:var(--cta);stroke-width:2.2;flex:none}
+.lrow .av{width:36px;height:36px;border-radius:50%;background:var(--pill);display:grid;place-items:center;font-size:13px;font-weight:700;color:var(--ink2);flex:none}
+/* ── empty state (kind 16) ── */
+.state{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:10px 0 6px}
+.state b{font-size:14.5px}.state p{font-size:13px;color:var(--ink2)}
+/* ── chips (kind 11) ── */
+.chips{display:flex;flex-wrap:wrap;gap:8px;padding:6px 0}
+.chip{height:40px;padding:0 16px;border-radius:999px;background:var(--surf);border:1px solid var(--line2);font-size:14px;font-weight:600;color:var(--ink2);display:inline-flex;align-items:center;gap:6px}
+.chip svg{width:14px;height:14px;color:var(--cta);stroke-width:2.4}
+/* ── reorder (kind 18 / 34) ── */
+.ro{display:flex;align-items:center;gap:6px;min-height:52px;border-top:1px solid var(--line);position:relative;transition:transform calc(90ms*var(--t)) var(--spring),box-shadow calc(90ms*var(--t))}
+.ro .grip{width:32px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--cta);flex:none;cursor:grab;margin-left:-8px}
+.ro .grip svg{width:18px;height:18px;fill:currentColor;stroke:none}
+.ro .mv{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--cta);flex:none}
+.ro .mv[disabled]{color:var(--line2)}
+.ro .mv svg{width:18px;height:18px;stroke-width:2.2}
+.ro.held{background:var(--pill);border-radius:12px}
+.ro.lifted{box-shadow:0 14px 30px -10px rgba(0,0,0,.45),0 0 0 2px var(--cta);border-radius:14px;z-index:3;background:var(--surf);transform:scale(1.02)}
+.mom{border-top:1px solid var(--line);padding:4px 0 8px}
+.mom:first-child{border-top:0}
+.dish{display:flex;align-items:center;gap:6px;min-height:48px;padding-left:24px}
+.dish .box{height:40px}
+.moms.arr .ro .mv{display:flex}.moms:not(.arr) .ro .mv{display:none}
+/* ── counter (kind 17) ── */
+.cnt{display:inline-flex;align-items:center;height:44px;border-radius:999px;background:var(--surf);border:1px solid var(--line2)}
+.cnt button{width:44px;height:44px;border-radius:50%;font-size:22px;color:var(--cta);display:flex;align-items:center;justify-content:center;line-height:1}
+.cnt button[disabled]{color:var(--line2)}
+.cnt b{min-width:34px;text-align:center;font-variant-numeric:tabular-nums;font-size:16px;display:inline-block}
+@keyframes tick{0%{transform:translateY(0);opacity:1}40%{transform:translateY(-6px);opacity:0}41%{transform:translateY(6px)}100%{transform:none;opacity:1}}
+.cnt b.tick{animation:tick calc(90ms*var(--t)) var(--in)}
+/* ── seat plan canvas ── */
+.canvas{flex:1;min-height:0;position:relative;background:var(--page);overflow:hidden}
+.canvas>svg{position:absolute;inset:0;width:100%;height:100%}
+.tbl{fill:var(--surf);stroke:var(--line2);stroke-width:1.5}
+.tbl.sel{stroke:var(--cta);stroke-width:2.5}
+.chair{fill:var(--line2);stroke:none}.chair.on{fill:var(--cta)}.chair.gone{fill:none;stroke:var(--line2);stroke-dasharray:2 2}
+.lbl{font:600 11px var(--sans);fill:var(--ink);text-anchor:middle;stroke:none}
+.lbl2{font:500 10px var(--sans);fill:var(--mute);text-anchor:middle;stroke:none}
+.dock{position:absolute;left:0;right:0;bottom:0;background:var(--paper);border-radius:22px 22px 0 0;box-shadow:0 -10px 40px -20px rgba(0,0,0,.5);z-index:6;display:flex;flex-direction:column;padding:0 16px max(10px,env(safe-area-inset-bottom))}
+.dock .edl{font:500 12.5px var(--sans);color:var(--mute);text-align:center;margin:2px 0 4px}
+.dock .edl b{color:var(--ink2);font-weight:600}
+/* ── computer ── */
+body.desk .body{padding:0 28px 40px}
+body.desk .cols{display:grid;grid-template-columns:300px 1fr;gap:28px;align-items:start}
+body.desk .cols .left{position:sticky;top:0;padding-top:14px}
+body.desk .bigpaper{width:240px;height:336px;border-radius:6px;background:#FFFDF9;border:1px solid #E6E0D6;box-shadow:0 6px 24px -10px rgba(0,0,0,.35);position:relative;overflow:hidden;color:#2C2A29}
+body.desk .bigpaper i{position:absolute;left:36px;right:36px;height:3px;background:#BFB6A8;border-radius:2px}
+body.desk .bigpaper i:nth-child(1){top:60px;height:5px;background:#8E6D3A}body.desk .bigpaper i:nth-child(2){top:110px}body.desk .bigpaper i:nth-child(3){top:130px;right:70px}body.desk .bigpaper i:nth-child(4){top:150px;right:60px}body.desk .bigpaper i:nth-child(5){bottom:36px;left:96px;right:96px;height:44px;border:1px solid #2C2A29;background:none;border-radius:2px}
+body.desk .bigpaper em{position:absolute;left:0;right:0;top:34px;text-align:center;font:600 9px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:#8E6D3A;font-style:normal}
+body.desk .bigcap{margin-top:10px;font-size:12.5px;color:var(--ink2)}
+body.desk .dd{width:220px}
+body.desk .sheet{left:auto;right:16px;bottom:16px;width:380px;border-radius:20px}
+body.desk .dock{left:auto;right:0;top:0;width:400px;border-radius:0;border-left:1px solid var(--line);padding-top:8px}
+body.desk .canvas{position:relative}body.desk .canvas>svg{right:400px;width:auto}
+body.desk .ans{max-width:320px}
+.left,.bigpaper,.bigcap{display:none}
+body.desk .left{display:block}body.desk .bigpaper{display:block}body.desk .bigcap{display:block}
+.hind{position:absolute;left:50%;bottom:8px;width:134px;height:5px;border-radius:3px;background:rgba(44,42,41,.35);transform:translateX(-50%);z-index:7}
+body.desk .hind{display:none}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="ctl">
+    <div class="ps" id="scr"><button aria-pressed="true" data-v="prints">Prints</button><button aria-pressed="false" data-v="seat">Seats</button><div class="th"></div></div>
+    <div class="ps" id="vw"><button aria-pressed="true" data-v="phone">Phone</button><button aria-pressed="false" data-v="desk">Computer</button><div class="th"></div></div>
+    <div class="ps" id="th"><button aria-pressed="true" data-v="light">Light</button><button aria-pressed="false" data-v="dark">Dark</button><div class="th"></div></div>
+  </div>
+
+  <div class="phone" id="phone">
+    <div class="bar">
+      <button class="round exit" aria-label="Exit the Maker" id="exit"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <div class="mid"><div class="seg second" id="seg">
+        <button aria-pressed="false" id="segA"><span class="lbl">Stages</span><svg viewBox="0 0 12 12"><path d="M2.5 4.5l3.5 3.5 3.5-3.5"/></svg></button>
+        <button aria-pressed="true" id="segB"><span class="lbl" id="segBl">Prints</span><svg viewBox="0 0 12 12"><path d="M2.5 4.5l3.5 3.5 3.5-3.5"/></svg></button>
+        <div class="thumb"></div>
+      </div></div>
+      <button class="round" aria-label="Undo the last change" id="undo" disabled><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
+      <button class="round apply" aria-label="Apply" id="apply"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span class="badge" id="badge">0</span></button>
+    </div>
+
+    <!-- ══════════ STUDIO › PRINTS ══════════ -->
+    <div class="body" id="prints">
+      <div class="cols">
+      <div class="left"><div class="bigpaper" id="bigpaper"><em>You are invited</em><i></i><i></i><i></i><i></i><i></i></div><p class="bigcap" id="bigcap">The Invitation · 5 × 7 in. Printouts are always on light paper, in Dark mode too.</p></div>
+      <div class="right">
+      <p class="where">You're editing · <b>Studio › Prints</b></p>
+
+      <div class="gh">Your invitation set <small>· in your theme</small></div>
+
+      <!-- THE INVITATION — Changed since printed · Parents' cards · Opening line -->
+      <div class="piece" data-piece="invitation">
+        <div class="phead"><div class="paper"><i></i><i></i><i></i><i></i><i></i></div><div class="tx"><b>The Invitation</b><span>5 × 7 in · A5</span></div>
+          <div class="ddw" id="szw"><button class="dd short" aria-haspopup="listbox" id="szb"><span id="szv">5 × 7 in</span><svg viewBox="0 0 14 14"><path d="M3 5l4 4 4-4"/></svg></button></div>
+        </div>
+        <div class="btnrow"><button class="ab second" data-save="The Invitation (PDF)"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>Save PDF</button><button class="ab quiet" data-save="The Invitation · sample">Sample · JPG</button></div>
+        <!-- 1 · CHANGED SINCE PRINTED → kind 12, status line (warn) -->
+        <div class="status warn" id="changed" role="status"><svg viewBox="0 0 24 24"><path d="M12 8v5M12 16.5v.3"/><circle cx="12" cy="12" r="9"/></svg><span class="tx"><b>Changed since you printed</b> on Oct 9 — save it again so the paper matches.</span><button id="changedgo">Save again</button></div>
+
+        <!-- 2 · PARENTS' CARDS → kind 3 switch · kind 15 list rows · kind 9 add · kind 1 side · kind 10 box -->
+        <div class="fr"><span class="l">Parents on the invitation</span><button class="ib" aria-label="What this is" data-tip="Guests whose role on your guest list is a parent's. Parents are optional — with none, the card leaves that part out."><i>i</i></button><button class="sw" role="switch" aria-checked="true" id="swpar"></button></div>
+        <div class="sub" id="parsub">
+          <div id="parlist"></div>
+          <div id="paradd"><button class="ab quiet" id="paraddb"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add a parent</button></div>
+          <div id="parform" hidden>
+            <div class="fr" style="border-top:0"><span class="l"><span class="stack">Whose parent<small>Sets their role on your guest list</small></span></span><div class="ps" style="width:168px;height:40px" id="side"><button aria-pressed="true" data-v="bride">Bride's</button><button aria-pressed="false" data-v="groom">Groom's</button><div class="th"></div></div></div>
+            <div class="fr" style="border-top:0"><div class="box"><input id="parname" placeholder="Their name" aria-label="The parent's name" maxlength="80"></div><button class="ab main" id="parsave" disabled>Add</button><button class="ab icon second" id="parcancel" aria-label="Cancel"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+          </div>
+        </div>
+
+        <div class="fr"><span class="l">Opening line</span><button class="sw" role="switch" aria-checked="true" id="swopen"></button></div>
+        <div class="sub" id="opensub"><div class="fr" style="border-top:0"><span class="l">The line</span><button class="ans" data-edit="Opening line" data-key="open"><span>Together with their families…</span><svg viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/></svg></button></div></div>
+        <div class="fr"><span class="l">Event Hub QR code</span><span class="v">Always printed</span></div>
+      </div>
+
+      <div class="piece"><div class="phead"><div class="paper"><i></i><i></i><i></i><i></i><i></i></div><div class="tx"><b>The Entourage</b><span>5 × 7 in · from your Wedding March</span></div><span class="unch">as built</span></div></div>
+
+      <!-- THE FINER DETAILS — Kindly reply two-door · Schedule for Everyone -->
+      <div class="piece" data-piece="details">
+        <div class="phead"><div class="paper"><i></i><i></i><i></i><i></i><i></i></div><div class="tx"><b>The Finer Details</b><span>5 × 7 in</span></div><button class="ab quiet" data-save="The Finer Details (PDF)">Save PDF</button></div>
+        <div class="fr"><span class="l">Schedule — the program</span><button class="ib" aria-label="What this is" data-tip="Only the moments marked for Everyone print here. A moment for the entourage or a smaller circle stays off the paper."><i>i</i></button><button class="sw" role="switch" aria-checked="false" id="swsched"></button></div>
+        <div class="sub" id="schedsub" hidden><p style="font-size:12.5px;color:var(--ink2);padding:6px 0 8px">Prints the moments for <b>Everyone</b> only.</p></div>
+        <!-- 3 · KINDLY REPLY, TWO DOORS → kind 3 switch · kind 2 dropdown · kind 6 typed row -->
+        <div class="fr"><span class="l">Kindly reply</span><button class="ib" aria-label="What this is" data-tip="Who guests reply to, printed on the card. A host or your coordinator is read from their account; or type your own line. It is the same line Studio › RSVP shows — change it in either place."><i>i</i></button><button class="sw" role="switch" aria-checked="true" id="swrsvp"></button></div>
+        <div class="sub" id="rsvpsub">
+          <div class="fr" style="border-top:0"><span class="l">Who guests reply to</span><div class="ddw" id="whow"><button class="dd" aria-haspopup="listbox" id="whob"><span id="whov">Claire · 0917 555 0142</span><svg viewBox="0 0 14 14"><path d="M3 5l4 4 4-4"/></svg></button></div></div>
+          <div class="fr" id="manrow" hidden><span class="l">Reply line</span><button class="ans empty" data-edit="Reply line" data-key="man"><span>Type it…</span><svg viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/></svg></button></div>
+        </div>
+        <div class="fr"><span class="l">Special message</span><button class="sw" role="switch" aria-checked="false" id="swmsg"></button></div>
+        <div class="fr"><span class="l">Event Hub QR code</span><span class="v">Always printed</span></div>
+      </div>
+
+      <!-- THE MENU — the menu editor -->
+      <div class="piece" data-piece="menu">
+        <div class="phead"><div class="paper"><i></i><i></i><i></i><i></i><i></i></div><div class="tx"><b>The Menu</b><span>5 × 7 in · saves as you go</span></div><button class="ab quiet" data-save="The Menu (PDF)" id="menusave">Save PDF</button></div>
+        <!-- 4 · MENU EDITOR → kind 18/34 reorder · kind 10 open boxes · kind 11 chips · kind 9 quiet -->
+        <div class="fr" style="border-top:0"><span class="l"><span class="stack">Your menu for the night<small>The moments of your night, in order, with their dishes</small></span></span><button class="ab quiet" id="arrange" aria-pressed="false">Arrange</button></div>
+        <div class="moms" id="moms"></div>
+        <div class="cap" style="margin-top:8px">Add a moment</div>
+        <div class="chips" id="momchips"></div>
+      </div>
+
+      <!-- EVENT PASS — the pass card look -->
+      <div class="piece" data-piece="pass">
+        <div class="phead"><div class="paper wide"><i></i><i></i><i></i><i></i><i></i></div><div class="tx"><b>Event pass</b><span>Calling card · train · boarding pass</span></div></div>
+        <div class="fr" style="border-top:0"><span class="l">Guest list — names on passes</span><button class="sw" role="switch" aria-checked="true" id="swnames"></button></div>
+        <div class="fr"><span class="l"><span class="stack">Ticket style<small>What each guest saves · waits for Apply</small></span></span></div>
+        <!-- 5 · PASS CARD LOOK → kind 5 style cards (3:4, picked one centred, terracotta ring) -->
+        <div class="strip" role="radiogroup" aria-label="Ticket style" id="passstrip"></div>
+        <div class="fr"><span class="l"><span class="stack">Digital ticket<small>One PNG per guest who is coming</small></span></span><button class="ab second" id="zip" data-pro="1"><span class="pro">◆ PRO</span>Save all tickets</button></div>
+        <div class="fr"><span class="l"><span class="stack">Printed ticket<small>Every guest · Phone card · PDF</small></span></span><button class="ab second" data-save="Every guest's ticket (PDF)"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>Save</button></div>
+      </div>
+
+      <div class="piece"><div class="phead"><div class="paper tall"><i></i><i></i><i></i><i></i><i></i></div><div class="tx"><b>Welcome poster</b><span>A3</span></div><span class="unch">as built</span></div></div>
+
+      <!-- OUR STORY POSTER — the poster photo -->
+      <div class="piece" data-piece="story">
+        <div class="phead"><div class="paper tall"><div class="ph"></div><i></i><i></i><i></i><i></i><i></i></div><div class="tx"><b>Our Story poster</b><span>A3 · 297 × 420 mm</span></div><button class="ab quiet" data-save="Our Story poster (PDF)">Save PDF</button></div>
+        <!-- 6 · POSTER PHOTO → kind 1 two-way pill · kind 21 upload with the pie · kind 12 plain-words problem -->
+        <div class="fr" style="border-top:0"><span class="l">Background</span><div class="ps" style="width:210px;height:40px" id="bgpick"><button aria-pressed="true" data-v="theme">Theme's picture</button><button aria-pressed="false" data-v="photo">My photo</button><div class="th"></div></div></div>
+        <div class="uprow" id="uprow" hidden><button class="drop" id="drop" aria-label="Upload a photo"><svg viewBox="0 0 24 24"><path d="M12 16V5M7 10l5-5 5 5"/><path d="M4 17v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2"/></svg>Upload<small>JPG · PNG · up to 30 MB</small></button><p id="uptext">For a sharp A3 poster use a photo at least 2480 × 3508 pixels.</p></div>
+        <div class="status bad" id="small" hidden><svg viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17.2v.3"/></svg><span class="tx">This photo is 1200 × 1600 pixels — small for A3, so it may print soft. Use one at least 2480 × 3508.</span><button id="smallgo">Change</button></div>
+      </div>
+
+      <div class="piece"><div class="phead"><div class="paper"><i></i><i></i><i></i><i></i><i></i></div><div class="tx"><b>Event card</b><span>A5 · index card</span></div><span class="unch">as built</span></div></div>
+
+      <div class="gh">For the day <small>· free for every event</small></div>
+      <div class="piece"><div class="phead"><div class="paper"><i></i><i></i><i></i><i></i><i></i></div><div class="tx"><b>Guest list registry · Guest QR codes · 2D seat plan</b><span>Table signs & place cards · Caterer meal counts · Event QR</span></div><span class="unch">as built</span></div></div>
+
+      <div class="gh">Download</div>
+      <div class="piece"><div class="btnrow" style="padding-top:4px"><button class="ab main" data-save="Whole set · Classic (PDF)"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>Whole set · PDF</button><button class="ab second" data-save="Every guest's ticket (PDF)">Every guest's ticket</button></div></div>
+      </div></div>
+    </div>
+
+    <!-- ══════════ STUDIO › SEAT PLAN — the table sheet with the counter ══════════ -->
+    <div class="canvas" id="seat" hidden>
+      <svg viewBox="0 0 375 760" id="seatsvg" preserveAspectRatio="xMidYMin meet"></svg>
+      <div class="dock" id="dock">
+        <div class="grab"></div>
+        <p class="edl">You're editing · <b>Seat plan › Table 10</b></p>
+        <div class="fr" style="border-top:0"><span class="l">Table name</span><button class="ans" data-edit="Table name" data-key="tname"><span>Table 10</span><svg viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/></svg></button></div>
+        <div class="fr"><span class="l">Shape</span><div class="ddw" id="shw"><button class="dd short" aria-haspopup="listbox" id="shb"><span id="shv">Round</span><svg viewBox="0 0 14 14"><path d="M3 5l4 4 4-4"/></svg></button></div></div>
+        <!-- THE SEAT COUNTER → kind 17 -->
+        <div class="fr"><span class="l"><span class="stack">Seats at this table<small id="seatsub">6 seated · of 10 chairs</small></span></span><span class="cnt" id="cnt"><button aria-label="One chair less" id="cm">−</button><b id="cv">8</b><button aria-label="One chair more" id="cp">+</button></span></div>
+        <div class="status info" id="seatnote" hidden role="status"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span class="tx" id="seatnotet">Chair 8 removed.</span><button id="seatundo">Undo</button></div>
+        <div class="btnrow"><button class="ab second"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>Rotate</button><button class="ab second">Edit chairs…</button><button class="ab second">Link…</button><button class="ab main" style="margin-left:auto" id="done"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>Done</button></div>
+        <div class="btnrow" style="padding-top:0"><button class="ab danger" id="deltab"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Delete this table</button></div>
+      </div>
+    </div>
+
+    <div class="scrim" id="scrim"></div>
+    <div class="sheet" id="sheet"><div class="grab"></div><h3 id="sheeth"></h3><div class="rows menu" id="sheetrows"></div></div>
+    <div class="cfm" id="cfm"><b id="cfmt">Delete this table?</b><p id="cfmp">Its guests go back to the unseated list.</p><div class="btnrow"><button class="ab second" id="cno">Keep it</button><button class="ab main" id="cyes" style="background:var(--bad);color:#fff">Delete</button></div></div>
+    <div class="toast" id="toast" role="status"><svg viewBox="0 0 24 24" id="toastic"><path d="M5 12l5 5L20 7"/></svg><span id="toastt">Saved</span></div>
+    <div class="hind"></div>
+  </div>
+
+  <div class="note"><h4>The map — each control → its kind</h4>
+  <table>
+  <tr><td>Changed since you printed</td><td><b>12</b> Messages · status line (amber) under the piece's saves, with one quiet "Save again"; never a bare note</td></tr>
+  <tr><td>Parents' cards</td><td><b>3</b> Switch → <b>15</b> List row per parent (opens the shipped guest card as a sheet) · <b>9</b> "Add a parent" → <b>1</b> Bride's | Groom's · <b>10</b> open name box · <b>16</b> empty state</td></tr>
+  <tr><td>Kindly reply (two doors)</td><td><b>3</b> Switch → <b>2</b> Dropdown "Who guests reply to" · <b>6</b> typed pill "Reply line" only for "Type it in…"; the SAME line Studio › RSVP shows (ⓘ says so, no link)</td></tr>
+  <tr><td>Menu editor</td><td><b>18/34</b> Reorder (dots to drag; arrows behind "Arrange" on a phone) · <b>10</b> open boxes · <b>11</b> chips from the Schedule's food moments · <b>9</b> quiet "Add a dish"; saves as you go → <b>12</b> toast</td></tr>
+  <tr><td>Pass card look</td><td><b>5</b> Style cards 3:4 (Classic · Ticket · Photo poster), picked one centred · <b>20</b> Pro mark on the zip · <b>9</b> Save; a pick waits for Apply</td></tr>
+  <tr><td>Poster photo</td><td><b>1</b> Theme's picture | My photo · <b>21</b> Upload square with the 0–100 pie, ✕ removes · <b>12</b> plain-words "may print soft"</td></tr>
+  <tr><td>Seat counter</td><td><b>17</b> Counter in the table sheet: − greys when every chair left is taken, + greys at the table's chairs; "Chair N removed · Undo" is <b>12</b></td></tr>
+  <tr><td>Everything</td><td>press answers at once (dip + pulse) · one ↺ step per press · ✓ counts only what waits for Apply (ticket style, opening line) · paper previews stay light in Dark · popups darken + blur · ⓘ is a centred popup on a phone</td></tr>
+  </table></div>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const q=new URLSearchParams(location.search);
+const still=matchMedia('(prefers-reduced-motion: reduce)');
+/* ── pill selectors ── */
+function pill(el,on){const bs=$$('.ps>button',el).length?[...el.querySelectorAll(':scope>button')]:[];const th=el.querySelector('.th');const lay=()=>{const b=bs.find(x=>x.getAttribute('aria-pressed')==='true');if(!b)return;th.style.setProperty('--w',b.offsetWidth+'px');th.style.setProperty('--x',(b.offsetLeft-3)+'px');};
+  bs.forEach(b=>b.addEventListener('click',()=>{if(b.getAttribute('aria-pressed')==='true')return;bs.forEach(x=>x.setAttribute('aria-pressed',x===b));lay();b.classList.remove('pulse-el');void b.offsetWidth;b.classList.add('pulse-el');on&&on(b.dataset.v,b);}));
+  requestAnimationFrame(lay);addEventListener('resize',lay);el._lay=lay;el._set=v=>{bs.forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===v));lay();};return el;}
+/* ── press feel on everything pressable ── */
+addEventListener('pointerdown',e=>{const t=e.target.closest('.dd,.sw,.sc,.ib,.ab,.chip,.cnt button,.ro .mv,.lrow,.ans,.round,.menu button,.status button,.drop');if(!t)return;t.classList.remove('pulse-el');void t.offsetWidth;t.classList.add('pulse-el');});
+/* ── toast ── */
+const toast=$('#toast');let tt;function say(m,bad){clearTimeout(tt);$('#toastt').textContent=m;toast.classList.toggle('bad',!!bad);$('#toastic').innerHTML=bad?'<path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17.2v.3"/>':'<path d="M5 12l5 5L20 7"/>';toast.classList.add('on');tt=setTimeout(()=>toast.classList.remove('on'),1800);}
+/* ── undo: one step per press; Apply counts only drafted presses ── */
+const undoStack=[];let drafted=0;const undoB=$('#undo'),applyB=$('#apply'),badge=$('#badge');
+function paint(){undoB.disabled=!undoStack.length;badge.textContent=drafted;applyB.classList.toggle('on',drafted>0);}
+function did(undo,opts={}){undoStack.push({undo,draft:!!opts.draft});if(opts.draft)drafted++;paint();if(opts.live!==false&&!opts.draft)say(opts.word||'Saved');}
+undoB.addEventListener('click',()=>{const s=undoStack.pop();if(!s)return;s.undo();if(s.draft)drafted=Math.max(0,drafted-1);paint();say('Undone');});
+applyB.addEventListener('click',()=>{if(!drafted){say('Nothing waiting to apply');return;}drafted=0;undoStack.length=0;paint();say('Applied — your Hub is updated');});
+$('#exit').addEventListener('click',()=>say(drafted?'Leave? '+drafted+' change'+(drafted>1?'s':'')+' not applied':'Back to your event'));
+/* ── scrim + sheet + ⓘ + confirm ── */
+const scrim=$('#scrim'),sheet=$('#sheet'),cfm=$('#cfm');let openW=null;
+function shut(){scrim.classList.remove('on');sheet.classList.remove('on');cfm.classList.remove('on');$$('.ddw.open').forEach(w=>w.classList.remove('open'));openW=null;}
+scrim.addEventListener('click',shut);
+function openSheet(title,items,cur,pick){$('#sheeth').textContent=title;const r=$('#sheetrows');r.innerHTML='';items.forEach(it=>{const b=document.createElement('button');b.setAttribute('role','option');b.setAttribute('aria-checked',it.k===cur);b.innerHTML=(it.sub?`<span>${it.label}<br><small>${it.sub}</small></span>`:`<span>${it.label}</span>`)+'<svg class="tick" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>';b.addEventListener('click',()=>{shut();pick(it.k,it);});r.appendChild(b);});scrim.classList.add('on');sheet.classList.add('on');}
+function dropdown(wrap,btn,items,get,pick){btn.addEventListener('click',e=>{e.stopPropagation();if(wrap.classList.contains('open')){shut();return;}shut();wrap.classList.add('open');openSheet(btn.getAttribute('aria-label')||btn.dataset.title||'Choose',items,get(),pick);});}
+$$('.ib').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();$('#cfmt').textContent=b.closest('.fr').querySelector('.l').textContent.trim().split('\n')[0];$('#cfmp').textContent=b.dataset.tip;$('#cyes').hidden=true;$('#cno').textContent='Got it';$('#cno').className='ab main';cfm.classList.add('on');scrim.classList.add('on');}));
+function confirm(title,p,yes,onYes){$('#cfmt').textContent=title;$('#cfmp').textContent=p;$('#cyes').hidden=false;$('#cyes').textContent=yes;$('#cno').textContent='Keep it';$('#cno').className='ab second';cfm.classList.add('on');scrim.classList.add('on');cfm._yes=onYes;}
+$('#cno').addEventListener('click',shut);$('#cyes').addEventListener('click',()=>{shut();cfm._yes&&cfm._yes();});
+/* ── switches: live (events.print_details) → Saved; one undo step ── */
+const subs={swpar:'#parsub',swopen:'#opensub',swrsvp:'#rsvpsub',swsched:'#schedsub'};
+$$('.sw').forEach(s=>s.addEventListener('click',()=>{const was=s.getAttribute('aria-checked')==='true';const set=v=>{s.setAttribute('aria-checked',v);const sub=subs[s.id];if(sub)$(sub).hidden=!v;};set(!was);did(()=>set(was),{word:was?'Off — it leaves the paper':'On — it prints'});}));
+/* ── typed answers: tap opens the field across the row; tap out or Enter keeps; ✕ leaves it ── */
+const vals={open:'Together with their families…',man:'',tname:'Table 10'};
+$$('.ans').forEach(a=>a.addEventListener('click',()=>{const fr=a.closest('.fr'),key=a.dataset.key,before=vals[key];const ed=document.createElement('div');ed.className='ed';ed.innerHTML=`<span class="capn">${a.dataset.edit}</span><div class="inbox"><input value="${before.replace(/"/g,'&quot;')}" aria-label="${a.dataset.edit}"></div><button class="no" aria-label="Leave it as it was"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>`;
+  fr.classList.add('editing');a.hidden=true;fr.appendChild(ed);const inp=ed.querySelector('input');inp.focus();inp.setSelectionRange(inp.value.length,inp.value.length);
+  const close=keep=>{if(!ed.isConnected)return;const v=inp.value.trim();ed.remove();fr.classList.remove('editing');a.hidden=false;if(keep&&v!==before){const set=x=>{vals[key]=x;a.querySelector('span').textContent=x||'Type it…';a.classList.toggle('empty',!x);};set(v);did(()=>set(before),key==='open'?{draft:true}:{});}};
+  ed.querySelector('.no').addEventListener('click',e=>{e.stopPropagation();close(false);});inp.addEventListener('keydown',e=>{if(e.key==='Enter')close(true);if(e.key==='Escape')close(false);});
+  setTimeout(()=>addEventListener('pointerdown',function out(e){if(ed.contains(e.target))return;removeEventListener('pointerdown',out);close(true);}),0);}));
+/* ── saves: the one ActionButton shows it is working, then the toast ── */
+$$('[data-save]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.busy)return;b.dataset.busy=1;const h=b.innerHTML;b.innerHTML='<span class="spin"></span>Making it…';setTimeout(()=>{b.innerHTML=h;delete b.dataset.busy;say(b.dataset.save+' saved');if(b.closest('[data-piece=invitation]'))$('#changed').hidden=true;},1100);}));
+$('#changedgo').addEventListener('click',()=>$('[data-piece=invitation] [data-save]').click());
+/* size dropdown */
+const szw=$('#szw'),szb=$('#szb');szb.dataset.title='Size';let sz='5x7';const SZ=[{k:'5x7',label:'5 × 7 in'},{k:'a5',label:'A5'}];dropdown(szw,szb,SZ,()=>sz,(k,it)=>{const was=sz,wl=$('#szv').textContent;sz=k;$('#szv').textContent=it.label;did(()=>{sz=was;$('#szv').textContent=wl;},{word:'Size: '+it.label});});
+/* ── 2 · PARENTS' CARDS ── */
+let parents=q.get('state')==='parents-empty'?[]:[{n:'Maria Santos',r:"Bride's mother",s:'bride'},{n:'Jose Santos',r:"Bride's father",s:'bride'},{n:'Lourdes Reyes',r:"Groom's mother",s:'groom'}];
+function drawParents(){const l=$('#parlist');l.innerHTML='';if(!parents.length){l.innerHTML='<div class="state"><b>No parents on your guest list yet</b><p>Add them here — each gets their own guest card, and the invitation names them.</p></div>';return;}
+  parents.forEach((p,i)=>{const b=document.createElement('button');b.className='lrow';if(i===0)b.style.borderTop='0';b.innerHTML=`<span class="av">${p.n.split(' ').map(x=>x[0]).join('').slice(0,2)}</span><span class="tx"><b>${p.n}</b><span>${p.r} · on your guest list</span></span><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>`;b.addEventListener('click',()=>say('Opens '+p.n.split(' ')[0]+"'s guest card"));l.appendChild(b);});}
+drawParents();
+const side=pill($('#side'));let sideV='bride';$('#side').addEventListener('click',e=>{const b=e.target.closest('button');if(b)sideV=b.dataset.v;});
+const parform=$('#parform'),paradd=$('#paradd'),parname=$('#parname'),parsave=$('#parsave');
+$('#paraddb').addEventListener('click',()=>{parform.hidden=false;paradd.hidden=true;parname.value='';parsave.disabled=true;setTimeout(()=>{parname.focus();side._lay();},30);});
+parname.addEventListener('input',()=>parsave.disabled=!parname.value.trim());
+parname.addEventListener('keydown',e=>{if(e.key==='Enter'&&parname.value.trim())parsave.click();});
+$('#parcancel').addEventListener('click',()=>{parform.hidden=true;paradd.hidden=false;});
+parsave.addEventListener('click',()=>{const n=parname.value.trim();if(!n)return;const p={n,r:(sideV==='bride'?"Bride's":"Groom's")+' parent',s:sideV};parsave.innerHTML='<span class="spin"></span>';parsave.disabled=true;setTimeout(()=>{parents.push(p);drawParents();parform.hidden=true;paradd.hidden=false;parsave.textContent='Add';did(()=>{parents=parents.filter(x=>x!==p);drawParents();},{word:n+' added to your guest list'});},700);});
+/* ── 3 · KINDLY REPLY — one field, two doors ── */
+const HOSTS=[{k:'host:1',label:'Claire Dela Cruz',sub:'0917 555 0142 · host'},{k:'host:2',label:'Miguel Santos',sub:'no number on their account · host'},{k:'host:3',label:'Ana Lim',sub:'0918 555 0199 · coordinator'},{k:'manual',label:'Type it in…'}];
+let who='host:1';const whoLabel=k=>{const h=HOSTS.find(x=>x.k===k);return k==='manual'?'Typed in':h?h.label+(h.sub.startsWith('no')?'':' · '+h.sub.split(' · ')[0]):'Choose…';};
+$('#whob').dataset.title='Who guests reply to';
+dropdown($('#whow'),$('#whob'),HOSTS,()=>who,k=>{const was=who;const set=v=>{who=v;$('#whov').textContent=whoLabel(v);$('#manrow').hidden=v!=='manual';};set(k);did(()=>set(was),{word:k==='manual'?'Type your reply line':'Kindly reply: '+whoLabel(k)});});
+/* ── 4 · MENU EDITOR — saves as you go ── */
+let menu=[{t:'Cocktail hour',d:['Lumpiang shanghai','Cheese & fruit']},{t:'Reception & dinner',d:['Lechon with liver sauce','Kare-kare','Garlic rice']}];
+const OFFERS=['Dessert','Midnight snack'];const moms=$('#moms');let arr=false;
+function drawMenu(moved){const before={};$$('.mom',moms).forEach(m=>before[m.dataset.k]=m.getBoundingClientRect().top);moms.innerHTML='';moms.classList.toggle('arr',arr);
+  menu.forEach((m,i)=>{const w=document.createElement('div');w.className='mom';w.dataset.k=m.t||('m'+i);
+    const ro=document.createElement('div');ro.className='ro';ro.innerHTML=`<span class="grip" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span><div class="box"><input value="${m.t.replace(/"/g,'&quot;')}" placeholder="Moment — e.g. Cocktail hour" aria-label="Moment ${i+1}" style="font-weight:600"><button class="x" aria-label="Remove this moment"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><button class="mv" aria-label="Earlier" ${i===0?'disabled':''}><svg viewBox="0 0 24 24"><path d="M6 14l6-6 6 6"/></svg></button><button class="mv" aria-label="Later" ${i===menu.length-1?'disabled':''}><svg viewBox="0 0 24 24"><path d="M6 10l6 6 6-6"/></svg></button>`;
+    const inp=ro.querySelector('input');inp.addEventListener('change',()=>{const was=m.t;m.t=inp.value.trim();did(()=>{m.t=was;drawMenu();});});
+    ro.querySelector('.x').addEventListener('click',()=>{const idx=menu.indexOf(m);menu.splice(idx,1);drawMenu();did(()=>{menu.splice(idx,0,m);drawMenu();},{word:'Moment removed'});});
+    const [up,dn]=ro.querySelectorAll('.mv');up.addEventListener('click',()=>{[menu[i-1],menu[i]]=[menu[i],menu[i-1]];drawMenu(w.dataset.k);did(()=>{[menu[i-1],menu[i]]=[menu[i],menu[i-1]];drawMenu();},{word:'Moved earlier'});});dn.addEventListener('click',()=>{[menu[i+1],menu[i]]=[menu[i],menu[i+1]];drawMenu(w.dataset.k);did(()=>{[menu[i+1],menu[i]]=[menu[i],menu[i+1]];drawMenu();},{word:'Moved later'});});
+    /* hold to lift (kind 34) — the hold tints the row, then it lifts; the drop is not wired in this prototype */
+    let hold;const grip=ro.querySelector('.grip');grip.addEventListener('pointerdown',()=>{ro.classList.add('held');hold=setTimeout(()=>{ro.classList.remove('held');ro.classList.add('lifted');navigator.vibrate&&navigator.vibrate(8);},350);});['pointerup','pointercancel','pointerleave'].forEach(ev=>grip.addEventListener(ev,()=>{clearTimeout(hold);ro.classList.remove('held');setTimeout(()=>ro.classList.remove('lifted'),200);}));
+    w.appendChild(ro);
+    m.d.forEach((d,j)=>{const r=document.createElement('div');r.className='dish';r.innerHTML=`<div class="box"><input value="${d.replace(/"/g,'&quot;')}" placeholder="A dish — e.g. Lechon with liver sauce" aria-label="Dish ${j+1}"><button class="x" aria-label="Remove this dish"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>`;
+      const di=r.querySelector('input');di.addEventListener('change',()=>{const was=d;m.d[j]=di.value.trim();did(()=>{m.d[j]=was;drawMenu();});});r.querySelector('.x').addEventListener('click',()=>{m.d.splice(j,1);drawMenu();did(()=>{m.d.splice(j,0,d);drawMenu();},{word:'Dish removed'});});w.appendChild(r);});
+    const add=document.createElement('div');add.className='dish';add.innerHTML='<button class="ab quiet"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add a dish</button>';add.querySelector('button').addEventListener('click',()=>{m.d.push('');drawMenu();setTimeout(()=>{const ins=w.querySelectorAll('.dish input');ins[ins.length-1]&&ins[ins.length-1].focus();},20);});w.appendChild(add);
+    moms.appendChild(w);});
+  const ch=$('#momchips');ch.innerHTML='';const used=new Set(menu.map(m=>m.t.toLowerCase()));[...OFFERS.filter(o=>!used.has(o.toLowerCase())),'A moment of your own'].forEach(o=>{const c=document.createElement('button');c.className='chip';c.innerHTML='<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>'+o;c.addEventListener('click',()=>{const m={t:o==='A moment of your own'?'':o,d:['']};menu.push(m);drawMenu();did(()=>{menu=menu.filter(x=>x!==m);drawMenu();},{word:m.t?m.t+' added':'New moment — name it'});if(!m.t)setTimeout(()=>{const ins=moms.querySelectorAll('.mom');ins[ins.length-1].querySelector('input').focus();},20);});ch.appendChild(c);});
+  if(moved&&!still.matches){$$('.mom',moms).forEach(w=>{const b=before[w.dataset.k];if(b==null)return;const dy=b-w.getBoundingClientRect().top;if(dy)w.animate([{transform:`translateY(${dy}px)`},{transform:'none'}],{duration:450,easing:'cubic-bezier(.34,1.56,.64,1)'});});}}
+drawMenu();
+$('#arrange').addEventListener('click',()=>{arr=!arr;$('#arrange').setAttribute('aria-pressed',arr);$('#arrange').textContent=arr?'Done':'Arrange';drawMenu();});
+/* ── 5 · PASS CARD LOOK — style cards; a pick waits for Apply ── */
+const DESIGNS=[{k:'classic',l:'Classic'},{k:'ticket',l:'Ticket'},{k:'poster',l:'Photo poster'}];let design='classic';const strip=$('#passstrip');
+function card(d){return `<span class="tk ${d.k}"><span class="tag">Guest ticket</span><span style="display:block;margin-top:18px;letter-spacing:.1em;font-size:6px;text-transform:uppercase;opacity:.75">${d.k==='ticket'?'Admit one':'You are invited'}</span><span class="nm">Ana Reyes</span><span style="display:block;margin-top:2px">Table 10 · Nov 28</span><span class="qr"></span></span>`;}
+function drawPass(){strip.innerHTML='';DESIGNS.forEach(d=>{const b=document.createElement('button');b.className='sc';b.setAttribute('role','radio');b.setAttribute('aria-checked',d.k===design);b.innerHTML=`<span class="f">${card(d)}</span><b>${d.l}</b>`;b.addEventListener('click',()=>{if(design===d.k)return;const was=design;const set=v=>{design=v;drawPass();centre();};set(d.k);did(()=>set(was),{draft:true});say(d.l+' — waits for Apply');});strip.appendChild(b);});}
+function centre(){const b=strip.querySelector('[aria-checked=true]');if(!b)return;const x=b.offsetLeft-(strip.clientWidth-b.offsetWidth)/2;strip.scrollTo({left:Math.max(0,x),behavior:still.matches?'auto':'smooth'});}
+drawPass();
+/* Pro mark on the zip: tried, never applied; a note offers See Pro / Not now */
+$('#zip').addEventListener('click',()=>{if($('#zip').dataset.pro){confirm('Every guest’s ticket, in one zip','One PNG per guest who is coming. This is part of Event Hub Pro. Each guest’s own ticket saves free from their page.','See Pro',()=>say('Opens the Event Hub Pro page'));}else say('passes.zip saved');});
+/* ── 6 · POSTER PHOTO — two-way pill, upload with the pie, plain-words problem ── */
+const bg=pill($('#bgpick'),(v)=>{const was=v==='photo'?'theme':'photo';setBg(v);did(()=>{bg._set(was);setBg(was,true);},{word:v==='theme'?'The theme’s picture':'Upload a photo'});});
+let photo=null;const drop=$('#drop'),D0=drop.innerHTML;
+function setBg(v,quiet){$('#uprow').hidden=v!=='photo';$('#small').hidden=!(v==='photo'&&photo&&photo.small);if(v==='photo'&&!photo){drop.classList.remove('has');drop.innerHTML=D0;}}
+function upload(small){if(drop.classList.contains('up'))return;drop.classList.add('up');drop.innerHTML='<span class="pie"><i>0%</i></span><small style="color:var(--mute)">Uploading…</small>';const pie=drop.querySelector('.pie'),num=pie.querySelector('i'),t0=performance.now(),dur=still.matches?10:1800;
+  (function step(now){const p=Math.min(100,Math.round((now-t0)/dur*100));pie.style.setProperty('--p',p);num.textContent=p+'%';if(p<100)requestAnimationFrame(step);else setTimeout(()=>{drop.classList.remove('up');drop.classList.add('has');drop.innerHTML='<u aria-label="Remove this photo">✕</u>';const was=photo;photo={small};$('#small').hidden=!small;$('#uptext').textContent=small?'':'Your photo is on the poster.';did(()=>{photo=was;drop.classList.remove('has');drop.innerHTML=D0;$('#small').hidden=true;$('#uptext').textContent='For a sharp A3 poster use a photo at least 2480 × 3508 pixels.';},{word:'Photo saved — the poster redraws'});},250);})(t0);}
+let nth=0;drop.addEventListener('click',e=>{if(drop.classList.contains('up'))return;if(e.target.tagName==='U'){const was=photo;photo=null;drop.classList.remove('has');drop.innerHTML=D0;$('#small').hidden=true;did(()=>{photo=was;drop.classList.add('has');drop.innerHTML='<u aria-label="Remove this photo">✕</u>';$('#small').hidden=!was.small;},{word:'Photo removed — the theme’s picture is back'});return;}if(drop.classList.contains('has'))return;upload(nth++%2===0);});
+$('#smallgo').addEventListener('click',()=>{photo=null;drop.classList.remove('has');drop.innerHTML=D0;$('#small').hidden=true;upload(false);});
+/* ── THE SEAT COUNTER (kind 17) ── */
+const CAP=10;let seated=6,removed=[],seatN=8;/* chairs 8 and 9 (0-based) removed today → 8 of 10 */removed=[8,9];
+const svg=$('#seatsvg');
+function drawCanvas(){const tables=[{x:90,y:110,n:'Table 8',s:8,c:8},{x:270,y:110,n:'Table 9',s:10,c:10},{x:187,y:290,n:'Table 10',sel:true},{x:90,y:470,n:'Table 11',s:4,c:10}];let h='';
+  tables.forEach(t=>{const cap=t.sel?CAP:t.c;const on=t.sel?seated:t.s;const rem=t.sel?removed:[];const R=44;h+=`<circle class="tbl ${t.sel?'sel':''}" cx="${t.x}" cy="${t.y}" r="${R}"/>`;for(let i=0;i<cap;i++){const a=-Math.PI/2+i*2*Math.PI/cap,cx=t.x+Math.cos(a)*(R+14),cy=t.y+Math.sin(a)*(R+14);const cls=rem.includes(i)?'gone':(i<on?'on':'');h+=`<circle class="chair ${cls}" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="6"/>`;}h+=`<text class="lbl" x="${t.x}" y="${t.y-2}">${t.n}</text><text class="lbl2" x="${t.x}" y="${t.y+13}">${on}/${cap-rem.length} seated</text>`;});
+  h+=`<rect x="20" y="608" width="335" height="14" rx="4" fill="var(--pill)" stroke="var(--line2)"/><text class="lbl2" x="187" y="640">Stage</text>`;svg.innerHTML=h;}
+const cv=$('#cv'),cm=$('#cm'),cp=$('#cp');
+function paintSeats(){const n=CAP-removed.length;cv.textContent=n;cm.disabled=n<=seated;cp.disabled=removed.length===0;$('#seatsub').textContent=`${seated} seated · of ${CAP} chairs`;cm.setAttribute('aria-label',n<=seated?'Every chair left is taken':'One chair less');cp.setAttribute('aria-label',removed.length?'One chair more':'All '+CAP+' chairs are out');drawCanvas();if(!still.matches){cv.classList.remove('tick');void cv.offsetWidth;cv.classList.add('tick');}}
+function seatNote(txt){$('#seatnotet').textContent=txt;$('#seatnote').hidden=false;}
+cm.addEventListener('click',()=>{const n=CAP-removed.length;if(n<=seated)return;/* the highest EMPTY chair goes (shipped rule) */let i=CAP-1;while(removed.includes(i))i--;removed.push(i);paintSeats();seatNote(`Chair ${i+1} removed.`);did(()=>{removed=removed.filter(x=>x!==i);paintSeats();$('#seatnote').hidden=true;},{live:false});});
+cp.addEventListener('click',()=>{if(!removed.length)return;const i=Math.min(...removed);/* the lowest removed chair comes back */removed=removed.filter(x=>x!==i);paintSeats();seatNote(`Chair ${i+1} is back.`);did(()=>{removed.push(i);paintSeats();$('#seatnote').hidden=true;},{live:false});});
+$('#seatundo').addEventListener('click',()=>{undoB.click();$('#seatnote').hidden=true;});
+paintSeats();
+$('#shb').dataset.title='Shape';let shape='round';const SH=[{k:'round',label:'Round'},{k:'rect',label:'Long table'},{k:'square',label:'Square'},{k:'half',label:'Half-round'}];dropdown($('#shw'),$('#shb'),SH,()=>shape,(k,it)=>{const was=shape,wl=$('#shv').textContent;shape=k;$('#shv').textContent=it.label;did(()=>{shape=was;$('#shv').textContent=wl;},{word:'Shape: '+it.label});});
+$('#done').addEventListener('click',()=>say('Table 10 kept'));
+$('#deltab').addEventListener('click',()=>confirm('Delete Table 10?','Its 6 guests go back to the unseated list. You can undo this.','Delete',()=>{say('Table 10 deleted');}));
+/* ── screen · view · theme ── */
+const scr=pill($('#scr'),v=>setScreen(v)),vw=pill($('#vw'),v=>setView(v)),th=pill($('#th'),v=>setTheme(v));
+function setScreen(v){$('#prints').hidden=v!=='prints';$('#seat').hidden=v!=='seat';$('#segBl').textContent=v==='prints'?'Prints':'Seat plan';scr._set(v);requestAnimationFrame(()=>{side._lay();bg._lay();centre();});}
+function setView(v){document.body.classList.toggle('desk',v==='desk');vw._set(v);requestAnimationFrame(()=>{[scr,vw,th,side,bg].forEach(p=>p._lay());centre();});}
+function setTheme(v){document.documentElement.dataset.theme=v;th._set(v);}
+$('#segA').addEventListener('click',()=>say('Opens the Stages list'));$('#segB').addEventListener('click',()=>say('Opens the Studio pages'));
+/* ── states for pictures ── */
+setView(q.get('view')||'phone');setTheme(q.get('theme')||'light');setScreen(q.get('screen')||'prints');
+const st=q.get('state');const show=sel=>{const el=$(sel),b=$('#prints');if(el)b.scrollTop=el.getBoundingClientRect().top-b.getBoundingClientRect().top+b.scrollTop-6;};
+setTimeout(()=>{switch(st){
+  case 'parents':$('#paraddb').click();parname.value='Ramon Reyes';parsave.disabled=false;show('[data-piece=invitation] .fr');break;
+  case 'parents-empty':show('[data-piece=invitation] .fr');break;
+  case 'kindly':show('[data-piece=details]');break;
+  case 'kindly-open':show('[data-piece=details]');setTimeout(()=>$('#whob').click(),120);break;
+  case 'kindly-typed':who='manual';$('#whov').textContent='Typed in';$('#manrow').hidden=false;vals.man='Reply by Nov 18 · Claire, 0917 555 0142';$('[data-key=man] span').textContent=vals.man;$('[data-key=man]').classList.remove('empty');show('[data-piece=details]');break;
+  case 'menu':show('[data-piece=menu]');break;
+  case 'menu-arrange':$('#arrange').click();show('[data-piece=menu]');break;
+  case 'pass':show('[data-piece=pass]');break;
+  case 'pass-picked':design='ticket';drawPass();drafted=1;undoStack.push({undo(){design='classic';drawPass();},draft:true});paint();show('[data-piece=pass]');setTimeout(centre,80);break;
+  case 'pro':show('[data-piece=pass]');setTimeout(()=>$('#zip').click(),120);break;
+  case 'poster':bg._set('photo');setBg('photo');show('[data-piece=story]');break;
+  case 'poster-small':bg._set('photo');setBg('photo');photo={small:true};drop.classList.add('has');drop.innerHTML='<u aria-label="Remove this photo">✕</u>';$('#small').hidden=false;$('#uptext').textContent='';show('[data-piece=story]');break;
+  case 'poster-up':bg._set('photo');setBg('photo');show('[data-piece=story]');drop.classList.add('up');drop.innerHTML='<span class="pie" style="--p:62"><i>62%</i></span><small style="color:var(--mute)">Uploading…</small>';break;
+  case 'changed':show('[data-piece=invitation]');break;
+  case 'tip':show('[data-piece=details]');setTimeout(()=>$$('[data-piece=details] .ib')[0].click(),120);break;
+  case 'undo':cm.click();break;
+  case 'min':removed=[6,7,8,9];paintSeats();seatNote('Chair 7 removed.');break;
+  case 'max':removed=[];paintSeats();seatNote('Chair 9 is back.');break;
+  default:break;}},60);
+})();
+</script>
+</body></html>
