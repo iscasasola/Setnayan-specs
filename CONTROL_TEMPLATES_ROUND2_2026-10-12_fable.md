@@ -34,6 +34,8 @@ What is drawn is read against: INTERACTION_RULES § 9 (terracotta = on / picked 
 
 ## Questions for the owner (one word each) — with my recommendation
 
+**All eleven ANSWERED 2026-10-12 — owner: "approve all" (every recommendation below is now the ruling; DECISION_LOG 812da1d). Do not re-ask.** Same day, on the first computer-width look: *"buttons on computer might not be proper"* (the pill thumbs kept their phone width — fixed: every thumb measures its picked segment and follows a ResizeObserver, as the shipped `PillThumb` does; 4+-segment pills become the Dropdown on a phone; 44 px targets throughout; a lone main button is full width on a phone only) → *"it is okay now"*.
+
 | # | Question | Recommend | Why |
 |---|---|---|---|
 | 1 | **Chat box on a phone — does Enter send, or make a new line?** (A) new line, the round button sends · (B) Enter sends | **A** | Filipino messages are often several lines; every phone chat app does A. On a computer Enter sends (drawn). |
