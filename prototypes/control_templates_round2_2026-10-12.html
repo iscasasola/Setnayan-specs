@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Setnayan — the control templates, round 2 (kinds 23–34)</title>
+<style>
+/* ── the same tokens as control_templates_2026-10-08.html, with a Dark pair for each (owner 2026-10-11: "dark mode should work").
+   Every "on / picked / tappable" colour is ONE token, --cta; the ink on it is --on-cta (worked out from the accent, never fixed at white). */
+:root{--paper:#FBF9F5;--page:#F4F0E8;--surf:#FFFFFF;--ink:#2C2A29;--ink2:#5B5752;--mute:#8E8880;--line:#E6E0D6;--line2:#D9D3C8;--pill:#F1ECE3;--gold:#A9834B;--gold-ink:#6F5527;--gold-soft:#E8DCC3;--cta:#C24E25;--on-cta:#FFFFFF;--ok:#2B744A;--ok-ink:#25613D;--ok-soft:#E6F2EA;--warn:#965A00;--warn-soft:#FBEFD9;--bad:#B3261E;--bad-soft:#F8E0DE;--info:#3B4E67;--info-soft:#E4E9F0;--chart2:#3B6E8F;--off:#9A948C;--scrim:rgba(44,42,41,.42);--shadow:0 14px 34px -14px rgba(44,42,41,.4);
+--in:cubic-bezier(.2,.8,.2,1);--spring:cubic-bezier(.34,1.56,.64,1);--t:3.04;
+--sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;--serif:"Cormorant Garamond",Georgia,"Times New Roman",serif}
+html[data-theme=dark]{--paper:#1E1C15;--page:#17160F;--surf:#232019;--ink:#FBFAF7;--ink2:#D6D1C7;--mute:#B3AEA3;--line:rgba(251,250,247,.16);--line2:rgba(251,250,247,.28);--pill:rgba(251,250,247,.08);--gold:#CBA766;--gold-ink:#E2C98B;--gold-soft:rgba(203,167,102,.18);--cta:#E5794E;--on-cta:#17160F;--ok:#6FCF97;--ok-ink:#6FCF97;--ok-soft:rgba(111,207,151,.14);--warn:#F0B45A;--warn-soft:rgba(240,180,90,.14);--bad:#F2817A;--bad-soft:rgba(242,129,122,.16);--info:#9DB2CE;--info-soft:rgba(157,178,206,.16);--chart2:#9DB2CE;--off:#8A857C;--scrim:rgba(0,0,0,.55);--shadow:0 14px 34px -14px rgba(0,0,0,.7)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--page);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.45;padding:0 16px 80px;transition:background calc(80ms*var(--t)),color calc(80ms*var(--t))}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input,textarea{font:inherit;color:inherit}
+[hidden]{display:none!important}
+main{max-width:430px;margin:0 auto}
+body.desk main{max-width:760px}
+header{padding:22px 0 6px}
+header h1{font-family:var(--serif);font-size:30px;font-weight:600;line-height:1.1}
+header p{color:var(--ink2);margin-top:6px;font-size:14px}
+header a{color:var(--cta);font-weight:600}
+.slow{position:sticky;top:0;z-index:20;background:var(--page);padding:10px 0;display:flex;align-items:center;gap:10px 14px;border-bottom:1px solid var(--line);font-size:14px;font-weight:600;flex-wrap:wrap}
+.slow>div{flex:1 1 150px;display:flex;flex-direction:column;gap:6px}
+.slow small{display:block;font-weight:400;color:var(--mute);font-size:12px}
+section{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:16px;margin-top:16px;position:relative;scroll-margin-top:120px}
+section h2{font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+section h2 em{font-style:normal;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);border:1px solid var(--line2);border-radius:999px;padding:2px 8px;font-weight:700}
+section h2 code{margin-left:auto;font-size:11px;font-weight:600;color:var(--mute);background:var(--pill);border-radius:6px;padding:2px 6px;font-family:ui-monospace,Menlo,monospace}
+.use{color:var(--ink2);font-size:13.5px;margin:4px 0 14px}
+.use b{color:var(--ink)}
+.moves{margin-top:14px;padding-top:10px;border-top:1px dashed var(--line2);font-size:12.5px;color:var(--ink2)}
+.moves b{color:var(--cta)}
+.demo{display:flex;flex-direction:column;gap:12px}
+.cap{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);font-weight:700;margin-bottom:-6px}
+.hr{height:1px;background:var(--line);margin:4px 0}
+.desk .two{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+
+/* ── borrowed unchanged from the approved gallery: pill selector · press · dropdown + sheet · scrim · buttons · badges · toast · confirm · shimmer · pie · fold */
+.ps{position:relative;display:flex;height:44px;padding:3px;border-radius:999px;background:var(--pill);border:1px solid var(--line)}
+.ps button{flex:1;position:relative;z-index:1;border-radius:999px;font-size:13px;font-weight:600;color:var(--off);display:flex;align-items:center;justify-content:center;gap:6px;padding:0 12px;white-space:nowrap;transition:color calc(220ms*var(--t)) var(--in)}
+.ps button[aria-pressed=true]{color:var(--on-cta)}
+.ps .th{position:absolute;top:3px;bottom:3px;left:0;width:var(--w,0px);transform:translateX(var(--x,0px));border-radius:999px;background:var(--cta);transition:transform calc(230ms*var(--t)) var(--spring),width calc(230ms*var(--t)) var(--spring)}
+@keyframes press{0%{scale:1}35%{scale:.93}100%{scale:1}}
+.pulse-el{animation:press calc(320ms*var(--t)) var(--in)}
+.rowx{display:flex;align-items:center;gap:10px;min-height:48px}
+.rowx .l{flex:1;font-weight:500}
+.ddw{position:relative}
+.dd{height:44px;display:inline-flex;align-items:center;gap:6px;padding:0 10px 0 14px;border-radius:999px;background:var(--surf);border:1px solid var(--line2);font-size:14px;font-weight:500;width:150px;justify-content:space-between;transition:border-color calc(160ms*var(--t))}
+.dd span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dd svg{flex:none;color:var(--cta);transition:transform calc(180ms*var(--t)) var(--spring)}
+.ddw.open .dd svg{transform:rotate(180deg)}.ddw.open .dd{border-color:var(--cta)}
+.menu{position:absolute;right:0;top:46px;min-width:190px;background:var(--surf);border:1px solid var(--line2);border-radius:16px;box-shadow:var(--shadow);padding:6px;z-index:40;opacity:0;transform:translateY(-6px) scale(.98);transform-origin:top right;pointer-events:none;transition:opacity calc(120ms*var(--t)) var(--in),transform calc(160ms*var(--t)) var(--spring)}
+.ddw.open .menu{opacity:1;transform:none;pointer-events:auto}
+.menu:before{display:none}
+.menu button{display:flex;width:100%;align-items:center;min-height:44px;padding:0 12px;border-radius:10px;font-size:14px;text-align:left}
+.menu button:active{background:var(--pill)}
+.menu button i{margin-left:auto;font-style:normal;color:var(--cta);font-weight:700;opacity:0}
+.menu button[aria-checked=true]{font-weight:600;color:var(--cta)}.menu button[aria-checked=true] i{opacity:1}
+.menu button svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-right:10px;color:var(--cta)}
+.scrim{position:fixed;inset:0;background:var(--scrim);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);z-index:30;opacity:0;pointer-events:none;transition:opacity calc(70ms*var(--t)) var(--in)}
+body.phone.sheet,body.cfming,body.viewing{overflow:hidden;touch-action:none}
+body.phone.sheet .scrim,body.cfming .scrim{opacity:1;pointer-events:auto}
+body.phone .menu{position:fixed;left:0;right:0;bottom:0;top:auto;min-width:0;border:0;border-radius:22px 22px 0 0;padding:8px 10px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -14px 40px -18px rgba(0,0,0,.5);opacity:1;transform:translateY(105%);transform-origin:bottom;transition:transform calc(220ms*var(--t)) var(--spring);max-height:calc(100dvh - 48px);overflow-y:auto;overscroll-behavior:contain}
+body.phone .ddw.open .menu{transform:none}
+body.phone .menu:before{display:block;content:attr(data-title);font-size:13px;font-weight:700;color:var(--ink2);padding:18px 12px 8px;background:linear-gradient(var(--line2),var(--line2)) center 6px/40px 4px no-repeat;border-radius:2px}
+body.phone .menu button{min-height:52px;font-size:16px}
+.btnrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.ab{height:48px;padding:0 22px;border-radius:999px;font-weight:600;font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:112px;transition:background calc(60ms*var(--t)),color calc(60ms*var(--t)),opacity calc(60ms*var(--t))}
+.ab.main{background:var(--cta);color:var(--on-cta)}
+.ab.second{background:var(--surf);color:var(--ink);border:1px solid var(--line2)}
+.ab.quiet{background:none;color:var(--cta);min-width:0;padding:0 12px}
+.ab[disabled],.ab[aria-disabled=true]{background:var(--pill);color:var(--off);border-color:var(--line);pointer-events:none}
+.ab svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.ab .spin,.spin{width:16px;height:16px;border-radius:50%;border:2px solid color-mix(in srgb,currentColor 30%,transparent);border-top-color:currentColor;animation:sp .8s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+.badge{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:700;background:var(--pill);color:var(--ink2);white-space:nowrap}
+.badge.ok{background:var(--ok-soft);color:var(--ok-ink)}.badge.wait{background:var(--warn-soft);color:var(--warn)}.badge.no{background:var(--bad-soft);color:var(--bad)}.badge.cta{background:color-mix(in srgb,var(--cta) 13%,transparent);color:var(--cta)}.badge.info{background:var(--info-soft);color:var(--info)}
+.toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top));z-index:60;transform:translate(-50%,-160%);background:var(--cta);color:var(--on-cta);border-radius:999px;padding:0 22px;height:48px;display:flex;align-items:center;justify-content:center;gap:12px;text-align:center;font-size:14px;font-weight:500;box-shadow:0 14px 30px -12px rgba(0,0,0,.5);transition:transform calc(120ms*var(--t)) var(--spring);white-space:nowrap}
+.toast.on{transform:translate(-50%,0)}
+.toast button{height:34px;padding:0 14px;border-radius:999px;background:var(--surf);color:var(--ink);font-weight:700;font-size:13px}
+.toast.bad{background:#7A1712;color:#fff;padding:0 8px 0 18px}
+.toast svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.cfm{position:fixed;left:50%;top:50%;z-index:60;width:min(330px,calc(100vw - 48px));transform:translate(-50%,-46%) scale(.94);opacity:0;pointer-events:none;background:var(--surf);border-radius:24px;padding:22px 20px 16px;text-align:center;box-shadow:0 24px 60px -20px rgba(0,0,0,.5);transition:opacity calc(50ms*var(--t)),transform calc(80ms*var(--t)) var(--spring)}
+.cfm.on{opacity:1;transform:translate(-50%,-50%);pointer-events:auto}
+.cfm b{display:block;font-size:18px;margin-bottom:6px}.cfm p{color:var(--ink2);font-size:14px;margin-bottom:16px}
+.cfm .btnrow{justify-content:center;flex-wrap:nowrap}.cfm .ab{flex:1;min-width:0;padding:0 10px}
+.status{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;padding:10px 14px;border-radius:14px}
+.status.ok{background:var(--ok-soft);color:var(--ok-ink)}.status.bad{background:var(--bad-soft);color:var(--bad)}
+.status button{margin-left:auto;color:inherit;text-decoration:underline;font-weight:700;min-height:44px}
+.sk i,.sk u,.shim{display:block;background:linear-gradient(90deg,var(--pill) 25%,color-mix(in srgb,var(--pill) 40%,var(--surf)) 50%,var(--pill) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite;border-radius:999px}
+@keyframes shim{to{background-position:-200% 0}}
+.sk{width:100%;display:flex;flex-direction:column;gap:14px}.sk div{display:flex;align-items:center;gap:12px}.sk i{width:42px;height:42px;flex:none}.sk u{height:12px;flex:1}.sk u.s{flex:.5}
+.pie{width:52px;height:52px;border-radius:50%;background:conic-gradient(var(--cta) calc(var(--p,0)*1%),color-mix(in srgb,var(--surf) 60%,transparent) 0);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.pie i{width:40px;height:40px;border-radius:50%;background:var(--surf);color:var(--cta);font-style:normal;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.state{padding:22px 18px;text-align:center;min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.state b{font-size:16px}.state p{font-size:13.5px;color:var(--ink2);max-width:260px}.state .em{width:52px;height:52px;border-radius:16px;background:var(--gold-soft);color:var(--gold);display:flex;align-items:center;justify-content:center}
+.state .em svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.state.bad .em{background:var(--bad-soft);color:var(--bad)}
+.av{width:36px;height:36px;border-radius:50%;background:var(--gold-soft);color:var(--gold-ink);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex:none}
+.av.sn{background:var(--cta);color:var(--on-cta);border-radius:11px;font-family:var(--serif);font-size:15px}
+.arrow{width:16px;height:16px;fill:none;stroke:var(--cta);stroke-width:2.2;flex:none;stroke-linecap:round;stroke-linejoin:round}
+.ic44{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;color:var(--cta)}
+.ic44 svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* a pill with 4+ sections: the phone shows its twin dropdown (full row), the computer the pill */
+body.phone .ps:has(+ .ddw.twin){display:none}
+body.desk .ddw.twin{display:none}
+.dd.full{width:100%}
+.ddw.twin .menu{left:0;right:0;transform-origin:top center}
+
+/* a lone main button is full width on a phone only; on a computer it keeps its own width */
+.ab.wide{flex:1}
+body.desk .ab.wide{flex:0 0 auto;min-width:240px}
+body.desk .thumb{max-width:480px}
+body.desk .calv,body.desk .legend,body.desk .dayl2{max-width:440px}
+body.desk .qrc{align-self:flex-start;align-items:center;width:100%}
+body.desk .msg{max-width:640px}
+
+/* ── 23 · chat — no frame around the stream (it is read); the message box is framed (it is pressed) */
+.stream{display:flex;flex-direction:column;gap:6px;min-height:200px;padding:4px 0}
+.chd{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:6px}
+.chd b{display:block;font-size:15px}.chd span{font-size:12.5px;color:var(--ink2)}
+.chd .ic44{margin-left:auto}
+.dayl{align-self:center;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);padding:6px 0}
+.bub{max-width:78%;padding:9px 13px;border-radius:18px;font-size:14.5px;line-height:1.35;animation:bubin calc(110ms*var(--t)) var(--spring);position:relative;overflow-wrap:anywhere}
+.bub.me{align-self:flex-end;background:var(--cta);color:var(--on-cta);border-bottom-right-radius:6px}
+.bub.you{align-self:flex-start;background:var(--pill);color:var(--ink);border-bottom-left-radius:6px}
+.bub small{display:block;font-size:10.5px;opacity:.78;margin-top:3px;text-align:right}
+.bub .who{display:block;font-size:11px;font-weight:700;color:var(--cta);margin-bottom:2px}
+.bub.fail{background:var(--bad-soft);color:var(--bad);cursor:pointer}.bub.fail small{opacity:1;font-weight:700}
+.bubrow{display:flex;gap:8px;align-items:flex-end;max-width:88%}.bubrow .av{width:26px;height:26px;font-size:10px}
+.bubrow .bub{max-width:none}
+.card-in{align-self:stretch;display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:16px;border:1px solid var(--line2);background:var(--surf);text-align:left;width:100%}
+.card-in .tx{flex:1;min-width:0}.card-in b{display:block;font-size:14px}.card-in span{display:block;font-size:12.5px;color:var(--ink2)}.card-in i{font-style:normal;font-weight:700;font-variant-numeric:tabular-nums}
+.typing{align-self:flex-start;display:flex;gap:4px;padding:12px 14px;background:var(--pill);border-radius:18px;border-bottom-left-radius:6px}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--mute);animation:ty 1.1s infinite}.typing i:nth-child(2){animation-delay:.18s}.typing i:nth-child(3){animation-delay:.36s}
+@keyframes ty{0%,60%,100%{opacity:.35;transform:none}30%{opacity:1;transform:translateY(-3px)}}
+@keyframes bubin{from{opacity:0;transform:translateY(8px) scale(.96)}to{opacity:1;transform:none}}
+.msg{display:flex;align-items:flex-end;gap:8px;margin-top:8px;background:var(--paper);padding-top:6px}
+.msg .inbox{flex:1;display:flex;align-items:flex-end;min-height:44px;padding:0 8px 0 16px;border-radius:22px;background:var(--surf);border:1px solid var(--line2)}
+.msg .inbox:focus-within{border-color:var(--cta);box-shadow:0 0 0 3px color-mix(in srgb,var(--cta) 14%,transparent)}
+.msg textarea{flex:1;min-width:0;border:0;outline:0;background:none;font-size:16px;line-height:1.35;resize:none;padding:11px 0;max-height:96px;overflow-y:auto}
+.msg .att{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;color:var(--cta)}
+.msg .att svg,.msg .send svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.msg .send{width:44px;height:44px;border-radius:50%;background:var(--cta);color:var(--on-cta);display:flex;align-items:center;justify-content:center;flex:none;transition:background calc(60ms*var(--t)),color calc(60ms*var(--t))}
+.msg .send[disabled]{background:var(--pill);color:var(--off)}
+.msg.quiet .inbox{opacity:.6}
+.notice-line{text-align:center;font-size:12.5px;color:var(--ink2);padding:8px 12px}
+
+/* ── 24 · QR card — the code is ALWAYS dark on white, in Light and in Dark (a scanner needs it) */
+.qrc{display:flex;flex-direction:column;align-items:center;gap:10px;padding:6px 0 2px;text-align:center}
+.qr{width:200px;height:200px;border-radius:18px;background:#fff;padding:14px;position:relative;box-shadow:0 1px 0 rgba(0,0,0,.04),0 10px 26px -16px rgba(0,0,0,.35)}
+html[data-theme=dark] .qr{box-shadow:0 0 0 1px rgba(255,255,255,.08),0 10px 26px -16px rgba(0,0,0,.8)}
+.qr svg{width:100%;height:100%;display:block}
+.qr .sn{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:38px;height:38px;border-radius:11px;background:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;font-size:18px;color:#C24E25}
+.qr.round{border-radius:50%}
+.qr.wait{background:var(--pill)}.qr.wait .shim{position:absolute;inset:14px;border-radius:12px}
+.qr.used:after{content:attr(data-word);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.82);border-radius:inherit;font-weight:700;font-size:18px;color:#2C2A29;letter-spacing:.04em}
+.qrc b{font-size:16px}.qrc span{font-size:13px;color:var(--ink2)}
+.qrc .btnrow{justify-content:center;margin-top:4px}
+
+/* ── 25 · map pin field — a Form row for the words, a map for the pin */
+.fr{display:flex;align-items:center;gap:10px;min-height:52px;border-top:1px solid var(--line)}
+.fr:first-child{border-top:0}
+.fr .l{flex:1;font-weight:500}
+.fr .dd{width:200px}
+.map{position:relative;height:190px;border-radius:16px;overflow:hidden;background:#E8E3D8;margin-top:10px;isolation:isolate}
+body.desk .map{height:260px}
+html[data-theme=dark] .map{background:#2A2820}
+.map svg.tiles{position:absolute;inset:0;width:100%;height:100%}
+.map .road{stroke:#fff;stroke-width:6;fill:none;stroke-linecap:round}.map .road.s{stroke-width:3}
+html[data-theme=dark] .map .road{stroke:#3A3730}
+.map .park{fill:#D7DFC4}html[data-theme=dark] .map .park{fill:#2F3528}
+.map .water{fill:#CFDCE5}html[data-theme=dark] .map .water{fill:#26313A}
+.map .lbl{font-size:10px;fill:#6A6865;font-weight:600}html[data-theme=dark] .map .lbl{fill:#9A958C}
+.pin{position:absolute;left:var(--x,50%);top:var(--y,50%);width:44px;height:44px;margin:-40px 0 0 -22px;display:flex;align-items:flex-start;justify-content:center;cursor:grab;touch-action:none;z-index:2;transition:left calc(120ms*var(--t)) var(--spring),top calc(120ms*var(--t)) var(--spring)}
+.pin.grab{transition:none;cursor:grabbing}
+.pin svg{width:30px;height:40px;filter:drop-shadow(0 4px 6px rgba(0,0,0,.3));transform-origin:50% 100%;transition:transform calc(90ms*var(--t)) var(--spring)}
+.pin.grab svg,.pin.drop svg{transform:translateY(-8px) scale(1.08)}
+.pin .pt{position:absolute;left:50%;bottom:-3px;width:10px;height:4px;margin-left:-5px;border-radius:50%;background:rgba(0,0,0,.28)}
+.ring{position:absolute;left:var(--x,50%);top:var(--y,50%);width:var(--r,120px);height:var(--r,120px);border-radius:50%;transform:translate(-50%,-50%);background:color-mix(in srgb,var(--cta) 14%,transparent);border:1.5px solid var(--cta);pointer-events:none;transition:width calc(120ms*var(--t)) var(--in),height calc(120ms*var(--t)) var(--in)}
+.map .me{position:absolute;right:10px;bottom:10px;width:44px;height:44px;border-radius:50%;background:var(--surf);border:1px solid var(--line2);color:var(--cta);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px -6px rgba(0,0,0,.4);z-index:2}
+.map .me svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.map .me.busy svg{animation:sp 1s linear infinite}
+.map .veil{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--page) 70%,transparent);font-size:13.5px;font-weight:600;color:var(--ink2);z-index:3;text-align:center;padding:0 24px}
+.map .veil.off{background:var(--pill)}
+.mapline{font-size:12.5px;color:var(--ink2);margin-top:8px;min-height:18px}.mapline.bad{color:var(--bad);font-weight:600}
+.rng{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:none;cursor:pointer;touch-action:pan-y}
+.rng::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--cta) var(--v,50%),var(--line2) 0)}
+.rng::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:var(--surf);border:2px solid var(--cta);margin-top:-10px;box-shadow:0 2px 6px rgba(0,0,0,.18);transition:transform calc(70ms*var(--t)) var(--spring),background calc(50ms*var(--t))}
+.rng:active::-webkit-slider-thumb{transform:scale(.9);background:var(--cta);box-shadow:0 2px 6px rgba(0,0,0,.18),0 0 0 10px color-mix(in srgb,var(--cta) 18%,transparent)}
+.pline{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin:10px 0 2px}.pline span{color:var(--mute);font-weight:400}
+
+/* ── 26 · price summary — read-only rows: hairlines, no frame; the total is the one bold line; the buy is a confirm + pay */
+.sum{display:flex;flex-direction:column}
+.sum .ln{display:flex;justify-content:space-between;gap:12px;min-height:44px;align-items:center;border-top:1px solid var(--line);font-size:14.5px}
+.sum .ln:first-child{border-top:0}
+.sum .ln span{color:var(--ink2);min-width:0}.sum .ln span small{display:block;font-size:12px;color:var(--mute)}
+.sum .ln i{font-style:normal;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sum .ln.minus i{color:var(--ok-ink)}
+.sum .ln.tot{border-top:2px solid var(--line2);min-height:56px;font-weight:700;font-size:16px}.sum .ln.tot span{color:var(--ink)}.sum .ln.tot i{font-size:22px}
+.sum .ln.plan{min-height:52px}.sum .ln.plan i{display:flex;align-items:center;gap:8px}
+.sum .ln.fee{font-size:13px}
+.sum .end{height:1px;background:var(--line);margin-top:0}
+
+/* ── 27 · notification row — hairline rows, dot = unread, terracotta arrow = it opens */
+.nrow{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;min-height:64px;padding:10px 2px;border-top:1px solid var(--line)}
+.nrow:first-child,.ngrp .nrow:first-of-type{border-top:0}
+.nrow .dot{width:9px;height:9px;border-radius:50%;background:var(--cta);flex:none;margin-top:16px;transition:opacity calc(70ms*var(--t))}
+.nrow.read .dot{opacity:0}.nrow.read b{font-weight:500}
+.nrow .tx{flex:1;min-width:0}
+.nrow b{display:block;font-size:14.5px;transition:font-weight calc(70ms*var(--t))}.nrow span{display:block;font-size:12.5px;color:var(--ink2)}
+.nrow time{font-size:11.5px;color:var(--mute);flex:none;margin-top:3px}
+.nrow .arrow{margin-top:12px}
+.ngrp .cap{margin:10px 0 2px}
+.bell{position:relative;display:inline-flex}
+.bell em{position:absolute;top:2px;right:2px;min-width:18px;height:18px;border-radius:9px;background:var(--cta);color:var(--on-cta);font-style:normal;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid var(--paper)}
+
+/* ── 28 · photo grid — pictures edge to edge, no frame; only Add is framed (dashed, it is pressed) */
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+body.desk .pgrid{grid-template-columns:repeat(5,1fr)}
+.pgrid .ph{position:relative;aspect-ratio:1;border-radius:12px;background-size:cover;background-position:center;overflow:hidden;touch-action:none;transition:transform calc(90ms*var(--t)) var(--spring),box-shadow calc(90ms*var(--t)),opacity calc(90ms*var(--t))}
+.pgrid .ph .cov{position:absolute;left:6px;top:6px;height:20px;padding:0 7px;border-radius:999px;background:rgba(255,255,255,.92);color:#2C2A29;font-size:10.5px;font-weight:700;display:flex;align-items:center}
+.pgrid .ph .x{position:absolute;right:0;top:0;width:44px;height:44px;border-radius:50%;background:rgba(44,42,41,.62);color:#fff;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity calc(60ms*var(--t))}
+.pgrid .ph .x svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round}
+body.desk .pgrid .ph:hover .x,.pgrid.managing .ph .x{opacity:1}
+.pgrid .ph.lifted{transform:scale(1.06);box-shadow:0 14px 30px -10px rgba(0,0,0,.5),0 0 0 2px var(--cta);z-index:3;transition:none}
+.pgrid .ph.gapped{opacity:.35}
+.pgrid .add{aspect-ratio:1;border-radius:12px;border:1.5px dashed var(--line2);background:var(--surf);color:var(--cta);font-weight:600;font-size:12.5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.pgrid .add svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.pgrid .ph.up{background:var(--pill);display:flex;align-items:center;justify-content:center}
+.pgrid .ph.up .pie{width:44px;height:44px;box-shadow:none;background:conic-gradient(var(--cta) calc(var(--p,0)*1%),var(--line) 0)}.pgrid .ph.up .pie i{width:34px;height:34px;font-size:10px}
+.pgrid .ph.bad{background:var(--bad-soft);color:var(--bad);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;text-align:center;padding:6px;gap:2px}
+.pgrid .ph.bad u{text-decoration:underline;font-weight:700}
+.pgrid .shim{aspect-ratio:1;border-radius:12px}
+.pcount{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;color:var(--ink2);margin-top:2px}
+.pcount button{color:var(--cta);font-weight:700;min-height:44px;padding:0 6px}
+.view{position:fixed;inset:0;z-index:70;background:rgba(20,18,17,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity calc(70ms*var(--t)) var(--in)}
+.view.on{opacity:1;pointer-events:auto}
+.view .pic{width:min(86vw,420px);aspect-ratio:3/4;border-radius:18px;background-size:cover;background-position:center;transform:scale(.92);transition:transform calc(110ms*var(--t)) var(--spring)}
+.view.on .pic{transform:none}
+.view .x,.view .nv,.view .del{position:absolute;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px}
+.view .x{top:14px;right:14px}.view .nv.l{left:10px;top:50%}.view .nv.r{right:10px;top:50%}.view .del{bottom:24px;right:14px;font-size:13px;font-weight:700;width:auto;padding:0 16px;border-radius:999px}
+.view em{color:#fff;font-style:normal;font-size:13px;margin-top:12px;opacity:.85}
+
+/* ── 29 · star rating (display) — read, not pressed; gold is the mark's colour (the accent is for tapping) */
+.star{display:inline-flex;align-items:center;gap:5px;font-weight:600;font-variant-numeric:tabular-nums}
+.star svg{width:16px;height:16px;fill:var(--gold);stroke:none;flex:none}
+.star small{font-weight:400;color:var(--ink2);font-size:13px}
+.star.big{flex-direction:column;align-items:flex-start;gap:2px}
+.star.big b{font-size:40px;line-height:1;font-weight:700;letter-spacing:-.02em}
+.stars{display:inline-flex;gap:2px}.stars svg{width:20px;height:20px}
+.stars .frac{position:relative}.stars .frac svg.bg{fill:var(--line2)}.stars .frac svg.fg{position:absolute;left:0;top:0;clip-path:inset(0 calc(100% - var(--f,50%)) 0 0)}
+.rbars{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.rbars div{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink2)}
+.rbars div b{width:12px;text-align:right;font-weight:600;color:var(--ink)}
+.rbars .meter{flex:1}
+.rbars div small{width:24px;text-align:right}
+.rowdoor{display:flex;align-items:center;gap:10px;min-height:52px;width:100%;text-align:left;border-top:1px solid var(--line)}
+.rowdoor .tx{flex:1;font-weight:500}
+
+/* ── 30 · search box — its own bar; ≥ 60 % of the thumb row; the ✕ clears */
+.thumb{display:flex;gap:8px;align-items:center;padding:8px;border-radius:999px;background:color-mix(in srgb,var(--surf) 86%,transparent);-webkit-backdrop-filter:blur(22px) saturate(1.5);backdrop-filter:blur(22px) saturate(1.5);border:1px solid var(--line);box-shadow:0 10px 24px -14px rgba(0,0,0,.35)}
+.srch{display:flex;align-items:center;gap:8px;height:48px;padding:0 16px;border-radius:999px;background:var(--surf);border:1px solid var(--line2);flex:1 1 60%;min-width:0;transition:border-color calc(50ms*var(--t)),box-shadow calc(50ms*var(--t))}
+.srch:focus-within{border-color:var(--cta);box-shadow:0 0 0 3px color-mix(in srgb,var(--cta) 14%,transparent)}
+.srch input{flex:1;min-width:0;font-size:16px;border:0;outline:0;background:none}
+.srch input::placeholder{color:var(--mute)}
+.srch svg{width:18px;height:18px;fill:none;stroke:var(--mute);stroke-width:2;stroke-linecap:round;flex:none}
+.srch .clr{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;margin-right:-14px}
+.srch .clr i{width:28px;height:28px;border-radius:50%;background:var(--pill);display:flex;align-items:center;justify-content:center}
+.srch .clr svg{width:12px;height:12px;stroke:var(--ink2);stroke-width:2.6}
+.thumb .ab{flex:0 0 auto;min-width:0;padding:0 18px}
+.sres{margin-top:4px}
+.sres .lrow{display:flex;align-items:center;gap:12px;min-height:56px;width:100%;text-align:left;border-top:1px solid var(--line);padding:0 2px}
+.sres .lrow:first-child{border-top:0}
+.sres .lrow .tx{flex:1;min-width:0}.sres .lrow b{display:block;font-size:14.5px;font-weight:600}.sres .lrow span{display:block;font-size:12.5px;color:var(--ink2)}
+.sres mark{background:none;color:var(--cta);font-weight:700}
+.sline{font-size:12.5px;color:var(--ink2);padding:8px 2px;display:flex;align-items:center;gap:8px}
+
+/* ── 31 · calendar day states — the approved calendar (kind 8) plus dots with meaning; the picked day stays the one terracotta circle */
+.calv{padding:0}
+.calv .hd{display:flex;align-items:center;gap:6px;padding:0 2px 6px}
+.calv .hd b{flex:1;text-align:center;font-size:15px}
+.calv .hd button{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--cta);font-size:20px}
+.calv .gr{display:grid;grid-template-columns:repeat(7,1fr);gap:0;text-align:center}
+.calv .gr span{font-size:11px;font-weight:700;color:var(--mute);padding:4px 0}
+.calv .gr button{position:relative;height:44px;border-radius:999px;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--ink);transition:background calc(60ms*var(--t)),color calc(60ms*var(--t))}
+.calv .gr button.past{color:var(--off)}
+.calv .gr button.today{box-shadow:0 0 0 1.5px var(--line2) inset}
+.calv .gr button[aria-checked=true]{background:var(--cta);color:var(--on-cta);font-weight:700}
+.calv .gr button.blocked{color:var(--off);background:repeating-linear-gradient(135deg,transparent 0 3px,var(--line) 3px 4px);border-radius:10px}
+.calv .gr button.blocked[aria-checked=true]{background:var(--cta);color:var(--on-cta)}
+.calv .gr button .d{position:absolute;bottom:5px;left:50%;transform:translateX(-50%);display:flex;gap:2px}
+.calv .gr button .d i{width:5px;height:5px;border-radius:50%;display:block}
+.calv .gr button .d i.bk{background:var(--ok)}.calv .gr button .d i.hd{background:var(--warn)}.calv .gr button .d i.ev{background:var(--cta)}
+.calv .gr button[aria-checked=true] .d i{background:var(--on-cta)}
+.calv .gr button.full{font-weight:700}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--ink2);padding:8px 2px 0}
+.legend span{display:inline-flex;align-items:center;gap:6px}.legend i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.legend i.bl{width:14px;height:10px;border-radius:3px;background:repeating-linear-gradient(135deg,transparent 0 3px,var(--line2) 3px 4px)}
+.dayl2{margin-top:6px;font-size:13.5px;color:var(--ink2)}.dayl2 b{display:block;color:var(--ink);font-size:14px;padding:6px 0}
+.dayrow{display:flex;align-items:center;gap:10px;min-height:48px;border-top:1px solid var(--line);width:100%;text-align:left}
+.dayrow .tx{flex:1;min-width:0}.dayrow .tx b{display:inline;padding:0;font-weight:600}.dayrow .tx span{display:block;font-size:12.5px}
+
+/* ── 32 · charts — read-only data, no frame, ends in a divider; one hue for the series, the accent for "now" or "you" */
+.bars{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;align-items:end;height:92px;padding-top:26px;position:relative}
+.bars .b{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;padding:0;cursor:default}
+.bars .b i{display:block;width:100%;max-width:22px;height:var(--h,0);min-height:3px;border-radius:4px 4px 0 0;background:var(--line2);transition:height calc(230ms*var(--t)) var(--in)}
+.bars .b.now i{background:var(--cta)}
+.bars .b.ahead i{background:transparent;box-shadow:inset 0 0 0 1.5px var(--line2);height:10px}
+.bars .b small{font-size:10.5px;color:var(--mute);font-weight:500}.bars .b.now small{color:var(--ink);font-weight:700}
+.bars .b .bub{position:absolute;top:-2px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--page);font-size:11px;font-weight:700;padding:5px 7px;border-radius:999px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity calc(60ms*var(--t))}
+.bars .b .bub:after{content:"";position:absolute;left:50%;bottom:-4px;width:8px;height:8px;background:var(--ink);transform:translateX(-50%) rotate(45deg);border-radius:2px}
+.bars .b.on .bub,.bars .b:hover .bub{opacity:1}
+.bars .b.on i{filter:brightness(.9)}
+.khead{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.khead b{font-size:28px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1}
+.khead span{font-size:13px;color:var(--ink2)}
+.mix{display:flex;height:14px;border-radius:999px;overflow:hidden;gap:2px;margin-top:10px;background:var(--line)}
+.mix i{display:block;height:100%;width:var(--w);transition:width calc(230ms*var(--t)) var(--in)}
+.mix i.a{background:var(--cta)}.mix i.b{background:var(--chart2)}.mix i.c{background:var(--off)}
+.mixl{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--ink2);margin-top:8px}
+.mixl span{display:inline-flex;align-items:center;gap:6px}.mixl i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.mixl i.a{background:var(--cta)}.mixl i.b{background:var(--chart2)}.mixl i.c{background:var(--off)}
+.mixl b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.meter{height:10px;border-radius:999px;background:var(--line);overflow:hidden;flex:1}
+.meter i{display:block;height:100%;width:var(--v,0);border-radius:999px;background:var(--cta);transition:width calc(230ms*var(--t)) var(--in)}
+.meter.ok i{background:var(--ok)}
+.mline{display:flex;align-items:center;gap:10px;margin-top:8px}.mline b{font-variant-numeric:tabular-nums;min-width:3.2em;text-align:right;font-size:14px}
+.cstate{min-height:92px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:13.5px;color:var(--ink2);gap:8px;padding:0 12px}
+.cstate .bad{color:var(--bad);font-weight:600}
+.cbars{display:flex;gap:4px;align-items:end;height:60px}.cbars .shim{flex:1;border-radius:4px 4px 0 0}
+
+/* ── 33 · tier marks — one family: Verified is earned (green); Solo · Pro · Enterprise are plans (gold); the mark differs, the size never */
+.tier{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;border-radius:999px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;vertical-align:middle;line-height:1;white-space:nowrap}
+.tier.ver{background:var(--ok-soft);color:var(--ok-ink)}
+.tier.solo,.tier.pro,.tier.ent{background:var(--gold-soft);color:var(--gold-ink)}
+.tier svg{width:11px;height:11px;fill:currentColor;stroke:none}
+.tier.ver svg{fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.tier.new{background:var(--pill);color:var(--ink2)}
+.tierrow{display:flex;align-items:center;gap:10px;min-height:52px;border-top:1px solid var(--line)}
+.tierrow:first-child{border-top:0}
+.tierrow .nm{flex:1;font-weight:600;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tierrow .nm small{font-weight:400;color:var(--ink2);font-size:12.5px;width:100%}
+.tiergrid{display:grid;grid-template-columns:auto 1fr;gap:10px 14px;align-items:center;font-size:13px;color:var(--ink2)}
+.tiergrid b{color:var(--ink)}
+
+/* ── 34 · reorder — hold to lift (the Maker's feel), the others slide, arrows and keys for anyone who cannot drag */
+.rol{display:flex;flex-direction:column}
+.ro{display:flex;align-items:center;gap:8px;min-height:56px;border-top:1px solid var(--line);background:var(--paper);position:relative;touch-action:pan-y;user-select:none;-webkit-user-select:none;transition:transform calc(90ms*var(--t)) var(--spring),box-shadow calc(90ms*var(--t)),opacity calc(90ms*var(--t))}
+.ro:first-child{border-top:0}
+.ro .grip{width:32px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--cta);flex:none;cursor:grab;touch-action:none}
+.ro .grip svg{width:18px;height:18px;fill:currentColor}
+.ro .nm{flex:1;font-weight:500;min-width:0}.ro .nm small{display:block;font-size:12px;color:var(--mute);font-weight:400}
+.ro .mv{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--cta);flex:none}
+.ro .mv[disabled]{color:var(--line2)}
+/* owner 2026-10-12 (round-2 q10): on a phone the arrows sit behind "Arrange"; on a computer they show on every row */
+body.phone .rol:not(.managing) .mv{display:none}
+.ro .mv svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.ro.lifted{box-shadow:0 14px 30px -10px rgba(0,0,0,.45),0 0 0 2px var(--cta);border-radius:14px;border-top-color:transparent;z-index:3;background:var(--surf);transform:scale(1.03);transition:none;cursor:grabbing}
+.ro.locked .grip{color:var(--line2);cursor:not-allowed}.ro.locked .nm{color:var(--ink2)}
+.ro:focus-visible{outline:2px solid var(--cta);outline-offset:-2px;border-radius:12px}
+.ro.held{background:var(--pill);border-radius:12px}
+.rline{font-size:12.5px;color:var(--ink2);padding:8px 2px 0;min-height:30px}.rline.bad{color:var(--bad);font-weight:600}
+@keyframes shake{0%,100%{translate:0}15%{translate:-7px}30%{translate:6px}45%{translate:-5px}60%{translate:4px}75%{translate:-2px}90%{translate:1px}}
+.shake{animation:shake .45s cubic-bezier(.36,.07,.19,.97)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body class="phone">
+<div class="scrim" id="scrim"></div>
+<div class="toast" id="toast" role="status"><svg id="toastic" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Saved</span><button type="button" hidden>Try again</button></div>
+<div class="cfm" id="cfm" role="dialog" aria-modal="true"><b id="cfmt">Pay ₱15,000?</b><p id="cfmp">Down payment for the Cruz wedding. Charged to GCash ••••12.</p><div class="btnrow"><button class="ab second" id="cno">Not now</button><button class="ab main" id="cyes">Pay ₱15,000</button></div></div>
+<div class="view" id="pview" role="dialog" aria-label="Photo"><button class="x" aria-label="Close">✕</button><button class="nv l" aria-label="Previous">‹</button><div class="pic" id="vpic"></div><button class="nv r" aria-label="Next">›</button><em id="vcap"></em><button class="del" id="vdel">Remove</button></div>
+
+<main>
+<header>
+  <h1>The control templates — round 2</h1>
+  <p>Twelve more kinds, numbered on from the <a href="control_templates_2026-10-08.html">twenty-two you approved on 2026-10-08</a>. Same colours, same press, same 0.7 s. Each one is drawn in Light and Dark, for a phone and for a computer, with its pressed, loading, empty and failure states. Tap everything.</p>
+</header>
+
+<div class="slow">
+  <div><span>View as<small id="vw">a phone, 375 px</small></span>
+    <div class="ps" role="group" aria-label="View as" id="view"><span class="th"></span><button aria-pressed="true" data-v="phone">Phone</button><button aria-pressed="false" data-v="desk">Computer</button></div></div>
+  <div><span>Look<small id="lk">Light</small></span>
+    <div class="ps" role="group" aria-label="Light or Dark" id="look"><span class="th"></span><button aria-pressed="true" data-l="light">Light</button><button aria-pressed="false" data-l="dark">Dark</button></div></div>
+</div>
+
+<!-- ═══════════════ 23 ═══════════════ -->
+<section id="k23">
+  <h2>23 · Chat <em>new</em><code>ChatThread</code></h2>
+  <p class="use"><b>One chat page for every conversation:</b> a supplier about an event, a person, a Samahan group, and Setnayan's own notices. Yours on the right in our colour, theirs on the left in grey; in a group each message names its writer. <b>Not for</b> a comment under a post or a form reply — those are rows.</p>
+  <div class="demo">
+    <div class="ps" role="group" aria-label="Chat with" id="chatmode"><span class="th"></span><button aria-pressed="true" data-c="sup">Supplier</button><button aria-pressed="false" data-c="per">Person</button><button aria-pressed="false" data-c="grp">Samahan</button><button aria-pressed="false" data-c="sn">Setnayan</button></div>
+    <div class="ps" role="group" aria-label="Chat state" id="chatstate"><span class="th"></span><button aria-pressed="true" data-s="live">Live</button><button aria-pressed="false" data-s="empty">Empty</button><button aria-pressed="false" data-s="load">Loading</button><button aria-pressed="false" data-s="bad">Problem</button></div>
+    <div class="chd" id="chd"></div>
+    <div class="stream" id="stream" aria-live="polite"></div>
+    <div class="msg" id="msgbox"><button class="att" aria-label="Attach a photo or file"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button><span class="inbox"><textarea id="msgi" rows="1" placeholder="Message…" aria-label="Your message" enterkeyhint="send"></textarea></span><button class="send" id="msgs" aria-label="Send" disabled><svg viewBox="0 0 24 24"><path d="M4 12l16-8-6 16-2-7z"/></svg></button></div>
+  </div>
+  <p class="moves"><b>What moves:</b> a new bubble rises in with the same small spring as every press. Send is grey until there is something to send, then terracotta. A sent message says Sending… then Sent, then Seen; one that did not go turns red and says <b>Not sent · tap to try again</b> — never silent. The message box grows to four lines, then scrolls inside itself. On a phone, Enter is a new line and the round button sends; on a computer, Enter sends and Shift + Enter is a new line. The box stays at the bottom while the thread scrolls under it, and sits in the thumb zone above the keyboard. The Setnayan thread has no message box: it is notices you read, with one button on each.</p>
+</section>
+
+<!-- ═══════════════ 24 ═══════════════ -->
+<section id="k24">
+  <h2>24 · QR card <em>new</em><code>QrCard</code></h2>
+  <p class="use"><b>A code people show, scan, share or download:</b> your page's link, a shortlist code, a booked one-use code, a pay-to code. <b>Not for</b> the guest's pass — that keeps its approved round code (2026-09-29). The code is always dark on white, in Dark mode too, because a scanner needs it.</p>
+  <div class="demo">
+    <div class="ps" role="group" aria-label="QR state" id="qrmode"><span class="th"></span><button aria-pressed="true" data-q="ok">Ready</button><button aria-pressed="false" data-q="load">Making</button><button aria-pressed="false" data-q="used">Used</button><button aria-pressed="false" data-q="bad">Problem</button></div>
+    <div class="qrc" id="qrc"></div>
+  </div>
+  <p class="moves"><b>What moves:</b> the card presses like a button and opens big on tap (so a cashier can scan from a phone held up). Share opens the phone's own share sheet; Download saves a PNG with the name under it. While the code is being made, the square shimmers — nothing fake to scan. A used or void code is greyed with the word on it, so nobody tries it twice. A problem says so with Try again, never an empty square. The small SETNAYAN mark in the middle is our only brand on it.</p>
+</section>
+
+<!-- ═══════════════ 25 ═══════════════ -->
+<section id="k25">
+  <h2>25 · Map pin field <em>new</em><code>MapPinField</code></h2>
+  <p class="use"><b>An address and its pin:</b> a venue, where a supplier is based, how far they travel. The words are a Form row; the pin is on a small map under it. <b>Not for</b> directions or a live map — that is the phone's own maps app, opened from a row.</p>
+  <div class="demo">
+    <div class="ps" role="group" aria-label="Map state" id="mapmode"><span class="th"></span><button aria-pressed="true" data-m="ok">Pin</button><button aria-pressed="false" data-m="reach">Reach</button><button aria-pressed="false" data-m="find">Finding</button><button aria-pressed="false" data-m="none">Not found</button><button aria-pressed="false" data-m="off">Offline</button></div>
+    <div class="fr"><span class="l">Address</span><button class="dd" id="addr"><span>Tagaytay Highlands, Cavite</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button></div>
+    <div class="map" id="map"><svg class="tiles" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect class="park" x="40" y="20" width="110" height="70" rx="14"/><path class="water" d="M300 0h100v90c-40 10-70-10-100-30z"/><path class="road" d="M0 120 C120 100 220 140 400 110"/><path class="road" d="M180 0 L170 200"/><path class="road s" d="M0 60 L400 70"/><path class="road s" d="M260 0 L300 200"/><path class="road s" d="M60 200 L90 0"/><text class="lbl" x="48" y="58">Picnic Grove</text><text class="lbl" x="330" y="60">Taal Lake</text><text class="lbl" x="200" y="150">Tagaytay–Nasugbu Hwy</text></svg>
+      <div class="ring" id="ring" hidden></div>
+      <div class="pin" id="pin" role="slider" aria-label="The pin. Drag to move it." tabindex="0"><svg viewBox="0 0 30 40" aria-hidden="true"><path d="M15 39C15 39 2 24 2 14a13 13 0 0 1 26 0c0 10-13 25-13 25z" fill="var(--cta)"/><circle cx="15" cy="14" r="5" fill="var(--on-cta)"/></svg><span class="pt"></span></div>
+      <button class="me" id="locme" aria-label="Use my location"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
+      <div class="veil" id="mapveil" hidden></div></div>
+    <div id="reach" hidden><div class="pline">Travels up to <span id="rkm">30 km</span></div><input class="rng" id="rrng" type="range" min="5" max="150" step="5" value="30" aria-label="How far you travel"></div>
+    <div class="mapline" id="mapline">Pin dropped at 14.1086, 120.9620 · drag it if it is off.</div>
+  </div>
+  <p class="moves"><b>What moves:</b> typing an address finds it and the pin drops in with a small bounce; dragging the pin lifts it (it rises under your finger) and sets it back down where you let go, and the address words update to match. "Use my location" spins while the phone finds you, then drops the pin. For a supplier's reach, a terracotta ring grows and shrinks with the slider (kind 17). An address that cannot be found says so under the map and asks you to drop the pin yourself; an offline map goes grey with the words "Map is offline — your address still saves" — the field never blocks the form. The pin can also be moved with the arrow keys.</p>
+</section>
+
+<!-- ═══════════════ 26 ═══════════════ -->
+<section id="k26">
+  <h2>26 · Price summary <em>new</em><code>PriceSummary</code></h2>
+  <p class="use"><b>What a quote comes to:</b> its lines, what comes off, the total, then how it is paid. Read-only rows with hairlines, no box. <b>Not for</b> editing the lines — that is the quote's own Form rows; <b>never</b> a switch that buys. Buying is always a confirm + pay step (owner, 2026-10-12).</p>
+  <div class="demo">
+    <div class="ps" role="group" aria-label="Summary state" id="summode"><span class="th"></span><button aria-pressed="true" data-s="ok">Quote</button><button aria-pressed="false" data-s="paid">Part paid</button><button aria-pressed="false" data-s="load">Loading</button><button aria-pressed="false" data-s="bad">Problem</button></div>
+    <div class="sum" id="sum"></div>
+    <div class="btnrow" id="sumbtn"><button class="ab main wide" id="paybtn">Pay ₱15,000 down</button></div>
+  </div>
+  <p class="moves"><b>What moves:</b> a changed total counts up or down to its new figure instead of jumping. A line that comes off is green with a minus. The payment plan is one row per instalment with its date and a badge: Paid · Due Oct 3 · Not yet. The main button names the amount it will take; pressing it opens the confirm box (kind 12), and only Pay there pays. A supplier's copy carries one extra small line, the Setnayan booking fee, since the fee is between Setnayan and the supplier (owner, 2026-10-12). Loading shimmers the rows; a problem says "Couldn't load this quote · Try again" and the button is dimmed.</p>
+</section>
+
+<!-- ═══════════════ 27 ═══════════════ -->
+<section id="k27">
+  <h2>27 · Notification row <em>new</em><code>NotificationRow</code></h2>
+  <p class="use"><b>One notice in the in-app list:</b> who or what, one line, when. A dot means unread. Tapping opens the thing it is about and marks it read. <b>Not for</b> a result you just caused — that is a toast (kind 12).</p>
+  <div class="demo">
+    <div class="rowx"><span class="l">The bell</span><span class="bell"><span class="ic44" aria-label="Notifications, 3 unread"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"/></svg></span><em id="bellc">3</em></span></div>
+    <div class="ps" role="group" aria-label="List state" id="nmode"><span class="th"></span><button aria-pressed="true" data-s="ok">Notices</button><button aria-pressed="false" data-s="empty">Empty</button><button aria-pressed="false" data-s="load">Loading</button><button aria-pressed="false" data-s="bad">Problem</button></div>
+    <div id="nlist"></div>
+  </div>
+  <p class="moves"><b>What moves:</b> tap a row and its dot fades and its title goes light as it opens; the bell's number counts down. Rows are grouped Today · Earlier with a caption between, hairlines, no boxes, a terracotta arrow at the end. A ⋯ on the page holds "Mark all as read". Empty says "You're all caught up" with nothing to press; loading shimmers rows; a problem says so with Try again. The list is the same list the envelope and the bell open; the Setnayan thread (kind 23) carries the same notices in chat form.</p>
+</section>
+
+<!-- ═══════════════ 28 ═══════════════ -->
+<section id="k28">
+  <h2>28 · Photo grid <em>new</em><code>PhotoGrid</code></h2>
+  <p class="use"><b>A set of pictures to look at, add to and arrange:</b> a shop's portfolio, an album, a mood board. Pictures sit edge to edge with no frame; only Add is framed, because it is pressed. <b>Not for</b> choosing one look (that is the Style card) or a single cover (that is Upload, kind 21).</p>
+  <div class="demo">
+    <div class="ps" role="group" aria-label="Grid state" id="pgmode"><span class="th"></span><button aria-pressed="true" data-s="ok">Photos</button><button aria-pressed="false" data-s="empty">Empty</button><button aria-pressed="false" data-s="load">Loading</button></div>
+    <div class="pgrid" id="pgrid"></div>
+    <div class="pcount" id="pcount"><span>18 of 30 · the first one is your cover</span><button type="button" id="pmanage">Arrange</button></div>
+  </div>
+  <p class="moves"><b>What moves:</b> tap a picture and it opens big, dark around it, swipe or arrow for the next; Remove lives there and asks once. Add opens the phone's picker; each new picture arrives as a tile with its own 0–100 pie, then the photo. <b>Hold a picture to lift it</b> — the same feel as moving a scene in the Maker: about a third of a second, a small buzz, it grows a little with a terracotta edge — then drag; the others slide aside and the first slot is always the cover. A picture that did not upload is a red tile that says so, with Try again, and never a blank. "Arrange" shows every ✕ for anyone who cannot hold.</p>
+</section>
+
+<!-- ═══════════════ 29 ═══════════════ -->
+<section id="k29">
+  <h2>29 · Star rating <em>display only</em><code>StarRating</code></h2>
+  <p class="use"><b>What a shop's reviews come to:</b> one gold star, the number, the count. Read, not pressed. <b>Not for</b> giving a rating (that stays <code style="font-size:11px">StarRatingInput</code>) and <b>never</b> "☆ 0.0 · 0": a shop with no reviews reads <b>New</b> (owner, 2026-09-11).</p>
+  <div class="demo">
+    <div class="cap">In a line (a card, a row, a header)</div>
+    <div class="rowx"><span class="l">Lumina Studio</span><span class="star"><svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.2 6.8.8-5 4.6 1.3 6.7L12 17.5l-6 3.3 1.3-6.7-5-4.6 6.8-.8z"/></svg>4.8<small>· 31</small></span></div>
+    <div class="rowx"><span class="l">Saysay Catering</span><span class="tier new">New</span></div>
+    <div class="cap">On the shop's page</div>
+    <div class="star big"><b>4.8</b><span class="stars" id="stars"></span><small>31 reviews · 9 this year</small></div>
+    <div class="rbars" id="rbars"></div>
+    <button class="rowdoor"><span class="tx">See all 31 reviews</span><svg class="arrow" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5"/></svg></button>
+  </div>
+  <p class="moves"><b>What moves:</b> nothing — it is read. The five stars fill to the exact figure (4.8 shows four and most of a fifth). The bars under them are meters (kind 32) and the row "See all reviews" is the door; the stars themselves are never the button. Gold is the mark's colour because terracotta means "tap me" everywhere else.</p>
+</section>
+
+<!-- ═══════════════ 30 ═══════════════ -->
+<section id="k30">
+  <h2>30 · Search box <em>new</em><code>SearchBox</code></h2>
+  <p class="use"><b>Find something in the place you are in:</b> this event's guests, your customers, a supplier's services. Its own bar, not a Form row; on a phone it lives in the thumb row and takes at least 60 % of it, with one Add beside it. <b>Not for</b> filtering by a value — that is a Dropdown.</p>
+  <div class="demo">
+    <div class="thumb"><div class="srch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input placeholder="Name, table or group" id="srch" aria-label="Search guests"><button class="clr" type="button" id="srchx" hidden aria-label="Clear"><i><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></i></button></div><button class="ab main">＋ Add</button></div>
+    <div class="sres" id="sres"></div>
+  </div>
+  <p class="moves"><b>What moves:</b> the box lights terracotta when you tap in and the keyboard comes up. Results change as you type — the matching letters are terracotta in each row — under one small line that says how many. The ✕ appears as soon as there is a word and clears it with the same press as every button; tapping outside only puts the keyboard away, the word stays. No one found says so and offers Add; a problem says so with Try again. It searches the place you are in (owner's rule § 4): what is searched is said in the placeholder.</p>
+</section>
+
+<!-- ═══════════════ 31 ═══════════════ -->
+<section id="k31">
+  <h2>31 · Calendar days with several states <em>extends kind 8</em><code>CalendarGrid</code></h2>
+  <p class="use"><b>The approved calendar, with meaning under the days:</b> a supplier's dates (booked · holding · blocked · free), a couple's plan. The picked day stays the one terracotta circle; a dot says what is on the day; a blocked day is crossed out. <b>Not for</b> picking one date in a form — that is kind 8 as approved.</p>
+  <div class="demo">
+    <div class="calv"><div class="hd"><button aria-label="Earlier month" data-n="-1">‹</button><b id="cvm"></b><button aria-label="Later month" data-n="1">›</button></div><div class="gr" id="cvg"></div></div>
+    <div class="legend"><span><i style="background:var(--ok)"></i>Booked</span><span><i style="background:var(--warn)"></i>Holding</span><span><i class="bl"></i>Blocked</span><span><i style="background:var(--cta)"></i>Your event</span></div>
+    <div class="dayl2" id="cvd"></div>
+  </div>
+  <p class="moves"><b>What moves:</b> the circle lands on the day you tap with the same press as everything else, and the day's rows appear under the month: one row per booking or hold with its badge. Two things on a day are two dots; a full day (its limit reached) is bold. A blocked day cannot be picked by a couple and shows why to the supplier. The colour is never the only sign — every dot has its word in the legend and in the day's list. Changing the month slides, as approved.</p>
+</section>
+
+<!-- ═══════════════ 32 ═══════════════ -->
+<section id="k32">
+  <h2>32 · Charts <em>new</em><code>Bars · MixBar · Fill</code></h2>
+  <p class="use"><b>Three shapes for Insights and Money:</b> bars over time, a mix bar (what makes up a whole), a meter (how far along). Read-only, no frame, each ends in a divider. One grey for the series; terracotta only for "now" or "you". <b>Never</b> a second axis, a pie, or red/green for up/down.</p>
+  <div class="demo">
+    <div class="ps" role="group" aria-label="Chart state" id="chmode"><span class="th"></span><button aria-pressed="true" data-s="ok">Data</button><button aria-pressed="false" data-s="empty">Empty</button><button aria-pressed="false" data-s="load">Loading</button><button aria-pressed="false" data-s="bad">Problem</button></div>
+    <div id="chartbox"></div>
+  </div>
+  <p class="moves"><b>What moves:</b> bars grow up from the baseline when they come into view (once). Tap a bar and its number pops above it; on a computer, hover does the same. The current bar is terracotta and the days ahead are hollow. The mix bar's parts have a hairline gap between them and are named under it with their numbers — the colour alone never carries the name. A meter fills to its figure with the number beside it. Empty says what to do ("Your page went live Tuesday — views show from tomorrow"), loading shimmers the shape, a problem says so with Try again. The half-ring gauge on the look board is not drawn here — it is still awaiting your look there.</p>
+</section>
+
+<!-- ═══════════════ 33 ═══════════════ -->
+<section id="k33">
+  <h2>33 · Tier marks <em>extends kind 20</em><code>TierMark</code></h2>
+  <p class="use"><b>One family of small pills the size of the NEW tag:</b> Verified ✓ is earned (green); Solo · Pro ◆ · Enterprise are plans (gold, the mark differs). Free wears nothing. Shown beside a shop's name and on its cards; read, not pressed. <b>Not for</b> a state (Live, Draft, Booked — those are badges, kind 11).</p>
+  <div class="demo">
+    <div class="cap">The family</div>
+    <div class="btnrow" style="gap:8px"><span class="tier ver"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Verified</span><span class="tier solo"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg>Solo</span><span class="tier pro"><svg viewBox="0 0 24 24"><path d="M12 3l9 9-9 9-9-9z"/></svg>Pro</span><span class="tier ent"><svg viewBox="0 0 24 24"><path d="M12 3l9 9-9 9-9-9z"/><path d="M12 8l4 4-4 4-4-4z" fill="var(--paper)"/></svg>Enterprise</span><span class="tier new">New</span></div>
+    <div class="cap">Beside a name</div>
+    <div>
+      <div class="tierrow"><span class="av">LS</span><span class="nm">Lumina Studio <span class="tier ver"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Verified</span><span class="tier pro"><svg viewBox="0 0 24 24"><path d="M12 3l9 9-9 9-9-9z"/></svg>Pro</span><small>Photographer · Tagaytay</small></span></div>
+      <div class="tierrow"><span class="av">SC</span><span class="nm">Saysay Catering <span class="tier solo"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg>Solo</span><small>Caterer · Quezon City</small></span></div>
+      <div class="tierrow"><span class="av">MH</span><span class="nm">Manila Hotel Events <span class="tier ver"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Verified</span><span class="tier ent"><svg viewBox="0 0 24 24"><path d="M12 3l9 9-9 9-9-9z"/><path d="M12 8l4 4-4 4-4-4z" fill="var(--paper)"/></svg>Enterprise</span><small>Venue · Manila</small></span></div>
+      <div class="tierrow"><span class="av">RB</span><span class="nm">Rico's Band<small>Band · Cavite · on Free, so no plan mark</small></span></div>
+    </div>
+    <div class="cap">What each one means</div>
+    <div class="tiergrid"><span class="tier ver"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Verified</span><span><b>Papers checked</b> by Setnayan. Earned, not bought. Can sit beside any plan.</span><span class="tier solo"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg>Solo</span><span><b>One person's shop</b> on the Solo plan.</span><span class="tier pro"><svg viewBox="0 0 24 24"><path d="M12 3l9 9-9 9-9-9z"/></svg>Pro</span><span><b>Pro plan</b> — the ◆ you approved on 2026-10-08.</span><span class="tier ent"><svg viewBox="0 0 24 24"><path d="M12 3l9 9-9 9-9-9z"/><path d="M12 8l4 4-4 4-4-4z" fill="var(--paper)"/></svg>Enterprise</span><span><b>A team or a chain</b> on Enterprise: the ◆ with a window in it.</span></div>
+  </div>
+  <p class="moves"><b>What moves:</b> nothing — a mark is read. On a shop's own Settings › Plan the same mark sits in the Plan row, and changing it is a confirm + pay step, never a switch (owner, 2026-10-12). A Custom plan is never shown publicly (it wears Pro's mark). Dark mode keeps the same two tints with lighter ink on them.</p>
+</section>
+
+<!-- ═══════════════ 34 ═══════════════ -->
+<section id="k34">
+  <h2>34 · Reorder — hold to lift <em>extends kind 18</em><code>Reorder · useHoldToLift</code></h2>
+  <p class="use"><b>Put things in your own order:</b> service cards, photos, the pages of a Hub. <b>Hold</b> a row to lift it (the Maker's feel: about a third of a second, a small buzz, it grows a little with a terracotta edge), drag, let go. Arrows (behind "Arrange" on a phone, on every row on a computer — owner 2026-10-12) and the keyboard do the same for anyone who cannot drag. <b>Not for</b> moving one thing between lists.</p>
+  <div class="demo" style="gap:0">
+    <div class="rol" id="rol"></div>
+    <div class="rline" id="rline">Hold a row to lift it; on a phone, Arrange shows the arrows. With a keyboard: Space picks up, ↑ ↓ move, Space drops, Esc puts it back.</div>
+    <div class="btnrow" style="margin-top:8px"><button class="ab second" id="roarr">Arrange</button><button class="ab second" id="rofail">Show a failed save</button></div>
+  </div>
+  <p class="moves"><b>What moves:</b> while you hold, the row tints to show the hold is counting; at the lift it rises with a shadow and a terracotta edge, and the rows it passes slide out of its way. On a computer the mouse lifts it at once. Let go and it settles with the family's small bounce; "Order saved" peeks from the top. A row that cannot move (the Reveal, the cover) does not lift and says why under the list. If the save fails the row slides back where it was, and a red line says "That did not save. Nothing changed — please try again." In the Maker only, the lower third slides away while a scene is held and slides back on release (owner, 2026-10-11).</p>
+</section>
+
+<footer style="margin-top:24px;font-size:12.5px;color:var(--mute)">Fable · 2026-10-12 · the rules and the open questions are in <code>CONTROL_TEMPLATES_ROUND2_2026-10-12_fable.md</code>. The first 22 kinds: <a href="control_templates_2026-10-08.html" style="color:var(--cta)">control_templates_2026-10-08.html</a>.</footer>
+</main>
+
+<script>
+/* ── the same helpers as the approved gallery */
+const still=matchMedia('(prefers-reduced-motion:reduce)');
+const T=()=>parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--t'))||1;
+function press(el){if(!el||still.matches)return;el.classList.remove('pulse-el');el.offsetWidth;el.classList.add('pulse-el');el.addEventListener('animationend',()=>el.classList.remove('pulse-el'),{once:true});
+  const r=el.getBoundingClientRect();const g=document.createElement('span');g.style.cssText='position:fixed;pointer-events:none;z-index:99;border-radius:999px;left:'+r.left+'px;top:'+r.top+'px;width:'+r.width+'px;height:'+r.height+'px';
+  g.animate([{boxShadow:'0 0 0 0 color-mix(in srgb,var(--cta) 45%,transparent)',opacity:1},{boxShadow:'0 0 0 10px color-mix(in srgb,var(--cta) 0%,transparent)',opacity:0}],{duration:180*T(),easing:'cubic-bezier(.2,.8,.2,1)'});document.body.appendChild(g);setTimeout(()=>g.remove(),200*T());}
+function place(ps,animate){const on=ps.querySelector('button[aria-pressed=true]');const th=ps.querySelector('.th');if(!on||!th)return;if(!animate)th.style.transition='none';th.style.setProperty('--x',on.offsetLeft+'px');th.style.setProperty('--w',on.offsetWidth+'px');if(!animate){th.offsetWidth;th.style.transition='';}}
+document.querySelectorAll('.ps').forEach(ps=>{ps.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{ps.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));place(ps,true);press(ps.querySelector('.th'));}));place(ps,false);});
+addEventListener('resize',()=>document.querySelectorAll('.ps').forEach(p=>place(p,false)));
+// the thumb MEASURES the picked box and follows the track's size (the shipped PillThumb does the same with a ResizeObserver)
+const ro=new ResizeObserver(es=>es.forEach(e=>place(e.target,false)));document.querySelectorAll('.ps').forEach(p=>ro.observe(p));
+const replaceAll=()=>requestAnimationFrame(()=>document.querySelectorAll('.ps').forEach(p=>place(p,false)));
+addEventListener('load',()=>document.querySelectorAll('.ps').forEach(p=>place(p,false)));
+document.addEventListener('click',e=>{const b=e.target.closest('button,[role=button]');if(b&&!b.closest('.ps')&&!b.classList.contains('b'))press(b);},true);
+// § 9: a pill selector holds 2–3 sections on a phone (4 on a computer). Every pill with 4+ segments gets a twin Dropdown; the phone shows the dropdown, the computer the pill. Both stay in step.
+document.querySelectorAll('.ps').forEach(ps=>{const bs=[...ps.querySelectorAll('button')];if(bs.length<4||ps.closest('.slow'))return;const w=document.createElement('div');w.className='ddw twin';const name=ps.getAttribute('aria-label')||'Choose';
+  w.innerHTML='<button class="dd full" aria-haspopup="listbox"><span></span><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button><div class="menu" role="listbox" data-title="'+name+'">'+bs.map((b,i)=>'<button role="option" data-i="'+i+'" aria-checked="false">'+b.textContent+'<i>✓</i></button>').join('')+'</div>';
+  ps.after(w);const lab=w.querySelector('.dd span');const sync=()=>{const on=bs.findIndex(b=>b.getAttribute('aria-pressed')==='true');lab.textContent=bs[on>=0?on:0].textContent;w.querySelectorAll('[role=option]').forEach((o,i)=>o.setAttribute('aria-checked',i===on));};
+  w.querySelectorAll('[role=option]').forEach(o=>o.addEventListener('click',e=>{e.stopPropagation();bs[+o.dataset.i].click();sync();w.classList.remove('open');document.body.classList.remove('sheet');}));
+  bs.forEach(b=>b.addEventListener('click',sync));sync();});
+function closeAll(except){document.querySelectorAll('.ddw.open').forEach(d=>{if(d!==except)d.classList.remove('open')});document.body.classList.toggle('sheet',!!except);}
+document.querySelectorAll('.ddw .dd').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const w=b.closest('.ddw');const open=!w.classList.contains('open');closeAll(open?w:null);w.classList.toggle('open',open);}));
+addEventListener('click',()=>closeAll(null));
+const VW={phone:'a phone, 375 px',desk:'a computer'};
+function setView(v){document.body.classList.toggle('phone',v==='phone');document.body.classList.toggle('desk',v==='desk');document.getElementById('vw').textContent=VW[v];document.querySelectorAll('#view button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===v));replaceAll();}
+document.querySelectorAll('#view button').forEach(b=>b.addEventListener('click',()=>{closeAll(null);setView(b.dataset.v);}));
+function setLook(l){document.documentElement.dataset.theme=l;document.getElementById('lk').textContent=l==='dark'?'Dark':'Light';document.querySelectorAll('#look button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.l===l));replaceAll();}
+document.querySelectorAll('#look button').forEach(b=>b.addEventListener('click',()=>setLook(b.dataset.l)));
+(()=>{const q=new URLSearchParams(location.search);if(q.get('view'))setView(q.get('view'));if(q.get('theme'))setLook(q.get('theme'));else if(matchMedia('(prefers-color-scheme:dark)').matches)setLook('dark');})();
+// toast + confirm (kind 12)
+const toast=document.getElementById('toast');let tt;function say(msg,bad){clearTimeout(tt);toast.querySelector('span').textContent=msg;toast.classList.toggle('bad',!!bad);document.getElementById('toastic').innerHTML=bad?'<path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17.2v.3"/>':'<path d="M5 12.5l4.5 4.5L19 7.5"/>';toast.querySelector('button').hidden=!bad;toast.classList.add('on');tt=setTimeout(()=>toast.classList.remove('on'),bad?4200:2200);}
+toast.querySelector('button').addEventListener('click',()=>{toast.classList.remove('on');setTimeout(()=>say('Saved'),500);});
+const cfm=document.getElementById('cfm');const cfmShut=()=>{cfm.classList.remove('on');document.body.classList.remove('cfming');};
+cfm.addEventListener('click',e=>e.stopPropagation());document.getElementById('cno').addEventListener('click',cfmShut);addEventListener('click',cfmShut);
+function confirm2(title,text,verb,then){document.getElementById('cfmt').textContent=title;document.getElementById('cfmp').textContent=text;const y=document.getElementById('cyes');y.textContent=verb;y.onclick=()=>{cfmShut();then&&then();};cfm.classList.add('on');document.body.classList.add('cfming');}
+const SHIM=n=>'<div class="sk" aria-busy="true">'+Array.from({length:n},()=>'<div><i></i><u></u><u class="s"></u></div>').join('')+'</div>';
+const ARROW='<svg class="arrow" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5"/></svg>';
+
+// ── 23 · chat
+(()=>{const stream=document.getElementById('stream'),chd=document.getElementById('chd'),mi=document.getElementById('msgi'),ms=document.getElementById('msgs'),box=document.getElementById('msgbox');let kind='sup',state='live',n=0;
+  const C={sup:{h:'<span class="av">GT</span><span><b>The Garden at Tagaytay</b><span>Supplier · about Maria &amp; Jose · Dec 12</span></span><button class="ic44" aria-label="More"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></svg></button>',ph:'Message…',
+      b:[['day','Yesterday'],['you','Hi Maria! Sending the menu options today.','10:02 AM'],['card','Quote sent · Garden Classic','₱110,000 · valid 7 days'],['day','Today'],['me','Thank you — can we do the tasting on Saturday?','10:05 AM · Seen'],['typing']]},
+    per:{h:'<span class="av">TB</span><span><b>Tito Ben</b><span>Person · just the two of you</span></span><button class="ic44" aria-label="More"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></svg></button>',ph:'Message…',
+      b:[['day','Yesterday'],['you','Got the rings! Bringing them Friday.','4:12 PM'],['me','You are the best, Tito.','4:15 PM · Seen'],['me','Can you also bring the car?','4:16 PM · Not sent · tap to try again','fail']]},
+    grp:{h:'<span class="av" style="border-radius:11px">SC</span><span><b>Santos Clan</b><span>Samahan · 14 members · members only</span></span><button class="ic44" aria-label="More"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></svg></button>',ph:'Message…',
+      b:[['day','Today'],['you','Sino pa ang hindi pa nag-RSVP?','9:40 AM','Tita Luz','TL'],['you','Kami na, tatlo kami.','9:44 AM','Kuya Marco','KM'],['me','Salamat! The list is on the event page.','9:50 AM · Seen by 6']]},
+    sn:{h:'<span class="av sn">S</span><span><b>Setnayan</b><span>Notices about your events and your shop</span></span>',ph:'',
+      b:[['day','Today'],['you','Ana &amp; Miguel asked you for a quote. Reply within 2 days to keep your reply time.','10:12 AM'],['btn','Reply now'],['day','Yesterday'],['you','Your booking fee for the Cruz wedding (₱2,500) is due Oct 3.','9:00 AM'],['btn','Pay ₱2,500']]}};
+  function bub(x){if(x[0]==='day')return '<div class="dayl">'+x[1]+'</div>';if(x[0]==='typing')return '<div class="typing" aria-label="They are typing"><i></i><i></i><i></i></div>';
+    if(x[0]==='card')return '<button class="card-in"><span class="tx"><b>'+x[1]+'</b><span>'+x[2]+'</span></span>'+ARROW+'</button>';
+    if(x[0]==='btn')return '<button class="ab main" style="align-self:flex-start;height:44px;min-width:0;padding:0 16px;font-size:14px;margin:-2px 0 6px">'+x[1]+'</button>';
+    if(x[0]==='me')return '<div class="bub me'+(x[3]==='fail'?' fail':'')+'" '+(x[3]==='fail'?'role="button" tabindex="0"':'')+'>'+x[1]+'<small>'+x[2]+'</small></div>';
+    return x[4]?'<div class="bubrow"><span class="av">'+x[4]+'</span><div class="bub you"><span class="who">'+x[3]+'</span>'+x[1]+'<small>'+x[2]+'</small></div></div>':'<div class="bub you">'+x[1]+'<small>'+x[2]+'</small></div>';}
+  function draw(){const c=C[kind];chd.innerHTML=c.h;box.hidden=kind==='sn';mi.placeholder=c.ph;
+    if(state==='load'){stream.innerHTML=SHIM(3);return;}
+    if(state==='bad'){stream.innerHTML='<div class="state bad"><span class="em"><svg viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17.2v.3"/></svg></span><b>We could not load this chat</b><p>Your messages are safe. This is our side or your connection.</p><button class="ab second">Try again</button></div>';return;}
+    if(state==='empty'){stream.innerHTML='<div class="state"><span class="em"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg></span><b>'+(kind==='sn'?'No notices yet':'Say hello')+'</b><p>'+(kind==='sn'?'We will write here when something needs you.':kind==='grp'?'Nobody has written in Santos Clan yet.':'Your first message starts the thread. They see it at once.')+'</p></div>';return;}
+    stream.innerHTML=c.b.map(bub).join('');
+    stream.querySelectorAll('.bub.fail').forEach(b=>b.addEventListener('click',()=>{b.classList.remove('fail');b.removeAttribute('role');const s=b.querySelector('small');s.textContent='Sending…';setTimeout(()=>s.textContent=s.textContent.replace('Sending…','4:16 PM · Sent'),700*T()/3);}));
+    stream.querySelectorAll('.card-in').forEach(b=>b.addEventListener('click',()=>say('Opens the quote')));
+    stream.querySelectorAll('.ab').forEach(b=>b.addEventListener('click',()=>say(b.textContent.trim()+' — opens')));}
+  document.querySelectorAll('#chatmode button').forEach(b=>b.addEventListener('click',()=>{kind=b.dataset.c;draw();}));
+  document.querySelectorAll('#chatstate button').forEach(b=>b.addEventListener('click',()=>{state=b.dataset.s;draw();}));
+  mi.addEventListener('input',()=>{ms.disabled=!mi.value.trim();mi.style.height='auto';mi.style.height=Math.min(96,mi.scrollHeight)+'px';});
+  const send=()=>{const v=mi.value.trim();if(!v)return;n++;const t=document.querySelector('#stream .typing');if(t)t.remove();const b=document.createElement('div');b.className='bub me';b.textContent=v;const sm=document.createElement('small');sm.textContent='Sending…';b.appendChild(sm);stream.appendChild(b);mi.value='';mi.style.height='auto';ms.disabled=true;b.scrollIntoView({block:'nearest',behavior:still.matches?'auto':'smooth'});
+    setTimeout(()=>{if(n%3===0){b.classList.add('fail');b.setAttribute('role','button');sm.textContent='Not sent · tap to try again';b.onclick=()=>{b.classList.remove('fail');b.removeAttribute('role');sm.textContent='Sending…';setTimeout(()=>sm.textContent='Sent',700);b.onclick=null;};}else{sm.textContent='Sent';setTimeout(()=>sm.textContent='Seen',1600);}},800);};
+  ms.addEventListener('click',send);mi.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.body.classList.contains('desk')&&!e.shiftKey){e.preventDefault();send();}});
+  draw();})();
+
+// ── 24 · QR card
+(()=>{const host=document.getElementById('qrc');
+  // a believable code: a fixed pseudo-random module grid with the three finder squares (never a real code — the real one is made from the link)
+  let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};const N=25;let cells='';
+  const finder=(x,y)=>'<rect x="'+x+'" y="'+y+'" width="7" height="7" fill="#1A1816"/><rect x="'+(x+1)+'" y="'+(y+1)+'" width="5" height="5" fill="#fff"/><rect x="'+(x+2)+'" y="'+(y+2)+'" width="3" height="3" fill="#1A1816"/>';
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){const inF=(x<8&&y<8)||(x>N-9&&y<8)||(x<8&&y>N-9);const mid=x>8&&x<16&&y>8&&y<16;if(inF||mid)continue;if(rnd()<.46)cells+='<rect x="'+x+'" y="'+y+'" width="1" height="1" fill="#1A1816"/>';}
+  const SVG='<svg viewBox="0 0 '+N+' '+N+'" shape-rendering="crispEdges" aria-hidden="true">'+finder(0,0)+finder(N-7,0)+finder(0,N-7)+cells+'</svg><span class="sn">S</span>';
+  const V={ok:'<button class="qr" aria-label="Your shop\'s code. Tap to open it big">'+SVG+'</button><b>Lumina Studio</b><span>setnayan.com/lumina · they scan, you join their shortlist</span><div class="btnrow"><button class="ab main" id="qshare"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>Share</button><button class="ab second" id="qdl"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Download</button></div>',
+    load:'<div class="qr wait" aria-busy="true" aria-label="Making your code"><span class="shim"></span></div><b>Reyes debut · ₱45,000</b><span>Making the code…</span><div class="btnrow"><button class="ab main" disabled>Share</button><button class="ab second" disabled>Download</button></div>',
+    used:'<div class="qr used" data-word="Used · Oct 1" aria-label="This code was used on Oct 1">'+SVG+'</div><b>Reyes debut · ₱45,000</b><span>One-use · claimed Oct 1 · the date is booked</span><div class="btnrow"><button class="ab second">Make a new one</button></div>',
+    bad:'<div class="state bad" style="min-height:120px"><span class="em"><svg viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17.2v.3"/></svg></span><b>Couldn\'t make the code</b><p>Nothing was issued. Try again in a moment.</p><button class="ab second">Try again</button></div>'};
+  const draw=k=>{host.innerHTML=V[k];const big=host.querySelector('button.qr');if(big)big.addEventListener('click',()=>{const v=document.getElementById('pview');document.getElementById('vpic').style.cssText='background:#fff;aspect-ratio:1;display:flex;align-items:center;justify-content:center;padding:24px';document.getElementById('vpic').innerHTML=SVG.replace('<span class="sn">S</span>','');document.getElementById('vcap').textContent='Hold it up to the scanner';document.getElementById('vdel').hidden=true;v.classList.add('on');document.body.classList.add('viewing');});
+    const s=host.querySelector('#qshare'),d=host.querySelector('#qdl');if(s)s.addEventListener('click',()=>say('Opens the share sheet'));if(d)d.addEventListener('click',()=>say('Saved lumina-qr.png'));};
+  document.querySelectorAll('#qrmode button').forEach(b=>b.addEventListener('click',()=>draw(b.dataset.q)));draw('ok');})();
+
+// ── 25 · map pin field
+(()=>{const map=document.getElementById('map'),pin=document.getElementById('pin'),ring=document.getElementById('ring'),veil=document.getElementById('mapveil'),line=document.getElementById('mapline'),reach=document.getElementById('reach'),rr=document.getElementById('rrng'),rk=document.getElementById('rkm'),me=document.getElementById('locme');
+  let x=.5,y=.5;const put=()=>{pin.style.setProperty('--x',x*100+'%');pin.style.setProperty('--y',y*100+'%');ring.style.setProperty('--x',x*100+'%');ring.style.setProperty('--y',y*100+'%');};
+  const coords=()=>'Pin at '+(14.0+ (1-y)*.3).toFixed(4)+', '+(120.8+x*.4).toFixed(4);
+  let drag=null;pin.addEventListener('pointerdown',e=>{if(veil.hidden===false)return;e.preventDefault();pin.setPointerCapture(e.pointerId);drag=true;pin.classList.add('grab');try{navigator.vibrate&&navigator.vibrate(10);}catch(_){}});
+  pin.addEventListener('pointermove',e=>{if(!drag)return;const r=map.getBoundingClientRect();x=Math.max(.04,Math.min(.96,(e.clientX-r.left)/r.width));y=Math.max(.12,Math.min(.96,(e.clientY-r.top)/r.height));put();});
+  const drop=()=>{if(!drag)return;drag=null;pin.classList.remove('grab');pin.classList.add('drop');setTimeout(()=>pin.classList.remove('drop'),120*T());line.className='mapline';line.textContent=coords()+' · address updated to match.';say('Pin moved');};
+  pin.addEventListener('pointerup',drop);pin.addEventListener('pointercancel',drop);
+  pin.addEventListener('keydown',e=>{const k={ArrowLeft:[-.02,0],ArrowRight:[.02,0],ArrowUp:[0,-.03],ArrowDown:[0,.03]}[e.key];if(!k)return;e.preventDefault();x=Math.max(.04,Math.min(.96,x+k[0]));y=Math.max(.12,Math.min(.96,y+k[1]));put();line.textContent=coords();});
+  rr.addEventListener('input',()=>{rr.style.setProperty('--v',((rr.value-5)/145*100)+'%');rk.textContent=rr.value+' km';ring.style.setProperty('--r',(40+rr.value*1.3)+'px');});rr.dispatchEvent(new Event('input'));
+  me.addEventListener('click',e=>{e.stopPropagation();if(me.classList.contains('busy'))return;me.classList.add('busy');line.className='mapline';line.textContent='Finding you…';setTimeout(()=>{me.classList.remove('busy');x=.36;y=.62;put();pin.classList.add('drop');setTimeout(()=>pin.classList.remove('drop'),120*T());line.textContent=coords()+' · from your phone\'s location.';},1200);});
+  function mode(m){veil.hidden=true;veil.className='veil';reach.hidden=m!=='reach';ring.hidden=m!=='reach';pin.hidden=false;line.className='mapline';
+    if(m==='ok'){x=.5;y=.5;put();line.textContent=coords()+' · drag it if it is off.';}
+    if(m==='reach'){x=.5;y=.5;put();line.textContent='Couples within this ring see you first.';}
+    if(m==='find'){pin.hidden=true;veil.hidden=false;veil.innerHTML='<span class="spin" style="margin-right:8px"></span>Finding "Tagaytay Highlands"…';line.textContent='';}
+    if(m==='none'){x=.5;y=.5;put();line.className='mapline bad';line.textContent='We couldn\'t find that address. Drop the pin yourself — your words are kept as typed.';}
+    if(m==='off'){veil.hidden=false;veil.classList.add('off');veil.textContent='Map is offline — your address still saves.';pin.hidden=true;line.textContent='';}}
+  document.querySelectorAll('#mapmode button').forEach(b=>b.addEventListener('click',()=>mode(b.dataset.m)));mode('ok');
+  document.getElementById('addr').addEventListener('click',e=>{e.stopPropagation();say('Opens the row across, as a Form row');});})();
+
+// ── 26 · price summary
+(()=>{const sum=document.getElementById('sum'),btn=document.getElementById('paybtn');
+  const L=(a,b,c,cls)=>'<div class="ln'+(cls?' '+cls:'')+'"><span>'+a+(b?'<small>'+b+'</small>':'')+'</span><i>'+c+'</i></div>';
+  const lines='<div class="ln" style="min-height:32px;border:0"><span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--mute)">Garden Classic · Maria &amp; Jose · Dec 12</span></div>'+L('Full-day coverage','12 h · photo + video','₱85,000')+L('Album','40 pages','₱15,000')+L('Same-day edit','3-min film','₱10,000')+L('Early booking','5 % off','− ₱5,500','minus');
+  const V={ok:lines+L('Total','','₱104,500','tot')+'<div class="ln" style="min-height:32px"><span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--mute)">How it is paid · 30 % down, the rest 7 days before</span></div>'+L('Down payment','when you book','<i>₱31,350 <span class="badge wait">Not yet</span></i>','plan')+L('The rest','due Dec 5','<i>₱73,150 <span class="badge">Not yet</span></i>','plan')+L('Booking fee to Setnayan','supplier\'s copy only · 2 of 5 free used','free','fee')+'<div class="end"></div>',
+    paid:lines+L('Total','','₱104,500','tot')+'<div class="ln" style="min-height:32px"><span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--mute)">How it is paid</span></div>'+L('Down payment','paid Sep 1 · GCash','<i>₱31,350 <span class="badge ok">Paid</span></i>','plan')+L('The rest','due Dec 5','<i>₱73,150 <span class="badge cta">Due Dec 5</span></i>','plan')+'<div class="end"></div>',
+    load:'<div class="sk" aria-busy="true" aria-label="Loading the quote"><div><u></u><u class="s"></u></div><div><u></u><u class="s"></u></div><div><u></u><u class="s"></u></div><div><u style="height:18px"></u><u class="s" style="height:18px"></u></div></div>',
+    bad:'<div class="status bad">Couldn\'t load this quote. Nothing has been charged.<button type="button">Try again</button></div>'};
+  const B={ok:['Pay ₱31,350 down',false],paid:['Pay ₱73,150',false],load:['Pay',true],bad:['Pay',true]};
+  const draw=k=>{sum.innerHTML=V[k];btn.textContent=B[k][0];btn.disabled=B[k][1];};
+  document.querySelectorAll('#summode button').forEach(b=>b.addEventListener('click',()=>draw(b.dataset.s)));draw('ok');
+  btn.addEventListener('click',e=>{e.stopPropagation();const amt=btn.textContent.match(/₱[\d,]+/)[0];confirm2(amt+' — pay it?','For the Garden Classic quote · Maria & Jose. Charged to GCash ••••12. Nothing is paid until you press Pay.','Pay '+amt,()=>{btn.innerHTML='<span class="spin"></span>Paying…';setTimeout(()=>{say('Paid '+amt);draw('paid');},1100);});});})();
+
+// ── 27 · notification row
+(()=>{const host=document.getElementById('nlist'),bell=document.getElementById('bellc');let unread=3;
+  const R=(t,l,w,read)=>'<button class="nrow'+(read?' read':'')+'"><span class="dot" aria-hidden="true"></span><span class="tx"><b>'+t+'</b><span>'+l+'</span></span><time>'+w+'</time>'+ARROW+'</button>';
+  const V={ok:'<div class="ngrp"><div class="cap">Today</div>'+R('Ana &amp; Miguel asked for a quote','Wedding · Mar 13, 2027 · Tagaytay · reply within 2 days','2 h')+R('Booking fee due Oct 3','Cruz wedding · ₱2,500 to Setnayan','5 h')+R('New review · 5 ★','"Lumina made our day feel like a film." — Reyes','9 h')+'<div class="cap">Earlier</div>'+R('Jun &amp; Liza paid ₱42,000','Cruz wedding · balance received','Mon',true)+R('Your page went live','setnayan.com/lumina','Sep 28',true)+'</div>',
+    empty:'<div class="state"><span class="em"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><b>You\'re all caught up</b><p>We will write here when something needs you.</p></div>',
+    load:SHIM(4),
+    bad:'<div class="state bad"><span class="em"><svg viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17.2v.3"/></svg></span><b>We could not load your notices</b><p>Nothing is lost. Try again in a moment.</p><button class="ab second">Try again</button></div>'};
+  const draw=k=>{host.innerHTML=V[k];host.querySelectorAll('.nrow').forEach(r=>r.addEventListener('click',()=>{if(!r.classList.contains('read')){r.classList.add('read');unread=Math.max(0,unread-1);bell.textContent=unread;bell.hidden=!unread;}say('Opens: '+r.querySelector('b').textContent);}));};
+  document.querySelectorAll('#nmode button').forEach(b=>b.addEventListener('click',()=>draw(b.dataset.s)));draw('ok');})();
+
+// ── 28 · photo grid — hold to lift, same timings as the Maker (350 ms · 8 px slop · haptic)
+const HOLD_MS=350,SLOP=8;
+(()=>{const g=document.getElementById('pgrid'),pc=document.getElementById('pcount');
+  const PICS=['linear-gradient(140deg,#D9C2A5,#8D6B52)','radial-gradient(circle at 50% 30%,#FFE9B8,#B8823E 55%,#4A2E17)','linear-gradient(170deg,#8FB7C9,#E9D9B8 55%,#6E8F5B 56%,#3F5F3C)','linear-gradient(#B9B1AB,#F3E9E6)','linear-gradient(135deg,#F6E3B0,#B98D3C)','radial-gradient(circle at 30% 30%,#FFF4D6,#D8B46A)','linear-gradient(160deg,#D8673B,#B04420)','linear-gradient(135deg,#E9C9A8,#B9826A)'];
+  let pics=PICS.map((p,i)=>({p,id:i}));let order=null;
+  const ADD='<button class="add" id="padd"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add</button>';
+  function draw(k){if(k==='empty'){g.innerHTML='<div class="state" style="grid-column:1/-1;min-height:160px"><span class="em"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M21 15l-4.5-4.5L8 19"/></svg></span><b>No photos yet</b><p>Add your best work first — the first one becomes your cover.</p><button class="ab main" style="margin-top:6px">＋ Add photos</button></div>';pc.hidden=true;return;}
+    if(k==='load'){g.innerHTML=Array.from({length:6},()=>'<span class="shim"></span>').join('');pc.hidden=true;return;}
+    pc.hidden=false;g.innerHTML=ADD+pics.map((x,i)=>'<div class="ph" data-id="'+x.id+'" style="background:'+x.p+'" role="button" tabindex="0" aria-label="Photo '+(i+1)+(i===0?', your cover':'')+'. Tap to open, hold to move">'+(i===0?'<span class="cov">Cover</span>':'')+'<button class="x" aria-label="Remove"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>').join('')+'<div class="ph up" aria-busy="true" aria-label="Uploading"><span class="pie"><i>0%</i></span></div><div class="ph bad" role="button"><span>Didn\'t upload</span><u>Try again</u></div>';
+    pc.querySelector('span').textContent=pics.length+' of 30 · the first one is your cover';
+    // the upload pie
+    const up=g.querySelector('.ph.up'),pie=up.querySelector('.pie'),num=pie.querySelector('i'),t0=performance.now(),d=2600*T()/3;(function step(now){if(!up.isConnected)return;const p=Math.min(100,Math.round((now-t0)/d*100));pie.style.setProperty('--p',p);num.textContent=p+'%';if(p<100)requestAnimationFrame(step);else setTimeout(()=>{up.className='ph';up.style.background=PICS[(pics.length)%PICS.length];up.innerHTML='<button class="x" aria-label="Remove"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>';up.removeAttribute('aria-busy');pics.push({p:up.style.background,id:Date.now()});pc.querySelector('span').textContent=pics.length+' of 30 · the first one is your cover';},250);})(t0);
+    g.querySelector('.ph.bad').addEventListener('click',e=>{const b=e.currentTarget;b.className='ph up';b.innerHTML='<span class="pie"><i>0%</i></span>';const pie=b.querySelector('.pie'),num=pie.querySelector('i'),t0=performance.now(),d=1500;(function step(now){const p=Math.min(100,Math.round((now-t0)/d*100));pie.style.setProperty('--p',p);num.textContent=p+'%';if(p<100)requestAnimationFrame(step);else{b.className='ph';b.style.background=PICS[1];b.innerHTML='';}})(t0);});
+    document.getElementById('padd').addEventListener('click',()=>say('Opens the phone\'s photo picker'));
+    g.querySelectorAll('.ph .x').forEach(x=>x.addEventListener('click',e=>{e.stopPropagation();const ph=x.closest('.ph');confirm2('Remove this photo?','It leaves your page at once. This cannot be undone.','Remove',()=>{ph.remove();pics=pics.filter(p=>String(p.id)!==ph.dataset.id);say('Removed');});}));}
+  // viewer
+  const view=document.getElementById('pview'),vp=document.getElementById('vpic'),vc=document.getElementById('vcap'),vd=document.getElementById('vdel');let vi=0;
+  const show=i=>{const ph=[...g.querySelectorAll('.ph[data-id]')];vi=(i+ph.length)%ph.length;vp.style.cssText='background:'+ph[vi].style.background;vp.innerHTML='';vc.textContent='Photo '+(vi+1)+' of '+ph.length;vd.hidden=false;};
+  const shut=()=>{view.classList.remove('on');document.body.classList.remove('viewing');};
+  g.addEventListener('click',e=>{const ph=e.target.closest('.ph[data-id]');if(!ph||e.target.closest('.x')||g.dataset.moved)return;show([...g.querySelectorAll('.ph[data-id]')].indexOf(ph));view.classList.add('on');document.body.classList.add('viewing');});
+  view.querySelector('.x').addEventListener('click',shut);view.addEventListener('click',e=>{if(e.target===view)shut();});
+  view.querySelector('.l').addEventListener('click',e=>{e.stopPropagation();show(vi-1);});view.querySelector('.r').addEventListener('click',e=>{e.stopPropagation();show(vi+1);});
+  vd.addEventListener('click',e=>{e.stopPropagation();confirm2('Remove this photo?','It leaves your page at once. This cannot be undone.','Remove',()=>{const ph=[...g.querySelectorAll('.ph[data-id]')][vi];pics=pics.filter(p=>String(p.id)!==ph.dataset.id);ph.remove();shut();say('Removed');});});
+  addEventListener('keydown',e=>{if(!view.classList.contains('on'))return;if(e.key==='Escape')shut();if(e.key==='ArrowLeft')show(vi-1);if(e.key==='ArrowRight')show(vi+1);});
+  // hold to lift (2-D)
+  let pr=null,dr=null;const haptic=()=>{try{navigator.vibrate&&navigator.vibrate(12);}catch(_){}};
+  const centers=()=>[...g.querySelectorAll('.ph[data-id]')].map(el=>{const r=el.getBoundingClientRect();return {el,cx:r.left+r.width/2,cy:r.top+r.height/2};});
+  const flip=(els,mut)=>{const a=new Map(els.map(el=>[el,el.getBoundingClientRect()]));mut();if(still.matches)return;els.forEach(el=>{const b=el.getBoundingClientRect(),o=a.get(el);const dx=o.left-b.left,dy=o.top-b.top;if(dx||dy)el.animate([{transform:'translate('+dx+'px,'+dy+'px)'},{transform:'none'}],{duration:180,easing:'cubic-bezier(.2,.8,.2,1)'});});};
+  g.addEventListener('pointerdown',e=>{const ph=e.target.closest('.ph[data-id]');if(!ph||e.target.closest('.x'))return;const mouse=e.pointerType==='mouse';pr={ph,x:e.clientX,y:e.clientY,id:e.pointerId,mouse};ph.setPointerCapture(e.pointerId);
+    if(!mouse){ph.classList.add('held');pr.timer=setTimeout(()=>{pr.timer=null;lift(e);},HOLD_MS);}});
+  function lift(e){const {ph}=pr;haptic();ph.classList.remove('held');ph.classList.add('lifted');const r=ph.getBoundingClientRect();dr={ph,dx:e.clientX-r.left-r.width/2,dy:e.clientY-r.top-r.height/2,r};g.dataset.moved='';}
+  g.addEventListener('pointermove',e=>{if(!pr)return;if(!dr){if(Math.hypot(e.clientX-pr.x,e.clientY-pr.y)>SLOP){if(pr.mouse)lift(e);else{clearTimeout(pr.timer);pr.ph.classList.remove('held');pr=null;}}return;}
+    const ph=dr.ph;ph.style.transform='translate('+(e.clientX-dr.r.left-dr.r.width/2-dr.dx)+'px,'+(e.clientY-dr.r.top-dr.r.height/2-dr.dy)+'px) scale(1.06)';
+    const c=centers().filter(x=>x.el!==ph);let best=null,bd=1e9;c.forEach(x=>{const d=Math.hypot(x.cx-e.clientX,x.cy-e.clientY);if(d<bd){bd=d;best=x;}});
+    if(best&&bd<dr.r.width*.6){const els=[...g.querySelectorAll('.ph[data-id]')].filter(x=>x!==ph);const before=ph.compareDocumentPosition(best.el)&Node.DOCUMENT_POSITION_FOLLOWING;flip(els,()=>{before?best.el.after(ph):best.el.before(ph);});dr.r=ph.getBoundingClientRect();dr.dx=e.clientX-dr.r.left-dr.r.width/2;dr.dy=e.clientY-dr.r.top-dr.r.height/2;ph.style.transform='scale(1.06)';}});
+  const end=e=>{if(!pr)return;if(pr.timer)clearTimeout(pr.timer);pr.ph.classList.remove('held');if(dr){const ph=dr.ph;const from=ph.style.transform;ph.style.transform='';ph.classList.remove('lifted');if(!still.matches)ph.animate([{transform:from||'scale(1.06)'},{transform:'none'}],{duration:220,easing:'cubic-bezier(.34,1.56,.64,1)'});
+      // the first slot is always the cover
+      g.querySelectorAll('.cov').forEach(c=>c.remove());const first=g.querySelector('.ph[data-id]');if(first){const c=document.createElement('span');c.className='cov';c.textContent='Cover';first.prepend(c);}
+      pics=[...g.querySelectorAll('.ph[data-id]')].map(el=>pics.find(p=>String(p.id)===el.dataset.id));say('Order saved');setTimeout(()=>delete g.dataset.moved,50);dr=null;}pr=null;};
+  g.addEventListener('pointerup',end);g.addEventListener('pointercancel',end);
+  document.getElementById('pmanage').addEventListener('click',e=>{const on=g.classList.toggle('managing');e.currentTarget.textContent=on?'Done':'Arrange';});
+  document.querySelectorAll('#pgmode button').forEach(b=>b.addEventListener('click',()=>draw(b.dataset.s)));draw('ok');})();
+
+// ── 29 · stars
+(()=>{const S='<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.2 6.8.8-5 4.6 1.3 6.7L12 17.5l-6 3.3 1.3-6.7-5-4.6 6.8-.8z"/></svg>';const v=4.8;let h='';for(let i=1;i<=5;i++){const f=Math.max(0,Math.min(1,v-(i-1)));h+='<span class="frac" style="--f:'+(f*100)+'%">'+S.replace('<svg','<svg class="bg"')+S.replace('<svg','<svg class="fg"')+'</span>';}
+  document.getElementById('stars').innerHTML=h;const B=[[5,24],[4,5],[3,2],[2,0],[1,0]];document.getElementById('rbars').innerHTML=B.map(x=>'<div><b>'+x[0]+'</b><span class="meter"><i style="--v:'+(x[1]/31*100)+'%"></i></span><small>'+x[1]+'</small></div>').join('');
+  document.querySelector('.rowdoor').addEventListener('click',()=>say('Opens the reviews'));})();
+
+// ── 30 · search box
+(()=>{const si=document.getElementById('srch'),sx=document.getElementById('srchx'),res=document.getElementById('sres');
+  const G=[['Teresita Santos','Family · Table 3'],['Ramon Cruz','Friends · no table yet'],['Rosa Santos-Lim','Family · Table 3'],['Robert Chan','Work · Table 8'],['Lourdes Bautista','Sponsors · Table 1']];
+  const hi=(s,q)=>q?s.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','ig'),'<mark>$1</mark>'):s;
+  function draw(){const q=si.value.trim();sx.hidden=!q;if(!q){res.innerHTML='';return;}if(q.toLowerCase()==='fail'){res.innerHTML='<div class="status bad">Couldn\'t search right now.<button type="button">Try again</button></div>';return;}
+    const m=G.filter(x=>x[0].toLowerCase().includes(q.toLowerCase()));
+    res.innerHTML=(m.length?'<div class="sline">'+m.length+' of '+G.length+' guests</div>'+m.map(x=>'<button class="lrow"><span class="av">'+x[0].split(/[\s-]+/).map(w=>w[0]).join('').slice(0,2)+'</span><span class="tx"><b>'+hi(x[0],q)+'</b><span>'+x[1]+'</span></span>'+ARROW+'</button>').join(''):'<div class="state" style="min-height:110px"><b>No one named "'+q+'"</b><p>Check the spelling, or add them.</p><button class="ab second">＋ Add "'+q+'"</button></div>');
+    res.querySelectorAll('.lrow').forEach(r=>r.addEventListener('click',()=>say('Opens '+r.querySelector('b').textContent)));}
+  si.addEventListener('input',draw);sx.addEventListener('click',()=>{si.value='';draw();si.focus();});
+  const q=new URLSearchParams(location.search).get('q');if(q){si.value=q;draw();}})();
+
+// ── 31 · calendar day states
+(()=>{const g=document.getElementById('cvg'),mh=document.getElementById('cvm'),dy=document.getElementById('cvd');
+  const MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const D={'2026-10-3':[['bk','Reyes debut','Tagaytay · 2:00 PM · Full-day','Booked','ok']],'2026-10-4':[['bk','Cruz wedding','Makati · 1:00 PM · Full-day','Booked','ok']],'2026-10-10':[['bk','Bautista christening','QC · 10:00 AM','Booked','ok']],'2026-10-11':[['hd','Hold · Bautista','asked for Oct 11 if the Cruz date moves','Holding','wait']],'2026-10-14':'blocked','2026-10-15':'blocked','2026-10-24':[['hd','Hold · Ocampo debut','quote sent · answer by Oct 20','Holding','wait']],'2026-10-25':[['hd','Hold · Villanueva','asked today','Holding','wait'],['hd','Hold · Lim','asked yesterday','Holding','wait']],'2026-10-31':[['ev','Maria & Jose · your wedding','Tagaytay Highlands · 3:00 PM','Your event','cta']]};
+  let view=new Date(2026,9,1),a=new Date(2026,9,4);const key=d=>d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();const long=d=>MN[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear();
+  function say2(){const it=D[key(a)];let h='<b>'+long(a)+'</b>';if(it==='blocked')h+='<div class="dayrow"><span class="tx"><b>Blocked</b><span>Family trip · Oct 14–15 · couples cannot ask for this day</span></span><button class="ab quiet">Unblock</button></div>';
+    else if(!it)h+='<div class="dayrow"><span class="tx"><b>Free</b><span>Nothing on this day yet</span></span><button class="ab quiet">Block it</button></div>';
+    else h+=it.map(x=>'<button class="dayrow"><span class="tx"><b>'+x[1]+'</b><span>'+x[2]+'</span></span><span class="badge '+x[4]+'">'+x[3]+'</span>'+ARROW+'</button>').join('')+(it.length>=2?'<div class="sline">2 of 2 holds for this day — it is full.</div>':'');dy.innerHTML=h;}
+  function draw(){mh.textContent=MN[view.getMonth()]+' '+view.getFullYear();g.innerHTML='';'SMTWTFS'.split('').forEach(d=>{const s=document.createElement('span');s.textContent=d;g.appendChild(s);});
+    const first=new Date(view.getFullYear(),view.getMonth(),1).getDay(),days=new Date(view.getFullYear(),view.getMonth()+1,0).getDate();for(let i=0;i<first;i++)g.appendChild(document.createElement('i'));
+    for(let d=1;d<=days;d++){const dt=new Date(view.getFullYear(),view.getMonth(),d),el=document.createElement('button');el.textContent=d;const it=D[key(dt)];el.setAttribute('aria-checked',key(dt)===key(a));
+      if(key(dt)==='2026-10-12')el.classList.add('today');if(dt<new Date(2026,9,12))el.classList.add('past');
+      if(it==='blocked'){el.classList.add('blocked');el.setAttribute('aria-label',long(dt)+', blocked');}
+      else if(it){const dd=document.createElement('span');dd.className='d';it.forEach(x=>{const i=document.createElement('i');i.className=x[0];dd.appendChild(i);});el.appendChild(dd);if(it.length>=2)el.classList.add('full');el.setAttribute('aria-label',long(dt)+', '+it.map(x=>x[3]).join(' and '));}
+      el.addEventListener('click',()=>{a=dt;draw();say2();press(g.querySelector('[aria-checked=true]'));});g.appendChild(el);}}
+  document.querySelectorAll('#k31 .calv [data-n]').forEach(x=>x.addEventListener('click',()=>{view=new Date(view.getFullYear(),view.getMonth()+Number(x.dataset.n),1);draw();if(!still.matches)g.animate([{opacity:0,transform:'translateX('+(Number(x.dataset.n)*18)+'px)'},{opacity:1,transform:'none'}],{duration:120*T(),easing:'cubic-bezier(.2,.8,.2,1)'});}));
+  draw();say2();})();
+
+// ── 32 · charts
+(()=>{const host=document.getElementById('chartbox');
+  const VALS=[12,18,15,22,19,30,26,34,31,41,38,52];const DAYS=['1','','','4','','','7','','','10','','12'];
+  const ok='<div class="khead"><b>318</b><span>views · last 12 days</span></div><div class="bars" role="img" aria-label="Views by day, 12 days, 318 in all">'+VALS.map((v,i)=>'<button class="b'+(i===11?' now':'')+'" aria-label="Oct '+(i+1)+': '+v+' views"><span class="bub">'+v+'</span><i style="--h:'+(v/52*100)+'%"></i><small>'+DAYS[i]+'</small></button>').join('')+'<button class="b ahead" aria-label="Tomorrow"><i></i><small>13</small></button><button class="b ahead" aria-label="The day after"><i></i><small>14</small></button></div><div class="hr"></div>'
+   +'<div class="khead" style="margin-top:14px"><b>9</b><span>bookings · where they came from</span></div><div class="mix" role="img" aria-label="7 from Setnayan, 1 direct, 1 referred"><i class="a" style="--w:78%"></i><i class="b" style="--w:11%"></i><i class="c" style="--w:11%"></i></div><div class="mixl"><span><i class="a"></i>Setnayan <b>7</b></span><span><i class="b"></i>Referred <b>1</b></span><span><i class="c"></i>Direct <b>1</b></span></div><div class="hr" style="margin-top:12px"></div>'
+   +'<div class="khead" style="margin-top:14px"><b>₱186,000</b><span>of ₱230,000 received</span></div><div class="mline"><span class="meter ok"><i style="--v:81%"></i></span><b>81 %</b></div><div class="mline"><span style="font-size:12.5px;color:var(--ink2)">Profile complete</span><span class="meter" style="flex:1"><i style="--v:70%"></i></span><b>7 of 10</b></div><div class="hr" style="margin-top:12px"></div>';
+  const V={ok,empty:'<div class="khead"><b>—</b><span>views</span></div><div class="cstate">Your page went live Tuesday — views show from tomorrow.</div><div class="hr"></div>',
+    load:'<div class="khead"><span class="shim" style="width:72px;height:26px"></span><span class="shim" style="width:120px;height:12px"></span></div><div class="cbars" aria-busy="true">'+Array.from({length:12},(_,i)=>'<span class="shim" style="height:'+(30+((i*37)%50))+'%"></span>').join('')+'</div><div class="hr"></div>',
+    bad:'<div class="khead"><b>—</b><span>views</span></div><div class="cstate"><span class="bad">Couldn\'t load your views.</span><button class="ab quiet">Try again</button></div><div class="hr"></div>'};
+  const draw=k=>{host.innerHTML=V[k];host.querySelectorAll('.bars .b').forEach(b=>b.addEventListener('click',()=>{host.querySelectorAll('.bars .b').forEach(x=>x.classList.toggle('on',x===b&&!x.classList.contains('on')));}));
+    if(k==='ok'&&!still.matches){const bars=host.querySelectorAll('.bars .b:not(.ahead) i');bars.forEach(i=>{const h=i.style.getPropertyValue('--h');i.style.setProperty('--h','0%');});requestAnimationFrame(()=>requestAnimationFrame(()=>bars.forEach((i,j)=>i.style.setProperty('--h',(VALS[j]/52*100)+'%'))));}};
+  document.querySelectorAll('#chmode button').forEach(b=>b.addEventListener('click',()=>draw(b.dataset.s)));draw('ok');})();
+
+// ── 34 · reorder — hold to lift (rows), arrows, keyboard
+(()=>{const rol=document.getElementById('rol'),line=document.getElementById('rline');let order=[['Full-day wedding coverage','₱85,000 · Live'],['Half-day coverage','₱45,000 · Live'],['Same-day edit','₱12,000 · add-on'],['Prenup session','₱18,000 · Draft']];const LOCK='Cover photo';
+  const UP='<svg viewBox="0 0 24 24"><path d="M6 14l6-6 6 6"/></svg>',DN='<svg viewBox="0 0 24 24"><path d="M6 10l6 6 6-6"/></svg>',GRIP='<svg viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>',LK='<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+  let failNext=false,picked=null;
+  function draw(moved){const before={};rol.querySelectorAll('.ro').forEach(r=>before[r.dataset.k]=r.getBoundingClientRect().top);rol.innerHTML='<div class="ro locked" data-k="'+LOCK+'" tabindex="0" aria-label="Cover photo keeps its place"><span class="grip" aria-hidden="true">'+LK+'</span><span class="nm">'+LOCK+'<small>always first</small></span></div>';
+    order.forEach((k,i)=>{const r=document.createElement('div');r.className='ro';r.dataset.k=k[0];r.tabIndex=0;r.setAttribute('aria-label',k[0]+'. Hold to move, or Space then arrows');r.innerHTML='<span class="grip" aria-hidden="true">'+GRIP+'</span><span class="nm">'+k[0]+'<small>'+k[1]+'</small></span><button class="mv" aria-label="Move '+k[0]+' up" '+(i===0?'disabled':'')+'>'+UP+'</button><button class="mv" aria-label="Move '+k[0]+' down" '+(i===order.length-1?'disabled':'')+'>'+DN+'</button>';
+      const [u,d]=r.querySelectorAll('.mv');u.addEventListener('click',e=>{e.stopPropagation();move(i,i-1);});d.addEventListener('click',e=>{e.stopPropagation();move(i,i+1);});rol.appendChild(r);});
+    if(still.matches)return;rol.querySelectorAll('.ro').forEach(r=>{const b=before[r.dataset.k];if(b==null)return;const dy=b-r.getBoundingClientRect().top;if(!dy)return;r.animate([{transform:'translateY('+dy+'px)'},{transform:'none'}],{duration:150*T(),easing:'cubic-bezier(.34,1.56,.64,1)'});});}
+  function save(prev){if(failNext){failNext=false;order=prev;draw();line.className='rline bad';line.textContent='That did not save. Nothing changed — please try again.';say("Couldn't save",true);return;}line.className='rline';line.textContent='Order saved.';say('Order saved');}
+  function move(i,j){if(j<0||j>=order.length)return;const prev=order.map(x=>x);[order[i],order[j]]=[order[j],order[i]];draw(order[j][0]);save(prev);}
+  // hold to lift
+  let pr=null,dr=null;const haptic=()=>{try{navigator.vibrate&&navigator.vibrate(12);}catch(_){}};
+  const flip=(el,mut)=>{const a=el.getBoundingClientRect().top;mut();const b=el.getBoundingClientRect().top;if(a!==b&&!still.matches)el.animate([{transform:'translateY('+(a-b)+'px)'},{transform:'none'}],{duration:180,easing:'cubic-bezier(.2,.8,.2,1)'});};
+  rol.addEventListener('pointerdown',e=>{const row=e.target.closest('.ro');if(!row||e.target.closest('.mv'))return;if(row.classList.contains('locked')){line.className='rline';line.textContent='The cover photo keeps its place — it is always first.';row.classList.add('shake');setTimeout(()=>row.classList.remove('shake'),500);return;}
+    const mouse=e.pointerType==='mouse';pr={row,x:e.clientX,y:e.clientY,mouse};row.setPointerCapture(e.pointerId);if(!mouse){row.classList.add('held');pr.timer=setTimeout(()=>{pr.timer=null;lift(e);},HOLD_MS);}});
+  function lift(e){const row=pr.row;haptic();row.classList.remove('held');row.classList.add('lifted');dr={row,y0:e.clientY,prev:order.map(x=>x)};}
+  rol.addEventListener('pointermove',e=>{if(!pr)return;if(!dr){if(Math.hypot(e.clientX-pr.x,e.clientY-pr.y)>SLOP){if(pr.mouse)lift(e);else{clearTimeout(pr.timer);pr.row.classList.remove('held');pr=null;}}return;}
+    const row=dr.row;row.style.transform='translateY('+(e.clientY-dr.y0)+'px) scale(1.03)';const prev=row.previousElementSibling,next=row.nextElementSibling;
+    if(prev&&!prev.classList.contains('locked')){const r=prev.getBoundingClientRect();if(e.clientY<r.top+r.height/2){flip(prev,()=>rol.insertBefore(row,prev));dr.y0-=r.height;row.style.transform='translateY('+(e.clientY-dr.y0)+'px) scale(1.03)';return;}}
+    if(next){const r=next.getBoundingClientRect();if(e.clientY>r.top+r.height/2){flip(next,()=>rol.insertBefore(next,row));dr.y0+=r.height;row.style.transform='translateY('+(e.clientY-dr.y0)+'px) scale(1.03)';}}});
+  const end=()=>{if(!pr)return;if(pr.timer)clearTimeout(pr.timer);pr.row.classList.remove('held');if(dr){const row=dr.row;const from=row.style.transform;row.style.transform='';row.classList.remove('lifted');if(!still.matches)row.animate([{transform:from||'scale(1.03)'},{transform:'none'}],{duration:220,easing:'cubic-bezier(.34,1.56,.64,1)'});
+      const names=[...rol.querySelectorAll('.ro:not(.locked)')].map(r=>r.dataset.k);const prev=dr.prev;order=names.map(n=>order.find(o=>o[0]===n));draw();save(prev);dr=null;}pr=null;};
+  rol.addEventListener('pointerup',end);rol.addEventListener('pointercancel',end);
+  // keyboard: Space picks up · arrows move · Space drops · Esc puts back
+  rol.addEventListener('keydown',e=>{const row=e.target.closest('.ro');if(!row||row.classList.contains('locked'))return;const i=order.findIndex(o=>o[0]===row.dataset.k);
+    if(e.key===' '||e.key==='Enter'){e.preventDefault();if(picked){const prev=picked.prev;picked=null;row.classList.remove('lifted');save(prev);}else{picked={k:row.dataset.k,prev:order.map(x=>x)};row.classList.add('lifted');line.className='rline';line.textContent='Picked up. ↑ ↓ to move, Space to drop, Esc to put it back.';}}
+    if(picked&&(e.key==='ArrowUp'||e.key==='ArrowDown')){e.preventDefault();const j=i+(e.key==='ArrowUp'?-1:1);if(j<0||j>=order.length)return;[order[i],order[j]]=[order[j],order[i]];draw(row.dataset.k);const nr=[...rol.querySelectorAll('.ro')].find(r=>r.dataset.k===picked.k);nr.classList.add('lifted');nr.focus();}
+    if(picked&&e.key==='Escape'){order=picked.prev;picked=null;draw();line.className='rline';line.textContent='Put back where it was.';[...rol.querySelectorAll('.ro')].find(r=>r.dataset.k===row.dataset.k).focus();}});
+  document.getElementById('roarr').addEventListener('click',e=>{const on=rol.classList.toggle('managing');e.currentTarget.textContent=on?'Done':'Arrange';});
+  document.getElementById('rofail').addEventListener('click',()=>{failNext=true;line.className='rline';line.textContent='The next move will fail to save — try one.';});
+  draw();})();
+</script>
+</body>
+</html>
