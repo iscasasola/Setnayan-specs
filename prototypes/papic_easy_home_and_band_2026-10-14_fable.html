@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Papic — easy to buy, track and see · Home row + the Papic band · 2026-10-14 (Fable)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== tokens — the approved Home's set (home_and_guests_2026-10-07_fable.html); the accent is ONE token by its job ===== */
+:root{ --paper:#f6f4ef; --paper-2:#fbfaf7; --ink:#1d1b17; --mute:#6f6a60; --line:#e3ddd0; --gild:#b8963e; --gild-soft:#f1e9d2;
+  --accent:#C24E25; --on-accent:#fff; --ok:#2E7D4F; --ok-soft:#e3eee4; --warn:#B26B00; --warn-bg:#f6e9dd; --warn-ink:#8a4a1e; --danger:#B3261E; --danger-soft:#f7e3e1;
+  --off:#9A948C; --seg-track:rgba(29,27,23,.06); --bar:64px; --ease:cubic-bezier(.2,.8,.2,1); --spring:cubic-bezier(.34,1.56,.64,1); --dur:.7s; --press:320ms }
+@media (prefers-color-scheme:dark){ :root{ --paper:#161513; --paper-2:#1f1d1a; --ink:#efeae0; --mute:#a39d90; --line:#2e2b26; --gild:#d1b162; --gild-soft:#2d2719;
+  --accent:#E5794E; --ok:#6FCF97; --ok-soft:#1f2d22; --warn:#F0B45A; --warn-bg:#3a2a1e; --warn-ink:#f0c9a6; --danger:#F2817A; --danger-soft:#3a2220; --off:#6b665e; --seg-track:rgba(239,234,224,.08) } }
+*{box-sizing:border-box} html,body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.45 "Hanken Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+svg{width:18px;height:18px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.mute{color:var(--mute)} .num{font-variant-numeric:tabular-nums}
+
+/* ===== the review page around the phones ===== */
+.gallery{padding:22px 16px 40px;max-width:1200px;margin:0 auto}
+.gallery h1{font-weight:500;font-size:21px;margin:0 0 4px;letter-spacing:-.01em} .gallery>p{color:var(--mute);margin:0 0 14px;max-width:760px;font-size:14px}
+.tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px;position:relative;z-index:20}
+.tools .lab{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.frames{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start;justify-content:center}
+.fwrap{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;max-width:390px}
+.flabel{font-size:12px;color:var(--mute);letter-spacing:.06em;text-transform:uppercase}
+.phone{position:relative;width:100%;background:var(--paper);overflow:hidden}
+@media (min-width:860px){ .phone{width:390px;height:844px;border:1px solid var(--line);border-radius:30px;box-shadow:0 10px 40px rgba(0,0,0,.08);overflow:clip} .phone .screen{position:absolute;inset:0;overflow:auto;overscroll-behavior:contain} .phone.locked .screen{overflow:hidden} }
+@media (max-width:859px){ .phone{border-top:1px solid var(--line);border-bottom:1px solid var(--line)} .phone .screen{min-height:70vh} .phone .nav{position:sticky;bottom:0} .phone .sheet,.phone .scrim,.phone .toast{position:fixed} html.locked{overflow:hidden} }
+.map{margin:26px auto 0;max-width:820px;border-top:1px solid var(--line);padding-top:14px;font-size:13px;color:var(--mute)}
+.map b{color:var(--ink);font-weight:600} .map ul{margin:6px 0 0;padding-left:18px} .map li{margin:2px 0}
+
+/* ===== dropdown (kind 2) — a ▾ ALWAYS opens its choices; chevron + ticked choice are the accent; one open at a time ===== */
+.dd{position:relative;display:inline-block}
+.dd>button{height:44px;padding:0 14px 0 16px;border:1px solid var(--line);border-radius:999px;background:var(--paper-2);display:inline-flex;align-items:center;gap:10px;font-weight:500;min-width:220px;justify-content:space-between;transition:transform var(--press) var(--ease)}
+.dd>button .chev{color:var(--accent);transition:transform calc(var(--dur)*.5) var(--ease)} .dd.open>button .chev{transform:rotate(180deg)}
+.dd .list{position:absolute;left:0;top:calc(100% + 6px);min-width:100%;background:var(--paper-2);border:1px solid var(--line);border-radius:16px;padding:6px;box-shadow:0 14px 40px rgba(0,0,0,.14);display:none;z-index:30}
+.dd.open .list{display:block}
+.dd .list button{width:100%;text-align:left;height:44px;padding:0 12px;border-radius:10px;display:flex;align-items:center;gap:10px;white-space:nowrap}
+.dd .list button:hover{background:var(--seg-track)} .dd .list button .tick{width:18px;color:var(--accent);visibility:hidden} .dd .list button.on{color:var(--accent);font-weight:600} .dd .list button.on .tick{visibility:visible}
+
+/* ===== app shell — the approved Home's ===== */
+.shell{position:sticky;top:0;z-index:6;background:var(--paper);display:flex;align-items:center;gap:12px;padding:10px 16px;height:56px;border-bottom:1px solid var(--line)}
+.shell .logo{font-weight:600;letter-spacing:.18em;color:var(--gild);font-size:15px}.shell .right{margin-left:auto;display:flex;gap:8px}
+.shell .ic{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;font-size:14px;color:var(--mute)}.shell .av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#d6a26a,#9a6b3a)}
+main{padding:0 16px calc(var(--bar) + 28px);max-width:720px;margin:0 auto;overflow-x:clip}
+.cover{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;padding:16px 0 4px}
+.cover .eyebrow,.eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)} .cover .name{font-size:26px;font-weight:600;letter-spacing:-.01em;margin-top:2px}
+h2{font-weight:500;font-size:22px;margin:18px 0 2px;letter-spacing:-.01em} .k2{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin:16px 0 6px}
+.nav{position:absolute;left:0;right:0;bottom:0;height:var(--bar);background:var(--paper);border-top:1px solid var(--line);display:flex;z-index:6}
+.nav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;color:var(--mute)} .nav button.on{color:var(--accent);font-weight:600}
+@media (min-width:860px){ .nav{position:absolute} }
+
+/* ===== buttons (kind 9) — pill; main = the accent, ONE per screen; second = tinted; quiet = text ===== */
+.btn{height:44px;padding:0 16px;border:1px solid var(--line);border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:8px;color:var(--ink);white-space:nowrap;font-size:14px;font-weight:500;background:var(--paper-2);transition:transform var(--press) var(--ease),background 160ms,color 160ms,opacity 160ms;position:relative}
+.btn.main{background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:600}
+.btn.second{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,transparent);background:color-mix(in srgb,var(--accent) 9%,transparent)}
+.btn.quiet{border-color:transparent;background:transparent;color:var(--accent);padding:0 8px;font-weight:500}
+.btn.wide{width:100%} .btn[disabled],.btn.off{opacity:.45;cursor:default;pointer-events:none}
+.btn .spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:sp .8s linear infinite}
+.btn.working,.btn.working[disabled]{transform:scale(.97);background:color-mix(in srgb,var(--accent) 88%,#000);opacity:1;pointer-events:none}
+.pressing{animation:press var(--press) var(--ease)} .ring::after{content:"";position:absolute;inset:-2px;border-radius:inherit;animation:ring .6s var(--ease) forwards;pointer-events:none}
+@keyframes press{0%{scale:1}35%{scale:.93}100%{scale:1}} @keyframes ring{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 45%,transparent)}100%{box-shadow:0 0 0 10px transparent}} @keyframes sp{to{transform:rotate(360deg)}}
+.acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* ===== cards + rows ===== */
+.card{border:1px solid var(--line);border-radius:16px;padding:14px;background:var(--paper-2);margin-top:14px}
+.card .title{font-size:19px;font-weight:600;margin:4px 0 2px;letter-spacing:-.01em}.card .body{color:var(--mute);font-size:14px;margin:0 0 10px}
+.card.papic{border-color:color-mix(in srgb,var(--accent) 35%,transparent)}
+.nums{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px} .tile{border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--paper-2);text-align:left;display:block}
+.tile .v{font-size:22px;font-weight:600;letter-spacing:-.01em}.tile .k{font-size:12px;color:var(--mute)}
+.meter{position:relative;height:6px;border-radius:3px;background:var(--line);overflow:hidden}.meter-fill{position:absolute;left:0;top:0;bottom:0;background:var(--ok);width:0;transition:width 700ms var(--ease);border-radius:3px}
+.meter-fill.low{background:var(--warn)} .meter-fill.gone{background:var(--danger)} .meter-fill.wait{background:var(--gild)}
+.sec{border-top:1px solid var(--line)} .bar{width:100%;display:flex;align-items:center;gap:12px;padding:12px 0;text-align:left}
+.bar .ico{width:40px;height:40px;border-radius:50%;background:var(--gild-soft);display:grid;place-items:center;color:var(--ink);flex:0 0 auto} .bar .ico svg{width:19px;height:19px}
+.bar .chev{margin-left:auto;color:var(--accent);transition:transform calc(var(--dur)*.5) var(--ease)} .bar b{font-weight:600} .bar .s{font-size:13px;color:var(--mute);display:block}
+.fold{display:grid;grid-template-rows:0fr;transition:grid-template-rows calc(var(--dur)*.6) var(--ease)}.fold>div{overflow:clip;min-height:0} .open>.fold{grid-template-rows:1fr}.open .bar .chev{transform:rotate(180deg)}
+
+/* ===== the service row — Home › Your services (the template for every paid service) ===== */
+.svc{border:1px solid var(--line);border-radius:16px;background:var(--paper-2);padding:12px 14px;margin-top:10px;text-align:left;width:100%;display:block;transition:transform var(--press) var(--ease)}
+.svc .head{display:flex;align-items:center;gap:10px} .svc .mark{width:34px;height:34px;border-radius:10px;background:var(--gild-soft);display:grid;place-items:center;color:var(--ink)} .svc .mark svg{width:18px;height:18px}
+.svc .name{font-weight:600} .svc .brand{font-size:12px;color:var(--mute);margin-top:-2px} .svc .arrow{margin-left:auto;color:var(--accent)}
+.svc .status{margin:10px 0 0;font-size:14px;display:flex;align-items:center;gap:6px;flex-wrap:wrap} .svc .status .n{font-weight:600} .svc .status.warn{color:var(--warn-ink)} .svc .status.gone{color:var(--danger)}
+.svc .meter{margin-top:8px} .svc .acts{margin-top:10px} .svc .acts .btn{height:40px;font-size:13px}
+.svc .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);display:inline-block} .svc .dot.warn{background:var(--warn)} .svc .dot.gone{background:var(--danger)} .svc .dot.wait{background:var(--gild)}
+
+/* ===== the Papic page: top bar pill, the ONE band, sections ===== */
+.topbar{position:sticky;top:0;z-index:6;padding:10px 16px 8px;background:linear-gradient(var(--paper) 70%,transparent)}
+.topbar .pill{height:48px;border:1px solid var(--line);border-radius:999px;background:var(--paper-2);display:flex;align-items:center;padding:0 6px;box-shadow:0 6px 20px rgba(0,0,0,.06)}
+.topbar .pill .rb{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--accent)} .topbar .pill .ttl{flex:1;text-align:center;font-weight:600}
+.band{border:1px solid color-mix(in srgb,var(--accent) 28%,var(--line));border-radius:20px;background:var(--paper-2);padding:16px 16px 14px;margin-top:6px}
+.band .row1{display:flex;align-items:flex-start;gap:12px;justify-content:space-between}
+.band .big{font-size:34px;font-weight:600;letter-spacing:-.02em;line-height:1.05} .band .big small{font-size:15px;font-weight:500;color:var(--mute);letter-spacing:0;margin-left:4px}
+.band .of{font-size:13px;color:var(--mute);margin-top:2px} .band .meter{margin:12px 0 10px}
+.band .line{font-size:13.5px;color:var(--mute);margin:10px 0 0;display:flex;gap:6px;align-items:center} .band .line .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);flex:0 0 auto} .band .line .dot.wait{background:var(--gild)} .band .line .dot.gone{background:var(--danger)} .band .line .dot.warn{background:var(--warn)}
+.band .say{font-size:14px;margin:8px 0 0;font-weight:500} .band .say.warn{color:var(--warn-ink)} .band .say.gone{color:var(--danger)}
+.band .big.warn{color:var(--warn-ink)} .band .big.gone{color:var(--danger)}
+.band .see{margin-top:12px}
+.sect{border-top:1px solid var(--line);padding:14px 0} .sect .h{display:flex;align-items:center;gap:12px} .sect .h .ico{width:40px;height:40px;border-radius:50%;background:var(--gild-soft);display:grid;place-items:center;flex:0 0 auto} .sect .h .ico svg{width:19px;height:19px}
+.sect .h b{font-weight:600;display:block} .sect .h .s{font-size:13px;color:var(--mute)} .sect .h .end{margin-left:auto}
+.sect .under{margin:12px 0 0 52px} .sect.dim .h,.sect.dim .under{opacity:.55}
+.camrow{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:14px} .camrow .who{flex:1} .camrow .st{font-size:12.5px;color:var(--mute)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px} .grid .ph{aspect-ratio:1;border-radius:10px;background:linear-gradient(135deg,#d9b48a,#8c5a3a);position:relative;overflow:hidden} .grid .ph:nth-child(2){background:linear-gradient(135deg,#c9d3b8,#5f7a53)} .grid .ph:nth-child(3){background:linear-gradient(135deg,#e7cfc1,#a8614b)} .grid .ph:nth-child(4){background:linear-gradient(135deg,#d6cbe7,#6a5a8c)} .grid .ph:nth-child(5){background:linear-gradient(135deg,#f0dcb0,#b7903c)} .grid .ph:nth-child(6){background:linear-gradient(135deg,#bcd3dc,#3f6e82)}
+.grid .ph.more{background:var(--seg-track);display:grid;place-items:center;color:var(--accent);font-weight:600;font-size:14px}
+.empty{border:1px dashed var(--line);border-radius:14px;padding:16px;text-align:center;margin-top:12px} .empty .t{font-weight:600} .empty .s{font-size:13px;color:var(--mute);margin:4px 0 10px}
+.flash{animation:flash 1.2s var(--ease)} @keyframes flash{0%{background:color-mix(in srgb,var(--accent) 14%,transparent)}100%{background:transparent}}
+
+/* ===== switch (kind 3) — accent when on, grey when off; the knob travels ===== */
+.sw{width:52px;height:32px;border-radius:999px;background:var(--off);position:relative;flex:0 0 auto;transition:background calc(var(--dur)*.5)} .sw::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform var(--dur) var(--spring)}
+.sw.on{background:var(--accent)} .sw.on::after{transform:translateX(20px)} .sw[disabled]{opacity:.4}
+.swrow{display:flex;align-items:center;gap:12px;padding:6px 0} .swrow .t{flex:1} .swrow .t b{display:block;font-weight:500} .swrow .t .s{font-size:12.5px;color:var(--mute)}
+
+/* ===== form rows in Settings (kind 6) — label left, pill answer right with the accent mark ===== */
+.frow{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:14px} .frow .l{flex:1} .frow .ans{height:40px;padding:0 12px 0 14px;border:1px solid var(--line);border-radius:999px;background:var(--paper-2);display:inline-flex;align-items:center;gap:8px;min-width:150px;justify-content:space-between} .frow .ans .chev{color:var(--accent)}
+
+/* ===== sheet (phone dropdown / Buy more) + scrim: dark AND blurred, nothing behind works ===== */
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.34);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity 240ms;z-index:8}
+.phone.locked .scrim{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:88%;overflow:auto;background:var(--paper-2);border-radius:22px 22px 0 0;padding:14px 16px calc(16px + env(safe-area-inset-bottom));transform:translateY(105%);transition:transform 360ms var(--ease);z-index:9;box-shadow:0 -10px 40px rgba(0,0,0,.18)}
+.phone.locked .sheet{transform:none} .sheet .grab{width:38px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 12px}
+.sheet h3{font-size:19px;font-weight:600;margin:0 0 2px;letter-spacing:-.01em} .sheet .sub{color:var(--mute);font-size:14px;margin:0 0 14px}
+.sheet .choice{width:100%;height:48px;display:flex;align-items:center;gap:10px;padding:0 10px;border-radius:12px;text-align:left} .sheet .choice .tick{width:20px;color:var(--accent);visibility:hidden} .sheet .choice.on{color:var(--accent);font-weight:600} .sheet .choice.on .tick{visibility:visible}
+
+/* ===== the counter (kind 17) — the shipped CreditStepper, re-skinned on the template ===== */
+.ctr{display:flex;align-items:stretch;gap:8px;margin-top:8px} .ctr .pm{width:48px;height:60px;border:1px solid var(--line);border-radius:14px;display:grid;place-items:center;color:var(--accent);background:var(--paper-2);transition:transform var(--press) var(--ease)} .ctr .pm[disabled]{color:var(--off);opacity:.5}
+.ctr .val{flex:1;border:1px solid var(--line);border-radius:14px;background:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 10px;min-width:0}
+.ctr .val .p{font-size:24px;font-weight:600;letter-spacing:-.01em;line-height:1.1} .ctr .val .c{font-size:12.5px;color:var(--mute);white-space:nowrap}
+.ends{font-size:12px;color:var(--mute);margin:8px 0 0} .after{margin:14px 0 0;padding:12px 14px;border-radius:12px;background:var(--seg-track);font-size:14px;display:flex;justify-content:space-between;gap:10px} .after b{font-weight:600}
+.step{font-size:13px;color:var(--mute);text-align:center;margin:8px 0 0;min-height:18px}
+
+/* ===== toast (kind 12) — from the TOP, centred, accent with ✓, never darkens ===== */
+.toast{position:absolute;left:50%;top:12px;transform:translate(-50%,-160%);background:var(--accent);color:#fff;border-radius:999px;padding:0 20px;height:46px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500;box-shadow:0 14px 30px -12px rgba(0,0,0,.5);transition:transform 420ms var(--spring);white-space:nowrap;z-index:12;pointer-events:none;max-width:calc(100% - 24px)}
+.toast.on{transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} }
+</style>
+</head>
+<body>
+<div class="gallery">
+  <h1>Papic — easy to buy, track and see · the Home row and the Papic band</h1>
+  <p>Two screens, one fact: how many credits are left and where the photos are. Left: Home › Your services (the row every paid service will wear). Right: the Papic page, opening with ONE band. Pick a state — both phones react. Everything is fake and local; nothing is sent.</p>
+  <div class="tools">
+    <span class="lab">State</span>
+    <div class="dd" id="stateDD"><button type="button" aria-haspopup="listbox"><span id="stateLabel">On with credits</span><svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div class="list" role="listbox" id="stateList"></div></div>
+    <span class="mute" style="font-size:12.5px">Maria &amp; Jose · 32 guests · 2,000 credits bought</span>
+  </div>
+
+  <div class="frames">
+    <div class="fwrap"><div class="flabel">Home · Your services</div>
+      <div class="phone" id="homePhone">
+        <div class="screen" id="homeScreen">
+          <div class="shell"><span class="logo">SETNAYAN</span><span class="right"><span class="ic">🔔</span><span class="av"></span></span></div>
+          <main id="homeMain"></main>
+          <div class="nav" id="homeNav"></div>
+        </div>
+        <div class="scrim" data-close="home"></div>
+        <div class="sheet" id="homeSheet"></div>
+        <div class="toast" id="homeToast"></div>
+      </div>
+    </div>
+    <div class="fwrap"><div class="flabel">Our Services › Papic</div>
+      <div class="phone" id="papicPhone">
+        <div class="screen" id="papicScreen">
+          <div class="topbar"><div class="pill"><button class="rb" data-act="note" data-text="Back to Home" aria-label="Back"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button><span class="ttl">Papic</span><button class="rb" data-act="note" data-text="More (⋯)" aria-label="More"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button></div></div>
+          <main id="papicMain"></main>
+          <div class="nav" id="papicNav"></div>
+        </div>
+        <div class="scrim" data-close="papic"></div>
+        <div class="sheet" id="papicSheet"></div>
+        <div class="toast" id="papicToast"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="map">
+    <b>Map card — every control → its kind (INTERACTION_RULES § 9)</b>
+    <ul>
+      <li>Home › Your services row → <b>List row</b> (15) holding a <b>Progress</b> meter (22) and two <b>Action buttons</b> (9: Buy more = second, See photos = plain); the whole row is a door to the page. Running low / stopped are the row's own status line (12), never a second card.</li>
+      <li>Home › Next card → the shipped Next card; Papic takes it only at its two moments (ready before the first photo · stopped at zero) and then the row drops its matching button — never twice.</li>
+      <li>Papic page › top bar → <b>Top bar pill</b> (14). The band → ONE card: count (22 Progress) · <b>Buy more</b> = the page's one main button (9) · <b>See your N photos ↓</b> = second (9) · one status line (12).</li>
+      <li>Guests' cameras › Let guests shoot now → <b>Switch</b> (3). Photos → <b>Photo grid</b> (28) + Download all (9 plain) · the empty state → <b>Empty</b> (16). Settings rows → <b>Form row</b> (6) whose ▾ rises as a <b>Dropdown</b> sheet (2); <b>Change dates</b> → quiet action (9), last.</li>
+      <li>Buy more → <b>Sheet</b> over a dark, blurred scrim; <b>Counter</b> (17) = the shipped CreditStepper's − / + and ladder; <b>Continue to payment</b> → main button (9): pressed at once, then reads "Opening payment…" and cannot be pressed twice. Toast → from the top (12).</li>
+      <li>State picker above the phones → <b>Dropdown</b> (2) — a review tool, outside the app. Prices here are the ladder's seed (100 → ₱70 … 100,000 → ₱24,000); the app reads <code>platform_retail_catalog_v2</code>.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+/* ---------- sample event: Maria & Jose, the standard sample ---------- */
+const BASE={ names:'Maria & Jose', guests:32, bought:2000, coming:21, noreply:7, toInvite:12 };
+const STATES={
+  before:{ label:'Before the window', left:2000, photos:0, days:234, eventDay:'Saturday, 5 June 2027', onFrom:'Tuesday, 1 December', windowOpen:false, lastShot:null },
+  on:    { label:'On with credits',   left:1240, photos:86,   days:66,  eventDay:'Saturday, 19 December 2026', onFrom:'Monday, 1 June', windowOpen:true, lastShot:'2 hours ago' },
+  low:   { label:'Running low (140 left)', left:140, photos:1860, days:66, eventDay:'Saturday, 19 December 2026', onFrom:'Monday, 1 June', windowOpen:true, lastShot:'4 minutes ago' },
+  stopped:{label:'Stopped (0)',       left:0,    photos:2000, days:66,  eventDay:'Saturday, 19 December 2026', onFrom:'Monday, 1 June', windowOpen:true, lastShot:'just now' },
+  empty: { label:'No photos yet',     left:2000, photos:0,    days:66,  eventDay:'Saturday, 19 December 2026', onFrom:'Monday, 1 June', windowOpen:true, lastShot:null },
+};
+const LOW_PCT=10; // POOL_METER_LOW_PCT
+/* the ladder: the six owner anchors; the rungs between inherit the deepest anchor's rate (lib/papic-anchor-ladder.ts) */
+const ANCHORS=[[100,70],[3000,1680],[10000,4500],[20000,7200],[50000,15000],[100000,24000]];
+const RUNGS=[100,300,500,1000,2000,3000,5000,6000,10000,15000,20000,30000,50000,75000,100000];
+const rateAt=n=>{let r=null;for(const [s,p] of ANCHORS){if(n>=s)r=p/s;}return r;};
+const LADDER=RUNGS.map(n=>{const r=rateAt(n);return {credits:n,php:Math.round(r*n),off:Math.round((1-r)*100)};});
+
+let S={ key:'on', sheet:null, ladderAt:0, guestsNow:false, settingsOpen:false, opening:false, settings:{faces:'Off',allot:'Standard'} };
+const $=(s,r=document)=>r.querySelector(s); const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const n$=v=>v.toLocaleString('en-PH'); const peso=v=>'₱'+v.toLocaleString('en-PH');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ICO={
+  cam:'<svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+  spark:'<svg viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></svg>',
+  img:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-8 8"/></svg>',
+  dl:'<svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M4 20h16"/></svg>',
+  plus:'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>', minus:'<svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg>',
+  chev:'<svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>', arrow:'<svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>',
+  check:'<svg class="tick" viewBox="0 0 24 24"><path d="m5 12 4 4L19 7"/></svg>', gear:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  users:'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-4.5-6.2"/></svg>',
+  mail:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
+  home:'<svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v9H3z"/></svg>', store:'<svg viewBox="0 0 24 24"><path d="M3 9h18l-1-5H4zM4 9v11h16V9M9 20v-6h6v6"/></svg>', globe:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>', grip:'<svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="1.3"/><circle cx="12" cy="6" r="1.3"/><circle cx="18" cy="6" r="1.3"/><circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/><circle cx="6" cy="18" r="1.3"/><circle cx="12" cy="18" r="1.3"/><circle cx="18" cy="18" r="1.3"/></svg>',
+};
+
+/* ---------- derived facts: one function, both screens read it ---------- */
+function facts(){
+  const st=STATES[S.key]; const pct=Math.round(st.left/BASE.bought*100);
+  const mood = !st.windowOpen?'wait' : st.left===0?'gone' : pct<LOW_PCT?'low' : 'ok';
+  const papicNext = st.windowOpen && st.left===0 ? 'stopped' : (st.windowOpen && st.photos===0 && st.left>0 ? 'ready' : null);
+  return {...st, pct, mood, papicNext};
+}
+function btn(label,attrs,tone='',icon=''){ return `<button type="button" class="btn ${tone}" ${attrs}>${icon}<span>${esc(label)}</span></button>`; }
+
+/* ---------- HOME ---------- */
+function renderHome(){
+  const f=facts();
+  let next;
+  if(f.papicNext==='stopped') next={papic:true,eyebrow:'Your next step',title:'Your cameras have stopped',body:`All ${n$(BASE.bought)} credits are used. Your guests' cameras rest until you add more — nothing they shot is lost.`,btn:btn('Buy more','data-act="buy"','main',ICO.plus),later:btn('Later','data-act="note" data-text="Hides this step for today"')};
+  else if(f.papicNext==='ready') next={papic:true,eyebrow:'Your next step',title:'Your cameras are ready',body:`${n$(f.left)} credits are in. Share your Event Hub link — the first photo a guest shoots lands here.`,btn:btn('Open Papic','data-act="open-papic"','main',ICO.cam),later:btn('Later','data-act="note" data-text="Hides this step for today"')};
+  else next={eyebrow:'Your next step',title:`Send ${BASE.toInvite} invitations`,body:`${BASE.toInvite} guests have no invitation yet. One tap sends each their own link and ticket.`,btn:btn('Send invitations','data-act="note" data-text="Opens Guests"','main',ICO.mail),later:btn('Later','data-act="note" data-text="Hides this step for today"')};
+
+  // the Papic row — its status line says the one thing that matters now; the buttons are the two doors
+  let status, dot, meterCls='', acts=[];
+  const see = f.photos>0 ? btn(`See ${n$(f.photos)} photos`,'data-act="see-photos"','',ICO.img) : null;
+  const buy = btn('Buy more','data-act="buy"','second',ICO.plus);
+  if(f.mood==='wait'){ status=`<span class="n num">${n$(f.left)} credits</span> · On from ${esc(f.onFrom)}`; dot='wait'; meterCls='wait'; acts=[buy]; }
+  else if(f.mood==='gone'){ status=`<span class="n num">0 credits left</span> · Your cameras have stopped`; dot='gone'; meterCls='gone'; acts=[ f.papicNext==='stopped'? null : buy, see ]; }
+  else if(f.mood==='low'){ status=`Running low · <span class="n num">${n$(f.left)} credits left</span>`; dot='warn'; meterCls='low'; acts=[buy,see]; }
+  else { status=`<span class="n num">${n$(f.left)} credits left</span>${f.photos===0?' · No photos yet':''}`; dot=''; acts=[buy,see]; }
+  acts=acts.filter(Boolean);
+
+  $('#homeMain').innerHTML=`<div class="cover"><div><div class="eyebrow">Wedding · ${esc(f.eventDay)}</div><div class="name">${esc(BASE.names)}</div></div></div>
+    <div class="card ${next.papic?'papic':''}"><div class="eyebrow">${next.eyebrow}</div><div class="title">${esc(next.title)}</div><p class="body">${esc(next.body)}</p><div class="acts">${next.btn}${next.later}</div></div>
+    <div class="nums"><button class="tile" data-act="note" data-text="Opens the date sheet"><div class="v num">${n$(f.days)}</div><div class="k">days to go</div></button><button class="tile" data-act="note" data-text="Opens Guests"><div class="v num">${BASE.coming}</div><div class="k">coming</div></button><button class="tile" data-act="note" data-text="Opens Guests"><div class="v num">${BASE.noreply}</div><div class="k">no reply</div></button></div>
+    <div class="sec"><button class="bar" data-act="note" data-text="Opens What's next"><span class="ico">☑</span><span><b>What's next</b> <span class="mute">· 3 open</span></span><span class="chev">${ICO.chev}</span></button></div>
+    <p class="k2">Your services</p>
+    <button class="svc" data-act="open-papic" aria-label="Open Papic">
+      <div class="head"><span class="mark">${ICO.cam}</span><span><div class="name">Papic</div><div class="brand">Guest photos</div></span><span class="arrow">${ICO.arrow}</span></div>
+      <p class="status ${f.mood==='low'?'warn':f.mood==='gone'?'gone':''}"><span class="dot ${dot}"></span>${status}</p>
+      <div class="meter"><div class="meter-fill ${meterCls}" style="width:${f.pct}%"></div></div>
+      <div class="acts">${acts.join('')}</div>
+    </button>
+    <button class="svc" data-act="note" data-text="Opens Setnayan AI">
+      <div class="head"><span class="mark">${ICO.spark}</span><span><div class="name">Setnayan AI</div><div class="brand">Planner</div></span><span class="arrow">${ICO.arrow}</span></div>
+      <p class="status"><span class="dot"></span>On · Sai is watching your plan</p>
+    </button>
+    <p class="mute" style="font-size:12px;margin:18px 0 0">Every row is a door. The row says what is left and where the result is; the two buttons are the only two things a couple ever needs from here — buy, and see.</p>`;
+  $('#homeNav').innerHTML=[['home','Home',1],['users','Guests'],['store','Suppliers'],['globe','Hub'],['grip','More']].map(([i,l,on])=>`<button class="${on?'on':''}">${ICO[i]}<span>${l}</span></button>`).join('');
+}
+
+/* ---------- PAPIC PAGE ---------- */
+function renderPapic(){
+  const f=facts(); const st=STATES[S.key];
+  let big, word='credits left', say='', line, dot, meterCls='';
+  if(f.mood==='wait'){ big=`${n$(f.left)}`; word='credits ready'; line=`Papic turns on ${esc(f.onFrom)} · cameras wait until then`; dot='wait'; meterCls='wait'; }
+  else if(f.mood==='gone'){ big=`<span class="gone">0</span>`; say=`<p class="say gone">Your guests' cameras have stopped — add credits to restart them.</p>`; line=`On from ${esc(f.onFrom)} · until 12 hours after your day`; dot='gone'; meterCls='gone'; }
+  else if(f.mood==='low'){ big=`<span class="warn">${n$(f.left)}</span>`; say=`<p class="say warn">Running low — under ${LOW_PCT}% of what you bought.</p>`; line=`On from ${esc(f.onFrom)} · until 12 hours after your day`; dot='warn'; meterCls='low'; }
+  else { big=`${n$(f.left)}`; line=`On from ${esc(f.onFrom)} · until 12 hours after your day`; dot=''; }
+  const see = f.photos>0 ? btn(`See your ${n$(f.photos)} photos`,'data-act="see-photos"','second wide',ICO.img) : `<div class="btn wide off" aria-disabled="true">${ICO.img}<span>No photos yet</span></div>`;
+
+  const camsLine = f.mood==='wait' ? `Waiting for ${esc(f.onFrom)}` : f.mood==='gone' ? 'Resting — no credits to shoot with' : '2 cameras · on';
+  const guestsLine = f.mood==='wait' ? `Guests can shoot from ${esc(f.onFrom)}` : f.mood==='gone' ? 'Resting — no credits to shoot with' : (S.guestsNow ? 'Guests can shoot now' : `Guests shoot on your day only · ${esc(f.eventDay.split(' 20')[0])}`);
+  const photosLine = f.photos>0 ? `${n$(f.photos)} photos · last one ${esc(f.lastShot)}` : 'None yet';
+
+  $('#papicMain').innerHTML=`
+    <div class="band" id="band">
+      <div class="row1"><div><div class="big num">${big}</div><div class="of">${word} · of ${n$(BASE.bought)} bought</div></div>${btn('Buy more','data-act="buy"','main',ICO.plus)}</div>
+      <div class="meter"><div class="meter-fill ${meterCls}" style="width:${f.pct}%"></div></div>
+      ${say}
+      <div class="see">${see}</div>
+      <p class="line"><span class="dot ${dot}"></span><span>${line}</span></p>
+    </div>
+
+    <div class="sect ${f.mood==='wait'||f.mood==='gone'?'dim':''}" id="sec-cams"><div class="h"><span class="ico">${ICO.cam}</span><span><b>Your cameras</b><span class="s">${camsLine}</span></span><span class="end">${btn('Open camera','data-act="note" data-text="Opens your camera"','quiet')}</span></div>
+      <div class="under"><div class="camrow"><span class="who">Maria's phone</span><span class="st">${f.mood==='ok'||f.mood==='low'?'ready':'waiting'}</span></div><div class="camrow"><span class="who">Jose's phone</span><span class="st">${f.mood==='ok'||f.mood==='low'?'ready':'waiting'}</span></div></div></div>
+
+    <div class="sect ${f.mood==='wait'||f.mood==='gone'?'dim':''}" id="sec-guests"><div class="h"><span class="ico">${ICO.users}</span><span><b>Guests' cameras</b><span class="s">${guestsLine}</span></span></div>
+      <div class="under"><div class="swrow"><span class="t"><b>Let guests shoot now</b><span class="s">Off = their cameras open on your day and close 12 hours after.</span></span><button type="button" class="sw ${S.guestsNow?'on':''}" role="switch" aria-checked="${S.guestsNow}" data-act="guests-now" ${f.mood==='wait'||f.mood==='gone'?'disabled':''} aria-label="Let guests shoot now"></button></div></div></div>
+
+    <div class="sect" id="sec-photos"><div class="h"><span class="ico">${ICO.img}</span><span><b>Photos</b><span class="s">${photosLine}</span></span><span class="end">${f.photos>0?btn('Download all','data-act="note" data-text="Starts one zip of all photos"','',ICO.dl):''}</span></div>
+      ${f.photos>0
+        ? `<div class="grid">${[1,2,3,4,5].map(()=>'<div class="ph"></div>').join('')}<button class="ph more" data-act="note" data-text="Opens the gallery">All ${n$(f.photos)} ›</button></div>`
+        : `<div class="empty"><div class="t">No photos yet</div><div class="s">${f.mood==='wait'?`They start landing here from ${esc(f.onFrom)}.`:'The first one lands here the moment a guest shoots.'}</div>${btn('Share your Event Hub link','data-act="note" data-text="Opens the share sheet"','second')}</div>`}
+    </div>
+
+    <div class="sect ${S.settingsOpen?'open':''}" id="sec-settings"><button class="bar" style="padding:0" data-act="settings"><span class="ico">${ICO.gear}</span><span><b>Settings</b><span class="s">Faces · allotment · dates</span></span><span class="chev">${ICO.chev}</span></button>
+      <div class="fold"><div><div class="under" style="margin-left:0">
+        <div class="frow"><span class="l">Blurred faces</span><button type="button" class="ans" data-act="pick" data-key="faces">${esc(S.settings.faces)}${ICO.chev}</button></div>
+        <div class="frow"><span class="l">Allotment per guest</span><button type="button" class="ans" data-act="pick" data-key="allot">${esc(S.settings.allot)}${ICO.chev}</button></div>
+        <div class="frow" style="padding-top:12px"><span class="l mute" style="font-size:13px">Cameras on from ${esc(f.onFrom)}, automatic.</span>${btn('Change dates','data-act="dates"','quiet')}</div>
+      </div></div></div></div>`;
+  $('#papicNav').innerHTML=[['home','Home'],['users','Guests'],['store','Suppliers'],['globe','Hub'],['grip','More',1]].map(([i,l,on])=>`<button class="${on?'on':''}">${ICO[i]}<span>${l}</span></button>`).join('');
+}
+
+/* ---------- the Buy more sheet: the shipped stepper on the template ---------- */
+function renderBuySheet(which){
+  const f=facts(); const r=LADDER[S.ladderAt]; const atFloor=S.ladderAt===0, atTop=S.ladderAt===LADDER.length-1;
+  const floor=LADDER[0], top=LADDER[LADDER.length-1];
+  return `<div class="grab"></div><h3>Add credits</h3><p class="sub">${f.left===0?'Your cameras restart the moment this is paid.':`You have ${n$(f.left)} credits now.`}</p>
+    <div class="eyebrow">How much to add</div>
+    <div class="ctr"><button type="button" class="pm" data-act="less" aria-label="Less" ${atFloor?'disabled':''}>${ICO.minus}</button><div class="val" aria-live="polite"><span class="p num">${peso(r.php)}</span><span class="c">adds ${n$(r.credits)} credits · ${r.off}% off</span></div><button type="button" class="pm" data-act="more" aria-label="More" ${atTop?'disabled':''}>${ICO.plus}</button></div>
+    <p class="ends">${peso(floor.php)} to ${peso(top.php)} · ${LADDER.length} sizes · add any of them again later.</p>
+    <div class="after"><span>After this</span><b class="num">${n$(f.left+r.credits)} credits</b></div>
+    <div style="margin-top:14px">${S.opening?`<button type="button" class="btn main wide working" disabled><span class="spin"></span><span>Opening payment…</span></button>`:btn('Continue to payment','data-act="pay"','main wide')}</div>
+    <p class="step" id="payStep">${S.opening?'Taking you to GCash, card or bank — one order, never two.':''}</p>
+    <div style="text-align:center;margin-top:6px">${btn('Not now','data-act="close"','quiet')}</div>`;
+}
+function renderPickSheet(key){
+  const opts= key==='faces'?['Off','Guests only','Everyone but the two of you']:['Standard','Generous','Tight'];
+  const name= key==='faces'?'Blurred faces':'Allotment per guest';
+  return `<div class="grab"></div><h3>${name}</h3><p class="sub">One choice. Tap to pick; it saves quietly.</p>${opts.map(o=>`<button type="button" class="choice ${S.settings[key]===o?'on':''}" data-act="choose" data-key="${key}" data-val="${esc(o)}">${ICO.check}<span>${esc(o)}</span></button>`).join('')}`;
+}
+function renderDatesSheet(){
+  const f=facts();
+  return `<div class="grab"></div><h3>When can your cameras shoot?</h3><p class="sub">Automatic is ${esc(f.onFrom)} until 12 hours after your day. Change only if you must.</p>
+    <div class="frow"><span class="l">From</span><button type="button" class="ans" data-act="note" data-text="Opens the calendar (kind 8)">${esc(f.onFrom)}<svg class="chev" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button></div>
+    <div class="frow"><span class="l">Until</span><button type="button" class="ans" data-act="note" data-text="Opens the calendar (kind 8)">12 h after your day<svg class="chev" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button></div>
+    <div style="margin-top:14px">${btn('Keep automatic','data-act="close"','main wide')}</div>`;
+}
+
+/* ---------- sheets, toasts, press ---------- */
+const PH={home:$('#homePhone'),papic:$('#papicPhone')};
+function openSheet(which,kind,extra){ S.sheet={which,kind,extra}; drawSheet(); PH[which].classList.add('locked'); document.documentElement.classList.add('locked'); }
+function drawSheet(){ if(!S.sheet) return; const {which,kind,extra}=S.sheet; const el=$('#'+which+'Sheet'); el.innerHTML= kind==='buy'?renderBuySheet(which): kind==='pick'?renderPickSheet(extra): renderDatesSheet(); }
+/* a step changes the figures where they stand — the buttons stay, so the press is seen and nothing jumps */
+function stepInPlace(){ if(!S.sheet||S.sheet.kind!=='buy') return; const f=facts(); const r=LADDER[S.ladderAt]; const sh=$('#'+S.sheet.which+'Sheet');
+  sh.querySelector('.val .p').textContent=peso(r.php); sh.querySelector('.val .c').textContent=`adds ${n$(r.credits)} credits · ${r.off}% off`; sh.querySelector('.after b').textContent=`${n$(f.left+r.credits)} credits`;
+  sh.querySelector('[data-act="less"]').disabled=S.ladderAt===0; sh.querySelector('[data-act="more"]').disabled=S.ladderAt===LADDER.length-1; }
+function closeSheet(){ if(!S.sheet) return; PH[S.sheet.which].classList.remove('locked'); document.documentElement.classList.remove('locked'); S.sheet=null; S.opening=false; }
+let toastT={}; function toast(which,msg){ const t=$('#'+which+'Toast'); t.innerHTML=`<svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 7"/></svg><span>${esc(msg)}</span>`; t.classList.add('on'); clearTimeout(toastT[which]); toastT[which]=setTimeout(()=>t.classList.remove('on'),2200); }
+function press(el){ if(!el) return; el.classList.remove('pressing','ring'); void el.offsetWidth; el.classList.add('pressing'); if(el.classList.contains('main')) el.classList.add('ring'); setTimeout(()=>el.classList.remove('pressing','ring'),700); }
+function whichPhone(el){ return el.closest('#homePhone')?'home':'papic'; }
+function goPhotos(){ const sec=$('#sec-photos'); const scr=$('#papicScreen'); if(matchMedia('(min-width:860px)').matches){ scr.scrollTo({top:sec.offsetTop-70,behavior:'smooth'}); } else { sec.scrollIntoView({behavior:'smooth',block:'start'}); } sec.classList.remove('flash'); void sec.offsetWidth; sec.classList.add('flash'); }
+function goPapic(){ if(!matchMedia('(min-width:860px)').matches) $('#papicPhone').scrollIntoView({behavior:'smooth',block:'start'}); else $('#papicScreen').scrollTo({top:0,behavior:'smooth'}); const b=$('#band'); b.classList.remove('flash'); void b.offsetWidth; b.classList.add('flash'); }
+
+document.addEventListener('click',e=>{
+  const sc=e.target.closest('.scrim'); if(sc){ closeSheet(); return; }
+  const el=e.target.closest('[data-act]'); if(!el) return; e.stopPropagation();
+  const act=el.dataset.act; const which=whichPhone(el); press(el.classList.contains('btn')||el.classList.contains('pm')?el:null);
+  switch(act){
+    case 'note': toast(which,el.dataset.text); break;
+    case 'open-papic': toast('home','Opens Papic'); goPapic(); break;
+    case 'see-photos': if(which==='home'){ toast('home','Opens Papic › Photos'); } goPhotos(); break;
+    case 'buy': S.ladderAt=0; S.opening=false; setTimeout(()=>openSheet(which,'buy'),120); break;
+    case 'less': if(S.ladderAt>0){S.ladderAt--; stepInPlace();} break;
+    case 'more': if(S.ladderAt<LADDER.length-1){S.ladderAt++; stepInPlace();} break;
+    case 'pay': { if(S.opening) break; S.opening=true; el.classList.add('working'); el.innerHTML='<span class="spin"></span><span>Opening payment…</span>'; el.disabled=true; $('#payStep').textContent='Taking you to GCash, card or bank — one order, never two.';
+      const add=LADDER[S.ladderAt]; setTimeout(()=>{ closeSheet(); S.opening=false; toast(which,`Payment page opened · ${n$(add.credits)} credits for ${peso(add.php)} (sample)`); },1500); break; }
+    case 'close': closeSheet(); break;
+    case 'guests-now': S.guestsNow=!S.guestsNow; el.classList.toggle('on',S.guestsNow); el.setAttribute('aria-checked',S.guestsNow); setTimeout(()=>{ renderPapic(); toast('papic',S.guestsNow?'Guests can shoot now':'Guests shoot on your day only'); },700); break;
+    case 'settings': S.settingsOpen=!S.settingsOpen; $('#sec-settings').classList.toggle('open',S.settingsOpen); break;
+    case 'pick': openSheet('papic','pick',el.dataset.key); break;
+    case 'choose': S.settings[el.dataset.key]=el.dataset.val; closeSheet(); renderPapic(); toast('papic','Saved'); break;
+    case 'dates': openSheet('papic','dates'); break;
+  }
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeSheet(); $('#stateDD').classList.remove('open'); } });
+
+/* ---------- the state picker (a dropdown: opens its choices, never cycles) ---------- */
+const dd=$('#stateDD');
+$('#stateList').innerHTML=Object.entries(STATES).map(([k,v])=>`<button type="button" role="option" data-state="${k}" class="${k===S.key?'on':''}">${ICO.check}<span>${esc(v.label)}</span></button>`).join('');
+dd.querySelector('button').addEventListener('click',e=>{ e.stopPropagation(); dd.classList.toggle('open'); });
+$('#stateList').addEventListener('click',e=>{ const b=e.target.closest('[data-state]'); if(!b) return; e.stopPropagation(); setState(b.dataset.state); dd.classList.remove('open'); });
+document.addEventListener('click',()=>dd.classList.remove('open'));
+function setState(k){ S.key=k; S.guestsNow=false; S.settingsOpen=false; closeSheet(); $('#stateLabel').textContent=STATES[k].label; $$('#stateList button').forEach(b=>b.classList.toggle('on',b.dataset.state===k)); render(); try{ history.replaceState(null,'','#'+k); }catch(_){} }
+function render(){ renderHome(); renderPapic(); }
+addEventListener('hashchange',()=>{ const k=location.hash.replace('#',''); if(STATES[k]&&k!==S.key) setState(k); });
+const h=location.hash.replace('#',''); if(STATES[h]) { S.key=h; $('#stateLabel').textContent=STATES[h].label; $$('#stateList button').forEach(b=>b.classList.toggle('on',b.dataset.state===h)); }
+render();
+</script>
+</body>
+</html>
