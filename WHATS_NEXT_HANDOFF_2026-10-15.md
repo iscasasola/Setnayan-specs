@@ -59,7 +59,7 @@ Older drafts still open: batch 7 #6532 (dark mode + public fixes — merge main,
 
 ## 3 · WAITING ON THE OWNER
 - **Cover Scene** prototype (Fable, finished, NOT yet shown):
-  `Setnayan/prototypes/maker_cover_group_background_2026-10-14_fable.html` — PUBLISHED for him 15 Oct: https://claude.ai/artifact/WhiYtnAuMME7NSgkKsd2t1 (his answer not yet in). Rulings in it: named "Cover Scene" ·
+  `Setnayan/prototypes/maker_cover_group_background_2026-10-14_fable.html` — PUBLISHED for him 15 Oct: https://claude.ai/artifact/WhiYtnAuMME7NSgkKsd2t1 (APPROVED 15 Oct — all three: Framed as drawn, Hero folded in, Scene ◆ Pro). Rulings in it: named "Cover Scene" ·
   fills the whole first screen on any device · the Hero folds into the Cover Scene's Background (one background) ·
   Scene ◆ ready-made loops play · Upload = photos (videos kept, not played for guests). Publish it as an Artifact
   (strip doctype/head/body, `<title>Cover Scene</title>`), ask for his OK, then build. Open questions inside: Framed
@@ -101,6 +101,19 @@ Older drafts still open: batch 7 #6532 (dark mode + public fixes — merge main,
   Preview ▾ moves or whether `?phase=` stays host-only by URL). site-body's host branch already draws no "Get inside".
   Re-aim each guard to the new claim ("a signed-in host sees no owner chrome on /[slug]"), never delete one to go green;
   sabotage once. Branch `rd/host-strip-removed`, draft + label, feature batch (not a live fault).
+- **Cover Scene (APPROVED 15 Oct):** build the approved prototype
+  `Setnayan/prototypes/maker_cover_group_background_2026-10-14_fable.html` (https://claude.ai/artifact/WhiYtnAuMME7NSgkKsd2t1)
+  exactly — its notes' "delta to build" is the spec: part key `coverscene` + `makerPartParent` in `lib/maker-parts.ts`
+  (the grey "This sits on the Cover Scene." line gains "Select the Cover Scene ›"; tap empty cover space; first row of
+  the parts ▾) · the cover section full first screen (`min-h-[100svh]`, `100dvh` under @supports) in
+  `pahina-masthead.tsx` · Framed = inset with a rounded margin on the page colour, Full width = edge to edge (owner:
+  yes) · ONE background: the Hero folds into the Cover Scene's Background, Details › Hero is a second door to the same
+  value, `resolveHero` keeps feeding poster/home card (owner: yes) · `canvas.ground` on the hero row, no migration ·
+  the unchanged `StageBackground` rows via a thin adapter · Scene ◆ ready-made loops play for guests and stay PRO (owner:
+  Pro) · Upload ◆ = photos; videos kept/counted, never worn while `GUEST_HERO_VIDEO_PLAYBACK` is false ·
+  `COUPLE_MEDIA_QUOTA_BYTES` Pro 500 MB, Free none (owner) with the "Your media · N MB of 500 MB" meter · legibility
+  over the scene's ground · guard `the-cover-scene-is-one-group.test.ts`. Opus. Branch `rd/cover-scene`. Side-by-sides at
+  375 + desktop vs the prototype before merge.
 - Every other build: its worktree's last commits + the table above + `handovers/` are the brief. Rules for all:
   lab/stand-in only (never Apply/Undo/Restore on cale-ice, never the owner's browser pane), whole `pnpm preflight`
   before every push, draft PR + `do-not-auto-merge`, never `--admin`, live fixes ship alone, features as one tested
