@@ -59,7 +59,7 @@ Older drafts still open: batch 7 #6532 (dark mode + public fixes — merge main,
 
 ## 3 · WAITING ON THE OWNER
 - **Cover Scene** prototype (Fable, finished, NOT yet shown):
-  `Setnayan/prototypes/maker_cover_group_background_2026-10-14_fable.html`. Rulings in it: named "Cover Scene" ·
+  `Setnayan/prototypes/maker_cover_group_background_2026-10-14_fable.html` — PUBLISHED for him 15 Oct: https://claude.ai/artifact/WhiYtnAuMME7NSgkKsd2t1 (his answer not yet in). Rulings in it: named "Cover Scene" ·
   fills the whole first screen on any device · the Hero folds into the Cover Scene's Background (one background) ·
   Scene ◆ ready-made loops play · Upload = photos (videos kept, not played for guests). Publish it as an Artifact
   (strip doctype/head/body, `<title>Cover Scene</title>`), ask for his OK, then build. Open questions inside: Framed
