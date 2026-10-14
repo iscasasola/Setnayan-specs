@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Maker — premium effects &amp; attire figures (2026-10-14)</title>
+<!--
+  Setnayan · Event Hub Maker · Studio › Look › Background › EFFECTS, and Studio › Mood Board & Dress Code › ATTIRE.
+  Design + clickable prototype only (Fable, 2026-10-14). No network, no fonts fetched, nothing saved.
+
+  Owner, verbatim (DECISION_LOG 2026-10-14 "MAKER TEST: SEVEN ISSUES"):
+    3. "effects does not look professional and premium."
+    5. "on mood board: on attire: the sample person with cartoon ish animated that shows the palette for that role is
+        still a basic shape. need to improve the look · presentation per role on attire needs to be fixed. · VIP,
+        immediate family secondary sponsor and guests have both genders. so let them pick an attire for male and attire
+        for female. · remove entourage"
+
+  WHAT SHIPS TODAY (read on origin/main, 2026-10-14) — drawn here as "Today" so the owner compares, never redrawn blind:
+    · Effects: lib/ambient-effects.ts — Lanterns ◆ · Falling petals ◆ · Sparkles · Capiz glow ◆ · Gold shimmer ◆ · Bokeh lights,
+      one at a time on the main background, How much ▾ (Subtle · Standard · Lavish) + Colour ▾ (Original · the five).
+      Its CSS is ported below verbatim (the `t-*` kinds), so "Today" IS today's drawing.
+    · Attire: studio/mood-board/_components/mood-board-studio.tsx — one FormRows list: a ChosenRow per role ("Wear · Long gown ▾"),
+      under it `Figure` = a skin circle + a rounded rectangle in the role's FIRST colour (every role, even the groom, wears a gown
+      shape), the colour dots, "Arrives …", and the role's inspiration board; after the rows the lone ENTOURAGE board
+      (lib/inspiration-slots.ts, slotKey 'entourage', target wedding_party). Rows come from `studioAttireRows` (mood-board-editor.tsx):
+      celebrant? · bride · groom · VIP·Immediate Family · Principal Sponsors · Secondary Sponsors · Nikah Principals · Bridesmaids ·
+      Groomsmen · Bearers & Flower Girl · Officiants & Readers · Guests — only the groups on the guest list; the guests always.
+    · The figure the GUEST sees (app/_components/role-figure.tsx ← lib/role-figure.ts gownFig/suitFig) is the reception scene's
+      polygon people — the same basic shapes; the new SVG figures below are meant to replace BOTH (one figure, as the test
+      `the-palette-wears-a-person` already demands).
+
+  HOUSE RULES HONOURED: one PickMenu for any 3+ choices (INTERACTION_RULES § 2) · ≥ 44 px targets · ◆ marks Pro and never blocks ·
+  frames only on what you press, dividers between topics, Light + Dark (owner 2026-10-11) · the Maker never slow: effects are CSS
+  on transform/opacity only; reduced motion = a finished still (lib/ambient-effects.ts rule) · the top bar is the locked two-dropdown
+  bar (Maker_Two_Bars_LOCKED_2026-10-09.md).
+  ?shot=effects | ?shot=attire isolates one phone. The Light | Dark switch and the "Showing ▾" dropdown sit above the phone.
+-->
+<style>
+:root{--paper:#FBF9F5;--page:#F4F0E8;--ink:#2C2A29;--ink2:#5B5752;--mute:#8E8880;--line:#E6E0D6;--line2:#D9D3C8;--pill:#F1ECE3;--gold:#A9834B;--gold-soft:#E8DCC3;--cta:#C24E25;--cta-wash:#F8E7E0;--ok:#2B744A;--ok-wash:#E6F2EA;--bad:#B3261E;--shadow:rgba(44,42,41,.35);--in:cubic-bezier(.2,.8,.2,1);--sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;--serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;--bezel:#1b1b1b;--body:#EDE8DF;--field:#FFFFFF;--skin:#D8B48F;--hair:#2A1C15}
+[data-theme=dark]{--paper:#1E1C1A;--page:#161514;--ink:#F1ECE4;--ink2:#C9C2B8;--mute:#8E8880;--line:#33302C;--line2:#3E3A35;--pill:#26231F;--gold:#C9A24B;--gold-soft:#3A3122;--cta:#E0623A;--cta-wash:#3A241B;--ok:#4FA06E;--ok-wash:#1E2F25;--bad:#E0574D;--shadow:rgba(0,0,0,.6);--bezel:#000;--body:#0F0E0D;--field:#26231F}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--body);font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;appearance:none;border:0;background:none;cursor:pointer;padding:0;margin:0;text-align:left}
+svg{display:block}
+.wrap{max-width:1180px;margin:0 auto;padding:22px 16px 60px}
+h1{font-family:var(--serif);font-weight:500;font-size:30px;margin:8px 0 2px;line-height:1.1}
+.lead{font-size:13.5px;color:var(--ink2);max-width:860px;line-height:1.5;margin:0 0 14px}
+.banner{display:inline-flex;align-items:center;gap:8px;background:var(--cta-wash);color:var(--cta);border:1px solid rgba(194,78,37,.35);border-radius:999px;padding:5px 12px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700}
+.ctl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0 18px}
+.ctl .lbl{font-size:12px;color:var(--mute);letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+.frames{display:flex;flex-wrap:wrap;gap:26px;justify-content:center;align-items:flex-start}
+.frame{width:375px;max-width:100%;min-width:0;flex:0 1 auto}
+.frame h2{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:700;margin:0 0 8px;text-align:center;max-width:375px}
+.frame .cap{max-width:375px;font-size:12px;color:var(--ink2);line-height:1.45;margin:8px auto 0;text-align:center}
+body.shot{background:#fff}body.shot .wrap{padding:0;max-width:none}body.shot .banner,body.shot h1,body.shot .lead,body.shot .ctl,body.shot .frame h2,body.shot .frame .cap,body.shot .notes{display:none}
+body.shot .frames{gap:0}body.shot .phone{border:0;border-radius:0;box-shadow:none}
+/* ── the phone ── */
+.phone{width:375px;height:812px;background:var(--page);border:6px solid var(--bezel);border-radius:40px;position:relative;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 50px -30px var(--shadow)}
+@media (max-width:430px){.phone{width:100%;height:auto;min-height:calc(100vh - 24px);border-radius:0;border:0;box-shadow:none}.frame{width:100%}.status,.home{display:none}.phone .bd,.phone .sheet{position:fixed}.phone .sheet{padding-bottom:max(30px,env(safe-area-inset-bottom))}.wrap{padding:12px 0 40px}.banner,h1,.lead,.ctl{margin-left:16px;margin-right:16px}.frame .cap{padding:0 16px}.notes{margin:20px 16px 0}}
+.status{height:46px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 5px;font-size:13px;font-weight:600;background:var(--paper);z-index:50}
+.status .bat{width:24px;height:11px;border:1.5px solid var(--ink);border-radius:3px;position:relative;margin-bottom:2px}
+.status .bat:after{content:"";position:absolute;left:2px;top:2px;bottom:2px;right:5px;background:var(--ink);border-radius:1px}
+.home{flex:none;height:26px;background:var(--paper);position:relative}
+.home:after{content:"";position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.85}
+.topnav{height:56px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;background:var(--paper);border-bottom:1px solid var(--line);z-index:20}
+.rnd{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;position:relative}
+.exitx{background:var(--bad);color:#fff}.applyg{background:var(--ok);color:#fff}
+.applyg .n{position:absolute;right:-3px;top:-3px;min-width:19px;height:19px;border-radius:10px;background:var(--ink);color:var(--paper);font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid var(--paper)}
+.undob{background:var(--pill);border:1px solid var(--line);color:var(--ink)}
+.rnd svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.seg{flex:1;height:44px;border-radius:999px;background:var(--pill);border:1px solid var(--line);display:flex;padding:3px;position:relative}
+.seg button{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;border-radius:999px;font-size:13px;font-weight:600;color:var(--ink2);position:relative;z-index:1}
+.seg button.on{color:#fff}.seg .thumb{position:absolute;top:3px;bottom:3px;left:3px;width:calc(50% - 3px);border-radius:999px;background:var(--cta);transition:transform .22s var(--in)}
+.seg button svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.lt{flex:1;min-height:0;position:relative;display:flex;flex-direction:column;overflow:hidden}
+.pane{flex:1;min-height:0;overflow:auto;padding:10px 16px 28px;scrollbar-width:none}
+.pane::-webkit-scrollbar{display:none}
+/* the studio's pill selector (ISegmented) */
+.pills{height:40px;border-radius:999px;background:var(--pill);border:1px solid var(--line);display:flex;padding:3px;margin:2px 0 10px}
+.pills button{flex:1;height:32px;border-radius:999px;font-size:12px;font-weight:600;color:var(--ink2);display:flex;align-items:center;justify-content:center;white-space:nowrap}
+.pills button.on{background:var(--paper);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+/* the house dropdown (PickMenu, two-line `.fh`) and the two-way toggle */
+.fh{flex:1 1 0;min-width:0;height:44px;border:1px solid var(--line);background:var(--field);border-radius:14px;padding:0 24px 0 11px;position:relative;text-align:left;display:flex;flex-direction:column;justify-content:center;transition:transform .1s var(--in)}
+.fh:active{transform:scale(.985)}
+.fh .fn{font:500 10.5px/1.1 var(--sans);color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fh .fv{font:600 13px/1.25 var(--sans);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fh svg{position:absolute;right:8px;top:50%;margin-top:-6px;width:12px;height:12px;color:var(--cta);fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s var(--in)}
+.fh[aria-expanded=true] svg{transform:rotate(180deg)}
+.fh.one{flex-direction:row;align-items:center;gap:6px}.fh.one .fn{font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.tg{display:flex;gap:6px}
+.tg button{flex:1;height:44px;border:1px solid var(--line);background:var(--field);color:var(--mute);border-radius:999px;font:600 13px var(--sans);min-width:0;display:flex;align-items:center;justify-content:center;gap:6px}
+.tg button[aria-pressed=true]{background:var(--cta);border-color:var(--cta);color:#fff}
+.tg.small button{height:36px;font-size:12px}
+.sw{display:flex;align-items:center;gap:10px;height:44px;font-size:13px;font-weight:500}
+.sw i{width:44px;height:26px;border-radius:13px;background:var(--line2);position:relative;transition:background .2s;flex:none}
+.sw i:after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s var(--in);box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.sw[aria-checked=true] i{background:var(--ok)}.sw[aria-checked=true] i:after{transform:translateX(18px)}
+.rowc{display:flex;gap:6px;align-items:center;margin:8px 0}
+.pro{font-size:10px;color:var(--gold);vertical-align:middle;margin-left:3px}
+.eyeb{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--mute);margin:12px 0 6px}
+hr.div{border:0;border-top:1px solid var(--line);margin:12px 0}
+/* the PickMenu sheet inside the phone (one open at a time; a tap on the dark closes) */
+.bd{position:absolute;inset:0;background:rgba(20,16,12,.42);z-index:80;animation:fadein .18s var(--in)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--paper);border-radius:22px 22px 0 0;padding:8px 8px 30px;z-index:90;animation:up .22s var(--in);box-shadow:0 -8px 28px -14px var(--shadow);max-height:78%;display:flex;flex-direction:column}
+.sheet .grab{width:40px;height:4px;border-radius:2px;background:var(--line2);margin:2px auto 8px}
+.sheet h4{font-family:var(--serif);font-weight:500;font-size:19px;margin:2px 10px 8px}
+.sheet .list{overflow:auto;scrollbar-width:none}
+.sheet .opt{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;padding:8px 10px;border-radius:12px;font-size:14px;font-weight:500}
+.sheet .opt:active{background:var(--pill)}
+.sheet .opt .tick{margin-left:auto;color:var(--cta);visibility:hidden;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.sheet .opt[aria-selected=true]{color:var(--cta)}.sheet .opt[aria-selected=true] .tick{visibility:visible}
+.sheet .opt .dot{width:22px;height:22px;border-radius:50%;flex:none;border:1px solid rgba(0,0,0,.12)}
+.sheet .opt small{color:var(--mute);font-weight:400;font-size:12px}
+.sheet .chips{display:flex;flex-wrap:wrap;gap:8px;padding:4px 10px 10px}
+.sheet .chips button{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.sheet .chips button i{width:30px;height:30px;border-radius:50%;border:1px solid rgba(0,0,0,.12);display:block}
+.sheet .chips button[aria-selected=true] i{outline:2px solid var(--cta);outline-offset:2px}
+@keyframes up{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+/* ── page-level dropdown (the switcher) ── */
+.pdd{position:relative;min-width:200px;max-width:260px;flex:1}
+.pdd .fh{width:100%}
+.pdd .menu{position:absolute;left:0;right:0;top:48px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:6px;z-index:60;box-shadow:0 14px 30px -16px var(--shadow)}
+.pdd .menu button{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:0 10px;border-radius:10px;font-size:14px;font-weight:500}
+.pdd .menu button[aria-selected=true]{color:var(--cta)}
+.pdd .menu button svg{margin-left:auto;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.6;visibility:hidden}
+.pdd .menu button[aria-selected=true] svg{visibility:visible}
+.tgp{display:flex;gap:4px;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--paper)}
+.tgp button{height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;color:var(--mute)}
+.tgp button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+
+/* ═══════════════ EFFECTS — the sample stage ═══════════════ */
+.stage{position:relative;height:338px;border-radius:14px;overflow:hidden;isolation:isolate;color:var(--c-body);container-type:size}
+.stage[data-ground=dark]{--c-head:#F3EBDD;--c-body:#DCD3C6;--c-eyebrow:#C9A24B;--btn-bg:#F3EBDD;--btn-fg:#2C2A29;background:radial-gradient(120% 90% at 50% 10%,#2C2724 0,#1A1817 60%,#121110 100%)}
+.stage[data-ground=light]{--c-head:#2C2A29;--c-body:#5B5752;--c-eyebrow:#A9834B;--btn-bg:#2C2A29;--btn-fg:#F7F2EA;background:radial-gradient(120% 90% at 50% 10%,#FBF7F1 0,#F1EADF 65%,#E6DCCB 100%)}
+.stage .words{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px 22px;pointer-events:none}
+.stage .eyebrow{font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--c-eyebrow);margin-bottom:10px;font-weight:600}
+.stage .names{font-family:var(--serif);font-size:38px;line-height:1;color:var(--c-head);font-weight:500;letter-spacing:.01em}
+.stage .amp{font-style:italic;font-weight:400;color:var(--c-eyebrow);margin:0 6px}
+.stage .dline{font-size:12.5px;letter-spacing:.06em;margin-top:12px;color:var(--c-body)}
+.stage .pline{font-size:11.5px;letter-spacing:.02em;margin-top:3px;color:var(--c-body);opacity:.85}
+.stage .gbtn{margin-top:18px;height:40px;padding:0 18px;border-radius:6px;background:var(--btn-bg);color:var(--btn-fg);font-size:12px;font-weight:600;letter-spacing:.04em;display:flex;align-items:center}
+.stage .tag{position:absolute;left:10px;top:8px;z-index:4;font-size:9px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--c-body);opacity:.55}
+/* the effect layer — the shipped band mask: full at the edges, half across the middle where the words sit */
+.fx{--T:125cqh;position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden;container-type:size;-webkit-mask-image:linear-gradient(180deg,#000 0 12%,rgba(0,0,0,.5) 26%,rgba(0,0,0,.5) 82%,#000 94%);mask-image:linear-gradient(180deg,#000 0 12%,rgba(0,0,0,.5) 26%,rgba(0,0,0,.5) 82%,#000 94%)}
+.fx[data-mini]{-webkit-mask-image:none;mask-image:none}
+.fx i{position:absolute;display:block;will-change:transform,opacity}
+
+/* ── TODAY — lib/ambient-effects.ts AMBIENT_EFFECT_CSS, ported as it ships (kinds t-*) ── */
+.fx[data-fx=t-lanterns] i{left:var(--x);bottom:-14%;width:calc(26px*var(--s));height:calc(34px*var(--s));border-radius:46% 46% 44% 44%/38% 38% 62% 62%;background:radial-gradient(ellipse at 50% 58%,var(--c2) 0,var(--c1) 22%,var(--c3) 100%);box-shadow:0 0 calc(28px*var(--s)) var(--c1-75),0 0 calc(8px*var(--s)) var(--c2-55),inset 0 calc(-4px*var(--s)) calc(6px*var(--s)) var(--c3-35);filter:blur(var(--b));opacity:var(--o);animation:t-rise var(--d) linear infinite var(--dl),t-sway calc(var(--d)/2.6) ease-in-out infinite alternate var(--dl)}
+.fx[data-fx=t-lanterns] i:before{content:"";position:absolute;left:50%;top:calc(-14px*var(--s));width:1px;height:calc(14px*var(--s));background:var(--c2-55)}
+.fx[data-fx=t-lanterns] i:after{content:"";position:absolute;left:30%;right:30%;top:calc(-3px*var(--s));height:calc(5px*var(--s));border-radius:2px;background:var(--c3)}
+.fx[data-fx=t-lanterns][data-ground=light] i{box-shadow:0 0 calc(14px*var(--s)) var(--c3-35),inset 0 calc(-4px*var(--s)) calc(6px*var(--s)) var(--c3-35)}
+@keyframes t-rise{from{transform:translateY(0) rotate(-2deg)}to{transform:translateY(calc(-1*var(--T))) rotate(2deg)}}
+@keyframes t-sway{from{translate:calc(-8px*var(--s)) 0}to{translate:calc(8px*var(--s)) 0}}
+.fx[data-fx=t-petals] i{left:var(--x);top:-10%;width:calc(19px*var(--s));height:calc(12px*var(--s));box-shadow:0 1px 2px rgba(0,0,0,.12);border-radius:100% 0 100% 0;background:linear-gradient(135deg,var(--c1),var(--c2));opacity:var(--o);filter:blur(var(--b));animation:t-fall var(--d) cubic-bezier(.4,.1,.6,.9) infinite var(--dl),t-turn calc(var(--d)/3) ease-in-out infinite alternate var(--dl)}
+@keyframes t-fall{from{transform:translateY(0) translateX(0)}50%{transform:translateY(calc(.5*var(--T))) translateX(calc(18px*var(--s)))}to{transform:translateY(var(--T)) translateX(calc(-12px*var(--s)))}}
+@keyframes t-turn{from{rotate:-40deg;scale:1 .7}to{rotate:50deg;scale:1 1}}
+.fx[data-fx=t-sparkles] i{left:var(--x);top:var(--y);width:calc(10px*var(--s));height:calc(10px*var(--s));background:var(--c1);clip-path:polygon(50% 0,58% 42%,100% 50%,58% 58%,50% 100%,42% 58%,0 50%,42% 42%);filter:drop-shadow(0 0 calc(3px*var(--s)) var(--c1));animation:t-twinkle var(--d) ease-in-out infinite alternate var(--dl)}
+@keyframes t-twinkle{from{opacity:.05;transform:scale(.4) rotate(0)}to{opacity:var(--o);transform:scale(1) rotate(25deg)}}
+.fx[data-fx=t-capiz] i{left:var(--x);top:calc(-6% + var(--y));width:calc(22px*var(--s));height:calc(22px*var(--s));border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--c2-85),var(--c1-45) 55%,var(--c1-12) 100%);border:1px solid var(--c2-55);box-shadow:0 0 calc(10px*var(--s)) var(--c1-45);opacity:var(--o);transform-origin:50% calc(-40px*var(--s));animation:t-swing var(--d) ease-in-out infinite alternate var(--dl)}
+.fx[data-fx=t-capiz] i:before{content:"";position:absolute;left:50%;top:calc(-40px*var(--s));width:1px;height:calc(40px*var(--s));background:var(--c2-55)}
+.fx[data-fx=t-capiz][data-ground=light] i{background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.95),var(--c1-35) 55%,var(--c1-12) 100%);border-color:var(--c3-35);box-shadow:0 1px calc(8px*var(--s)) var(--c3-20)}
+@keyframes t-swing{from{rotate:-6deg}to{rotate:6deg}}
+.fx[data-fx=t-bokeh] i{left:var(--x);top:var(--y);width:calc(64px*var(--s));height:calc(64px*var(--s));border-radius:50%;background:radial-gradient(circle,var(--c1) 0,var(--c1) 55%,rgba(255,255,255,0) 72%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);filter:blur(calc(6px - 4px*var(--s)));opacity:calc(var(--o)*.7);mix-blend-mode:screen;animation:t-drift var(--d) ease-in-out infinite alternate var(--dl)}
+.fx[data-fx=t-bokeh][data-ground=light] i{mix-blend-mode:multiply;opacity:calc(var(--o)*.35)}
+@keyframes t-drift{from{transform:translate(0,0) scale(.9)}to{transform:translate(calc(26px*var(--s)),calc(-18px*var(--s))) scale(1.1)}}
+.fx[data-fx=t-shimmer] i{left:var(--x);top:var(--y);width:calc(70px*var(--s));height:1.5px;border-radius:1px;background:linear-gradient(90deg,transparent,var(--c1) 35%,var(--c2) 50%,var(--c1) 65%,transparent);transform:rotate(-32deg);opacity:0;animation:t-glint var(--d) ease-in-out infinite var(--dl)}
+.fx[data-fx=t-shimmer] i:after{content:"";position:absolute;left:46%;top:-4px;width:8%;height:9px;border-radius:50%;background:radial-gradient(ellipse,var(--c2),transparent 70%)}
+.fx[data-fx=t-shimmer][data-ground=light] i{mix-blend-mode:multiply}
+@keyframes t-glint{0%{opacity:0;transform:rotate(-32deg) translate(calc(-30px*var(--s)),calc(14px*var(--s)))}45%{opacity:var(--o)}100%{opacity:0;transform:rotate(-32deg) translate(calc(40px*var(--s)),calc(-18px*var(--s)))}}
+
+/* ── PROPOSED — restrained: slow, few, soft-edged, fades at both ends, depth by blur, palette-tinted (kinds p-*) ── */
+/* Soft haze — three large veils of light drifting, barely there. The "professional" default. FREE. */
+.fx[data-fx=p-haze] i{left:var(--x);top:var(--y);width:calc(70%*var(--s));height:calc(42%*var(--s));border-radius:50%;background:radial-gradient(ellipse,var(--c1-75) 0,var(--c1-35) 45%,transparent 70%);filter:blur(calc(22px*var(--s)));opacity:var(--o);mix-blend-mode:screen;animation:p-veil var(--d) ease-in-out infinite alternate var(--dl)}
+.fx[data-fx=p-haze][data-ground=light] i{mix-blend-mode:multiply;opacity:calc(var(--o)*.55)}
+@keyframes p-veil{from{transform:translate(-6%,-3%) scale(.94)}to{transform:translate(6%,4%) scale(1.06)}}
+/* Bokeh lights — six out-of-focus discs with the bright RIM a real lens draws, three depths, breathing. FREE. */
+.fx[data-fx=p-bokeh] i{left:var(--x);top:var(--y);width:calc(96px*var(--s));height:calc(96px*var(--s));border-radius:50%;background:radial-gradient(circle,var(--c1-35) 0,var(--c1-45) 58%,var(--c2-85) 70%,transparent 73%);filter:blur(calc(8px - 6px*var(--s)));opacity:0;mix-blend-mode:screen;animation:p-bdrift var(--d) ease-in-out infinite alternate var(--dl),p-breathe calc(var(--d)/3) ease-in-out infinite var(--dl)}
+.fx[data-fx=p-bokeh][data-ground=light] i{mix-blend-mode:multiply;background:radial-gradient(circle,var(--c1-12) 0,var(--c1-35) 58%,var(--c3-35) 70%,transparent 73%)}
+@keyframes p-bdrift{from{transform:translate(0,0) scale(.96)}to{transform:translate(calc(22px*var(--s)),calc(-14px*var(--s))) scale(1.04)}}
+@keyframes p-breathe{0%,100%{opacity:calc(var(--o)*.45)}50%{opacity:var(--o)}}
+/* Gold dust — tiny luminous points rising and fading; never a star, never a rotation. ◆ */
+.fx[data-fx=p-dust] i{left:var(--x);top:var(--y);width:calc(3px*var(--s));height:calc(3px*var(--s));border-radius:50%;background:var(--c2);box-shadow:0 0 calc(5px*var(--s)) var(--c1),0 0 calc(10px*var(--s)) var(--c1-45);opacity:0;animation:p-dust var(--d) ease-in-out infinite var(--dl)}
+.fx[data-fx=p-dust][data-ground=light] i{background:var(--c3);box-shadow:0 0 calc(4px*var(--s)) var(--c1-75)}
+@keyframes p-dust{0%{opacity:0;transform:translate(0,0)}25%{opacity:var(--o)}70%{opacity:calc(var(--o)*.6)}100%{opacity:0;transform:translate(calc(10px*var(--s)),calc(-48px*var(--s)))}}
+/* Petal drift — seven petals, a real petal shape in two tones, falling on a slow S with a soft turn; fades in and out. ◆ */
+.fx[data-fx=p-petals] i{left:var(--x);top:-8%;width:calc(16px*var(--s));height:calc(24px*var(--s));border-radius:80% 20% 60% 40%/60% 40% 70% 30%;background:linear-gradient(160deg,var(--c2) 0,var(--c1) 55%,var(--c3) 100%);box-shadow:inset calc(2px*var(--s)) calc(-2px*var(--s)) calc(4px*var(--s)) rgba(255,255,255,.18),0 calc(2px*var(--s)) calc(4px*var(--s)) rgba(0,0,0,.14);filter:blur(var(--b));opacity:0;animation:p-fall var(--d) linear infinite var(--dl),p-sway calc(var(--d)/4) ease-in-out infinite alternate var(--dl)}
+@keyframes p-fall{0%{opacity:0;transform:translateY(0)}8%{opacity:var(--o)}88%{opacity:var(--o)}100%{opacity:0;transform:translateY(var(--T))}}
+@keyframes p-sway{from{translate:calc(-14px*var(--s)) 0;rotate:-28deg;scale:1 .92}to{translate:calc(14px*var(--s)) 0;rotate:32deg;scale:1 1}}
+/* Lanterns — four, large and far apart, a real lantern: ribbed paper body, cap, base and tassel, warm halo, slow rise. ◆ */
+.fx[data-fx=p-lanterns] i{left:var(--x);bottom:-20%;width:calc(34px*var(--s));height:calc(46px*var(--s));border-radius:48% 48% 46% 46%/34% 34% 66% 66%;background:repeating-linear-gradient(90deg,rgba(0,0,0,0) 0 calc(5px*var(--s)),rgba(0,0,0,.07) calc(5px*var(--s)) calc(6px*var(--s))),radial-gradient(ellipse at 50% 62%,var(--c2) 0,var(--c1) 34%,var(--c3) 100%);box-shadow:0 0 calc(40px*var(--s)) var(--c1-45),0 0 calc(90px*var(--s)) var(--c1-12);filter:blur(var(--b));opacity:0;animation:p-lrise var(--d) linear infinite var(--dl),p-lsway calc(var(--d)/5) ease-in-out infinite alternate var(--dl)}
+.fx[data-fx=p-lanterns] i:before{content:"";position:absolute;left:28%;right:28%;top:calc(-4px*var(--s));height:calc(6px*var(--s));border-radius:3px 3px 1px 1px;background:var(--c3);box-shadow:0 calc(1px*var(--s)) 0 var(--c3-35)}
+.fx[data-fx=p-lanterns] i:after{content:"";position:absolute;left:50%;bottom:calc(-16px*var(--s));width:calc(2px*var(--s));height:calc(16px*var(--s));margin-left:calc(-1px*var(--s));background:linear-gradient(180deg,var(--c3) 0 35%,var(--c1) 35% 100%);border-radius:0 0 2px 2px}
+.fx[data-fx=p-lanterns][data-ground=light] i{box-shadow:0 0 calc(22px*var(--s)) var(--c1-35),0 calc(6px*var(--s)) calc(14px*var(--s)) var(--c3-20)}
+@keyframes p-lrise{0%{opacity:0;transform:translateY(0) rotate(-1deg)}10%{opacity:var(--o)}90%{opacity:var(--o)}100%{opacity:0;transform:translateY(calc(-1*var(--T))) rotate(1deg)}}
+@keyframes p-lsway{from{translate:calc(-10px*var(--s)) 0}to{translate:calc(10px*var(--s)) 0}}
+/* Gold shimmer — the glint lives on the NAMES (light passing over gold type) plus two faint glints in the frame. ◆ */
+.stage[data-shimmer] .names{background:linear-gradient(100deg,var(--c-head) 0 38%,var(--sh-hi) 50%,var(--c-head) 62% 100%);background-size:260% 100%;background-position:120% 0;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p-sweep 7.5s ease-in-out infinite}
+.stage[data-shimmer] .amp{color:transparent}
+@keyframes p-sweep{0%,55%{background-position:120% 0}100%{background-position:-60% 0}}
+.fx[data-fx=p-shimmer] i{left:var(--x);top:var(--y);width:calc(110px*var(--s));height:1px;background:linear-gradient(90deg,transparent,var(--c1-45) 40%,var(--c2-85) 50%,var(--c1-45) 60%,transparent);transform:rotate(-24deg);opacity:0;animation:p-glint var(--d) ease-in-out infinite var(--dl)}
+.fx[data-fx=p-shimmer][data-ground=light] i{mix-blend-mode:multiply}
+@keyframes p-glint{0%{opacity:0;transform:rotate(-24deg) translate(calc(-40px*var(--s)),calc(16px*var(--s)))}50%{opacity:var(--o)}100%{opacity:0;transform:rotate(-24deg) translate(calc(50px*var(--s)),calc(-20px*var(--s)))}}
+/* Light leak — one warm band of light breathing across the frame, like film. ◆ (optional — the owner decides) */
+.fx[data-fx=p-leak] i{left:-30%;top:-40%;width:160%;height:180%;background:linear-gradient(100deg,transparent 30%,var(--c1-35) 46%,var(--c2-55) 52%,var(--c1-35) 58%,transparent 72%);transform:rotate(-18deg);opacity:0;mix-blend-mode:screen;filter:blur(calc(10px*var(--s)));animation:p-leak var(--d) ease-in-out infinite var(--dl)}
+.fx[data-fx=p-leak][data-ground=light] i{mix-blend-mode:multiply}
+@keyframes p-leak{0%{opacity:0;transform:rotate(-18deg) translateX(-22%)}40%{opacity:var(--o)}100%{opacity:0;transform:rotate(-18deg) translateX(22%)}}
+/* Film grain — fine static noise, three frames stepping; drawn by an in-document SVG filter, no image. ◆ (optional) */
+.fx[data-fx=p-grain] svg{position:absolute;inset:0;width:100%;height:100%;opacity:var(--go);mix-blend-mode:overlay}
+.fx[data-fx=p-grain] svg rect{animation:p-grain 1.2s steps(1) infinite}
+.fx[data-fx=p-grain] svg rect:nth-child(2){animation-delay:-.4s}.fx[data-fx=p-grain] svg rect:nth-child(3){animation-delay:-.8s}
+@keyframes p-grain{0%,33%{opacity:1}34%,100%{opacity:0}}
+/* REDUCE MOTION (the system's, or the switch) = A FINISHED STILL: the animation is taken off and each shape stands
+   part-way through its cycle (--p), never hidden, never at its start off the page. */
+[data-rm] .fx i,[data-rm] .stage .names,[data-rm] .fx svg rect{animation:none!important}
+[data-rm] .fx[data-fx=t-lanterns] i{transform:translateY(calc(-1*var(--p)*var(--T))) rotate(calc(4deg*var(--p) - 2deg))}
+[data-rm] .fx[data-fx=t-petals] i{transform:translateY(calc(var(--p)*var(--T)));rotate:calc(90deg*var(--p) - 40deg)}
+[data-rm] .fx[data-fx=t-sparkles] i{opacity:calc(.05 + (var(--o) - .05)*var(--p));transform:scale(calc(.4 + .6*var(--p))) rotate(calc(25deg*var(--p)))}
+[data-rm] .fx[data-fx=t-capiz] i{rotate:calc(12deg*var(--p) - 6deg)}
+[data-rm] .fx[data-fx=t-bokeh] i{transform:translate(calc(26px*var(--s)*var(--p)),calc(-18px*var(--s)*var(--p))) scale(calc(.9 + .2*var(--p)))}
+[data-rm] .fx[data-fx=t-shimmer] i{opacity:calc(var(--o)*var(--g));transform:rotate(-32deg) translate(calc((70px*var(--p) - 30px)*var(--s)),calc((14px - 32px*var(--p))*var(--s)))}
+[data-rm] .fx[data-fx=p-haze] i{transform:translate(calc(12%*var(--p) - 6%),calc(7%*var(--p) - 3%))}
+[data-rm] .fx[data-fx=p-bokeh] i{opacity:calc(var(--o)*.75);transform:translate(calc(22px*var(--s)*var(--p)),calc(-14px*var(--s)*var(--p)))}
+[data-rm] .fx[data-fx=p-dust] i{opacity:calc(var(--o)*var(--g));transform:translate(calc(10px*var(--s)*var(--p)),calc(-48px*var(--s)*var(--p)))}
+[data-rm] .fx[data-fx=p-petals] i{opacity:var(--o);transform:translateY(calc(var(--p)*var(--T)));rotate:calc(60deg*var(--p) - 28deg)}
+[data-rm] .fx[data-fx=p-lanterns] i{opacity:var(--o);transform:translateY(calc(-1*var(--p)*var(--T)))}
+[data-rm] .fx[data-fx=p-shimmer] i{opacity:calc(var(--o)*var(--g));transform:rotate(-24deg) translate(calc((90px*var(--p) - 40px)*var(--s)),calc((16px - 36px*var(--p))*var(--s)))}
+[data-rm] .fx[data-fx=p-leak] i{opacity:calc(var(--o)*.7);transform:rotate(-18deg) translateX(calc(44%*var(--p) - 22%))}
+[data-rm] .fx[data-fx=p-grain] svg rect:nth-child(n+2){opacity:0}
+[data-rm] .stage[data-shimmer] .names{background-position:30% 0}
+@media (prefers-reduced-motion:reduce){
+  .fx i,.stage .names,.fx svg rect{animation:none!important}
+  .fx[data-fx=t-lanterns] i{transform:translateY(calc(-1*var(--p)*var(--T))) rotate(calc(4deg*var(--p) - 2deg))}
+  .fx[data-fx=t-petals] i{transform:translateY(calc(var(--p)*var(--T)));rotate:calc(90deg*var(--p) - 40deg)}
+  .fx[data-fx=t-sparkles] i{opacity:calc(.05 + (var(--o) - .05)*var(--p));transform:scale(calc(.4 + .6*var(--p))) rotate(calc(25deg*var(--p)))}
+  .fx[data-fx=t-capiz] i{rotate:calc(12deg*var(--p) - 6deg)}
+  .fx[data-fx=t-bokeh] i{transform:translate(calc(26px*var(--s)*var(--p)),calc(-18px*var(--s)*var(--p))) scale(calc(.9 + .2*var(--p)))}
+  .fx[data-fx=t-shimmer] i{opacity:calc(var(--o)*var(--g));transform:rotate(-32deg) translate(calc((70px*var(--p) - 30px)*var(--s)),calc((14px - 32px*var(--p))*var(--s)))}
+  .fx[data-fx=p-haze] i{transform:translate(calc(12%*var(--p) - 6%),calc(7%*var(--p) - 3%))}
+  .fx[data-fx=p-bokeh] i{opacity:calc(var(--o)*.75);transform:translate(calc(22px*var(--s)*var(--p)),calc(-14px*var(--s)*var(--p)))}
+  .fx[data-fx=p-dust] i{opacity:calc(var(--o)*var(--g));transform:translate(calc(10px*var(--s)*var(--p)),calc(-48px*var(--s)*var(--p)))}
+  .fx[data-fx=p-petals] i{opacity:var(--o);transform:translateY(calc(var(--p)*var(--T)));rotate:calc(60deg*var(--p) - 28deg)}
+  .fx[data-fx=p-lanterns] i{opacity:var(--o);transform:translateY(calc(-1*var(--p)*var(--T)))}
+  .fx[data-fx=p-shimmer] i{opacity:calc(var(--o)*var(--g));transform:rotate(-24deg) translate(calc((90px*var(--p) - 40px)*var(--s)),calc((16px - 36px*var(--p))*var(--s)))}
+  .fx[data-fx=p-leak] i{opacity:calc(var(--o)*.7);transform:rotate(-18deg) translateX(calc(44%*var(--p) - 22%))}
+  .fx[data-fx=p-grain] svg rect:nth-child(n+2){opacity:0}
+  .stage[data-shimmer] .names{background-position:30% 0}
+  .sheet,.bd,.pdd .menu{animation:none}
+}
+/* the effect cards — 3:4 phone-shaped, a live miniature each, the picked one framed (it is pressable) */
+.cards{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 6px;scrollbar-width:none;margin:0 -2px}
+.cards::-webkit-scrollbar{display:none}
+.card{flex:none;width:92px;scroll-snap-align:start;text-align:center}
+.card .pv{display:block;position:relative;width:92px;height:122px;border-radius:12px;overflow:hidden;border:1.5px solid var(--line);isolation:isolate;container-type:size;transition:transform .1s var(--in)}
+.card:active .pv{transform:scale(.97)}
+.card[aria-pressed=true] .pv{border-color:var(--cta);box-shadow:0 0 0 2px var(--cta-wash)}
+.card .pv .mini{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;gap:3px}
+.card .pv .mini b{font-family:var(--serif);font-weight:500;font-size:13px;line-height:1;color:var(--c-head)}
+.card .pv .mini span{width:22px;height:1px;background:var(--c-eyebrow);opacity:.6}
+.card .pv[data-ground=dark]{--c-head:#F3EBDD;--c-eyebrow:#C9A24B;background:radial-gradient(120% 90% at 50% 10%,#2C2724 0,#1A1817 60%,#121110 100%)}
+.card .pv[data-ground=light]{--c-head:#2C2A29;--c-eyebrow:#A9834B;background:radial-gradient(120% 90% at 50% 10%,#FBF7F1 0,#F1EADF 65%,#E6DCCB 100%)}
+.card .nm{display:block;font-size:11.5px;font-weight:600;margin-top:5px;line-height:1.2}
+.card .nm small{display:block;font-size:9.5px;color:var(--mute);font-weight:500;margin-top:1px;letter-spacing:.06em;text-transform:uppercase}
+.card[aria-pressed=true] .nm{color:var(--cta)}
+.card .pv .mini.none{font-size:11px;color:var(--mute);font-weight:600}
+.card .pv .mini.none b{color:var(--mute);font-family:var(--sans);font-size:12px}
+
+/* ═══════════════ ATTIRE ═══════════════ */
+.role{padding:10px 0 12px}
+.role header{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.role header h3{font-family:var(--serif);font-weight:500;font-size:21px;margin:0;line-height:1.1}
+.role header small{font-size:12px;color:var(--mute);margin-left:auto;white-space:nowrap}
+.role .sub{font-size:12px;color:var(--ink2);margin:2px 0 8px;line-height:1.4}
+.who{display:flex;gap:10px}
+.who .g{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
+.who .gl{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--mute);display:flex;align-items:center;gap:6px}
+.who .gl i{width:14px;height:14px;display:inline-flex}.who .gl i svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.who .figrow{display:flex;align-items:flex-end;gap:10px}
+.who.one .figrow{gap:14px}
+.figwrap{height:132px;display:flex;align-items:flex-end;justify-content:center;flex:none}
+.figwrap svg{height:132px;width:auto}
+.figwrap.kid svg{height:104px}
+.who.one .figwrap{width:86px}.who.two .figwrap{width:62px}
+.who .ctrls{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px;justify-content:flex-end}
+.swatches{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.swatches button{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:50%;margin:-6px}
+.swatches button i{width:28px;height:28px;border-radius:50%;border:1px solid rgba(0,0,0,.12);display:block;box-shadow:inset 0 -3px 0 rgba(0,0,0,.08)}
+.swatches button.add i{border:1.5px dashed var(--line2);background:none;display:flex;align-items:center;justify-content:center;color:var(--mute);font-size:16px;box-shadow:none}
+.swatches .lab{font-size:10.5px;color:var(--mute);margin-left:8px}
+.who.two .swatches{flex-direction:column;align-items:flex-start;gap:0;flex-wrap:nowrap}
+.who.two .swatches button{margin:-7px 0}
+.who.two .swatches button i{width:26px;height:26px}
+.who.two .ctrls{justify-content:center;align-items:flex-start}
+.who .fh{width:100%;flex:none}
+.note{display:flex;align-items:center;gap:8px;min-height:44px;font-size:13px;color:var(--ink2);margin-top:4px}
+.note .k{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--mute);flex:none}
+.note em{font-style:italic;color:var(--ink)}
+.note .edit{margin-left:auto;color:var(--cta);font-weight:600;font-size:12.5px;flex:none;height:44px;display:flex;align-items:center;padding:0 4px}
+.ideas{display:flex;align-items:center;gap:6px;margin-top:2px}
+.ideas .th{display:flex;gap:4px}
+.ideas .th i{width:34px;height:34px;border-radius:7px;background:linear-gradient(135deg,var(--a),var(--b));opacity:.9;display:block}
+.ideas .cnt{font-size:12px;color:var(--mute);margin-left:4px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ideas .btn{margin-left:auto;height:44px;display:flex;align-items:center;gap:4px;color:var(--cta);font-weight:600;font-size:12.5px;padding:0 6px;white-space:nowrap;flex:none}
+.ideas .plus{width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--cta)}
+.ideas .plus i{width:30px;height:30px;border:1.5px solid var(--line2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-style:normal;line-height:1}
+.guestline{font-size:12px;color:var(--ink2);line-height:1.4;margin-top:6px}
+/* TODAY's attire rows — the shipped FormRows look, drawn so the owner compares */
+.trow{padding:10px 0 4px}
+.trow .top{display:flex;align-items:center;gap:10px;min-height:44px}
+.trow .top b{font-size:15px;font-weight:600;flex:1}
+.trow .top .wear{height:36px;border:1px solid var(--line);border-radius:999px;padding:0 12px;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px;background:var(--field)}
+.trow .top .wear svg{width:11px;height:11px;fill:none;stroke:var(--cta);stroke-width:2.6}
+.trow .below{display:flex;gap:12px;padding:2px 0 8px}
+.tfig{position:relative;height:72px;width:46px;flex:none}
+.tfig .h{position:absolute;left:15px;top:0;height:16px;width:16px;border-radius:50%;background:#E9D9C8}
+.tfig .b{position:absolute;left:6px;top:18px;height:54px;width:34px;border-radius:16px 16px 2px 2px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1)}
+.trow .dots{display:flex;gap:6px;align-items:center}
+.trow .dots i{width:28px;height:28px;border-radius:50%;border:1px solid rgba(0,0,0,.1);display:block}
+.trow .dots .plus{width:28px;height:28px;border:1.5px dashed var(--line2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--mute);font-size:14px}
+.trow small{font-size:11.5px;color:var(--mute)}
+.trow .board{display:flex;align-items:center;gap:6px;margin-top:6px}
+.trow .board b{font-size:12px;font-weight:600}
+.trow .board .ph{width:30px;height:30px;border-radius:6px;background:var(--line2);display:block}
+.trow .board .lnk{margin-left:auto;color:var(--cta);font-weight:600;font-size:12px}
+.tband{display:flex;align-items:center;gap:8px;background:var(--cta-wash);color:var(--cta);border-radius:12px;padding:8px 12px;font-size:12px;line-height:1.35;margin:4px 0 8px}
+.tband b{font-weight:700}
+/* ── the notes under the phone ── */
+.notes{max-width:860px;margin:28px auto 0;font-size:13.5px;line-height:1.55;color:var(--ink2)}
+.notes h2{font-family:var(--serif);font-weight:500;font-size:22px;color:var(--ink);margin:18px 0 6px}
+.notes table{border-collapse:collapse;width:100%;font-size:12.5px}
+.notes th,.notes td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.notes th{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.notes code{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;background:var(--pill);padding:1px 5px;border-radius:5px;color:var(--ink)}
+.notes .figs{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;padding:10px 0}
+.notes .figs figure{margin:0;text-align:center;font-size:11px;color:var(--mute)}
+.notes .figs svg{height:150px;width:auto;margin:0 auto 4px}
+.notes ol,.notes ul{padding-left:20px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="banner">Design · 2026-10-14 · for the owner's OK · nothing is saved</span>
+  <h1>Premium effects · Attire with real figures</h1>
+  <p class="lead">Two Maker screens, redrawn from what ships. <b>Effects</b>: Studio › Look › Background › Effects — Today beside Proposed, every tile moving live. <b>Attire</b>: Studio › Mood Board &amp; Dress Code › Attire — illustrated figures in the role's exact colours, a clean block per role, men and women picked separately where a role has both, Entourage gone. Sample event: <b>Maria &amp; Jose</b>. Tap everything; it is all fake.</p>
+  <div class="ctl">
+    <span class="lbl">Showing</span>
+    <div class="pdd" id="pdd">
+      <button class="fh one" id="pddBtn" aria-expanded="false" aria-haspopup="listbox"><span class="fn">Screen</span><span class="fv" id="pddVal">Effects</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="menu" id="pddMenu" hidden role="listbox">
+        <button role="option" data-v="effects" aria-selected="true">Effects — Studio › Look › Background<svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+        <button role="option" data-v="attire">Attire — Studio › Mood Board &amp; Dress Code<svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+      </div>
+    </div>
+    <span class="lbl">Theme</span>
+    <div class="tgp" id="theme"><button aria-pressed="true" data-t="light">Light</button><button aria-pressed="false" data-t="dark">Dark</button></div>
+  </div>
+
+  <div class="frames">
+    <div class="frame">
+      <h2 id="frameTitle">Studio › Look › Background › Effects</h2>
+      <div class="phone" id="phone">
+        <div class="status"><span>9:41</span><span class="bat"></span></div>
+        <div class="topnav">
+          <button class="rnd exitx" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+          <div class="seg"><div class="thumb" id="segThumb" style="transform:translateX(100%)"></div><button id="segA">Stages <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button><button class="on" id="segB">Look <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button></div>
+          <button class="rnd undob" aria-label="Undo"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg></button>
+          <button class="rnd applyg" aria-label="Apply"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span class="n" id="applyN">2</span></button>
+        </div>
+        <div class="lt">
+          <div class="pane" id="pane"></div>
+          <div id="sheetHost"></div>
+        </div>
+        <div class="home"></div>
+      </div>
+      <p class="cap" id="frameCap">Today | Proposed swaps the whole effect set on the same sample. The cards are 3:4 and alive. ◆ = Event Hub Pro — tried on the sample, named at Apply, never a padlock.</p>
+    </div>
+  </div>
+
+  <section class="notes" id="notes">
+    <h2>What exists today, what changed</h2>
+    <table>
+      <tr><th>Piece</th><th>Today (origin/main)</th><th>Proposed</th></tr>
+      <tr><td>Effects</td><td>Six, one at a time on the main background (<code>lib/ambient-effects.ts</code>): Lanterns ◆ · Falling petals ◆ · Sparkles · Capiz glow ◆ · Gold shimmer ◆ · Bokeh lights. Hard four-point stars, leaf-shaped petals, 8–16 shapes popping in at their start, 3–22 s cycles.</td><td>Six curated, same controls (How much ▾ · Colour ▾): <b>Soft haze</b> (free, new) · <b>Bokeh lights</b> (free, refined: real bright rim, breathing) · <b>Gold dust</b> ◆ (replaces Sparkles) · <b>Petal drift</b> ◆ (refined) · <b>Lanterns</b> ◆ (refined: 4, large, ribbed, tassel) · <b>Gold shimmer</b> ◆ (now on the names). Capiz glow dropped. Two optional extras to say yes/no to: <b>Light leak</b> ◆ · <b>Film grain</b> ◆. Every shape fades in and out, nothing pops; cycles 12–60 s; depth by blur; the readable band mask and the reduce-motion still stay exactly as shipped.</td></tr>
+      <tr><td>Attire figure</td><td>Studio: a skin circle over a rounded rectangle in the first colour, a gown for every role (<code>Figure</code> in <code>mood-board-studio.tsx</code>). Guest page: the reception scene's polygon gown/suit (<code>lib/role-figure.ts</code>).</td><td>One inline-SVG figure set with colour slots (<code>--main --accent --skin --hair</code>): women — long gown · terno/Filipiniana · cocktail · midi · pantsuit; men — barong Tagalog · suit · black tie · open shirt; children — flower girl dress · boy's barong/suit. The garment follows the Wear ▾ pick; "Not said yet" draws a dotted silhouette, never a guessed outfit (the 2026-09-20 no-default rule). Still, not animated.</td></tr>
+      <tr><td>Per role</td><td>One FormRows list: name + "Wear ▾" on the row, then figure · dots · "Arrives" · the role's photo board, all in one line that wraps.</td><td>One block per role, divided by a hairline (frames only on what you press): name · who and how many · arrives → the figure beside its colours and its Wear ▾ → note → the role's inspiration row (＋ · Search ideas ›).</td></tr>
+      <tr><td>Both genders</td><td>Sponsors and family draw a gown-and-suit PAIR on the guest page, but ONE Wear ▾ for both in the Studio.</td><td><b>For men</b> / <b>For women</b> side by side — each its own colours, figure and Wear ▾ — on VIP · Immediate Family, Principal Sponsors, Secondary Sponsors, Guests (and Bearers &amp; Flower Girl as boys / girls). Bride, Groom, Maid/Matron of Honor, Bridesmaids, Groomsmen stay single; Best Man / Best Woman stays single and the figure follows the outfit picked.</td></tr>
+      <tr><td>Entourage</td><td>A lone "Entourage" photo board after the rows (<code>lib/inspiration-slots.ts</code> slotKey <code>entourage</code> → the shared <code>wedding_party</code> palette).</td><td>Removed from Attire. Nothing replaces it on screen: Bridesmaids · Groomsmen · Flower girl · Ring bearer already carry their own boards. The <code>wedding_party</code> fallback palette stays as code (a silent fallback), not a row.</td></tr>
+    </table>
+    <h2>The figures, one per garment (colour slots)</h2>
+    <div class="figs" id="figGallery"></div>
+    <h2>Questions for the owner</h2>
+    <ol>
+      <li><b>Light leak and Film grain</b> — keep as two more ◆ effects, or stop at six?</li>
+      <li><b>Principal Sponsors</b> (ninongs &amp; ninangs) and <b>Bearers &amp; Flower Girl</b> also hold both sexes — drawn with two picks here as well. Yes?</li>
+      <li><b>Capiz glow</b> is dropped as the weakest of the six. Keep it instead of one of the new ones?</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+/* ═════════════ shared ═════════════ */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const FIVE={dominant:'#7A1F2B',supporting:'#1F3A2E',accent:'#C9A24B',neutral:'#F3EBE1',accent2:'#B88A6A'};
+const SLOT_LABEL={dominant:'Dominant',supporting:'Supporting',accent:'Accent',neutral:'Neutral',accent2:'Accent 2'};
+function rgb(h){const n=parseInt(h.slice(1),16);return [(n>>16)&255,(n>>8)&255,n&255]}
+function hex(r,g,b){return '#'+[r,g,b].map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('').toUpperCase()}
+function mix(a,b,t){const A=rgb(a),B=rgb(b);return hex(A[0]+(B[0]-A[0])*t,A[1]+(B[1]-A[1])*t,A[2]+(B[2]-A[2])*t)}
+function lum(h){const [r,g,b]=rgb(h);return .299*r+.587*g+.114*b}
+function wash(h,a){const [r,g,b]=rgb(h);return `rgba(${r},${g},${b},${a})`}
+function shade(h,amt){const [r,g,b]=rgb(h);return hex(r+amt,g+amt,b+amt)}
+function seeded(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const ESC=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const CHEV='<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
+const TICK='<svg class="tick" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>';
+
+/* page state */
+const state={view:'effects',theme:'light',rm:false,
+  fx:{mode:'proposed',ground:'dark',kind:'p-haze',todayKind:'t-lanterns',intensity:'standard',colour:'original'},
+  at:{mode:'proposed'}};
+let applyCount=2;
+const bump=()=>{applyCount++;$('#applyN').textContent=applyCount};
+
+/* ═════════════ EFFECTS ═════════════ */
+const SCALE={subtle:.6,standard:1,lavish:1.5};
+const INT_LABEL={subtle:'Subtle',standard:'Standard',lavish:'Lavish'};
+/* today's six — counts, periods and "Original" colours as lib/ambient-effects.ts has them */
+const TODAY=[
+ {k:'t-lanterns',name:'Lanterns',pro:true,count:8,period:22,orig:(d,f)=>({bodies:['#F2B25A'],hi:'#FFE2A8',deep:'#9C5A1E'})},
+ {k:'t-petals',name:'Falling petals',pro:true,count:12,period:14,orig:(d,f)=>({bodies:[f.neutral,f.accent2],hi:mix(f.neutral,'#fff',.4),deep:mix(f.accent2,'#000',.35)})},
+ {k:'t-sparkles',name:'Sparkles',pro:false,count:16,period:3.2,orig:(d,f)=>({bodies:[d?'#FFF4D6':f.supporting],hi:'#FFFFFF',deep:d?'#D9C7A0':mix(f.supporting,'#000',.35)})},
+ {k:'t-capiz',name:'Capiz glow',pro:true,count:9,period:5,orig:(d,f)=>({bodies:['#E9DCCB'],hi:'#FFFFFF',deep:'#BFA98E'})},
+ {k:'t-shimmer',name:'Gold shimmer',pro:true,count:14,period:9,orig:(d,f)=>({bodies:['#D4AF37'],hi:'#FFF1B8',deep:'#8A6D1E'})},
+ {k:'t-bokeh',name:'Bokeh lights',pro:false,count:9,period:18,orig:(d,f)=>({bodies:['#FFD9A0'],hi:'#FFF3D9',deep:'#B88A4B'})},
+];
+/* proposed — fewer, slower, softer */
+const PROPOSED=[
+ {k:'p-haze',name:'Soft haze',pro:false,count:3,period:48,line:'Light drifting through the room',orig:(d,f)=>({bodies:[d?'#F3E6CF':f.dominant],hi:'#FFFFFF',deep:d?'#C9B58F':mix(f.dominant,'#000',.35)})},
+ {k:'p-bokeh',name:'Bokeh lights',pro:false,count:6,period:30,line:'Out-of-focus lights, breathing',orig:(d,f)=>({bodies:[d?'#FFD9A0':f.accent2],hi:'#FFF6E3',deep:d?'#B88A4B':mix(f.accent2,'#000',.35)})},
+ {k:'p-dust',name:'Gold dust',pro:true,count:18,period:14,line:'Tiny points of gold, rising',orig:(d,f)=>({bodies:['#D4AF37'],hi:'#FFF1B8',deep:'#8A6D1E'})},
+ {k:'p-petals',name:'Petal drift',pro:true,count:7,period:26,line:'A few petals, slowly',orig:(d,f)=>({bodies:[f.neutral,mix(f.accent2,f.neutral,.5)],hi:'#FFFFFF',deep:mix(f.accent2,'#000',.25)})},
+ {k:'p-lanterns',name:'Lanterns',pro:true,count:4,period:52,line:'Four paper lanterns, far apart',orig:(d,f)=>({bodies:['#F2B25A'],hi:'#FFE9B8',deep:'#8C5A2A'})},
+ {k:'p-shimmer',name:'Gold shimmer',pro:true,count:2,period:11,line:'Light passing over the names',orig:(d,f)=>({bodies:['#D4AF37'],hi:'#FFF4CC',deep:'#8A6D1E'})},
+ {k:'p-leak',name:'Light leak',pro:true,ask:true,count:1,period:16,line:'A warm band, like film',orig:(d,f)=>({bodies:[d?'#F4B37C':f.accent2],hi:'#FFE6C4',deep:'#9C5A2A'})},
+ {k:'p-grain',name:'Film grain',pro:true,ask:true,count:0,period:1,line:'A fine grain over everything',orig:(d,f)=>({bodies:['#FFFFFF'],hi:'#FFFFFF',deep:'#000000'})},
+];
+const FXBY={};[...TODAY,...PROPOSED].forEach(e=>FXBY[e.k]=e);
+function pull(body,dark){let c=body;for(let i=0;i<12;i++){const L=lum(c);if(dark?L>=92:L<=178)break;c=mix(c,dark?'#FFFFFF':'#000000',.08)}return c}
+function triad(body){return{bodies:[body],hi:mix(body,'#FFFFFF',.4),deep:mix(body,'#000000',.35)}}
+const GRAIN_SVG=(id)=>`<svg xmlns="http://www.w3.org/2000/svg"><filter id="${id}a" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="3" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .9 0"/></filter><filter id="${id}b" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="11" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .9 0"/></filter><filter id="${id}c" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="29" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .9 0"/></filter><rect width="100%" height="100%" filter="url(#${id}a)"/><rect width="100%" height="100%" filter="url(#${id}b)"/><rect width="100%" height="100%" filter="url(#${id}c)"/></svg>`;
+let grainN=0;
+/* the one answer to "what does this effect draw here?" — a layer filled with <i> shapes, like ambientEffectSpec() */
+function spawn(layer,kind,{intensity,colour,ground,mini}){
+  const e=FXBY[kind];layer.innerHTML='';layer.dataset.fx=kind;layer.dataset.ground=ground;if(mini)layer.dataset.mini='';else delete layer.dataset.mini;
+  const dark=ground==='dark';
+  const slot=colour!=='original'?FIVE[colour]:null;
+  const own=slot?triad(pull(slot,dark)):e.orig(dark,FIVE);
+  const c1=own.bodies[0],c2=own.hi,c3=own.deep;
+  const vars={'--c1':c1,'--c2':c2,'--c3':c3,'--c1-75':wash(c1,.75),'--c1-45':wash(c1,.45),'--c1-35':wash(c1,.35),'--c1-12':wash(c1,.12),'--c2-85':wash(c2,.85),'--c2-55':wash(c2,.55),'--c3-35':wash(c3,.35),'--c3-20':wash(c3,.2)};
+  for(const k in vars)layer.style.setProperty(k,vars[k]);
+  if(kind==='p-grain'){const id='g'+(++grainN);layer.style.setProperty('--go',{subtle:.05,standard:.085,lavish:.13}[intensity]*(mini?.8:1));layer.innerHTML=GRAIN_SVG(id);return}
+  const n=Math.min(24,Math.max(1,Math.round(e.count*SCALE[intensity]*(mini?.6:1))));
+  const r=seeded((Object.keys(FXBY).indexOf(kind)+1)*97+n);
+  const base=e.period;let html='';
+  for(let i=0;i<n;i++){
+    const depth=r();let s=(0.55+depth*0.75)*(mini?.5:1);
+    const x=r()*96+2,y=r()*90+4;const d=base*(0.75+r()*0.6),dl=-r()*base;const still=((-dl/d)%1+1)%1;
+    const body=own.bodies.length>1?own.bodies[Math.floor(r()*own.bodies.length)]:null;
+    let o=(0.5+depth*0.5),b=depth<0.25?'1.4px':depth<0.5?'.5px':'0px';
+    /* the proposed kinds hold back: lower ceilings, more blur on the far ones */
+    if(kind==='p-haze'){s=(0.8+depth*0.5)*(mini?.7:1);o=dark?.55:.5}
+    if(kind==='p-bokeh'){o=(0.35+depth*0.35);b=depth<0.4?'6px':depth<0.7?'2px':'0px'}
+    if(kind==='p-dust'){o=(0.45+depth*0.5);b='0px'}
+    if(kind==='p-petals'){o=(0.55+depth*0.4);b=depth<0.3?'1.6px':depth<0.55?'.6px':'0px'}
+    if(kind==='p-lanterns'){s=(0.55+depth*0.9)*(mini?.5:1);o=(0.55+depth*0.45);b=depth<0.3?'1.8px':depth<0.6?'.7px':'0px'}
+    if(kind==='p-shimmer'){o=.7;b='0px'}
+    if(kind==='p-leak'){o=dark?.5:.38;s=1}
+    const g=(still<0.45?still/0.45:(1-still)/0.55).toFixed(3);
+    html+=`<i style="--x:${x.toFixed(1)}%;--y:${y.toFixed(1)}%;--s:${s.toFixed(2)};--b:${b};--o:${o.toFixed(2)};--d:${d.toFixed(1)}s;--dl:${dl.toFixed(1)}s;--p:${still.toFixed(3)};--g:${g}${body?`;--c1:${body}`:''}"></i>`;
+  }
+  layer.innerHTML=html;
+}
+function effectsHTML(){
+  const f=state.fx,set=f.mode==='today'?TODAY:PROPOSED,kind=f.mode==='today'?f.todayKind:f.kind;
+  const e=FXBY[kind];
+  return `
+  <div class="pills"><button class="on">Background</button><button>Elements</button><button>Music</button></div>
+  <div class="stage" id="stage" data-ground="${f.ground}" ${kind==='p-shimmer'?'data-shimmer':''} style="--sh-hi:#FFF4CC">
+    <span class="tag">${f.mode==='today'?'Today':'Proposed'} · ${ESC(e.name)}${e.pro?' ◆':''}</span>
+    <div class="fx" id="fxMain"></div>
+    <div class="words"><div class="eyebrow">Together with their families</div><div class="names">Maria<span class="amp">&amp;</span>Jose</div><div class="dline">SATURDAY · 14 FEBRUARY 2027</div><div class="pline">San Agustin Church · Intramuros, Manila</div><div class="gbtn">Open the invitation</div></div>
+  </div>
+  <div class="rowc tg" id="fxMode"><button aria-pressed="${f.mode==='today'}" data-m="today">Today</button><button aria-pressed="${f.mode==='proposed'}" data-m="proposed">Proposed</button></div>
+  <div class="eyeb">Effect${f.mode==='proposed'?' — six, plus two to decide on':' — the six that ship'}</div>
+  <div class="cards" id="fxCards">
+    <button class="card" data-k="none" aria-pressed="false"><span class="pv" data-ground="${f.ground}"><span class="mini"><b>M &amp; J</b><span></span></span></span><span class="nm">None</span></button>
+    ${set.map(x=>`<button class="card" data-k="${x.k}" aria-pressed="${x.k===kind}"><span class="pv" data-ground="${f.ground}"><span class="fx" data-card="${x.k}"></span><span class="mini"><b>M &amp; J</b><span></span></span></span><span class="nm">${ESC(x.name)}${x.pro?'<i class="pro">◆</i>':''}${x.ask?'<small>ask</small>':''}</span></button>`).join('')}
+  </div>
+  <div class="rowc">
+    <button class="fh" id="fxInt" aria-expanded="false"><span class="fn">How much</span><span class="fv">${INT_LABEL[f.intensity]}</span>${CHEV}</button>
+    <button class="fh" id="fxCol" aria-expanded="false"><span class="fn">Colour</span><span class="fv">${f.colour==='original'?'Original':SLOT_LABEL[f.colour]}</span>${CHEV}</button>
+  </div>
+  <hr class="div">
+  <div class="eyeb">For this review only</div>
+  <div class="rowc tg small" id="fxGround"><button aria-pressed="${f.ground==='dark'}" data-g="dark">Dark ground</button><button aria-pressed="${f.ground==='light'}" data-g="light">Light ground</button></div>
+  <button class="sw" id="rmSw" role="switch" aria-checked="${state.rm}"><i></i>Reduce motion — the finished still</button>
+  <p class="guestline">${f.mode==='proposed'?ESC(e.line||'')+'. ':''}Every shape moves on transform and opacity only, fades at both ends, and stands still under reduce-motion. The band across the middle is half strength so the words stay readable.</p>`;
+}
+function mountEffects(){
+  const f=state.fx,kind=f.mode==='today'?f.todayKind:f.kind;
+  $('#pane').innerHTML=effectsHTML();
+  spawn($('#fxMain'),kind,{intensity:f.intensity,colour:f.colour,ground:f.ground,mini:false});
+  $$('#fxCards .fx').forEach(l=>spawn(l,l.dataset.card,{intensity:'standard',colour:f.colour,ground:f.ground,mini:true}));
+  const cur=$('#fxCards .card[aria-pressed=true]');if(cur)cur.scrollIntoView({inline:'center',block:'nearest'});
+  $('#fxMode').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;f.mode=b.dataset.m;mountEffects()};
+  $('#fxGround').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;f.ground=b.dataset.g;mountEffects()};
+  $('#fxCards').onclick=ev=>{const c=ev.target.closest('.card');if(!c)return;const k=c.dataset.k;
+    if(k==='none'){$$('#fxCards .card').forEach(x=>x.setAttribute('aria-pressed',x===c));$('#fxMain').innerHTML='';$('#stage').removeAttribute('data-shimmer');$('#stage .tag').textContent='None';return}
+    if(f.mode==='today')f.todayKind=k;else f.kind=k;bump();mountEffects()};
+  $('#fxInt').onclick=()=>openSheet('How much',Object.keys(INT_LABEL).map(k=>({k,label:INT_LABEL[k],on:f.intensity===k})),k=>{f.intensity=k;bump();mountEffects()});
+  $('#fxCol').onclick=()=>openSheet('Colour',[{k:'original',label:'Original',sub:'the effect’s own',on:f.colour==='original'},...Object.keys(FIVE).map(k=>({k,label:SLOT_LABEL[k],dot:FIVE[k],on:f.colour===k}))],k=>{f.colour=k;bump();mountEffects()});
+  $('#rmSw').onclick=()=>{state.rm=!state.rm;$('#rmSw').setAttribute('aria-checked',state.rm);if(state.rm)$('#phone').dataset.rm='';else delete $('#phone').dataset.rm};
+}
+
+/* ═════════════ ATTIRE ═════════════ */
+const STYLES=[['long_gown','Long gown'],['cocktail_dress','Cocktail dress'],['filipiniana','Filipiniana'],['barong_tagalog','Barong Tagalog'],['suit','Suit'],['formal','Formal'],['smart_casual','Smart casual']];
+const STYLE_LABEL=Object.fromEntries(STYLES);
+/* the style vocabulary is ONE list (lib/role-dress-code.ts ATTIRE_STYLES); per block the fitting ones are listed first */
+const ORDER={f:['long_gown','filipiniana','cocktail_dress','formal','smart_casual','suit','barong_tagalog'],m:['barong_tagalog','suit','formal','smart_casual','filipiniana','long_gown','cocktail_dress'],girl:['cocktail_dress','filipiniana','long_gown','formal','smart_casual','suit','barong_tagalog'],boy:['barong_tagalog','suit','formal','smart_casual','filipiniana','long_gown','cocktail_dress']};
+/* style × who → the garment drawn */
+const GARMENT={
+ f:{long_gown:'gown',cocktail_dress:'cocktail',filipiniana:'terno',barong_tagalog:'barongf',suit:'pantsuit',formal:'gown',smart_casual:'midi'},
+ m:{barong_tagalog:'barong',suit:'suit',formal:'tux',smart_casual:'shirt',long_gown:'suit',cocktail_dress:'suit',filipiniana:'barong'},
+ girl:{cocktail_dress:'dress',filipiniana:'dress',long_gown:'dress',formal:'dress',smart_casual:'dress',suit:'dress',barong_tagalog:'dress'},
+ boy:{barong_tagalog:'barongb',suit:'suitb',formal:'suitb',smart_casual:'suitb',filipiniana:'barongb',long_gown:'suitb',cocktail_dress:'suitb'}};
+/* Maria & Jose's people — the order studioAttireRows() draws (Mood Board order), only the groups on their list, the guests always */
+const ROLES=[
+ {key:'bride',name:'The bride',sub:'Maria',arrives:'1:30 PM',pal:['#F3EBE1','#C9A24B'],blocks:[{who:'f',style:'long_gown'}],note:'Ivory, cathedral veil',ideas:4},
+ {key:'groom',name:'The groom',sub:'Jose',arrives:'1:00 PM',pal:['#2E3A4F','#C9A24B'],blocks:[{who:'m',style:'suit'}],note:'',ideas:2},
+ {key:'vip_family',name:'VIP · Immediate Family',sub:'Parents and immediate family of both sides · 8 people',arrives:'1:30 PM',pal:['#7A1F2B','#C9A24B','#F3EBE1'],blocks:[{who:'m',label:'For men',style:'barong_tagalog'},{who:'f',label:'For women',style:'filipiniana'}],note:'Mothers in the wine; fathers in piña',ideas:0},
+ {key:'principal_sponsors',name:'Principal Sponsors',sub:'Ninongs & ninangs · 12 people',arrives:'2:00 PM',pal:['#1F3A2E','#C9A24B'],blocks:[{who:'m',label:'For men',style:'barong_tagalog'},{who:'f',label:'For women',style:'long_gown'}],note:'',ideas:0},
+ {key:'secondary_sponsors',name:'Secondary Sponsors',sub:'Candle · veil · cord · 6 people',arrives:'2:00 PM',pal:['#B88A6A','#F3EBE1'],blocks:[{who:'m',label:'For men',style:'suit'},{who:'f',label:'For women',style:'cocktail_dress'}],note:'',ideas:0},
+ {key:'bridesmaids',name:'Bridesmaids',sub:'5 people',arrives:'12:30 PM',pal:['#D9A5A0','#C9A24B','#E8C4B8'],blocks:[{who:'f',style:'long_gown'}],note:'Any of the three — mix, not match',ideas:6},
+ {key:'groomsmen',name:'Groomsmen',sub:'5 people',arrives:'12:30 PM',pal:['#3B4A5C','#C9A24B'],blocks:[{who:'m',style:'suit'}],note:'',ideas:3},
+ {key:'bearers_flower_girl',name:'Bearers & Flower Girl',sub:'Ring · bible · coin bearers and the flower girl · 4 children',arrives:'1:30 PM',pal:['#F3EBE1','#C9A24B'],blocks:[{who:'boy',label:'For boys',style:'barong_tagalog'},{who:'girl',label:'For girls',style:'cocktail_dress'}],note:'',ideas:2},
+ {key:'guest',name:'Guests',sub:'Everyone else — they pick ANY ONE of these colours',arrives:null,pal:['#6B7A8F','#B88A6A','#1F3A2E','#D9A5A0'],options:true,blocks:[{who:'m',label:'For men',style:'smart_casual'},{who:'f',label:'For women',style:'cocktail_dress'}],note:'No white, no red',ideas:0},
+];
+/* each block may own its colours; starts on the role's */
+ROLES.forEach(r=>r.blocks.forEach(b=>{b.pal=[...r.pal]}));
+
+/* ── the figures: inline SVG with colour slots ── */
+const FIG_W=120;
+function figSvg(who,garment,main,accent,opts={}){
+  const d=shade(main,-26),l=shade(main,26);
+  const acc=accent||mix(main,'#FFFFFF',.35);
+  const H=who==='boy'||who==='girl'?240:300;
+  const vars=`--main:${main};--main-d:${d};--main-l:${l};--accent:${acc}`;
+  const parts=[];
+  const floor=H-8;
+  parts.push(`<ellipse cx="60" cy="${floor}" rx="${who==='boy'||who==='girl'?34:42}" ry="4" fill="rgba(0,0,0,.12)"/>`);
+  if(garment==='unset'){
+    const sil=who==='m'||who==='boy'?`M60 ${who==='boy'?18:18} m-13 16 a13 16 0 1 0 26 0 a13 16 0 1 0 -26 0 M34 66 C44 58 76 58 86 66 L90 152 L78 152 L80 ${floor-4} L62 ${floor-4} L60 200 L58 ${floor-4} L40 ${floor-4} L42 152 L30 152 Z`
+      :`M60 18 m-13 16 a13 16 0 1 0 26 0 a13 16 0 1 0 -26 0 M43 66 C50 60 70 60 77 66 L79 104 C90 160 98 230 102 ${floor-2} L18 ${floor-2} C22 230 30 160 41 104 Z`;
+    parts.push(`<path d="${sil}" fill="none" stroke="var(--mute,#8E8880)" stroke-width="1.6" stroke-dasharray="4 4" opacity=".8"/>`);
+    return `<svg viewBox="0 0 ${FIG_W} ${H}" style="${vars}" aria-hidden="true">${parts.join('')}</svg>`;
+  }
+  const female=who==='f'||who==='girl', child=who==='boy'||who==='girl';
+  /* hair behind */
+  if(female)parts.push(`<ellipse cx="${child?60:71}" cy="${child?30:46}" rx="${child?17:7}" ry="${child?16:6}" fill="var(--hair,#2A1C15)"/>`);
+  /* body by garment (drawn before the head, which sits on top) */
+  const skin='var(--skin,#D8B48F)';
+  if(female&&!child){
+    parts.push(`<path d="M44 64 C36 90 34 118 38 150 C40 153 45 153 46 150 C44 118 46 94 52 70Z" fill="${skin}"/><path d="M76 64 C84 90 86 118 82 150 C80 153 75 153 74 150 C76 118 74 94 68 70Z" fill="${skin}"/>`);
+    parts.push(`<path d="M44 62 C50 57 70 57 76 62 L77 86 L43 86Z" fill="${skin}"/>`);
+  }
+  if(garment==='gown'||garment==='terno'||garment==='cocktail'||garment==='midi'||garment==='barongf'){
+    const skirt={gown:`M41 104 C32 160 24 230 20 ${floor} L100 ${floor} C96 230 88 160 79 104 C70 110 50 110 41 104Z`,
+      terno:`M41 104 C36 160 34 230 36 ${floor} L84 ${floor} C86 230 84 160 79 104 C70 110 50 110 41 104Z`,
+      barongf:`M41 104 C37 160 35 230 36 ${floor} L84 ${floor} C85 230 83 160 79 104 C70 110 50 110 41 104Z`,
+      cocktail:`M41 104 C36 140 31 170 29 192 L91 192 C89 170 84 140 79 104 C70 110 50 110 41 104Z`,
+      midi:`M41 104 C36 150 32 200 31 232 L89 232 C88 200 84 150 79 104 C70 110 50 110 41 104Z`}[garment];
+    const hem={gown:floor,terno:floor,barongf:floor,cocktail:192,midi:232}[garment];
+    if(hem<floor){/* legs + shoes */
+      parts.push(`<path d="M46 ${hem-2} L44 ${floor-8} L54 ${floor-8} L58 ${hem+10} L62 ${floor-8} L72 ${floor-8} L74 ${hem-2}Z" fill="${skin}"/>`);
+      parts.push(`<path d="M43 ${floor-9} L55 ${floor-9} L56 ${floor-2} L41 ${floor-2}Z M61 ${floor-9} L73 ${floor-9} L75 ${floor-2} L60 ${floor-2}Z" fill="var(--hair,#2A1C15)"/>`);
+    }
+    const skirtFill=garment==='barongf'?'var(--main-d)':'var(--main)';
+    parts.push(`<path d="${skirt}" fill="${skirtFill}"/>`);
+    /* form: a shadow on the right, a highlight fold on the left */
+    parts.push(`<path d="M60 106 C58 170 55 240 54 ${hem} L${garment==='gown'?100:garment==='cocktail'?91:garment==='midi'?89:84} ${hem} C${garment==='gown'?96:garment==='cocktail'?89:garment==='midi'?88:86} 230 88 160 79 104 C73 108 66 109 60 106Z" fill="rgba(0,0,0,.10)"/>`);
+    parts.push(`<path d="M49 112 C45 170 41 235 39 ${hem-4}" stroke="rgba(255,255,255,.22)" stroke-width="2" fill="none" stroke-linecap="round"/>`);
+    /* bodice */
+    if(garment==='terno'){
+      parts.push(`<path d="M42 64 C50 60 70 60 78 64 L79 104 C70 110 50 110 41 104Z" fill="var(--main)"/><path d="M50 64 C55 76 65 76 70 64Z" fill="${skin}"/>`);
+      parts.push(`<path d="M44 66 C30 54 24 72 33 84 C38 88 44 85 46 78Z" fill="var(--main)"/><path d="M76 66 C90 54 96 72 87 84 C82 88 76 85 74 78Z" fill="var(--main)"/>`);
+      parts.push(`<path d="M44 68 C36 62 32 72 36 80 C39 83 43 80 44 76Z" fill="rgba(255,255,255,.2)"/><path d="M76 68 C84 62 88 72 84 80 C81 83 77 80 76 76Z" fill="rgba(255,255,255,.2)"/>`);
+      parts.push(`<path d="M41 100 C50 106 70 106 79 100 L79 108 C70 114 50 114 41 108Z" fill="var(--accent)"/>`);
+    }else if(garment==='barongf'){
+      parts.push(`<path d="M42 64 C50 60 70 60 78 64 L79 112 C70 116 50 116 41 112Z" fill="#FBF8F2"/><path d="M42 64 C50 60 70 60 78 64 L79 112 C70 116 50 116 41 112Z" fill="var(--main)" opacity=".55"/>`);
+      parts.push(`<path d="M53 62 L60 74 L67 62 L64 62 L60 68 L56 62Z" fill="#FBF8F2"/><path d="M56 76 V108 M60 76 V108 M64 76 V108" stroke="var(--accent)" stroke-width=".8" stroke-dasharray="2 2"/>`);
+    }else if(garment==='midi'){
+      parts.push(`<path d="M40 64 C50 59 70 59 80 64 L80 74 L40 74Z" fill="var(--main)"/><path d="M43 72 C48 68 56 72 60 74 C64 72 72 68 77 72 L79 104 C70 110 50 110 41 104Z" fill="var(--main)"/>`);
+      parts.push(`<path d="M41 100 C50 106 70 106 79 100 L79 106 C70 112 50 112 41 106Z" fill="var(--accent)"/>`);
+    }else{
+      parts.push(`<path d="M43 78 C48 70 56 75 60 77 C64 75 72 70 77 78 L79 104 C70 110 50 110 41 104Z" fill="var(--main)"/>`);
+      parts.push(`<path d="M41 100 C50 106 70 106 79 100 L79 108 C70 114 50 114 41 108Z" fill="var(--accent)"/>`);
+    }
+  }
+  if(garment==='pantsuit'){
+    parts.push(`<path d="M44 150 L41 ${floor-4} L57 ${floor-4} L60 200 L63 ${floor-4} L79 ${floor-4} L76 150Z" fill="var(--main-d)"/>`);
+    parts.push(`<path d="M39 ${floor-5} L58 ${floor-5} L58 ${floor-1} L37 ${floor-1}Z M62 ${floor-5} L81 ${floor-5} L83 ${floor-1} L62 ${floor-1}Z" fill="#1A1816"/>`);
+    parts.push(`<path d="M50 62 L60 108 L70 62Z" fill="#F7F3EC"/><path d="M38 66 C46 59 50 59 52 62 L60 108 L68 62 C70 59 74 59 82 66 L85 150 L35 150Z" fill="var(--main)"/>`);
+    parts.push(`<path d="M52 62 L60 108 L56 100 L49 72Z M68 62 L60 108 L64 100 L71 72Z" fill="rgba(0,0,0,.16)"/><path d="M60 108 L68 62 C70 59 74 59 82 66 L85 150 L60 150Z" fill="rgba(0,0,0,.08)"/>`);
+    parts.push(`<rect x="37" y="144" width="8" height="11" rx="4" fill="${skin}"/><rect x="75" y="144" width="8" height="11" rx="4" fill="${skin}"/>`);
+    parts.push(`<path d="M44 62 C50 57 70 57 76 62 L76 72 L44 72Z" fill="${skin}"/>`);
+  }
+  if(garment==='suit'||garment==='tux'||garment==='shirt'||garment==='barong'){
+    const trous=garment==='barong'?'#2A2622':garment==='shirt'?'#4A4138':'var(--main-d)';
+    parts.push(`<path d="M42 150 L39 ${floor-4} L57 ${floor-4} L60 200 L63 ${floor-4} L81 ${floor-4} L78 150Z" fill="${trous}"/>`);
+    parts.push(`<path d="M37 ${floor-5} L58 ${floor-5} L58 ${floor-1} L35 ${floor-1}Z M62 ${floor-5} L83 ${floor-5} L85 ${floor-1} L62 ${floor-1}Z" fill="#1A1816"/>`);
+    if(garment==='barong'){
+      parts.push(`<path d="M36 64 C46 58 74 58 84 64 L86 160 L34 160Z" fill="#FBF8F2"/><path d="M36 64 C46 58 74 58 84 64 L86 160 L34 160Z" fill="var(--main)" opacity=".82"/>`);
+      parts.push(`<path d="M60 70 L86 160 L60 160Z" fill="rgba(0,0,0,.06)"/>`);
+      parts.push(`<rect x="54" y="72" width="12" height="84" fill="rgba(255,255,255,.14)"/><path d="M56 76 V152 M60 76 V152 M64 76 V152" stroke="var(--accent)" stroke-width=".9" stroke-dasharray="2.5 2" opacity=".95"/>`);
+      parts.push(`<circle cx="60" cy="84" r="1.4" fill="var(--accent)"/><circle cx="60" cy="100" r="1.4" fill="var(--accent)"/><circle cx="60" cy="116" r="1.4" fill="var(--accent)"/><circle cx="60" cy="132" r="1.4" fill="var(--accent)"/>`);
+      parts.push(`<path d="M53 60 L60 72 L67 60 L64 60 L60 66 L56 60Z" fill="#FBF8F2"/>`);
+      parts.push(`<rect x="36" y="152" width="9" height="12" rx="4" fill="${skin}"/><rect x="75" y="152" width="9" height="12" rx="4" fill="${skin}"/>`);
+    }else if(garment==='shirt'){
+      parts.push(`<path d="M36 64 C46 58 74 58 84 64 L86 150 L34 150Z" fill="var(--main)"/><path d="M60 68 L86 150 L60 150Z" fill="rgba(0,0,0,.08)"/>`);
+      parts.push(`<path d="M52 58 L60 72 L68 58 L72 62 L60 78 L48 62Z" fill="var(--main-l)"/><path d="M55 60 L60 70 L65 60Z" fill="${skin}"/>`);
+      parts.push(`<path d="M60 78 V146" stroke="rgba(0,0,0,.14)" stroke-width="1"/><rect x="36" y="142" width="9" height="12" rx="4" fill="${skin}"/><rect x="75" y="142" width="9" height="12" rx="4" fill="${skin}"/>`);
+    }else{
+      parts.push(`<path d="M48 60 L60 112 L72 60Z" fill="#F7F3EC"/>`);
+      parts.push(`<path d="M32 66 C42 58 50 58 52 60 L60 112 L68 60 C70 58 78 58 88 66 L90 150 L30 150Z" fill="var(--main)"/>`);
+      parts.push(`<path d="M60 112 L68 60 C70 58 78 58 88 66 L90 150 L60 150Z" fill="rgba(0,0,0,.08)"/>`);
+      if(garment==='tux'){
+        parts.push(`<path d="M52 60 L60 112 L55 100 L46 68 Z M68 60 L60 112 L65 100 L74 68Z" fill="var(--main-l)" opacity=".9"/>`);
+        parts.push(`<path d="M54 64 L60 67 L66 64 L66 70 L60 67 L54 70Z" fill="var(--accent)"/><rect x="58.5" y="64" width="3" height="6" rx="1" fill="var(--accent)"/>`);
+      }else{
+        parts.push(`<path d="M52 60 L60 112 L56 104 L49 70Z M68 60 L60 112 L64 104 L71 70Z" fill="rgba(0,0,0,.18)"/>`);
+        parts.push(`<path d="M57 66 L63 66 L64 108 L60 114 L56 108Z" fill="var(--accent)"/><rect x="57" y="62" width="6" height="5" rx="1" fill="var(--accent)"/>`);
+        parts.push(`<rect x="77" y="80" width="7" height="3" fill="var(--accent)"/>`);
+      }
+      parts.push(`<path d="M52 58 L60 66 L68 58 L66 63 L60 71 L54 63Z" fill="#F7F3EC"/>`);
+      parts.push(`<rect x="33" y="144" width="9" height="12" rx="4" fill="${skin}"/><rect x="78" y="144" width="9" height="12" rx="4" fill="${skin}"/>`);
+    }
+    parts.push(`<path d="M53 48 L67 48 L68 62 L52 62Z" fill="${skin}"/>`);
+  }
+  if(garment==='dress'){/* flower girl */
+    parts.push(`<path d="M47 168 L45 ${floor-8} L55 ${floor-8} L58 180 L61 ${floor-8} L71 ${floor-8} L69 168Z" fill="${skin}"/>`);
+    parts.push(`<path d="M44 ${floor-9} L56 ${floor-9} L57 ${floor-3} L42 ${floor-3}Z M60 ${floor-9} L72 ${floor-9} L74 ${floor-3} L59 ${floor-3}Z" fill="var(--hair,#2A1C15)"/>`);
+    parts.push(`<path d="M42 64 C34 80 32 100 36 118 L40 118 C38 100 40 84 46 70Z" fill="${skin}"/><path d="M78 64 C86 80 88 100 84 118 L80 118 C82 100 80 84 74 70Z" fill="${skin}"/>`);
+    parts.push(`<path d="M40 100 C28 128 24 158 24 170 L96 170 C96 158 92 128 80 100Z" fill="var(--main)"/><path d="M60 102 C58 130 56 160 56 170 L96 170 C96 158 92 128 80 100Z" fill="rgba(0,0,0,.09)"/>`);
+    parts.push(`<path d="M42 62 C50 58 70 58 78 62 L80 102 L40 102Z" fill="var(--main)"/><path d="M52 62 C55 70 65 70 68 62Z" fill="${skin}"/>`);
+    parts.push(`<path d="M40 98 L80 98 L80 106 L40 106Z" fill="var(--accent)"/><circle cx="60" cy="102" r="4" fill="var(--accent)" stroke="rgba(0,0,0,.12)"/>`);
+    parts.push(`<path d="M54 48 L66 48 L67 62 L53 62Z" fill="${skin}"/>`);
+  }
+  if(garment==='barongb'||garment==='suitb'){/* ring bearer */
+    const trous=garment==='barongb'?'#2A2622':'var(--main-d)';
+    parts.push(`<path d="M44 128 L42 ${floor-6} L57 ${floor-6} L60 170 L63 ${floor-6} L78 ${floor-6} L76 128Z" fill="${trous}"/>`);
+    parts.push(`<path d="M40 ${floor-7} L58 ${floor-7} L58 ${floor-2} L38 ${floor-2}Z M62 ${floor-7} L80 ${floor-7} L82 ${floor-2} L62 ${floor-2}Z" fill="#1A1816"/>`);
+    if(garment==='barongb'){
+      parts.push(`<path d="M38 62 C48 58 72 58 82 62 L84 134 L36 134Z" fill="#FBF8F2"/><path d="M38 62 C48 58 72 58 82 62 L84 134 L36 134Z" fill="var(--main)" opacity=".82"/>`);
+      parts.push(`<rect x="55" y="68" width="10" height="62" fill="rgba(255,255,255,.14)"/><path d="M57 72 V126 M60 72 V126 M63 72 V126" stroke="var(--accent)" stroke-width=".8" stroke-dasharray="2 2"/><path d="M54 60 L60 70 L66 60 L64 60 L60 65 L56 60Z" fill="#FBF8F2"/>`);
+    }else{
+      parts.push(`<path d="M50 60 L60 100 L70 60Z" fill="#F7F3EC"/><path d="M36 64 C46 58 52 58 52 60 L60 100 L68 60 C68 58 74 58 84 64 L86 134 L34 134Z" fill="var(--main)"/><path d="M57 64 L63 64 L63 92 L60 98 L57 92Z" fill="var(--accent)"/>`);
+    }
+    parts.push(`<rect x="36" y="128" width="8" height="10" rx="4" fill="${skin}"/><rect x="76" y="128" width="8" height="10" rx="4" fill="${skin}"/>`);
+    parts.push(`<path d="M54 46 L66 46 L67 60 L53 60Z" fill="${skin}"/>`);
+  }
+  /* neck (adult women) and head */
+  if(female&&!child)parts.push(`<path d="M54 46 L66 46 L67 62 L53 62Z" fill="${skin}"/><path d="M54 46 Q60 53 66 46 L66 51 Q60 57 54 51Z" fill="rgba(0,0,0,.08)"/>`);
+  else parts.push(`<path d="M54 46 Q60 52 66 46 L66 50 Q60 55 54 50Z" fill="rgba(0,0,0,.08)"/>`);
+  const hr=child?15:13,hy=child?17:16;
+  parts.push(`<ellipse cx="60" cy="${child?32:34}" rx="${hr}" ry="${hy}" fill="${skin}"/>`);
+  if(female)parts.push(child?`<path d="M45 30 C45 12 75 12 75 30 C70 22 50 22 45 30Z" fill="var(--hair,#2A1C15)"/>`:`<path d="M47 32 C48 17 72 17 73 32 C69 25 63 23 60 23 C57 23 51 25 47 32Z" fill="var(--hair,#2A1C15)"/>`);
+  else parts.push(child?`<path d="M45 32 C45 14 75 14 75 32 C75 26 68 20 60 20 C52 20 45 26 45 32Z" fill="var(--hair,#2A1C15)"/>`:`<path d="M47 33 C47 16 73 16 73 33 C73 27 66 22 60 22 C54 22 47 27 47 33Z" fill="var(--hair,#2A1C15)"/>`);
+  return `<svg viewBox="0 0 ${FIG_W} ${H}" style="${vars}" aria-hidden="true">${parts.join('')}</svg>`;
+}
+const WHO_ICON={m:'<svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="3.5"/><path d="M6 21v-4a6 6 0 0 1 12 0v4"/></svg>',f:'<svg viewBox="0 0 24 24"><circle cx="12" cy="6.5" r="3.5"/><path d="M8 21l1.5-8h5L16 21z"/></svg>',boy:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M7 21v-3a5 5 0 0 1 10 0v3"/></svg>',girl:'<svg viewBox="0 0 24 24"><circle cx="12" cy="7.5" r="4"/><path d="M8 21l1.5-7h5L16 21z"/></svg>'};
+function blockHTML(r,b,bi){
+  const style=b.style,g=style?GARMENT[b.who][style]:'unset';
+  const main=b.pal[0]||'#9B9B9B',acc=b.pal[1]||null;
+  const kid=b.who==='boy'||b.who==='girl';
+  const sw=`<div class="swatches">${b.pal.map((c,i)=>`<button data-sw="${bi}:${i}" aria-label="Colour ${c}"><i style="background:${c}"></i></button>`).join('')}${b.pal.length<(r.options?6:3)?`<button class="add" data-add="${bi}" aria-label="Add a colour"><i>＋</i></button>`:''}</div>`;
+  const wear=`<button class="fh" data-wear="${bi}" aria-expanded="false"><span class="fn">Wear</span><span class="fv">${style?ESC(STYLE_LABEL[style]):'Not said yet'}</span>${CHEV}</button>`;
+  return `<div class="g">${b.label?`<span class="gl"><i>${WHO_ICON[b.who]}</i>${ESC(b.label)}</span>`:''}<div class="figrow"><div class="figwrap${kid?' kid':''}">${figSvg(b.who,g,main,acc)}</div><div class="ctrls">${sw}${r.blocks.length===1?wear:''}</div></div>${r.blocks.length>1?wear:''}</div>`;
+}
+function ideasHTML(r){
+  const a=r.pal[0],b=r.pal[1]||r.pal[0];
+  return `<div class="ideas"><div class="th">${r.ideas?`<i style="--a:${a};--b:${mix(b,'#ffffff',.3)}"></i><i style="--a:${mix(a,'#000',.2)};--b:${b}"></i>`:''}</div><span class="cnt">${r.ideas?`${r.ideas} photo${r.ideas>1?'s':''}`:'No photos yet'}</span><button class="plus" data-plus="${r.key}" aria-label="Add a photo"><i>＋</i></button><button class="btn" data-search="${r.key}">Search ideas ›</button></div>`;
+}
+function attireProposedHTML(){
+  return ROLES.map((r,ri)=>`<section class="role" data-role="${r.key}">
+    <header><h3>${ESC(r.name)}</h3>${r.arrives?`<small>Arrives ${r.arrives}</small>`:''}</header>
+    <p class="sub">${ESC(r.sub)}</p>
+    <div class="who ${r.blocks.length>1?'two':'one'}" data-ri="${ri}">${r.blocks.map((b,bi)=>blockHTML(r,b,bi)).join('')}</div>
+    ${r.options?`<p class="guestline">Guests wear any one of the colours above — never combined. The figures show the first.</p>`:''}
+    <div class="note"><span class="k">Note</span>${r.note?`<em>“${ESC(r.note)}”</em>`:`<span style="color:var(--mute)">Nothing yet</span>`}<button class="edit" data-note="${r.key}">${r.note?'Change':'Add a note'}</button></div>
+    ${ideasHTML(r)}
+  </section>${ri<ROLES.length-1?'<hr class="div" style="margin:4px 0">':''}`).join('');
+}
+/* TODAY — the shipped list, drawn as it ships */
+function attireTodayHTML(){
+  const rows=[['The bride','Long gown','#F3EBE1',['#F3EBE1','#C9A24B'],'1:30 PM',true],['The groom','Suit','#2E3A4F',['#2E3A4F','#C9A24B'],'1:00 PM',true],['VIP · Immediate Family',null,'#7A1F2B',['#7A1F2B','#C9A24B','#F3EBE1'],'1:30 PM',false],['Principal Sponsors','Barong Tagalog','#1F3A2E',['#1F3A2E','#C9A24B'],'2:00 PM',false],['Secondary Sponsors',null,'#B88A6A',['#B88A6A','#F3EBE1'],'2:00 PM',false],['Bridesmaids','Long gown','#D9A5A0',['#D9A5A0','#C9A24B','#E8C4B8'],'12:30 PM',true],['Groomsmen','Suit','#3B4A5C',['#3B4A5C','#C9A24B'],'12:30 PM',true],['Bearers & Flower Girl',null,'#F3EBE1',['#F3EBE1','#C9A24B'],'1:30 PM',true],['Guests',null,'#6B7A8F',['#6B7A8F','#B88A6A','#1F3A2E','#D9A5A0'],null,false]];
+  return `<div class="tband"><span>⚠</span><span><b>Today, as it ships.</b> One row per role; under it a circle-and-rectangle "figure" in the first colour (a gown shape for every role, the groom included), the dots, Arrives, and the role's board. The <b>Entourage</b> board sits alone at the end.</span></div>`+
+  rows.map(([n,w,c,pal,arr,board])=>`<div class="trow"><div class="top"><b>${ESC(n)}</b><span class="wear">${w?`Wear · ${w}`:'Not said yet'}<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span></div><div class="below"><span class="tfig"><span class="h"></span><span class="b" style="background:${c}"></span></span><div style="flex:1;min-width:0"><div class="dots">${pal.map(p=>`<i style="background:${p}"></i>`).join('')}${pal.length<3?'<span class="plus">＋</span>':''}</div>${arr?`<small>Arrives ${arr}</small>`:''}${board?`<div class="board"><b>${n==='The bride'?'Bridal gown':n==='The groom'?'Groom’s suit':n==='Bearers & Flower Girl'?'Flower girl · Ring bearer':n}</b><span class="ph"></span><span class="ph"></span><span class="lnk">＋ · Search ideas ›</span></div>`:''}</div></div></div>`).join('')+
+  `<hr class="div"><div class="trow"><div class="board" style="margin:0"><b>Entourage</b><span class="ph"></span><span class="ph"></span><span class="ph"></span><span class="lnk">＋ · Search ideas ›</span></div><small>The whole party's board — the one the owner says to remove.</small></div>`;
+}
+function mountAttire(){
+  const a=state.at;
+  $('#pane').innerHTML=`<div class="pills"><button>Palette</button><button class="on">Attire</button><button>Inspiration</button><button>Do’s &amp; Don’ts</button></div>
+  <div class="rowc tg" id="atMode" style="margin-top:0"><button aria-pressed="${a.mode==='today'}" data-m="today">Today</button><button aria-pressed="${a.mode==='proposed'}" data-m="proposed">Proposed</button></div>
+  ${a.mode==='today'?attireTodayHTML():attireProposedHTML()}`;
+  $('#atMode').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;a.mode=b.dataset.m;mountAttire()};
+  if(a.mode!=='proposed')return;
+  $('#pane').onclick=ev=>{
+    const t=ev.target;
+    const wearB=t.closest('[data-wear]');
+    if(wearB){const sec=wearB.closest('.who');const r=ROLES[+sec.dataset.ri],b=r.blocks[+wearB.dataset.wear];
+      const opts=[{k:'',label:'Not said yet',sub:'no outfit is ever assumed',on:!b.style},...ORDER[b.who].map(k=>({k,label:STYLE_LABEL[k],on:b.style===k}))];
+      openSheet(`${r.name}${b.label?' — '+b.label.toLowerCase():''} · what to wear`,opts,k=>{b.style=k||null;bump();mountAttire()});return}
+    const swB=t.closest('[data-sw]');
+    if(swB){const sec=swB.closest('.who');const r=ROLES[+sec.dataset.ri];const [bi,i]=swB.dataset.sw.split(':').map(Number);const b=r.blocks[bi];
+      openColour(`${r.name}${b.label?' — '+b.label.toLowerCase():''} · colour ${i+1}`,b.pal[i],c=>{if(c===null){b.pal.splice(i,1)}else b.pal[i]=c;bump();mountAttire()},true);return}
+    const addB=t.closest('[data-add]');
+    if(addB){const sec=addB.closest('.who');const r=ROLES[+sec.dataset.ri];const b=r.blocks[+addB.dataset.add];
+      openColour(`${r.name}${b.label?' — '+b.label.toLowerCase():''} · add a colour`,null,c=>{if(c)b.pal.push(c);bump();mountAttire()},false);return}
+    const noteB=t.closest('[data-note]');
+    if(noteB){const r=ROLES.find(x=>x.key===noteB.dataset.note);openNote(r);return}
+    if(t.closest('[data-plus]')||t.closest('[data-search]')){toast(t.closest('[data-search]')?'Search ideas › opens the suppliers’ photos for this role (shipped gallery picker).':'＋ opens your photos (shipped file picker).');return}
+  };
+}
+function openNote(r){
+  const host=$('#sheetHost');
+  host.innerHTML=`<div class="bd" data-close></div><div class="sheet"><div class="grab"></div><h4>${ESC(r.name)} · a note</h4><div style="padding:0 10px 8px"><input id="noteIn" value="${ESC(r.note)}" placeholder="e.g. ivory, not white" maxlength="120" style="width:100%;height:44px;border:1px solid var(--line);border-radius:12px;padding:0 12px;font:inherit;font-size:14px;background:var(--field);color:var(--ink)"><p style="font-size:11.5px;color:var(--mute);margin:6px 2px 10px">Up to 120 letters. Read by this role on their invitation.</p><div class="tg"><button data-close>Keep</button><button id="noteOk" style="background:var(--cta);border-color:var(--cta);color:#fff">Save</button></div></div></div>`;
+  host.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>host.innerHTML='');
+  $('#noteOk').onclick=()=>{r.note=$('#noteIn').value.trim();host.innerHTML='';bump();mountAttire()};
+  $('#noteIn').focus();
+}
+
+/* ═════════════ PickMenu sheet (one for everything; ticks on the current) ═════════════ */
+function openSheet(title,opts,onPick){
+  const host=$('#sheetHost');
+  host.innerHTML=`<div class="bd" data-close></div><div class="sheet" role="listbox" aria-label="${ESC(title)}"><div class="grab"></div><h4>${ESC(title)}</h4><div class="list">${opts.map(o=>`<button class="opt" role="option" data-k="${o.k}" aria-selected="${!!o.on}">${o.dot?`<i class="dot" style="background:${o.dot}"></i>`:''}<span>${ESC(o.label)}${o.sub?` <small>· ${ESC(o.sub)}</small>`:''}</span>${TICK}</button>`).join('')}</div></div>`;
+  host.querySelector('[data-close]').onclick=()=>host.innerHTML='';
+  host.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{host.innerHTML='';onPick(b.dataset.k)});
+}
+function openColour(title,current,onPick,canRemove){
+  const host=$('#sheetHost');
+  const chips=Object.keys(FIVE).map(k=>`<button data-c="${FIVE[k]}" aria-selected="${current===FIVE[k]}" aria-label="${SLOT_LABEL[k]}"><i style="background:${FIVE[k]}"></i></button>`).join('')+['#2E3A4F','#3B4A5C','#D9A5A0','#E8C4B8','#6B7A8F','#F7F3EC','#1A1816'].map(c=>`<button data-c="${c}" aria-selected="${current===c}"><i style="background:${c}"></i></button>`).join('');
+  host.innerHTML=`<div class="bd" data-close></div><div class="sheet"><div class="grab"></div><h4>${ESC(title)}</h4><div class="eyeb" style="margin:0 10px 4px">Your five, then any colour</div><div class="chips">${chips}<button data-c="any" aria-label="Any colour"><i style="background:conic-gradient(#C24E25,#C9A24B,#2B744A,#2E3A4F,#7A1F2B,#C24E25)"></i></button></div>${canRemove?`<div style="padding:0 10px"><button class="opt" data-rm style="color:var(--bad)">Remove this colour</button></div>`:''}</div>`;
+  host.querySelector('[data-close]').onclick=()=>host.innerHTML='';
+  host.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{host.innerHTML='';const c=b.dataset.c;onPick(c==='any'?'#8A6F4E':c)});
+  const rm=host.querySelector('[data-rm]');if(rm)rm.onclick=()=>{host.innerHTML='';onPick(null)};
+}
+function toast(text){
+  const host=$('#sheetHost');
+  host.innerHTML=`<div class="bd" data-close style="background:transparent"></div><div class="sheet" style="padding-bottom:22px"><div class="grab"></div><p style="margin:4px 12px 8px;font-size:13.5px;line-height:1.45">${ESC(text)}</p></div>`;
+  host.querySelector('[data-close]').onclick=()=>host.innerHTML='';
+  setTimeout(()=>{if(host.querySelector('[data-close]'))host.innerHTML=''},2600);
+}
+
+/* ═════════════ the page ═════════════ */
+function mount(){
+  $('#sheetHost').innerHTML='';
+  const isFx=state.view==='effects';
+  $('#segB').innerHTML=(isFx?'Look':'Mood Board')+' '+CHEV;
+  $('#frameTitle').textContent=isFx?'Studio › Look › Background › Effects':'Studio › Mood Board & Dress Code › Attire';
+  $('#frameCap').textContent=isFx?'Today | Proposed swaps the whole effect set on the same sample. The cards are 3:4 and alive. ◆ = Event Hub Pro — tried on the sample, named at Apply, never a padlock.':'One block per role, divided by a hairline. Where a role holds both, For men and For women each have their own colours, figure and Wear ▾. "Not said yet" draws a dotted silhouette — no outfit is ever assumed. Today shows the shipped rows, Entourage included.';
+  if(isFx)mountEffects();else mountAttire();
+  $('#pddVal').textContent=isFx?'Effects':'Attire';
+  $$('#pddMenu [role=option]').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===state.view));
+}
+$('#pddBtn').onclick=()=>{const m=$('#pddMenu');const open=m.hidden;m.hidden=!open;$('#pddBtn').setAttribute('aria-expanded',open)};
+$('#pddMenu').onclick=ev=>{const b=ev.target.closest('[role=option]');if(!b)return;state.view=b.dataset.v;$('#pddMenu').hidden=true;$('#pddBtn').setAttribute('aria-expanded','false');mount()};
+document.addEventListener('click',ev=>{if(!ev.target.closest('#pdd')){$('#pddMenu').hidden=true;$('#pddBtn').setAttribute('aria-expanded','false')}});
+$('#theme').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;state.theme=b.dataset.t;document.documentElement.dataset.theme=state.theme;$$('#theme button').forEach(x=>x.setAttribute('aria-pressed',x===b))};
+if(matchMedia('(prefers-color-scheme:dark)').matches){state.theme='dark';document.documentElement.dataset.theme='dark';$$('#theme button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.t==='dark'))}
+/* the gallery under the phone: every garment once, in the bride's and groom's colours */
+$('#figGallery').innerHTML=[['f','gown','Long gown / Formal'],['f','terno','Filipiniana · terno'],['f','cocktail','Cocktail dress'],['f','midi','Smart casual'],['f','pantsuit','Suit'],['f','barongf','Barong (women)'],['m','barong','Barong Tagalog'],['m','suit','Suit'],['m','tux','Formal · black tie'],['m','shirt','Smart casual'],['girl','dress','Flower girl'],['boy','barongb','Ring bearer · barong'],['boy','suitb','Ring bearer · suit'],['f','unset','Not said yet'],['m','unset','Not said yet']]
+  .map(([w,g,n])=>`<figure>${figSvg(w,g,w==='m'||w==='boy'?'#2E3A4F':'#7A1F2B','#C9A24B')}${n}</figure>`).join('');
+const q=new URLSearchParams(location.search);
+if(q.get('shot')){document.body.classList.add('shot');state.view=q.get('shot')==='attire'?'attire':'effects'}
+mount();
+</script>
+</body>
+</html>
