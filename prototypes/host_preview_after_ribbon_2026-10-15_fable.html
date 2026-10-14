@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Host preview after the ribbon</title>
+<!--
+  HOST PREVIEW AFTER THE RIBBON — Fable, 2026-10-15
+  Owner ruling (2026-10-15, on www.setnayan.com/cale-ice): the owner ribbon ("Your Event Hub — as a guest
+  sees it" · Edit · Preview ▾) — "Remove it". The couple's own page looks exactly like a guest's; editing is
+  from the dashboard.
+
+  THE PICK: the Maker already owns both jobs the strip carried.
+    · the stage  → the top bar's left half (Maker two bars, LOCKED 2026-10-09) already selects it;
+    · the page as a guest → hold ▶ (phone, stage-tools.tsx) · 👁 Preview › "Preview the whole <stage>" (desktop);
+    · a way back → Home's "Edit your Event Hub" (always there) and "Back to the Maker" on ?preview=draft
+      (preview-way-back.tsx — NOT the ribbon; it survives).
+  THE ONE GAP: "See as" (guest who hasn't replied · replied Yes · declined · signed out) has no phone home —
+  the new phone bar (MAKER_TOOLBAR_STAGES_STUDIO = exit · side · undo · apply) has no 👁, so the ribbon was the
+  phone's only See as. DELTA: one dropdown beside "Exit preview" in the hold-▶ preview. Nothing else moves.
+
+  No network except Google Fonts. No storage. Tokens from maker_cover_group_background_2026-10-14_fable.html.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#FBF9F5;--page:#F4F0E8;--ink:#2C2A29;--ink2:#5B5752;--mute:#8E8880;--line:#E6E0D6;--line2:#D9D3C8;--pill:#F1ECE3;--gold:#A9834B;--gold-soft:#E8DCC3;--cta:#C24E25;--cta-wash:#F8E7E0;--ok:#2B744A;--bad:#B3261E;--shadow:rgba(44,42,41,.35);--in:cubic-bezier(.2,.8,.2,1);--spring:cubic-bezier(.34,1.3,.5,1);--sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;--serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;--bezel:#1b1b1b;--body:#EDE8DF;--field:#FFFFFF;--tbar:#F1EEE8}
+[data-theme=dark]{--paper:#1E1C1A;--page:#161514;--ink:#F1ECE4;--ink2:#C9C2B8;--mute:#8E8880;--line:#33302C;--line2:#3E3A35;--pill:#26231F;--gold:#C9A24B;--gold-soft:#3A3122;--cta:#E0623A;--cta-wash:#3A241B;--ok:#4FA06E;--bad:#E0574D;--shadow:rgba(0,0,0,.6);--bezel:#000;--body:#0F0E0D;--field:#26231F;--tbar:#1E1C1A}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--body);font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;appearance:none;border:0;background:none;cursor:pointer;padding:0;margin:0;text-align:left}
+.wrap{max-width:1180px;margin:0 auto;padding:22px 16px 60px}
+h1{font-family:var(--serif);font-weight:500;font-size:30px;margin:8px 0 2px;line-height:1.1}
+.lead{font-size:13.5px;color:var(--ink2);max-width:880px;line-height:1.5;margin:0 0 14px}
+.lead b{color:var(--ink)}
+.banner{display:inline-flex;align-items:center;gap:8px;background:var(--cta-wash);color:var(--cta);border:1px solid rgba(194,78,37,.35);border-radius:999px;padding:5px 12px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700}
+.ctl{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:14px 0 22px}
+.ctl .lbl{font-size:11px;color:var(--mute);letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin-right:-8px}
+.tgp{display:flex;gap:4px;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--paper)}
+.tgp button{height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;color:var(--mute)}
+.tgp button[aria-pressed=true]{background:var(--cta);color:#fff}
+.frames{display:flex;flex-wrap:wrap;gap:28px;justify-content:center;align-items:flex-start}
+.frame{display:flex;flex-direction:column;align-items:center;width:375px}
+.frame h2{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:700;margin:0 0 8px;text-align:center}
+.frame .cap{font-size:12px;color:var(--ink2);line-height:1.45;margin:8px auto 0;text-align:center;min-height:36px;max-width:340px}
+.frame .cap b{color:var(--ink)}
+.frame .cap .x{color:var(--bad);font-weight:700}
+[hidden]{display:none!important}
+
+/* ── phone ── */
+.phone{width:375px;height:812px;background:var(--page);border:6px solid var(--bezel);border-radius:40px;position:relative;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 50px -30px var(--shadow)}
+.status{height:46px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 5px;font-size:13px;font-weight:600;background:var(--paper);z-index:50}
+.status .bat{width:24px;height:11px;border:1.5px solid var(--ink);border-radius:3px;position:relative;margin-bottom:2px}
+.status .bat:after{content:"";position:absolute;left:2px;top:2px;bottom:2px;right:5px;background:var(--ink);border-radius:1px}
+.url{height:34px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--paper);border-bottom:1px solid var(--line);font-size:12px;color:var(--ink2);gap:6px}
+.url i{font-style:normal;color:var(--ok);font-size:11px}
+
+/* ── the guest page (cale-ice-like sample) ── */
+.site{flex:1;min-height:0;overflow:auto;position:relative;background:#F4F0E8;scrollbar-width:none}
+.site::-webkit-scrollbar{display:none}
+[data-theme=dark] .site{background:#1A1816}
+.ribbon{position:sticky;top:0;z-index:30;background:rgba(241,236,227,.95);backdrop-filter:blur(6px);border-bottom:1px solid var(--line2);padding:10px 14px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+[data-theme=dark] .ribbon{background:rgba(38,35,31,.95)}
+.ribbon .say{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink2);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;width:100%}
+.chip{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--line2);background:var(--paper);font-size:12px;font-weight:500;color:var(--ink2);position:relative}
+.chip svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.chip[aria-expanded=true]{background:var(--pill);color:var(--ink)}
+.cover{min-height:560px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 28px;background:radial-gradient(120% 80% at 50% 0%,#F6EFE3,#EAE1D2)}
+[data-theme=dark] .cover{background:radial-gradient(120% 80% at 50% 0%,#2C2A29,#1F1D1B)}
+.cover .eyebrow{font-size:9.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:10px}
+.cover .mark{font-family:var(--serif);font-size:26px;color:var(--gold);letter-spacing:.06em;margin-bottom:8px;line-height:1}
+.cover .names{font-family:var(--serif);font-size:34px;line-height:1.02;color:var(--ink);font-weight:500;text-wrap:balance}
+.cover .line{font-family:var(--serif);font-style:italic;font-size:15px;color:var(--ink2);margin-top:10px}
+.cover .date{font-size:10.5px;letter-spacing:.2em;color:var(--gold);margin-top:16px;font-weight:600;text-transform:uppercase}
+.cover .venue{font-size:11px;line-height:1.5;color:var(--ink2);margin-top:6px}
+.cover .rsvp{margin-top:22px;height:44px;padding:0 22px;border-radius:999px;background:var(--cta);color:#fff;font-weight:600;font-size:13px;display:inline-flex;align-items:center}
+.chapter{padding:28px 24px;border-top:1px solid var(--line)}
+.chapter h3{font-family:var(--serif);font-weight:500;font-size:22px;margin:0 0 6px}
+.chapter p{font-size:12.5px;line-height:1.55;color:var(--ink2);margin:0}
+.gbar{height:52px;flex:none;display:flex;align-items:center;justify-content:space-around;background:var(--paper);border-top:1px solid var(--line);font-size:10px;font-weight:600;color:var(--mute);letter-spacing:.04em}
+.gbar b{color:var(--cta)}
+.seeas-tag{position:absolute;left:12px;top:12px;z-index:5;font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cta);border:1px solid rgba(194,78,37,.4);border-radius:999px;padding:3px 10px;background:rgba(251,249,245,.85)}
+[data-theme=dark] .seeas-tag{background:rgba(30,28,26,.85)}
+
+/* ── dropdown list (one PickMenu look) ── */
+.menu{position:absolute;z-index:60;min-width:230px;background:var(--paper);border:1px solid var(--line2);border-radius:14px;box-shadow:0 18px 40px -18px var(--shadow);padding:6px;transform-origin:top left;animation:pop .16s var(--spring)}
+.menu.up{transform-origin:bottom left}
+@keyframes pop{from{opacity:0;transform:scale(.96) translateY(-3px)}to{opacity:1;transform:none}}
+.menu .hd{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:700;padding:8px 10px 4px}
+.menu button{display:flex;width:100%;min-height:44px;align-items:center;justify-content:space-between;gap:10px;padding:0 10px;border-radius:9px;font-size:13.5px;font-weight:500;color:var(--ink)}
+.menu button:hover{background:var(--pill)}
+.menu button:active{transform:scale(.985)}
+.menu button[aria-selected=true]{color:var(--cta);font-weight:600}
+.menu button small{font-size:11px;color:var(--mute);font-weight:500}
+.menu button .ok{color:var(--ok);font-weight:700}
+
+/* ── the Maker (two bars, LOCKED 2026-10-09) ── */
+.topnav{height:56px;flex:none;display:flex;align-items:center;gap:6px;padding:0 10px;background:var(--paper);border-bottom:1px solid var(--line);z-index:20;transition:transform .28s var(--in),opacity .28s}
+.rnd{width:44px;height:44px;flex:none;border-radius:999px;display:flex;align-items:center;justify-content:center;position:relative}
+.rnd svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.rnd:active{transform:scale(.94)}
+.exitx{background:var(--bad);color:#fff}.applyg{background:var(--ok);color:#fff}
+.applyg .n{position:absolute;right:-3px;top:-3px;min-width:19px;height:19px;border-radius:10px;background:var(--ink);color:var(--paper);font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid var(--paper)}
+.undob{background:var(--pill);border:1px solid var(--line);color:var(--ink)}
+.halves{flex:1;min-width:0;display:flex;gap:4px;position:relative}
+.half{flex:1 1 0;min-width:0;height:44px;border-radius:999px;background:var(--pill);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;gap:4px;font-size:13px;font-weight:600;color:var(--ink);padding:0 8px}
+.half span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-width:0}
+.half svg{width:12px;height:12px;flex:none;color:var(--cta);fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s var(--in)}
+.half[aria-expanded=true]{box-shadow:0 0 0 2px rgba(194,78,37,.25)}
+.half[aria-expanded=true] svg{transform:rotate(180deg)}
+.half:active{transform:scale(.985)}
+.work{flex:1;min-height:0;position:relative;background:var(--tbar);padding:8px 8px 0;display:flex;flex-direction:column;transition:padding .28s var(--in)}
+.page{flex:1;min-height:0;background:#fff;border-radius:8px 8px 0 0;overflow:hidden;position:relative;box-shadow:0 1px 2px rgba(40,34,24,.08);transition:border-radius .28s var(--in)}
+[data-theme=dark] .page{background:#121110}
+.page .cover{min-height:100%;transform-origin:top center}
+.page .cover .names{font-size:28px}
+.part{outline:1.5px dashed transparent;outline-offset:6px;border-radius:4px;transition:outline-color .18s}
+.part[aria-pressed=true]{outline-color:var(--cta)}
+.part .tag{position:absolute;transform:translate(-50%,-26px);left:50%;font:600 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;background:var(--cta);color:#fff;padding:3px 6px;border-radius:999px;white-space:nowrap}
+.part{position:relative}
+.toolbar{flex:none;height:330px;background:var(--paper);border-top:1px solid var(--line);border-radius:18px 18px 0 0;display:flex;flex-direction:column;padding:0 10px;transition:transform .28s var(--in),opacity .28s;box-shadow:0 -8px 24px -20px var(--shadow)}
+.toolbar .handle{height:14px;display:flex;align-items:center;justify-content:center}
+.toolbar .handle i{width:36px;height:4px;border-radius:2px;background:var(--line2)}
+.toolbar .edl{height:20px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--mute)}
+.toolbar .edl b{color:var(--ink2);font-weight:600}
+.toolbar .edl .info{width:18px;height:18px;border-radius:999px;border:1px solid var(--line2);display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--mute)}
+.band{height:52px;display:flex;align-items:center;gap:6px}
+.seg{display:flex;flex:1;gap:2px;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--pill);position:relative}
+.seg button{flex:1;height:38px;border-radius:999px;font-size:12.5px;font-weight:600;color:var(--mute);text-align:center;position:relative;z-index:1}
+.seg button[aria-pressed=true]{background:var(--paper);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.playb{width:44px;height:44px;border-radius:999px;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:center;flex:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;transition:transform .12s}
+.playb svg{width:18px;height:18px;fill:currentColor}
+.playb[data-held=true]{transform:scale(.9);box-shadow:0 0 0 4px rgba(194,78,37,.3)}
+.rows{flex:1;display:flex;flex-direction:column;gap:6px;padding-top:4px}
+.row{height:48px;border:1px solid var(--line);border-radius:12px;background:var(--field);display:flex;align-items:center;padding:0 12px;font-size:12.5px;color:var(--ink2);gap:8px}
+.row .lbl{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);font-weight:700;min-width:54px}
+.row .val{flex:1;color:var(--ink);font-weight:500;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.row.last{justify-content:space-around;background:transparent;border-style:dashed}
+.row.last span{font-size:12px;font-weight:600;color:var(--ink2)}
+.row.last .rm{color:var(--bad)}
+.row.empty{border-style:dashed;background:transparent}
+.safe{height:34px;flex:none}
+
+/* ── the hold-▶ preview: bars step aside, the page takes the phone ── */
+.maker[data-previewing] .topnav{transform:translateY(-100%);opacity:0;position:absolute;top:46px;left:0;right:0}
+.maker[data-previewing] .toolbar{transform:translateY(110%);opacity:0;position:absolute;bottom:0;left:0;right:0}
+.maker[data-previewing] .work{padding:0}
+.maker[data-previewing] .page{border-radius:0}
+.maker[data-previewing] .part{outline-color:transparent}
+.maker[data-previewing] .part .tag{display:none}
+.pvbar{position:absolute;left:0;right:0;bottom:calc(52px + 12px);z-index:31;display:flex;justify-content:center;gap:8px;padding:0 12px;pointer-events:none}
+.pvbar>*{pointer-events:auto}
+.ab{height:44px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;padding:0 14px;white-space:nowrap;flex:none;font-size:13px;font-weight:600;box-shadow:0 10px 24px -14px var(--shadow);transition:transform .12s}
+.ab:active{transform:scale(.97)}
+.ab.brand{background:var(--cta);color:#fff}
+.ab.quiet{background:var(--paper);border:1px solid var(--line2);color:var(--ink);min-width:0;flex:0 1 auto;max-width:200px}
+.ab.quiet span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.ab svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.ab.quiet svg.dd{width:12px;height:12px;color:var(--cta);stroke-width:2.6;transition:transform .2s var(--in)}
+.ab.quiet[aria-expanded=true] svg.dd{transform:rotate(180deg)}
+.ab.quiet[aria-busy=true]{opacity:.8}
+.toast{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(330px + 14px);z-index:40;background:var(--ink);color:var(--paper);font-size:12px;font-weight:500;padding:9px 14px;border-radius:999px;white-space:nowrap;animation:pop .18s var(--spring);box-shadow:0 10px 24px -12px var(--shadow)}
+.toast.lowline{bottom:calc(52px + 12px + 52px)}
+.toast .spin{display:inline-block;width:10px;height:10px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:999px;margin-right:7px;vertical-align:-1px;animation:rot .8s linear infinite}
+[data-theme=dark] .toast .spin{border-color:rgba(0,0,0,.25);border-top-color:#111}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* ── notes ── */
+.notes{margin-top:40px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.note{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.note h3{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:700;margin:0 0 10px}
+.note ul,.note ol{margin:0;padding-left:18px;font-size:13px;line-height:1.55;color:var(--ink2)}
+.note li{margin-bottom:7px}.note li b{color:var(--ink)}
+.note code{font:500 11.5px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--pill);padding:1px 5px;border-radius:5px;color:var(--ink)}
+.note .k{display:inline-block;font:600 10px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;background:var(--cta);color:#fff;padding:3px 6px;border-radius:999px;margin-right:4px;vertical-align:1px}
+.note .k.g{background:var(--mute)}.note .k.o{background:var(--ok)}
+.walk{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 18px;margin:0 auto 22px;max-width:780px}
+.walk h3{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:700;margin:0 0 8px}
+.walk ol{margin:0;padding-left:18px;font-size:13px;line-height:1.55;color:var(--ink2)}
+.walk li{margin-bottom:6px}.walk li b{color:var(--ink)}
+@media (max-width:420px){.wrap{padding:16px 16px 40px}.phone{width:100%;max-width:375px}.frame{width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="banner">Prototype · Fable · 2026-10-15</span>
+  <h1>Where Preview and Edit live once the ribbon is gone</h1>
+  <p class="lead"><b>The pick: the Maker's two bars, exactly as locked.</b> The stage is the top bar's left half (it already selects a stage); the page as a guest is <b>hold ▶</b> (phone) or 👁 Preview › "Preview the whole stage" (desktop); the way back to editing is Home's "Edit your Event Hub" and "Back to the Maker" on the preview tab — both already shipped and neither is the ribbon. The one thing the strip alone gave a phone was <b>See as</b> (the new phone bar has no 👁). So the delta is <b>one dropdown beside "Exit preview"</b>. Nothing is added to the guest page; nothing is added to Home.</p>
+
+  <div class="ctl">
+    <span class="lbl">Show</span>
+    <div class="tgp" role="group" aria-label="Before or after">
+      <button id="tBefore" aria-pressed="true" onclick="show('before')">Before</button>
+      <button id="tAfter" aria-pressed="false" onclick="show('after')">After</button>
+    </div>
+    <span class="lbl">Theme</span>
+    <div class="tgp" role="group" aria-label="Light or dark">
+      <button id="tLight" aria-pressed="true" onclick="theme('light')">Light</button>
+      <button id="tDark" aria-pressed="false" onclick="theme('dark')">Dark</button>
+    </div>
+  </div>
+
+  <div class="walk" id="walkAfter" hidden>
+    <h3>Walk it (After)</h3>
+    <ol>
+      <li><b>Left phone</b> is the couple's own page, signed in — now byte-identical to a guest's. Nothing to press that a guest can't.</li>
+      <li><b>Right phone</b> is the Maker. Tap <b>Invitation ▾</b> (top bar, left half) — the five stages open; pick one. That is the stage choice the ribbon had.</li>
+      <li><b>Hold ▶</b> (half a second) — both bars step aside, the page is the whole phone, as a guest. A short tap only plays (and says "Hold ▶ to preview the whole page." once).</li>
+      <li>In the preview, tap <b>See as · You ▾</b> — the same five rows the ribbon and the desktop dropdown have. A pick shows pressed, one line says what is being drawn, then the page wears the tag.</li>
+      <li><b>Exit preview</b> brings the bars back, at the same stage and part.</li>
+    </ol>
+  </div>
+
+  <!-- ═══════════ BEFORE ═══════════ -->
+  <div class="frames" id="before">
+    <div class="frame">
+      <h2>Before · the couple opens their own page</h2>
+      <div class="phone">
+        <div class="status"><span>9:41</span><span class="bat"></span></div>
+        <div class="url"><i>🔒</i> www.setnayan.com/cale-ice</div>
+        <div class="site" id="siteBefore">
+          <aside class="ribbon" aria-label="Host controls">
+            <p class="say">Your Event Hub — as a guest sees it</p>
+            <button class="chip"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Edit your Event Hub</button>
+            <button class="chip" id="rbPreview" aria-haspopup="listbox" aria-expanded="false" onclick="toggleMenu('rbMenu',this)">Preview: Invitation <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+            <div class="menu" id="rbMenu" hidden style="left:14px;top:76px">
+              <div class="hd">Stage</div>
+              <button aria-selected="false">Save the Date</button>
+              <button aria-selected="false">RSVP</button>
+              <button aria-selected="true">Invitation</button>
+              <button aria-selected="false">The Day</button>
+              <button aria-selected="false">Post Event</button>
+              <div class="hd">See as</div>
+              <button aria-selected="true">You <span class="ok">✓</span></button>
+              <button>Guest who hasn’t replied</button>
+              <button>Replied Yes <small>ticket · You’re going</small></button>
+              <button>Declined</button>
+              <button>Signed out <small>the door</small></button>
+            </div>
+          </aside>
+          <div class="cover">
+            <div class="eyebrow">Together with their families</div>
+            <div class="mark">C &amp; I</div>
+            <div class="names">Caleb<br>&amp; Isabel</div>
+            <div class="line">invite you to celebrate the beginning of forever</div>
+            <div class="date">Saturday · 14 February 2027</div>
+            <div class="venue">San Agustin Church, Intramuros<br>Reception to follow at The Peninsula Manila</div>
+            <span class="rsvp">Reply by 10 January</span>
+          </div>
+          <div class="chapter"><h3>Our story</h3><p>It began with a borrowed umbrella on Taft Avenue and a jeepney that never came.</p></div>
+          <div class="chapter"><h3>The day</h3><p>Ceremony at 3 in the afternoon. Doors open at 2:30.</p></div>
+        </div>
+        <div class="gbar"><b>Welcome</b><span>Details</span><span>RSVP</span><span>Gifts</span></div>
+      </div>
+      <p class="cap">The owner ribbon (<code>owner-ribbon.tsx</code>): a strip only the host sees, Edit, and Preview ▾ with stages + See as. Owner, 2026-10-15: <span class="x">"Remove it."</span></p>
+    </div>
+  </div>
+
+  <!-- ═══════════ AFTER ═══════════ -->
+  <div class="frames" id="after" hidden>
+    <div class="frame">
+      <h2>After · the couple's own page</h2>
+      <div class="phone">
+        <div class="status"><span>9:41</span><span class="bat"></span></div>
+        <div class="url"><i>🔒</i> www.setnayan.com/cale-ice</div>
+        <div class="site">
+          <div class="cover">
+            <div class="eyebrow">Together with their families</div>
+            <div class="mark">C &amp; I</div>
+            <div class="names">Caleb<br>&amp; Isabel</div>
+            <div class="line">invite you to celebrate the beginning of forever</div>
+            <div class="date">Saturday · 14 February 2027</div>
+            <div class="venue">San Agustin Church, Intramuros<br>Reception to follow at The Peninsula Manila</div>
+            <span class="rsvp">Reply by 10 January</span>
+          </div>
+          <div class="chapter"><h3>Our story</h3><p>It began with a borrowed umbrella on Taft Avenue and a jeepney that never came.</p></div>
+          <div class="chapter"><h3>The day</h3><p>Ceremony at 3 in the afternoon. Doors open at 2:30.</p></div>
+        </div>
+        <div class="gbar"><b>Welcome</b><span>Details</span><span>RSVP</span><span>Gifts</span></div>
+      </div>
+      <p class="cap"><b>Exactly a guest's page.</b> No strip, no Edit, no Preview. The couple edits from the dashboard (Home › Edit your Event Hub · the event menu › Event Hub Maker) — the doors that already exist.</p>
+    </div>
+
+    <div class="frame">
+      <h2>After · the Maker (phone) — Preview lives here</h2>
+      <div class="phone maker" id="maker">
+        <div class="status"><span>9:41</span><span class="bat"></span></div>
+        <div class="topnav">
+          <button class="rnd exitx" aria-label="Leave the Maker"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+          <div class="halves">
+            <button class="half" id="stageDd" aria-haspopup="listbox" aria-expanded="false" onclick="toggleMenu('stageMenu',this)"><span id="stageName">Invitation</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+            <button class="half" aria-haspopup="listbox" onclick="say('Studio ▾ opens its 11 pages — unchanged, not drawn here.')"><span>Studio</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+            <div class="menu" id="stageMenu" hidden style="left:0;top:48px;min-width:200px">
+              <div class="hd">Stage</div>
+              <button data-stage="Save the Date" onclick="pickStage(this)">Save the Date</button>
+              <button data-stage="RSVP" onclick="pickStage(this)">RSVP</button>
+              <button data-stage="Invitation" aria-selected="true" onclick="pickStage(this)">Invitation</button>
+              <button data-stage="The Day" onclick="pickStage(this)">The Day</button>
+              <button data-stage="Post Event" onclick="pickStage(this)">Post Event</button>
+            </div>
+          </div>
+          <button class="rnd undob" aria-label="Undo"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
+          <button class="rnd applyg" aria-label="Apply"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span class="n">2</span></button>
+        </div>
+
+        <div class="work">
+          <div class="page">
+            <span class="seeas-tag" id="seeTag" hidden>See as · Guest who hasn’t replied</span>
+            <div class="cover" id="pageCover">
+              <div class="eyebrow part" onclick="pickPart(this,'Eyebrow')">Together with their families</div>
+              <div class="mark part" onclick="pickPart(this,'Monogram')">C &amp; I</div>
+              <div class="names part" aria-pressed="true" onclick="pickPart(this,'Names')"><span class="tag" id="partTag">Names</span>Caleb<br>&amp; Isabel</div>
+              <div class="line part" onclick="pickPart(this,'Opening line')">invite you to celebrate the beginning of forever</div>
+              <div class="date part" onclick="pickPart(this,'Date')">Saturday · 14 February 2027</div>
+              <div class="venue part" onclick="pickPart(this,'Venue')">San Agustin Church, Intramuros<br>Reception to follow at The Peninsula Manila</div>
+              <span class="rsvp part" id="rsvpBtn" onclick="pickPart(this,'RSVP button')">Reply by 10 January</span>
+            </div>
+          </div>
+          <!-- the guests' own bar stays under the sample (locked: "that is the bottom nav of the actual event hub") -->
+          <div class="gbar" style="border-radius:0 0 8px 8px"><b>Welcome</b><span>Details</span><span>RSVP</span><span>Gifts</span></div>
+        </div>
+
+        <!-- 👁 the hold-▶ preview's one row: Exit preview (exists) + See as ▾ (NEW, phone only) -->
+        <div class="pvbar" id="pvbar" hidden>
+          <button class="ab brand" onclick="exitPreview()"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>Exit preview</button>
+          <button class="ab quiet" id="seeAsBtn" aria-haspopup="listbox" aria-expanded="false" aria-busy="false" onclick="toggleMenu('seeMenu',this)"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg><span id="seeAsWord">See as · You</span><svg class="dd" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+          <div class="menu up" id="seeMenu" hidden style="left:140px;bottom:52px;min-width:215px">
+            <div class="hd">See as</div>
+            <button data-see="You" aria-selected="true" onclick="pickSee(this)">You <small>editing</small></button>
+            <button data-see="Guest who hasn’t replied" onclick="pickSee(this)">Guest who hasn’t replied</button>
+            <button data-see="Replied Yes" onclick="pickSee(this)">Replied Yes <small>ticket · You’re going</small></button>
+            <button data-see="Declined" onclick="pickSee(this)">Declined</button>
+            <button data-see="Signed out" onclick="pickSee(this)">Signed out <small>the door</small></button>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="handle"><i></i></div>
+          <div class="edl"><span>You’re editing · <b id="edlStage">Invitation</b> › Welcome › <b id="edlPart">Names</b></span><span class="info">i</span></div>
+          <div class="band">
+            <div class="seg" role="group" aria-label="Tool">
+              <button aria-pressed="true" onclick="segPick(this)">Edit</button>
+              <button onclick="segPick(this)">Style</button>
+              <button onclick="segPick(this)">Background</button>
+              <button onclick="segPick(this)">Animate</button>
+            </div>
+            <button class="playb" id="playb" aria-label="Play the stage as guests see it — hold to preview the whole page" data-held="false"
+              onpointerdown="holdStart()" onpointerup="holdEnd()" onpointerleave="holdEnd()" onpointercancel="holdEnd()" oncontextmenu="return false" onclick="playTap()">
+              <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+          </div>
+          <div class="rows">
+            <div class="row"><span class="lbl">Names</span><span class="val">Caleb &amp; Isabel</span></div>
+            <div class="row"><span class="lbl">Joiner</span><span class="val">&amp;</span></div>
+            <div class="row empty"></div>
+            <div class="row last"><span>↑ Earlier</span><span>↓ Later</span><span class="rm">Remove</span></div>
+          </div>
+          <div class="safe"></div>
+        </div>
+        <div class="toast" id="toast" hidden></div>
+      </div>
+      <p class="cap"><b>Top bar's left half</b> = the stage choice. <b>Hold ▶</b> = the whole page as a guest (shipped). <b>See as ▾</b> beside Exit preview = the one new control, phone only; a desktop already has the dropdown above its preview.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════ NOTES ═══════════ -->
+  <div class="notes">
+    <div class="note">
+      <h3>What exists (nothing redrawn)</h3>
+      <ul>
+        <li><b>Stage choice</b> — the top bar's left half, <code>maker-bar.ts</code> <code>MAKER_TOOLBAR_STAGES_STUDIO</code> (<code>exit · side · undo · apply</code>), LOCKED 2026-10-09: "Stages and Studio both has dropdown".</li>
+        <li><b>The whole page as a guest</b> — phone: hold ▶ in <code>stage-tools.tsx</code> (<code>STAGE_HOLD_MS</code>, <code>enterPreview</code>/<code>exitPreview</code>, <code>data-stage-exit-preview</code>, <code>STAGE_HOLD_HINT</code>). Desktop: 👁 Preview's <code>PreviewStageLink</code> → <code>/[slug]?phase=&lt;stage&gt;&amp;preview=draft</code>.</li>
+        <li><b>See as</b> — model <code>lib/see-as.ts</code> (<code>SEE_AS</code>, <code>SEE_AS_EDITING</code>); state <code>maker-shell.tsx</code> <code>seeAs/setSeeAs</code>; desktop dropdown <code>editor-shell.tsx</code> <code>data-maker-see-as</code> (<code>hidden … lg:flex</code>); phone tag <code>data-maker-see-as-tag</code> (<code>lg:hidden</code>) — the tag exists on a phone but nothing on the new phone bar can set it.</li>
+        <li><b>Way back to editing</b> — Home's "Edit your Event Hub" (<code>home-first-screen.tsx</code>, "always"); <code>preview-way-back.tsx</code> "Back to the Maker" on the <code>?preview=draft</code> tab (mounted from <code>makerWayBack</code>, NOT from the ribbon).</li>
+        <li><b>The host-only params</b> <code>?phase=</code> / <code>?as=</code> on <code>/[slug]</code> — authorised in <code>page.tsx</code> on the server capability; they stay, just un-advertised on the page (the Maker's preview is their caller).</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h3>What's new (one control)</h3>
+      <ul>
+        <li><span class="k">new</span><b>See as ▾ beside Exit preview</b>, in the hold-▶ preview's row (<code>data-stage-exit-preview</code>), phone only (<code>lg:hidden</code>, like the row itself). ONE <code>PickMenu</code>: You · editing / Guest who hasn't replied / Replied Yes / Declined / Signed out — the same rows, the same <code>setSeeAs</code>.</li>
+        <li>A pick <b>shows pressed</b> (<code>sn-press</code>) and <b>one line</b> while the canvas redraws at <code>?as=</code>: "Drawing it as a guest who hasn't replied…" — then the existing tag says whose eyes.</li>
+        <li>44 px floor; ▾ opens its list (never cycles); a pick never leaves the preview.</li>
+        <li><span class="k g">not new</span>Stage choice in the preview — the bars are away in the preview by design; the stage is picked <i>before</i> holding ▶, and Exit returns to the same stage and part (<code>before.current</code>). No second stage control.</li>
+        <li><span class="k g">not new</span>A "See as a guest ▾" on Home's Event Hub card — rejected: a third preview door, and Home is not where the page is being looked at. Desktop — unchanged.</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h3>The delta to build</h3>
+      <ol>
+        <li><b>Delete</b> <code>app/[slug]/_components/owner-ribbon.tsx</code>, <code>owner-phase-menu.tsx</code>, <code>lib/owner-ribbon.ts</code> + <code>owner-ribbon.test.ts</code> + <code>owner-ribbon-speaks-the-makers-stages.test.ts</code>; <code>SEE_AS_YOU</code> in <code>lib/see-as.ts</code> (its only consumer).</li>
+        <li><b>Unmount</b> the two <code>&lt;OwnerRibbon&gt;</code>: <code>site-body.tsx</code> (<code>isEditorCanvas ? null : ownerRibbon</code>) and the private-landing branch in <code>app/[slug]/page.tsx</code>. Keep <code>ownerCapability</code> → <code>viewerIsEventHost</code> (the host body copy, Q1 below).</li>
+        <li><b>Add</b> the See as <code>PickMenu</code> next to <code>ActionButton "Exit preview"</code> in <code>stage-tools.tsx</code>, reading <code>useMaker().seeAs/setSeeAs</code>; the loading line through the toolbar's one toast (<code>setWhyRef</code>).</li>
+        <li><b>Guards that change</b>: <code>the-maker-canvas-is-only-the-page.test.ts</code> — drop the <code>Host controls bar</code> row (mount count 1 → 0) · <code>each-guest-page-has-one-main-action.test.ts</code>, <code>a-control-that-works-for-whoever-sees-it.test.ts</code>, <code>a-dark-look-keeps-its-words.test.ts</code> — each <code>read('…owner-ribbon.tsx')</code> goes · <code>see-as-never-writes.test.ts</code> — remove the <code>[data-owner-ribbon]</code> free selector · <code>sample-viewer-inert.tsx</code> — drop the <code>data-owner-ribbon</code> exemption · <code>the-hub-next-step-never-points-at-itself.test.ts</code> prose · regenerate <code>lib/ugat/screens.generated.json</code>.</li>
+        <li><b>New guard</b>: the hold-▶ preview row names a See as <code>PickMenu</code> (count 1) and no second stage control; <code>see-as-never-writes</code> keeps holding the canvas inert.</li>
+        <li>Changelog fragment · DECISION_LOG row 2026-10-15 "the owner ribbon is removed; Preview is the Maker's" · <code>maker-bar.ts</code> docblock no longer says the ribbon is a preview door.</li>
+      </ol>
+    </div>
+    <div class="note">
+      <h3>Open questions (owner)</h3>
+      <ol>
+        <li><b>"Exactly like a guest's" — the strip only, or the host's own body copy too?</b> <code>site-body.tsx</code> still draws host-voiced lines for a verified host (<code>host-body-variant.test.ts</code>, "the host sees their own page"). This prototype removes the strip only; if the body copy goes too, <code>viewerIsEventHost</code> loses its last page consumer.</li>
+        <li><b>See as on a phone: in the hold-▶ preview (proposed), or not at all?</b> If you never check a page as a declined guest on a phone, the delta is deletion only and the desktop dropdown stays the one See as.</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── page controls ── */
+function show(w){document.getElementById('before').hidden=w!=='before';document.getElementById('after').hidden=w!=='after';document.getElementById('walkAfter').hidden=w!=='after';document.getElementById('tBefore').setAttribute('aria-pressed',w==='before');document.getElementById('tAfter').setAttribute('aria-pressed',w==='after');closeMenus()}
+function theme(t){document.documentElement.setAttribute('data-theme',t);document.getElementById('tLight').setAttribute('aria-pressed',t==='light');document.getElementById('tDark').setAttribute('aria-pressed',t==='dark')}
+
+/* ── one dropdown at a time; a ▾ opens its choices ── */
+let openBtn=null;
+function closeMenus(){document.querySelectorAll('.menu').forEach(m=>m.hidden=true);document.querySelectorAll('[aria-haspopup]').forEach(b=>b.setAttribute('aria-expanded','false'));openBtn=null}
+function toggleMenu(id,btn){const m=document.getElementById(id);const was=!m.hidden;closeMenus();if(!was){m.hidden=false;btn.setAttribute('aria-expanded','true');openBtn=btn}}
+document.addEventListener('click',e=>{if(!e.target.closest('.menu')&&!e.target.closest('[aria-haspopup]'))closeMenus()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenus();if(document.getElementById('maker').hasAttribute('data-previewing'))exitPreview()}});
+document.querySelectorAll('#rbMenu button').forEach(b=>b.addEventListener('click',()=>{const grp=b.previousElementSibling&&b.closest('.menu');closeMenus();const t=b.firstChild.textContent.trim();document.getElementById('rbPreview').firstChild.textContent='Preview: '+t+' '}));
+
+/* ── the Maker ── */
+let toastT=null;
+function say(words,busy,low){const t=document.getElementById('toast');t.innerHTML=(busy?'<span class="spin"></span>':'')+words;t.classList.toggle('lowline',!!low);t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,busy?700:1800)}
+function pickStage(b){const s=b.dataset.stage;document.querySelectorAll('#stageMenu button').forEach(x=>x.setAttribute('aria-selected',x===b));document.getElementById('stageName').textContent=s;document.getElementById('edlStage').textContent=s;closeMenus();
+  const c=document.getElementById('pageCover');c.style.opacity='.4';say('Opening '+s+'…',true);setTimeout(()=>{c.style.opacity='';},420)}
+function pickPart(el,name){if(document.getElementById('maker').hasAttribute('data-previewing')){say(name==='RSVP button'?'Nothing is sent from a preview.':'Links are switched off in preview.',false,true);return}
+  document.querySelectorAll('.part').forEach(p=>p.removeAttribute('aria-pressed'));el.setAttribute('aria-pressed','true');document.querySelectorAll('.part .tag').forEach(t=>t.remove());const tag=document.createElement('span');tag.className='tag';tag.textContent=name;el.prepend(tag);document.getElementById('edlPart').textContent=name}
+function segPick(b){b.parentElement.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b))}
+
+/* ▶: a tap plays; a hold (500 ms) previews the whole page as a guest */
+let hold={t:null,fired:false},hintSaid=false;
+function holdStart(){holdEnd();hold.fired=false;document.getElementById('playb').dataset.held='true';hold.t=setTimeout(()=>{hold.t=null;hold.fired=true;enterPreview()},500)}
+function holdEnd(){if(hold.t)clearTimeout(hold.t);hold.t=null;document.getElementById('playb').dataset.held='false'}
+function playTap(){if(hold.fired){hold.fired=false;return}if(!hintSaid){hintSaid=true;say('Hold ▶ to preview the whole page.')}else say('Playing Names…',true)}
+function enterPreview(){closeMenus();const m=document.getElementById('maker');m.setAttribute('data-previewing','');document.getElementById('pvbar').hidden=false;document.getElementById('playb').dataset.held='false'}
+function exitPreview(){closeMenus();const m=document.getElementById('maker');m.removeAttribute('data-previewing');document.getElementById('pvbar').hidden=true;
+  /* back to editing: the page is the couple's own again */
+  document.querySelectorAll('#seeMenu button').forEach(x=>x.setAttribute('aria-selected',x.dataset.see==='You'));document.getElementById('seeAsWord').textContent='See as · You';document.getElementById('seeTag').hidden=true}
+function pickSee(b){const who=b.dataset.see;closeMenus();const btn=document.getElementById('seeAsBtn');document.querySelectorAll('#seeMenu button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  btn.setAttribute('aria-busy','true');document.getElementById('seeAsWord').textContent='See as · '+who;
+  if(who==='You'){say('Back to your own view…',true,true)}else say('Drawing it as '+(who==='Signed out'?'a signed-out visitor':who==='Replied Yes'?'a guest who replied Yes':who==='Declined'?'a guest who declined':'a guest who hasn’t replied')+'…',true,true);
+  const c=document.getElementById('pageCover');c.style.opacity='.4';
+  setTimeout(()=>{c.style.opacity='';btn.setAttribute('aria-busy','false');const tag=document.getElementById('seeTag');tag.hidden=who==='You';tag.textContent='See as · '+who;
+    const r=document.getElementById('rsvpBtn');r.textContent=who==='Replied Yes'?'You’re going · ticket':who==='Declined'?'You can’t make it':who==='Signed out'?'Sign in to reply':'Reply by 10 January'},600)}
+</script>
+</body>
+</html>

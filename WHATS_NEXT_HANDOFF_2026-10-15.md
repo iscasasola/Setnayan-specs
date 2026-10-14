@@ -12,6 +12,15 @@ worktree is at `~/Documents/Claude/Projects/<worktree>`; if a worktree is gone, 
 it to every builder. Rulings: corpus `~/Documents/Claude/Projects/Setnayan/DECISION_LOG.md`, rows dated 2026-10-14
 (all pushed). Builders' own notes: `handovers/<name>.md` and `handovers/inflight-2026-10-15/`.
 
+
+## ⏩ UPDATE 15 Oct ~04:00 — building resumed on the OLD account until 98 % weekly (85 % at start)
+Owner: "use the remaining % to build the fixes … up to 98%". Wave 1 RUNNING: stage Size (Opus, wt-stage-size, reset to
+main first) · March drag + RSVP Back finisher (Sonnet: walk → whole preflight → draft PR + label → CI). Wave 2 (if
+budget remains): built Event Hub features to "PR open, CI green" in value order — maker-look, march-card, rollcall,
+egifts-inline, prints-previews, effects-attire, text-width (after Size). Leftovers of the dead builders were cleared
+(dev servers on 3592/3661, se4 + makerlook waiters, the se4 requeue watcher, a dead walk lock). If this account stops
+again, check each branch's PR state with `gh pr list --state open`.
+
 ## 0 · Before restarting builders — the Mac
 - Background lock waiters and requeue scripts from the dead builders may STILL be running (they run preflights with
   nobody to read them). Look: `~/Documents/Claude/Projects/heavy-lock.sh status`. Their logs are in
@@ -89,7 +98,7 @@ Older drafts still open: batch 7 #6532 (dark mode + public fixes — merge main,
   the words don't resize. Find why for EVERY part offering Size on every stage; prove with computed font-size per
   step on the render; guard + sabotage; branch `rd/stage-size-resizes`; draft + label; ships alone. Check
   `rd/maker-look-fixes` (Elements colour not showing on preview) for a shared root cause first.
-- **Host strip removed (owner 15 Oct, "Remove it"):** the owner ribbon on `/[slug]` for a signed-in host
+- **Host strip removed — DESIGN APPROVED 15 Oct** (`Setnayan/prototypes/host_preview_after_ribbon_2026-10-15_fable.html`, https://claude.ai/artifact/2qek7DDRugqRX23LvuSmm1; its notes' "delta to build" is the spec): Preview stays in the Maker (stage from the top bar, hold ▶); ADD one "See as ▾" PickMenu beside "Exit preview" in the hold-▶ preview, phone only (owner: yes); remove the STRIP ONLY — the host-voiced body lines stay (owner: strip only). Original ruling (owner 15 Oct, "Remove it"): the owner ribbon on `/[slug]` for a signed-in host
   (`app/[slug]/_components/owner-ribbon.tsx` OwnerRibbon — "Your Event Hub — as a guest sees it" · Edit · Preview ▾ via
   `owner-phase-menu.tsx`; model `lib/owner-ribbon.ts` buildOwnerRibbon; mounted in `site-body.tsx` / `page.tsx`). The
   host's own page must look exactly like a guest's; editing is from the dashboard only. It is woven into ~20 guards
@@ -110,8 +119,8 @@ Older drafts still open: batch 7 #6532 (dark mode + public fixes — merge main,
   yes) · ONE background: the Hero folds into the Cover Scene's Background, Details › Hero is a second door to the same
   value, `resolveHero` keeps feeding poster/home card (owner: yes) · `canvas.ground` on the hero row, no migration ·
   the unchanged `StageBackground` rows via a thin adapter · Scene ◆ ready-made loops play for guests and stay PRO (owner:
-  Pro) · Upload ◆ = photos; videos kept/counted, never worn while `GUEST_HERO_VIDEO_PLAYBACK` is false ·
-  `COUPLE_MEDIA_QUOTA_BYTES` Pro 500 MB, Free none (owner) with the "Your media · N MB of 500 MB" meter · legibility
+  Pro) · Upload ◆ = photos and ≤15 s clips like every stage (own stage clips already play for guests — owner: keep playing); only the cover's own HERO clip stays locked while `GUEST_HERO_VIDEO_PLAYBACK` is false ·
+  the EXISTING `MAKER_EVENT_MEDIA_BYTES_CAP` (100 MB, `lib/couple-media-allowance.ts`) becomes plan-aware — Pro 500 MB, Free keeps 100 MB (owner, corrected 15 Oct; never add a second quota constant) with the "Your media · N MB of 500 MB" meter · legibility
   over the scene's ground · guard `the-cover-scene-is-one-group.test.ts`. Opus. Branch `rd/cover-scene`. Side-by-sides at
   375 + desktop vs the prototype before merge.
 - Every other build: its worktree's last commits + the table above + `handovers/` are the brief. Rules for all:
