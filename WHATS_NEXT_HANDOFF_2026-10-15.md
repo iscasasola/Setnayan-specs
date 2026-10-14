@@ -70,7 +70,7 @@ Older drafts still open: batch 7 #6532 (dark mode + public fixes — merge main,
   (today `GUEST_HERO_VIDEO_PLAYBACK = false`, SEC-6). Cloudflare's CSAM tool is NOT available (DNS is GoDaddy, see
   CLAUDE.md). Bring options + cost to him; nothing is built.
 - **The toolbar on www.setnayan.com/cale-ice** — signed-out there is none (measured). Most likely Vercel's own toolbar
-  (he is signed into Vercel). Asked him for a screenshot; unanswered.
+  (he is signed into Vercel). CLOSED 15 Oct: owner re-opened the link and the toolbar did not show.
 - His own to-dos: Start on /admin/launch-offer · Google Wallet set-up · refund wording.
 
 ## 4 · TRAPS (each cost time tonight)
@@ -89,6 +89,18 @@ Older drafts still open: batch 7 #6532 (dark mode + public fixes — merge main,
   the words don't resize. Find why for EVERY part offering Size on every stage; prove with computed font-size per
   step on the render; guard + sabotage; branch `rd/stage-size-resizes`; draft + label; ships alone. Check
   `rd/maker-look-fixes` (Elements colour not showing on preview) for a shared root cause first.
+- **Host strip removed (owner 15 Oct, "Remove it"):** the owner ribbon on `/[slug]` for a signed-in host
+  (`app/[slug]/_components/owner-ribbon.tsx` OwnerRibbon — "Your Event Hub — as a guest sees it" · Edit · Preview ▾ via
+  `owner-phase-menu.tsx`; model `lib/owner-ribbon.ts` buildOwnerRibbon; mounted in `site-body.tsx` / `page.tsx`). The
+  host's own page must look exactly like a guest's; editing is from the dashboard only. It is woven into ~20 guards
+  (`grep -rln "OwnerRibbon\|owner-ribbon\|buildOwnerRibbon\|data-owner-ribbon" apps/web`) incl. the-host-sees-their-own-page,
+  host-body-variant, owner-ribbon*.test.ts, see-as-*, a-control-that-works-for-whoever-sees-it, the-hub-next-step-never-
+  points-at-itself, a-dark-look-keeps-its-words, each-guest-page-has-one-main-action, the Maker canvas test. Keep what
+  OTHER surfaces still need: `supplier-ribbon.tsx` (vendors), `sample-viewer-inert.tsx` / See-as, the Maker canvas
+  (it never showed the ribbon), and the `?phase=` previews (reachable from the dashboard / Maker, decide where the
+  Preview ▾ moves or whether `?phase=` stays host-only by URL). site-body's host branch already draws no "Get inside".
+  Re-aim each guard to the new claim ("a signed-in host sees no owner chrome on /[slug]"), never delete one to go green;
+  sabotage once. Branch `rd/host-strip-removed`, draft + label, feature batch (not a live fault).
 - Every other build: its worktree's last commits + the table above + `handovers/` are the brief. Rules for all:
   lab/stand-in only (never Apply/Undo/Restore on cale-ice, never the owner's browser pane), whole `pnpm preflight`
   before every push, draft PR + `do-not-auto-merge`, never `--admin`, live fixes ship alone, features as one tested
