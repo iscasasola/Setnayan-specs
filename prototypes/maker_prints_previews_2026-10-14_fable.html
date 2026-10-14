@@ -1,0 +1,820 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Studio › Prints · previews · prototype</title>
+<!--
+  STUDIO › PRINTS — EVERY PRINT SHOWS WHAT IT LOOKS LIKE (2026-10-14, Fable, design only, no app code).
+  Owner, verbatim: "i cannot see what the different prints look like".
+
+  Rule 0 (measured on origin/main 394b5ae, 2026-10-14):
+    · every print ALREADY has a real render: the invitation set → /api/hub-print/<piece>?mode=screen (one SVG per piece,
+      Front · Back side by side, versioned + immutable cache, #6078); the free group → page 1 as an SVG
+      (/api/hub-print/guest-registry|qr-codes, /seating/print, /seating/caterer), the seat plan → /seating/export?format=preview,
+      the entrance chart → /seating/print?chart=table|az&format=preview (a PNG), the ticket → /api/guest/pass-card (1080 × 1440 PNG).
+    · on a COMPUTER Studio › Prints shows the current piece's picture on the left (PrintPieceBody / PrintPreview).
+    · on a PHONE it shows NONE: lib/studio-details.ts `${form} [data-details-body]{display:none}` steps the picture aside
+      for every full-screen form tool, and StudioPrintHead (studio-tools.tsx) is name · size line · size ▾ only.
+      The approved 2026-10-13 prototype carried a 44 × 62 abstract "paper" icon in each head; the build dropped it.
+  So this is a DELTA on the approved Studio › Prints page (maker_prints_seat_counter_2026-10-13.html — same tokens, same rows):
+    1. the head of every print row gets a THUMBNAIL — the SAME picture the route already draws, shrunk, at true paper
+       proportions (the box takes the piece's shape, printPreviewBox) — lazy, low priority, immutable-cached;
+    2. tap the thumbnail or the name → the PREVIEW sheet: the print full-size, pinch/double-tap to zoom, pages to flip,
+       the size ▾, the Save / Sample / "Changed since you printed · Save again" actions that already exist, and the
+       paper line (size · pages · how many);
+    3. empty states are drawn ON the paper (no tables yet, no menu yet, no story yet, nobody has said yes yet) and the
+       preview sheet says what is missing with the in-place door;
+    4. the entrance chart gets its own row (it is a different sheet and size from the pack; same route, same files).
+  Nothing new is written. The only build asks: (a) `?page=N` on the page-1 preview routes (their layouts already
+  return every page); (b) a `?look=` on the ticket's screen preview is already there (passLookShared).
+  Controls: Phone | Computer · Light | Dark · Full event | Fresh event (every empty state) · Theme Classic (free) | ◆ Luxe (Pro, not owned).
+  States for pictures: ?view=phone|desk&theme=light|dark&event=full|fresh&look=house|velvet&open=<piece>
+-->
+<style>
+:root{--paper:#FBF9F5;--page:#F4F0E8;--surf:#FFFFFF;--ink:#2C2A29;--ink2:#5B5752;--mute:#8E8880;--line:#E6E0D6;--line2:#D9D3C8;--pill:#F1ECE3;--gold:#A9834B;--gold-ink:#6F5527;--gold-soft:#E8DCC3;--cta:#C24E25;--on-cta:#FFFFFF;--ok:#2B744A;--ok-ink:#25613D;--ok-soft:#E6F2EA;--warn:#965A00;--warn-soft:#FBEFD9;--bad:#B3261E;--bad-soft:#F8E0DE;--off:#9A948C;--scrim:rgba(44,42,41,.42);--shadow:0 14px 34px -14px rgba(44,42,41,.4);
+--in:cubic-bezier(.2,.8,.2,1);--spring:cubic-bezier(.34,1.56,.64,1);--t:3.04;--dur:.7s;
+--sans:-apple-system,"Helvetica Neue",Inter,system-ui,Arial,sans-serif;--serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+/* the paper's own type — never the app's; printouts are always light */
+--pserif:"Cormorant Garamond",Georgia,"Times New Roman",serif;--psans:"Helvetica Neue",Arial,sans-serif;--pscript:"Snell Roundhand","Apple Chancery","Brush Script MT","URW Chancery L",cursive}
+html[data-theme=dark]{--paper:#1E1C15;--page:#17160F;--surf:#232019;--ink:#FBFAF7;--ink2:#D6D1C7;--mute:#B3AEA3;--line:rgba(251,250,247,.16);--line2:rgba(251,250,247,.28);--pill:rgba(251,250,247,.08);--gold:#CBA766;--gold-ink:#E2C98B;--gold-soft:rgba(203,167,102,.18);--cta:#E5794E;--on-cta:#17160F;--ok:#6FCF97;--ok-ink:#6FCF97;--ok-soft:rgba(111,207,151,.14);--warn:#F0B45A;--warn-soft:rgba(240,180,90,.14);--bad:#F2817A;--bad-soft:rgba(242,129,122,.16);--off:#8A857C;--scrim:rgba(0,0,0,.55);--shadow:0 14px 34px -14px rgba(0,0,0,.7)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%}
+body{background:#D9D4CB;color:var(--ink);font:15px/1.45 var(--sans);padding:12px 0 40px}
+html[data-theme=dark] body{background:#0E0D09}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+[hidden]{display:none!important}
+svg.i{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.wrap{display:flex;flex-direction:column;align-items:center;gap:12px}
+.ctl{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;width:375px;max-width:100vw;padding:0 16px;font-size:13px}
+.ctl .ps{height:40px;flex:1 1 0;min-width:0}
+.ctl .ps button{font-size:12px;padding:0 6px}
+body.desk .ctl,body.desk .note{width:1024px}
+.note{width:375px;max-width:100vw;background:var(--surf);border:1px solid var(--line);border-radius:16px;padding:12px 14px;font-size:12.5px;color:var(--ink2)}
+.note h4{font:700 11.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin:8px 0 6px}
+.note table{width:100%;border-collapse:collapse;font-size:12.5px}
+.note td{padding:4px 6px 4px 0;border-top:1px solid var(--line);vertical-align:top}
+.note td:first-child{font-weight:600;color:var(--ink);white-space:nowrap}
+.note b{color:var(--ink)}
+/* ── pill selector (kind 1) ── */
+.ps{position:relative;display:flex;height:44px;padding:3px;border-radius:999px;background:var(--pill);border:1px solid var(--line)}
+.ps button{flex:1;position:relative;z-index:1;border-radius:999px;font-size:13px;font-weight:600;color:var(--off);display:flex;align-items:center;justify-content:center;gap:6px;padding:0 10px;white-space:nowrap;transition:color calc(220ms*var(--t)) var(--in)}
+.ps button[aria-pressed=true]{color:var(--on-cta)}
+.ps .th{position:absolute;top:3px;bottom:3px;left:0;width:var(--w,0px);transform:translateX(var(--x,0px));border-radius:999px;background:var(--cta);transition:transform calc(230ms*var(--t)) var(--spring),width calc(230ms*var(--t)) var(--spring)}
+@keyframes press{0%{scale:1}35%{scale:.93}100%{scale:1}}
+.pulse-el{animation:press calc(320ms*var(--t)) var(--in)}
+/* ── the phone ── */
+.phone{position:relative;width:375px;max-width:100vw;height:812px;background:var(--page);overflow:hidden;border-radius:26px;box-shadow:0 20px 50px -20px rgba(0,0,0,.45);display:flex;flex-direction:column;isolation:isolate}
+body.desk .phone{width:1024px;height:720px;border-radius:18px}
+@media(max-width:420px){body{padding:0}.wrap{gap:0}.ctl{min-height:52px;background:var(--surf);border-bottom:1px solid var(--line);flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.ctl .ps{flex:none;min-width:150px}.phone{border-radius:0;height:calc(100dvh - 52px)!important;box-shadow:none}.note{display:none}}
+/* ── top bar (Maker_Two_Bars_LOCKED: [✕][Stages ▾ | Prints ▾][↺][✓]) ── */
+.bar{flex:none;height:52px;display:flex;align-items:center;gap:6px;padding:0 6px;background:var(--surf);border-bottom:1px solid var(--line);z-index:5;position:relative}
+.round{flex:none;width:44px;height:44px;border-radius:999px;display:grid;place-items:center;background:var(--pill);color:var(--mute);position:relative}
+.round svg{width:20px;height:20px}
+.round.exit{background:var(--bad);color:#fff}
+.round.apply.on{background:var(--cta);color:var(--on-cta)}
+.round.apply .badge{position:absolute;top:-2px;right:-2px;min-width:18px;height:18px;border-radius:999px;background:var(--surf);color:var(--cta);border:1.5px solid var(--cta);font:700 11px/15px var(--sans);text-align:center;padding:0 4px;display:none}
+.round.apply.on .badge{display:block}
+.round[disabled]{opacity:.45}
+.mid{flex:1;min-width:0;display:flex;justify-content:center}
+.seg{position:relative;display:flex;background:var(--pill);border-radius:999px;padding:3px;width:100%;max-width:420px}
+.seg button{flex:1 1 0;min-width:0;height:38px;border-radius:999px;font:600 13px var(--sans);color:var(--off);position:relative;z-index:1;display:inline-flex;align-items:center;justify-content:center;gap:3px;padding:0 4px;white-space:nowrap}
+.seg button[aria-pressed=true]{color:var(--on-cta)}
+.seg button svg{width:12px;height:12px;flex:none;stroke-width:2.4}
+.seg button:not([aria-pressed=true]) svg{color:var(--cta)}
+.seg .segth{position:absolute;top:3px;bottom:3px;left:3px;width:calc(50% - 3px);border-radius:999px;background:var(--cta);transform:translateX(100%);z-index:0}
+/* ── body ── */
+.body{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;position:relative;scrollbar-width:none;padding:0 16px 40px}
+.body::-webkit-scrollbar{display:none}
+.where{margin:12px 0 2px;font:500 12.5px var(--sans);color:var(--mute)}
+.where b{color:var(--ink2);font-weight:600}
+.gh{margin:18px 0 2px;font:700 11.5px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--mute);display:flex;align-items:baseline;gap:8px}
+.gh small{font-weight:400;letter-spacing:0;text-transform:none;font-size:12px}
+.piece{margin-top:8px}
+.piece+.piece{border-top:1px solid var(--line);padding-top:4px}
+/* ═══ THE DELTA · 1 — a print row's head carries its real thumbnail ═══ */
+.phead{display:flex;align-items:center;gap:12px;min-height:80px}
+.thumb{flex:none;width:72px;height:72px;display:grid;place-items:center;border-radius:10px;position:relative;padding:0}
+.thumb .pp{display:block;max-width:72px;max-height:72px;background:#FFFDF9;border-radius:2px;box-shadow:0 1px 2px rgba(0,0,0,.14),0 6px 14px -8px rgba(0,0,0,.35);overflow:hidden;position:relative}
+.thumb .pp svg{display:block;width:100%;height:100%}
+.thumb .pp.wait{background:linear-gradient(100deg,#EFEAE1 20%,#F9F6F0 40%,#EFEAE1 60%);background-size:200% 100%;animation:shim 1.2s linear infinite}
+@keyframes shim{to{background-position:-200% 0}}
+.thumb .pp.wait::after{content:"Drawing…";position:absolute;inset:0;display:grid;place-items:center;font:600 9px var(--sans);color:#8E8880;letter-spacing:.04em}
+.thumb .pages{position:absolute;right:-4px;bottom:-4px;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--ink);color:var(--paper);font:700 10.5px/20px var(--sans);text-align:center;box-shadow:0 1px 2px rgba(0,0,0,.3)}
+html[data-theme=dark] .thumb .pages{background:var(--paper);color:var(--ink)}
+.thumb .edge{position:absolute;left:4px;right:4px;bottom:4px;height:3px;border-radius:0 0 3px 3px;background:#E3DDD2;box-shadow:0 1px 1px rgba(0,0,0,.15)}
+.phead .tx{flex:1;min-width:0;text-align:left;min-height:44px;display:flex;flex-direction:column;justify-content:center}
+.phead .tx b{display:block;font-size:15.5px;font-weight:600}
+.phead .tx span{display:block;font-size:12.5px;color:var(--ink2)}
+.phead .tx em{display:block;font-size:12px;color:var(--cta);font-style:normal;font-weight:600}
+.phead>button{border-radius:12px}
+.phead .tx small.pro{margin-left:6px;vertical-align:1px}
+.unch{font-size:11px;color:var(--mute);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+/* ── form rows (kind 6 / 10) ── */
+.fr{display:flex;align-items:center;gap:10px;min-height:52px;border-top:1px solid var(--line)}
+.rows>.fr:first-child,.phead+.fr{border-top:0}
+.fr .l{flex:1;font-weight:500;display:flex;align-items:center;gap:2px;min-width:0}
+.fr .l small{display:block;font-size:12px;color:var(--mute);font-weight:400}
+.fr .l .stack{display:flex;flex-direction:column;min-width:0}
+.fr .v{color:var(--ink2);font-size:14px;display:inline-flex;align-items:center;gap:6px;min-height:44px}
+.sub{padding-left:8px;border-left:2px solid var(--line);margin:2px 0 8px}
+.sub .fr{min-height:48px}
+.ans{height:44px;display:inline-flex;align-items:center;gap:8px;padding:0 10px 0 14px;border-radius:999px;background:var(--surf);border:1px solid var(--line2);font-size:14px;max-width:220px;text-align:left}
+.ans span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.ans svg{width:14px;height:14px;color:var(--cta);flex:none;stroke-width:2.3}
+/* ── dropdown (kind 2) ── */
+.ddw{position:relative}
+.dd{height:44px;display:inline-flex;align-items:center;gap:6px;padding:0 10px 0 14px;border-radius:999px;background:var(--surf);border:1px solid var(--line2);font-size:14px;font-weight:500;width:170px;justify-content:space-between}
+.dd.short{width:128px}
+.dd span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dd svg{flex:none;width:14px;height:14px;color:var(--cta);stroke-width:2.4;transition:transform calc(180ms*var(--t)) var(--spring)}
+.ddw.open .dd svg{transform:rotate(180deg)}.ddw.open .dd{border-color:var(--cta)}
+/* ── switch (kind 3) ── */
+.sw{width:50px;height:30px;border-radius:999px;background:var(--line2);position:relative;flex:none;transition:background calc(220ms*var(--t)) var(--in)}
+.sw:after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform calc(200ms*var(--t)) var(--spring)}
+.sw[aria-checked=true]{background:var(--cta)}
+.sw[aria-checked=true]:after{transform:translateX(20px)}
+/* ── ⓘ (kind 7) ── */
+.ib{width:44px;min-height:44px;flex:none;display:flex;align-items:center;justify-content:center}
+.ib i{width:22px;height:22px;border-radius:50%;border:1px solid var(--line2);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--cta);font-style:normal;background:var(--surf)}
+/* ── action button (kind 9) ── */
+.ab{height:44px;padding:0 18px;border-radius:999px;font-weight:600;font-size:14px;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:0;transition:background calc(60ms*var(--t)),color calc(60ms*var(--t)),opacity calc(60ms*var(--t))}
+.ab.main{background:var(--cta);color:var(--on-cta)}
+.ab.second{background:var(--surf);color:var(--ink);border:1px solid var(--line2)}
+.ab.quiet{background:none;color:var(--cta);padding:0 10px}
+.ab.icon{width:44px;padding:0}
+.ab[disabled]{background:var(--pill);color:var(--off);border-color:var(--line);pointer-events:none}
+.ab svg{width:18px;height:18px;stroke-width:2.2}
+.ab .spin{width:16px;height:16px;border-radius:50%;border:2px solid color-mix(in srgb,currentColor 30%,transparent);border-top-color:currentColor;animation:sp .8s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 0 4px}
+/* ── Pro mark (kind 20) ── */
+.pro{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 9px;border-radius:999px;background:var(--gold-soft);color:var(--gold-ink);font-size:11px;font-weight:800;letter-spacing:.04em}
+/* ── status line + toast (kind 12) ── */
+.status{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:500;padding:10px 14px;border-radius:14px;margin:6px 0}
+.status.warn{background:var(--warn-soft);color:var(--warn)}
+.status.ok{background:var(--ok-soft);color:var(--ok-ink)}
+.status.bad{background:var(--bad-soft);color:var(--bad)}
+.status.info{background:var(--pill);color:var(--ink2)}
+.status svg{width:18px;height:18px;flex:none;stroke-width:2.2}
+.status .tx{flex:1;min-width:0}.status .tx b{font-weight:700}
+.status button{color:inherit;text-decoration:underline;font-weight:700;min-height:44px;padding:0 6px;flex:none}
+.toast{position:absolute;left:50%;top:60px;z-index:80;transform:translate(-50%,-320%);background:var(--cta);color:var(--on-cta);border-radius:999px;padding:0 20px;height:44px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;box-shadow:var(--shadow);transition:transform calc(90ms*var(--t)) var(--spring);white-space:nowrap;max-width:calc(100% - 32px)}
+.toast.on{transform:translate(-50%,0)}
+.toast svg{width:18px;height:18px;stroke-width:2.4}
+/* ── scrim + sheet + confirm ── */
+.scrim{position:absolute;inset:0;background:var(--scrim);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity calc(90ms*var(--t)) var(--in);z-index:40}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:calc(100% - 16px);background:var(--paper);border-radius:22px 22px 0 0;transform:translateY(105%);transition:transform var(--dur) var(--spring);z-index:50;display:flex;flex-direction:column;box-shadow:0 -10px 40px -20px rgba(0,0,0,.5)}
+.sheet.on{transform:none}
+.grab{width:40px;height:4px;border-radius:9px;background:var(--line2);margin:10px auto 2px;flex:none}
+.sheet h3{font:700 12px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin:8px 20px 4px}
+.sheet .rows{overflow:auto;padding:0 12px 16px}
+.menu button{display:flex;width:100%;align-items:center;min-height:48px;padding:0 12px;border-radius:12px;font-size:15px;text-align:left;gap:10px}
+.menu button[aria-checked=true]{color:var(--cta);font-weight:600}
+.menu button .tick{margin-left:auto;width:18px;height:18px;visibility:hidden;stroke-width:2.6}
+.menu button[aria-checked=true] .tick{visibility:visible}
+.menu button small{color:var(--mute);font-weight:400;font-size:13px}
+.menu button[disabled]{color:var(--off)}
+.cfm{position:absolute;left:50%;top:50%;z-index:70;width:min(320px,calc(100% - 48px));transform:translate(-50%,-46%) scale(.94);opacity:0;pointer-events:none;background:var(--surf);border-radius:24px;padding:22px 20px 16px;text-align:center;box-shadow:0 24px 60px -20px rgba(0,0,0,.5);transition:opacity calc(50ms*var(--t)),transform calc(70ms*var(--t)) var(--spring)}
+.cfm.on{opacity:1;transform:translate(-50%,-50%);pointer-events:auto}
+.cfm b{display:block;font-size:18px;margin-bottom:6px}.cfm p{color:var(--ink2);font-size:14px;margin-bottom:16px}
+.cfm .btnrow{justify-content:center;flex-wrap:nowrap;padding:0}.cfm .ab{flex:1}
+/* ── style cards (kind 5) — the ticket looks, drawn from the SAME ticket generator ── */
+.strip{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 6px;scrollbar-width:none;margin:0 -2px}
+.strip::-webkit-scrollbar{display:none}
+.sc{flex:none;width:112px;scroll-snap-align:center;text-align:center}
+.sc .f{display:block;width:112px;height:149px;border-radius:14px;position:relative;overflow:hidden;box-shadow:0 0 0 0 var(--cta);transition:box-shadow calc(160ms*var(--t)) var(--spring);background:#FFFDF9}
+.sc .f svg{display:block;width:100%;height:100%}
+.sc[aria-checked=true] .f{box-shadow:0 0 0 3px var(--cta)}
+.sc b{display:block;margin-top:9px;font-size:12px;font-weight:500;color:var(--off)}
+.sc[aria-checked=true] b{color:var(--cta);font-weight:700}
+/* ═══ THE DELTA · 2 — the preview sheet ═══ */
+.viewer{position:absolute;inset:0;z-index:50;background:var(--page);display:flex;flex-direction:column;transform:translateY(104%);transition:transform var(--dur) var(--spring)}
+.viewer.on{transform:none}
+.vhead{flex:none;height:52px;display:flex;align-items:center;gap:6px;padding:0 6px;background:var(--surf);border-bottom:1px solid var(--line)}
+.vhead .tt{flex:1;min-width:0;text-align:center}
+.vhead .tt b{display:block;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vhead .tt span{display:block;font-size:12px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:16px}
+.vhead .tt span.step{color:var(--cta);font-weight:600}
+.stage{flex:1;min-height:0;position:relative;overflow:hidden;touch-action:none;background:var(--page);display:grid;place-items:center}
+.stage .pg{position:absolute;inset:0;display:grid;place-items:center;transition:transform calc(90ms*var(--t)) var(--in),opacity calc(90ms*var(--t))}
+.stage .pg.out-l{transform:translateX(-18%);opacity:0}.stage .pg.out-r{transform:translateX(18%);opacity:0}
+.stage .sheetpaper{background:#FFFDF9;box-shadow:0 2px 4px rgba(0,0,0,.14),0 24px 40px -18px rgba(0,0,0,.45);transform-origin:center;will-change:transform;position:relative}
+.stage .sheetpaper svg{display:block;width:100%;height:100%}
+.stage .sheetpaper.wait{background:linear-gradient(100deg,#EFEAE1 20%,#F9F6F0 40%,#EFEAE1 60%);background-size:200% 100%;animation:shim 1.2s linear infinite}
+.zoomtip{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);font:600 11.5px var(--sans);color:var(--mute);background:var(--surf);border:1px solid var(--line);border-radius:999px;padding:5px 12px;pointer-events:none;opacity:0;transition:opacity .3s}
+.zoomtip.on{opacity:1}
+.pager{flex:none;display:flex;align-items:center;justify-content:center;gap:4px;min-height:52px;padding:0 8px}
+.pager .ab.icon{background:var(--surf);border:1px solid var(--line2);color:var(--cta)}
+.pager .ab.icon[disabled]{color:var(--line2);background:var(--pill)}
+.dots{display:flex;gap:5px;align-items:center;padding:0 8px;min-width:0;overflow:hidden}
+.dots i{width:6px;height:6px;border-radius:50%;background:var(--line2);flex:none;transition:transform .3s var(--spring),background .3s}
+.dots i.on{background:var(--cta);transform:scale(1.5)}
+.dots b{font:600 12.5px var(--sans);color:var(--ink2);padding:0 4px;white-space:nowrap}
+.vfoot{flex:none;background:var(--surf);border-top:1px solid var(--line);padding:0 16px max(10px,env(safe-area-inset-bottom));max-height:46%;overflow:auto}
+.vfoot .fr:first-child{border-top:0}
+.chipline{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px;color:var(--ink2);padding:10px 0 2px}
+.chipline .ch{height:26px;padding:0 10px;border-radius:999px;background:var(--pill);display:inline-flex;align-items:center;gap:4px;font-weight:600;color:var(--ink2);font-size:12px}
+.chipline .ch.gold{background:var(--gold-soft);color:var(--gold-ink)}
+/* ── empty state (kind 16) ── */
+.state{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:10px 0 6px}
+.state b{font-size:14.5px}.state p{font-size:13px;color:var(--ink2)}
+/* ── computer: the preview is the left column, docked; rows on the right ── */
+body.desk .body{padding:0 28px 40px}
+body.desk .cols{display:grid;grid-template-columns:440px 1fr;gap:28px;align-items:start}
+body.desk .cols .left{position:sticky;top:0;padding-top:14px}
+body.desk .viewer{position:sticky;inset:auto;top:0;transform:none;height:660px;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--surf)}
+body.desk .viewer .vhead .ab.icon.back{visibility:hidden}
+body.desk .dd{width:220px}
+body.desk .sheet{left:auto;right:16px;bottom:16px;width:380px;border-radius:20px}
+body.desk .cfm{left:auto;right:40px;transform:translate(0,-46%) scale(.94)}body.desk .cfm.on{transform:translate(0,-50%)}
+body.desk .thumb{width:56px;height:56px}body.desk .thumb .pp{max-width:56px;max-height:56px}body.desk .phead{min-height:64px}
+.left{display:none}body.desk .left{display:block}
+.hind{position:absolute;left:50%;bottom:8px;width:134px;height:5px;border-radius:3px;background:rgba(44,42,41,.35);transform:translateX(-50%);z-index:90;pointer-events:none}
+body.desk .hind{display:none}
+@media(prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="ctl">
+    <div class="ps" id="vw"><button aria-pressed="true" data-v="phone">Phone</button><button aria-pressed="false" data-v="desk">Computer</button><div class="th"></div></div>
+    <div class="ps" id="th"><button aria-pressed="true" data-v="light">Light</button><button aria-pressed="false" data-v="dark">Dark</button><div class="th"></div></div>
+    <div class="ps" id="ev"><button aria-pressed="true" data-v="full">Full event</button><button aria-pressed="false" data-v="fresh">Fresh event</button><div class="th"></div></div>
+    <div class="ps" id="lk"><button aria-pressed="true" data-v="house">Classic · free</button><button aria-pressed="false" data-v="velvet">◆ Luxe · Pro</button><div class="th"></div></div>
+  </div>
+
+  <div class="phone" id="phone">
+    <div class="bar">
+      <button class="round exit" aria-label="Exit the Maker"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <div class="mid"><div class="seg">
+        <button aria-pressed="false"><span>Stages</span><svg class="i" viewBox="0 0 12 12"><path d="M2.5 4.5l3.5 3.5 3.5-3.5"/></svg></button>
+        <button aria-pressed="true"><span>Prints</span><svg class="i" viewBox="0 0 12 12"><path d="M2.5 4.5l3.5 3.5 3.5-3.5"/></svg></button>
+        <div class="segth"></div>
+      </div></div>
+      <button class="round" aria-label="Undo the last change" disabled><svg class="i" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
+      <button class="round apply" aria-label="Apply"><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span class="badge">0</span></button>
+    </div>
+
+    <div class="body" id="body">
+      <div class="cols">
+      <div class="left" id="leftcol"></div>
+      <div class="right">
+      <p class="where">You're editing · <b>Studio › Prints</b></p>
+      <div id="list"></div>
+      </div></div>
+    </div>
+
+    <!-- THE PREVIEW SHEET — full screen on a phone (under the top bar), the left column on a computer -->
+    <div class="viewer" id="viewer" aria-hidden="true">
+      <div class="vhead">
+        <button class="ab icon quiet back" id="vback" aria-label="Back to Prints"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <div class="tt"><b id="vtitle">The Invitation</b><span id="vline"></span></div>
+        <button class="ab icon quiet" id="vzoom" aria-label="Zoom"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M8 11h6M11 8v6"/></svg></button>
+      </div>
+      <div class="stage" id="stage"><div class="zoomtip" id="zoomtip">Pinch or double-tap to zoom</div></div>
+      <div class="pager" id="pager"></div>
+      <div class="vfoot" id="vfoot"></div>
+    </div>
+
+    <div class="scrim" id="scrim"></div>
+    <div class="sheet" id="sheet"><div class="grab"></div><h3 id="sheeth"></h3><div class="rows menu" id="sheetrows"></div></div>
+    <div class="cfm" id="cfm"><b id="cfmt"></b><p id="cfmp"></p><div class="btnrow"><button class="ab second" id="cno">Keep it</button><button class="ab main" id="cyes">See Pro</button></div></div>
+    <div class="toast" id="toast" role="status"><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span id="toastt">Saved</span></div>
+    <div class="hind"></div>
+  </div>
+
+  <div class="note">
+    <h4>What this shows</h4>
+    <p>The approved Studio › Prints page (2026-10-13), plus one delta: <b>every print row carries a thumbnail of the real print</b> — Maria &amp; Jose's own names, date, venue, tables and guests, at true paper proportions — and <b>a tap opens the print full size</b> (pinch / double-tap to zoom, pages to flip) with the Save actions that already exist. Try <b>Fresh event</b> for every empty state, <b>◆ Luxe</b> for a Pro theme the couple does not own (sample watermark; ◆ never blocks), <b>Dark</b> to see the paper stay light.</p>
+    <h4>Control → kind</h4>
+    <table>
+      <tr><td>Thumbnail in the row head</td><td>Form row (6) with a picture at its left, 72 px box in the piece's own shape (printPreviewBox) · lazy, low priority · the SAME SVG the route already serves (mode=screen) · a page badge when there is more than one page</td></tr>
+      <tr><td>Tap thumb / name</td><td>opens the Preview sheet (full screen on a phone like every form tool; the left column on a computer) · the thumb is the same picture, so page 1 is on screen at once, no second fetch</td></tr>
+      <tr><td>Zoom</td><td>pinch · double-tap · the ⌕ button (1× ↔ 2.5×) · drag to pan when zoomed · a small tip the first time</td></tr>
+      <tr><td>Pages</td><td>‹ › (44 px) + dots up to 12, "Page n of N" after · swipe when not zoomed · Front · Back for a two-sided card · By table | A to Z is a two-way Pill (1) on the chart</td></tr>
+      <tr><td>Size</td><td>the shipped Dropdown (2) — Calling card · Train · Boarding · ID · Phone card; 5 × 7 · A5; A5 · index cards; A3 · A2 · A1 · 24 × 36 in — the page redraws in it</td></tr>
+      <tr><td>Paper line</td><td>chips: size · sides/pages · how many (from the guest list and the seat plan) · the theme — "◆ Luxe · sample until Pro" on a Pro theme without Pro</td></tr>
+      <tr><td>Actions</td><td>Action (9): Save PDF main · Sample JPG quiet · ◆ Save · Luxe → the centred Pro note (20), never a page jump · "Changed since you printed · Save again" = status line (12) · Preparing… → Sent to your downloads</td></tr>
+      <tr><td>Empty</td><td>drawn ON the paper (the real routes already print "Add your menu…" on the card) + a kind-16 state under it with the in-place door: Open Seat plan · Add your menu · Add your Love Story · Guest list</td></tr>
+      <tr><td>Too full</td><td>the chart's own words: "84 names don't fit on A3 at a size guests can read. Choose A2 — every name fits there." — the Save is withheld, A2 is one tap</td></tr>
+    </table>
+    <h4>Reuse vs new</h4>
+    <p><b>Reuse as-is:</b> every invitation-set piece (one SVG each, Front · Back already side by side), ticket PNG, registry / QR / pack / caterer page 1, seat plan SVG, chart PNG. <b>New, small:</b> <code>?page=N</code> on the page-1 routes (their layouts already return every page); the ticket strip draws the three looks through the same generator; the "how many" counts (guests · seated · pages) are the layouts' own numbers, returned in a header like <code>x-print-fields</code>.</p>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════════════════════
+   THE SAMPLE EVENT — Maria & Jose. Every name on every print comes from here.
+   ════════════════════════════════════════════════════════════════════════════ */
+const Q = new URLSearchParams(location.search);
+const S = { view: Q.get('view') || 'phone', theme: Q.get('theme') || 'light', event: Q.get('event') || 'full', look: Q.get('look') || 'house', open: Q.get('open') || null, pro: false };
+const EV = {
+  names: ['Maria', 'Jose'], couple: 'Maria & Jose', mark: 'M&J', eyebrow: 'The wedding of',
+  date: 'Saturday · June 20, 2026', dateShort: 'June 20, 2026', time: '2:30 PM',
+  church: 'San Agustin Church, Intramuros', reception: 'The Manila Hotel', receptionTime: '6:00 PM',
+  address: 'setnayan.com/maria-and-jose',
+  parents: { groom: ['Mr. & Mrs. Antonio Reyes'], bride: ['Mr. & Mrs. Ramon Santos'] },
+  opening: 'Together with their families',
+  rsvp: 'Kindly reply to Claire · 0917 555 0142 by May 20',
+  dress: 'Formal — black tie optional', swatches: ['#5B2C3B', '#C9A77A', '#E8DCC3', '#2F3E34'],
+  gifts: ['GCash · •••• 0142', 'BPI · •••• 7890'],
+  program: ['2:30 PM · Ceremony', '4:00 PM · Photos', '6:00 PM · Reception', '8:30 PM · First dance'],
+  menu: [{ t: 'Cocktails', d: ['Lumpiang shanghai', 'Kinilaw na tanigue', 'Cheese & kesong puti'] }, { t: 'Dinner', d: ['Lechon de leche', 'Sinigang na baboy', 'Garlic rice', 'Pancit canton', 'Grilled tuna belly'] }, { t: 'Dessert', d: ['Leche flan', 'Ube halaya', 'Wedding cake'] }],
+  story: [{ l: 'How we met', m: [['2018', 'A rainy Tuesday at the UST library', 'Manila']] }, { l: 'The first trip', m: [['2020', 'Siargao, three days of no signal', 'Siargao']] }, { l: 'The yes', m: [['Dec 2025', 'On the breakwater at sunset', 'Manila Bay']] }],
+  entourage: {
+    front: [['Principal sponsors', ['Mr. Ricardo Lim', 'Mrs. Teresa Lim', 'Mr. Jaime Ocampo', 'Mrs. Lourdes Ocampo', 'Dr. Manuel Tan', 'Mrs. Pilar Tan']], ['Best man', ['Miguel Reyes']], ['Maid of honour', ['Andrea Santos']], ['Groomsmen', ['Paolo Cruz', 'Vince Bautista', 'Noel Garcia']], ['Bridesmaids', ['Carla Mendoza', 'Nina Flores', 'Lea Torres']]],
+    back: [['Candle', ['Rafael Castillo', 'Sofia Navarro']], ['Veil', ['Oscar Pascual', 'Yvette Domingo']], ['Cord', ['Marco Aquino', 'Grace Salazar']], ['Flower girls', ['Lia Reyes', 'Mia Santos']], ['Ring bearer', ['Nico Reyes']], ['Coin bearer', ['Gab Santos']]],
+  },
+};
+const TABLES = ['Sampaguita', 'Ilang-Ilang', 'Waling-Waling', 'Gumamela', 'Rosal', 'Dama de Noche', 'Santan', 'Kalachuchi'];
+const FIRST = ['Ana', 'Ben', 'Carla', 'Daniel', 'Elena', 'Francis', 'Grace', 'Hector', 'Isabel', 'Jun', 'Karen', 'Luis', 'Mica', 'Noel', 'Olivia', 'Paolo', 'Queenie', 'Rafael', 'Sofia', 'Tomas', 'Ursula', 'Vince', 'Wendy', 'Xavier', 'Yvette', 'Zach', 'Lea', 'Marco', 'Nina', 'Oscar'];
+const LAST = ['Cruz', 'Reyes', 'Santos', 'Garcia', 'Mendoza', 'Torres', 'Flores', 'Villanueva', 'Ramos', 'Bautista', 'Dela Cruz', 'Castillo', 'Aquino', 'Navarro', 'Salazar', 'Domingo', 'Pascual', 'Lim', 'Tan', 'Ocampo'];
+const GUESTS = []; const DIETS = ['', '', '', 'no pork', '', 'vegetarian', '', '', 'no seafood', ''];
+for (let i = 0; i < 120; i += 1) {
+  const first = FIRST[i % 30], last = LAST[(i * 7 + Math.floor(i / 30)) % 20];
+  GUESTS.push({ i, first, last, name: `${first} ${last}`, yes: i % 5 !== 4, party: i % 3 === 0 ? 2 : 1, diet: DIETS[i % 10] });
+}
+function data() {
+  const fresh = S.event === 'fresh';
+  const yes = fresh ? [] : GUESTS.filter((g) => g.yes);
+  const seated = fresh ? [] : yes.slice(0, 84);
+  const byTable = TABLES.map((t, k) => ({ name: t, guests: seated.filter((g, j) => Math.floor((j * 8) / 84) === k) }));
+  return { fresh, invited: GUESTS.length, yes, seated, unseated: yes.length - seated.length, tables: fresh ? [] : byTable, menu: fresh ? [] : EV.menu, story: fresh ? [] : EV.story };
+}
+const tableOf = (g) => { const d = data(); for (const t of d.tables) if (t.guests.includes(g)) return t.name; return null; };
+const surnameFirst = (g) => `${g.last}, ${g.first}`;
+
+/* ── the paper's look: the theme on paper (printLookFor) ───────────────────── */
+const LOOKS = {
+  house: { name: 'Classic', tier: 'free', paper: '#FFFDF9', ink: '#2C2A29', muted: '#6F6A62', accent: '#A9834B', heading: '#2C2A29', still: 'none', ornament: '❦', caps: false },
+  velvet: { name: 'Luxe', tier: 'pro', paper: '#2A1E2C', ink: '#F3E9D8', muted: '#C9B8A4', accent: '#D4B36A', heading: '#F7EFE2', still: 'full', ornament: '✦', caps: false },
+};
+const look = () => LOOKS[S.look];
+const isSample = () => look().tier === 'pro' && !S.pro;
+
+/* ════════════════════════════════════════════════════════════════════════════
+   THE PAPERS — one generator per print, in millimetres, drawn at EVERY scale
+   (thumb and full) from the same string, as the real route's one layout is.
+   ════════════════════════════════════════════════════════════════════════════ */
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const FONT = { serif: 'var(--pserif)', sans: 'var(--psans)', script: 'var(--pscript)' };
+function T(x, y, s, o = {}) {
+  const l = look();
+  return `<text x="${x}" y="${y}" style="font-family:${FONT[o.font || 'sans']};font-size:${o.size || 3}px;${o.italic ? 'font-style:italic;' : ''}${o.weight ? `font-weight:${o.weight};` : ''}${o.tracking ? `letter-spacing:${o.tracking}px;` : ''}" fill="${o.color || l.ink}" text-anchor="${o.anchor || 'middle'}">${esc(o.caps ? String(s).toUpperCase() : s)}</text>`;
+}
+function wrapLines(s, maxChars) { const out = []; let line = ''; for (const w of String(s).split(' ')) { if ((line + ' ' + w).trim().length > maxChars && line) { out.push(line); line = w; } else line = (line + ' ' + w).trim(); } if (line) out.push(line); return out; }
+function rule(cx, y, half, color) { return `<rect x="${cx - half}" y="${y}" width="${half * 2}" height="0.25" fill="${color}"/>`; }
+function ornRule(cx, y, half, color) { return `${rule(cx - half / 2 - 2, y, half / 2, color)}${rule(cx + half / 2 + 2, y, half / 2, color)}${T(cx, y + 1.1, look().ornament, { size: 3, color })}`; }
+function medal(cx, cy, r, inverse) { const l = look(); return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${l.accent}" stroke-width="${Math.max(0.25, r * 0.05)}"/>${T(cx, cy + r * 0.36, EV.mark, { font: 'serif', size: r * 1.05, color: inverse ? '#fff' : l.heading, italic: true })}`; }
+/* a QR that reads true at a glance — seeded modules with finders; a SAMPLE's QR has no finders and a band (print-sample-raster) */
+function QR(x, y, s, seed = 7, plain = false, placeholder = isSample()) {
+  const n = 21, c = s / n; let r = seed * 9973 + 17; const rnd = () => ((r = (r * 16807) % 2147483647) / 2147483647);
+  const ink = '#1a1a1a'; let out = `<rect x="${x}" y="${y}" width="${s}" height="${s}" fill="#fff"/>`;
+  const finder = (fx, fy) => `<rect x="${fx}" y="${fy}" width="${c * 7}" height="${c * 7}" fill="${ink}"/><rect x="${fx + c}" y="${fy + c}" width="${c * 5}" height="${c * 5}" fill="#fff"/><rect x="${fx + 2 * c}" y="${fy + 2 * c}" width="${c * 3}" height="${c * 3}" fill="${ink}"/>`;
+  for (let i = 0; i < n; i += 1) for (let j = 0; j < n; j += 1) {
+    const inF = (i < 8 && j < 8) || (i < 8 && j > n - 9) || (i > n - 9 && j < 8);
+    if (!placeholder && inF) continue;
+    if (rnd() > 0.52) out += `<rect x="${x + j * c}" y="${y + i * c}" width="${c}" height="${c}" fill="${ink}"/>`;
+  }
+  if (!placeholder) out += finder(x, y) + finder(x + s - 7 * c, y) + finder(x, y + s - 7 * c);
+  else out += `<rect x="${x}" y="${y + s * 0.4}" width="${s}" height="${s * 0.2}" fill="#fff"/>${T(x + s / 2, y + s * 0.55, 'SAMPLE', { size: s * 0.14, weight: 700, color: ink, tracking: s * 0.01 })}`;
+  if (!plain) out = `<rect x="${x - c}" y="${y - c}" width="${s + 2 * c}" height="${s + 2 * c}" rx="${c}" fill="#fff"/>` + out;
+  return out;
+}
+function WM(w, h) {
+  if (!isSample()) return '';
+  let out = `<g opacity=".16" transform="rotate(-24 ${w / 2} ${h / 2})">`;
+  for (let y = -h; y < h * 2; y += Math.max(10, h / 8)) for (let x = -w; x < w * 2; x += Math.max(38, w / 2.4)) out += T(x, y, 'SAMPLE · SETNAYAN', { size: Math.max(3.4, w / 24), weight: 700, color: look().tier === 'pro' ? '#fff' : '#000', anchor: 'start' });
+  return out + '</g>';
+}
+function still(w, h, band) { /* the theme's picture (a Pro theme) — Luxe prints over a full still under a veil */
+  const l = look(); if (l.still === 'none') return '';
+  return `<defs><linearGradient id="st${w}${h}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5B2C3B"/><stop offset=".55" stop-color="#2A1E2C"/><stop offset="1" stop-color="#1B1420"/></linearGradient></defs><rect x="0" y="0" width="${w}" height="${h}" fill="url(#st${w}${h})"/><circle cx="${w * 0.82}" cy="${h * 0.18}" r="${w * 0.22}" fill="#C9A77A" opacity=".18"/><circle cx="${w * 0.18}" cy="${h * 0.8}" r="${w * 0.3}" fill="#D4B36A" opacity=".1"/>`;
+}
+function paper(w, h, inner, cut = '') {
+  const l = look();
+  const rx = cut === 'rounded' ? Math.min(w, h) * 0.06 : 0;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}"><clipPath id="c${w}x${h}"><rect width="${w}" height="${h}" rx="${rx}"/></clipPath><g clip-path="url(#c${w}x${h})"><rect width="${w}" height="${h}" fill="${l.paper}"/>${inner}${WM(w, h)}</g></svg>`;
+}
+const page = (w, h, body, extra = {}) => ({ w, h, svg: paper(w, h, body, extra.cut), label: extra.label });
+
+/* ── THE INVITATION 5 × 7 in (127 × 177.8 mm) — drawInvitation's order ──── */
+function pInvitation() {
+  const l = look(); const w = 127, h = 177.8, cx = w / 2; let y = 24; let s = still(w, h);
+  s += medal(cx, 22, 9); y = 40;
+  s += T(cx, y, EV.opening, { size: 3.3, color: l.muted }); y += 7;
+  s += T(cx - 2.5, y, EV.parents.groom[0], { size: 3.1, anchor: 'end' }) + T(cx + 2.5, y, EV.parents.bride[0], { size: 3.1, anchor: 'start' }); y += 10;
+  s += T(cx, y, EV.eyebrow, { size: 2.7, color: l.accent, caps: true, tracking: 0.7 }); y += 13;
+  s += T(cx, y, EV.names[0], { font: 'script', size: 13, color: l.heading }); y += 7.5;
+  s += T(cx, y, '&', { font: 'serif', size: 6, color: l.accent, italic: true }); y += 11;
+  s += T(cx, y, EV.names[1], { font: 'script', size: 13, color: l.heading }); y += 6;
+  s += ornRule(cx, y, 16, l.accent); y += 8;
+  s += T(cx, y, EV.date, { size: 3.3, caps: true, tracking: 0.4 }); y += 5.5;
+  s += T(cx, y, `Ceremony at ${EV.time}`, { size: 3, color: l.muted }); y += 6;
+  s += T(cx, y, EV.church, { font: 'serif', size: 4.2, color: l.heading }); y += 6;
+  s += T(cx, y, `Reception to follow · ${EV.reception} · ${EV.receptionTime}`, { size: 2.9, color: l.muted }); y += 8;
+  s += T(cx, y, EV.rsvp, { size: 2.9, color: l.muted, italic: true });
+  s += QR(w - 19, h - 19, 12, 3) + T(w - 13, h - 4.6, 'Event Hub', { size: 2, color: l.muted });
+  return [page(w, h, s, { label: 'Front' })];
+}
+/* ── THE ENTOURAGE — measured, balanced, Front · Back ─────────────────────── */
+function pEntourage() {
+  const l = look(); const w = 127, h = 177.8, cx = w / 2;
+  const side = (groups, title) => {
+    let s = still(w, h); s += medal(cx, 16, 6.5); s += T(cx, 28, 'The', { size: 2.6, color: l.accent, caps: true, tracking: 0.7 }); s += T(cx, 37, title, { font: 'serif', size: 8, color: l.heading }); s += rule(cx, 41, 11, l.accent);
+    let y = 51;
+    for (const [head, names] of groups) {
+      s += T(cx, y, head, { size: 2.5, color: l.accent, caps: true, tracking: 0.6 }); y += 5;
+      if (names.length > 2) { for (let i = 0; i < names.length; i += 2) { s += T(cx - 3, y, names[i], { size: 3.2, anchor: 'end' }); if (names[i + 1]) s += T(cx + 3, y, names[i + 1], { size: 3.2, anchor: 'start' }); y += 5; } }
+      else { for (const n of names) { s += T(cx, y, n, { size: 3.2 }); y += 5; } }
+      y += 3;
+    }
+    s += QR(w - 19, h - 19, 12, 4);
+    return s;
+  };
+  return [page(w, h, side(EV.entourage.front, 'Entourage'), { label: 'Front' }), page(w, h, side(EV.entourage.back, 'Entourage'), { label: 'Back' })];
+}
+/* ── THE FINER DETAILS — the QR always at the foot of the front ───────────── */
+function pDetails() {
+  const l = look(); const w = 127, h = 177.8, cx = w / 2; let s = still(w, h); let y;
+  s += medal(cx, 16, 6.5); s += T(cx, 28, 'The', { size: 2.6, color: l.accent, caps: true, tracking: 0.7 }); s += T(cx, 37, 'Finer Details', { font: 'serif', size: 8, color: l.heading }); s += rule(cx, 41, 11, l.accent);
+  y = 52; const head = (t) => { s += T(cx, y, t, { size: 2.5, color: l.accent, caps: true, tracking: 0.6 }); y += 5; };
+  head('Dress code'); s += T(cx, y, EV.dress, { size: 3.1 }); y += 5; EV.swatches.forEach((c, i) => { s += `<circle cx="${cx - 9 + i * 6}" cy="${y}" r="2.1" fill="${c}" stroke="${l.paper}" stroke-width=".4"/>`; }); y += 9;
+  head('Gifts'); s += T(cx, y, 'Your presence is our present. Should you wish to give, a gift of cash is welcome.', { size: 2.8, color: l.muted }); y += 4.5; s += T(cx, y, EV.gifts.join('  ·  '), { size: 3 }); y += 9;
+  head('The program'); for (const p of EV.program) { s += T(cx, y, p, { size: 3 }); y += 4.5; } y += 4;
+  head('Kindly reply'); s += T(cx, y, EV.rsvp.replace('Kindly reply to ', ''), { size: 3 });
+  const q = 20; s += QR(cx - q / 2, h - 41, q, 5) + T(cx, h - 16, 'Scan for our Event Hub', { size: 2.5, color: l.accent, caps: true, tracking: 0.5 }) + T(cx, h - 11, EV.address, { size: 2.6, color: l.muted });
+  return [page(w, h, s, { label: 'Front' })];
+}
+/* ── THE MENU — never blank: "Add your menu…" is what the real card prints ── */
+function pMenu() {
+  const l = look(); const d = data(); const w = 127, h = 177.8, cx = w / 2; let s = still(w, h);
+  s += medal(cx, 16, 6.5); s += T(cx, 28, 'The', { size: 2.6, color: l.accent, caps: true, tracking: 0.7 }); s += T(cx, 37, 'Menu', { font: 'serif', size: 8, color: l.heading }); s += rule(cx, 41, 11, l.accent);
+  let y = 56;
+  if (!d.menu.length) { for (const line of wrapLines('Add your menu in Studio › Prints — the moments of your night, and the dishes of each.', 44)) { s += T(cx, y, line, { size: 3.1, color: l.muted }); y += 4.5; } }
+  else for (const m of d.menu) { s += T(cx, y, m.t, { size: 2.6, color: l.accent, caps: true, tracking: 0.6 }); y += 5.5; for (const dish of m.d) { s += T(cx, y, dish, { font: 'serif', size: 3.9 }); y += 5.2; } y += 4; }
+  s += QR(w - 19, h - 19, 12, 6);
+  return [page(w, h, s, { label: 'Front' })];
+}
+/* ── EVENT PASS — calling card · ID · train · boarding (layoutPass) ───────── */
+const PASS_FORMATS = { 'calling-card': ['Calling card', 90, 54, 'card'], cr80: ['ID card (CR80)', 85.7, 54, 'card'], train: ['Train ticket', 140, 70, 'train'], boarding: ['Boarding pass', 203, 82, 'boarding'], 'phone-card': ['Phone card (3:4 portrait)', 90, 120, 'phone'] };
+function pPass(fmtKey = S.fmt.pass, guest = (data().yes[0] || GUESTS[0])) {
+  const [, w, h, style] = PASS_FORMATS[fmtKey]; const l = look();
+  if (style === 'phone') return pTicket(S.ticket, guest, 90, 120);
+  const stubW = style === 'boarding' ? w * 0.3 : style === 'train' ? w * 0.28 : Math.min(w * 0.36, 30); const mainW = w - stubW; const k = h / 54;
+  let s = still(mainW, h); if (l.still !== 'none') s += `<rect width="${mainW}" height="${h}" fill="${l.paper}" opacity=".8"/>`;
+  s += `<rect x="${mainW}" y="0" width="${stubW}" height="${h}" fill="${l.tier === 'pro' ? '#1B1420' : '#F4EFE5'}"/><line x1="${mainW}" y1="2" x2="${mainW}" y2="${h - 2}" stroke="${l.accent}" stroke-width=".3" stroke-dasharray="1 1"/>`;
+  const cx = mainW / 2; let y = 10 * k;
+  s += T(5 * k, y, EV.eyebrow, { size: 2.2 * k, color: l.accent, caps: true, tracking: 0.5, anchor: 'start' }); y += 8 * k;
+  s += T(5 * k, y, EV.couple, { font: 'script', size: 8 * k, color: l.heading, anchor: 'start' }); y += 7 * k;
+  s += T(5 * k, y, EV.date.replace('Saturday · ', ''), { size: 2.6 * k, caps: true, tracking: 0.3, anchor: 'start' }); y += 4.2 * k;
+  s += T(5 * k, y, `${EV.time} · ${EV.church}`, { size: 2.4 * k, color: l.muted, anchor: 'start' }); y += 4.2 * k;
+  s += T(5 * k, y, `Reception · ${EV.reception}`, { size: 2.4 * k, color: l.muted, anchor: 'start' });
+  s += T(5 * k, h - 5 * k, guest.name, { font: 'serif', size: 4.4 * k, color: l.heading, anchor: 'start' }) + T(mainW - 4 * k, h - 5 * k, guest.party > 1 ? 'and 1 guest' : 'Admits one', { size: 2.3 * k, color: l.muted, anchor: 'end' });
+  const q = Math.min(stubW - 8 * k, h - 16 * k); s += QR(mainW + (stubW - q) / 2, (h - q) / 2 - 2 * k, q, guest.i + 11) + T(mainW + stubW / 2, h - 5 * k, 'Scans once at the door', { size: Math.max(1.6, 1.7 * k), color: l.tier === 'pro' ? '#C9B8A4' : '#6F6A62' });
+  if (style !== 'card') s += T(mainW + stubW / 2, 6 * k, style === 'boarding' ? 'BOARDING PASS' : 'ADMIT ONE', { size: 2 * k, weight: 700, color: l.accent, tracking: 0.5 });
+  return [page(w, h, s, { cut: 'rounded', label: 'Front' })];
+}
+/* ── THE TICKET a guest saves (3:4) — Classic · Ticket · Photo poster ─────── */
+function pTicket(design = S.ticket, guest = (data().yes[0] || GUESTS[0]), w = 90, h = 120) {
+  const l = look(); const cx = w / 2; let s = '';
+  const dark = design === 'poster' || l.tier === 'pro';
+  if (design === 'poster') s += `<defs><linearGradient id="tp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E9C9A8"/><stop offset="1" stop-color="#5B2C3B"/></linearGradient><linearGradient id="tv" x1="0" y1="0" x2="0" y2="1"><stop offset=".35" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".7"/></linearGradient></defs><rect width="${w}" height="${h}" fill="url(#tp)"/><rect width="${w}" height="${h}" fill="url(#tv)"/>`;
+  else s += still(w, h);
+  const ink = dark ? '#FFFFFF' : l.heading, mut = dark ? 'rgba(255,255,255,.75)' : l.muted, acc = design === 'poster' ? '#F3E9D8' : l.accent;
+  if (design === 'classic') s += `<rect x="4" y="4" width="${w - 8}" height="${h - 8}" rx="4" fill="none" stroke="${acc}" stroke-width=".35" opacity=".5"/>`;
+  if (design === 'ticket') { s += `<line x1="0" y1="${h * 0.62}" x2="${w}" y2="${h * 0.62}" stroke="${acc}" stroke-width=".4" stroke-dasharray="1.6 1.2"/><circle cx="0" cy="${h * 0.62}" r="4" fill="var(--page)"/><circle cx="${w}" cy="${h * 0.62}" r="4" fill="var(--page)"/>`; }
+  s += T(w - 6, 9, 'Guest ticket', { size: 2.2, caps: true, tracking: 0.6, color: acc, anchor: 'end' });
+  s += medal(cx, 20, 6.5, dark); s += T(cx, 35, EV.couple, { font: 'script', size: 7.5, color: ink }); s += ornRule(cx, 40, 14, acc);
+  s += T(cx, 54, guest.name, { font: 'serif', size: 8.2, color: ink }); s += T(cx, 60, guest.party > 1 ? 'and 1 guest' : 'Admits one', { size: 2.8, color: mut });
+  s += T(cx, 66, `${EV.dateShort} · ${EV.time}`, { size: 2.7, caps: true, tracking: 0.3, color: ink });
+  const q = 30; s += QR(cx - q / 2, 71, q, guest.i + 3) + T(cx, h - 9, 'Scans once at the door', { size: 2.4, color: mut }) + T(cx, h - 4.5, EV.address, { size: 2.2, color: mut });
+  return [page(w, h, s, { cut: 'rounded', label: 'Ticket' })];
+}
+/* ── PRINTED TICKETS — ganged on A4 with cut lines (sheet: 2 × 2 phone cards) ── */
+function pPrintedTickets() {
+  const d = data(); const guests = d.yes; const per = 4; const pages = []; const w = 210, h = 297;
+  const n = Math.max(1, Math.ceil(guests.length / per));
+  for (let p = 0; p < n; p += 1) {
+    let s = `<rect width="${w}" height="${h}" fill="#fff"/>`;
+    const cards = guests.slice(p * per, p * per + per);
+    if (!cards.length) s += T(w / 2, h / 2, 'No guest has said yes yet — tickets print for guests who are coming.', { size: 4, color: '#6b6b6b' });
+    cards.forEach((g, i) => { const x = 12 + (i % 2) * 93, y = 24 + Math.floor(i / 2) * 126; const t = pTicket(S.ticket, g)[0]; s += `<g transform="translate(${x} ${y})">${t.svg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '')}</g><rect x="${x - 1}" y="${y - 1}" width="92" height="122" fill="none" stroke="#bbb" stroke-width=".2" stroke-dasharray="1 1"/>`; });
+    s += T(w / 2, 14, `${EV.couple} · tickets · page ${p + 1} of ${n}`, { size: 2.8, color: '#6b6b6b' });
+    pages.push({ w, h, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}">${s}</svg>`, label: `Page ${p + 1}` });
+  }
+  return pages;
+}
+/* ── WELCOME POSTER A3 ─────────────────────────────────────────────────────── */
+function pPoster() {
+  const l = look(); const w = 297, h = 420, cx = w / 2; let s = still(w, h); let y = 70;
+  if (l.still === 'none') s += `<rect width="${w}" height="${h * 0.4}" fill="#EFE7DA"/>` + T(cx, 70, 'The theme’s picture', { size: 5, color: '#B3A48E', caps: true, tracking: 1 });
+  y = h * 0.4 + 40; s += medal(cx, y, 20, false); y += 40;
+  s += T(cx, y, 'Welcome to the wedding of', { size: 6, color: l.accent, caps: true, tracking: 1.6 }); y += 34;
+  s += T(cx, y, EV.names[0], { font: 'script', size: 34, color: l.heading }); y += 18; s += T(cx, y, '&', { font: 'serif', size: 14, color: l.accent, italic: true }); y += 30; s += T(cx, y, EV.names[1], { font: 'script', size: 34, color: l.heading }); y += 16;
+  s += ornRule(cx, y, 40, l.accent); y += 16; s += T(cx, y, EV.date, { size: 7, caps: true, tracking: 1 }); y += 12; s += T(cx, y, EV.church, { size: 6.2, color: l.muted });
+  const pw = 150, q = 46, px = cx - pw / 2, py = h - 90; s += `<rect x="${px}" y="${py}" width="${pw}" height="${q + 14}" fill="${l.paper}" stroke="${l.accent}" stroke-width=".4"/>` + QR(px + 7, py + 7, q, 8, true) + T(px + q + 18, py + 24, 'Scan for our', { size: 6, caps: true, tracking: .8, anchor: 'start' }) + T(px + q + 18, py + 34, 'Event Hub', { size: 6, caps: true, tracking: .8, anchor: 'start' }) + T(px + q + 18, py + 44, 'Photos · your table · the schedule', { size: 4, color: l.muted, anchor: 'start' }) + T(px + q + 18, py + 51, EV.address, { size: 3.6, color: l.muted, anchor: 'start' });
+  return [page(w, h, s)];
+}
+/* ── OUR STORY POSTER A3 — chapter by chapter; never printed blank ─────────── */
+function pStoryPoster() {
+  const l = look(); const d = data(); const w = 297, h = 420, cx = w / 2; let s = still(w, h);
+  s += `<defs><linearGradient id="sp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E9C9A8"/><stop offset="1" stop-color="#8E5B47"/></linearGradient></defs><rect width="${w}" height="${h * 0.42}" fill="url(#sp)"/>` + T(cx, h * 0.21, S.posterPhoto === 'photo' ? 'Your photo' : 'The theme’s picture', { size: 6, color: 'rgba(255,255,255,.7)', caps: true, tracking: 1.4 });
+  let y = h * 0.42 + 34; s += T(cx, y, 'Our Story', { font: 'script', size: 26, color: l.heading }); y += 10; s += ornRule(cx, y, 36, l.accent); y += 18;
+  if (!d.story.length) { s += T(cx, y + 20, 'Add your Love Story in Studio — each chapter prints here with its moments.', { size: 5, color: l.muted }); }
+  else for (const ch of d.story) { s += T(cx, y, ch.l, { size: 5, color: l.accent, caps: true, tracking: 1 }); y += 12; for (const [when, line, place] of ch.m) { s += T(cx, y, when, { size: 4.4, color: l.muted }); y += 8; s += T(cx, y, line, { font: 'serif', size: 7.6, color: l.heading }); y += 8; s += T(cx, y, place, { size: 4.2, color: l.muted, italic: true }); y += 16; } }
+  s += T(cx, h - 24, EV.couple, { font: 'script', size: 10, color: l.heading }) + T(cx, h - 14, EV.date, { size: 4.2, color: l.muted, caps: true, tracking: .8 });
+  return [page(w, h, s)];
+}
+/* ── EVENT CARD — A5 portrait, or a landscape index card ──────────────────── */
+const CARD_FORMATS = { 'card-a5': ['A5', 148, 210], 'index-5x3': ['Index card 5 × 3 in', 127, 76.2], 'index-6x4': ['Index card 6 × 4 in', 152.4, 101.6] };
+function pCard(fmtKey = S.fmt.card) {
+  const l = look(); const [, w, h] = CARD_FORMATS[fmtKey]; const landscape = w > h; let s = still(w, h);
+  const left = landscape ? w * 0.42 : 0; if (landscape) s += `<rect width="${left}" height="${h}" fill="${l.still === 'none' ? '#EFE7DA' : '#3A2A3C'}"/>`;
+  const cx = left + (w - left) / 2; let y = landscape ? h * 0.26 : h * 0.3;
+  s += medal(cx, y, landscape ? 7 : 10); y += landscape ? 14 : 20;
+  s += T(cx, y, EV.eyebrow, { size: landscape ? 2.4 : 2.8, color: l.accent, caps: true, tracking: .7 }); y += landscape ? 10 : 14;
+  s += T(cx, y, EV.couple, { font: 'script', size: landscape ? 9 : 12, color: l.heading }); y += landscape ? 6 : 8;
+  s += ornRule(cx, y, landscape ? 12 : 16, l.accent); y += landscape ? 7 : 9;
+  s += T(cx, y, EV.date, { size: landscape ? 2.6 : 3.2, caps: true, tracking: .4 }); y += landscape ? 5 : 6; s += T(cx, y, EV.church, { size: landscape ? 2.6 : 3.2, color: l.muted });
+  s += QR(w - 17, h - 17, 11, 9);
+  return [page(w, h, s, { cut: landscape ? 'rounded' : '' })];
+}
+/* ── THE FREE GROUP — plain A4 reports (print-report.ts: ink, rule, zebra) ─── */
+const RP = { ink: '#1a1a1a', muted: '#6b6b6b', rule: '#d8d4cc', zebra: '#f6f4f0', gold: '#a8843f' };
+function reportPages(title, columns, rows, opts = {}) {
+  const w = 210, h = 297, m = 14, rowH = opts.rowH || 7.2, top = 40; const per = Math.floor((h - top - 18) / rowH); const pages = []; const n = Math.max(1, Math.ceil(rows.length / per));
+  for (let p = 0; p < n; p += 1) {
+    let s = `<rect width="${w}" height="${h}" fill="#fff"/>` + T(m, 18, title, { font: 'serif', size: 7, color: RP.ink, anchor: 'start' }) + T(m, 25, `${EV.couple} · ${EV.dateShort}${opts.sub ? ' · ' + opts.sub : ''}`, { size: 3, color: RP.muted, anchor: 'start' }) + T(w - m, 25, `page ${p + 1} of ${n}`, { size: 3, color: RP.muted, anchor: 'end' });
+    let x = m; const cols = columns.map((c) => ({ ...c, x: (x += 0), w: c.w * (w - 2 * m) })); let xx = m; cols.forEach((c) => { c.x = xx; xx += c.w; });
+    s += `<rect x="${m}" y="${top - 6}" width="${w - 2 * m}" height=".35" fill="${RP.ink}"/>`;
+    cols.forEach((c) => { s += T(c.align === 'right' ? c.x + c.w - 2 : c.x + 1.5, top - 8.5, c.label, { size: 2.6, weight: 700, color: RP.muted, caps: true, tracking: .3, anchor: c.align === 'right' ? 'end' : 'start' }); });
+    const slice = rows.slice(p * per, p * per + per);
+    if (!slice.length) s += T(w / 2, top + 30, opts.empty || 'Nothing to list yet.', { size: 3.6, color: RP.muted });
+    slice.forEach((r, i) => {
+      const y = top + i * rowH; if (i % 2) s += `<rect x="${m}" y="${y - rowH + 2.2}" width="${w - 2 * m}" height="${rowH}" fill="${RP.zebra}"/>`;
+      cols.forEach((c, j) => { const v = r[j]; if (c.kind === 'box') s += `<rect x="${c.x + c.w / 2 - 2}" y="${y - 3.4}" width="4" height="4" fill="none" stroke="${RP.ink}" stroke-width=".3"/>`; else if (c.kind === 'line') s += `<rect x="${c.x + 2}" y="${y}" width="${c.w - 4}" height=".25" fill="${RP.rule}"/>`; else s += T(c.align === 'right' ? c.x + c.w - 2 : c.x + 1.5, y, v ?? '', { size: 3.1, color: r.muted ? RP.muted : RP.ink, anchor: c.align === 'right' ? 'end' : 'start' }); });
+    });
+    if (opts.foot && p === n - 1) s += T(m, h - 12, opts.foot, { size: 2.8, color: RP.muted, anchor: 'start' });
+    pages.push({ w, h, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}">${s}</svg>`, label: `Page ${p + 1}` });
+  }
+  return pages;
+}
+function pRegistry() {
+  const d = data(); const rows = [...GUESTS].sort((a, b) => surnameFirst(a).localeCompare(surnameFirst(b))).map((g) => [surnameFirst(g), String(g.party), tableOf(g) || '—', d.fresh ? '—' : g.yes ? 'Coming' : 'Not coming', '', '']);
+  return reportPages('Guest list registry', [{ label: 'Name', w: .34 }, { label: 'Party', w: .08, align: 'right' }, { label: 'Table', w: .18 }, { label: 'RSVP', w: .12 }, { label: 'Arrived', w: .1, kind: 'box' }, { label: 'Signature', w: .18, kind: 'line' }], rows, { sub: `${d.invited} guests · ${d.fresh ? 'no replies yet' : d.yes.length + ' coming'}`, foot: 'A guest marked “passed away” is listed, never counted.' });
+}
+function pQrCodes() {
+  const w = 210, h = 297, per = 12, pages = []; const n = Math.ceil(GUESTS.length / per);
+  for (let p = 0; p < n; p += 1) {
+    let s = `<rect width="${w}" height="${h}" fill="#fff"/>` + T(12, 10, `${EV.couple} · guest QR codes · page ${p + 1} of ${n}`, { size: 2.6, color: RP.muted, anchor: 'start' });
+    GUESTS.slice(p * per, p * per + per).forEach((g, i) => { const cw = (w - 24) / 3, ch = (h - 24 - 6) / 4; const x = 12 + (i % 3) * cw, y = 16 + Math.floor(i / 3) * ch; const q = 36; s += QR(x + cw / 2 - q / 2, y + 8, q, g.i + 21, true, false) + T(x + cw / 2, y + q + 15, g.name, { size: 3.4, color: RP.ink }) + T(x + cw / 2, y + q + 20, g.party > 1 ? 'and 1 guest' : 'Admits one', { size: 2.6, color: RP.muted }); });
+    pages.push({ w, h, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}">${s}</svg>`, label: `Page ${p + 1}` });
+  }
+  return pages;
+}
+function pSeatPlan() {
+  const d = data(); const w = 420, h = 297; let s = `<rect width="${w}" height="${h}" fill="#fff"/>` + T(14, 16, `${EV.couple} · seat plan`, { font: 'serif', size: 7, color: RP.ink, anchor: 'start' }) + T(14, 22, `${EV.reception} · ${EV.dateShort}`, { size: 3, color: RP.muted, anchor: 'start' });
+  s += `<rect x="14" y="28" width="270" height="${h - 42}" fill="#FAF8F4" stroke="${RP.rule}" stroke-width=".4"/><rect x="100" y="34" width="98" height="14" rx="2" fill="#E8DCC3"/>` + T(149, 43, 'STAGE', { size: 3.4, weight: 700, color: RP.gold, tracking: .8 });
+  if (!d.tables.length) s += T(149, 150, 'No tables yet', { size: 7, color: RP.muted }) + T(149, 160, 'Make your room in Studio › Seat plan — the tables and chairs print here.', { size: 3.4, color: RP.muted });
+  d.tables.forEach((t, k) => { const cx = 50 + (k % 4) * 66, cy = 85 + Math.floor(k / 4) * 90; s += `<circle cx="${cx}" cy="${cy}" r="16" fill="#fff" stroke="${RP.ink}" stroke-width=".5"/>`; for (let c = 0; c < 11; c += 1) { const a = (c / 11) * Math.PI * 2; s += `<circle cx="${cx + Math.cos(a) * 21}" cy="${cy + Math.sin(a) * 21}" r="2.6" fill="${c < t.guests.length ? RP.gold : '#fff'}" stroke="${RP.ink}" stroke-width=".35"/>`; } s += T(cx, cy - 1, t.name, { size: 3.4, weight: 700, color: RP.ink }) + T(cx, cy + 4, `${t.guests.length} of 11`, { size: 2.8, color: RP.muted }); });
+  let y = 36; s += T(296, y, 'Who sits where', { size: 3, weight: 700, color: RP.muted, caps: true, tracking: .4, anchor: 'start' }); y += 6;
+  d.tables.forEach((t) => { s += T(296, y, `${t.name} · ${t.guests.length} seated`, { size: 3.2, weight: 700, color: RP.ink, anchor: 'start' }); y += 4.4; for (const line of wrapLines(t.guests.slice(0, 11).map((g) => g.name).join(', '), 60)) { s += T(296, y, line, { size: 2.5, color: RP.muted, anchor: 'start' }); y += 3.4; } y += 2.2; });
+  s += `<rect x="296" y="${h - 38}" width="110" height="24" fill="none" stroke="${RP.rule}" stroke-width=".4"/>` + T(300, h - 31, d.fresh ? 'Nobody to seat yet' : `Not seated yet · ${d.unseated}`, { size: 3, weight: 700, color: RP.ink, anchor: 'start' }) + T(300, h - 25, d.fresh ? '' : d.yes.slice(84, 90).map((g) => g.name).join(', ') + ' …', { size: 2.5, color: RP.muted, anchor: 'start' });
+  return [{ w, h, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}">${s}</svg>` }];
+}
+function pSeatingPack() {
+  const d = data(); if (!d.tables.length) return reportPages('Table directory', [{ label: 'Table', w: .3 }, { label: 'Guests', w: .7 }], [], { empty: 'No tables yet — make your room in Studio › Seat plan.', sub: 'directory · signs · place cards' });
+  const pages = reportPages('Table directory', [{ label: 'Table', w: .28 }, { label: 'Seated', w: .1, align: 'right' }, { label: 'Guests', w: .62 }], d.tables.map((t) => [t.name, String(t.guests.length), t.guests.map((g) => g.first + ' ' + g.last[0] + '.').join(', ')]), { sub: `${d.seated.length} seated at ${d.tables.length} tables`, rowH: 9 });
+  const w = 210, h = 297;
+  d.tables.forEach((t, k) => { let s = `<rect width="${w}" height="${h}" fill="#fff"/>` + T(w / 2, 60, 'Table', { size: 8, color: RP.gold, caps: true, tracking: 3 }) + T(w / 2, 110, t.name, { font: 'serif', size: 30, color: RP.ink }) + `<rect x="${w / 2 - 30}" y="122" width="60" height=".5" fill="${RP.gold}"/>` + QR(w / 2 - 35, 150, 70, 300 + k, true, false) + T(w / 2, 236, 'Scan to visit our wedding', { size: 4.4, color: RP.muted }) + T(w / 2, 246, EV.couple, { font: 'script', size: 9, color: RP.ink }) + T(w / 2, h - 14, `${t.guests.length} seated · ${t.name}`, { size: 2.8, color: RP.muted }); pages.push({ w, h, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}">${s}</svg>`, label: `Sign · ${t.name}` }); });
+  const per = 8; const n = Math.ceil(d.seated.length / per);
+  for (let p = 0; p < n; p += 1) { let s = `<rect width="${w}" height="${h}" fill="#fff"/>` + T(12, 10, `Place cards · page ${p + 1} of ${n} · fold along the line`, { size: 2.6, color: RP.muted, anchor: 'start' }); d.seated.slice(p * per, p * per + per).forEach((g, i) => { const cw = 93, ch = 66; const x = 12 + (i % 2) * cw, y = 16 + Math.floor(i / 2) * ch; s += `<rect x="${x}" y="${y}" width="${cw - 4}" height="${ch - 4}" fill="none" stroke="#bbb" stroke-width=".2" stroke-dasharray="1 1"/><line x1="${x}" y1="${y + (ch - 4) / 2}" x2="${x + cw - 4}" y2="${y + (ch - 4) / 2}" stroke="#ccc" stroke-width=".2"/>`; const cy = y + (ch - 4) * 0.75; s += QR(x + 6, cy - 9, 18, 500 + g.i, true, false) + T(x + 30, cy - 3, g.name, { font: 'serif', size: 5.2, color: RP.ink, anchor: 'start' }) + T(x + 30, cy + 3, tableOf(g) || '', { size: 2.8, color: RP.gold, caps: true, tracking: .6, anchor: 'start' }); }); pages.push({ w, h, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}">${s}</svg>`, label: `Place cards ${p + 1}` }); }
+  return pages;
+}
+/* ── THE ENTRANCE CHART — A3 · A2 · A1 · 24 × 36 in; By table | A to Z; names never cut ── */
+const CHART_SIZES = { a3: ['A3', 297, 420], a2: ['A2', 420, 594], a1: ['A1', 594, 841], '24x36': ['24 × 36 in', 610, 914] };
+function chartFits(sizeKey) { const d = data(); const [, w, h] = CHART_SIZES[sizeKey]; const cap = Math.floor((w * h) / 2400); return { ok: d.seated.length <= cap, cap }; }
+function chartSuggest(sizeKey) { const order = ['a3', 'a2', 'a1', '24x36']; for (const k of order.slice(order.indexOf(sizeKey) + 1)) if (chartFits(k).ok) return k; return null; }
+function pChart(layout = S.chartLayout, sizeKey = S.fmt.chart) {
+  const d = data(); const [, w, h] = CHART_SIZES[sizeKey]; const k = w / 420; let s = `<rect width="${w}" height="${h}" fill="#fff"/>`;
+  s += T(w / 2, 40 * k, 'Please find your seat', { size: 10 * k, color: RP.gold, caps: true, tracking: 3 * k }) + T(w / 2, 72 * k, EV.couple, { font: 'script', size: 30 * k, color: RP.ink }) + `<rect x="${w / 2 - 40 * k}" y="${84 * k}" width="${80 * k}" height="${.6 * k}" fill="${RP.gold}"/>`;
+  if (!d.tables.length) { s += T(w / 2, h / 2, 'No tables yet', { font: 'serif', size: 18 * k, color: RP.muted }) + T(w / 2, h / 2 + 14 * k, 'Seat your guests in Studio › Seat plan — the chart draws from it.', { size: 5 * k, color: RP.muted }); return [{ w, h, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}">${s}</svg>` }]; }
+  if (layout === 'table') { const cols = 2; const cw = (w - 40 * k) / cols; d.tables.forEach((t, i) => { const x = 20 * k + (i % cols) * cw + cw / 2, y0 = 110 * k + Math.floor(i / cols) * (h - 130 * k) / Math.ceil(d.tables.length / cols); let y = y0; s += T(x, y, t.name, { font: 'serif', size: 11 * k, color: RP.ink }) + `<rect x="${x - 16 * k}" y="${y + 3 * k}" width="${32 * k}" height="${.5 * k}" fill="${RP.gold}"/>`; y += 12 * k; for (const g of t.guests) { s += T(x, y, g.name, { size: 5.2 * k, color: RP.ink }); y += 7.2 * k; } }); }
+  else { const rows = [...d.seated].sort((a, b) => surnameFirst(a).localeCompare(surnameFirst(b))); const cols = 3; const per = Math.ceil(rows.length / cols); const cw = (w - 40 * k) / cols; let letter = ''; rows.forEach((g, i) => { const c = Math.floor(i / per); const x = 20 * k + c * cw; const y = 108 * k + (i % per) * ((h - 128 * k) / per); const L = g.last[0]; let s2 = ''; if (L !== letter && (i % per === 0 || true)) { if (L !== letter) { s2 += T(x, y, L, { font: 'serif', size: 6.5 * k, weight: 700, color: RP.gold, anchor: 'start' }); letter = L; } } s += s2 + T(x + 10 * k, y, surnameFirst(g), { size: 5 * k, color: RP.ink, anchor: 'start' }) + T(x + cw - 6 * k, y, tableOf(g), { size: 4.2 * k, color: RP.muted, anchor: 'end', caps: true, tracking: .5 * k }); }); }
+  s += T(w / 2, h - 16 * k, `${d.seated.length} guests seated · ${d.tables.length} tables`, { size: 4 * k, color: RP.muted });
+  return [{ w, h, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}">${s}</svg>` }];
+}
+function pCaterer() {
+  const d = data(); const rows = d.tables.map((t) => [t.name, String(t.guests.length), String(t.guests.filter((g) => !g.diet).length), t.guests.filter((g) => g.diet).map((g) => `${g.first} ${g.last[0]}. — ${g.diet}`).join(' · ') || '—']);
+  return reportPages('Caterer meal counts', [{ label: 'Table', w: .22 }, { label: 'Seated', w: .1, align: 'right' }, { label: 'Regular', w: .1, align: 'right' }, { label: 'Dietary notes', w: .58 }], rows, { sub: d.fresh ? 'nobody has said yes yet' : `${d.yes.length} coming · ${d.yes.reduce((a, g) => a + g.party, 0)} meals`, rowH: 10, empty: 'Nobody has said yes yet — the caterer sheet counts guests who are coming.', foot: 'Counts confirmed guests only. Dietary notes come from each guest’s reply.' });
+}
+function pEventQr() { const w = 120, h = 120; let s = `<rect width="${w}" height="${h}" fill="#fff"/>` + QR(16, 10, 88, 77, true, false) + `<circle cx="60" cy="54" r="11" fill="#fff"/>` + T(60, 58, EV.mark, { font: 'serif', size: 10, italic: true, color: RP.ink }) + T(60, 110, EV.address, { size: 4.2, color: RP.muted }); return [{ w, h, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}">${s}</svg>` }]; }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   THE PRINTS — in the shipped list's order (PRINT_SET_KEYS, then free-prints.ts)
+   ════════════════════════════════════════════════════════════════════════════ */
+S.fmt = { pass: 'calling-card', inv: 'inv-5x7', card: 'card-a5', chart: 'a2' }; S.ticket = 'classic'; S.chartLayout = 'table'; S.posterPhoto = 'theme'; S.printed = { invitation: true };
+const INV_SIZES = { 'inv-5x7': ['5 × 7 in', 127, 177.8], 'inv-a5': ['A5', 148, 210] };
+const fmtLabel = (fam) => fam === 'pass' ? PASS_FORMATS[S.fmt.pass][0] : fam === 'inv' ? INV_SIZES[S.fmt.inv][0] : fam === 'card' ? CARD_FORMATS[S.fmt.card][0] : CHART_SIZES[S.fmt.chart][0];
+const fmtMm = (fam) => { const f = fam === 'pass' ? PASS_FORMATS[S.fmt.pass] : fam === 'inv' ? INV_SIZES[S.fmt.inv] : fam === 'card' ? CARD_FORMATS[S.fmt.card] : CHART_SIZES[S.fmt.chart]; return `${f[1]} × ${f[2]} mm`; };
+const themeChip = () => isSample() ? `<span class="ch gold">◆ ${look().name} · sample until Pro</span>` : `<span class="ch">${look().name}${look().tier === 'free' ? ' · free' : ''}</span>`;
+const PRINTS = [
+  { group: 'Your invitation set', sub: 'in your theme' },
+  { key: 'invitation', label: 'The Invitation', line: () => `${fmtLabel('inv')} · 1 card`, fam: 'inv', pages: pInvitation, how: () => `${Math.ceil(data().invited * 0.6)} cards — one per household on your guest list`, saves: 'set', changed: true,
+    rows: `<div class="fr"><span class="l">Parents on the invitation</span><button class="ib" aria-label="What this is"><i>i</i></button><button class="sw" role="switch" aria-checked="true"></button></div><div class="fr"><span class="l">Opening line</span><button class="sw" role="switch" aria-checked="true"></button></div><div class="sub"><div class="fr" style="border-top:0"><span class="l">The line</span><button class="ans"><span>Together with their families</span><svg class="i" viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/></svg></button></div></div><div class="fr"><span class="l">Event Hub QR code</span><span class="v">Always printed</span></div>` },
+  { key: 'entourage', label: 'The Entourage', line: () => `${fmtLabel('inv')} · Front · Back · from your Wedding March`, fam: 'inv', pages: pEntourage, how: () => `${Math.ceil(data().invited * 0.6)} cards`, saves: 'set' },
+  { key: 'details', label: 'The Finer Details', line: () => `${fmtLabel('inv')} · 1 card`, fam: 'inv', pages: pDetails, how: () => `${Math.ceil(data().invited * 0.6)} cards`, saves: 'set',
+    rows: `<div class="fr"><span class="l">Schedule — the program</span><button class="ib" aria-label="What this is"><i>i</i></button><button class="sw" role="switch" aria-checked="true"></button></div><div class="fr"><span class="l">Kindly reply</span><button class="ib" aria-label="What this is"><i>i</i></button><button class="sw" role="switch" aria-checked="true"></button></div><div class="sub"><div class="fr" style="border-top:0"><span class="l">Who guests reply to</span><div class="ddw"><button class="dd" aria-haspopup="listbox"><span>Claire · 0917 555 0142</span><svg class="i" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4"/></svg></button></div></div></div><div class="fr"><span class="l">Special message</span><button class="sw" role="switch" aria-checked="false"></button></div>` },
+  { key: 'menu', label: 'The Menu', line: () => `${fmtLabel('inv')} · ${data().menu.length ? data().menu.reduce((a, m) => a + m.d.length, 0) + ' dishes' : 'no dishes yet'}`, fam: 'inv', pages: pMenu, how: () => `${data().tables.length ? data().tables.length * 2 : 0} cards — two per table`, saves: 'set', empty: () => data().menu.length ? null : { b: 'No menu yet', p: 'The moments of your night and the dishes of each — this card is never printed blank.', door: 'Add your menu' } },
+  { key: 'pass', label: 'Event pass', line: () => `${fmtLabel('pass')} · one per guest`, fam: 'pass', pages: () => pPass(), how: () => data().yes.length ? `${data().yes.length} passes — guests who said yes · ${PASS_FORMATS[S.fmt.pass][0]}, ${S.fmt.pass === 'boarding' ? '2' : S.fmt.pass === 'train' ? '3' : S.fmt.pass === 'phone-card' ? '4' : '8'} to an A4` : 'Nobody has said yes yet', saves: 'set',
+    rows: `<div class="fr"><span class="l">Guest list — names on passes</span><button class="sw" role="switch" aria-checked="true"></button></div>` },
+  { key: 'ticket', label: 'Digital ticket', line: () => `3:4 picture · what each guest saves · ${S.ticket === 'classic' ? 'Classic' : S.ticket === 'ticket' ? 'Ticket' : 'Photo poster'}`, pages: () => pTicket(), how: () => data().yes.length ? `${data().yes.length} tickets — guests who said yes` : 'Nobody has said yes yet', saves: 'ticket', empty: () => data().yes.length ? null : { b: 'No guest has said yes yet', p: 'A ticket is drawn for every guest who is coming. Until then, this is how Ana’s would look.', door: 'Open Guest list' }, strip: true },
+  { key: 'passes', label: 'Printed ticket', line: () => `A4 · 4 to a page · ${Math.max(1, Math.ceil(data().yes.length / 4))} pages`, pages: pPrintedTickets, how: () => data().yes.length ? `${data().yes.length} tickets on ${Math.ceil(data().yes.length / 4)} A4 pages, cut lines in the margins` : 'Nobody has said yes yet', saves: 'free', empty: () => data().yes.length ? null : { b: 'No guest has said yes yet', p: 'Tickets print for guests who are coming.', door: 'Open Guest list' } },
+  { key: 'poster', label: 'Welcome poster', line: () => 'A3 · 297 × 420 mm · 1 sheet', pages: pPoster, how: () => '1 sheet — for the door or an easel', saves: 'set' },
+  { key: 'story-poster', label: 'Our Story poster', line: () => `A3 · 297 × 420 mm · ${data().story.length ? data().story.length + ' chapters' : 'no story yet'}`, pages: pStoryPoster, how: () => '1 sheet — to frame', saves: 'set', empty: () => data().story.length ? null : { b: 'No Love Story yet', p: 'The poster prints your chapters, moment by moment. It is never printed blank.', door: 'Add your Love Story' },
+    rows: `<div class="fr"><span class="l">Background</span><div class="ps" style="width:210px;height:40px" id="bgpick"><button aria-pressed="true" data-v="theme">Theme's picture</button><button aria-pressed="false" data-v="photo">My photo</button><div class="th"></div></div></div>` },
+  { key: 'card', label: 'Event card', line: () => `${fmtLabel('card')} · 1 card`, fam: 'card', pages: () => pCard(), how: () => `${data().tables.length ? data().tables.length * 2 : 2} cards — for the tables or the welcome desk`, saves: 'set' },
+  { group: 'For the day', sub: 'free for every event' },
+  { key: 'guest-registry', label: 'Guest list registry', line: () => `A4 · ${pRegistry().length} pages · ${data().invited} guests`, pages: pRegistry, how: () => `${pRegistry().length} A4 pages — the reception desk list, A to Z`, saves: 'free' },
+  { key: 'qr-codes', label: 'Guest QR codes', line: () => `A4 · 12 to a page · ${pQrCodes().length} pages`, pages: pQrCodes, how: () => `${data().invited} codes on ${pQrCodes().length} pages — every guest, with their name`, saves: 'free' },
+  { key: 'seat-plan', label: '2D seat plan', line: () => `A3 landscape · 1 page · ${data().tables.length ? data().tables.length + ' tables' : 'no tables yet'}`, pages: pSeatPlan, how: () => '1 A3 page — your room from above, in your colours or as a blueprint', saves: 'seat', empty: () => data().tables.length ? null : { b: 'No tables yet', p: 'Make your room in Seat plan — every table with its chairs prints here.', door: 'Open Seat plan' } },
+  { key: 'seating-pack', label: 'Table signs & place cards', line: () => data().tables.length ? `A4 · ${pSeatingPack().length} pages · directory, ${data().tables.length} signs, ${data().seated.length} place cards` : 'A4 · no tables yet', pages: pSeatingPack, how: () => data().tables.length ? `${pSeatingPack().length} A4 pages: 1 directory · ${data().tables.length} table signs · ${Math.ceil(data().seated.length / 8)} pages of place cards (8 to a page)` : 'Nothing to print yet', saves: 'free', empty: () => data().tables.length ? null : { b: 'No tables yet', p: 'Seat your guests in Seat plan — the directory, the signs and the place cards print from it.', door: 'Open Seat plan' } },
+  { key: 'chart', label: 'Entrance seating chart', line: () => `${fmtLabel('chart')} · 1 sheet · ${S.chartLayout === 'table' ? 'By table' : 'A to Z'}`, fam: 'chart', pages: () => pChart(), how: () => data().seated.length ? `1 sheet · ${data().seated.length} names${data().unseated ? ` · ${data().unseated} guests have no seat yet and are not on it` : ''}` : 'Nothing to print yet', saves: 'chart', empty: () => data().tables.length ? null : { b: 'No tables yet', p: 'Seat your guests in Seat plan — the chart lists only guests with a seat.', door: 'Open Seat plan' }, chart: true },
+  { key: 'caterer', label: 'Caterer meal counts', line: () => `A4 · ${pCaterer().length} page${pCaterer().length > 1 ? 's' : ''} · ${data().yes.length ? data().yes.length + ' coming' : 'no replies yet'}`, pages: pCaterer, how: () => data().yes.length ? `${pCaterer().length} A4 page${pCaterer().length > 1 ? 's' : ''} — meals per table and every dietary note · a spreadsheet too` : 'Nobody has said yes yet', saves: 'caterer', empty: () => data().yes.length ? null : { b: 'Nobody has said yes yet', p: 'The caterer sheet counts guests who are coming.', door: 'Open Guest list' } },
+  { key: 'event-qr', label: 'Event QR', line: () => 'PNG · one code for everything', pages: pEventQr, how: () => '1 picture — for a welcome sign, a table card or a screen', saves: 'png' },
+];
+
+/* ════════════════════════════════════════════════════════════════════════════
+   THE PAGE — Studio › Prints, each row with its thumbnail
+   ════════════════════════════════════════════════════════════════════════════ */
+const $ = (id) => document.getElementById(id);
+const ICON = { dl: '<svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>', chev: '<svg class="i" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4"/></svg>', warn: '<svg class="i" viewBox="0 0 24 24"><path d="M12 8v5M12 16.5v.3"/><circle cx="12" cy="12" r="9"/></svg>', ok: '<svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>' };
+const byKey = (k) => PRINTS.find((p) => p.key === k);
+function thumbHtml(p) {
+  const pg = p.pages()[0]; const n = p.pages().length; const ar = pg.w / pg.h; const W = ar >= 1 ? 72 : Math.round(72 * ar), H = ar >= 1 ? Math.round(72 / ar) : 72;
+  return `<button class="thumb" data-open="${p.key}" aria-label="Preview ${p.label}"><span class="pp wait" style="width:${W}px;height:${H}px" data-thumb="${p.key}"></span>${n > 1 ? `<span class="pages">${n}</span>` : ''}</button>`;
+}
+function sizeDd(p) {
+  if (!p.fam) return '';
+  return `<div class="ddw"><button class="dd short" aria-haspopup="listbox" data-size="${p.fam}" aria-label="${p.label} size"><span>${fmtLabel(p.fam)}</span>${ICON.chev}</button></div>`;
+}
+function render() {
+  const d = data(); let h = '';
+  for (const p of PRINTS) {
+    if (p.group) { h += `<div class="gh">${p.group} <small>· ${p.sub}</small></div>`; continue; }
+    const e = p.empty ? p.empty() : null;
+    h += `<div class="piece" data-piece="${p.key}"><div class="phead">${thumbHtml(p)}<button class="tx" data-open="${p.key}"><b>${p.label}${p.key === 'passes' && isSample() ? '' : ''}</b><span>${p.line()}</span>${e ? `<em>${e.b} ›</em>` : ''}</button>${p.fam ? sizeDd(p) : p.saves === 'free' || p.saves === 'png' ? `<button class="ab quiet" data-save="${p.key}">${p.saves === 'png' ? 'Save image' : 'Save PDF'}</button>` : ''}</div>`;
+    if (p.changed && S.printed[p.key] && !d.fresh) h += `<div class="status warn" role="status">${ICON.warn}<span class="tx"><b>Changed since you printed</b> on Oct 9 — save it again so the paper matches.</span><button data-save="${p.key}">Save again</button></div>`;
+    if (p.strip) h += `<div class="fr"><span class="l"><span class="stack">Ticket style<small>What each guest saves · waits for Apply</small></span></span></div><div class="strip" role="radiogroup" aria-label="Ticket style" id="tstrip">${['classic', 'ticket', 'poster'].map((k) => `<button class="sc" role="radio" aria-checked="${S.ticket === k}" data-ticket="${k}"><span class="f">${pTicket(k)[0].svg}</span><b>${k === 'classic' ? 'Classic' : k === 'ticket' ? 'Ticket' : 'Photo poster'}</b></button>`).join('')}</div><div class="fr"><span class="l"><span class="stack">Save all tickets<small>One PNG per guest who is coming</small></span></span><button class="ab second" data-prozip="1"><span class="pro">◆ PRO</span>Save all</button></div>`;
+    if (p.rows) h += p.rows;
+    h += '</div>';
+  }
+  h += `<div class="gh">Download</div><div class="piece"><div class="btnrow" style="padding-top:4px"><button class="ab main" data-save="set">${ICON.dl}Whole set · ${isSample() ? 'Classic ' : ''}PDF</button><button class="ab second" data-save="passes">Every guest’s ticket</button></div>${isSample() ? `<div class="btnrow" style="padding-top:0"><button class="ab second" data-pro="set"><span class="pro">◆ PRO</span>Whole set · ${look().name} (PDF)</button><button class="ab quiet" data-save="sample">Sample sheet · ${look().name} (JPG)</button></div>` : ''}</div>`;
+  $('list').innerHTML = h;
+  lazyThumbs();
+}
+/* ⚡ lazy, low priority: a thumb draws when it scrolls into view — the first one first (the route's own cache; here a short wait so the shimmer is seen) */
+let io;
+function lazyThumbs() {
+  io?.disconnect();
+  io = new IntersectionObserver((es) => { es.forEach((e, i) => { if (!e.isIntersecting) return; const el = e.target; io.unobserve(el); const p = byKey(el.dataset.thumb); setTimeout(() => { el.innerHTML = p.pages()[0].svg; el.classList.remove('wait'); }, 120 + i * 140); }); }, { root: $('body'), rootMargin: '80px' });
+  document.querySelectorAll('[data-thumb]').forEach((el) => io.observe(el));
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   THE PREVIEW SHEET — zoom, pages, the size ▾, the saves
+   ════════════════════════════════════════════════════════════════════════════ */
+const V = { key: null, page: 0, pages: [], zoom: 1, tx: 0, ty: 0, tipShown: false, pending: false };
+function stageSize() { const r = $('stage').getBoundingClientRect(); return { w: r.width - 32, h: r.height - 32 }; }
+function fitPx(pg) { const st = stageSize(); const k = Math.min(st.w / pg.w, st.h / pg.h); return { w: Math.round(pg.w * k), h: Math.round(pg.h * k) }; }
+function drawPage(dir) {
+  const pg = V.pages[V.page]; const { w, h } = fitPx(pg); const stage = $('stage');
+  const old = stage.querySelector('.pg'); if (old) { old.classList.add(dir === 'next' ? 'out-l' : 'out-r'); setTimeout(() => old.remove(), 280 * 1.0); }
+  const el = document.createElement('div'); el.className = 'pg' + (dir ? (dir === 'next' ? ' out-r' : ' out-l') : ''); el.innerHTML = `<div class="sheetpaper${V.page > 0 && !pg.drawn ? ' wait' : ''}" style="width:${w}px;height:${h}px">${V.page > 0 && !pg.drawn ? '' : pg.svg}</div>`;
+  stage.appendChild(el); requestAnimationFrame(() => el.classList.remove('out-r', 'out-l'));
+  V.zoom = 1; V.tx = 0; V.ty = 0; applyZoom();
+  if (V.page > 0 && !pg.drawn) { step(`Drawing page ${V.page + 1}…`); setTimeout(() => { pg.drawn = true; const sp = el.querySelector('.sheetpaper'); if (sp) { sp.innerHTML = pg.svg; sp.classList.remove('wait'); } step(null); }, 260); }
+  pg.drawn = true;
+  drawPager();
+}
+function applyZoom() { const sp = $('stage').querySelector('.pg:last-child .sheetpaper'); if (sp) sp.style.transform = `translate(${V.tx}px,${V.ty}px) scale(${V.zoom})`; $('vzoom').setAttribute('aria-pressed', V.zoom > 1); }
+function setZoom(z, ax, ay) { const prev = V.zoom; V.zoom = Math.max(1, Math.min(4, z)); if (V.zoom === 1) { V.tx = 0; V.ty = 0; } else if (ax !== undefined) { const r = $('stage').getBoundingClientRect(); const px = ax - r.left - r.width / 2, py = ay - r.top - r.height / 2; V.tx = px - (px - V.tx) * (V.zoom / prev); V.ty = py - (py - V.ty) * (V.zoom / prev); } applyZoom(); }
+function drawPager() {
+  const n = V.pages.length; const pg = V.pages[V.page]; let h = '';
+  if (n > 1) { h += `<button class="ab icon" id="pprev" aria-label="Previous page" ${V.page === 0 ? 'disabled' : ''}><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><div class="dots">${n <= 12 ? V.pages.map((_, i) => `<i class="${i === V.page ? 'on' : ''}"></i>`).join('') : `<b>Page ${V.page + 1} of ${n}</b>`}</div><button class="ab icon" id="pnext" aria-label="Next page" ${V.page === n - 1 ? 'disabled' : ''}><svg class="i" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>`; }
+  $('pager').innerHTML = h; $('pager').hidden = n <= 1;
+  $('vline').textContent = n > 1 ? `${pg.label || `Page ${V.page + 1}`} · ${V.page + 1} of ${n}` : (pg.label && pg.label !== 'Front' ? pg.label : fmtLineOf(byKey(V.key)));
+  $('vline').classList.remove('step');
+  $('pprev')?.addEventListener('click', () => go(-1)); $('pnext')?.addEventListener('click', () => go(1));
+}
+function fmtLineOf(p) { const pg = p.pages()[0]; return `${pg.w} × ${pg.h} mm`; }
+function go(d) { const n = V.page + d; if (n < 0 || n >= V.pages.length) return; V.page = n; drawPage(d > 0 ? 'next' : 'prev'); }
+let stepT; function step(t) { clearTimeout(stepT); const el = $('vline'); if (t) { el.textContent = t; el.classList.add('step'); } else drawPager(); }
+function openPreview(key, from) {
+  const p = byKey(key); V.key = key; V.page = 0; V.pages = p.pages().map((pg) => ({ ...pg, drawn: false }));
+  if (from) from.classList.add('pulse-el');
+  $('vtitle').textContent = p.label; $('viewer').classList.add('on'); $('viewer').setAttribute('aria-hidden', 'false');
+  step(`Opening your ${p.label.replace(/^the\s+/i, '').toLowerCase()}…`);
+  setTimeout(() => { $('stage').querySelectorAll('.pg').forEach((e) => e.remove()); drawPage(); drawFoot(); if (!V.tipShown) { V.tipShown = true; $('zoomtip').classList.add('on'); setTimeout(() => $('zoomtip').classList.remove('on'), 2600); } }, 120);
+  history.replaceState(null, '', `?${new URLSearchParams({ view: S.view, theme: S.theme, event: S.event, look: S.look, open: key })}`);
+}
+function closePreview() { $('viewer').classList.remove('on'); $('viewer').setAttribute('aria-hidden', 'true'); V.key = null; render(); }
+function drawFoot() {
+  const p = byKey(V.key); const d = data(); const e = p.empty ? p.empty() : null; const pg = V.pages[0]; let h = '';
+  h += `<div class="chipline"><span class="ch">${p.fam ? fmtLabel(p.fam) : pg.label === 'Ticket' ? '3 : 4' : pg.w > 400 ? 'A3' : pg.w === 210 ? 'A4' : ''} · ${pg.w} × ${pg.h} mm</span><span class="ch">${V.pages.length > 1 ? V.pages.length + ' pages' : p.key === 'entourage' ? 'Front · Back' : '1 sheet'}</span>${p.saves === 'set' || p.saves === 'ticket' ? themeChip() : '<span class="ch">free</span>'}</div>`;
+  if (p.chart) h += `<div class="fr"><span class="l">Layout</span><div class="ps" style="width:190px;height:40px" id="chartpick"><button aria-pressed="${S.chartLayout === 'table'}" data-v="table">By table</button><button aria-pressed="${S.chartLayout === 'az'}" data-v="az">A to Z</button><div class="th"></div></div></div>`;
+  if (p.fam) h += `<div class="fr"><span class="l">${p.chart ? 'Size' : 'Paper size'}</span><div class="ddw"><button class="dd" aria-haspopup="listbox" data-size="${p.fam}"><span>${fmtLabel(p.fam)}</span>${ICON.chev}</button></div></div>`;
+  if (p.strip) h += `<div class="fr"><span class="l">Style</span><div class="ddw"><button class="dd" aria-haspopup="listbox" data-tstyle="1"><span>${S.ticket === 'classic' ? 'Classic' : S.ticket === 'ticket' ? 'Ticket' : 'Photo poster'}</span>${ICON.chev}</button></div></div>`;
+  h += `<div class="fr"><span class="l"><span class="stack">How many<small>${p.how()}</small></span></span></div>`;
+  if (e) h += `<div class="state"><b>${e.b}</b><p>${e.p}</p><button class="ab second" data-door="${e.door}">${e.door}</button></div>`;
+  else if (p.chart && !chartFits(S.fmt.chart).ok) { const sug = chartSuggest(S.fmt.chart); h += `<div class="status bad" role="status">${ICON.warn}<span class="tx">${d.seated.length} names don’t fit on ${fmtLabel('chart')} at a size guests can read. ${sug ? `Choose ${CHART_SIZES[sug][0]} — every name fits there.` : 'Even 24 × 36 in is too small — print By table and A to Z as two charts.'}</span>${sug ? `<button data-chartsize="${sug}">Use ${CHART_SIZES[sug][0]}</button>` : ''}</div>`; }
+  else {
+    if (p.changed && S.printed[p.key]) h += `<div class="status warn" role="status">${ICON.warn}<span class="tx"><b>Changed since you printed</b> on Oct 9 — save it again so the paper matches.</span><button data-save="${p.key}">Save again</button></div>`;
+    h += '<div class="btnrow">';
+    if (p.saves === 'set') { if (isSample()) h += `<button class="ab main" data-save="${p.key}">${ICON.dl}Save · Classic (PDF)</button><button class="ab second" data-pro="${p.key}"><span class="pro">◆ PRO</span>Save · ${look().name} (PDF)</button><button class="ab quiet" data-save="sample">Sample · ${look().name} (JPG)</button>`; else h += `<button class="ab main" data-save="${p.key}">${ICON.dl}Save PDF${look().tier === 'free' && S.look !== 'house' ? ` · ${look().name}` : ''}</button>${S.look !== 'house' ? `<button class="ab quiet" data-save="${p.key}-classic">Save · Classic (PDF)</button>` : ''}`; }
+    else if (p.saves === 'ticket') h += `<button class="ab main" data-save="ticket-one">${ICON.dl}Save Ana’s ticket (PNG)</button><button class="ab second" data-prozip="1"><span class="pro">◆ PRO</span>Save all tickets</button>`;
+    else if (p.saves === 'seat') h += `<button class="ab main" data-save="seat">${ICON.dl}Save in your colours</button><button class="ab second" data-save="seat-bp">Save as blueprint</button>`;
+    else if (p.saves === 'caterer') h += `<button class="ab main" data-save="caterer">${ICON.dl}Save PDF</button><button class="ab second" data-save="caterer-csv">Save spreadsheet</button>`;
+    else if (p.saves === 'chart') h += `<button class="ab main" data-save="chart">${ICON.dl}Save PDF · ${S.chartLayout === 'table' ? 'By table' : 'A to Z'}</button><button class="ab quiet" data-save="pack">Table signs &amp; place cards</button>`;
+    else if (p.saves === 'png') h += `<button class="ab main" data-save="event-qr">${ICON.dl}Save image</button>`;
+    else h += `<button class="ab main" data-save="${p.key}">${ICON.dl}Save PDF</button>`;
+    h += '</div>';
+  }
+  $('vfoot').innerHTML = h;
+  if (p.chart) pill($('chartpick'), (v) => { S.chartLayout = v; V.pages = p.pages().map((x) => ({ ...x, drawn: false })); V.page = 0; drawPage(); drawFoot(); });
+}
+
+/* ── gestures on the stage: pinch · double-tap · drag · swipe ─────────────── */
+(() => {
+  const st = $('stage'); let pts = new Map(); let lastTap = 0; let startDist = 0, startZoom = 1, lastX = 0, lastY = 0, swipeX = null, moved = false;
+  st.addEventListener('pointerdown', (e) => { pts.set(e.pointerId, e); st.setPointerCapture(e.pointerId); moved = false; if (pts.size === 2) { const [a, b] = [...pts.values()]; startDist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY); startZoom = V.zoom; } else { lastX = e.clientX; lastY = e.clientY; swipeX = V.zoom === 1 ? e.clientX : null; } });
+  st.addEventListener('pointermove', (e) => { if (!pts.has(e.pointerId)) return; pts.set(e.pointerId, e); if (pts.size === 2) { const [a, b] = [...pts.values()]; const d = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY); setZoom(startZoom * (d / startDist), (a.clientX + b.clientX) / 2, (a.clientY + b.clientY) / 2); moved = true; } else if (V.zoom > 1) { V.tx += e.clientX - lastX; V.ty += e.clientY - lastY; lastX = e.clientX; lastY = e.clientY; moved = true; applyZoom(); } });
+  const up = (e) => { if (pts.size === 1 && swipeX !== null && V.zoom === 1) { const dx = e.clientX - swipeX; if (Math.abs(dx) > 48) go(dx < 0 ? 1 : -1); else if (!moved) { const now = Date.now(); if (now - lastTap < 320) setZoom(2.5, e.clientX, e.clientY); lastTap = now; } } else if (pts.size === 1 && !moved) { const now = Date.now(); if (now - lastTap < 320) setZoom(1); lastTap = now; } pts.delete(e.pointerId); };
+  st.addEventListener('pointerup', up); st.addEventListener('pointercancel', (e) => pts.delete(e.pointerId));
+  st.addEventListener('wheel', (e) => { if (!e.ctrlKey && !e.metaKey) return; e.preventDefault(); setZoom(V.zoom * (e.deltaY < 0 ? 1.1 : 0.9), e.clientX, e.clientY); }, { passive: false });
+  $('vzoom').addEventListener('click', (e) => { $('vzoom').classList.add('pulse-el'); setZoom(V.zoom > 1 ? 1 : 2.5, e.clientX, e.clientY); });
+})();
+
+/* ── the dropdown sheet (kind 2) ──────────────────────────────────────────── */
+function openSheet(title, items, onPick) {
+  $('sheeth').textContent = title; $('sheetrows').innerHTML = items.map((it) => `<button role="option" aria-checked="${it.on}" data-k="${it.k}" ${it.off ? 'disabled' : ''}><span>${it.l}${it.s ? ` <small>· ${it.s}</small>` : ''}</span><svg class="i tick" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>`).join('');
+  $('scrim').classList.add('on'); $('sheet').classList.add('on');
+  $('sheetrows').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => { b.classList.add('pulse-el'); setTimeout(() => { closeSheet(); onPick(b.dataset.k); }, 160); }));
+}
+function closeSheet() { $('scrim').classList.remove('on'); $('sheet').classList.remove('on'); document.querySelectorAll('.ddw.open').forEach((d) => d.classList.remove('open')); }
+$('scrim').addEventListener('click', closeSheet);
+function sizeMenu(fam, btn) {
+  btn.closest('.ddw')?.classList.add('open'); btn.classList.add('pulse-el');
+  const d = data();
+  const opts = fam === 'pass' ? Object.entries(PASS_FORMATS).map(([k, v]) => ({ k, l: v[0], s: `${v[1]} × ${v[2]} mm`, on: S.fmt.pass === k }))
+    : fam === 'inv' ? Object.entries(INV_SIZES).map(([k, v]) => ({ k, l: v[0], s: `${v[1]} × ${v[2]} mm`, on: S.fmt.inv === k }))
+    : fam === 'card' ? Object.entries(CARD_FORMATS).map(([k, v]) => ({ k, l: v[0], s: `${v[1]} × ${v[2]} mm`, on: S.fmt.card === k }))
+    : Object.entries(CHART_SIZES).map(([k, v]) => ({ k, l: v[0], s: d.tables.length ? (chartFits(k).ok ? 'every name fits' : 'too small for ' + d.seated.length + ' names') : `${v[1]} × ${v[2]} mm`, on: S.fmt.chart === k }));
+  openSheet(fam === 'chart' ? 'Chart size' : 'Paper size', opts, (k) => { S.fmt[fam] = k; afterPick(); });
+}
+function afterPick() { if (V.key) { const p = byKey(V.key); V.pages = p.pages().map((x) => ({ ...x, drawn: false })); V.page = 0; drawPage(); drawFoot(); } render(); }
+/* ── saves (kind 9: Preparing… → Sent to your downloads) and the Pro note (kind 20) ── */
+function save(btn, what) {
+  if (btn.dataset.busy) return; btn.dataset.busy = '1'; const was = btn.innerHTML; btn.classList.add('pulse-el'); btn.innerHTML = '<span class="spin"></span>Preparing…';
+  setTimeout(() => { btn.innerHTML = was; delete btn.dataset.busy; toast(what === 'sample' ? 'Sample saved — low resolution, marked SAMPLE' : what === 'caterer-csv' ? 'Sent to your downloads · spreadsheet' : 'Sent to your downloads'); const p = byKey(V.key || ''); if (p?.changed && (what === p.key || what === p.key + '-classic')) { delete S.printed[p.key]; if (V.key) drawFoot(); render(); } }, 900);
+}
+let toastT; function toast(t) { $('toastt').textContent = t; $('toast').classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => $('toast').classList.remove('on'), 2200); }
+function proNote(kind) { $('cfmt').textContent = kind === 'zip' ? 'Every ticket in one file is Event Hub Pro' : `Printing in ${look().name} is Event Hub Pro`; $('cfmp').textContent = kind === 'zip' ? 'With Event Hub Pro you save all your guests’ tickets at once. Each guest can still save their own ticket, free.' : `Classic prints free and print-ready for everyone. The same piece in ${look().name} — foil, the still, the die cut — is Event Hub Pro. Until then this is a sample: low resolution, marked.`; $('scrim').classList.add('on'); $('cfm').classList.add('on'); }
+$('cno').addEventListener('click', () => { $('scrim').classList.remove('on'); $('cfm').classList.remove('on'); });
+$('cyes').addEventListener('click', () => { $('scrim').classList.remove('on'); $('cfm').classList.remove('on'); toast('Opens Event Hub Pro — in place, never a page jump'); });
+
+/* ── one listener for the page and the sheet ──────────────────────────────── */
+$('phone').addEventListener('click', (e) => {
+  const t = e.target.closest('[data-open],[data-size],[data-save],[data-pro],[data-prozip],[data-ticket],[data-tstyle],[data-door],[data-chartsize]'); if (!t) return;
+  if (t.dataset.open) return openPreview(t.dataset.open, t);
+  if (t.dataset.size) return sizeMenu(t.dataset.size, t);
+  if (t.dataset.save) return save(t, t.dataset.save);
+  if (t.dataset.pro !== undefined && t.hasAttribute('data-pro')) { t.classList.add('pulse-el'); return proNote('print'); }
+  if (t.hasAttribute('data-prozip')) { t.classList.add('pulse-el'); return proNote('zip'); }
+  if (t.dataset.ticket) { S.ticket = t.dataset.ticket; t.classList.add('pulse-el'); document.querySelectorAll('[data-ticket]').forEach((b) => b.setAttribute('aria-checked', b.dataset.ticket === S.ticket)); t.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); $('apply')?.classList.add('on'); const ap = document.querySelector('.round.apply'); ap.classList.add('on'); ap.querySelector('.badge').textContent = '1'; const th = document.querySelector('[data-thumb="ticket"]'); if (th) th.innerHTML = pTicket()[0].svg; const pt = document.querySelector('[data-thumb="passes"]'); if (pt) pt.innerHTML = pPrintedTickets()[0].svg; document.querySelector('[data-piece="ticket"] .tx span').textContent = byKey('ticket').line(); return; }
+  if (t.dataset.tstyle) { t.closest('.ddw').classList.add('open'); return openSheet('Ticket style', [['classic', 'Classic'], ['ticket', 'Ticket'], ['poster', 'Photo poster']].map(([k, l]) => ({ k, l, on: S.ticket === k })), (k) => { S.ticket = k; afterPick(); }); }
+  if (t.dataset.chartsize) { S.fmt.chart = t.dataset.chartsize; t.classList.add('pulse-el'); return afterPick(); }
+  if (t.dataset.door) { t.classList.add('pulse-el'); return toast(`${t.dataset.door} — opens in place, you come back here`); }
+});
+$('vback').addEventListener('click', closePreview);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeSheet(); if (V.key) closePreview(); } if (!V.key) return; if (e.key === 'ArrowRight') go(1); if (e.key === 'ArrowLeft') go(-1); });
+
+/* ── the control bar (kind 1 pills, thumb measured on resize) ─────────────── */
+function pill(el, onPick) {
+  if (!el) return; const th = el.querySelector('.th'); const bs = [...el.querySelectorAll('button')];
+  const place = () => { const b = bs.find((x) => x.getAttribute('aria-pressed') === 'true'); if (!b) return; th.style.setProperty('--w', b.offsetWidth + 'px'); th.style.setProperty('--x', b.offsetLeft - 3 + 'px'); };
+  bs.forEach((b) => b.addEventListener('click', () => { bs.forEach((x) => x.setAttribute('aria-pressed', x === b)); b.classList.add('pulse-el'); place(); onPick(b.dataset.v); }));
+  requestAnimationFrame(place); new ResizeObserver(place).observe(el);
+}
+function setView(v) { S.view = v; document.body.classList.toggle('desk', v === 'desk'); if (v === 'desk') { $('leftcol').appendChild($('viewer')); if (!V.key) openPreview('invitation'); } else { $('phone').insertBefore($('viewer'), $('scrim')); } setTimeout(() => { if (V.key) { drawPage(); } }, 50); }
+pill($('vw'), setView);
+pill($('th'), (v) => { S.theme = v; document.documentElement.dataset.theme = v; });
+pill($('ev'), (v) => { S.event = v; render(); if (V.key) { const p = byKey(V.key); V.pages = p.pages().map((x) => ({ ...x, drawn: false })); V.page = 0; drawPage(); drawFoot(); } });
+pill($('lk'), (v) => { S.look = v; render(); if (V.key) { const p = byKey(V.key); V.pages = p.pages().map((x) => ({ ...x, drawn: false })); V.page = 0; drawPage(); drawFoot(); } });
+['vw', 'th', 'ev', 'lk'].forEach((id, i) => { const want = [S.view, S.theme, S.event, S.look][i]; const b = $(id).querySelector(`[data-v="${want}"]`); if (b && b.getAttribute('aria-pressed') !== 'true') b.click(); });
+window.addEventListener('resize', () => { if (V.key) drawPage(); });
+render();
+if (S.open && byKey(S.open)) setTimeout(() => openPreview(S.open), 300);
+document.addEventListener('click', (e) => { const p = e.target.closest('#bgpick button'); if (p) { S.posterPhoto = p.dataset.v; const th = document.querySelector('[data-thumb="story-poster"]'); if (th) th.innerHTML = pStoryPoster()[0].svg; } });
+</script>
+</body></html>

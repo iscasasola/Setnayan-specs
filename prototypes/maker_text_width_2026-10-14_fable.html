@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Maker — Width on Style's last row (2026-10-14)</title>
+<!--
+  Setnayan · Event Hub Maker · the bottom toolbar › STYLE › row 4: Colour · Size · WIDTH.
+  Design + clickable prototype only (Fable, 2026-10-14). No network but Google Fonts, nothing saved, no localStorage.
+
+  Owner, 2026-10-14: "what if there is a part where we want to have the text take up more width?" → picked
+  "Width on Style's last row — Colour · Size · Width on one row; Width = Narrow · Normal · Wide · Full, per part;
+  Normal is the theme's own."
+
+  WHAT SHIPS TODAY (read on a copy of origin/main, 2026-10-14 — drawn here, never redrawn blind):
+    · stage-panel/stage-look-row.tsx `StageLookRow`: row 4 of Style = "Colour" + ONE circle (striped = the theme's own;
+      opens the app's one ColourSheet) + "Size" + the app Slider over the shipped steps (70…160, inside the part's bounds)
+      + the value "100%". A part that takes only one of the two (the mark: a size) draws only that one.
+    · lib/maker-stage-room.ts `SP_LOOK_ROW` / `SP_LOOK_ROW_LABEL` (13 px labels) · `SP_DD` (white pill, small-caps word,
+      value, gold chevron — the panel's labelled dropdown, already used by Background's rows).
+    · stage-panel/part-look.ts: what a part can take = `HUB_ELEMENT_FIELDS` (lib/element-style.ts); a pick = ONE canvas
+      write (`withElementChoice` → `elements[el].<field>`), laid on the page at once (`elementPreview`), saved held.
+    · Width today: nothing per part. A scene arranged as "text" is capped at 58ch (`.hub-arr-text`, globals.css); the
+      cover's names and line take whatever their theme gives them.
+
+  HOUSE RULES HONOURED: one PickMenu for any set of 3+ choices; a ▾ opens its choices, never cycles · ≥ 44 px targets ·
+  ◆ marks Pro and never blocks (Width is FREE — it is a text choice, like size and colour) · the toolbar is 330 px in four
+  rows, rows fill from the top · the Maker never slow: a tap answers at once, the re-wrap is CSS on max-width ·
+  Light + Dark · a tap on a stage part only SELECTS it.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#FBF9F5;--page:#F4F0E8;--ink:#2C2A29;--ink2:#5B5752;--mute:#8E8880;--line:#E6E0D6;--line2:#D9D3C8;--pill:#F1ECE3;--gold:#A9834B;--gold-soft:#E8DCC3;--cta:#C24E25;--cta-wash:#F8E7E0;--ok:#2B744A;--bad:#B3261E;--shadow:rgba(44,42,41,.35);--in:cubic-bezier(.2,.8,.2,1);--spring:cubic-bezier(.34,1.3,.5,1);--sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;--serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;--bezel:#1b1b1b;--body:#EDE8DF;--field:#FFFFFF;--tbar:#F1EEE8}
+[data-theme=dark]{--paper:#1E1C1A;--page:#161514;--ink:#F1ECE4;--ink2:#C9C2B8;--mute:#8E8880;--line:#33302C;--line2:#3E3A35;--pill:#26231F;--gold:#C9A24B;--gold-soft:#3A3122;--cta:#E0623A;--cta-wash:#3A241B;--ok:#4FA06E;--bad:#E0574D;--shadow:rgba(0,0,0,.6);--bezel:#000;--body:#0F0E0D;--field:#26231F;--tbar:#1E1C1A}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--body);font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;appearance:none;border:0;background:none;cursor:pointer;padding:0;margin:0;text-align:left}
+svg{display:block}
+.wrap{max-width:1180px;margin:0 auto;padding:22px 16px 60px}
+h1{font-family:var(--serif);font-weight:500;font-size:30px;margin:8px 0 2px;line-height:1.1}
+.lead{font-size:13.5px;color:var(--ink2);max-width:860px;line-height:1.5;margin:0 0 14px}
+.banner{display:inline-flex;align-items:center;gap:8px;background:var(--cta-wash);color:var(--cta);border:1px solid rgba(194,78,37,.35);border-radius:999px;padding:5px 12px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700}
+.ctl{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin:14px 0 18px}
+.ctl .lbl{font-size:11px;color:var(--mute);letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin-right:-8px}
+.tgp{display:flex;gap:4px;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--paper)}
+.tgp button{height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;color:var(--mute)}
+.tgp button[aria-pressed=true]{background:var(--cta);color:#fff}
+.frames{display:flex;flex-wrap:wrap;gap:26px;justify-content:center;align-items:flex-start}
+.frame{width:375px;max-width:100%;min-width:0;flex:0 1 auto}
+.frame h2{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:700;margin:0 0 8px;text-align:center}
+.frame .cap{font-size:12px;color:var(--ink2);line-height:1.45;margin:8px auto 0;text-align:center}
+.frame .cap b{color:var(--ink)}
+.frame.wide{width:760px}
+@media (max-width:430px){.phone{width:100%;height:auto;min-height:calc(100vh - 24px);border-radius:0;border:0;box-shadow:none}.frame{width:100%}.status,.home{display:none}.wrap{padding:12px 0 40px}.banner,h1,.lead,.ctl{margin-left:16px;margin-right:16px}.frame .cap{padding:0 16px}.notes{margin:20px 16px 0}}
+
+/* ── the phone ── */
+.phone{width:375px;height:812px;background:var(--page);border:6px solid var(--bezel);border-radius:40px;position:relative;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 50px -30px var(--shadow)}
+.status{height:46px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 5px;font-size:13px;font-weight:600;background:var(--paper);z-index:50}
+.status .bat{width:24px;height:11px;border:1.5px solid var(--ink);border-radius:3px;position:relative;margin-bottom:2px}
+.status .bat:after{content:"";position:absolute;left:2px;top:2px;bottom:2px;right:5px;background:var(--ink);border-radius:1px}
+/* the locked top bar: ✕ · two equal dropdown halves · ↶ · Apply */
+.topnav{height:56px;flex:none;display:flex;align-items:center;gap:6px;padding:0 10px;background:var(--paper);border-bottom:1px solid var(--line);z-index:20}
+.rnd{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;position:relative}
+.exitx{background:var(--bad);color:#fff}.applyg{background:var(--ok);color:#fff}
+.applyg .n{position:absolute;right:-3px;top:-3px;min-width:19px;height:19px;border-radius:10px;background:var(--ink);color:var(--paper);font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid var(--paper)}
+.undob{background:var(--pill);border:1px solid var(--line);color:var(--ink)}
+.rnd svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.halves{flex:1;min-width:0;display:flex;gap:4px}
+.half{flex:1 1 0;min-width:0;height:44px;border-radius:999px;background:var(--pill);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;gap:4px;font-size:13px;font-weight:600;color:var(--ink);padding:0 8px}
+.half span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-width:0}
+.half svg{width:12px;height:12px;flex:none;color:var(--cta);fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── the stage area (the guest's page, as the Maker shows it) ── */
+.work{flex:1;min-height:0;position:relative;background:var(--tbar);padding:8px 8px 0;display:flex;flex-direction:column}
+.page{flex:1;min-height:0;background:#fff;border-radius:8px 8px 0 0;overflow:hidden;position:relative;box-shadow:0 1px 2px rgba(40,34,24,.08)}
+[data-theme=dark] .page{background:#121110}
+.stage{position:absolute;inset:0;color:var(--c-body);--c-head:#F3EBDD;--c-body:#DCD3C6;--c-eyebrow:#C9A24B;background:radial-gradient(120% 90% at 50% 10%,#2C2724 0,#1A1817 60%,#121110 100%)}
+.stage[data-shape=framed]{inset:14px 14px 0;border-radius:16px;box-shadow:0 0 0 1px rgba(255,255,255,.08)}
+.stage[data-shape=full]{inset:0;border-radius:0}
+/* the stage's padding — "Full" reaches this, never the edge */
+.stage .words{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:safe center;text-align:center;padding:22px 20px;gap:0;overflow-y:auto;scrollbar-width:none}.stage .words::-webkit-scrollbar{display:none}
+.stage .words.left{align-items:flex-start;text-align:left}
+.part{position:relative;display:block;width:100%;text-align:inherit;color:inherit;transition:max-width .18s var(--in);border-radius:6px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.part>span{display:block;zoom:var(--z,1)}
+.part[aria-pressed=true]{box-shadow:0 0 0 1.5px var(--cta),0 0 0 5px rgba(194,78,37,.18)}
+.part .tag{position:absolute;right:-2px;top:-16px;font:600 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;background:var(--cta);color:#fff;padding:3px 6px;border-radius:999px;opacity:0;transform:translateY(4px);transition:opacity .18s,transform .18s var(--spring);pointer-events:none;zoom:1}
+.part[aria-pressed=true] .tag{opacity:1;transform:none}
+/* the "theme's own" (Normal = absence): what this sample theme gives each part — only while no Width is picked */
+.part.p-eyebrow:not([data-width]){max-width:none}.part.p-names:not([data-width]){max-width:none}.part.p-line:not([data-width]){max-width:26ch}.part.p-body:not([data-width]){max-width:30ch}.part.p-date{max-width:none}
+/* widths: a share of the stage INSIDE its padding, capped in ch so a desktop never runs 1,200 px wide */
+.part[data-width=narrow]{max-width:min(60%,32ch)}
+.part[data-width=wide]{max-width:min(90%,60ch)}
+.part[data-width=full]{max-width:min(100%,76ch)}
+.p-eyebrow span{font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--c-eyebrow);font-weight:600;margin-bottom:12px}
+.p-mark span{font-family:var(--serif);font-size:22px;color:var(--c-eyebrow);letter-spacing:.06em;margin-bottom:10px;line-height:1}
+.p-names span{font-family:var(--serif);font-size:36px;line-height:1.02;color:var(--c-head);font-weight:500;letter-spacing:.01em;text-wrap:balance}
+.p-line span{font-family:var(--serif);font-style:italic;font-size:17px;line-height:1.3;color:var(--c-body);margin-top:12px}
+.p-body span{font-size:11.5px;line-height:1.55;color:var(--c-body);margin-top:14px;opacity:.9}
+.p-date span{font-size:11px;letter-spacing:.2em;color:var(--c-eyebrow);margin-top:16px;font-weight:600}
+.part[style*="--c"]>span{color:var(--c)!important}
+/* the width guide — a bracket drawn at the chosen width when Width is picked, then gone */
+.guide{position:absolute;left:0;right:0;top:50%;height:0;pointer-events:none;opacity:0;transition:opacity .25s}
+.guide.on{opacity:1}
+.guide i{position:absolute;top:-9px;height:18px;border:1.5px dashed var(--cta);border-top:0;border-bottom:0;left:var(--l);right:var(--l)}
+.guide b{position:absolute;left:0;right:0;top:-1px;height:0;border-top:1.5px dashed var(--cta);margin:0 var(--l);opacity:.6}
+.guide em{position:absolute;left:50%;top:12px;transform:translateX(-50%);font:600 9.5px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;background:var(--cta);color:#fff;padding:3px 7px;border-radius:999px;font-style:normal;white-space:nowrap}
+
+/* ── the locked bottom toolbar: 330 px = handle 14 · line 20 · band 52 · 4×48 + 3×6 · safe 34 ── */
+.tbar{flex:none;height:330px;background:var(--tbar);border-radius:22px 22px 0 0;position:relative;box-shadow:0 -1px 0 var(--line2),0 -8px 18px -12px rgba(40,34,24,.35);display:flex;flex-direction:column;--rh:48px;--rg:6px}
+.tbar .grabh{height:14px;display:grid;place-items:center}.tbar .grabh i{width:40px;height:4px;border-radius:9px;background:var(--line2)}
+.tbar .edit{font:600 9.5px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--mute);text-align:center;height:20px;padding:2px 0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tbar .edit b{color:var(--ink)}
+.tools{height:52px;padding:4px 10px;display:flex;gap:8px;align-items:center}
+.tsel{position:relative;flex:1;display:flex;height:44px;background:var(--field);border:1px solid var(--line);border-radius:999px;padding:3px}
+.tsel button{flex:1;border-radius:999px;font:600 12.5px var(--sans);letter-spacing:-.01em;padding:0 2px;color:var(--mute);display:inline-flex;align-items:center;justify-content:center;position:relative;z-index:1;transition:color .3s;white-space:nowrap}
+.tsel button[aria-pressed=true]{color:#fff}
+.tsel .th{position:absolute;top:3px;bottom:3px;left:3px;width:calc((100% - 6px)/4);border-radius:999px;background:var(--cta);transition:transform .7s var(--spring);transform:translateX(100%)}
+.tplay{flex:none;width:44px;height:44px;border-radius:999px;border:1px solid var(--line);background:var(--field);color:var(--ink);display:grid;place-items:center}
+.tplay svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.g4{display:grid;grid-template-rows:repeat(4,var(--rh));grid-auto-rows:0;gap:var(--rg);padding:0 10px;height:calc(4*var(--rh) + 3*var(--rg));overflow:hidden}
+/* rows 1–3: the look cards (real miniatures in the build; stand-ins here) */
+.cards{grid-row:1/4;display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:2px 0;margin:0 -10px;padding-left:10px;padding-right:10px;scroll-snap-type:x mandatory}
+.cards::-webkit-scrollbar{display:none}
+.lc{flex:none;width:112px;height:100%;border-radius:14px;border:1px solid var(--line);background:var(--field);display:flex;flex-direction:column;overflow:hidden;scroll-snap-align:center;text-align:center}
+.lc .pic{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px;background:#1A1817;color:#F3EBDD;font-family:var(--serif)}
+.lc .pic i{display:block;font-style:normal;font-size:12px;line-height:1}.lc .pic small{font-size:6.5px;letter-spacing:.16em;text-transform:uppercase;color:#C9A24B;font-family:var(--sans)}
+.lc .nm{height:22px;border-top:1px solid var(--line);background:var(--page);font:500 10.5px/21px var(--sans);color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
+.lc[aria-checked=true]{box-shadow:0 0 0 2px var(--page),0 0 0 4px var(--cta)}.lc[aria-checked=true] .nm{color:var(--cta);font-weight:600}
+/* ROW 4 — THE DELTA: Colour · Size · Width */
+.lookrow{grid-row:4;display:flex;align-items:center;gap:8px;min-width:0;height:var(--rh)}
+.lookrow .lbl{flex:none;font:500 13px var(--sans);color:var(--ink)}
+.lookrow .lbl.c{display:none}
+.lookrow.fit .lbl.c{display:block}
+.circ{flex:none;width:44px;height:44px;display:grid;place-items:center;border-radius:50%}
+.circ i{display:block;width:32px;height:32px;border-radius:50%;box-shadow:inset 0 0 0 1px var(--line2);background:repeating-linear-gradient(45deg,#fff 0 4px,#EDE8DF 4px 8px)}
+.circ.on i{box-shadow:0 0 0 2px var(--tbar),0 0 0 4px var(--cta)}
+.circ:active i{transform:scale(.94)}
+.sl{flex:1 1 0;min-width:0;height:44px;display:flex;align-items:center;padding:0 2px;position:relative}
+.sl input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;margin:0;touch-action:none}
+.sl input::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--cta) var(--p,50%),var(--line2) var(--p,50%))}
+.sl input::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;border:2px solid var(--cta);margin-top:-9px;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.sl input::-moz-range-track{height:6px;border-radius:3px;background:var(--line2)}.sl input::-moz-range-progress{height:6px;border-radius:3px;background:var(--cta)}.sl input::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#fff;border:2px solid var(--cta)}
+.val{flex:none;width:40px;text-align:right;font:500 13.5px var(--sans);font-variant-numeric:tabular-nums;color:var(--ink);opacity:.8}
+/* the Width dropdown — the house two-line dropdown (`.fh`, the 2026-10-14 effects prototype; `SP_DD` in the build) at its SHORT size */
+.fh{flex:none;height:44px;border:1px solid var(--line);background:var(--field);border-radius:14px;padding:0 24px 0 11px;position:relative;text-align:left;display:flex;flex-direction:column;justify-content:center;transition:transform .1s var(--in);min-width:0}
+.fh:active{transform:scale(.985)}
+.fh .fn{font:600 9.5px/1.1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--mute);white-space:nowrap}
+.fh .fv{font:600 13px/1.25 var(--sans);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fh svg{position:absolute;right:8px;top:50%;margin-top:-6px;width:12px;height:12px;color:var(--cta);fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s var(--in)}
+.fh[aria-expanded=true] svg{transform:rotate(180deg)}
+.fh.wdd{width:86px}
+.lookrow.fit .fh.wdd{width:auto;flex-direction:row;align-items:center;gap:6px;border-radius:999px;padding-left:14px}
+.lookrow.fit .fh.wdd .fn{font-size:9.5px}.lookrow.fit .fh.wdd .fv{font-size:14px;font-weight:500}
+.lookrow .none{flex:1 1 0;min-width:0;font:500 12.5px var(--sans);color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:2px}
+.tbar .foot{flex:none;height:34px}
+
+/* ── the sheet (PickMenu on a phone rises from the bottom; the rest darkens and blurs) ── */
+.bd{position:absolute;inset:0;background:rgba(20,16,12,.42);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:80;animation:fadein .18s var(--in)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--paper);border-radius:22px 22px 0 0;padding:8px 8px 30px;z-index:90;animation:up .22s var(--in);box-shadow:0 -8px 28px -14px var(--shadow);max-height:78%;display:flex;flex-direction:column}
+.sheet .grab{width:40px;height:4px;border-radius:2px;background:var(--line2);margin:2px auto 8px}
+.sheet h4{font-family:var(--serif);font-weight:500;font-size:19px;margin:2px 10px 8px}
+.sheet .list{overflow:auto;scrollbar-width:none}
+.sheet .opt{display:flex;align-items:center;gap:12px;width:100%;min-height:48px;padding:8px 10px;border-radius:12px;font-size:14px;font-weight:500}
+.sheet .opt:active{background:var(--pill)}
+.sheet .opt .tick{margin-left:auto;color:var(--cta);visibility:hidden;width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.sheet .opt[aria-selected=true]{color:var(--cta)}.sheet .opt[aria-selected=true] .tick{visibility:visible}
+.sheet .opt small{display:block;color:var(--mute);font-weight:400;font-size:12px;margin-top:1px}
+.sheet .opt .wg{flex:none;width:44px;height:26px;border-radius:6px;background:var(--pill);display:grid;place-items:center}
+.sheet .opt .wg i{display:block;height:4px;border-radius:2px;background:currentColor;opacity:.75;width:var(--w)}
+.sheet .opt .wg i.th{background:repeating-linear-gradient(90deg,currentColor 0 3px,transparent 3px 6px)}
+.sheet .chips{display:flex;flex-wrap:wrap;gap:8px;padding:4px 10px 10px}
+.sheet .chips button{width:44px;height:44px;border-radius:50%;display:grid;place-items:center}
+.sheet .chips button i{width:30px;height:30px;border-radius:50%;border:1px solid rgba(0,0,0,.12);display:block}
+.sheet .chips button[aria-selected=true] i{outline:2px solid var(--cta);outline-offset:2px}
+.sheet .plain{margin:0 10px;font-size:12.5px;color:var(--mute);line-height:1.45}
+@keyframes up{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+
+/* ── the desktop stage (same state, 720 px wide) ── */
+.deskbox{width:760px;max-width:100%;height:470px;border-radius:18px;overflow:hidden;position:relative;border:6px solid var(--bezel);background:#121110}
+.deskbox .stage{inset:0;border-radius:0}
+.deskbox .stage[data-shape=framed]{inset:18px 18px 0;border-radius:16px}
+.deskbox .p-names span{font-size:50px}.deskbox .p-line span{font-size:19px}.deskbox .p-body span{font-size:13px}.deskbox .p-eyebrow span{font-size:10.5px}
+.deskbox .words{padding:28px 40px}
+.deskbox .part{cursor:default}
+
+/* ── notes ── */
+.notes{max-width:1020px;margin:34px auto 0;background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:18px 22px}
+.notes h3{font-family:var(--serif);font-weight:500;font-size:22px;margin:0 0 6px}
+.notes h4{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:18px 0 6px}
+.notes p,.notes li{font-size:13.5px;line-height:1.55;color:var(--ink2)}
+.notes b{color:var(--ink)}.notes code{font-size:12px;background:var(--pill);padding:1px 5px;border-radius:5px;color:var(--ink)}
+.notes ul{padding-left:18px;margin:4px 0}
+.notes table{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0}
+.notes th,.notes td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.notes th{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.notes .q{background:var(--cta-wash);border-left:3px solid var(--cta);padding:8px 12px;border-radius:0 10px 10px 0;margin:6px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="banner">Maker · Style › row 4 · Width</span>
+  <h1>Width on Style's last row — Colour · Size · Width</h1>
+  <p class="lead">The owner's pick (2026-10-14): a fourth choice per part so its words can take more, or less, of the stage. <b>Normal is the theme's own</b> — nothing changes until a couple picks. Tap a part on the stage to select it, then use the row. The Width dropdown re-wraps the words live, and a dotted guide shows the width it means.</p>
+  <div class="ctl">
+    <span class="lbl">Look</span>
+    <div class="tgp" id="theme"><button aria-pressed="true" data-t="light">Light</button><button aria-pressed="false" data-t="dark">Dark</button></div>
+    <span class="lbl">Stage</span>
+    <div class="tgp" id="shape"><button aria-pressed="true" data-s="framed">Framed</button><button aria-pressed="false" data-s="full">Full width</button></div>
+    <span class="lbl">Row words</span>
+    <div class="tgp" id="fit"><button aria-pressed="true" data-f="built">As designed</button><button aria-pressed="false" data-f="all">All three words (fit check)</button></div>
+  </div>
+
+  <div class="frames">
+    <div class="frame">
+      <h2>Phone · 375 px · Style › row 4</h2>
+      <div class="phone" id="phone">
+        <div class="status"><span>9:41</span><span class="bat"></span></div>
+        <div class="topnav">
+          <button class="rnd exitx" aria-label="Leave the Maker"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+          <div class="halves">
+            <button class="half" aria-haspopup="listbox"><span>Cover</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+            <button class="half" aria-haspopup="listbox"><span id="partName">Names</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+          </div>
+          <button class="rnd undob" aria-label="Undo"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
+          <button class="rnd applyg" aria-label="Apply"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span class="n" id="n">0</span></button>
+        </div>
+        <div class="work">
+          <div class="page">
+            <div class="stage" id="stage" data-shape="framed">
+              <div class="words" id="words"></div>
+              <div class="guide" id="guide"><b></b><i></i><em></em></div>
+            </div>
+          </div>
+        </div>
+        <div class="tbar">
+          <div class="grabh"><i></i></div>
+          <div class="edit">You're editing · <b>Cover › <span id="editPart">Names</span></b></div>
+          <div class="tools">
+            <div class="tsel"><span class="th"></span><button>Edit</button><button aria-pressed="true">Style</button><button>Background</button><button>Animate</button></div>
+            <button class="tplay" aria-label="Play"><svg viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></svg></button>
+          </div>
+          <div class="g4">
+            <div class="cards" id="cards"></div>
+            <div class="lookrow" id="lookrow"></div>
+          </div>
+          <div class="foot"></div>
+        </div>
+      </div>
+      <p class="cap" id="cap"></p>
+    </div>
+
+    <div class="frame wide">
+      <h2>Desktop · the same part, 720 px stage — the ch cap keeps Full readable</h2>
+      <div class="deskbox"><div class="stage" id="dstage" data-shape="framed"><div class="words" id="dwords"></div></div></div>
+      <p class="cap">On a phone the share wins (60 % · 90 % · 100 % of the stage inside its padding). On a desktop the cap in characters wins — Narrow 32ch · Wide 60ch · Full 76ch — so a paragraph never runs 1,200 px wide. Normal stays whatever the theme drew.</p>
+    </div>
+  </div>
+
+  <div class="notes">
+    <h3>Notes for the owner and the builder</h3>
+
+    <h4>What exists (read on a copy of main, 2026-10-14)</h4>
+    <ul>
+      <li><b>Row 4 of Style is already Colour · Size</b> — <code>StageLookRow</code> (<code>stage-panel/stage-look-row.tsx</code>): one circle that opens the app's one colour picker, the app slider over the shipped steps, the value "100%". A part that takes only one draws only that one (the mark: Size only).</li>
+      <li><b>What a part can take is one table</b> — <code>HUB_ELEMENT_FIELDS</code> in <code>lib/element-style.ts</code>; a pick is one canvas write (<code>elements[el].size</code>, <code>.color</code>) through <code>part-look.ts</code>, shown on the page at once, saved in the background.</li>
+      <li><b>The labelled dropdown pill already exists in this toolbar</b> — <code>SP_DD</code> (small-caps word · value · gold chevron), used by Background's rows; the house two-line dropdown is the one in the 2026-10-14 effects prototype.</li>
+      <li><b>Width today:</b> nothing per part. A scene arranged as "text" is capped at 58 characters (<code>.hub-arr-text</code>); the cover's names and line take whatever the theme gives them.</li>
+    </ul>
+
+    <h4>What's new — the answers to the four questions</h4>
+    <p><b>1 · Does Colour · Size · Width fit one row at 375?</b> Yes, as drawn — with two decisions. The row has 355 px inside the toolbar's inset. Three written words + a circle + a slider + its value + a labelled pill leaves the slider <b>about 30 px</b> (press "All three words" above and read the measurement under the phone). So: <b>the word "Colour" is dropped</b> — the circle is the approved colour-circle kind and needs no caption, exactly as the Background rows draw it — and <b>Width is the house two-line dropdown at its short size</b> (the word WIDTH sits inside the pill, above the value). That leaves the Size bar <b>about 125 px</b>: ten steps, a 24 px thumb, usable. The owner's row stays one row; nothing moves to a second one.</p>
+    <p><b>2 · What Width means.</b> The widest a part's words may run, as a share of the stage <em>inside its padding</em>: <b>Narrow</b> 60 % · <b>Normal</b> the theme's own (stored as nothing, like Size 100) · <b>Wide</b> 90 % · <b>Full</b> 100 %, to the padding, never the edge. Each has a cap in characters so a desktop stays readable: Narrow 32ch · Wide 60ch · Full 76ch (<code>max-width: min(90%, 60ch)</code>). Framed and Full-width stages behave the same — the share is measured inside whichever box the stage is. The box sits where the part's alignment puts it (centre → centred; left → to the left); Size and Width are independent — bigger words in a Narrow box wrap sooner, which is the point.</p>
+    <p><b>3 · Which parts take Width.</b> Every part whose words can run to more than one line. A part that does not take it draws no Width control — the same rule as the mark drawing no Colour today.</p>
+    <table>
+      <tr><th>Takes Width</th><th>Does not</th></tr>
+      <tr><td>Names · Small line on top · Invitation line · Venue · Photo caption · Heading · Words (a scene's paragraph)</td><td>Your mark (a drawing) · Joiner (one word) · Date · Time · Details link (a button) · Label (a scene's one- or two-word label)</td></tr>
+    </table>
+    <p><b>4 · The stage reacts live.</b> Tap a part, pick a Width: the words re-wrap at once (CSS on <code>max-width</code>, under 100 ms), a dotted guide shows the width for a moment, the Apply count goes up. Width is <b>free</b> — it is a text choice like size and colour (DECISION_LOG 2026-09-28: free = design pick, text, size, colour). No ◆.</p>
+
+    <h4>Control map (INTERACTION_RULES § 9 — every control is one of the kinds)</h4>
+    <ul>
+      <li>Colour circle → <b>Colour circle</b> (the approved kind 21), opens the one ColourSheet — unchanged.</li>
+      <li>Size → the app <b>Slider</b> with its value beside it — unchanged.</li>
+      <li>Width → <b>Dropdown</b> (<code>PickMenu</code>, short size); a ▾ opens its choices as a sheet from the bottom on a phone, a list on desktop. Never cycles on tap.</li>
+      <li>A part on the stage → a tap only <b>selects</b> it (the Maker rule); the row then shows that part's colour, size and width.</li>
+      <li>Light | Dark · Framed | Full width · Row words → prototype-only harness pills (2-way Pill selector), not in the build.</li>
+    </ul>
+
+    <h4>The delta to build (extend, never redraw)</h4>
+    <ul>
+      <li><code>lib/element-style.ts</code>: add <code>'width'</code> to the field union; <code>HUB_ELEMENT_WIDTHS = ['narrow','wide','full']</code> (Normal = absence); add <code>'width'</code> to <code>HUB_ELEMENT_FIELDS</code> for the parts in the table; sanitise it; <code>hubElementStyleCss</code> emits <code>max-width: min(&lt;share&gt;, &lt;cap&gt;ch)</code> and a <code>margin-inline</code> that follows the part's alignment. One constant table holds the three shares and caps.</li>
+      <li><code>stage-panel/part-look.ts</code>: <code>partLookFields</code> returns <code>width</code>; <code>partLookNow</code> reads it; <code>keepPartLook</code> / <code>partLookNext</code> take the field — the same one write, same undo.</li>
+      <li><code>stage-panel/stage-look-row.tsx</code>: after Size, a <code>PickMenu</code> (short, inside the <code>SP_DD</code> pill with its small-caps word) when <code>can.width</code>; drop the written "Colour" at phone width (keep it as the circle's accessible name and the sheet's title "Colour of the names").</li>
+      <li><code>lib/maker-stage-room.ts</code>: the short-pill class for the row's dropdown (<code>SP_LOOK_ROW_DD</code>), nothing else new.</li>
+      <li>No migration: the canvas is JSON (<code>elements[el].width</code>), the sanitiser just has to keep the key. The guest page already draws whatever <code>hubElementStyleCss</code> emits.</li>
+      <li>Guards: a width test beside <code>element-size-scale.test.ts</code> (every part in the table draws a cap; the parts outside it never do); the row's existing "a tap on the worn choice saves nothing" test extended to Width.</li>
+    </ul>
+
+    <h4>Open questions — owner's call</h4>
+    <div class="q"><b>Q1 · The written word "Colour" leaves row 4 at phone width.</b> The circle stands alone (its name is still read out, and its sheet is titled). On wider screens the word comes back. OK, or keep the word and accept a smaller Size bar?</div>
+    <div class="q"><b>Q2 · Small line on top takes Width, Label does not.</b> Both are small tracked lines; the first is often a sentence ("Together with their families"), the second a word or two ("Our story"). Should both take it?</div>
+    <div class="q"><b>Q3 · The numbers.</b> Narrow 60 % · Wide 90 % · Full 100 %, caps 32 · 60 · 76 characters. These are drawn here to be looked at, not measured against a theme — pick them by eye on this page.</div>
+  </div>
+</div>
+
+<script>
+/* ───────── sample parts (the cover's own words; a tap selects) ───────── */
+const SIZE_STEPS=[70,78,85,92,100,110,120,132,145,160];
+const BOUNDS={eyebrow:[85,145],mark:[70,160],names:[70,145],line:[85,145],body:[85,145],date:[85,145]};
+const PARTS=[
+  {k:'eyebrow',name:'Small line on top',text:'Together with their families',takes:{colour:true,size:true,width:true}},
+  {k:'mark',name:'Your mark',text:'M ❦ J',takes:{colour:false,size:true,width:false}},
+  {k:'names',name:'Names',text:'Maria Angelica & Juan Carlos',takes:{colour:true,size:true,width:true}},
+  {k:'line',name:'Invitation line',text:'invite you to celebrate the beginning of their forever, with love and gratitude',takes:{colour:true,size:true,width:true}},
+  {k:'body',name:'Words',text:'Saturday, the fourteenth of February, two thousand twenty-seven, at four in the afternoon. Caleruega Church, Nasugbu, Batangas, with the reception to follow at the garden pavilion.',takes:{colour:true,size:true,width:true}},
+  {k:'date',name:'Date',text:'14 · 02 · 2027',takes:{colour:true,size:true,width:false}},
+];
+const state={sel:'names',look:{},applies:0,fit:false};
+for(const p of PARTS) state.look[p.k]={colour:null,size:100,width:null};
+const WIDTHS=[
+  {k:'narrow',n:'Narrow',d:'About 6 in 10 of the stage',w:'45%'},
+  {k:null,n:'Normal',d:'As the theme drew it',w:'60%',th:true},
+  {k:'wide',n:'Wide',d:'About 9 in 10 of the stage',w:'80%'},
+  {k:'full',n:'Full',d:'Edge to edge, inside the stage’s padding',w:'100%'},
+];
+const PAL=['#F3EBDD','#C9A24B','#C24E25','#7A8B6F','#9DB7C9','#D98AA6'];
+const $=id=>document.getElementById(id);
+const svgChev='<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
+const svgTick='<svg class="tick" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>';
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+
+/* ───────── the stage (phone + desktop share the state) ───────── */
+function partHtml(p,interactive){
+  const l=state.look[p.k];
+  const st=(l.colour?'--c:'+l.colour+';':'')+'--z:'+(l.size/100);
+  return '<'+(interactive?'button type="button"':'div')+' class="part p-'+p.k+'" data-k="'+p.k+'"'+(l.width?' data-width="'+l.width+'"':'')+(interactive?' aria-pressed="'+(state.sel===p.k)+'"':'')+' style="'+st+'"><span>'+esc(p.text)+'</span>'+(interactive?'<i class="tag">'+esc(p.name)+'</i>':'')+'</'+(interactive?'button':'div')+'>';
+}
+function drawStage(){
+  $('words').innerHTML=PARTS.map(p=>partHtml(p,true)).join('');
+  $('dwords').innerHTML=PARTS.map(p=>partHtml(p,false)).join('');
+  $('words').querySelectorAll('.part').forEach(b=>b.addEventListener('click',()=>{state.sel=b.dataset.k;drawAll();}));
+}
+let guideT=null;
+function flashGuide(part){
+  const g=$('guide'),l=state.look[part.k];
+  const share={narrow:60,wide:90,full:100}[l.width];
+  if(!share){g.classList.remove('on');return}
+  const words=$('words'),pad=20,inner=words.clientWidth-pad*2;
+  const box=Math.min(inner*share/100, cap(part,l.width));
+  const left=pad+(inner-box)/2;
+  g.style.setProperty('--l',left+'px');
+  const el=words.querySelector('.p-'+part.k);
+  if(el){const r=el.getBoundingClientRect(),w=words.getBoundingClientRect();g.style.top=(r.top-w.top+r.height/2)+'px'}
+  g.querySelector('em').textContent=({narrow:'Narrow · 60%',wide:'Wide · 90%',full:'Full · 100%'})[l.width];
+  g.classList.add('on');clearTimeout(guideT);guideT=setTimeout(()=>g.classList.remove('on'),1100);
+}
+function cap(part,w){ /* the ch cap, in px, for the guide only: ch ≈ .5em of the part's size */
+  const em={eyebrow:9.5,names:36,line:17,body:11.5}[part.k]||14;
+  const ch={narrow:32,wide:60,full:76}[w];
+  return ch*em*.5*(state.look[part.k].size/100);
+}
+
+/* ───────── the toolbar ───────── */
+function drawCards(){
+  const looks=['Classic','Modern','Cyber Neon ◆','Garden ◆','Letterpress ◆'];
+  $('cards').innerHTML=looks.map((n,i)=>'<button class="lc" role="radio" aria-checked="'+(i===0)+'"><span class="pic"><small>Together</small><i>M &amp; J</i><small>invite you</small></span><span class="nm">'+n+'</span></button>').join('');
+}
+function drawRow(){
+  const p=PARTS.find(x=>x.k===state.sel),l=state.look[p.k],row=$('lookrow');
+  row.classList.toggle('fit',state.fit);
+  let h='';
+  if(p.takes.colour){
+    h+='<span class="lbl c">Colour</span><button class="circ'+(l.colour?' on':'')+'" aria-label="'+(l.colour?'Colour '+l.colour:'The theme’s colour')+' — change it" id="circ"><i'+(l.colour?' style="background:'+l.colour+'"':'')+'></i></button>';
+  }
+  if(p.takes.size){
+    const steps=SIZE_STEPS.filter(s=>s>=BOUNDS[p.k][0]&&s<=BOUNDS[p.k][1]);
+    const at=Math.max(0,steps.indexOf(l.size));
+    h+='<span class="lbl">Size</span><span class="sl" id="sl"><input type="range" aria-label="Text size" min="0" max="'+(steps.length-1)+'" step="1" value="'+at+'" style="--p:'+(at/(steps.length-1)*100)+'%" data-steps="'+steps.join(',')+'"></span><span class="val" id="val">'+l.size+'%</span>';
+  }
+  if(p.takes.width){
+    const cur=WIDTHS.find(w=>w.k===l.width);
+    h+='<button class="fh wdd" id="wdd" aria-haspopup="listbox" aria-expanded="false"><span class="fn">Width</span><span class="fv">'+cur.n+'</span>'+svgChev+'</button>';
+  }
+  if(!p.takes.width && !p.takes.colour){ /* the mark: Size only — the row shows what there is, nothing else */ }
+  row.innerHTML=h;
+  const c=$('circ');if(c)c.addEventListener('click',openColour);
+  const s=row.querySelector('input[type=range]');
+  if(s)s.addEventListener('input',()=>{const steps=s.dataset.steps.split(',').map(Number);const v=steps[+s.value];s.style.setProperty('--p',(+s.value/(steps.length-1)*100)+'%');$('val').textContent=v+'%';if(v!==l.size){l.size=v;bump();drawStage();}});
+  const w=$('wdd');if(w)w.addEventListener('click',openWidth);
+  $('partName').textContent=p.name;$('editPart').textContent=p.name;
+  measure();
+}
+function measure(){
+  const p=PARTS.find(x=>x.k===state.sel);
+  const sl=$('sl');const px=sl?Math.round(sl.getBoundingClientRect().width):0;
+  const parts=[];
+  if(p.takes.colour)parts.push('Colour circle');if(p.takes.size)parts.push('Size bar');if(p.takes.width)parts.push('Width ▾');
+  let msg='<b>'+p.name+'</b> takes '+parts.join(' · ')+(p.takes.width?'':' — <b>no Width</b>, like the mark draws no Colour')+'.';
+  if(sl)msg+=' Size bar measured: <b>'+px+' px</b>'+(px<70?' — <b style="color:var(--bad)">too small to use</b>: this is why the word "Colour" leaves the row at 375.':px<110?' — tight.':' — usable (ten steps, 24 px thumb).');
+  $('cap').innerHTML=msg;
+}
+function bump(){state.applies++;$('n').textContent=state.applies;}
+
+/* ───────── the sheets (one open at a time; a tap on the dark closes) ───────── */
+function openSheet(title,inner){
+  closeSheet();
+  const ph=$('phone');
+  const bd=document.createElement('div');bd.className='bd';bd.id='bd';bd.addEventListener('click',closeSheet);
+  const sh=document.createElement('div');sh.className='sheet';sh.id='sh';
+  sh.innerHTML='<div class="grab"></div><h4>'+title+'</h4>'+inner;
+  ph.appendChild(bd);ph.appendChild(sh);
+  const w=$('wdd');if(w)w.setAttribute('aria-expanded','true');
+}
+function closeSheet(){['bd','sh'].forEach(i=>{const e=$(i);if(e)e.remove()});const w=$('wdd');if(w)w.setAttribute('aria-expanded','false');}
+function openWidth(){
+  const p=PARTS.find(x=>x.k===state.sel),l=state.look[p.k];
+  const list=WIDTHS.map(w=>'<button class="opt" role="option" aria-selected="'+(w.k===l.width)+'" data-w="'+(w.k||'')+'"><span class="wg"><i class="'+(w.th?'th':'')+'" style="--w:'+w.w+'"></i></span><span>'+w.n+'<small>'+w.d+'</small></span>'+svgTick+'</button>').join('');
+  openSheet('Width of the '+p.name.toLowerCase(),'<div class="list">'+list+'</div>');
+  $('sh').querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>{
+    const v=b.dataset.w||null; closeSheet();
+    if(v===l.width)return; /* a tap on the worn choice saves nothing */
+    l.width=v;bump();drawStage();drawRow();setTimeout(()=>flashGuide(p),0);
+  }));
+}
+function openColour(){
+  const p=PARTS.find(x=>x.k===state.sel),l=state.look[p.k];
+  const chips='<button role="option" aria-selected="'+(l.colour===null)+'" data-c="" aria-label="The theme’s colour"><i style="background:repeating-linear-gradient(45deg,#fff 0 4px,#EDE8DF 4px 8px)"></i></button>'+PAL.map(c=>'<button role="option" aria-selected="'+(l.colour===c)+'" data-c="'+c+'" aria-label="'+c+'"><i style="background:'+c+'"></i></button>').join('');
+  openSheet('Colour of the '+p.name.toLowerCase(),'<div class="chips">'+chips+'</div><p class="plain">The Mood Board’s colours first, then any colour. The striped circle is the theme’s own.</p>');
+  $('sh').querySelectorAll('.chips button').forEach(b=>b.addEventListener('click',()=>{const v=b.dataset.c||null;closeSheet();if(v===l.colour)return;l.colour=v;bump();drawStage();drawRow();}));
+}
+
+/* ───────── harness pills ───────── */
+function pill(id,attr,fn){$(id).querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{$(id).querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));fn(b.dataset[attr]);}));}
+pill('theme','t',t=>document.documentElement.setAttribute('data-theme',t));
+pill('shape','s',s=>{$('stage').dataset.shape=s;$('dstage').dataset.shape=s;});
+pill('fit','f',f=>{state.fit=f==='all';drawRow();});
+function drawAll(){drawStage();drawRow();}
+drawCards();drawAll();
+window.addEventListener('resize',measure);
+</script>
+</body>
+</html>

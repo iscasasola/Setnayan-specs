@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Maker — The Cover Scene gets its own background (2026-10-14)</title>
+<!--
+  Setnayan · Event Hub Maker · the Cover › selecting the words as ONE GROUP and giving that group a Background.
+  Design + clickable prototype only (Fable, 2026-10-14). No network but Google Fonts, nothing saved, no localStorage.
+
+  Owner, 2026-10-14, on seeing the draft, verbatim: "Call it Cover Scene." — the group is the COVER SCENE everywhere.
+  Owner, 2026-10-14, later, verbatim: "Cover scene will take up the whole screen initially whatever screen type it is" →
+  the Cover Scene FILLS THE FIRST SCREEN on load (phone · tablet · desktop; 100svh/dvh, minding the browser bars); its
+  words sit inside it; its Background is that whole screen's background. So Framed | Full width is no longer a plate vs
+  a band behind the words — Framed = the screen inset with a rounded margin on the page colour; Full width = edge to edge.
+  And ONE background for the first screen: the Hero (Details › Hero) is FOLDED INTO the Cover Scene's Background — the
+  couple's photo is its Upload pick, the written card its first source; Details › Hero draws the same rows (two doors,
+  one value), never a second cover background. Owner, same day: "so they can upload photos, media files to enhance the
+  look of their website" → Pro couples get 500 MB of media (PROPOSED, not confirmed) — drawn as "Your media · 120 MB of
+  500 MB" with a picker of the couple's files; videos stay "won't play for guests yet".
+  Owner, 2026-10-14, verbatim: "on the cover. where the logo, title is, we can set a background on that group. i don't
+  know how to select it. so i can place an animated video on the background" → approved: design a way to SELECT the
+  cover's logo + title group and give it its own background. Moving backgrounds = Setnayan's ready-made Scene ◆ loops
+  only for now; a couple's OWN clip does not play for guests (`GUEST_HERO_VIDEO_PLAYBACK = false`, SEC-6), so Upload
+  offers photos here and an uploaded clip is never drawn playing.
+
+  WHAT SHIPS TODAY (read on a copy of origin/main, 2026-10-14 — drawn here, never redrawn blind):
+    · lib/maker-parts.ts: the cover's parts are each a word on it (logo · Title · names · date · place · invite line ·
+      link), all `canvas: 'f:hero'` with an `el`. There is NO group to select. Their Background tool is GREY and says
+      "This sits on the cover's background." (`makerPartToolWhy`; `makerPartToolWorks`: bg only for `w:` canvases).
+    · The cover's background is the Hero — the couple's photo or the written card — from Details › Hero
+      (`lib/event-hero.ts`, ONE hero for every stage and the poster).
+    · stage-panel/stage-background.tsx `StageBackground`: FOUR rows — source ▾ (The Event Hub's · Colour · Scene ◆ ·
+      Upload ◆) · that source's tiles · ONE control (colour circle + Opacity on a glass, or Darker ━●━ Lighter) ·
+      Framed | Full width (+ Still | Parallax on a photo). Reused here row for row.
+    · lib/hub-legibility.ts: words follow their background automatically, FREE, AA over the worst sample; the scrim is
+      strengthened until they pass.
+    · lib/background-source.ts `BACKGROUND_SOURCE_IS_PRO`: Colour free · Scene ◆ · Upload ◆ — tried free, named at Apply.
+
+  HOUSE RULES HONOURED: a tap on a stage part only SELECTS it · the top bar's right half ▾ lists the page's parts ·
+  bottom toolbar Edit | Style | Background | Animate, 330 px, four rows from the top · one PickMenu per set of 3+ ·
+  ◆ marks Pro and never blocks ("Unlock Pro and Apply" is the gate) · 44 px floor · ≤100 ms per tap, a press shows
+  pressed + one loading line · Light + Dark · no "Edit in X ↗" link-outs.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#FBF9F5;--page:#F4F0E8;--ink:#2C2A29;--ink2:#5B5752;--mute:#8E8880;--line:#E6E0D6;--line2:#D9D3C8;--pill:#F1ECE3;--gold:#A9834B;--gold-soft:#E8DCC3;--cta:#C24E25;--cta-wash:#F8E7E0;--ok:#2B744A;--bad:#B3261E;--shadow:rgba(44,42,41,.35);--in:cubic-bezier(.2,.8,.2,1);--spring:cubic-bezier(.34,1.3,.5,1);--sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;--serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;--bezel:#1b1b1b;--body:#EDE8DF;--field:#FFFFFF;--tbar:#F1EEE8}
+[data-theme=dark]{--paper:#1E1C1A;--page:#161514;--ink:#F1ECE4;--ink2:#C9C2B8;--mute:#8E8880;--line:#33302C;--line2:#3E3A35;--pill:#26231F;--gold:#C9A24B;--gold-soft:#3A3122;--cta:#E0623A;--cta-wash:#3A241B;--ok:#4FA06E;--bad:#E0574D;--shadow:rgba(0,0,0,.6);--bezel:#000;--body:#0F0E0D;--field:#26231F;--tbar:#1E1C1A}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--body);font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;appearance:none;border:0;background:none;cursor:pointer;padding:0;margin:0;text-align:left}
+svg{display:block}
+.wrap{max-width:1180px;margin:0 auto;padding:22px 16px 60px}
+h1{font-family:var(--serif);font-weight:500;font-size:30px;margin:8px 0 2px;line-height:1.1}
+.lead{font-size:13.5px;color:var(--ink2);max-width:880px;line-height:1.5;margin:0 0 14px}
+.banner{display:inline-flex;align-items:center;gap:8px;background:var(--cta-wash);color:var(--cta);border:1px solid rgba(194,78,37,.35);border-radius:999px;padding:5px 12px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700}
+.ctl{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin:14px 0 18px}
+.ctl .lbl{font-size:11px;color:var(--mute);letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin-right:-8px}
+.tgp{display:flex;gap:4px;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--paper)}
+.tgp button{height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;color:var(--mute)}
+.tgp button[aria-pressed=true]{background:var(--cta);color:#fff}
+.frames{display:flex;flex-wrap:wrap;gap:26px;justify-content:center;align-items:flex-start}
+.frame{width:375px;max-width:100%;min-width:0;flex:0 1 auto}
+.frame h2{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:700;margin:0 0 8px;text-align:center}
+.frame .cap{font-size:12px;color:var(--ink2);line-height:1.45;margin:8px auto 0;text-align:center;min-height:36px}
+.frame .cap b{color:var(--ink)}
+.walk{width:375px;max-width:100%}
+.walk ol{margin:0;padding-left:18px;font-size:13px;line-height:1.55;color:var(--ink2)}
+.walk li{margin-bottom:8px}.walk li b{color:var(--ink)}
+.walk .k{display:inline-block;font:600 10px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;background:var(--cta);color:#fff;padding:3px 6px;border-radius:999px;margin-right:4px;vertical-align:1px}
+.walk .k.g{background:var(--mute)}
+@media (max-width:430px){.phone{width:100%;height:auto;min-height:calc(100vh - 24px);border-radius:0;border:0;box-shadow:none}.frame{width:100%}.status,.home{display:none}.wrap{padding:12px 0 40px}.banner,h1,.lead,.ctl{margin-left:16px;margin-right:16px}.frame .cap{padding:0 16px}.notes{margin:20px 16px 0}.walk{padding:0 16px}}
+
+/* ── the phone ── */
+.phone{width:375px;height:812px;background:var(--page);border:6px solid var(--bezel);border-radius:40px;position:relative;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 50px -30px var(--shadow)}
+.status{height:46px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 5px;font-size:13px;font-weight:600;background:var(--paper);z-index:50}
+.status .bat{width:24px;height:11px;border:1.5px solid var(--ink);border-radius:3px;position:relative;margin-bottom:2px}
+.status .bat:after{content:"";position:absolute;left:2px;top:2px;bottom:2px;right:5px;background:var(--ink);border-radius:1px}
+/* the locked top bar: ✕ · two equal dropdown halves · ↶ · Apply */
+.topnav{height:56px;flex:none;display:flex;align-items:center;gap:6px;padding:0 10px;background:var(--paper);border-bottom:1px solid var(--line);z-index:20}
+.rnd{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;position:relative}
+.exitx{background:var(--bad);color:#fff}.applyg{background:var(--ok);color:#fff}
+.applyg .n{position:absolute;right:-3px;top:-3px;min-width:19px;height:19px;border-radius:10px;background:var(--ink);color:var(--paper);font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid var(--paper)}
+.applyg .n.pro{background:var(--gold);color:#1b1b1b}
+.undob{background:var(--pill);border:1px solid var(--line);color:var(--ink)}
+.rnd svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.rnd:active{transform:scale(.94)}
+.halves{flex:1;min-width:0;display:flex;gap:4px}
+.half{flex:1 1 0;min-width:0;height:44px;border-radius:999px;background:var(--pill);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;gap:4px;font-size:13px;font-weight:600;color:var(--ink);padding:0 8px}
+.half span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-width:0}
+.half svg{width:12px;height:12px;flex:none;color:var(--cta);fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.half:active{transform:scale(.985)}
+
+/* ── the stage area (the guest's page, as the Maker shows it) ── */
+.work{flex:1;min-height:0;position:relative;background:var(--tbar);padding:8px 8px 0;display:flex;flex-direction:column}
+.page{flex:1;min-height:0;background:#fff;border-radius:8px 8px 0 0;overflow:hidden;position:relative;box-shadow:0 1px 2px rgba(40,34,24,.08)}
+[data-theme=dark] .page{background:#121110}
+.stage{position:absolute;inset:0;overflow:hidden;background:#F4F0E8}
+[data-theme=dark] .stage{background:#1A1816}
+/* THE COVER SCENE — the whole first screen (100svh on the guest's device; the page frame here). Framed = the screen
+   inset with a rounded margin, the page colour showing round it; Full width = edge to edge. Full height either way. */
+.scene{position:absolute;inset:0;overflow:hidden;transition:inset .3s var(--in),border-radius .3s var(--in);isolation:isolate}
+.scene[data-shape=framed]{inset:12px 12px 12px;border-radius:18px;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.scene[aria-pressed=true]:after{content:"";position:absolute;inset:5px;border:1.5px dashed var(--cta);border-radius:inherit;pointer-events:none;z-index:3}
+.scene>.tag{position:absolute;right:12px;top:10px;font:600 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;background:var(--cta);color:#fff;padding:3px 6px;border-radius:999px;opacity:0;transform:translateY(4px);transition:opacity .18s,transform .18s var(--spring);pointer-events:none;font-style:normal;white-space:nowrap;z-index:4}
+.scene[aria-pressed=true]>.tag{opacity:1;transform:none}
+.scene .ground{position:absolute;inset:0;z-index:0;overflow:hidden}
+.scene .scrim{position:absolute;inset:0;z-index:1;pointer-events:none}
+/* the first source: the written card on the theme's own ground (today's free hero) */
+.hero{position:absolute;inset:0;transition:opacity .3s}
+.hero.photo{background:
+  radial-gradient(60% 40% at 70% 18%,rgba(255,214,160,.55) 0,transparent 60%),
+  radial-gradient(90% 60% at 30% 80%,rgba(40,70,50,.9) 0,transparent 70%),
+  radial-gradient(120% 70% at 50% 100%,#1c2a22 0,transparent 60%),
+  linear-gradient(180deg,#d9a46b 0,#b57a52 28%,#5a5a4a 55%,#2b3b31 100%)}
+.hero.photo:after{content:"";position:absolute;inset:0;background:
+  radial-gradient(3px 3px at 20% 30%,rgba(255,240,200,.55),transparent 70%),radial-gradient(2px 2px at 60% 22%,rgba(255,240,200,.5),transparent 70%),radial-gradient(2.5px 2.5px at 80% 40%,rgba(255,240,200,.45),transparent 70%),radial-gradient(2px 2px at 35% 55%,rgba(255,240,200,.4),transparent 70%),
+  repeating-linear-gradient(115deg,transparent 0 18px,rgba(0,0,0,.05) 18px 19px);opacity:.9}
+.hero.card{background:radial-gradient(120% 90% at 50% 10%,#F6EFE3 0,#EDE3D2 60%,#E2D6C2 100%)}
+.hero.card:after{content:"";position:absolute;inset:14px;border:1px solid rgba(169,131,75,.5);border-radius:6px;box-shadow:inset 0 0 0 4px #F6EFE3,inset 0 0 0 5px rgba(169,131,75,.35)}
+/* the words, inside the screen: a tap on EMPTY space selects the Cover Scene; a tap on a word selects the word */
+.cover{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.grp{position:relative;width:100%;display:flex;flex-direction:column;align-items:center;text-align:center}
+.part .tag{position:absolute;right:-2px;top:-14px;font:600 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;background:var(--cta);color:#fff;padding:3px 6px;border-radius:999px;opacity:0;transform:translateY(4px);transition:opacity .18s,transform .18s var(--spring);pointer-events:none;font-style:normal;white-space:nowrap}
+.part[aria-pressed=true] .tag{opacity:1;transform:none}
+/* the words — tone follows the screen's background automatically (hub-legibility) */
+.scene{--c-head:#F6EFE3;--c-body:#EAE1D2;--c-eyebrow:#E6C98A}
+.scene[data-tone=ink]{--c-head:#2C2A29;--c-body:#4A4642;--c-eyebrow:#A9834B}
+.part{position:relative;display:block;width:100%;text-align:inherit;color:inherit;border-radius:6px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:color .3s}
+.part[aria-pressed=true]{box-shadow:0 0 0 1.5px var(--cta),0 0 0 5px rgba(194,78,37,.18)}
+.part>span{display:block;transition:color .3s}
+.p-eyebrow span{font-size:9.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--c-eyebrow);font-weight:600;margin-bottom:10px}
+.p-mark span{font-family:var(--serif);font-size:26px;color:var(--c-eyebrow);letter-spacing:.06em;margin-bottom:8px;line-height:1}
+.p-names span{font-family:var(--serif);font-size:32px;line-height:1.02;color:var(--c-head);font-weight:500;letter-spacing:.01em;text-wrap:balance}
+.p-line span{font-family:var(--serif);font-style:italic;font-size:15px;line-height:1.3;color:var(--c-body);margin-top:10px}
+.p-date span{font-size:10.5px;letter-spacing:.2em;color:var(--c-eyebrow);margin-top:14px;font-weight:600;text-transform:uppercase}
+.p-venue span{font-size:11px;line-height:1.5;color:var(--c-body);margin-top:6px}
+.p-link span{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--c-body);margin-top:14px;font-weight:600;opacity:.85}
+/* the Reveal sits ON TOP of the cover, untouched — a hint of it */
+.reveal-hint{position:absolute;left:12px;top:10px;font:600 9px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.7);background:rgba(0,0,0,.28);padding:4px 7px;border-radius:999px;pointer-events:none;z-index:4}
+.scene[data-tone=ink] .reveal-hint{color:rgba(0,0,0,.55);background:rgba(255,255,255,.4)}
+/* the desktop frame: the same first screen at 760 px — the guest's browser, the Cover Scene filling the viewport */
+.deskbox{width:760px;max-width:100%;height:470px;border-radius:18px;overflow:hidden;position:relative;border:6px solid var(--bezel);background:#F4F0E8}
+[data-theme=dark] .deskbox{background:#1A1816}
+.deskbox .scene[data-shape=framed]{inset:20px 20px 20px;border-radius:22px}
+.deskbox .cover{padding:36px 60px;cursor:default}
+.deskbox .p-names span{font-size:52px}.deskbox .p-line span{font-size:19px}.deskbox .p-eyebrow span{font-size:11px}.deskbox .p-mark span{font-size:34px}.deskbox .p-date span{font-size:12px}.deskbox .p-venue span{font-size:13px}.deskbox .p-link span{font-size:11px}
+.deskbox .part{cursor:default;pointer-events:none}
+.deskbox .urlbar{position:absolute;left:0;right:0;top:0;height:28px;background:var(--paper);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:6px;padding:0 10px;font:500 10.5px var(--sans);color:var(--mute);z-index:5}
+.deskbox .urlbar i{width:8px;height:8px;border-radius:50%;background:var(--line2);display:block}
+.deskbox .urlbar span{margin-left:8px;background:var(--pill);border-radius:999px;padding:3px 10px;color:var(--ink2)}
+.deskbox .scene{top:28px}
+.deskbox .scene[data-shape=framed]{top:48px}
+/* the media meter + picker (Upload ◆) */
+.meter{margin:0 10px 10px;display:flex;align-items:center;gap:10px;font:500 12.5px var(--sans);color:var(--ink2)}
+.meter .bar{flex:1;height:6px;border-radius:3px;background:var(--line);overflow:hidden}.meter .bar i{display:block;height:100%;width:24%;background:var(--gold);border-radius:3px}
+.meter b{color:var(--ink);font-variant-numeric:tabular-nums}
+.files{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 10px}
+.file{position:relative;height:72px;border-radius:12px;overflow:hidden;display:flex;align-items:flex-end;padding:6px;font:600 10.5px var(--sans);color:#fff;outline:1px solid rgba(0,0,0,.08);outline-offset:-1px}
+.file span.loop{position:absolute;inset:0;z-index:0;text-shadow:none}.file span{position:relative;z-index:1;text-shadow:0 1px 2px rgba(0,0,0,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file[aria-selected=true]{box-shadow:0 0 0 2px var(--paper),0 0 0 4px var(--cta)}
+.file.vid{opacity:.55}.file.vid:before{content:"▶";position:absolute;left:6px;top:6px;z-index:1;font-size:11px;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.file .mb{position:absolute;right:6px;top:5px;z-index:1;font-size:9px;font-weight:500;opacity:.9}
+
+/* ── READY-MADE SCENE LOOPS (stand-ins: CSS motion, no network). The build plays the theme's real loop. ── */
+@keyframes drift{from{background-position:0 0,0 0,0 0}to{background-position:140px 60px,-90px 120px,40px -80px}}
+@keyframes sweep{from{transform:translateX(-30%) rotate(8deg)}to{transform:translateX(30%) rotate(8deg)}}
+@keyframes twinkle{0%,100%{opacity:.35}50%{opacity:1}}
+@keyframes blob{0%{transform:translate(0,0) scale(1)}50%{transform:translate(18px,-12px) scale(1.15)}100%{transform:translate(0,0) scale(1)}}
+.loop{position:absolute;inset:0}
+.loop:before,.loop:after{content:"";position:absolute;inset:-20%}
+.loop-luxe{background:#15110E}
+.loop-luxe:before{background:radial-gradient(3px 3px at 12% 30%,#E8C98A,transparent 70%),radial-gradient(2px 2px at 48% 72%,#F3DFB0,transparent 70%),radial-gradient(4px 4px at 80% 24%,#D9B26A,transparent 70%),radial-gradient(2px 2px at 66% 50%,#F0D59C,transparent 70%),radial-gradient(3px 3px at 28% 84%,#C9A24B,transparent 70%),radial-gradient(2px 2px at 90% 78%,#E8C98A,transparent 70%);background-size:220px 160px,180px 140px,260px 200px,200px 170px,240px 190px,210px 150px;animation:drift 14s linear infinite}
+.loop-luxe:after{background:radial-gradient(60% 50% at 50% 50%,rgba(201,162,75,.28),transparent 70%);animation:blob 9s ease-in-out infinite}
+.loop-cinderella{background:linear-gradient(160deg,#1B2B4A,#3A5B8F 60%,#6E93C4)}
+.loop-cinderella:before{background:radial-gradient(2px 2px at 20% 20%,#fff,transparent 70%),radial-gradient(3px 3px at 70% 35%,#DCEBFF,transparent 70%),radial-gradient(2px 2px at 40% 70%,#fff,transparent 70%),radial-gradient(2px 2px at 85% 80%,#DCEBFF,transparent 70%);background-size:160px 120px,210px 170px,190px 150px,230px 180px;animation:drift 11s linear infinite}
+.loop-cinderella:after{background:radial-gradient(40% 40% at 60% 40%,rgba(255,255,255,.22),transparent 70%);animation:twinkle 3.5s ease-in-out infinite}
+.loop-whimsical{background:#FBEFF3}
+.loop-whimsical:before{background:radial-gradient(40% 35% at 30% 40%,#F6C9D6,transparent 70%),radial-gradient(35% 35% at 75% 55%,#CFE8F3,transparent 70%),radial-gradient(30% 30% at 55% 85%,#FBE3B4,transparent 70%);animation:blob 8s ease-in-out infinite}
+.loop-whimsical:after{background:radial-gradient(3px 3px at 20% 30%,#E8A0B8,transparent 70%),radial-gradient(3px 3px at 60% 60%,#9ED0E8,transparent 70%),radial-gradient(3px 3px at 80% 25%,#F2C97A,transparent 70%);background-size:150px 130px,190px 160px,170px 140px;animation:drift 12s linear infinite}
+.loop-gatsby{background:#101010}
+.loop-gatsby:before{background:repeating-linear-gradient(90deg,transparent 0 22px,rgba(201,162,75,.55) 22px 23px),repeating-linear-gradient(0deg,transparent 0 22px,rgba(201,162,75,.35) 22px 23px);mask:radial-gradient(70% 60% at 50% 50%,#000 30%,transparent 100%);-webkit-mask:radial-gradient(70% 60% at 50% 50%,#000 30%,transparent 100%);animation:drift 20s linear infinite}
+.loop-gatsby:after{background:linear-gradient(100deg,transparent 40%,rgba(232,201,138,.35) 50%,transparent 60%);animation:sweep 5s ease-in-out infinite alternate}
+.loop-cyber{background:#0B0A14}
+.loop-cyber:before{background:radial-gradient(45% 40% at 25% 40%,rgba(255,61,180,.55),transparent 70%),radial-gradient(45% 40% at 75% 60%,rgba(0,229,255,.5),transparent 70%);animation:blob 6s ease-in-out infinite}
+.loop-cyber:after{background:repeating-linear-gradient(0deg,transparent 0 6px,rgba(255,255,255,.06) 6px 7px);animation:drift 7s linear infinite}
+.loop-regency{background:linear-gradient(180deg,#DCE3D6,#C9D2C2)}
+.loop-regency:before{background:radial-gradient(50% 40% at 30% 30%,rgba(255,255,255,.7),transparent 70%),radial-gradient(40% 40% at 70% 70%,rgba(169,131,75,.18),transparent 70%);animation:blob 10s ease-in-out infinite}
+.loop-vintage{background:#C9B48F}
+.loop-vintage:before{background:radial-gradient(70% 60% at 50% 50%,rgba(255,245,220,.5),transparent 80%),repeating-radial-gradient(circle at 50% 50%,transparent 0 3px,rgba(90,60,30,.06) 3px 4px);animation:twinkle 4s ease-in-out infinite}
+.loop-rustic{background:linear-gradient(180deg,#5E3F2A,#3A2718)}
+.loop-rustic:before{background:radial-gradient(3px 3px at 15% 25%,#F3D9A8,transparent 70%),radial-gradient(2px 2px at 55% 60%,#F3D9A8,transparent 70%),radial-gradient(3px 3px at 85% 35%,#F3D9A8,transparent 70%);background-size:200px 160px,170px 150px,230px 190px;animation:drift 13s linear infinite}
+.loop-modern{background:linear-gradient(135deg,#2B2B2B,#4A4A4A)}
+.loop-modern:after{background:linear-gradient(100deg,transparent 42%,rgba(255,255,255,.14) 50%,transparent 58%);animation:sweep 4.5s ease-in-out infinite alternate}
+/* the couple's own photos (stand-ins) */
+.own-1{background:radial-gradient(60% 50% at 40% 40%,#F2C9A8,transparent 70%),linear-gradient(160deg,#B96E5C,#5C3A3A)}
+.own-2{background:radial-gradient(60% 50% at 60% 30%,#DDE9C8,transparent 70%),linear-gradient(180deg,#7E9C6B,#324A2E)}
+.own-3{background:radial-gradient(60% 50% at 50% 80%,#FFE6B8,transparent 70%),linear-gradient(180deg,#8FC2D6,#2E5F7A)}
+
+/* ── the locked bottom toolbar: 330 px = handle 14 · line 20 · band 52 · 4×48 + 3×6 · safe 34 ── */
+.tbar{flex:none;height:330px;background:var(--tbar);border-radius:22px 22px 0 0;position:relative;box-shadow:0 -1px 0 var(--line2),0 -8px 18px -12px rgba(40,34,24,.35);display:flex;flex-direction:column;--rh:48px;--rg:6px}
+.tbar .grabh{height:14px;display:grid;place-items:center}.tbar .grabh i{width:40px;height:4px;border-radius:9px;background:var(--line2)}
+.tbar .edit{font:600 9.5px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--mute);text-align:center;height:20px;padding:2px 0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tbar .edit b{color:var(--ink)}.tbar .edit.busy{color:var(--cta)}
+.tools{height:52px;padding:4px 10px;display:flex;gap:8px;align-items:center}
+.tsel{position:relative;flex:1;display:flex;height:44px;background:var(--field);border:1px solid var(--line);border-radius:999px;padding:3px}
+.tsel button{flex:1;border-radius:999px;font:600 12.5px var(--sans);letter-spacing:-.01em;padding:0 2px;color:var(--mute);display:inline-flex;align-items:center;justify-content:center;position:relative;z-index:1;transition:color .3s;white-space:nowrap}
+.tsel button[aria-pressed=true]{color:#fff}
+.tsel button.grey{color:var(--line2)}
+.tsel .th{position:absolute;top:3px;bottom:3px;left:3px;width:calc((100% - 6px)/4);border-radius:999px;background:var(--cta);transition:transform .55s var(--spring);transform:translateX(var(--x,0))}
+.tplay{flex:none;width:44px;height:44px;border-radius:999px;border:1px solid var(--line);background:var(--field);color:var(--ink);display:grid;place-items:center}
+.tplay svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.g4{display:grid;grid-template-rows:repeat(4,var(--rh));grid-auto-rows:0;gap:var(--rg);padding:0 10px;height:calc(4*var(--rh) + 3*var(--rg));overflow:hidden}
+.row{display:flex;align-items:center;gap:8px;min-width:0;height:var(--rh)}
+.r1{grid-row:1}.r2{grid-row:2}.r3{grid-row:3}.r4{grid-row:4}
+.row .lbl{flex:none;font:500 13px var(--sans);color:var(--ink)}
+.row .lbl.m{font-size:12px;color:var(--mute)}
+.quiet{font:400 12.5px/1.4 var(--sans);color:var(--mute);padding:0 4px;min-width:0}
+.quiet b{color:var(--ink);font-weight:600}
+/* the labelled dropdown pill — the shipped `SP_DD` (small-caps word · value · gold chevron) */
+.dd{position:relative;flex:1;min-width:0;height:44px;display:flex;align-items:center;gap:8px;padding:0 34px 0 14px;border-radius:999px;background:var(--field);box-shadow:inset 0 0 0 1px var(--line);transition:transform .1s var(--in)}
+.dd:active{transform:scale(.985)}
+.dd small{flex:none;max-width:48%;font:700 9.5px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dd b{font:600 13.5px var(--sans);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.dd svg{position:absolute;right:12px;top:50%;margin-top:-6px;width:12px;height:12px;color:var(--cta);fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s var(--in)}
+.dd[aria-expanded=true] svg{transform:rotate(180deg)}
+/* row 2 — the tiles strip (the shipped SP_BG_STRIP / SP_BG_TILE / SP_BG_TILE_FACE: a picture, its name written on it) */
+.strip{display:flex;align-items:center;gap:8px;height:100%;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;margin:0 -10px;padding:0 10px}
+.strip::-webkit-scrollbar{display:none}
+.tile{position:relative;flex:none;height:44px;display:flex;align-items:center;justify-content:center;border-radius:12px;transition:transform .1s var(--in)}
+.tile:active{transform:scale(.96)}
+.tile .face{position:relative;display:flex;align-items:flex-end;justify-content:center;height:38px;min-width:84px;padding:0 8px 4px;border-radius:12px;overflow:hidden;background:#fff;outline:1px solid rgba(44,42,41,.12);outline-offset:-1px;color:#fff;font:600 12px var(--sans);white-space:nowrap}
+.tile[aria-pressed=true] .face{box-shadow:0 0 0 2px var(--tbar),0 0 0 4px var(--cta)}
+.tile .face .loop{inset:0}
+.tile .face .fade{position:absolute;inset:auto 0 0 0;height:60%;background:linear-gradient(180deg,transparent,rgba(0,0,0,.55))}
+.tile .face .fade.ink{background:linear-gradient(180deg,transparent,rgba(255,255,255,.75))}
+.tile .face span{position:relative;z-index:1}
+.tile .face.ink{color:var(--ink)}
+.tile .face.none span:before{content:"";position:absolute;left:-10px;right:-10px;top:50%;height:1.5px;background:var(--bad);transform:rotate(-16deg)}
+.tile .face.add{background:var(--field);color:var(--ink);gap:4px;align-items:center}
+.tile .face.add svg{width:14px;height:14px;color:var(--cta);fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
+.tile .face .pro{position:absolute;right:5px;top:4px;font-size:9px;color:#E8C98A;z-index:1;text-shadow:0 0 2px rgba(0,0,0,.5)}
+/* row 3 — the one control: colour circle (+ opacity on a glass) or Darker ━●━ Lighter */
+.circ{flex:none;width:44px;height:44px;display:grid;place-items:center;border-radius:50%}
+.circ i{display:block;width:32px;height:32px;border-radius:50%;box-shadow:inset 0 0 0 1px var(--line2);background:var(--bgc,#2C2A29)}
+.circ.on i{box-shadow:0 0 0 2px var(--tbar),0 0 0 4px var(--cta)}
+.circ:active i{transform:scale(.94)}
+.sl{flex:1 1 0;min-width:0;height:44px;display:flex;align-items:center;padding:0 2px;position:relative}
+.sl input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;margin:0;touch-action:none}
+.sl input::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--line2) var(--a,50%),var(--cta) var(--a,50%),var(--cta) var(--b,50%),var(--line2) var(--b,50%))}
+.sl input::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;border:2px solid var(--cta);margin-top:-9px;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.sl input::-moz-range-track{height:6px;border-radius:3px;background:var(--line2)}.sl input::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#fff;border:2px solid var(--cta)}
+.sl .mid{position:absolute;left:50%;top:50%;width:2px;height:12px;margin:-6px 0 0 -1px;background:var(--mute);opacity:.5;border-radius:1px;pointer-events:none}
+.val{flex:none;width:40px;text-align:right;font:500 13.5px var(--sans);font-variant-numeric:tabular-nums;color:var(--ink);opacity:.8}
+/* row 4 — 2-way pill selectors (the shipped PillSelector) */
+.ps{display:flex;height:44px;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--field);flex:1;min-width:0}
+.ps button{flex:1;border-radius:999px;font:600 12.5px var(--sans);color:var(--mute);display:flex;align-items:center;justify-content:center;white-space:nowrap;padding:0 8px;transition:background .2s,color .2s}
+.ps button[aria-pressed=true]{background:var(--cta);color:#fff}
+/* the door: the dead end becomes one tap */
+.door{flex:none;height:44px;border-radius:999px;background:var(--field);border:1px solid var(--line);padding:0 14px 0 14px;display:inline-flex;align-items:center;gap:6px;font:600 13px var(--sans);color:var(--cta);white-space:nowrap}
+.door svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.door:active{transform:scale(.98)}
+/* Style's rows for a single word (stand-ins from the approved 2026-10-14 width prototype) */
+.cards{grid-row:1/4;display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:2px 0;margin:0 -10px;padding-left:10px;padding-right:10px}
+.cards::-webkit-scrollbar{display:none}
+.lc{flex:none;width:112px;height:100%;border-radius:14px;border:1px solid var(--line);background:var(--field);display:flex;flex-direction:column;overflow:hidden;text-align:center}
+.lc .pic{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px;background:#1A1817;color:#F3EBDD;font-family:var(--serif)}
+.lc .pic i{display:block;font-style:normal;font-size:12px;line-height:1}.lc .pic small{font-size:6.5px;letter-spacing:.16em;text-transform:uppercase;color:#C9A24B;font-family:var(--sans)}
+.lc .nm{height:22px;border-top:1px solid var(--line);background:var(--page);font:500 10.5px/21px var(--sans);color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
+.lc[aria-checked=true]{box-shadow:0 0 0 2px var(--page),0 0 0 4px var(--cta)}.lc[aria-checked=true] .nm{color:var(--cta);font-weight:600}
+.fh{flex:none;height:44px;border:1px solid var(--line);background:var(--field);border-radius:14px;padding:0 24px 0 11px;position:relative;text-align:left;display:flex;flex-direction:column;justify-content:center;min-width:0;width:86px}
+.fh .fn{font:600 9.5px/1.1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--mute);white-space:nowrap}
+.fh .fv{font:600 13px/1.25 var(--sans);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fh svg{position:absolute;right:8px;top:50%;margin-top:-6px;width:12px;height:12px;color:var(--cta);fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.wordsbox{flex:1;min-width:0;height:44px;border-radius:14px;background:var(--field);border:1px solid var(--line);padding:0 12px;display:flex;align-items:center;font:500 13.5px var(--sans);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tbar .foot{flex:none;height:34px}
+
+/* ── the sheet (PickMenu on a phone rises from the bottom; the rest darkens and blurs) ── */
+.bd{position:absolute;inset:0;background:rgba(20,16,12,.42);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:80;animation:fadein .18s var(--in)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--paper);border-radius:22px 22px 0 0;padding:8px 8px 30px;z-index:90;animation:up .22s var(--in);box-shadow:0 -8px 28px -14px var(--shadow);max-height:78%;display:flex;flex-direction:column}
+.sheet .grab{width:40px;height:4px;border-radius:2px;background:var(--line2);margin:2px auto 8px}
+.sheet h4{font-family:var(--serif);font-weight:500;font-size:19px;margin:2px 10px 8px}
+.sheet .list{overflow:auto;scrollbar-width:none}
+.sheet .opt{display:flex;align-items:center;gap:12px;width:100%;min-height:48px;padding:8px 10px;border-radius:12px;font-size:14px;font-weight:500}
+.sheet .opt:active{background:var(--pill)}
+.sheet .opt.sub{padding-left:34px}
+.sheet .opt .ic{flex:none;width:28px;height:28px;border-radius:8px;background:var(--pill);display:grid;place-items:center;color:var(--ink2)}
+.sheet .opt .ic svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sheet .opt .ic.g{background:var(--cta-wash);color:var(--cta)}
+.sheet .opt .tick{margin-left:auto;color:var(--cta);visibility:hidden;width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.sheet .opt[aria-selected=true]{color:var(--cta)}.sheet .opt[aria-selected=true] .tick{visibility:visible}
+.sheet .opt small{display:block;color:var(--mute);font-weight:400;font-size:12px;margin-top:1px}
+.sheet .opt .pro{color:var(--gold);font-size:12px;margin-left:4px}
+.sheet .chips{display:flex;flex-wrap:wrap;gap:8px;padding:4px 10px 10px}
+.sheet .chips button{width:44px;height:44px;border-radius:50%;display:grid;place-items:center}
+.sheet .chips button i{width:30px;height:30px;border-radius:50%;border:1px solid rgba(0,0,0,.12);display:block}
+.sheet .chips button[aria-selected=true] i{outline:2px solid var(--cta);outline-offset:2px}
+.sheet .plain{margin:0 10px;font-size:12.5px;color:var(--mute);line-height:1.45}
+.sheet .cta{margin:10px 10px 0;height:48px;border-radius:999px;background:var(--cta);color:#fff;font:600 14px var(--sans);display:flex;align-items:center;justify-content:center;gap:6px}
+.sheet .ghost{margin:6px 10px 0;height:44px;border-radius:999px;font:600 13.5px var(--sans);color:var(--ink2);display:flex;align-items:center;justify-content:center}
+.sheet .up{margin:0 10px;height:96px;border:1.5px dashed var(--line2);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--ink2);font:500 13px var(--sans)}
+.sheet .up small{font-size:11.5px;color:var(--mute)}
+.toast{position:absolute;left:50%;bottom:346px;transform:translateX(-50%);background:var(--ink);color:var(--paper);font:500 12.5px var(--sans);padding:9px 14px;border-radius:999px;z-index:95;white-space:nowrap;animation:fadein .2s var(--in);pointer-events:none}
+@keyframes up{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+
+/* ── notes ── */
+.notes{max-width:1020px;margin:34px auto 0;background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:18px 22px}
+.notes h3{font-family:var(--serif);font-weight:500;font-size:22px;margin:0 0 6px}
+.notes h4{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:18px 0 6px}
+.notes p,.notes li{font-size:13.5px;line-height:1.55;color:var(--ink2)}
+.notes b{color:var(--ink)}.notes code{font-size:12px;background:var(--pill);padding:1px 5px;border-radius:5px;color:var(--ink)}
+.notes ul{padding-left:18px;margin:4px 0}
+.notes table{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0}
+.notes th,.notes td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.notes th{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.notes .q{background:var(--cta-wash);border-left:3px solid var(--cta);padding:8px 12px;border-radius:0 10px 10px 0;margin:6px 0}
+.notes .rec{background:rgba(43,116,74,.08);border-left:3px solid var(--ok);padding:8px 12px;border-radius:0 10px 10px 0;margin:6px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="banner">Maker · Cover › Cover Scene · Background</span>
+  <h1>The Cover Scene — the cover's words, selected as one, with their own background</h1>
+  <p class="lead">The owner's rulings (2026-10-14): the cover's words are one selectable group, <b>the Cover Scene</b>, and <b>it fills the whole first screen on load — on any screen</b>. Its Background is that screen's background, with the Hero folded into it so there is one. Three ways to select it, the shipped Background rows unchanged, ready-made moving Scenes ◆ playing full screen, and Upload with the couple's media. Tap the cover's empty space, or a word then Background, and try it; the desktop frame follows the same state.</p>
+  <div class="ctl">
+    <span class="lbl">Look</span>
+    <div class="tgp" id="theme"><button aria-pressed="true" data-t="light">Light</button><button aria-pressed="false" data-t="dark">Dark</button></div>
+  </div>
+
+  <div class="frames">
+    <div class="frame">
+      <h2>Phone · 375 px · the Cover Scene fills the first screen</h2>
+      <div class="phone" id="phone">
+        <div class="status"><span>9:41</span><span class="bat"></span></div>
+        <div class="topnav">
+          <button class="rnd exitx" aria-label="Leave the Maker"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+          <div class="halves">
+            <button class="half" id="stageDd" aria-haspopup="listbox"><span>Save the date</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+            <button class="half" id="partDd" aria-haspopup="listbox"><span id="partName">Cover Scene</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+          </div>
+          <button class="rnd undob" id="undo" aria-label="Undo"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
+          <button class="rnd applyg" id="apply" aria-label="Apply"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span class="n" id="n">0</span></button>
+        </div>
+        <div class="work">
+          <div class="page">
+            <div class="stage" id="stage">
+              <div class="scene" id="scene" data-shape="framed" data-tone="cream" aria-pressed="true">
+                <div class="ground" id="ground"></div><div class="scrim" id="scrim"></div>
+                <span class="reveal-hint">Reveal plays over this</span>
+                <div class="cover" id="cover"></div>
+                <i class="tag">Cover Scene</i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tbar">
+          <div class="grabh"><i></i></div>
+          <div class="edit" id="editLine">You're editing · <b>Cover › Cover Scene</b></div>
+          <div class="tools">
+            <div class="tsel" id="tsel"><span class="th"></span><button data-tool="edit">Edit</button><button data-tool="style">Style</button><button data-tool="bg" aria-pressed="true">Background</button><button data-tool="animate">Animate</button></div>
+            <button class="tplay" aria-label="Play"><svg viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></svg></button>
+          </div>
+          <div class="g4" id="g4"></div>
+          <div class="foot"></div>
+        </div>
+      </div>
+      <p class="cap" id="cap"></p>
+    </div>
+
+    <div class="walk">
+      <h2 style="font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:700;margin:0 0 8px">Walk it · the three doors to the group</h2>
+      <ol>
+        <li><span class="k">1</span><b>The dead end becomes the door.</b> Tap a word on the cover (the names), then <b>Background</b>. Today that tool is grey and only says <i>"This sits on the cover's background."</i> Now the same line ends in one tap: <b>Select the Cover Scene ›</b>. This is where the owner was when he said <i>"I don't know how to select it."</i></li>
+        <li><span class="k">2</span><b>Tap the cover's empty space.</b> Anywhere on the cover that is not a word selects the group — a dotted outline runs round all the words, tagged <i>Cover Scene</i>.</li>
+        <li><span class="k">3</span><b>The parts ▾.</b> The top bar's right half lists this page's parts; <b>Cover Scene</b> is its first row, with the words indented under it.</li>
+        <li><span class="k g">then</span>Background ▾ → <b>Scene ◆</b> → tap <b>▶ Luxe</b>. The tile shows pressed at once and the toolbar's line reads <i>Loading Luxe…</i>; the loop plays across the whole first screen, on the phone and in the desktop frame below. Slide <b>Darker ━●━ Lighter</b>; the words flip to ink or cream on their own. <b>Framed</b> insets the screen with a rounded margin on the page colour; <b>Full width</b> runs it edge to edge. Press <b>Apply</b> — it asks <i>Unlock Pro and Apply</i>; it never blocked the trying.</li>
+        <li><span class="k g">also</span>Background ▾ → <b>Upload ◆</b> → <b>＋ Upload</b>: the sheet shows <i>Your media · 120 MB of 500 MB</i> and the couple's files — photos pick, videos are greyed with <i>won't play for guests yet</i>. <b>The theme's own</b> is the written card, today's free cover. <b>Colour</b> is free.</li>
+      </ol>
+    </div>
+
+    <div class="frame" style="width:760px">
+      <h2>Desktop · 760 px · the same first screen, the same state</h2>
+      <div class="deskbox"><div class="urlbar"><i></i><i></i><i></i><span>setnayan.com/maria-and-juan</span></div><div class="scene" id="dscene" data-shape="framed" data-tone="cream"><div class="ground" id="dground"></div><div class="scrim" id="dscrim"></div><div class="cover" id="dcover"></div></div></div>
+      <p class="cap">Whatever the screen, the Cover Scene is the first screen: <code>min-height: 100svh</code> (the small viewport, so the phone's browser bars never cut the words; <code>100dvh</code> where it is supported), the words centred inside it, the page's first scroll beginning under it. Framed keeps a wider margin on a desktop (the page gutter); Full width bleeds. The Reveal still plays over it.</p>
+    </div>
+  </div>
+
+  <div class="notes">
+    <h3>Notes for the owner and the builder</h3>
+
+    <h4>What exists (read on a copy of main, 2026-10-14)</h4>
+    <ul>
+      <li><b>The cover's words are each a part, and there is no group.</b> <code>lib/maker-parts.ts</code> — logo (<code>el: 'mark'</code>), Title (<code>eyebrow</code>), Names, Date, Place, Invite line, Link, all <code>canvas: 'f:hero'</code>. <code>makerPartToolWorks(key, 'bg')</code> is true only for a <code>w:</code> scene, so a cover word's Background is grey, and <code>makerPartToolWhy</code> answers <i>"This sits on the cover's background."</i> — a true sentence with nowhere to go.</li>
+      <li><b>The cover's background today is the Hero</b> — <code>lib/event-hero.ts</code> <code>resolveHero</code>: the couple's photo (<code>landing_page_hero_image_url</code>) or the written card, from Details › Hero, ONE hero for every stage, the poster, the home card and Post Event's starting cover (<code>every-hero-reads-the-one-resolver.test.ts</code>). The hero's clip plays only for the couple (<code>guestVideoRef</code> is null while <code>GUEST_HERO_VIDEO_PLAYBACK</code> is closed).</li>
+      <li><b>The cover is not full-screen today</b> — the hero is a section of the page (<code>pahina-masthead.tsx</code>), as tall as its content, with the next scene under it.</li>
+      <li><b>The Background rows already exist</b> — <code>stage-panel/stage-background.tsx</code> <code>StageBackground</code>: source ▾ · tiles · one control · Framed | Full width. Scenes hand their saves in through <code>scene-background-row.tsx</code>; the fixed blocks have <code>block-background.tsx</code>. The Pro mark is <code>lib/background-source.ts</code> <code>BACKGROUND_SOURCE_IS_PRO</code> (Colour free · Scene ◆ · Upload ◆) and the gate is Apply's <i>"Unlock Pro and Apply"</i> (<code>lib/hub-pro-effect-view.ts</code>).</li>
+      <li><b>Words already follow their background</b> — <code>lib/hub-legibility.ts</code>: the theme's two inks, AA over the worst sample, the scrim strengthened until it passes; free by ruling (2026-09-25).</li>
+      <li><b>The ready-made loops exist</b> — the theme loops (<code>INVITE_THEMES[id].media</code>, <code>ground: 'loop'</code>): Classic · Rustic · Modern · Cinderella · Luxe · Vintage · Whimsical · Regency · Great Gatsby · Cyber Neon. They are Setnayan's own, so they are screened by definition and may play for guests.</li>
+    </ul>
+
+    <h4>What's new — the answers to the five questions</h4>
+    <p><b>1 · How the group is selected — three doors, one of them the fix.</b> (a) <b>The grey line becomes a door.</b> A cover word's Background tool keeps its sentence and gains one tap: <i>"This sits on the Cover Scene."</i> → <b>Select the Cover Scene ›</b>. The owner's exact moment of confusion was a word picked and Background tapped; that moment now answers. (b) <b>A tap on the cover's empty space</b> — the one place a couple taps when they mean "the whole thing" — selects the group, with the dotted outline round every word. (c) <b>Cover Scene is the first row of the parts ▾</b>, its words indented beneath it. No fourth: a long-press, a "Group" button or a Shift-tap would all need telling.</p>
+    <div class="rec"><b>2 · What the group is — every word on the cover</b> (logo · title · names · invite line · date · place · link), named <b>Cover Scene</b> by the owner. Three reasons, and now a fourth: a scene that fills the screen holds everything on it. The hero's four designs (<code>lib/hero-design.ts</code>: The Card · The Marquee · The Crest · The Letter) lay these words out as ONE composition — a plate behind only the logo and title cuts that composition in two, with the names sitting half on the Hero and half off it, and the couple then wants a second plate for the names (two groups, two backgrounds, two bars). A couple says "the words" and "the picture"; nobody says "the logo-and-title group". And it is one thing to select, one outline, one Background.</div>
+    <div class="rec"><b>3 · The Cover Scene is the whole first screen, and its Background is that screen's background — the Hero folded in, so there is ONE.</b> Owner, verbatim: <i>"Cover scene will take up the whole screen initially whatever screen type it is."</i> So on load a guest sees the Cover Scene filling the viewport — phone, tablet or desktop — the words centred inside it, the page's first scroll beginning under it. <b>Framed</b> now means the screen inset with a rounded margin, the page colour (Global Look) showing round it — a card on the page, still full height; <b>Full width</b> means edge to edge. Both fill the height; only the edges differ. <b>Which of the two "cover backgrounds" survives: the Cover Scene's.</b> Details › Hero does not die — it becomes a second door to the same value (the rule every Info field already follows: two doors, one value). Its Upload pick IS <code>landing_page_hero_image_url</code>; its first source, <b>The theme's own</b>, IS today's written card; a Scene ◆ or a Colour are what the Hero could never be. <code>resolveHero</code> keeps answering the poster, the home card and Post Event — from the Cover Scene's still (a loop's poster frame, the photo, or the card). Why this way round and not Hero-replaces-Cover-Scene: the Hero is a photo-or-card and knows nothing of a loop, a colour, a glass or a shape; the Cover Scene's Background is the shipped four rows and knows all of them, and it is where the couple is standing when they want it.</div>
+    <p><b>4 · Legibility.</b> Row 3 on a Scene or a photo is the one <b>Darker ━●━ Lighter</b> bar, as shipped; and under it the free rule already in the tree: the words' tone is chosen over the screen's ground (the loop's measured lightest and darkest clusters, the colour, the photo's sample under the words), and the scrim is strengthened until AA passes. In the prototype: slide the bar past the middle and watch the words flip from cream to ink on their own; the caption under the phone says what was measured. A glass (Opaque · Frosted) sits over the theme's own ground, so the written card shows through it.</p>
+    <p><b>5 · Free and Pro, and the couple's media.</b> Exactly the shipped rule: <b>The theme's own</b> (the written card) and <b>Colour</b> (Plain · Diagonal · Glow · Opaque · Frosted) free; <b>Scene ◆</b> and <b>Upload ◆</b> Pro — tried free, named at Apply as <i>Unlock Pro and Apply</i>, never a padlock. The Scene ◆ loops are the "animated video" the owner asked for, and they play full screen. <b>Upload ◆</b> opens the couple's media: one line <i>Your media · 120 MB of 500 MB</i> (owner, same day: <i>"so they can upload photos, media files to enhance the look of their website"</i> — <b>500 MB for Pro is PROPOSED, not confirmed</b>) and a picker of their files; a photo is picked, a video is greyed and says <i>won't play for guests yet</i> — it is kept, it is counted, it is not worn.</p>
+
+    <h4>Control map (every control is one of the approved kinds)</h4>
+    <ul>
+      <li>Source ▾ → <b>Dropdown</b> (PickMenu, the shipped <code>Dd</code> in <code>SP_DD</code>); a ▾ opens its choices, never cycles.</li>
+      <li>The tiles → <b>Picture tiles</b> (<code>SP_BG_TILE</code>, the name written on the face, ▶ before a moving one, ◆ on a Pro source's tiles).</li>
+      <li>Colour circle → <b>Colour circle</b>, opens the one ColourSheet; Opacity / Darker-Lighter → the app <b>Slider</b> (centre-filled for the shade).</li>
+      <li>Framed | Full width · Still | Parallax → <b>2-way Pill selector</b> (<code>PillSelector</code>).</li>
+      <li>Select the Cover Scene › → a <b>quiet row's one button</b> (the same shape as Edit's "Open in Studio › Info" door) — it selects, it does not navigate.</li>
+      <li>Cover Scene in the parts ▾ → a row of the same list, with its words as <b>indented rows</b> under it.</li>
+      <li>Your media → a <b>meter line</b> and a <b>picture grid</b> in the Upload sheet (the shipped <code>MakerSheet</code>); a video tile is greyed with its one line, never a dead tap.</li>
+      <li>Light | Dark → a prototype-only harness pill, not in the build.</li>
+    </ul>
+
+    <h4>The delta to build (extend, never redraw)</h4>
+    <ul>
+      <li><code>lib/maker-parts.ts</code>: one new part key <code>'coverscene'</code> — <code>{ label: 'Cover Scene', source: 'tool', canvas: 'f:hero', layouts: NONE }</code> (no <code>el</code>: it IS the section). <code>makerPartToolWorks</code>: <code>bg</code> true for it; <code>edit</code> · <code>style</code> · <code>animate</code> false with their own lines (<i>"Tap a word to edit it."</i>). <code>makerPartToolWhy(key, 'bg')</code> for a hero <code>el</code> returns <i>"This sits on the Cover Scene."</i> and a new <code>makerPartParent(key) → 'coverscene'</code> gives the toolbar the door. Add <code>'coverscene'</code> first in every page that lists hero words (<code>MAKER_STAGE_PAGES</code>: save_the_date.home · rsvp.home · event.live · editorial.home · the RSVP form). <code>makerPartOfTap('f:hero', null)</code> then names it — today a tap on the cover with no <code>el</code> falls to the logo.</li>
+      <li><b>Where it lives:</b> the hero row's canvas JSON — <code>invitation_widgets.config_json.canvas.ground</code> on <code>f:hero</code>, a sibling of <code>elements</code> and <code>design</code>: <code>{ ground: HubMainGround-shaped (colour / loop / own-photo), shade, shape: 'framed'|'full' }</code>. Absent = The theme's own (the absence rule). <b>No migration</b>; the canvas sanitiser keeps the key; an own pick's ref is written through to <code>landing_page_hero_image_url</code> by the one hero writer, so every surface on <code>resolveHero</code> keeps reading one value. The sanitiser refuses a clip ref while <code>GUEST_HERO_VIDEO_PLAYBACK</code> is closed.</li>
+      <li><b>Full screen:</b> <code>pahina-masthead.tsx</code>'s cover section becomes <code>min-h-[100svh]</code> (<code>100dvh</code> under <code>@supports</code>), words centred, Framed = <code>m-3 rounded-[18px]</code> on a phone and the page gutter on a desktop (<code>lib/maker-stage-room.ts</code> holds the two numbers); the page's scroll starts under it. The Reveal keeps sitting on top.</li>
+      <li><b>Details › Hero:</b> its panel draws the same <code>StageBackground</code> rows through the same adapter, carrying <code>data-same-field="cover_scene"</code> — the second door. The old photo picker is that adapter's Upload source.</li>
+      <li><b>Media:</b> the library already has the <code>media</code> rows per event; the meter is <code>sum(bytes)</code> over them against an entitlement constant <code>COUPLE_MEDIA_QUOTA_BYTES</code> in <code>lib/entitlements.ts</code> (Pro: 500 MB <b>proposed</b>; free: open). The picker lists the rows, photos pickable, videos greyed with the one line.</li>
+      <li><b>Pro:</b> the same test as a scene's background — <code>BACKGROUND_SOURCE_IS_PRO</code> over <code>backgroundSourceOf(words.ground)</code>, counted by the Apply effect that already names scene backgrounds.</li>
+      <li><b>Drawing it:</b> <code>pahina-masthead.tsx</code>'s cover section is the Cover Scene (<code>[data-maker-section="f:hero"]</code>, no <code>el</code>); its ground is laid by the same <code>backgroundLayOf</code> the scenes use (still · clip · colour · scrim), a loop playing through the existing clip layer gated by <code>sceneClipRefForGuests</code> — a ready-made loop passes, an own clip is never offered.</li>
+      <li><b>Legibility:</b> <code>hub-legibility.ts</code> is called with the Cover Scene's ground (the loop's measured clusters, the colour, the photo's sample under the words); the resulting tone and scrim are written as the scene's CSS variables, which the words already read.</li>
+      <li><b>The toolbar:</b> a thin <code>cover-words-background.tsx</code> that hands the group's saves to the unchanged <code>StageBackground</code> — like <code>scene-background-row.tsx</code> does for a scene — with <code>sources</code> labelled The cover's · Colour · Scene ◆ · Upload ◆, Upload's sheet titled "Upload a photo" and its one line. The picked frame: <code>makerStagePickedAttr('coverscene') = 'f:hero|'</code> → the canvas outlines the group box.</li>
+      <li><b>Guards:</b> extend <code>every-hero-word-is-a-part.test.ts</code> (the group lists every drawn hero word); new <code>the-cover-scene-is-one-group.test.ts</code>: the group has Background only · a cover word's Background line names the door · Scene and Upload are Pro, Colour is not · a clip ref never survives the sanitiser · the cover section is full-height on every page that leads with it · <code>resolveHero</code> and the Cover Scene's Background never disagree (one writer).</li>
+    </ul>
+
+    <h4>Open questions — owner's call</h4>
+    <div class="q"><b>Q1 · Framed = the screen inset with a rounded margin on the page colour</b> (12 px on a phone, the page gutter on a desktop), Full width = edge to edge — both full height. OK?</div>
+    <div class="q"><b>Q2 · The Hero folds into the Cover Scene's Background</b> — one value, Details › Hero becomes a second door drawing the same rows; the poster and the home card take the Cover Scene's still. OK? (The other way round — the Hero staying the owner of the first screen — cannot hold a loop, a colour or a shape.)</div>
+    <div class="q"><b>Q3 · 500 MB of media for Pro</b> is drawn as proposed. Confirm the number, and say what a free couple gets (none, or a small allowance for the written card's one photo).</div>
+    <div class="q"><b>Q4 · Scene ◆ is Pro by the shipped rule</b> (a moving background is Event Hub Pro). The 2026-10-08 restudy drew Scene without a ◆ and left "free or Pro" to you. Still Pro here?</div>
+    <div class="q"><b>Q5 · Videos are uploaded, counted and kept, but not worn</b> while an uploaded clip cannot play for guests (SEC-6). When the screening lands, they join the picker as pickable with no redesign. OK to say so in the picker's one line?</div>
+  </div>
+</div>
+
+<script>
+/* ───────── the cover's words (the hero's parts, as shipped) — all of them are the Cover Scene ───────── */
+const WORDS=[
+  {k:'ename',el:'eyebrow',name:'Title',text:'Save the date'},
+  {k:'logo',el:'mark',name:'Logo',text:'M ❦ J'},
+  {k:'names',el:'names',name:'Names',text:'Maria Angelica & Juan Carlos'},
+  {k:'heroline',el:'line',name:'Invite line',text:'invite you to celebrate their wedding'},
+  {k:'date',el:'date',name:'Date',text:'Saturday · 14 February 2027'},
+  {k:'place',el:'venue',name:'Place',text:'Caleruega Church, Nasugbu, Batangas'},
+  {k:'herolink',el:'link',name:'Link',text:'the day, the place, the story ↓'},
+];
+/* ONE background for the first screen: the Hero folded in — the written card is the first source, the couple's photo an Upload pick */
+const SOURCES=[
+  {k:'theme',n:'The theme’s own',pro:false,sub:'The written card on the theme’s own ground — today’s look, free'},
+  {k:'colour',n:'Colour',pro:false,sub:'A plain colour, a gradient, or a glass — free'},
+  {k:'scene',n:'Scene',pro:true,sub:'A ready-made moving background that plays for guests — Setnayan’s own'},
+  {k:'own',n:'Upload',pro:true,sub:'Your photos — videos don’t play for guests yet'},
+];
+const COLOUR_TILES=[{k:'plain',n:'Plain'},{k:'diagonal',n:'Diagonal'},{k:'glow',n:'Glow'},{k:'opaque',n:'Opaque',glass:true},{k:'frosted',n:'Frosted',glass:true}];
+/* the theme loops — Setnayan's own, screened by definition. lum = the loop's measured centre luminance (stand-in numbers). */
+const SCENE_TILES=[
+  {k:'luxe',n:'Luxe',lum:.12},{k:'cinderella',n:'Cinderella',lum:.28},{k:'whimsical',n:'Whimsical',lum:.86},{k:'gatsby',n:'Great Gatsby',lum:.1},
+  {k:'cyber',n:'Cyber Neon',lum:.14},{k:'regency',n:'Regency',lum:.74},{k:'vintage',n:'Vintage',lum:.62},{k:'rustic',n:'Rustic',lum:.2},{k:'modern',n:'Modern',lum:.22},
+];
+/* the couple's media (stand-ins): photos wear; videos are kept, counted, not worn */
+const MEDIA=[
+  {k:'own-1',n:'Our engagement',mb:3.2,lum:.42},{k:'own-2',n:'The garden',mb:2.8,lum:.4},{k:'own-3',n:'Us at the beach',mb:4.1,lum:.55},
+  {k:'vid-1',n:'Proposal clip',mb:68,video:true,cls:'loop-rustic'},{k:'vid-2',n:'Prenup teaser',mb:41,video:true,cls:'loop-modern'},
+];
+const MEDIA_USED=120,MEDIA_QUOTA=500; /* PROPOSED — not confirmed */
+const PAL=['#2C2A29','#F6EFE3','#5B1A22','#1F3A2E','#C9A24B','#9DB7C9','#D98AA6','#3A2E5B'];
+const $=id=>document.getElementById(id);
+const chev='<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
+const tick='<svg class="tick" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>';
+const arrow='<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>';
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function lum(hex){const n=parseInt(hex.slice(1),16),r=n>>16&255,g=n>>8&255,b=n&255;const f=c=>{c/=255;return c<=.03928?c/12.92:Math.pow((c+.055)/1.055,2.4)};return .2126*f(r)+.7152*f(g)+.0722*f(b)}
+const THEME_LUM=.85; /* the written card's parchment */
+
+const state={
+  sel:'group',            /* 'group' (the Cover Scene) | a word key */
+  tool:'bg',              /* edit | style | bg | animate */
+  words:{source:'theme',colourTile:'plain',colour:'#2C2A29',opacity:70,sceneTile:null,ownTile:null,shade:0,shape:'framed',motion:'still'},
+  look:{}, applies:0,
+};
+for(const w of WORDS) state.look[w.k]={colour:null,size:100,width:null};
+
+/* ───────── the stage — the phone and the desktop frame draw ONE state ───────── */
+function wordHtml(w,interactive){
+  const l=state.look[w.k];
+  const tag=interactive?'<i class="tag">'+esc(w.name)+'</i>':'';
+  return '<'+(interactive?'button type="button"':'div')+' class="part p-'+w.el+'" data-k="'+w.k+'"'+(interactive?' aria-pressed="'+(state.sel===w.k)+'"':'')+(l.colour?' style="--c-head:'+l.colour+';--c-body:'+l.colour+';--c-eyebrow:'+l.colour+'"':'')+'><span>'+esc(w.text)+'</span>'+tag+'</'+(interactive?'button':'div')+'>';
+}
+function drawStage(){
+  $('cover').innerHTML='<div class="grp">'+WORDS.map(w=>wordHtml(w,true)).join('')+'</div>';
+  $('dcover').innerHTML='<div class="grp">'+WORDS.map(w=>wordHtml(w,false)).join('')+'</div>';
+  $('cover').querySelectorAll('.part').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();select(b.dataset.k);}));
+  $('cover').onclick=()=>select('group');
+  $('scene').setAttribute('aria-pressed',state.sel==='group');
+  for(const id of ['scene','dscene'])$(id).dataset.shape=state.words.shape;
+  paintGround();
+}
+/* the screen's ground + the automatic tone (hub-legibility over the Cover Scene's OWN ground) */
+function paintGround(){
+  const w=state.words;
+  let base=THEME_LUM,glass=false,html='',css='';
+  const t=COLOUR_TILES.find(x=>x.k===w.colourTile);
+  if(w.source==='theme'||(w.source==='scene'&&!w.sceneTile)||(w.source==='own'&&!w.ownTile)){html='<div class="hero card"></div>'}
+  else if(w.source==='colour'){
+    const c=w.colour;base=lum(c);
+    if(t.k==='plain')css='background:'+c;
+    if(t.k==='diagonal')css='background:linear-gradient(150deg,'+c+' 0,color-mix(in srgb,'+c+' 70%,#000) 100%)';
+    if(t.k==='glow')css='background:radial-gradient(80% 70% at 50% 40%,color-mix(in srgb,'+c+' 70%,#fff) 0,'+c+' 100%)';
+    if(t.glass){glass=true;html='<div class="hero card"></div><div style="position:absolute;inset:0;background:'+c+';opacity:'+(w.opacity/100)+(t.k==='frosted'?';backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)':'')+'"></div>'}
+  }
+  else if(w.source==='scene'){html='<div class="loop loop-'+w.sceneTile+'"></div>';base=SCENE_TILES.find(x=>x.k===w.sceneTile).lum}
+  else if(w.source==='own'){const m=MEDIA.find(x=>x.k===w.ownTile);html='<div class="loop '+m.k+'"'+(w.motion==='parallax'?' style="animation:blob 12s ease-in-out infinite"':'')+'></div>';base=m.lum}
+  /* the shade: Darker ↔ Lighter, laid as a scrim; a glass has its opacity instead */
+  const sh=(w.source==='scene'&&w.sceneTile)||(w.source==='own'&&w.ownTile)||(w.source==='colour'&&!glass)?w.shade:0;
+  let eff=glass?(base*(w.opacity/100)+THEME_LUM*(1-w.opacity/100)):base;
+  eff=sh<0?eff*(1-(-sh/100*.75)):sh>0?eff+(1-eff)*(sh/100*.8):eff;
+  const tone=eff>.45?'ink':'cream';
+  let scrim=sh<0?'rgba(0,0,0,'+(-sh/100*.75)+')':sh>0?'rgba(255,255,255,'+(sh/100*.8)+')':'transparent';
+  /* the automatic scrim: strengthened until the tone clears — a little extra when the ground is mid-grey */
+  if(eff>.34&&eff<.56&&!glass)scrim=tone==='ink'?'rgba(255,255,255,.28)':'rgba(0,0,0,.32)';
+  for(const [g,s,sc] of [['ground','scrim','scene'],['dground','dscrim','dscene']]){
+    $(g).innerHTML=html;$(g).style.cssText=css;$(s).style.background=scrim;$(sc).dataset.tone=tone;$(sc).dataset.eff=eff.toFixed(2);
+  }
+  caption();
+}
+function select(k){state.sel=k;if(k==='group')state.tool='bg';drawAll();}
+
+/* ───────── the toolbar ───────── */
+const TOOLS=['edit','style','bg','animate'];
+function worksOn(sel,tool){ if(sel==='group')return tool==='bg'; return tool!=='bg'; }
+function drawTools(){
+  const i=TOOLS.indexOf(state.tool);
+  $('tsel').querySelector('.th').style.setProperty('--x',(i*100)+'%');
+  $('tsel').querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.tool===state.tool);b.classList.toggle('grey',!worksOn(state.sel,b.dataset.tool)&&b.dataset.tool!==state.tool)});
+  const name=state.sel==='group'?'Cover Scene':WORDS.find(w=>w.k===state.sel).name;
+  $('partName').textContent=name;
+  $('editLine').className='edit';
+  $('editLine').innerHTML='You’re editing · <b>Save the date › Cover › '+esc(name)+'</b>';
+}
+function drawPanel(){
+  const g=$('g4');
+  if(state.sel==='group'){
+    if(state.tool!=='bg'){
+      const why={edit:'Nothing to type on the Cover Scene as a whole — tap a word to edit it.',style:'Style has nothing to change on the Cover Scene — tap a word for its colour and size.',animate:'The Cover Scene opens with the Reveal — tap a word to animate it on its own.'}[state.tool];
+      g.innerHTML='<div class="row r1 quiet">'+why+'</div>';return;
+    }
+    drawBgRows();return;
+  }
+  const w=WORDS.find(x=>x.k===state.sel),l=state.look[w.k];
+  if(state.tool==='bg'){
+    /* THE DELTA ON A SINGLE WORD: the shipped grey line, now ending in one tap */
+    g.innerHTML='<div class="row r1"><span class="quiet">This sits on the <b>Cover Scene</b>.</span></div><div class="row r2"><button class="door" id="door">Select the Cover Scene '+arrow+'</button></div>';
+    $('door').addEventListener('click',()=>{select('group');toast('Cover Scene selected');});return;
+  }
+  if(state.tool==='edit'){
+    g.innerHTML='<div class="row r1"><span class="wordsbox">'+esc(w.text)+'</span></div><div class="row r2 quiet">Type on the page — the same words in Studio › Info.</div>';return;
+  }
+  if(state.tool==='style'){
+    const looks=['Classic','Modern','Cyber Neon ◆'];
+    g.innerHTML='<div class="cards">'+looks.map((n,i)=>'<button class="lc" role="radio" aria-checked="'+(i===0)+'"><span class="pic"><small>Save the date</small><i>M &amp; J</i></span><span class="nm">'+n+'</span></button>').join('')+'</div>'+
+      '<div class="row r4"><button class="circ'+(l.colour?' on':'')+'" id="circ" aria-label="Colour"><i style="--bgc:'+(l.colour||'repeating-linear-gradient(45deg,#fff 0 4px,#EDE8DF 4px 8px)')+'"></i></button><span class="lbl">Size</span><span class="sl"><input type="range" aria-label="Text size" min="0" max="9" value="4" style="--a:0;--b:44%"></span><span class="val">100%</span><button class="fh" aria-haspopup="listbox"><span class="fn">Width</span><span class="fv">Normal</span>'+chev+'</button></div>';
+    $('circ').addEventListener('click',()=>openColour('word'));return;
+  }
+  g.innerHTML='<div class="row r1"><button class="dd"><small>Build in</small><b>Fade up</b>'+chev+'</button></div><div class="row r2"><button class="dd"><small>Action</small><b>Still</b>'+chev+'</button></div><div class="row r3"><button class="dd"><small>Build out</small><b>Fade</b>'+chev+'</button></div>';
+}
+/* THE FOUR ROWS — `StageBackground`, row for row */
+function drawBgRows(){
+  const w=state.words,g=$('g4');
+  const src=SOURCES.find(s=>s.k===w.source);
+  let h='<div class="row r1"><button class="dd" id="srcDd" aria-haspopup="listbox" aria-expanded="false"><small>Background</small><b>'+src.n+(src.pro?' ◆':'')+'</b>'+chev+'</button></div>';
+  /* row 2 */
+  if(w.source==='theme') h+='<div class="row r2 quiet">The written card on the theme’s own ground — every stage, the poster.</div>';
+  else{
+    let tiles='';
+    if(w.source==='colour') tiles=COLOUR_TILES.map(t=>'<button class="tile" data-tile="'+t.k+'" aria-pressed="'+(t.k===w.colourTile)+'" aria-label="'+t.n+'"><span class="face" style="'+tileFace(t)+'"><span>'+t.n+'</span></span></button>').join('');
+    if(w.source==='scene') tiles=SCENE_TILES.map(t=>'<button class="tile" data-tile="'+t.k+'" aria-pressed="'+(t.k===w.sceneTile)+'" aria-label="'+t.n+'"><span class="face"><span class="loop loop-'+t.k+'"></span><span class="fade"></span><span class="pro">◆</span><span>▶ '+t.n+'</span></span></button>').join('');
+    if(w.source==='own') tiles='<button class="tile" data-up="1" aria-haspopup="dialog"><span class="face add"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Upload</span></button>'+MEDIA.filter(m=>!m.video).map(t=>'<button class="tile" data-tile="'+t.k+'" aria-pressed="'+(t.k===w.ownTile)+'" aria-label="'+t.n+'"><span class="face"><span class="loop '+t.k+'"></span><span class="fade"></span><span class="pro">◆</span><span>'+t.n+'</span></span></button>').join('');
+    h+='<div class="row r2"><div class="strip" role="group" aria-label="'+src.n+' backgrounds">'+tiles+'</div></div>';
+  }
+  /* row 3 — the one control */
+  const ct=COLOUR_TILES.find(t=>t.k===w.colourTile);
+  if(w.source==='colour'){
+    h+='<div class="row r3"><span class="lbl">Colour</span><button class="circ on" id="circ" aria-label="Background colour — change it"><i style="--bgc:'+w.colour+'"></i></button>'+(ct.glass?'<span class="lbl m">Opacity</span><span class="sl"><input type="range" id="op" aria-label="Opacity" min="10" max="100" step="5" value="'+w.opacity+'" style="--a:0;--b:'+((w.opacity-10)/90*100)+'%"></span><span class="val" id="opv">'+w.opacity+'%</span>':shadeBar())+'</div>';
+  } else if((w.source==='scene'&&w.sceneTile)||(w.source==='own'&&w.ownTile)){
+    h+='<div class="row r3">'+shadeBar()+'</div>';
+  }
+  /* row 4 — the shape: Framed (inset, rounded, on the page colour) | Full width (edge to edge) — full height either way */
+  if(w.source!=='theme'||true){
+    h+='<div class="row r4"><div class="ps" role="group" aria-label="Width"><button data-shape="framed" aria-pressed="'+(w.shape==='framed')+'">Framed</button><button data-shape="full" aria-pressed="'+(w.shape==='full')+'">Full width</button></div>'+(w.source==='own'&&w.ownTile?'<div class="ps" role="group" aria-label="How the photo moves"><button data-motion="still" aria-pressed="'+(w.motion==='still')+'">Still</button><button data-motion="parallax" aria-pressed="'+(w.motion==='parallax')+'">Parallax</button></div>':'')+'</div>';
+  }
+  g.innerHTML=h;
+  $('srcDd').addEventListener('click',openSource);
+  g.querySelectorAll('.tile[data-tile]').forEach(b=>b.addEventListener('click',()=>pickTile(b.dataset.tile,b)));
+  const up=g.querySelector('.tile[data-up]');if(up)up.addEventListener('click',openUpload);
+  const c=$('circ');if(c)c.addEventListener('click',()=>openColour('bg'));
+  const op=$('op');if(op)op.addEventListener('input',()=>{w.opacity=+op.value;op.style.setProperty('--b',((w.opacity-10)/90*100)+'%');$('opv').textContent=w.opacity+'%';paintGround();});
+  const sh=$('shade');if(sh){
+    sh.addEventListener('input',()=>{w.shade=+sh.value;setShadeFill(sh);paintGround();});
+    sh.addEventListener('change',()=>{w.shade=Math.round(+sh.value/25)*25;sh.value=w.shade;setShadeFill(sh);bump();paintGround();}); /* ONE write, when let go, on the stop it settles on */
+  }
+  g.querySelectorAll('[data-shape]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.shape===w.shape)return;w.shape=b.dataset.shape;bump();drawAll();}));
+  g.querySelectorAll('[data-motion]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.motion===w.motion)return;w.motion=b.dataset.motion;bump();drawAll();}));
+}
+function shadeBar(){const w=state.words;const p=(w.shade+100)/2;return '<span class="lbl m">Darker</span><span class="sl"><span class="mid"></span><input type="range" id="shade" aria-label="Darker or lighter" min="-100" max="100" step="1" value="'+w.shade+'" style="--a:'+Math.min(50,p)+'%;--b:'+Math.max(50,p)+'%"></span><span class="lbl m">Lighter</span>';}
+function setShadeFill(sh){const p=(+sh.value+100)/2;sh.style.setProperty('--a',Math.min(50,p)+'%');sh.style.setProperty('--b',Math.max(50,p)+'%');}
+function tileFace(t){
+  const c=state.words.colour;
+  if(t.k==='plain')return 'background:'+c;
+  if(t.k==='diagonal')return 'background:linear-gradient(150deg,'+c+',color-mix(in srgb,'+c+' 70%,#000))';
+  if(t.k==='glow')return 'background:radial-gradient(80% 70% at 50% 40%,color-mix(in srgb,'+c+' 70%,#fff),'+c+')';
+  if(t.k==='opaque')return 'background:color-mix(in srgb,'+c+' 70%,#EDE3D2)';
+  return 'background:color-mix(in srgb,'+c+' 45%,#EDE3D2)';
+}
+/* a press shows pressed and ONE loading line; the loop lands on the screen; the Maker never waits on it */
+let loadT=null;
+function pickTile(k,btn){
+  const w=state.words;
+  if(w.source==='colour'){ if(k===w.colourTile)return; w.colourTile=k;bump();drawAll();return; }
+  const key=w.source==='scene'?'sceneTile':'ownTile';
+  if(k===w[key])return;
+  $('g4').querySelectorAll('.tile').forEach(b=>b.setAttribute('aria-pressed',b===btn));
+  const t=(w.source==='scene'?SCENE_TILES:MEDIA).find(x=>x.k===k);
+  const el=$('editLine');el.className='edit busy';el.innerHTML='Loading <b>'+esc(t.n)+'…</b>';
+  clearTimeout(loadT);
+  loadT=setTimeout(()=>{w[key]=k;bump();drawAll();},380);
+}
+function isPro(){const w=state.words;return SOURCES.find(s=>s.k===w.source).pro&&(w.sceneTile||w.ownTile);}
+function bump(){state.applies++;const pro=isPro();$('n').classList.toggle('pro',!!pro);$('n').textContent=pro?state.applies+' ◆':state.applies;}
+
+/* ───────── the sheets ───────── */
+function openSheet(title,inner,onOpen){
+  closeSheet();
+  const ph=$('phone');
+  const bd=document.createElement('div');bd.className='bd';bd.id='bd';bd.addEventListener('click',closeSheet);
+  const sh=document.createElement('div');sh.className='sheet';sh.id='sh';
+  sh.innerHTML='<div class="grab"></div>'+(title?'<h4>'+title+'</h4>':'')+inner;
+  ph.appendChild(bd);ph.appendChild(sh);
+  const d=$('srcDd');if(d)d.setAttribute('aria-expanded','true');
+  if(onOpen)onOpen(sh);
+}
+function closeSheet(){['bd','sh'].forEach(i=>{const e=$(i);if(e)e.remove()});const d=$('srcDd');if(d)d.setAttribute('aria-expanded','false');}
+function toast(t){const o=document.createElement('div');o.className='toast';o.textContent=t;$('phone').appendChild(o);setTimeout(()=>o.remove(),1400);}
+function openSource(){
+  const w=state.words;
+  const list=SOURCES.map(s=>'<button class="opt" role="option" aria-selected="'+(s.k===w.source)+'" data-s="'+s.k+'"><span>'+s.n+(s.pro?'<span class="pro">◆</span>':'')+'<small>'+s.sub+'</small></span>'+tick+'</button>').join('');
+  openSheet('Background of the Cover Scene','<div class="list">'+list+'</div>',sh=>{
+    sh.querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>{const v=b.dataset.s;closeSheet();if(v===w.source)return;w.source=v;bump();drawAll();}));
+  });
+}
+function openColour(where){
+  const cur=where==='bg'?state.words.colour:state.look[state.sel].colour;
+  const chips=(where==='bg'?'':'<button role="option" aria-selected="'+(cur===null)+'" data-c="" aria-label="The theme’s colour"><i style="background:repeating-linear-gradient(45deg,#fff 0 4px,#EDE8DF 4px 8px)"></i></button>')+PAL.map(c=>'<button role="option" aria-selected="'+(cur===c)+'" data-c="'+c+'" aria-label="'+c+'"><i style="background:'+c+'"></i></button>').join('');
+  openSheet(where==='bg'?'Colour of the Cover Scene':'Colour of the '+WORDS.find(x=>x.k===state.sel).name.toLowerCase(),'<div class="chips">'+chips+'</div><p class="plain">The Mood Board’s colours first, then any colour.</p>',sh=>{
+    sh.querySelectorAll('.chips button').forEach(b=>b.addEventListener('click',()=>{const v=b.dataset.c||null;closeSheet();if(v===cur)return;if(where==='bg')state.words.colour=v;else state.look[state.sel].colour=v;bump();drawAll();}));
+  });
+}
+/* Upload ◆ — the couple's media: the meter (500 MB for Pro is PROPOSED), the files; photos pick, videos are kept but not worn */
+function openUpload(){
+  const w=state.words;
+  const files=MEDIA.map(m=>'<button class="file'+(m.video?' vid':'')+'" role="option" aria-selected="'+(m.k===w.ownTile)+'" data-m="'+m.k+'"'+(m.video?' aria-disabled="true"':'')+'><span class="loop '+(m.cls||m.k)+'"></span><span class="mb">'+m.mb+' MB</span><span>'+m.n+'</span></button>').join('');
+  openSheet('Your media','<div class="meter"><span>Your media</span><span class="bar"><i style="width:'+(MEDIA_USED/MEDIA_QUOTA*100)+'%"></i></span><b>'+MEDIA_USED+' MB of '+MEDIA_QUOTA+' MB</b></div><div class="files">'+files+'</div><p class="plain" style="margin-top:10px">Photos go on the Cover Scene. Videos are kept here and counted, but <b style="color:var(--ink)">won’t play for guests yet</b> — for a moving cover, pick a Scene ◆.</p><button class="cta" id="upNew">＋ Upload a photo or video</button><button class="ghost" id="upClose">Not now</button>',sh=>{
+    sh.querySelectorAll('.file').forEach(b=>b.addEventListener('click',()=>{
+      const m=MEDIA.find(x=>x.k===b.dataset.m);
+      if(m.video){toast('Videos won’t play for guests yet');return}
+      closeSheet();if(m.k===w.ownTile)return;
+      const el=$('editLine');el.className='edit busy';el.innerHTML='Loading <b>'+esc(m.n)+'…</b>';
+      clearTimeout(loadT);loadT=setTimeout(()=>{w.ownTile=m.k;bump();drawAll();},380);
+    }));
+    $('upNew').addEventListener('click',()=>{closeSheet();toast('Prototype — the phone’s own picker opens here');});
+    $('upClose').addEventListener('click',closeSheet);
+  });
+}
+function openParts(){
+  const rows=[{k:'group',n:'Cover Scene',sub:'The first screen — its background',g:true},...WORDS.map(w=>({k:w.k,n:w.name,sub:null,g:false,sub2:true})),{k:'x1',n:'Countdown',sub:null},{k:'x2',n:'Message',sub:null}];
+  const list=rows.map(r=>'<button class="opt'+(r.sub2?' sub':'')+'" role="option" aria-selected="'+(r.k===state.sel)+'" data-k="'+r.k+'"><span class="ic'+(r.g?' g':'')+'">'+(r.g?'<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="3"/><path d="M8 10h8M8 14h5"/></svg>':'<svg viewBox="0 0 24 24"><path d="M5 7h14M7 12h10M9 17h6"/></svg>')+'</span><span>'+r.n+(r.sub?'<small>'+r.sub+'</small>':'')+'</span>'+tick+'</button>').join('');
+  openSheet('Parts of this page','<div class="list">'+list+'</div>',sh=>{
+    sh.querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.k;closeSheet();if(k.startsWith('x')){toast('Prototype — the cover only');return}select(k);}));
+  });
+}
+function openStage(){
+  const st=['Save the date','RSVP','Invitation','The Day','Post Event'];
+  openSheet('Stage','<div class="list">'+st.map((s,i)=>'<button class="opt" role="option" aria-selected="'+(i===0)+'">'+s+tick+'</button>').join('')+'</div>',sh=>{sh.querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>{closeSheet();toast('Prototype — the cover only');}));});
+}
+function openApply(){
+  const w=state.words;
+  if(!state.applies){toast('Nothing to apply yet');return}
+  if(!isPro()){openSheet('Apply '+state.applies+' change'+(state.applies>1?'s':'')+'?','<p class="plain">Your guests see the Cover Scene’s new background as soon as you apply — and so do the poster and your home card.</p><button class="cta" id="ok">Apply</button><button class="ghost" id="no">Keep editing</button>',sh=>{$('ok').addEventListener('click',()=>{closeSheet();state.applies=0;$('n').textContent='0';$('n').classList.remove('pro');toast('Applied — guests see it now')});$('no').addEventListener('click',closeSheet);});return}
+  const what=w.source==='scene'?'A moving Scene ◆ on the Cover Scene':'A photo of your own ◆ on the Cover Scene';
+  openSheet('Unlock Pro and Apply','<p class="plain"><b style="color:var(--ink)">'+what+'</b> is Event Hub Pro. You tried it free; your guests see it once you unlock.</p><button class="cta" id="ok">◆ Unlock Pro and Apply</button><button class="ghost" id="no">Keep trying</button>',sh=>{$('ok').addEventListener('click',()=>{closeSheet();toast('Prototype — Pro checkout is the shipped one')});$('no').addEventListener('click',closeSheet);});
+}
+
+/* ───────── caption under the phone (what is measured) ───────── */
+function caption(){
+  const w=state.words,sc=$('scene');
+  const name=state.sel==='group'?'<b>Cover Scene</b> selected — the whole first screen, one dotted outline.':'<b>'+WORDS.find(x=>x.k===state.sel).name+'</b> selected — one word; its Background is the Cover Scene’s.';
+  let bg='';
+  if(w.source==='theme')bg=' Background: the theme’s own (the written card) · '+w.shape+' — free.';
+  else if(w.source==='colour')bg=' Background: Colour · '+COLOUR_TILES.find(t=>t.k===w.colourTile).n+' · '+w.shape+' — free.';
+  else if(w.source==='scene')bg=w.sceneTile?' Background: ▶ '+SCENE_TILES.find(t=>t.k===w.sceneTile).n+' ◆ · '+w.shape+' — Pro at Apply.':' Pick a Scene ◆ — the card stays until one is picked.';
+  else bg=w.ownTile?' Background: '+MEDIA.find(t=>t.k===w.ownTile).n+' ◆ · '+w.shape+' · '+w.motion+' — Pro at Apply.':' Upload or pick a photo ◆ — the card stays until one is picked.';
+  const tone=sc?' Words measured over the screen: <b>'+(sc.dataset.tone==='ink'?'ink':'cream')+'</b> (ground ≈ '+sc.dataset.eff+'), automatic, free.':'';
+  $('cap').innerHTML=name+bg+tone;
+}
+
+/* ───────── wiring ───────── */
+$('tsel').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.tool=b.dataset.tool;drawAll();}));
+$('partDd').addEventListener('click',openParts);
+$('stageDd').addEventListener('click',openStage);
+$('apply').addEventListener('click',openApply);
+$('undo').addEventListener('click',()=>{if(!state.applies){toast('Nothing to undo');return}state.applies=Math.max(0,state.applies-1);const pro=isPro();$('n').textContent=pro?state.applies+' ◆':state.applies;toast('Undone — prototype counts only');});
+function pill(id,attr,fn){$(id).querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{$(id).querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));fn(b.dataset[attr]);}));}
+pill('theme','t',t=>document.documentElement.setAttribute('data-theme',t));
+function drawAll(){drawStage();drawTools();drawPanel();caption();}
+drawAll();
+</script>
+</body>
+</html>
