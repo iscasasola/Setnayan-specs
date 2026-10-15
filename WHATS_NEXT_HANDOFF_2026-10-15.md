@@ -139,7 +139,7 @@ Older drafts still open: batch 7 #6532 (dark mode + public fixes — merge main,
   line: 'One photo at a time, centred; the next peeks in.', stages: STD }` in the `gallery` set of
   `lib/scene-styles-stages.ts` · `OurPhotosGlimpse` beside Grid/Film strip in `our-photos-styles.tsx` + a small client
   rail leaf + the `sceneStyle === 'glimpse'` branch in `our-photos-widget.tsx` · reuse `gallery-lightbox.tsx` · scroll-snap
-  centre, neighbours scale .92/opacity .72, dots ≤ 8 else "3 / 12", no autoplay, reduced motion = no scale · cards 3:4.
+  centre, neighbours scale .92/opacity .72, dots ≤ 8 else "3 / 12", **AUTO-SCROLL ON (owner 15 Oct, overrides the prototype's "no autoplay")**: advances one photo every ~4 s, smooth, loops; pauses on touch/swipe/hover and while the lightbox is open, resumes after ~6 s idle; runs only while the rail is on screen (IntersectionObserver) and the tab is visible; reduced motion = no auto-scroll and no scale · cards 3:4.
   Owner picks: **add a typed heading field to the Photos scene** (Details › Photos; every Photos style shows it — e.g.
   "Glimpse of Us"; the fixed "Our photos" eyebrow stays as the default when empty) · Post Event later (second step).
   Extend the three pinning guards (`scene-styles-stages.test.ts`, `layouts-are-the-shipped-scene-styles.test.ts`,
