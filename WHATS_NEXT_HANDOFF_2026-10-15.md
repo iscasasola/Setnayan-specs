@@ -21,6 +21,17 @@ egifts-inline, prints-previews, effects-attire, text-width (after Size). Leftove
 (dev servers on 3592/3661, se4 + makerlook waiters, the se4 requeue watcher, a dead walk lock). If this account stops
 again, check each branch's PR state with `gh pr list --state open`.
 
+**~06:30 PHT: LIVE `a5c0f1b`** — RSVP Back at 320 (#6538) shipped; March drag guard (#6536) merged (test only: thousands of
+random drags + Undo never lose anyone; the owner's "lost Bridgette" was NOT reproduced — likely a drop landing out of
+view; asked him to look in "Not walking" before Undo next time). Worktrees wt-march-keep and wt-rsvp-open-close pruned.
+
+**~07:20 PHT: LIVE `c5fc266`** — stage Size live fix #6539 (a scene's Size writes label + heading + words; guard
+`lib/a-scene-size-reaches-every-word.test.ts`). Six feature draft PRs, CI green, NOT tested by testers yet: #6537 Maker Look ·
+#6540 March guest card · #6541 Roll call · #6542 E-Gifts inline · #6543 Prints previews · #6544 Effects + AI attire.
+RUNNING at 88 % weekly: Colour live fix `rd/stage-colour-every-word` (owner: Colour colours ALL words; Dress code chips +
+do/don't follow Size and Colour) · Width rebased onto Size → PR · batch train `rd/batch-8-event-hub` (the six + Width) →
+then two testers → ship if budget allows; otherwise the new account starts with the testers on batch 8.
+
 ## 0 · Before restarting builders — the Mac
 - Background lock waiters and requeue scripts from the dead builders may STILL be running (they run preflights with
   nobody to read them). Look: `~/Documents/Claude/Projects/heavy-lock.sh status`. Their logs are in
@@ -73,7 +84,7 @@ Older drafts still open: batch 7 #6532 (dark mode + public fixes — merge main,
   Scene ◆ ready-made loops play · Upload = photos (videos kept, not played for guests). Publish it as an Artifact
   (strip doctype/head/body, `<title>Cover Scene</title>`), ask for his OK, then build. Open questions inside: Framed
   meaning · Hero folded in · Scene ◆ still Pro.
-- **Media allowance** — owner: Pro gets **500 MB** of media; **Free gets nothing extra** (keeps logo + Hero photo).
+- **Media allowance** — FINAL: **Free 10 MB, Pro 100 MB** (owner 15 Oct; supersedes 500 MB / "nothing extra" / "keeps 100 MB").
   Not built. Constant proposed: `COUPLE_MEDIA_QUOTA_BYTES` in `lib/entitlements.ts`. Cost ≈ nothing (R2 ~$0.015/GB-mo).
 - **Video checking** — owner said "Yes, research it": find a way to screen uploaded videos so they can play for guests
   (today `GUEST_HERO_VIDEO_PLAYBACK = false`, SEC-6). Cloudflare's CSAM tool is NOT available (DNS is GoDaddy, see
@@ -120,7 +131,7 @@ Older drafts still open: batch 7 #6532 (dark mode + public fixes — merge main,
   value, `resolveHero` keeps feeding poster/home card (owner: yes) · `canvas.ground` on the hero row, no migration ·
   the unchanged `StageBackground` rows via a thin adapter · Scene ◆ ready-made loops play for guests and stay PRO (owner:
   Pro) · Upload ◆ = photos and ≤15 s clips like every stage (own stage clips already play for guests — owner: keep playing); only the cover's own HERO clip stays locked while `GUEST_HERO_VIDEO_PLAYBACK` is false ·
-  the EXISTING `MAKER_EVENT_MEDIA_BYTES_CAP` (100 MB, `lib/couple-media-allowance.ts`) becomes plan-aware — Pro 500 MB, Free keeps 100 MB (owner, corrected 15 Oct; never add a second quota constant) with the "Your media · N MB of 500 MB" meter · legibility
+  the EXISTING `MAKER_EVENT_MEDIA_BYTES_CAP` (100 MB, `lib/couple-media-allowance.ts`) becomes plan-aware — **Free 10 MB, Pro 100 MB** (owner, FINAL 15 Oct ~07:40, supersedes 100/500; never add a second quota constant; existing files are always kept — a couple over the cap just cannot add more; measured: only cale-ice (internal) is over 10 MB, at 144.9 MB on the unsettled counter — internal accounts follow the internal = Pro rule unless the owner says otherwise) with the "Your media · N MB of 500 MB" meter · legibility
   over the scene's ground · guard `the-cover-scene-is-one-group.test.ts`. Opus. Branch `rd/cover-scene`. Side-by-sides at
   375 + desktop vs the prototype before merge.
 - Every other build: its worktree's last commits + the table above + `handovers/` are the brief. Rules for all:
