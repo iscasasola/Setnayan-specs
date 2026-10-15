@@ -1,4 +1,18 @@
 
+
+## ▶ THE NEW ACCOUNT'S ORDER (owner: "on the new account, we continue with all the builds")
+The Mac was cleaned at hand-over: heavy + walk lanes FREE, no waiters, no dev servers. Every branch is on GitHub.
+1. **Colour live fix #6549** — if its CI is green and it isn't merged yet: release ALONE (ready → remove label → merge --auto --match-head-commit → deploy-prod → /api/health).
+2. **Batch 8** `rd/batch-8-event-hub` — re-merge `rd/stage-text-width` (it got the Width-pill fix after the train was built) → whole preflight → ONE draft PR → CI → two testers → ship.
+3. **Veil #6546** (CI green) — two testers + owner's iPhone (music starts on the tap) → ship (can ride with batch 8).
+4. **Glimpse** `rd/photos-glimpse` (11 preflight fixes done or in progress — see its handover top) → whole preflight → PR; then **#6547** Glimpse on Post Event.
+5. **Host strip** `rd/host-strip-removed` · **Media** `rd/media-allowance-by-plan` (Free 10 / Pro 500 MB — money rule: show the owner the PR body) → preflight → PRs → batch with 4.
+6. **Supplier dashboard steps 1–6** — #6533 (2) + #6535 (6) green; steps 1, 3, 4, 5 on `rd/supplier-easy-{1-today,3-maker,4-chat,5-page}` need whole preflight + PR (step 3 vs the live card-fields fix in `canvas-maker.tsx`: take step 3's side) → ONE supplier batch → two testers → ship → the real church-helper test.
+7. **Cover Scene** `rd/cover-scene` (steps 1–6 built) → phone walk → side-by-sides → preflight → PR.
+8. **Apple Wallet #6548** (CI green, OFF by flag) → whole preflight → Apple badge (owner) → owner's iPhone test.
+9. **Camera drawing tap** `rd/camera-drawing-tap` (if the PR was opened) → preflight → ship with a batch.
+Then: Papic pattern for the other paid services (maps in `SERVICES_PAPIC_PATTERN_MAP_2026-10-14.md`), video screening (plan in `VIDEO_SCREENING_OPTIONS_2026-10-15.md`, owner decision pending), the road to the Apple check.
+
 ## ⏹ STATE AT WIND-DOWN — 15 Oct ~13:30 PHT, 95 % weekly (stop at 98 %) — START HERE ON THE NEW ACCOUNT
 Live: `c5fc266`. Every branch below is on GitHub; each has `controller-2026-10-12/handovers/<name>.md` with its exact next step.
 | Work | State | Next |
