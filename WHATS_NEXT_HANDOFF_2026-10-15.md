@@ -134,6 +134,16 @@ Older drafts still open: batch 7 #6532 (dark mode + public fixes — merge main,
   the EXISTING `MAKER_EVENT_MEDIA_BYTES_CAP` (100 MB, `lib/couple-media-allowance.ts`) becomes plan-aware — **Free 10 MB, Pro 500 MB** (owner, FINAL 15 Oct ~07:50 — "Pro is 500MB"; supersedes 100/500 and 10/100; never add a second quota constant; existing files are always kept — a couple over the cap just cannot add more; measured: only cale-ice (internal = Pro) is over 10 MB, at 144.9 MB — under Pro's 500 MB) with the "Your media · N MB of 500 MB" meter · legibility
   over the scene's ground · guard `the-cover-scene-is-one-group.test.ts`. Opus. Branch `rd/cover-scene`. Side-by-sides at
   375 + desktop vs the prototype before merge.
+- **Glimpse photo style (APPROVED 15 Oct):** build `Setnayan/prototypes/photos_glimpse_style_2026-10-15_fable.html`
+  (https://claude.ai/artifact/1fBZUi3ZU16sHhxu2Lu25x) — its notes' delta is the spec: `{ id: 'glimpse', name: 'Glimpse',
+  line: 'One photo at a time, centred; the next peeks in.', stages: STD }` in the `gallery` set of
+  `lib/scene-styles-stages.ts` · `OurPhotosGlimpse` beside Grid/Film strip in `our-photos-styles.tsx` + a small client
+  rail leaf + the `sceneStyle === 'glimpse'` branch in `our-photos-widget.tsx` · reuse `gallery-lightbox.tsx` · scroll-snap
+  centre, neighbours scale .92/opacity .72, dots ≤ 8 else "3 / 12", no autoplay, reduced motion = no scale · cards 3:4.
+  Owner picks: **add a typed heading field to the Photos scene** (Details › Photos; every Photos style shows it — e.g.
+  "Glimpse of Us"; the fixed "Our photos" eyebrow stays as the default when empty) · Post Event later (second step).
+  Extend the three pinning guards (`scene-styles-stages.test.ts`, `layouts-are-the-shipped-scene-styles.test.ts`,
+  `every-scene-style-draws.test.ts`). Our own design — never the third-party site's assets. Branch `rd/photos-glimpse`.
 - Every other build: its worktree's last commits + the table above + `handovers/` are the brief. Rules for all:
   lab/stand-in only (never Apply/Undo/Restore on cale-ice, never the owner's browser pane), whole `pnpm preflight`
   before every push, draft PR + `do-not-auto-merge`, never `--admin`, live fixes ship alone, features as one tested

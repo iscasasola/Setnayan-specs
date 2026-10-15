@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Photos · Glimpse style</title>
+<meta name="description" content="A 4th style of the Photos scene: one big photo centred, the next peeking in at both edges. Fable prototype, 2026-10-15.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f6f1e8;         /* warm ivory — the Classic theme's paper */
+    --paper-2: #efe8db;
+    --ink: #1f1b17;
+    --ink-soft: #4f535b;
+    --ink-faint: rgba(31,27,23,.12);
+    --accent: #8a6a3c;        /* muted brass, ours */
+    --card-shadow: 0 18px 40px rgba(31,27,23,.18);
+    --pane: #ffffff;
+    --pane-2: #f3f0ea;
+    --ok: #2f7a4f;
+    --warn: #a2602a;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #17151a; --paper-2: #1f1c22; --ink: #f2ede6; --ink-soft: #b6b9be;
+      --ink-faint: rgba(242,237,230,.14); --accent: #cfae7a;
+      --card-shadow: 0 18px 40px rgba(0,0,0,.55); --pane: #121114; --pane-2: #1b191e;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #17151a; --paper-2: #1f1c22; --ink: #f2ede6; --ink-soft: #b6b9be;
+    --ink-faint: rgba(242,237,230,.14); --accent: #cfae7a;
+    --card-shadow: 0 18px 40px rgba(0,0,0,.55); --pane: #121114; --pane-2: #1b191e;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--pane-2); color: var(--ink);
+    font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 15px; line-height: 1.5;
+    padding: 16px; -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 { font-weight: 600; letter-spacing: -.01em; margin: 0; }
+  h1 { font-size: 22px; } h2 { font-size: 17px; margin-top: 8px; } h3 { font-size: 14px; }
+  p { margin: 6px 0; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .92em; background: var(--ink-faint); padding: 1px 5px; border-radius: 4px; }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  .lede { color: var(--ink-soft); max-width: 72ch; }
+
+  /* ── Controls bar ───────────────────────────────────────────── */
+  .bar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin: 14px 0 18px; }
+  .seg { display: inline-flex; border: 1px solid var(--ink-faint); border-radius: 999px; overflow: hidden; background: var(--pane); }
+  .seg button { all: unset; cursor: pointer; padding: 7px 13px; font: 500 13px Inter, sans-serif; color: var(--ink-soft); min-height: 0; }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+  .seg .lbl { padding: 7px 10px 7px 13px; font-size: 12px; color: var(--ink-soft); border-right: 1px solid var(--ink-faint); }
+
+  /* ── Device frames ─────────────────────────────────────────── */
+  .stage-area { display: grid; gap: 22px; }
+  .frame { background: var(--paper); color: var(--ink); border: 1px solid var(--ink-faint); border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,.08); overflow: hidden; margin: 0 auto; }
+  .frame.phone { width: 375px; max-width: 100%; }
+  .frame.desktop { width: 100%; border-radius: 14px; }
+  .frame .chrome { display: flex; justify-content: space-between; align-items: center; padding: 10px 18px 0; font-size: 12px; color: var(--ink-soft); }
+  .frame.desktop .chrome { padding: 10px 16px; border-bottom: 1px solid var(--ink-faint); }
+  .scene { padding: 28px 0 30px; }
+  .frame.desktop .scene { padding: 44px 0 46px; }
+
+  .eyebrow { text-align: center; font: 500 11px Inter, sans-serif; letter-spacing: .22em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 6px; }
+  .heading {
+    text-align: center; margin: 0 16px 18px; color: var(--accent);
+    font: italic 500 46px/1.05 "Cormorant Garamond", Georgia, serif;
+  }
+  .frame.desktop .heading { font-size: 68px; margin-bottom: 28px; }
+  .heading small { display: block; font: italic 400 15px/1.3 "Cormorant Garamond", serif; color: var(--ink-soft); margin-top: 6px; letter-spacing: .02em; }
+
+  /* ── The rail ───────────────────────────────────────────────── */
+  .rail-wrap { position: relative; }
+  .rail {
+    display: flex; gap: var(--gap, 12px); overflow-x: auto; overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    padding: 10px 0 18px;
+    /* the first and last card still centre: pad the rail by half the leftover */
+    padding-left: var(--edge); padding-right: var(--edge);
+    scroll-padding-inline: var(--edge);
+  }
+  .rail::-webkit-scrollbar { display: none; }
+  .card {
+    flex: 0 0 var(--card-w); aspect-ratio: 3 / 4; border-radius: 18px; overflow: hidden;
+    scroll-snap-align: center; position: relative; cursor: pointer;
+    box-shadow: var(--card-shadow);
+    transform: scale(var(--s, .92)); opacity: var(--o, .72);
+    transition: transform .25s ease, opacity .25s ease;
+    will-change: transform, opacity;
+  }
+  .card:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  .card.is-centre { --s: 1; --o: 1; }
+  .rail-wrap.one .card { --s: 1; --o: 1; }
+  .reduce .card { --s: 1 !important; --o: 1 !important; transition: none; }
+  .reduce .rail { scroll-behavior: auto; }
+  .card .ph { position: absolute; inset: 0; }
+  .card .ph::after { /* a quiet "photo" — a horizon and a sun, nothing borrowed */
+    content: ""; position: absolute; left: 14%; right: 14%; bottom: 22%; height: 1px; background: rgba(255,255,255,.35);
+  }
+  .card .ph i { position: absolute; border-radius: 50%; background: rgba(255,255,255,.28); }
+  .card .num { position: absolute; left: 12px; bottom: 10px; font: 500 11px Inter, sans-serif; letter-spacing: .14em; color: rgba(255,255,255,.75); }
+  .card .flag { position: absolute; right: 10px; top: 10px; font: 500 10px Inter, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.85); background: rgba(0,0,0,.28); padding: 3px 7px; border-radius: 999px; backdrop-filter: blur(4px); }
+
+  /* phone sizing: centre ≈ 62 % of the width, neighbours peek ~14 % each side */
+  .frame.phone .rail { --card-w: 232px; --gap: 12px; --edge: calc((375px - var(--card-w)) / 2); }
+  /* desktop: a 400 px centre card, two neighbours fully visible each side, more peeking */
+  .frame.desktop .rail { --card-w: 320px; --gap: 18px; --edge: calc((100% - var(--card-w)) / 2); }
+  @media (min-width: 900px) { .frame.desktop .rail { --card-w: 380px; } }
+
+  /* arrows (desktop; appear on hover or keyboard focus within) */
+  .arrow {
+    position: absolute; top: 50%; translate: 0 -50%; width: 44px; height: 44px; border-radius: 50%;
+    border: 1px solid var(--ink-faint); background: color-mix(in srgb, var(--paper) 88%, transparent); color: var(--ink);
+    display: grid; place-items: center; cursor: pointer; font-size: 20px; opacity: 0; transition: opacity .2s; backdrop-filter: blur(6px);
+    padding: 0; min-height: 44px;
+  }
+  .arrow.l { left: 18px; } .arrow.r { right: 18px; }
+  .frame.desktop .rail-wrap:hover .arrow, .frame.desktop .rail-wrap:focus-within .arrow { opacity: 1; }
+  .frame.phone .arrow { display: none; }
+  .arrow[disabled] { opacity: 0 !important; pointer-events: none; }
+
+  /* dots · counter */
+  .where { display: flex; justify-content: center; align-items: center; gap: 12px; min-height: 22px; margin-top: 2px; }
+  .dots { display: flex; gap: 6px; }
+  .dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--ink); opacity: .22; transition: opacity .2s, transform .2s; }
+  .dots i.on { opacity: 1; transform: scale(1.25); }
+  .count { font: 500 11px Inter, sans-serif; letter-spacing: .18em; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .hint { text-align: center; font: 500 11px Inter, sans-serif; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-soft); margin-top: 10px; }
+
+  /* ── Viewer (stands in for the shipped GalleryLightbox) ─────── */
+  .viewer { position: absolute; inset: 0; background: rgba(10,9,8,.94); color: #fff; display: none; flex-direction: column; z-index: 5; }
+  .viewer.open { display: flex; }
+  .viewer .top { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; font-size: 12px; letter-spacing: .14em; }
+  .viewer button { all: unset; cursor: pointer; min-width: 44px; min-height: 44px; display: grid; place-items: center; border-radius: 50%; }
+  .viewer button:hover { background: rgba(255,255,255,.12); }
+  .viewer .big { flex: 1; display: grid; place-items: center; padding: 0 16px; }
+  .viewer .big .ph { width: min(100%, 420px); aspect-ratio: 3 / 4; border-radius: 12px; position: relative; overflow: hidden; }
+  .viewer .nav { display: flex; justify-content: space-between; padding: 10px 20px 18px; }
+  .frame { position: relative; }
+
+  /* ── Maker · Style tab cards ───────────────────────────────── */
+  .maker { background: var(--pane); border: 1px solid var(--ink-faint); border-radius: 16px; padding: 14px 16px 16px; }
+  .maker .crumb { font-size: 12px; color: var(--ink-soft); letter-spacing: .04em; }
+  .maker .crumb b { color: var(--ink); font-weight: 600; }
+  .cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 12px; max-width: 560px; }
+  .scard { border-radius: 14px; border: 1.5px solid var(--ink-faint); background: var(--paper); aspect-ratio: 3 / 4; padding: 8px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; position: relative; transition: border-color .15s, transform .15s; }
+  .scard:hover { transform: translateY(-2px); }
+  .scard[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 2px var(--ink) inset; }
+  .scard .mini { flex: 1; border-radius: 8px; background: var(--paper-2); position: relative; overflow: hidden; margin-bottom: 8px; }
+  .scard .nm { font: 600 12px Inter, sans-serif; }
+  .scard .ln { font-size: 10.5px; color: var(--ink-soft); line-height: 1.3; }
+  .scard .tick { position: absolute; top: 6px; right: 6px; width: 18px; height: 18px; border-radius: 50%; background: var(--ink); color: var(--paper); font-size: 11px; display: none; place-items: center; }
+  .scard[aria-pressed="true"] .tick { display: grid; }
+  /* mini schematics */
+  .mini .b { position: absolute; background: var(--ink); opacity: .55; border-radius: 2px; }
+  .mini.mosaic .b:nth-child(1){left:8%;top:8%;width:84%;height:30%} .mini.mosaic .b:nth-child(2){left:8%;top:44%;width:40%;height:40%} .mini.mosaic .b:nth-child(3){left:52%;top:52%;width:40%;height:40%}
+  .mini.grid .b { width: 26%; height: 20%; } .mini.grid .b:nth-child(1){left:8%;top:10%} .mini.grid .b:nth-child(2){left:37%;top:10%} .mini.grid .b:nth-child(3){left:66%;top:10%} .mini.grid .b:nth-child(4){left:8%;top:36%} .mini.grid .b:nth-child(5){left:37%;top:36%} .mini.grid .b:nth-child(6){left:66%;top:36%} .mini.grid .b:nth-child(7){left:8%;top:62%} .mini.grid .b:nth-child(8){left:37%;top:62%} .mini.grid .b:nth-child(9){left:66%;top:62%}
+  .mini.film .b { height: 16%; width: 28%; } .mini.film .b:nth-child(1){left:-6%;top:30%} .mini.film .b:nth-child(2){left:26%;top:30%} .mini.film .b:nth-child(3){left:58%;top:30%} .mini.film .b:nth-child(4){left:90%;top:30%} .mini.film .b:nth-child(5){left:8%;top:54%} .mini.film .b:nth-child(6){left:40%;top:54%} .mini.film .b:nth-child(7){left:72%;top:54%}
+  .mini.glimpse .b { top: 22%; height: 56%; border-radius: 4px; } .mini.glimpse .b:nth-child(1){left:-18%;width:30%;opacity:.3} .mini.glimpse .b:nth-child(2){left:28%;width:44%;opacity:.7;top:18%;height:64%} .mini.glimpse .b:nth-child(3){left:88%;width:30%;opacity:.3}
+  .mini.glimpse::after { content: "Glimpse of Us"; position: absolute; left: 0; right: 0; top: 4%; text-align: center; font: italic 500 9px "Cormorant Garamond", serif; color: var(--accent); }
+  .menu-note { margin-top: 12px; font-size: 12.5px; color: var(--ink-soft); border-top: 1px dashed var(--ink-faint); padding-top: 10px; }
+  .pick { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--ink-faint); border-radius: 10px; padding: 7px 10px; font-size: 13px; background: var(--paper); }
+
+  /* ── Notes ──────────────────────────────────────────────────── */
+  .notes { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); margin-top: 26px; }
+  .note { background: var(--pane); border: 1px solid var(--ink-faint); border-radius: 14px; padding: 14px 16px; font-size: 13.5px; }
+  .note h3 { margin-bottom: 6px; }
+  .note ul { margin: 6px 0 0 18px; padding: 0; } .note li { margin: 4px 0; }
+  .tag { display: inline-block; font: 600 10px Inter, sans-serif; letter-spacing: .12em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; border: 1px solid currentColor; margin-right: 6px; }
+  .tag.have { color: var(--ok); } .tag.new { color: var(--warn); }
+  @media (max-width: 640px) { .cards { grid-template-columns: repeat(2, 1fr); } .frame.desktop { display: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Photos scene · 4th style “Glimpse”</h1>
+  <p class="lede">The owner's ask (2026-10-15, from a third-party invite he liked): one big portrait photo centred, the previous and next peeking in at both edges, swipe to move. Drawn as a style of the <b>shipped Photos scene</b> — same photos, same order, no new field. Fonts, photos and ornaments here are stand-ins; the real heading uses the theme's display face.</p>
+
+  <div class="bar" role="toolbar" aria-label="Prototype controls">
+    <div class="seg"><span class="lbl">Theme</span><button data-theme="light" aria-pressed="true">Light</button><button data-theme="dark" aria-pressed="false">Dark</button></div>
+    <div class="seg"><span class="lbl">Photos</span><button data-n="1">1</button><button data-n="2">2</button><button data-n="5">5</button><button data-n="12" aria-pressed="true">12</button></div>
+    <div class="seg"><span class="lbl">Reduced motion</span><button data-rm="off" aria-pressed="true">Off</button><button data-rm="on" aria-pressed="false">On</button></div>
+  </div>
+
+  <div class="stage-area">
+    <!-- PHONE 375 -->
+    <div class="frame phone" data-frame="phone">
+      <div class="chrome"><span>9:41</span><span>375 · guest view</span></div>
+      <section class="scene" aria-label="Photos">
+        <p class="eyebrow">Our photos</p>
+        <h2 class="heading">Glimpse of Us<small>the scene heading the couple typed — any words</small></h2>
+        <div class="rail-wrap">
+          <div class="rail" tabindex="0" aria-label="Our photos, one at a time. Swipe sideways."></div>
+          <button class="arrow l" aria-label="Previous photo">‹</button>
+          <button class="arrow r" aria-label="Next photo">›</button>
+        </div>
+        <div class="where"><div class="dots"></div><span class="count"></span></div>
+        <p class="hint">Swipe · tap to open</p>
+      </section>
+      <div class="viewer" role="dialog" aria-modal="true" aria-label="Photo">
+        <div class="top"><span class="vcount">3 / 12</span><button class="vclose" aria-label="Close">✕</button></div>
+        <div class="big"><div class="ph"></div></div>
+        <div class="nav"><button class="vprev" aria-label="Previous">‹</button><button class="vnext" aria-label="Next">›</button></div>
+      </div>
+    </div>
+
+    <!-- DESKTOP -->
+    <div class="frame desktop" data-frame="desktop">
+      <div class="chrome"><span>setnayan.com/mia-and-leo</span><span>desktop · hover for arrows · ← → keys</span></div>
+      <section class="scene" aria-label="Photos">
+        <p class="eyebrow">Our photos</p>
+        <h2 class="heading">Glimpse of Us</h2>
+        <div class="rail-wrap">
+          <div class="rail" tabindex="0" aria-label="Our photos, one at a time. Use the arrows."></div>
+          <button class="arrow l" aria-label="Previous photo">‹</button>
+          <button class="arrow r" aria-label="Next photo">›</button>
+        </div>
+        <div class="where"><div class="dots"></div><span class="count"></span></div>
+      </section>
+      <div class="viewer" role="dialog" aria-modal="true" aria-label="Photo">
+        <div class="top"><span class="vcount"></span><button class="vclose" aria-label="Close">✕</button></div>
+        <div class="big"><div class="ph"></div></div>
+        <div class="nav"><button class="vprev" aria-label="Previous">‹</button><button class="vnext" aria-label="Next">›</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAKER · how the couple picks it -->
+  <h2 style="margin-top:26px">How the couple picks it</h2>
+  <div class="maker" style="margin-top:10px">
+    <div class="crumb">Event Hub Maker › Stages › Save the Date › <b>Photos</b> › Style</div>
+    <div class="cards" role="group" aria-label="Photos style">
+      <button class="scard" aria-pressed="false"><div class="mini mosaic"><i class="b"></i><i class="b"></i><i class="b"></i></div><div class="nm">Mosaic</div><div class="ln">A cover photo, then two across, offset.</div><span class="tick">✓</span></button>
+      <button class="scard" aria-pressed="false"><div class="mini grid"><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i></div><div class="nm">Grid</div><div class="ln">Three across, every photo the same size.</div><span class="tick">✓</span></button>
+      <button class="scard" aria-pressed="false"><div class="mini film"><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i></div><div class="nm">Film strip</div><div class="ln">Strips that slide sideways.</div><span class="tick">✓</span></button>
+      <button class="scard" aria-pressed="true"><div class="mini glimpse"><i class="b"></i><i class="b"></i><i class="b"></i></div><div class="nm">Glimpse</div><div class="ln">One photo at a time, centred; the next peeks in.</div><span class="tick">✓</span></button>
+    </div>
+    <p class="menu-note">3:4 cards are the Style tab of the new Maker (house rule: style cards are phone-shaped, never wide strips). Where the Photos row still uses the older website editor's <code>scene-style-row.tsx</code>, the same style is simply the 4th option of its <code>PickMenu</code>: <span class="pick">Style&nbsp;·&nbsp;<b>Glimpse</b> ▾</span> with the hint line <i>“One photo at a time, centred; the next peeks in.”</i> Picking is FREE (no ◆). The pick is one <code>canvas.style</code> value on the <code>our_photos</code> row — exactly as Mosaic/Grid/Film strip are stored today.</p>
+  </div>
+
+  <!-- NOTES -->
+  <div class="notes">
+    <div class="note">
+      <h3>Decisions shown above</h3>
+      <ul>
+        <li><b>Mechanics:</b> native horizontal scroll with <code>scroll-snap-type: x mandatory</code> and <code>scroll-snap-align: center</code> — the same snap family Film strip already uses (<code>snap-x</code>/<code>snap-start</code>), so swipe, momentum and the back-gesture all behave like the shipped strip. Rail padding of half the leftover width lets the first and last photo centre too.</li>
+        <li><b>Centre card:</b> scale 1 · opacity 1; neighbours scale .92 · opacity .72, eased 250 ms as they move. Measured per frame from each card's distance to the rail centre — no index state, so a half-swipe looks right.</li>
+        <li><b>Where am I:</b> dots up to 8 photos; from 9 up, a tabular “3 / 12” counter instead (12 dots on a 375 screen read as noise). Shown here: switch Photos 5 ↔ 12.</li>
+        <li><b>Tap:</b> the centre card opens the full-screen viewer — the shipped <code>GalleryLightbox</code> (<code>app/_components/gallery/gallery-lightbox.tsx</code>, <code>kind: 'photo'</code>, prev/next, close); a neighbour tap just scrolls it to the centre (it is 72 % opaque — a tap says “bring it forward”, not “open”).</li>
+        <li><b>Desktop:</b> 380 px centre card, two neighbours visible each side, ‹ › arrows on hover / keyboard focus, ← → keys move one photo. No arrows on phones (the thumb is the arrow).</li>
+        <li><b>Autoplay: no.</b> The guest is reading an invitation at their pace; a timer fights the finger on a snap rail (it jumps mid-swipe), fights the page's Reveal/motion budget, and the shipped Film strip has none either. If the owner wants motion later, it belongs in the Maker's <b>Animate</b> row as a choice, not baked into the style.</li>
+        <li><b>Reduced motion:</b> no scale, no fade, no smooth-scroll — cards simply snap. Toggle it above.</li>
+        <li><b>1 photo:</b> one centred card, no dots, no hint, no peeking. <b>2 photos:</b> same rail — first centred, second peeks right; one swipe swaps them. Nothing special-cased beyond hiding the dots at 1.</li>
+        <li><b>Aspect:</b> every card is cropped to <b>3:4 portrait</b> (<code>object-fit: cover</code>) — the shape the phone is, the shape Mosaic's tiles already use, and the only way neighbours line up as a rail. A landscape photo loses its sides; the couple orders photos today, so the one they put first is the one that opens centred.</li>
+        <li><b>Light + dark:</b> ivory paper / deep-plum paper via the theme's tokens; card shadow is the only thing that changes weight.</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h3>What exists · what's new · the delta</h3>
+      <p><span class="tag have">exists</span><code>lib/scene-styles-stages.ts</code> — the <code>gallery</code> set: <code>mosaic</code> · <code>grid</code> · <code>film-strip</code>, stages <code>STD</code>, default Mosaic.</p>
+      <p><span class="tag have">exists</span><code>app/[slug]/_components/our-photos-widget.tsx</code> (Mosaic, takes <code>sceneStyle</code>) and <code>our-photos-styles.tsx</code> (<code>OurPhotosGrid</code>, <code>OurPhotosFilmStrip</code> — pure, props-in, presigned <code>&lt;img&gt;</code>).</p>
+      <p><span class="tag have">exists</span><code>app/_components/gallery/gallery-lightbox.tsx</code> — the full-screen viewer (<code>src · kind · onClose · label</code>). Reuse; do not draw a second one.</p>
+      <p><span class="tag have">exists</span>The Style pick UI: <code>scene-style-row.tsx</code> (<code>PickMenu</code>) and the Maker's Style tab — a 4th entry appears there with no UI work.</p>
+      <p><span class="tag new">new</span>One style entry: <code>{ id: 'glimpse', name: 'Glimpse', line: 'One photo at a time, centred; the next peeks in.', stages: STD }</code> appended to the <code>gallery</code> set (not shared with Post Event, so a new id is correct).</p>
+      <p><span class="tag new">new</span>One renderer: <code>OurPhotosGlimpse({ urls })</code> beside Grid/Film strip, plus the branch <code>if (sceneStyle === 'glimpse')</code> in <code>OurPhotosWidget</code>. ⚠ The scale/opacity, counter and the lightbox hold state → a small <code>'use client'</code> leaf (e.g. <code>glimpse-rail.tsx</code>); the SSR markup is the plain snap rail, so the page draws before JS.</p>
+      <p><span class="tag new">new</span>Guards to extend (each pins the style list and goes red otherwise): <code>lib/scene-styles-stages.test.ts</code> (<code>for (const id of ['grid','mosaic','film-strip'])</code>), <code>lib/layouts-are-the-shipped-scene-styles.test.ts</code> (<code>['gallery','save_the_date',[…]]</code>), <code>app/[slug]/_components/every-scene-style-draws.test.ts</code> (<code>for (const id of ['grid','film-strip'])</code>) — add <code>'glimpse'</code> to each and a render assertion for 1 · 2 · 12 urls.</p>
+      <p>No migration, no new column, no new question — a <code>canvas.style</code> value the couple already saves.</p>
+    </div>
+    <div class="note">
+      <h3>Open questions (owner)</h3>
+      <ul>
+        <li><b>The heading.</b> The shipped Photos scene draws a fixed eyebrow “Our photos” and no typed heading. Glimpse is built around a big script heading. Does the Photos scene get a heading field in Details (then every style may show it), or does Glimpse alone draw the eyebrow large? Drawn here: eyebrow kept, heading added above the rail. Recommend the Details field — one place to type, every style benefits.</li>
+        <li><b>Post Event too?</b> Grid and Film strip carry Post Event's ids and draw on both. Glimpse is drawn here for Save the Date · Invitation · The Day only (<code>STD</code>). Should Photos of you (Post Event) get it as well, in a second step?</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const HUES = [28, 352, 205, 160, 44, 290, 12, 190, 75, 330, 230, 98];
+  let N = 12, reduce = false;
+
+  function paintPhoto(el, i) {
+    const h = HUES[i % HUES.length];
+    el.style.background = `linear-gradient(165deg, hsl(${h} 38% 72%) 0%, hsl(${h} 42% 48%) 55%, hsl(${(h+30)%360} 36% 30%) 100%)`;
+    el.innerHTML = `<i style="width:34%;aspect-ratio:1;left:${18 + (i*17)%48}%;top:${12 + (i*11)%22}%"></i>`;
+  }
+
+  function buildFrame(frame) {
+    const rail = frame.querySelector('.rail');
+    const wrap = frame.querySelector('.rail-wrap');
+    const dots = frame.querySelector('.dots');
+    const count = frame.querySelector('.count');
+    const hint = frame.querySelector('.hint');
+    const viewer = frame.querySelector('.viewer');
+    const vph = viewer.querySelector('.ph');
+    const vcount = viewer.querySelector('.vcount');
+    const arrL = frame.querySelector('.arrow.l'), arrR = frame.querySelector('.arrow.r');
+    let centre = 0, raf = 0, open = -1;
+
+    function render() {
+      rail.innerHTML = ''; dots.innerHTML = '';
+      wrap.classList.toggle('one', N === 1);
+      for (let i = 0; i < N; i++) {
+        const c = document.createElement('div');
+        c.className = 'card'; c.tabIndex = -1; c.dataset.i = i;
+        c.setAttribute('role', 'button'); c.setAttribute('aria-label', `Photo ${i+1} of ${N}`);
+        const ph = document.createElement('div'); ph.className = 'ph'; paintPhoto(ph, i);
+        c.appendChild(ph);
+        const n = document.createElement('span'); n.className = 'num'; n.textContent = String(i+1).padStart(2,'0'); c.appendChild(n);
+        if (i === 3) { const f = document.createElement('span'); f.className = 'flag'; f.textContent = 'landscape · cropped'; c.appendChild(f); }
+        c.addEventListener('click', () => { if (i === centre) openViewer(i); else scrollTo(i, true); });
+        rail.appendChild(c);
+      }
+      if (N > 1 && N <= 8) { for (let i = 0; i < N; i++) { const d = document.createElement('i'); dots.appendChild(d); } }
+      count.textContent = '';
+      if (hint) hint.style.visibility = N === 1 ? 'hidden' : '';
+      rail.scrollLeft = 0; measure();
+    }
+
+    function cardCentre(c) { return c.offsetLeft + c.offsetWidth / 2; }
+    function scrollTo(i, smooth) {
+      const c = rail.children[i]; if (!c) return;
+      const left = cardCentre(c) - rail.clientWidth / 2;
+      rail.scrollTo({ left, behavior: (smooth && !reduce) ? 'smooth' : 'auto' });
+    }
+    function measure() {
+      raf = 0;
+      const mid = rail.scrollLeft + rail.clientWidth / 2;
+      let best = 0, bestD = Infinity;
+      [...rail.children].forEach((c, i) => {
+        const d = Math.abs(cardCentre(c) - mid);
+        if (d < bestD) { bestD = d; best = i; }
+        const t = Math.min(1, d / (c.offsetWidth * 1.1));   // 0 at centre → 1 one card away
+        if (!reduce && N > 1) { c.style.setProperty('--s', (1 - 0.08 * t).toFixed(3)); c.style.setProperty('--o', (1 - 0.28 * t).toFixed(3)); }
+        else { c.style.removeProperty('--s'); c.style.removeProperty('--o'); }
+      });
+      centre = best;
+      [...rail.children].forEach((c, i) => c.classList.toggle('is-centre', i === best));
+      [...dots.children].forEach((d, i) => d.classList.toggle('on', i === best));
+      count.textContent = N > 8 ? `${best + 1} / ${N}` : '';
+      arrL.disabled = best === 0; arrR.disabled = best === N - 1;
+    }
+    rail.addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(measure); }, { passive: true });
+    rail.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { e.preventDefault(); scrollTo(Math.min(N-1, centre+1), true); }
+      if (e.key === 'ArrowLeft')  { e.preventDefault(); scrollTo(Math.max(0, centre-1), true); }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openViewer(centre); }
+    });
+    arrL.addEventListener('click', () => scrollTo(centre - 1, true));
+    arrR.addEventListener('click', () => scrollTo(centre + 1, true));
+
+    function openViewer(i) {
+      open = i; paintPhoto(vph, i); vcount.textContent = `${i+1} / ${N}`; viewer.classList.add('open'); viewer.querySelector('.vclose').focus();
+    }
+    function closeViewer() { viewer.classList.remove('open'); scrollTo(open, false); rail.focus(); open = -1; }
+    viewer.querySelector('.vclose').addEventListener('click', closeViewer);
+    viewer.querySelector('.vprev').addEventListener('click', () => openViewer((open - 1 + N) % N));
+    viewer.querySelector('.vnext').addEventListener('click', () => openViewer((open + 1) % N));
+    viewer.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeViewer(); if (e.key === 'ArrowRight') openViewer((open+1)%N); if (e.key === 'ArrowLeft') openViewer((open-1+N)%N); });
+    window.addEventListener('resize', () => { scrollTo(centre, false); measure(); });
+
+    return { render, measure };
+  }
+
+  const frames = [...document.querySelectorAll('.frame')].map(buildFrame);
+  const rerender = () => frames.forEach(f => f.render());
+
+  function seg(sel, attr, fn) {
+    document.querySelectorAll(sel).forEach(b => b.addEventListener('click', () => {
+      b.parentElement.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+      fn(b.dataset[attr]);
+    }));
+  }
+  seg('[data-theme]', 'theme', v => document.documentElement.setAttribute('data-theme', v));
+  seg('[data-n]', 'n', v => { N = +v; rerender(); });
+  seg('[data-rm]', 'rm', v => { reduce = v === 'on'; document.body.classList.toggle('reduce', reduce); frames.forEach(f => f.measure()); });
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { reduce = true; document.body.classList.add('reduce'); document.querySelector('[data-rm="on"]').click(); }
+  if (matchMedia('(prefers-color-scheme: dark)').matches) { document.querySelector('[data-theme="dark"]').click(); }
+
+  // Maker cards: press to select (prototype only)
+  document.querySelectorAll('.scard').forEach(c => c.addEventListener('click', () => {
+    document.querySelectorAll('.scard').forEach(x => x.setAttribute('aria-pressed', x === c ? 'true' : 'false'));
+  }));
+
+  rerender();
+})();
+</script>
+</body>
+</html>
