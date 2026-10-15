@@ -1,3 +1,19 @@
+
+## ⏹ STATE AT WIND-DOWN — 15 Oct ~13:30 PHT, 95 % weekly (stop at 98 %) — START HERE ON THE NEW ACCOUNT
+Live: `c5fc266`. Every branch below is on GitHub; each has `controller-2026-10-12/handovers/<name>.md` with its exact next step.
+| Work | State | Next |
+|---|---|---|
+| Colour live fix `rd/stage-colour-every-word` | pushed (5 commits), preflight queued | preflight → draft PR → CI → ship ALONE |
+| Batch 8 `rd/batch-8-event-hub` (#6537 #6540 #6541 #6542 #6543 #6544 + Width #6545) | merged train pushed (56 commits), preflight queued | preflight → ONE draft PR → CI → two testers → ship |
+| Veil #6546 | CI green (quick preflight only) | two testers + owner's iPhone (sound on tap) → ship; move the builder's uncommitted DECISION_LOG rows to the corpus |
+| Glimpse `rd/photos-glimpse` | pushed; preflight was running | open PR if green; then #6547 Post Event (failing checks, merge after) |
+| Host strip `rd/host-strip-removed` | pushed; preflight queued | preflight → PR |
+| Media `rd/media-allowance-by-plan` (Free 10 / Pro 500 MB) | pushed, unit 22/22, sabotage 5/5 | read `handovers/media-by-plan-preflight.log` → PR (money rule: owner sees the PR body) |
+| Cover Scene `rd/cover-scene` | partial, pushed | continue from its handover |
+| Apple Wallet #6548 | 1 failing check | fix → owner's iPhone test |
+| The Day parts `rd/the-day-parts-respond` | no commits yet | restart from its handover |
+Supplier steps 1–6: #6533 #6535 + branches rd/supplier-easy-{1,3,4,5}-* — unchanged since 15 Oct 00:20.
+
 # HANDOFF — Thu 15 Oct 2026 ~00:30 PHT · the old account hit its SESSION LIMIT (resets 3:20 am) — START HERE
 
 Owner, verbatim: *"continue building until 98% and document everything so we can transfer to a new account"* ·
@@ -31,6 +47,29 @@ view; asked him to look in "Not walking" before Undo next time). Worktrees wt-ma
 RUNNING at 88 % weekly: Colour live fix `rd/stage-colour-every-word` (owner: Colour colours ALL words; Dress code chips +
 do/don't follow Size and Colour) · Width rebased onto Size → PR · batch train `rd/batch-8-event-hub` (the six + Width) →
 then two testers → ship if budget allows; otherwise the new account starts with the testers on batch 8.
+
+**~08:30 PHT: owner — "build as much now before we transfer".** Six builders running, each committing + pushing its
+`rd/*` branch after EVERY step with a note in `controller-2026-10-12/handovers/<name>.md`:
+`rd/stage-colour-every-word` (live fix) · `rd/stage-text-width` → `rd/batch-8-event-hub` (the six + Width) ·
+`rd/photos-glimpse` · `rd/host-strip-removed` · `rd/media-allowance-by-plan` (Free 10 MB / Pro 500 MB) · `rd/cover-scene`
+(big; expect partial). NEW ACCOUNT: `gh pr list --state open` + `git ls-remote origin 'refs/heads/rd/*'` + those
+handover notes = where each stopped.
+
+**~09:00 PHT (92 %): four more started** (owner picked all four), each pushing after every step with a note in
+`handovers/`: `rd/apple-wallet-pass` (Apple only; secrets stay in Vercel; device test needs his iPhone) ·
+`rd/guest-small-faults` (contrast, 44 px taps, /login cookie notice, /venue wording, film timing) ·
+`rd/the-day-parts-respond` (two The Day parts that didn't answer a tap) · `rd/photos-glimpse-post-event` (stacked on
+`rd/photos-glimpse` — merge after it). Plus the veil build `rd/veil-tap-and-hold-behind` (tap OR swipe up unveils, music
+starts inside the tap, nothing behind the veil plays until it lifts). Full checks for these were left to the next account.
+
+**Veil: draft PR #6546, CI green (27/27)** — tap or swipe up unveils, music starts inside the tap, nothing behind plays
+until unveil (12 s safety release), double-tap/petal-tap gone. ⚠ Only the QUICK preflight half ran locally (queue was
+full); CI covered the rest. Needs: two testers + the OWNER'S REAL iPHONE for sound-on-tap, then ship (feature, not a live
+fault). The builder's own calls (veil back down doesn't re-pause; envelope/door openings release but don't start music;
+an invisible-start scene animation stays hidden under the sheer veil) are written in the Setnayan checkout's
+DECISION_LOG and `0024_Veil_Reveal_Spec` but NOT committed (that checkout has other sessions' edits) — move those rows
+to the corpus via wt-corpus-push. Guest small faults: 4 of 5 already fixed on main; the film's 22 s autoplay is the
+owner's 2026-09-26 ruling (left).
 
 ## 0 · Before restarting builders — the Mac
 - Background lock waiters and requeue scripts from the dead builders may STILL be running (they run preflights with
