@@ -9,9 +9,9 @@ Live: `c5fc266`. Every branch below is on GitHub; each has `controller-2026-10-1
 | Glimpse `rd/photos-glimpse` | pushed; preflight was running | open PR if green; then #6547 Post Event (failing checks, merge after) |
 | Host strip `rd/host-strip-removed` | pushed; preflight queued | preflight → PR |
 | Media `rd/media-allowance-by-plan` (Free 10 / Pro 500 MB) | pushed, unit 22/22, sabotage 5/5 | read `handovers/media-by-plan-preflight.log` → PR (money rule: owner sees the PR body) |
-| Cover Scene `rd/cover-scene` | partial, pushed | continue from its handover |
-| Apple Wallet #6548 | 1 failing check | fix → owner's iPhone test |
-| The Day parts `rd/the-day-parts-respond` | no commits yet | restart from its handover |
+| Cover Scene `rd/cover-scene` @370f70268a | steps 1–6 built + guard (10 claims, sabotaged), never seen in a browser; Details › Hero door NOT built (first-load budget) | phone walk (`cover-scene/scripts/run-walk-phone.sh`, lab link needs `?studio=1`) → side-by-sides → preflight → PR |
+| Apple Wallet #6548 @7595270c12 | built, OFF until `WALLET_PASS_ENABLED=true` + the six env vars; CI round 2 running (round 1: gitleaks false positive, fixed) | re-read checks → whole preflight → Apple badge SVG (owner) → owner's 6-step iPhone test in its handover. ⚠ it reused the `wt-rsvp-picture` worktree |
+| The Day parts | NOT A PRODUCT FAULT: the walk script tapped under the toolbar; re-walked with hit-testing, every The Day part answers | optional: Camera drawing tap (one commit in stage-tools.tsx); walk scripts should hit-test before tapping |
 Supplier steps 1–6: #6533 #6535 + branches rd/supplier-easy-{1,3,4,5}-* — unchanged since 15 Oct 00:20.
 
 # HANDOFF — Thu 15 Oct 2026 ~00:30 PHT · the old account hit its SESSION LIMIT (resets 3:20 am) — START HERE
