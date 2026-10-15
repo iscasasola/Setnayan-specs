@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Event Hub · guest desktop</title>
+<!--
+  Fable · 2026-10-15 · The guest Event Hub on a desktop (1024 · 1280 · 1440), beside the phone (375).
+  Owner, verbatim, 15 Oct 2026: "the design we made seemed like it is just for mobile view" → "Move desktop
+  ahead of Admin … and design the guest Event Hub on desktop too."
+  The phone design is the contract; this ADAPTS it. Nothing is added to what a guest can do. Every word is the
+  shipped copy (www.setnayan.com/cale-ice, apps/web/app/[slug]/ on origin/main f24165e95) or a 2026-10-15 ruling.
+  Rules carried: frames only on what you press · one exit (×) · say "event" · "Event Hub", never "website" ·
+  any set of choices is a dropdown · the spotlight tour (prototypes/spotlight_tour_sample_2026-10-02.html).
+  No network except Google Fonts. No storage.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  /* doc chrome (light) */
+  --page:#F4F0E8; --paper:#FBF9F5; --ink:#2C2A29; --mute:#8E8880; --line:#E6E0D6; --gold:#A9834B; --gold-soft:#E8DCC3;
+  --cta:#C24E25; --ok:#2B744A; --pill:#F1ECE3; --field:#FFFFFF; --shadow:rgba(44,42,41,.28);
+  /* the couple's Look — the guest page wears THIS, not the viewer's theme */
+  --l-paper:#F7F2EC; --l-ink:#2C2A29; --l-ink2:#4A4642; --l-mute:#8E8880; --l-line:rgba(44,42,41,.14);
+  --l-gold:#A9834B; --l-accent:#5C0700; --l-bar:rgba(247,242,236,.88); --l-sheet:#FBF9F5;
+  --l-wash:#EFE7DC;
+}
+:root[data-theme="dark"]{
+  --page:#161514; --paper:#1E1C1A; --ink:#F1ECE4; --mute:#8E8880; --line:#33302C; --gold:#C9A24B; --gold-soft:#3A3122;
+  --cta:#E0623A; --ok:#4FA06E; --pill:#26231F; --field:#26231F; --shadow:rgba(0,0,0,.6);
+  /* the couple's Look, dark variant (the Look's own dark ink/paper pair — lib/hub-legibility picks the ink) */
+  --l-paper:#17151A; --l-ink:#F2EDE6; --l-ink2:#D9D2C8; --l-mute:#9B958C; --l-line:rgba(242,237,230,.16);
+  --l-gold:#CFAE7A; --l-accent:#E6B7B0; --l-bar:rgba(23,21,26,.86); --l-sheet:#1F1C22; --l-wash:#241F26;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--page);color:var(--ink);font:15px/1.5 var(--sans)}
+a{color:inherit}
+h1{font:600 34px/1.1 var(--serif);margin:0 0 6px}
+h2{font:600 26px/1.15 var(--serif);margin:0 0 4px}
+h3{font:600 16px/1.3 var(--sans);margin:0 0 4px}
+.eyebrow{font:600 11px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.wrap{max-width:1240px;margin:0 auto;padding:28px 24px 80px}
+.lede{color:var(--mute);max-width:78ch;margin:0 0 16px}
+.lede b{color:var(--ink)}
+.controls{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;padding:12px 0 18px;border-bottom:1px solid var(--line);margin-bottom:28px;position:sticky;top:0;background:var(--page);z-index:5}
+.ctl{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mute)}
+.ctl select{font:500 13px var(--sans);color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:10px;padding:8px 30px 8px 12px;appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--mute) 50%),linear-gradient(135deg,var(--mute) 50%,transparent 50%);background-position:right 14px top 55%,right 9px top 55%;background-size:5px 5px;background-repeat:no-repeat;cursor:pointer}
+.switch{position:relative;width:42px;height:24px;border-radius:12px;background:var(--line);border:0;cursor:pointer;padding:0}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--paper);box-shadow:0 1px 3px var(--shadow);transition:transform .2s}
+.switch[aria-checked="true"]{background:var(--ok)}
+.switch[aria-checked="true"]::after{transform:translateX(18px)}
+.sec{margin:0 0 56px;padding-top:8px}
+.sec>.eyebrow{margin-bottom:6px}
+.sec p.what{color:var(--mute);max-width:90ch;margin:4px 0 14px}
+.sec p.what b{color:var(--ink)}
+.pair{display:flex;gap:22px;align-items:flex-start}
+.pair .deskwrap{flex:1 1 auto;min-width:0}
+.pair .phonewrap{flex:0 0 auto}
+.cap{font:500 11px/1.4 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin:8px 0 0}
+.cap b{color:var(--ink);font-weight:600}
+.box{position:relative;overflow:visible}
+.scaler{transform-origin:top left;position:absolute;left:0;top:0}
+/* ───────── the desktop frame ───────── */
+.desk{width:var(--w,1280px);height:var(--h,800px);background:var(--l-paper);color:var(--l-ink);font-family:var(--sans);position:relative;overflow:hidden;border-radius:14px;box-shadow:0 20px 48px var(--shadow)}
+.desk .addr{position:absolute;left:0;right:0;top:0;height:30px;background:var(--pill);color:var(--mute);font:500 11px var(--sans);display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.02em;z-index:4}
+.desk .addr i{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--line)}
+.desk .vp{position:absolute;inset:30px 0 0 0;overflow:hidden}
+/* the guest's one bar on a desktop — the same five, in a top bar */
+.gbar{position:absolute;left:0;right:0;top:0;height:56px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 20px;background:var(--l-bar);backdrop-filter:blur(10px);border-bottom:1px solid var(--l-line);z-index:3;transition:transform .3s}
+.gbar.hidden{transform:translateY(-100%)}
+.gbar .lft{display:flex;align-items:center;gap:14px;min-width:0}
+.gbar .x{width:36px;height:36px;border-radius:50%;border:1px solid var(--l-line);display:grid;place-items:center;font:500 18px/1 var(--sans);color:var(--l-ink);background:transparent;cursor:pointer}
+.gbar .x:hover,.hov{box-shadow:0 0 0 2px var(--l-gold)}
+.gbar .nm{font:600 15px var(--serif);letter-spacing:.04em;white-space:nowrap}
+.gbar .nm small{display:block;font:600 9px var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--l-mute);margin-top:1px}
+.gbar .tabs{display:flex;gap:4px;justify-self:center}
+.gbar .tab{display:flex;align-items:center;gap:7px;padding:0 14px;height:36px;border-radius:18px;font:500 13px var(--sans);color:var(--l-ink2);cursor:pointer;white-space:nowrap}
+.gbar .tab svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.gbar .tab.on{color:var(--l-ink);font-weight:600;background:var(--l-wash)}
+.gbar .tab.cam{color:#7A3B5E}
+.gbar .tab:hover{box-shadow:0 0 0 2px var(--l-gold)}
+.gbar .rgt{display:flex;justify-content:flex-end;gap:8px;align-items:center}
+.gbar .ic{width:36px;height:36px;border-radius:50%;border:1px solid var(--l-line);display:grid;place-items:center;cursor:pointer;color:var(--l-ink)}
+.gbar .ic svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.gbar .ic.av{background:var(--l-wash);font:600 11px var(--sans)}
+/* page body */
+.body{position:absolute;inset:0;overflow:hidden;padding-top:56px}
+.body.nobar{padding-top:0}
+.col{margin:0 auto;padding:0 32px}
+.plate{max-width:768px}   /* 48rem — the reading column */
+.stage{max-width:1024px}  /* 64rem — the wide column */
+.sc{padding:56px 0 24px}
+.sc .ey{font:600 10.5px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--l-gold)}
+.sc h2{font:500 42px/1.05 var(--serif);margin:6px 0 4px;color:var(--l-ink)}
+.sc h2 i{font-style:italic;font-weight:400}
+.sc .sub{font:italic 500 19px var(--serif);color:var(--l-mute)}
+.sc p{font:400 15px/1.55 var(--sans);color:var(--l-ink2);margin:10px 0 0;max-width:60ch}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
+.rule{height:1px;background:var(--l-line);margin:34px 0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 24px;border-radius:24px;font:600 14px var(--sans);background:var(--l-ink);color:var(--l-paper);cursor:pointer;border:0}
+.btn.sec2{background:transparent;color:var(--l-ink);border:1px solid var(--l-line)}
+.btn:hover{box-shadow:0 0 0 2px var(--l-gold)}
+.link{font:500 13px var(--sans);color:var(--l-gold);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+/* cover */
+.cover{position:absolute;inset:0;display:grid;place-items:center;text-align:center;background:
+ radial-gradient(1200px 500px at 50% -10%,rgba(169,131,75,.18),transparent 60%),var(--l-paper)}
+.cover .in{max-width:760px;padding:0 32px}
+.cover .ey{font:600 11px var(--sans);letter-spacing:.24em;text-transform:uppercase;color:var(--l-gold)}
+.cover .names{font:500 92px/1 var(--serif);margin:18px 0 10px;color:var(--l-ink)}
+.cover .names i{font-style:italic;font-weight:400;color:var(--l-gold);font-size:.55em;vertical-align:middle;margin:0 .15em}
+.cover .line{font:400 20px/1.5 var(--serif);color:var(--l-ink2)}
+.cover .date{font:600 12px var(--sans);letter-spacing:.22em;text-transform:uppercase;color:var(--l-ink);margin-top:22px}
+.cover .cue{position:absolute;left:0;right:0;bottom:26px;text-align:center;font:500 12px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--l-mute)}
+.cover .cue b{display:block;font:400 22px/1 var(--serif);color:var(--l-gold);margin-top:6px;animation:bob 1.6s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+.veil{position:absolute;inset:0;background:
+ repeating-linear-gradient(115deg,rgba(255,255,255,.06) 0 6px,rgba(255,255,255,0) 6px 14px),
+ linear-gradient(180deg,rgba(247,242,236,.45),rgba(247,242,236,.2));backdrop-filter:blur(6px);pointer-events:none}
+:root[data-theme="dark"] .veil{background:repeating-linear-gradient(115deg,rgba(255,255,255,.03) 0 6px,transparent 6px 14px),linear-gradient(180deg,rgba(23,21,26,.5),rgba(23,21,26,.25))}
+/* countdown */
+.count{display:flex;gap:26px;align-items:baseline}
+.count .n{font:500 150px/1 var(--serif);color:var(--l-ink);letter-spacing:-.02em}
+.count .u{font:italic 500 40px var(--serif);color:var(--l-gold)}
+.hms{font:500 13px var(--sans);letter-spacing:.2em;color:var(--l-ink2);margin-top:8px}
+.cal{font:400 14px var(--sans)}
+.cal .m{font:500 36px/1 var(--serif);margin-bottom:14px}.cal .m span{color:var(--l-mute);font-style:italic}
+.cal table{border-collapse:collapse;width:100%}
+.cal th{font:600 10px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--l-mute);padding:4px 0}
+.cal td{text-align:center;padding:9px 0;color:var(--l-ink2);font-size:14px}
+.cal td.dim{color:var(--l-mute);opacity:.5}
+.cal td.on span{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:8px;background:var(--l-accent);color:#fff;font-weight:600}
+.note{font:italic 400 24px/1.4 var(--serif);color:var(--l-ink);margin-top:8px}
+.note small{display:block;font:600 10px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--l-mute);margin-top:12px;font-style:normal}
+/* schedule */
+.prog{display:grid;grid-template-columns:120px 1fr;row-gap:0}
+.prog>div{padding:16px 0;border-top:1px solid var(--l-line)}
+.prog .t{font:500 20px var(--serif);color:var(--l-gold)}
+.prog .t small{display:block;font:500 11px var(--sans);color:var(--l-mute);letter-spacing:.06em}
+.prog .w{font:500 19px var(--serif);color:var(--l-ink)}
+.prog .w small{display:block;font:400 13px var(--sans);color:var(--l-mute)}
+.venue{padding:14px 0;border-top:1px solid var(--l-line)}
+.venue b{font:500 19px var(--serif);display:block}
+.venue span{font:400 13px var(--sans);color:var(--l-mute)}
+.map{height:150px;border-radius:12px;background:linear-gradient(135deg,var(--l-wash),var(--l-line));margin-top:10px;display:grid;place-items:center;font:500 12px var(--sans);color:var(--l-mute);cursor:pointer}
+.map:hover{box-shadow:0 0 0 2px var(--l-gold)}
+/* dress code */
+.chips{display:flex;flex-wrap:wrap;gap:18px 26px;margin-top:18px}
+.chip{display:flex;flex-direction:column;align-items:center;gap:6px;font:500 12px var(--sans);color:var(--l-ink2)}
+.chip i{width:54px;height:54px;border-radius:50%;box-shadow:inset 0 0 0 1px var(--l-line)}
+.chip small{font-size:10px;color:var(--l-mute);letter-spacing:.06em}
+/* march */
+.march{display:grid;grid-template-columns:40px 1fr 1fr;column-gap:22px;align-items:center}
+.march .h{grid-column:1/-1;font:600 10.5px var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--l-gold);padding:26px 0 8px}
+.march .h small{color:var(--l-mute);letter-spacing:0;text-transform:none;font-weight:500;margin-left:8px}
+.march .k{font:500 18px var(--serif);color:var(--l-mute)}
+.march .nmn{font:500 19px var(--serif);padding:10px 0;border-top:1px solid var(--l-line)}
+.march .nmn small{display:block;font:600 9.5px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--l-gold)}
+.march .alone{font:italic 400 15px var(--serif);color:var(--l-mute);padding:10px 0;border-top:1px dashed var(--l-line)}
+.march .aisle{grid-column:1/-1;display:grid;grid-template-columns:40px 1fr 1fr;column-gap:22px;font:600 9.5px var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--l-mute);text-align:center}
+.march .aisle span:first-child{grid-column:2}
+/* roll call (the entourage) */
+.ent{display:grid;grid-template-columns:1fr 1fr;gap:0 48px}
+.ent .g{padding:18px 0;border-top:1px solid var(--l-line)}
+.ent .g b{display:block;font:600 10.5px var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--l-gold);margin-bottom:8px}
+.ent .r{font:500 18px/1.3 var(--serif)}
+.ent .r small{display:block;font:400 12px var(--sans);color:var(--l-mute);margin-bottom:6px}
+/* photos · glimpse */
+.glimpse{position:relative;height:430px;display:flex;align-items:center;justify-content:center;gap:18px;overflow:hidden}
+.glimpse .ph{width:320px;height:400px;border-radius:6px;flex:0 0 auto;transition:transform .25s,opacity .25s;cursor:pointer}
+.glimpse .ph.side{transform:scale(.92);opacity:.72}
+.glimpse .ph:hover{box-shadow:0 0 0 2px var(--l-gold)}
+.glimpse .arr{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:var(--l-sheet);border:1px solid var(--l-line);display:grid;place-items:center;font:400 26px/1 var(--serif);color:var(--l-ink);cursor:pointer;box-shadow:0 6px 20px var(--shadow)}
+.glimpse .arr.l{left:14px}.glimpse .arr.r{right:14px}
+.glimpse .arr.hov{box-shadow:0 0 0 2px var(--l-gold),0 6px 20px var(--shadow)}
+.ctr{font:500 13px var(--sans);color:var(--l-mute);text-align:center;margin-top:10px;font-variant-numeric:tabular-nums}
+.p1{background:linear-gradient(160deg,#C9A9A6,#5C0700)}.p2{background:linear-gradient(160deg,#D8C7B0,#6B4226)}.p3{background:linear-gradient(160deg,#9CA98B,#351115)}.p4{background:linear-gradient(160deg,#E6C0B3,#803236)}.p5{background:linear-gradient(160deg,#F3E5B9,#646B38)}
+/* e-gifts */
+.gift{display:flex;gap:14px;flex-wrap:wrap;margin-top:18px}
+/* reply: side panel */
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.28);z-index:5}
+.panel{position:absolute;top:0;right:0;bottom:0;width:440px;background:var(--l-sheet);z-index:6;padding:22px 28px;box-shadow:-14px 0 40px var(--shadow);overflow:hidden}
+.panel .hd{display:flex;align-items:flex-start;justify-content:space-between;border-bottom:1px solid var(--l-line);padding-bottom:12px}
+.panel .hd h2{font:300 30px/1.1 var(--serif);margin:0}
+.panel .hd button{background:none;border:0;font:500 13px var(--sans);color:var(--l-mute);cursor:pointer;min-height:44px}
+.panel .q{font:500 22px var(--serif);margin:22px 0 10px}
+.opt{display:flex;align-items:center;gap:12px;height:52px;border:1px solid var(--l-line);border-radius:12px;padding:0 16px;font:500 15px var(--sans);margin-bottom:8px;cursor:pointer;background:var(--field)}
+.opt.on{border-color:var(--l-ink);box-shadow:inset 0 0 0 1px var(--l-ink)}
+.opt:hover{box-shadow:0 0 0 2px var(--l-gold)}
+.opt i{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--l-mute)}
+.opt.on i{border:5px solid var(--l-ink)}
+.fld{height:48px;border:1px solid var(--l-line);border-radius:10px;padding:0 14px;display:flex;align-items:center;font:400 14px var(--sans);color:var(--l-mute);background:var(--field);margin-top:8px}
+.lbl{font:600 10.5px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--l-mute);margin-top:18px}
+.panel .foot{position:absolute;left:28px;right:28px;bottom:20px}
+.panel .foot .btn{width:100%}
+.priv{font:400 11px var(--sans);color:var(--l-mute);text-align:center;margin-top:10px}
+/* the day */
+.live{display:grid;grid-template-columns:1.35fr 1fr;gap:40px;align-items:start}
+.player{aspect-ratio:16/9;border-radius:12px;background:linear-gradient(135deg,#2a2426,#4a3a3d);position:relative;display:grid;place-items:center;color:#fff}
+.player .dot{position:absolute;left:14px;top:12px;font:600 10px var(--sans);letter-spacing:.14em;background:#B51A00;color:#fff;padding:4px 8px;border-radius:6px}
+.player .pl{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:26px;cursor:pointer}
+.player .pl:hover{box-shadow:0 0 0 2px var(--l-gold)}
+.now{padding:14px 0;border-top:1px solid var(--l-line);display:flex;justify-content:space-between;align-items:baseline}
+.now b{font:500 20px var(--serif)}.now span{font:500 12px var(--sans);color:var(--l-mute);letter-spacing:.08em}
+.now.on b{color:var(--l-accent)}
+.seatmap{display:grid;grid-template-columns:repeat(6,1fr);gap:26px 20px;padding:10px 0}
+.tbl{aspect-ratio:1;border-radius:50%;border:1px solid var(--l-line);display:grid;place-items:center;font:500 15px var(--serif);color:var(--l-mute);position:relative;cursor:pointer}
+.tbl:hover{box-shadow:0 0 0 2px var(--l-gold)}
+.tbl.you{border:2px solid var(--l-accent);color:var(--l-ink);font-weight:600}
+.tbl.you::after{content:"You";position:absolute;bottom:-20px;font:600 10px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--l-accent)}
+.qr{width:200px;height:200px;background:repeating-conic-gradient(var(--l-ink) 0 25%,transparent 0 50%) 0 0/16px 16px;border:10px solid var(--l-sheet);outline:1px solid var(--l-line)}
+/* post event gallery */
+.gal{columns:4;column-gap:12px}
+.gal div{break-inside:avoid;margin-bottom:12px;border-radius:6px;cursor:pointer}
+.gal div:hover{box-shadow:0 0 0 2px var(--l-gold)}
+.pick{display:inline-flex;align-items:center;gap:10px;height:40px;padding:0 14px;border:1px solid var(--l-line);border-radius:20px;font:500 13px var(--sans);cursor:pointer;background:var(--field)}
+.pick:hover{box-shadow:0 0 0 2px var(--l-gold)}
+.pick b{font-weight:600}
+.pick::after{content:"▾";color:var(--l-mute)}
+/* ───────── the phone frame ───────── */
+.phone{width:375px;height:812px;background:var(--l-paper);color:var(--l-ink);border-radius:40px;position:relative;overflow:hidden;box-shadow:0 0 0 9px var(--bezel,#000),0 20px 48px var(--shadow);font-family:var(--sans)}
+:root[data-theme="dark"] .phone{--bezel:#1b1b1b}
+.phone .st{position:absolute;left:0;right:0;top:0;height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font:600 14px var(--sans);z-index:3}
+.phone .pbody{position:absolute;inset:44px 0 0 0;padding:0 22px;overflow:hidden}
+.phone .ptop{display:flex;justify-content:space-between;align-items:center;padding:4px 0 10px}
+.phone .ptop .x{width:34px;height:34px;border-radius:50%;border:1px solid var(--l-line);display:grid;place-items:center;font-size:17px}
+.phone .ptop .av{width:34px;height:34px;border-radius:50%;background:var(--l-wash);display:grid;place-items:center;font:600 11px var(--sans)}
+.phone .pbar{position:absolute;left:0;right:0;bottom:0;height:78px;background:var(--l-bar);backdrop-filter:blur(10px);border-top:1px solid var(--l-line);display:flex;justify-content:space-around;align-items:flex-start;padding:8px 6px 0;z-index:3}
+.phone .pbar div{display:flex;flex-direction:column;align-items:center;gap:4px;font:500 10.5px var(--sans);color:var(--l-ink2);width:64px}
+.phone .pbar div.on{color:var(--l-ink);font-weight:600}
+.phone .pbar div.cam{color:#7A3B5E}
+.phone .pbar svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.phone .sc{padding:22px 0 0}
+.phone .sc h2{font-size:34px}
+.phone .sc p{font-size:14px}
+.phone .count{gap:14px}.phone .count .n{font-size:110px}.phone .count .u{font-size:30px}
+.phone .cover .names{font-size:58px}
+.phone .cover .in{padding:0 20px}
+.phone .cover .line{font-size:17px}
+.phone .cover .cue{bottom:26px}
+.phone .prog{grid-template-columns:86px 1fr}
+.phone .prog .t,.phone .prog .w{font-size:17px}
+.phone .chips{gap:14px 16px}.phone .chip i{width:42px;height:42px}
+.phone .march{grid-template-columns:26px 1fr 1fr;column-gap:10px}
+.phone .march .nmn{font-size:15px}
+.phone .glimpse{height:330px;gap:10px}.phone .glimpse .ph{width:232px;height:300px}
+.phone .sheet{position:absolute;left:0;right:0;bottom:0;height:72%;background:var(--l-sheet);border-radius:22px 22px 0 0;padding:10px 20px;z-index:6;box-shadow:0 -14px 40px var(--shadow)}
+.phone .sheet .grab{width:36px;height:4px;border-radius:2px;background:var(--l-line);margin:0 auto 12px}
+.phone .sheet .hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid var(--l-line);padding-bottom:10px}
+.phone .sheet .hd h2{font:300 27px/1.1 var(--serif);margin:0}
+.phone .sheet .hd span{font:500 13px var(--sans);color:var(--l-mute)}
+.phone .q{font:500 20px var(--serif);margin:16px 0 8px}
+.phone .live{grid-template-columns:1fr;gap:16px}
+.phone .seatmap{grid-template-columns:repeat(3,1fr);gap:22px 16px}
+.phone .gal{columns:2}
+.phone .pscrim{position:absolute;inset:0;background:rgba(0,0,0,.28);z-index:5}
+/* hover & keyboard legend */
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px 28px;margin-top:8px}
+.legend div{padding-top:10px;border-top:1px solid var(--line)}
+.legend b{display:block;font:600 13px var(--sans);margin-bottom:3px}
+.legend span{color:var(--mute);font-size:13px}
+/* notes */
+.notes{border-top:1px solid var(--line);padding-top:28px;margin-top:40px}
+.notes h2{margin-bottom:10px}
+.notes h3{margin-top:22px}
+.notes ul{padding-left:18px;margin:6px 0}
+.notes li{margin:5px 0;color:var(--ink)}
+.notes li code,.notes p code{font:500 12.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--pill);padding:1px 6px;border-radius:5px}
+.notes .q{padding:12px 0;border-top:1px solid var(--line)}
+.notes .q b{display:block;font-size:14px}
+.notes .q .rec{display:inline-block;font:600 10.5px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--ok);margin-right:8px}
+.tag{display:inline-block;font:600 10px var(--sans);letter-spacing:.12em;text-transform:uppercase;padding:3px 7px;border-radius:6px;background:var(--gold-soft);color:var(--gold);margin-right:6px}
+.tag.new{background:#E8F3EC;color:var(--ok)}
+:root[data-theme="dark"] .tag.new{background:#1E2E24}
+.tag.keep{background:var(--pill);color:var(--mute)}
+@media (max-width:1100px){.pair{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Prototype · Fable · 2026-10-15</div>
+  <h1>The guest Event Hub on a desktop</h1>
+  <p class="lede">Owner, 15 Oct: <b>"the design we made seemed like it is just for mobile view"</b> → design the guest Event Hub on desktop too. The phone is the contract; a desktop <b>adapts</b> it — the same stages, the same five tabs per stage in the same order, the same words, one exit. The only things that change are <b>where the menu sits, how wide the words run, and which scenes may use the room</b>. The guest page wears the couple's Look — the Light · Dark switch below is the Look's own light and dark pair (<code>lib/hub-legibility.ts</code> picks the ink), not the viewer's app theme.</p>
+
+  <div class="controls">
+    <div class="ctl">Width
+      <select id="w" aria-label="Desktop width">
+        <option value="1024">1024 · iPad landscape · small laptop</option>
+        <option value="1280" selected>1280 · laptop</option>
+        <option value="1440">1440 · desktop</option>
+      </select>
+    </div>
+    <div class="ctl">Dark <button id="dark" class="switch" role="switch" aria-checked="false" aria-label="Dark"></button></div>
+    <div class="ctl" id="scaleNote">scaled to fit this page — every number in the frame is at true size</div>
+  </div>
+
+  <div id="frames"></div>
+
+  <!-- ───────────── hover · keyboard · the small widths ───────────── -->
+  <section class="sec">
+    <div class="eyebrow">A mouse, a keyboard, a smaller window</div>
+    <h2>How a desktop guest presses things</h2>
+    <div class="legend">
+      <div><b>Hover = one soft gold ring</b><span>on every tab, button, photo, table and map — the Maker desktop's ring, nothing else lights up. Read-only text never reacts (frames only on what you press).</span></div>
+      <div><b>The cursor is the only hint</b><span>pointer on doors, default on words. No tooltips; every control already carries its word.</span></div>
+      <div><b>Scroll opens the cover</b><span>a wheel or trackpad scroll = the phone's swipe up; a click on the veil = the tap. Space · ↓ · PageDown do the same. The music starts on that click (2026-10-15 ruling).</span></div>
+      <div><b>← → in Glimpse and the gallery</b><span>arrows and Escape in the viewer; Tab walks the five tabs; Enter opens.</span></div>
+      <div><b>1024–1279</b><span>the same top bar with the words; the wide column is the window minus 64 px; two-column scenes stay two columns (each ≥ 440 px). Below 1024 = the phone design, untouched.</span></div>
+      <div><b>1440</b><span>nothing grows past 1024 px of content; the extra room is margin on both sides, so a 27-inch screen reads like a 13-inch one.</span></div>
+      <div><b>Dark</b><span>the Look's dark pair — bar, sheet, side panel and the dim scrim all take the Look's dark paper; the ring stays gold.</span></div>
+      <div><b>First visit</b><span>the spotlight tour (dim + gliding ring) on the five tabs and the ×, once; the ring lands on the top bar instead of the bottom bar — same words, same keys in <code>lib/tours.ts</code>.</span></div>
+    </div>
+  </section>
+
+  <!-- ───────────── notes ───────────── -->
+  <section class="notes">
+    <div class="eyebrow">Notes for the owner and the builder</div>
+    <h2>Delta to build</h2>
+    <p class="lede">RULE 0, measured on <code>origin/main</code> f24165e95 (2026-10-15): the guest page <b>already</b> has a desktop branch — at <code>xl</code> (1280) <code>site-menu-bar.tsx</code> hides the pinned bottom bar and draws the SAME five slots as a 7 rem rail down the left margin ("Site sections"); every room already lays its words in a 48 rem plate or a 64 rem stage; the Reply is already one dialog (<code>rsvp-sheet.tsx</code>, <code>role="dialog"</code>, heading from <code>rsvpSheetHeading</code>); the day's hub (<code>hub/hub-shell.tsx</code>) is already a <code>fixed inset-0</code> shell with ≤5 tabs. Nothing below adds a destination, a word or a query. The resolver (<code>_lib/site-nav.ts</code>) is not touched: it decides the slots; the bar only draws them.</p>
+
+    <h3>1 · The menu: the rail becomes a top bar, from <code>lg</code> (1024)</h3>
+    <ul>
+      <li><span class="tag keep">keep</span>the top bar IS the shipped sticky header — <code>app/[slug]/_components/invitation-shell.tsx</code> <code>&lt;header data-sticky-top&gt;</code> already carries the × (<code>data-hub-exit</code>, "Close — back to Setnayan", <code>exitHref</code> = <code>/</code>), the mark and the stage word / monogram on the right. Nothing new is fixed to the top.</li>
+      <li><span class="tag">change</span><code>app/[slug]/_components/site-menu-bar.tsx</code> — at <code>lg:</code> the five slots render INTO that header's centre cell (icon + word) and the <code>xl:block</code> rail (<code>renderRailSlot</code>, the <code>left-[max(0.75rem,calc(50%-46.5rem))]</code> nav) is retired; the pinned bottom bar becomes <code>lg:hidden</code> (today <code>xl:hidden</code>). Same <code>slots</code>, verbatim, same order; the camera keeps its action colour, not the centre (the file's own reasoning stands). The header's right cell takes <code>guest-hub-bar.tsx</code>'s <code>data-top-corner</code> cluster (<code>TOP_CORNER_SLOT_ID</code>: music · Account) so there is one top row, not a header plus two floating corners.</li>
+      <li><span class="tag">change</span><code>app/[slug]/_components/guest-hub-bar.tsx</code> + <code>public-event-day-bar.tsx</code> — at <code>lg</code> their <code>fixed … top-3</code> corners portal into the header's cells; their <code>max-w-md</code> bottom bars are already off wherever the menu renders (<code>menuOn</code>). Below <code>lg</code> unchanged.</li>
+      <li><span class="tag">change</span><code>app/[slug]/_components/hub/hub-shell.tsx</code> — the day's bottom <code>nav aria-label="Live hub"</code> and its More sheet render as the same top bar at <code>lg</code>; the panel keeps <code>fixed inset-0</code>, scrolls under it. The More sheet becomes a PickMenu under its button (any set of choices is a dropdown).</li>
+      <li><span class="tag">change</span><code>app/[slug]/_lib/rail-fits.test.ts</code> re-aimed at the header (the arithmetic it asserts — rail vs 64 rem stage, the <code>2xl:max-w-[76rem]</code> ceiling marked FINAL — no longer exists, so the ceiling may go); <code>bottom-edge.test.ts</code> keeps matching the spacer line, now <code>lg:hidden</code>. The shell column (<code>max-w-3xl xl:max-w-5xl</code>, <code>_lib/measures.ts</code> PLATE / STAGE) is the 48 / 64 rem pair drawn here — unchanged.</li>
+      <li><span class="tag keep">keep</span>the Maker's "Preview ▾ Desktop" draws THIS page (the shipped canvas already draws the guest's layout — MAKER_DESKTOP_ADAPTATION rec. 4 "Real").</li>
+    </ul>
+
+    <h3>2 · The cover: the first screen, no bars, on every width</h3>
+    <ul>
+      <li><span class="tag">change</span>the Cover Scene is already ruled full-first-screen (<code>min-height: 100svh</code>, 2026-10-14 "the Cover Scene fills the whole first screen on load — on any screen"); on a desktop the bar is <b>not drawn</b> while the cover holds (<code>HubCoverHold</code> in <code>hub-scenes.tsx</code> already knows "leaves"): the bar mounts translated −100 % and slides in on the first scroll / unveil. One class on the shell, read from the same hold the veil uses (<code>lib/hub-veil.ts</code> <code>data-veil-hold</code>). The × is the one thing drawn over the cover (top-left, 2026-10-01 "ONE EXIT").</li>
+      <li><span class="tag">change</span><code>reveal/veil-reveal.tsx</code> — wheel / trackpad scroll and Space · ↓ · PageDown run the same lift as swipe up; a click runs the tap; the music's <code>play()</code> stays inside that handler (2026-10-15 ruling). The instruction stays "Tap or swipe up to unveil"; on a pointer it reads "Click or scroll to unveil" — one string with a hover-media branch, in the same component.</li>
+    </ul>
+
+    <h3>3 · Widths: the two columns the code already has</h3>
+    <ul>
+      <li><span class="tag keep">keep</span><b>48 rem plate</b> (768 px) for Welcome · Countdown + note · Dress code · E-Gifts · Me · the thank-you — centred, as today.</li>
+      <li><span class="tag">change</span><b>64 rem stage</b> (1024 px) for the scenes that earn the width, each with a <code>lg:grid-cols-2</code> inside the stage: <code>countdown.tsx</code> (count | calendar — the approved 2026-09-29 desktop frame), <code>schedule-widget.tsx</code> + <code>venue-widget.tsx</code> (The program | The venues, one scene on the day's Live too), <code>entourage-section.tsx</code> + <code>entourage-styles.tsx</code> — Wedding March and Roll call are two STYLES of this one scene (style C "The march · Your line is marked." · style A "Roll call"): the march lays left | right of the aisle (the guest view of the Maker's own two columns), Roll call lays its groups in two columns, <code>your-photos-widget.tsx</code> Glimpse (320-px cards, the approved style with "hover for arrows · ← → keys"), <code>seats-show-on-the-day.tsx</code> / <code>find-seat</code> (six tables across), <code>your-shots-gallery.tsx</code> and Post Event's gallery (4 columns at 1280, 3 at 1024, 2 on a phone). The widths come from <code>lib/element-style.ts</code> <code>HUB_ELEMENT_WIDTH_BOX</code> where the couple set one (2026-10-14 Width ruling) — a desktop never overrides the couple's Narrow / Wide / Full.</li>
+      <li><span class="tag keep">keep</span>1440 adds margin only. Nothing scales up except the display sizes already in <code>globals.css</code>'s <code>clamp()</code>s.</li>
+    </ul>
+
+    <h3>4 · The Reply: the same sheet, from the side</h3>
+    <ul>
+      <li><span class="tag">change</span><code>rsvp-sheet.tsx</code> — the <code>.sn-rsvp-sheet</code> rule gets an <code>@media (min-width:1024px)</code> branch: <code>top:0; right:0; bottom:0; width:440px</code>, <code>sn-rsvp-rise</code> becomes a slide from the right; the scrim, the dialog, the heading ("Your reply" / "Change your reply" / "Your details"), the steps and Save are untouched; <code>--sn-kb</code> is 0 on a desktop. <code>back-closes-the-reply-sheet.test.ts</code> and <code>the-reply-is-a-sheet.test.ts</code> stay green — it is still the one sheet, only its edge changes.</li>
+      <li><span class="tag keep">keep</span>the trigger words (<code>rsvpSheetTrigger</code>: "Reply to the invitation" · "Need to change your reply or your details?") and the spotlight on Home.</li>
+    </ul>
+
+    <h3>5 · The Day on a desktop</h3>
+    <ul>
+      <li><span class="tag">change</span>Live: <code>watch-live-block.tsx</code> (16:9) beside the run of show (<code>schedule-widget.tsx</code>, the now-row lit) in the stage's two columns; the announcement (<code>day-of-announcement.tsx</code>) stays a full-width line above both.</li>
+      <li><span class="tag">change</span>Find your seat: the map uses the stage, six tables across, the guest's table ringed; "Your table" (<code>your-seat-block.tsx</code>) stays the first line.</li>
+      <li><span class="tag new">new · small</span>Camera on a desktop: the tab keeps its word and colour; its page shows the guest's own QR (the one <code>guest-ticket.tsx</code> already draws) with "Scan to open the Camera on your phone", and "Your shots" below (<code>your-shots-gallery.tsx</code>). No webcam. One branch on the camera route by hover-media, no new query — Q3.</li>
+    </ul>
+
+    <h3>6 · Post Event</h3>
+    <ul>
+      <li><span class="tag">change</span>Gallery: the two shipped sections stay two sections — "Photos of you" (<code>photos-of-you-gallery.tsx</code>) then "Your shots" (<code>your-shots-gallery.tsx</code>, its "Everyone’s photos →" link when the host shares the whole gallery) — each 4 / 3 / 2 columns; the shipped <code>GalleryLightbox</code> with ← → Esc. Post Event is anchors, not tabs (<code>TABBED_STAGES</code>), so its header tabs scroll, as today. Recap keeps the approved 2026-09-29 two-column desktop frame.</li>
+    </ul>
+
+    <h3>7 · Guards to extend, none to delete</h3>
+    <ul>
+      <li><code>site-menu-bar.test.ts</code> (five, same order, at both widths) · <code>rail-fits.test.ts</code> → the bar's cells never overlap at 1024 with the longest stage word ("Post Event") and five tabs · <code>the-first-screen-is-never-hidden.test.ts</code> gains "and no bar is drawn over the cover at lg" · <code>the-reply-is-a-sheet.test.ts</code> gains the side-panel branch · a new <code>the-desktop-is-the-phone-adapted.test.ts</code>: for each stage the lg slots equal the phone slots (same resolver output, rendered twice).</li>
+      <li>Check card: Playwright at 1024 × 768, 1280 × 800, 1440 × 900 AND 375 × 812 touch, light and dark, each stage — the phone screenshots first (phone-first).</li>
+    </ul>
+
+    <h2 style="margin-top:34px">Open questions for the owner (≤5)</h2>
+    <div class="q"><b>Q1 · Where the menu lives on a desktop.</b><span class="rec">Recommended: top bar</span> One slim top bar (× · names · the five tabs with their words · account) from 1024 up — the approved 2026-09-29 desktop frames and the Maker's top bar already speak this language, and a top bar fits at 1024 where the shipped left rail only fits from 1280. Alternative: keep the shipped left rail at 1280 and add nothing at 1024.</div>
+    <div class="q"><b>Q2 · How the Reply opens.</b><span class="rec">Recommended: side panel</span> The same sheet slides in from the right (440 px) so the invitation stays in view while the guest answers — the phone's sheet, turned on its side. Alternative: a centred dialog over a dimmed page.</div>
+    <div class="q"><b>Q3 · The Camera tab on a laptop.</b><span class="rec">Recommended: hand it to the phone</span> The desktop Camera page shows the guest's QR — "Scan to open the Camera on your phone" — and their shots below; no webcam capture (a laptop webcam at a table makes poor Papic shots, and 99 % are on phones anyway). Alternative: allow the webcam with the same capture flow.</div>
+    <div class="q"><b>Q4 · The bar while reading.</b><span class="rec">Recommended: stays</span> After the cover opens, the top bar stays pinned at the top of every tab's page (a desktop has the room; a guest always sees the exit and the tabs). Alternative: hide on scroll down, return on scroll up.</div>
+    <div class="q"><b>Q5 · Which scenes may go two-column.</b><span class="rec">Recommended: the seven drawn</span> Countdown + calendar · Program | Venues · The entourage (its March and Roll call styles) · Photos (Glimpse) · Live | run of show · Seat map · Gallery. Everything else stays the centred reading column. Alternative: fewer — only Photos, Seat map and Gallery use the width; every text scene stays one column.</div>
+    <p class="lede" style="margin-top:18px">Not asked, because the corpus answers it: one exit (2026-10-01) · five tabs, same order, no sixth at any width (<code>site-menu-bar.tsx</code>) · the cover fills the first screen on any screen (2026-10-14) · tap or swipe (here: click or scroll) unveils and starts the music (2026-10-15) · the host's page looks like a guest's, desktop unchanged (2026-10-15) · a choice is a dropdown · frames only on what you press · "event", never "celebration"; "Event Hub", never "website".</p>
+  </section>
+</div>
+
+<script>
+/* ───────── icons ───────── */
+const I={
+ home:'<svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
+ details:'<svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>',
+ story:'<svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/></svg>',
+ gallery:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="16" cy="9" r="1.5"/></svg>',
+ me:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
+ live:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M6.3 6.3a8 8 0 0 0 0 11.4M17.7 6.3a8 8 0 0 1 0 11.4M3.5 3.5a12 12 0 0 0 0 17M20.5 3.5a12 12 0 0 1 0 17"/></svg>',
+ camera:'<svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+ film:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></svg>',
+ suppliers:'<svg viewBox="0 0 24 24"><path d="M3 9l1-5h16l1 5M3 9h18v11H3zM9 20v-6h6v6"/></svg>',
+ music:'<svg viewBox="0 0 24 24"><path d="M9 18V6l11-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>',
+ share:'<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>'
+};
+/* the tabs per stage — site-nav.ts labels, stage-bar.ts allow-lists, same order on both widths */
+const TABS={
+ rsvp:[['home','Home'],['details','Details'],['story','Story'],['me','Me']],
+ event:[['live','Live'],['home','Home'],['camera','Camera'],['gallery','Gallery'],['me','Me']],
+ editorial:[['home','Recap'],['film','Film'],['suppliers','Suppliers'],['gallery','Gallery'],['me','Me']]
+};
+const STAGE={rsvp:'Invitation',event:'The Day',editorial:'Post Event'};
+const names='Indalecio &amp; Claire';
+function bar(stage,on,hidden){
+ const t=TABS[stage].map(([k,l])=>`<div class="tab ${k===on?'on':''} ${k==='camera'?'cam':''}">${I[k]}${l}</div>`).join('');
+ return `<div class="gbar ${hidden?'hidden':''}"><div class="lft"><button class="x" aria-label="Leave the Event Hub">×</button><div class="nm">${names}<small>Event Hub · ${STAGE[stage]}</small></div></div><div class="tabs">${t}</div><div class="rgt"><div class="ic">${I.music}</div><div class="ic">${I.share}</div><div class="ic av">RA</div></div></div>`;
+}
+function pbar(stage,on){
+ return `<div class="pbar">${TABS[stage].map(([k,l])=>`<div class="${k===on?'on':''} ${k==='camera'?'cam':''}">${I[k]}${l}</div>`).join('')}</div>`;
+}
+const ptop=`<div class="ptop"><div class="x">×</div><div class="av">RA</div></div>`;
+const st=`<div class="st"><span>9:41</span><span>●●● ▲ ▮</span></div>`;
+const addr=`<div class="addr"><i></i><i></i><i></i>&nbsp;&nbsp;🔒 www.setnayan.com/cale-ice</div>`;
+
+/* ───────── scenes (shared between the two frames; CSS lays them out) ───────── */
+const S={
+ cover:(phone)=>`<div class="cover"><div class="veil"></div><div class="in"><div class="ey">Together with their families</div><div class="names">Indalecio <i>and</i> Claire</div><div class="line">invite you to celebrate their wedding</div><div class="date">December 18, 2026</div></div><div class="cue">${phone?'Tap or swipe up to unveil':'Click or scroll to unveil'}<b>↓</b></div></div>`,
+ welcome:`<div class="col stage"><div class="sc"><div class="two"><div><div class="ey">Until we say ‘I do’</div><div class="count"><span class="n">64</span><span class="u">days</span></div><div class="hms">11 H · 24 M · 08 S</div><div class="rule"></div><div class="ey">A note from us</div><div class="note">“We cant wait to celebrate with you”<small>Indalecio &amp; Claire</small></div></div><div class="cal"><div class="m">December <span>2026</span></div><table><tr><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th></tr><tr><td class="dim">30</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td></tr><tr><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td></tr><tr><td>14</td><td>15</td><td>16</td><td>17</td><td class="on"><span>18</span></td><td class="dim">19</td><td class="dim">20</td></tr></table><p style="margin-top:14px">Friday, 18 December 2026 · 2:30 PM · Santuario de San Vicente de Paul Parish</p><div style="margin-top:22px"><span class="btn">Reply to the invitation</span></div></div></div></div></div>`,
+ welcomePhone:`<div class="sc"><div class="ey">Until we say ‘I do’</div><div class="count"><span class="n">64</span><span class="u">days</span></div><div class="hms">11 H · 24 M · 08 S</div><div class="rule" style="margin:22px 0"></div><div class="ey">A note from us</div><div class="note" style="font-size:21px">“We cant wait to celebrate with you”<small>Indalecio &amp; Claire</small></div><div style="margin-top:22px"><span class="btn" style="width:100%">Reply to the invitation</span></div></div>`,
+ details:`<div class="col stage"><div class="sc"><div class="two"><div><div class="ey">The program</div><h2>The run of show</h2><div class="prog" style="margin-top:14px"><div class="t">2:30 PM<small>– 3:30 PM</small></div><div class="w">Ceremony</div><div class="t">5:00 PM<small>– 7:00 PM</small></div><div class="w">Cocktails<small>Cocktail hour</small></div><div class="t">7:00 PM<small>– 11:00 PM</small></div><div class="w">Reception<small>Reception &amp; Dinner</small></div></div></div><div><div class="ey">The venues</div><h2>Where</h2><div class="venue" style="margin-top:14px"><b>Santuario de San Vicente de Paul Parish</b><span>Ceremony · 2:30 PM</span><div class="map">Map · directions</div></div><div class="venue"><b>Seda Hotel Vertis North</b><span>Reception · 7:00 PM</span><div class="map">Map · directions</div></div></div></div></div></div>`,
+ detailsPhone:`<div class="sc"><div class="ey">The program</div><h2>The run of show</h2><div class="prog" style="margin-top:10px"><div class="t">2:30 PM<small>– 3:30 PM</small></div><div class="w">Ceremony</div><div class="t">5:00 PM<small>– 7:00 PM</small></div><div class="w">Cocktails<small>Cocktail hour</small></div><div class="t">7:00 PM<small>– 11:00 PM</small></div><div class="w">Reception<small>Reception &amp; Dinner</small></div></div><div class="rule" style="margin:20px 0"></div><div class="ey">The venues</div><div class="venue" style="border:0;padding-top:6px"><b>Santuario de San Vicente de Paul Parish</b><span>Ceremony · 2:30 PM</span><div class="map" style="height:110px">Map · directions</div></div></div>`,
+ dress:`<div class="col plate"><div class="sc"><div class="ey">Dress code</div><h2>Dress with us</h2><p>Formal · wear the palette</p><div class="ey" style="margin-top:26px">Our colours</div><div class="chips"><div class="chip"><i style="background:#5C0700"></i>Rosewood<small>#5C0700</small></div><div class="chip"><i style="background:#669C35"></i>Pandan Green<small>#669C35</small></div><div class="chip"><i style="background:#B51A00"></i>Firebrick<small>#B51A00</small></div><div class="chip"><i style="background:#F7F2EC"></i>Cream<small>#F7F2EC</small></div><div class="chip"><i style="background:#CFAFAF"></i>Dusty Rose<small>#CFAFAF</small></div><div class="chip"><i style="background:#351115"></i>Oxblood<small>#351115</small></div><div class="chip"><i style="background:#646B38"></i>Olive Grove<small>#646B38</small></div><div class="chip"><i style="background:#F3E5B9"></i>Marigold<small>#F3E5B9</small></div></div><div class="rule"></div><div class="ey">E-Gifts</div><h2>A gift, if you wish</h2><p>The digital money dance — straight to the couple.</p><div class="gift"><span class="btn">Send a gift</span><span class="btn sec2">See the wish list</span></div></div></div>`,
+ march:`<div class="col stage"><div class="sc"><div class="ey">Wedding March</div><h2>Who walks, in order</h2><div class="march"><div class="aisle"><span>Left</span><span>Right</span></div><div class="h">The groom &amp; his parents <small>2 walks</small></div><div class="k">1</div><div class="nmn">Mr. Peregrino Buanhog</div><div class="nmn">Mrs. Milagros Buanhog</div><div class="k">2</div><div class="nmn">Indalecio Casasola<small>The groom</small></div><div class="alone">walks alone</div><div class="h">Immediate family <small>3 walks</small></div><div class="k">3</div><div class="nmn">Mr. Fidel Bautista</div><div class="nmn">Ms. Carmen Reyes</div><div class="k">4</div><div class="nmn">Mr. Noel Buanhog</div><div class="alone">walks alone</div><div class="k">5</div><div class="nmn">Mrs. Cely Tan</div><div class="nmn">Mr. Mark Tan</div><div class="h">Maid of honor &amp; best man <small>1 walk</small></div><div class="k">6</div><div class="nmn">Ms. Catherine E. Buanhog<small>Maid of Honor</small></div><div class="nmn">Mr. Ronald Sacdalan<small>Best Man</small></div></div></div></div>`,
+ roll:`<div class="col stage"><div class="sc"><div class="ey">The entourage</div><h2>Standing with us</h2><div class="ent" style="margin-top:18px"><div class="g"><b>Parents</b><div class="r">Mr. Manuel C. Casasola<small>Father of the Groom</small>Atty. Eufrocina M. Sacdalan-Casasola<small>Parent of the Groom</small>Mrs. Milagros E. Buanhog<small>Mother of the Bride</small>Mr. Peregrino R. Buanhog<small>Father of the Bride</small></div></div><div class="g"><b>Maid of Honor &amp; Best Man / Best Woman</b><div class="r">Ms. Catherine E. Buanhog<small>Maid of Honor</small>Atty. Indalecia S. Casasola<small>Best Woman</small>Mr. Ronald Sacdalan<small>Best Man</small></div></div><div class="g"><b>Principal Sponsors</b><div class="r">Hon. Ricardo Villahermosa &amp; Mrs. Jessica Villahermosa<small>Ninong &amp; Ninang</small>Mr. Arman Almarines &amp; Dr. Maria Theresa Alonzo<small>Ninong &amp; Ninang</small></div></div><div class="g"><b>Secondary Sponsors</b><div class="r">Christopher E. Buanhog &amp; Katrina T. Buanhog<small>Candle</small>Mr. Brillante Loo &amp; Mrs. Fatima Palma-Loo<small>Veil</small>Mr. Arjay Javier &amp; Atty. Jessica Jota-Javier<small>Cord</small></div></div></div></div></div>`,
+ photos:(phone)=>`<div class="${phone?'':'col stage'}"><div class="sc" style="padding-top:34px"><div class="ey" style="text-align:center">Our photos</div><h2 style="text-align:center;font-style:italic;font-weight:400">Glimpse of Us</h2><div class="glimpse" style="margin-top:14px">${phone?'':'<div class="arr l">‹</div><div class="arr r hov">›</div>'}<div class="ph side p1"></div><div class="ph p2"></div><div class="ph side p3"></div></div><div class="ctr">3 / 12${phone?' · swipe · tap to open':' · hover for arrows · ← → keys · click to open'}</div></div></div>`,
+ replyBody:`<div class="q">Will you be there?</div><div class="opt on"><i></i>Joyfully accepts</div><div class="opt"><i></i>Regretfully declines</div><div class="lbl">Meal preference</div><div class="fld">No preference ▾</div><div class="lbl">Dietary notes</div><div class="fld">Anything we should know</div>`,
+ live:`<div class="col stage"><div class="sc" style="padding-top:34px"><div class="ey">Happening now</div><h2>Ceremony</h2><div class="live" style="margin-top:18px"><div><div class="player"><span class="dot">LIVE</span><span class="pl">▶</span></div><p style="margin-top:12px">Watch Live · from the Santuario de San Vicente de Paul Parish</p></div><div><div class="ey" style="margin-bottom:8px">The run of show</div><div class="now on"><b>Ceremony</b><span>2:30 PM</span></div><div class="now"><b>Cocktails</b><span>5:00 PM</span></div><div class="now"><b>Reception &amp; Dinner</b><span>7:00 PM</span></div><div class="rule" style="margin:20px 0"></div><div class="ey">Your table</div><p style="font:500 22px var(--serif);color:var(--l-ink);margin-top:4px">Table 7 · Narra</p><span class="link">Find your seat</span></div></div></div></div>`,
+ livePhone:`<div class="sc" style="padding-top:18px"><div class="ey">Happening now</div><h2>Ceremony</h2><div class="player" style="margin-top:12px"><span class="dot">LIVE</span><span class="pl">▶</span></div><div class="ey" style="margin-top:20px">The run of show</div><div class="now on"><b>Ceremony</b><span>2:30 PM</span></div><div class="now"><b>Cocktails</b><span>5:00 PM</span></div><div class="now"><b>Reception &amp; Dinner</b><span>7:00 PM</span></div></div>`,
+ seat:(phone)=>`<div class="${phone?'':'col stage'}"><div class="sc" style="padding-top:34px"><div class="ey">Find your seat</div><h2>Your table <i>· Table 7, Narra</i></h2><p>Ramon Aquino · with Lourdes Aquino</p><div class="seatmap" style="margin-top:22px">${[1,2,3,4,5,6,7,8,9,10,11,12].slice(0,phone?9:12).map(n=>`<div class="tbl ${n===7?'you':''}">${n}</div>`).join('')}</div></div></div>`,
+ camera:`<div class="col plate"><div class="sc" style="padding-top:34px;text-align:center"><div class="ey">Camera</div><h2>Your Papic camera</h2><p style="margin:10px auto 0">Scan to open the Camera on your phone — your shots land here.</p><div class="qr" style="margin:26px auto 0"></div><div class="rule"></div><div class="ey">Your shots</div><p style="margin:8px auto 0">Photos you take with the Camera land here.</p><div style="margin-top:14px"><span class="btn sec2">Take your first photo</span></div></div></div>`,
+ gallery:(phone)=>`<div class="${phone?'':'col stage'}"><div class="sc" style="padding-top:34px"><div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px"><div><div class="ey">Gallery</div><h2>Photos of you</h2></div><span class="link">Everyone’s photos →</span></div><div class="gal" style="margin-top:18px">${['p1 180','p2 240','p3 150','p4 210','p5 170','p1 230','p2 160','p3 200','p4 180','p5 150','p1 220','p2 170'].slice(0,phone?6:12).map(s=>{const[c,h]=s.split(' ');return `<div class="${c}" style="height:${h}px"></div>`}).join('')}</div></div></div>`
+};
+
+/* ───────── frames ───────── */
+const F=[
+ {ey:'Invitation · the first screen',t:'The Cover Scene fills the screen — no bars until it opens',
+  what:'Exactly the phone: the cover is the whole first screen (2026-10-14), the veil over it, nothing playing behind it. On a desktop the only thing drawn over it is the <b>×</b>. A wheel scroll or a click unveils and starts the music; then the top bar slides in. "Tap or swipe up" reads "Click or scroll" on a pointer — same string, same component.',
+  desk:s=>`<div class="body nobar">${S.cover(false)}<button class="x" style="position:absolute;left:20px;top:14px;width:36px;height:36px;border-radius:50%;border:1px solid var(--l-line);background:transparent;font:500 18px/1 var(--sans);color:var(--l-ink);z-index:4">×</button></div>`,
+  phone:`${S.cover(true)}<div class="x" style="position:absolute;left:18px;top:52px;width:34px;height:34px;border-radius:50%;border:1px solid var(--l-line);display:grid;place-items:center;font-size:17px;z-index:4">×</div>`,
+  cap:'<b>No bar</b> on either · the × is the one exit · the veil holds everything behind it'},
+ {ey:'Invitation · Home',t:'Welcome: the countdown beside the calendar, the note under it',
+  what:'The top bar is in: <b>× · names · Home · Details · Story · Me · account</b> — the phone\'s five, the phone\'s order (Gallery joins only with early shooting on, as the resolver decides). Countdown + calendar take the two columns of the 64 rem stage (the approved 2026-09-29 desktop frame); the note and the Reply button sit in the reading column under them. Nothing is added — the Reply button is the phone\'s.',
+  desk:s=>`${bar('rsvp','home')}<div class="body">${S.welcome}</div>`,
+  phone:`<div class="pbody">${ptop}${S.welcomePhone}</div>${pbar('rsvp','home')}`,
+  cap:'<b>Top bar</b> ≥ 1024 · the phone keeps its bottom bar and the two corners'},
+ {ey:'Invitation · Details',t:'The program beside the venues',
+  what:'Details is one page (each tab is its own page, 2026-09-30). On a desktop the schedule and the venues share the stage\'s two columns; a map is a door (framed), the times are not. The shipped words: "The program · The run of show", "The venues".',
+  desk:s=>`${bar('rsvp','details')}<div class="body">${S.details}</div>`,
+  phone:`<div class="pbody">${ptop}${S.detailsPhone}</div>${pbar('rsvp','details')}`,
+  cap:'<b>Two columns</b> at 1024 and up · one column on the phone, in the same order'},
+ {ey:'Invitation · Details, further down',t:'Dress code and E-Gifts stay the reading column',
+  what:'Words and colour chips do not earn width: 48 rem, centred, a divider between topics. The only frames are the two gift buttons. The chips are the colours the couple named on the live page (Rosewood · Pandan Green · Firebrick …).',
+  desk:s=>`${bar('rsvp','details')}<div class="body">${S.dress}</div>`,
+  phone:`<div class="pbody">${ptop}<div class="sc"><div class="ey">Dress code</div><h2>Dress with us</h2><p>Formal · wear the palette</p><div class="ey" style="margin-top:20px">Our colours</div><div class="chips"><div class="chip"><i style="background:#5C0700"></i>Rosewood</div><div class="chip"><i style="background:#669C35"></i>Pandan Green</div><div class="chip"><i style="background:#B51A00"></i>Firebrick</div><div class="chip"><i style="background:#F7F2EC"></i>Cream</div><div class="chip"><i style="background:#CFAFAF"></i>Dusty Rose</div><div class="chip"><i style="background:#351115"></i>Oxblood</div></div><div class="rule" style="margin:22px 0"></div><div class="ey">E-Gifts</div><p>The digital money dance — straight to the couple.</p><div class="gift"><span class="btn" style="width:100%">Send a gift</span></div></div></div>${pbar('rsvp','details')}`,
+  cap:'<b>Reading column</b> 768 px · frames only on the two buttons'},
+ {ey:'Invitation · Details · Wedding March',t:'Left and right of the aisle — the guest side of the Maker\'s two columns',
+  what:'The Maker already lays the march out as two columns, left and right of the aisle (approved 2026-10-06). The guest sees the same shape, read-only (the entourage scene\'s style C, "The march"): no frames, a dashed "walks alone" where a slot is empty, the numbers in the margin, "Your line is marked." for a guest who walks. On the phone the two columns narrow but stay two — a march is left and right.',
+  desk:s=>`${bar('rsvp','details')}<div class="body">${S.march}</div>`,
+  phone:`<div class="pbody">${ptop}<div class="sc">${S.march.replace('<div class="col stage"><div class="sc">','').replace(/<\/div><\/div>$/,'')}</div></div>${pbar('rsvp','details')}`,
+  cap:'<b>Stage</b> 1024 px · the same two columns at 375, narrower'},
+ {ey:'Invitation · Details · Roll call',t:'The entourage in two columns of groups',
+  what:'"The entourage · Standing with us" — the same scene in its "Roll call" style, its groups flowing into two columns on a desktop (Parents · Maid of Honor & Best Man · Principal Sponsors · Secondary Sponsors …). A name is never a frame.',
+  desk:s=>`${bar('rsvp','details')}<div class="body">${S.roll}</div>`,
+  phone:`<div class="pbody">${ptop}<div class="sc"><div class="ey">The entourage</div><h2>Standing with us</h2><div class="ent" style="grid-template-columns:1fr;margin-top:10px"><div class="g"><b>Parents</b><div class="r">Mr. Manuel C. Casasola<small>Father of the Groom</small>Atty. Eufrocina M. Sacdalan-Casasola<small>Parent of the Groom</small>Mrs. Milagros E. Buanhog<small>Mother of the Bride</small></div></div><div class="g"><b>Maid of Honor &amp; Best Man / Best Woman</b><div class="r">Ms. Catherine E. Buanhog<small>Maid of Honor</small>Atty. Indalecia S. Casasola<small>Best Woman</small></div></div></div></div></div>${pbar('rsvp','details')}`,
+  cap:'<b>Two columns</b> of groups · one on the phone'},
+ {ey:'Invitation · Photos',t:'Glimpse — one photo centred, the next peeking in, arrows on hover',
+  what:'The approved 2026-10-15 Glimpse style, its own desktop note honoured: 320-px cards, neighbours at .92 / 72 %, <b>arrows appear on hover</b>, ← → keys, click opens the shipped lightbox. The counter reads "3 / 12". Same photos, same order, no new field.',
+  desk:s=>`${bar('rsvp','home')}<div class="body">${S.photos(false)}</div>`,
+  phone:`<div class="pbody">${ptop}${S.photos(true)}</div>${pbar('rsvp','home')}`,
+  cap:'<b>Hover</b> shows ‹ › (the right one is hovered: gold ring) · swipe on the phone'},
+ {ey:'Invitation · Reply',t:'The same sheet, from the side — the invitation stays in view',
+  what:'<code>rsvp-sheet.tsx</code> is one dialog: heading "Your reply" (or "Change your reply"), "Will you be there?", Joyfully accepts / Regretfully declines, Meal preference, Dietary notes, Save RSVP, the privacy line. On a desktop it slides in from the right at 440 px over a dim scrim; on the phone it rises from the bottom. Back / Escape closes it, as shipped.',
+  desk:s=>`${bar('rsvp','home')}<div class="body">${S.welcome}</div><div class="scrim"></div><div class="panel"><div class="hd"><h2>Your reply</h2><button>Close</button></div>${S.replyBody}<div class="foot"><span class="btn">Save RSVP</span><div class="priv">Only the hosts see your reply.</div></div></div>`,
+  phone:`<div class="pbody">${ptop}${S.welcomePhone}</div>${pbar('rsvp','home')}<div class="pscrim"></div><div class="sheet"><div class="grab"></div><div class="hd"><h2>Your reply</h2><span>Close</span></div>${S.replyBody}<div style="position:absolute;left:20px;right:20px;bottom:18px"><span class="btn" style="width:100%">Save RSVP</span></div></div>`,
+  cap:'<b>Side panel</b> 440 px · <b>bottom sheet</b> on the phone · one dialog, two edges'},
+ {ey:'The Day · Live',t:'Watch beside the run of show',
+  what:'The Day\'s five: <b>Live · Home · Camera · Gallery · Me</b> (owner 2026-09-30), the Camera in its action colour, not re-centred (the file\'s own reasoning). Live puts the broadcast (16:9) beside the program with the now-row lit, and the guest\'s table under it with "Find your seat". The announcement line, when there is one, runs full width above both.',
+  desk:s=>`${bar('event','live')}<div class="body">${S.live}</div>`,
+  phone:`<div class="pbody">${ptop}${S.livePhone}</div>${pbar('event','live')}`,
+  cap:'<b>1.35 : 1</b> columns · stacked on the phone, player first'},
+ {ey:'The Day · Find your seat',t:'The seat map uses the stage; your table is ringed',
+  what:'"Find your seat" (the shipped door) opens the map six tables across; the guest\'s table carries the Look\'s accent ring and the word You. A table is a door (hover ring); the heading is not.',
+  desk:s=>`${bar('event','home')}<div class="body">${S.seat(false)}</div>`,
+  phone:`<div class="pbody">${ptop}${S.seat(true)}</div>${pbar('event','home')}`,
+  cap:'<b>Six across</b> on a desktop · three on the phone'},
+ {ey:'The Day · Camera',t:'A laptop hands the Camera to the phone',
+  what:'The tab keeps its word and colour. On a desktop its page shows the guest\'s own QR with "Scan to open the Camera on your phone", and "Your shots" below — the Camera stays a phone thing (99 % are on phones; a laptop webcam at a table is not Papic). No webcam capture — Q3.',
+  desk:s=>`${bar('event','camera')}<div class="body">${S.camera}</div>`,
+  phone:`<div class="pbody" style="background:#111;color:#fff"><div class="ptop"><div class="x" style="border-color:#444">×</div><div></div></div><div style="position:absolute;inset:60px 0 120px;background:linear-gradient(160deg,#3a2f31,#1a1517)"></div><div style="position:absolute;left:0;right:0;bottom:36px;display:flex;justify-content:center;align-items:center;gap:40px"><div style="width:44px;height:44px;border-radius:8px;background:#444"></div><div style="width:72px;height:72px;border-radius:50%;border:4px solid #fff"></div><div style="width:44px;height:44px;border-radius:50%;border:1px solid #666;display:grid;place-items:center;font-size:12px">↻</div></div></div>`,
+  cap:'<b>QR to the phone</b> on a desktop · the real camera on the phone'},
+ {ey:'Post Event · Gallery',t:'Four columns, one dropdown for whose photos',
+  what:'Post Event\'s five: <b>Recap · Film · Suppliers · Gallery · Me</b> (Film and Suppliers only when each exists; no Camera after the day). The gallery is the two shipped sections — "Photos of you", then "Your shots" — and "Everyone’s photos →" when the host shares the whole gallery (2026-10-01). 4 columns at 1280, 3 at 1024, 2 on the phone; click opens the shipped lightbox with ← → Esc.',
+  desk:s=>`${bar('editorial','gallery')}<div class="body">${S.gallery(false)}</div>`,
+  phone:`<div class="pbody">${ptop}${S.gallery(true)}</div>${pbar('editorial','gallery')}`,
+  cap:'<b>Masonry</b> · the same two sections on both'}
+];
+
+const host=document.getElementById('frames');
+host.innerHTML=F.map((f,i)=>`<section class="sec" id="f${i}"><div class="eyebrow">${f.ey}</div><h2>${f.t}</h2><p class="what">${f.what}</p><div class="pair"><div class="deskwrap"><div class="box" data-dbox><div class="scaler" data-desk><div class="desk">${addr}<div class="vp">${f.desk()}</div></div></div></div><p class="cap"><b>Desktop</b> · <span data-wlabel></span> · ${f.cap}</p></div><div class="phonewrap"><div class="box" data-pbox><div class="scaler" data-phone><div class="phone">${st}${f.phone}</div></div></div><p class="cap"><b>Phone</b> · 375</p></div></div></section>`).join('');
+
+/* ───────── width + scale ───────── */
+const wSel=document.getElementById('w');
+function layout(){
+ const W=+wSel.value, H=W===1024?768:W===1280?800:900;
+ document.querySelectorAll('.desk').forEach(d=>{d.style.setProperty('--w',W+'px');d.style.setProperty('--h',H+'px')});
+ document.querySelectorAll('[data-wlabel]').forEach(e=>e.textContent=W+' × '+H);
+ const pair=document.querySelector('.pair'); const total=pair.getBoundingClientRect().width;
+ const stacked=window.innerWidth<=1100;
+ const phoneScale=stacked?Math.min(1,total/375):0.62;
+ const room=stacked?total:total-375*phoneScale-22;
+ const ds=Math.min(1,room/W);
+ document.querySelectorAll('[data-desk]').forEach(s=>{s.style.transform=`scale(${ds})`;s.style.width=W+'px';s.style.height=H+'px';s.parentElement.style.height=(H*ds)+'px';s.parentElement.style.width=(W*ds)+'px'});
+ document.querySelectorAll('[data-phone]').forEach(s=>{s.style.transform=`scale(${phoneScale})`;s.style.width='375px';s.style.height='812px';s.parentElement.style.height=(812*phoneScale+18)+'px';s.parentElement.style.width=(375*phoneScale+18)+'px'});
+ document.getElementById('scaleNote').textContent=`desktop frame shown at ${Math.round(ds*100)} % — every number in it is at true size`;
+}
+wSel.addEventListener('change',layout); window.addEventListener('resize',layout); layout();
+/* dark */
+const dk=document.getElementById('dark');
+dk.addEventListener('click',()=>{const on=dk.getAttribute('aria-checked')!=='true';dk.setAttribute('aria-checked',on);document.documentElement.dataset.theme=on?'dark':'light'});
+if(matchMedia('(prefers-color-scheme: dark)').matches){dk.click()}
+</script>
+</body>
+</html>
