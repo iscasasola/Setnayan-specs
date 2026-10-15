@@ -84,7 +84,7 @@ Older drafts still open: batch 7 #6532 (dark mode + public fixes — merge main,
   Scene ◆ ready-made loops play · Upload = photos (videos kept, not played for guests). Publish it as an Artifact
   (strip doctype/head/body, `<title>Cover Scene</title>`), ask for his OK, then build. Open questions inside: Framed
   meaning · Hero folded in · Scene ◆ still Pro.
-- **Media allowance** — FINAL: **Free 10 MB, Pro 100 MB** (owner 15 Oct; supersedes 500 MB / "nothing extra" / "keeps 100 MB").
+- **Media allowance** — FINAL: **Free 10 MB, Pro 500 MB** (owner 15 Oct, "Free 10MB" + "Pro is 500MB").
   Not built. Constant proposed: `COUPLE_MEDIA_QUOTA_BYTES` in `lib/entitlements.ts`. Cost ≈ nothing (R2 ~$0.015/GB-mo).
 - **Video checking** — owner said "Yes, research it": find a way to screen uploaded videos so they can play for guests
   (today `GUEST_HERO_VIDEO_PLAYBACK = false`, SEC-6). Cloudflare's CSAM tool is NOT available (DNS is GoDaddy, see
@@ -131,7 +131,7 @@ Older drafts still open: batch 7 #6532 (dark mode + public fixes — merge main,
   value, `resolveHero` keeps feeding poster/home card (owner: yes) · `canvas.ground` on the hero row, no migration ·
   the unchanged `StageBackground` rows via a thin adapter · Scene ◆ ready-made loops play for guests and stay PRO (owner:
   Pro) · Upload ◆ = photos and ≤15 s clips like every stage (own stage clips already play for guests — owner: keep playing); only the cover's own HERO clip stays locked while `GUEST_HERO_VIDEO_PLAYBACK` is false ·
-  the EXISTING `MAKER_EVENT_MEDIA_BYTES_CAP` (100 MB, `lib/couple-media-allowance.ts`) becomes plan-aware — **Free 10 MB, Pro 100 MB** (owner, FINAL 15 Oct ~07:40, supersedes 100/500; never add a second quota constant; existing files are always kept — a couple over the cap just cannot add more; measured: only cale-ice (internal) is over 10 MB, at 144.9 MB on the unsettled counter — internal accounts follow the internal = Pro rule unless the owner says otherwise) with the "Your media · N MB of 500 MB" meter · legibility
+  the EXISTING `MAKER_EVENT_MEDIA_BYTES_CAP` (100 MB, `lib/couple-media-allowance.ts`) becomes plan-aware — **Free 10 MB, Pro 500 MB** (owner, FINAL 15 Oct ~07:50 — "Pro is 500MB"; supersedes 100/500 and 10/100; never add a second quota constant; existing files are always kept — a couple over the cap just cannot add more; measured: only cale-ice (internal = Pro) is over 10 MB, at 144.9 MB — under Pro's 500 MB) with the "Your media · N MB of 500 MB" meter · legibility
   over the scene's ground · guard `the-cover-scene-is-one-group.test.ts`. Opus. Branch `rd/cover-scene`. Side-by-sides at
   375 + desktop vs the prototype before merge.
 - Every other build: its worktree's last commits + the table above + `handovers/` are the brief. Rules for all:
