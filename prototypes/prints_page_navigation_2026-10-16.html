@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Studio › Prints · find your way · prototype</title>
+<!--
+  STUDIO › PRINTS — "so fix the prints page. so we can easily navigate." (owner, verbatim, 2026-10-16, scrolling the
+  page at the EVENT PASS SIZE picker.) Fable, design only — NOTHING here is built; nothing merges until the owner approves the look.
+
+  THE BASELINE IS THE REAL PAGE. Measured 2026-10-16 on origin/main 42046cc69c in the Maker lab
+  (/dev/maker-lab?studio=1 → Studio › Prints), 375 × 812 with touch emulation. The eight "before" pictures in
+  prints_page_navigation_2026-10-16/ are that page, untouched (the lab cannot draw the print pictures — it has no
+  signed-in database — so every thumbnail reads "Drawing…" or a ⚠; on the owner's event they are the real prints).
+  The whole page is ONE scrolling form: 5,725 px tall at 375 (7.5 screens of 760 px) · 5,621 px at 390 (7.1 screens).
+  16 pieces · 2 group headings ("YOUR INVITATION SET" at the top, "FOR THE DAY" 3,972 px down = 5.2 screens later).
+
+  THE DELTA (only what is drawn over the pictures, nothing redrawn):
+    1 · a PIECE BAR in the thumb zone — ‹ · [the piece you are on ▾] · › — the one house dropdown (PickMenu, as a sheet on
+        a phone, groups sticky) listing every piece under its group; a pick scrolls the form to that piece (the shipped
+        `select(k)` already scrolls the editor column to `[data-details-editor=k]`); the label follows the scroll.
+    2 · ONE block "ON EVERY PRINT" at the head of the form — "Event Hub QR code · Always printed" and the "Add an NFC
+        sticker spot" switch, with their one Save — in place of the three identical "Always printed" rows (Invitation ·
+        Finer Details · Event pass) and the NFC switch that today sits under Finer Details' Kindly reply (NFC prints on the
+        pass, the details card and the QR poster — a whole-set setting; owner: keep it with the QR line).
+    3 · the head row's small line names the CHOSEN size only ("Calling card · 90 × 54 mm · one per guest"); the list of
+        every size lives in the dropdown where it already is. Today the five pass sizes wrap to eleven lines beside the
+        picture and the dropdown — a 245-px head — and the same for Event card (176 px) and the Entrance seating chart (246 px).
+  Everything else is as shipped: the same rows, switches, Saves, previews, menu editor, ticket style, poster photo.
+
+  Rules honoured: one dropdown for any set of choices · tools in the lower third · a frame only on what is pressable,
+  hairlines between topics · nothing links elsewhere · "event", never "celebration" · Event Hub, never website ·
+  375/390 first · tokens for dark (the shipped app is light-only on main today — globals.css "Dark → DISABLED";
+  the rd/dark-* PRs in flight bring it back; the pictures here stay light because today's page is light).
+-->
+<style>
+:root{--page:#F4F0E8;--surf:#FFFFFF;--ink:#2C2A29;--ink2:#5B5752;--mute:#8E8880;--line:#E6E0D6;--line2:#D2CBBF;--pill:#F1ECE3;
+--cta:#B4542E;--on-cta:#FFFFFF;--gold:#A9834B;--gold-ink:#6F5527;--green:#4F6B4A;--amber:#B86E12;--amber-bg:#FFF4E0;--bad:#A33A2B;
+--sans:-apple-system,"Helvetica Neue",Inter,system-ui,Arial,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+--in:cubic-bezier(.2,.8,.2,1)}
+html[data-theme=dark]{--page:#17160F;--surf:#232019;--ink:#FBFAF7;--ink2:#D6D1C7;--mute:#B3AEA3;--line:rgba(251,250,247,.14);--line2:rgba(251,250,247,.26);--pill:rgba(251,250,247,.08);--amber-bg:#3A2A10;--green:#6E8E68}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%}
+body{background:#D9D4CB;color:var(--ink);font:15px/1.45 var(--sans);padding:16px 0 48px}
+html[data-theme=dark] body{background:#0E0D09}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+[hidden]{display:none!important}
+svg.i{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;width:20px;height:20px}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px;display:flex;flex-direction:column;gap:16px}
+h1{font-size:22px;font-weight:700;letter-spacing:-.01em}
+.sub{color:var(--ink2);font-size:13.5px}
+.ctl{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:13px;color:var(--ink2)}
+.ps{position:relative;display:flex;height:40px;padding:3px;border-radius:999px;background:var(--pill);border:1px solid var(--line)}
+.ps button{flex:1;border-radius:999px;font-size:13px;font-weight:600;color:var(--ink2);padding:0 14px;white-space:nowrap}
+.ps button[aria-pressed=true]{background:var(--cta);color:var(--on-cta)}
+.two{display:grid;grid-template-columns:1fr;gap:24px;justify-items:center}
+@media(min-width:820px){.two{grid-template-columns:1fr 1fr;align-items:start}}
+.col{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%}
+.col > .cap{width:375px;max-width:100%;font-size:13px;color:var(--ink2);display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.col > .cap b{color:var(--ink);font-size:14px}
+/* ── the phone ── */
+.phone{position:relative;width:375px;max-width:100%;height:812px;background:var(--page);overflow:hidden;border-radius:26px;box-shadow:0 20px 50px -20px rgba(0,0,0,.45);display:flex;flex-direction:column}
+.bar{flex:none;height:52px;background:url(prints_page_navigation_2026-10-16/before-375-01-top.jpg) 0 0/375px 812px no-repeat;border-bottom:1px solid var(--line);position:relative;z-index:4}
+.scroller{flex:1;min-height:0;overflow-y:auto;overscroll-contain:contain;scroll-behavior:smooth;position:relative;-webkit-overflow-scrolling:touch}
+.pg{position:relative;width:375px}
+.frame{width:375px;background-repeat:no-repeat;background-size:375px 812px}
+/* annotation marks (prototype only — never UI) */
+.mark{position:absolute;left:0;right:0;border:2px dashed var(--amber);background:rgba(184,110,18,.08);pointer-events:none;z-index:2}
+.mark > span{position:absolute;right:6px;top:-13px;background:var(--amber);color:#fff;font:600 11px/18px var(--sans);padding:0 8px;border-radius:999px;white-space:nowrap}
+.mark.lo > span{top:auto;bottom:-13px}
+.ruler{position:absolute;right:10px;bottom:12px;z-index:3;background:var(--amber);color:#fff;font:600 12px/1 var(--sans);padding:8px 10px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.25);pointer-events:none}
+/* masks: a shipped row that leaves its place in the AFTER picture */
+.gone{position:absolute;left:0;right:0;z-index:2;background:color-mix(in srgb,var(--page) 82%,transparent);backdrop-filter:grayscale(1);display:flex;align-items:center;justify-content:center;pointer-events:none}
+.gone > span{font:600 11.5px var(--sans);color:var(--amber);background:var(--amber-bg);border:1px dashed var(--amber);padding:3px 10px;border-radius:999px}
+/* ── the shipped Studio rows, as they are on the page (white band, 14-px label, hairlines) ── */
+.gh{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;background:var(--page);border-bottom:1px solid var(--line);font:600 10px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+.gh small{font:500 11px var(--sans);letter-spacing:0;text-transform:none;color:var(--mute)}
+.band{background:var(--surf);padding:0 16px}
+.fr{min-height:52px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:14px;color:var(--ink)}
+.fr + .fr{border-top:1px solid var(--line)}
+.fr .l{display:flex;align-items:center;gap:8px}
+.fr .val{font-size:13px;color:var(--mute)}
+.ib{width:22px;height:22px;border-radius:999px;border:1px solid var(--line2);color:var(--cta);font:italic 600 12px Georgia,serif;display:grid;place-items:center}
+.sw{position:relative;width:46px;height:28px;border-radius:999px;background:rgba(44,42,41,.18);flex:none;transition:background .2s}
+.sw::after{content:"";position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:999px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:transform .2s}
+.sw[aria-checked=true]{background:var(--green)}.sw[aria-checked=true]::after{transform:translateX(18px)}
+.saverow{display:flex;align-items:center;gap:12px;padding:8px 0 12px}
+.save{height:48px;padding:0 24px 0 20px;border-radius:999px;background:var(--cta);color:var(--on-cta);font-weight:600;font-size:15px;display:inline-flex;align-items:center;gap:10px}
+.save svg{width:18px;height:18px}
+.saverow .q{font-size:13px;color:var(--gold-ink);display:flex;align-items:center;gap:6px}
+html[data-theme=dark] .saverow .q{color:#D9BE8C}
+/* the head row — ChosenRow: picture · name + line · size ▾ */
+.head{display:flex;align-items:center;gap:14px;min-height:96px;padding:8px 0}
+.head .pic{flex:none;width:52px;height:72px;border-radius:8px;background:var(--surf);box-shadow:0 1px 3px rgba(0,0,0,.18);display:grid;place-items:center;color:var(--mute);font:500 9px var(--sans)}
+.head .nm{flex:1;min-width:0}
+.head .nm b{display:block;font-size:16px;font-weight:500;line-height:1.2}
+.head .nm span{display:block;font-size:12.5px;color:var(--mute);line-height:1.3;margin-top:2px}
+.dd{flex:none;height:44px;padding:0 14px 0 16px;border:1px solid var(--line2);border-radius:999px;background:var(--surf);display:inline-flex;align-items:center;gap:10px;font-size:15px;color:var(--ink);max-width:170px}
+.dd svg{width:14px;height:14px;color:var(--cta);flex:none}
+.dd span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.patch{position:absolute;left:0;right:0;z-index:2;background:var(--surf)}
+.patch .why{display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--page) 85%,transparent)}
+.patch .why span{font:600 11.5px var(--sans);color:var(--amber);background:var(--amber-bg);border:1px dashed var(--amber);padding:3px 10px;border-radius:999px;text-align:center}
+/* ── THE PIECE BAR (the delta) ── */
+.pbar{flex:none;height:56px;padding:6px 8px calc(6px + env(safe-area-inset-bottom));background:var(--surf);border-top:1px solid var(--line);display:flex;align-items:center;gap:6px;position:relative;z-index:5}
+.pbar .step{flex:none;width:44px;height:44px;border-radius:999px;background:var(--pill);display:grid;place-items:center;color:var(--ink)}
+.pbar .step[disabled]{opacity:.35}
+.pbar .pick{flex:1;min-width:0;height:44px;border:1px solid var(--line2);border-radius:999px;background:var(--surf);display:flex;align-items:center;justify-content:center;gap:8px;padding:0 14px}
+.pbar .pick .w{min-width:0;display:flex;flex-direction:column;align-items:center;line-height:1.1}
+.pbar .pick .w b{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+.pbar .pick .w small{font-size:10.5px;color:var(--mute);letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+.pbar .pick svg{width:14px;height:14px;color:var(--cta);flex:none}
+.pbar .pick:active,.pbar .step:active{transform:scale(.97)}
+/* the pick's sheet (PickMenu opens as a sheet on a phone) */
+.scrim{position:absolute;inset:0;background:rgba(20,16,10,.35);z-index:8;opacity:0;transition:opacity .2s}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:72%;background:var(--surf);border-radius:18px 18px 0 0;box-shadow:0 -12px 40px -16px rgba(0,0,0,.4);z-index:9;transform:translateY(102%);transition:transform .26s var(--in);display:flex;flex-direction:column}
+.sheet.open{transform:none}.scrim.open{opacity:1}
+.sheet .grab{flex:none;height:18px;display:grid;place-items:center}.sheet .grab i{width:40px;height:4px;border-radius:999px;background:var(--line2)}
+.sheet .ttl{flex:none;padding:2px 20px 10px;font:600 10.5px var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--mute)}
+.sheet ul{list-style:none;overflow-y:auto;overscroll-behavior:contain;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+.sheet li.g{position:sticky;top:0;background:var(--surf);font:600 10px var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--mute);padding:12px 20px 6px;border-top:1px solid var(--line)}
+.sheet li.g:first-child{border-top:0}
+.sheet li button{width:100%;min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;font-size:15px;text-align:left}
+.sheet li button small{color:var(--mute);font-size:12px}
+.sheet li button .tick{width:18px;height:18px;color:var(--gold);visibility:hidden}
+.sheet li button[aria-selected=true]{font-weight:600}.sheet li button[aria-selected=true] .tick{visibility:visible}
+/* ── notes ── */
+.note{background:var(--surf);border:1px solid var(--line);border-radius:16px;padding:14px 16px;font-size:13.5px;color:var(--ink2)}
+.note h3{font-size:15px;color:var(--ink);margin:0 0 8px}
+.note h4{font:700 11px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin:14px 0 6px}
+.note ol,.note ul{padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.note b{color:var(--ink)}
+.note table{width:100%;border-collapse:collapse;font-size:12.5px}
+.note td,.note th{padding:5px 6px 5px 0;border-top:1px solid var(--line);vertical-align:top;text-align:left}
+.note th{color:var(--mute);font-weight:600;border-top:0}
+.note td:first-child{font-weight:600;color:var(--ink);white-space:nowrap}
+.note code{font:12px var(--mono);background:var(--pill);padding:1px 5px;border-radius:5px}
+.grid2{display:grid;grid-template-columns:1fr;gap:16px}@media(min-width:820px){.grid2{grid-template-columns:1fr 1fr}}
+</style></head>
+<body>
+<div class="wrap">
+  <div>
+    <h1>Studio › Prints — find your way</h1>
+    <p class="sub">Prototype for approval · 2026-10-16 · Fable · nothing built. Left: today's page, the real pictures. Right: the same page with three changes drawn over it — scroll it, press the bar.</p>
+  </div>
+  <div class="ctl">
+    <div class="ps" role="group" aria-label="Prototype theme"><button type="button" data-theme-pick="light" aria-pressed="true">Light</button><button type="button" data-theme-pick="dark" aria-pressed="false">Dark</button></div>
+    <span>Dark colours the new bar, block and sheet only — the pictures are today's page, which is light.</span>
+  </div>
+
+  <div class="two">
+    <!-- ════════ BEFORE ════════ -->
+    <div class="col">
+      <div class="cap"><b>Before — today</b><span>5,725 px · 7.5 screens at 375</span></div>
+      <div class="phone" id="before">
+        <div class="bar" aria-hidden="true"></div>
+        <div class="scroller" id="bsc"><div class="pg" id="bpg"></div></div>
+        <div class="ruler" id="bruler">screen 1 of 7.5</div>
+      </div>
+      <div class="cap"><span>Amber marks are notes, not UI. The ⚠ / "Drawing…" squares are the lab's — on your event they are the real prints.</span></div>
+    </div>
+    <!-- ════════ AFTER ════════ -->
+    <div class="col">
+      <div class="cap"><b>After — the delta</b><span>bar · one block · short head lines</span></div>
+      <div class="phone" id="after">
+        <div class="bar" aria-hidden="true"></div>
+        <div class="scroller" id="asc"><div class="pg" id="apg"></div></div>
+        <div class="pbar">
+          <button type="button" class="step" id="prev" aria-label="Previous piece"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
+          <button type="button" class="pick" id="pick" aria-haspopup="listbox" aria-expanded="false"><span class="w"><small id="pickg">Your invitation set</small><b id="pickl">Invitation</b></span><svg class="i" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+          <button type="button" class="step" id="next" aria-label="Next piece"><svg class="i" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+        </div>
+        <div class="scrim" id="scrim" hidden></div>
+        <div class="sheet" id="sheet" role="listbox" aria-label="Which print">
+          <div class="grab"><i></i></div>
+          <div class="ttl">Which print</div>
+          <ul id="plist"></ul>
+        </div>
+      </div>
+      <div class="cap"><span>The bar's label follows the scroll. ‹ › step one piece. The dropdown is the house PickMenu, opened as a sheet, groups sticky — the shipped <code>select(k)</code> scroll.</span></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="note">
+      <h3>What is on the page today</h3>
+      <p>Measured 2026-10-16 · origin/main <code>42046cc69c</code> · <code>/dev/maker-lab?studio=1</code> → Studio › Prints · 375 × 812, touch. One scrolling form, every editor mounted; the only landmarks are two group bands and each piece's head row.</p>
+      <table>
+        <tr><th>Piece (its real head)</th><th>Starts at</th><th>Screen</th><th>Holds</th></tr>
+        <tr><td>YOUR INVITATION SET</td><td>0</td><td>1</td><td>group band</td></tr>
+        <tr><td>Invitation</td><td>0</td><td>1</td><td>size ▾ · Save PDF · Parents on the invitation · Opening line (Start from ▾ + field) · <i>Event Hub QR code · Always printed</i> · Save</td></tr>
+        <tr><td>Entourage</td><td>601</td><td>1</td><td>Save PDF</td></tr>
+        <tr><td>Finer Details</td><td>754</td><td>2</td><td>Save PDF · E-Gifts gift details · E-Gifts thank-you · Love Story · Schedule · Mood Board · Special message · Kindly reply (Who guests reply to ▾) · <i>Always printed</i> · Save · <i>Add an NFC sticker spot</i></td></tr>
+        <tr><td>Menu</td><td>1,547</td><td>3</td><td>Save PDF · the menu editor (moments, dishes, Arrange, Add a moment)</td></tr>
+        <tr><td>Event pass</td><td>2,358</td><td>4</td><td>size ▾ (five sizes wrap to 11 lines — a 245-px head) · Save PDF · Guest list names · <i>Always printed</i> · Save · THE TICKET GUESTS SAVE: Ticket style cards · Digital ticket ◆ zip · Printed ticket</td></tr>
+        <tr><td>Welcome poster</td><td>3,352</td><td>5</td><td>Save PDF</td></tr>
+        <tr><td>Our Story poster</td><td>3,505</td><td>5</td><td>Save PDF · Background: Theme's picture | My photo</td></tr>
+        <tr><td>Event card</td><td>3,714</td><td>5</td><td>size ▾ (three sizes wrap — 176-px head) · Save PDF</td></tr>
+        <tr><td>FOR THE DAY</td><td>3,972</td><td>6</td><td>group band · "free for every event"</td></tr>
+        <tr><td>Guest list registry</td><td>3,971</td><td>6</td><td>Save PDF</td></tr>
+        <tr><td>Guest QR codes</td><td>4,169</td><td>6</td><td>Save PDF</td></tr>
+        <tr><td>2D seat plan</td><td>4,322</td><td>6</td><td>Save in your colours · Save as blueprint · Offer a seat plan with the set · Save</td></tr>
+        <tr><td>Table signs &amp; place cards</td><td>4,599</td><td>7</td><td>Save PDF</td></tr>
+        <tr><td>Entrance seating chart</td><td>4,752</td><td>7</td><td>size ▾ (246-px head) · Layout By table | A to Z · Entrance chart · by table</td></tr>
+        <tr><td>Caterer meal counts</td><td>5,136</td><td>7</td><td>Save PDF · Save spreadsheet</td></tr>
+        <tr><td>Event QR</td><td>5,289</td><td>7</td><td>Save image</td></tr>
+        <tr><td>Download the set</td><td>5,442</td><td>8</td><td>Whole set · Classic (PDF) · Every guest's ticket · Classic</td></tr>
+      </table>
+      <h4>Why a person loses their place</h4>
+      <ul>
+        <li><b>7.5 screens, two signposts.</b> "YOUR INVITATION SET" is on screen 1 and "FOR THE DAY" on screen 6 — five screens with no heading, while the top nav says only "Prints ▾".</li>
+        <li><b>Two pieces are taller than a screen</b> (Finer Details 793 px, Event pass 994 px): mid-block you see switches with no piece name in view — the NFC switch sits right above "Menu" and reads as the Menu's.</li>
+        <li><b>The same row repeats</b> — "Event Hub QR code · Always printed" three times, "Save · Guests see this right away" four times — so three screens look alike.</li>
+        <li><b>The heads that should anchor you are the tallest rows:</b> the Event pass head lists all five sizes beside its picture and its dropdown — 11 wrapped lines, 245 px — exactly the screen the owner was on.</li>
+        <li><b>Global vs per piece is not drawn as such.</b> Global: the QR (always), the NFC spot (prints on the pass, the details card and the QR poster), the one words form. Per piece: size, what it includes, its Saves, ticket style, poster photo, chart layout.</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h3>The change — three things, nothing redrawn</h3>
+      <ol>
+        <li><b>The piece bar, in the thumb zone.</b> ‹ · <i>the piece you are on</i> ▾ · › under the form, 56 px. The ▾ is the one house dropdown (PickMenu → a sheet on a phone, group headings sticky, a tick on the current). A pick runs the shipped <code>select(k)</code>, which already scrolls the editor column to that piece; the label follows the scroll (the piece whose head last passed the top). Phone only — on a computer the navigator column already lists the pieces.</li>
+        <li><b>ON EVERY PRINT — one block at the head of the form.</b> "Event Hub QR code · Always printed", the "Add an NFC sticker spot" switch (its ⓘ already says where it prints), one Save. The three per-piece "Always printed" rows and the NFC row under Finer Details' Kindly reply go. Same form, same field names — one place.</li>
+        <li><b>Head lines name the chosen size, not every size.</b> "Calling card · 90 × 54 mm · one per guest" (Event pass), "A5 · 148 × 210 mm" (Event card), "A2" (Entrance chart). Every size stays in the dropdown, where it is already picked. A head goes from 245 px to about 110.</li>
+      </ol>
+      <h4>What stays exactly as shipped</h4>
+      <p>Every piece's picture in its head and its full-size sheet (approved 2026-10-14), the Saves, the include switches, the menu editor, Parents, Kindly reply, Ticket style, poster Background, the chart Layout, Download the set, the top nav. The four inline Saves stay (one form, saved where you changed it).</p>
+      <h4>Decided, not asked</h4>
+      <ul>
+        <li>The bar sits at the <b>bottom</b>, not under the top nav: tools live in the lower third, and the top nav stays as shipped. It is a bar, not a second Stages-style pill row.</li>
+        <li>The global block sits <b>first</b>: you meet it once and know it applies to everything below; the Invitation is the second thing on screen, as today.</li>
+        <li>"Prints ▾" in the top nav keeps naming the page; the bar names the piece.</li>
+      </ul>
+      <h4>Where a builder would touch (no code in this prototype)</h4>
+      <ul>
+        <li><code>apps/web/app/dashboard/[eventId]/launch/_components/details-workspace.tsx</code> — mount the bar under <code>editorsBody</code> for a Studio form group with pieces; it already has <code>select</code>, <code>editorRef</code> and the <code>formAt</code> scroll.</li>
+        <li>new <code>studio-prints-bar.tsx</code> (client): PickMenu + ‹ ›; an IntersectionObserver over <code>[data-details-editor]</code> for the label; loaded through <code>StudioTool</code> / <code>details-lazy.tsx</code> like the other Studio parts.</li>
+        <li><code>maker-details.tsx</code> — one editor for "On every print" (<code>qrAlways</code> + <code>nfcToggle</code> + <code>save</code>) at the head of the Prints form in Studio; drop the three per-piece <code>qrAlways</code> and the Finer Details <code>nfcToggle</code> in Studio only.</li>
+        <li><code>lib/maker-details-items.ts</code> + <code>lib/studio-details.ts</code> — the new item key in the <code>set</code> group and its <code>STUDIO_FORM_HEADS</code> title "On every print".</li>
+        <li><code>maker-prints.tsx</code> <code>PrintPieceEditor</code> (Studio branch) — the head's <code>line</code>: the chosen format's label and mm instead of <code>sizes.join(…)</code>. Not <code>print-layout.ts</code> / <code>pass-card.ts</code> — another builder has those.</li>
+        <li>Guards to re-read first: <code>lib/studio-prints-six-are-the-templates.test.ts</code>, <code>lib/every-print-shows-its-picture.test.ts</code>, <code>lib/studio-prints-posts-the-same.test.ts</code> (the words form must post the same fields).</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── the measured page (375 × 812; the scroller is 760 px under the 52-px top nav) ── */
+const DIR='prints_page_navigation_2026-10-16/';
+const FRAMES=[[0,'before-375-01-top.jpg'],[740,'before-375-02-finer-details.jpg'],[1480,'before-375-03-nfc-menu.jpg'],[2220,'before-375-04-event-pass.jpg'],[2960,'before-375-05-ticket-style-posters.jpg'],[3700,'before-375-06-event-card-for-the-day.jpg'],[4440,'before-375-07-seat-plan-entrance-chart.jpg'],[4965,'before-375-08-bottom.jpg']];
+const VIEW=760, TOTAL=5721;
+const PIECES=[
+ ['invitation','Invitation','Your invitation set',0],['entourage','Entourage','Your invitation set',601],['details','Finer Details','Your invitation set',754],['menu','Menu','Your invitation set',1547],
+ ['pass','Event pass','Your invitation set',2358],['poster','Welcome poster','Your invitation set',3352],['story-poster','Our Story poster','Your invitation set',3505],['card','Event card','Your invitation set',3714],
+ ['guest-registry','Guest list registry','For the day',3971],['qr-codes','Guest QR codes','For the day',4169],['seat-plan','2D seat plan','For the day',4322],['seating-pack','Table signs & place cards','For the day',4599],
+ ['seating-chart','Entrance seating chart','For the day',4752],['caterer','Caterer meal counts','For the day',5136],['event-qr','Event QR','For the day',5289],['download','Download the set','Download the set',5442]];
+/* rows the delta moves (top, height) — measured on the same page */
+const QR_ROWS=[[505,44],[1399,44],[2719,44]]; const NFC=[1495,52];
+const HEADS={pass:[2359,245,'Event pass','Calling card · 90 × 54 mm · one per guest','Calling card'],card:[3727,176,'Event card','A5 · 148 × 210 mm','A5'],'seating-chart':[4765,246,'Entrance seating chart','A2 · one sheet for the door','A2']};
+
+function frames(into){
+  /* each picture's last 4 px is the lab page's own bottom edge — the next frame starts over it */
+  let prevEnd=0; const SHOW=VIEW-4;
+  FRAMES.forEach(([off,file],k)=>{
+    const crop=k?Math.max(0,prevEnd-off):0; const h=SHOW-crop;
+    const d=document.createElement('div'); d.className='frame'; d.style.height=h+'px';
+    d.style.backgroundImage=`url(${DIR}${file})`; d.style.backgroundPosition=`0 -${52+crop}px`;
+    into.appendChild(d); prevEnd=off+SHOW;
+  });
+}
+function mark(into,top,h,text,lo){const m=document.createElement('div');m.className='mark'+(lo?' lo':'');m.style.top=top+'px';m.style.height=h+'px';m.innerHTML=`<span>${text}</span>`;into.appendChild(m);}
+
+/* ════ BEFORE ════ */
+const bpg=document.getElementById('bpg'); bpg.style.height=TOTAL+'px'; frames(bpg);
+QR_ROWS.forEach(([t,h],i)=>mark(bpg,t-2,h+4,`same row · ${i+1} of 3`));
+mark(bpg,NFC[0]-2,NFC[1]+4,'a whole-set switch, under one card',true);
+[[553,48,'Save · 1 of 4'],[1447,48,'Save · 2 of 4'],[2767,48,'Save · 3 of 4'],[4539,48,'Save · 4 of 4']].forEach(([t,h,s])=>mark(bpg,t-2,h+4,s,true));
+Object.values(HEADS).forEach(([t,h,n])=>mark(bpg,t,h,`${n} head · ${h} px — the sizes wrap`));
+mark(bpg,3972-44,44,'the next heading — 5.2 screens after the first');
+const bsc=document.getElementById('bsc'), bruler=document.getElementById('bruler');
+bsc.addEventListener('scroll',()=>{bruler.textContent=`screen ${(bsc.scrollTop/VIEW+1).toFixed(1)} of ${(TOTAL/VIEW).toFixed(1)}`;},{passive:true});
+
+/* ════ AFTER ════ */
+const apg=document.getElementById('apg');
+/* 1 · the global block (DOM, the shipped Studio rows) */
+const blk=document.createElement('div'); blk.innerHTML=`
+  <div class="gh"><span>On every print</span><small>QR · NFC spot</small></div>
+  <div class="band">
+    <div class="fr"><span class="l">Event Hub QR code</span><span class="val">Always printed</span></div>
+    <div class="fr"><span class="l">Add an NFC sticker spot <button type="button" class="ib" aria-label="What this is">i</button></span><button type="button" class="sw" role="switch" aria-checked="false" aria-label="Add an NFC sticker spot"></button></div>
+    <div class="saverow"><span class="save"><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>Save</span><span class="q">Guests see this right away <span class="ib" style="width:20px;height:20px;color:var(--mute)">i</span></span></div>
+  </div>`;
+apg.appendChild(blk);
+blk.querySelector('.sw').addEventListener('click',e=>{const b=e.currentTarget;b.setAttribute('aria-checked',b.getAttribute('aria-checked')==='true'?'false':'true');});
+const G=blk.getBoundingClientRect().height||212; /* measured once drawn */
+const body=document.createElement('div'); body.style.position='relative'; body.style.height=TOTAL+'px'; frames(body); apg.appendChild(body);
+/* 2 · the rows that moved up — dimmed where they were */
+function gone(t,h,text){const g=document.createElement('div');g.className='gone';g.style.top=t+'px';g.style.height=h+'px';g.innerHTML=`<span>${text}</span>`;body.appendChild(g);}
+QR_ROWS.forEach(([t,h])=>gone(t,h,'↑ once, under ON EVERY PRINT'));
+gone(NFC[0],NFC[1],'↑ moved to ON EVERY PRINT');
+/* 3 · the head lines — the chosen size only */
+for(const k in HEADS){const [t,h,name,line,val]=HEADS[k];const p=document.createElement('div');p.className='patch';p.style.top=t+'px';p.style.height=h+'px';
+  p.innerHTML=`<div class="band"><div class="head"><div class="pic">Drawing…</div><div class="nm"><b>${name}</b><span>${line}</span></div><button type="button" class="dd" aria-label="${name} size"><span>${val}</span><svg class="i" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button></div></div><div class="why" style="height:${h-96-16}px"><span>${h} px → ~110 px · every size stays in the dropdown</span></div>`;
+  body.appendChild(p);}
+/* the bar */
+const asc=document.getElementById('asc'), pickl=document.getElementById('pickl'), pickg=document.getElementById('pickg'), prev=document.getElementById('prev'), next=document.getElementById('next');
+const ALL=[['every','On every print','Prints',-G],...PIECES]; /* tops relative to the frames' body; the global block is above it */
+const topOf=i=>ALL[i][3]+G; let cur=0;
+function setCur(i){cur=Math.max(0,Math.min(ALL.length-1,i));pickl.textContent=ALL[cur][1];pickg.textContent=ALL[cur][2];prev.disabled=cur===0;next.disabled=cur===ALL.length-1;
+  document.querySelectorAll('#plist [role=option]').forEach((b,j)=>b.setAttribute('aria-selected',String(j===cur)));}
+function follow(){const y=asc.scrollTop+90;let i=0;for(let j=0;j<ALL.length;j++){if(topOf(j)<=y)i=j;} if(asc.scrollTop+asc.clientHeight>=asc.scrollHeight-2)i=ALL.length-1; if(i!==cur)setCur(i);}
+asc.addEventListener('scroll',follow,{passive:true});
+function go(i){setCur(i);asc.scrollTo({top:Math.max(0,topOf(cur)-(cur?2:0)),behavior:'smooth'});}
+prev.addEventListener('click',()=>go(cur-1)); next.addEventListener('click',()=>go(cur+1));
+/* the sheet (PickMenu as a sheet) */
+const sheet=document.getElementById('sheet'),scrim=document.getElementById('scrim'),pick=document.getElementById('pick'),plist=document.getElementById('plist');
+let lastG=null; ALL.forEach(([k,label,group],i)=>{ if(group!==lastG && i>0){const g=document.createElement('li');g.className='g';g.textContent=group==='For the day'?'For the day · free for every event':group;plist.appendChild(g);lastG=group;}
+  const li=document.createElement('li');li.innerHTML=`<button type="button" role="option" aria-selected="${i===cur}"><span>${label}${i===0?' <small>QR · NFC spot</small>':''}</span><svg class="i tick" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>`;
+  li.querySelector('button').addEventListener('click',()=>{close();setTimeout(()=>go(i),120);});plist.appendChild(li);});
+function open(){scrim.hidden=false;requestAnimationFrame(()=>{scrim.classList.add('open');sheet.classList.add('open');});pick.setAttribute('aria-expanded','true');const on=plist.querySelector('[aria-selected=true]');on&&on.scrollIntoView({block:'center'});}
+function close(){scrim.classList.remove('open');sheet.classList.remove('open');pick.setAttribute('aria-expanded','false');setTimeout(()=>{scrim.hidden=true;},220);}
+pick.addEventListener('click',()=>sheet.classList.contains('open')?close():open()); scrim.addEventListener('click',close);
+setCur(0);
+/* theme */
+document.querySelectorAll('[data-theme-pick]').forEach(b=>b.addEventListener('click',()=>{document.documentElement.setAttribute('data-theme',b.dataset.themePick);document.querySelectorAll('[data-theme-pick]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));}));
+</script>
+</body></html>
