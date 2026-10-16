@@ -67,8 +67,8 @@ Wiring: new **`platform_expenses`** table (internal, admin-only RLS) + receipt o
 |---|---|---|
 | Health status strip | `/api/health` + `/api/health/deep` | Live (current) / history needs probe persistence |
 | Error rate | Sentry (wired) | Live |
-| API p95 latency | Vercel/Sentry Perf | Needs wiring |
-| Lighthouse per deploy + CWV gauges (LCP/INP/CLS) | Lighthouse CI (required check) + web-vitals RUM | Partial |
+| API p95 latency → **page-load p50/p95 (real users)** | `app_load_timings` (load-time log, 2026-10-16, repo PR #6578) | Built — draft PR, not live |
+| Lighthouse per deploy + CWV gauges (LCP/INP/CLS) | Lighthouse CI (required check) + field LCP/INP from `app_load_timings` (PR #6578) | Partial (CLS not measured) |
 | Reports trend (inverse-good) | `user_reports` by status | Live |
 
 ## 4 · Load-bearing schema facts (verified 2026-07-02, honor when building)
@@ -87,7 +87,8 @@ Wiring: new **`platform_expenses`** table (internal, admin-only RLS) + receipt o
 | **PR 1** | Route + nav-registry slot (6-menu placement) + Growth & Stability zones' **Live** charts (extend `fetchGrowthStats`; sibling fetchers: monetization 3-table union · completed lifecycle · content/trust) + growth-index + leaderboard + ghost-line pattern + Sentry error rate + health strip | Yes |
 | **PR 2** | Action Center — auto backlog counts from real tables; `platform_ops_notes`-style small table for manual-tracked cards (credits, renewals, rotations) | Yes (auto cards) |
 | **PR 3** | Expenses & Receipts — `platform_expenses` migration (RLS admin-only, at CREATE TABLE) + R2 receipt upload + coverage stat + ledger + upcoming charges | Yes once migrated |
-| Later | Probe persistence (uptime/dependency history) · p95 wiring · web-vitals RUM · receipts@ email-forward inbox · live credit-balance APIs | — |
+| Later | Probe persistence (uptime/dependency history) · receipts@ email-forward inbox · live credit-balance APIs | — |
+| 2026-10-16 | **Load-time log** — p95 wiring + web-vitals RUM: browser reporter (lazy, beacon, ≥1 s always / ~1 in 10 faster, weighted) → `app_load_timings` (route patterns only, 30-day trim, admin-only) → **Slow loads** tab + live p50/p95 and Web Vitals cards; per-page targets in `platform_settings.load_time_targets`, default 1.5 s, desktop-only editing. Repo PR #6578 (draft) | Once merged + deployed |
 
 Premium animation system ports from the prototype (scroll-into-view IntersectionObserver, once-only, transform/opacity-only, reduced-motion + no-JS safe).
 
