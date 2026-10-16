@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Maker — the Cover Scene's own Edit · Style (Opening) · Animate (2026-10-16)</title>
+<!--
+  Setnayan · Event Hub Maker · THE COVER SCENE'S OWN TOOLS, in place — Edit (show/hide each line), Style (the Opening,
+  folded in from the Reveal tile), Animate (ONE entrance for the whole cover, ▶ previews it).
+  Design + clickable prototype only (Fable, 2026-10-16). No network but Google Fonts; nothing saved; no localStorage.
+
+  OWNER ASK, verbatim (2026-10-16): "Yes — prototype the Cover Scene's own Edit (show/hide each line) and Animate (the
+  whole cover's entrance, ▶ preview) in place, from real cale-ice captures. Show me before building."
+  Then, same day: "veil should stay with the cover page" — the Reveal/Veil leaves its own tile above the cover and is
+  set from the Cover Scene's tools. And: "Yes — behind the veil, none of the cover's words show. After the unveil, every
+  line enters with the cover's entrance (lines with no Build in get the cover's default)."
+
+  REAL BASELINE (never redrawn blind) — the pictures in ./cover_scene_edit_animate_2026-10-16/:
+    · before-maker-cover-scene-background.webp · before-maker-scene-framed-full.webp · before-maker-upload.webp ·
+      before-maker-title-style.webp — the OWNER'S OWN screenshots of his Maker on cale-ice, today (Cover Scene picked:
+      Edit · Style · Animate grey; the "Opens once, over the cover" tile floating above the cover; Framed | Full width).
+    · before-guest-live-2026-10-16-unveiled.webp — the PUBLIC page https://www.setnayan.com/cale-ice, read-only, 375 px,
+      after the unveil, captured today. before-guest-public-2026-10-15-veil.webp — the same page a day earlier (then the
+      card-shaped cover: invite line · time · link), with the veil down.
+    · ground-live-vintage-still.jpg — a still of the live Vintage scene behind the words, softened so the words here can
+      be live text that hides and enters.
+
+  THE COVER'S REAL LINES on cale-ice today (Invitation › Home, as guests see it, top to bottom):
+    1 Title (hero el `eyebrow`)  "WITH THANKSGIVING TO GOD AND WITH THE BLESSING OF OUR PARENTS,"
+    2 Logo  (`mark`)             the IC monogram between two rules
+    3 Names (`names` + `joiner`) "Indalecio & Claire"
+    4 Date  (`date`)             "December 18, 2026"
+    5 Place (`venue`)            "Santuario de San Vicente de Paul Parish · Seda Hotel Vertis North"
+  Not drawn on THIS cover shape (a photo/scene ground = the plain masthead): Invite line · Time · Link — they are the
+  written card's (`HUB_HERO_CARD_ONLY_KEYS`); the 2026-10-15 capture had them. The Edit list shows only the words the
+  cover draws (`heroPartsFor`) — on a card-shaped cover it would list seven.
+
+  WHAT SHIPS TODAY (read on a detached worktree of origin/main f687fdea3, 2026-10-16):
+    · lib/maker-parts.ts  MAKER_COVER_SCENE ('coverscene'): makerPartToolWorks → Background ONLY; Edit · Style · Animate
+      grey with MAKER_COVER_SCENE_TOOL_WHY ("Tap a word to edit it." / "…for its colour and size." / "…to animate it on
+      its own."). The cover's words: logo · ename (Title) · names · heroline · date · place · herolink, each `f:hero` + el.
+    · lib/element-style.ts  EVERY hero word already has `hidden` (TEXT_FIELDS; mark and joiner list it) and `motion`
+      { in: MotionFx, speed, delay } — hubElementHidden() is THE one hidden rule (guests never see it). No new schema.
+    · stage-panel/stage-animate.tsx  the FOUR ROWS: Build in | Action | Build out · Fade · Blur · Move · Size chips ·
+      From ▾ / Grow | Shrink · Movement ◆ (Quick 0.6 s · Calm 1.1 s · Cinematic 1.8 s, lib/animate-feel.ts) · Plays ·
+      Delay (None · Short 0.3 s · Long 0.8 s, HUB_EL_DELAY). The vocabulary used here, nothing invented.
+    · stage-tools.tsx  ▶ tap = the picked part's phase; hold = the whole page as a guest with "Exit preview"
+      (STAGE_HOLD_HINT "Hold ▶ to preview the whole page.").  app/[slug]/_components/play-sequence.ts plays it.
+    · The Reveal TILE: stage-panel/reveal-picture.tsx revealStubHtml ("Opens once, over the cover / then every page
+      after it opens plain"), put at the top of the canvas by stage-tools.tsx (data-maker-reveal-part), hidden on the
+      guest page by globals.css; its tools = the shipped reveal picker (maker-reveal.tsx via MakerLookPages.reveal:
+      None free · each opening Event Hub Pro ◆ · Extras ▾ · per-stage Shown | Hidden). RevealPlay plays it on ▶.
+    · lib/cover-scene.ts  the Cover Scene is the whole first screen; (in flight, other builders) always edge to edge —
+      the Framed | Full width toggle leaves (DECISION_LOG 2026-10-16) — and a ≤ 15 s cover video may be its ground.
+
+  RULINGS HONOURED: 2026-10-09 Maker Animate · ▶ · Scrub (Movement = a phase's own feel; ▶ tap plays, hold previews the
+  page) · 2026-10-10 the four tabs stay consistent on every part (a tool with nothing to do says so) · 2026-10-15 the
+  veil: tap or swipe up unveils, nothing behind it plays until then, the unveil starts the music · 2026-10-16 names wait
+  for their real entrance · behind the veil none of the words show · always full screen · cover video.
+  HOUSE RULES: one PickMenu per set of choices, never a pill row · tools in the lower third, four rows · a frame only on
+  something pressable, dividers between topics · no "Edit in X ↗" · "event", never "celebration" · Event Hub, never
+  "website" · FREE very easy · light + dark tokens · 44 px floor.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#FBF9F5;--page:#F4F0E8;--ink:#2C2A29;--ink2:#5B5752;--mute:#8E8880;--line:#E6E0D6;--line2:#D9D3C8;--pill:#F1ECE3;--gold:#A9834B;--gold-soft:#E8DCC3;--cta:#C24E25;--cta-wash:#F8E7E0;--ok:#2B744A;--bad:#B3261E;--shadow:rgba(44,42,41,.35);--in:cubic-bezier(.2,.8,.2,1);--spring:cubic-bezier(.34,1.3,.5,1);--sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;--serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;--bezel:#1b1b1b;--body:#EDE8DF;--field:#FFFFFF;--tbar:#F1EEE8;--sw-off:#CFC8BC}
+[data-theme=dark]{--paper:#1E1C1A;--page:#161514;--ink:#F1ECE4;--ink2:#C9C2B8;--mute:#8E8880;--line:#33302C;--line2:#3E3A35;--pill:#26231F;--gold:#C9A24B;--gold-soft:#3A3122;--cta:#E0623A;--cta-wash:#3A241B;--ok:#4FA06E;--bad:#E0574D;--shadow:rgba(0,0,0,.6);--bezel:#000;--body:#0F0E0D;--field:#26231F;--tbar:#1E1C1A;--sw-off:#4A453E}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--body);font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;appearance:none;border:0;background:none;cursor:pointer;padding:0;margin:0;text-align:left}
+svg{display:block}
+img{max-width:100%;display:block}
+.wrap{max-width:1180px;margin:0 auto;padding:22px 16px 60px}
+h1{font-family:var(--serif);font-weight:500;font-size:30px;margin:8px 0 2px;line-height:1.1}
+h3{font-family:var(--serif);font-weight:500;font-size:22px;margin:34px 0 8px}
+.lead{font-size:13.5px;color:var(--ink2);max-width:880px;line-height:1.5;margin:0 0 14px}
+.banner{display:inline-flex;align-items:center;gap:8px;background:var(--cta-wash);color:var(--cta);border:1px solid rgba(194,78,37,.35);border-radius:999px;padding:5px 12px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700}
+.ctl{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin:14px 0 18px}
+.ctl .lbl{font-size:11px;color:var(--mute);letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin-right:-8px}
+.tgp{display:flex;gap:4px;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--paper)}
+.tgp button{height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;color:var(--mute)}
+.tgp button[aria-pressed=true]{background:var(--cta);color:#fff}
+.hr{height:1px;background:var(--line);margin:28px 0}
+.frames{display:flex;flex-wrap:wrap;gap:26px;justify-content:center;align-items:flex-start}
+.frame{width:var(--pw,375px);max-width:100%;min-width:0;flex:0 1 auto}
+.frame h2{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:700;margin:0 0 8px;text-align:center}
+.frame .cap{font-size:12px;color:var(--ink2);line-height:1.45;margin:8px auto 0;text-align:center;min-height:36px}
+.frame .cap b{color:var(--ink)}
+.walk{width:375px;max-width:100%}
+.walk ol{margin:0;padding-left:18px;font-size:13px;line-height:1.55;color:var(--ink2)}
+.walk li{margin-bottom:8px}.walk li b{color:var(--ink)}
+.walk .k{display:inline-block;font:600 10px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;background:var(--cta);color:#fff;padding:3px 6px;border-radius:999px;margin-right:4px;vertical-align:1px}
+.walk .k.g{background:var(--mute)}
+/* before → after strip: the real captures */
+.shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin:10px 0 0}
+.shot{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:10px}
+.shot img{border-radius:8px;border:1px solid var(--line)}
+.shot .t{font:700 10.5px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin:0 0 8px}
+.shot .t b{color:var(--cta)}
+.shot p{font-size:12px;color:var(--ink2);line-height:1.45;margin:8px 0 0}
+.shot p b{color:var(--ink)}
+.notes{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin-top:24px;font-size:13.5px;line-height:1.55;color:var(--ink2)}
+.notes h4{font-family:var(--serif);font-weight:500;font-size:20px;margin:0 0 8px;color:var(--ink)}
+.notes h4+p{margin-top:0}
+.notes ul,.notes ol{margin:6px 0 14px;padding-left:20px}
+.notes li{margin-bottom:6px}
+.notes b{color:var(--ink)}
+.notes code{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--pill);padding:1px 5px;border-radius:5px;color:var(--ink)}
+.notes .q{font-style:italic;color:var(--ink)}
+table.lines{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0 14px}
+table.lines td,table.lines th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+table.lines th{font:700 10.5px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+@media (max-width:430px){.phone{width:100%;height:auto;min-height:calc(100vh - 24px);border-radius:0;border:0;box-shadow:none}.frame{width:100%}.status{display:none}.wrap{padding:12px 0 40px}.banner,h1,.lead,.ctl,h3{margin-left:16px;margin-right:16px}.frame .cap{padding:0 16px}.notes{margin:20px 16px 0}.walk{padding:0 16px}.shots{margin:0 16px}.hr{margin:28px 16px}}
+
+/* ── the phone ── */
+.phone{width:var(--pw,375px);height:var(--ph,812px);background:var(--page);border:6px solid var(--bezel);border-radius:40px;position:relative;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 50px -30px var(--shadow)}
+.status{height:46px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 5px;font-size:13px;font-weight:600;background:var(--paper);z-index:50}
+.status .bat{width:24px;height:11px;border:1.5px solid var(--ink);border-radius:3px;position:relative;margin-bottom:2px}
+.status .bat:after{content:"";position:absolute;left:2px;top:2px;bottom:2px;right:5px;background:var(--ink);border-radius:1px}
+/* the locked top bar: ✕ · two dropdown halves · ↶ · Apply — slides away in the whole-page preview */
+.topnav{height:56px;flex:none;display:flex;align-items:center;gap:6px;padding:0 10px;background:var(--paper);border-bottom:1px solid var(--line);z-index:20;transition:margin-top .32s var(--in)}
+.phone[data-preview=on] .topnav{margin-top:-57px}
+.rnd{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;position:relative}
+.exitx{background:var(--bad);color:#fff}.applyg{background:var(--ok);color:#fff}
+.applyg .n{position:absolute;right:-3px;top:-3px;min-width:19px;height:19px;border-radius:10px;background:var(--ink);color:var(--paper);font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid var(--paper)}
+.applyg .n.pro{background:var(--gold);color:#1b1b1b}
+.undob{background:var(--pill);border:1px solid var(--line);color:var(--ink)}
+.rnd svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.rnd:active{transform:scale(.94)}
+.halves{flex:1;min-width:0;display:flex;gap:4px}
+.half{flex:1 1 0;min-width:0;height:44px;border-radius:999px;background:var(--pill);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;gap:4px;font-size:13px;font-weight:600;color:var(--ink);padding:0 8px}
+.half.on{background:var(--cta);color:#fff;border-color:var(--cta)}
+.half span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-width:0}
+.half svg{width:12px;height:12px;flex:none;color:var(--cta);fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.half.on svg{color:#fff}
+.half:active{transform:scale(.985)}
+
+/* ── the stage area: the guest's page as the Maker shows it ── */
+.work{flex:1;min-height:0;position:relative;background:var(--tbar);padding:8px 8px 0;display:flex;flex-direction:column}
+.phone[data-preview=on] .work{padding:0}
+.page{flex:1;min-height:0;background:#fff;border-radius:8px 8px 0 0;overflow:hidden;position:relative;box-shadow:0 1px 2px rgba(40,34,24,.08)}
+.phone[data-preview=on] .page{border-radius:0}
+[data-theme=dark] .page{background:#121110}
+/* THE COVER SCENE — ALWAYS the whole first screen, edge to edge (owner 2026-10-16: the Framed | Full width choice is gone) */
+.scene{position:absolute;inset:0;overflow:hidden;isolation:isolate;--c-head:#2C2A29;--c-body:#4A4642;--c-eyebrow:#1F2440}
+.scene[aria-pressed=true]:after{content:"";position:absolute;inset:5px;border:1.5px dashed var(--cta);border-radius:6px;pointer-events:none;z-index:3}
+.scene>.tag{position:absolute;left:10px;top:10px;font:600 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;background:var(--cta);color:#fff;padding:4px 7px;border-radius:999px;opacity:0;transform:translateY(4px);transition:opacity .18s,transform .18s var(--spring);pointer-events:none;white-space:nowrap;z-index:4;display:flex;gap:4px;align-items:center}
+.scene[aria-pressed=true]>.tag{opacity:1;transform:none}
+.scene>.tag svg{width:8px;height:8px;fill:currentColor}
+/* 🎭 where the old tile went: the opening is NAMED on the cover it plays over — a hint, not a tile */
+.openhint{position:absolute;right:10px;top:10px;font:600 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:rgba(0,0,0,.6);background:rgba(255,255,255,.55);backdrop-filter:blur(4px);padding:4px 7px;border-radius:999px;pointer-events:none;z-index:4;white-space:nowrap}
+.phone[data-preview=on] .openhint,.phone[data-preview=on] .scene>.tag,.phone[data-preview=on] .scene:after{display:none}
+.scene .ground{position:absolute;inset:0;z-index:0;overflow:hidden;background:#D9CFC2}
+.scene .ground img,.scene .ground .loop{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.scene .scrim{position:absolute;inset:0;z-index:1;pointer-events:none;background:rgba(246,239,227,.42)}
+/* the words — real text, so each can hide and enter */
+.cover{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.grp{position:relative;width:100%;display:flex;flex-direction:column;align-items:center;text-align:center}
+.part{position:relative;display:block;width:100%;text-align:inherit;color:inherit;border-radius:6px;cursor:pointer;-webkit-tap-highlight-color:transparent;will-change:transform,opacity,filter}
+.part[aria-pressed=true]{box-shadow:0 0 0 1.5px var(--cta),0 0 0 5px rgba(194,78,37,.18)}
+.part .tag{position:absolute;right:-2px;top:-14px;font:600 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;background:var(--cta);color:#fff;padding:3px 6px;border-radius:999px;opacity:0;transform:translateY(4px);transition:opacity .18s,transform .18s var(--spring);pointer-events:none;white-space:nowrap;z-index:2}
+.part[aria-pressed=true] .tag{opacity:1;transform:none}
+.part[data-hidden=true]{display:none}
+.part>span{display:block}
+.p-eyebrow span{font-size:7.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--c-eyebrow);font-weight:500;line-height:1.5;margin-bottom:8px;max-width:300px;margin-left:auto;margin-right:auto}
+.p-mark span{font-family:var(--serif);font-style:italic;font-size:22px;color:#1F2440;line-height:1;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:10px}
+.p-mark span:before,.p-mark span:after{content:"";width:34px;height:1px;background:currentColor;opacity:.5}
+.p-mark span i{font-style:italic;letter-spacing:-.14em;font-weight:400}
+.p-names span{font-family:var(--serif);font-size:40px;line-height:.98;color:var(--c-head);font-weight:400;letter-spacing:.005em}
+.p-names span em{display:block;font-style:italic;font-size:20px;color:#5B5752;line-height:1.05;margin:4px 0 2px}
+.p-date span{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--c-head);margin-top:8px;line-height:1.1}
+.p-venue span{font-family:var(--serif);font-size:10.5px;line-height:1.35;color:var(--c-body);margin-top:3px}
+/* the written card's own three (drawn only on that shape) */
+.p-line span{font:400 10px/1.4 var(--sans);color:var(--c-body);margin:8px auto 0;max-width:250px}
+.p-time span{font:500 8px var(--sans);letter-spacing:.22em;text-transform:uppercase;color:var(--c-body);margin-top:4px}
+/* 🔗 the foot line: small spaced caps + ⌄, at the foot of the full-screen cover, above the safe area — a cover word like the others */
+.p-link{position:absolute;left:0;right:0;bottom:14px;width:auto;text-align:center;padding:4px 0}
+.p-link span{font:600 8.5px var(--sans);letter-spacing:.22em;text-transform:uppercase;color:var(--c-head);display:inline-flex;align-items:center;justify-content:center;gap:4px;opacity:.9}
+.p-link span b{font-weight:700;color:var(--ok)}.p-link span u{text-decoration:underline;text-underline-offset:3px}
+.p-link span svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;animation:nod 2.4s ease-in-out infinite}
+.p-link[data-live=false] span{opacity:.5;cursor:default}
+@keyframes nod{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+/* ✨ SHIMMER — the part's own ink with a lighter band of the SAME hue sliding across (the competitor's is always gold; ours
+   follows the colour the couple set; Gold is a choice). Reduced motion: no band, the plain colour. */
+.part[data-shimmer=on]>span{--sh-ink:var(--c-head);--sh-band:color-mix(in srgb,var(--c-head) 45%,#fff);background-image:linear-gradient(100deg,var(--sh-ink) 0 38%,var(--sh-band) 50%,var(--sh-ink) 62% 100%);background-size:260% 100%;background-position:120% 0;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:shimmer 5s linear infinite}
+.part[data-shimmer=on].p-eyebrow>span{--sh-ink:var(--c-eyebrow)}
+.part[data-shimmer=on][data-band=gold]>span{--sh-ink:#835C2F;--sh-band:#F0D9A8}
+.part[data-shimmer=on]>span em{color:inherit;-webkit-text-fill-color:#5B5752}
+@keyframes shimmer{0%{background-position:120% 0}100%{background-position:-140% 0}}
+@media (prefers-reduced-motion:reduce){.part[data-shimmer=on]>span{animation:none;background-image:none;color:var(--sh-ink)!important}.p-link span svg{animation:none}}
+/* 🎭 THE OPENING over the cover: the sheer veil, edge to edge of the full-screen cover; behind it none of the words show */
+.veil{position:absolute;inset:0;z-index:6;background:linear-gradient(180deg,rgba(255,252,247,.78),rgba(255,250,243,.66) 55%,rgba(255,248,240,.74));backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center;padding-bottom:26px;cursor:pointer;transition:transform .9s var(--in),opacity .9s var(--in);touch-action:none}
+.veil:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(100deg,transparent 0 14px,rgba(255,255,255,.35) 14px 16px),radial-gradient(60% 40% at 50% 0,rgba(255,255,255,.6),transparent 70%);pointer-events:none}
+.veil .say{position:relative;font-family:var(--serif);font-size:15px;color:#2C2A29;background:rgba(255,255,255,.6);border-radius:999px;padding:8px 16px;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.veil[data-lifted=true]{transform:translateY(-104%);opacity:.6;pointer-events:none}
+.veil[data-gone=true]{display:none}
+.cover[data-held=true] .part{opacity:0}
+/* the guest's own tab bar — a BAR under the page in the Maker (never over the cover for a guest) */
+.gbar{height:44px;flex:none;display:flex;align-items:center;justify-content:space-around;background:var(--paper);border-top:1px solid var(--line);font:600 12.5px var(--sans);color:var(--mute);transition:margin-bottom .32s var(--in)}
+.gbar b{color:var(--ink);position:relative}
+.gbar b:after{content:"";position:absolute;left:0;right:0;top:-15px;height:2px;background:var(--ink)}
+.phone[data-preview=on] .gbar{display:none}
+/* "Exit preview" — the hold's door back */
+/* …top-left in the preview (the theme preview's own place, 2026-09-28): the cover's FOOT is now the Link's — nothing may sit on it */
+.exitp{position:absolute;left:12px;top:12px;z-index:60;height:40px;border-radius:999px;background:rgba(44,42,41,.88);color:#fff;font:600 13px var(--sans);padding:0 16px;display:none;align-items:center;gap:6px;box-shadow:0 8px 20px -10px rgba(0,0,0,.6)}
+.phone[data-preview=on] .exitp{display:flex}
+
+/* ── the locked bottom toolbar: 330 px = handle 14 · line 20 · band 52 · 4×48 + 3×6 · safe 34 ── */
+.tbar{flex:none;height:330px;background:var(--tbar);border-radius:22px 22px 0 0;position:relative;box-shadow:0 -1px 0 var(--line2),0 -8px 18px -12px rgba(40,34,24,.35);display:flex;flex-direction:column;--rh:48px;--rg:6px;transition:margin-bottom .32s var(--in)}
+.phone[data-preview=on] .tbar{margin-bottom:-330px}
+.tbar .grabh{height:14px;display:grid;place-items:center}.tbar .grabh i{width:40px;height:4px;border-radius:9px;background:var(--line2)}
+.tbar .edit{font:600 9.5px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--mute);text-align:center;height:20px;padding:2px 0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tbar .edit b{color:var(--ink)}.tbar .edit.busy{color:var(--cta)}
+.tools{height:52px;padding:4px 10px;display:flex;gap:8px;align-items:center}
+.tsel{position:relative;flex:1;display:flex;height:44px;background:var(--field);border:1px solid var(--line);border-radius:999px;padding:3px}
+.tsel button{flex:1;border-radius:999px;font:600 12.5px var(--sans);letter-spacing:-.01em;padding:0 2px;color:var(--mute);display:inline-flex;align-items:center;justify-content:center;position:relative;z-index:1;transition:color .3s;white-space:nowrap}
+.tsel button[aria-pressed=true]{color:#fff}
+.tsel button.grey{color:var(--line2)}
+.tsel .th{position:absolute;top:3px;bottom:3px;left:3px;width:calc((100% - 6px)/4);border-radius:999px;background:var(--cta);transition:transform .55s var(--spring);transform:translateX(var(--x,0))}
+.tplay{flex:none;width:44px;height:44px;border-radius:999px;border:1px solid var(--line);background:var(--field);color:var(--ink);display:grid;place-items:center;position:relative;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+.tplay svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tplay[data-playing=true]{background:var(--cta);color:#fff;border-color:var(--cta)}
+.tplay:after{content:"";position:absolute;inset:-1px;border-radius:999px;border:2px solid var(--cta);opacity:0;transform:scale(.9);transition:opacity .45s,transform .45s}
+.tplay[data-holding=true]:after{opacity:1;transform:scale(1.15)}
+.g4{display:grid;grid-template-rows:repeat(4,var(--rh));grid-auto-rows:0;gap:var(--rg);padding:0 10px;height:calc(4*var(--rh) + 3*var(--rg));overflow:hidden}
+.row{display:flex;align-items:center;gap:8px;min-width:0;height:var(--rh)}
+.r1{grid-row:1}.r2{grid-row:2}.r3{grid-row:3}.r4{grid-row:4}
+.row .lbl{flex:none;font:500 13px var(--sans);color:var(--ink)}
+.row .lbl.m{font-size:12px;color:var(--mute)}
+.quiet{font:400 12.5px/1.4 var(--sans);color:var(--mute);padding:0 4px;min-width:0}
+.quiet b{color:var(--ink);font-weight:600}
+/* the labelled dropdown pill — the shipped `SP_DD` (small-caps word · value · gold chevron) */
+.dd{position:relative;flex:1;min-width:0;height:44px;display:flex;align-items:center;gap:8px;padding:0 34px 0 14px;border-radius:999px;background:var(--field);box-shadow:inset 0 0 0 1px var(--line);transition:transform .1s var(--in)}
+.dd:active{transform:scale(.985)}
+.dd small{flex:none;max-width:48%;font:700 9.5px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dd b{font:600 13.5px var(--sans);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.dd svg{position:absolute;right:12px;top:50%;margin-top:-6px;width:12px;height:12px;color:var(--cta);fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s var(--in)}
+.dd[aria-expanded=true] svg{transform:rotate(180deg)}
+.dd[aria-disabled=true]{opacity:.4}
+/* stacked: the name above its value (the shipped `stacked` Dd), two or three in one row */
+.fh{flex:1 1 0;min-width:0;height:44px;border:1px solid var(--line);background:var(--field);border-radius:14px;padding:0 24px 0 11px;position:relative;text-align:left;display:flex;flex-direction:column;justify-content:center}
+.fh .fn{font:600 9.5px/1.1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--mute);white-space:nowrap}
+.fh .fv{font:600 13px/1.25 var(--sans);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fh svg{position:absolute;right:8px;top:50%;margin-top:-6px;width:12px;height:12px;color:var(--cta);fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.fh:active{transform:scale(.985)}
+.fh[aria-disabled=true]{opacity:.4}
+/* ✨ THE DELTA · Edit on the Cover Scene — the lines, two to a row, each a pill: its name (a tap selects the word) + the house switch */
+.lines2{display:grid;grid-template-columns:1fr 1fr;gap:6px 8px;grid-row:1/4;align-content:start;height:calc(3*var(--rh) + 2*var(--rg))}
+.lines2.tall{grid-row:1/5;height:calc(4*var(--rh) + 3*var(--rg))}
+.ln{height:var(--rh);border-radius:999px;background:var(--field);box-shadow:inset 0 0 0 1px var(--line);display:flex;align-items:center;min-width:0;padding:0 4px 0 0;transition:box-shadow .2s}
+.ln[aria-current=true]{box-shadow:inset 0 0 0 1.5px var(--cta)}
+.ln .nm{flex:1;min-width:0;height:44px;display:flex;flex-direction:column;justify-content:center;padding:0 2px 0 13px;text-align:left}
+.ln .nm b{font:600 13px/1.15 var(--sans);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.ln .nm small{font:400 10.5px/1.2 var(--sans);color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;margin-top:1px}
+.ln[data-off=true] .nm b{color:var(--mute);text-decoration:line-through;text-decoration-color:var(--line2)}
+/* the app's ONE switch (`SwitchTrack`, 50 × 30: grey off, the accent on) on a 44 px tap */
+.sw{flex:none;width:50px;height:44px;display:grid;place-items:center;position:relative}
+.sw i{display:block;width:50px;height:30px;border-radius:999px;background:var(--sw-off);position:relative;transition:background .22s}
+.sw i:after{content:"";position:absolute;left:2px;top:2px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .22s var(--spring)}
+.sw[aria-checked=true] i{background:var(--cta)}
+.sw[aria-checked=true] i:after{transform:translateX(20px)}
+.sw:active i:after{width:30px}
+.sw.lock{opacity:.5}
+.always{flex:none;font:600 10px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--mute);padding:0 10px 0 4px;white-space:nowrap}
+/* Animate on the Cover Scene — the beats line (row 3): numbered, not pressable, no frame */
+.beats{display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden;padding:0 2px;flex:1}
+.beats .b{display:flex;align-items:center;gap:5px;min-width:0;font:500 12px var(--sans);color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.beats .b i{flex:none;width:18px;height:18px;border-radius:50%;background:var(--cta);color:#fff;font:700 10px/18px var(--sans);text-align:center;font-style:normal}
+.beats .b.m i{background:var(--mute)}
+.beats .sep{flex:none;width:10px;height:1px;background:var(--line2)}
+/* 2-way pill selectors (the shipped PillSelector) and chips (the shipped Chips) */
+.ps{display:flex;height:44px;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--field);flex:1;min-width:0}
+.ps button{flex:1;border-radius:999px;font:600 12.5px var(--sans);color:var(--mute);display:flex;align-items:center;justify-content:center;white-space:nowrap;padding:0 8px;transition:background .2s,color .2s}
+.ps button[aria-pressed=true]{background:var(--cta);color:#fff}
+.ps button.grey{color:var(--line2)}
+.chips{display:flex;gap:6px;flex:1;min-width:0}
+.chips button{flex:1;height:40px;border-radius:999px;border:1px solid var(--line);background:var(--field);font:600 12.5px var(--sans);color:var(--ink2);display:flex;align-items:center;justify-content:center;white-space:nowrap}
+.chips button[aria-pressed=true]{background:var(--cta);color:#fff;border-color:var(--cta)}
+/* the door: one tap, never a dead end */
+.door{flex:none;height:44px;border-radius:999px;background:var(--field);border:1px solid var(--line);padding:0 14px;display:inline-flex;align-items:center;gap:6px;font:600 13px var(--sans);color:var(--cta);white-space:nowrap}
+.door svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.door:active{transform:scale(.98)}
+/* Style on the Cover Scene = the OPENING's cards (the shipped reveal picker, phone-shaped per the 2026-10-08 fault) */
+.cards{grid-row:1/4;display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:2px 10px;margin:0 -10px}
+.cards::-webkit-scrollbar{display:none}
+.lc{flex:none;width:118px;height:100%;border-radius:14px;border:1px solid var(--line);background:var(--field);display:flex;flex-direction:column;overflow:hidden;text-align:center;position:relative}
+.lc .pic{flex:1;min-height:0;position:relative;overflow:hidden;background:#D9CFC2}
+.lc .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.9)}
+.lc .pic .v{position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,252,247,.82),rgba(255,250,243,.7));backdrop-filter:blur(2px)}
+.lc .pic .v:after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(100deg,transparent 0 10px,rgba(255,255,255,.4) 10px 12px)}
+.lc .pic .w{position:absolute;left:0;right:0;top:40%;text-align:center;font-family:var(--serif);font-size:14px;color:#2C2A29;line-height:1}
+.lc .pic .w small{display:block;font:500 5px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:#1F2440;margin-bottom:4px}
+.lc .pic .none{position:absolute;inset:0;display:grid;place-items:center;color:var(--ink);font:600 11px var(--sans)}
+.lc .pic .none:before{content:"";position:absolute;left:12%;right:12%;top:50%;height:1.5px;background:var(--bad);transform:rotate(-14deg)}
+.lc .pro{position:absolute;right:6px;top:5px;font-size:10px;color:#E8C98A;text-shadow:0 0 2px rgba(0,0,0,.5);z-index:1}
+.lc .nm{height:22px;border-top:1px solid var(--line);background:var(--page);font:500 10.5px/21px var(--sans);color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
+.lc[aria-checked=true]{box-shadow:0 0 0 2px var(--page),0 0 0 4px var(--cta)}.lc[aria-checked=true] .nm{color:var(--cta);font-weight:600}
+.lc.soon{opacity:.45}
+/* Background rows (as shipped, minus Framed | Full width) */
+.strip{display:flex;align-items:center;gap:8px;height:100%;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;margin:0 -10px;padding:0 10px}
+.strip::-webkit-scrollbar{display:none}
+.tile{position:relative;flex:none;height:44px;display:flex;align-items:center;justify-content:center;border-radius:12px;transition:transform .1s var(--in)}
+.tile:active{transform:scale(.96)}
+.tile .face{position:relative;display:flex;align-items:flex-end;justify-content:center;height:38px;min-width:84px;padding:0 8px 4px;border-radius:12px;overflow:hidden;background:#fff;outline:1px solid rgba(44,42,41,.12);outline-offset:-1px;color:#fff;font:600 12px var(--sans);white-space:nowrap}
+.tile[aria-pressed=true] .face{box-shadow:0 0 0 2px var(--tbar),0 0 0 4px var(--cta)}
+.tile .face .loop,.tile .face img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.tile .face .fade{position:absolute;inset:auto 0 0 0;height:60%;background:linear-gradient(180deg,transparent,rgba(0,0,0,.55))}
+.tile .face span{position:relative;z-index:1}
+.tile .face.add{background:var(--field);color:var(--ink);gap:4px;align-items:center}
+.tile .face.add svg{width:14px;height:14px;color:var(--cta);fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
+.tile .face .pro{position:absolute;right:5px;top:4px;font-size:9px;color:#E8C98A;z-index:1;text-shadow:0 0 2px rgba(0,0,0,.5)}
+.sl{flex:1 1 0;min-width:0;height:44px;display:flex;align-items:center;padding:0 2px;position:relative}
+.sl input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;margin:0;touch-action:none}
+.sl input::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--line2) var(--a,50%),var(--cta) var(--a,50%),var(--cta) var(--b,50%),var(--line2) var(--b,50%))}
+.sl input::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;border:2px solid var(--cta);margin-top:-9px;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.sl input::-moz-range-track{height:6px;border-radius:3px;background:var(--line2)}.sl input::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#fff;border:2px solid var(--cta)}
+.sl .mid{position:absolute;left:50%;top:50%;width:2px;height:12px;margin:-6px 0 0 -1px;background:var(--mute);opacity:.5;border-radius:1px;pointer-events:none}
+.wordsbox{flex:1;min-width:0;height:44px;border-radius:14px;background:var(--field);border:1px solid var(--line);padding:0 12px;display:flex;align-items:center;font:500 13.5px var(--sans);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.loop{position:absolute;inset:0}
+.loop-modern{background:linear-gradient(160deg,#EDE9E3,#CFC7BB 60%,#9A9088)}.loop-cyber{background:linear-gradient(160deg,#3A1E6B,#A020F0 50%,#1DE3FF)}.loop-luxe{background:radial-gradient(60% 60% at 50% 30%,#7A1C2E,#2A0B12)}.loop-vintage{background:linear-gradient(180deg,#D9CFC2,#B9A893)}.loop-regency{background:linear-gradient(160deg,#F2E6D8,#C9B7A0 60%,#8F7A62)}.loop-rustic{background:linear-gradient(160deg,#C8A46B,#7A5A32)}.loop-cinderella{background:linear-gradient(160deg,#BFD5EA,#5F85B5)}.loop-gatsby{background:radial-gradient(60% 50% at 50% 20%,#E6C98A,#3A2A10 70%)}
+.tbar .foot{flex:none;height:34px}
+
+/* ── the sheet (PickMenu on a phone rises from the bottom; the rest darkens and blurs) ── */
+.bd{position:absolute;inset:0;background:rgba(20,16,12,.42);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:80;animation:fadein .18s var(--in)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--paper);border-radius:22px 22px 0 0;padding:8px 8px 30px;z-index:90;animation:up .22s var(--in);box-shadow:0 -8px 28px -14px var(--shadow);max-height:78%;display:flex;flex-direction:column}
+.sheet .grab{width:40px;height:4px;border-radius:2px;background:var(--line2);margin:2px auto 8px}
+.sheet h4{font-family:var(--serif);font-weight:500;font-size:19px;margin:2px 10px 8px}
+.sheet .list{overflow:auto;scrollbar-width:none}
+.sheet .opt{display:flex;align-items:center;gap:12px;width:100%;min-height:48px;padding:8px 10px;border-radius:12px;font-size:14px;font-weight:500}
+.sheet .opt:active{background:var(--pill)}
+.sheet .opt.sub{padding-left:34px}
+.sheet .opt .ic{flex:none;width:28px;height:28px;border-radius:8px;background:var(--pill);display:grid;place-items:center;color:var(--ink2)}
+.sheet .opt .ic svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sheet .opt .ic.g{background:var(--cta-wash);color:var(--cta)}
+.sheet .opt .tick{margin-left:auto;color:var(--cta);visibility:hidden;width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.sheet .opt[aria-selected=true]{color:var(--cta)}.sheet .opt[aria-selected=true] .tick{visibility:visible}
+.sheet .opt small{display:block;color:var(--mute);font-weight:400;font-size:12px;margin-top:1px}
+.sheet .opt .pro{color:var(--gold);font-size:12px;margin-left:4px}
+.sheet .hd{font:700 10px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);padding:10px 10px 4px}
+.sheet .plain{margin:0 10px;font-size:12.5px;color:var(--mute);line-height:1.45}
+.sheet .cta{margin:10px 10px 0;height:48px;border-radius:999px;background:var(--cta);color:#fff;font:600 14px var(--sans);display:flex;align-items:center;justify-content:center;gap:6px}
+.sheet .ghost{margin:6px 10px 0;height:44px;border-radius:999px;font:600 13.5px var(--sans);color:var(--ink2);display:flex;align-items:center;justify-content:center}
+.toast{position:absolute;left:50%;top:70px;transform:translateX(-50%);background:rgba(44,42,41,.92);color:#fff;font:500 12.5px var(--sans);padding:9px 14px;border-radius:999px;z-index:100;animation:fadein .18s var(--in);white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+@keyframes up{from{transform:translateY(16px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.veil{transition:none}.th{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="banner">Prototype · Fable · 2026-10-16 · the Cover Scene's own tools, in place</span>
+  <h1>The Cover Scene gets its Edit, its Style and its Animate — in its own four tabs</h1>
+  <p class="lead">Today the Cover Scene works on <b>Background</b> only; Edit, Style and Animate are grey ("Tap a word to edit it."), and the Reveal floats above the cover as its own tile. Below, the real thing (the owner's own captures of cale-ice today), then the delta in a working phone: <b>Edit</b> = each line with the house switch · <b>Style</b> = the Opening, folded in from the Reveal tile · <b>Animate</b> = ONE entrance for the whole cover, in beats, + <b>Shimmers ▾</b>; ▶ plays veil → unveil → every line entering. Each word keeps its own Edit · Style · Animate; a word's own Animate overrides the cover's and can be reset. The cover's <b>Link</b> can go to <b>Reply</b> ("Confirm attendance ⌄", at the foot).</p>
+  <div class="ctl">
+    <span class="lbl">Theme</span><div class="tgp" id="theme"><button data-t="light" aria-pressed="true">Light</button><button data-t="dark" aria-pressed="false">Dark</button></div>
+    <span class="lbl">Phone</span><div class="tgp" id="pw"><button data-w="375" aria-pressed="true">375 × 812</button><button data-w="390" aria-pressed="false">390 × 844</button></div>
+    <span class="lbl">Cover shape</span><div class="tgp" id="shape"><button data-s="plain" aria-pressed="true">Today (+ the link = 6 lines)</button><button data-s="card" aria-pressed="false">Written card (8 lines)</button></div>
+    <span class="lbl">The guest</span><div class="tgp" id="guest"><button data-g="pending" aria-pressed="true">Not replied</button><button data-g="yes" aria-pressed="false">Coming</button><button data-g="no" aria-pressed="false">Can’t</button><button data-g="closed" aria-pressed="false">Replies closed</button></div>
+  </div>
+
+  <div class="frames">
+    <div class="frame">
+      <h2>After — the Cover Scene picked, live</h2>
+      <div class="phone" id="phone" data-preview="off">
+        <div class="status"><span>9:41</span><span class="bat"></span></div>
+        <div class="topnav">
+          <button class="rnd exitx" aria-label="Exit the Maker"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+          <div class="halves">
+            <button class="half on" id="stageDd" aria-haspopup="listbox"><span>Invitation</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+            <button class="half" id="studioDd" aria-haspopup="listbox"><span>Studio</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+          </div>
+          <button class="rnd undob" id="undo" aria-label="Undo"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-2"/></svg></button>
+          <button class="rnd applyg" id="apply" aria-label="Apply"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span class="n" id="n">0</span></button>
+        </div>
+        <div class="work">
+          <div class="page">
+            <div class="scene" id="scene" aria-pressed="true">
+              <div class="ground" id="ground"></div>
+              <div class="scrim" id="scrim"></div>
+              <div class="cover" id="cover"></div>
+              <div class="veil" id="veil" data-gone="true"><span class="say">Tap or swipe up to unveil</span></div>
+              <span class="tag"><svg viewBox="0 0 10 10"><path d="M1 3h8L5 8z"/></svg>Cover Scene</span>
+              <span class="openhint" id="openhint">Sheer veil ◆ opens over it</span>
+            </div>
+          </div>
+          <button class="exitp" id="exitp"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>Exit preview</button>
+        </div>
+        <div class="gbar"><b>Home</b><span>Details</span><span>Story</span><span>Me</span></div>
+        <div class="tbar">
+          <div class="grabh"><i></i></div>
+          <div class="edit" id="editLine">You’re editing · <b>Invitation › Home › Cover Scene</b></div>
+          <div class="tools">
+            <div class="tsel" id="tsel" role="tablist">
+              <span class="th"></span>
+              <button role="tab" data-tool="edit">Edit</button>
+              <button role="tab" data-tool="style">Style</button>
+              <button role="tab" data-tool="bg">Background</button>
+              <button role="tab" data-tool="animate">Animate</button>
+            </div>
+            <button class="tplay" id="play" aria-label="Play — hold to preview the whole page"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+          </div>
+          <div class="g4" id="g4"></div>
+          <div class="foot"></div>
+        </div>
+      </div>
+      <p class="cap" id="cap"></p>
+    </div>
+
+    <div class="walk">
+      <h2 style="font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:700;margin:0 0 8px">Walk it</h2>
+      <ol>
+        <li><span class="k">Edit</span> The cover's lines, top to bottom, two to a row, each with <b>the house switch</b>. Switch <b>Title</b> off — it <b>leaves the cover at once</b>. <b>Names</b> has no switch ("always"); a tap says why. Tap a line's <b>name</b> → that word is picked, with its own tools.</li>
+        <li><span class="k">Style</span> Not grey any more: it is the <b>Opening</b> — the Reveal's own cards (None free · Sheer veil ◆ · the rest after the envelope proof), <b>folded in from the tile</b> that used to float above the cover. The tile is gone; the cover's corner names the opening.</li>
+        <li><span class="k">Animate</span> <b>Entrance ▾</b> — one dropdown of whole-cover entrances, each setting every word's Build in in order (three beats = the shipped Delay steps None · Short · Long). <b>Movement ◆</b> = the feel (Quick · Calm · Cinematic). Row 3 draws the beats. Row 4: who is on their own, and <b>Reset to the cover's entrance</b>.</li>
+        <li><span class="k">▶</span> Tap: the <b>closed veil with no words</b> → the unveil → every line entering in its beat. <b>Hold ▶</b>: the whole page as a guest — the bars slide away, the veil waits for <b>your</b> tap, "Exit preview" brings everything back.</li>
+        <li><span class="k g">A word</span> Tap <b>Logo</b> on the cover → its own Animate shows the cover's values with "Follows the cover's entrance". Change a chip → <b>on its own</b>, and row 3 offers "Reset to the cover's entrance ›". The group's row 4 now counts it.</li>
+        <li><span class="k g">Background</span> As shipped — <b>no Framed | Full width</b> any more (the cover is always edge to edge); Upload ◆ now takes <b>your video (≤ 15 s)</b>: it plays muted for guests, a still for strangers.</li>
+        <li><span class="k">Shimmer</span> Cover Scene › Animate › <b>Shimmers ▾</b> — Nothing · The names · The title · both: a lighter band of the word's <b>own</b> colour passes across it every 5 s (the competitor's is always gold; ours follows the couple's colour, <b>Gold</b> is a choice). On a word: Animate › <b>Action</b> › While on screen ▾ = Still · Drift · <b>Shimmer</b> (three choices = one dropdown). Still under reduced motion.</li>
+        <li><span class="k">Confirm attendance</span> The cover's <b>Link</b> (a shipped word, the couple's own text) now has <b>Goes to ▾</b>: The details (today) · <b>Reply</b>. With Reply it sits at the <b>foot of the cover</b>, small spaced caps + ⌄, enters last with the cover's entrance, after the unveil. Hold ▶, unveil, tap it: the <b>shipped reply sheet</b> opens — no new screen. Switch <i>The guest</i> above: "You're coming ✓ · Change", "You can't make it · Change", "Replies are closed" (not pressable).</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="hr"></div>
+  <h3>Before → after, from the real captures</h3>
+  <p class="lead">Left and middle: the owner's own screenshots of his Maker on cale-ice, today, and the public page as guests see it (read-only, 375 px). Right: what changes.</p>
+  <div class="shots">
+    <div class="shot"><p class="t">Before · Maker · Cover Scene picked</p><img src="cover_scene_edit_animate_2026-10-16/before-maker-cover-scene-background.webp" alt="The Maker today: Cover Scene picked, Background live, Edit · Style · Animate grey; the Reveal tile floats above the cover"><p><b>Edit · Style · Animate are grey.</b> Above the cover: the Reveal's tile — a blank picture box, "Opens once, over the cover / then every page after it opens plain". <b>After:</b> all four tabs live; the tile is gone, the opening is set in Style and named in the cover's corner.</p></div>
+    <div class="shot"><p class="t">Before · Maker · Scene ◆ · Framed | Full width</p><img src="cover_scene_edit_animate_2026-10-16/before-maker-scene-framed-full.webp" alt="The Maker today: Background › Scene ◆ Vintage with the Framed | Full width row"><p><b>Framed | Full width</b> is still drawn here (row 4). <b>After:</b> gone — the Cover Scene is always full screen, edge to edge (owner, 2026-10-16); the row holds Still | Parallax on a photo and nothing on a scene.</p></div>
+    <div class="shot"><p class="t">Before · the public page · unveiled · today</p><img src="cover_scene_edit_animate_2026-10-16/before-guest-live-2026-10-16-unveiled.webp" alt="www.setnayan.com/cale-ice at 375 px after the unveil: Title, IC monogram, Indalecio & Claire, December 18, 2026, the two venues"><p><b>The cover's real lines:</b> Title · Logo · Names · Date · Place — five. These five are the Edit list. (A day earlier the cover was the written card: + Invite line · Time · Link — the <i>Written card</i> toggle above shows that list.)</p></div>
+    <div class="shot"><p class="t">Before · the public page · the veil · 2026-10-15</p><img src="cover_scene_edit_animate_2026-10-16/before-guest-public-2026-10-15-veil.webp" alt="The public page with the veil down over the cover, the words showing through"><p>Yesterday the words showed <b>through</b> the veil. <b>After (owner, today):</b> behind the veil none of the cover's words show; after the unveil every line enters with the cover's entrance. ▶ above plays exactly that.</p></div>
+    <div class="shot"><p class="t">Before · a word's own tools (Title › Style)</p><img src="cover_scene_edit_animate_2026-10-16/before-maker-title-style.webp" alt="The Maker today: Title picked, Style with the look cards, Colour · Size · Width"><p>Untouched. Every word keeps Edit · Style · Animate of its own; only its Edit gains the same <b>Shown on the cover</b> switch (one value, two doors), and its Animate says when it follows the cover.</p></div>
+  </div>
+
+  <div class="notes">
+    <h4>The cover's real line list (cale-ice, live, 2026-10-16)</h4>
+    <table class="lines"><tr><th>#</th><th>Line (Maker name)</th><th>hero el</th><th>What it says</th><th>Switch</th></tr>
+      <tr><td>1</td><td>Title</td><td><code>eyebrow</code></td><td>WITH THANKSGIVING TO GOD AND WITH THE BLESSING OF OUR PARENTS,</td><td>yes</td></tr>
+      <tr><td>2</td><td>Logo</td><td><code>mark</code></td><td>the IC monogram between two rules</td><td>yes (the Studio switch "Show the logo on Cover and QR" is the same fact — one value)</td></tr>
+      <tr><td>3</td><td>Names</td><td><code>names</code> + <code>joiner</code></td><td>Indalecio &amp; Claire</td><td><b>none — always shown</b></td></tr>
+      <tr><td>4</td><td>Date</td><td><code>date</code></td><td>December 18, 2026</td><td>yes</td></tr>
+      <tr><td>5</td><td>Place</td><td><code>venue</code></td><td>Santuario de San Vicente de Paul Parish · Seda Hotel Vertis North</td><td>yes</td></tr>
+      <tr><td>6</td><td>Link <i>(new on this shape)</i></td><td><code>link</code></td><td>Confirm attendance ⌄ — the shipped Link, pointed at Reply; at the foot; reads the guest's own reply once given</td><td>yes</td></tr>
+      <tr><td colspan="5" style="color:var(--mute)">Drawn only when the cover is the written card (<code>HUB_HERO_CARD_ONLY_KEYS</code>): Invite line (<code>line</code>) "Request the honor of your presence…" · Time (<code>time</code>) "CEREMONY 2:30 PM" · Link (<code>link</code>) "the day, the place, the story ↓" — as the 2026-10-15 capture had them. The list follows <code>heroPartsFor</code>, so it never offers a switch that moves no pixels.</td></tr>
+    </table>
+
+    <h4>Decisions made here (the owner may overrule any)</h4>
+    <ol>
+      <li><b>Names cannot be hidden.</b> The names are what the cover IS: the loading screen's cover band draws them (ruling 2026-10-16), the home card and the poster read them, and "names wait for their real entrance" was ruled for them this morning. A cover with no names is a photo, not an invitation. So Names has no switch; a tap on its place says <span class="q">"The names are the cover — they are always shown."</span> Builder note: today's model allows <code>hidden</code> on <code>names</code> (TEXT_FIELDS) — the sanitiser should drop it for <code>names</code> so the two doors agree. Every other line hides; the <b>Logo</b> switch is the same value as Studio's "Show the logo on Cover and QR" (owner 2026-10-15 (4)) — one fact, never two switches.</li>
+      <li><b>A hidden line leaves the cover at once</b> (the owner's words), and it comes back from this list — so the old "ghosted on the canvas" drawing of a hidden part (the inspector's frame B) is no longer needed on the cover: the list is where you see what is hidden. Guests never see it (<code>hubElementHidden</code>, the one rule).</li>
+      <li><b>Style stays — and gets a job: the Opening.</b> The four tabs stay on every part (owner 2026-10-10, "make Edit | Style | Background | Animate consistent"), so removing Style for the group was never on. With the veil folded into the cover, the Reveal's own tool — a strip of phone-shaped cards (None · Sheer veil ◆ …, the 2026-10-08 fault), Extras ▾ — is exactly a Style tab, already built (<code>MakerLookPages.reveal</code>). So Cover Scene › Style = that picker, unchanged, with "Opening" as its name. <i>Alternative, if the owner prefers:</i> an <b>Opening ▾</b> dropdown as Animate's first row (then Style goes back to grey). The cards are why Style won: an opening is something you look at.</li>
+      <li><b>The tile goes.</b> No "Opens once, over the cover" picture above the cover: the opening is picked in Cover Scene › Style and named in the cover's corner ("Sheer veil ◆ opens over it"). Per-stage Shown | Hidden becomes picking None on that stage's Cover Scene — each stage that leads with the cover (Save the Date · Invitation › Welcome · The Day › Live, exactly <code>revealStageOf</code>) has its own. ▶ on the Cover Scene plays opening → unveil → entrance.</li>
+      <li><b>One entrance, three beats.</b> An Entrance sets each word's Build in (the shipped four effects + way) and its Delay. A word's Delay has three steps (None · Short 0.3 s · Long 0.8 s), so a cover entrance has at most three beats — nothing new is invented; if the owner wants more beats, Delay needs a fourth step (not this delta). <b>Movement ◆</b> sets every word's speed (Quick 0.6 s · Calm 1.1 s · Cinematic 1.8 s). "Plays" is not offered on the cover: it is the first screen, it plays on arrival (after the unveil, when there is a veil).</li>
+      <li><b>A word's own Animate wins, and says so.</b> Picking a word shows the cover's values in its own rows with "Follows the cover's entrance". The first change makes it its own (the shipped per-element save); the group's row 4 counts the words on their own and offers one door, "Reset to the cover's entrance ›", which clears those words' own Build in (the entrance applies again). Stored how: the entrance is ONE value on the hero row's canvas (<code>canvas.entrance</code>), resolved at read time into each word's Build in <b>unless the word stores its own</b> — so nothing is written into seven elements, and a later entrance pick still reaches every word that follows.</li>
+      <li><b>Behind the veil, nothing.</b> With an opening on, the closed veil shows none of the words (owner, today); the unveil starts the entrance — every line, lines with no Build in taking the cover's default (the builder shipping this uses the shipped default Build in; this Animate is where the couple picks that default). ▶ tap plays that whole sequence; hold ▶ = the page as a guest, where the veil waits for a real tap or swipe.</li>
+      <li><b>Shimmer is an Action, not a Build in</b> — it plays while the word is on screen, looping, which is exactly what Action is for (Still · Drift today; <code>HUB_EL_DURING</code>). Measured on the competitor: not a glow but a metallic sheen — a gradient clipped to the text with a bright band sliding across every 5 s, always gold. Ours: the word's own ink with a <b>lighter band of the same hue</b> (<code>color-mix</code>), so a navy title shimmers navy; <b>Gold</b> (#835C2F → #F0D9A8) is a Band choice, offered because every theme has a gold in its palette (<code>--gold</code>). Reduced motion or Save-Data: no band, the plain colour — the word never becomes transparent text with no paint. Three Action choices on a text part means the shipped Still | Drift pill becomes <b>one dropdown</b> (the owner's rule). The cover's <b>Shimmers ▾</b> is the same resolver shape as the entrance: a word's own Action wins.</li>
+      <li><b>"Confirm attendance" is the cover's Link, pointed at Reply</b> — not a new part. The Link already exists (<code>link</code>: the couple's own words, today "the day, the place, the story ↓", a scroll to <code>#site-details</code>). The delta is one <b>Goes to ▾</b> (The details · Reply). Pointed at Reply it (a) is drawn on every cover shape, at the <b>foot</b> of the full-screen cover (today <code>link</code> is card-only), (b) enters last, after the unveil, with the cover's entrance — never over the closed veil, (c) opens the <b>shipped</b> reply: the RSVP sheet on a phone, the 440-px side panel on a computer (approved 2026-10-15, "Reply as a side panel"), the passcode first for a visitor without a key (2026-10-06); no new screen, and no bar appears over the cover — the line is on the cover, the bars still wait for the swipe up. It reads the guest's own state, the Reply card's three (<code>guest-me-parts.ts</code>): before → "Confirm attendance ⌄" · coming → "You're coming ✓ · Change" · can't → "You can't make it · Change"; replies closed → "Replies are closed", not pressable (no frame, dimmed). Default words "Confirm attendance" (the couple retypes them on the page as any Link). The one-page Invitation's Home jump mark still exists; this line is the cover's own shortcut.</li>
+    </ol>
+
+    <h4>Small add to a shipped tool · or new code</h4>
+    <ul>
+      <li><b>Small add:</b> Cover Scene › Edit (the lines: <code>hidden</code> exists on every word; <code>PanelSwitch</code> exists; a 2-up grid of the shipped pill) · Cover Scene › Style = the shipped reveal picker mounted on the group (zero new UI; the tile's removal is a deletion) · Background's Framed | Full width removal (in flight) · the Link's <b>Goes to ▾</b> (one <code>Dd</code>, one stored key <code>to: 'reply'</code>, the tap calls the shipped reply opener) · the word's Action as a <code>Dd</code> (the <code>does</code> slot already takes options).</li>
+      <li><b>New code:</b> the cover <b>entrance</b> (<code>COVER_ENTRANCES</code> + the resolver that lets a word's own Build in win, the beats line, the reset door, ▶ playing the group in beat order) · <b>Shimmer</b> itself (a new <code>HUB_EL_DURING</code> value with its CSS — gradient clipped to text, the band's colour derived from the part's ink, the reduced-motion fallback — plus the sanitiser and the guest page's declarations) · the Link drawn at the foot on the plain masthead and reading the guest's reply state (the masthead is server-rendered; the state is the guest's own row, so it joins <code>loadGuestContext</code>'s read, not a second query) · the veil holding the words (the builder in flight owns it).</li>
+    </ul>
+
+    <h4>The delta a builder would touch (extend, never redraw)</h4>
+    <ul>
+      <li><code>apps/web/lib/maker-parts.ts</code> — <code>makerPartToolWorks(MAKER_COVER_SCENE, t)</code> true for all four; <code>MAKER_COVER_SCENE_TOOL_WHY</code> retired (and <code>a-tool-with-nothing-to-do-says-so.test.ts</code> / <code>the-cover-scene-is-one-group.test.ts</code> claim (1) re-derived). The <code>'reveal'</code> part leaves every page list that has a <code>'coverscene'</code> (<code>MAKER_STAGE_PAGES</code>); the Reveal's lock-first rules (<code>makerArrivalPart</code>, the drag lock) move onto the group.</li>
+      <li><code>apps/web/lib/element-style.ts</code> — nothing new: <code>hidden</code> and <code>motion</code> exist on every hero word. One sanitiser line: drop <code>hidden</code> on <code>names</code>. The Logo switch reads/writes the same fact as <code>events.logo_wanted</code> (one resolver).</li>
+      <li><code>apps/web/lib/cover-scene.ts</code> (⚠ other builders are in it now: always-full-screen + cover video) — add <code>COVER_ENTRANCES</code> (key · label · per-el <code>{ in: MotionFx, delay }</code>) and <code>resolveCoverEntrance(canvas, elements)</code>: a word's own <code>motion.in</code> wins, else the entrance's; <code>entrance</code> absent = the theme's own (the absence rule). <code>lib/hub-canvas.ts</code> keeps the key through the sanitiser.</li>
+      <li><code>apps/web/app/dashboard/[eventId]/launch/_components/stage-panel/</code> — new <code>cover-lines.tsx</code> (Edit: the 2-up pills + <code>PanelSwitch</code>, names without one), <code>cover-animate.tsx</code> (Entrance <code>Dd</code> · Movement <code>Dd</code> · the beats line · the overrides door); <code>stage-animate.tsx</code> gains the "Follows the cover's entrance" note (its existing <code>note</code> slot) and the reset door; <code>stage-edit.tsx</code> row 2 gets "Shown on the cover" on a cover word (its existing one-switch slot).</li>
+      <li><code>stage-tools.tsx</code> — route the four tools for <code>coverscene</code>; ▶ on the group plays opening → entrance through <code>play-sequence.ts</code> (a new <code>more</code> list: every word in beat order); the Reveal tile (<code>revealLeadsHere</code>, <code>data-maker-reveal-part</code>, <code>revealStubHtml</code>) is removed and the group's Style mounts <code>MakerLookPages.reveal</code> (<code>RevealPartTools</code>) instead; <code>RevealPlay</code> becomes the first step of the group's ▶. <code>globals.css</code> "Reveal's TILE" rule and <code>reveal-picture.tsx</code>'s stub go; <code>RevealPicture</code> (the cards) stays.</li>
+      <li><code>apps/web/app/[slug]/_components/pahina-masthead.tsx</code> + <code>cover-scene-layer.ts</code> (⚠ in flight) — read the resolved entrance per word; with the veil held (<code>lib/hub-veil.ts</code>) the words are not drawn until the unveil, then every word enters (the builder shipping "behind the veil, none of the cover's words show" owns this; this Animate only feeds the default).</li>
+      <li><b>Shimmer</b> — <code>lib/element-style.ts</code>: <code>HUB_EL_DURING</code> + <code>'shimmer'</code> (text parts only; <code>hubElementDeclarations</code> emits the clipped gradient from the part's resolved ink, <code>--hub-shimmer-band</code> = <code>color-mix(in srgb, ink 45%, white)</code> or the theme's gold), <code>lib/motion-effects.ts</code> untouched; <code>stage-animate.tsx</code>'s <code>does</code> becomes a <code>Dd</code> when three or more options; <code>globals.css</code> one keyframe + the <code>prefers-reduced-motion</code> rule; the Cover Scene's <code>Shimmers ▾</code> in <code>cover-animate.tsx</code> writes <code>canvas.shimmer</code> and the resolver reads it like the entrance.</li>
+      <li><b>The Link to Reply</b> — <code>lib/element-style.ts</code>: <code>link</code> leaves <code>HUB_HERO_CARD_ONLY_KEYS</code> when <code>to === 'reply'</code> (drawn on every cover shape, at the foot); <code>HubElementStyle.to?: 'reply'</code> (sanitised); <code>pahina-masthead.tsx</code> draws the foot line and its three states from the guest's row (<code>guest-me-parts.ts</code>'s copy); the tap calls the one reply opener the Reply card (<code>rsvpcard</code>) and Me already call — the sheet on a phone, the side panel on a computer — and the passcode gate first for a visitor; <code>stage-edit.tsx</code> row 3 on the Link: <code>Goes to ▾</code>.</li>
+      <li>Guards to add: the group has all four tools; Names has no switch; a hidden line is absent from the guest's cover; an entrance reaches every word that stores no Build in of its own and none that does; the Reveal tile is drawn nowhere; the veil covers the whole cover (inset 0 of the full-screen scene) on phone and desktop.</li>
+    </ul>
+    <p><b>Dependencies on work in flight (not redrawn here):</b> <code>cover-words-background.tsx</code> · <code>lib/cover-scene.ts</code> · <code>cover-scene-layer.ts</code> (the Framed | Full width removal and the ≤ 15 s cover video — this prototype's Background tab shows their outcome only), the style-card previews, and the "behind the veil, none of the words show" build. <b>Nothing here is repo code.</b></p>
+  </div>
+</div>
+
+<script>
+/* ───────── the cover's words — cale-ice, live, 2026-10-16 (read-only public page) ───────── */
+const WORDS_ALL=[
+  {k:'ename',el:'eyebrow',name:'Title',text:'With thanksgiving to God and with the blessing of our parents,',card:true,plain:true},
+  {k:'logo',el:'mark',name:'Logo',text:'IC',card:true,plain:true},
+  {k:'names',el:'names',name:'Names',text:'Indalecio & Claire',card:true,plain:true,always:true},
+  {k:'heroline',el:'line',name:'Invite line',text:'Request the honor of your presence as we unite in the Sacrament of Holy Matrimony',card:true,plain:false},
+  {k:'date',el:'date',name:'Date',text:'December 18, 2026',card:true,plain:true},
+  {k:'time',el:'time',name:'Time',text:'Ceremony 2:30 PM',card:true,plain:false},
+  {k:'place',el:'venue',name:'Place',text:'Santuario de San Vicente de Paul Parish · Seda Hotel Vertis North',card:false,plain:true},
+  /* 🔗 the cover's Link — the shipped `link` part (its words are the couple's); the delta: it may GO TO REPLY, and then it
+     is drawn on every cover shape, at the foot, after the unveil ("confirm attendance jumps them to RSVP") */
+  {k:'herolink',el:'link',name:'Link',text:'Confirm attendance',card:true,plain:true,foot:true},
+];
+/* the guest the preview is for — the line at the foot reads the guest's own reply state (lib/guest-me-parts.ts' three) */
+const GUEST={pending:{n:'Not replied yet'},yes:{n:'Replied · coming'},no:{n:'Replied · can’t make it'},closed:{n:'Replies closed'}};
+/* THE SHIPPED VOCABULARY — nothing invented: effects (Fade · Blur · Move + way · Size), Movement, Delay */
+const FEEL={quick:{n:'Quick',s:.6},calm:{n:'Calm',s:1.1},cinematic:{n:'Cinematic',s:1.8}};
+const DELAY={none:0,short:.3,long:.8};
+const DELAY_N={none:'None',short:'Short',long:'Long'};
+/* 🎬 THE WHOLE COVER'S ENTRANCES — each sets every word's Build in (fx) and Delay (its beat). Three beats = the three Delay steps. */
+const ENTRANCES=[
+  {k:'theme',n:'The theme’s own',sub:'Each word as the look plays it today — nothing stored',
+   set:{eyebrow:{fx:{fade:1},d:'none'},mark:{fx:{fade:1},d:'none'},names:{fx:{fade:1,move:'below'},d:'none'},line:{fx:{fade:1},d:'short'},date:{fx:{fade:1},d:'short'},time:{fx:{fade:1},d:'short'},venue:{fx:{fade:1},d:'short'},link:{fx:{fade:1},d:'long'}}},
+  {k:'names',n:'Names first',sub:'The names rise alone, then the top, then the day',
+   set:{names:{fx:{fade:1,move:'below'},d:'none'},mark:{fx:{fade:1},d:'short'},eyebrow:{fx:{fade:1},d:'short'},line:{fx:{fade:1,move:'below'},d:'long'},date:{fx:{fade:1,move:'below'},d:'long'},time:{fx:{fade:1,move:'below'},d:'long'},venue:{fx:{fade:1,move:'below'},d:'long'},link:{fx:{fade:1},d:'long'}}},
+  {k:'top',n:'Top to bottom',sub:'Title and mark, then the names, then the day',
+   set:{eyebrow:{fx:{fade:1},d:'none'},mark:{fx:{fade:1},d:'none'},names:{fx:{fade:1,move:'below'},d:'short'},line:{fx:{fade:1,move:'below'},d:'long'},date:{fx:{fade:1,move:'below'},d:'long'},time:{fx:{fade:1,move:'below'},d:'long'},venue:{fx:{fade:1,move:'below'},d:'long'},link:{fx:{fade:1,move:'below'},d:'long'}}},
+  {k:'once',n:'All together',sub:'Every word fades in at once',
+   set:{eyebrow:{fx:{fade:1},d:'none'},mark:{fx:{fade:1},d:'none'},names:{fx:{fade:1},d:'none'},line:{fx:{fade:1},d:'none'},date:{fx:{fade:1},d:'none'},time:{fx:{fade:1},d:'none'},venue:{fx:{fade:1},d:'none'},link:{fx:{fade:1},d:'none'}}},
+  {k:'soft',n:'Soft focus',sub:'Blur clears on the names first, then on the rest',
+   set:{names:{fx:{fade:1,blur:1},d:'none'},eyebrow:{fx:{fade:1,blur:1},d:'short'},mark:{fx:{fade:1,blur:1},d:'short'},line:{fx:{fade:1,blur:1},d:'long'},date:{fx:{fade:1,blur:1},d:'long'},time:{fx:{fade:1,blur:1},d:'long'},venue:{fx:{fade:1,blur:1},d:'long'},link:{fx:{fade:1,blur:1},d:'long'}}},
+  {k:'sides',n:'From the sides',sub:'The names grow in; the lines come from left and right',
+   set:{names:{fx:{fade:1,size:'grow'},d:'none'},mark:{fx:{fade:1,move:'above'},d:'short'},eyebrow:{fx:{fade:1,move:'above'},d:'short'},line:{fx:{fade:1,move:'left'},d:'long'},date:{fx:{fade:1,move:'left'},d:'long'},time:{fx:{fade:1,move:'right'},d:'long'},venue:{fx:{fade:1,move:'right'},d:'long'},link:{fx:{fade:1},d:'long'}}},
+  {k:'still',n:'Still',sub:'No entrance — the words are simply there (after an unveil, they appear together)',
+   set:{}},
+];
+const OPENINGS=[
+  {k:'none',n:'None',sub:'The cover itself, with nothing over it — free',pro:false},
+  {k:'veil-sheer',n:'Sheer veil',sub:'Tap or swipe up to unveil · nothing behind it plays until then',pro:true},
+  {k:'envelope',n:'Four-flap envelope',sub:'After the envelope proof (owner 2026-10-15)',pro:true,soon:true},
+  {k:'church-doors',n:'Church doors',sub:'After the envelope proof',pro:true,soon:true},
+];
+const SOURCES=[
+  {k:'theme',n:'The theme’s own',pro:false,sub:'The written card on the theme’s own ground — every stage, the poster'},
+  {k:'colour',n:'Colour',pro:false,sub:'A plain colour, a gradient, or a glass — free'},
+  {k:'scene',n:'Scene',pro:true,sub:'A ready-made moving background that plays for guests — Setnayan’s own'},
+  {k:'own',n:'Upload',pro:true,sub:'Your photos — and a video of 15 s or less, muted, for your guests'},
+];
+const SCENE_TILES=[{k:'modern',n:'Modern'},{k:'cyber',n:'Cyber Neon'},{k:'luxe',n:'Luxe'},{k:'vintage',n:'Vintage'},{k:'regency',n:'Regency'},{k:'rustic',n:'Rustic'},{k:'cinderella',n:'Cinderella'},{k:'gatsby',n:'Great Gatsby'}];
+const $=id=>document.getElementById(id);
+const chev='<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
+const tick='<svg class="tick" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>';
+const arrow='<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>';
+const GROUND='cover_scene_edit_animate_2026-10-16/ground-live-vintage-still.jpg';
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+
+/* ✨ Action's choices for a text part — the shipped Still · Drift + the new SHIMMER (a moving lighter band of the part's own hue) */
+const ACTIONS=[{k:'still',n:'Still',sub:'Nothing while on screen'},{k:'drift',n:'Drift',sub:'A slow breath of movement'},{k:'shimmer',n:'Shimmer',sub:'A lighter band of its own colour passes across it, every 5 s — still under reduced motion'}];
+const BANDS=[{k:'hue',n:'Same hue',sub:'Your colour, lighter'},{k:'gold',n:'Gold',sub:'The theme’s gold'}];
+const SHIMMER_ON=[{k:'none',n:'Nothing'},{k:'names',n:'The names'},{k:'ename',n:'The title'},{k:'both',n:'Names and title'}];
+const state={
+  sel:'group', tool:'edit', shape:'plain',
+  shown:{}, entrance:'theme', feel:'calm', opening:'veil-sheer',
+  shimmer:'none', band:'hue', phase:'in', linkTo:'reply', guest:'pending',
+  ownAct:{},            /* word el → 'still'|'drift'|'shimmer' once a word's Action is its own */
+  own:{},               /* word el → {fx,d,feel} once it goes its own way */
+  bg:{source:'scene',sceneTile:'vintage',ownTile:null,shade:0,motion:'still'},
+  applies:0, lastTool:{}, hintSaid:false,
+};
+for(const w of WORDS_ALL)state.shown[w.k]=true;
+const WORDS=()=>WORDS_ALL.filter(w=>state.shape==='card'?w.card:w.plain);
+const word=k=>WORDS_ALL.find(w=>w.k===k);
+const entrance=()=>ENTRANCES.find(e=>e.k===state.entrance);
+/* 🔑 the resolver: a word's own Build in wins; else the cover's entrance; else nothing */
+function motionOf(w){ if(state.own[w.el])return {...state.own[w.el],own:true}; const e=entrance().set[w.el]; return e?{fx:e.fx,d:e.d,feel:state.feel,own:false}:{fx:null,d:'none',feel:state.feel,own:false}; }
+/* 🔑 the same resolver for Action: a word's own wins; else the cover's "shimmers" pick; else Still */
+function actionOf(w){ if(state.ownAct[w.el])return {act:state.ownAct[w.el],own:true}; const s=state.shimmer; const on=s==='both'?['names','eyebrow']:s==='names'?['names']:s==='ename'?['eyebrow']:[]; return {act:on.includes(w.el)?'shimmer':'still',own:false}; }
+function fxWords(fx){ if(!fx)return 'None'; const p=[]; if(fx.fade)p.push('Fade'); if(fx.blur)p.push('Blur'); if(fx.move)p.push('Move from '+({below:'below',above:'above',left:'the left',right:'the right'})[fx.move]); if(fx.size)p.push(fx.size==='grow'?'Grow':'Shrink'); return p.join(' · '); }
+
+/* ───────── the stage ───────── */
+const chevDown='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+/* 🔗 what the foot line SAYS for this guest: before · coming · can't · closed (the shipped Reply card's three states + closed) */
+function linkWords(w){
+  if(state.linkTo!=='reply')return {html:esc(w.text)+' ↓',live:true};
+  const g=state.guest;
+  if(g==='yes')return {html:'You’re coming <b>✓</b> · <u>Change</u>',live:true};
+  if(g==='no')return {html:'You can’t make it · <u>Change</u>',live:true};
+  if(g==='closed')return {html:'Replies are closed',live:false};
+  return {html:esc(w.text)+' '+chevDown,live:true};
+}
+function wordHtml(w){
+  const a=actionOf(w);
+  const inner=w.el==='mark'?'<span><i>I</i><i>C</i></span>':w.el==='names'?'<span>Indalecio<em>&amp;</em>Claire</span>':w.el==='link'?'<span>'+linkWords(w).html+'</span>':'<span>'+esc(w.text)+'</span>';
+  return '<button type="button" class="part p-'+w.el+'" data-k="'+w.k+'" data-el="'+w.el+'" aria-pressed="'+(state.sel===w.k)+'" data-hidden="'+(!state.shown[w.k])+'" data-shimmer="'+(a.act==='shimmer'?'on':'off')+'" data-band="'+state.band+'"'+(w.el==='link'&&!linkWords(w).live?' data-live="false"':'')+'>'+inner+'<i class="tag">'+esc(w.name)+'</i></button>';
+}
+function drawStage(){
+  const ws=WORDS();
+  $('cover').innerHTML='<div class="grp">'+ws.filter(w=>!w.foot).map(wordHtml).join('')+'</div>'+ws.filter(w=>w.foot).map(wordHtml).join('');
+  $('cover').querySelectorAll('.part').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();if($('phone').dataset.preview==='on'){if(b.dataset.el==='link')openReply();return}select(b.dataset.k);}));
+  $('cover').onclick=()=>{if($('phone').dataset.preview==='on')return;select('group')};
+  $('scene').setAttribute('aria-pressed',state.sel==='group');
+  const op=OPENINGS.find(o=>o.k===state.opening);
+  $('openhint').textContent=op.k==='none'?'No opening — the cover shows at once':op.n+' ◆ opens over it';
+  paintGround();
+}
+function paintGround(){
+  const b=state.bg;let html='';
+  if(b.source==='scene')html='<div class="loop loop-'+b.sceneTile+'"></div>'+(b.sceneTile==='vintage'?'<img src="'+GROUND+'" alt="">':'');
+  else if(b.source==='own'&&b.ownTile)html='<img src="'+GROUND+'" alt="" style="filter:sepia(.25) '+(b.ownTile==='video'?'contrast(1.05)':'')+'">';
+  else if(b.source==='colour')html='<div class="loop" style="background:#2C2A29"></div>';
+  else html='<div class="loop" style="background:radial-gradient(120% 90% at 50% 10%,#F6EFE3 0,#EDE3D2 60%,#E2D6C2 100%)"></div>';
+  $('ground').innerHTML=html;
+  const sh=b.shade;$('scrim').style.background=sh<0?'rgba(0,0,0,'+(-sh/100*.75)+')':sh>0?'rgba(255,255,255,'+(sh/100*.8)+')':(b.source==='colour'?'transparent':'rgba(246,239,227,.42)');
+  $('scene').style.setProperty('--c-head',b.source==='colour'?'#F6EFE3':'#2C2A29');$('scene').style.setProperty('--c-body',b.source==='colour'?'#EAE1D2':'#4A4642');$('scene').style.setProperty('--c-eyebrow',b.source==='colour'?'#E6C98A':'#1F2440');
+}
+function select(k){
+  state.sel=k;
+  /* 🧠 the tool a part opens on: the one last used on it, else its first */
+  state.tool=state.lastTool[k]||(k==='group'?'edit':'edit');
+  drawAll();
+}
+
+/* ───────── the toolbar ───────── */
+const TOOLS=['edit','style','bg','animate'];
+function worksOn(sel,tool){ if(sel==='group')return true; return tool!=='bg'; }
+function drawTools(){
+  const i=TOOLS.indexOf(state.tool);
+  $('tsel').querySelector('.th').style.setProperty('--x',(i*100)+'%');
+  $('tsel').querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.tool===state.tool);b.classList.toggle('grey',!worksOn(state.sel,b.dataset.tool)&&b.dataset.tool!==state.tool)});
+  const name=state.sel==='group'?'Cover Scene':word(state.sel).name;
+  $('editLine').className='edit';
+  $('editLine').innerHTML='You’re editing · <b>Invitation › Home › '+esc(name)+'</b>';
+  state.lastTool[state.sel]=state.tool;
+}
+function drawPanel(){
+  const g=$('g4');
+  if(state.sel==='group'){
+    if(state.tool==='edit')return drawLines(g);
+    if(state.tool==='style')return drawOpening(g);
+    if(state.tool==='bg')return drawBgRows(g);
+    return drawCoverAnimate(g);
+  }
+  const w=word(state.sel);
+  if(state.tool==='bg'){
+    g.innerHTML='<div class="row r1"><span class="quiet">This sits on the <b>Cover Scene</b>.</span></div><div class="row r2"><button class="door" id="door">Select the Cover Scene '+arrow+'</button></div>';
+    $('door').addEventListener('click',()=>{select('group');toast('Cover Scene selected');});return;
+  }
+  if(state.tool==='edit'){
+    /* the shipped Edit: the words (typed on the page) — and, in its one-switch slot, the SAME show/hide the list holds */
+    const sw=w.always?'<span class="quiet">The names are the cover — <b>always shown</b>.</span>':'<span class="lbl">Shown on the cover</span><span style="flex:1"></span><button class="sw" role="switch" aria-checked="'+state.shown[w.k]+'" data-sw="'+w.k+'" aria-label="Shown on the cover"><i></i></button>';
+    const r3=w.el==='link'
+      ?'<button class="fh" id="linkTo" aria-haspopup="listbox" style="flex:0 0 150px"><span class="fn">Goes to</span><span class="fv">'+(state.linkTo==='reply'?'Reply':'The details')+'</span>'+chev+'</button><span class="quiet" style="flex:1">'+(state.linkTo==='reply'?'Opens the reply — no new screen. Reads the guest’s own answer once given.':'Scrolls to the details, as today.')+'</span>'
+      :'<span class="quiet">'+(w.el==='mark'?'Size and motion only; its picture is Studio › Logo’s.':w.el==='names'||w.el==='date'||w.el==='venue'?'The fact itself is Details’ — tap the page to retype what you own.':'Type on the page — tap the words.')+'</span>';
+    g.innerHTML='<div class="row r1"><span class="wordsbox">'+esc(w.el==='mark'?'Your mark — the Logo Maker draws it':w.text)+'</span></div><div class="row r2">'+sw+'</div><div class="row r3">'+r3+'</div>';
+    const s=g.querySelector('[data-sw]');if(s)s.addEventListener('click',()=>toggleShown(w.k));
+    const lt=$('linkTo');if(lt)lt.addEventListener('click',()=>openList('Where the link goes',[{k:'reply',n:'Reply',sub:'Opens the shipped reply sheet (a side panel on a computer)'},{k:'details',n:'The details',sub:'Scrolls down to the details, as today'}],state.linkTo,k=>{state.linkTo=k;if(k==='details')w.text='the day, the place, the story';else w.text='Confirm attendance';bump();drawAll();}));
+    return;
+  }
+  if(state.tool==='style'){
+    g.innerHTML='<div class="cards">'+['Small caps','Classic','Modern'].map((n,i)=>'<button class="lc" role="radio" aria-checked="'+(i===0)+'"><span class="pic"><img src="'+GROUND+'" alt=""><span class="w"><small>'+esc(w.name)+'</small>'+(w.el==='names'?'I &amp; C':w.el==='mark'?'IC':'Aa')+'</span></span><span class="nm">'+n+'</span></button>').join('')+'</div>'+
+      '<div class="row r4"><span class="lbl">Colour</span><span style="width:32px;height:32px;border-radius:50%;background:#1F2440;flex:none;box-shadow:0 0 0 2px var(--tbar),0 0 0 4px var(--cta)"></span><span class="lbl">Size</span><span class="sl"><input type="range" aria-label="Text size" min="0" max="9" value="4" style="--a:0;--b:44%"></span><button class="fh" style="flex:0 0 86px" aria-haspopup="listbox"><span class="fn">Width</span><span class="fv">Normal</span>'+chev+'</button></div>';
+    return;
+  }
+  drawWordAnimate(g,w);
+}
+
+/* ✨ EDIT on the Cover Scene — its lines, top to bottom, two to a row */
+function drawLines(g){
+  const ws=WORDS();
+  const cells=ws.map(w=>{
+    const txt=w.el==='mark'?'the monogram':w.text;
+    const ctl=w.always?'<button class="always" data-always="1" aria-label="Always shown">always</button>':'<button class="sw" role="switch" aria-checked="'+state.shown[w.k]+'" data-sw="'+w.k+'" aria-label="Show '+esc(w.name)+'"><i></i></button>';
+    return '<div class="ln" aria-current="'+(state.sel===w.k)+'" data-off="'+(!state.shown[w.k])+'"><button class="nm" data-pick="'+w.k+'"><b>'+esc(w.name)+'</b><small>'+esc(txt)+'</small></button>'+ctl+'</div>';
+  }).join('');
+  const hidden=ws.filter(w=>!state.shown[w.k]).length;
+  /* six lines fit three rows and leave row 4 for the hint; the written card's eight take all four rows (the hint moves to the editing line) */
+  const tall=ws.length>6;
+  g.innerHTML='<div class="lines2'+(tall?' tall':'')+'" role="group" aria-label="The cover’s lines">'+cells+'</div>'+(tall?'':'<div class="row r4"><span class="quiet">'+(hidden?'<b>'+hidden+' hidden</b> — guests won’t see '+(hidden===1?'it':'them')+'; switch it back on here. ':'')+'Tap a name to edit that word.</span></div>');
+  if(tall){const el=$('editLine');el.innerHTML=(hidden?'<b>'+hidden+' hidden</b> · ':'')+'Tap a name to edit that word';}
+  g.querySelectorAll('[data-sw]').forEach(b=>b.addEventListener('click',()=>toggleShown(b.dataset.sw)));
+  g.querySelectorAll('[data-pick]').forEach(b=>b.addEventListener('click',()=>select(b.dataset.pick)));
+  const a=g.querySelector('[data-always]');if(a)a.addEventListener('click',()=>toast('The names are the cover — they are always shown.'));
+}
+function toggleShown(k){ state.shown[k]=!state.shown[k]; bump(); drawAll(); }
+
+/* 🎭 STYLE on the Cover Scene = the OPENING — the shipped reveal picker's cards, phone-shaped; None free, each opening Pro ◆ */
+function drawOpening(g){
+  const cards=OPENINGS.map(o=>{
+    const pic=o.k==='none'?'<img src="'+GROUND+'" alt=""><span class="w"><small>With thanksgiving</small>I &amp; C</span>':o.k==='veil-sheer'?'<img src="'+GROUND+'" alt=""><span class="v"></span>':'<img src="'+GROUND+'" alt=""><span class="v" style="background:linear-gradient(180deg,#EDE3D2,#D9CBB4);backdrop-filter:none"></span>';
+    return '<button class="lc'+(o.soon?' soon':'')+'" role="radio" aria-checked="'+(o.k===state.opening)+'" data-open="'+o.k+'"><span class="pic">'+pic+(o.pro?'<span class="pro">◆</span>':'')+'</span><span class="nm">'+o.n+'</span></button>';
+  }).join('');
+  const op=OPENINGS.find(o=>o.k===state.opening);
+  g.innerHTML='<div class="cards" role="radiogroup" aria-label="Opening">'+cards+'</div><div class="row r4">'+(op.k==='none'?'<span class="quiet">No opening: the cover shows at once, its entrance plays on arrival.</span>':'<button class="fh" aria-haspopup="listbox" id="extras"><span class="fn">Extras ◆</span><span class="fv">The theme’s</span>'+chev+'</button><span class="quiet" style="flex:1.4">Opens once, over this cover. Behind it, nothing shows or plays.</span>')+'</div>';
+  g.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.open;const o=OPENINGS.find(x=>x.k===k);if(o.soon){toast('After the envelope proof — not yet');return}if(k===state.opening)return;state.opening=k;bump();drawAll();}));
+  const ex=$('extras');if(ex)ex.addEventListener('click',()=>toast('Extras ▾ — the shipped reveal tune knobs open here'));
+}
+
+/* 🎬 ANIMATE on the Cover Scene — ONE entrance for the whole cover */
+function drawCoverAnimate(g){
+  const e=entrance();
+  const ws=WORDS();
+  const beats=['none','short','long'].map((d,i)=>{const names=ws.filter(w=>{const m=motionOf(w);return m.fx&&m.d===d&&state.shown[w.k]}).map(w=>w.name);return names.length?'<span class="b"><i>'+(i+1)+'</i>'+esc(names.join(', '))+'</span>':''}).filter(Boolean).join('<span class="sep"></span>');
+  const own=ws.filter(w=>state.own[w.el]).map(w=>w.name);
+  g.innerHTML=
+    '<div class="row r1"><button class="dd" id="entDd" aria-haspopup="listbox" aria-expanded="false"><small>Entrance</small><b>'+e.n+'</b>'+chev+'</button></div>'+
+    '<div class="row r2"><button class="fh" id="feelDd" aria-haspopup="listbox"'+(e.k==='still'?' aria-disabled="true"':'')+'><span class="fn">Movement ◆</span><span class="fv">'+FEEL[state.feel].n+'</span>'+chev+'</button><button class="fh" id="shimDd" aria-haspopup="listbox"><span class="fn">Shimmers</span><span class="fv">'+SHIMMER_ON.find(s=>s.k===state.shimmer).n+'</span>'+chev+'</button></div>'+
+    '<div class="row r3">'+(beats?'<div class="beats" aria-label="In this order">'+beats+'</div>':'<span class="quiet">The words are simply there'+(state.opening!=='none'?' — they appear together on the unveil':'')+'.</span>')+'</div>'+
+    '<div class="row r4">'+(own.length?'<span class="quiet" style="flex:1"><b>'+esc(own.join(', '))+'</b> '+(own.length===1?'has':'have')+' an entrance of '+(own.length===1?'its':'their')+' own.</span><button class="door" id="resetAll">Reset to the cover’s '+arrow+'</button>':'<span class="quiet">Tap a word to animate it on its own — it then keeps its own Build in.</span>')+'</div>';
+  $('entDd').addEventListener('click',openEntrance);
+  const f=$('feelDd');f.addEventListener('click',()=>{if(e.k==='still'){toast('Turn on an entrance first.');return}openFeel()});
+  $('shimDd').addEventListener('click',()=>openList('What shimmers on the cover',SHIMMER_ON.map(s=>({k:s.k,n:s.n,sub:s.k==='none'?'':'A lighter band of its own colour passes across, every 5 s · still under reduced motion'})),state.shimmer,k=>{state.shimmer=k;bump();drawAll();}));
+  const r=$('resetAll');if(r)r.addEventListener('click',()=>{state.own={};bump();drawAll();toast('Every word follows the cover’s entrance again');});
+}
+/* a WORD's Animate — the shipped four rows; the delta: it says when it follows the cover, and the way back */
+function drawWordAnimate(g,w){
+  const m=motionOf(w);const fx=m.fx||{};
+  const chip=(k,n)=>'<button aria-pressed="'+(!!fx[k])+'" data-fx="'+k+'">'+n+'</button>';
+  const ph=state.phase;
+  const row1='<div class="row r1"><div class="ps" role="group" aria-label="Animate"><button aria-pressed="'+(ph==='in')+'" data-ph="in">Build in</button><button aria-pressed="'+(ph==='act')+'" data-ph="act">Action</button><button aria-pressed="'+(ph==='out')+'" data-ph="out">Build out</button></div></div>';
+  if(ph==='act'){
+    /* ✨ ACTION on a text part: three choices now → ONE dropdown (Still · Drift · Shimmer), never a pill row */
+    const a=actionOf(w);const act=ACTIONS.find(x=>x.k===a.act);
+    g.innerHTML=row1+
+      '<div class="row r2"><button class="dd" id="actDd" aria-haspopup="listbox"><small>While on screen</small><b>'+act.n+'</b>'+chev+'</button></div>'+
+      '<div class="row r3">'+(a.act==='shimmer'?'<button class="fh" id="bandDd" aria-haspopup="listbox" style="flex:0 0 140px"><span class="fn">Band</span><span class="fv">'+BANDS.find(b=>b.k===state.band).n+'</span>'+chev+'</button><span class="quiet" style="flex:1">Your colour, with a lighter band of the same hue passing across. Still under reduced motion.</span>':'<span class="quiet">'+act.sub+'.</span>')+'</div>'+
+      '<div class="row r4">'+(a.own?'<span class="quiet" style="flex:1">On its own.</span><button class="door" id="resetAct">Follow the cover '+arrow+'</button>':'<span class="quiet">'+(a.act==='shimmer'?'From the cover’s <b>Shimmers</b> pick.':'Action has no feel and no drive of its own.')+'</span>')+'</div>';
+    g.querySelectorAll('[data-ph]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.ph==='out'){toast('Prototype — Build out is the shipped row');return}state.phase=b.dataset.ph;drawAll();}));
+    $('actDd').addEventListener('click',()=>openList('While the '+w.name.toLowerCase()+' is on screen',ACTIONS,a.act,k=>{state.ownAct[w.el]=k;bump();drawAll();}));
+    const bd=$('bandDd');if(bd)bd.addEventListener('click',()=>openList('The band',BANDS,state.band,k=>{state.band=k;bump();drawAll();}));
+    const ra=$('resetAct');if(ra)ra.addEventListener('click',()=>{delete state.ownAct[w.el];bump();drawAll();});
+    return;
+  }
+  g.innerHTML=row1+
+    '<div class="row r2"><div class="chips" role="group" aria-label="Build in">'+chip('fade','Fade')+chip('blur','Blur')+chip('move','Move')+chip('size','Size')+'</div></div>'+
+    '<div class="row r3">'+(m.own?'<span class="quiet" style="flex:1">On its own.</span><button class="door" id="resetOne">Reset to the cover’s entrance '+arrow+'</button>':'<span class="quiet">Follows the cover’s entrance — <b>'+esc(entrance().n)+'</b>. Change anything here and this word goes its own way.</span>')+'</div>'+
+    '<div class="row r4"><button class="fh" id="wfeel" aria-haspopup="listbox"><span class="fn">Movement ◆</span><span class="fv">'+FEEL[m.feel].n+'</span>'+chev+'</button><button class="fh" aria-haspopup="listbox" id="wplays"><span class="fn">Plays</span><span class="fv">On arrival</span>'+chev+'</button><button class="fh" id="wdelay" aria-haspopup="listbox"><span class="fn">Delay</span><span class="fv">'+DELAY_N[m.d]+'</span>'+chev+'</button></div>';
+  g.querySelectorAll('[data-fx]').forEach(b=>b.addEventListener('click',()=>{
+    const n={...(m.fx||{})};const k=b.dataset.fx;
+    if(k==='move')n.move=n.move?null:'below';else if(k==='size')n.size=n.size?null:'grow';else n[k]=!n[k];
+    for(const key of Object.keys(n))if(!n[key])delete n[key];
+    state.own[w.el]={fx:Object.keys(n).length?n:null,d:m.d,feel:m.feel};bump();drawAll();
+  }));
+  g.querySelectorAll('[data-ph]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.ph==='out'){toast('Prototype — Build out is the shipped row');return}state.phase=b.dataset.ph;drawAll();}));
+  const r=$('resetOne');if(r)r.addEventListener('click',()=>{delete state.own[w.el];bump();drawAll();toast(w.name+' follows the cover’s entrance again');});
+  $('wfeel').addEventListener('click',()=>openList('Movement of the '+w.name.toLowerCase(),Object.keys(FEEL).map(k=>({k,n:FEEL[k].n,sub:FEEL[k].s.toFixed(1)+' s'})),m.feel,k=>{state.own[w.el]={fx:m.fx,d:m.d,feel:k};bump();drawAll();}));
+  $('wdelay').addEventListener('click',()=>openList('Delay of the '+w.name.toLowerCase(),Object.keys(DELAY).map(k=>({k,n:DELAY_N[k],sub:DELAY[k]?DELAY[k].toFixed(1)+' s':'Straight away'})),m.d,k=>{state.own[w.el]={fx:m.fx,d:k,feel:m.feel};bump();drawAll();}));
+  $('wplays').addEventListener('click',()=>toast('The cover is the first screen — it plays on arrival.'));
+}
+/* BACKGROUND — as shipped (source ▾ · tiles · Darker ━●━ Lighter) MINUS Framed | Full width; Upload ◆ takes a ≤ 15 s video */
+function drawBgRows(g){
+  const b=state.bg;const src=SOURCES.find(s=>s.k===b.source);
+  let h='<div class="row r1"><button class="dd" id="srcDd" aria-haspopup="listbox" aria-expanded="false"><small>Background</small><b>'+src.n+(src.pro?' ◆':'')+'</b>'+chev+'</button></div>';
+  if(b.source==='theme')h+='<div class="row r2"><span class="quiet">The written card on the theme’s own ground — every stage, the poster.</span></div>';
+  else if(b.source==='colour')h+='<div class="row r2"><span class="quiet">Plain · Diagonal · Glow · Opaque · Frosted — the shipped tiles (not redrawn here).</span></div>';
+  else if(b.source==='scene')h+='<div class="row r2"><div class="strip" role="group" aria-label="Scenes">'+SCENE_TILES.map(t=>'<button class="tile" data-tile="'+t.k+'" aria-pressed="'+(t.k===b.sceneTile)+'"><span class="face"><span class="loop loop-'+t.k+'"></span>'+(t.k==='vintage'?'<img src="'+GROUND+'" alt="">':'')+'<span class="fade"></span><span class="pro">◆</span><span>▶ '+t.n+'</span></span></button>').join('')+'</div></div>';
+  else h+='<div class="row r2"><div class="strip" role="group" aria-label="Your media"><button class="tile" data-up="1"><span class="face add"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Upload</span></button><button class="tile" data-tile="photo" aria-pressed="'+(b.ownTile==='photo')+'"><span class="face"><img src="'+GROUND+'" alt="" style="filter:sepia(.3)"><span class="fade"></span><span class="pro">◆</span><span>Your photo</span></span></button><button class="tile" data-tile="video" aria-pressed="'+(b.ownTile==='video')+'"><span class="face"><img src="'+GROUND+'" alt="" style="filter:sepia(.3) contrast(1.1)"><span class="fade"></span><span class="pro">◆</span><span>▶ Your video · 12 s</span></span></button></div></div>';
+  if(b.source==='scene'||(b.source==='own'&&b.ownTile)){const p=(b.shade+100)/2;h+='<div class="row r3"><span class="lbl m">Darker</span><span class="sl"><span class="mid"></span><input type="range" id="shade" aria-label="Darker or lighter" min="-100" max="100" step="1" value="'+b.shade+'" style="--a:'+Math.min(50,p)+'%;--b:'+Math.max(50,p)+'%"></span><span class="lbl m">Lighter</span></div>';}
+  /* row 4 — ⚠ no Framed | Full width (owner 2026-10-16: always full screen, edge to edge) */
+  if(b.source==='own'&&b.ownTile==='photo')h+='<div class="row r4"><div class="ps" role="group" aria-label="How the photo moves"><button data-motion="still" aria-pressed="'+(b.motion==='still')+'">Still</button><button data-motion="parallax" aria-pressed="'+(b.motion==='parallax')+'">Parallax</button></div></div>';
+  else if(b.source==='own'&&b.ownTile==='video')h+='<div class="row r4"><span class="quiet">Plays muted for your guests, 15 s or less · a still on pages strangers see.</span></div>';
+  else h+='<div class="row r4"><span class="quiet">Always full screen, edge to edge — every Cover Scene.</span></div>';
+  g.innerHTML=h;
+  $('srcDd').addEventListener('click',()=>openList('Background of the Cover Scene',SOURCES.map(s=>({k:s.k,n:s.n+(s.pro?' ◆':''),sub:s.sub})),b.source,k=>{b.source=k;if(k==='own'&&!b.ownTile)b.ownTile='photo';bump();drawAll();}));
+  g.querySelectorAll('.tile[data-tile]').forEach(t=>t.addEventListener('click',()=>{const k=t.dataset.tile;if(b.source==='scene'){if(k===b.sceneTile)return;b.sceneTile=k}else{if(k===b.ownTile)return;b.ownTile=k}bump();drawAll();}));
+  const up=g.querySelector('[data-up]');if(up)up.addEventListener('click',()=>toast('Prototype — the phone’s own picker opens here'));
+  const sh=$('shade');if(sh){sh.addEventListener('input',()=>{b.shade=+sh.value;const p=(b.shade+100)/2;sh.style.setProperty('--a',Math.min(50,p)+'%');sh.style.setProperty('--b',Math.max(50,p)+'%');paintGround();});sh.addEventListener('change',()=>{b.shade=Math.round(+sh.value/25)*25;bump();drawAll();});}
+  g.querySelectorAll('[data-motion]').forEach(x=>x.addEventListener('click',()=>{if(x.dataset.motion===b.motion)return;b.motion=x.dataset.motion;bump();drawAll();}));
+}
+
+/* ───────── ▶ — tap plays what is picked; hold = the whole page as a guest ───────── */
+let playing=false,holdT=null,held=false,pressT=0;
+function fxFrom(fx){ if(!fx)return null; const t=[];let o=1,f='none';
+  if(fx.fade)o=0; if(fx.blur)f='blur(8px)';
+  if(fx.move==='below')t.push('translateY(18px)');if(fx.move==='above')t.push('translateY(-18px)');if(fx.move==='left')t.push('translateX(-22px)');if(fx.move==='right')t.push('translateX(22px)');
+  if(fx.size==='grow')t.push('scale(.9)');if(fx.size==='shrink')t.push('scale(1.08)');
+  return {opacity:o,transform:t.join(' ')||'none',filter:f}; }
+function playEntrance(onlyKey){
+  const nodes=[...$('cover').querySelectorAll('.part')].filter(n=>n.dataset.hidden!=='true'&&(!onlyKey||n.dataset.k===onlyKey));
+  let longest=0;
+  for(const n of nodes){
+    const w=word(n.dataset.k);const m=motionOf(w);const from=fxFrom(m.fx);
+    if(!from)continue;
+    const dur=FEEL[m.feel].s*1000,delay=DELAY[m.d]*1000;longest=Math.max(longest,dur+delay);
+    n.animate([from,{opacity:1,transform:'none',filter:'none'}],{duration:dur,delay,easing:'cubic-bezier(.2,.8,.2,1)',fill:'backwards'});
+  }
+  return longest;
+}
+function playTap(){
+  if(playing)return;playing=true;$('play').dataset.playing='true';
+  const cover=$('cover'),veil=$('veil');
+  const group=state.sel==='group';
+  const withVeil=group&&state.opening!=='none';
+  const finish=ms=>setTimeout(()=>{playing=false;$('play').dataset.playing='false';cover.dataset.held='false';veil.dataset.gone='true';veil.dataset.lifted='false';},ms+300);
+  if(withVeil){
+    /* 🎭 the closed veil — NONE of the words show behind it — then the unveil, then every line in its beat */
+    cover.dataset.held='true';veil.dataset.gone='false';veil.dataset.lifted='false';
+    setTimeout(()=>{veil.dataset.lifted='true';setTimeout(()=>{cover.dataset.held='false';finish(playEntrance());},350);},900);
+  } else finish(playEntrance(group?null:state.sel));
+}
+function startPreview(){
+  held=true;$('phone').dataset.preview='on';closeSheet();
+  const cover=$('cover'),veil=$('veil');
+  if(state.opening!=='none'){cover.dataset.held='true';veil.dataset.gone='false';veil.dataset.lifted='false';}
+  else playEntrance();
+}
+function exitPreview(){
+  held=false;$('phone').dataset.preview='off';$('cover').dataset.held='false';$('veil').dataset.gone='true';$('veil').dataset.lifted='false';drawAll();
+}
+$('veil').addEventListener('click',()=>{const v=$('veil');if(v.dataset.gone==='true'||v.dataset.lifted==='true'||!held)return;v.dataset.lifted='true';setTimeout(()=>{$('cover').dataset.held='false';playEntrance();},350);toast('The music starts on this tap');});
+let swipeY=null;$('veil').addEventListener('pointerdown',e=>{swipeY=e.clientY});$('veil').addEventListener('pointerup',e=>{if(swipeY!==null&&swipeY-e.clientY>40)$('veil').click();swipeY=null;});
+$('exitp').addEventListener('click',exitPreview);
+/* 🔗 in the whole-page preview a tap on the foot line opens the SHIPPED reply — the RSVP sheet here, a 440-px side panel on a computer. No new screen. */
+function openReply(){
+  const g=state.guest;
+  if(g==='closed'){toast('Replies are closed — nothing opens');return}
+  const body=g==='pending'
+    ?'<p class="plain"><b style="color:var(--ink)">Will you join us?</b> · Reply by 30 November 2026</p><p class="plain" style="margin-top:8px">The shipped RSVP sheet — your answer, your seats, the questions the couple asked. Nothing new is drawn.</p><button class="cta" id="ok">Reply</button>'
+    :'<p class="plain"><b style="color:var(--ink)">'+(g==='yes'?'You’re coming · 2 seats':'You can’t make it')+'</b></p><p class="plain" style="margin-top:8px">The same sheet, open on your reply.</p><button class="cta" id="ok">Change my reply</button>';
+  openSheet('Reply',body+'<button class="ghost" id="no">Not now</button>',sh=>{$('ok').addEventListener('click',()=>{closeSheet();toast('Prototype — the shipped RSVP flow continues here');});$('no').addEventListener('click',closeSheet);});
+}
+const pb=$('play');
+pb.addEventListener('pointerdown',e=>{e.preventDefault();pressT=Date.now();pb.dataset.holding='true';holdT=setTimeout(()=>{holdT=null;pb.dataset.holding='false';startPreview();},450);});
+const endPress=()=>{pb.dataset.holding='false';if(holdT){clearTimeout(holdT);holdT=null;if(!state.hintSaid){state.hintSaid=true;toast('Hold ▶ to preview the whole page.');}playTap();}};
+pb.addEventListener('pointerup',endPress);pb.addEventListener('pointercancel',()=>{pb.dataset.holding='false';if(holdT){clearTimeout(holdT);holdT=null;}});pb.addEventListener('pointerleave',()=>{if(holdT){clearTimeout(holdT);holdT=null;pb.dataset.holding='false';}});
+pb.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.shiftKey){e.preventDefault();startPreview();}else if(e.key==='Enter'||e.key===' '){e.preventDefault();playTap();}});
+
+/* ───────── the sheets (PickMenu on a phone) ───────── */
+function openSheet(title,inner,onOpen){
+  closeSheet();const ph=$('phone');
+  const bd=document.createElement('div');bd.className='bd';bd.id='bd';bd.addEventListener('click',closeSheet);
+  const sh=document.createElement('div');sh.className='sheet';sh.id='sh';
+  sh.innerHTML='<div class="grab"></div>'+(title?'<h4>'+title+'</h4>':'')+inner;
+  ph.appendChild(bd);ph.appendChild(sh);
+  document.querySelectorAll('.dd[aria-haspopup]').forEach(d=>d.setAttribute('aria-expanded','true'));
+  if(onOpen)onOpen(sh);
+}
+function closeSheet(){['bd','sh'].forEach(i=>{const e=$(i);if(e)e.remove()});document.querySelectorAll('.dd[aria-haspopup]').forEach(d=>d.setAttribute('aria-expanded','false'));}
+function toast(t){const old=$('phone').querySelector('.toast');if(old)old.remove();const o=document.createElement('div');o.className='toast';o.textContent=t;$('phone').appendChild(o);setTimeout(()=>o.remove(),1600);}
+function openList(title,items,cur,pick){
+  openSheet(title,'<div class="list">'+items.map(it=>'<button class="opt" role="option" aria-selected="'+(it.k===cur)+'" data-k="'+it.k+'"><span>'+it.n+(it.sub?'<small>'+it.sub+'</small>':'')+'</span>'+tick+'</button>').join('')+'</div>',sh=>{
+    sh.querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.k;closeSheet();if(k===cur)return;pick(k);}));
+  });
+}
+function openEntrance(){
+  const own=WORDS().filter(w=>state.own[w.el]).length;
+  openSheet('Entrance of the Cover Scene','<div class="list">'+ENTRANCES.map(e=>'<button class="opt" role="option" aria-selected="'+(e.k===state.entrance)+'" data-k="'+e.k+'"><span>'+e.n+'<small>'+e.sub+'</small></span>'+tick+'</button>').join('')+'</div>'+(own?'<p class="plain" style="margin-top:8px">'+own+' word'+(own>1?'s keep':' keeps')+' an entrance of '+(own>1?'their':'its')+' own — reset '+(own>1?'them':'it')+' in row 4 to follow this.</p>':''),sh=>{
+    sh.querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.k;closeSheet();if(k===state.entrance)return;state.entrance=k;bump();drawAll();}));
+  });
+}
+function openFeel(){openList('Movement of the cover’s entrance',Object.keys(FEEL).map(k=>({k,n:FEEL[k].n,sub:FEEL[k].s.toFixed(1)+' s per word'})),state.feel,k=>{state.feel=k;bump();drawAll();});}
+function openParts(){
+  const rows=[{k:'group',n:'Cover Scene',sub:'The first screen — its lines, opening, background, entrance',g:true},...WORDS().map(w=>({k:w.k,n:w.name+(state.shown[w.k]?'':' · hidden'),sub2:true})),{k:'x1',n:'Countdown'},{k:'x2',n:'Message'}];
+  openSheet('Parts of this page','<div class="list">'+rows.map(r=>'<button class="opt'+(r.sub2?' sub':'')+'" role="option" aria-selected="'+(r.k===state.sel)+'" data-k="'+r.k+'"><span class="ic'+(r.g?' g':'')+'">'+(r.g?'<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="3"/><path d="M8 10h8M8 14h5"/></svg>':'<svg viewBox="0 0 24 24"><path d="M5 7h14M7 12h10M9 17h6"/></svg>')+'</span><span>'+r.n+(r.sub?'<small>'+r.sub+'</small>':'')+'</span>'+tick+'</button>').join('')+'</div>',sh=>{
+    sh.querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.k;closeSheet();if(k.startsWith('x')){toast('Prototype — the cover only');return}select(k);}));
+  });
+}
+function bump(){state.applies++;const pro=state.opening!=='none'||state.bg.source==='scene'||state.bg.source==='own';$('n').classList.toggle('pro',pro);$('n').textContent=pro?state.applies+' ◆':state.applies;}
+function openApply(){
+  if(!state.applies){toast('Nothing to apply yet');return}
+  const pro=state.opening!=='none'||state.bg.source==='scene'||state.bg.source==='own';
+  openSheet(pro?'Unlock Pro and Apply':'Apply '+state.applies+' change'+(state.applies>1?'s':'')+'?','<p class="plain">'+(pro?'<b style="color:var(--ink)">The Sheer veil ◆ and the Scene ◆</b> are Event Hub Pro. You tried them free; your guests see them once you unlock.':'Your guests see the cover’s lines and its entrance as soon as you apply.')+'</p><button class="cta" id="ok">'+(pro?'◆ Unlock Pro and Apply':'Apply')+'</button><button class="ghost" id="no">Keep editing</button>',sh=>{$('ok').addEventListener('click',()=>{closeSheet();state.applies=0;$('n').textContent='0';$('n').classList.remove('pro');toast(pro?'Prototype — Pro checkout is the shipped one':'Applied — guests see it now')});$('no').addEventListener('click',closeSheet);});
+}
+
+/* ───────── caption under the phone (what is measured) ───────── */
+function caption(){
+  const ws=WORDS();const hidden=ws.filter(w=>!state.shown[w.k]).map(w=>w.name);const own=ws.filter(w=>state.own[w.el]).map(w=>w.name);
+  const op=OPENINGS.find(o=>o.k===state.opening);
+  $('cap').innerHTML=(state.sel==='group'?'<b>Cover Scene</b> picked — '+ws.length+' lines'+(hidden.length?', <b>'+hidden.join(', ')+' hidden</b> (gone for guests)':', all shown'):'<b>'+word(state.sel).name+'</b> picked — its own tools; its Shown switch and its Animate are the same values the group lists.')+
+    ' · Opening: <b>'+op.n+'</b>'+(op.pro?' ◆':'')+' · Entrance: <b>'+entrance().n+'</b> · '+FEEL[state.feel].n+(own.length?' · on their own: <b>'+own.join(', ')+'</b>':'')+' · full screen, edge to edge.';
+}
+
+/* ───────── wiring ───────── */
+$('tsel').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const t=b.dataset.tool;if(!worksOn(state.sel,t)){toast('This sits on the Cover Scene.');return}state.tool=t;drawAll();}));
+$('studioDd').addEventListener('click',openParts);
+$('stageDd').addEventListener('click',()=>openList('Stage',[{k:'std',n:'Save the date'},{k:'rsvp',n:'RSVP'},{k:'inv',n:'Invitation'},{k:'day',n:'The Day'},{k:'post',n:'Post Event'}],'inv',()=>toast('Prototype — the Invitation’s cover only')));
+$('apply').addEventListener('click',openApply);
+$('undo').addEventListener('click',()=>{if(!state.applies){toast('Nothing to undo');return}state.applies=Math.max(0,state.applies-1);$('n').textContent=state.applies;toast('Undone — prototype counts only');});
+function pill(id,attr,fn){$(id).querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{$(id).querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));fn(b.dataset[attr]);}));}
+pill('theme','t',t=>document.documentElement.setAttribute('data-theme',t));
+pill('pw','w',w=>{document.documentElement.style.setProperty('--pw',w+'px');document.documentElement.style.setProperty('--ph',(w==='390'?844:812)+'px');});
+pill('shape','s',s=>{state.shape=s;if(state.sel!=='group'&&!WORDS().some(w=>w.k===state.sel))state.sel='group';drawAll();});
+pill('guest','g',g=>{state.guest=g;drawAll();});
+function drawAll(){drawStage();drawTools();drawPanel();caption();}
+drawAll();
+</script>
+</body>
+</html>
