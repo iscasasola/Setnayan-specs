@@ -27,6 +27,7 @@ PIECES = [
     ("wax-seal",        "A6-wax-seal.png",     7.0,  8, ("w",  84), {"recolour": True}),
     ("chandelier",      "A7-chandelier.png",   5.0, 10, ("w", 140), {}),
     ("fan",             "A8-lace-fan.png",     4.0, 10, ("w", 150), {}),
+    ("church",          "church-illustration-v2.png", 3.0, 4, ("w", 343), {"floor": "1%", "avifq": 44}),
 ]
 ONLY = set(sys.argv[1:])
 if os.path.exists(os.path.join(OUT, "report.json")): report_prev = json.load(open(os.path.join(OUT, "report.json")))
@@ -82,7 +83,7 @@ for name, src, F, G, (which, css), x in PIECES:
     else: rh = css * 2; rw = round(tw * rh / th)
     sh("magick", work + "_cut.png", "-filter", "Lanczos", "-resize", f"{rw}x{rh}!", os.path.join(OUT, name + ".png"))
     sh("cwebp", "-quiet", "-q", "78", "-alpha_q", "88", "-m", "6", os.path.join(OUT, name + ".png"), "-o", os.path.join(OUT, name + ".webp"))
-    sh("magick", os.path.join(OUT, name + ".png"), "-quality", "50", "-define", "heic:speed=4", os.path.join(OUT, name + ".avif"))
+    sh("magick", os.path.join(OUT, name + ".png"), "-quality", str(x.get("avifq", 50)), "-define", "heic:speed=4", os.path.join(OUT, name + ".avif"))
     info = dict(src=src, bg=bg, trim=[tw, th], render=[rw, rh], css=[rw / 2, rh / 2],
                 webp=os.path.getsize(os.path.join(OUT, name + ".webp")), avif=os.path.getsize(os.path.join(OUT, name + ".avif")))
     if x.get("centre"):
